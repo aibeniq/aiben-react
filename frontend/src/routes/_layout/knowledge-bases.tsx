@@ -11,10 +11,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { FiSearch } from "react-icons/fi"
 import { z } from "zod"
 
-import { ItemsService } from "@/client"
-import { ItemActionsMenu } from "@/components/Common/ItemActionsMenu"
-import AddItem from "@/components/Items/AddItem"
-import PendingItems from "@/components/Pending/PendingItems"
+import { KnowledgeBasesService } from "@/client"
+import { KnowledgeBaseActionsMenu } from "@/components/Common/KnowledgeBaseActionsMenu"
+import AddKnowledgeBase from "@/components/KnowledgeBases/AddKnowledgeBase"
+import PendingKnowledgeBases from "@/components/Pending/PendingKnowledgeBases"
 import {
   PaginationItems,
   PaginationNextTrigger,
@@ -22,7 +22,7 @@ import {
   PaginationRoot,
 } from "@/components/ui/pagination.tsx"
 
-const itemsSearchSchema = z.object({
+const knowledgeBasesSearchSchema = z.object({
   page: z.number().catch(1),
 })
 
@@ -31,14 +31,14 @@ const PER_PAGE = 5
 function getKnowledgeBasesQueryOptions({ page }: { page: number }) {
   return {
     queryFn: () =>
-      ItemsService.readItems({ skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
+      KnowledgeBasesService.readKnowledgeBases({ skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
     queryKey: ["items", { page }],
   }
 }
 
 export const Route = createFileRoute("/_layout/knowledge-bases")({
   component: KnowledgeBases,
-  validateSearch: (search) => itemsSearchSchema.parse(search),
+  validateSearch: (search) => knowledgeBasesSearchSchema.parse(search),
 })
 
 function KnowledgeBasesTable() {
@@ -59,7 +59,7 @@ function KnowledgeBasesTable() {
   const count = data?.count ?? 0
 
   if (isLoading) {
-    return <PendingItems />
+    return <PendingKnowledgeBases />
   }
 
   if (items.length === 0) {
@@ -70,9 +70,9 @@ function KnowledgeBasesTable() {
             <FiSearch />
           </EmptyState.Indicator>
           <VStack textAlign="center">
-            <EmptyState.Title>You don't have any items yet</EmptyState.Title>
+            <EmptyState.Title>You don't have any Knowledge Bases yet</EmptyState.Title>
             <EmptyState.Description>
-              Add a new knowledge base to get started
+              Add a new Knowledge Base to get started
             </EmptyState.Description>
           </VStack>
         </EmptyState.Content>
@@ -108,7 +108,7 @@ function KnowledgeBasesTable() {
                 {item.description || "N/A"}
               </Table.Cell>
               <Table.Cell>
-                <ItemActionsMenu item={item} />
+                <KnowledgeBaseActionsMenu item={item} />
               </Table.Cell>
             </Table.Row>
           ))}
@@ -135,9 +135,9 @@ function KnowledgeBases() {
   return (
     <Container maxW="full">
       <Heading size="lg" pt={12}>
-        Items Management
+        Knowledge Base Management
       </Heading>
-      <AddItem />
+      <AddKnowledgeBase />
       <KnowledgeBasesTable />
     </Container>
   )
