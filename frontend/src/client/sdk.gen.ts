@@ -218,9 +218,6 @@ export class KnowledgeBasesService {
   public static createKnowledgeBase(
     data: KnowledgeBasesCreateKnowledgeBaseData,
   ): CancelablePromise<KnowledgeBasesCreateKnowledgeBaseResponse> {
-
-    console.log("Data received by SDK: ", data);
-
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/knowledge-bases/",
@@ -228,10 +225,10 @@ export class KnowledgeBasesService {
         title: data.title,
         description: data.description,
       },
-      formData: data.requestBody,
+      formData: data.formData,
       mediaType: "multipart/form-data",
       errors: {
-        422: "Schmalidation Error",
+        422: "Validation Error",
       },
     })
   }
