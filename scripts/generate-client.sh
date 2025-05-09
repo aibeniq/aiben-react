@@ -3,8 +3,10 @@
 set -e
 set -x
 
+echo "Starting the generate-client script..."
+
 cd backend
-python -c "import app.main; import json; print(json.dumps(app.main.app.openapi()))" > ../openapi.json
+/mnt/c/miniconda/aibeniq-react/backend/.venv/Scripts/python.exe -c "import app.main; import json; print(json.dumps(app.main.app.openapi()))" > ../openapi.json
 cd ..
 mv openapi.json frontend/
 cd frontend

@@ -1,19 +1,17 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { type SubmitHandler, useForm } from "react-hook-form"
-
 import {
   Button,
+  ButtonGroup,
   DialogActionTrigger,
-  DialogTitle,
   Input,
   Text,
   VStack,
 } from "@chakra-ui/react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
-import { FaPlus } from "react-icons/fa"
+import { type SubmitHandler, useForm } from "react-hook-form"
+import { FaExchangeAlt } from "react-icons/fa"
 
-import { type ItemCreate, ItemsService } from "@/client"
-import type { ApiError } from "@/client/core/ApiError"
+import { type ApiError, type KnowledgeBasePublic, KnowledgeBasesService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 import {
@@ -23,11 +21,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogRoot,
+  DialogTitle,
   DialogTrigger,
 } from "../ui/dialog"
 import { Field } from "../ui/field"
 
-const AddItem = () => {
+interface EditKnowledgeBaseProps {
+  item: KnowledgeBasePublic
+}
+
+interface KnowledgeBaseUpdateForm {
+  title: string
+  description?: string
+}
+
+const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
@@ -35,21 +43,21 @@ const AddItem = () => {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isValid, isSubmitting },
-  } = useForm<ItemCreate>({
+    formState: { errors, isSubmitting },
+  } = useForm<KnowledgeBaseUpdateForm>({
     mode: "onBlur",
     criteriaMode: "all",
     defaultValues: {
-      title: "",
-      description: "",
+      ...item,
+      description: item.description ?? undefined,
     },
   })
 
   const mutation = useMutation({
-    mutationFn: (data: ItemCreate) =>
-      ItemsService.createItem({ requestBody: data }),
+    mutationFn: (data: KnowledgeBaseUpdateForm) =>
+      KnowledgeBasesService.updateKnowledgeBase({ id: item.id, requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Item created successfully.")
+      showSuccessToast("Knowledge Base updated successfully.")
       reset()
       setIsOpen(false)
     },
@@ -57,12 +65,11 @@ const AddItem = () => {
       handleError(err)
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["items"] })
+      queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
     },
   })
 
-  const onSubmit: SubmitHandler<ItemCreate> = (data) => {
-    console.log([data])
+  const onSubmit: SubmitHandler<KnowledgeBaseUpdateForm> = async (data) => {
     mutation.mutate(data)
   }
 
@@ -74,18 +81,18 @@ const AddItem = () => {
       onOpenChange={({ open }) => setIsOpen(open)}
     >
       <DialogTrigger asChild>
-        <Button value="add-item" my={4}>
-          <FaPlus fontSize="16px" />
-          Add Item
+        <Button variant="ghost">
+          <FaExchangeAlt fontSize="16px" />
+          Edit Knowledge Base
         </Button>
       </DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle>Add Item</DialogTitle>
+            <DialogTitle>Edit Knowledge Base</DialogTitle>
           </DialogHeader>
           <DialogBody>
-            <Text mb={4}>Fill in the details to add a new item.</Text>
+            <Text mb={4}>Update the Knowledge Base details below.</Text>
             <VStack gap={4}>
               <Field
                 required
@@ -96,7 +103,7 @@ const AddItem = () => {
                 <Input
                   id="title"
                   {...register("title", {
-                    required: "Title is required.",
+                    required: "Title is required",
                   })}
                   placeholder="Title"
                   type="text"
@@ -119,23 +126,20 @@ const AddItem = () => {
           </DialogBody>
 
           <DialogFooter gap={2}>
-            <DialogActionTrigger asChild>
-              <Button
-                variant="subtle"
-                colorPalette="gray"
-                disabled={isSubmitting}
-              >
-                Cancel
+            <ButtonGroup>
+              <DialogActionTrigger asChild>
+                <Button
+                  variant="subtle"
+                  colorPalette="gray"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+              </DialogActionTrigger>
+              <Button variant="solid" type="submit" loading={isSubmitting}>
+                Save
               </Button>
-            </DialogActionTrigger>
-            <Button
-              variant="solid"
-              type="submit"
-              disabled={!isValid}
-              loading={isSubmitting}
-            >
-              Save
-            </Button>
+            </ButtonGroup>
           </DialogFooter>
         </form>
         <DialogCloseTrigger />
@@ -144,4 +148,4 @@ const AddItem = () => {
   )
 }
 
-export default AddItem
+export default EditKnowledgeBase

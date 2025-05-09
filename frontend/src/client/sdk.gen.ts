@@ -14,6 +14,16 @@ import type {
   ItemsUpdateItemResponse,
   ItemsDeleteItemData,
   ItemsDeleteItemResponse,
+  KnowledgeBasesReadKnowledgeBasesData,
+  KnowledgeBasesReadKnowledgeBasesResponse,
+  KnowledgeBasesCreateKnowledgeBaseData,
+  KnowledgeBasesCreateKnowledgeBaseResponse,
+  KnowledgeBasesReadKnowledgeBaseData,
+  KnowledgeBasesReadKnowledgeBaseResponse,
+  KnowledgeBasesUpdateKnowledgeBaseData,
+  KnowledgeBasesUpdateKnowledgeBaseResponse,
+  KnowledgeBasesDeleteKnowledgeBaseData,
+  KnowledgeBasesDeleteKnowledgeBaseResponse,
   LoginLoginAccessTokenData,
   LoginLoginAccessTokenResponse,
   LoginTestTokenResponse,
@@ -159,6 +169,136 @@ export class ItemsService {
     return __request(OpenAPI, {
       method: "DELETE",
       url: "/api/v1/items/{id}",
+      path: {
+        id: data.id,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
+export class KnowledgeBasesService {
+  /**
+   * Read Knowledge Bases
+   * Retrieve knowledge bases.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @returns KnowledgeBasesPublic Successful Response
+   * @throws ApiError
+   */
+  public static readKnowledgeBases(
+    data: KnowledgeBasesReadKnowledgeBasesData = {},
+  ): CancelablePromise<KnowledgeBasesReadKnowledgeBasesResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/knowledge-bases/",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Create Knowledge Base
+   * Create new knowledge base with compressed file data.
+   * @param data The data for the request.
+   * @param data.title
+   * @param data.formData
+   * @param data.description
+   * @returns KnowledgeBasePublic Successful Response
+   * @throws ApiError
+   */
+  public static createKnowledgeBase(
+    data: KnowledgeBasesCreateKnowledgeBaseData,
+  ): CancelablePromise<KnowledgeBasesCreateKnowledgeBaseResponse> {
+
+    console.log("Data received by SDK: ", data);
+
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/knowledge-bases/",
+      query: {
+        title: data.title,
+        description: data.description,
+      },
+      formData: data.requestBody,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: "Schmalidation Error",
+      },
+    })
+  }
+
+  /**
+   * Read Knowledge Base
+   * Get knowledge base by ID.
+   * @param data The data for the request.
+   * @param data.id
+   * @returns KnowledgeBasePublic Successful Response
+   * @throws ApiError
+   */
+  public static readKnowledgeBase(
+    data: KnowledgeBasesReadKnowledgeBaseData,
+  ): CancelablePromise<KnowledgeBasesReadKnowledgeBaseResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/knowledge-bases/{id}",
+      path: {
+        id: data.id,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Knowledge Base
+   * Update a knowledge base.
+   * @param data The data for the request.
+   * @param data.id
+   * @param data.requestBody
+   * @returns KnowledgeBasePublic Successful Response
+   * @throws ApiError
+   */
+  public static updateKnowledgeBase(
+    data: KnowledgeBasesUpdateKnowledgeBaseData,
+  ): CancelablePromise<KnowledgeBasesUpdateKnowledgeBaseResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/knowledge-bases/{id}",
+      path: {
+        id: data.id,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Knowledge Base
+   * Delete a knowledge base.
+   * @param data The data for the request.
+   * @param data.id
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static deleteKnowledgeBase(
+    data: KnowledgeBasesDeleteKnowledgeBaseData,
+  ): CancelablePromise<KnowledgeBasesDeleteKnowledgeBaseResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/knowledge-bases/{id}",
       path: {
         id: data.id,
       },
