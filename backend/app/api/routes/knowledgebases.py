@@ -64,6 +64,8 @@ def create_knowledge_base(
     session: SessionDep,
     current_user: CurrentUser,
     knowledge_base_in: KnowledgeBaseCreate = Depends(),
+    #title: str,
+    #description: str | None = None,
     files: List[UploadFile] = File(...),
 ) -> Any:
     """

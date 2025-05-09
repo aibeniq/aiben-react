@@ -51,27 +51,15 @@ const AddKnowledgeBase = () => {
 
   const mutation = useMutation({
   mutationFn: (data: { title: string; description: string; files: File[] }) => {
-    //console.log("Now beginning mutation...");
-
-    // Construct the FormData object
-    const formData = new FormData();
-
-    // Append files to the FormData object
-    data.files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    // Append title and description to the FormData object
-    //formData.append("title", data.title);
-    //formData.append("description", data.description);
-
-    //console.log("FormData being sent:", formData);
+    console.log("Now beginning mutation...");
 
     // Send the FormData object to the backend
     return KnowledgeBasesService.createKnowledgeBase({
       title: data.title, // Still required for the `query` object
       description: data.description, // Still required for the `query` object
-      requestBody: formData, // Include all fields in the FormData payload
+      formData: {
+        files: data.files, // ✅ this is what the SDK expects
+      }, // Include all fields in the FormData payload
     });
   },
   onSuccess: () => {

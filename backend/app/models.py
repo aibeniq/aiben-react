@@ -145,7 +145,6 @@ class KnowledgeBase(KnowledgeBaseBase, table=True):
     owner: User | None = Relationship(back_populates="knowledge_bases")
     data: bytes | None = Field(default=None, sa_column=LargeBinary)  # New column for compressed data
 
-
 # Properties to return via API, id is always required
 class KnowledgeBasePublic(KnowledgeBaseBase):
     id: uuid.UUID
