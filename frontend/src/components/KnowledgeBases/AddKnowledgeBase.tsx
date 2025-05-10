@@ -69,7 +69,13 @@ const AddKnowledgeBase = () => {
     setIsOpen(false);
   },
   onError: (err: ApiError) => {
-    handleError(err);
+    if (err.status === 409) {
+        // Handle duplicate title error specifically
+        showErrorToast(err.body.detail || "A knowledge base with this title already exists");
+    } else {
+        // Handle other errors
+        handleError(err);
+    }
   },
   onSettled: () => {
     queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] });

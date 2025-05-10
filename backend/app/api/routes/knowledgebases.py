@@ -64,13 +64,15 @@ def create_knowledge_base(
     session: SessionDep,
     current_user: CurrentUser,
     knowledge_base_in: KnowledgeBaseCreate = Depends(),
-    #title: str,
-    #description: str | None = None,
     files: List[UploadFile] = File(...),
 ) -> Any:
     """
     Create new knowledge base with compressed file data.
     """
+
+    # validate that the Knowledge Base name is unique
+    # 
+
     # Compress the uploaded files into a zip archive
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
@@ -79,13 +81,36 @@ def create_knowledge_base(
             zip_file.writestr(file.filename, file_content)
     zip_buffer.seek(0)
 
-    # Create the knowledge base using the KnowledgeBaseCreate schema
-    knowledge_base = KnowledgeBase(
-        title=knowledge_base_in.title,
-        description=knowledge_base_in.description,
-        owner_id=current_user.id,
-        data=zip_buffer.read(),  # Save the compressed data in the `data` column
+    # Check if a knowledge base with this title already exists for this user
+    existing_kb = session.exec(
+        select(KnowledgeBase).where(
+            KnowledgeBase.title == knowledge_base_in.title,
+            KnowledgeBase.owner_id == current_user.id
+        )
+    ).first()
+
+    if existing_kb:
+        raise HTTPException(
+            status_code=409,  # Using 409 Conflict for duplicate resource
+            detail=f"A knowledge base with the title '{knowledge_base_in.title}' already exists"
+        )
+
+    # Use model_validate to create and validate the knowledge base
+    knowledge_base = KnowledgeBase.model_validate(
+        knowledge_base_in,
+        update={
+            "owner_id": current_user.id,
+            "data": zip_buffer.read()
+        }
     )
+
+    # Create the knowledge base using the KnowledgeBaseCreate schema
+    #knowledge_base = KnowledgeBase(
+    #    title=knowledge_base_in.title,
+    #    description=knowledge_base_in.description,
+    #    owner_id=current_user.id,
+    #    data=zip_buffer.read(),  # Save the compressed data in the `data` column
+    #)
     session.add(knowledge_base)
     session.commit()
     session.refresh(knowledge_base)
