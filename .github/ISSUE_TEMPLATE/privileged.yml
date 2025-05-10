@@ -1,4 +1,4 @@
-name: Privileged
+"""name: Privileged
 description: You are @tiangolo or he asked you directly to create an issue here. If not, check the other options. 👇
 body:
   - type: markdown
@@ -19,4 +19,4 @@ body:
     id: content
     attributes:
       label: Issue Content
-      description: Add the content of the issue here.
+      description: Add the content of the issue here."""	
