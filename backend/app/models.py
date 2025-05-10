@@ -117,7 +117,7 @@ class NewPassword(SQLModel):
 # classes for Knowledge Bases
 # Shared properties
 class KnowledgeBaseBase(SQLModel):
-    title: str = Field(min_length=1, max_length=255)
+    title: str = Field(min_length=1, max_length=255, unique=True)
     description: str | None = Field(default=None, max_length=255)
     # New property to store file paths or URLs
     #file_paths: Optional[List[str]] = Field(default=None, sa_column_kwargs={"nullable": True})
