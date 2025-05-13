@@ -52,6 +52,9 @@ export type KnowledgeBasePublic = {
   files?: Array<{
     [key: string]: unknown
   }>
+  date_created: string
+  date_modified: string
+  number_of_sources?: number
 }
 
 export type KnowledgeBasesPublic = {

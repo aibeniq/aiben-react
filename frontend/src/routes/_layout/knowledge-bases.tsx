@@ -85,9 +85,11 @@ function KnowledgeBasesTable() {
       <Table.Root size={{ base: "sm", md: "md" }}>
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeader w="sm">ID</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Title</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Description</Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">Number of Sources</Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">Date Created</Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">Date Modified</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Actions</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
@@ -95,17 +97,19 @@ function KnowledgeBasesTable() {
           {items?.map((item) => (
             <Table.Row key={item.id} opacity={isPlaceholderData ? 0.5 : 1}>
               <Table.Cell truncate maxW="sm">
-                {item.id}
-              </Table.Cell>
-              <Table.Cell truncate maxW="sm">
                 {item.title}
               </Table.Cell>
-              <Table.Cell
-                color={!item.description ? "gray" : "inherit"}
-                truncate
-                maxW="30%"
-              >
+              <Table.Cell truncate maxW="sm">
                 {item.description || "N/A"}
+              </Table.Cell>
+              <Table.Cell truncate maxW="sm">
+                {item.number_of_sources}
+              </Table.Cell>
+              <Table.Cell truncate maxW="sm">
+                {new Date(item.date_created).toLocaleDateString()}
+              </Table.Cell>
+              <Table.Cell truncate maxW="sm">
+                {new Date(item.date_modified).toLocaleDateString()}
               </Table.Cell>
               <Table.Cell>
                 <KnowledgeBaseActionsMenu item={item} />

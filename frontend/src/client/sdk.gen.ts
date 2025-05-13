@@ -182,7 +182,7 @@ export class ItemsService {
 export class KnowledgeBasesService {
   /**
    * Read Knowledge Bases
-   * Retrieve knowledge bases.
+   * Retrieve knowledge bases with additional metadata: Number of Sources, Date Created, and Date Modified.
    * @param data The data for the request.
    * @param data.skip
    * @param data.limit
@@ -207,7 +207,7 @@ export class KnowledgeBasesService {
 
   /**
    * Create Knowledge Base
-   * Create new knowledge base with compressed file data.
+   * Create new knowledge base with a compressed folder with the Chroma VectorDB.
    * @param data The data for the request.
    * @param data.title
    * @param data.formData

@@ -146,12 +146,18 @@ class KnowledgeBase(KnowledgeBaseBase, table=True):
     )
     owner: User | None = Relationship(back_populates="knowledge_bases")
     data: bytes | None = Field(default=None, sa_column=LargeBinary)  # New column for compressed data
+    date_created: datetime
+    date_modified: datetime
+    
 
 # Properties to return via API, id is always required
 class KnowledgeBasePublic(KnowledgeBaseBase):
     id: uuid.UUID
     owner_id: uuid.UUID
     files: List[dict] = Field(default_factory=list)
+    date_created: datetime
+    date_modified: datetime
+    number_of_sources: int = Field(default=0)  # New property to count the number of sources
 
 
 class KnowledgeBasesPublic(SQLModel):
