@@ -5,6 +5,9 @@ from fastapi import UploadFile
 from sqlmodel import select, Session
 from app.models import Source, SourceData
 from app.api.deps import CurrentUser
+from io import BytesIO
+import zipfile
+
 
 class KnowledgeBaseService:
     @staticmethod
@@ -24,8 +27,9 @@ class KnowledgeBaseService:
             knowledge_base_id: ID of parent knowledge base
             file: Uploaded file
         """
-        file.file.seek(0)
+        #file.file.seek(0)
         file_content = file.file.read()
+
         file_hash = hashlib.sha256(file_content).hexdigest()
 
         # Check if this file hash already exists
@@ -43,11 +47,18 @@ class KnowledgeBaseService:
             )
             session.add(source)
         else:
+
+            # Compress the file content into .zip format
+            zip_buffer = BytesIO()
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+                zip_file.writestr(file.filename, file_content)
+            compressed_content = zip_buffer.getvalue()
+
             # Create new source_data entry
             source_data_id = uuid.uuid4()
             source_data = SourceData(
                 id=source_data_id,
-                data=file_content,
+                data=compressed_content,
                 file_hash=file_hash
             )
             session.add(source_data)

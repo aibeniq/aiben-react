@@ -12,7 +12,7 @@ import {
   HStack,
   Box,
 } from "@chakra-ui/react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { FaPlus, FaTrash } from "react-icons/fa"
 
 import { type KnowledgeBaseCreate, KnowledgeBasesService } from "@/client"
@@ -48,6 +48,13 @@ const AddKnowledgeBase = () => {
       description: "",
     },
   })
+
+  // Reset selected files when the popup is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedFiles([]);
+    }
+  }, [isOpen]);
 
   const mutation = useMutation({
   mutationFn: (data: { title: string; description: string; files: File[] }) => {

@@ -6,6 +6,7 @@ from sqlmodel import func, select, delete
 
 import zipfile
 import io
+import os
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import KnowledgeBase, KnowledgeBaseCreate, KnowledgeBasePublic, KnowledgeBasesPublic, KnowledgeBaseUpdate, Message, Source, SourceData
@@ -14,6 +15,12 @@ import hashlib
 
 from app.services.knowledgebases import KnowledgeBaseService
 
+import tempfile
+
+from langchain_community.document_loaders import TextLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
 
@@ -87,7 +94,7 @@ def create_knowledge_base(
     files: List[UploadFile] = File(...),
 ) -> Any:
     """
-    Create new knowledge base with compressed file data.
+    Create new knowledge base with a compressed folder with the Chroma VectorDB.
     """
 
     # Check if a knowledge base with this title already exists for this user
@@ -98,19 +105,65 @@ def create_knowledge_base(
         )
     ).first()
 
+    print("Checking for existing knowledge base")
+
     if existing_kb:
         raise HTTPException(
             status_code=409,  # Using 409 Conflict for duplicate resource
             detail=f"A knowledge base with the title '{knowledge_base_in.title}' already exists"
         )
+    
+    # Initialize variables for Chroma
+    documents = []
 
-    # Compress the uploaded files into a zip archive
+    # Process each file
+    for file in files:
+        print(f"Received file: {file}")
+        print(f"Type of file: {type(file)}")
+        
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as temp_file:
+            temp_file.write(file.file.read())  # Write the file content to the temporary file
+            temp_file_path = temp_file.name 
+
+        # Use TextLoader to load the file content
+        text_loader = TextLoader(temp_file_path, encoding="utf-8")
+        loaded_documents = text_loader.load()
+
+        # Append loaded documents to the list
+        documents.extend(loaded_documents)
+
+         # Reset the file pointer before passing to create_source_entries
+        file.file.seek(0)  
+
+    print("Splitting documents...")
+
+    # Split documents into chunks using RecursiveCharacterTextSplitter
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=20)
+    splits = text_splitter.split_documents(documents)
+
+    print("Initializing embeddings...")
+
+    # Initialize HuggingFace embeddings
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+
+    print("Creating Chroma VectorDB...")
+
+    # Create Chroma VectorDB from the document splits
+    Chroma.from_documents(documents=splits, embedding=embeddings, persist_directory="./chroma_db")
+
+    print("Zipping Chroma database...")
+
+    # Compress the Chroma database directory into a zip file
     zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
-        for file in files:
-            file_content = file.file.read()
-            zip_file.writestr(file.filename, file_content)
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        for root, _, filenames in os.walk("./chroma_db"):
+            for filename in filenames:
+                file_path = os.path.join(root, filename)
+                arcname = os.path.relpath(file_path, "./chroma_db")  # Preserve directory structure
+                zip_file.write(file_path, arcname)
     zip_buffer.seek(0)
+
+    print("Validating knowledge base...")
 
     # Use model_validate to create and validate the knowledge base
     knowledge_base = KnowledgeBase.model_validate(
@@ -121,12 +174,17 @@ def create_knowledge_base(
         }
     )
 
+    print("Adding knowledge base to session...")
+
     session.add(knowledge_base)
 
     session.flush()  # This ensures the knowledge_base.id is available
 
     # Process each file
     for file in files:
+        print(f"Received file: {file}")
+        print(f"Type of file: {type(file)}")
+
         KnowledgeBaseService.create_source_entries(
             session=session,
             current_user=current_user,
