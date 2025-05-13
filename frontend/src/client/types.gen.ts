@@ -4,6 +4,11 @@ export type Body_knowledge_bases_create_knowledge_base = {
   files: Array<Blob | File>
 }
 
+export type Body_knowledge_bases_update_knowledge_base = {
+  files?: Array<Blob | File> | null
+  removed_file_ids?: Array<string>
+}
+
 export type Body_login_login_access_token = {
   grant_type?: string | null
   username: string
@@ -44,16 +49,14 @@ export type KnowledgeBasePublic = {
   description?: string | null
   id: string
   owner_id: string
+  files?: Array<{
+    [key: string]: unknown
+  }>
 }
 
 export type KnowledgeBasesPublic = {
   data: Array<KnowledgeBasePublic>
   count: number
-}
-
-export type KnowledgeBaseUpdate = {
-  title?: string | null
-  description?: string | null
 }
 
 export type Message = {
@@ -182,8 +185,10 @@ export type KnowledgeBasesReadKnowledgeBaseData = {
 export type KnowledgeBasesReadKnowledgeBaseResponse = KnowledgeBasePublic
 
 export type KnowledgeBasesUpdateKnowledgeBaseData = {
+  description?: string | null
+  formData?: Body_knowledge_bases_update_knowledge_base
   id: string
-  requestBody: KnowledgeBaseUpdate
+  title?: string | null
 }
 
 export type KnowledgeBasesUpdateKnowledgeBaseResponse = KnowledgeBasePublic

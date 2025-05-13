@@ -1,14 +1,19 @@
 import uuid
-from typing import Any, List
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
-from sqlmodel import func, select
+from sqlmodel import func, select, delete
 
 import zipfile
 import io
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import KnowledgeBase, KnowledgeBaseCreate, KnowledgeBasePublic, KnowledgeBasesPublic, KnowledgeBaseUpdate, Message
+from app.models import KnowledgeBase, KnowledgeBaseCreate, KnowledgeBasePublic, KnowledgeBasesPublic, KnowledgeBaseUpdate, Message, Source, SourceData
+
+import hashlib
+
+from app.services.knowledgebases import KnowledgeBaseService
+
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
 
@@ -53,9 +58,24 @@ def read_knowledge_base(
     knowledge_base = session.get(KnowledgeBase, id)
     if not knowledge_base:
         raise HTTPException(status_code=404, detail="Knowledge base not found")
-    if not current_user.is_superuser and (knowledge_base.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
-    return knowledge_base
+    
+    # Get all sources for this knowledge base
+    sources = session.exec(
+        select(Source).where(Source.knowledge_base_id == id)
+    ).all()
+
+    # Construct the response model
+    knowledge_base_public = KnowledgeBasePublic(
+        **knowledge_base.model_dump(),  # Copy all fields from the KnowledgeBase object
+        files=[
+            {
+                "id": str(source.source_data_id),  # Use source_data_id as the file ID
+                "name": source.name  # Use the source name as file name
+            }
+            for source in sources
+        ]
+    )
+    return knowledge_base_public
 
 
 @router.post("/", response_model=KnowledgeBasePublic)
@@ -69,17 +89,6 @@ def create_knowledge_base(
     """
     Create new knowledge base with compressed file data.
     """
-
-    # validate that the Knowledge Base name is unique
-    # 
-
-    # Compress the uploaded files into a zip archive
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
-        for file in files:
-            file_content = file.file.read()
-            zip_file.writestr(file.filename, file_content)
-    zip_buffer.seek(0)
 
     # Check if a knowledge base with this title already exists for this user
     existing_kb = session.exec(
@@ -95,6 +104,14 @@ def create_knowledge_base(
             detail=f"A knowledge base with the title '{knowledge_base_in.title}' already exists"
         )
 
+    # Compress the uploaded files into a zip archive
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+        for file in files:
+            file_content = file.file.read()
+            zip_file.writestr(file.filename, file_content)
+    zip_buffer.seek(0)
+
     # Use model_validate to create and validate the knowledge base
     knowledge_base = KnowledgeBase.model_validate(
         knowledge_base_in,
@@ -104,14 +121,19 @@ def create_knowledge_base(
         }
     )
 
-    # Create the knowledge base using the KnowledgeBaseCreate schema
-    #knowledge_base = KnowledgeBase(
-    #    title=knowledge_base_in.title,
-    #    description=knowledge_base_in.description,
-    #    owner_id=current_user.id,
-    #    data=zip_buffer.read(),  # Save the compressed data in the `data` column
-    #)
     session.add(knowledge_base)
+
+    session.flush()  # This ensures the knowledge_base.id is available
+
+    # Process each file
+    for file in files:
+        KnowledgeBaseService.create_source_entries(
+            session=session,
+            current_user=current_user,
+            knowledge_base_id=knowledge_base.id,
+            file=file
+        )
+
     session.commit()
     session.refresh(knowledge_base)
     return knowledge_base
@@ -123,11 +145,16 @@ def update_knowledge_base(
     session: SessionDep,
     current_user: CurrentUser,
     id: uuid.UUID,
-    knowledge_base_in: KnowledgeBaseUpdate,
+    knowledge_base_in: KnowledgeBaseUpdate = Depends(),
+    files: Optional[List[UploadFile]] = None,
 ) -> Any:
     """
     Update a knowledge base.
     """
+    print("Now updating knowledge base...")
+    if knowledge_base_in.removed_file_ids is None:
+        knowledge_base_in.removed_file_ids = []
+    print("Source IDs to remove:", knowledge_base_in.removed_file_ids)
     knowledge_base = session.get(KnowledgeBase, id)
     if not knowledge_base:
         raise HTTPException(status_code=404, detail="Knowledge base not found")
@@ -136,6 +163,33 @@ def update_knowledge_base(
     update_dict = knowledge_base_in.model_dump(exclude_unset=True)
     knowledge_base.sqlmodel_update(update_dict)
     session.add(knowledge_base)
+
+    session.flush()
+
+    # Process each file
+    if files:
+        for file in files:
+            KnowledgeBaseService.create_source_entries(
+                session=session,
+                current_user=current_user,
+                knowledge_base_id=knowledge_base.id,
+                file=file
+            )
+
+    # Handle file deletions
+    if len(knowledge_base_in.removed_file_ids) > 0:
+        # Delete entries from the Source table
+        session.exec(
+            delete(Source)
+            .where(Source.source_data_id.in_(knowledge_base_in.removed_file_ids))
+        )
+
+        # Delete entries from the SourceData table
+        session.exec(
+            delete(SourceData)
+            .where(SourceData.id.in_(knowledge_base_in.removed_file_ids))
+        )
+
     session.commit()
     session.refresh(knowledge_base)
     return knowledge_base

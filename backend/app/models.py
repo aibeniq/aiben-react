@@ -2,8 +2,8 @@ import uuid
 from typing import List, Optional
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
-from sqlalchemy import LargeBinary
-
+from sqlalchemy import LargeBinary, Column, PrimaryKeyConstraint
+from datetime import datetime
 
 # Shared properties
 class UserBase(SQLModel):
@@ -130,7 +130,9 @@ class KnowledgeBaseCreate(KnowledgeBaseBase):
 
 # Properties to receive on KnowledgeBase update
 class KnowledgeBaseUpdate(KnowledgeBaseBase):
-    title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
+    title: str | None = Field(default=None, min_length=1, max_length=255, unique=True)  # type: ignore
+    description: str | None = Field(default=None, max_length=255)
+    removed_file_ids: List[str] = Field(default_factory=list)  # List of file IDs to be removed
     # Allow updating file paths
     # file_paths: Optional[List[str]] = None
 
@@ -149,8 +151,37 @@ class KnowledgeBase(KnowledgeBaseBase, table=True):
 class KnowledgeBasePublic(KnowledgeBaseBase):
     id: uuid.UUID
     owner_id: uuid.UUID
+    files: List[dict] = Field(default_factory=list)
 
 
 class KnowledgeBasesPublic(SQLModel):
     data: list[KnowledgeBasePublic]
     count: int
+
+
+# "Source" referes to a document in a knowledge base
+class Source(SQLModel, table=True):
+    __tablename__ = "sources"
+    id: uuid.UUID = Field(primary_key=True, default_factory=uuid.uuid4)
+    source_data_id: uuid.UUID = Field(
+        foreign_key="source-data.id", nullable=False
+    )
+    knowledge_base_id: uuid.UUID = Field(
+        foreign_key="knowledge-bases.id", 
+        nullable=False, 
+        ondelete="CASCADE",
+    )
+    owner_id: uuid.UUID = Field(
+        foreign_key="user.id", 
+        nullable=False, 
+        ondelete="CASCADE"
+    )
+    name: str = Field(max_length=255)
+    date_created: datetime = Field(default_factory=datetime.utcnow)
+
+# This stores the actual file data, not just the metadata
+class SourceData(SQLModel, table=True):
+    __tablename__ = "source-data"
+    id: uuid.UUID = Field(primary_key=True)
+    data: bytes = Field(sa_column=LargeBinary)
+    file_hash: str = Field(max_length=64)  # SHA-256 hash is 64 characters
