@@ -218,35 +218,91 @@ def update_knowledge_base(
         raise HTTPException(status_code=404, detail="Knowledge base not found")
     if not current_user.is_superuser and (knowledge_base.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
+    
     update_dict = knowledge_base_in.model_dump(exclude_unset=True)
     knowledge_base.sqlmodel_update(update_dict)
-    session.add(knowledge_base)
 
-    session.flush()
+    # Retrieve the compressed folder from the database
+    if files or knowledge_base_in.removed_file_ids:
+        print("Retrieving existing VectorDB...")
+        zip_buffer = io.BytesIO(knowledge_base.data)
+        with zipfile.ZipFile(zip_buffer, "r") as zip_file:
+            zip_file.extractall("./chroma_db")
 
-    # Process each file
-    if files:
-        for file in files:
-            KnowledgeBaseService.create_source_entries(
-                session=session,
-                current_user=current_user,
-                knowledge_base_id=knowledge_base.id,
-                file=file
+         # Load the existing Chroma VectorDB
+        print("Loading existing Chroma VectorDB...")
+        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        chroma_vector_database = Chroma(persist_directory="./chroma_db", embedding_function=embeddings)
+
+        # Process new files (if any)
+        if files:
+            print("Adding new files to VectorDB...")
+            documents = []
+            for file in files:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as temp_file:
+                    temp_file.write(file.file.read())
+                    temp_file_path = temp_file.name
+
+                # Use TextLoader to load the file content
+                text_loader = TextLoader(temp_file_path, encoding="utf-8")
+                loaded_documents = text_loader.load()
+                documents.extend(loaded_documents)
+
+                # Reset the file pointer before passing to create_source_entries
+                file.file.seek(0)
+
+                # Add source entries for the new files
+                KnowledgeBaseService.create_source_entries(
+                    session=session,
+                    current_user=current_user,
+                    knowledge_base_id=knowledge_base.id,
+                    file=file
+                )
+
+            # Add the new documents to the VectorDB
+            chroma_vector_database.add_documents(documents)
+
+        # Handle file deletions
+        if knowledge_base_in.removed_file_ids is not None:
+        #if len(knowledge_base_in.removed_file_ids) > 0 and knowledge_base_in.removed_file_ids[0] != "00000000-0000-0000-0000-000000000000":
+            print("Removing files from VectorDB...")
+            sources_to_remove = session.exec(
+                select(Source).where(Source.source_data_id.in_(knowledge_base_in.removed_file_ids))
+            ).all()
+
+            print("Sources to remove:", sources_to_remove)
+
+            for source in sources_to_remove:
+                chroma_vector_database.delete(ids=[str(source.source_data_id)])
+
+            # Delete entries from the Source table
+            session.exec(
+                delete(Source)
+                .where(Source.source_data_id.in_(knowledge_base_in.removed_file_ids))
             )
 
-    # Handle file deletions
-    if len(knowledge_base_in.removed_file_ids) > 0:
-        # Delete entries from the Source table
-        session.exec(
-            delete(Source)
-            .where(Source.source_data_id.in_(knowledge_base_in.removed_file_ids))
-        )
+            # Delete entries from the SourceData table
+            session.exec(
+                delete(SourceData)
+                .where(SourceData.id.in_(knowledge_base_in.removed_file_ids))
+            )
 
-        # Delete entries from the SourceData table
-        session.exec(
-            delete(SourceData)
-            .where(SourceData.id.in_(knowledge_base_in.removed_file_ids))
-        )
+        # Zip the updated VectorDB
+        print("Zipping updated VectorDB...")
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for root, _, filenames in os.walk("./chroma_db"):
+                for filename in filenames:
+                    file_path = os.path.join(root, filename)
+                    arcname = os.path.relpath(file_path, "./chroma_db")
+                    zip_file.write(file_path, arcname)
+        zip_buffer.seek(0)
+
+        # Update the knowledge base data in the database
+        print("Updating knowledge base data in the database...")
+        knowledge_base.data = zip_buffer.read()
+
+    session.add(knowledge_base)
 
     session.commit()
     session.refresh(knowledge_base)
