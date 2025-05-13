@@ -261,7 +261,9 @@ export class KnowledgeBasesService {
    * Update a knowledge base.
    * @param data The data for the request.
    * @param data.id
-   * @param data.requestBody
+   * @param data.title
+   * @param data.description
+   * @param data.formData
    * @returns KnowledgeBasePublic Successful Response
    * @throws ApiError
    */
@@ -274,8 +276,12 @@ export class KnowledgeBasesService {
       path: {
         id: data.id,
       },
-      body: data.requestBody,
-      mediaType: "application/json",
+      query: {
+        title: data.title,
+        description: data.description,
+      },
+      formData: data.formData,
+      mediaType: "multipart/form-data",
       errors: {
         422: "Validation Error",
       },

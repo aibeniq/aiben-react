@@ -3,8 +3,8 @@ import { BsThreeDotsVertical } from "react-icons/bs"
 import { MenuContent, MenuRoot, MenuTrigger } from "../ui/menu"
 
 import type { KnowledgeBasePublic } from "@/client"
-import DeleteItem from "../Items/DeleteItem"
-import EditItem from "../Items/EditItem"
+import EditKnowledgeBase from "@/components/KnowledgeBases/EditKnowledgeBase"
+import DeleteKnowledgeBase from "../KnowledgeBases/DeleteKnowledgeBase"
 
 interface KnowledgeBaseActionsMenuProps {
   item: KnowledgeBasePublic
@@ -19,8 +19,8 @@ export const KnowledgeBaseActionsMenu = ({ item }: KnowledgeBaseActionsMenuProps
         </IconButton>
       </MenuTrigger>
       <MenuContent>
-        <EditItem item={item} />
-        <DeleteItem id={item.id} />
+        <EditKnowledgeBase item={item} />
+        <DeleteKnowledgeBase id={item.id} />
       </MenuContent>
     </MenuRoot>
   )

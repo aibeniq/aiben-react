@@ -1,0 +1,65 @@
+from typing import List
+import uuid
+import hashlib
+from fastapi import UploadFile
+from sqlmodel import select, Session
+from app.models import Source, SourceData
+from app.api.deps import CurrentUser
+
+class KnowledgeBaseService:
+    @staticmethod
+    def create_source_entries(
+        *,
+        session: Session,
+        current_user: CurrentUser,
+        knowledge_base_id: uuid.UUID,
+        file: UploadFile,
+    ) -> None:
+        """
+        Create source and source_data entries for a single file.
+        
+        Args:
+            session: Database session
+            current_user: Current authenticated user
+            knowledge_base_id: ID of parent knowledge base
+            file: Uploaded file
+        """
+        file.file.seek(0)
+        file_content = file.file.read()
+        file_hash = hashlib.sha256(file_content).hexdigest()
+
+        # Check if this file hash already exists
+        existing_source_data = session.exec(
+            select(SourceData).where(SourceData.file_hash == file_hash)
+        ).first()
+
+        if existing_source_data:
+            # Create only a new source entry using existing source_data
+            source = Source(
+                source_data_id=existing_source_data.id,
+                owner_id=current_user.id,
+                name=file.filename,
+                knowledge_base_id=knowledge_base_id
+            )
+            session.add(source)
+        else:
+            # Create new source_data entry
+            source_data_id = uuid.uuid4()
+            source_data = SourceData(
+                id=source_data_id,
+                data=file_content,
+                file_hash=file_hash
+            )
+            session.add(source_data)
+            session.flush()
+
+            # Create new source entry
+            source = Source(
+                source_data_id=source_data_id,
+                owner_id=current_user.id,
+                name=file.filename,
+                knowledge_base_id=knowledge_base_id
+            )
+            session.add(source)
+
+        file.file.seek(0)

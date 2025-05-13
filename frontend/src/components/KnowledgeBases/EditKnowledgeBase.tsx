@@ -5,11 +5,14 @@ import {
   Input,
   Text,
   VStack,
+  HStack,
+  Box,
 } from "@chakra-ui/react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useState, useEffect } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FaExchangeAlt } from "react-icons/fa"
+import { FaExchangeAlt, FaTrash } from "react-icons/fa"
+import { useDropzone } from "react-dropzone"
 
 import { type ApiError, type KnowledgeBasePublic, KnowledgeBasesService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -36,9 +39,26 @@ interface KnowledgeBaseUpdateForm {
 }
 
 const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
+  console.log('KnowledgeBase item:', item)
+  console.log('KnowledgeBase item ID:', item.id)
+  
   const [isOpen, setIsOpen] = useState(false)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [removedFileIds, setRemovedFileIds] = useState<string[]>([])
   const queryClient = useQueryClient()
-  const { showSuccessToast } = useCustomToast()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+
+  const { data: knowledgeBase, isLoading } = useQuery({
+    queryKey: ['knowledge-base', item.id],
+    queryFn: async () => {
+      console.log('Fetching knowledge base with ID:', item.id)
+      return KnowledgeBasesService.readKnowledgeBase({ id: item.id })
+    },
+    enabled: isOpen, // Only fetch when dialog is open
+  })
+
+  console.log('KnowledgeBase data:', knowledgeBase)
+
   const {
     register,
     handleSubmit,
@@ -47,18 +67,52 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
   } = useForm<KnowledgeBaseUpdateForm>({
     mode: "onBlur",
     criteriaMode: "all",
+    // Initialize with item prop instead
     defaultValues: {
-      ...item,
+      title: item.title,
       description: item.description ?? undefined,
     },
   })
 
+  // Add useEffect to update form when knowledgeBase data loads
+  useEffect(() => {
+    if (knowledgeBase) {
+      reset({
+        title: knowledgeBase.title,
+        description: knowledgeBase.description ?? undefined,
+      })
+    }
+  }, [knowledgeBase, reset])
+
   const mutation = useMutation({
-    mutationFn: (data: KnowledgeBaseUpdateForm) =>
-      KnowledgeBasesService.updateKnowledgeBase({ id: item.id, requestBody: data }),
+    mutationFn: (data: KnowledgeBaseUpdateForm & { files: File[], removedFileIds: string[] }) => {
+      console.log('Now beginning mutation...')
+
+      console.log("Title sent to KnowledgeBasesService.updateKnowledgeBase:", data.title)
+      console.log("Description sent to KnowledgeBasesService.updateKnowledgeBase:", data.description)
+      console.log("Removed file IDs sent to KnowledgeBasesService.updateKnowledgeBase:", data.removedFileIds)
+      console.log('FormData sent to KnowledgeBasesService.updateKnowledgeBase is as follows:', data)
+
+      const payload = {
+        title: data.title,
+        description: data.description,
+        id: item.id,
+        formData: {
+          files: data.files, 
+          ...(data.removedFileIds && data.removedFileIds.length > 0
+          ? { removed_file_ids: data.removedFileIds }
+          : {removed_file_ids: ["00000000-0000-0000-0000-000000000000"]})  // sending an empty list in case of no deletions fails for some reason. Sending a single dummy entry instead
+        }}
+
+      console.log('Payload being sent to KnowledgeBasesService.updateKnowledgeBase:', payload);
+      
+      return KnowledgeBasesService.updateKnowledgeBase(payload)
+    },
     onSuccess: () => {
       showSuccessToast("Knowledge Base updated successfully.")
       reset()
+      setSelectedFiles([])
+      setRemovedFileIds([])
       setIsOpen(false)
     },
     onError: (err: ApiError) => {
@@ -70,8 +124,39 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
   })
 
   const onSubmit: SubmitHandler<KnowledgeBaseUpdateForm> = async (data) => {
-    mutation.mutate(data)
+    console.log('Submitting form data:', data)	
+    console.log('Selected files:', selectedFiles)
+    console.log('Removed file IDs:', removedFileIds)
+    mutation.mutate({
+      ...data,
+      files: selectedFiles,
+      removedFileIds
+    })
   }
+
+  const onDrop = (acceptedFiles: File[]) => {
+    setSelectedFiles(prev => [...prev, ...acceptedFiles])
+  }
+
+  const handleRemoveNewFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handleRemoveExistingFile = (fileId: string) => {
+    setRemovedFileIds(prev => [...prev, fileId])
+  }
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "text/plain": [".txt"],
+      "application/pdf": [".pdf"],
+      "application/msword": [".doc"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "application/rtf": [".rtf"],
+    },
+    multiple: true
+  })
 
   return (
     <DialogRoot
@@ -122,6 +207,73 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                   type="text"
                 />
               </Field>
+
+              {/* Existing Files */}
+              {knowledgeBase?.files && knowledgeBase.files.length > 0 && (
+                <Box w="full">
+                  <Text mb={2}>Current Files:</Text>
+                  <VStack align="start" spacing={2}>
+                    {knowledgeBase.files
+                      .filter(file => !removedFileIds.includes(file.id))
+                      .map((file) => (
+                        <HStack key={file.id} w="full" justify="space-between">
+                          <Text isTruncated>{file.name}</Text>
+                          <Box
+                            as="button"
+                            type="button"
+                            aria-label="Remove file"
+                            onClick={() => handleRemoveExistingFile(file.id)}
+                            _hover={{ color: "red.500" }}
+                          >
+                            <FaTrash />
+                          </Box>
+                        </HStack>
+                      ))}
+                  </VStack>
+                </Box>
+              )}
+
+              {/* File Upload Area */}
+              <Box
+                {...getRootProps()}
+                border="2px dashed"
+                borderColor={isDragActive ? "blue.500" : "gray.300"}
+                borderRadius="md"
+                p={4}
+                textAlign="center"
+                cursor="pointer"
+                _hover={{ borderColor: "blue.500" }}
+              >
+                <input {...getInputProps()} />
+                <Text>
+                  {isDragActive
+                    ? "Drop the files here..."
+                    : "Drag and drop files here, or click to browse"}
+                </Text>
+              </Box>
+
+              {/* New Selected Files */}
+              {selectedFiles.length > 0 && (
+                <Box w="full">
+                  <Text mb={2}>New Files:</Text>
+                  <VStack align="start" spacing={2}>
+                    {selectedFiles.map((file, index) => (
+                      <HStack key={index} w="full" justify="space-between">
+                        <Text isTruncated>{file.name}</Text>
+                        <Box
+                          as="button"
+                          type="button"
+                          aria-label="Remove file"
+                          onClick={() => handleRemoveNewFile(index)}
+                          _hover={{ color: "red.500" }}
+                        >
+                          <FaTrash />
+                        </Box>
+                      </HStack>
+                    ))}
+                  </VStack>
+                </Box>
+              )}
             </VStack>
           </DialogBody>
 
