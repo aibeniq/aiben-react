@@ -15,7 +15,11 @@ import hashlib
 
 from app.services.knowledgebases import KnowledgeBaseService
 
+from sqlalchemy.sql import func
+
 import tempfile
+
+from datetime import datetime
 
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -30,13 +34,25 @@ def read_knowledge_bases(
     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
 ) -> Any:
     """
-    Retrieve knowledge bases.
+    Retrieve knowledge bases with additional metadata: Number of Sources, Date Created, and Date Modified.
     """
+    # Base query to count sources and retrieve metadata
+    query = (
+        session.query(
+            KnowledgeBase,
+            func.count(Source.id).label("number_of_sources"),
+            KnowledgeBase.date_created,
+            KnowledgeBase.date_modified,
+        )
+        .join(Source, Source.knowledge_base_id == KnowledgeBase.id, isouter=True)
+        .group_by(KnowledgeBase.id)
+    )
+
+    # Apply filters based on user permissions
     if current_user.is_superuser:
         count_statement = select(func.count()).select_from(KnowledgeBase)
         count = session.exec(count_statement).one()
-        statement = select(KnowledgeBase).offset(skip).limit(limit)
-        knowledge_bases = session.exec(statement).all()
+        query = query.offset(skip).limit(limit)
     else:
         count_statement = (
             select(func.count())
@@ -44,13 +60,31 @@ def read_knowledge_bases(
             .where(KnowledgeBase.owner_id == current_user.id)
         )
         count = session.exec(count_statement).one()
-        statement = (
-            select(KnowledgeBase)
-            .where(KnowledgeBase.owner_id == current_user.id)
+        query = (
+            query.filter(KnowledgeBase.owner_id == current_user.id)
             .offset(skip)
             .limit(limit)
         )
-        knowledge_bases = session.exec(statement).all()
+
+    # Execute the query
+    results = query.all()
+
+    # Format the response
+    knowledge_bases = [
+        KnowledgeBasePublic(
+            id=kb.KnowledgeBase.id,
+            owner_id=kb.KnowledgeBase.owner_id,
+            title=kb.KnowledgeBase.title,
+            description=kb.KnowledgeBase.description,
+            files=[],  # Files can be populated separately if needed
+            number_of_sources=kb.number_of_sources,
+            date_created=kb.date_created,
+            date_modified=kb.date_modified,
+        )
+        for kb in results
+    ]
+
+    print("Knowledge Bases Response:", knowledge_bases)
 
     return KnowledgeBasesPublic(data=knowledge_bases, count=count)
 
@@ -170,7 +204,9 @@ def create_knowledge_base(
         knowledge_base_in,
         update={
             "owner_id": current_user.id,
-            "data": zip_buffer.read()
+            "data": zip_buffer.read(),
+            "date_created": datetime.utcnow(),
+            "date_modified": datetime.utcnow(),
         }
     )
 
@@ -301,6 +337,9 @@ def update_knowledge_base(
         # Update the knowledge base data in the database
         print("Updating knowledge base data in the database...")
         knowledge_base.data = zip_buffer.read()
+
+    # Update the date_modified field
+    knowledge_base.date_modified = datetime.utcnow()
 
     session.add(knowledge_base)
 
