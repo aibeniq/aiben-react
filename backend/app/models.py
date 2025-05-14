@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Optional
+from typing import List, Dict, Optional
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
 from sqlalchemy import LargeBinary, Column, PrimaryKeyConstraint
@@ -191,3 +191,11 @@ class SourceData(SQLModel, table=True):
     id: uuid.UUID = Field(primary_key=True)
     data: bytes = Field(sa_column=LargeBinary)
     file_hash: str = Field(max_length=64)  # SHA-256 hash is 64 characters
+    
+# Request model for FormConnect
+class FormConnectRequest(SQLModel):
+    fields: str
+
+# Response model for FormConnect
+class FormConnectResponse(SQLModel):
+    results: str  # Results of the comparison

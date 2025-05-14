@@ -4,6 +4,8 @@ import type { CancelablePromise } from "./core/CancelablePromise"
 import { OpenAPI } from "./core/OpenAPI"
 import { request as __request } from "./core/request"
 import type {
+  FormconnectProcessFormData,
+  FormconnectProcessFormResponse,
   ItemsReadItemsData,
   ItemsReadItemsResponse,
   ItemsCreateItemData,
@@ -57,6 +59,34 @@ import type {
   UtilsTestEmailResponse,
   UtilsHealthCheckResponse,
 } from "./types.gen"
+
+export class FormconnectService {
+  /**
+   * Process Form
+   * Process the uploaded files and fields.
+   * @param data The data for the request.
+   * @param data.fields
+   * @param data.formData
+   * @returns FormConnectResponse Successful Response
+   * @throws ApiError
+   */
+  public static processForm(
+    data: FormconnectProcessFormData,
+  ): CancelablePromise<FormconnectProcessFormResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/formconnect/process",
+      query: {
+        fields: data.fields,
+      },
+      formData: data.formData,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
 
 export class ItemsService {
   /**
