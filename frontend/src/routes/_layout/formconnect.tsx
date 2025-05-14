@@ -7,6 +7,8 @@ import {
   Textarea,
   VStack,
   HStack,
+  Switch,
+  Field
 } from "@chakra-ui/react"
 import { useState, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
@@ -15,18 +17,27 @@ import { useMutation } from "@tanstack/react-query"
 import { FormconnectService } from "@/client"
 
 const FormConnect = () => {
-  const [files, setFiles] = useState<File[]>([])
+  const [fileItems, setFileItems] = useState<Array<{
+    file: File;
+    isHandwritten: boolean;
+  }>>([]);
+
   const [fields, setFields] = useState("")
   const [results, setResults] = useState("")
 
   const mutation = useMutation({
-    mutationFn: (data: {fields: string; files: File[]}) => {
+    mutationFn: (data: {
+      fields: string;
+      digitized_files: File[];
+      handwritten_files: File[];
+    }) => {
       console.log("Now beginning mutation...")
       
       return FormconnectService.processForm({
         fields: data.fields,
         formData: {
-          files: data.files,
+          digitized_files: data.digitized_files,
+          handwritten_files: data.handwritten_files,
         },
       })
     },
@@ -48,15 +59,23 @@ const FormConnect = () => {
   })
 
   const addFile = (file: File) => {
-    setFiles(prevFiles => [...prevFiles, file])
+    setFileItems(prevItems => [...prevItems, { file, isHandwritten: false }])
   }
 
   const removeFile = (index: number) => {
-    setFiles(prevFiles => prevFiles.filter((_, i) => i !== index))
+    setFileItems(prevItems => prevItems.filter((_, i) => i !== index))
   }
 
   const updateFile = (index: number, file: File) => {
-    setFiles(prevFiles => prevFiles.map((f, i) => i === index ? file : f))
+    setFileItems(prevItems => prevItems.map((item, i) => 
+      i === index ? { ...item, file } : item
+    ))
+  }
+
+  const toggleHandwritten = (index: number) => {
+    setFileItems(prevItems => prevItems.map((item, i) => 
+      i === index ? { ...item, isHandwritten: !item.isHandwritten } : item
+    ))
   }
 
   const handleAddNewFile = () => {
@@ -65,7 +84,7 @@ const FormConnect = () => {
   }
 
   const handleRun = async () => {
-    if (files.length < 1) {
+    if (fileItems.length < 1) {
       setResults("Please upload at least one file.")
       return
     }
@@ -75,13 +94,17 @@ const FormConnect = () => {
       return
     }
 
-    // Filter out placeholder files (if any)
-    const validFiles = files.filter(f => f.size > 0)
+    // Filter out placeholder files and separate into digitized vs handwritten
+    const validItems = fileItems.filter(item => item.file.size > 0)
+    const digitizedFiles = validItems.filter(item => !item.isHandwritten).map(item => item.file)
+    const handwrittenFiles = validItems.filter(item => item.isHandwritten).map(item => item.file)
 
     const requestData = {
       fields: fields,
-      files: validFiles,
+      digitized_files: digitizedFiles,
+      handwritten_files: handwrittenFiles,
     }
+
     console.log("Request Data:", requestData)
 
     mutation.mutate(requestData)
@@ -90,7 +113,7 @@ const FormConnect = () => {
   // Add to your component (place in FormConnect before the return statement)
   useEffect(() => {
     // Start with one empty file slot
-    if (files.length === 0) {
+    if (fileItems.length === 0) {
       handleAddNewFile()
     }
   }, [])
@@ -102,13 +125,14 @@ const FormConnect = () => {
       </Heading>
       <VStack spacing={4} align="stretch">
         {/* File Uploaders */}
-        {files.map((file, index) => (
+        {fileItems.map((fileItem, index) => (
           <FileDropzone 
             key={index}
             index={index}
-            file={file}
+            fileItem={fileItem}
             onUpdate={updateFile}
             onRemove={removeFile}
+            onToggleHandwritten={toggleHandwritten}
           />
         ))}
 
@@ -129,7 +153,7 @@ const FormConnect = () => {
         <Button 
           colorScheme="blue" 
           onClick={handleRun}
-          isDisabled={files.length < 1 || !fields.trim()}
+          isDisabled={fileItems.length < 1 || !fields.trim() || !fileItems.some(item => item.file.size > 0)}
         >
           Run
         </Button>
@@ -152,12 +176,18 @@ const FormConnect = () => {
   )
 }
 
-// FileDropzone component definition here
-const FileDropzone = ({ index, file, onUpdate, onRemove }: { 
+const FileDropzone = ({ 
+  index, 
+  fileItem, 
+  onUpdate, 
+  onRemove, 
+  onToggleHandwritten 
+}: { 
   index: number, 
-  file: File | null, 
+  fileItem: { file: File, isHandwritten: boolean }, 
   onUpdate: (index: number, file: File) => void,
-  onRemove: (index: number) => void 
+  onRemove: (index: number) => void,
+  onToggleHandwritten: (index: number) => void
 }) => {
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles) => {
@@ -169,48 +199,74 @@ const FileDropzone = ({ index, file, onUpdate, onRemove }: {
       "application/pdf": [".pdf"],
       "text/plain": [".txt"],
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+      "image/gif": [".gif"],
+      "image/bmp": [".bmp"],
+      "image/tiff": [".tif", ".tiff"],
+      "image/webp": [".webp"],
     },
     multiple: false,
   })
 
-  // Check if file is a placeholder (empty file with name "placeholder")
+  const { file, isHandwritten } = fileItem
+  
+  // Check if file is a placeholder
   const isPlaceholder = file && file.name === "placeholder" && file.size === 0
 
   return (
     <Box position="relative">
-      <Box
-        {...getRootProps()}
-        border="2px dashed"
-        borderColor="gray.300"
-        borderRadius="md"
-        p={4}
-        textAlign="center"
-        cursor="pointer"
-        _hover={{ borderColor: "blue.500" }}
-      >
-        <input {...getInputProps()} />
-         <Text>
-          {file && !isPlaceholder 
-            ? `Selected File: ${file.name}` 
-            : `Drag and drop File ${index + 1} here, or click to browse`
-          }
-        </Text>
-      </Box>
-      {file && (
-        <Button 
-          size="sm" 
-          colorScheme="red" 
-          position="absolute" 
-          top="5px" 
-          right="5px"
-          onClick={(e) => {
-            e.stopPropagation()
-            onRemove(index)
-          }}
+      <VStack align="stretch" spacing={2}>
+        <Box
+          {...getRootProps()}
+          border="2px dashed"
+          borderColor="gray.300"
+          borderRadius="md"
+          p={4}
+          textAlign="center"
+          cursor="pointer"
+          _hover={{ borderColor: "blue.500" }}
         >
-          ✕
-        </Button>
-      )}
+          <input {...getInputProps()} />
+          <Text>
+            {file && !isPlaceholder 
+              ? `Selected File: ${file.name}` 
+              : `Drag and drop File ${index + 1} here, or click to browse`
+            }
+          </Text>
+        </Box>
+        
+        {/* Only show toggle if a real file is uploaded */}
+        {file && !isPlaceholder && (
+          <HStack justify="space-between" px={2}>
+            <Field.Root display="flex" alignItems="center" width="auto">
+              <Field.Label htmlFor={`handwritten-${index}`} mb="0" fontSize="sm">
+                Analyze handwriting
+              </Field.Label>
+              <Switch.Root id={`handwritten-${index}`} colorPalette="blue">
+                <Switch.HiddenInput 
+                  checked={isHandwritten} 
+                  onChange={() => onToggleHandwritten(index)} 
+                />
+                <Switch.Control>
+                  <Switch.Thumb />
+                </Switch.Control>
+              </Switch.Root>
+            </Field.Root>
+            
+            <Button 
+              size="sm" 
+              colorScheme="red" 
+              onClick={(e) => {
+                e.stopPropagation()
+                onRemove(index)
+              }}
+            >
+              Remove
+            </Button>
+          </HStack>
+        )}
+      </VStack>
     </Box>
   )
 }
