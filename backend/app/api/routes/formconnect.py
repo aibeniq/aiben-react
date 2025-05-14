@@ -278,19 +278,36 @@ async def compare_multiple_documents(documents: List[Dict[str, str]], file_names
         
         {documents}
         
-        Please analyze all the documents and:
-        1. Identify any fields that have different values across documents
-        2. For each discrepancy, list the field name and the different values found
-        3. If possible, suggest which value is most likely correct
-        4. Provide a summary of how consistent the documents are overall
+        Please analyze all the documents and identify any fields that have different values across documents.
         
-        Format your response as a clear, readable report."""
+        Create a markdown table with the following format:
+        1. First column should be titled "FIELD" and contain the field name
+        2. Each additional column should have the document name as header (e.g., "Document 1", "Document 2")
+        3. Include ONLY fields where there are discrepancies between documents
+        
+        After the table, please:
+        1. For each discrepancy, suggest which value is most likely correct and why
+        2. Provide a summary of how consistent the documents are overall
+        
+        Example format:
+        ```markdown
+        | FIELD | Document 1 | Document 2 | ... |
+        |-------|------------|------------|-----|
+        | Name  | John Smith | J. Smith   | ... |
+        | Date  | 2023-01-01 | 2023-01-15 | ... |
+        ```
+        
+        ONLY return the Markdown table -- do NOT return any other text. 
+        Also, do NOT add tick marks like ``` and the label 'markdown': just give the actual markdown table content as raw text.
+        However, if there are no discrepancies, please state that all fields match across documents.
+        """
     )
     
     prompt = prompt_template.format_prompt(documents=documents_str)
 
     # Call the LLM
     response = llm(prompt.to_messages())
+    print("Comparison response:", response.content)
     return response.content
 
 
