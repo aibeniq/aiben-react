@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Dict, Optional
+from typing import List, Dict, Any, Optional
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
 from sqlalchemy import LargeBinary, Column, PrimaryKeyConstraint
@@ -198,4 +198,4 @@ class FormConnectRequest(SQLModel):
 
 # Response model for FormConnect
 class FormConnectResponse(SQLModel):
-    results: str  # Results of the comparison
+    results: Dict[str, Any]  # Accept any dictionary structure
