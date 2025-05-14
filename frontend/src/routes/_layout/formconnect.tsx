@@ -8,13 +8,16 @@ import {
   VStack,
   HStack,
   Switch,
-  Field
+  Field,
+  Spinner
 } from "@chakra-ui/react"
 import { useState, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
 import { FormconnectService } from "@/client"
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 const FormConnect = () => {
   const [fileItems, setFileItems] = useState<Array<{
@@ -24,6 +27,7 @@ const FormConnect = () => {
 
   const [fields, setFields] = useState("")
   const [results, setResults] = useState("")
+  const [loading, setLoading] = useState(false);
 
   const mutation = useMutation({
     mutationFn: (data: {
@@ -45,6 +49,7 @@ const FormConnect = () => {
       console.log("Response data:", data)
       // Handle both comparison and single file responses
       if (data.results.comparison) {
+        console.log("Comparison data:", data.results.comparison)
         setResults(data.results.comparison)
       } else if (data.results.message) {
         setResults(`${data.results.message}\n\n${JSON.stringify(data.results.extracted_data, null, 2)}`)
@@ -85,38 +90,59 @@ const FormConnect = () => {
 
   const handleRun = async () => {
     if (fileItems.length < 1) {
-      setResults("Please upload at least one file.")
-      return
+      setResults("Please upload at least one file.");
+      return;
     }
 
     if (!fields.trim()) {
-      setResults("Please enter at least one field.")
-      return
+      setResults("Please enter at least one field.");
+      return;
     }
 
     // Filter out placeholder files and separate into digitized vs handwritten
-    const validItems = fileItems.filter(item => item.file.size > 0)
-    const digitizedFiles = validItems.filter(item => !item.isHandwritten).map(item => item.file)
-    const handwrittenFiles = validItems.filter(item => item.isHandwritten).map(item => item.file)
+    const validItems = fileItems.filter(item => item.file.size > 0);
+    const digitizedFiles = validItems.filter(item => !item.isHandwritten).map(item => item.file);
+    const handwrittenFiles = validItems.filter(item => item.isHandwritten).map(item => item.file);
 
     const requestData = {
       fields: fields,
       digitized_files: digitizedFiles,
       handwritten_files: handwrittenFiles,
-    }
+    };
 
-    console.log("Request Data:", requestData)
+    console.log("Request Data:", requestData);
 
-    mutation.mutate(requestData)
-  }
+    setLoading(true); // Set loading to true
+    mutation.mutate(requestData, {
+      onSettled: () => {
+        setLoading(false); // Set loading to false when the process finishes
+      },
+    });
+  };
 
-  // Add to your component (place in FormConnect before the return statement)
   useEffect(() => {
     // Start with one empty file slot
     if (fileItems.length === 0) {
       handleAddNewFile()
     }
   }, [])
+
+  
+// Create custom components for table rendering
+const components = {
+  table: (props) => (
+    <Box as="table" width="full" borderWidth="1px" borderRadius="md" overflow="hidden" {...props} />
+  ),
+  thead: (props) => <Box as="thead" bg="gray.100" {...props} />,
+  tbody: (props) => <Box as="tbody" {...props} />,
+  tr: (props) => <Box as="tr" {...props} />,
+  th: (props) => (
+    <Box as="th" p={4} textAlign="left" fontWeight="bold" borderBottomWidth="1px" {...props} />
+  ),
+  td: (props) => (
+    <Box as="td" p={4} borderBottomWidth="1px" {...props} />
+  ),
+};
 
   return (
     <Container maxW="lg" py={8}>
@@ -168,8 +194,27 @@ const FormConnect = () => {
           minH="100px"
           maxH="400px"
           overflowY="auto"
+          position="relative"
+          opacity={loading ? 0.5 : 1} // Grey out the panel when loading
         >
-          <Text whiteSpace="pre-wrap">{results || "Results will appear here after running."}</Text>
+          {loading && (
+            <Box
+              position="absolute"
+              top="50%"
+              left="50%"
+              transform="translate(-50%, -50%)"
+              zIndex="1"
+            >
+              <Spinner size="lg" color="blue.500" />
+            </Box>
+          )}
+          {results ? (
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+              {results}
+            </ReactMarkdown>
+          ) : (
+            <Text>Results will appear here after running.</Text>
+          )}
         </Box>
       </VStack>
     </Container>
