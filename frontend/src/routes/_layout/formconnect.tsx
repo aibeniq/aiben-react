@@ -35,7 +35,9 @@ const FormConnect = () => {
       });
     },
     onSuccess: (data) => {
-      setResults(data.results);
+      console.log("Response data:")
+      console.log(data)
+      setResults(data.results.comparison);
     },
     onError: (error) => {
       console.log("Mutation unsuccessful!")

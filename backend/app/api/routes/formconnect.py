@@ -37,7 +37,13 @@ async def extract_fields_from_document(file: UploadFile, template: Dict[str, str
     """
     # Read the file content
     content = await file.read()
-    text = content.decode("utf-8")  # Assuming the file is text-based (e.g., .txt, .docx, .pdf)
+    
+    try:
+        text = content.decode("utf-8")  # Try to decode as UTF-8
+    except UnicodeDecodeError:
+        # If it's not a text file, we could handle binary files differently
+        # For now, just return an error message in the template
+        return {k: f"Could not extract: Binary file {file.filename}" for k in template.keys()}
 
     # Create the prompt
     prompt_template = ChatPromptTemplate.from_template(
@@ -49,24 +55,58 @@ async def extract_fields_from_document(file: UploadFile, template: Dict[str, str
 
     # Call the LLM
     response = llm(prompt.to_messages())
-    return response.content  # Assuming the LLM returns a JSON string
+    
+    # Try to parse the response as JSON
+    try:
+        import json
+        # The output might already be a dictionary
+        if isinstance(response.content, dict):
+            return response.content
+        # Otherwise, try to parse it as JSON
+        content_dict = json.loads(response.content)
+        return content_dict
+    except (json.JSONDecodeError, AttributeError):
+        # If JSON parsing fails or response.content is not string-like
+        # Return the content wrapped in a dictionary
+        return {"raw_content": str(response.content)}
 
-async def compare_documents(template1: Dict[str, str], template2: Dict[str, str]) -> str:
+async def compare_multiple_documents(documents: List[Dict[str, str]], file_names: List[str]) -> str:
     """
-    Compare the extracted fields from two documents using the LLM.
+    Compare fields across multiple documents using the LLM.
+    
+    Args:
+        documents: List of dictionaries containing extracted fields
+        file_names: List of file names corresponding to the documents
+        
+    Returns:
+        String with comparison results
     """
-    # Create the prompt
+    # Create a combined representation of all documents
+    documents_str = ""
+    for i, (doc, name) in enumerate(zip(documents, file_names)):
+        documents_str += f"Document {i+1} ({name}): {doc}\n\n"
+    
+    # Create the prompt for multi-document comparison
     prompt_template = ChatPromptTemplate.from_template(
-        """I am going to show you two sets of information from two documents that were compared:
-        Document 1: {template1}
-        Document 2: {template2}
-        Are there mismatches in any of the fields? If so, give them in a bulleted list along with a description of why they mismatch."""
+        """I am going to show you information extracted from multiple documents:
+        
+        {documents}
+        
+        Please analyze all the documents and:
+        1. Identify any fields that have different values across documents
+        2. For each discrepancy, list the field name and the different values found
+        3. If possible, suggest which value is most likely correct
+        4. Provide a summary of how consistent the documents are overall
+        
+        Format your response as a clear, readable report."""
     )
-    prompt = prompt_template.format_prompt(template1=template1, template2=template2)
+    
+    prompt = prompt_template.format_prompt(documents=documents_str)
 
     # Call the LLM
     response = llm(prompt.to_messages())
-    return response.content  # Assuming the LLM returns a plain text response
+    return response.content
+
 
 @router.post("/process", response_model=FormConnectResponse)
 async def process_form(
@@ -76,7 +116,12 @@ async def process_form(
     """
     Process the uploaded files and fields.
     """
-    print("Now processing files...")
+    print(f"Now processing {len(files)} files...")
+    
+    # Check if we have at least one file
+    if len(files) < 1:
+        raise HTTPException(status_code=400, detail="At least one file must be uploaded.")
+    
     # Parse the fields into a list
     field_list = form_connect_in.fields.splitlines()
 
@@ -86,12 +131,32 @@ async def process_form(
     # Generate the JSON template
     template = generate_template(field_list)
 
-    # Extract fields from both documents
-    extracted1 = await extract_fields_from_document(files[0], template)
-    extracted2 = await extract_fields_from_document(files[1], template)
+    # Extract fields from all documents
+    extracted_results = []
+    file_names = []
+    
+    for file in files:
+        extracted = await extract_fields_from_document(file, template)
+        extracted_results.append(extracted)
+        file_names.append(file.filename)
+        
+        # Reset file position for potential future reads
+        await file.seek(0)
 
-    # Compare the extracted fields
-    comparison_results = await compare_documents(extracted1, extracted2)
+    # If there's only one file, we can't do comparison
+    if len(files) == 1:
+        result = {
+            "message": "Only one document provided. No comparison performed.",
+            "extracted_data": extracted_results[0]
+        }
+    else:
+        # Compare the extracted fields
+        comparison_result = await compare_multiple_documents(extracted_results, file_names)
+        result = {
+            "message": "Documents compared successfully",
+            "comparison": comparison_result,
+            "extracted_data": extracted_results
+        }
 
-    # Return the comparison results
-    return FormConnectResponse(results=comparison_results)
+    # Return the comparison results as a dictionary
+    return FormConnectResponse(results=result)

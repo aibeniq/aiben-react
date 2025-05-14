@@ -23,7 +23,9 @@ export type Body_login_login_access_token = {
 }
 
 export type FormConnectResponse = {
-  results: string
+  results: {
+    [key: string]: unknown
+  }
 }
 
 export type HTTPValidationError = {
