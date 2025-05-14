@@ -20,6 +20,7 @@ import { Route as LayoutIndexImport } from './routes/_layout/index'
 import { Route as LayoutSettingsImport } from './routes/_layout/settings'
 import { Route as LayoutKnowledgeBasesImport } from './routes/_layout/knowledge-bases'
 import { Route as LayoutItemsImport } from './routes/_layout/items'
+import { Route as LayoutFormconnectImport } from './routes/_layout/formconnect'
 import { Route as LayoutAdminImport } from './routes/_layout/admin'
 
 // Create/Update Routes
@@ -69,6 +70,11 @@ const LayoutItemsRoute = LayoutItemsImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
+const LayoutFormconnectRoute = LayoutFormconnectImport.update({
+  path: '/formconnect',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
 const LayoutAdminRoute = LayoutAdminImport.update({
   path: '/admin',
   getParentRoute: () => LayoutRoute,
@@ -102,6 +108,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/formconnect': {
+      preLoaderRoute: typeof LayoutFormconnectImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/items': {
       preLoaderRoute: typeof LayoutItemsImport
       parentRoute: typeof LayoutImport
@@ -126,6 +136,7 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren([
   LayoutRoute.addChildren([
     LayoutAdminRoute,
+    LayoutFormconnectRoute,
     LayoutItemsRoute,
     LayoutKnowledgeBasesRoute,
     LayoutSettingsRoute,
