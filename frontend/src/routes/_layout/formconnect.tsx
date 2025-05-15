@@ -9,7 +9,8 @@ import {
   HStack,
   Switch,
   Field,
-  Spinner
+  Spinner,
+  Input
 } from "@chakra-ui/react"
 import { useState, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
@@ -25,9 +26,27 @@ const FormConnect = () => {
     isHandwritten: boolean;
   }>>([]);
 
+  const [forms, setForms] = useState([]); // List of forms
+  const [selectedForm, setSelectedForm] = useState(null); // Currently selected form
+  const [formName, setFormName] = useState(""); // Name of the form being created/edited
+  const [formDescription, setFormDescription] = useState(""); // Description of the form
+
   const [fields, setFields] = useState("")
   const [results, setResults] = useState("")
   const [loading, setLoading] = useState(false);
+
+  const fetchForms = async () => {
+    try {
+      const data = await FormconnectService.getForms();
+      setForms(data);
+    } catch (error) {
+      console.error("Error fetching forms:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchForms();
+  }, []);
 
   const mutation = useMutation({
     mutationFn: (data: {
@@ -168,12 +187,175 @@ const components = {
         </Button>
 
         {/* Fields Textarea */}
-        <Textarea
-          placeholder="Enter fields, one per line"
-          value={fields}
-          onChange={(e) => setFields(e.target.value)}
-          rows={6}
-        />
+        <Box>
+          <Text mb={2}>Forms</Text>
+          <select
+            value={selectedForm?.id || ""}
+            onChange={(e) => {
+              const form = forms.find((f) => f.id === e.target.value);
+              setSelectedForm(form);
+              setFields(form?.fields || "");
+              setFormName(form?.name || ""); // Update formName state
+              setFormDescription(form?.description || ""); // Update formDescription state
+            }}
+          >
+            <option value="">Select a form</option>
+            {forms.map((form) => (
+              <option key={form.id} value={form.id}>
+                {form.name}
+              </option>
+            ))}
+          </select>
+
+          <Box>
+            <Text mb={2}>Form Name</Text>
+            <Input
+              value={formName}
+              onChange={(e) => setFormName(e.target.value)}
+              placeholder="Enter form name"
+            />
+          </Box>
+          <Box>
+            <Text mb={2}>Form Description</Text>
+            <Textarea
+              value={formDescription}
+              onChange={(e) => setFormDescription(e.target.value)}
+              placeholder="Enter form description"
+            />
+          </Box>
+
+          <Box>
+            <Text mb={2}>Fields</Text>
+            <Textarea
+              value={fields}
+              onChange={(e) => setFields(e.target.value)}
+              placeholder="Enter fields, one per line"
+              rows={6}
+            />
+          </Box>
+
+          <HStack spacing={4}>
+          <Button
+            colorScheme="teal"
+            onClick={async () => {
+              try {
+                if (selectedForm) {
+                  // Update the selected form
+                  await FormconnectService.updateForm({
+                    formId: selectedForm.id,
+                    requestBody: {
+                      name: formName,
+                      description: formDescription,
+                      fields,
+                    },
+                  });
+
+                  alert("Form updated successfully.");
+                } else {
+                  // Create a new form
+                  const response = await FormconnectService.createForm({
+                    requestBody: {
+                      name: formName,
+                      description: formDescription,
+                      fields,
+                    },
+                  });
+
+                  //if (!response.ok) {
+                  //  throw new Error("Failed to save form");
+                  //}
+
+                  const newForm = await response
+                  setForms((prev) => [...prev, newForm]);
+                  alert("Form created successfully.");
+                }
+
+                // Clear the form fields and re-fetch the list of forms
+                setFormName("");
+                setFormDescription("");
+                setFields("");
+                setSelectedForm(null);
+                await fetchForms();
+              } catch (error) {
+                console.error("Error saving form:", error);
+                alert("Failed to save form. Please try again.");
+              }
+            }}
+          >
+            Save Form
+          </Button>
+
+          <Button
+            colorScheme="blue"
+            onClick={async () => {
+              if (!selectedForm) {
+                alert("Please select a form to copy.");
+                return;
+              }
+
+              try {
+                // Create a copy of the selected form
+                const response = await FormconnectService.createForm({
+                  requestBody: {
+                    name: `${selectedForm.name} (Copy)`, // Append "(Copy)" to the name
+                    description: selectedForm.description,
+                    fields: selectedForm.fields,
+                  },
+                });
+
+                //if (!response.ok) {
+                //  throw new Error("Failed to copy form");
+                //}
+
+                const newForm = await response
+                setForms((prev) => [...prev, newForm]);
+                alert("Form copied successfully.");
+
+                // Re-fetch the list of forms
+                await fetchForms();
+              } catch (error) {
+                console.error("Error copying form:", error);
+                alert("Failed to copy form. Please try again.");
+              }
+            }}
+            isDisabled={!selectedForm} // Disable the button if no form is selected
+          >
+            Copy Form
+          </Button>
+
+          <Button
+            colorScheme="red"
+            onClick={async () => {
+              if (!selectedForm) {
+                alert("Please select a form to delete.");
+                return;
+              }
+
+              try {
+                // Call the deleteForm method from FormconnectService
+                await FormconnectService.deleteForm({ formId: selectedForm.id });
+
+                // Remove the deleted form from the list of forms
+                setForms((prev) => prev.filter((form) => form.id !== selectedForm.id));
+
+                // Clear the selected form and fields
+                setSelectedForm(null);
+                setFields("");
+                setFormName("");
+                setFormDescription("");
+
+                alert("Form deleted successfully.");
+              } catch (error) {
+                console.error("Error deleting form:", error);
+                alert("Failed to delete form. Please try again.");
+              }
+            }}
+            isDisabled={!selectedForm} // Disable the button if no form is selected
+          >
+            Delete Form
+        </Button>
+        </HStack>
+        </Box>
 
         {/* Run Button */}
         <Button 

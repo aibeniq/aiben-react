@@ -1,4 +1,9 @@
-from app.models import FormConnectRequest, FormConnectResponse
+import uuid
+from app.models import FormConnectRequest, FormConnectResponse, FormConnectForm
+
+from app.api.deps import CurrentUser, SessionDep
+
+from sqlmodel import Session, select
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from typing import List, Dict
 
@@ -12,6 +17,8 @@ import base64
 from tempfile import NamedTemporaryFile
 from pathlib import Path
 import fitz  # PyMuPDF
+
+from datetime import datetime
 
 # Load environment variables from .env file
 load_dotenv(dotenv_path="c:/miniconda/aibeniq-react/.env", override=True)
@@ -388,3 +395,78 @@ async def process_form(
 
     # Return the comparison results as a dictionary
     return FormConnectResponse(results=result)
+
+# Functions related to Forms
+@router.post("/forms", response_model=FormConnectForm)
+def create_form(form: FormConnectForm, session: SessionDep, current_user: CurrentUser,):
+    """
+    Save a new form to the database.
+    """
+    existing_form = session.exec(select(FormConnectForm).where(FormConnectForm.name == form.name)).first()
+    if existing_form:
+        raise HTTPException(status_code=400, detail="A form with this name already exists.")
+    
+    form.owner_id = current_user.id
+    session.add(form)
+    session.commit()
+    session.refresh(form)
+    return form
+
+@router.get("/forms", response_model=List[FormConnectForm])
+def get_forms(session: SessionDep, current_user: CurrentUser):
+    """
+    Retrieve all forms from the database for this user.
+    """
+    return session.exec(
+        select(FormConnectForm).where(FormConnectForm.owner_id == current_user.id)
+    ).all()
+
+@router.get("/forms/{form_id}", response_model=FormConnectForm)
+def get_form(form_id: uuid.UUID, session: SessionDep):
+    """
+    Retrieve a specific form by ID.
+    """
+    form = session.get(FormConnectForm, form_id)
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found.")
+    return form
+
+@router.put("/forms/{form_id}", response_model=FormConnectForm)
+def update_form(form_id: uuid.UUID, updated_form: FormConnectForm, session: SessionDep, current_user: CurrentUser):
+    """
+    Update an existing form.
+    """
+    form = session.get(FormConnectForm, form_id)
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found.")
+    
+    # Ensure the current user is the owner of the form
+    if form.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this form.")
+    
+    form.name = updated_form.name
+    form.description = updated_form.description
+    form.fields = updated_form.fields
+    form.date_modified = datetime.utcnow()
+    
+    session.add(form)
+    session.commit()
+    session.refresh(form)
+    return form
+
+@router.delete("/forms/{form_id}")
+def delete_form(form_id: uuid.UUID, session: SessionDep, current_user: CurrentUser):
+    """
+    Delete a form by ID.
+    """
+    form = session.get(FormConnectForm, form_id)
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found.")
+    
+    # Ensure the current user is the owner of the form
+    if form.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this form.")
+    
+    session.delete(form)
+    session.commit()
+    return {"message": "Form deleted successfully."}

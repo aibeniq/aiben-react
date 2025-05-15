@@ -199,3 +199,14 @@ class FormConnectRequest(SQLModel):
 # Response model for FormConnect
 class FormConnectResponse(SQLModel):
     results: Dict[str, Any]  # Accept any dictionary structure
+
+# Form, i.e., list of form fields for FormConnect functionality
+class FormConnectForm(SQLModel, table=True):
+    __tablename__ = "forms"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    name: str = Field(max_length=255, unique=True, nullable=False)
+    description: str | None = Field(default=None, max_length=255)
+    fields: str = Field(nullable=False)  # Store fields as a JSON string
+    owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)  # Add owner_id column
+    date_created: datetime = Field(default_factory=datetime.utcnow)
+    date_modified: datetime = Field(default_factory=datetime.utcnow)
