@@ -8,9 +8,11 @@ import {
   VStack,
   HStack,
   Switch,
-  Field,
+  Field as ChakraField,
   Spinner,
-  Input
+  Input,
+  Separator,
+  Table,
 } from "@chakra-ui/react"
 import { useState, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
@@ -20,13 +22,17 @@ import { FormconnectService } from "@/client"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd' 
+import { FaPlus, FaArrowsAlt } from "react-icons/fa"
+import { Field } from "../../components/ui/field"
 
 const FormConnect = () => {
   const [mode, setMode] = useState<"manual" | "batch">("manual"); // Toggle between Manual and Batch Mode
-  const [batchFileItems, setBatchFileItems] = useState<Array<{ 
-    files: Array<{ file: File; isHandwritten: boolean }> 
+  // Update the state definition to include isHandwritten at the item level
+const [batchFileItems, setBatchFileItems] = useState<Array<{ 
+  files: Array<File>;
+    isHandwritten: boolean;
   }>>([
-    { files: [] },
+    { files: [], isHandwritten: false },
   ]);
 
   const [batchResults, setBatchResults] = useState<string[]>([]);
@@ -54,10 +60,53 @@ const FormConnect = () => {
   const addFilesToBatchUploader = (index: number, newFiles: File[]) => {
     setBatchFileItems((prev) =>
       prev.map((item, i) =>
-        i === index ? { files: [...item.files, ...newFiles] } : item
+        i === index ? { 
+          ...item, 
+          files: [...item.files, ...newFiles],
+          isHandwritten: item.isHandwritten  // Preserve the handwritten state
+        } : item
       )
     );
   };
+
+  const getBatchSetCount = () => {
+    // Find the minimum number of files across all batch uploaders
+    // This represents how many complete sets we can process
+    if (!batchFileItems || batchFileItems.length === 0) return 0;
+    
+    // Get the number of files in each uploader
+    const fileCounts = batchFileItems.map(item => item.files.length);
+    
+    // Return the minimum (as we can only process as many complete sets as the column with fewest files)
+    return Math.min(...fileCounts);
+  };
+  
+
+  const moveFileInColumn = (colIndex: number, fileIndex: number, direction: 'up' | 'down') => {
+  setBatchFileItems((prev) => {
+    const newItems = [...prev];
+    const files = [...newItems[colIndex].files];
+    
+    // Calculate the new position
+    const newIndex = direction === 'up' ? fileIndex - 1 : fileIndex + 1;
+    
+    // Check if the new index is valid
+    if (newIndex < 0 || newIndex >= files.length) return prev;
+    
+    // Swap the files
+    const temp = files[fileIndex];
+    files[fileIndex] = files[newIndex];
+    files[newIndex] = temp;
+    
+    // Update the files in the column
+    newItems[colIndex] = {
+      ...newItems[colIndex],
+      files: files
+    };
+    
+    return newItems;
+  });
+};
 
   const reorderFilesInBatchUploader = (index: number, newFiles: File[]) => {
     setBatchFileItems((prev) =>
@@ -193,13 +242,15 @@ const FormConnect = () => {
     });
   };
 
+  // Update your isBatchConfigValid function
   const isBatchConfigValid = () => {
     if (batchFileItems.length < 2) return false;
     
-    const fileCount = batchFileItems[0].files.length;
-    if (fileCount === 0) return false;
+    // Find the minimum number of files in any column
+    const minFileCount = Math.min(...batchFileItems.map(item => item.files.length));
     
-    return batchFileItems.every(item => item.files.length === fileCount);
+    // Valid if we have at least one file in each column
+    return minFileCount > 0;
   };
 
   useEffect(() => {
@@ -307,188 +358,216 @@ const components = {
   ),
 };
 
-  return (
+    return (
     <Container maxW="container.xl" py={8}>
-      <Heading size="lg" mb={6}>
+      {/* Add this overlay spinner that shows when batchLoading is true */}
+    {batchLoading && (
+      <Box
+        position="absolute"
+        top="0"
+        left="0"
+        right="0"
+        bottom="0"
+        bg="rgba(255, 255, 255, 0.7)"
+        zIndex="10"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        borderRadius="md"
+      >
+        <VStack spacing={4}>
+          <Spinner size="xl" color="blue.500" thickness="4px" />
+          <Text fontWeight="medium">Processing batch files...</Text>
+        </VStack>
+      </Box>
+    )}
+
+      <Heading size="xl" mb={6}>
         FormConnect
       </Heading>
       
-      <VStack spacing={4} align="stretch">
-        {/* Fields Textarea */}
-        <Box>
-          <Text mb={2}>Forms</Text>
-          <select
-            value={selectedForm?.id || ""}
-            onChange={(e) => {
-              const form = forms.find((f) => f.id === e.target.value);
-              setSelectedForm(form);
-              setFields(form?.fields || "");
-              setFormName(form?.name || ""); // Update formName state
-              setFormDescription(form?.description || ""); // Update formDescription state
-            }}
-          >
-            <option value="">Select a form</option>
-            {forms.map((form) => (
-              <option key={form.id} value={form.id}>
-                {form.name}
-              </option>
-            ))}
-          </select>
+      <VStack spacing={6} align="stretch">
+        {/* Form Selection and Management */}
+        <VStack spacing={4} align="stretch">
+          <Heading size="md" mb={2}>Form Template Selection</Heading>
+          <Field label="Form Templates" required>
+            <select
+              value={selectedForm?.id || ""}
+              onChange={(e) => {
+                const form = forms.find((f) => f.id === e.target.value);
+                setSelectedForm(form);
+                setFields(form?.fields || "");
+                setFormName(form?.name || "");
+                setFormDescription(form?.description || "");
+              }}
+              style={{
+                width: '100%',
+                padding: '0.5rem',
+                borderRadius: '0.375rem',
+                borderColor: '#E2E8F0',
+              }}
+            >
+              <option value="">Select a form</option>
+              {forms.map((form) => (
+                <option key={form.id} value={form.id}>
+                  {form.name}
+                </option>
+              ))}
+            </select>
+          </Field>
 
-          <Box>
-            <Text mb={2}>Form Name</Text>
+          <Field label="Form Template Name" required>
             <Input
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
               placeholder="Enter form name"
             />
-          </Box>
-          <Box>
-            <Text mb={2}>Form Description</Text>
+          </Field>
+
+          <Field label="Form Template Description">
             <Textarea
               value={formDescription}
               onChange={(e) => setFormDescription(e.target.value)}
-              placeholder="Enter form description"
+              placeholder="Enter form template description"
+              resize="vertical"
             />
-          </Box>
+          </Field>
 
-          <Box>
-            <Text mb={2}>Fields</Text>
+          <Field label="Fields" required>
             <Textarea
               value={fields}
               onChange={(e) => setFields(e.target.value)}
               placeholder="Enter fields, one per line"
               rows={6}
+              resize="vertical"
             />
-          </Box>
+          </Field>
 
-          <HStack spacing={4}>
-          <Button
-            colorScheme="teal"
-            onClick={async () => {
-              try {
-                if (selectedForm) {
-                  // Update the selected form
-                  await FormconnectService.updateForm({
-                    formId: selectedForm.id,
-                    requestBody: {
-                      name: formName,
-                      description: formDescription,
-                      fields,
-                    },
-                  });
+          <HStack spacing={4} pt={2}>
+            <Button
+              variant="solid"
+              onClick={async () => {
+                try {
+                  if (selectedForm) {
+                    // Update the selected form
+                    await FormconnectService.updateForm({
+                      formId: selectedForm.id,
+                      requestBody: {
+                        name: formName,
+                        description: formDescription,
+                        fields,
+                      },
+                    });
 
-                  alert("Form updated successfully.");
-                } else {
-                  // Create a new form
+                    alert("Form template updated successfully.");
+                  } else {
+                    // Create a new form
+                    const response = await FormconnectService.createForm({
+                      requestBody: {
+                        name: formName,
+                        description: formDescription,
+                        fields,
+                      },
+                    });
+
+                    const newForm = await response
+                    setForms((prev) => [...prev, newForm]);
+                    alert("Form template created successfully.");
+                  }
+
+                  // Clear the form fields and re-fetch the list of forms
+                  setFormName("");
+                  setFormDescription("");
+                  setFields("");
+                  setSelectedForm(null);
+                  await fetchForms();
+                } catch (error) {
+                  console.error("Error saving form template:", error);
+                  alert("Failed to save form template. Please try again.");
+                }
+              }}
+            >
+              Save Form Template
+            </Button>
+
+            <Button
+              variant="subtle"
+              colorPalette="blue"
+              onClick={async () => {
+                if (!selectedForm) {
+                  alert("Please select a form template to copy.");
+                  return;
+                }
+
+                try {
+                  // Create a copy of the selected form
                   const response = await FormconnectService.createForm({
                     requestBody: {
-                      name: formName,
-                      description: formDescription,
-                      fields,
+                      name: `${selectedForm.name} (Copy)`,
+                      description: selectedForm.description,
+                      fields: selectedForm.fields,
                     },
                   });
-
-                  //if (!response.ok) {
-                  //  throw new Error("Failed to save form");
-                  //}
 
                   const newForm = await response
                   setForms((prev) => [...prev, newForm]);
-                  alert("Form created successfully.");
+                  alert("Form template copied successfully.");
+
+                  // Re-fetch the list of forms
+                  await fetchForms();
+                } catch (error) {
+                  console.error("Error copying form template:", error);
+                  alert("Failed to copy form template. Please try again.");
+                }
+              }}
+              isDisabled={!selectedForm}
+            >
+              Copy Form Template
+            </Button>
+
+            <Button
+              variant="subtle"
+              colorPalette="red"
+              onClick={async () => {
+                if (!selectedForm) {
+                  alert("Please select a form temmplate to delete.");
+                  return;
                 }
 
-                // Clear the form fields and re-fetch the list of forms
-                setFormName("");
-                setFormDescription("");
-                setFields("");
-                setSelectedForm(null);
-                await fetchForms();
-              } catch (error) {
-                console.error("Error saving form:", error);
-                alert("Failed to save form. Please try again.");
-              }
-            }}
-          >
-            Save Form
-          </Button>
+                try {
+                  // Call the deleteForm method from FormconnectService
+                  await FormconnectService.deleteForm({ formId: selectedForm.id });
 
-          <Button
-            colorScheme="blue"
-            onClick={async () => {
-              if (!selectedForm) {
-                alert("Please select a form to copy.");
-                return;
-              }
+                  // Remove the deleted form from the list of forms
+                  setForms((prev) => prev.filter((form) => form.id !== selectedForm.id));
 
-              try {
-                // Create a copy of the selected form
-                const response = await FormconnectService.createForm({
-                  requestBody: {
-                    name: `${selectedForm.name} (Copy)`, // Append "(Copy)" to the name
-                    description: selectedForm.description,
-                    fields: selectedForm.fields,
-                  },
-                });
+                  // Clear the selected form and fields
+                  setSelectedForm(null);
+                  setFields("");
+                  setFormName("");
+                  setFormDescription("");
 
-                //if (!response.ok) {
-                //  throw new Error("Failed to copy form");
-                //}
+                  alert("Form template deleted successfully.");
+                } catch (error) {
+                  console.error("Error deleting form template:", error);
+                  alert("Failed to delete form templtae. Please try again.");
+                }
+              }}
+              isDisabled={!selectedForm}
+            >
+              Delete Form Template
+            </Button>
+          </HStack>
+        </VStack>
 
-                const newForm = await response
-                setForms((prev) => [...prev, newForm]);
-                alert("Form copied successfully.");
-
-                // Re-fetch the list of forms
-                await fetchForms();
-              } catch (error) {
-                console.error("Error copying form:", error);
-                alert("Failed to copy form. Please try again.");
-              }
-            }}
-            isDisabled={!selectedForm} // Disable the button if no form is selected
-          >
-            Copy Form
-          </Button>
-
-          <Button
-            colorScheme="red"
-            onClick={async () => {
-              if (!selectedForm) {
-                alert("Please select a form to delete.");
-                return;
-              }
-
-              try {
-                // Call the deleteForm method from FormconnectService
-                await FormconnectService.deleteForm({ formId: selectedForm.id });
-
-                // Remove the deleted form from the list of forms
-                setForms((prev) => prev.filter((form) => form.id !== selectedForm.id));
-
-                // Clear the selected form and fields
-                setSelectedForm(null);
-                setFields("");
-                setFormName("");
-                setFormDescription("");
-
-                alert("Form deleted successfully.");
-              } catch (error) {
-                console.error("Error deleting form:", error);
-                alert("Failed to delete form. Please try again.");
-              }
-            }}
-            isDisabled={!selectedForm} // Disable the button if no form is selected
-          >
-            Delete Form
-        </Button>
-        </HStack>
-        </Box>
+      <Separator my={4} />
+      <Heading size="md" mb={4}>File Input</Heading>
+      
         
         {/* Mode Toggle */}
-        <Box>
+        <Field>
           <HStack justify="space-between" align="center">
-            <Text>Mode:</Text>
+            <Text fontWeight="medium">Mode:</Text>
             <HStack align="center">
               <Text>Manual</Text>
               <Switch.Root id="mode-toggle" colorPalette="teal">
@@ -503,11 +582,11 @@ const components = {
               <Text>Batch</Text>
             </HStack>
           </HStack>
-        </Box>
+        </Field>
 
         {/* Conditional Rendering Based on Mode */}
         {mode === "manual" ? (
-          <>
+          <VStack spacing={4} align="stretch">
             {/* Manual Mode UI */}
             {fileItems.map((fileItem, index) => (
               <FileDropzone
@@ -520,23 +599,29 @@ const components = {
               />
             ))}
 
-            <Button colorScheme="teal" onClick={handleAddNewFile}>
-              + Add File
-            </Button>
+            <HStack spacing={4}>
+              <Button variant="outline" colorPalette="teal" leftIcon={<FaPlus fontSize="12px" />} onClick={handleAddNewFile}>
+                Add File
+              </Button>
 
-            <Button
-              colorScheme="blue"
-              onClick={handleRun}
-              isDisabled={
-                fileItems.length < 1 || !fields.trim() || !fileItems.some((item) => item.file.size > 0)
-              }
-            >
-              Run
-            </Button>
+              <Button
+                variant="solid"
+                onClick={handleRun}
+                isDisabled={
+                  fileItems.length < 1 || !fields.trim() || !fileItems.some((item) => item.file.size > 0)
+                }
+                loading={loading}
+              >
+                Run
+              </Button>
+            </HStack>
+
+            <Separator my={4} />
+            <Heading size="md" mb={4}>Results</Heading>
 
             <Box
               border="1px solid"
-              borderColor="gray.300"
+              borderColor="gray.200"
               borderRadius="md"
               p={4}
               bg="gray.50"
@@ -544,7 +629,7 @@ const components = {
               maxH="400px"
               overflowY="auto"
               position="relative"
-              opacity={loading ? 0.5 : 1} // Grey out the panel when loading
+              opacity={loading ? 0.5 : 1}
             >
               {loading && (
                 <Box
@@ -562,53 +647,210 @@ const components = {
                   {results}
                 </ReactMarkdown>
               ) : (
-                <Text>Results will appear here after running.</Text>
+                <Text color="gray.500">Results will appear here after running.</Text>
               )}
             </Box>
-          </>
+          </VStack>
         ) : (
-          <>
-            {/* Batch Mode UI */}
-            <HStack spacing={4} align="start" wrap="wrap" width="100%">
-            {batchFileItems.map((batchItem, index) => (
-              <BatchFileDropzone
-                key={index}
-                index={index}
-                files={batchItem.files}
-                onAddFiles={(newFiles) => addFilesToBatchUploader(index, newFiles)}
-                onRemoveFile={(fileIndex) => removeFileFromBatchUploader(index, fileIndex)}
-                onRemoveUploader={() => removeBatchUploader(index)}
-                onReorderFiles={(newFiles) => reorderFilesInBatchUploader(index, newFiles)}
-                onToggleHandwritten={() => toggleBatchHandwritten(index)}
-              />
-            ))}
+            // New table-based Batch Mode UI with Chakra UI v3 syntax
+          <VStack spacing={4} align="stretch">
+            <Box overflowX="auto" width="100%">
+              <Table.Root variant="simple" width="100%">
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader width="100px">Files</Table.ColumnHeader>
+                    {batchFileItems.map((batchItem, index) => (
+                      <Table.ColumnHeader key={index} textAlign="center">
+                        <ColumnHeaderUploader 
+                          index={index}
+                          isHandwritten={batchItem.isHandwritten}
+                          onAddFiles={(newFiles) => {
+                            // Update the files in this column
+                            const updatedBatchItems = [...batchFileItems];
+                            updatedBatchItems[index] = {
+                              ...updatedBatchItems[index],
+                              files: [...updatedBatchItems[index].files, ...newFiles]
+                            };
+                            setBatchFileItems(updatedBatchItems);
+                          }}
+                          onRemove={() => removeBatchUploader(index)}
+                          onToggleHandwritten={() => toggleBatchHandwritten(index)}
+                          isRemoveDisabled={batchFileItems.length <= 1}
+                        />
+                      </Table.ColumnHeader>
+                    ))}
+                    <Table.ColumnHeader width="60px">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        colorPalette="teal" 
+                        leftIcon={<FaPlus fontSize="10px" />}
+                        onClick={addBatchUploader}
+                      >
+                        Add Source
+                      </Button>
+                    </Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {/* Find the maximum number of files in any column */}
+                  {Array.from({ length: Math.max(1, ...batchFileItems.map(item => item.files.length)) }).map((_, rowIndex) => (
+                    <Table.Row key={rowIndex}>
+                      <Table.Cell fontWeight="medium">File {rowIndex + 1}</Table.Cell>
+                      
+                      {/* Map through each column */}
+                      {batchFileItems.map((batchItem, colIndex) => (
+                        <Table.Cell key={colIndex} padding={2}>
+                          {rowIndex < batchItem.files.length ? (
+                            // Display file if it exists for this row/column
+                            <VStack width="100%" spacing={0}>
+                              <HStack width="100%" mb={2}>
+                                <Box 
+                                  border="1px solid" 
+                                  borderColor="gray.200" 
+                                  borderRadius="md" 
+                                  p={2} 
+                                  bg="white"
+                                  width="100%"
+                                  height="36px"
+                                  overflow="hidden"
+                                >
+                                  <Box
+                                    maxW="100%"
+                                    maxH="32px"
+                                    overflowY="auto"
+                                    overflowX="hidden"
+                                    css={{
+                                      '&::-webkit-scrollbar': { width: '4px' },
+                                      '&::-webkit-scrollbar-track': { width: '6px', background: 'transparent' },
+                                      '&::-webkit-scrollbar-thumb': { background: '#CBD5E0', borderRadius: '24px' },
+                                    }}
+                                    title={batchItem.files[rowIndex].name}
+                                    textAlign="left"
+                                    display="flex"
+                                    alignItems="flex-start"
+                                    justifyContent="flex-start"
+                                    lineHeight="tight"
+                                    fontSize="sm"
+                                  >
+                                    {batchItem.files[rowIndex].name}
+                                  </Box>
+                                </Box>
+                                <Box>
+                                  <Button 
+                                    size="xs" 
+                                    colorPalette="red" 
+                                    onClick={() => removeFileFromBatchUploader(colIndex, rowIndex)}
+                                  >
+                                    ✕
+                                  </Button>
+                                </Box>
+                              </HStack>
+                              
+                              {/* Only display the reorder button if this is not the last file 
+                                  right above an empty row */}
+                              {rowIndex < batchItem.files.length - 1 && (
+                                <Button
+                                  size="xs"
+                                  colorPalette="blue"
+                                  variant="ghost"
+                                  width="100%"
+                                  height="20px"
+                                  onClick={() => {
+                                    // Open a reorder dialog or initiate a draggable interaction
+                                    // For now, we'll create a simple toggle between up and down
+                                    const isFirstFile = rowIndex === 0;
+                                    const isLastFile = rowIndex === batchItem.files.length - 1;
+                                    
+                                    // If it's the first file, we can only move down
+                                    if (isFirstFile) {
+                                      moveFileInColumn(colIndex, rowIndex, 'down');
+                                    }
+                                    // If it's the last file, we can only move up
+                                    else if (isLastFile) {
+                                      moveFileInColumn(colIndex, rowIndex, 'up');
+                                    }
+                                    // For files in the middle, we'll toggle between moving up and down
+                                    else {
+                                      // Using a simple approach - move up first, then next click will move down
+                                      // This could be improved with a proper UI
+                                      const direction = rowIndex % 2 === 0 ? 'up' : 'down';
+                                      moveFileInColumn(colIndex, rowIndex, direction);
+                                    }
+                                  }}
+                                >
+                                  <Box display="flex" flexDirection="column" alignItems="center" fontSize="10px" lineHeight="1">
+                                    <span>↑</span>
+                                    <span>↓</span>
+                                  </Box>
+                                </Button>
+                              )}
+                            </VStack>
+                          ) : (
+                            // Show file upload interface for empty cells
+                            <FileCellUploader 
+                              onAddFile={(file) => {
+                                const newFiles = [...file];
+                                addFilesToBatchUploader(colIndex, newFiles);
+                              }} 
+                            />
+                          )}
+                        </Table.Cell>
+                      ))}
+                      <Table.Cell></Table.Cell>
+                    </Table.Row>
+                  ))}
+                  
+                  {/* Add new file row */}
+                  <Table.Row>
+                    <Table.Cell fontWeight="medium">
+                      <Text>Add Row</Text>
+                    </Table.Cell>
+                    {batchFileItems.map((_, colIndex) => (
+                      <Table.Cell key={colIndex}>
+                        <FileCellUploader 
+                          onAddFile={(file) => {
+                            const newFiles = [...file];
+                            addFilesToBatchUploader(colIndex, newFiles);
+                          }} 
+                        />
+                      </Table.Cell>
+                    ))}
+                    <Table.Cell></Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+              </Table.Root>
+            </Box>
+
+            <HStack spacing={4}>
+              <Button 
+                variant="solid"
+                colorPalette={isBatchConfigValid() ? "blue" : "gray"}
+                onClick={handleProcessBatch}
+                isLoading={batchLoading}
+                isDisabled={!isBatchConfigValid()}
+              >
+                {isBatchConfigValid() 
+                  ? `Process ${getBatchSetCount()} Batch Sets` 
+                  : "Invalid Batch Configuration"}
+              </Button>
             </HStack>
 
-            <HStack spacing={4} mt={4}>
-            <Button colorScheme="teal" onClick={addBatchUploader}>
-              + Add Uploader
-            </Button>
-
-            <Button 
-              colorScheme={isBatchConfigValid() ? "blue" : "gray"}
-              onClick={handleProcessBatch}
-              isLoading={batchLoading}
-              isDisabled={!isBatchConfigValid()}
-            >
-              {isBatchConfigValid() 
-                ? `Process ${batchFileItems[0].files.length} Batch Sets` 
-                : "Invalid Batch Configuration"}
-            </Button>
-
-            {/* Batch results section */}
-            {batchResults.length > 0 && (
-              <Box>
-                <HStack spacing={4} mb={2}>
-                  <Text>Results:</Text>
+            {/* Results section */}
+            <Separator my={4} />
+            <Heading size="md" mb={4}>Results</Heading>
+            <Box>
+              {batchResults.length > 0 ? (
+                <Field label="Batch Set">
                   <select
                     value={selectedBatchResult}
                     onChange={(e) => setSelectedBatchResult(Number(e.target.value))}
-                    style={{ padding: '0.5rem', borderRadius: '0.375rem' }}
+                    style={{ 
+                      width: '100%',
+                      padding: '0.5rem', 
+                      borderRadius: '0.375rem',
+                      borderColor: '#E2E8F0'
+                    }}
                   >
                     {batchResults.map((_, index) => (
                       <option key={index} value={index}>
@@ -616,44 +858,43 @@ const components = {
                       </option>
                     ))}
                   </select>
-                </HStack>
-                
-                <Box
-                  border="1px solid"
-                  borderColor="gray.300"
-                  borderRadius="md"
-                  p={4}
-                  bg="gray.50"
-                  minH="100px"
-                  maxH="400px"
-                  overflowY="auto"
-                  position="relative"
-                  opacity={batchLoading ? 0.5 : 1}
-                >
-                  {batchLoading ? (
-                    <Box
-                      position="absolute"
-                      top="50%"
-                      left="50%"
-                      transform="translate(-50%, -50%)"
-                      zIndex="1"
-                    >
-                      <Spinner size="lg" color="blue.500" />
-                    </Box>
+                </Field>
+              ) : null}
+              
+              <Box
+                border="1px solid"
+                borderColor="gray.200"
+                borderRadius="md"
+                p={4}
+                bg="gray.50"
+                minH="100px"
+                maxH="400px"
+                overflowY="auto"
+                position="relative"
+                opacity={batchLoading ? 0.5 : 1}
+              >
+                {batchLoading ? (
+                  <Box
+                    position="absolute"
+                    top="50%"
+                    left="50%"
+                    transform="translate(-50%, -50%)"
+                    zIndex="1"
+                  >
+                    <Spinner size="lg" color="blue.500" />
+                  </Box>
+                ) : (
+                  batchResults.length > 0 ? (
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+                      {batchResults[selectedBatchResult]}
+                    </ReactMarkdown>
                   ) : (
-                    batchResults.length > 0 ? (
-                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                        {batchResults[selectedBatchResult]}
-                      </ReactMarkdown>
-                    ) : (
-                      <Text>No results available.</Text>
-                    )
-                  )}
-                </Box>
+                    <Text color="gray.500">Results will appear here after processing batch files.</Text>
+                  )
+                )}
               </Box>
-            )}
-          </HStack>
-          </>
+            </Box>
+          </VStack>
         )}
       </VStack>
     </Container>
@@ -723,10 +964,10 @@ const FileDropzone = ({
         {/* Only show toggle if a real file is uploaded */}
         {file && !isPlaceholder && (
           <HStack justify="space-between" px={2}>
-            <Field.Root display="flex" alignItems="center" width="auto">
-              <Field.Label htmlFor={`handwritten-${index}`} mb="0" fontSize="sm">
+            <ChakraFieldRoot display="flex" alignItems="center" width="auto">
+              <ChakraFieldLabel htmlFor={`handwritten-${index}`} mb="0" fontSize="sm">
                 Analyze handwriting
-              </Field.Label>
+              </ChakraFieldLabel>
               <Switch.Root id={`handwritten-${index}`} colorPalette="blue">
                 <Switch.HiddenInput 
                   checked={isHandwritten} 
@@ -736,7 +977,7 @@ const FileDropzone = ({
                   <Switch.Thumb />
                 </Switch.Control>
               </Switch.Root>
-            </Field.Root>
+            </ChakraFieldRoot>
             
             <Button 
               size="sm" 
@@ -755,6 +996,132 @@ const FileDropzone = ({
   )
 }
 
+
+// Add this component right below your BatchFileDropzone component 
+const FileCellUploader = ({ onAddFile }: { onAddFile: (files: File[]) => void }) => {
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop: (acceptedFiles) => {
+      if (acceptedFiles.length > 0) {
+        onAddFile(acceptedFiles);
+      }
+    },
+    accept: {
+      "application/pdf": [".pdf"],
+      "text/plain": [".txt"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+    },
+    multiple: false, // Only allow one file per drop for this cell
+  });
+
+  return (
+    <VStack width="100%" spacing={0} height="62px"> {/* Match the height of a file cell with its reorder button */}
+      <Box 
+        {...getRootProps()} 
+        border="1px dashed" 
+        borderColor="gray.300" 
+        borderRadius="md" 
+        p={2}
+        textAlign="center"
+        cursor="pointer"
+        _hover={{ borderColor: "blue.500", bg: "blue.50" }}
+        height="36px"
+        width="100%"
+        fontSize="sm"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        mb={2} /* Match the mb={2} from the HStack in the file display */
+      >
+        <input {...getInputProps()} />
+        <Text fontSize="xs" color="gray.500">
+          Drop file or click
+        </Text>
+      </Box>
+      {/* Add invisible spacing element to match the reorder button's height */}
+      <Box height="20px" width="100%"></Box>
+    </VStack>
+  );
+};
+
+// Add this new component for the column header uploader
+
+const ColumnHeaderUploader = ({ 
+  index, 
+  isHandwritten, 
+  onAddFiles, 
+  onRemove, 
+  onToggleHandwritten,
+  isRemoveDisabled
+}: { 
+  index: number, 
+  isHandwritten: boolean,
+  onAddFiles: (files: File[]) => void,
+  onRemove: () => void, 
+  onToggleHandwritten: () => void,
+  isRemoveDisabled: boolean
+}) => {
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop: (acceptedFiles) => {
+      if (acceptedFiles.length > 0) {
+        onAddFiles(acceptedFiles);
+      }
+    },
+    accept: {
+      "application/pdf": [".pdf"],
+      "text/plain": [".txt"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+    },
+    multiple: true, // Allow multiple files
+  });
+
+  return (
+    <VStack>
+      <Box 
+        {...getRootProps()} 
+        width="100%"
+        textAlign="center"
+        cursor="pointer"
+        borderRadius="md"
+        p={1}
+        _hover={{ bg: "blue.50" }}
+      >
+        <input {...getInputProps()} />
+        <Text fontSize="sm">Source {index + 1}</Text>
+        <Text fontSize="xs" color="blue.500">Click to upload multiple files</Text>
+      </Box>
+      
+      <HStack>
+        <ChakraField.Root display="flex" alignItems="center" width="auto">
+          <ChakraField.Label htmlFor={`batch-handwritten-${index}`} mb="0" fontSize="xs">
+            Analyze Handwriting
+          </ChakraField.Label>
+          <Switch.Root id={`batch-handwritten-${index}`} colorPalette="blue" size="sm">
+            <Switch.HiddenInput 
+              checked={isHandwritten} 
+              onChange={onToggleHandwritten} 
+            />
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+          </Switch.Root>
+        </ChakraField.Root>
+        
+        <Button 
+          size="xs" 
+          colorPalette="red" 
+          onClick={onRemove}
+          isDisabled={isRemoveDisabled}
+        >
+          ✕
+        </Button>
+      </HStack>
+    </VStack>
+  );
+};
 
 const BatchFileDropzone = ({
   index,
@@ -826,10 +1193,10 @@ const BatchFileDropzone = ({
               </Text>
             )}
           </VStack>
-          <Field.Root display="flex" alignItems="center" width="auto">
-            <Field.Label htmlFor={`batch-handwritten-${index}`} mb="0" fontSize="sm">
+          <ChakraField.Root display="flex" alignItems="center" width="auto">
+            <ChakraField.Label htmlFor={`batch-handwritten-${index}`} mb="0" fontSize="sm">
               Analyze handwriting
-            </Field.Label>
+            </ChakraField.Label>
             <Switch.Root id={`batch-handwritten-${index}`} colorPalette="blue">
               <Switch.HiddenInput 
                 checked={isHandwritten} 
@@ -839,7 +1206,7 @@ const BatchFileDropzone = ({
                 <Switch.Thumb />
               </Switch.Control>
             </Switch.Root>
-          </Field.Root>
+          </ChakraField.Root>
         </HStack>
 
         <Box {...getRootProps()} textAlign="center" cursor="pointer" _hover={{ borderColor: "blue.500" }}>
@@ -880,8 +1247,39 @@ const BatchFileDropzone = ({
                             borderRadius="md"
                             border="1px solid"
                             borderColor="gray.200"
+                            height="30px" // Fixed height
+                            overflow="hidden" // Prevent overflow
+                            width="100%"
                           >
-                            <Text>{file.name}</Text>
+                            <Box
+                              maxW="60%"
+                              maxH="32px"
+                              overflowY="auto"
+                              overflowX="hidden"
+                              css={{
+                                '&::-webkit-scrollbar': {
+                                  width: '4px',
+                                },
+                                '&::-webkit-scrollbar-track': {
+                                  width: '6px',
+                                  background: 'transparent',
+                                },
+                                '&::-webkit-scrollbar-thumb': {
+                                  background: '#CBD5E0',
+                                  borderRadius: '24px',
+                                },
+                              }}
+                              title={file.name}
+                              textAlign="left"
+                              display="flex"
+                              alignItems="flex-start"
+                              justifyContent="flex-start"
+                              lineHeight="tight"
+                              fontSize="sm"
+                              p={0}
+                            >
+                              {file.name}
+                            </Box>
                             <HStack spacing={2}>
                               {/* Move Up Button */}
                               <Button
@@ -896,6 +1294,9 @@ const BatchFileDropzone = ({
                                   }
                                 }}
                                 isDisabled={fileIndex === 0}
+                                flexShrink={0}
+                                minW="24px" // Fixed minimum width
+                                height="24px" // Fixed height
                               >
                                 ↑
                               </Button>
@@ -913,6 +1314,9 @@ const BatchFileDropzone = ({
                                   }
                                 }}
                                 isDisabled={fileIndex === files.length - 1}
+                                flexShrink={0}
+                                minW="24px" // Fixed minimum width
+                                height="24px" // Fixed height
                               >
                                 ↓
                               </Button>
@@ -922,6 +1326,9 @@ const BatchFileDropzone = ({
                                 size="xs"
                                 colorScheme="red"
                                 onClick={() => onRemoveFile(fileIndex)}
+                                flexShrink={0}
+                                minW="24px" // Fixed minimum width
+                                height="24px" // Fixed height
                               >
                                 Remove
                               </Button>
