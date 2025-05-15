@@ -6,6 +6,15 @@ import { request as __request } from "./core/request"
 import type {
   FormconnectProcessFormData,
   FormconnectProcessFormResponse,
+  FormconnectGetFormsResponse,
+  FormconnectCreateFormData,
+  FormconnectCreateFormResponse,
+  FormconnectGetFormData,
+  FormconnectGetFormResponse,
+  FormconnectUpdateFormData,
+  FormconnectUpdateFormResponse,
+  FormconnectDeleteFormData,
+  FormconnectDeleteFormResponse,
   ItemsReadItemsData,
   ItemsReadItemsResponse,
   ItemsCreateItemData,
@@ -64,6 +73,10 @@ export class FormconnectService {
   /**
    * Process Form
    * Process the uploaded files and fields.
+   *
+   * Handles two types of files:
+   * - digitized_files: Standard text extraction
+   * - handwritten_files: OCR-based extraction (placeholder)
    * @param data The data for the request.
    * @param data.fields
    * @param data.formData
@@ -81,6 +94,113 @@ export class FormconnectService {
       },
       formData: data.formData,
       mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Forms
+   * Retrieve all forms from the database.
+   * @returns FormConnectForm Successful Response
+   * @throws ApiError
+   */
+  public static getForms(): CancelablePromise<FormconnectGetFormsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/formconnect/forms",
+    })
+  }
+
+  /**
+   * Create Form
+   * Save a new form to the database.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns FormConnectForm Successful Response
+   * @throws ApiError
+   */
+  public static createForm(
+    data: FormconnectCreateFormData,
+  ): CancelablePromise<FormconnectCreateFormResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/formconnect/forms",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Form
+   * Retrieve a specific form by ID.
+   * @param data The data for the request.
+   * @param data.formId
+   * @returns FormConnectForm Successful Response
+   * @throws ApiError
+   */
+  public static getForm(
+    data: FormconnectGetFormData,
+  ): CancelablePromise<FormconnectGetFormResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/formconnect/forms/{form_id}",
+      path: {
+        form_id: data.formId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Form
+   * Update an existing form.
+   * @param data The data for the request.
+   * @param data.formId
+   * @param data.requestBody
+   * @returns FormConnectForm Successful Response
+   * @throws ApiError
+   */
+  public static updateForm(
+    data: FormconnectUpdateFormData,
+  ): CancelablePromise<FormconnectUpdateFormResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/formconnect/forms/{form_id}",
+      path: {
+        form_id: data.formId,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Form
+   * Delete a form by ID.
+   * @param data The data for the request.
+   * @param data.formId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static deleteForm(
+    data: FormconnectDeleteFormData,
+  ): CancelablePromise<FormconnectDeleteFormResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/formconnect/forms/{form_id}",
+      path: {
+        form_id: data.formId,
+      },
       errors: {
         422: "Validation Error",
       },
