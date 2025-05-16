@@ -11,6 +11,7 @@ from app.models import (
     EmbeddingModelUpdate,
     EmbeddingModelPublic,
     EmbeddingModelsPublic,
+    EmbeddingModelValidate,
     Message
 )
 from datetime import datetime
@@ -293,12 +294,14 @@ def set_default_embedding_model(
     return model
 
 @router.post("/validate", response_model=Message)
-def validate_embedding_model(model_id: str = Body(...)) -> Message:
+def validate_embedding_model(
+    model_data: EmbeddingModelValidate
+) -> Message:
     """
     Validate if a HuggingFace model ID is valid.
     """
     try:
-        _ = HuggingFaceEmbeddings(model_name=model_id)
+        _ = HuggingFaceEmbeddings(model_name=model_data.model_id)
         return Message(message="Model is valid")
     except Exception as e:
         raise HTTPException(

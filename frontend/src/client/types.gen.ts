@@ -63,6 +63,10 @@ export type EmbeddingModelUpdate = {
   is_default?: boolean | null
 }
 
+export type EmbeddingModelValidate = {
+  model_id: string
+}
+
 export type FormConnectForm = {
   id?: string
   name: string
@@ -108,6 +112,7 @@ export type ItemUpdate = {
 export type KnowledgeBasePublic = {
   title: string
   description?: string | null
+  embedding_model_id?: string | null
   id: string
   owner_id: string
   files?: Array<{
@@ -254,7 +259,7 @@ export type EmbeddingModelsSetDefaultEmbeddingModelResponse =
   EmbeddingModelPublic
 
 export type EmbeddingModelsValidateEmbeddingModelData = {
-  requestBody: string
+  requestBody: EmbeddingModelValidate
 }
 
 export type EmbeddingModelsValidateEmbeddingModelResponse = Message
@@ -334,6 +339,7 @@ export type KnowledgeBasesReadKnowledgeBasesResponse = KnowledgeBasesPublic
 
 export type KnowledgeBasesCreateKnowledgeBaseData = {
   description?: string | null
+  embeddingModelId?: string | null
   formData: Body_knowledge_bases_create_knowledge_base
   title: string
 }
@@ -348,6 +354,7 @@ export type KnowledgeBasesReadKnowledgeBaseResponse = KnowledgeBasePublic
 
 export type KnowledgeBasesUpdateKnowledgeBaseData = {
   description?: string | null
+  embeddingModelId?: string | null
   formData?: Body_knowledge_bases_update_knowledge_base
   id: string
   title?: string | null
