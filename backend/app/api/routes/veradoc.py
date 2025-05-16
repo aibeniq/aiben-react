@@ -3,6 +3,8 @@ from app.models import VeraDocRequest, VeraDocResponse, VeraDocChecklist, RagChe
 
 from app.api.deps import CurrentUser, SessionDep
 
+from app.services.knowledgebases import get_embedding_model
+
 from sqlmodel import Session, select
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from typing import List, Dict
@@ -437,8 +439,24 @@ async def process_rag_checklist(
             else:
                 raise HTTPException(status_code=400, detail="Knowledge base has no vector database data")
             
-            # 3. Load the vector database
-            embeddings = HuggingFaceEmbeddings(model_name='all-MiniLM-L6-v2')
+            # 3. Load the vector database with the SAME model used to create the knowledge base
+            # Use the knowledge base's specific embedding model if available
+            if kb.embedding_model_id:
+                from app.models import EmbeddingModel
+                embedding_model = session.get(EmbeddingModel, kb.embedding_model_id)
+                if embedding_model:
+                    model_name = embedding_model.model_id
+                    print(f"Using knowledge base's original embedding model: {model_name}")
+                else:
+                    # Fallback if the model was deleted from the database
+                    model_name = "all-MiniLM-L6-v2"  # Default fallback
+                    print(f"Original embedding model not found, using fallback model: {model_name}")
+            else:
+                # For knowledge bases created before tracking embedding models
+                model_name = get_embedding_model(session)
+                print(f"Knowledge base has no embedding model record, using current default: {model_name}")
+            
+            embeddings = HuggingFaceEmbeddings(model_name=model_name)
             chroma_db = Chroma(persist_directory=temp_dir, embedding_function=embeddings)
             retriever = chroma_db.as_retriever(search_kwargs={"k": 5})
             
