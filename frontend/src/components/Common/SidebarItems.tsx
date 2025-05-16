@@ -1,7 +1,7 @@
 import { Box, Flex, Icon, Text } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Link as RouterLink } from "@tanstack/react-router"
-import { FiBriefcase, FiHome, FiSettings, FiUsers, FiBookOpen, FiClipboard  } from "react-icons/fi"
+import { FiBriefcase, FiHome, FiSettings, FiUsers, FiBookOpen, FiClipboard, FiTool } from "react-icons/fi"
 import { TbPlugConnected } from "react-icons/tb";
 import type { IconType } from "react-icons/lib"
 
@@ -13,6 +13,7 @@ const items = [
   { icon: FiBookOpen, title: "Knowledge Bases", path: "/knowledge-bases" },
    { icon: FiClipboard, title: "VeraDoc", path: "/veradoc" },
   { icon: TbPlugConnected, title: "FormConnect", path: "/formconnect" },
+  { icon: FiTool, title: "Model Selection", path: "/model-selection" },
   { icon: FiSettings, title: "User Settings", path: "/settings" },
 ]
 

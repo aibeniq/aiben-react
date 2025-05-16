@@ -74,3 +74,20 @@ class KnowledgeBaseService:
             session.add(source)
 
         file.file.seek(0)
+
+def get_embedding_model(session):
+    """Get the current default embedding model from the database."""
+    from app.models import EmbeddingModel
+    from sqlmodel import select
+    
+    # Try to get the default model
+    default_model = session.exec(
+        select(EmbeddingModel)
+        .where(EmbeddingModel.is_default == True)
+    ).first()
+    
+    # If no default model is found, fallback to a hardcoded value
+    if not default_model:
+        return "all-MiniLM-L6-v2"
+    
+    return default_model.model_id

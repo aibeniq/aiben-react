@@ -33,6 +33,36 @@ export type Body_veradoc_process_rag_checklist = {
   handwritten_files?: Array<Blob | File>
 }
 
+export type EmbeddingModelCreate = {
+  name: string
+  model_id: string
+  description?: string
+  is_default?: boolean
+}
+
+export type EmbeddingModelPublic = {
+  id?: string
+  name?: string
+  model_id?: string
+  description?: string
+  is_default?: boolean
+  owner_id?: string | null
+  date_created?: string
+  date_modified?: string
+}
+
+export type EmbeddingModelsPublic = {
+  data: Array<EmbeddingModelPublic>
+  count: number
+}
+
+export type EmbeddingModelUpdate = {
+  name?: string | null
+  model_id?: string | null
+  description?: string | null
+  is_default?: boolean | null
+}
+
 export type FormConnectForm = {
   id?: string
   name: string
@@ -180,6 +210,54 @@ export type VeraDocResponse = {
     [key: string]: unknown
   }
 }
+
+export type EmbeddingModelsGetEmbeddingModelsData = {
+  limit?: number
+  skip?: number
+}
+
+export type EmbeddingModelsGetEmbeddingModelsResponse = EmbeddingModelsPublic
+
+export type EmbeddingModelsCreateEmbeddingModelData = {
+  requestBody: EmbeddingModelCreate
+}
+
+export type EmbeddingModelsCreateEmbeddingModelResponse = EmbeddingModelPublic
+
+export type EmbeddingModelsGetEmbeddingModelData = {
+  modelId: string
+}
+
+export type EmbeddingModelsGetEmbeddingModelResponse = EmbeddingModelPublic
+
+export type EmbeddingModelsUpdateEmbeddingModelData = {
+  modelId: string
+  requestBody: EmbeddingModelUpdate
+}
+
+export type EmbeddingModelsUpdateEmbeddingModelResponse = EmbeddingModelPublic
+
+export type EmbeddingModelsDeleteEmbeddingModelData = {
+  modelId: string
+}
+
+export type EmbeddingModelsDeleteEmbeddingModelResponse = Message
+
+export type EmbeddingModelsGetDefaultEmbeddingModelResponse =
+  EmbeddingModelPublic
+
+export type EmbeddingModelsSetDefaultEmbeddingModelData = {
+  modelId: string
+}
+
+export type EmbeddingModelsSetDefaultEmbeddingModelResponse =
+  EmbeddingModelPublic
+
+export type EmbeddingModelsValidateEmbeddingModelData = {
+  requestBody: string
+}
+
+export type EmbeddingModelsValidateEmbeddingModelResponse = Message
 
 export type FormconnectProcessFormData = {
   fields: string

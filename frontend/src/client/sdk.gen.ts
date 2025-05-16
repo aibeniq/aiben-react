@@ -4,6 +4,21 @@ import type { CancelablePromise } from "./core/CancelablePromise"
 import { OpenAPI } from "./core/OpenAPI"
 import { request as __request } from "./core/request"
 import type {
+  EmbeddingModelsGetEmbeddingModelsData,
+  EmbeddingModelsGetEmbeddingModelsResponse,
+  EmbeddingModelsCreateEmbeddingModelData,
+  EmbeddingModelsCreateEmbeddingModelResponse,
+  EmbeddingModelsGetEmbeddingModelData,
+  EmbeddingModelsGetEmbeddingModelResponse,
+  EmbeddingModelsUpdateEmbeddingModelData,
+  EmbeddingModelsUpdateEmbeddingModelResponse,
+  EmbeddingModelsDeleteEmbeddingModelData,
+  EmbeddingModelsDeleteEmbeddingModelResponse,
+  EmbeddingModelsGetDefaultEmbeddingModelResponse,
+  EmbeddingModelsSetDefaultEmbeddingModelData,
+  EmbeddingModelsSetDefaultEmbeddingModelResponse,
+  EmbeddingModelsValidateEmbeddingModelData,
+  EmbeddingModelsValidateEmbeddingModelResponse,
   FormconnectProcessFormData,
   FormconnectProcessFormResponse,
   FormconnectGetFormsResponse,
@@ -81,6 +96,185 @@ import type {
   VeradocDeleteChecklistData,
   VeradocDeleteChecklistResponse,
 } from "./types.gen"
+
+export class EmbeddingModelsService {
+  /**
+   * Get Embedding Models
+   * Get all embedding models.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @returns EmbeddingModelsPublic Successful Response
+   * @throws ApiError
+   */
+  public static getEmbeddingModels(
+    data: EmbeddingModelsGetEmbeddingModelsData = {},
+  ): CancelablePromise<EmbeddingModelsGetEmbeddingModelsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/embedding-models/",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Create Embedding Model
+   * Create a new embedding model.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns EmbeddingModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static createEmbeddingModel(
+    data: EmbeddingModelsCreateEmbeddingModelData,
+  ): CancelablePromise<EmbeddingModelsCreateEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/embedding-models/",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Embedding Model
+   * Get a specific embedding model by ID.
+   * @param data The data for the request.
+   * @param data.modelId
+   * @returns EmbeddingModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static getEmbeddingModel(
+    data: EmbeddingModelsGetEmbeddingModelData,
+  ): CancelablePromise<EmbeddingModelsGetEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/embedding-models/{model_id}",
+      path: {
+        model_id: data.modelId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Embedding Model
+   * Update an embedding model.
+   * @param data The data for the request.
+   * @param data.modelId
+   * @param data.requestBody
+   * @returns EmbeddingModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static updateEmbeddingModel(
+    data: EmbeddingModelsUpdateEmbeddingModelData,
+  ): CancelablePromise<EmbeddingModelsUpdateEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/embedding-models/{model_id}",
+      path: {
+        model_id: data.modelId,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Embedding Model
+   * Delete an embedding model.
+   * @param data The data for the request.
+   * @param data.modelId
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static deleteEmbeddingModel(
+    data: EmbeddingModelsDeleteEmbeddingModelData,
+  ): CancelablePromise<EmbeddingModelsDeleteEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/embedding-models/{model_id}",
+      path: {
+        model_id: data.modelId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Default Embedding Model
+   * Get the default embedding model.
+   * @returns EmbeddingModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static getDefaultEmbeddingModel(): CancelablePromise<EmbeddingModelsGetDefaultEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/embedding-models/default",
+    })
+  }
+
+  /**
+   * Set Default Embedding Model
+   * Set an embedding model as the default.
+   * @param data The data for the request.
+   * @param data.modelId
+   * @returns EmbeddingModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static setDefaultEmbeddingModel(
+    data: EmbeddingModelsSetDefaultEmbeddingModelData,
+  ): CancelablePromise<EmbeddingModelsSetDefaultEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/embedding-models/{model_id}/set-default",
+      path: {
+        model_id: data.modelId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Validate Embedding Model
+   * Validate if a HuggingFace model ID is valid.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static validateEmbeddingModel(
+    data: EmbeddingModelsValidateEmbeddingModelData,
+  ): CancelablePromise<EmbeddingModelsValidateEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/embedding-models/validate",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
 
 export class FormconnectService {
   /**

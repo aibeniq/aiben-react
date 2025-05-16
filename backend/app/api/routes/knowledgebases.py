@@ -7,9 +7,11 @@ from sqlmodel import func, select, delete
 import zipfile
 import io
 import os
+import shutil
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import KnowledgeBase, KnowledgeBaseCreate, KnowledgeBasePublic, KnowledgeBasesPublic, KnowledgeBaseUpdate, Message, Source, SourceData
+from app.services.knowledgebases import get_embedding_model
 
 import hashlib
 
@@ -28,7 +30,6 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
-
 
 @router.get("/", response_model=KnowledgeBasesPublic)
 def read_knowledge_bases(
@@ -210,13 +211,64 @@ def create_knowledge_base(
 
     print("Initializing embeddings...")
 
-    # Initialize HuggingFace embeddings
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    # Get embedding model - first try the one provided in the request
+    if knowledge_base_in.embedding_model_id:
+        # Verify the embedding model exists
+        from app.models import EmbeddingModel
+        model = session.get(EmbeddingModel, knowledge_base_in.embedding_model_id)
+        if not model:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Embedding model with ID {knowledge_base_in.embedding_model_id} not found"
+            )
+        model_id = model.model_id
+        embedding_model_id = model.id
+    else:
+        # Get the default embedding model
+        from app.models import EmbeddingModel
+        default_model = session.exec(
+            select(EmbeddingModel)
+            .where(EmbeddingModel.is_default == True)
+        ).first()
+        
+        if default_model:
+            model_id = default_model.model_id
+            embedding_model_id = default_model.id
+        else:
+            # Fallback to hardcoded value if no default model
+            model_id = "all-MiniLM-L6-v2"
+            embedding_model_id = None
+    
+    # Initialize embeddings with the selected model
+    try:
+        embeddings = HuggingFaceEmbeddings(model_name=model_id)
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Error initializing embedding model {model_id}: {str(e)}"
+        )
 
-    print("Creating Chroma VectorDB...")
+    print(f"Using embedding model: {model_id}")
+
+    # Clear out any existing chroma_db directory
+    chroma_dir = "./chroma_db"
+    if os.path.exists(chroma_dir):
+        print(f"Removing existing {chroma_dir} directory...")
+        shutil.rmtree(chroma_dir)
+        os.makedirs(chroma_dir, exist_ok=True)    
 
     # Create Chroma VectorDB from the document splits
-    Chroma.from_documents(documents=splits, embedding=embeddings, persist_directory="./chroma_db")
+    try:
+        Chroma.from_documents(documents=splits, embedding=embeddings, persist_directory=chroma_dir)
+    except Exception as e:
+        print(f"Error creating Chroma VectorDB: {str(e)}")
+        # Clean up the directory on error
+        if os.path.exists(chroma_dir):
+            shutil.rmtree(chroma_dir)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error creating vector database: {str(e)}"
+        )
 
     print("Zipping Chroma database...")
 
@@ -238,6 +290,7 @@ def create_knowledge_base(
         update={
             "owner_id": current_user.id,
             "data": zip_buffer.read(),
+            "embedding_model_id": embedding_model_id,  # Store the embedding model ID
             "date_created": datetime.utcnow(),
             "date_modified": datetime.utcnow(),
         }
@@ -292,16 +345,58 @@ def update_knowledge_base(
     knowledge_base.sqlmodel_update(update_dict)
 
     # Retrieve the compressed folder from the database
+     # If files or vector operations are being performed, use the KB's embedding model
     if files or knowledge_base_in.removed_file_ids:
         print("Retrieving existing VectorDB...")
+        
+        # Clear out any existing chroma_db directory
+        chroma_dir = "./chroma_db"
+        if os.path.exists(chroma_dir):
+            print(f"Removing existing {chroma_dir} directory...")
+            shutil.rmtree(chroma_dir)
+            os.makedirs(chroma_dir, exist_ok=True)
+        
         zip_buffer = io.BytesIO(knowledge_base.data)
-        with zipfile.ZipFile(zip_buffer, "r") as zip_file:
-            zip_file.extractall("./chroma_db")
+        try:
+            with zipfile.ZipFile(zip_buffer, "r") as zip_file:
+                zip_file.extractall(chroma_dir)
+        except Exception as e:
+            # Clean up on extraction error
+            if os.path.exists(chroma_dir):
+                shutil.rmtree(chroma_dir)
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error extracting vector database: {str(e)}"
+            )
 
-         # Load the existing Chroma VectorDB
+        # Load the existing Chroma VectorDB with the same embedding model
         print("Loading existing Chroma VectorDB...")
-        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-        chroma_vector_database = Chroma(persist_directory="./chroma_db", embedding_function=embeddings)
+        
+        # Get the embedding model ID from the knowledge base
+        if knowledge_base.embedding_model_id:
+            from app.models import EmbeddingModel
+            model = session.get(EmbeddingModel, knowledge_base.embedding_model_id)
+            if model:
+                model_id = model.model_id
+            else:
+                # Fallback if model was deleted
+                model_id = "all-MiniLM-L6-v2"
+        else:
+            # For backwards compatibility with KBs created before tracking
+            model_id = "all-MiniLM-L6-v2"
+            
+        print(f"Using embedding model: {model_id}")
+        try:
+            embeddings = HuggingFaceEmbeddings(model_name=model_id)
+            chroma_vector_database = Chroma(persist_directory=chroma_dir, embedding_function=embeddings)
+        except Exception as e:
+            # Clean up on loading error
+            if os.path.exists(chroma_dir):
+                shutil.rmtree(chroma_dir)
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error loading vector database: {str(e)}"
+            )
 
         # Process new files (if any)
         if files:
@@ -357,19 +452,26 @@ def update_knowledge_base(
             )
 
         # Zip the updated VectorDB
-        print("Zipping updated VectorDB...")
-        zip_buffer = io.BytesIO()
-        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-            for root, _, filenames in os.walk("./chroma_db"):
-                for filename in filenames:
-                    file_path = os.path.join(root, filename)
-                    arcname = os.path.relpath(file_path, "./chroma_db")
-                    zip_file.write(file_path, arcname)
-        zip_buffer.seek(0)
+        try:
+            # Zip the updated VectorDB
+            print("Zipping updated VectorDB...")
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+                for root, _, filenames in os.walk(chroma_dir):
+                    for filename in filenames:
+                        file_path = os.path.join(root, filename)
+                        arcname = os.path.relpath(file_path, chroma_dir)
+                        zip_file.write(file_path, arcname)
+            zip_buffer.seek(0)
 
-        # Update the knowledge base data in the database
-        print("Updating knowledge base data in the database...")
-        knowledge_base.data = zip_buffer.read()
+            # Update the knowledge base data in the database
+            print("Updating knowledge base data in the database...")
+            knowledge_base.data = zip_buffer.read()
+        finally:
+            # Clean up regardless of success or failure
+            if os.path.exists(chroma_dir):
+                print(f"Cleaning up {chroma_dir} directory...")
+                shutil.rmtree(chroma_dir)
 
     # Update the date_modified field
     knowledge_base.date_modified = datetime.utcnow()

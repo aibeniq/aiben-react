@@ -119,14 +119,16 @@ class NewPassword(SQLModel):
 class KnowledgeBaseBase(SQLModel):
     title: str = Field(min_length=1, max_length=255, unique=True)
     description: str | None = Field(default=None, max_length=255)
+    embedding_model_id: Optional[uuid.UUID] = Field(
+        default=None, foreign_key="embeddingmodel.id"
+    )
     # New property to store file paths or URLs
     #file_paths: Optional[List[str]] = Field(default=None, sa_column_kwargs={"nullable": True})
 
 
 # Properties to receive on KnowledgeBase creation
 class KnowledgeBaseCreate(KnowledgeBaseBase):
-    pass
-
+    embedding_model_id: Optional[uuid.UUID] = None
 
 # Properties to receive on KnowledgeBase update
 class KnowledgeBaseUpdate(KnowledgeBaseBase):
@@ -245,3 +247,33 @@ class VeraDocRagResponse(VeraDocRequest):
 class RagChecklistRequest(VeraDocRequest):
     knowledge_base_id: str
     questions: str
+
+# models to allow for front-end selection of embedding model
+class EmbeddingModel(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    name: str = Field(index=True)  # Human-readable name
+    model_id: str  # HuggingFace model ID
+    description: str = Field(default="")
+    is_default: bool = Field(default=False)
+    owner_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
+    date_created: datetime = Field(default_factory=datetime.utcnow)
+    date_modified: datetime = Field(default_factory=datetime.utcnow)
+
+class EmbeddingModelCreate(SQLModel):
+    name: str
+    model_id: str
+    description: str = ""
+    is_default: bool = False
+
+class EmbeddingModelUpdate(SQLModel):
+    name: Optional[str] = None
+    model_id: Optional[str] = None
+    description: Optional[str] = None
+    is_default: Optional[bool] = None
+
+class EmbeddingModelPublic(EmbeddingModel):
+    pass
+
+class EmbeddingModelsPublic(SQLModel):
+    data: List[EmbeddingModelPublic]
+    count: int
