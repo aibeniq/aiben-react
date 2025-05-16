@@ -64,17 +64,38 @@ const VeraDoc = () => {
     };
 
   const [mode, setMode] = useState<"manual" | "batch">("manual"); // Toggle between Manual and Batch Mode
-  // Update the state definition to include isHandwritten at the item level
-const [batchFileItems, setBatchFileItems] = useState<Array<{ 
-  files: Array<File>;
+ 
+  const [batchFiles, setBatchFiles] = useState<Array<{
+    file: File;
     isHandwritten: boolean;
-  }>>([
-    { files: [], isHandwritten: false },
-  ]);
+  }>>([]);
 
   const [batchResults, setBatchResults] = useState<string[]>([]);
   const [selectedBatchResult, setSelectedBatchResult] = useState<number>(0);
   const [batchLoading, setBatchLoading] = useState<boolean>(false);
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop: (acceptedFiles) => {
+      if (acceptedFiles.length > 0) {
+        // Convert the new files to our file item format
+        const newFileItems = acceptedFiles.map(file => ({
+          file,
+          isHandwritten: false
+        }));
+        
+        // Add to existing files
+        setBatchFiles(prev => [...prev, ...newFileItems]);
+      }
+    },
+    accept: {
+      "application/pdf": [".pdf"],
+      "text/plain": [".txt"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+    },
+    multiple: true,
+  });
 
   // Add batch uploader
   const addBatchUploader = () => {
@@ -117,50 +138,7 @@ const [batchFileItems, setBatchFileItems] = useState<Array<{
     // Return the minimum (as we can only process as many complete sets as the column with fewest files)
     return Math.min(...fileCounts);
   };
-  
-
-  const moveFileInColumn = (colIndex: number, fileIndex: number, direction: 'up' | 'down') => {
-  setBatchFileItems((prev) => {
-    const newItems = [...prev];
-    const files = [...newItems[colIndex].files];
-    
-    // Calculate the new position
-    const newIndex = direction === 'up' ? fileIndex - 1 : fileIndex + 1;
-    
-    // Check if the new index is valid
-    if (newIndex < 0 || newIndex >= files.length) return prev;
-    
-    // Swap the files
-    const temp = files[fileIndex];
-    files[fileIndex] = files[newIndex];
-    files[newIndex] = temp;
-    
-    // Update the files in the column
-    newItems[colIndex] = {
-      ...newItems[colIndex],
-      files: files
-    };
-    
-    return newItems;
-  });
-};
-
-  const reorderFilesInBatchUploader = (index: number, newFiles: File[]) => {
-    setBatchFileItems((prev) =>
-      prev.map((item, i) => (i === index ? { files: newFiles } : item))
-    );
-  };
-
-  const removeFileFromBatchUploader = (uploaderIndex: number, fileIndex: number) => {
-    setBatchFileItems((prev) =>
-      prev.map((item, i) =>
-        i === uploaderIndex
-          ? { files: item.files.filter((_, j) => j !== fileIndex) }
-          : item
-      )
-    );
-  };
-  
+   
   const [fileItems, setFileItems] = useState<Array<{
     file: File;
     isHandwritten: boolean;
@@ -331,86 +309,89 @@ const [batchFileItems, setBatchFileItems] = useState<Array<{
   }, [])
 
   const handleProcessBatch = async () => {
-    // Validate: At least 2 batch uploaders
-    if (batchFileItems.length < 2) {
-      setResults("Error: Batch processing requires at least 2 batch uploaders.");
-      return;
-    }
+  if (batchFiles.length === 0) {
+    setResults("Error: Please upload at least one file for batch processing.");
+    return;
+  }
+  
+  if (!questions.trim()) {
+    setResults("Error: Please enter at least one question.");
+    return;
+  }
+
+  if (!selectedKnowledgeBase?.id) {
+    setResults("Error: Please select a knowledge base for context.");
+    return;
+  }
+  
+  // Clear previous results
+  setBatchResults([]);
+  setSelectedBatchResult(0);
+  setBatchLoading(true);
+  
+  try {
+    const results: string[] = [];
     
-    // Check if all batch uploaders have the same number of files
-    const fileCount = batchFileItems[0].files.length;
-    if (fileCount === 0) {
-      setResults("Error: Each batch uploader must contain at least 1 file.");
-      return;
-    }
-    
-    const allSameCount = batchFileItems.every(item => item.files.length === fileCount);
-    if (!allSameCount) {
-      setResults("Error: All batch uploaders must contain the same number of files.");
-      return;
-    }
-    
-    // Clear previous results
-    setBatchResults([]);
-    setSelectedBatchResult(0);
-    setBatchLoading(true);
-    
-    try {
-      // Process each "row" of files (1st from each uploader, then 2nd, etc.)
-      const results: string[] = [];
+    // Process each file individually
+    for (let i = 0; i < batchFiles.length; i++) {
+      const fileItem = batchFiles[i];
       
-      for (let fileIndex = 0; fileIndex < fileCount; fileIndex++) {
-        // Collect files from each uploader at the current index
-        const rowFiles = batchFileItems.map(item => ({
-          file: item.files[fileIndex],
-          isHandwritten: item.isHandwritten
-        }));
+      // Separate files based on handwritten flag
+      const regularFiles = fileItem.isHandwritten ? [] : [fileItem.file];
+      const handwrittenFiles = fileItem.isHandwritten ? [fileItem.file] : [];
+      
+      // Process this file
+      const requestData = {
+        questions: questions,
+        knowledgeBaseId: selectedKnowledgeBase.id,
+        files: regularFiles,
+        handwrittenFiles: handwrittenFiles,
+      };
+      
+      // Call the API using our mutation
+      const response = await VeradocService.processRagChecklist({
+        questions: requestData.questions,
+        knowledgeBaseId: requestData.knowledgeBaseId,
+        formData: {
+          files: requestData.files,
+          handwritten_files: requestData.handwrittenFiles,
+        },
+      });
+      
+      // Format the response
+      let displayResults = `# Analysis Results for ${fileItem.file.name}\n\n`;
+      
+      if (response.results.final_evaluation) {
+        displayResults += "## FINAL EVALUATION\n\n";
+        displayResults += response.results.final_evaluation + "\n\n";
+      }
+
+      if (response.results.qa_pairs) {
+        displayResults += "## ADDITIONAL DETAILS\n\n";
         
-        // Separate into digitized and handwritten files
-        const digitizedFiles = rowFiles.filter(item => !item.isHandwritten).map(item => item.file);
-        const handwrittenFiles = rowFiles.filter(item => item.isHandwritten).map(item => item.file);
-        
-        // Skip processing if there are no questions defined
-        if (!questions.trim()) {
-          results.push("Error: No questions defined.");
-          continue;
-        }
-        
-        // Process this batch row
-        const requestData = {
-          questions: questions,
-          checklistData: {
-            digitized_files: digitizedFiles,
-            handwritten_files: handwrittenFiles,
-          },
-        };
-        
-        // Call the API
-        const response = await VeradocService.processChecklist(requestData);
-        
-        // Checklistat the result based on the response structure
-        let resultText = "";
-        if (response.results.comparison) {
-          resultText = response.results.comparison;
-        } else if (response.results.message) {
-          resultText = `${response.results.message}\n\n${JSON.stringify(response.results.extracted_data, null, 2)}`;
-        } else {
-          resultText = JSON.stringify(response.results, null, 2);
-        }
-        
-        results.push(resultText);
+        response.results.qa_pairs.forEach((pair, index) => {
+          displayResults += `### Question ${index + 1}:\n${pair.question}\n\n`;
+          displayResults += `**Answer:**\n${pair.answer}\n\n`;
+          
+          if (pair.context) {
+            displayResults += `**Relevant Policy Context:**\n${pair.context}\n\n`;
+          }
+        });
       }
       
-      // Update state with all results
-      setBatchResults(results);
-      
-    } catch (error) {
-      console.error("Batch processing error:", error);
-      setResults(`Error processing batch: ${error.message}`);
-    } finally {
-      setBatchLoading(false);
+      results.push(displayResults);
     }
-  };
+    
+    // Update state with all results
+    setBatchResults(results);
+    
+  } catch (error) {
+    console.error("Batch processing error:", error);
+    setResults(`Error processing batch: ${error.message}`);
+  } finally {
+    setBatchLoading(false);
+  }
+};
 
 // Create custom components for table rendering
 const components = {
@@ -779,187 +760,101 @@ const components = {
             </Box>
           </VStack>
         ) : (
-            // New table-based Batch Mode UI with Chakra UI v3 syntax
           <VStack spacing={4} align="stretch">
-            <Box overflowX="auto" width="100%">
-              <Table.Root variant="simple" width="100%">
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeader width="100px">Files</Table.ColumnHeader>
-                    {batchFileItems.map((batchItem, index) => (
-                      <Table.ColumnHeader key={index} textAlign="center">
-                        <ColumnHeaderUploader 
-                          index={index}
-                          isHandwritten={batchItem.isHandwritten}
-                          onAddFiles={(newFiles) => {
-                            // Update the files in this column
-                            const updatedBatchItems = [...batchFileItems];
-                            updatedBatchItems[index] = {
-                              ...updatedBatchItems[index],
-                              files: [...updatedBatchItems[index].files, ...newFiles]
-                            };
-                            setBatchFileItems(updatedBatchItems);
-                          }}
-                          onRemove={() => removeBatchUploader(index)}
-                          onToggleHandwritten={() => toggleBatchHandwritten(index)}
-                          isRemoveDisabled={batchFileItems.length <= 1}
-                        />
-                      </Table.ColumnHeader>
-                    ))}
-                    <Table.ColumnHeader width="60px">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        colorPalette="teal" 
-                        leftIcon={<FaPlus fontSize="10px" />}
-                        onClick={addBatchUploader}
-                      >
-                        Add Source
-                      </Button>
-                    </Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {/* Find the maximum number of files in any column */}
-                  {Array.from({ length: Math.max(1, ...batchFileItems.map(item => item.files.length)) }).map((_, rowIndex) => (
-                    <Table.Row key={rowIndex}>
-                      <Table.Cell fontWeight="medium">File {rowIndex + 1}</Table.Cell>
-                      
-                      {/* Map through each column */}
-                      {batchFileItems.map((batchItem, colIndex) => (
-                        <Table.Cell key={colIndex} padding={2}>
-                          {rowIndex < batchItem.files.length ? (
-                            // Display file if it exists for this row/column
-                            <VStack width="100%" spacing={0}>
-                              <HStack width="100%" mb={2}>
-                                <Box 
-                                  border="1px solid" 
-                                  borderColor="gray.200" 
-                                  borderRadius="md" 
-                                  p={2} 
-                                  bg="white"
-                                  width="100%"
-                                  height="36px"
-                                  overflow="hidden"
-                                >
-                                  <Box
-                                    maxW="100%"
-                                    maxH="32px"
-                                    overflowY="auto"
-                                    overflowX="hidden"
-                                    css={{
-                                      '&::-webkit-scrollbar': { width: '4px' },
-                                      '&::-webkit-scrollbar-track': { width: '6px', background: 'transparent' },
-                                      '&::-webkit-scrollbar-thumb': { background: '#CBD5E0', borderRadius: '24px' },
-                                    }}
-                                    title={batchItem.files[rowIndex].name}
-                                    textAlign="left"
-                                    display="flex"
-                                    alignItems="flex-start"
-                                    justifyContent="flex-start"
-                                    lineHeight="tight"
-                                    fontSize="sm"
-                                  >
-                                    {batchItem.files[rowIndex].name}
-                                  </Box>
-                                </Box>
-                                <Box>
-                                  <Button 
-                                    size="xs" 
-                                    colorPalette="red" 
-                                    onClick={() => removeFileFromBatchUploader(colIndex, rowIndex)}
-                                  >
-                                    ✕
-                                  </Button>
-                                </Box>
-                              </HStack>
-                              
-                              {/* Only display the reorder button if this is not the last file 
-                                  right above an empty row */}
-                              {rowIndex < batchItem.files.length - 1 && (
-                                <Button
-                                  size="xs"
-                                  colorPalette="blue"
-                                  variant="ghost"
-                                  width="100%"
-                                  height="20px"
-                                  onClick={() => {
-                                    // Open a reorder dialog or initiate a draggable interaction
-                                    // For now, we'll create a simple toggle between up and down
-                                    const isFirstFile = rowIndex === 0;
-                                    const isLastFile = rowIndex === batchItem.files.length - 1;
-                                    
-                                    // If it's the first file, we can only move down
-                                    if (isFirstFile) {
-                                      moveFileInColumn(colIndex, rowIndex, 'down');
-                                    }
-                                    // If it's the last file, we can only move up
-                                    else if (isLastFile) {
-                                      moveFileInColumn(colIndex, rowIndex, 'up');
-                                    }
-                                    // For files in the middle, we'll toggle between moving up and down
-                                    else {
-                                      // Using a simple approach - move up first, then next click will move down
-                                      // This could be improved with a proper UI
-                                      const direction = rowIndex % 2 === 0 ? 'up' : 'down';
-                                      moveFileInColumn(colIndex, rowIndex, direction);
-                                    }
-                                  }}
-                                >
-                                  <Box display="flex" flexDirection="column" alignItems="center" fontSize="10px" lineHeight="1">
-                                    <span>↑</span>
-                                    <span>↓</span>
-                                  </Box>
-                                </Button>
-                              )}
-                            </VStack>
-                          ) : (
-                            // Show file upload interface for empty cells
-                            <FileCellUploader 
-                              onAddFile={(file) => {
-                                const newFiles = [...file];
-                                addFilesToBatchUploader(colIndex, newFiles);
-                              }} 
-                            />
-                          )}
-                        </Table.Cell>
-                      ))}
-                      <Table.Cell></Table.Cell>
-                    </Table.Row>
-                  ))}
-                  
-                  {/* Add new file row */}
-                  <Table.Row>
-                    <Table.Cell fontWeight="medium">
-                      <Text>Add Row</Text>
-                    </Table.Cell>
-                    {batchFileItems.map((_, colIndex) => (
-                      <Table.Cell key={colIndex}>
-                        <FileCellUploader 
-                          onAddFile={(file) => {
-                            const newFiles = [...file];
-                            addFilesToBatchUploader(colIndex, newFiles);
-                          }} 
-                        />
-                      </Table.Cell>
-                    ))}
-                    <Table.Cell></Table.Cell>
-                  </Table.Row>
-                </Table.Body>
-              </Table.Root>
+            {/* File Upload Area */}
+            <Box
+              border="2px dashed"
+              borderColor="gray.300"
+              borderRadius="md"
+              p={6}
+              textAlign="center"
+              cursor="pointer"
+              _hover={{ borderColor: "blue.500", bg: "blue.50" }}
+              {...getRootProps()} // Use useDropzone directly in the component
+            >
+              <input {...getInputProps()} />
+              <VStack spacing={2}>
+                <Text>Drag and drop files here, or click to browse</Text>
+                <Text fontSize="sm" color="gray.500">
+                  You can upload multiple files at once
+                </Text>
+              </VStack>
             </Box>
 
+            {/* Uploaded Files List */}
+            {batchFiles.length > 0 && (
+              <Box>
+                <Text fontWeight="medium" mb={2}>
+                  Uploaded Files ({batchFiles.length})
+                </Text>
+                <VStack align="stretch" spacing={2} maxH="300px" overflowY="auto">
+                  {batchFiles.map((fileItem, index) => (
+                    <HStack
+                      key={fileItem.file.name + index} // More reliable key
+                      justify="space-between"
+                      bg="white"
+                      p={3}
+                      borderRadius="md"
+                      border="1px solid"
+                      borderColor="gray.200"
+                    >
+                      <Box>
+                        <Text fontWeight="medium" noOfLines={1}>
+                          {fileItem.file.name}
+                        </Text>
+                        <Text fontSize="xs" color="gray.500">
+                          {(fileItem.file.size / 1024).toFixed(1)} KB
+                        </Text>
+                      </Box>
+                      <HStack>
+                        <ChakraField.Root display="flex" alignItems="center" width="auto">
+                          <ChakraField.Label htmlFor={`batch-handwritten-${index}`} mb="0" fontSize="sm">
+                            Handwritten
+                          </ChakraField.Label>
+                          <Switch.Root id={`batch-handwritten-${index}`} colorPalette="blue">
+                            <Switch.HiddenInput 
+                              checked={fileItem.isHandwritten} 
+                              onChange={() => {
+                                setBatchFiles(prev => 
+                                  prev.map((item, i) => 
+                                    i === index ? { ...item, isHandwritten: !item.isHandwritten } : item
+                                  )
+                                );
+                              }}
+                            />
+                            <Switch.Control>
+                              <Switch.Thumb />
+                            </Switch.Control>
+                          </Switch.Root>
+                        </ChakraField.Root>
+                        <Button 
+                          size="sm" 
+                          colorPalette="red" 
+                          onClick={() => {
+                            setBatchFiles(prev => prev.filter((_, i) => i !== index));
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </HStack>
+                    </HStack>
+                  ))}
+                </VStack>
+              </Box>
+            )}
+
+            {/* Process Button */}
             <HStack spacing={4}>
               <Button 
                 variant="solid"
-                colorPalette={isBatchConfigValid() ? "blue" : "gray"}
+                colorPalette={batchFiles.length > 0 ? "blue" : "gray"}
                 onClick={handleProcessBatch}
                 isLoading={batchLoading}
-                isDisabled={!isBatchConfigValid()}
+                isDisabled={batchFiles.length === 0}
               >
-                {isBatchConfigValid() 
-                  ? `Process ${getBatchSetCount()} Batch Sets` 
-                  : "Invalid Batch Configuration"}
+                {batchFiles.length > 0 
+                  ? `Process ${batchFiles.length} Files` 
+                  : "No Files to Process"}
               </Button>
             </HStack>
 
@@ -968,7 +863,7 @@ const components = {
             <Heading size="md" mb={4}>Results</Heading>
             <Box>
               {batchResults.length > 0 ? (
-                <Field label="Batch Set">
+                <Field label="Select File to View Results">
                   <select
                     value={selectedBatchResult}
                     onChange={(e) => setSelectedBatchResult(Number(e.target.value))}
@@ -981,7 +876,8 @@ const components = {
                   >
                     {batchResults.map((_, index) => (
                       <option key={index} value={index}>
-                        Batch Set {index + 1}
+                        {/* Display file name when available */}
+                        {batchFiles[index]?.file?.name || `File ${index + 1}`}
                       </option>
                     ))}
                   </select>
@@ -1005,7 +901,7 @@ const components = {
                     position="absolute"
                     top="50%"
                     left="50%"
-                    transchecklist="translate(-50%, -50%)"
+                    transform="translate(-50%, -50%)"
                     zIndex="1"
                   >
                     <Spinner size="lg" color="blue.500" />
@@ -1016,7 +912,7 @@ const components = {
                       {batchResults[selectedBatchResult]}
                     </ReactMarkdown>
                   ) : (
-                    <Text color="gray.500">Results will appear here after processing batch files.</Text>
+                    <Text color="gray.500">Results will appear here after processing files.</Text>
                   )
                 )}
               </Box>
@@ -1122,364 +1018,6 @@ const FileDropzone = ({
     </Box>
   )
 }
-
-
-// Add this component right below your BatchFileDropzone component 
-const FileCellUploader = ({ onAddFile }: { onAddFile: (files: File[]) => void }) => {
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles) => {
-      if (acceptedFiles.length > 0) {
-        onAddFile(acceptedFiles);
-      }
-    },
-    accept: {
-      "application/pdf": [".pdf"],
-      "text/plain": [".txt"],
-      "application/vnd.openxmlchecklistats-officedocument.wordprocessingml.document": [".docx"],
-      "image/jpeg": [".jpg", ".jpeg"],
-      "image/png": [".png"],
-    },
-    multiple: false, // Only allow one file per drop for this cell
-  });
-
-  return (
-    <VStack width="100%" spacing={0} height="62px"> {/* Match the height of a file cell with its reorder button */}
-      <Box 
-        {...getRootProps()} 
-        border="1px dashed" 
-        borderColor="gray.300" 
-        borderRadius="md" 
-        p={2}
-        textAlign="center"
-        cursor="pointer"
-        _hover={{ borderColor: "blue.500", bg: "blue.50" }}
-        height="36px"
-        width="100%"
-        fontSize="sm"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        mb={2} /* Match the mb={2} from the HStack in the file display */
-      >
-        <input {...getInputProps()} />
-        <Text fontSize="xs" color="gray.500">
-          Drop file or click
-        </Text>
-      </Box>
-      {/* Add invisible spacing element to match the reorder button's height */}
-      <Box height="20px" width="100%"></Box>
-    </VStack>
-  );
-};
-
-// Add this new component for the column header uploader
-
-const ColumnHeaderUploader = ({ 
-  index, 
-  isHandwritten, 
-  onAddFiles, 
-  onRemove, 
-  onToggleHandwritten,
-  isRemoveDisabled
-}: { 
-  index: number, 
-  isHandwritten: boolean,
-  onAddFiles: (files: File[]) => void,
-  onRemove: () => void, 
-  onToggleHandwritten: () => void,
-  isRemoveDisabled: boolean
-}) => {
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles) => {
-      if (acceptedFiles.length > 0) {
-        onAddFiles(acceptedFiles);
-      }
-    },
-    accept: {
-      "application/pdf": [".pdf"],
-      "text/plain": [".txt"],
-      "application/vnd.openxmlchecklistats-officedocument.wordprocessingml.document": [".docx"],
-      "image/jpeg": [".jpg", ".jpeg"],
-      "image/png": [".png"],
-    },
-    multiple: true, // Allow multiple files
-  });
-
-  return (
-    <VStack>
-      <Box 
-        {...getRootProps()} 
-        width="100%"
-        textAlign="center"
-        cursor="pointer"
-        borderRadius="md"
-        p={1}
-        _hover={{ bg: "blue.50" }}
-      >
-        <input {...getInputProps()} />
-        <Text fontSize="sm">Source {index + 1}</Text>
-        <Text fontSize="xs" color="blue.500">Click to upload multiple files</Text>
-      </Box>
-      
-      <HStack>
-        <ChakraField.Root display="flex" alignItems="center" width="auto">
-          <ChakraField.Label htmlFor={`batch-handwritten-${index}`} mb="0" fontSize="xs">
-            Analyze Handwriting
-          </ChakraField.Label>
-          <Switch.Root id={`batch-handwritten-${index}`} colorPalette="blue" size="sm">
-            <Switch.HiddenInput 
-              checked={isHandwritten} 
-              onChange={onToggleHandwritten} 
-            />
-            <Switch.Control>
-              <Switch.Thumb />
-            </Switch.Control>
-          </Switch.Root>
-        </ChakraField.Root>
-        
-        <Button 
-          size="xs" 
-          colorPalette="red" 
-          onClick={onRemove}
-          isDisabled={isRemoveDisabled}
-        >
-          ✕
-        </Button>
-      </HStack>
-    </VStack>
-  );
-};
-
-const BatchFileDropzone = ({
-  index,
-  files,
-  isHandwritten,
-  onAddFiles,
-  onRemoveFile,
-  onRemoveUploader,
-  onReorderFiles,
-  onToggleHandwritten,
-}: {
-  index: number;
-  files: File[];
-  isHandwritten: boolean;
-  onAddFiles: (newFiles: File[]) => void;
-  onRemoveFile: (fileIndex: number) => void;
-  onRemoveUploader: () => void;
-  onReorderFiles: (newFiles: File[]) => void;
-  onToggleHandwritten: () => void;
-}) => {
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles) => {
-      if (acceptedFiles.length > 0) {
-        onAddFiles(acceptedFiles);
-      }
-    },
-    accept: {
-      "application/pdf": [".pdf"],
-      "text/plain": [".txt"],
-      "application/vnd.openxmlchecklistats-officedocument.wordprocessingml.document": [".docx"],
-      "image/jpeg": [".jpg", ".jpeg"],
-      "image/png": [".png"],
-    },
-    multiple: true, // Allow multiple files
-  });
-
-  // Define handleDragEnd inside the component
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
-    
-    const reorderedFiles = Array.from(files);
-    const [movedFile] = reorderedFiles.splice(result.source.index, 1);
-    reorderedFiles.splice(result.destination.index, 0, movedFile);
-    onReorderFiles(reorderedFiles);
-  };
-
-  // Create safe IDs without special characters
-  const getSafeId = (fileIndex: number) => `file-${index}-${fileIndex}`;
-
-  return (
-    <Box
-      position="relative"
-      border="2px dashed"
-      borderColor="gray.300"
-      borderRadius="md"
-      p={4}
-      minW="250px" // Ensure a fixed or minimum width
-      maxW="300px"
-      flex="1" // Allow flexibility in the horizontal layout
-    >
-      <VStack align="stretch" spacing={2}>
-        {/* Header with handwriting toggle */}
-        <HStack justify="space-between" mb={1}>
-          <VStack align="start" spacing={0}>
-            <Text fontWeight="bold">Source {index + 1}</Text>
-            {files.length > 0 && (
-              <Text fontSize="xs" color="gray.600">
-                {files.length} {files.length === 1 ? "file" : "files"} for processing
-              </Text>
-            )}
-          </VStack>
-          <ChakraField.Root display="flex" alignItems="center" width="auto">
-            <ChakraField.Label htmlFor={`batch-handwritten-${index}`} mb="0" fontSize="sm">
-              Analyze handwriting
-            </ChakraField.Label>
-            <Switch.Root id={`batch-handwritten-${index}`} colorPalette="blue">
-              <Switch.HiddenInput 
-                checked={isHandwritten} 
-                onChange={onToggleHandwritten} 
-              />
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch.Root>
-          </ChakraField.Root>
-        </HStack>
-
-        <Box {...getRootProps()} textAlign="center" cursor="pointer" _hover={{ borderColor: "blue.500" }}>
-          <input {...getInputProps()} />
-          <Text>Drag and drop files here, or click to browse</Text>
-        </Box>
-
-        {/* Display uploaded files */}
-        {files.length > 0 && (
-          <Box>
-            <Text fontWeight="bold" mb={2}>
-              Uploaded Files:
-            </Text>
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId={`batch-${index}`}>
-                {(provided) => (
-                  <VStack
-                    align="stretch"
-                    spacing={1}
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                  >
-                    {files.map((file, fileIndex) => (
-                      <Draggable
-                        key={getSafeId(fileIndex)}
-                        draggableId={getSafeId(fileIndex)}
-                        index={fileIndex}
-                      >
-                        {(provided) => (
-                          <HStack
-                            justify="space-between"
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            mb={1}
-                            bg="white"
-                            p={2}
-                            borderRadius="md"
-                            border="1px solid"
-                            borderColor="gray.200"
-                            height="30px" // Fixed height
-                            overflow="hidden" // Prevent overflow
-                            width="100%"
-                          >
-                            <Box
-                              maxW="60%"
-                              maxH="32px"
-                              overflowY="auto"
-                              overflowX="hidden"
-                              css={{
-                                '&::-webkit-scrollbar': {
-                                  width: '4px',
-                                },
-                                '&::-webkit-scrollbar-track': {
-                                  width: '6px',
-                                  background: 'transparent',
-                                },
-                                '&::-webkit-scrollbar-thumb': {
-                                  background: '#CBD5E0',
-                                  borderRadius: '24px',
-                                },
-                              }}
-                              title={file.name}
-                              textAlign="left"
-                              display="flex"
-                              alignItems="flex-start"
-                              justifyContent="flex-start"
-                              lineHeight="tight"
-                              fontSize="sm"
-                              p={0}
-                            >
-                              {file.name}
-                            </Box>
-                            <HStack spacing={2}>
-                              {/* Move Up Button */}
-                              <Button
-                                size="xs"
-                                colorScheme="blue"
-                                onClick={() => {
-                                  if (fileIndex > 0) {
-                                    const reorderedFiles = Array.from(files);
-                                    const [movedFile] = reorderedFiles.splice(fileIndex, 1);
-                                    reorderedFiles.splice(fileIndex - 1, 0, movedFile);
-                                    onReorderFiles(reorderedFiles);
-                                  }
-                                }}
-                                isDisabled={fileIndex === 0}
-                                flexShrink={0}
-                                minW="24px" // Fixed minimum width
-                                height="24px" // Fixed height
-                              >
-                                ↑
-                              </Button>
-
-                              {/* Move Down Button */}
-                              <Button
-                                size="xs"
-                                colorScheme="blue"
-                                onClick={() => {
-                                  if (fileIndex < files.length - 1) {
-                                    const reorderedFiles = Array.from(files);
-                                    const [movedFile] = reorderedFiles.splice(fileIndex, 1);
-                                    reorderedFiles.splice(fileIndex + 1, 0, movedFile);
-                                    onReorderFiles(reorderedFiles);
-                                  }
-                                }}
-                                isDisabled={fileIndex === files.length - 1}
-                                flexShrink={0}
-                                minW="24px" // Fixed minimum width
-                                height="24px" // Fixed height
-                              >
-                                ↓
-                              </Button>
-
-                              {/* Remove File Button */}
-                              <Button
-                                size="xs"
-                                colorScheme="red"
-                                onClick={() => onRemoveFile(fileIndex)}
-                                flexShrink={0}
-                                minW="24px" // Fixed minimum width
-                                height="24px" // Fixed height
-                              >
-                                Remove
-                              </Button>
-                            </HStack>
-                          </HStack>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </VStack>
-                )}
-              </Droppable>
-            </DragDropContext>
-          </Box>
-        )}
-
-        {/* Remove uploader button */}
-        <Button size="sm" colorScheme="red" onClick={onRemoveUploader}>
-          Remove Uploader
-        </Button>
-      </VStack>
-    </Box>
-  );
-};
 
 // Export the Route for compatibility with the routing system
 export const Route = createFileRoute("/_layout/veradoc")({
