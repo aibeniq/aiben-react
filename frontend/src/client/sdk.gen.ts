@@ -569,6 +569,7 @@ export class KnowledgeBasesService {
    * @param data.title
    * @param data.formData
    * @param data.description
+   * @param data.embeddingModelId
    * @returns KnowledgeBasePublic Successful Response
    * @throws ApiError
    */
@@ -581,6 +582,7 @@ export class KnowledgeBasesService {
       query: {
         title: data.title,
         description: data.description,
+        embedding_model_id: data.embeddingModelId,
       },
       formData: data.formData,
       mediaType: "multipart/form-data",
@@ -620,6 +622,7 @@ export class KnowledgeBasesService {
    * @param data.id
    * @param data.title
    * @param data.description
+   * @param data.embeddingModelId
    * @param data.formData
    * @returns KnowledgeBasePublic Successful Response
    * @throws ApiError
@@ -636,6 +639,7 @@ export class KnowledgeBasesService {
       query: {
         title: data.title,
         description: data.description,
+        embedding_model_id: data.embeddingModelId,
       },
       formData: data.formData,
       mediaType: "multipart/form-data",

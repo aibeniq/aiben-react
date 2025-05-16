@@ -277,3 +277,6 @@ class EmbeddingModelPublic(EmbeddingModel):
 class EmbeddingModelsPublic(SQLModel):
     data: List[EmbeddingModelPublic]
     count: int
+
+class EmbeddingModelValidate(SQLModel):
+    model_id: str
