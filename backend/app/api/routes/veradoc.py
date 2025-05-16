@@ -1,5 +1,5 @@
 import uuid
-from app.models import FormConnectRequest, FormConnectResponse, FormConnectForm
+from app.models import VeraDocRequest, VeraDocResponse, VeraDocChecklist
 
 from app.api.deps import CurrentUser, SessionDep
 
@@ -31,21 +31,21 @@ if not openai_api_key:
 
 # Set up OpenAI API key
 os.environ["OPENAI_API_KEY"] = openai_api_key
-router = APIRouter(prefix="/formconnect", tags=["formconnect"])
+router = APIRouter(prefix="/veradoc", tags=["veradoc"])
 
 # Initialize the LLM
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
 
-def generate_template(questions: List[str]) -> Dict[str, str]:
+def generate_template(fields: List[str]) -> Dict[str, str]:
     """
-    Generate a JSON template from a list of questions.
-    Each question will have a blank value.
+    Generate a JSON template from a list of fields.
+    Each field will have a blank value.
     """
-    return {question: "" for question in questions}
+    return {field: "" for field in fields}
 
-async def extract_questions_from_digitized_document(file: UploadFile, template: Dict[str, str]) -> Dict[str, str]:
+async def extract_fields_from_digitized_document(file: UploadFile, template: Dict[str, str]) -> Dict[str, str]:
     """
-    Extract questions from a document using the LLM.
+    Extract fields from a document using the LLM.
     """
     # Read the file content
     content = await file.read()
@@ -59,9 +59,9 @@ async def extract_questions_from_digitized_document(file: UploadFile, template: 
 
     # Create the prompt
     prompt_template = ChatPromptTemplate.from_template(
-        """Here is a template of the questions that I want you to extract from this document: {template}
+        """Here is a template of the fields that I want you to extract from this document: {template}
         Here is the full text of a document: {document_text}
-        Fill out the template based on the questions you can find."""
+        Fill out the template based on the fields you can find."""
     )
     prompt = prompt_template.format_prompt(template=template, document_text=text)
 
@@ -82,18 +82,18 @@ async def extract_questions_from_digitized_document(file: UploadFile, template: 
         # Return the content wrapped in a dictionary
         return {"raw_content": str(response.content)}
 
-async def extract_questions_from_handwritten_document(file: UploadFile, template: Dict[str, str]) -> Dict[str, str]:
+async def extract_fields_from_handwritten_document(file: UploadFile, template: Dict[str, str]) -> Dict[str, str]:
     """
-    Extract questions from a handwritten document by either:
+    Extract fields from a handwritten document by either:
     1. For PDFs: extracting images from the PDF and sending to the LLM
     2. For image files: sending the image directly to the LLM
     
     Args:
         file: Uploaded file containing handwritten content (PDF or image format)
-        template: Dictionary template of questions to extract
+        template: Dictionary template of fields to extract
         
     Returns:
-        Dictionary of extracted questions
+        Dictionary of extracted fields
     """
     # Read the file content
     content = await file.read()
@@ -110,18 +110,18 @@ async def extract_questions_from_handwritten_document(file: UploadFile, template
             
             # Create a prompt for the image
             prompt_template = ChatPromptTemplate.from_template(
-                """Here is a template of the questions that I want you to extract from this image: {template}
+                """Here is a template of the fields that I want you to extract from this image: {template}
                 
                 I'm sending you an image with handwritten content.
                 
-                For each question in the template, try to locate and extract the corresponding value from the image.
+                For each field in the template, try to locate and extract the corresponding value from the image.
                 Pay special attention to handwritten text and ensure accuracy in your extraction.
                 
                 Return your results as a JSON object matching the template structure.
                 """
             )
             
-            # Format the prompt with the template
+            # Checklistat the prompt with the template
             prompt = prompt_template.format_prompt(template=template)
             
             # Create a list of messages with text and image
@@ -193,18 +193,18 @@ async def extract_questions_from_handwritten_document(file: UploadFile, template
             
             # Create a prompt with the images for the LLM
             prompt_template = ChatPromptTemplate.from_template(
-                """Here is a template of the questions that I want you to extract from these document images: {template}
+                """Here is a template of the fields that I want you to extract from these document images: {template}
                 
                 I'm sending you images from a document with handwritten content.
                 
-                For each question in the template, try to locate and extract the corresponding value from the images.
+                For each field in the template, try to locate and extract the corresponding value from the images.
                 Pay special attention to handwritten text and ensure accuracy in your extraction.
                 
                 Return your results as a JSON object matching the template structure.
                 """
             )
             
-            # Format the prompt with the template
+            # Checklistat the prompt with the template
             prompt = prompt_template.format_prompt(template=template)
             
             # Create a list of messages with text and images
@@ -254,7 +254,7 @@ async def extract_questions_from_handwritten_document(file: UploadFile, template
         # For non-PDF, non-image files, fall back to the regular extraction
         # but add a note that this was supposed to be processed as handwritten
         await file.seek(0)  # Reset file position
-        result = await extract_questions_from_digitized_document(file, template)
+        result = await extract_fields_from_digitized_document(file, template)
         
         # Add a note that this was meant to be processed as handwritten
         for key in result:
@@ -265,10 +265,10 @@ async def extract_questions_from_handwritten_document(file: UploadFile, template
 
 async def compare_multiple_documents(documents: List[Dict[str, str]], file_names: List[str]) -> str:
     """
-    Compare questions across multiple documents using the LLM.
+    Compare fields across multiple documents using the LLM.
     
     Args:
-        documents: List of dictionaries containing extracted questions
+        documents: List of dictionaries containing extracted fields
         file_names: List of file names corresponding to the documents
         
     Returns:
@@ -285,12 +285,12 @@ async def compare_multiple_documents(documents: List[Dict[str, str]], file_names
         
         {documents}
         
-        Please analyze all the documents and identify any questions that have different values across documents.
+        Please analyze all the documents and identify any fields that have different values across documents.
         
         Create a markdown table with the following format:
-        1. First column should be titled "FIELD" and contain the question name
+        1. First column should be titled "FIELD" and contain the field name
         2. Each additional column should have the document name as header (e.g., "Document 1", "Document 2")
-        3. Include ONLY questions where there are discrepancies between documents
+        3. Include ONLY fields where there are discrepancies between documents
         
         After the table, please:
         1. For each discrepancy, suggest which value is most likely correct and why
@@ -306,7 +306,7 @@ async def compare_multiple_documents(documents: List[Dict[str, str]], file_names
         
         ONLY return the Markdown table -- do NOT return any other text. 
         Also, do NOT add tick marks like ``` and the label 'markdown': just give the actual markdown table content as raw text.
-        However, if there are no discrepancies, please state that all questions match across documents.
+        However, if there are no discrepancies, please state that all fields match across documents.
         """
     )
     
@@ -318,14 +318,14 @@ async def compare_multiple_documents(documents: List[Dict[str, str]], file_names
     return response.content
 
 
-@router.post("/process", response_model=FormConnectResponse)
-async def process_form(
-    form_connect_in: FormConnectRequest = Depends(),
+@router.post("/process", response_model=VeraDocResponse)
+async def process_checklist(
+    checklist_connect_in: VeraDocRequest = Depends(),
     digitized_files: List[UploadFile] = File(None),
     handwritten_files: List[UploadFile] = File(None),
 ):
     """
-    Process the uploaded files and questions.
+    Process the uploaded files and fields.
     
     Handles two types of files:
     - digitized_files: Standard text extraction
@@ -338,26 +338,26 @@ async def process_form(
     if total_files < 1:
         raise HTTPException(status_code=400, detail="At least one file must be uploaded.")
     
-    # Parse the questions into a list
-    question_list = form_connect_in.questions.splitlines()
+    # Parse the fields into a list
+    field_list = checklist_connect_in.fields.splitlines()
 
-    if not question_list:
-        raise HTTPException(status_code=400, detail="No questions provided.")
+    if not field_list:
+        raise HTTPException(status_code=400, detail="No fields provided.")
 
     # Generate the JSON template
-    template = generate_template(question_list)
+    template = generate_template(field_list)
 
-    # Extract questions from all documents
+    # Extract fields from all documents
     extracted_results = []
     file_names = []
     
     # Process digitized files using the existing function
     if digitized_files:
         for file in digitized_files:
-            extracted = await extract_questions_from_digitized_document(file, template)
+            extracted = await extract_fields_from_digitized_document(file, template)
 
             print("Results for file name:", file.filename)
-            print("Extracted questions:", extracted)
+            print("Extracted fields:", extracted)
             extracted_results.append(extracted)
             file_names.append(f"{file.filename} (digitized)")
             
@@ -367,11 +367,11 @@ async def process_form(
     # Process handwritten files using a specialized function (placeholder)
     if handwritten_files:
         for file in handwritten_files:
-            extracted = await extract_questions_from_handwritten_document(file, template)
+            extracted = await extract_fields_from_handwritten_document(file, template)
             extracted_results.append(extracted)
 
             print("Results for file name:", file.filename)
-            print("Extracted questions:", extracted)
+            print("Extracted fields:", extracted)
             
             file_names.append(f"{file.filename} (handwritten)")
             
@@ -385,7 +385,7 @@ async def process_form(
             "extracted_data": extracted_results[0]
         }
     else:
-        # Compare the extracted questions
+        # Compare the extracted fields
         comparison_result = await compare_multiple_documents(extracted_results, file_names)
         result = {
             "message": "Documents compared successfully",
@@ -394,79 +394,79 @@ async def process_form(
         }
 
     # Return the comparison results as a dictionary
-    return FormConnectResponse(results=result)
+    return VeraDocResponse(results=result)
 
-# Functions related to Forms
-@router.post("/forms", response_model=FormConnectForm)
-def create_form(form: FormConnectForm, session: SessionDep, current_user: CurrentUser,):
+# Functions related to Checklists
+@router.post("/checklists", response_model=VeraDocChecklist)
+def create_checklist(checklist: VeraDocChecklist, session: SessionDep, current_user: CurrentUser,):
     """
-    Save a new form to the database.
+    Save a new checklist to the database.
     """
-    existing_form = session.exec(select(FormConnectForm).where(FormConnectForm.name == form.name)).first()
-    if existing_form:
-        raise HTTPException(status_code=400, detail="A form with this name already exists.")
+    existing_checklist = session.exec(select(VeraDocChecklist).where(VeraDocChecklist.name == checklist.name)).first()
+    if existing_checklist:
+        raise HTTPException(status_code=400, detail="A checklist with this name already exists.")
     
-    form.owner_id = current_user.id
-    session.add(form)
+    checklist.owner_id = current_user.id
+    session.add(checklist)
     session.commit()
-    session.refresh(form)
-    return form
+    session.refresh(checklist)
+    return checklist
 
-@router.get("/forms", response_model=List[FormConnectForm])
-def get_forms(session: SessionDep, current_user: CurrentUser):
+@router.get("/checklists", response_model=List[VeraDocChecklist])
+def get_checklists(session: SessionDep, current_user: CurrentUser):
     """
-    Retrieve all forms from the database for this user.
+    Retrieve all checklists from the database for this user.
     """
     return session.exec(
-        select(FormConnectForm).where(FormConnectForm.owner_id == current_user.id)
+        select(VeraDocChecklist).where(VeraDocChecklist.owner_id == current_user.id)
     ).all()
 
-@router.get("/forms/{form_id}", response_model=FormConnectForm)
-def get_form(form_id: uuid.UUID, session: SessionDep):
+@router.get("/checklists/{checklist_id}", response_model=VeraDocChecklist)
+def get_checklist(checklist_id: uuid.UUID, session: SessionDep):
     """
-    Retrieve a specific form by ID.
+    Retrieve a specific checklist by ID.
     """
-    form = session.get(FormConnectForm, form_id)
-    if not form:
-        raise HTTPException(status_code=404, detail="Form not found.")
-    return form
+    checklist = session.get(VeraDocChecklist, checklist_id)
+    if not checklist:
+        raise HTTPException(status_code=404, detail="Checklist not found.")
+    return checklist
 
-@router.put("/forms/{form_id}", response_model=FormConnectForm)
-def update_form(form_id: uuid.UUID, updated_form: FormConnectForm, session: SessionDep, current_user: CurrentUser):
+@router.put("/checklists/{checklist_id}", response_model=VeraDocChecklist)
+def update_checklist(checklist_id: uuid.UUID, updated_checklist: VeraDocChecklist, session: SessionDep, current_user: CurrentUser):
     """
-    Update an existing form.
+    Update an existing checklist.
     """
-    form = session.get(FormConnectForm, form_id)
-    if not form:
-        raise HTTPException(status_code=404, detail="Form not found.")
+    checklist = session.get(VeraDocChecklist, checklist_id)
+    if not checklist:
+        raise HTTPException(status_code=404, detail="Checklist not found.")
     
-    # Ensure the current user is the owner of the form
-    if form.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to update this form.")
+    # Ensure the current user is the owner of the checklist
+    if checklist.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this checklist.")
     
-    form.name = updated_form.name
-    form.description = updated_form.description
-    form.questions = updated_form.questions
-    form.date_modified = datetime.utcnow()
+    checklist.name = updated_checklist.name
+    checklist.description = updated_checklist.description
+    checklist.fields = updated_checklist.fields
+    checklist.date_modified = datetime.utcnow()
     
-    session.add(form)
+    session.add(checklist)
     session.commit()
-    session.refresh(form)
-    return form
+    session.refresh(checklist)
+    return checklist
 
-@router.delete("/forms/{form_id}")
-def delete_form(form_id: uuid.UUID, session: SessionDep, current_user: CurrentUser):
+@router.delete("/checklists/{checklist_id}")
+def delete_checklist(checklist_id: uuid.UUID, session: SessionDep, current_user: CurrentUser):
     """
-    Delete a form by ID.
+    Delete a checklist by ID.
     """
-    form = session.get(FormConnectForm, form_id)
-    if not form:
-        raise HTTPException(status_code=404, detail="Form not found.")
+    checklist = session.get(VeraDocChecklist, checklist_id)
+    if not checklist:
+        raise HTTPException(status_code=404, detail="Checklist not found.")
     
-    # Ensure the current user is the owner of the form
-    if form.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to delete this form.")
+    # Ensure the current user is the owner of the checklist
+    if checklist.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this checklist.")
     
-    session.delete(form)
+    session.delete(checklist)
     session.commit()
-    return {"message": "Form deleted successfully."}
+    return {"message": "Checklist deleted successfully."}

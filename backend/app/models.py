@@ -210,3 +210,22 @@ class FormConnectForm(SQLModel, table=True):
     owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)  # Add owner_id column
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
+   
+# Request model for VeraDoc
+class VeraDocRequest(SQLModel):
+    questions: str
+
+# Response model for VeraDoc
+class VeraDocResponse(SQLModel):
+    results: Dict[str, Any]  # Accept any dictionary structure
+
+# Form, i.e., list of questions for VeraDoc functionality
+class VeraDocChecklist(SQLModel, table=True):
+    __tablename__ = "questions"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    name: str = Field(max_length=255, unique=True, nullable=False)
+    description: str | None = Field(default=None, max_length=255)
+    questions: str = Field(nullable=False)  # Store questions as a JSON string
+    owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)  # Add owner_id column
+    date_created: datetime = Field(default_factory=datetime.utcnow)
+    date_modified: datetime = Field(default_factory=datetime.utcnow)
