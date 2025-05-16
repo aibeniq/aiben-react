@@ -159,7 +159,9 @@ class KnowledgeBasePublic(KnowledgeBaseBase):
     files: List[dict] = Field(default_factory=list)
     date_created: datetime
     date_modified: datetime
-    number_of_sources: int = Field(default=0)  # New property to count the number of sources
+    number_of_sources: int = Field(default=0)
+    embedding_model_id: Optional[uuid.UUID] = None
+    embedding_model_name: Optional[str] = Field(default=None)
 
 
 class KnowledgeBasesPublic(SQLModel):
