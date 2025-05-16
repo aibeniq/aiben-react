@@ -121,6 +121,7 @@ export type KnowledgeBasePublic = {
   date_created: string
   date_modified: string
   number_of_sources?: number
+  embedding_model_name?: string | null
 }
 
 export type KnowledgeBasesPublic = {

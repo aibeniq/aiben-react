@@ -72,8 +72,17 @@ def read_knowledge_bases(
     results = query.all()
 
     # Format the response
-    knowledge_bases = [
-        KnowledgeBasePublic(
+    knowledge_bases = []
+    for kb in results:
+        # Get embedding model name if it exists
+        embedding_model_name = None
+        if kb.KnowledgeBase.embedding_model_id:
+            from app.models import EmbeddingModel
+            model = session.get(EmbeddingModel, kb.KnowledgeBase.embedding_model_id)
+            if model:
+                embedding_model_name = model.name
+
+        kb_public = KnowledgeBasePublic(
             id=kb.KnowledgeBase.id,
             owner_id=kb.KnowledgeBase.owner_id,
             title=kb.KnowledgeBase.title,
@@ -82,9 +91,10 @@ def read_knowledge_bases(
             number_of_sources=kb.number_of_sources,
             date_created=kb.date_created,
             date_modified=kb.date_modified,
+            embedding_model_id=kb.KnowledgeBase.embedding_model_id,
+            embedding_model_name=embedding_model_name,
         )
-        for kb in results
-    ]
+        knowledge_bases.append(kb_public)
 
     print("Knowledge Bases Response:", knowledge_bases)
 
@@ -102,6 +112,14 @@ def read_knowledge_base(
     if not knowledge_base:
         raise HTTPException(status_code=404, detail="Knowledge base not found")
     
+    # Get embedding model name if it exists
+    embedding_model_name = None
+    if knowledge_base.embedding_model_id:
+        from app.models import EmbeddingModel
+        model = session.get(EmbeddingModel, knowledge_base.embedding_model_id)
+        if model:
+            embedding_model_name = model.name
+    
     # Get all sources for this knowledge base
     sources = session.exec(
         select(Source).where(Source.knowledge_base_id == id)
@@ -116,10 +134,10 @@ def read_knowledge_base(
                 "name": source.name  # Use the source name as file name
             }
             for source in sources
-        ]
+        ],
+        embedding_model_name=embedding_model_name
     )
     return knowledge_base_public
-
 
 @router.post("/", response_model=KnowledgeBasePublic)
 def create_knowledge_base(

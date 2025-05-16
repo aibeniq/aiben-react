@@ -5,6 +5,7 @@ import {
   Heading,
   Table,
   VStack,
+  Badge
 } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
@@ -88,6 +89,7 @@ function KnowledgeBasesTable() {
             <Table.ColumnHeader w="sm">Title</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Description</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Number of Sources</Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">Embedding Model</Table.ColumnHeader> {/* Add this line */}
             <Table.ColumnHeader w="sm">Date Created</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Date Modified</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Actions</Table.ColumnHeader>
@@ -104,6 +106,17 @@ function KnowledgeBasesTable() {
               </Table.Cell>
               <Table.Cell truncate maxW="sm">
                 {item.number_of_sources}
+              </Table.Cell>
+              <Table.Cell truncate maxW="sm">
+                {item.embedding_model_name ? (
+                  <Badge colorPalette="blue" size="sm">
+                    {item.embedding_model_name}
+                  </Badge>
+                ) : (
+                  <Badge colorPalette="gray" size="sm">
+                    Default
+                  </Badge>
+                )}
               </Table.Cell>
               <Table.Cell truncate maxW="sm">
                 {new Date(item.date_created).toLocaleDateString()}
