@@ -14,11 +14,12 @@ import {
   Separator,
   Table,
 } from "@chakra-ui/react"
+import useCustomToast from "@/hooks/useCustomToast"
 import { useState, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
-import { VeradocService } from "@/client"
+import { VeradocService, KnowledgeBasesService } from "@/client"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd' 
@@ -26,6 +27,42 @@ import { FaPlus, FaArrowsAlt } from "react-icons/fa"
 import { Field } from "../../components/ui/field"
 
 const VeraDoc = () => {
+
+  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<any>(null);
+  const [knowledgeBases, setKnowledgeBases] = useState<any[]>([]);
+
+  // Add this effect to fetch knowledge bases when component mounts
+  useEffect(() => {
+    const fetchKnowledgeBases = async () => {
+      try {
+        // Assuming your service has a method to fetch knowledge bases
+        const response = await KnowledgeBasesService.readKnowledgeBases({ 
+          skip: 0, 
+          limit: 100 // Get all knowledge bases
+        });
+        setKnowledgeBases(response.data || []);
+      } catch (error) {
+        console.error("Error fetching knowledge bases:", error);
+      }
+    };
+
+    fetchKnowledgeBases();
+  }, []);
+
+    // Add these state variables with your other state definitions
+    const [selectedKnowledgeBaseDetails, setSelectedKnowledgeBaseDetails] = useState<any>(null);
+
+    // Add this function to fetch knowledge base details including sources
+    const fetchKnowledgeBaseDetails = async (knowledgeBaseId: string) => {
+      try {
+        const response = await KnowledgeBasesService.readKnowledgeBase({ id: knowledgeBaseId });
+        setSelectedKnowledgeBaseDetails(response);
+      } catch (error) {
+        console.error("Error fetching knowledge base details:", error);
+        showErrorToast("Failed to fetch knowledge base details");
+      }
+    };
+
   const [mode, setMode] = useState<"manual" | "batch">("manual"); // Toggle between Manual and Batch Mode
   // Update the state definition to include isHandwritten at the item level
 const [batchFileItems, setBatchFileItems] = useState<Array<{ 
@@ -151,36 +188,58 @@ const [batchFileItems, setBatchFileItems] = useState<Array<{
     fetchChecklists();
   }, []);
 
+  // Add this mutation hook inside your VeraDoc component, before your handleRun function
   const mutation = useMutation({
     mutationFn: (data: {
       questions: string;
-      digitized_files: File[];
-      handwritten_files: File[];
+      knowledgeBaseId: string;
+      files: File[];
+      handwrittenFiles: File[];
     }) => {
-      console.log("Now beginning mutation...")
+      console.log("Now beginning RAG mutation...")
       
-      return VeradocService.processChecklist({
+      // Call the API with the proper structure according to your SDK
+      return VeradocService.processRagChecklist({
         questions: data.questions,
-        checklistData: {
-          digitized_files: data.digitized_files,
-          handwritten_files: data.handwritten_files,
+        knowledgeBaseId: data.knowledgeBaseId,
+        formData: {
+          files: data.files,
+          handwritten_files: data.handwrittenFiles,
         },
       })
     },
     onSuccess: (data) => {
       console.log("Response data:", data)
-      // Handle both comparison and single file responses
-      if (data.results.comparison) {
-        console.log("Comparison data:", data.results.comparison)
-        setResults(data.results.comparison)
-      } else if (data.results.message) {
-        setResults(`${data.results.message}\n\n${JSON.stringify(data.results.extracted_data, null, 2)}`)
-      } else {
-        setResults(JSON.stringify(data.results, null, 2))
+      
+      // Format the response for display
+      let displayResults = "# Analysis Results\n\n";
+      
+      // Display the final evaluation first
+      if (data.results.final_evaluation) {
+        displayResults += "## FINAL EVALUATION\n\n";
+        displayResults += data.results.final_evaluation + "\n\n";
       }
+
+      // Display additional details (QA pairs)
+      if (data.results.qa_pairs) {
+        displayResults += "## ADDITIONAL DETAILS\n\n";
+        
+        // Format each question-answer pair
+        data.results.qa_pairs.forEach((pair, index) => {
+          displayResults += `### Question ${index + 1}:\n${pair.question}\n\n`;
+          displayResults += `**Answer:**\n${pair.answer}\n\n`;
+          
+          // Display context used if available
+          if (pair.context) {
+            displayResults += `**Relevant Policy Context:**\n${pair.context}\n\n`;
+          }
+        });
+      }
+      
+      setResults(displayResults);
     },
     onError: (error) => {
-      console.log("Mutation unsuccessful!")
+      console.log("RAG mutation unsuccessful!")
       setResults(`Error: ${error.message}`)
     },
   })
@@ -221,15 +280,26 @@ const [batchFileItems, setBatchFileItems] = useState<Array<{
       return;
     }
 
-    // Filter out placeholder files and separate into digitized vs handwritten
+    if (!selectedKnowledgeBase?.id) {
+      setResults("Please select a knowledge base for context.");
+      return;
+    }
+
+    // Filter out placeholder files and separate into regular vs handwritten
     const validItems = fileItems.filter(item => item.file.size > 0);
-    const digitizedFiles = validItems.filter(item => !item.isHandwritten).map(item => item.file);
+    const regularFiles = validItems.filter(item => !item.isHandwritten).map(item => item.file);
     const handwrittenFiles = validItems.filter(item => item.isHandwritten).map(item => item.file);
+
+    if (validItems.length < 1) {
+      setResults("Please upload at least one valid file.");
+      return;
+    }
 
     const requestData = {
       questions: questions,
-      digitized_files: digitizedFiles,
-      handwritten_files: handwrittenFiles,
+      knowledgeBaseId: selectedKnowledgeBase.id,
+      files: regularFiles,
+      handwrittenFiles: handwrittenFiles,
     };
 
     console.log("Request Data:", requestData);
@@ -387,6 +457,66 @@ const components = {
       </Heading>
       
       <VStack spacing={6} align="stretch">
+        <VStack spacing={4} align="stretch">
+          <Heading size="md" mb={2}>Knowledge Base Selection</Heading>
+          <Field label="Knowledge Bases" required>
+            <select
+              value={selectedKnowledgeBase?.id || ""}
+              onChange={(e) => {
+                const kb = knowledgeBases.find((kb) => kb.id === e.target.value);
+                setSelectedKnowledgeBase(kb);
+                // When a knowledge base is selected, fetch its sources
+                if (kb?.id) {
+                  fetchKnowledgeBaseDetails(kb.id);
+                }
+              }}
+              style={{
+                width: '100%',
+                padding: '0.5rem',
+                borderRadius: '0.375rem',
+                borderColor: '#E2E8F0',
+              }}
+            >
+              <option value="">Select a knowledge base</option>
+              {knowledgeBases.map((kb) => (
+                <option key={kb.id} value={kb.id}>
+                  {kb.title}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          {/* Add this table to display knowledge base sources */}
+          {selectedKnowledgeBase && selectedKnowledgeBase.id && (
+            <Box mt={4}>
+              <Text fontWeight="medium" mb={2}>Sources:</Text>
+              {selectedKnowledgeBaseDetails?.files && selectedKnowledgeBaseDetails.files.length > 0 ? (
+                <Table.Root variant="simple" size="sm">
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.ColumnHeader>Name</Table.ColumnHeader>
+                      <Table.ColumnHeader>Date Added</Table.ColumnHeader>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
+                    {selectedKnowledgeBaseDetails.files.map((file) => (
+                      <Table.Row key={file.id}>
+                        <Table.Cell>{file.name}</Table.Cell>
+                        <Table.Cell>{new Date(file.date_created || '').toLocaleDateString()}</Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Root>
+              ) : (
+                <Text color="gray.500">No sources found for this knowledge base.</Text>
+              )}
+            </Box>
+          )}
+        </VStack>        
+
+        {/* Separator before Checklist Selection */}
+        <Separator my={4} />
+
         {/* Checklist Selection and Management */}
         <VStack spacing={4} align="stretch">
           <Heading size="md" mb={2}>Checklist Selection</Heading>
@@ -428,7 +558,7 @@ const components = {
             <Textarea
               value={checklistDescription}
               onChange={(e) => setChecklistDescription(e.target.value)}
-              placeholder="Enter checklist template description"
+              placeholder="Enter checklist description"
               resize="vertical"
             />
           </Field>
@@ -459,7 +589,7 @@ const components = {
                       },
                     });
 
-                    alert("Checklist template updated successfully.");
+                    alert("Checklist updated successfully.");
                   } else {
                     // Create a new checklist
                     const response = await VeradocService.createChecklist({
@@ -472,7 +602,7 @@ const components = {
 
                     const newChecklist = await response
                     setChecklists((prev) => [...prev, newChecklist]);
-                    alert("Checklist template created successfully.");
+                    alert("Checklist created successfully.");
                   }
 
                   // Clear the checklist questions and re-fetch the list of checklists
@@ -482,8 +612,8 @@ const components = {
                   setSelectedChecklist(null);
                   await fetchChecklists();
                 } catch (error) {
-                  console.error("Error saving checklist template:", error);
-                  alert("Failed to save checklist template. Please try again.");
+                  console.error("Error saving checklist:", error);
+                  alert("Failed to save checklist. Please try again.");
                 }
               }}
             >
@@ -495,7 +625,7 @@ const components = {
               colorPalette="blue"
               onClick={async () => {
                 if (!selectedChecklist) {
-                  alert("Please select a checklist template to copy.");
+                  alert("Please select a checklist to copy.");
                   return;
                 }
 
@@ -511,13 +641,13 @@ const components = {
 
                   const newChecklist = await response
                   setChecklists((prev) => [...prev, newChecklist]);
-                  alert("Checklist template copied successfully.");
+                  alert("Checklist copied successfully.");
 
                   // Re-fetch the list of checklists
                   await fetchChecklists();
                 } catch (error) {
-                  console.error("Error copying checklist template:", error);
-                  alert("Failed to copy checklist template. Please try again.");
+                  console.error("Error copying checklist:", error);
+                  alert("Failed to copy checklist. Please try again.");
                 }
               }}
               isDisabled={!selectedChecklist}
@@ -547,9 +677,9 @@ const components = {
                   setChecklistName("");
                   setChecklistDescription("");
 
-                  alert("Checklist template deleted successfully.");
+                  alert("Checklist deleted successfully.");
                 } catch (error) {
-                  console.error("Error deleting checklist template:", error);
+                  console.error("Error deleting checklist:", error);
                   alert("Failed to delete checklist templtae. Please try again.");
                 }
               }}
@@ -561,7 +691,7 @@ const components = {
         </VStack>
 
       <Separator my={4} />
-      <Heading size="md" mb={4}>File Input</Heading>
+      <Heading size="md" mb={4}>Document Input</Heading>
       
         
         {/* Mode Toggle */}
@@ -600,9 +730,6 @@ const components = {
             ))}
 
             <HStack spacing={4}>
-              <Button variant="outline" colorPalette="teal" leftIcon={<FaPlus fontSize="12px" />} onClick={handleAddNewFile}>
-                Add File
-              </Button>
 
               <Button
                 variant="solid"
@@ -964,10 +1091,10 @@ const FileDropzone = ({
         {/* Only show toggle if a real file is uploaded */}
         {file && !isPlaceholder && (
           <HStack justify="space-between" px={2}>
-            <ChakraFieldRoot display="flex" alignItems="center" width="auto">
-              <ChakraFieldLabel htmlFor={`handwritten-${index}`} mb="0" fontSize="sm">
+            <ChakraField.Root display="flex" alignItems="center" width="auto">
+              <ChakraField.Label htmlFor={`handwritten-${index}`} mb="0" fontSize="sm">
                 Analyze handwriting
-              </ChakraFieldLabel>
+              </ChakraField.Label>
               <Switch.Root id={`handwritten-${index}`} colorPalette="blue">
                 <Switch.HiddenInput 
                   checked={isHandwritten} 
@@ -977,7 +1104,7 @@ const FileDropzone = ({
                   <Switch.Thumb />
                 </Switch.Control>
               </Switch.Root>
-            </ChakraFieldRoot>
+            </ChakraField.Root>
             
             <Button 
               size="sm" 
