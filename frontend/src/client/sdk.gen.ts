@@ -69,6 +69,8 @@ import type {
   UtilsHealthCheckResponse,
   VeradocProcessChecklistData,
   VeradocProcessChecklistResponse,
+  VeradocProcessRagChecklistData,
+  VeradocProcessRagChecklistResponse,
   VeradocGetChecklistsResponse,
   VeradocCreateChecklistData,
   VeradocCreateChecklistResponse,
@@ -874,6 +876,34 @@ export class VeradocService {
       url: "/api/v1/veradoc/process",
       query: {
         questions: data.questions,
+      },
+      formData: data.formData,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Process Rag Checklist
+   * Process the uploaded files using RAG with a knowledge base.
+   * @param data The data for the request.
+   * @param data.questions
+   * @param data.knowledgeBaseId
+   * @param data.formData
+   * @returns VeraDocResponse Successful Response
+   * @throws ApiError
+   */
+  public static processRagChecklist(
+    data: VeradocProcessRagChecklistData,
+  ): CancelablePromise<VeradocProcessRagChecklistResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/veradoc/process-rag",
+      query: {
+        questions: data.questions,
+        knowledge_base_id: data.knowledgeBaseId,
       },
       formData: data.formData,
       mediaType: "multipart/form-data",

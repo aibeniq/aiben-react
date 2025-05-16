@@ -229,3 +229,19 @@ class VeraDocChecklist(SQLModel, table=True):
     owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)  # Add owner_id column
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
+
+class VeraDocRagQA(VeraDocRequest):
+    question: str
+    answer: str
+    context: Optional[str] = None
+
+class VeraDocRagResult(VeraDocRequest):
+    final_evaluation: str
+    qa_pairs: List[VeraDocRagQA]
+
+class VeraDocRagResponse(VeraDocRequest):
+    results: VeraDocRagResult
+
+class RagChecklistRequest(VeraDocRequest):
+    knowledge_base_id: str
+    questions: str

@@ -964,10 +964,10 @@ const FileDropzone = ({
         {/* Only show toggle if a real file is uploaded */}
         {file && !isPlaceholder && (
           <HStack justify="space-between" px={2}>
-            <ChakraFieldRoot display="flex" alignItems="center" width="auto">
-              <ChakraFieldLabel htmlFor={`handwritten-${index}`} mb="0" fontSize="sm">
+            <ChakraField.Root display="flex" alignItems="center" width="auto">
+              <ChakraField.Label htmlFor={`handwritten-${index}`} mb="0" fontSize="sm">
                 Analyze handwriting
-              </ChakraFieldLabel>
+              </ChakraField.Label>
               <Switch.Root id={`handwritten-${index}`} colorPalette="blue">
                 <Switch.HiddenInput 
                   checked={isHandwritten} 
@@ -977,7 +977,7 @@ const FileDropzone = ({
                   <Switch.Thumb />
                 </Switch.Control>
               </Switch.Root>
-            </ChakraFieldRoot>
+            </ChakraField.Root>
             
             <Button 
               size="sm" 

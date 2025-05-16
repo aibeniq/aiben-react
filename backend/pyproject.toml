@@ -28,6 +28,7 @@ dependencies = [
     "chromadb==1.0.9",
     "openai==1.68.2",
     "pymupdf==1.25.5",
+    "pypdf==5.4.0",
 ]
 
 [tool.uv]

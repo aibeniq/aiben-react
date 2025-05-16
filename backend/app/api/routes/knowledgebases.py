@@ -21,7 +21,8 @@ import tempfile
 
 from datetime import datetime
 
-from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import TextLoader, PyPDFLoader
+import mimetypes
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
@@ -153,21 +154,53 @@ def create_knowledge_base(
     # Process each file
     for file in files:
         print(f"Received file: {file}")
-        print(f"Type of file: {type(file)}")
+        content_type = file.content_type or mimetypes.guess_type(file.filename)[0]
+        print(f"Content type: {content_type}")
         
         with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as temp_file:
             temp_file.write(file.file.read())  # Write the file content to the temporary file
             temp_file_path = temp_file.name 
 
-        # Use TextLoader to load the file content
-        text_loader = TextLoader(temp_file_path, encoding="utf-8")
-        loaded_documents = text_loader.load()
+        # Choose appropriate loader based on file type
+        try:
+            if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
+                print("Loading PDF with PyPDFLoader...")
+                loader = PyPDFLoader(temp_file_path)
+                loaded_documents = loader.load()
+            else:
+                print("Loading text with TextLoader...")
+                # Try with different encodings if utf-8 fails
+                try:
+                    loader = TextLoader(temp_file_path, encoding="utf-8")
+                    loaded_documents = loader.load()
+                except UnicodeDecodeError:
+                    # Try with a more forgiving encoding
+                    loader = TextLoader(temp_file_path, encoding="latin-1")
+                    loaded_documents = loader.load()
 
-        # Append loaded documents to the list
-        documents.extend(loaded_documents)
+            # Append loaded documents to the list
+            documents.extend(loaded_documents)
+        except Exception as e:
+            # Clean up the temp file
+            os.unlink(temp_file_path)
+            # Log the error and continue with other files or raise exception
+            print(f"Error processing file {file.filename}: {str(e)}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Error processing file {file.filename}: {str(e)}"
+            )
 
-         # Reset the file pointer before passing to create_source_entries
-        file.file.seek(0)  
+        # Reset the file pointer before passing to create_source_entries
+        file.file.seek(0)
+
+    # Clean up temporary files
+    for root, dirs, files_in_dir in os.walk(tempfile.gettempdir()):
+        for filename in files_in_dir:
+            if any(uploaded_file.filename in filename for uploaded_file in files):
+                try:
+                    os.unlink(os.path.join(root, filename))
+                except:
+                    pass
 
     print("Splitting documents...")
 

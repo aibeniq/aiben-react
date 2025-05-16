@@ -28,6 +28,11 @@ export type Body_veradoc_process_checklist = {
   handwritten_files?: Array<Blob | File>
 }
 
+export type Body_veradoc_process_rag_checklist = {
+  files: Array<Blob | File>
+  handwritten_files?: Array<Blob | File>
+}
+
 export type FormConnectForm = {
   id?: string
   name: string
@@ -378,6 +383,14 @@ export type VeradocProcessChecklistData = {
 }
 
 export type VeradocProcessChecklistResponse = VeraDocResponse
+
+export type VeradocProcessRagChecklistData = {
+  formData: Body_veradoc_process_rag_checklist
+  knowledgeBaseId: string
+  questions: string
+}
+
+export type VeradocProcessRagChecklistResponse = VeraDocResponse
 
 export type VeradocGetChecklistsResponse = Array<VeraDocChecklist>
 
