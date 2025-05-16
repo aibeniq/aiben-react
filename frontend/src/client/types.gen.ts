@@ -23,11 +23,17 @@ export type Body_login_login_access_token = {
   client_secret?: string | null
 }
 
+export type Body_veradoc_process_checklist = {
+  digitized_files?: Array<Blob | File>
+  handwritten_files?: Array<Blob | File>
+}
+
 export type FormConnectForm = {
   id?: string
   name: string
   description?: string | null
   fields: string
+  owner_id: string
   date_created?: string
   date_modified?: string
 }
@@ -152,6 +158,22 @@ export type ValidationError = {
   loc: Array<string | number>
   msg: string
   type: string
+}
+
+export type VeraDocChecklist = {
+  id?: string
+  name: string
+  description?: string | null
+  questions: string
+  owner_id: string
+  date_created?: string
+  date_modified?: string
+}
+
+export type VeraDocResponse = {
+  results: {
+    [key: string]: unknown
+  }
 }
 
 export type FormconnectProcessFormData = {
@@ -349,3 +371,37 @@ export type UtilsTestEmailData = {
 export type UtilsTestEmailResponse = Message
 
 export type UtilsHealthCheckResponse = boolean
+
+export type VeradocProcessChecklistData = {
+  formData?: Body_veradoc_process_checklist
+  questions: string
+}
+
+export type VeradocProcessChecklistResponse = VeraDocResponse
+
+export type VeradocGetChecklistsResponse = Array<VeraDocChecklist>
+
+export type VeradocCreateChecklistData = {
+  requestBody: VeraDocChecklist
+}
+
+export type VeradocCreateChecklistResponse = VeraDocChecklist
+
+export type VeradocGetChecklistData = {
+  checklistId: string
+}
+
+export type VeradocGetChecklistResponse = VeraDocChecklist
+
+export type VeradocUpdateChecklistData = {
+  checklistId: string
+  requestBody: VeraDocChecklist
+}
+
+export type VeradocUpdateChecklistResponse = VeraDocChecklist
+
+export type VeradocDeleteChecklistData = {
+  checklistId: string
+}
+
+export type VeradocDeleteChecklistResponse = unknown

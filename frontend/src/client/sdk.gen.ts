@@ -67,12 +67,23 @@ import type {
   UtilsTestEmailData,
   UtilsTestEmailResponse,
   UtilsHealthCheckResponse,
+  VeradocProcessChecklistData,
+  VeradocProcessChecklistResponse,
+  VeradocGetChecklistsResponse,
+  VeradocCreateChecklistData,
+  VeradocCreateChecklistResponse,
+  VeradocGetChecklistData,
+  VeradocGetChecklistResponse,
+  VeradocUpdateChecklistData,
+  VeradocUpdateChecklistResponse,
+  VeradocDeleteChecklistData,
+  VeradocDeleteChecklistResponse,
 } from "./types.gen"
 
 export class FormconnectService {
   /**
    * Process Form
-   * Process the uploaded files and fields.
+   * Process the uploaded files and questions.
    *
    * Handles two types of files:
    * - digitized_files: Standard text extraction
@@ -102,7 +113,7 @@ export class FormconnectService {
 
   /**
    * Get Forms
-   * Retrieve all forms from the database.
+   * Retrieve all forms from the database for this user.
    * @returns FormConnectForm Successful Response
    * @throws ApiError
    */
@@ -837,6 +848,145 @@ export class UtilsService {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/utils/health-check/",
+    })
+  }
+}
+
+export class VeradocService {
+  /**
+   * Process Checklist
+   * Process the uploaded files and fields.
+   *
+   * Handles two types of files:
+   * - digitized_files: Standard text extraction
+   * - handwritten_files: OCR-based extraction (placeholder)
+   * @param data The data for the request.
+   * @param data.questions
+   * @param data.formData
+   * @returns VeraDocResponse Successful Response
+   * @throws ApiError
+   */
+  public static processChecklist(
+    data: VeradocProcessChecklistData,
+  ): CancelablePromise<VeradocProcessChecklistResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/veradoc/process",
+      query: {
+        questions: data.questions,
+      },
+      formData: data.formData,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Checklists
+   * Retrieve all checklists from the database for this user.
+   * @returns VeraDocChecklist Successful Response
+   * @throws ApiError
+   */
+  public static getChecklists(): CancelablePromise<VeradocGetChecklistsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/veradoc/checklists",
+    })
+  }
+
+  /**
+   * Create Checklist
+   * Save a new checklist to the database.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns VeraDocChecklist Successful Response
+   * @throws ApiError
+   */
+  public static createChecklist(
+    data: VeradocCreateChecklistData,
+  ): CancelablePromise<VeradocCreateChecklistResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/veradoc/checklists",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Checklist
+   * Retrieve a specific checklist by ID.
+   * @param data The data for the request.
+   * @param data.checklistId
+   * @returns VeraDocChecklist Successful Response
+   * @throws ApiError
+   */
+  public static getChecklist(
+    data: VeradocGetChecklistData,
+  ): CancelablePromise<VeradocGetChecklistResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/veradoc/checklists/{checklist_id}",
+      path: {
+        checklist_id: data.checklistId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Checklist
+   * Update an existing checklist.
+   * @param data The data for the request.
+   * @param data.checklistId
+   * @param data.requestBody
+   * @returns VeraDocChecklist Successful Response
+   * @throws ApiError
+   */
+  public static updateChecklist(
+    data: VeradocUpdateChecklistData,
+  ): CancelablePromise<VeradocUpdateChecklistResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/veradoc/checklists/{checklist_id}",
+      path: {
+        checklist_id: data.checklistId,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Checklist
+   * Delete a checklist by ID.
+   * @param data The data for the request.
+   * @param data.checklistId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static deleteChecklist(
+    data: VeradocDeleteChecklistData,
+  ): CancelablePromise<VeradocDeleteChecklistResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/veradoc/checklists/{checklist_id}",
+      path: {
+        checklist_id: data.checklistId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
     })
   }
 }
