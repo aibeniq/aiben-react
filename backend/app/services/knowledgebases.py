@@ -88,6 +88,15 @@ def get_embedding_model(session):
     
     # If no default model is found, fallback to a hardcoded value
     if not default_model:
-        return "all-MiniLM-L6-v2"
+        from app.models import ModelProvider
+        return {
+            "model_id": "all-MiniLM-L6-v2",
+            "provider": ModelProvider.HUGGINGFACE,
+            "api_key": None
+        }
     
-    return default_model.model_id
+    return {
+        "model_id": default_model.model_id,
+        "provider": default_model.provider,
+        "api_key": default_model.api_key
+    }

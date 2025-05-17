@@ -11,7 +11,7 @@ import shutil
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import KnowledgeBase, KnowledgeBaseCreate, KnowledgeBasePublic, KnowledgeBasesPublic, KnowledgeBaseUpdate, Message, Source, SourceData
-from app.services.knowledgebases import get_embedding_model
+from app.services.embeddings import load_embeddings_model
 
 import hashlib
 
@@ -26,7 +26,6 @@ from datetime import datetime
 from langchain_community.document_loaders import TextLoader, PyPDFLoader
 import mimetypes
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
@@ -259,7 +258,11 @@ def create_knowledge_base(
     
     # Initialize embeddings with the selected model
     try:
-        embeddings = HuggingFaceEmbeddings(model_name=model_id)
+        embeddings = load_embeddings_model(
+            provider=model.provider,
+            model_id=model.model_id,
+            api_key=model.api_key
+        )
     except Exception as e:
         raise HTTPException(
             status_code=400,
@@ -405,7 +408,11 @@ def update_knowledge_base(
             
         print(f"Using embedding model: {model_id}")
         try:
-            embeddings = HuggingFaceEmbeddings(model_name=model_id)
+            embeddings = load_embeddings_model(
+                provider=model.provider,
+                model_id=model.model_id,
+                api_key=model.api_key
+            )
             chroma_vector_database = Chroma(persist_directory=chroma_dir, embedding_function=embeddings)
         except Exception as e:
             # Clean up on loading error

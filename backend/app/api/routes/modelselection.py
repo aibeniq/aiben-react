@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Depends, Body
 from sqlmodel import select, func
 
 from app.api.deps import CurrentUser, SessionDep
+from app.services.embeddings import load_embeddings_model
 from app.models import (
     EmbeddingModel, 
     EmbeddingModelCreate, 
@@ -12,10 +13,12 @@ from app.models import (
     EmbeddingModelPublic,
     EmbeddingModelsPublic,
     EmbeddingModelValidate,
+    ModelProvider,
     Message
 )
 from datetime import datetime
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import OpenAIEmbeddings
 
 router = APIRouter(prefix="/embedding-models", tags=["embedding-models"])
 
@@ -31,18 +34,21 @@ def initialize_default_models(session: SessionDep):
         {
             "name": "MiniLM-L6-v2",
             "model_id": "all-MiniLM-L6-v2",
+            "provider": ModelProvider.HUGGINGFACE,  # Specify provider explicitly
             "description": "A compact and efficient embedding model, good balance of performance and speed.",
             "is_default": True
         },
         {
             "name": "MPNet Base v2", 
             "model_id": "all-mpnet-base-v2",
+            "provider": ModelProvider.HUGGINGFACE,  # Specify provider explicitly
             "description": "Higher quality embeddings, but slower and larger than MiniLM.",
             "is_default": False
         },
         {
             "name": "MiniLM-L12-v2",
             "model_id": "all-MiniLM-L12-v2", 
+            "provider": ModelProvider.HUGGINGFACE,  # Specify provider explicitly
             "description": "Larger version of MiniLM with improved performance.",
             "is_default": False
         }
@@ -52,6 +58,7 @@ def initialize_default_models(session: SessionDep):
         model = EmbeddingModel(
             name=model_data["name"],
             model_id=model_data["model_id"],
+            provider=model_data["provider"],
             description=model_data["description"],
             is_default=model_data["is_default"]
         )
@@ -298,13 +305,22 @@ def validate_embedding_model(
     model_data: EmbeddingModelValidate
 ) -> Message:
     """
-    Validate if a HuggingFace model ID is valid.
+    Validate if an embedding model ID is valid for the specified provider.
     """
     try:
-        _ = HuggingFaceEmbeddings(model_name=model_data.model_id)
-        return Message(message="Model is valid")
+        # Initialize the embeddings model based on provider
+        embeddings = load_embeddings_model(
+            provider=model_data.provider,
+            model_id=model_data.model_id
+        )
+        
+        # Test the model with a simple query
+        test_query = "This is a test query to validate the embedding model."
+        _ = embeddings.embed_query(test_query)
+        
+        return Message(message=f"Model is valid for provider {model_data.provider}")
     except Exception as e:
         raise HTTPException(
             status_code=400, 
-            detail=f"Invalid HuggingFace model ID: {str(e)}"
+            detail=f"Invalid embedding model: {str(e)}"
         )

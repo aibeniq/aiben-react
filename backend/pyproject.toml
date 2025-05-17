@@ -29,6 +29,7 @@ dependencies = [
     "openai==1.68.2",
     "pymupdf==1.25.5",
     "pypdf==5.4.0",
+    "langchain-openai==0.3.17",
 ]
 
 [tool.uv]

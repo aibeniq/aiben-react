@@ -4,6 +4,7 @@ from app.models import VeraDocRequest, VeraDocResponse, VeraDocChecklist, RagChe
 from app.api.deps import CurrentUser, SessionDep
 
 from app.services.knowledgebases import get_embedding_model
+from app.services.embeddings import load_embeddings_model
 
 from sqlmodel import Session, select
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
@@ -456,7 +457,11 @@ async def process_rag_checklist(
                 model_name = get_embedding_model(session)
                 print(f"Knowledge base has no embedding model record, using current default: {model_name}")
             
-            embeddings = HuggingFaceEmbeddings(model_name=model_name)
+            embedding_info = get_embedding_model(session)
+            embeddings = get_embeddings_model(
+                provider=embedding_info["provider"],
+                model_id=embedding_info["model_id"]
+            )
             chroma_db = Chroma(persist_directory=temp_dir, embedding_function=embeddings)
             retriever = chroma_db.as_retriever(search_kwargs={"k": 5})
             

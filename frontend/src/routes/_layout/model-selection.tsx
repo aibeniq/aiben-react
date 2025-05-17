@@ -44,6 +44,9 @@ function EmbeddingModels() {
   const [isValidating, setIsValidating] = useState(false)
   const [isModelValid, setIsModelValid] = useState<boolean | null>(null)
   const [validationMessage, setValidationMessage] = useState("")
+
+  const [modelProvider, setModelProvider] = useState("huggingface")
+  const [apiKey, setApiKey] = useState("")
   
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -131,22 +134,33 @@ function EmbeddingModels() {
     }
     
     setIsValidating(true)
-    validateModelMutation.mutate(modelId)
+    validateModelMutation.mutate({
+        model_id: modelId,
+        provider: modelProvider,
+        api_key: modelProvider === "openai" ? apiKey : undefined
+    })
   }
   
   // Handler for model submission
-  const handleAddModel = () => {
+    const handleAddModel = () => {
     if (!modelName.trim() || !modelId.trim()) {
-      showErrorToast("Please fill in all required fields")
-      return
+        showErrorToast("Please fill in all required fields")
+        return
+    }
+    
+    if (modelProvider === "openai" && !apiKey.trim()) {
+        showErrorToast("API key is required for OpenAI models")
+        return
     }
     
     addModelMutation.mutate({
-      name: modelName,
-      model_id: modelId,
-      description: modelDescription,
+        name: modelName,
+        model_id: modelId,
+        provider: modelProvider,
+        description: modelDescription,
+        api_key: modelProvider === "openai" ? apiKey : undefined
     })
-  }
+    }
   
   // Handler for setting a model as default
   const handleSetDefault = (modelId: string) => {
@@ -269,8 +283,18 @@ function EmbeddingModels() {
                     placeholder="e.g., My Custom Model"
                     />
                 </Field>
+
+                <Field label="Provider" required>
+                <select 
+                    value={modelProvider}
+                    onChange={(e) => setModelProvider(e.target.value)}
+                >
+                    <option value="huggingface">HuggingFace</option>
+                    <option value="openai">OpenAI</option>
+                </select>
+                </Field>
                 
-                <Field label="HuggingFace Model ID" required>
+                <Field label="Model ID" required>
                     <HStack>
                     <Input
                         value={modelId}

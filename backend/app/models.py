@@ -1,8 +1,9 @@
+import enum
 import uuid
 from typing import List, Dict, Any, Optional
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
-from sqlalchemy import LargeBinary, Column, PrimaryKeyConstraint
+from sqlalchemy import LargeBinary, Column, PrimaryKeyConstraint, Enum as SQLAlchemyEnum
 from datetime import datetime
 
 # Shared properties
@@ -250,28 +251,55 @@ class RagChecklistRequest(VeraDocRequest):
     knowledge_base_id: str
     questions: str
 
-# models to allow for front-end selection of embedding model
+# Enum for model providers
+class ModelProvider(str, enum.Enum):
+    HUGGINGFACE = "huggingface"
+    OPENAI = "openai"
+    # Add other providers as needed
+
+# Define a SQLAlchemy type for the enum
+ModelProviderType = SQLAlchemyEnum(
+    ModelProvider, 
+    name="modelprovider",
+    create_constraint=True,
+    validate_strings=True,
+    native_enum=True,
+    values_callable=lambda x: [e.value for e in x]  # Use enum values instead of names
+)
+
+# Update the EmbeddingModel table
 class EmbeddingModel(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str = Field(index=True)  # Human-readable name
-    model_id: str  # HuggingFace model ID
+    model_id: str  # Model identifier (e.g., "all-MiniLM-L6-v2" or "text-embedding-3-large")
+    provider: ModelProvider = Field(
+        default=ModelProvider.HUGGINGFACE,
+        sa_column=Column(ModelProviderType, nullable=False)
+    )
     description: str = Field(default="")
     is_default: bool = Field(default=False)
     owner_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
 
+# Update create and update models
 class EmbeddingModelCreate(SQLModel):
     name: str
     model_id: str
+    provider: ModelProvider = ModelProvider.HUGGINGFACE
     description: str = ""
     is_default: bool = False
 
 class EmbeddingModelUpdate(SQLModel):
     name: Optional[str] = None
     model_id: Optional[str] = None
+    provider: Optional[ModelProvider] = None
     description: Optional[str] = None
     is_default: Optional[bool] = None
+
+class EmbeddingModelValidate(SQLModel):
+    model_id: str
+    provider: ModelProvider
 
 class EmbeddingModelPublic(EmbeddingModel):
     pass
@@ -279,6 +307,3 @@ class EmbeddingModelPublic(EmbeddingModel):
 class EmbeddingModelsPublic(SQLModel):
     data: List[EmbeddingModelPublic]
     count: int
-
-class EmbeddingModelValidate(SQLModel):
-    model_id: str
