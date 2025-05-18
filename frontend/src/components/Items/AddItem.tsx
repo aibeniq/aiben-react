@@ -62,6 +62,7 @@ const AddItem = () => {
   })
 
   const onSubmit: SubmitHandler<ItemCreate> = (data) => {
+    console.log([data])
     mutation.mutate(data)
   }
 

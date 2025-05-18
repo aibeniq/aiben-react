@@ -1,3 +1,6 @@
+import os
+import stat
+
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -121,3 +124,4 @@ def verify_password_reset_token(token: str) -> str | None:
         return str(decoded_token["sub"])
     except InvalidTokenError:
         return None
+    

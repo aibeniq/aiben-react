@@ -17,9 +17,12 @@ import { Route as RecoverPasswordImport } from './routes/recover-password'
 import { Route as LoginImport } from './routes/login'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
+import { Route as LayoutVeradocImport } from './routes/_layout/veradoc'
 import { Route as LayoutSettingsImport } from './routes/_layout/settings'
+import { Route as LayoutModelSelectionImport } from './routes/_layout/model-selection'
 import { Route as LayoutKnowledgeBasesImport } from './routes/_layout/knowledge-bases'
 import { Route as LayoutItemsImport } from './routes/_layout/items'
+import { Route as LayoutFormconnectImport } from './routes/_layout/formconnect'
 import { Route as LayoutAdminImport } from './routes/_layout/admin'
 
 // Create/Update Routes
@@ -54,8 +57,18 @@ const LayoutIndexRoute = LayoutIndexImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
+const LayoutVeradocRoute = LayoutVeradocImport.update({
+  path: '/veradoc',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
 const LayoutSettingsRoute = LayoutSettingsImport.update({
   path: '/settings',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutModelSelectionRoute = LayoutModelSelectionImport.update({
+  path: '/model-selection',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -66,6 +79,11 @@ const LayoutKnowledgeBasesRoute = LayoutKnowledgeBasesImport.update({
 
 const LayoutItemsRoute = LayoutItemsImport.update({
   path: '/items',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutFormconnectRoute = LayoutFormconnectImport.update({
+  path: '/formconnect',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -102,6 +120,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/formconnect': {
+      preLoaderRoute: typeof LayoutFormconnectImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/items': {
       preLoaderRoute: typeof LayoutItemsImport
       parentRoute: typeof LayoutImport
@@ -110,8 +132,16 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutKnowledgeBasesImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/model-selection': {
+      preLoaderRoute: typeof LayoutModelSelectionImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/settings': {
       preLoaderRoute: typeof LayoutSettingsImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/veradoc': {
+      preLoaderRoute: typeof LayoutVeradocImport
       parentRoute: typeof LayoutImport
     }
     '/_layout/': {
@@ -126,9 +156,12 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren([
   LayoutRoute.addChildren([
     LayoutAdminRoute,
+    LayoutFormconnectRoute,
     LayoutItemsRoute,
     LayoutKnowledgeBasesRoute,
+    LayoutModelSelectionRoute,
     LayoutSettingsRoute,
+    LayoutVeradocRoute,
     LayoutIndexRoute,
   ]),
   LoginRoute,
