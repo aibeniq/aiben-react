@@ -16,9 +16,9 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/labeler@v5
-      if: ${{ github.event.action != 'labeled' && github.event.action != 'unlabeled' }}
-    - run: echo "Done adding labels"
+      - uses: actions/labeler@v5
+        if: ${{ github.event.action != 'labeled' && github.event.action != 'unlabeled' }}
+      - run: echo "Done adding labels"
   # Run this after labeler applied labels
   check-labels:
     needs:
@@ -27,7 +27,12 @@ jobs:
       pull-requests: read
     runs-on: ubuntu-latest
     steps:
-      - uses: docker://agilepathway/pull-request-label-checker:latest
-        with:
-          one_of: breaking,security,feature,bug,refactor,upgrade,docs,lang-all,internal
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check if PR has any label
+        run: |
+          labels=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/labels" | \
+            jq length)
+          if [ "$labels" -eq "0" ]; then
+            echo "Error: Pull request must have at least one label"
+            exit 1
+          fi
