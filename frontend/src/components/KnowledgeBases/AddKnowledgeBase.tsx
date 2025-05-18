@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { useDropzone } from "react-dropzone"
 
@@ -11,11 +11,12 @@ import {
   VStack,
   HStack,
   Box,
+  Spinner
 } from "@chakra-ui/react"
 import { useState, useEffect } from "react"
 import { FaPlus, FaTrash } from "react-icons/fa"
 
-import { type KnowledgeBaseCreate, KnowledgeBasesService } from "@/client"
+import { type KnowledgeBaseCreate, KnowledgeBasesService, EmbeddingModelsService } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
@@ -33,6 +34,7 @@ import { Field } from "../ui/field"
 const AddKnowledgeBase = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]) // State for managing selected files
+  const [selectedEmbeddingModelId, setSelectedEmbeddingModelId] = useState<string | null>(null)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const {
@@ -49,21 +51,30 @@ const AddKnowledgeBase = () => {
     },
   })
 
+  const { data: embeddingModels = [] } = useQuery({
+    queryKey: ["embedding-models"],
+    queryFn: () => EmbeddingModelsService.getEmbeddingModels().then(res => res.data),
+    // Don't fetch if modal is closed
+    enabled: isOpen
+  })
+
   // Reset selected files when the popup is closed
   useEffect(() => {
     if (!isOpen) {
       setSelectedFiles([]);
+      setSelectedEmbeddingModelId(null)
     }
   }, [isOpen]);
 
   const mutation = useMutation({
-  mutationFn: (data: { title: string; description: string; files: File[] }) => {
+  mutationFn: (data: { title: string; description: string; embedding_model_id: string | null; files: File[] }) => {
     console.log("Now beginning mutation...");
 
     // Send the FormData object to the backend
     return KnowledgeBasesService.createKnowledgeBase({
       title: data.title, // Still required for the `query` object
       description: data.description, // Still required for the `query` object
+      embedding_model_id: data.embedding_model_id,
       formData: {
         files: data.files, // ✅ this is what the SDK expects
       }, // Include all fields in the FormData payload
@@ -73,6 +84,7 @@ const AddKnowledgeBase = () => {
     showSuccessToast("Knowledge Base created successfully.");
     reset();
     setSelectedFiles([]); // Reset selected files after successful creation
+    setSelectedEmbeddingModelId(null)
     setIsOpen(false);
   },
   onError: (err: ApiError) => {
@@ -100,12 +112,13 @@ const AddKnowledgeBase = () => {
     const requestData = {
       title: data.title,
       description: data.description || "",
+      embedding_model_id: selectedEmbeddingModelId,
       files: selectedFiles, // Pass the selected files
     }
 
     console.log([requestData])
 
-    mutation.mutate(requestData)
+    return mutation.mutateAsync(requestData)
   }
 
   const onDrop = (acceptedFiles: File[]) => {
@@ -148,11 +161,38 @@ const AddKnowledgeBase = () => {
         </Button>
       </DialogTrigger>
       <DialogContent>
+        <Box position="relative">
+        {isSubmitting && (
+          <Box
+            position="absolute"
+            top="0"
+            left="0"
+            right="0"
+            bottom="0"
+            bg="blackAlpha.300"
+            zIndex="50"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            borderRadius="md"
+          >
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="blue.500"
+              size="xl"
+            />
+          </Box>
+        )}
+
+
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>Add Knowledge Base</DialogTitle>
           </DialogHeader>
           <DialogBody>
+            
             <Text mb={4}>Fill in the details to add a new Knowledge Base.</Text>
             <VStack gap={4}>
               <Field
@@ -183,6 +223,20 @@ const AddKnowledgeBase = () => {
                   type="text"
                 />
               </Field>
+
+             <Field label="Embedding Model">
+              <select
+                value={selectedEmbeddingModelId || ""}
+                onChange={(e) => setSelectedEmbeddingModelId(e.target.value || null)}
+                className="w-full p-2 border rounded"
+              >
+                {embeddingModels.map((model) => (
+                  <option key={model.id} value={model.id}>
+                    {model.name} ({model.provider}) {model.is_default ? "(Default)" : ""}
+                  </option>
+                ))}
+              </select>
+            </Field>
 
               {/* Drag-and-Drop File Upload */}
               <Box
@@ -241,13 +295,14 @@ const AddKnowledgeBase = () => {
             <Button
               variant="solid"
               type="submit"
-              disabled={!isValid}
+              disabled={!isValid || isSubmitting}
               loading={isSubmitting}
             >
-              Save
+              {isSubmitting ? "Creating..." : "Save"}
             </Button>
           </DialogFooter>
         </form>
+        </Box>
         <DialogCloseTrigger />
       </DialogContent>
     </DialogRoot>

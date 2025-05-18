@@ -3,11 +3,10 @@ import uuid
 import hashlib
 from fastapi import UploadFile
 from sqlmodel import select, Session
-from app.models import Source, SourceData
+from app.models import Source, SourceData, EmbeddingModel
 from app.api.deps import CurrentUser
 from io import BytesIO
 import zipfile
-
 
 class KnowledgeBaseService:
     @staticmethod
@@ -77,8 +76,7 @@ class KnowledgeBaseService:
 
 def get_embedding_model(session):
     """Get the current default embedding model from the database."""
-    from app.models import EmbeddingModel
-    from sqlmodel import select
+    print("Now determining which embedding model to use...")
     
     # Try to get the default model
     default_model = session.exec(
@@ -91,12 +89,10 @@ def get_embedding_model(session):
         from app.models import ModelProvider
         return {
             "model_id": "all-MiniLM-L6-v2",
-            "provider": ModelProvider.HUGGINGFACE,
-            "api_key": None
+            "provider": ModelProvider.HUGGINGFACE
         }
     
     return {
         "model_id": default_model.model_id,
-        "provider": default_model.provider,
-        "api_key": default_model.api_key
+        "provider": default_model.provider
     }
