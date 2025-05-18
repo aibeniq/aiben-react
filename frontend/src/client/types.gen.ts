@@ -36,6 +36,7 @@ export type Body_veradoc_process_rag_checklist = {
 export type EmbeddingModelCreate = {
   name: string
   model_id: string
+  provider?: ModelProvider
   description?: string
   is_default?: boolean
 }
@@ -44,6 +45,7 @@ export type EmbeddingModelPublic = {
   id?: string
   name?: string
   model_id?: string
+  provider?: ModelProvider
   description?: string
   is_default?: boolean
   owner_id?: string | null
@@ -59,12 +61,14 @@ export type EmbeddingModelsPublic = {
 export type EmbeddingModelUpdate = {
   name?: string | null
   model_id?: string | null
+  provider?: ModelProvider | null
   description?: string | null
   is_default?: boolean | null
 }
 
 export type EmbeddingModelValidate = {
   model_id: string
+  provider: ModelProvider
 }
 
 export type FormConnectForm = {
@@ -132,6 +136,8 @@ export type KnowledgeBasesPublic = {
 export type Message = {
   message: string
 }
+
+export type ModelProvider = "huggingface" | "openai"
 
 export type NewPassword = {
   token: string

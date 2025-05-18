@@ -255,7 +255,7 @@ export class EmbeddingModelsService {
 
   /**
    * Validate Embedding Model
-   * Validate if a HuggingFace model ID is valid.
+   * Validate if an embedding model ID is valid for the specified provider.
    * @param data The data for the request.
    * @param data.requestBody
    * @returns Message Successful Response
