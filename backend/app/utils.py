@@ -125,23 +125,3 @@ def verify_password_reset_token(token: str) -> str | None:
     except InvalidTokenError:
         return None
     
-def set_write_permissions(directory: str):
-    """
-    Recursively set write permissions for the user on the given directory and its contents.
-    
-    Args:
-        directory (str): The path to the directory.
-    """
-    for root, dirs, files in os.walk(directory):
-        # Set write permissions for all directories
-        for dir_name in dirs:
-            dir_path = os.path.join(root, dir_name)
-            os.chmod(dir_path, stat.S_IWUSR | stat.S_IRUSR | stat.S_IXUSR)
-
-        # Set write permissions for all files
-        for file_name in files:
-            file_path = os.path.join(root, file_name)
-            os.chmod(file_path, stat.S_IWUSR | stat.S_IRUSR)
-
-    # Finally, set write permissions for the root directory itself
-    os.chmod(directory, stat.S_IWUSR | stat.S_IRUSR | stat.S_IXUSR)
