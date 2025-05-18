@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { type SubmitHandler, useForm } from "react-hook-form"
-import { useDropzone } from "react-dropzone"
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { useDropzone } from "react-dropzone";
 
 import {
   Button,
@@ -11,14 +11,15 @@ import {
   VStack,
   HStack,
   Box,
-} from "@chakra-ui/react"
-import { useState, useEffect } from "react"
-import { FaPlus, FaTrash } from "react-icons/fa"
+  Link,
+} from "@chakra-ui/react";
+import { useState, useEffect } from "react";
+import { FaPlus, FaTrash } from "react-icons/fa";
 
-import { type KnowledgeBaseCreate, KnowledgeBasesService } from "@/client"
-import type { ApiError } from "@/client/core/ApiError"
-import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"
+import { KnowledgeBasesService } from "@/client";
+import type { ApiError } from "@/client/core/ApiError";
+import useCustomToast from "@/hooks/useCustomToast";
+import { handleError } from "@/utils";
 import {
   DialogBody,
   DialogCloseTrigger,
@@ -27,14 +28,19 @@ import {
   DialogHeader,
   DialogRoot,
   DialogTrigger,
-} from "../ui/dialog"
-import { Field } from "../ui/field"
+} from "../ui/dialog";
+import { Field } from "../ui/field";
+
+interface KnowledgeBaseCreate {
+  title: string;
+  description: string;
+}
 
 const AddKnowledgeBase = () => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]) // State for managing selected files
-  const queryClient = useQueryClient()
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]); // State for managing selected files
+  const queryClient = useQueryClient();
+  const { showSuccessToast, showErrorToast } = useCustomToast();
   const {
     register,
     handleSubmit,
@@ -47,7 +53,7 @@ const AddKnowledgeBase = () => {
       title: "",
       description: "",
     },
-  })
+  });
 
   // Reset selected files when the popup is closed
   useEffect(() => {
@@ -57,82 +63,89 @@ const AddKnowledgeBase = () => {
   }, [isOpen]);
 
   const mutation = useMutation({
-  mutationFn: (data: { title: string; description: string; files: File[] }) => {
-    console.log("Now beginning mutation...");
+    mutationFn: (data: {
+      title: string;
+      description: string;
+      files: File[];
+    }) => {
+      console.log("Now beginning mutation...");
 
-    // Send the FormData object to the backend
-    return KnowledgeBasesService.createKnowledgeBase({
-      title: data.title, // Still required for the `query` object
-      description: data.description, // Still required for the `query` object
-      formData: {
-        files: data.files, // ✅ this is what the SDK expects
-      }, // Include all fields in the FormData payload
-    });
-  },
-  onSuccess: () => {
-    showSuccessToast("Knowledge Base created successfully.");
-    reset();
-    setSelectedFiles([]); // Reset selected files after successful creation
-    setIsOpen(false);
-  },
-  onError: (err: ApiError) => {
-    if (err.status === 409) {
+      // Send the FormData object to the backend
+      return KnowledgeBasesService.createKnowledgeBase({
+        title: data.title, // Still required for the `query` object
+        description: data.description, // Still required for the `query` object
+        formData: {
+          files: data.files, // ✅ this is what the SDK expects
+        }, // Include all fields in the FormData payload
+      });
+    },
+    onSuccess: () => {
+      showSuccessToast("Knowledge Base created successfully.");
+      reset();
+      setSelectedFiles([]); // Reset selected files after successful creation
+      setIsOpen(false);
+    },
+    onError: (err: ApiError) => {
+      if (err.status === 409) {
         // Handle duplicate title error specifically
-        showErrorToast(err.body.detail || "A knowledge base with this title already exists");
-    } else {
+        showErrorToast(
+          (err.body as { detail: string }).detail ||
+            "A knowledge base with this title already exists"
+        );
+      } else {
         // Handle other errors
         handleError(err);
-    }
-  },
-  onSettled: () => {
-    queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] });
-  },
-});
-
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] });
+    },
+  });
 
   const onSubmit: SubmitHandler<KnowledgeBaseCreate> = (data) => {
     if (selectedFiles.length === 0) {
-      showErrorToast("At least one file is required.")
-      return
+      showErrorToast("At least one file is required.");
+      return;
     }
-    
+
     // Prepare the data for the SDK function
     const requestData = {
       title: data.title,
       description: data.description || "",
       files: selectedFiles, // Pass the selected files
-    }
+    };
 
-    console.log([requestData])
+    console.log([requestData]);
 
-    mutation.mutate(requestData)
-  }
+    mutation.mutate(requestData);
+  };
 
   const onDrop = (acceptedFiles: File[]) => {
-    setSelectedFiles((prevFiles) => [...prevFiles, ...acceptedFiles]) // Add new files to the existing list
-  }
+    setSelectedFiles((prevFiles) => [...prevFiles, ...acceptedFiles]); // Add new files to the existing list
+  };
 
   const handleRemoveFile = (index: number) => {
-    setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index))
-  }
+    setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     onDropRejected: (fileRejections) => {
       fileRejections.forEach((file) => {
-        showErrorToast(`File ${file.file.name} is not supported.`)
-        console.error(`File ${file.file.name} is not supported.`)
-      })
+        showErrorToast(`File ${file.file.name} is not supported.`);
+        console.error(`File ${file.file.name} is not supported.`);
+      });
     },
     accept: {
       "text/plain": [".txt"], // Plain text files
       "application/pdf": [".pdf"], // PDF files
       "application/msword": [".doc"], // Word documents
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"], // Word documents (modern format)
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"], // Word documents (modern format)
       "application/rtf": [".rtf"], // Rich Text Format files
     },
     multiple: true, // Allow multiple file uploads
-  })
+  });
 
   return (
     <DialogRoot
@@ -202,15 +215,23 @@ const AddKnowledgeBase = () => {
                   <Text>Drag and drop files here, or click to browse</Text>
                 )}
               </Box>
-              
+
               {/* Display Selected Files */}
               {selectedFiles.length > 0 && (
                 <Box w="full">
                   <Text mb={2}>Selected Files:</Text>
-                  <VStack align="start" spacing={2}>
+                  <VStack align="start" gap={2}>
                     {selectedFiles.map((file, index) => (
                       <HStack key={index} w="full" justify="space-between">
-                        <Text isTruncated>{file.name}</Text>
+                        <Link
+                          href={URL.createObjectURL(file)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          color="blue.500"
+                          _hover={{ textDecoration: "underline" }}
+                        >
+                          {file.name}
+                        </Link>
                         <Box
                           as="button"
                           aria-label="Remove file"
@@ -224,7 +245,6 @@ const AddKnowledgeBase = () => {
                   </VStack>
                 </Box>
               )}
-
             </VStack>
           </DialogBody>
 
@@ -251,7 +271,7 @@ const AddKnowledgeBase = () => {
         <DialogCloseTrigger />
       </DialogContent>
     </DialogRoot>
-  )
-}
+  );
+};
 
-export default AddKnowledgeBase
+export default AddKnowledgeBase;
