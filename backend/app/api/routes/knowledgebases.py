@@ -10,12 +10,12 @@ import os
 import shutil
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import KnowledgeBase, KnowledgeBaseCreate, KnowledgeBasePublic, KnowledgeBasesPublic, KnowledgeBaseUpdate, Message, Source, SourceData
+from app.models import KnowledgeBase, KnowledgeBaseCreate, KnowledgeBasePublic, KnowledgeBasesPublic, KnowledgeBaseUpdate, Message, Source, SourceData, EmbeddingModel
 from app.services.embeddings import load_embeddings_model
-
 import hashlib
 
 from app.services.knowledgebases import KnowledgeBaseService
+from app.utils import set_write_permissions
 
 from sqlalchemy.sql import func
 
@@ -76,7 +76,6 @@ def read_knowledge_bases(
         # Get embedding model name if it exists
         embedding_model_name = None
         if kb.KnowledgeBase.embedding_model_id:
-            from app.models import EmbeddingModel
             model = session.get(EmbeddingModel, kb.KnowledgeBase.embedding_model_id)
             if model:
                 embedding_model_name = model.name
@@ -114,7 +113,6 @@ def read_knowledge_base(
     # Get embedding model name if it exists
     embedding_model_name = None
     if knowledge_base.embedding_model_id:
-        from app.models import EmbeddingModel
         model = session.get(EmbeddingModel, knowledge_base.embedding_model_id)
         if model:
             embedding_model_name = model.name
@@ -149,6 +147,9 @@ def create_knowledge_base(
     """
     Create new knowledge base with a compressed folder with the Chroma VectorDB.
     """
+
+    print("Received the following metadata for the knowledge base:")
+    print(knowledge_base_in)
 
     # Check if a knowledge base with this title already exists for this user
     existing_kb = session.exec(
@@ -230,8 +231,9 @@ def create_knowledge_base(
 
     # Get embedding model - first try the one provided in the request
     if knowledge_base_in.embedding_model_id:
+
+        print("Using provided embedding model ID:", knowledge_base_in.embedding_model_id)
         # Verify the embedding model exists
-        from app.models import EmbeddingModel
         model = session.get(EmbeddingModel, knowledge_base_in.embedding_model_id)
         if not model:
             raise HTTPException(
@@ -239,29 +241,34 @@ def create_knowledge_base(
                 detail=f"Embedding model with ID {knowledge_base_in.embedding_model_id} not found"
             )
         model_id = model.model_id
+        provider = model.provider
         embedding_model_id = model.id
     else:
         # Get the default embedding model
-        from app.models import EmbeddingModel
         default_model = session.exec(
             select(EmbeddingModel)
             .where(EmbeddingModel.is_default == True)
         ).first()
+
+        print("Default embedding model:", default_model)
         
         if default_model:
             model_id = default_model.model_id
+            provider = default_model.provider
             embedding_model_id = default_model.id
         else:
+            print("No default embedding model found, using hardcoded value.")
             # Fallback to hardcoded value if no default model
             model_id = "all-MiniLM-L6-v2"
+            default_model = "huggingface"
             embedding_model_id = None
     
     # Initialize embeddings with the selected model
+
     try:
         embeddings = load_embeddings_model(
-            provider=model.provider,
-            model_id=model.model_id,
-            api_key=model.api_key
+            provider=provider,
+            model_id=model_id
         )
     except Exception as e:
         raise HTTPException(
@@ -275,6 +282,7 @@ def create_knowledge_base(
     chroma_dir = "./chroma_db"
     if os.path.exists(chroma_dir):
         print(f"Removing existing {chroma_dir} directory...")
+        set_write_permissions("./chroma_db")
         shutil.rmtree(chroma_dir)
         os.makedirs(chroma_dir, exist_ok=True)    
 
@@ -395,7 +403,6 @@ def update_knowledge_base(
         
         # Get the embedding model ID from the knowledge base
         if knowledge_base.embedding_model_id:
-            from app.models import EmbeddingModel
             model = session.get(EmbeddingModel, knowledge_base.embedding_model_id)
             if model:
                 model_id = model.model_id
@@ -410,8 +417,7 @@ def update_knowledge_base(
         try:
             embeddings = load_embeddings_model(
                 provider=model.provider,
-                model_id=model.model_id,
-                api_key=model.api_key
+                model_id=model.model_id
             )
             chroma_vector_database = Chroma(persist_directory=chroma_dir, embedding_function=embeddings)
         except Exception as e:
