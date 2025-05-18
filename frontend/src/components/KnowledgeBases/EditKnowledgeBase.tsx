@@ -254,7 +254,8 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                         knowledgeBase.files as Array<{
                           id: string;
                           name: string;
-                          url: string;
+                          url?: string;
+                          data?: string; // Use raw data as a fallback
                         }>
                       )
                         .filter((file) => !removedFileIds.includes(file.id))
@@ -265,7 +266,11 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                             justify="space-between"
                           >
                             <Link
-                              href={file.url}
+                              href={
+                                file.data_base64
+                                  ? `data:${file.content_type || 'application/octet-stream'};base64,${file.data_base64}`
+                                  : "#"
+                              }
                               target="_blank"
                               rel="noopener noreferrer"
                               color="blue.500"

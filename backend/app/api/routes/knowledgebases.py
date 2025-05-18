@@ -8,6 +8,7 @@ import zipfile
 import io
 import os
 import shutil
+from io import BytesIO
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import KnowledgeBase, KnowledgeBaseCreate, KnowledgeBasePublic, KnowledgeBasesPublic, KnowledgeBaseUpdate, Message, Source, SourceData, EmbeddingModel
@@ -99,10 +100,6 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
     Returns:
         List[Any]: A list of loaded documents from the file.
     """
-    import tempfile
-    import mimetypes
-    from langchain_community.document_loaders import TextLoader, PyPDFLoader
-
     print(f"Processing file: {file.filename}")
     content_type = file.content_type or mimetypes.guess_type(file.filename)[0]
     print(f"Detected content type: {content_type}")
@@ -206,7 +203,6 @@ def read_knowledge_bases(
 
     return KnowledgeBasesPublic(data=knowledge_bases, count=count)
 
-
 @router.get("/{id}", response_model=KnowledgeBasePublic)
 def read_knowledge_base(
     session: SessionDep, current_user: CurrentUser, id: uuid.UUID
@@ -225,21 +221,43 @@ def read_knowledge_base(
         if model:
             embedding_model_name = model.name
     
-    # Get all sources for this knowledge base
+    # Get all sources for this knowledge base with SourceData joined
     sources = session.exec(
-        select(Source).where(Source.knowledge_base_id == id)
+        select(Source, SourceData)
+        .join(SourceData, Source.source_data_id == SourceData.id)
+        .where(Source.knowledge_base_id == id)
     ).all()
+
+    files = []
+    for source in sources:
+        try:
+            # Extract the original content from the ZIP
+            zip_data = BytesIO(source.SourceData.data)
+            with zipfile.ZipFile(zip_data, "r") as zip_file:
+                # Get the first file in the archive (which should be the only one)
+                file_info = zip_file.infolist()[0]
+                file_content = zip_file.read(file_info.filename)
+
+                # Determine the proper content type based on the filename
+                content_type = mimetypes.guess_type(source.Source.name)[0] or "application/octet-stream"
+                
+                # Base64 encode the file content
+                import base64
+                files.append({
+                    "id": str(source.Source.source_data_id),
+                    "name": source.Source.name,
+                    "data_base64": base64.b64encode(file_content).decode('utf-8'),
+                    "content_type": content_type  # Default type
+                })
+        except Exception as e:
+            # Log the error but continue processing other files
+            print(f"Error extracting file {source.Source.name}: {str(e)}")
+            continue
 
     # Construct the response model
     knowledge_base_public = KnowledgeBasePublic(
         **knowledge_base.model_dump(),  # Copy all fields from the KnowledgeBase object
-        files=[
-            {
-                "id": str(source.source_data_id),  # Use source_data_id as the file ID
-                "name": source.name  # Use the source name as file name
-            }
-            for source in sources
-        ],
+        files=files,
         embedding_model_name=embedding_model_name
     )
     return knowledge_base_public
