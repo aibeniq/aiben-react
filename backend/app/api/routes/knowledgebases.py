@@ -16,7 +16,6 @@ from app.services.embeddings import load_embeddings_model
 import hashlib
 
 from app.services.knowledgebases import KnowledgeBaseService
-from app.utils import set_write_permissions
 
 from sqlalchemy.sql import func
 
@@ -330,15 +329,9 @@ def create_knowledge_base(
     print(f"Using embedding model: {model_id}")
 
     # Clear out any existing chroma_db directory
-    chroma_dir = "./chroma_db"
-    if os.path.exists(chroma_dir):
-        print(f"Removing existing {chroma_dir} directory...")
-        set_write_permissions("./chroma_db")
-        shutil.rmtree(chroma_dir)
-        os.makedirs(chroma_dir, exist_ok=True)    
-
-    # Create Chroma VectorDB from the document splits
+    chroma_dir = tempfile.mkdtemp()
     try:
+        # Create Chroma VectorDB from the document splits
         Chroma.from_documents(documents=splits, embedding=embeddings, persist_directory=chroma_dir)
     except Exception as e:
         print(f"Error creating Chroma VectorDB: {str(e)}")
@@ -355,10 +348,10 @@ def create_knowledge_base(
     # Compress the Chroma database directory into a zip file
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-        for root, _, filenames in os.walk("./chroma_db"):
+        for root, _, filenames in os.walk(chroma_dir):
             for filename in filenames:
                 file_path = os.path.join(root, filename)
-                arcname = os.path.relpath(file_path, "./chroma_db")  # Preserve directory structure
+                arcname = os.path.relpath(file_path, chroma_dir)  # Preserve directory structure
                 zip_file.write(file_path, arcname)
     zip_buffer.seek(0)
 
@@ -425,102 +418,75 @@ def update_knowledge_base(
     knowledge_base.sqlmodel_update(update_dict)
 
     # Retrieve the compressed folder from the database
-     # If files or vector operations are being performed, use the KB's embedding model
     if files or knowledge_base_in.removed_file_ids:
         print("Retrieving existing VectorDB...")
         
         # Clear out any existing chroma_db directory
-        chroma_dir = "./chroma_db"
-        if os.path.exists(chroma_dir):
-            print(f"Removing existing {chroma_dir} directory...")
-            set_write_permissions("./chroma_db")
-            shutil.rmtree(chroma_dir)
-            os.makedirs(chroma_dir, exist_ok=True)
-        
-        zip_buffer = io.BytesIO(knowledge_base.data)
+        chroma_dir = tempfile.mkdtemp()
         try:
-            with zipfile.ZipFile(zip_buffer, "r") as zip_file:
-                zip_file.extractall(chroma_dir)
-        except Exception as e:
-            # Clean up on extraction error
-            if os.path.exists(chroma_dir):
-                shutil.rmtree(chroma_dir)
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error extracting vector database: {str(e)}"
-            )
-
-        # Load the existing Chroma VectorDB with the same embedding model
-        print("Loading existing Chroma VectorDB...")
-
-        # Use the new function to load the embeddings model
-        embeddings, model_id, provider = load_correct_embeddings_model(
-            session=session,
-            embedding_model_id=knowledge_base_in.embedding_model_id
-        )
-        
-        try:
+            # Extract the zipped ChromaDB into the temp directory
+            if knowledge_base.data:
+                with zipfile.ZipFile(io.BytesIO(knowledge_base.data), 'r') as zip_ref:
+                    zip_ref.extractall(chroma_dir)
+            else:
+                raise HTTPException(status_code=400, detail="Knowledge base has no vector database data")
             
-            chroma_vector_database = Chroma(persist_directory=chroma_dir, embedding_function=embeddings)
-        except Exception as e:
-            # Clean up on loading error
-            if os.path.exists(chroma_dir):
-                shutil.rmtree(chroma_dir)
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error loading vector database: {str(e)}"
+            # Load the vector database with the SAME model used to create the knowledge base
+            embeddings, model_id, provider = load_correct_embeddings_model(
+                session=session,
+                embedding_model_id=knowledge_base_in.embedding_model_id
             )
+            
+            # Initialize Chroma with the existing database
+            chroma_vector_database = Chroma(persist_directory=chroma_dir, embedding_function=embeddings)
 
-        # Process new files (if any)
-        if files:
-            print("Adding new files to VectorDB...")
-            documents = []
-            for file in files:
-                loaded_documents = load_uploaded_file(file)
-                documents.extend(loaded_documents)
+            # Process new files (if any)
+            if files:
+                print("Adding new files to VectorDB...")
+                documents = []
+                for file in files:
+                    loaded_documents = load_uploaded_file(file)
+                    documents.extend(loaded_documents)
 
-                # Reset the file pointer before passing to create_source_entries
-                file.file.seek(0)
+                    # Reset the file pointer before passing to create_source_entries
+                    file.file.seek(0)
 
-                # Add source entries for the new files
-                KnowledgeBaseService.create_source_entries(
-                    session=session,
-                    current_user=current_user,
-                    knowledge_base_id=knowledge_base.id,
-                    file=file
+                    # Add source entries for the new files
+                    KnowledgeBaseService.create_source_entries(
+                        session=session,
+                        current_user=current_user,
+                        knowledge_base_id=knowledge_base.id,
+                        file=file
+                    )
+
+                # Add the new documents to the VectorDB only if we have new files
+                if documents:
+                    chroma_vector_database.add_documents(documents)
+
+            # Handle file deletions
+            if knowledge_base_in.removed_file_ids:
+                print("Removing files from VectorDB...")
+                sources_to_remove = session.exec(
+                    select(Source).where(Source.source_data_id.in_(knowledge_base_in.removed_file_ids))
+                ).all()
+
+                print("Sources to remove:", sources_to_remove)
+
+                for source in sources_to_remove:
+                    chroma_vector_database.delete(ids=[str(source.source_data_id)])
+
+                # Delete entries from the Source table
+                session.exec(
+                    delete(Source)
+                    .where(Source.source_data_id.in_(knowledge_base_in.removed_file_ids))
                 )
 
-            # Add the new documents to the VectorDB
-            set_write_permissions("./chroma_db")
-            chroma_vector_database.add_documents(documents)
+                # Delete entries from the SourceData table
+                session.exec(
+                    delete(SourceData)
+                    .where(SourceData.id.in_(knowledge_base_in.removed_file_ids))
+                )
 
-        # Handle file deletions
-        if knowledge_base_in.removed_file_ids is not None:
-        #if len(knowledge_base_in.removed_file_ids) > 0 and knowledge_base_in.removed_file_ids[0] != "00000000-0000-0000-0000-000000000000":
-            print("Removing files from VectorDB...")
-            sources_to_remove = session.exec(
-                select(Source).where(Source.source_data_id.in_(knowledge_base_in.removed_file_ids))
-            ).all()
-
-            print("Sources to remove:", sources_to_remove)
-
-            for source in sources_to_remove:
-                chroma_vector_database.delete(ids=[str(source.source_data_id)])
-
-            # Delete entries from the Source table
-            session.exec(
-                delete(Source)
-                .where(Source.source_data_id.in_(knowledge_base_in.removed_file_ids))
-            )
-
-            # Delete entries from the SourceData table
-            session.exec(
-                delete(SourceData)
-                .where(SourceData.id.in_(knowledge_base_in.removed_file_ids))
-            )
-
-        # Zip the updated VectorDB
-        try:
             # Zip the updated VectorDB
             print("Zipping updated VectorDB...")
             zip_buffer = io.BytesIO()
@@ -535,6 +501,15 @@ def update_knowledge_base(
             # Update the knowledge base data in the database
             print("Updating knowledge base data in the database...")
             knowledge_base.data = zip_buffer.read()
+
+        except Exception as e:
+            # Clean up on error
+            if os.path.exists(chroma_dir):
+                shutil.rmtree(chroma_dir)
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error updating vector database: {str(e)}"
+            )
         finally:
             # Clean up regardless of success or failure
             if os.path.exists(chroma_dir):
