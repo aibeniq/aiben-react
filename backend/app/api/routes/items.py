@@ -61,6 +61,9 @@ def create_item(
     """
     Create new item.
     """
+    print("Creating item...")
+    print("Title:", item_in.title)
+
     item = Item.model_validate(item_in, update={"owner_id": current_user.id})
     session.add(item)
     session.commit()

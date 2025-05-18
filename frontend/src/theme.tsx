@@ -15,6 +15,9 @@ export const system = createSystem(defaultConfig, {
       color: "ui.main",
       fontWeight: "bold",
     },
+    ".dnd-placeholder": {
+      display: "none", // Required for react-beautiful-dnd
+    },
   },
   theme: {
     tokens: {

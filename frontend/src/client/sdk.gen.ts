@@ -4,6 +4,32 @@ import type { CancelablePromise } from "./core/CancelablePromise"
 import { OpenAPI } from "./core/OpenAPI"
 import { request as __request } from "./core/request"
 import type {
+  EmbeddingModelsGetEmbeddingModelsData,
+  EmbeddingModelsGetEmbeddingModelsResponse,
+  EmbeddingModelsCreateEmbeddingModelData,
+  EmbeddingModelsCreateEmbeddingModelResponse,
+  EmbeddingModelsGetEmbeddingModelData,
+  EmbeddingModelsGetEmbeddingModelResponse,
+  EmbeddingModelsUpdateEmbeddingModelData,
+  EmbeddingModelsUpdateEmbeddingModelResponse,
+  EmbeddingModelsDeleteEmbeddingModelData,
+  EmbeddingModelsDeleteEmbeddingModelResponse,
+  EmbeddingModelsGetDefaultEmbeddingModelResponse,
+  EmbeddingModelsSetDefaultEmbeddingModelData,
+  EmbeddingModelsSetDefaultEmbeddingModelResponse,
+  EmbeddingModelsValidateEmbeddingModelData,
+  EmbeddingModelsValidateEmbeddingModelResponse,
+  FormconnectProcessFormData,
+  FormconnectProcessFormResponse,
+  FormconnectGetFormsResponse,
+  FormconnectCreateFormData,
+  FormconnectCreateFormResponse,
+  FormconnectGetFormData,
+  FormconnectGetFormResponse,
+  FormconnectUpdateFormData,
+  FormconnectUpdateFormResponse,
+  FormconnectDeleteFormData,
+  FormconnectDeleteFormResponse,
   ItemsReadItemsData,
   ItemsReadItemsResponse,
   ItemsCreateItemData,
@@ -14,6 +40,16 @@ import type {
   ItemsUpdateItemResponse,
   ItemsDeleteItemData,
   ItemsDeleteItemResponse,
+  KnowledgeBasesReadKnowledgeBasesData,
+  KnowledgeBasesReadKnowledgeBasesResponse,
+  KnowledgeBasesCreateKnowledgeBaseData,
+  KnowledgeBasesCreateKnowledgeBaseResponse,
+  KnowledgeBasesReadKnowledgeBaseData,
+  KnowledgeBasesReadKnowledgeBaseResponse,
+  KnowledgeBasesUpdateKnowledgeBaseData,
+  KnowledgeBasesUpdateKnowledgeBaseResponse,
+  KnowledgeBasesDeleteKnowledgeBaseData,
+  KnowledgeBasesDeleteKnowledgeBaseResponse,
   LoginLoginAccessTokenData,
   LoginLoginAccessTokenResponse,
   LoginTestTokenResponse,
@@ -46,7 +82,338 @@ import type {
   UtilsTestEmailData,
   UtilsTestEmailResponse,
   UtilsHealthCheckResponse,
+  VeradocProcessChecklistData,
+  VeradocProcessChecklistResponse,
+  VeradocProcessRagChecklistData,
+  VeradocProcessRagChecklistResponse,
+  VeradocGetChecklistsResponse,
+  VeradocCreateChecklistData,
+  VeradocCreateChecklistResponse,
+  VeradocGetChecklistData,
+  VeradocGetChecklistResponse,
+  VeradocUpdateChecklistData,
+  VeradocUpdateChecklistResponse,
+  VeradocDeleteChecklistData,
+  VeradocDeleteChecklistResponse,
 } from "./types.gen"
+
+export class EmbeddingModelsService {
+  /**
+   * Get Embedding Models
+   * Get all embedding models.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @returns EmbeddingModelsPublic Successful Response
+   * @throws ApiError
+   */
+  public static getEmbeddingModels(
+    data: EmbeddingModelsGetEmbeddingModelsData = {},
+  ): CancelablePromise<EmbeddingModelsGetEmbeddingModelsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/embedding-models/",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Create Embedding Model
+   * Create a new embedding model.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns EmbeddingModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static createEmbeddingModel(
+    data: EmbeddingModelsCreateEmbeddingModelData,
+  ): CancelablePromise<EmbeddingModelsCreateEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/embedding-models/",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Embedding Model
+   * Get a specific embedding model by ID.
+   * @param data The data for the request.
+   * @param data.modelId
+   * @returns EmbeddingModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static getEmbeddingModel(
+    data: EmbeddingModelsGetEmbeddingModelData,
+  ): CancelablePromise<EmbeddingModelsGetEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/embedding-models/{model_id}",
+      path: {
+        model_id: data.modelId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Embedding Model
+   * Update an embedding model.
+   * @param data The data for the request.
+   * @param data.modelId
+   * @param data.requestBody
+   * @returns EmbeddingModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static updateEmbeddingModel(
+    data: EmbeddingModelsUpdateEmbeddingModelData,
+  ): CancelablePromise<EmbeddingModelsUpdateEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/embedding-models/{model_id}",
+      path: {
+        model_id: data.modelId,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Embedding Model
+   * Delete an embedding model.
+   * @param data The data for the request.
+   * @param data.modelId
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static deleteEmbeddingModel(
+    data: EmbeddingModelsDeleteEmbeddingModelData,
+  ): CancelablePromise<EmbeddingModelsDeleteEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/embedding-models/{model_id}",
+      path: {
+        model_id: data.modelId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Default Embedding Model
+   * Get the default embedding model.
+   * @returns EmbeddingModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static getDefaultEmbeddingModel(): CancelablePromise<EmbeddingModelsGetDefaultEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/embedding-models/default",
+    })
+  }
+
+  /**
+   * Set Default Embedding Model
+   * Set an embedding model as the default.
+   * @param data The data for the request.
+   * @param data.modelId
+   * @returns EmbeddingModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static setDefaultEmbeddingModel(
+    data: EmbeddingModelsSetDefaultEmbeddingModelData,
+  ): CancelablePromise<EmbeddingModelsSetDefaultEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/embedding-models/{model_id}/set-default",
+      path: {
+        model_id: data.modelId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Validate Embedding Model
+   * Validate if a HuggingFace model ID is valid.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static validateEmbeddingModel(
+    data: EmbeddingModelsValidateEmbeddingModelData,
+  ): CancelablePromise<EmbeddingModelsValidateEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/embedding-models/validate",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
+export class FormconnectService {
+  /**
+   * Process Form
+   * Process the uploaded files and questions.
+   *
+   * Handles two types of files:
+   * - digitized_files: Standard text extraction
+   * - handwritten_files: OCR-based extraction (placeholder)
+   * @param data The data for the request.
+   * @param data.fields
+   * @param data.formData
+   * @returns FormConnectResponse Successful Response
+   * @throws ApiError
+   */
+  public static processForm(
+    data: FormconnectProcessFormData,
+  ): CancelablePromise<FormconnectProcessFormResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/formconnect/process",
+      query: {
+        fields: data.fields,
+      },
+      formData: data.formData,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Forms
+   * Retrieve all forms from the database for this user.
+   * @returns FormConnectForm Successful Response
+   * @throws ApiError
+   */
+  public static getForms(): CancelablePromise<FormconnectGetFormsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/formconnect/forms",
+    })
+  }
+
+  /**
+   * Create Form
+   * Save a new form to the database.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns FormConnectForm Successful Response
+   * @throws ApiError
+   */
+  public static createForm(
+    data: FormconnectCreateFormData,
+  ): CancelablePromise<FormconnectCreateFormResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/formconnect/forms",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Form
+   * Retrieve a specific form by ID.
+   * @param data The data for the request.
+   * @param data.formId
+   * @returns FormConnectForm Successful Response
+   * @throws ApiError
+   */
+  public static getForm(
+    data: FormconnectGetFormData,
+  ): CancelablePromise<FormconnectGetFormResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/formconnect/forms/{form_id}",
+      path: {
+        form_id: data.formId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Form
+   * Update an existing form.
+   * @param data The data for the request.
+   * @param data.formId
+   * @param data.requestBody
+   * @returns FormConnectForm Successful Response
+   * @throws ApiError
+   */
+  public static updateForm(
+    data: FormconnectUpdateFormData,
+  ): CancelablePromise<FormconnectUpdateFormResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/formconnect/forms/{form_id}",
+      path: {
+        form_id: data.formId,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Form
+   * Delete a form by ID.
+   * @param data The data for the request.
+   * @param data.formId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static deleteForm(
+    data: FormconnectDeleteFormData,
+  ): CancelablePromise<FormconnectDeleteFormResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/formconnect/forms/{form_id}",
+      path: {
+        form_id: data.formId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
 
 export class ItemsService {
   /**
@@ -159,6 +526,143 @@ export class ItemsService {
     return __request(OpenAPI, {
       method: "DELETE",
       url: "/api/v1/items/{id}",
+      path: {
+        id: data.id,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
+export class KnowledgeBasesService {
+  /**
+   * Read Knowledge Bases
+   * Retrieve knowledge bases with additional metadata: Number of Sources, Date Created, and Date Modified.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @returns KnowledgeBasesPublic Successful Response
+   * @throws ApiError
+   */
+  public static readKnowledgeBases(
+    data: KnowledgeBasesReadKnowledgeBasesData = {},
+  ): CancelablePromise<KnowledgeBasesReadKnowledgeBasesResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/knowledge-bases/",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Create Knowledge Base
+   * Create new knowledge base with a compressed folder with the Chroma VectorDB.
+   * @param data The data for the request.
+   * @param data.title
+   * @param data.formData
+   * @param data.description
+   * @param data.embeddingModelId
+   * @returns KnowledgeBasePublic Successful Response
+   * @throws ApiError
+   */
+  public static createKnowledgeBase(
+    data: KnowledgeBasesCreateKnowledgeBaseData,
+  ): CancelablePromise<KnowledgeBasesCreateKnowledgeBaseResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/knowledge-bases/",
+      query: {
+        title: data.title,
+        description: data.description,
+        embedding_model_id: data.embeddingModelId,
+      },
+      formData: data.formData,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Read Knowledge Base
+   * Get knowledge base by ID.
+   * @param data The data for the request.
+   * @param data.id
+   * @returns KnowledgeBasePublic Successful Response
+   * @throws ApiError
+   */
+  public static readKnowledgeBase(
+    data: KnowledgeBasesReadKnowledgeBaseData,
+  ): CancelablePromise<KnowledgeBasesReadKnowledgeBaseResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/knowledge-bases/{id}",
+      path: {
+        id: data.id,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Knowledge Base
+   * Update a knowledge base.
+   * @param data The data for the request.
+   * @param data.id
+   * @param data.title
+   * @param data.description
+   * @param data.embeddingModelId
+   * @param data.formData
+   * @returns KnowledgeBasePublic Successful Response
+   * @throws ApiError
+   */
+  public static updateKnowledgeBase(
+    data: KnowledgeBasesUpdateKnowledgeBaseData,
+  ): CancelablePromise<KnowledgeBasesUpdateKnowledgeBaseResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/knowledge-bases/{id}",
+      path: {
+        id: data.id,
+      },
+      query: {
+        title: data.title,
+        description: data.description,
+        embedding_model_id: data.embeddingModelId,
+      },
+      formData: data.formData,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Knowledge Base
+   * Delete a knowledge base.
+   * @param data The data for the request.
+   * @param data.id
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static deleteKnowledgeBase(
+    data: KnowledgeBasesDeleteKnowledgeBaseData,
+  ): CancelablePromise<KnowledgeBasesDeleteKnowledgeBaseResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/knowledge-bases/{id}",
       path: {
         id: data.id,
       },
@@ -544,6 +1048,173 @@ export class UtilsService {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/utils/health-check/",
+    })
+  }
+}
+
+export class VeradocService {
+  /**
+   * Process Checklist
+   * Process the uploaded files and fields.
+   *
+   * Handles two types of files:
+   * - digitized_files: Standard text extraction
+   * - handwritten_files: OCR-based extraction (placeholder)
+   * @param data The data for the request.
+   * @param data.questions
+   * @param data.formData
+   * @returns VeraDocResponse Successful Response
+   * @throws ApiError
+   */
+  public static processChecklist(
+    data: VeradocProcessChecklistData,
+  ): CancelablePromise<VeradocProcessChecklistResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/veradoc/process",
+      query: {
+        questions: data.questions,
+      },
+      formData: data.formData,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Process Rag Checklist
+   * Process the uploaded files using RAG with a knowledge base.
+   * @param data The data for the request.
+   * @param data.questions
+   * @param data.knowledgeBaseId
+   * @param data.formData
+   * @returns VeraDocResponse Successful Response
+   * @throws ApiError
+   */
+  public static processRagChecklist(
+    data: VeradocProcessRagChecklistData,
+  ): CancelablePromise<VeradocProcessRagChecklistResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/veradoc/process-rag",
+      query: {
+        questions: data.questions,
+        knowledge_base_id: data.knowledgeBaseId,
+      },
+      formData: data.formData,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Checklists
+   * Retrieve all checklists from the database for this user.
+   * @returns VeraDocChecklist Successful Response
+   * @throws ApiError
+   */
+  public static getChecklists(): CancelablePromise<VeradocGetChecklistsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/veradoc/checklists",
+    })
+  }
+
+  /**
+   * Create Checklist
+   * Save a new checklist to the database.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns VeraDocChecklist Successful Response
+   * @throws ApiError
+   */
+  public static createChecklist(
+    data: VeradocCreateChecklistData,
+  ): CancelablePromise<VeradocCreateChecklistResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/veradoc/checklists",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Checklist
+   * Retrieve a specific checklist by ID.
+   * @param data The data for the request.
+   * @param data.checklistId
+   * @returns VeraDocChecklist Successful Response
+   * @throws ApiError
+   */
+  public static getChecklist(
+    data: VeradocGetChecklistData,
+  ): CancelablePromise<VeradocGetChecklistResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/veradoc/checklists/{checklist_id}",
+      path: {
+        checklist_id: data.checklistId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Checklist
+   * Update an existing checklist.
+   * @param data The data for the request.
+   * @param data.checklistId
+   * @param data.requestBody
+   * @returns VeraDocChecklist Successful Response
+   * @throws ApiError
+   */
+  public static updateChecklist(
+    data: VeradocUpdateChecklistData,
+  ): CancelablePromise<VeradocUpdateChecklistResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/veradoc/checklists/{checklist_id}",
+      path: {
+        checklist_id: data.checklistId,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Checklist
+   * Delete a checklist by ID.
+   * @param data The data for the request.
+   * @param data.checklistId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static deleteChecklist(
+    data: VeradocDeleteChecklistData,
+  ): CancelablePromise<VeradocDeleteChecklistResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/veradoc/checklists/{checklist_id}",
+      path: {
+        checklist_id: data.checklistId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
     })
   }
 }
