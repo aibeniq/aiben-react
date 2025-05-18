@@ -7,16 +7,21 @@ import {
   VStack,
   HStack,
   Box,
-} from "@chakra-ui/react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState, useEffect } from "react"
-import { type SubmitHandler, useForm } from "react-hook-form"
-import { FaExchangeAlt, FaTrash } from "react-icons/fa"
-import { useDropzone } from "react-dropzone"
+  Link,
+} from "@chakra-ui/react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { FaExchangeAlt, FaTrash } from "react-icons/fa";
+import { useDropzone } from "react-dropzone";
 
-import { type ApiError, type KnowledgeBasePublic, KnowledgeBasesService } from "@/client"
-import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"
+import {
+  type ApiError,
+  type KnowledgeBasePublic,
+  KnowledgeBasesService,
+} from "@/client";
+import useCustomToast from "@/hooks/useCustomToast";
+import { handleError } from "@/utils";
 import {
   DialogBody,
   DialogCloseTrigger,
@@ -26,38 +31,38 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog"
-import { Field } from "../ui/field"
+} from "../ui/dialog";
+import { Field } from "../ui/field";
 
 interface EditKnowledgeBaseProps {
-  item: KnowledgeBasePublic
+  item: KnowledgeBasePublic;
 }
 
 interface KnowledgeBaseUpdateForm {
-  title: string
-  description?: string
+  title: string;
+  description?: string;
 }
 
 const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
-  console.log('KnowledgeBase item:', item)
-  console.log('KnowledgeBase item ID:', item.id)
-  
-  const [isOpen, setIsOpen] = useState(false)
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [removedFileIds, setRemovedFileIds] = useState<string[]>([])
-  const queryClient = useQueryClient()
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  console.log("KnowledgeBase item:", item);
+  console.log("KnowledgeBase item ID:", item.id);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [removedFileIds, setRemovedFileIds] = useState<string[]>([]);
+  const queryClient = useQueryClient();
+  const { showSuccessToast, showErrorToast } = useCustomToast();
 
   const { data: knowledgeBase, isLoading } = useQuery({
-    queryKey: ['knowledge-base', item.id],
+    queryKey: ["knowledge-base", item.id],
     queryFn: async () => {
-      console.log('Fetching knowledge base with ID:', item.id)
-      return KnowledgeBasesService.readKnowledgeBase({ id: item.id })
+      console.log("Fetching knowledge base with ID:", item.id);
+      return KnowledgeBasesService.readKnowledgeBase({ id: item.id });
     },
     enabled: isOpen, // Only fetch when dialog is open
-  })
+  });
 
-  console.log('KnowledgeBase data:', knowledgeBase)
+  console.log("KnowledgeBase data:", knowledgeBase);
 
   const {
     register,
@@ -72,7 +77,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
       title: item.title,
       description: item.description ?? undefined,
     },
-  })
+  });
 
   // Add useEffect to update form when knowledgeBase data loads
   useEffect(() => {
@@ -80,71 +85,92 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
       reset({
         title: knowledgeBase.title,
         description: knowledgeBase.description ?? undefined,
-      })
+      });
     }
-  }, [knowledgeBase, reset])
+  }, [knowledgeBase, reset]);
 
   const mutation = useMutation({
-    mutationFn: (data: KnowledgeBaseUpdateForm & { files: File[], removedFileIds: string[] }) => {
-      console.log('Now beginning mutation...')
+    mutationFn: (
+      data: KnowledgeBaseUpdateForm & {
+        files: File[];
+        removedFileIds: string[];
+      }
+    ) => {
+      console.log("Now beginning mutation...");
 
-      console.log("Title sent to KnowledgeBasesService.updateKnowledgeBase:", data.title)
-      console.log("Description sent to KnowledgeBasesService.updateKnowledgeBase:", data.description)
-      console.log("Removed file IDs sent to KnowledgeBasesService.updateKnowledgeBase:", data.removedFileIds)
-      console.log('FormData sent to KnowledgeBasesService.updateKnowledgeBase is as follows:', data)
+      console.log(
+        "Title sent to KnowledgeBasesService.updateKnowledgeBase:",
+        data.title
+      );
+      console.log(
+        "Description sent to KnowledgeBasesService.updateKnowledgeBase:",
+        data.description
+      );
+      console.log(
+        "Removed file IDs sent to KnowledgeBasesService.updateKnowledgeBase:",
+        data.removedFileIds
+      );
+      console.log(
+        "FormData sent to KnowledgeBasesService.updateKnowledgeBase is as follows:",
+        data
+      );
 
       const payload = {
         title: data.title,
         description: data.description,
         id: item.id,
         formData: {
-          files: data.files, 
+          files: data.files,
           ...(data.removedFileIds && data.removedFileIds.length > 0
-          ? { removed_file_ids: data.removedFileIds }
-          : {removed_file_ids: ["00000000-0000-0000-0000-000000000000"]})  // sending an empty list in case of no deletions fails for some reason. Sending a single dummy entry instead
-        }}
+            ? { removed_file_ids: data.removedFileIds }
+            : { removed_file_ids: ["00000000-0000-0000-0000-000000000000"] }), // sending an empty list in case of no deletions fails for some reason. Sending a single dummy entry instead
+        },
+      };
 
-      console.log('Payload being sent to KnowledgeBasesService.updateKnowledgeBase:', payload);
-      
-      return KnowledgeBasesService.updateKnowledgeBase(payload)
+      console.log(
+        "Payload being sent to KnowledgeBasesService.updateKnowledgeBase:",
+        payload
+      );
+
+      return KnowledgeBasesService.updateKnowledgeBase(payload);
     },
     onSuccess: () => {
-      showSuccessToast("Knowledge Base updated successfully.")
-      reset()
-      setSelectedFiles([])
-      setRemovedFileIds([])
-      setIsOpen(false)
+      showSuccessToast("Knowledge Base updated successfully.");
+      reset();
+      setSelectedFiles([]);
+      setRemovedFileIds([]);
+      setIsOpen(false);
     },
     onError: (err: ApiError) => {
-      handleError(err)
+      handleError(err);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
+      queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] });
     },
-  })
+  });
 
   const onSubmit: SubmitHandler<KnowledgeBaseUpdateForm> = async (data) => {
-    console.log('Submitting form data:', data)	
-    console.log('Selected files:', selectedFiles)
-    console.log('Removed file IDs:', removedFileIds)
+    console.log("Submitting form data:", data);
+    console.log("Selected files:", selectedFiles);
+    console.log("Removed file IDs:", removedFileIds);
     mutation.mutate({
       ...data,
       files: selectedFiles,
-      removedFileIds
-    })
-  }
+      removedFileIds,
+    });
+  };
 
   const onDrop = (acceptedFiles: File[]) => {
-    setSelectedFiles(prev => [...prev, ...acceptedFiles])
-  }
+    setSelectedFiles((prev) => [...prev, ...acceptedFiles]);
+  };
 
   const handleRemoveNewFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
-  }
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleRemoveExistingFile = (fileId: string) => {
-    setRemovedFileIds(prev => [...prev, fileId])
-  }
+    setRemovedFileIds((prev) => [...prev, fileId]);
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -152,11 +178,12 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
       "text/plain": [".txt"],
       "application/pdf": [".pdf"],
       "application/msword": [".doc"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
       "application/rtf": [".rtf"],
     },
-    multiple: true
-  })
+    multiple: true,
+  });
 
   return (
     <DialogRoot
@@ -212,15 +239,28 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
               {knowledgeBase?.files && knowledgeBase.files.length > 0 && (
                 <Box w="full">
                   <Text mb={2}>Current Files:</Text>
-                  <VStack align="start" spacing={2}>
-                    {knowledgeBase.files
-                      .filter(file => !removedFileIds.includes(file.id))
+                  <VStack align="start" gap={2}>
+                    {(
+                      knowledgeBase.files as Array<{
+                        id: string;
+                        name: string;
+                        url: string;
+                      }>
+                    )
+                      .filter((file) => !removedFileIds.includes(file.id))
                       .map((file) => (
                         <HStack key={file.id} w="full" justify="space-between">
-                          <Text isTruncated>{file.name}</Text>
+                          <Link
+                            href={file.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            color="blue.500"
+                            _hover={{ textDecoration: "underline" }}
+                          >
+                            {file.name}
+                          </Link>
                           <Box
                             as="button"
-                            type="button"
                             aria-label="Remove file"
                             onClick={() => handleRemoveExistingFile(file.id)}
                             _hover={{ color: "red.500" }}
@@ -256,13 +296,20 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
               {selectedFiles.length > 0 && (
                 <Box w="full">
                   <Text mb={2}>New Files:</Text>
-                  <VStack align="start" spacing={2}>
+                  <VStack align="start" gap={2}>
                     {selectedFiles.map((file, index) => (
                       <HStack key={index} w="full" justify="space-between">
-                        <Text isTruncated>{file.name}</Text>
+                        <Link
+                          href={URL.createObjectURL(file)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          color="blue.500"
+                          _hover={{ textDecoration: "underline" }}
+                        >
+                          {file.name}
+                        </Link>
                         <Box
                           as="button"
-                          type="button"
                           aria-label="Remove file"
                           onClick={() => handleRemoveNewFile(index)}
                           _hover={{ color: "red.500" }}
@@ -297,7 +344,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
         <DialogCloseTrigger />
       </DialogContent>
     </DialogRoot>
-  )
-}
+  );
+};
 
-export default EditKnowledgeBase
+export default EditKnowledgeBase;
