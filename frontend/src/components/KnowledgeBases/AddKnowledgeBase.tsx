@@ -11,7 +11,7 @@ import {
   VStack,
   HStack,
   Box,
-  Spinner
+  Spinner,
   Link,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";

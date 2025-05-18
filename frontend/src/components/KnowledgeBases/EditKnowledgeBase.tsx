@@ -8,6 +8,7 @@ import {
   HStack,
   Box,
   Link,
+  Spinner
 } from "@chakra-ui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -98,23 +99,6 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
     ) => {
       console.log("Now beginning mutation...");
 
-      console.log(
-        "Title sent to KnowledgeBasesService.updateKnowledgeBase:",
-        data.title
-      );
-      console.log(
-        "Description sent to KnowledgeBasesService.updateKnowledgeBase:",
-        data.description
-      );
-      console.log(
-        "Removed file IDs sent to KnowledgeBasesService.updateKnowledgeBase:",
-        data.removedFileIds
-      );
-      console.log(
-        "FormData sent to KnowledgeBasesService.updateKnowledgeBase is as follows:",
-        data
-      );
-
       const payload = {
         title: data.title,
         description: data.description,
@@ -123,7 +107,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
           files: data.files,
           ...(data.removedFileIds && data.removedFileIds.length > 0
             ? { removed_file_ids: data.removedFileIds }
-            : { removed_file_ids: ["00000000-0000-0000-0000-000000000000"] }), // sending an empty list in case of no deletions fails for some reason. Sending a single dummy entry instead
+            : { removed_file_ids: ["00000000-0000-0000-0000-000000000000"] }), // sending a dummy entry if no deletions
         },
       };
 
@@ -199,59 +183,142 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogHeader>
-            <DialogTitle>Edit Knowledge Base</DialogTitle>
-          </DialogHeader>
-          <DialogBody>
-            <Text mb={4}>Update the Knowledge Base details below.</Text>
-            <VStack gap={4}>
-              <Field
-                required
-                invalid={!!errors.title}
-                errorText={errors.title?.message}
-                label="Title"
-              >
-                <Input
-                  id="title"
-                  {...register("title", {
-                    required: "Title is required",
-                  })}
-                  placeholder="Title"
-                  type="text"
-                />
-              </Field>
+        <Box position="relative">
+          {/* Add spinner and grey overlay when submitting */}
+          {isSubmitting && (
+            <Box
+              position="absolute"
+              top="0"
+              left="0"
+              right="0"
+              bottom="0"
+              bg="blackAlpha.300"
+              zIndex="50"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              borderRadius="md"
+            >
+              <Spinner
+                thickness="4px"
+                speed="0.65s"
+                emptyColor="gray.200"
+                color="blue.500"
+                size="xl"
+              />
+            </Box>
+          )}
 
-              <Field
-                invalid={!!errors.description}
-                errorText={errors.description?.message}
-                label="Description"
-              >
-                <Input
-                  id="description"
-                  {...register("description")}
-                  placeholder="Description"
-                  type="text"
-                />
-              </Field>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Edit Knowledge Base</DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              <Text mb={4}>Update the Knowledge Base details below.</Text>
+              <VStack gap={4}>
+                <Field
+                  required
+                  invalid={!!errors.title}
+                  errorText={errors.title?.message}
+                  label="Title"
+                >
+                  <Input
+                    id="title"
+                    {...register("title", {
+                      required: "Title is required",
+                    })}
+                    placeholder="Title"
+                    type="text"
+                  />
+                </Field>
 
-              {/* Existing Files */}
-              {knowledgeBase?.files && knowledgeBase.files.length > 0 && (
-                <Box w="full">
-                  <Text mb={2}>Current Files:</Text>
-                  <VStack align="start" gap={2}>
-                    {(
-                      knowledgeBase.files as Array<{
-                        id: string;
-                        name: string;
-                        url: string;
-                      }>
-                    )
-                      .filter((file) => !removedFileIds.includes(file.id))
-                      .map((file) => (
-                        <HStack key={file.id} w="full" justify="space-between">
+                <Field
+                  invalid={!!errors.description}
+                  errorText={errors.description?.message}
+                  label="Description"
+                >
+                  <Input
+                    id="description"
+                    {...register("description")}
+                    placeholder="Description"
+                    type="text"
+                  />
+                </Field>
+
+                {/* Existing Files */}
+                {knowledgeBase?.files && knowledgeBase.files.length > 0 && (
+                  <Box w="full">
+                    <Text mb={2}>Current Files:</Text>
+                    <VStack align="start" gap={2}>
+                      {(
+                        knowledgeBase.files as Array<{
+                          id: string;
+                          name: string;
+                          url: string;
+                        }>
+                      )
+                        .filter((file) => !removedFileIds.includes(file.id))
+                        .map((file) => (
+                          <HStack
+                            key={file.id}
+                            w="full"
+                            justify="space-between"
+                          >
+                            <Link
+                              href={file.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              color="blue.500"
+                              _hover={{ textDecoration: "underline" }}
+                            >
+                              {file.name}
+                            </Link>
+                            <Box
+                              as="button"
+                              aria-label="Remove file"
+                              onClick={() => handleRemoveExistingFile(file.id)}
+                              _hover={{ color: "red.500" }}
+                            >
+                              <FaTrash />
+                            </Box>
+                          </HStack>
+                        ))}
+                    </VStack>
+                  </Box>
+                )}
+
+                {/* File Upload Area */}
+                <Box
+                  {...getRootProps()}
+                  border="2px dashed"
+                  borderColor={isDragActive ? "blue.500" : "gray.300"}
+                  borderRadius="md"
+                  p={4}
+                  textAlign="center"
+                  cursor="pointer"
+                  _hover={{ borderColor: "blue.500" }}
+                >
+                  <input {...getInputProps()} />
+                  <Text>
+                    {isDragActive
+                      ? "Drop the files here..."
+                      : "Drag and drop files here, or click to browse"}
+                  </Text>
+                </Box>
+
+                {/* New Selected Files */}
+                {selectedFiles.length > 0 && (
+                  <Box w="full">
+                    <Text mb={2}>New Files:</Text>
+                    <VStack align="start" gap={2}>
+                      {selectedFiles.map((file, index) => (
+                        <HStack
+                          key={index}
+                          w="full"
+                          justify="space-between"
+                        >
                           <Link
-                            href={file.url}
+                            href={URL.createObjectURL(file)}
                             target="_blank"
                             rel="noopener noreferrer"
                             color="blue.500"
@@ -262,85 +329,37 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                           <Box
                             as="button"
                             aria-label="Remove file"
-                            onClick={() => handleRemoveExistingFile(file.id)}
+                            onClick={() => handleRemoveNewFile(index)}
                             _hover={{ color: "red.500" }}
                           >
                             <FaTrash />
                           </Box>
                         </HStack>
                       ))}
-                  </VStack>
-                </Box>
-              )}
+                    </VStack>
+                  </Box>
+                )}
+              </VStack>
+            </DialogBody>
 
-              {/* File Upload Area */}
-              <Box
-                {...getRootProps()}
-                border="2px dashed"
-                borderColor={isDragActive ? "blue.500" : "gray.300"}
-                borderRadius="md"
-                p={4}
-                textAlign="center"
-                cursor="pointer"
-                _hover={{ borderColor: "blue.500" }}
-              >
-                <input {...getInputProps()} />
-                <Text>
-                  {isDragActive
-                    ? "Drop the files here..."
-                    : "Drag and drop files here, or click to browse"}
-                </Text>
-              </Box>
-
-              {/* New Selected Files */}
-              {selectedFiles.length > 0 && (
-                <Box w="full">
-                  <Text mb={2}>New Files:</Text>
-                  <VStack align="start" gap={2}>
-                    {selectedFiles.map((file, index) => (
-                      <HStack key={index} w="full" justify="space-between">
-                        <Link
-                          href={URL.createObjectURL(file)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          color="blue.500"
-                          _hover={{ textDecoration: "underline" }}
-                        >
-                          {file.name}
-                        </Link>
-                        <Box
-                          as="button"
-                          aria-label="Remove file"
-                          onClick={() => handleRemoveNewFile(index)}
-                          _hover={{ color: "red.500" }}
-                        >
-                          <FaTrash />
-                        </Box>
-                      </HStack>
-                    ))}
-                  </VStack>
-                </Box>
-              )}
-            </VStack>
-          </DialogBody>
-
-          <DialogFooter gap={2}>
-            <ButtonGroup>
-              <DialogActionTrigger asChild>
-                <Button
-                  variant="subtle"
-                  colorPalette="gray"
-                  disabled={isSubmitting}
-                >
-                  Cancel
+            <DialogFooter gap={2}>
+              <ButtonGroup>
+                <DialogActionTrigger asChild>
+                  <Button
+                    variant="subtle"
+                    colorPalette="gray"
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                </DialogActionTrigger>
+                <Button variant="solid" type="submit" loading={isSubmitting}>
+                  Save
                 </Button>
-              </DialogActionTrigger>
-              <Button variant="solid" type="submit" loading={isSubmitting}>
-                Save
-              </Button>
-            </ButtonGroup>
-          </DialogFooter>
-        </form>
+              </ButtonGroup>
+            </DialogFooter>
+          </form>
+        </Box>
         <DialogCloseTrigger />
       </DialogContent>
     </DialogRoot>

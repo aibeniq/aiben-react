@@ -30,6 +30,115 @@ from langchain_community.vectorstores import Chroma
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
 
+def load_correct_embeddings_model(
+    session: SessionDep,
+    embedding_model_id: Optional[uuid.UUID] = None
+) -> Any:
+    """
+    Load the correct embeddings model based on the provided embedding_model_id or default model.
+
+    Args:
+        session (SessionDep): The database session.
+        embedding_model_id (Optional[uuid.UUID]): The ID of the embedding model to load.
+
+    Returns:
+        embeddings: The loaded embeddings model.
+        model_id: The ID of the embedding model.
+        provider: The provider of the embedding model.
+    """
+    if embedding_model_id:
+        print("Using provided embedding model ID:", embedding_model_id)
+        # Verify the embedding model exists
+        model = session.get(EmbeddingModel, embedding_model_id)
+        if not model:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Embedding model with ID {embedding_model_id} not found"
+            )
+        model_id = model.model_id
+        provider = model.provider
+    else:
+        # Get the default embedding model
+        default_model = session.exec(
+            select(EmbeddingModel)
+            .where(EmbeddingModel.is_default == True)
+        ).first()
+
+        print("Default embedding model:", default_model)
+
+        if default_model:
+            model_id = default_model.model_id
+            provider = default_model.provider
+        else:
+            print("No default embedding model found, using hardcoded value.")
+            # Fallback to hardcoded value if no default model
+            model_id = "all-MiniLM-L6-v2"
+            provider = "huggingface"
+
+    # Initialize embeddings with the selected model
+    try:
+        embeddings = load_embeddings_model(
+            provider=provider,
+            model_id=model_id
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Error initializing embedding model {model_id}: {str(e)}"
+        )
+
+    print(f"Using embedding model: {model_id}")
+    return embeddings, model_id, provider
+
+def load_uploaded_file(file: UploadFile) -> List[Any]:
+    """
+    Load an uploaded file based on its type (e.g., PDF, text file).
+
+    Args:
+        file (UploadFile): The uploaded file to process.
+
+    Returns:
+        List[Any]: A list of loaded documents from the file.
+    """
+    import tempfile
+    import mimetypes
+    from langchain_community.document_loaders import TextLoader, PyPDFLoader
+
+    print(f"Processing file: {file.filename}")
+    content_type = file.content_type or mimetypes.guess_type(file.filename)[0]
+    print(f"Detected content type: {content_type}")
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as temp_file:
+        temp_file.write(file.file.read())  # Write the file content to the temporary file
+        temp_file_path = temp_file.name
+
+    try:
+        if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
+            print("Loading PDF with PyPDFLoader...")
+            loader = PyPDFLoader(temp_file_path)
+            loaded_documents = loader.load()
+        else:
+            print("Loading text with TextLoader...")
+            # Try with different encodings if utf-8 fails
+            try:
+                loader = TextLoader(temp_file_path, encoding="utf-8")
+                loaded_documents = loader.load()
+            except UnicodeDecodeError:
+                print("UTF-8 decoding failed. Retrying with Latin-1 encoding...")
+                loader = TextLoader(temp_file_path, encoding="latin-1")
+                loaded_documents = loader.load()
+
+        return loaded_documents
+    except Exception as e:
+        print(f"Error processing file {file.filename}: {str(e)}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Error processing file {file.filename}: {str(e)}"
+        )
+    finally:
+        # Clean up the temporary file
+        os.unlink(temp_file_path)
+
 @router.get("/", response_model=KnowledgeBasesPublic)
 def read_knowledge_bases(
     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
@@ -170,44 +279,10 @@ def create_knowledge_base(
     # Initialize variables for Chroma
     documents = []
 
-    # Process each file
+    # Process each uploaded file
     for file in files:
-        print(f"Received file: {file}")
-        content_type = file.content_type or mimetypes.guess_type(file.filename)[0]
-        print(f"Content type: {content_type}")
-        
-        with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as temp_file:
-            temp_file.write(file.file.read())  # Write the file content to the temporary file
-            temp_file_path = temp_file.name 
-
-        # Choose appropriate loader based on file type
-        try:
-            if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
-                print("Loading PDF with PyPDFLoader...")
-                loader = PyPDFLoader(temp_file_path)
-                loaded_documents = loader.load()
-            else:
-                print("Loading text with TextLoader...")
-                # Try with different encodings if utf-8 fails
-                try:
-                    loader = TextLoader(temp_file_path, encoding="utf-8")
-                    loaded_documents = loader.load()
-                except UnicodeDecodeError:
-                    # Try with a more forgiving encoding
-                    loader = TextLoader(temp_file_path, encoding="latin-1")
-                    loaded_documents = loader.load()
-
-            # Append loaded documents to the list
-            documents.extend(loaded_documents)
-        except Exception as e:
-            # Clean up the temp file
-            os.unlink(temp_file_path)
-            # Log the error and continue with other files or raise exception
-            print(f"Error processing file {file.filename}: {str(e)}")
-            raise HTTPException(
-                status_code=400,
-                detail=f"Error processing file {file.filename}: {str(e)}"
-            )
+        loaded_documents = load_uploaded_file(file)
+        documents.extend(loaded_documents)
 
         # Reset the file pointer before passing to create_source_entries
         file.file.seek(0)
@@ -229,52 +304,10 @@ def create_knowledge_base(
 
     print("Initializing embeddings...")
 
-    # Get embedding model - first try the one provided in the request
-    if knowledge_base_in.embedding_model_id:
-
-        print("Using provided embedding model ID:", knowledge_base_in.embedding_model_id)
-        # Verify the embedding model exists
-        model = session.get(EmbeddingModel, knowledge_base_in.embedding_model_id)
-        if not model:
-            raise HTTPException(
-                status_code=404, 
-                detail=f"Embedding model with ID {knowledge_base_in.embedding_model_id} not found"
-            )
-        model_id = model.model_id
-        provider = model.provider
-        embedding_model_id = model.id
-    else:
-        # Get the default embedding model
-        default_model = session.exec(
-            select(EmbeddingModel)
-            .where(EmbeddingModel.is_default == True)
-        ).first()
-
-        print("Default embedding model:", default_model)
-        
-        if default_model:
-            model_id = default_model.model_id
-            provider = default_model.provider
-            embedding_model_id = default_model.id
-        else:
-            print("No default embedding model found, using hardcoded value.")
-            # Fallback to hardcoded value if no default model
-            model_id = "all-MiniLM-L6-v2"
-            default_model = "huggingface"
-            embedding_model_id = None
-    
-    # Initialize embeddings with the selected model
-
-    try:
-        embeddings = load_embeddings_model(
-            provider=provider,
-            model_id=model_id
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Error initializing embedding model {model_id}: {str(e)}"
-        )
+    embeddings, model_id, provider = load_correct_embeddings_model(
+        session=session,
+        embedding_model_id=knowledge_base_in.embedding_model_id
+    )
 
     print(f"Using embedding model: {model_id}")
 
@@ -319,7 +352,7 @@ def create_knowledge_base(
         update={
             "owner_id": current_user.id,
             "data": zip_buffer.read(),
-            "embedding_model_id": embedding_model_id,  # Store the embedding model ID
+            "embedding_model_id": knowledge_base_in.embedding_model_id,
             "date_created": datetime.utcnow(),
             "date_modified": datetime.utcnow(),
         }
@@ -382,6 +415,7 @@ def update_knowledge_base(
         chroma_dir = "./chroma_db"
         if os.path.exists(chroma_dir):
             print(f"Removing existing {chroma_dir} directory...")
+            set_write_permissions("./chroma_db")
             shutil.rmtree(chroma_dir)
             os.makedirs(chroma_dir, exist_ok=True)
         
@@ -400,25 +434,15 @@ def update_knowledge_base(
 
         # Load the existing Chroma VectorDB with the same embedding model
         print("Loading existing Chroma VectorDB...")
+
+        # Use the new function to load the embeddings model
+        embeddings, model_id, provider = load_correct_embeddings_model(
+            session=session,
+            embedding_model_id=knowledge_base_in.embedding_model_id
+        )
         
-        # Get the embedding model ID from the knowledge base
-        if knowledge_base.embedding_model_id:
-            model = session.get(EmbeddingModel, knowledge_base.embedding_model_id)
-            if model:
-                model_id = model.model_id
-            else:
-                # Fallback if model was deleted
-                model_id = "all-MiniLM-L6-v2"
-        else:
-            # For backwards compatibility with KBs created before tracking
-            model_id = "all-MiniLM-L6-v2"
-            
-        print(f"Using embedding model: {model_id}")
         try:
-            embeddings = load_embeddings_model(
-                provider=model.provider,
-                model_id=model.model_id
-            )
+            
             chroma_vector_database = Chroma(persist_directory=chroma_dir, embedding_function=embeddings)
         except Exception as e:
             # Clean up on loading error
@@ -434,13 +458,7 @@ def update_knowledge_base(
             print("Adding new files to VectorDB...")
             documents = []
             for file in files:
-                with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as temp_file:
-                    temp_file.write(file.file.read())
-                    temp_file_path = temp_file.name
-
-                # Use TextLoader to load the file content
-                text_loader = TextLoader(temp_file_path, encoding="utf-8")
-                loaded_documents = text_loader.load()
+                loaded_documents = load_uploaded_file(file)
                 documents.extend(loaded_documents)
 
                 # Reset the file pointer before passing to create_source_entries
@@ -455,6 +473,7 @@ def update_knowledge_base(
                 )
 
             # Add the new documents to the VectorDB
+            set_write_permissions("./chroma_db")
             chroma_vector_database.add_documents(documents)
 
         # Handle file deletions
