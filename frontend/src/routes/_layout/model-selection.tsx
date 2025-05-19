@@ -16,6 +16,7 @@ import {
   Textarea,
   useDisclosure,
   VStack,
+  Separator,
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
@@ -25,11 +26,239 @@ import { Field } from "../../components/ui/field"
 import useCustomToast from "@/hooks/useCustomToast"
 
 // This will need to be added to your SDK client
-import { EmbeddingModelsService } from "@/client"
+import { LlmModelsService, EmbeddingModelsService } from "@/client"
 
 export const Route = createFileRoute("/_layout/model-selection")({
-  component: EmbeddingModels,
+  component: ModelSelection,
 })
+
+function ModelSelection() {
+  return (
+    <Container maxW="full">
+      {/* First section: Embedding Models */}
+      <EmbeddingModels />
+      
+      {/* Divider between sections */}
+      <Separator my={10} />
+      
+      {/* Second section: LLM Models */}
+      <LlmModels />
+    </Container>
+  );
+}
+
+function LlmModels() {
+  // Similar to your EmbeddingModels component but for LLMs
+  const [isOpen, setIsOpen] = useState(false);
+  const [modelName, setModelName] = useState("");
+  const [modelId, setModelId] = useState("");
+  const [modelDescription, setModelDescription] = useState("");
+  const [modelProvider, setModelProvider] = useState("openai");
+  
+  const queryClient = useQueryClient();
+  const { showSuccessToast, showErrorToast } = useCustomToast();
+  
+  // Query to fetch all LLM models
+  const { data: modelsData, isLoading } = useQuery({
+    queryKey: ["llmModels"],
+    queryFn: () => LlmModelsService.getLlmModels(),
+  });
+
+  // Add mutations for adding, updating, deleting models
+  const addModelMutation = useMutation({
+    mutationFn: (data: { name: string; model_id: string; provider: string; description: string }) =>
+      LlmModelsService.createLlmModel({ requestBody: data }),
+    onSuccess: () => {
+      showSuccessToast("LLM model added successfully")
+      resetForm()
+      setIsOpen(false)
+      queryClient.invalidateQueries({ queryKey: ["llmModels"] })
+    },
+    onError: (error) => {
+      showErrorToast(`Error adding LLM model: ${error.message}`)
+    },
+  })
+
+  // Mutation to set a model as default
+  const setDefaultMutation = useMutation({
+    mutationFn: (modelId: string) =>
+      LlmModelsService.setDefaultLlmModel({ modelId }),
+    onSuccess: () => {
+      showSuccessToast("Default LLM model updated successfully")
+      queryClient.invalidateQueries({ queryKey: ["llmModels"] })
+    },
+    onError: (error) => {
+      showErrorToast(`Error updating default LLM model: ${error.message}`)
+    },
+  })
+  
+  // Mutation to delete a model
+  const deleteModelMutation = useMutation({
+    mutationFn: (modelId: string) =>
+      LlmModelsService.deleteLlmModel({ modelId }),
+    onSuccess: () => {
+      showSuccessToast("LLM model deleted successfully")
+      queryClient.invalidateQueries({ queryKey: ["llmModels"] })
+    },
+    onError: (error) => {
+      showErrorToast(`Error deleting LLM model: ${error.message}`)
+    },
+  })
+
+  const resetForm = () => {
+    setModelName("")
+    setModelId("")
+    setModelDescription("")
+    setModelProvider("openai")
+  }
+
+  const handleAddModel = () => {
+    if (!modelName.trim() || !modelId.trim()) {
+      showErrorToast("Please fill in all required fields")
+      return
+    }
+    
+    addModelMutation.mutate({
+      name: modelName,
+      model_id: modelId,
+      provider: modelProvider,
+      description: modelDescription
+    })
+  }
+
+  const handleSetDefault = (modelId: string) => {
+    setDefaultMutation.mutate(modelId)
+  }
+  
+  const handleDeleteModel = (modelId: string) => {
+    if (confirm("Are you sure you want to delete this LLM model?")) {
+      deleteModelMutation.mutate(modelId)
+    }
+  }
+  
+  return (
+    <>
+      <Heading size="lg" mb={6}>
+        LLM Model Management
+      </Heading>
+      
+      <Text mb={4}>
+        Configure and manage the LLM models used for processing tasks.
+        The default model will be used for all operations.
+      </Text>
+      
+      <Button
+        leftIcon={<FiPlus />}
+        colorPalette="blue"
+        mb={6}
+        onClick={() => {
+          resetForm()
+          setIsOpen(true)
+        }}
+      >
+        Add New LLM Model
+      </Button>
+      
+      {isLoading ? (
+        <Flex justify="center" align="center" h="200px">
+          <Spinner size="lg" />
+        </Flex>
+      ) : !modelsData || modelsData.data.length === 0 ? (
+        <EmptyState.Root>
+          <EmptyState.Content>
+            <EmptyState.Icon>
+              <FiSettings size={24} />
+            </EmptyState.Icon>
+            <EmptyState.Title>No LLM models configured</EmptyState.Title>
+            <EmptyState.Description>
+              Add a new LLM model to get started
+            </EmptyState.Description>
+          </EmptyState.Content>
+        </EmptyState.Root>
+      ) : (
+        <Table.Root>
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeader>Name</Table.ColumnHeader>
+              <Table.ColumnHeader>Model ID</Table.ColumnHeader>
+              <Table.ColumnHeader>Provider</Table.ColumnHeader>
+              <Table.ColumnHeader>Description</Table.ColumnHeader>
+              <Table.ColumnHeader>Status</Table.ColumnHeader>
+              <Table.ColumnHeader>Actions</Table.ColumnHeader>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {modelsData.data.map((model) => (
+              <Table.Row key={model.id}>
+                <Table.Cell>{model.name}</Table.Cell>
+                <Table.Cell>
+                  <code>{model.model_id}</code>
+                </Table.Cell>
+                <Table.Cell>{model.provider}</Table.Cell>
+                <Table.Cell>{model.description}</Table.Cell>
+                <Table.Cell>
+                  {model.is_default ? (
+                    <Badge colorPalette="green" size="sm">Default</Badge>
+                  ) : (
+                    <Badge colorPalette="gray" size="sm">Available</Badge>
+                  )}
+                </Table.Cell>
+                <Table.Cell>
+                  <HStack spacing={2}>
+                    {!model.is_default && (
+                      <Button
+                        size="xs"
+                        colorPalette="blue"
+                        onClick={() => handleSetDefault(model.id)}
+                      >
+                        Set as Default
+                      </Button>
+                    )}
+                    {model.owner_id && (
+                      <Button
+                        size="xs"
+                        colorPalette="red"
+                        onClick={() => handleDeleteModel(model.id)}
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </HStack>
+                </Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table.Root>
+      )}
+      
+      {/* Dialog for adding a new LLM model */}
+      <Dialog.Root open={isOpen} onOpenChange={(details) => setIsOpen(details.open)}>
+        <Dialog.Content size="lg">
+          <Dialog.Header>Add New LLM Model</Dialog.Header>
+          <Dialog.CloseTrigger />
+          <Dialog.Body>
+            <VStack spacing={4} align="stretch">
+              {/* Your form fields... */}
+            </VStack>
+          </Dialog.Body>
+          
+          <Dialog.Footer>
+            <Button variant="outline" mr={3} onClick={() => setIsOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              colorPalette="blue"
+              onClick={handleAddModel}
+            >
+              Add Model
+            </Button>
+          </Dialog.Footer>
+        </Dialog.Content>
+      </Dialog.Root>
+    </>
+  );
+}
+
 
 function EmbeddingModels() {
   // Update your state management
@@ -136,8 +365,7 @@ function EmbeddingModels() {
     setIsValidating(true)
     validateModelMutation.mutate({
         model_id: modelId,
-        provider: modelProvider,
-        api_key: modelProvider === "openai" ? apiKey : undefined
+        provider: modelProvider
     })
   }
   
@@ -157,8 +385,7 @@ function EmbeddingModels() {
         name: modelName,
         model_id: modelId,
         provider: modelProvider,
-        description: modelDescription,
-        api_key: modelProvider === "openai" ? apiKey : undefined
+        description: modelDescription
     })
     }
   

@@ -50,6 +50,9 @@ import type {
   KnowledgeBasesUpdateKnowledgeBaseResponse,
   KnowledgeBasesDeleteKnowledgeBaseData,
   KnowledgeBasesDeleteKnowledgeBaseResponse,
+  LlmModelsGetLlmModelsData,
+  LlmModelsGetLlmModelsResponse,
+  LlmModelsGetDefaultLlmModelResponse,
   LoginLoginAccessTokenData,
   LoginLoginAccessTokenResponse,
   LoginTestTokenResponse,
@@ -669,6 +672,46 @@ export class KnowledgeBasesService {
       errors: {
         422: "Validation Error",
       },
+    })
+  }
+}
+
+export class LlmModelsService {
+  /**
+   * Get Llm Models
+   * Get all LLM models.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @returns LlmModelsPublic Successful Response
+   * @throws ApiError
+   */
+  public static getLlmModels(
+    data: LlmModelsGetLlmModelsData = {},
+  ): CancelablePromise<LlmModelsGetLlmModelsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/llm-models/",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Default Llm Model
+   * Get the default LLM model.
+   * @returns LlmModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static getDefaultLlmModel(): CancelablePromise<LlmModelsGetDefaultLlmModelResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/llm-models/default",
     })
   }
 }

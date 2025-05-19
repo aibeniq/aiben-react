@@ -1,6 +1,6 @@
 import uuid
-from app.models import FormConnectRequest, FormConnectResponse, FormConnectForm
-
+from app.models import FormConnectRequest, FormConnectResponse, FormConnectForm, ModelProvider, LlmModel
+from app.services.llms import create_llm
 from app.api.deps import CurrentUser, SessionDep
 
 from sqlmodel import Session, select
@@ -34,7 +34,29 @@ os.environ["OPENAI_API_KEY"] = openai_api_key
 router = APIRouter(prefix="/formconnect", tags=["formconnect"])
 
 # Initialize the LLM
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+#llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)  #OLD, hard-coded OpenAI call
+#load the default LLM from the database
+def get_default_llm(session: SessionDep):
+    """Get the current default LLM from the database."""
+    # Try to get the default model
+    default_model = session.exec(
+        select(LlmModel)
+        .where(LlmModel.is_default == True)
+    ).first()
+    
+    # If no default model is found, fallback to a hardcoded value
+    if not default_model:
+        return create_llm(
+            provider=ModelProvider.OPENAI,
+            model_id="gpt-4o-mini",
+            temperature=0.0
+        )
+    
+    return create_llm(
+        provider=default_model.provider,
+        model_id=default_model.model_id,
+        temperature=0.0
+    )
 
 def generate_template(questions: List[str]) -> Dict[str, str]:
     """
@@ -43,7 +65,7 @@ def generate_template(questions: List[str]) -> Dict[str, str]:
     """
     return {question: "" for question in questions}
 
-async def extract_questions_from_digitized_document(file: UploadFile, template: Dict[str, str]) -> Dict[str, str]:
+async def extract_questions_from_digitized_document(file: UploadFile, template: Dict[str, str], llm=None) -> Dict[str, str]:
     """
     Extract questions from a document using the LLM.
     """
@@ -331,6 +353,9 @@ async def process_form(
     - digitized_files: Standard text extraction
     - handwritten_files: OCR-based extraction (placeholder)
     """
+    # Get the default LLM
+    llm = get_default_llm(session)
+    
     total_files = (len(digitized_files) if digitized_files else 0) + (len(handwritten_files) if handwritten_files else 0)
     print(f"Now processing {total_files} files ({len(digitized_files) if digitized_files else 0} digitized, {len(handwritten_files) if handwritten_files else 0} handwritten)...")
     

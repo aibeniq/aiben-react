@@ -133,11 +133,27 @@ export type KnowledgeBasesPublic = {
   count: number
 }
 
+export type LlmModelPublic = {
+  id?: string
+  name?: string
+  model_id?: string
+  provider?: ModelProvider
+  description?: string
+  is_default?: boolean
+  owner_id?: string | null
+  date_created?: string
+  date_modified?: string
+}
+
+export type LlmModelsPublic = {
+  data: Array<LlmModelPublic>
+}
+
 export type Message = {
   message: string
 }
 
-export type ModelProvider = "huggingface" | "openai"
+export type ModelProvider = "huggingface" | "openai" | "ollama"
 
 export type NewPassword = {
   token: string
@@ -374,6 +390,15 @@ export type KnowledgeBasesDeleteKnowledgeBaseData = {
 }
 
 export type KnowledgeBasesDeleteKnowledgeBaseResponse = Message
+
+export type LlmModelsGetLlmModelsData = {
+  limit?: number
+  skip?: number
+}
+
+export type LlmModelsGetLlmModelsResponse = LlmModelsPublic
+
+export type LlmModelsGetDefaultLlmModelResponse = LlmModelPublic
 
 export type LoginLoginAccessTokenData = {
   formData: Body_login_login_access_token

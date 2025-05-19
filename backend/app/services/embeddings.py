@@ -24,6 +24,12 @@ def load_embeddings_model(provider: ModelProvider, model_id: str, api_key: Optio
             return OpenAIEmbeddings(model=model_id, openai_api_key=api_key)
         else:
             return OpenAIEmbeddings(model=model_id)
+        
+    elif provider == ModelProvider.OLLAMA:
+        # Configure Ollama embeddings
+        # The base_url is the Ollama server location (default is http://localhost:11434)
+        base_url = "http://localhost:11434"  # You might want to make this configurable
+        return OllamaEmbeddings(model=model_id, base_url=base_url)
     
     else:
         raise ValueError(f"Unsupported model provider: {provider}")
