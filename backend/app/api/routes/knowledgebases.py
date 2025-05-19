@@ -475,17 +475,37 @@ def update_knowledge_base(
                 for source in sources_to_remove:
                     chroma_vector_database.delete(ids=[str(source.source_data_id)])
 
-                # Delete entries from the Source table
+                # 1. First, only delete Source entries for THIS specific knowledge base
+                sources_to_delete = session.exec(
+                    select(Source).where(
+                        (Source.source_data_id.in_(knowledge_base_in.removed_file_ids)) & 
+                        (Source.knowledge_base_id == id)
+                    )
+                ).all()
+
+                # 2. Remember which source_data_ids we're removing
+                source_data_ids_to_check = [source.source_data_id for source in sources_to_delete]
+
+                # 3. Delete the specific Source entries (just the associations)
                 session.exec(
-                    delete(Source)
-                    .where(Source.source_data_id.in_(knowledge_base_in.removed_file_ids))
+                    delete(Source).where(
+                        (Source.source_data_id.in_(knowledge_base_in.removed_file_ids)) & 
+                        (Source.knowledge_base_id == id)
+                    )
                 )
 
-                # Delete entries from the SourceData table
-                session.exec(
-                    delete(SourceData)
-                    .where(SourceData.id.in_(knowledge_base_in.removed_file_ids))
-                )
+                # 4. For each source_data_id, check if it's still referenced by any Source
+                for source_data_id in source_data_ids_to_check:
+                    # Count how many Sources still reference this source_data_id
+                    remaining_references = session.exec(
+                        select(func.count()).where(Source.source_data_id == source_data_id)
+                    ).one()
+                    
+                    # If no Sources reference this source_data_id anymore, delete the SourceData
+                    if remaining_references == 0:
+                        session.exec(
+                            delete(SourceData).where(SourceData.id == source_data_id)
+                        )
 
             # Zip the updated VectorDB
             print("Zipping updated VectorDB...")
