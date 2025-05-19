@@ -284,11 +284,6 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                         .map((file) => (
                           <HStack key={file.id} w="full" justify="space-between">
                             <Link
-                              href={
-                                file.data_base64
-                                  ? `data:${file.content_type || "application/octet-stream"};base64,${file.data_base64}`
-                                  : "#"
-                              }
                               target="_blank"
                               rel="noopener noreferrer"
                               color="blue.500"
