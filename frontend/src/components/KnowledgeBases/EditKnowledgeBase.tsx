@@ -49,6 +49,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
   console.log("KnowledgeBase item ID:", item.id);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [formIsValid, setFormIsValid] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [removedFileIds, setRemovedFileIds] = useState<string[]>([]);
   const queryClient = useQueryClient();
@@ -63,13 +64,29 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
     enabled: isOpen, // Only fetch when dialog is open
   });
 
+  const validateForm = () => {
+    // Check if title is valid and there's at least one file (existing or new)
+    const hasTitleValue = !!knowledgeBase?.title;
+    const hasExistingFiles = knowledgeBase?.files && 
+      knowledgeBase.files.filter(f => !removedFileIds.includes(f.id)).length > 0;
+    const hasNewFiles = selectedFiles.length > 0;
+    const hasFiles = hasExistingFiles || hasNewFiles;
+    
+    return hasTitleValue && hasFiles;
+  };
+
+  useEffect(() => {
+    setFormIsValid(validateForm());
+  }, [knowledgeBase, selectedFiles, removedFileIds]);
+
+
   console.log("KnowledgeBase data:", knowledgeBase);
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isValid: hookFormIsValid, isSubmitting },
   } = useForm<KnowledgeBaseUpdateForm>({
     mode: "onBlur",
     criteriaMode: "all",
@@ -80,23 +97,12 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
     },
   });
 
-  // Add useEffect to update form when knowledgeBase data loads
-  useEffect(() => {
-    if (knowledgeBase) {
-      reset({
-        title: knowledgeBase.title,
-        description: knowledgeBase.description ?? undefined,
-      });
-    }
-  }, [knowledgeBase, reset]);
-
   const mutation = useMutation({
-    mutationFn: (
-      data: KnowledgeBaseUpdateForm & {
+    mutationFn: async (data: KnowledgeBaseUpdateForm & {
         files: File[];
         removedFileIds: string[];
-      }
-    ) => {
+      }) => {
+  
       console.log("Now beginning mutation...");
 
       const payload = {
@@ -137,6 +143,18 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
     console.log("Submitting form data:", data);
     console.log("Selected files:", selectedFiles);
     console.log("Removed file IDs:", removedFileIds);
+
+    console.log("Form submitted, isSubmitting:", isSubmitting);
+
+    const hasExistingFiles = knowledgeBase?.files && 
+      knowledgeBase.files.filter(f => !removedFileIds.includes(f.id)).length > 0;
+    const hasNewFiles = selectedFiles.length > 0;
+    
+    if (!hasExistingFiles && !hasNewFiles) {
+      showErrorToast("At least one file is required.");
+      return;
+    }
+
     mutation.mutate({
       ...data,
       files: selectedFiles,
@@ -169,6 +187,16 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
     multiple: true,
   });
 
+  // Add useEffect to update form when knowledgeBase data loads
+  useEffect(() => {
+    if (knowledgeBase) {
+      reset({
+        title: knowledgeBase.title,
+        description: knowledgeBase.description ?? undefined,
+      });
+    }
+  }, [knowledgeBase, reset]);
+
   return (
     <DialogRoot
       size={{ base: "xs", md: "md" }}
@@ -185,7 +213,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
       <DialogContent>
         <Box position="relative">
           {/* Add spinner and grey overlay when submitting */}
-          {isSubmitting && (
+          {mutation.isPending && (
             <Box
               position="absolute"
               top="0"
@@ -358,8 +386,13 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                     Cancel
                   </Button>
                 </DialogActionTrigger>
-                <Button variant="solid" type="submit" loading={isSubmitting}>
-                  Save
+                <Button 
+                  variant="solid" 
+                  type="submit" 
+                  disabled={!formIsValid || isSubmitting} 
+                  loading={isSubmitting}
+                >
+                  {isSubmitting ? "Saving..." : "Save"}
                 </Button>
               </ButtonGroup>
             </DialogFooter>
