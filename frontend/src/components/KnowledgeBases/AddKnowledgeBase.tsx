@@ -237,7 +237,12 @@ const AddKnowledgeBase = () => {
               <select
                 value={selectedEmbeddingModelId || ""}
                 onChange={(e) => setSelectedEmbeddingModelId(e.target.value || null)}
-                className="w-full p-2 border rounded"
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  borderRadius: '0.375rem',
+                  borderColor: '#E2E8F0',
+                }}
               >
                 {embeddingModels.map((model) => (
                   <option key={model.id} value={model.id}>
