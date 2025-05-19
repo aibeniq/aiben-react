@@ -51,6 +51,13 @@ def initialize_default_models(session: SessionDep):
             "provider": ModelProvider.HUGGINGFACE,  # Specify provider explicitly
             "description": "Larger version of MiniLM with improved performance.",
             "is_default": False
+        },
+        {
+            "name": "Ollama - nomic-embed-text",
+            "model_id": "nomic-embed-text",
+            "provider": ModelProvider.OLLAMA,
+            "description": "A local embedding model running via Ollama.",
+            "is_default": False
         }
     ]
     
