@@ -61,6 +61,9 @@ def get_default_llm(session: SessionDep):
         select(LlmModel)
         .where(LlmModel.is_default == True)
     ).first()
+
+    if default_model:
+        print(f"Loading default LLM model: {default_model.name} ({default_model.model_id}, provider: {default_model.provider})")
     
     # If no default model is found, fallback to a hardcoded value
     if not default_model:
