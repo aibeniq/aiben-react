@@ -23,11 +23,6 @@ export type Body_login_login_access_token = {
   client_secret?: string | null
 }
 
-export type Body_veradoc_process_checklist = {
-  digitized_files?: Array<Blob | File>
-  handwritten_files?: Array<Blob | File>
-}
-
 export type Body_veradoc_process_rag_checklist = {
   files: Array<Blob | File>
   handwritten_files?: Array<Blob | File>
@@ -133,6 +128,14 @@ export type KnowledgeBasesPublic = {
   count: number
 }
 
+export type LlmModelCreate = {
+  name: string
+  model_id: string
+  provider?: ModelProvider
+  description?: string
+  is_default?: boolean
+}
+
 export type LlmModelPublic = {
   id?: string
   name?: string
@@ -147,6 +150,11 @@ export type LlmModelPublic = {
 
 export type LlmModelsPublic = {
   data: Array<LlmModelPublic>
+}
+
+export type LlmModelsValidate = {
+  model_id: string
+  provider: ModelProvider
 }
 
 export type Message = {
@@ -398,7 +406,31 @@ export type LlmModelsGetLlmModelsData = {
 
 export type LlmModelsGetLlmModelsResponse = LlmModelsPublic
 
+export type LlmModelsCreateLlmModelData = {
+  requestBody: LlmModelCreate
+}
+
+export type LlmModelsCreateLlmModelResponse = LlmModelPublic
+
 export type LlmModelsGetDefaultLlmModelResponse = LlmModelPublic
+
+export type LlmModelsDeleteLlmModelData = {
+  modelId: string
+}
+
+export type LlmModelsDeleteLlmModelResponse = Message
+
+export type LlmModelsValidateLlmModelData = {
+  requestBody: LlmModelsValidate
+}
+
+export type LlmModelsValidateLlmModelResponse = Message
+
+export type LlmModelsSetDefaultLlmModelData = {
+  modelId: string
+}
+
+export type LlmModelsSetDefaultLlmModelResponse = LlmModelPublic
 
 export type LoginLoginAccessTokenData = {
   formData: Body_login_login_access_token
@@ -493,13 +525,6 @@ export type UtilsTestEmailData = {
 export type UtilsTestEmailResponse = Message
 
 export type UtilsHealthCheckResponse = boolean
-
-export type VeradocProcessChecklistData = {
-  formData?: Body_veradoc_process_checklist
-  questions: string
-}
-
-export type VeradocProcessChecklistResponse = VeraDocResponse
 
 export type VeradocProcessRagChecklistData = {
   formData: Body_veradoc_process_rag_checklist

@@ -344,3 +344,7 @@ class LlmModelPublic(LlmModel):
 
 class LlmModelsPublic(SQLModel):
     data: List[LlmModelPublic]
+
+class LlmModelsValidate(SQLModel):
+    model_id: str
+    provider: ModelProvider

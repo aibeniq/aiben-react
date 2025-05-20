@@ -16,6 +16,7 @@ def load_embeddings_model(provider: ModelProvider, model_id: str, api_key: Optio
         An initialized embeddings model ready for use
     """
     if provider == ModelProvider.HUGGINGFACE:
+        print("Loading HuggingFace embeddings model with model_id:", model_id)
         return HuggingFaceEmbeddings(model_name=model_id)
     
     elif provider == ModelProvider.OPENAI:

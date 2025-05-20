@@ -80,7 +80,7 @@ const AddKnowledgeBase = () => {
     return KnowledgeBasesService.createKnowledgeBase({
       title: data.title, // Still required for the `query` object
       description: data.description, // Still required for the `query` object
-      embedding_model_id: data.embedding_model_id,
+      embeddingModelId: data.embedding_model_id,
       formData: {
         files: data.files, // ✅ this is what the SDK expects
       }, // Include all fields in the FormData payload

@@ -1,7 +1,9 @@
-from app.models import ModelProvider
+from app.models import ModelProvider, LlmModel
 from langchain_openai import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
 from typing import Optional, Any, Dict
+from app.api.deps import SessionDep
+from sqlmodel import select
 
 def create_llm(provider: ModelProvider, model_id: str, 
                temperature: float = 0.0, 
@@ -50,3 +52,26 @@ def create_llm(provider: ModelProvider, model_id: str,
     
     else:
         raise ValueError(f"Unsupported LLM provider: {provider}")
+    
+
+def get_default_llm(session: SessionDep):
+    """Get the current default LLM from the database."""
+    # Try to get the default model
+    default_model = session.exec(
+        select(LlmModel)
+        .where(LlmModel.is_default == True)
+    ).first()
+    
+    # If no default model is found, fallback to a hardcoded value
+    if not default_model:
+        return create_llm(
+            provider=ModelProvider.OPENAI,
+            model_id="gpt-4o-mini",
+            temperature=0.0
+        )
+    
+    return create_llm(
+        provider=default_model.provider,
+        model_id=default_model.model_id,
+        temperature=0.0
+    )
