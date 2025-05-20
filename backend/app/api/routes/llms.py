@@ -107,6 +107,8 @@ def get_default_llm_model(session: SessionDep) -> LlmModelPublic:
     if not model:
         raise HTTPException(status_code=404, detail="No default LLM model found")
     
+    print(f"Loading default LLM model: {model.name} ({model.model_id}, provider: {model.provider})")
+    
     return model
 
 @router.post("/", response_model=LlmModelPublic)

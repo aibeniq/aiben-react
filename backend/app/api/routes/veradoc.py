@@ -116,6 +116,24 @@ async def process_rag_checklist(
                 model_id=model_id
             )
             chroma_db = Chroma(persist_directory=temp_dir, embedding_function=embeddings)
+
+            # Print all metadata in the vectorstore
+            print("======= CHROMA VECTORDB METADATA CONTENTS =======")
+            # Get all documents with their metadata
+            all_docs = chroma_db.get()
+            if all_docs and 'metadatas' in all_docs:
+                for i, metadata in enumerate(all_docs['metadatas']):
+                    print(f"Document {i+1} Metadata: {metadata}")
+                    # If you want to see document content as well
+                    if 'documents' in all_docs and i < len(all_docs['documents']):
+                        doc_preview = all_docs['documents'][i][:200] + "..." if len(all_docs['documents'][i]) > 100 else all_docs['documents'][i]
+                        print(f"Content preview: {doc_preview}")
+                    print("-" * 50)
+            else:
+                print("No documents or metadata found in the vectorstore")
+            print("================================================")
+
+
             retriever = chroma_db.as_retriever(search_kwargs={"k": 5})
             
             # 4. Initialize the LLM
@@ -193,6 +211,16 @@ async def process_rag_checklist(
                 # Step 1: Retrieve relevant context from the knowledge base
                 docs = retriever.get_relevant_documents(question)
                 context = "\n\n".join([doc.page_content for doc in docs])
+
+                # Store source documents for citation
+                source_citations = []
+                for doc in docs:
+                    # Extract metadata and source text
+                    source = {
+                        "content": doc.page_content,
+                        "metadata": doc.metadata
+                    }
+                    source_citations.append(source)
                 
                 # Step 2: Get the relevant policy context for this question
                 context_chain = context_prompt | llm
@@ -206,12 +234,17 @@ async def process_rag_checklist(
                     "question": question,
                     "question_context": question_context
                 })
+
+                print("Source citations for question:", question)
+                for source in source_citations:
+                    print(f"Source: {source['metadata'].get('source', 'Unknown')}, Content: {source['content']}")
                 
                 # Store the question-answer pair with context
                 qa_pairs.append({
                     "question": question,
                     "answer": qa_response.content,
-                    "context": question_context
+                    "context": question_context,
+                    "source_citations": source_citations
                 })
             
             # 8. Generate the final evaluation
