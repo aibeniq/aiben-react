@@ -50,6 +50,17 @@ import type {
   KnowledgeBasesUpdateKnowledgeBaseResponse,
   KnowledgeBasesDeleteKnowledgeBaseData,
   KnowledgeBasesDeleteKnowledgeBaseResponse,
+  LlmModelsGetLlmModelsData,
+  LlmModelsGetLlmModelsResponse,
+  LlmModelsCreateLlmModelData,
+  LlmModelsCreateLlmModelResponse,
+  LlmModelsGetDefaultLlmModelResponse,
+  LlmModelsDeleteLlmModelData,
+  LlmModelsDeleteLlmModelResponse,
+  LlmModelsValidateLlmModelData,
+  LlmModelsValidateLlmModelResponse,
+  LlmModelsSetDefaultLlmModelData,
+  LlmModelsSetDefaultLlmModelResponse,
   LoginLoginAccessTokenData,
   LoginLoginAccessTokenResponse,
   LoginTestTokenResponse,
@@ -82,8 +93,6 @@ import type {
   UtilsTestEmailData,
   UtilsTestEmailResponse,
   UtilsHealthCheckResponse,
-  VeradocProcessChecklistData,
-  VeradocProcessChecklistResponse,
   VeradocProcessRagChecklistData,
   VeradocProcessRagChecklistResponse,
   VeradocGetChecklistsResponse,
@@ -279,7 +288,7 @@ export class EmbeddingModelsService {
 export class FormconnectService {
   /**
    * Process Form
-   * Process the uploaded files and questions.
+   * Process the uploaded files and fields.
    *
    * Handles two types of files:
    * - digitized_files: Standard text extraction
@@ -673,6 +682,136 @@ export class KnowledgeBasesService {
   }
 }
 
+export class LlmModelsService {
+  /**
+   * Get Llm Models
+   * Get all LLM models.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @returns LlmModelsPublic Successful Response
+   * @throws ApiError
+   */
+  public static getLlmModels(
+    data: LlmModelsGetLlmModelsData = {},
+  ): CancelablePromise<LlmModelsGetLlmModelsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/llm-models/",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Create Llm Model
+   * Create a new LLM model.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns LlmModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static createLlmModel(
+    data: LlmModelsCreateLlmModelData,
+  ): CancelablePromise<LlmModelsCreateLlmModelResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/llm-models/",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Default Llm Model
+   * Get the default LLM model.
+   * @returns LlmModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static getDefaultLlmModel(): CancelablePromise<LlmModelsGetDefaultLlmModelResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/llm-models/default",
+    })
+  }
+
+  /**
+   * Delete Llm Model
+   * Delete an LLM model.
+   * @param data The data for the request.
+   * @param data.modelId
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static deleteLlmModel(
+    data: LlmModelsDeleteLlmModelData,
+  ): CancelablePromise<LlmModelsDeleteLlmModelResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/llm-models/{model_id}",
+      path: {
+        model_id: data.modelId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Validate Llm Model
+   * Validate if an LLM model ID is valid for the specified provider.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static validateLlmModel(
+    data: LlmModelsValidateLlmModelData,
+  ): CancelablePromise<LlmModelsValidateLlmModelResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/llm-models/validate",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Set Default Llm Model
+   * Set an LLM model as the default.
+   * @param data The data for the request.
+   * @param data.modelId
+   * @returns LlmModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static setDefaultLlmModel(
+    data: LlmModelsSetDefaultLlmModelData,
+  ): CancelablePromise<LlmModelsSetDefaultLlmModelResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/llm-models/{model_id}/set-default",
+      path: {
+        model_id: data.modelId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
 export class LoginService {
   /**
    * Login Access Token
@@ -1053,36 +1192,6 @@ export class UtilsService {
 }
 
 export class VeradocService {
-  /**
-   * Process Checklist
-   * Process the uploaded files and fields.
-   *
-   * Handles two types of files:
-   * - digitized_files: Standard text extraction
-   * - handwritten_files: OCR-based extraction (placeholder)
-   * @param data The data for the request.
-   * @param data.questions
-   * @param data.formData
-   * @returns VeraDocResponse Successful Response
-   * @throws ApiError
-   */
-  public static processChecklist(
-    data: VeradocProcessChecklistData,
-  ): CancelablePromise<VeradocProcessChecklistResponse> {
-    return __request(OpenAPI, {
-      method: "POST",
-      url: "/api/v1/veradoc/process",
-      query: {
-        questions: data.questions,
-      },
-      formData: data.formData,
-      mediaType: "multipart/form-data",
-      errors: {
-        422: "Validation Error",
-      },
-    })
-  }
-
   /**
    * Process Rag Checklist
    * Process the uploaded files using RAG with a knowledge base.

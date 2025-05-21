@@ -1,6 +1,6 @@
 import uuid
-from app.models import FormConnectRequest, FormConnectResponse, FormConnectForm
-
+from app.models import FormConnectRequest, FormConnectResponse, FormConnectForm, ModelProvider, LlmModel
+from app.services.llms import create_llm, get_default_llm
 from app.api.deps import CurrentUser, SessionDep
 
 from sqlmodel import Session, select
@@ -33,19 +33,16 @@ if not openai_api_key:
 os.environ["OPENAI_API_KEY"] = openai_api_key
 router = APIRouter(prefix="/formconnect", tags=["formconnect"])
 
-# Initialize the LLM
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+def generate_template(fields: List[str]) -> Dict[str, str]:
+    """
+    Generate a JSON template from a list of fields.
+    Each field will have a blank value.
+    """
+    return {field: "" for field in fields}
 
-def generate_template(questions: List[str]) -> Dict[str, str]:
+async def extract_fields_from_digitized_document(file: UploadFile, template: Dict[str, str], llm=None) -> Dict[str, str]:
     """
-    Generate a JSON template from a list of questions.
-    Each question will have a blank value.
-    """
-    return {question: "" for question in questions}
-
-async def extract_questions_from_digitized_document(file: UploadFile, template: Dict[str, str]) -> Dict[str, str]:
-    """
-    Extract questions from a document using the LLM.
+    Extract fields from a document using the LLM.
     """
     # Read the file content
     content = await file.read()
@@ -59,9 +56,9 @@ async def extract_questions_from_digitized_document(file: UploadFile, template: 
 
     # Create the prompt
     prompt_template = ChatPromptTemplate.from_template(
-        """Here is a template of the questions that I want you to extract from this document: {template}
+        """Here is a template of the fields that I want you to extract from this document: {template}
         Here is the full text of a document: {document_text}
-        Fill out the template based on the questions you can find."""
+        Fill out the template based on the fields you can find."""
     )
     prompt = prompt_template.format_prompt(template=template, document_text=text)
 
@@ -82,18 +79,18 @@ async def extract_questions_from_digitized_document(file: UploadFile, template: 
         # Return the content wrapped in a dictionary
         return {"raw_content": str(response.content)}
 
-async def extract_questions_from_handwritten_document(file: UploadFile, template: Dict[str, str]) -> Dict[str, str]:
+async def extract_fields_from_handwritten_document(file: UploadFile, template: Dict[str, str], llm) -> Dict[str, str]:
     """
-    Extract questions from a handwritten document by either:
+    Extract fields from a handwritten document by either:
     1. For PDFs: extracting images from the PDF and sending to the LLM
     2. For image files: sending the image directly to the LLM
     
     Args:
         file: Uploaded file containing handwritten content (PDF or image format)
-        template: Dictionary template of questions to extract
+        template: Dictionary template of fields to extract
         
     Returns:
-        Dictionary of extracted questions
+        Dictionary of extracted fields
     """
     # Read the file content
     content = await file.read()
@@ -110,11 +107,11 @@ async def extract_questions_from_handwritten_document(file: UploadFile, template
             
             # Create a prompt for the image
             prompt_template = ChatPromptTemplate.from_template(
-                """Here is a template of the questions that I want you to extract from this image: {template}
+                """Here is a template of the fields that I want you to extract from this image: {template}
                 
                 I'm sending you an image with handwritten content.
                 
-                For each question in the template, try to locate and extract the corresponding value from the image.
+                For each field in the template, try to locate and extract the corresponding value from the image.
                 Pay special attention to handwritten text and ensure accuracy in your extraction.
                 
                 Return your results as a JSON object matching the template structure.
@@ -143,7 +140,8 @@ async def extract_questions_from_handwritten_document(file: UploadFile, template
                 messages[0].content = content_parts
             
             # Call the LLM with image capability
-            multimodal_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+            #multimodal_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+            #response = multimodal_llm(messages)
             response = multimodal_llm(messages)
             
             # Parse response as JSON
@@ -193,11 +191,11 @@ async def extract_questions_from_handwritten_document(file: UploadFile, template
             
             # Create a prompt with the images for the LLM
             prompt_template = ChatPromptTemplate.from_template(
-                """Here is a template of the questions that I want you to extract from these document images: {template}
+                """Here is a template of the fields that I want you to extract from these document images: {template}
                 
                 I'm sending you images from a document with handwritten content.
                 
-                For each question in the template, try to locate and extract the corresponding value from the images.
+                For each field in the template, try to locate and extract the corresponding value from the images.
                 Pay special attention to handwritten text and ensure accuracy in your extraction.
                 
                 Return your results as a JSON object matching the template structure.
@@ -230,8 +228,9 @@ async def extract_questions_from_handwritten_document(file: UploadFile, template
                 messages[0].content = content_parts
             
             # Call the LLM (use a multimodal model that supports images)
-            multimodal_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
-            response = multimodal_llm(messages)
+            #multimodal_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+            #response = multimodal_llm(messages)
+            response = llm(messages)
             
             # Try to parse the response as JSON
             try:
@@ -254,7 +253,7 @@ async def extract_questions_from_handwritten_document(file: UploadFile, template
         # For non-PDF, non-image files, fall back to the regular extraction
         # but add a note that this was supposed to be processed as handwritten
         await file.seek(0)  # Reset file position
-        result = await extract_questions_from_digitized_document(file, template)
+        result = await extract_fields_from_digitized_document(file, template)
         
         # Add a note that this was meant to be processed as handwritten
         for key in result:
@@ -263,12 +262,12 @@ async def extract_questions_from_handwritten_document(file: UploadFile, template
         
         return result
 
-async def compare_multiple_documents(documents: List[Dict[str, str]], file_names: List[str]) -> str:
+async def compare_multiple_documents(documents: List[Dict[str, str]], file_names: List[str], llm) -> str:
     """
-    Compare questions across multiple documents using the LLM.
+    Compare fields across multiple documents using the LLM.
     
     Args:
-        documents: List of dictionaries containing extracted questions
+        documents: List of dictionaries containing extracted fields
         file_names: List of file names corresponding to the documents
         
     Returns:
@@ -285,12 +284,12 @@ async def compare_multiple_documents(documents: List[Dict[str, str]], file_names
         
         {documents}
         
-        Please analyze all the documents and identify any questions that have different values across documents.
+        Please analyze all the documents and identify any fields that have different values across documents.
         
         Create a markdown table with the following format:
-        1. First column should be titled "FIELD" and contain the question name
+        1. First column should be titled "FIELD" and contain the field name
         2. Each additional column should have the document name as header (e.g., "Document 1", "Document 2")
-        3. Include ONLY questions where there are discrepancies between documents
+        3. Include ONLY fields where there are discrepancies between documents
         
         After the table, please:
         1. For each discrepancy, suggest which value is most likely correct and why
@@ -306,7 +305,7 @@ async def compare_multiple_documents(documents: List[Dict[str, str]], file_names
         
         ONLY return the Markdown table -- do NOT return any other text. 
         Also, do NOT add tick marks like ``` and the label 'markdown': just give the actual markdown table content as raw text.
-        However, if there are no discrepancies, please state that all questions match across documents.
+        However, if there are no discrepancies, please state that all fields match across documents.
         """
     )
     
@@ -320,17 +319,21 @@ async def compare_multiple_documents(documents: List[Dict[str, str]], file_names
 
 @router.post("/process", response_model=FormConnectResponse)
 async def process_form(
+    session: SessionDep,
     form_connect_in: FormConnectRequest = Depends(),
     digitized_files: List[UploadFile] = File(None),
     handwritten_files: List[UploadFile] = File(None),
 ):
     """
-    Process the uploaded files and questions.
+    Process the uploaded files and fields.
     
     Handles two types of files:
     - digitized_files: Standard text extraction
     - handwritten_files: OCR-based extraction (placeholder)
     """
+    # Get the default LLM
+    llm = get_default_llm(session)
+    
     total_files = (len(digitized_files) if digitized_files else 0) + (len(handwritten_files) if handwritten_files else 0)
     print(f"Now processing {total_files} files ({len(digitized_files) if digitized_files else 0} digitized, {len(handwritten_files) if handwritten_files else 0} handwritten)...")
     
@@ -338,26 +341,26 @@ async def process_form(
     if total_files < 1:
         raise HTTPException(status_code=400, detail="At least one file must be uploaded.")
     
-    # Parse the questions into a list
-    question_list = form_connect_in.questions.splitlines()
+    # Parse the fields into a list
+    field_list = form_connect_in.fields.splitlines()
 
-    if not question_list:
-        raise HTTPException(status_code=400, detail="No questions provided.")
+    if not field_list:
+        raise HTTPException(status_code=400, detail="No fields provided.")
 
     # Generate the JSON template
-    template = generate_template(question_list)
+    template = generate_template(field_list)
 
-    # Extract questions from all documents
+    # Extract fields from all documents
     extracted_results = []
     file_names = []
     
     # Process digitized files using the existing function
     if digitized_files:
         for file in digitized_files:
-            extracted = await extract_questions_from_digitized_document(file, template)
+            extracted = await extract_fields_from_digitized_document(file, template, llm)
 
             print("Results for file name:", file.filename)
-            print("Extracted questions:", extracted)
+            print("Extracted fields:", extracted)
             extracted_results.append(extracted)
             file_names.append(f"{file.filename} (digitized)")
             
@@ -367,11 +370,11 @@ async def process_form(
     # Process handwritten files using a specialized function (placeholder)
     if handwritten_files:
         for file in handwritten_files:
-            extracted = await extract_questions_from_handwritten_document(file, template)
+            extracted = await extract_fields_from_handwritten_document(file, template, llm)
             extracted_results.append(extracted)
 
             print("Results for file name:", file.filename)
-            print("Extracted questions:", extracted)
+            print("Extracted fields:", extracted)
             
             file_names.append(f"{file.filename} (handwritten)")
             
@@ -385,8 +388,8 @@ async def process_form(
             "extracted_data": extracted_results[0]
         }
     else:
-        # Compare the extracted questions
-        comparison_result = await compare_multiple_documents(extracted_results, file_names)
+        # Compare the extracted fields
+        comparison_result = await compare_multiple_documents(extracted_results, file_names, llm)
         result = {
             "message": "Documents compared successfully",
             "comparison": comparison_result,
@@ -446,7 +449,7 @@ def update_form(form_id: uuid.UUID, updated_form: FormConnectForm, session: Sess
     
     form.name = updated_form.name
     form.description = updated_form.description
-    form.questions = updated_form.questions
+    form.fields = updated_form.fields
     form.date_modified = datetime.utcnow()
     
     session.add(form)

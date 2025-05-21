@@ -13,6 +13,7 @@ from io import BytesIO
 from app.api.deps import CurrentUser, SessionDep
 from app.models import KnowledgeBase, KnowledgeBaseCreate, KnowledgeBasePublic, KnowledgeBasesPublic, KnowledgeBaseUpdate, Message, Source, SourceData, EmbeddingModel
 from app.services.embeddings import load_embeddings_model
+from app.core.config import settings
 import hashlib
 
 from app.services.knowledgebases import KnowledgeBaseService
@@ -81,6 +82,7 @@ def load_correct_embeddings_model(
             provider=provider,
             model_id=model_id
         )
+        print("Embeddings model loaded successfully.")
     except Exception as e:
         raise HTTPException(
             status_code=400,
@@ -316,7 +318,10 @@ def create_knowledge_base(
     print("Splitting documents...")
 
     # Split documents into chunks using RecursiveCharacterTextSplitter
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=20)
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=settings.DOCUMENT_CHUNK_SIZE, 
+        chunk_overlap=settings.DOCUMENT_CHUNK_OVERLAP
+    )
     splits = text_splitter.split_documents(documents)
 
     print("Initializing embeddings...")
