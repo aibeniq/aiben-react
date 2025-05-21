@@ -337,8 +337,9 @@ function LlmModels() {
                           onClick={handleValidateModel}
                           isLoading={isValidating}
                           loadingText="Validating"
+                          disabled={!modelId.trim()}
                         >
-                          Validate
+                          {isValidating ? <Spinner size="sm" /> : "Validate"}
                         </Button>
                       </HStack>
                       {isModelValid !== null && (
@@ -453,16 +454,28 @@ function EmbeddingModels() {
   
   // Mutation to add a new model
   const addModelMutation = useMutation({
-    mutationFn: (data: { name: string; model_id: string; description: string }) =>
-      EmbeddingModelsService.createEmbeddingModel({ requestBody: data }),
-    onSuccess: () => {
-      showSuccessToast("Model added successfully")
-      resetForm()
-      onClose()
-      queryClient.invalidateQueries({ queryKey: ["embeddingModels"] })
+    mutationFn: (data: { name: string; model_id: string; provider: string; description: string }) => {
+      console.log("Sending data to createEmbeddingModel:", data);
+      return EmbeddingModelsService.createEmbeddingModel({ requestBody: data })
+        .then(response => {
+          console.log("Received successful response:", response);
+          return response;
+        })
+        .catch(error => {
+          console.error("Received error response:", error);
+          throw error;
+        });
+    },
+    onSuccess: (data) => {
+      console.log("Mutation completed successfully with data:", data);
+      showSuccessToast("Model added successfully");
+      resetForm();
+      onClose();
+      queryClient.invalidateQueries({ queryKey: ["embeddingModels"] });
     },
     onError: (error) => {
-      showErrorToast(`Error adding model: ${error.message}`)
+      console.error("Mutation failed with error:", error);
+      showErrorToast(`Error adding model: ${error.message}`);
     },
   })
   
@@ -725,8 +738,9 @@ function EmbeddingModels() {
                           onClick={handleValidateModel}
                           isLoading={isValidating}
                           loadingText="Validating"
+                          disabled={!modelId.trim()}
                         >
-                          Validate
+                          {isValidating ? <Spinner size="sm" /> : "Validate"}
                         </Button>
                       </HStack>
                       {isModelValid !== null && (

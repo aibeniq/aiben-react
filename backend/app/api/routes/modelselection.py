@@ -147,13 +147,35 @@ def create_embedding_model(
     """
     Create a new embedding model.
     """
-    # Check if the model_id is valid by trying to load it
+    # Check if the model_id is valid by trying to load it based on provider
     try:
-        _ = HuggingFaceEmbeddings(model_name=model_in.model_id)
+        if model_in.provider == ModelProvider.HUGGINGFACE:
+            # Validate HuggingFace model
+            _ = HuggingFaceEmbeddings(model_name=model_in.model_id)
+        elif model_in.provider == ModelProvider.OPENAI:
+            # Check if OpenAI API key is configured
+            api_key = os.environ.get("OPENAI_API_KEY")
+            if not api_key:
+                raise HTTPException(
+                    status_code=400,
+                    detail="OpenAI API key is not configured in the environment"
+                )
+            # Validate OpenAI model
+            _ = OpenAIEmbeddings(model=model_in.model_id, openai_api_key=api_key)
+        elif model_in.provider == ModelProvider.OLLAMA:
+            # For Ollama, we can't easily validate without making a call to the Ollama server
+            # So we'll just check if the format looks correct (basic validation)
+            if not model_in.model_id or not isinstance(model_in.model_id, str):
+                raise ValueError("Invalid model ID format for Ollama")
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported provider: {model_in.provider}"
+            )
     except Exception as e:
         raise HTTPException(
             status_code=400, 
-            detail=f"Invalid HuggingFace model ID: {str(e)}"
+            detail=f"Invalid {model_in.provider} model ID: {str(e)}"
         )
     
     # If this is set as default, unset any previous default models owned by the user
