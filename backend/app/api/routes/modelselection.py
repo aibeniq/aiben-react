@@ -51,6 +51,13 @@ def initialize_default_models(session: SessionDep):
             "provider": ModelProvider.HUGGINGFACE,  # Specify provider explicitly
             "description": "Larger version of MiniLM with improved performance.",
             "is_default": False
+        },
+        {
+            "name": "Ollama - nomic-embed-text",
+            "model_id": "nomic-embed-text",
+            "provider": ModelProvider.OLLAMA,
+            "description": "A local embedding model running via Ollama.",
+            "is_default": False
         }
     ]
     
@@ -307,6 +314,9 @@ def validate_embedding_model(
     """
     Validate if an embedding model ID is valid for the specified provider.
     """
+    print("Validating embedding model with the following parameters:")
+    print("Provider:", model_data.provider)
+    print("Model ID:", model_data.model_id)	
     try:
         # Initialize the embeddings model based on provider
         embeddings = load_embeddings_model(

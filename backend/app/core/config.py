@@ -42,6 +42,10 @@ class Settings(BaseSettings):
         list[AnyUrl] | str, BeforeValidator(parse_cors)
     ] = []
 
+    # Document processing parameters
+    DOCUMENT_CHUNK_SIZE: int = 1000
+    DOCUMENT_CHUNK_OVERLAP: int = 200
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def all_cors_origins(self) -> list[str]:

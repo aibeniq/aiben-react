@@ -255,6 +255,7 @@ class RagChecklistRequest(VeraDocRequest):
 class ModelProvider(str, enum.Enum):
     HUGGINGFACE = "huggingface"
     OPENAI = "openai"
+    OLLAMA = "ollama"
     # Add other providers as needed
 
 # Define a SQLAlchemy type for the enum
@@ -307,3 +308,43 @@ class EmbeddingModelPublic(EmbeddingModel):
 class EmbeddingModelsPublic(SQLModel):
     data: List[EmbeddingModelPublic]
     count: int
+
+# Add new models for LLM settings
+
+class LlmModel(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    name: str = Field(index=True)  # Human-readable name
+    model_id: str  # Model identifier (e.g., "gpt-4o-mini" or "llama3")
+    provider: ModelProvider = Field(
+        default=ModelProvider.OPENAI,
+        sa_column=Column(ModelProviderType, nullable=False)
+    )
+    description: str = Field(default="")
+    is_default: bool = Field(default=False)
+    owner_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
+    date_created: datetime = Field(default_factory=datetime.utcnow)
+    date_modified: datetime = Field(default_factory=datetime.utcnow)
+
+class LlmModelCreate(SQLModel):
+    name: str
+    model_id: str
+    provider: ModelProvider = ModelProvider.OPENAI
+    description: str = ""
+    is_default: bool = False
+
+class LlmModelUpdate(SQLModel):
+    name: Optional[str] = None
+    model_id: Optional[str] = None
+    provider: Optional[ModelProvider] = None
+    description: Optional[str] = None
+    is_default: Optional[bool] = None
+
+class LlmModelPublic(LlmModel):
+    pass
+
+class LlmModelsPublic(SQLModel):
+    data: List[LlmModelPublic]
+
+class LlmModelsValidate(SQLModel):
+    model_id: str
+    provider: ModelProvider
