@@ -82,6 +82,7 @@ def load_correct_embeddings_model(
             provider=provider,
             model_id=model_id
         )
+        print("Embeddings model loaded successfully.")
     except Exception as e:
         raise HTTPException(
             status_code=400,

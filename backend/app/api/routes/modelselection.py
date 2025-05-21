@@ -314,6 +314,9 @@ def validate_embedding_model(
     """
     Validate if an embedding model ID is valid for the specified provider.
     """
+    print("Validating embedding model with the following parameters:")
+    print("Provider:", model_data.provider)
+    print("Model ID:", model_data.model_id)	
     try:
         # Initialize the embeddings model based on provider
         embeddings = load_embeddings_model(
