@@ -1,4 +1,5 @@
 import uuid
+import os
 from typing import Any, List, Optional
 
 from fastapi import APIRouter, HTTPException, Depends, Body
@@ -334,3 +335,27 @@ def validate_embedding_model(
             status_code=400, 
             detail=f"Invalid embedding model: {str(e)}"
         )
+    
+# Add this new endpoint to your modelselection.py router
+@router.get("/check-api-key/{provider}", response_model=Message)
+def check_api_key_configured(provider: str) -> Message:
+    """
+    Check if the API key for a specific provider is configured in the backend.
+    """
+    print("Checking API key configuration for provider:", provider)
+    if provider == "openai":
+        # Check for OpenAI API key in environment
+        print("Checking OpenAI API key configuration...")
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if api_key:
+            return Message(message="API key is configured")
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail="OpenAI API key is not configured in the backend"
+            )
+    elif provider == "huggingface":
+        # For HuggingFace, check for token if needed
+        return Message(message="No API key needed for this provider")
+    else:
+        return Message(message="No API key needed for this provider")

@@ -295,6 +295,12 @@ export type EmbeddingModelsValidateEmbeddingModelData = {
 
 export type EmbeddingModelsValidateEmbeddingModelResponse = Message
 
+export type EmbeddingModelsCheckApiKeyConfiguredData = {
+  provider: string
+}
+
+export type EmbeddingModelsCheckApiKeyConfiguredResponse = Message
+
 export type FormconnectProcessFormData = {
   fields: string
   formData?: Body_formconnect_process_form
