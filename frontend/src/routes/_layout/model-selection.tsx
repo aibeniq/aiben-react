@@ -127,6 +127,25 @@ function LlmModels() {
     },
   })
 
+  // Mutation to validate a model
+  const validateModelMutation = useMutation({
+    mutationFn: (data: { requestBody: { model_id: string; provider: string } }) => {
+    console.log("The following data will be sent to the server for model validation:", data);
+    return LlmModelsService.validateLlmModel(data);
+  },
+    onSuccess: () => {
+      setIsModelValid(true)
+      setValidationMessage("Model is valid and can be loaded.")
+    },
+    onError: (error) => {
+      setIsModelValid(false)
+      setValidationMessage(`Invalid model: ${error.message}`)
+    },
+    onSettled: () => {
+      setIsValidating(false)
+    },
+  })
+
   const handleValidateModel = () => {
     if (!modelId.trim()) {
       setIsModelValid(false);
