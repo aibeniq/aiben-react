@@ -342,7 +342,6 @@ const AddKnowledgeBase = () => {
               variant="solid"
               type="submit"
               disabled={!isValid || isSubmitting}
-              loading={isSubmitting}
             >
               {isSubmitting ? "Creating..." : "Save"}
             </Button>
