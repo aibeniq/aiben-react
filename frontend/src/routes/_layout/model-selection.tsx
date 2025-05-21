@@ -109,22 +109,6 @@ function LlmModels() {
     },
   })
 
-  const validateModelMutation = useMutation({
-    mutationFn: (data: { model_id: string; provider: string }) =>
-      LlmModelsService.validateLlmModel({ requestBody: data }),
-    onSuccess: () => {
-      setIsModelValid(true);
-      setValidationMessage("Model is valid and can be loaded.");
-    },
-    onError: (error) => {
-      setIsModelValid(false);
-      setValidationMessage(`Invalid model: ${error.message}`);
-    },
-    onSettled: () => {
-      setIsValidating(false);
-    },
-  });
-
   const handleValidateModel = () => {
     if (!modelId.trim()) {
       setIsModelValid(false);
@@ -133,8 +117,10 @@ function LlmModels() {
     }
     setIsValidating(true);
     validateModelMutation.mutate({
+      requestBody: {
       model_id: modelId,
-      provider: modelProvider,
+      provider: modelProvider
+    }
     });
   };
 
@@ -429,10 +415,10 @@ function EmbeddingModels() {
   
   // Mutation to validate a model
   const validateModelMutation = useMutation({
-    mutationFn: (modelId: string) =>
-      EmbeddingModelsService.validateEmbeddingModel({ requestBody: {
-        model_id: modelId
-      } }),
+    mutationFn: (data: { requestBody: { model_id: string; provider: string } }) => {
+    console.log("The following data will be sent to the server for model validation:", data);
+    return EmbeddingModelsService.validateEmbeddingModel(data);
+  },
     onSuccess: () => {
       setIsModelValid(true)
       setValidationMessage("Model is valid and can be loaded.")
@@ -482,8 +468,10 @@ function EmbeddingModels() {
     
     setIsValidating(true)
     validateModelMutation.mutate({
+      requestBody: {  
         model_id: modelId,
         provider: modelProvider
+      }
     })
   }
   
