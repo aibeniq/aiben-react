@@ -19,6 +19,8 @@ import type {
   EmbeddingModelsSetDefaultEmbeddingModelResponse,
   EmbeddingModelsValidateEmbeddingModelData,
   EmbeddingModelsValidateEmbeddingModelResponse,
+  EmbeddingModelsCheckApiKeyConfiguredData,
+  EmbeddingModelsCheckApiKeyConfiguredResponse,
   FormconnectProcessFormData,
   FormconnectProcessFormResponse,
   FormconnectGetFormsResponse,
@@ -278,6 +280,29 @@ export class EmbeddingModelsService {
       url: "/api/v1/embedding-models/validate",
       body: data.requestBody,
       mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Check Api Key Configured
+   * Check if the API key for a specific provider is configured in the backend.
+   * @param data The data for the request.
+   * @param data.provider
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static checkApiKeyConfigured(
+    data: EmbeddingModelsCheckApiKeyConfiguredData,
+  ): CancelablePromise<EmbeddingModelsCheckApiKeyConfiguredResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/embedding-models/check-api-key/{provider}",
+      path: {
+        provider: data.provider,
+      },
       errors: {
         422: "Validation Error",
       },

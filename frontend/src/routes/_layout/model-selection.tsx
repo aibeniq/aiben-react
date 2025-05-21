@@ -20,7 +20,7 @@ import {
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { FiPlus, FiSettings, FiCheckCircle, FiXCircle } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -58,6 +58,24 @@ function LlmModels() {
   const [isValidating, setIsValidating] = useState(false);
   const [isModelValid, setIsModelValid] = useState<boolean | null>(null);
   const [validationMessage, setValidationMessage] = useState("");
+
+  const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(true);
+
+  // Add this effect to check API key when provider changes
+  useEffect(() => {
+    if (modelProvider === "openai") {
+      // Check if API key is configured in backend
+      EmbeddingModelsService.checkApiKeyConfigured({provider: "openai"})
+        .then(() => {
+          setIsApiKeyConfigured(true);
+        })
+        .catch(() => {
+          setIsApiKeyConfigured(false);
+        });
+    } else {
+      setIsApiKeyConfigured(true);
+    }
+  }, [modelProvider]);
   
   const queryClient = useQueryClient();
   const { showSuccessToast, showErrorToast } = useCustomToast();
@@ -115,6 +133,12 @@ function LlmModels() {
       setValidationMessage("Please enter a model ID");
       return;
     }
+
+    if (modelProvider === "openai" && !isApiKeyConfigured) {
+          showErrorToast("API key is required for OpenAI models and is not configured in the backend");
+          return;
+        }
+
     setIsValidating(true);
     validateModelMutation.mutate({
       requestBody: {
@@ -135,6 +159,12 @@ function LlmModels() {
     if (!modelName.trim() || !modelId.trim()) {
       showErrorToast("Please fill in all required fields")
       return
+    }
+
+    // Only check for API key if it's not configured in the backend
+    if (modelProvider === "openai" && !isApiKeyConfigured) {
+      showErrorToast("API key is required for OpenAI models and is not configured in the backend");
+      return;
     }
     
     addModelMutation.mutate({
@@ -379,7 +409,30 @@ function EmbeddingModels() {
   const [validationMessage, setValidationMessage] = useState("")
 
   const [modelProvider, setModelProvider] = useState("huggingface")
-  const [apiKey, setApiKey] = useState("")
+
+  const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(true);
+
+  // Add this effect to check API key when provider changes
+  useEffect(() => {
+    if (modelProvider === "openai") {
+      console.log("Checking API key configuration for OpenAI...");
+      // Check if API key is configured in backend
+      EmbeddingModelsService.checkApiKeyConfigured({provider: "openai"})
+        .then((response) => {
+          console.log("API key check succeeded:", response);
+          setIsApiKeyConfigured(true);
+        })
+        .catch((error) => {
+          console.error("API key check failed:", error); // Log the detailed error
+          console.log("Error response:", error.response); // Detailed error response if available
+          console.log("Error message:", error.message);
+          console.log("Error status:", error.status);
+          setIsApiKeyConfigured(false);
+        });
+    } else {
+      setIsApiKeyConfigured(true);
+    }
+  }, [modelProvider]);
   
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -465,6 +518,11 @@ function EmbeddingModels() {
       setValidationMessage("Please enter a model ID")
       return
     }
+
+    if (modelProvider === "openai" && !isApiKeyConfigured) {
+      showErrorToast("API key is required for OpenAI models and is not configured in the backend");
+      return;
+    }
     
     setIsValidating(true)
     validateModelMutation.mutate({
@@ -482,9 +540,9 @@ function EmbeddingModels() {
         return
     }
     
-    if (modelProvider === "openai" && !apiKey.trim()) {
-        showErrorToast("API key is required for OpenAI models")
-        return
+    if (modelProvider === "openai" && !isApiKeyConfigured) {
+      showErrorToast("API key is required for OpenAI models and is not configured in the backend");
+      return;
     }
     
     addModelMutation.mutate({
