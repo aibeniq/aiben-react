@@ -63,19 +63,33 @@ function LlmModels() {
 
   // Add this effect to check API key when provider changes
   useEffect(() => {
-    if (modelProvider === "openai") {
-      // Check if API key is configured in backend
-      EmbeddingModelsService.checkApiKeyConfigured({provider: "openai"})
-        .then(() => {
-          setIsApiKeyConfigured(true);
-        })
-        .catch(() => {
-          setIsApiKeyConfigured(false);
-        });
-    } else {
-      setIsApiKeyConfigured(true);
-    }
-  }, [modelProvider]);
+  if (modelProvider === "openai") {
+    console.log("Checking OpenAI API key configuration...");
+    EmbeddingModelsService.checkApiKeyConfigured({provider: "openai"})
+      .then((response) => {
+        console.log("API key check succeeded:", response);
+        setIsApiKeyConfigured(true);
+      })
+      .catch((error) => {
+        console.error("API key check failed:", error);
+        setIsApiKeyConfigured(false);
+      });
+  } else if (modelProvider === "ollama") {
+    console.log("Checking Ollama server configuration...");
+    EmbeddingModelsService.checkApiKeyConfigured({provider: "ollama"})
+      .then((response) => {
+        console.log("Ollama server check succeeded:", response);
+        setIsApiKeyConfigured(true);
+      })
+      .catch((error) => {
+        console.error("Ollama server check failed:", error);
+        showErrorToast("Ollama server is not available. Please ensure Ollama is running.");
+        setIsApiKeyConfigured(false);
+      });
+  } else {
+    setIsApiKeyConfigured(true);
+  }
+}, [modelProvider]);
   
   const queryClient = useQueryClient();
   const { showSuccessToast, showErrorToast } = useCustomToast();
@@ -339,6 +353,8 @@ function LlmModels() {
                       >
                         <option value="huggingface">HuggingFace</option>
                         <option value="openai">OpenAI</option>
+                        <option value="ollama">Ollama</option>
+                        
                       </select>
                     </Field>
 
@@ -658,10 +674,16 @@ function EmbeddingModels() {
                 </Table.Cell>
                 <Table.Cell>
                   <Badge 
-                    colorPalette={model.provider === "huggingface" ? "teal" : "purple"} 
+                    colorPalette={
+                      model.provider === "huggingface" ? "teal" : 
+                      model.provider === "openai" ? "purple" :
+                      model.provider === "ollama" ? "orange" : "gray"
+                    } 
                     size="sm"
                   >
-                    {model.provider === "huggingface" ? "HuggingFace" : "OpenAI"}
+                    {model.provider === "huggingface" ? "HuggingFace" : 
+                    model.provider === "openai" ? "OpenAI" : 
+                    model.provider === "ollama" ? "Ollama" : model.provider}
                   </Badge>
                 </Table.Cell>
                 <Table.Cell>{model.description}</Table.Cell>
@@ -740,6 +762,7 @@ function EmbeddingModels() {
                       >
                         <option value="huggingface">HuggingFace</option>
                         <option value="openai">OpenAI</option>
+                        <option value="ollama">Ollama</option>
                       </select>
                     </Field>
 

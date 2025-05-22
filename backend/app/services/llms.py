@@ -42,7 +42,7 @@ def create_llm(provider: ModelProvider, model_id: str,
     
     elif provider == ModelProvider.OLLAMA:
         # Configure Ollama
-        base_url = params.get("base_url", "http://localhost:11434")
+        base_url = params.get("OLLAMA_BASE_URL", "http://ollama:11434")
         return ChatOllama(
             model=model_id,
             temperature=temperature,

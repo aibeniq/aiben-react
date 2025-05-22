@@ -1,6 +1,7 @@
 import uuid
 import os
 from typing import Any, List, Optional
+import requests
 
 from fastapi import APIRouter, HTTPException, Depends, Body
 from sqlmodel import select, func
@@ -375,6 +376,24 @@ def check_api_key_configured(provider: str) -> Message:
             raise HTTPException(
                 status_code=404,
                 detail="OpenAI API key is not configured in the backend"
+            )
+    elif provider == "ollama":
+        # Check if Ollama server is reachable
+        base_url = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")
+        try:
+            import requests
+            response = requests.get(f"{base_url}/api/tags", timeout=2)
+            if response.status_code == 200:
+                return Message(message="Ollama server is reachable")
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Ollama server returned status {response.status_code}"
+                )
+        except Exception as e:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Cannot connect to Ollama server at {base_url}: {str(e)}"
             )
     elif provider == "huggingface":
         # For HuggingFace, check for token if needed
