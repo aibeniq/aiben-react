@@ -12,15 +12,21 @@ import {
   Icon,
   Field,
   Portal,
+  Accordion,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useDropzone } from "react-dropzone";
 import { FaFileUpload, FaPaperPlane, FaTimes } from "react-icons/fa";
+import { FiFileText } from "react-icons/fi";
 import { KnowledgeBasesService, ChatService } from "@/client";
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+  sources?: Array<{
+    content: string;
+    metadata: Record<string, any>;
+  }>;
 }
 
 interface ChatbotPanelProps {
@@ -40,16 +46,16 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
 
   // Get knowledge bases
   const { data: knowledgeBases = [] } = useQuery({
-  queryKey: ["knowledge-bases"],
-  queryFn: async () => {
-    const response = await KnowledgeBasesService.readKnowledgeBases({ 
-      skip: 0, 
-      limit: 100 // Get all knowledge bases
-    });
-    return response.data || [];
-  },
-  enabled: isOpen
-});
+    queryKey: ["knowledge-bases"],
+    queryFn: async () => {
+      const response = await KnowledgeBasesService.readKnowledgeBases({ 
+        skip: 0, 
+        limit: 100 // Get all knowledge bases
+      });
+      return response.data || [];
+    },
+    enabled: isOpen
+  });
 
   // Dropzone for file upload
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -81,8 +87,8 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
       let response;
       
       if (selectedKbId) {
-        response = await ChatService.askKnowledgeBase({
-          knowledgeBaseId: selectedKbId,
+        response = await ChatService.queryKnowledgeBase({
+          kbId: selectedKbId,
           question: userMessage,
           useDefaultModels: true
         });
@@ -92,15 +98,21 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
         formData.append("question", userMessage);
         formData.append("useDefaultModels", "true");
         
-        response = await ChatService.askDocument({
+        response = await ChatService.queryDocument({
           requestBody: formData
         });
       }
 
-      if (response?.data) {
+      console.log("Response:", response);
+
+      if (response?.answer) {
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: response.data.answer }
+          { 
+            role: "assistant", 
+            content: response.answer,
+            sources: response.sources 
+          }
         ]);
       }
     } catch (error) {
@@ -251,8 +263,72 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
                       alignSelf={msg.role === "user" ? "flex-end" : "flex-start"}
                       maxW="90%"
                       borderWidth="1px"
+                      width="100%"
                     >
                       <Text fontSize="sm">{msg.content}</Text>
+                      
+                      {/* Display sources if available */}
+                      {msg.sources && msg.sources.length > 0 && (
+                        <Accordion.Root type="single" collapsible mt={2}>
+                          <Accordion.Item>
+                            <h2>
+                              <Accordion.ItemTrigger bg="gray.100" _hover={{ bg: "gray.200" }}>
+                                <Box flex="1" textAlign="left" fontWeight="medium">
+                                  <HStack>
+                                    <Icon as={FiFileText} />
+                                    <Text fontSize="xs">
+                                      View Source Citations ({msg.sources.length})
+                                    </Text>
+                                  </HStack>
+                                </Box>
+                              </Accordion.ItemTrigger>
+                            </h2>
+                            <Accordion.ItemContent pb={2} bg="gray.50">
+                              {msg.sources.map((source, sIdx) => (
+                                <Box 
+                                  key={sIdx}
+                                  p={2} 
+                                  mb={2} 
+                                  borderWidth="1px" 
+                                  borderRadius="md"
+                                  bg="white"
+                                >
+                                  <Text fontWeight="bold" fontSize="xs" color="gray.700">
+                                    Source {sIdx + 1}:
+                                    {source.metadata?.source && (
+                                      <Text as="span" ml={1} fontWeight="normal" color="blue.600">
+                                        {/* Clean up temporary file paths */}
+                                        {source.metadata.source.includes('/tmp/') || source.metadata.source.includes('\\tmp\\')
+                                          ? (() => {
+                                              // First get the filename without the path
+                                              const filename = source.metadata.source.split('/').pop() || 
+                                                              source.metadata.source.split('\\').pop() || '';
+                                              
+                                              // Then remove everything before and including the first underscore
+                                              return filename.includes('_') 
+                                                ? filename.substring(filename.indexOf('_') + 1) 
+                                                : filename;
+                                            })()
+                                          : source.metadata.source}
+                                      </Text>
+                                    )}
+                                  </Text>
+                                  <Box 
+                                    mt={1} 
+                                    p={2} 
+                                    bg="gray.50" 
+                                    borderRadius="sm" 
+                                    fontSize="xs"
+                                    whiteSpace="pre-wrap"
+                                  >
+                                    {source.content}
+                                  </Box>
+                                </Box>
+                              ))}
+                            </Accordion.ItemContent>
+                          </Accordion.Item>
+                        </Accordion.Root>
+                      )}
                     </Box>
                   ))}
                   {isLoading && (
