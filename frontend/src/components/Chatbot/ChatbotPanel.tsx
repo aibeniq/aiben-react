@@ -27,6 +27,8 @@ interface ChatMessage {
     content: string;
     metadata: Record<string, any>;
   }>;
+  rephrasedQuestion?: string;
+  sessionId?: string;
 }
 
 interface ChatbotPanelProps {
@@ -44,8 +46,13 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
   const panelWidth = useBreakpointValue({ base: "100%", sm: "350px", md: "400px", lg: "450px" });
   const panelHeight = useBreakpointValue({ base: "75vh", md: "70vh" });
 
+  const [currentKbId, setCurrentKbId] = useState<string | null>(null);
+  const [currentFileName, setCurrentFileName] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string>("");
+
   const clearChat = () => {
     setMessages([]);
+    setSessionId(Math.random().toString(36).substring(2, 15));
   };
 
   // Get knowledge bases
@@ -82,6 +89,10 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
   const handleSendMessage = async () => {
     if (!question.trim() || (!selectedKbId && !uploadedFile)) return;
 
+    console.log("Current session ID:", sessionId);
+    console.log("Current KB ID:", currentKbId);
+    console.log("Selected KB ID:", selectedKbId);
+
     const userMessage = question;
     
     // Add the new user message to chat history
@@ -101,26 +112,51 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
         return `${role}: ${msg.content}`;
       }).join("\n\n");
       
+      // Check if this is a follow-up question with the same resources
+      const isFollowUp = sessionId && ((selectedKbId && selectedKbId === currentKbId) || 
+          (uploadedFile && currentFileName === uploadedFile.name));
       console.log("Formatted chat history:", formattedChatHistory);
+      console.log("Is follow-up:", isFollowUp);
 
       if (selectedKbId) {
+
+        // Set current KB ID if it's changed
+        if (currentKbId !== selectedKbId) {
+          setCurrentKbId(selectedKbId);
+          // Generate new session ID when knowledge base changes
+          setSessionId("");  // Clear it and let the server generate a new one
+          console.log("KB changed, clearing session ID");
+        }
+
         response = await ChatService.queryKnowledgeBase({
           kbId: selectedKbId,
           question: userMessage,
-          chatHistory: formattedChatHistory,  // Send chat history
-          useDefaultModels: true
+          chatHistory: formattedChatHistory,
+          useDefaultModels: true,
+          sessionId: sessionId,  // Make sure this is being sent correctly
+          isFollowUp: isFollowUp && sessionId ? true : false  // Only true if we have a session ID
         });
       } else if (uploadedFile) {
+        // Set current filename if it's changed
+        if (currentFileName !== uploadedFile.name) {
+          setCurrentFileName(uploadedFile.name);
+          // Don't generate a new session ID here - let the server handle it
+          setSessionId("");  // Clear it and let the server generate a new one
+          console.log("File changed, clearing session ID");
+        }
         const formData = new FormData();
-        formData.append("file", uploadedFile);
+        // Only send the file if this is NOT a follow-up question
+        if (!isFollowUp) {
+          formData.append("file", uploadedFile);
+        }
         
         response = await ChatService.queryDocument({
           question: userMessage,
           chatHistory: formattedChatHistory,
           useDefaultModels: true,
-          formData: {
-            file: uploadedFile
-          }
+          sessionId: sessionId,
+          isFollowUp: isFollowUp === true,
+          formData: isFollowUp ? undefined : { file: uploadedFile }
         });
       }
 
@@ -131,6 +167,12 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
         const rephrasedInfo = response.rephrased_question && 
           response.rephrased_question !== userMessage ? 
           `(Interpreted as: "${response.rephrased_question}")` : "";
+
+        // Store the session ID from the response
+        if (response.session_id) {
+          setSessionId(response.session_id);
+          console.log("Received session ID from server:", response.session_id);
+        }
         
         setMessages((prev) => [
           ...prev,
@@ -138,7 +180,8 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
             role: "assistant", 
             content: response.answer + (rephrasedInfo ? `\n\n${rephrasedInfo}` : ""),
             sources: response.sources,
-            rephrasedQuestion: response.rephrased_question
+            rephrasedQuestion: response.rephrased_question,
+            sessionId: response.session_id            
           }
         ]);
       }

@@ -121,6 +121,8 @@ export class ChatService {
    * @param data.question
    * @param data.chatHistory
    * @param data.useDefaultModels
+   * @param data.sessionId
+   * @param data.isFollowUp
    * @returns unknown Successful Response
    * @throws ApiError
    */
@@ -137,6 +139,8 @@ export class ChatService {
         question: data.question,
         chat_history: data.chatHistory,
         use_default_models: data.useDefaultModels,
+        session_id: data.sessionId,
+        is_follow_up: data.isFollowUp,
       },
       errors: {
         422: "Validation Error",
@@ -148,15 +152,17 @@ export class ChatService {
    * Query Document
    * Query an uploaded document with a question.
    * @param data The data for the request.
-   * @param data.formData
    * @param data.question
    * @param data.chatHistory
    * @param data.useDefaultModels
+   * @param data.sessionId
+   * @param data.isFollowUp
+   * @param data.formData
    * @returns unknown Successful Response
    * @throws ApiError
    */
   public static queryDocument(
-    data: ChatQueryDocumentData,
+    data: ChatQueryDocumentData = {},
   ): CancelablePromise<ChatQueryDocumentResponse> {
     return __request(OpenAPI, {
       method: "POST",
@@ -165,6 +171,8 @@ export class ChatService {
         question: data.question,
         chat_history: data.chatHistory,
         use_default_models: data.useDefaultModels,
+        session_id: data.sessionId,
+        is_follow_up: data.isFollowUp,
       },
       formData: data.formData,
       mediaType: "multipart/form-data",
