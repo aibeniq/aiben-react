@@ -2,8 +2,6 @@
 
 export type Body_chat_query_document = {
   file: Blob | File
-  question: string
-  use_default_models?: boolean
 }
 
 export type Body_formconnect_process_form = {
@@ -263,6 +261,8 @@ export type ChatQueryKnowledgeBaseResponse = unknown
 
 export type ChatQueryDocumentData = {
   formData: Body_chat_query_document
+  question?: string
+  useDefaultModels?: boolean
 }
 
 export type ChatQueryDocumentResponse = unknown
