@@ -95,11 +95,13 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
       } else if (uploadedFile) {
         const formData = new FormData();
         formData.append("file", uploadedFile);
-        formData.append("question", userMessage);
-        formData.append("useDefaultModels", "true");
         
         response = await ChatService.queryDocument({
-          requestBody: formData
+          question: userMessage,  // String parameter passed separately
+          useDefaultModels: true, // Boolean parameter passed separately
+          formData: {
+            file: uploadedFile    // Only the file in formData
+          }
         });
       }
 

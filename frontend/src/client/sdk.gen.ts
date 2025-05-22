@@ -115,6 +115,7 @@ import type {
 export class ChatService {
   /**
    * Query Knowledge Base
+   * Query a knowledge base with a question.
    * @param data The data for the request.
    * @param data.kbId
    * @param data.question
@@ -143,8 +144,11 @@ export class ChatService {
 
   /**
    * Query Document
+   * Query an uploaded document with a question.
    * @param data The data for the request.
    * @param data.formData
+   * @param data.question
+   * @param data.useDefaultModels
    * @returns unknown Successful Response
    * @throws ApiError
    */
@@ -154,6 +158,10 @@ export class ChatService {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/chat/document",
+      query: {
+        question: data.question,
+        use_default_models: data.useDefaultModels,
+      },
       formData: data.formData,
       mediaType: "multipart/form-data",
       errors: {

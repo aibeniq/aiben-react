@@ -156,12 +156,15 @@ async def query_knowledge_base(
 async def query_document(
     session: SessionDep,
     file: UploadFile = File(...),
-    question: str = Form(...),
-    use_default_models: bool = Form(False),
+    question: str = None,
+    use_default_models: bool = False,
 ):
     """
     Query an uploaded document with a question.
     """
+    if not question:
+        raise HTTPException(status_code=400, detail="Question is required")
+    
     # Get the default models
     embedding_model = session.exec(
         select(EmbeddingModel).where(EmbeddingModel.is_default == True)
