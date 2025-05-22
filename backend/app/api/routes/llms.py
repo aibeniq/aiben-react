@@ -1,3 +1,4 @@
+import os
 import uuid
 from typing import Any, List, Optional
 
@@ -20,6 +21,7 @@ from datetime import datetime
 
 
 from langchain_community.chat_models import ChatOllama
+from langchain_huggingface import HuggingFacePipeline
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
 from langchain_openai import ChatOpenAI
@@ -75,7 +77,7 @@ def get_llm_models(
     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
 ) -> LlmModelsPublic:
     """
-    Get all LLM models.
+    Get all LLMs.
     """
     # Initialize default models if none exist
     initialize_default_llm_models(session)
@@ -94,7 +96,7 @@ def get_llm_models(
 @router.get("/default", response_model=LlmModelPublic)
 def get_default_llm_model(session: SessionDep) -> LlmModelPublic:
     """
-    Get the default LLM model.
+    Get the default LLM.
     """
     # Initialize default models if none exist
     initialize_default_llm_models(session)
@@ -105,9 +107,9 @@ def get_default_llm_model(session: SessionDep) -> LlmModelPublic:
     ).first()
     
     if not model:
-        raise HTTPException(status_code=404, detail="No default LLM model found")
+        raise HTTPException(status_code=404, detail="No default LLM found")
     
-    print(f"Loading default LLM model: {model.name} ({model.model_id}, provider: {model.provider})")
+    print(f"Loading default LLM: {model.name} ({model.model_id}, provider: {model.provider})")
     
     return model
 
@@ -116,7 +118,7 @@ def create_llm_model(
     model_in: LlmModelCreate, session: SessionDep, current_user: CurrentUser
 ) -> LlmModelPublic:
     """
-    Create a new LLM model.
+    Create a new LLM.
     """
     # Optionally, validate model_id/provider here (e.g., try to instantiate the model)
     # For now, just create the model
@@ -136,16 +138,16 @@ def delete_llm_model(
     model_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
 ) -> Message:
     """
-    Delete an LLM model.
+    Delete an LLM.
     """
     model = session.get(LlmModel, model_id)
     if not model:
-        raise HTTPException(status_code=404, detail="LLM model not found")
+        raise HTTPException(status_code=404, detail="LLM not found")
     if model.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to delete this model")
     session.delete(model)
     session.commit()
-    return Message(message="LLM model deleted successfully")
+    return Message(message="LLM deleted successfully")
 
 @router.post("/validate", response_model=Message)
 def validate_llm_model(
@@ -153,14 +155,14 @@ def validate_llm_model(
     model_data: LlmModelsValidate,
 ) -> Message:
     """
-    Validate if an LLM model ID is valid for the specified provider.
+    Validate if an LLM ID is valid for the specified provider.
     """
     try:
         # Extract the provider and model_id
         provider = model_data.provider
         model_id = model_data.model_id
         
-        print(f"Validating LLM model: {model_id} (provider: {provider})")
+        print(f"Validating LLM: {model_id} (provider: {provider})")
         
         if provider == ModelProvider.OPENAI:
             # For OpenAI, attempt to create the model with a simple test
@@ -180,9 +182,7 @@ def validate_llm_model(
             print(f"OpenAI model validation successful: {model_id}")
             
         elif provider == ModelProvider.HUGGINGFACE:
-            # For HuggingFace, try to load the model
-            from langchain_huggingface import HuggingFacePipeline
-            
+            # For HuggingFace, try to load the model            
             print(f"Loading HuggingFace model: {model_id}")
             
             # Just check if the model exists - don't fully load it to save resources
@@ -197,13 +197,13 @@ def validate_llm_model(
             
         elif provider == ModelProvider.OLLAMA:
             # For Ollama, check if the model is available
-            
+            base_url = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")
             # Try to connect to Ollama server and verify model
             llm = ChatOllama(
                 model=model_id,
                 temperature=0.0,
                 # Use default Ollama URL, or configure as needed
-                base_url="http://localhost:11434"
+                base_url=base_url
             )
             
             # Simple test to verify the model is available
@@ -213,7 +213,7 @@ def validate_llm_model(
         else:
             raise ValueError(f"Unsupported provider: {provider}")
         
-        return Message(message=f"LLM model {model_id} is valid for provider {provider}")
+        return Message(message=f"LLM {model_id} is valid for provider {provider}")
         
     except Exception as e:
         import traceback
@@ -221,7 +221,7 @@ def validate_llm_model(
         print(f"LLM validation error: {str(e)}")
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid LLM model: {str(e)}"
+            detail=f"Invalid LLM: {str(e)}"
         )
     
 @router.post("/{model_id}/set-default", response_model=LlmModelPublic)
@@ -229,11 +229,11 @@ def set_default_llm_model(
     model_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
 ) -> LlmModelPublic:
     """
-    Set an LLM model as the default.
+    Set an LLM as the default.
     """
     model = session.get(LlmModel, model_id)
     if not model:
-        raise HTTPException(status_code=404, detail="LLM model not found")
+        raise HTTPException(status_code=404, detail="LLM not found")
     
     # Check if the model is system-owned or owned by the current user
     if model.owner_id is not None and model.owner_id != current_user.id:

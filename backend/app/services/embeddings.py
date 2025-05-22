@@ -1,6 +1,9 @@
+import os
+import requests
 from app.models import ModelProvider
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
+from langchain.embeddings import OllamaEmbeddings
 from typing import Optional
 
 def load_embeddings_model(provider: ModelProvider, model_id: str, api_key: Optional[str] = None):
@@ -28,8 +31,32 @@ def load_embeddings_model(provider: ModelProvider, model_id: str, api_key: Optio
         
     elif provider == ModelProvider.OLLAMA:
         # Configure Ollama embeddings
-        # The base_url is the Ollama server location (default is http://localhost:11434)
-        base_url = "http://localhost:11434"  # You might want to make this configurable
+        base_url = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")
+        print(f"Loading Ollama embeddings model with model_id: {model_id}, base_url: {base_url}")
+        
+        # First check if Ollama server is reachable
+        try:
+            response = requests.get(f"{base_url}/api/tags", timeout=5)
+            if response.status_code != 200:
+                raise ValueError(f"Ollama server not responding correctly at {base_url} (status: {response.status_code})")
+            
+            # Check if model exists (but don't fail, as Ollama can pull models on demand)
+            models_data = response.json()
+            # Different versions of Ollama API return different structures
+            available_models = []
+            if "models" in models_data:  # Newer versions
+                available_models = [model["name"] for model in models_data.get("models", [])]
+            else:  # Older versions
+                available_models = [model["name"] for model in models_data.get("models", [])]
+
+            if model_id not in available_models:
+                print(f"Warning: Model {model_id} may not be available in Ollama. Available models: {available_models}")
+                print(f"Ollama will attempt to pull the model if it's not found locally.")
+                
+        except requests.RequestException as e:
+            raise ValueError(f"Cannot connect to Ollama server at {base_url}: {str(e)}")
+        
+        # Create and return the embeddings model
         return OllamaEmbeddings(model=model_id, base_url=base_url)
     
     else:
