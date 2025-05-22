@@ -4,6 +4,10 @@ import type { CancelablePromise } from "./core/CancelablePromise"
 import { OpenAPI } from "./core/OpenAPI"
 import { request as __request } from "./core/request"
 import type {
+  ChatQueryKnowledgeBaseData,
+  ChatQueryKnowledgeBaseResponse,
+  ChatQueryDocumentData,
+  ChatQueryDocumentResponse,
   EmbeddingModelsGetEmbeddingModelsData,
   EmbeddingModelsGetEmbeddingModelsResponse,
   EmbeddingModelsCreateEmbeddingModelData,
@@ -107,6 +111,57 @@ import type {
   VeradocDeleteChecklistData,
   VeradocDeleteChecklistResponse,
 } from "./types.gen"
+
+export class ChatService {
+  /**
+   * Query Knowledge Base
+   * @param data The data for the request.
+   * @param data.kbId
+   * @param data.question
+   * @param data.useDefaultModels
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static queryKnowledgeBase(
+    data: ChatQueryKnowledgeBaseData,
+  ): CancelablePromise<ChatQueryKnowledgeBaseResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/chat/knowledge-base/{kb_id}",
+      path: {
+        kb_id: data.kbId,
+      },
+      query: {
+        question: data.question,
+        use_default_models: data.useDefaultModels,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Query Document
+   * @param data The data for the request.
+   * @param data.formData
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static queryDocument(
+    data: ChatQueryDocumentData,
+  ): CancelablePromise<ChatQueryDocumentResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/chat/document",
+      formData: data.formData,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
 
 export class EmbeddingModelsService {
   /**
@@ -710,7 +765,7 @@ export class KnowledgeBasesService {
 export class LlmModelsService {
   /**
    * Get Llm Models
-   * Get all LLM models.
+   * Get all LLMs.
    * @param data The data for the request.
    * @param data.skip
    * @param data.limit
@@ -735,7 +790,7 @@ export class LlmModelsService {
 
   /**
    * Create Llm Model
-   * Create a new LLM model.
+   * Create a new LLM.
    * @param data The data for the request.
    * @param data.requestBody
    * @returns LlmModelPublic Successful Response
@@ -757,7 +812,7 @@ export class LlmModelsService {
 
   /**
    * Get Default Llm Model
-   * Get the default LLM model.
+   * Get the default LLM.
    * @returns LlmModelPublic Successful Response
    * @throws ApiError
    */
@@ -770,7 +825,7 @@ export class LlmModelsService {
 
   /**
    * Delete Llm Model
-   * Delete an LLM model.
+   * Delete an LLM.
    * @param data The data for the request.
    * @param data.modelId
    * @returns Message Successful Response
@@ -793,7 +848,7 @@ export class LlmModelsService {
 
   /**
    * Validate Llm Model
-   * Validate if an LLM model ID is valid for the specified provider.
+   * Validate if an LLM ID is valid for the specified provider.
    * @param data The data for the request.
    * @param data.requestBody
    * @returns Message Successful Response
@@ -815,7 +870,7 @@ export class LlmModelsService {
 
   /**
    * Set Default Llm Model
-   * Set an LLM model as the default.
+   * Set an LLM as the default.
    * @param data The data for the request.
    * @param data.modelId
    * @returns LlmModelPublic Successful Response
