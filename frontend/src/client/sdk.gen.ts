@@ -8,6 +8,8 @@ import type {
   ChatQueryKnowledgeBaseResponse,
   ChatQueryDocumentData,
   ChatQueryDocumentResponse,
+  ChatQueryTextData,
+  ChatQueryTextResponse,
   EmbeddingModelsGetEmbeddingModelsData,
   EmbeddingModelsGetEmbeddingModelsResponse,
   EmbeddingModelsCreateEmbeddingModelData,
@@ -176,6 +178,35 @@ export class ChatService {
       },
       formData: data.formData,
       mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Query Text
+   * Answer a direct text question without a knowledge base or document.
+   * @param data The data for the request.
+   * @param data.question
+   * @param data.chatHistory
+   * @param data.sessionId
+   * @param data.isFollowUp
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static queryText(
+    data: ChatQueryTextData,
+  ): CancelablePromise<ChatQueryTextResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/chat/text",
+      query: {
+        question: data.question,
+        chat_history: data.chatHistory,
+        session_id: data.sessionId,
+        is_follow_up: data.isFollowUp,
+      },
       errors: {
         422: "Validation Error",
       },
