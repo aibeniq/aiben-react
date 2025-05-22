@@ -252,6 +252,7 @@ export type VeraDocResponse = {
 }
 
 export type ChatQueryKnowledgeBaseData = {
+  chatHistory?: string
   kbId: string
   question: string
   useDefaultModels?: boolean
@@ -260,6 +261,7 @@ export type ChatQueryKnowledgeBaseData = {
 export type ChatQueryKnowledgeBaseResponse = unknown
 
 export type ChatQueryDocumentData = {
+  chatHistory?: string
   formData: Body_chat_query_document
   question?: string
   useDefaultModels?: boolean

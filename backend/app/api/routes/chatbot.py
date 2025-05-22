@@ -19,12 +19,53 @@ from io import BytesIO
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
+
+def rephrase_question_with_context(llm, chat_history, current_question):
+    """Rephrase the user's current question considering previous chat context"""
+    
+    # Skip rephrasing if this is the first question
+    if not chat_history:
+        return current_question
+    
+    # Create the prompt for rephrasing
+    rephrase_prompt = ChatPromptTemplate.from_template("""
+    You are an AI that rephrases the user's latest question to incorporate relevant context from the conversation history.
+    
+    CONVERSATION HISTORY:
+    {chat_history}
+    
+    CURRENT QUESTION: {question}
+    
+    INSTRUCTIONS:
+    1. Analyze the conversation history and the current question.
+    2. Rewrite the current question to be self-contained, incorporating any relevant context.
+    3. The rephrased question should be answerable without needing to see the conversation history.
+    4. Return ONLY the rephrased question, nothing else.
+    5. If the current question is already self-contained and doesn't reference anything from the history, return it unchanged.
+    
+    REPHRASED QUESTION:
+    """)
+    
+    # Generate the rephrased question
+    chain = rephrase_prompt | llm
+    response = chain.invoke({
+        "chat_history": chat_history, 
+        "question": current_question
+    })
+    
+    rephrased_question = response.content.strip()
+    print(f"Original question: {current_question}")
+    print(f"Rephrased question: {rephrased_question}")
+    
+    return rephrased_question
+
 @router.post("/knowledge-base/{kb_id}")
 async def query_knowledge_base(
     session: SessionDep,
     current_user: CurrentUser,
     kb_id: str,
     question: str,
+    chat_history: str = None,
     use_default_models: bool = False,
 ):
     """
@@ -100,8 +141,15 @@ async def query_knowledge_base(
                     llm = get_default_llm(session)
                     print("Knowledge base LLM not found, using default LLM")
             
+            # Rephrase the question using chat history if available
+            if chat_history:
+                print("Rephrasing question with context")
+                rephrased_question = rephrase_question_with_context(llm, chat_history, question)
+            else:
+                rephrased_question = question
+            
             # 5. Retrieve relevant context for the question
-            docs = retriever.get_relevant_documents(question)
+            docs = retriever.get_relevant_documents(rephrased_question)
             context = "\n\n".join([doc.page_content for doc in docs])
             
             # Create a list of sources for citation
@@ -137,7 +185,7 @@ async def query_knowledge_base(
             chain = qa_prompt | llm
             response = chain.invoke({
                 "context": context, 
-                "question": question
+                "question": rephrased_question
             })
 
             print("Response:", response.content)
@@ -157,6 +205,7 @@ async def query_document(
     session: SessionDep,
     file: UploadFile = File(...),
     question: str = None,
+    chat_history: str = None,
     use_default_models: bool = False,
 ):
     """
@@ -222,9 +271,16 @@ async def query_document(
                 model_id=llm_model.model_id,
                 temperature=0.0
             )
+
+            # Rephrase the question using chat history if available
+            if chat_history:
+                print("Rephrasing question with context")
+                rephrased_question = rephrase_question_with_context(llm, chat_history, question)
+            else:
+                rephrased_question = question
             
             # Retrieve relevant context
-            docs = retriever.get_relevant_documents(question)
+            docs = retriever.get_relevant_documents(rephrased_question)
             context = "\n\n".join([doc.page_content for doc in docs])
             
             # Create a list of sources for citation
@@ -260,7 +316,7 @@ async def query_document(
             chain = qa_prompt | llm
             response = chain.invoke({
                 "context": context, 
-                "question": question
+                "question": rephrased_question
             })
 
             print("Response:", response.content)
