@@ -378,7 +378,6 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
               p={3}
               bg="gray.50"
             >
-              // Change the welcome text
               {messages.length === 0 ? (
                 <Text color="gray.500" textAlign="center" py={10} fontSize="sm">
                   {selectedKbId || uploadedFile ? 
