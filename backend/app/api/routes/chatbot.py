@@ -65,7 +65,8 @@ def rephrase_question_with_context(llm, chat_history, current_question):
     """Rephrase the user's current question considering previous chat context"""
     
     # Skip rephrasing if this is the first question
-    if not chat_history:
+    if not chat_history or chat_history.count("\n\n") < 1:
+        print("No previous context to consider, returning original question")
         return current_question
     
     # Create the prompt for rephrasing
