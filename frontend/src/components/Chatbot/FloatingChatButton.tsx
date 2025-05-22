@@ -13,7 +13,7 @@ const FloatingChatButton = ({ onClick }: FloatingChatButtonProps) => {
       bottom="4"
       right="4"
       size="50px"
-      bg="blue.500"
+      bg="teal"
       color="white"
       boxShadow="lg"
       zIndex="overlay"

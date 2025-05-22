@@ -119,6 +119,7 @@ export class ChatService {
    * @param data The data for the request.
    * @param data.kbId
    * @param data.question
+   * @param data.chatHistory
    * @param data.useDefaultModels
    * @returns unknown Successful Response
    * @throws ApiError
@@ -134,6 +135,7 @@ export class ChatService {
       },
       query: {
         question: data.question,
+        chat_history: data.chatHistory,
         use_default_models: data.useDefaultModels,
       },
       errors: {
@@ -148,6 +150,7 @@ export class ChatService {
    * @param data The data for the request.
    * @param data.formData
    * @param data.question
+   * @param data.chatHistory
    * @param data.useDefaultModels
    * @returns unknown Successful Response
    * @throws ApiError
@@ -160,6 +163,7 @@ export class ChatService {
       url: "/api/v1/chat/document",
       query: {
         question: data.question,
+        chat_history: data.chatHistory,
         use_default_models: data.useDefaultModels,
       },
       formData: data.formData,
