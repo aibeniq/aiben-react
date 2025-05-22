@@ -273,6 +273,15 @@ export type ChatQueryDocumentData = {
 
 export type ChatQueryDocumentResponse = unknown
 
+export type ChatQueryTextData = {
+  chatHistory?: string
+  isFollowUp?: boolean
+  question: string
+  sessionId?: string
+}
+
+export type ChatQueryTextResponse = unknown
+
 export type EmbeddingModelsGetEmbeddingModelsData = {
   limit?: number
   skip?: number

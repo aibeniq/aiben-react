@@ -451,3 +451,73 @@ async def startup_event():
             print("Session cache cleanup performed")
     
     asyncio.create_task(cleanup_sessions())
+
+# Endpoint for direct text queries
+@router.post("/text")
+async def query_text(
+    session: SessionDep,
+    current_user: CurrentUser,
+    question: str,
+    chat_history: str = None,
+    session_id: str = None,
+    is_follow_up: bool = False,
+):
+    """Answer a direct text question without a knowledge base or document."""
+    try:
+        print(f"Received text query - session_id: {session_id}, is_follow_up: {is_follow_up}")
+
+        # Generate a session ID if not provided
+        if not session_id:
+            session_id = str(uuid.uuid4())
+        
+        # Check if we have a cached LLM for this session
+        cached_data = session_cache.get(session_id)
+        llm = None
+        
+        if is_follow_up and cached_data:
+            print(f"Using cached LLM for session {session_id}")
+            llm = cached_data.get('llm')
+        
+        # If no cached LLM, get a new one
+        if not llm:
+            print("Setting up new LLM for text query")
+            # Get the default LLM model
+            llm = get_default_llm(session)
+            
+            # Cache the LLM
+            session_cache.set(session_id, {
+                'llm': llm,
+                'type': 'text_query'
+            })
+        
+        # Rephrase the question using chat history if available
+        if chat_history:
+            print("Rephrasing question with context")
+            rephrased_question = rephrase_question_with_context(llm, chat_history, question)
+        else:
+            rephrased_question = question
+        
+        # Define prompt template for general Q&A
+        qa_prompt_template = """
+        You are a helpful AI assistant. Answer the following question to the best of your knowledge.
+        If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+        QUESTION: {question}
+
+        ANSWER:
+        """
+        
+        qa_prompt = ChatPromptTemplate.from_template(qa_prompt_template)
+        
+        # Generate the answer
+        chain = qa_prompt | llm
+        response = chain.invoke({"question": rephrased_question})
+        
+        return {
+            "answer": response.content,
+            "session_id": session_id,
+            "rephrased_question": rephrased_question
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing question: {str(e)}")

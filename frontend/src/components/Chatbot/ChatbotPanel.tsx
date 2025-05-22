@@ -87,7 +87,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!question.trim() || (!selectedKbId && !uploadedFile)) return;
+    if (!question.trim()) return;
 
     console.log("Current session ID:", sessionId);
     console.log("Current KB ID:", currentKbId);
@@ -118,7 +118,15 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
       console.log("Formatted chat history:", formattedChatHistory);
       console.log("Is follow-up:", isFollowUp);
 
-      if (selectedKbId) {
+      if (!selectedKbId && !uploadedFile) {
+        // New case: No KB or file selected - use direct text query
+        response = await ChatService.queryText({
+          question: userMessage,
+          chatHistory: formattedChatHistory,
+          sessionId: sessionId,
+          isFollowUp: isFollowUp && sessionId ? true : false
+        });
+      } else if (selectedKbId) {
 
         // Set current KB ID if it's changed
         if (currentKbId !== selectedKbId) {
@@ -370,9 +378,12 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
               p={3}
               bg="gray.50"
             >
+              // Change the welcome text
               {messages.length === 0 ? (
                 <Text color="gray.500" textAlign="center" py={10} fontSize="sm">
-                  Select a knowledge base or upload a file, then ask a question.
+                  {selectedKbId || uploadedFile ? 
+                    "Select a knowledge base or upload a file, then ask a question." :
+                    "Ask me anything! For knowledge base search, select a knowledge base first."}
                 </Text>
               ) : (
                 <>
@@ -465,27 +476,39 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
         </Box>
         
         {/* Input area - Keep fixed at bottom */}
-        <HStack width="100%" p={4} pt={2} bg="white" borderTop="1px solid" borderColor="gray.100" flexShrink={0}>
-          <Textarea
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Ask a question..."
-            resize="none"
-            rows={2}
-            disabled={(!selectedKbId && !uploadedFile) || isLoading}
-            fontSize="sm"
-          />
-          <Button 
-            colorPalette="teal" 
-            onClick={handleSendMessage}
-            disabled={!question.trim() || (!selectedKbId && !uploadedFile) || isLoading}
-            isLoading={isLoading}
-            leftIcon={<FaPaperPlane />}
-            size="sm"
-          >
-            Send
-          </Button>
-        </HStack>
+        <Box width="100%" bg="white" borderTop="1px solid" borderColor="gray.100" flexShrink={0}>
+          <Text fontSize="xs" color="gray.500" px={4} pt={2} pb={1}>
+            {selectedKbId ? (
+              <>Using knowledge base: <b>{knowledgeBases.find(kb => kb.id === selectedKbId)?.title}</b></>
+            ) : uploadedFile ? (
+              <>Using document: <b>{uploadedFile.name}</b></>
+            ) : (
+              <>Using general AI assistant</>
+            )}
+          </Text>
+
+          <HStack width="100%" p={4} pt={1}>
+            <Textarea
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder="Ask a question..."
+              resize="none"
+              rows={2}
+              disabled={isLoading}
+              fontSize="sm"
+            />
+            <Button 
+              colorPalette="teal" 
+              onClick={handleSendMessage}
+              disabled={!question.trim() || isLoading}
+              isLoading={isLoading}
+              leftIcon={<FaPaperPlane />}
+              size="sm"
+            >
+              Send
+            </Button>
+          </HStack>
+        </Box>
       </Box>
     </Portal>
   );
