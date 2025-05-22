@@ -30,6 +30,7 @@ dependencies = [
     "pymupdf==1.25.5",
     "pypdf==5.4.0",
     "langchain-openai==0.3.17",
+    "python-docx>=0.8.11,<1.0.0",
 ]
 
 [tool.uv]
