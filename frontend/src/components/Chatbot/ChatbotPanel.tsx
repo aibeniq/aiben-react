@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useDropzone } from "react-dropzone";
-import { FaFileUpload, FaPaperPlane, FaTimes } from "react-icons/fa";
+import { FaFileUpload, FaPaperPlane, FaTimes, FaTrash } from "react-icons/fa";
 import { FiFileText } from "react-icons/fi";
 import { KnowledgeBasesService, ChatService } from "@/client";
 
@@ -43,6 +43,10 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const panelWidth = useBreakpointValue({ base: "100%", sm: "350px", md: "400px", lg: "450px" });
   const panelHeight = useBreakpointValue({ base: "75vh", md: "70vh" });
+
+  const clearChat = () => {
+    setMessages([]);
+  };
 
   // Get knowledge bases
   const { data: knowledgeBases = [] } = useQuery({
@@ -167,18 +171,36 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
           alignItems="center"
         >
           <Text fontWeight="bold">AI Assistant</Text>
-          <Button
-            variant="unstyled"
-            color="white"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            onClick={onClose}
-            size="sm"
-            p={0}
-          >
-            <Icon as={FaTimes} />
-          </Button>
+           <HStack spacing={2}>
+            {messages.length > 0 && (
+              <Button
+                variant="ghost"
+                color="white"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                onClick={clearChat}
+                size="sm"
+                p={1}
+                _hover={{ bg: "blue.600" }}
+                title="Clear chat history"
+              >
+                <Icon as={FaTrash} boxSize="14px" />
+              </Button>
+            )}
+            <Button
+              variant="unstyled"
+              color="white"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              onClick={onClose}
+              size="sm"
+              p={0}
+            >
+              <Icon as={FaTimes} />
+            </Button>
+          </HStack>
         </Box>
 
         {/* Body */}
@@ -213,29 +235,55 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
             <Text fontWeight="medium" alignSelf="flex-start">OR</Text>
 
             {/* File Upload */}
-            <Box 
-              {...getRootProps()}
-              p={3} 
-              border="2px dashed" 
-              borderColor={isDragActive ? "blue.500" : "gray.300"}
-              borderRadius="md" 
-              cursor="pointer"
-              width="100%"
-              bg={uploadedFile ? "green.50" : "transparent"}
-              _hover={{ borderColor: "blue.500" }}
-              transition="all 0.2s"
-              data-disabled={!!selectedKbId}
-            >
-              <input {...getInputProps()} />
-              <VStack spacing={1}>
-                <Icon as={FaFileUpload} boxSize="20px" color={isDragActive ? "blue.500" : "gray.500"} />
-                {uploadedFile ? (
-                  <Text fontSize="sm">{uploadedFile.name}</Text>
-                ) : (
-                  <Text fontSize="sm" textAlign="center">Drop a file here, or click to select</Text>
-                )}
-              </VStack>
-            </Box>
+<Box position="relative">
+  <Box 
+    {...getRootProps()}
+    p={3} 
+    border="2px dashed" 
+    borderColor={isDragActive ? "blue.500" : "gray.300"}
+    borderRadius="md" 
+    cursor="pointer"
+    width="100%"
+    bg={uploadedFile ? "green.50" : "transparent"}
+    _hover={{ borderColor: "blue.500" }}
+    transition="all 0.2s"
+    data-disabled={!!selectedKbId}
+  >
+    <input {...getInputProps()} />
+    <VStack spacing={1}>
+      <Icon as={FaFileUpload} boxSize="20px" color={isDragActive ? "blue.500" : "gray.500"} />
+      {uploadedFile ? (
+        <Text fontSize="sm">{uploadedFile.name}</Text>
+      ) : (
+        <Text fontSize="sm" textAlign="center">Drop a file here, or click to select</Text>
+      )}
+    </VStack>
+      </Box>
+      
+      {/* Remove file button - only shows when a file is uploaded */}
+      {uploadedFile && (
+        <Button
+          position="absolute"
+          top="-8px"
+          right="-8px"
+          size="xs"
+          colorPalette="red"
+          borderRadius="full"
+          width="24px"
+          height="24px"
+          minWidth="24px"
+          p={0}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent triggering the dropzone click
+            setUploadedFile(null);
+          }}
+          aria-label="Remove file"
+          title="Remove file"
+        >
+          <Icon as={FaTimes} boxSize="10px" />
+        </Button>
+      )}
+    </Box>
 
             {/* Chat Messages */}
             <Box 
