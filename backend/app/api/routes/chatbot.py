@@ -16,8 +16,49 @@ import tempfile
 import os
 import zipfile
 from io import BytesIO
+import asyncio
+import uuid
+from datetime import datetime
+import threading
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+
+# Create a simple cache for vector databases and retrievers
+# might want to use a more robust solution like Redis for production
+class SessionCache:
+    def __init__(self):
+        self.cache = {}
+        self.lock = threading.Lock()
+        self.expiry = {}  # For tracking session expiration
+        self._cleanup_interval = 3600  # 1 hour in seconds
+        
+    def get(self, session_id):
+        with self.lock:
+            if session_id in self.cache:
+                # Update last access time
+                self.expiry[session_id] = datetime.now()
+                return self.cache[session_id]
+        return None
+        
+    def set(self, session_id, data):
+        with self.lock:
+            self.cache[session_id] = data
+            self.expiry[session_id] = datetime.now()
+            
+    def cleanup(self):
+        """Remove sessions older than 30 minutes"""
+        now = datetime.now()
+        with self.lock:
+            expired = [sid for sid, time in self.expiry.items() 
+                      if (now - time).seconds > 1800]  # 30 minutes
+            for sid in expired:
+                if sid in self.cache:
+                    del self.cache[sid]
+                if sid in self.expiry:
+                    del self.expiry[sid]
+
+# Initialize the cache
+session_cache = SessionCache()
 
 
 def rephrase_question_with_context(llm, chat_history, current_question):
@@ -67,22 +108,52 @@ async def query_knowledge_base(
     question: str,
     chat_history: str = None,
     use_default_models: bool = False,
+    session_id: str = None,
+    is_follow_up: bool = False,
 ):
-    """
-    Query a knowledge base with a question.
-    """
+    """Query a knowledge base with a question."""
     try:
-        # 1. Retrieve knowledge base from database
-        kb = session.get(KnowledgeBase, kb_id)
-        if not kb:
-            raise HTTPException(status_code=404, detail="Knowledge base not found")
+        print(f"Received request - session_id: {session_id}, is_follow_up: {is_follow_up}")
+
+        # Generate a session ID if not provided
+        if not session_id:
+            session_id = str(uuid.uuid4())
         
-        # Check access rights (optional - remove if you want public access)
-        if kb.owner_id != current_user.id:
-            raise HTTPException(status_code=403, detail="You don't have access to this knowledge base")
+        # Check if we have a cached retriever for this session
+        cached_data = session_cache.get(session_id)
+        print(f"Session cache lookup - ID: {session_id}, Found: {cached_data is not None}")
+
+        if cached_data:
+            print(f"Cache contents for {session_id}: {list(cached_data.keys())}")
+        retriever = None
+        llm = None
         
-        # 2. Create a temporary directory for ChromaDB
-        with tempfile.TemporaryDirectory() as temp_dir:
+        print("Session ID:", session_id)
+        print("Is follow-up:", is_follow_up)
+        print("Cached data:", cached_data)
+        print("Cached KB ID:", cached_data.get('kb_id') if cached_data else None)
+        print("KB ID:", kb_id)
+
+        if is_follow_up and cached_data and cached_data.get('kb_id') == kb_id:
+            print(f"Using cached resources for session {session_id}")
+            retriever = cached_data.get('retriever')
+            llm = cached_data.get('llm')
+        
+        # If no cached retriever, we need to set everything up
+        if not retriever:
+            print("Setting up new resources for knowledge base query")
+            # 1. Retrieve knowledge base from database
+            kb = session.get(KnowledgeBase, kb_id)
+            if not kb:
+                raise HTTPException(status_code=404, detail="Knowledge base not found")
+            
+            # Check access rights
+            if kb.owner_id != current_user.id:
+                raise HTTPException(status_code=403, detail="You don't have access to this knowledge base")
+            
+            # 2. Create a temporary directory for ChromaDB
+            temp_dir = tempfile.mkdtemp()
+            
             # Extract the zipped ChromaDB into the temp directory
             if kb.data:
                 with zipfile.ZipFile(BytesIO(kb.data), 'r') as zip_ref:
@@ -90,9 +161,8 @@ async def query_knowledge_base(
             else:
                 raise HTTPException(status_code=400, detail="Knowledge base has no vector database data")
             
-            # 3. Load the vector database with the appropriate embedding model
+            # 3. Load embedding model and vector database
             if use_default_models:
-                # Use default embedding model
                 embedding_model = session.exec(
                     select(EmbeddingModel).where(EmbeddingModel.is_default == True)
                 ).first()
@@ -101,27 +171,23 @@ async def query_knowledge_base(
                 model_id = embedding_model.model_id
                 provider = embedding_model.provider
             elif kb.embedding_model_id:
-                # Use the knowledge base's specific model
+                # Use knowledge base's specific model
                 embedding_model = session.get(EmbeddingModel, kb.embedding_model_id)
                 if embedding_model:
                     model_id = embedding_model.model_id
                     provider = embedding_model.provider
                 else:
-                    # Fallback if the model was deleted
+                    # Fallback
                     embedding_info = get_embedding_model(session)
                     model_id = embedding_info["model_id"]
                     provider = embedding_info["provider"]
             else:
-                # Fallback to default
+                # Fallback
                 embedding_info = get_embedding_model(session)
                 model_id = embedding_info["model_id"]
                 provider = embedding_info["provider"]
             
-            print(f"Using embedding model: {model_id} ({provider})")
-            embeddings = load_embeddings_model(
-                provider=provider,
-                model_id=model_id
-            )
+            embeddings = load_embeddings_model(provider=provider, model_id=model_id)
             
             # Load the Chroma database
             chroma_db = Chroma(persist_directory=temp_dir, embedding_function=embeddings)
@@ -130,134 +196,162 @@ async def query_knowledge_base(
             # 4. Get the LLM
             if use_default_models:
                 llm = get_default_llm(session)
-                print("Using default LLM")
             else:
-                # Use the knowledge base's specific LLM
                 llm_model = session.get(LlmModel, kb.llm_model_id)
                 if llm_model:
                     llm = create_llm(llm_model.provider, llm_model.model_id, temperature=0.0)
-                    print(f"Using knowledge base's LLM: {llm_model.model_id}")
                 else:
                     llm = get_default_llm(session)
-                    print("Knowledge base LLM not found, using default LLM")
             
-            # Rephrase the question using chat history if available
-            if chat_history:
-                print("Rephrasing question with context")
-                rephrased_question = rephrase_question_with_context(llm, chat_history, question)
-            else:
-                rephrased_question = question
-            
-            # 5. Retrieve relevant context for the question
-            docs = retriever.get_relevant_documents(rephrased_question)
-            context = "\n\n".join([doc.page_content for doc in docs])
-            
-            # Create a list of sources for citation
-            sources = []
-            for doc in docs:
-                source = {
-                    "content": doc.page_content[:300] + "..." if len(doc.page_content) > 300 else doc.page_content,
-                    "metadata": doc.metadata
-                }
-                sources.append(source)
-            
-            # 6. Define prompt for question answering
-            qa_prompt_template = """
-            You are a helpful assistant that answers questions based on the provided context.
-            
-            CONTEXT:
-            {context}
-            
-            QUESTION: {question}
-            
-            INSTRUCTIONS:
-            1. Answer the question based ONLY on the information provided in the CONTEXT.
-            2. If the context doesn't contain enough information to answer the question, say "I don't have enough information to answer this question."
-            3. Be concise and to the point.
-            4. Don't make up information or use knowledge outside the provided context.
-            
-            ANSWER:
-            """
-            
-            qa_prompt = ChatPromptTemplate.from_template(qa_prompt_template)
-            
-            # 7. Generate the answer
-            chain = qa_prompt | llm
-            response = chain.invoke({
-                "context": context, 
-                "question": rephrased_question
+            # Cache the resources
+            session_cache.set(session_id, {
+                'kb_id': kb_id,
+                'retriever': retriever,
+                'llm': llm,
+                'temp_dir': temp_dir  # Store the temp directory path to avoid deletion
             })
-
-            print("Response:", response.content)
-            print("Sources:", sources)	
-            
-            return {
-                "answer": response.content,
-                "sources": sources
+        
+        # Rephrase the question using chat history if available
+        if chat_history:
+            print("Rephrasing question with context")
+            rephrased_question = rephrase_question_with_context(llm, chat_history, question)
+        else:
+            rephrased_question = question
+        
+        # 5. Retrieve relevant context for the question
+        docs = retriever.get_relevant_documents(rephrased_question)
+        context = "\n\n".join([doc.page_content for doc in docs])
+        
+        # Create a list of sources for citation
+        sources = []
+        for doc in docs:
+            source = {
+                "content": doc.page_content[:300] + "..." if len(doc.page_content) > 300 else doc.page_content,
+                "metadata": doc.metadata
             }
+            sources.append(source)
+        
+        # 6. Define prompt for question answering
+        qa_prompt_template = """
+        You are a helpful assistant that answers questions based on the provided context.
+        
+        CONTEXT:
+        {context}
+        
+        QUESTION: {question}
+        
+        INSTRUCTIONS:
+        1. Answer the question based ONLY on the information provided in the CONTEXT.
+        2. If the context doesn't contain enough information to answer the question, say "I don't have enough information to answer this question."
+        3. Be concise and to the point.
+        4. Don't make up information or use knowledge outside the provided context.
+        
+        ANSWER:
+        """
+        
+        qa_prompt = ChatPromptTemplate.from_template(qa_prompt_template)
+        
+        # 7. Generate the answer
+        chain = qa_prompt | llm
+        response = chain.invoke({
+            "context": context, 
+            "question": rephrased_question
+        })
+        
+        return {
+            "answer": response.content,
+            "sources": sources,
+            "session_id": session_id,  # Return session ID for client to use in follow-ups
+            "rephrased_question": rephrased_question
+        }
     
     except Exception as e:
+        # Don't delete the temp dir on error if it's cached
         raise HTTPException(status_code=500, detail=f"Error querying knowledge base: {str(e)}")
 
 
 @router.post("/document")
 async def query_document(
     session: SessionDep,
-    file: UploadFile = File(...),
     question: str = None,
     chat_history: str = None,
     use_default_models: bool = False,
+    session_id: str = None,
+    is_follow_up: bool = False,
+    file: UploadFile = File(None),
 ):
-    """
-    Query an uploaded document with a question.
-    """
+    """Query an uploaded document with a question."""
     if not question:
         raise HTTPException(status_code=400, detail="Question is required")
     
-    # Get the default models
-    embedding_model = session.exec(
-        select(EmbeddingModel).where(EmbeddingModel.is_default == True)
-    ).first()
+    # If it's a follow-up but no session ID provided, can't proceed
+    if is_follow_up and not session_id:
+        raise HTTPException(status_code=400, detail="Session ID required for follow-up questions")
     
-    if not embedding_model:
-        raise HTTPException(status_code=404, detail="No default embedding model found")
-    
-    llm_model = session.exec(
-        select(LlmModel).where(LlmModel.is_default == True)
-    ).first()
-    
-    if not llm_model:
-        raise HTTPException(status_code=404, detail="No default LLM model found")
-    
-    # Save uploaded file temporarily
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        temp_file.write(await file.read())
-        temp_path = temp_file.name
+    # If not a follow-up, we need a file
+    if not is_follow_up and not file:
+        raise HTTPException(status_code=400, detail="File is required for initial questions")
     
     try:
-        # Detect file type and use appropriate loader
-        if file.filename.endswith('.pdf'):
-            loader = PyPDFLoader(temp_path)
-        else:
-            # Default to text loader for other files
-            loader = TextLoader(temp_path)
+        # Check if we have a cached retriever for this session
+        retriever = None
+        llm = None
+        temp_path = None
         
-        # Load and split the document
-        documents = loader.load()
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200
-        )
-        chunks = text_splitter.split_documents(documents)
+        if is_follow_up and session_id:
+            print("Using cached resources for follow-up question")
+            cached_data = session_cache.get(session_id)
+            if cached_data:
+                print(f"Using cached resources for document session {session_id}")
+                retriever = cached_data.get('retriever')
+                llm = cached_data.get('llm')
         
-        # Create embeddings
-        embeddings = load_embeddings_model(
-            provider=embedding_model.provider,
-            model_id=embedding_model.model_id
-        )
-        
-        # Create vector store
-        with tempfile.TemporaryDirectory() as vector_dir:
+        # If no cached retriever or this is a new document, set up everything
+        if not retriever:
+            print("Setting up new resources for document query")
+            # Get the default models
+            embedding_model = session.exec(
+                select(EmbeddingModel).where(EmbeddingModel.is_default == True)
+            ).first()
+            
+            if not embedding_model:
+                raise HTTPException(status_code=404, detail="No default embedding model found")
+            
+            llm_model = session.exec(
+                select(LlmModel).where(LlmModel.is_default == True)
+            ).first()
+            
+            if not llm_model:
+                raise HTTPException(status_code=404, detail="No default LLM model found")
+            
+            # Save uploaded file temporarily
+            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                temp_file.write(await file.read())
+                temp_path = temp_file.name
+            
+            # Detect file type and use appropriate loader
+            if file.filename.endswith('.pdf'):
+                loader = PyPDFLoader(temp_path)
+            else:
+                # Default to text loader for other files
+                loader = TextLoader(temp_path)
+            
+            # Load and split the document
+            documents = loader.load()
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=1000,
+                chunk_overlap=200
+            )
+            chunks = text_splitter.split_documents(documents)
+            
+            # Create embeddings
+            embeddings = load_embeddings_model(
+                provider=embedding_model.provider,
+                model_id=embedding_model.model_id
+            )
+            
+            # Create vector store in a temp directory that persists for the session
+            vector_dir = tempfile.mkdtemp()
             vector_store = Chroma.from_documents(
                 documents=chunks, 
                 embedding=embeddings,
@@ -271,62 +365,88 @@ async def query_document(
                 model_id=llm_model.model_id,
                 temperature=0.0
             )
-
-            # Rephrase the question using chat history if available
-            if chat_history:
-                print("Rephrasing question with context")
-                rephrased_question = rephrase_question_with_context(llm, chat_history, question)
-            else:
-                rephrased_question = question
             
-            # Retrieve relevant context
-            docs = retriever.get_relevant_documents(rephrased_question)
-            context = "\n\n".join([doc.page_content for doc in docs])
+            # Generate a session ID if not provided
+            if not session_id:
+                session_id = str(uuid.uuid4())
             
-            # Create a list of sources for citation
-            sources = []
-            for doc in docs:
-                source = {
-                    "content": doc.page_content[:300] + "..." if len(doc.page_content) > 300 else doc.page_content,
-                    "metadata": doc.metadata
-                }
-                sources.append(source)
-            
-            # Define prompt
-            qa_prompt_template = """
-            You are a helpful assistant that answers questions based on the provided context.
-            
-            CONTEXT:
-            {context}
-            
-            QUESTION: {question}
-            
-            INSTRUCTIONS:
-            1. Answer the question based ONLY on the information provided in the CONTEXT.
-            2. If the context doesn't contain enough information to answer the question, say "I don't have enough information to answer this question."
-            3. Be concise and to the point.
-            4. Don't make up information or use knowledge outside the provided context.
-            
-            ANSWER:
-            """
-            
-            qa_prompt = ChatPromptTemplate.from_template(qa_prompt_template)
-            
-            # Generate the answer
-            chain = qa_prompt | llm
-            response = chain.invoke({
-                "context": context, 
-                "question": rephrased_question
+            # Cache the resources
+            session_cache.set(session_id, {
+                'retriever': retriever,
+                'llm': llm,
+                'vector_dir': vector_dir,
+                'temp_path': temp_path
             })
 
-            print("Response:", response.content)
-            print("Sources:", sources)	
-            
-            return {
-                "answer": response.content,
-                "sources": sources
+        # Rephrase the question using chat history if available
+        if chat_history:
+            print("Rephrasing question with context")
+            rephrased_question = rephrase_question_with_context(llm, chat_history, question)
+        else:
+            rephrased_question = question
+        
+        # Retrieve relevant context
+        docs = retriever.get_relevant_documents(rephrased_question)
+        context = "\n\n".join([doc.page_content for doc in docs])
+        
+        # Create a list of sources for citation
+        sources = []
+        for doc in docs:
+            source = {
+                "content": doc.page_content[:300] + "..." if len(doc.page_content) > 300 else doc.page_content,
+                "metadata": doc.metadata
             }
+            sources.append(source)
+        
+        # Define prompt
+        qa_prompt_template = """
+        You are a helpful assistant that answers questions based on the provided context.
+        
+        CONTEXT:
+        {context}
+        
+        QUESTION: {question}
+        
+        INSTRUCTIONS:
+        1. Answer the question based ONLY on the information provided in the CONTEXT.
+        2. If the context doesn't contain enough information to answer the question, say "I don't have enough information to answer this question."
+        3. Be concise and to the point.
+        4. Don't make up information or use knowledge outside the provided context.
+        
+        ANSWER:
+        """
+        
+        qa_prompt = ChatPromptTemplate.from_template(qa_prompt_template)
+        
+        # Generate the answer
+        chain = qa_prompt | llm
+        response = chain.invoke({
+            "context": context, 
+            "question": rephrased_question
+        })
+
+        print("Response:", response.content)
+        print("Sources:", sources)	
+        
+        return {
+            "answer": response.content,
+            "sources": sources,
+            "session_id": session_id,
+            "rephrased_question": rephrased_question
+        }
     
     finally:
-        # Clean up temporary file
-        os.unlink(temp_path)
+        # Only clean up temp files if not cached
+        if temp_path and not is_follow_up and not session_cache.get(session_id):
+            os.unlink(temp_path)
+
+# Add a cleanup task that runs periodically
+@router.on_event("startup")
+async def startup_event():
+    async def cleanup_sessions():
+        while True:
+            await asyncio.sleep(1800)  # 30 minutes
+            session_cache.cleanup()
+            print("Session cache cleanup performed")
+    
+    asyncio.create_task(cleanup_sessions())
