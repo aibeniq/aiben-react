@@ -23,6 +23,30 @@ class ReplicateWrapper:
         else:
             self.owner_model = model_id
             self.version = None
+            
+    # Add this method to make it work with the | operator
+    def __or__(self, other):
+        # If used with pipe operator, just return the result of invoke directly
+        print("ReplicateWrapper: __or__ method called")
+        
+        def chain_func(inputs):
+            print(f"ReplicateWrapper chain function called with inputs: {inputs}")
+            # Format prompt from inputs
+            if isinstance(inputs, dict):
+                # Extract all values and join them with newlines
+                prompt_parts = []
+                for key, value in inputs.items():
+                    prompt_parts.append(f"{key}: {value}")
+                prompt = "\n".join(prompt_parts)
+            else:
+                prompt = str(inputs)
+            
+            # Call invoke with the formatted prompt
+            result = self.invoke(prompt)
+            # Return an object with content attribute to mimic LangChain format
+            return type('obj', (object,), {'content': result})
+            
+        return chain_func
 
     def invoke(self, prompt):
         """Run the model with the provided prompt"""
@@ -162,6 +186,8 @@ def get_default_llm(session: SessionDep):
             model_id="gpt-4o-mini",
             temperature=0.0
         )
+    
+    print(f"Default LLM model found: {default_model.name} ({default_model.model_id}, provider: {default_model.provider})")
     
     return create_llm(
         provider=default_model.provider,
