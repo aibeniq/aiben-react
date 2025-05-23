@@ -9,6 +9,7 @@ from langchain.embeddings import OllamaEmbeddings
 from langchain.embeddings.base import Embeddings
 from typing import Optional, List
 from dotenv import load_dotenv
+import json
 
 def load_embeddings_model(provider: ModelProvider, model_id: str, api_key: Optional[str] = None):
     """
@@ -71,7 +72,6 @@ def load_embeddings_model(provider: ModelProvider, model_id: str, api_key: Optio
         # Create and return the embeddings model
         return OllamaEmbeddings(model=model_id, base_url=base_url)
     elif provider == "replicate":
-        #TO DO: fix this so it's not hardcoded
         current_dir = Path(__file__).resolve().parent
 
         # Navigate to project root (3 levels up from the current file)
@@ -154,23 +154,35 @@ class ReplicateEmbeddings(Embeddings):
             print(f"Using token of length: {len(os.environ.get('REPLICATE_API_TOKEN', ''))}")
             
             #TO DO: figure out why only this hardcoded example works??
-            
+
             # experiment with sample input from Replicate website
-            input_example = {
-                "sentences": "search_query: What is TSNE?\nsearch_query: Who is Laurens van der Maaten?"
-            }
+            #input_example = {
+            #    "sentences": "search_query: What is TSNE?\nsearch_query: Who is Laurens van der Maaten?"
+            #}
+            #input_example = {
+            #    "sentences": "search_query: Look ma! No hands!\nsearch_query: Look pa! Two hands!"
+            #}
 
             #formatted input
             #formatted_input = f"search_query: {text}"
 
+            #output = replicate.run(
+            #    self.model_id,
+            #    #input = input_example,
+            #    #input={"sentences": formatted_input},
+            #    input={"texts": "[\"text\"]"},
+            #    use_file_output=False
+            #)
+            text_json = json.dumps([text])
+
             output = replicate.run(
                 self.model_id,
-                input = input_example,
-                #input={"sentences": formatted_input},
-                use_file_output=False
+                input={
+                    "texts": text_json,
+                    "batch_size": 32,
+                    "normalize_embeddings": True
+                }
             )
-
-            print("Output from Replicate:", output)
             
             # Parse the output depending on the model's response format
             # This may need adjustment based on the specific Replicate model used
