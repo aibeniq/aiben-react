@@ -256,6 +256,7 @@ class ModelProvider(str, enum.Enum):
     HUGGINGFACE = "huggingface"
     OPENAI = "openai"
     OLLAMA = "ollama"
+    REPLICATE = "replicate"
     # Add other providers as needed
 
 # Define a SQLAlchemy type for the enum

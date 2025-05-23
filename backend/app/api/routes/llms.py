@@ -1,4 +1,5 @@
 import os
+import replicate
 import uuid
 from typing import Any, List, Optional
 
@@ -209,6 +210,36 @@ def validate_llm_model(
             # Simple test to verify the model is available
             response = llm.invoke("Hello")
             print(f"Ollama model validation successful: {model_id}")
+        
+        elif provider == ModelProvider.REPLICATE:
+            try:                
+                # Check if API token is configured
+                if "REPLICATE_API_TOKEN" not in os.environ:
+                    raise ValueError("REPLICATE_API_TOKEN not set in environment variables")
+                
+                # Try to get model info - this will fail if the model doesn't exist
+                # Parse model ID to get the correct format
+                if ":" in model_id:
+                    owner_model, version = model_id.split(":")
+                    # Get the model directly with version
+                    output = replicate.run(
+                        model_id,
+                        input={"prompt": "Hello"},
+                        use_file_output=False
+                    )
+                else:
+                    # Try using the model without explicit version
+                    output = replicate.run(
+                        model_id,
+                        input={"prompt": "Hello"},
+                        use_file_output=False
+                    )
+                
+                print(f"Replicate model validation successful: {model_id}")
+            
+            except Exception as e:
+                print(f"Error validating Replicate model: {str(e)}")
+                raise ValueError(f"Invalid Replicate model: {str(e)}")
             
         else:
             raise ValueError(f"Unsupported provider: {provider}")
