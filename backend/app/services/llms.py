@@ -122,14 +122,23 @@ def create_llm(provider: ModelProvider, model_id: str,
     elif provider == ModelProvider.REPLICATE:
         # Configure Replicate
         if api_key:
+            print("API key provided with length:", len(api_key))
             os.environ["REPLICATE_API_TOKEN"] = api_key
-            
-        # Create a Replicate wrapper
-        return ReplicateWrapper(
+        
+
+        print(f"Creating Replicate LLM wrapper for model: {model_id}")
+        print(f"REPLICATE_API_TOKEN set: {'Yes' if 'REPLICATE_API_TOKEN' in os.environ else 'No'}")
+        print(f"Token length: {len(os.environ.get('REPLICATE_API_TOKEN', ''))}")
+        
+        print("Now creating Replicate LLM wrapper...")
+        wrapper = ReplicateWrapper(
             model_id=model_id,
             temperature=temperature,
             **params
         )
+        print("Replicate LLM wrapper created successfully.")
+        # Create a Replicate wrapper
+        return wrapper
     
     else:
         raise ValueError(f"Unsupported LLM provider: {provider}")
