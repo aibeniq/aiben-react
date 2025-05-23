@@ -62,7 +62,7 @@ session_cache = SessionCache()
 
 
 def rephrase_question_with_context(llm, chat_history, current_question):
-    """Rephrase the user's current question considering previous chat context"""
+    """Rephrase the user's latest question considering previous chat context"""
     
     # Skip rephrasing if this is the first question
     if not chat_history or chat_history.count("\n\n") < 1:
@@ -70,13 +70,13 @@ def rephrase_question_with_context(llm, chat_history, current_question):
         return current_question
     
     # Create the prompt for rephrasing
-    rephrase_prompt = ChatPromptTemplate.from_template("""
+    prompt_text = f"""
     You are an AI that rephrases the user's latest question to incorporate relevant context from the conversation history.
     
     CONVERSATION HISTORY:
     {chat_history}
     
-    CURRENT QUESTION: {question}
+    CURRENT QUESTION: {current_question}
     
     INSTRUCTIONS:
     1. Analyze the conversation history and the current question.
@@ -86,20 +86,56 @@ def rephrase_question_with_context(llm, chat_history, current_question):
     5. If the current question is already self-contained and doesn't reference anything from the history, return it unchanged.
     
     REPHRASED QUESTION:
-    """)
+    """
     
-    # Generate the rephrased question
-    chain = rephrase_prompt | llm
-    response = chain.invoke({
-        "chat_history": chat_history, 
-        "question": current_question
-    })
+    print("Now rephrasing question with context")
     
-    rephrased_question = response.content.strip()
+    # Check if the model is a LangChain LLM or our ReplicateWrapper
+    if hasattr(llm, '__class__') and 'ReplicateWrapper' in llm.__class__.__name__:
+        # Handle ReplicateWrapper - direct invoke without LangChain chain
+        try:
+            response_text = llm.invoke(prompt_text)
+            rephrased_question = response_text.strip()
+        except Exception as e:
+            print(f"Error rephrasing with Replicate model: {e}")
+            return current_question
+    else:
+        # Handle LangChain-compatible LLM
+        try:
+            rephrase_prompt = ChatPromptTemplate.from_template("""
+            You are an AI that rephrases the user's latest question to incorporate relevant context from the conversation history.
+            
+            CONVERSATION HISTORY:
+            {chat_history}
+            
+            CURRENT QUESTION: {question}
+            
+            INSTRUCTIONS:
+            1. Analyze the conversation history and the current question.
+            2. Rewrite the current question to be self-contained, incorporating any relevant context.
+            3. The rephrased question should be answerable without needing to see the conversation history.
+            4. Return ONLY the rephrased question, nothing else.
+            5. If the current question is already self-contained and doesn't reference anything from the history, return it unchanged.
+            
+            REPHRASED QUESTION:
+            """)
+            
+            chain = rephrase_prompt | llm
+            response = chain.invoke({
+                "chat_history": chat_history, 
+                "question": current_question
+            })
+            
+            rephrased_question = response.content.strip()
+        except Exception as e:
+            print(f"Error rephrasing with LangChain model: {e}")
+            return current_question
+    
     print(f"Original question: {current_question}")
     print(f"Rephrased question: {rephrased_question}")
     
     return rephrased_question
+
 
 @router.post("/knowledge-base/{kb_id}")
 async def query_knowledge_base(
@@ -197,6 +233,7 @@ async def query_knowledge_base(
             # 4. Get the LLM
             if use_default_models:
                 llm = get_default_llm(session)
+                print("Default LLM model retrieved")
             else:
                 llm_model = session.get(LlmModel, kb.llm_model_id)
                 if llm_model:
@@ -222,6 +259,7 @@ async def query_knowledge_base(
         # 5. Retrieve relevant context for the question
         docs = retriever.get_relevant_documents(rephrased_question)
         context = "\n\n".join([doc.page_content for doc in docs])
+        print("Retrieved context:", context)
         
         # Create a list of sources for citation
         sources = []
@@ -250,17 +288,47 @@ async def query_knowledge_base(
         ANSWER:
         """
         
-        qa_prompt = ChatPromptTemplate.from_template(qa_prompt_template)
+        # 7. Generate the answer - with branching for different model types
+        answer_content = ""
         
-        # 7. Generate the answer
-        chain = qa_prompt | llm
-        response = chain.invoke({
-            "context": context, 
-            "question": rephrased_question
-        })
+        # Check if the model is a ReplicateWrapper or LangChain LLM
+        if hasattr(llm, '__class__') and 'ReplicateWrapper' in llm.__class__.__name__:
+            print("Using Replicate model for knowledge base query")
+            # For Replicate models, format the prompt directly and call invoke
+            try:
+                formatted_prompt = qa_prompt_template.format(
+                    context=context,
+                    question=rephrased_question
+                )
+                answer_content = llm.invoke(formatted_prompt)
+                print("Got response from Replicate model:", answer_content[:100])
+            except Exception as e:
+                print(f"Error generating answer with Replicate model: {e}")
+                raise HTTPException(
+                    status_code=500, 
+                    detail=f"Error generating answer: {str(e)}"
+                )
+        else:
+            print("Using LangChain model for knowledge base query")
+            # For LangChain models, use the chain approach
+            try:
+                qa_prompt = ChatPromptTemplate.from_template(qa_prompt_template)
+                chain = qa_prompt | llm
+                response = chain.invoke({
+                    "context": context, 
+                    "question": rephrased_question
+                })
+                answer_content = response.content
+                print("Got response from LangChain model:", answer_content[:100])
+            except Exception as e:
+                print(f"Error generating answer with LangChain model: {e}")
+                raise HTTPException(
+                    status_code=500, 
+                    detail=f"Error generating answer: {str(e)}"
+                )
         
         return {
-            "answer": response.content,
+            "answer": answer_content,
             "sources": sources,
             "session_id": session_id,  # Return session ID for client to use in follow-ups
             "rephrased_question": rephrased_question
@@ -268,8 +336,10 @@ async def query_knowledge_base(
     
     except Exception as e:
         # Don't delete the temp dir on error if it's cached
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error querying knowledge base: {str(e)}")
-
+    
 
 @router.post("/document")
 async def query_document(
@@ -417,29 +487,68 @@ async def query_document(
         ANSWER:
         """
         
-        qa_prompt = ChatPromptTemplate.from_template(qa_prompt_template)
+        # Generate the answer - with branching for different model types
+        answer_content = ""
         
-        # Generate the answer
-        chain = qa_prompt | llm
-        response = chain.invoke({
-            "context": context, 
-            "question": rephrased_question
-        })
+        # Check if the model is a ReplicateWrapper or LangChain LLM
+        if hasattr(llm, '__class__') and 'ReplicateWrapper' in llm.__class__.__name__:
+            print("Using Replicate model for document query")
+            # For Replicate models, format the prompt directly and call invoke
+            try:
+                formatted_prompt = qa_prompt_template.format(
+                    context=context,
+                    question=rephrased_question
+                )
+                answer_content = llm.invoke(formatted_prompt)
+                print("Got response from Replicate model:", answer_content[:100])
+            except Exception as e:
+                print(f"Error generating answer with Replicate model: {e}")
+                raise HTTPException(
+                    status_code=500, 
+                    detail=f"Error generating answer: {str(e)}"
+                )
+        else:
+            print("Using LangChain model for document query")
+            # For LangChain models, use the chain approach
+            try:
+                qa_prompt = ChatPromptTemplate.from_template(qa_prompt_template)
+                chain = qa_prompt | llm
+                response = chain.invoke({
+                    "context": context, 
+                    "question": rephrased_question
+                })
+                answer_content = response.content
+                print("Got response from LangChain model:", answer_content[:100])
+            except Exception as e:
+                print(f"Error generating answer with LangChain model: {e}")
+                raise HTTPException(
+                    status_code=500, 
+                    detail=f"Error generating answer: {str(e)}"
+                )
 
-        print("Response:", response.content)
-        print("Sources:", sources)	
+        print("Response:", answer_content[:100])
+        print("Sources:", len(sources))
         
         return {
-            "answer": response.content,
+            "answer": answer_content,
             "sources": sources,
             "session_id": session_id,
             "rephrased_question": rephrased_question
         }
     
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error querying document: {str(e)}")
+    
     finally:
         # Only clean up temp files if not cached
         if temp_path and not is_follow_up and not session_cache.get(session_id):
-            os.unlink(temp_path)
+            try:
+                os.unlink(temp_path)
+            except Exception as e:
+                print(f"Error removing temporary file: {e}")
+
 
 # Add a cleanup task that runs periodically
 @router.on_event("startup")
@@ -452,7 +561,7 @@ async def startup_event():
     
     asyncio.create_task(cleanup_sessions())
 
-# Endpoint for direct text queries
+
 @router.post("/text")
 async def query_text(
     session: SessionDep,
@@ -483,18 +592,21 @@ async def query_text(
             print("Setting up new LLM for text query")
             # Get the default LLM model
             llm = get_default_llm(session)
-            
+            print("Default LLM model retrieved")
             # Cache the LLM
             session_cache.set(session_id, {
                 'llm': llm,
                 'type': 'text_query'
             })
+            print("LLM cached for session", session_id)
         
         # Rephrase the question using chat history if available
         if chat_history:
             print("Rephrasing question with context")
             rephrased_question = rephrase_question_with_context(llm, chat_history, question)
+            print("Rephrased question:", rephrased_question)
         else:
+            print("No chat history, using original question")
             rephrased_question = question
         
         # Define prompt template for general Q&A
@@ -507,17 +619,52 @@ async def query_text(
         ANSWER:
         """
         
-        qa_prompt = ChatPromptTemplate.from_template(qa_prompt_template)
+        # Handle different model types
+        answer_content = ""
         
-        # Generate the answer
-        chain = qa_prompt | llm
-        response = chain.invoke({"question": rephrased_question})
+        # Check if the model is a ReplicateWrapper or LangChain LLM
+        if hasattr(llm, '__class__') and 'ReplicateWrapper' in llm.__class__.__name__:
+            print("Using Replicate model for direct text query")
+            # For Replicate models, format the prompt directly and call invoke
+            try:
+                formatted_prompt = qa_prompt_template.format(
+                    question=rephrased_question
+                )
+                answer_content = llm.invoke(formatted_prompt)
+                print("Got response from Replicate model:", answer_content[:100])
+            except Exception as e:
+                print(f"Error generating answer with Replicate model: {e}")
+                import traceback
+                traceback.print_exc()
+                raise HTTPException(
+                    status_code=500, 
+                    detail=f"Error generating answer: {str(e)}"
+                )
+        else:
+            print("Using LangChain model for direct text query")
+            # For LangChain models, use the chain approach
+            try:
+                qa_prompt = ChatPromptTemplate.from_template(qa_prompt_template)
+                chain = qa_prompt | llm
+                response = chain.invoke({"question": rephrased_question})
+                answer_content = response.content
+                print("Got response from LangChain model:", answer_content[:100])
+            except Exception as e:
+                print(f"Error generating answer with LangChain model: {e}")
+                import traceback
+                traceback.print_exc()
+                raise HTTPException(
+                    status_code=500, 
+                    detail=f"Error generating answer: {str(e)}"
+                )
         
         return {
-            "answer": response.content,
+            "answer": answer_content,
             "session_id": session_id,
             "rephrased_question": rephrased_question
         }
     
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error processing question: {str(e)}")
