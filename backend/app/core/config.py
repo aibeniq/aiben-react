@@ -1,3 +1,4 @@
+import os
 import secrets
 import warnings
 from typing import Annotated, Any, Literal
@@ -98,6 +99,8 @@ class Settings(BaseSettings):
     EMAIL_TEST_USER: EmailStr = "test@example.com"
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
+
+    REPLICATE_API_TOKEN: str | None = os.getenv("REPLICATE_API_TOKEN")
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":

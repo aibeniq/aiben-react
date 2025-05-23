@@ -1,10 +1,14 @@
 import os
+from pathlib import Path
+import replicate
 import requests
 from app.models import ModelProvider
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain.embeddings import OllamaEmbeddings
-from typing import Optional
+from langchain.embeddings.base import Embeddings
+from typing import Optional, List
+from dotenv import load_dotenv
 
 def load_embeddings_model(provider: ModelProvider, model_id: str, api_key: Optional[str] = None):
     """
@@ -18,6 +22,14 @@ def load_embeddings_model(provider: ModelProvider, model_id: str, api_key: Optio
     Returns:
         An initialized embeddings model ready for use
     """
+    current_dir = Path(__file__).resolve().parent
+
+    # Navigate to project root (3 levels up from the current file)
+    root_dir = current_dir.parent.parent.parent
+
+    # Load .env from project root
+    load_dotenv(dotenv_path=os.path.join(root_dir, ".env"), override=True)
+
     if provider == ModelProvider.HUGGINGFACE:
         print("Loading HuggingFace embeddings model with model_id:", model_id)
         return HuggingFaceEmbeddings(model_name=model_id)
@@ -58,6 +70,128 @@ def load_embeddings_model(provider: ModelProvider, model_id: str, api_key: Optio
         
         # Create and return the embeddings model
         return OllamaEmbeddings(model=model_id, base_url=base_url)
-    
+    elif provider == "replicate":
+        #TO DO: fix this so it's not hardcoded
+        current_dir = Path(__file__).resolve().parent
+
+        # Navigate to project root (3 levels up from the current file)
+        root_dir = current_dir.parent.parent.parent
+
+        # Load .env from project root
+        load_dotenv(dotenv_path=os.path.join(root_dir, ".env"), override=True)
+        api_key = os.getenv("REPLICATE_API_TOKEN")
+        print("API key length:", len(api_key) if api_key else 0)
+        
+        return ReplicateEmbeddings(model_id=model_id, api_key=api_key)
     else:
-        raise ValueError(f"Unsupported model provider: {provider}")
+        raise ValueError(f"Unsupported provider: {provider}")
+    
+    
+class ReplicateEmbeddings(Embeddings):
+    """Embeddings implementation using Replicate API."""
+
+    current_dir = Path(__file__).resolve().parent
+
+    # Navigate to project root (3 levels up from the current file)
+    root_dir = current_dir.parent.parent.parent
+
+    # Load .env from project root
+    load_dotenv(dotenv_path=os.path.join(root_dir, ".env"), override=True)
+    
+    def __init__(self, model_id: str, api_key: str = None):
+        """Initialize Replicate embeddings.
+        
+        Args:
+            model_id: The model identifier on Replicate
+            api_key: Optional API key for Replicate
+        """
+        # First try explicit API key
+        #if api_key and api_key.strip():
+        #    os.environ["REPLICATE_API_TOKEN"] = api_key
+        #    print(f"Using provided API key (length: {len(api_key)})")
+        #else:
+        #    # Try from environment
+        #    api_key = os.environ.get("REPLICATE_API_TOKEN")
+        #    if not api_key or not api_key.strip():
+        #        # Last resort - try to load from .env directly
+        #        try:
+        #            load_dotenv(dotenv_path="/app/../.env", override=True)
+        #            # Or more robustly:
+        #            possible_paths = [
+        #                "/app/../.env",  # Docker path
+        #                "../.env",       # Relative path
+        #                "../../.env",    # Another common relative path
+        #            ]
+        #            for path in possible_paths:
+        #                if os.path.exists(path):
+        #                    load_dotenv(dotenv_path=path, override=True)
+        #                    break
+        #            api_key = os.environ.get("REPLICATE_API_TOKEN")
+        #            print(f"Loaded API key from .env file: {'Success' if api_key else 'Failed'}")
+        #        except Exception as e:
+        #            print(f"Error loading .env: {e}")
+        #            
+        #    if not api_key or not api_key.strip():
+        #        raise ValueError("REPLICATE_API_TOKEN not set in environment variables and no API key provided")
+        #    else:
+        #        print(f"Using API key from environment (length: {len(api_key)})")
+        
+        self.model_id = model_id
+    
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        """Embed a list of texts."""
+        embeddings = []
+        for text in texts:
+            embedding = self.embed_query(text)
+            embeddings.append(embedding)
+        return embeddings
+    
+    def embed_query(self, text: str) -> List[float]:
+        """Embed a query text."""
+        # Run the Replicate model to get embeddings
+        try:
+            # Add debugging here
+            print(f"Using token of length: {len(os.environ.get('REPLICATE_API_TOKEN', ''))}")
+            
+            #TO DO: figure out why only this hardcoded example works??
+            
+            # experiment with sample input from Replicate website
+            input_example = {
+                "sentences": "search_query: What is TSNE?\nsearch_query: Who is Laurens van der Maaten?"
+            }
+
+            #formatted input
+            #formatted_input = f"search_query: {text}"
+
+            output = replicate.run(
+                self.model_id,
+                input = input_example,
+                #input={"sentences": formatted_input},
+                use_file_output=False
+            )
+
+            print("Output from Replicate:", output)
+            
+            # Parse the output depending on the model's response format
+            # This may need adjustment based on the specific Replicate model used
+            if isinstance(output, list) and all(isinstance(x, float) for x in output):
+                print("Replicate output is a list of floats.")
+                return output
+            elif isinstance(output, dict) and "embedding" in output:
+                print("Replicate output is a dictionary with 'embedding' key.")	
+                return output["embedding"]
+            elif len(output) > 0:
+                print(f"Replicate output is a list of type: {type(output[0])}")
+                try:
+                    # Attempt to convert to list of floats if possible
+                    embedding = [float(x) for x in output]
+                    print("Successfully converted output to list of floats.")
+                    return embedding
+                except (ValueError, TypeError):
+                    pass
+            else:
+                print("Replicate output is of unexpected type:", type(output))
+                raise ValueError(f"Unexpected output format from Replicate model: {type(output)}")
+                
+        except Exception as e:
+            raise ValueError(f"Error getting embeddings from Replicate: {str(e)}")

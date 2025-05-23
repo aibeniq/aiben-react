@@ -20,7 +20,8 @@ import {
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import { CancelablePromise } from "@/client/core/CancelablePromise";
 import { FiPlus, FiSettings, FiCheckCircle, FiXCircle } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -160,7 +161,7 @@ function LlmModels() {
     },
   })
 
-  const handleValidateModel = () => {
+  const handleValidateModel = async () => {
     if (!modelId.trim()) {
       setIsModelValid(false);
       setValidationMessage("Please enter a model ID");
@@ -172,13 +173,46 @@ function LlmModels() {
           return;
         }
 
-    setIsValidating(true);
-    validateModelMutation.mutate({
-      requestBody: {
-      model_id: modelId,
-      provider: modelProvider
+     // Cancel any existing validation
+    if (currentValidationRef.current) {
+      currentValidationRef.current.cancel();
     }
+
+    setIsValidating(true);
+
+    const promise = EmbeddingModelsService.validateEmbeddingModel({
+      requestBody: {
+        model_id: modelId,
+        provider: modelProvider
+      }
     });
+    
+    currentValidationRef.current = promise;
+
+    //validateModelMutation.mutate({
+    //  requestBody: {
+    //  model_id: modelId,
+    //  provider: modelProvider
+    //}
+    //});
+
+    try {
+      await promise;
+      setIsModelValid(true);
+      setValidationMessage("Model is valid and can be loaded.");
+    } catch (error) {
+      // Only show error if it's not a cancellation
+      if (error.name !== "CancelError") {
+        setIsModelValid(false);
+        setValidationMessage(`Invalid model: ${error.message}`);
+      }
+    } finally {
+      // Only reset if this is still the current validation
+      if (currentValidationRef.current === promise) {
+        setIsValidating(false);
+        currentValidationRef.current = null;
+      }
+    }
   };
 
   const resetForm = () => {
@@ -217,6 +251,37 @@ function LlmModels() {
       deleteModelMutation.mutate(modelId)
     }
   }
+
+  // Add a reference to store current validation promise
+  const currentValidationRef = useRef<CancelablePromise<any> | null>(null);
+  
+  // Clean up any pending validations when component unmounts
+  useEffect(() => {
+    return () => {
+      if (currentValidationRef.current) {
+        currentValidationRef.current.cancel();
+        currentValidationRef.current = null;
+      }
+    };
+  }, []);
+  
+  // Modify the Dialog to handle validation cancellation
+  const handleModalClose = () => {
+    // Cancel any pending validation
+    if (currentValidationRef.current) {
+      currentValidationRef.current.cancel();
+      currentValidationRef.current = null;
+    }
+    
+    // Reset form state
+    resetForm();
+    setIsValidating(false);
+    setIsModelValid(null);
+    
+    // Close the modal
+    setIsOpen(false);
+  };
+  
   
   return (
     <>
@@ -314,7 +379,16 @@ function LlmModels() {
       )}
       
       {/* Dialog for adding a new LLM */}
-        <Dialog.Root open={isOpen} onOpenChange={(details) => setIsOpen(details.open)}>
+        <Dialog.Root 
+            open={isOpen} 
+            onOpenChange={(details) => {
+              if (!details.open) {
+                handleModalClose();
+              } else {
+                setIsOpen(true);
+              }
+            }}
+          >
           <Dialog.Backdrop />
           <Dialog.Positioner>
           <Dialog.Content size={{ base: "xs", md: "md" }} placement="center">
@@ -354,7 +428,7 @@ function LlmModels() {
                         <option value="huggingface">HuggingFace</option>
                         <option value="openai">OpenAI</option>
                         <option value="ollama">Ollama</option>
-                        
+                        <option value="replicate">Replicate</option>
                       </select>
                     </Field>
 
@@ -677,13 +751,16 @@ function EmbeddingModels() {
                     colorPalette={
                       model.provider === "huggingface" ? "teal" : 
                       model.provider === "openai" ? "purple" :
-                      model.provider === "ollama" ? "orange" : "gray"
+                      model.provider === "ollama" ? "orange" : 
+                      model.provider === "replicate" ? "red" : "gray"
+                      
                     } 
                     size="sm"
                   >
                     {model.provider === "huggingface" ? "HuggingFace" : 
                     model.provider === "openai" ? "OpenAI" : 
-                    model.provider === "ollama" ? "Ollama" : model.provider}
+                    model.provider === "ollama" ? "Ollama" :
+                    model.provider === "replicate" ? "Replicate" : model.provider}
                   </Badge>
                 </Table.Cell>
                 <Table.Cell>{model.description}</Table.Cell>
@@ -763,6 +840,7 @@ function EmbeddingModels() {
                         <option value="huggingface">HuggingFace</option>
                         <option value="openai">OpenAI</option>
                         <option value="ollama">Ollama</option>
+                        <option value="replicate">Replicate</option>
                       </select>
                     </Field>
 

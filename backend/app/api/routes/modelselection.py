@@ -2,6 +2,7 @@ import uuid
 import os
 from typing import Any, List, Optional
 import requests
+import replicate
 
 from fastapi import APIRouter, HTTPException, Depends, Body
 from sqlmodel import select, func
@@ -168,6 +169,40 @@ def create_embedding_model(
             # So we'll just check if the format looks correct (basic validation)
             if not model_in.model_id or not isinstance(model_in.model_id, str):
                 raise ValueError("Invalid model ID format for Ollama")
+        elif model_in.provider == ModelProvider.REPLICATE:
+            # Check if Replicate API token is configured
+            api_token = os.environ.get("REPLICATE_API_TOKEN")
+            if not api_token:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Replicate API token is not configured in the environment"
+                )
+                
+            # Validate the Replicate model
+            # We'll use a similar approach to what's in your llms.py validation
+            try:
+                # Just check if the model exists, don't run a full embedding request
+                if ":" in model_in.model_id:
+                    # Model with specific version
+                    owner_model, version = model_in.model_id.split(":")
+                    # Just check metadata
+                    model_info = replicate.models.get(owner_model)
+                    # Verify the version exists
+                    version_exists = False
+                    for v in model_info.versions.list():
+                        if v.id.startswith(version):
+                            version_exists = True
+                            break
+                    if not version_exists:
+                        raise ValueError(f"Version {version} not found for model {owner_model}")
+                else:
+                    # Model without specific version (will use latest)
+                    model_info = replicate.models.get(model_in.model_id)
+                    
+                print(f"Replicate model validation successful: {model_in.model_id}")
+            except Exception as e:
+                print(f"Error validating Replicate model: {str(e)}")
+                raise ValueError(f"Invalid Replicate model: {str(e)}")
         else:
             raise HTTPException(
                 status_code=400,
@@ -347,10 +382,13 @@ def validate_embedding_model(
             provider=model_data.provider,
             model_id=model_data.model_id
         )
+        print("Embeddings model loaded successfully.")
         
         # Test the model with a simple query
         test_query = "This is a test query to validate the embedding model."
         _ = embeddings.embed_query(test_query)
+
+        print("Model validation successful.")
         
         return Message(message=f"Model is valid for provider {model_data.provider}")
     except Exception as e:
@@ -359,7 +397,6 @@ def validate_embedding_model(
             detail=f"Invalid embedding model: {str(e)}"
         )
     
-# Add this new endpoint to your modelselection.py router
 @router.get("/check-api-key/{provider}", response_model=Message)
 def check_api_key_configured(provider: str) -> Message:
     """
@@ -398,5 +435,14 @@ def check_api_key_configured(provider: str) -> Message:
     elif provider == "huggingface":
         # For HuggingFace, check for token if needed
         return Message(message="No API key needed for this provider")
+    elif provider == "replicate":
+        api_token = os.environ.get("REPLICATE_API_TOKEN")
+        if api_token:
+            return Message(message="API token is configured")
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail="Replicate API token is not configured in the backend"
+            )
     else:
         return Message(message="No API key needed for this provider")

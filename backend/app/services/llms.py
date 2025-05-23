@@ -1,9 +1,88 @@
+import replicate  
+import os
 from app.models import ModelProvider, LlmModel
 from langchain_openai import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
 from typing import Optional, Any, Dict
 from app.api.deps import SessionDep
 from sqlmodel import select
+from langchain_community.llms import Replicate  
+from langchain.schema import HumanMessage
+
+class ReplicateWrapper:
+    """Wrapper for Replicate API to make it compatible with our interface"""
+    
+    def __init__(self, model_id: str, temperature: float = 0.0, **kwargs):
+        self.model_id = model_id
+        self.temperature = temperature
+        self.kwargs = kwargs
+        
+        # Check if we have a modelversion format (owner/model:version)
+        if ":" in model_id:
+            self.owner_model, self.version = model_id.split(":")
+        else:
+            self.owner_model = model_id
+            self.version = None
+
+    def invoke(self, prompt):
+        """Run the model with the provided prompt"""
+        if isinstance(prompt, str):
+            input_text = prompt
+            system_prompt = self.kwargs.get("system_prompt", "")
+        elif hasattr(prompt, 'content'):
+            input_text = prompt.content
+            system_prompt = self.kwargs.get("system_prompt", "")
+        else:
+            # Handle list of messages by identifying system and user messages
+            system_messages = [msg.content for msg in prompt if hasattr(msg, 'type') and msg.type == 'system']
+            user_messages = [msg.content for msg in prompt if hasattr(msg, 'content') and not (hasattr(msg, 'type') and msg.type == 'system')]
+            
+            system_prompt = system_messages[0] if system_messages else self.kwargs.get("system_prompt", "")
+            input_text = "\n".join(user_messages)
+            
+        try:
+            # Prepare input with proper structure for Replicate models
+            input_params = {
+                "prompt": input_text,
+                "temperature": self.temperature,
+            }
+            
+            # Add system prompt if available
+            if system_prompt:
+                input_params["system_prompt"] = system_prompt
+                
+            # Add any additional parameters from kwargs that should be passed to the model
+            for key, value in self.kwargs.items():
+                if key not in ["system_prompt"]:  # Skip already handled keys
+                    input_params[key] = value
+                    
+            print(f"Running Replicate model: {self.model_id}")
+            print(f"Input parameters: {input_params}")
+            
+            # Use Replicate's stream function for better compatibility
+            if self.kwargs.get("streaming", False):
+                # For streaming, we'll gather chunks and join them
+                chunks = []
+                for chunk in replicate.stream(
+                    self.model_id if self.version else self.owner_model,
+                    input=input_params
+                ):
+                    chunks.append(chunk)
+                return "".join(chunks)
+            else:
+                # For non-streaming use case
+                output = replicate.run(
+                    self.model_id if self.version else self.owner_model,
+                    input=input_params
+                )
+                
+                # Handle various output formats
+                if isinstance(output, list):
+                    return output[0] if len(output) == 1 else "".join(output)
+                return output
+        except Exception as e:
+            print(f"Error running Replicate model: {e}")
+            raise
 
 def create_llm(provider: ModelProvider, model_id: str, 
                temperature: float = 0.0, 
@@ -11,16 +90,6 @@ def create_llm(provider: ModelProvider, model_id: str,
                additional_params: Optional[Dict[str, Any]] = None) -> Any:
     """
     Factory function to create the appropriate LLM based on provider.
-    
-    Args:
-        provider: The model provider (OpenAI, Ollama, etc.)
-        model_id: The model identifier
-        temperature: LLM temperature setting
-        api_key: Optional API key for providers that require authentication
-        additional_params: Additional parameters specific to the LLM provider
-        
-    Returns:
-        An initialized LLM ready for use
     """
     params = additional_params or {}
     
@@ -47,6 +116,18 @@ def create_llm(provider: ModelProvider, model_id: str,
             model=model_id,
             temperature=temperature,
             base_url=base_url,
+            **params
+        )
+    
+    elif provider == ModelProvider.REPLICATE:
+        # Configure Replicate
+        if api_key:
+            os.environ["REPLICATE_API_TOKEN"] = api_key
+            
+        # Create a Replicate wrapper
+        return ReplicateWrapper(
+            model_id=model_id,
+            temperature=temperature,
             **params
         )
     
