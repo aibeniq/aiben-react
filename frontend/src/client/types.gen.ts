@@ -165,7 +165,7 @@ export type Message = {
   message: string
 }
 
-export type ModelProvider = "huggingface" | "openai" | "ollama"
+export type ModelProvider = "huggingface" | "openai" | "ollama" | "replicate"
 
 export type NewPassword = {
   token: string
@@ -335,6 +335,12 @@ export type EmbeddingModelsCheckApiKeyConfiguredData = {
 }
 
 export type EmbeddingModelsCheckApiKeyConfiguredResponse = Message
+
+export type FilesGetSourceContentData = {
+  sourceId: string
+}
+
+export type FilesGetSourceContentResponse = unknown
 
 export type FormconnectProcessFormData = {
   fields: string

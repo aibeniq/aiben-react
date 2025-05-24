@@ -19,6 +19,7 @@ import { useDropzone } from "react-dropzone";
 import { FaFileUpload, FaPaperPlane, FaTimes, FaTrash } from "react-icons/fa";
 import { FiFileText } from "react-icons/fi";
 import { KnowledgeBasesService, ChatService } from "@/client";
+import SourceLink from "@/components/Common/SourceLink";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -49,6 +50,24 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
   const [currentKbId, setCurrentKbId] = useState<string | null>(null);
   const [currentFileName, setCurrentFileName] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string>("");
+
+  const getDisplayFileName = (source: string): string => {
+  if (!source) return "Unknown";
+  
+  // Clean up temporary file paths
+  if (source.includes('/tmp/') || source.includes('\\tmp\\')) {
+      // First get the filename without the path
+      const filename = source.split('/').pop() || 
+                      source.split('\\').pop() || '';
+      
+      // Then remove everything before and including the first underscore
+      return filename.includes('_') 
+        ? filename.substring(filename.indexOf('_') + 1) 
+        : filename;
+    }
+    
+    return source;
+  };
 
   const clearChat = () => {
     setMessages([]);
@@ -171,6 +190,14 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
       console.log("Response:", response);
 
       if (response?.answer) {
+        console.log("Sources from response:", response.sources);
+  
+        // Check if sources have source_data_id
+        if (response.sources && response.sources.length > 0) {
+          console.log("First source metadata:", response.sources[0].metadata);
+          console.log("Source has ID:", !!response.sources[0].metadata?.source_data_id);
+        }
+        
         // You can show the rephrased question if you want
         const rephrasedInfo = response.rephrased_question && 
           response.rephrased_question !== userMessage ? 
@@ -429,19 +456,21 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
                                   <Text fontWeight="bold" fontSize="xs" color="gray.700">
                                     Source {sIdx + 1}:
                                     {source.metadata?.source && (
-                                      <Text as="span" ml={1} fontWeight="normal" color="blue.600">
-                                        {/* Clean up temporary file paths */}
-                                        {source.metadata.source.includes('/tmp/') || source.metadata.source.includes('\\tmp\\')
-                                          ? (() => {
-                                              const filename = source.metadata.source.split('/').pop() || 
-                                                              source.metadata.source.split('\\').pop() || '';
-                                              
-                                              return filename.includes('_') 
-                                                ? filename.substring(filename.indexOf('_') + 1) 
-                                                : filename;
-                                            })()
-                                          : source.metadata.source}
-                                      </Text>
+                                      // Replace this with our SourceLink if source_data_id is available
+                                      source.metadata.source_data_id ? (
+                                        <SourceLink
+                                          sourceId={source.metadata.source_data_id}
+                                          fileName={getDisplayFileName(source.metadata.source)}
+                                          ml={1}
+                                          fontWeight="normal"
+                                          color="blue.600"
+                                          useModal={true}
+                                        />
+                                      ) : (
+                                        <Text as="span" ml={1} fontWeight="normal" color="blue.600">
+                                          {getDisplayFileName(source.metadata.source)}
+                                        </Text>
+                                      )
                                     )}
                                   </Text>
                                   <Box 

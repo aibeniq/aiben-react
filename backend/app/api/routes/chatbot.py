@@ -4,7 +4,7 @@ from app.services.embeddings import load_embeddings_model
 from app.services.llms import create_llm, get_default_llm
 from app.services.knowledgebases import get_embedding_model
 from app.api.deps import CurrentUser, SessionDep
-from app.models import KnowledgeBase, EmbeddingModel, LlmModel
+from app.models import KnowledgeBase, EmbeddingModel, LlmModel, Source
 from sqlmodel import Session, select
 from langchain.chains import RetrievalQA
 from langchain.document_loaders import TextLoader, PyPDFLoader
@@ -18,8 +18,10 @@ import zipfile
 from io import BytesIO
 import asyncio
 import uuid
+import re
 from datetime import datetime
 import threading
+from pathlib import Path
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -264,9 +266,44 @@ async def query_knowledge_base(
         # Create a list of sources for citation
         sources = []
         for doc in docs:
+            # Ensure source_data_id is included in metadata if available
+            metadata = doc.metadata.copy()  # Copy to avoid modifying the original
+            
+            # If the metadata contains a source path that matches a pattern from a KB
+            if 'source' in metadata and isinstance(metadata['source'], str):
+                # Try to find the corresponding source_data_id
+                source_path = metadata['source']
+                # Extract just the filename
+                raw_filename = Path(source_path).name
+                
+                # Extract the real filename after the underscore using regex
+                # This looks for any characters followed by an underscore, then captures everything after
+                match = re.search(r'^[^_]*_(.+)$', raw_filename)
+                if match:
+                    # Use the captured group (everything after the underscore)
+                    filename = match.group(1)
+                else:
+                    # Fallback to the original filename if no underscore found
+                    filename = raw_filename
+                
+                # Debug info
+                print(f"Looking up source with filename: {filename}")
+                
+                # Try to find the source by name
+                source_entry = session.exec(
+                    select(Source)
+                    .where(Source.name == filename)
+                ).first()
+                
+                if source_entry:
+                    print(f"Found source entry with ID: {source_entry.source_data_id}")
+                    metadata['source_data_id'] = str(source_entry.source_data_id)
+                else:
+                    print(f"No source entry found for filename: {filename}")
+            
             source = {
                 "content": doc.page_content[:300] + "..." if len(doc.page_content) > 300 else doc.page_content,
-                "metadata": doc.metadata
+                "metadata": metadata
             }
             sources.append(source)
         
@@ -463,9 +500,24 @@ async def query_document(
         # Create a list of sources for citation
         sources = []
         for doc in docs:
+            # Ensure source_data_id is included in metadata if available
+            metadata = doc.metadata.copy()  # Copy to avoid modifying the original
+            
+            # If the metadata contains a source path that matches a pattern from a KB
+            if 'source' in metadata and isinstance(metadata['source'], str):
+                # Try to find the corresponding source_data_id
+                source_path = metadata['source']
+                source_entry = session.exec(
+                    select(Source)
+                    .where(Source.name == Path(source_path).name)
+                ).first()
+                
+                if source_entry:
+                    metadata['source_data_id'] = str(source_entry.source_data_id)
+            
             source = {
                 "content": doc.page_content[:300] + "..." if len(doc.page_content) > 300 else doc.page_content,
-                "metadata": doc.metadata
+                "metadata": metadata
             }
             sources.append(source)
         

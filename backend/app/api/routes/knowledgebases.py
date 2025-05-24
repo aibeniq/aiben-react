@@ -223,42 +223,25 @@ def read_knowledge_base(
         if model:
             embedding_model_name = model.name
     
-    # Get all sources for this knowledge base with SourceData joined
+     # Get all sources for this knowledge base
     sources = session.exec(
-        select(Source, SourceData)
-        .join(SourceData, Source.source_data_id == SourceData.id)
+        select(Source)
         .where(Source.knowledge_base_id == id)
     ).all()
 
     files = []
     for source in sources:
-        try:
-            # Extract the original content from the ZIP
-            zip_data = BytesIO(source.SourceData.data)
-            with zipfile.ZipFile(zip_data, "r") as zip_file:
-                # Get the first file in the archive (which should be the only one)
-                file_info = zip_file.infolist()[0]
-                file_content = zip_file.read(file_info.filename)
-
-                # Determine the proper content type based on the filename
-                content_type = mimetypes.guess_type(source.Source.name)[0] or "application/octet-stream"
-                
-                # Base64 encode the file content
-                import base64
-                files.append({
-                    "id": str(source.Source.source_data_id),
-                    "name": source.Source.name,
-                    "data_base64": base64.b64encode(file_content).decode('utf-8'),
-                    "content_type": content_type  # Default type
-                })
-        except Exception as e:
-            # Log the error but continue processing other files
-            print(f"Error extracting file {source.Source.name}: {str(e)}")
-            continue
+        # Only include metadata, not the actual file content
+        files.append({
+            "id": str(source.source_data_id),
+            "name": source.name,
+            "date_created": source.date_created,
+            # Don't include data_base64 here
+        })
 
     # Construct the response model
     knowledge_base_public = KnowledgeBasePublic(
-        **knowledge_base.model_dump(),  # Copy all fields from the KnowledgeBase object
+        **knowledge_base.model_dump(),
         files=files,
         embedding_model_name=embedding_model_name
     )
