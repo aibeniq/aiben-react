@@ -1,3 +1,4 @@
+import os
 import secrets
 import warnings
 from typing import Annotated, Any, Literal
@@ -41,6 +42,10 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: Annotated[
         list[AnyUrl] | str, BeforeValidator(parse_cors)
     ] = []
+
+    # Document processing parameters
+    DOCUMENT_CHUNK_SIZE: int = 1000
+    DOCUMENT_CHUNK_OVERLAP: int = 200
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -94,6 +99,46 @@ class Settings(BaseSettings):
     EMAIL_TEST_USER: EmailStr = "test@example.com"
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
+
+    # LLM Templates
+    VERADOC_CONTEXT_PROMPT_TEMPLATE: str = """
+    CONTEXT:
+    {context}
+    
+    INSTRUCTION: 
+    What necessary information from the context above should be kept in mind when answering the following question? {question} 
+    ONLY INCLUDE POLICY INFORMATION THAT WOULD BE SPECIFICALLY PERTINENT TO THE QUESTION -- do NOT just repeat general requirements.
+    
+    ANSWER:
+    According to the policy context, the following should be kept in mind when answering the question:
+    """
+    
+    VERADOC_QA_PROMPT_TEMPLATE: str = """
+    Read the following document and answer the following question clearly and concisely in 100 words or less.
+    
+    SAMPLE DOCUMENT: {document_text}
+    
+    QUESTION: {question}
+    
+    Keep the following RELEVANT REQUIREMENTS in mind when answering the question:
+    {question_context}
+    
+    ANSWER:
+    """
+    
+    VERADOC_FINAL_PROMPT_TEMPLATE: str = """
+    According to policy, an acceptable document must have all of the elements described in the following questions.
+    Read the following question-and-answer pairs about a certain proposal and determine whether or not it conforms to the policy.
+    
+    Remember: if any single element is missing from the proposal, it automatically means that the entire proposal does NOT conform to policy.
+    If the plan does not conform to policy, explain why not.
+    
+    {qa_pairs}
+    
+    Based on the question-and-answer pairs above, does the plan follow policy?
+    """
+
+    REPLICATE_API_TOKEN: str | None = os.getenv("REPLICATE_API_TOKEN")
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":

@@ -13,8 +13,10 @@ import {
   Input,
   Separator,
   Table,
+  Accordion,
 } from "@chakra-ui/react"
 import useCustomToast from "@/hooks/useCustomToast"
+import SourceLink from "@/components/Common/SourceLink"
 import { useState, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import { createFileRoute } from "@tanstack/react-router"
@@ -22,14 +24,31 @@ import { useMutation } from "@tanstack/react-query"
 import { VeradocService, KnowledgeBasesService } from "@/client"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd' 
-import { FaPlus, FaArrowsAlt } from "react-icons/fa"
+import { FiFileText } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 
 const VeraDoc = () => {
 
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<any>(null);
   const [knowledgeBases, setKnowledgeBases] = useState<any[]>([]);
+
+  const getDisplayFileName = (source: string): string => {
+    if (!source) return "Unknown";
+    
+    // Clean up temporary file paths
+    if (source.includes('/tmp/') || source.includes('\\tmp\\')) {
+      // First get the filename without the path
+      const filename = source.split('/').pop() || 
+                      source.split('\\').pop() || '';
+      
+      // Then remove everything before and including the first underscore
+      return filename.includes('_') 
+        ? filename.substring(filename.indexOf('_') + 1) 
+        : filename;
+    }
+    
+    return source;
+  };
 
   // Add this effect to fetch knowledge bases when component mounts
   useEffect(() => {
@@ -70,7 +89,7 @@ const VeraDoc = () => {
     isHandwritten: boolean;
   }>>([]);
 
-  const [batchResults, setBatchResults] = useState<string[]>([]);
+  const [batchResults, setBatchResults] = useState<Array<{ displayResults: string; qaPairs: any[] }>>([]);
   const [selectedBatchResult, setSelectedBatchResult] = useState<number>(0);
   const [batchLoading, setBatchLoading] = useState<boolean>(false);
 
@@ -144,6 +163,7 @@ const VeraDoc = () => {
     isHandwritten: boolean;
   }>>([]);
 
+  const [qaPairs, setQaPairs] = useState<Array<any>>([]);
   const [checklists, setChecklists] = useState([]); // List of checklists
   const [selectedChecklist, setSelectedChecklist] = useState(null); // Currently selected checklist
   const [checklistName, setChecklistName] = useState(""); // Name of the checklist being created/edited
@@ -189,32 +209,11 @@ const VeraDoc = () => {
     onSuccess: (data) => {
       console.log("Response data:", data)
       
-      // Format the response for display
-      let displayResults = "# Analysis Results\n\n";
-      
-      // Display the final evaluation first
-      if (data.results.final_evaluation) {
-        displayResults += "## FINAL EVALUATION\n\n";
-        displayResults += data.results.final_evaluation + "\n\n";
-      }
+      setResults(data.results.final_evaluation);
 
-      // Display additional details (QA pairs)
-      if (data.results.qa_pairs) {
-        displayResults += "## ADDITIONAL DETAILS\n\n";
-        
-        // Format each question-answer pair
-        data.results.qa_pairs.forEach((pair, index) => {
-          displayResults += `### Question ${index + 1}:\n${pair.question}\n\n`;
-          displayResults += `**Answer:**\n${pair.answer}\n\n`;
-          
-          // Display context used if available
-          if (pair.context) {
-            displayResults += `**Relevant Policy Context:**\n${pair.context}\n\n`;
-          }
-        });
-      }
+      // Store the QA pairs to render with custom components
+      setQaPairs(data.results.qa_pairs || []);
       
-      setResults(displayResults);
     },
     onError: (error) => {
       console.log("RAG mutation unsuccessful!")
@@ -360,32 +359,22 @@ const VeraDoc = () => {
       
       // Format the response
       let displayResults = `# Analysis Results for ${fileItem.file.name}\n\n`;
-      
+
       if (response.results.final_evaluation) {
         displayResults += "## FINAL EVALUATION\n\n";
         displayResults += response.results.final_evaluation + "\n\n";
       }
 
-      if (response.results.qa_pairs) {
-        displayResults += "## ADDITIONAL DETAILS\n\n";
-        
-        response.results.qa_pairs.forEach((pair, index) => {
-          displayResults += `### Question ${index + 1}:\n${pair.question}\n\n`;
-          displayResults += `**Answer:**\n${pair.answer}\n\n`;
-          
-          if (pair.context) {
-            displayResults += `**Relevant Policy Context:**\n${pair.context}\n\n`;
-          }
-        });
-      }
-      
-      results.push(displayResults);
-    }
+      // Store the QA pairs in the results array
+      results.push({
+        displayResults,
+        qaPairs: response.results.qa_pairs || []
+      });
+
+      // Update your state for batch results
+      setBatchResults(results);
     
-    // Update state with all results
-    setBatchResults(results);
-    
-  } catch (error) {
+  }} catch (error) {
     console.error("Batch processing error:", error);
     setResults(`Error processing batch: ${error.message}`);
   } finally {
@@ -482,7 +471,16 @@ const components = {
                   <Table.Body>
                     {selectedKnowledgeBaseDetails.files.map((file) => (
                       <Table.Row key={file.id}>
-                        <Table.Cell>{file.name}</Table.Cell>
+                        <Table.Cell>
+                          {/* Make the file name clickable with SourceLink */}
+                          <SourceLink
+                            sourceId={file.id}
+                            fileName={file.name}
+                            useModal={true}
+                            color="blue.600"
+                            _hover={{ textDecoration: "underline" }}
+                          />
+                        </Table.Cell>
                         <Table.Cell>{new Date(file.date_created || '').toLocaleDateString()}</Table.Cell>
                       </Table.Row>
                     ))}
@@ -661,7 +659,7 @@ const components = {
                   alert("Checklist deleted successfully.");
                 } catch (error) {
                   console.error("Error deleting checklist:", error);
-                  alert("Failed to delete checklist templtae. Please try again.");
+                  alert("Failed to delete checklist. Please try again.");
                 }
               }}
               isDisabled={!selectedChecklist}
@@ -751,9 +749,87 @@ const components = {
                 </Box>
               )}
               {results ? (
+                <>
                 <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
                   {results}
                 </ReactMarkdown>
+
+                {qaPairs.length > 0 && (
+                  <Box mt={4}>
+                    {qaPairs.map((pair, index) => (
+                      <Box key={index} mb={4} p={4} borderWidth="1px" borderRadius="md" bg="white">
+                        <Heading as="h3" size="md" mb={2}>
+                          Question {index + 1}: {pair.question}
+                        </Heading>
+                        
+                        <Box mb={3}>
+                          <Text fontWeight="bold">Answer:</Text>
+                          <Text>{pair.answer}</Text>
+                        </Box>
+                        
+                        <Box mb={3}>
+                          <Text fontWeight="bold">Relevant Policy Context:</Text>
+                          <Text>{pair.context}</Text>
+                        </Box>
+                        
+                        {pair.source_citations && pair.source_citations.length > 0 && (
+                          <Accordion.Root type="single" collapsible mt={2}>
+                            <Accordion.Item>
+                              <h2>
+                                <Accordion.ItemTrigger bg="gray.100" _hover={{ bg: "gray.200" }}>
+                                  <Box flex="1" textAlign="left" fontWeight="medium">
+                                    <HStack>
+                                      <FiFileText />
+                                      <Text>View Source Citations ({pair.source_citations.length})</Text>
+                                    </HStack>
+                                  </Box>
+                                </Accordion.ItemTrigger>
+                              </h2>
+                              <Accordion.ItemContent pb={4} bg="gray.50">
+                                {pair.source_citations.map((citation, cIndex) => (
+                                  <Box 
+                                    key={cIndex}
+                                    p={3} 
+                                    mb={2} 
+                                    borderWidth="1px" 
+                                    borderRadius="md"
+                                    bg="white"
+                                  >
+                                    {citation.metadata.source_data_id ? (
+                                        <SourceLink
+                                          sourceId={citation.metadata.source_data_id}
+                                          fileName={getDisplayFileName(citation.metadata.source)}
+                                          ml={1}
+                                          fontWeight="normal"
+                                          color="blue.600"
+                                          useModal={true}
+                                        />
+                                      ) : (
+                                        <Text as="span" ml={1} fontWeight="normal" color="blue.600">
+                                          {getDisplayFileName(citation.metadata.source)}
+                                        </Text>
+                                      )}
+                                    <Box 
+                                      mt={2} 
+                                      p={2} 
+                                      bg="gray.50" 
+                                      borderRadius="sm" 
+                                      fontSize="sm"
+                                      whiteSpace="pre-wrap"
+                                    >
+                                      {citation.content}
+                                    </Box>
+                                  </Box>
+                                ))}
+                              </Accordion.ItemContent>
+                            </Accordion.Item>
+                          </Accordion.Root>
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
+                  )}
+                </>
               ) : (
                 <Text color="gray.500">Results will appear here after running.</Text>
               )}
@@ -908,9 +984,87 @@ const components = {
                   </Box>
                 ) : (
                   batchResults.length > 0 ? (
+                    <>
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                      {batchResults[selectedBatchResult]}
+                      {batchResults[selectedBatchResult].displayResults}
                     </ReactMarkdown>
+
+                    <Box mt={4}>
+                      {batchResults[selectedBatchResult].qaPairs.map((pair, index) => (
+                        <Box key={index} mb={4} p={4} borderWidth="1px" borderRadius="md" bg="white">
+                          <Heading as="h3" size="md" mb={2}>
+                            Question {index + 1}: {pair.question}
+                          </Heading>
+                          
+                          <Box mb={3}>
+                            <Text fontWeight="bold">Answer:</Text>
+                            <Text>{pair.answer}</Text>
+                          </Box>
+                          
+                          <Box mb={3}>
+                            <Text fontWeight="bold">Relevant Policy Context:</Text>
+                            <Text>{pair.context}</Text>
+                          </Box>
+                          
+                          {pair.source_citations && 
+                            console.log("Source citations:", pair.source_citations)}
+                          {pair.source_citations && pair.source_citations.length > 0 && (
+                            <Accordion.Root type="single" collapsible mt={2}>
+                              <Accordion.Item>
+                                <h2>
+                                  <Accordion.ItemTrigger bg="gray.100" _hover={{ bg: "gray.200" }}>
+                                    <Box flex="1" textAlign="left" fontWeight="medium">
+                                      <HStack>
+                                        <FiFileText />
+                                        <Text>View Source Citations ({pair.source_citations.length})</Text>
+                                      </HStack>
+                                    </Box>
+                                  </Accordion.ItemTrigger>
+                                </h2>
+                                <Accordion.ItemContent pb={4} bg="gray.50">
+                                  {pair.source_citations.map((citation, cIndex) => (
+                                    <Box 
+                                      key={cIndex}
+                                      p={3} 
+                                      mb={2} 
+                                      borderWidth="1px" 
+                                      borderRadius="md"
+                                      bg="white"
+                                    >
+                                      {citation.metadata.source_data_id ? (
+                                        <SourceLink
+                                          sourceId={citation.metadata.source_data_id}
+                                          fileName={getDisplayFileName(citation.metadata.source)}
+                                          ml={1}
+                                          fontWeight="normal" 
+                                          color="blue.600"
+                                          useModal={true}
+                                        />
+                                      ) : (
+                                        <Text as="span" ml={1} fontWeight="normal" color="blue.600">
+                                          {getDisplayFileName(citation.metadata.source)}
+                                        </Text>
+                                      )}
+                                      <Box 
+                                        mt={2} 
+                                        p={2} 
+                                        bg="gray.50" 
+                                        borderRadius="sm" 
+                                        fontSize="sm"
+                                        whiteSpace="pre-wrap"
+                                      >
+                                        {citation.content}
+                                      </Box>
+                                    </Box>
+                                  ))}
+                                </Accordion.ItemContent>
+                              </Accordion.Item>
+                            </Accordion.Root>
+                          )}
+                        </Box>
+                      ))}
+                    </Box>
+                    </>
                   ) : (
                     <Text color="gray.500">Results will appear here after processing files.</Text>
                   )
