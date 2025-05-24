@@ -174,6 +174,7 @@ dependencies = [
     { name = "pyjwt" },
     { name = "pymupdf" },
     { name = "pypdf" },
+    { name = "python-docx" },
     { name = "python-multipart" },
     { name = "replicate" },
     { name = "sentry-sdk", extra = ["fastapi"] },
@@ -213,6 +214,7 @@ requires-dist = [
     { name = "pyjwt", specifier = ">=2.8.0,<3.0.0" },
     { name = "pymupdf", specifier = "==1.25.5" },
     { name = "pypdf", specifier = "==5.4.0" },
+    { name = "python-docx", specifier = ">=0.8.11,<1.0.0" },
     { name = "python-multipart", specifier = ">=0.0.7,<1.0.0" },
     { name = "replicate", specifier = "==1.0.6" },
     { name = "sentry-sdk", extras = ["fastapi"], specifier = ">=1.40.6,<2.0.0" },
@@ -2871,6 +2873,15 @@ sdist = { url = "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427", size = 229892, upload-time = "2024-03-01T18:36:18.57Z" },
 ]
+
+[[package]]
+name = "python-docx"
+version = "0.8.11"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "lxml" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8b/a0/52729ce4aa026f31b74cc877be1d11e4ddeaa361dc7aebec148171644b33/python-docx-0.8.11.tar.gz", hash = "sha256:1105d233a0956dd8dd1e710d20b159e2d72ac3c301041b95f4d4ceb3e0ebebc4", size = 5561613, upload-time = "2021-05-15T22:18:24.824Z" }
 
 [[package]]
 name = "python-dotenv"

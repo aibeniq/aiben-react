@@ -1,5 +1,5 @@
 import uuid
-from app.models import VeraDocRequest, VeraDocResponse, VeraDocChecklist, RagChecklistRequest, EmbeddingModel, Source
+from app.models import VeraDocRequest, VeraDocResponse, VeraDocChecklist, RagChecklistRequest, EmbeddingModel, Source, KnowledgeBase
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
@@ -30,7 +30,6 @@ from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
-from app.models import KnowledgeBase
 import zipfile
 from io import BytesIO
 

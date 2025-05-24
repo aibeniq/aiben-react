@@ -101,6 +101,25 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER_PASSWORD: str
 
     # LLM Templates
+    REPORT_GENIE_PROMPT_TEMPLATE: str = """
+    REFERENCE INFORMATION:
+    {context}
+
+    TASK:
+    Based on the reference information above, write a clear and comprehensive section for a research participation consent form. The section to create is: {question}
+
+    The content should:
+    1. Be written in plain language (8th-grade reading level)
+    2. Include all legally required elements for this section
+    3. Follow standard consent form conventions
+    4. Be concise yet thorough
+    5. Use second-person perspective (addressing "you" - the participant)
+
+    FORMAT OUTPUT AS A PROPERLY FORMATTED CONSENT FORM SECTION with an appropriate heading and content.
+
+    SECTION CONTENT:
+    """
+
     VERADOC_CONTEXT_PROMPT_TEMPLATE: str = """
     CONTEXT:
     {context}

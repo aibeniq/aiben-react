@@ -19,6 +19,7 @@ import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
 import { Route as LayoutVeradocImport } from './routes/_layout/veradoc'
 import { Route as LayoutSettingsImport } from './routes/_layout/settings'
+import { Route as LayoutReportgenieImport } from './routes/_layout/reportgenie'
 import { Route as LayoutModelSelectionImport } from './routes/_layout/model-selection'
 import { Route as LayoutKnowledgeBasesImport } from './routes/_layout/knowledge-bases'
 import { Route as LayoutItemsImport } from './routes/_layout/items'
@@ -64,6 +65,11 @@ const LayoutVeradocRoute = LayoutVeradocImport.update({
 
 const LayoutSettingsRoute = LayoutSettingsImport.update({
   path: '/settings',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutReportgenieRoute = LayoutReportgenieImport.update({
+  path: '/reportgenie',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -136,6 +142,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutModelSelectionImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/reportgenie': {
+      preLoaderRoute: typeof LayoutReportgenieImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/settings': {
       preLoaderRoute: typeof LayoutSettingsImport
       parentRoute: typeof LayoutImport
@@ -160,6 +170,7 @@ export const routeTree = rootRoute.addChildren([
     LayoutItemsRoute,
     LayoutKnowledgeBasesRoute,
     LayoutModelSelectionRoute,
+    LayoutReportgenieRoute,
     LayoutSettingsRoute,
     LayoutVeradocRoute,
     LayoutIndexRoute,

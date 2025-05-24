@@ -355,3 +355,28 @@ class LlmModelsPublic(SQLModel):
 class LlmModelsValidate(SQLModel):
     model_id: str
     provider: ModelProvider
+
+# Request model for ReportGenie
+class ReportGenieRequest(SQLModel):
+    knowledge_base_id: str
+    sections: str
+
+# Response model for ReportGenie
+class ReportGenieResponse(SQLModel):
+    results: Dict[str, Any]  # Accept any dictionary structure
+
+# Form for saving outlines
+class ReportGenieOutline(SQLModel, table=True):
+    __tablename__ = "reportgenie_outlines"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    name: str = Field(max_length=255, unique=True, nullable=False)
+    description: str | None = Field(default=None, max_length=255)
+    sections: str = Field(nullable=False)  # Store sections outline as a string
+    owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
+    date_created: datetime = Field(default_factory=datetime.utcnow)
+    date_modified: datetime = Field(default_factory=datetime.utcnow)
+
+class ReportGenieSection(SQLModel):
+    title: str
+    content: str
+    source_citations: List[Dict[str, Any]] = Field(default_factory=list)
