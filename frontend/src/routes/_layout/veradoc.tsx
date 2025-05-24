@@ -275,7 +275,7 @@ const VeraDoc = () => {
     const requestData = {
       questions: questions,
       knowledgeBaseId: selectedKnowledgeBase.id,
-      digitized_files: regularFiles,
+      files: regularFiles,
       handwrittenFiles: handwrittenFiles,
     };
 
@@ -659,7 +659,7 @@ const components = {
                   alert("Checklist deleted successfully.");
                 } catch (error) {
                   console.error("Error deleting checklist:", error);
-                  alert("Failed to delete checklist templtae. Please try again.");
+                  alert("Failed to delete checklist. Please try again.");
                 }
               }}
               isDisabled={!selectedChecklist}
