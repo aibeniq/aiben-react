@@ -3,7 +3,7 @@ import uuid
 from typing import List, Dict, Any, Optional
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
-from sqlalchemy import LargeBinary, Column, PrimaryKeyConstraint, Enum as SQLAlchemyEnum
+from sqlalchemy import LargeBinary, Column, PrimaryKeyConstraint, UniqueConstraint, Enum as SQLAlchemyEnum
 from datetime import datetime
 
 # Shared properties
@@ -118,7 +118,7 @@ class NewPassword(SQLModel):
 # classes for Knowledge Bases
 # Shared properties
 class KnowledgeBaseBase(SQLModel):
-    title: str = Field(min_length=1, max_length=255, unique=True)
+    title: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=255)
     embedding_model_id: Optional[uuid.UUID] = Field(
         default=None, foreign_key="embeddingmodel.id"
@@ -140,15 +140,21 @@ class KnowledgeBaseUpdate(KnowledgeBaseBase):
     # file_paths: Optional[List[str]] = None
 
 
-# Database model
+# Then add a table constraint in KnowledgeBase
 class KnowledgeBase(KnowledgeBaseBase, table=True):
-    __tablename__ = "knowledge-bases"  # Explicitly set the table name; otherwise inferred automatically from class name
+    __tablename__ = "knowledge-bases"
+    # Add a unique constraint across title and owner_id
+    __table_args__ = (
+        PrimaryKeyConstraint("id"),
+        UniqueConstraint("title", "owner_id", name="uq_knowledgebase_title_owner"),
+    )
+    
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     owner_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
     owner: User | None = Relationship(back_populates="knowledge_bases")
-    data: bytes | None = Field(default=None, sa_column=LargeBinary)  # New column for compressed data
+    data: bytes | None = Field(default=None, sa_column=LargeBinary)
     date_created: datetime
     date_modified: datetime
     
