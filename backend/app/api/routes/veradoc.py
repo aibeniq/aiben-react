@@ -2,7 +2,7 @@ import uuid
 from app.models import VeraDocRequest, VeraDocResponse, VeraDocChecklist, RagChecklistRequest, EmbeddingModel, Source
 
 from app.api.deps import CurrentUser, SessionDep
-
+from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm
@@ -56,12 +56,12 @@ router = APIRouter(prefix="/veradoc", tags=["veradoc"])
 # Initialize the LLM
 #llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
 
-def generate_template(fields: List[str]) -> Dict[str, str]:
+def generate_template(questions: List[str]) -> Dict[str, str]:
     """
-    Generate a JSON template from a list of fields.
+    Generate a JSON template from a list of questions.
     Each field will have a blank value.
     """
-    return {field: "" for field in fields}
+    return {field: "" for field in questions}
 
 # Add the new endpoint
 @router.post("/process-rag", response_model=VeraDocResponse)
@@ -149,42 +149,9 @@ async def process_rag_checklist(
             print("LLM successfully loaded.")
             
             # 5. Define the prompts for the different stages
-            context_prompt_template = """
-            CONTEXT:
-            {context}
-            
-            INSTRUCTION: 
-            What necessary information from the context above should be kept in mind when answering the following question? {question} 
-            ONLY INCLUDE POLICY INFORMATION THAT WOULD BE SPECIFICALLY PERTINENT TO THE QUESTION -- do NOT just repeat general requirements.
-            
-            ANSWER:
-            According to the policy context, the following should be kept in mind when answering the question:
-            """
-            
-            qa_prompt_template = """
-            Read the following document and answer the following question clearly and concisely in 100 words or less.
-            
-            SAMPLE DOCUMENT: {document_text}
-            
-            QUESTION: {question}
-            
-            Keep the following RELEVANT REQUIREMENTS in mind when answering the question:
-            {question_context}
-            
-            ANSWER:
-            """
-            
-            final_prompt_template = """
-            According to policy, an acceptable document must have all of the elements described in the following questions.
-            Read the following question-and-answer pairs about a certain proposal and determine whether or not it conforms to the policy.
-            
-            Remember: if any single element is missing from the proposal, it automatically means that the entire proposal does NOT conform to policy.
-            If the plan does not conform to policy, explain why not.
-            
-            {qa_pairs}
-            
-            Based on the question-and-answer pairs above, does the plan follow policy?
-            """
+            context_prompt_template = settings.VERADOC_CONTEXT_PROMPT_TEMPLATE
+            qa_prompt_template = settings.VERADOC_QA_PROMPT_TEMPLATE
+            final_prompt_template = settings.VERADOC_FINAL_PROMPT_TEMPLATE
 
             # 6. Process each uploaded file
             qa_pairs = []
@@ -419,7 +386,7 @@ def update_checklist(checklist_id: uuid.UUID, updated_checklist: VeraDocChecklis
     
     checklist.name = updated_checklist.name
     checklist.description = updated_checklist.description
-    checklist.fields = updated_checklist.fields
+    checklist.questions = updated_checklist.questions
     checklist.date_modified = datetime.utcnow()
     
     session.add(checklist)
