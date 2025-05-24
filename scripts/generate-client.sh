@@ -10,5 +10,8 @@ cd backend
 cd ..
 mv openapi.json frontend/
 cd frontend
-npm run generate-client
-npx biome format --write ./src/client
+#npm run generate-client  #David having issues with environment... replacing with the below
+cmd.exe /c npm-with-node.bat run generate-client
+
+#npx biome format --write ./src/client  #David having issues with environment... replacing with the below
+cmd.exe /c npm-with-node.bat run format
