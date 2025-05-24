@@ -82,6 +82,17 @@ import type {
   LoginRecoverPasswordHtmlContentResponse,
   PrivateCreateUserData,
   PrivateCreateUserResponse,
+  ReportgenieGenerateReportData,
+  ReportgenieGenerateReportResponse,
+  ReportgenieGetOutlinesResponse,
+  ReportgenieCreateOutlineData,
+  ReportgenieCreateOutlineResponse,
+  ReportgenieGetOutlineData,
+  ReportgenieGetOutlineResponse,
+  ReportgenieUpdateOutlineData,
+  ReportgenieUpdateOutlineResponse,
+  ReportgenieDeleteOutlineData,
+  ReportgenieDeleteOutlineResponse,
   UsersReadUsersData,
   UsersReadUsersResponse,
   UsersCreateUserData,
@@ -1093,6 +1104,140 @@ export class PrivateService {
       url: "/api/v1/private/users/",
       body: data.requestBody,
       mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
+export class ReportgenieService {
+  /**
+   * Generate Report
+   * Generate a report based on sections outline and knowledge base search results.
+   * @param data The data for the request.
+   * @param data.knowledgeBaseId
+   * @param data.sections
+   * @returns ReportGenieResponse Successful Response
+   * @throws ApiError
+   */
+  public static generateReport(
+    data: ReportgenieGenerateReportData,
+  ): CancelablePromise<ReportgenieGenerateReportResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/reportgenie/generate",
+      query: {
+        knowledge_base_id: data.knowledgeBaseId,
+        sections: data.sections,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Outlines
+   * Retrieve all outlines from the database for this user.
+   * @returns ReportGenieOutline Successful Response
+   * @throws ApiError
+   */
+  public static getOutlines(): CancelablePromise<ReportgenieGetOutlinesResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/reportgenie/outlines",
+    })
+  }
+
+  /**
+   * Create Outline
+   * Save a new outline to the database.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns ReportGenieOutline Successful Response
+   * @throws ApiError
+   */
+  public static createOutline(
+    data: ReportgenieCreateOutlineData,
+  ): CancelablePromise<ReportgenieCreateOutlineResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/reportgenie/outlines",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Outline
+   * Retrieve a specific outline by ID.
+   * @param data The data for the request.
+   * @param data.outlineId
+   * @returns ReportGenieOutline Successful Response
+   * @throws ApiError
+   */
+  public static getOutline(
+    data: ReportgenieGetOutlineData,
+  ): CancelablePromise<ReportgenieGetOutlineResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/reportgenie/outlines/{outline_id}",
+      path: {
+        outline_id: data.outlineId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Outline
+   * Update an existing outline.
+   * @param data The data for the request.
+   * @param data.outlineId
+   * @param data.requestBody
+   * @returns ReportGenieOutline Successful Response
+   * @throws ApiError
+   */
+  public static updateOutline(
+    data: ReportgenieUpdateOutlineData,
+  ): CancelablePromise<ReportgenieUpdateOutlineResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/reportgenie/outlines/{outline_id}",
+      path: {
+        outline_id: data.outlineId,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Outline
+   * Delete an outline by ID.
+   * @param data The data for the request.
+   * @param data.outlineId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static deleteOutline(
+    data: ReportgenieDeleteOutlineData,
+  ): CancelablePromise<ReportgenieDeleteOutlineResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/reportgenie/outlines/{outline_id}",
+      path: {
+        outline_id: data.outlineId,
+      },
       errors: {
         422: "Validation Error",
       },

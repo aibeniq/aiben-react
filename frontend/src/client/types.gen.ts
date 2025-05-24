@@ -179,6 +179,22 @@ export type PrivateUserCreate = {
   is_verified?: boolean
 }
 
+export type ReportGenieOutline = {
+  id?: string
+  name: string
+  description?: string | null
+  sections: string
+  owner_id: string
+  date_created?: string
+  date_modified?: string
+}
+
+export type ReportGenieResponse = {
+  results: {
+    [key: string]: unknown
+  }
+}
+
 export type Token = {
   access_token: string
   token_type?: string
@@ -510,6 +526,40 @@ export type PrivateCreateUserData = {
 }
 
 export type PrivateCreateUserResponse = UserPublic
+
+export type ReportgenieGenerateReportData = {
+  knowledgeBaseId: string
+  sections: string
+}
+
+export type ReportgenieGenerateReportResponse = ReportGenieResponse
+
+export type ReportgenieGetOutlinesResponse = Array<ReportGenieOutline>
+
+export type ReportgenieCreateOutlineData = {
+  requestBody: ReportGenieOutline
+}
+
+export type ReportgenieCreateOutlineResponse = ReportGenieOutline
+
+export type ReportgenieGetOutlineData = {
+  outlineId: string
+}
+
+export type ReportgenieGetOutlineResponse = ReportGenieOutline
+
+export type ReportgenieUpdateOutlineData = {
+  outlineId: string
+  requestBody: ReportGenieOutline
+}
+
+export type ReportgenieUpdateOutlineResponse = ReportGenieOutline
+
+export type ReportgenieDeleteOutlineData = {
+  outlineId: string
+}
+
+export type ReportgenieDeleteOutlineResponse = unknown
 
 export type UsersReadUsersData = {
   limit?: number
