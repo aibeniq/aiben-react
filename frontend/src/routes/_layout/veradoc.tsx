@@ -275,7 +275,7 @@ const VeraDoc = () => {
     const requestData = {
       questions: questions,
       knowledgeBaseId: selectedKnowledgeBase.id,
-      files: regularFiles,
+      digitized_files: regularFiles,
       handwrittenFiles: handwrittenFiles,
     };
 
