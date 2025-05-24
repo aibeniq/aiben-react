@@ -471,7 +471,16 @@ const components = {
                   <Table.Body>
                     {selectedKnowledgeBaseDetails.files.map((file) => (
                       <Table.Row key={file.id}>
-                        <Table.Cell>{file.name}</Table.Cell>
+                        <Table.Cell>
+                          {/* Make the file name clickable with SourceLink */}
+                          <SourceLink
+                            sourceId={file.id}
+                            fileName={file.name}
+                            useModal={true}
+                            color="blue.600"
+                            _hover={{ textDecoration: "underline" }}
+                          />
+                        </Table.Cell>
                         <Table.Cell>{new Date(file.date_created || '').toLocaleDateString()}</Table.Cell>
                       </Table.Row>
                     ))}
