@@ -18,6 +18,7 @@ import { useDropzone } from "react-dropzone"
 
 import { type ApiError, type KnowledgeBasePublic, KnowledgeBasesService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
+import SourceLink from "../Common/SourceLink"
 import { handleError } from "@/utils"
 import {
   DialogBody,
@@ -272,37 +273,16 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                   <Box w="full">
                     <Text mb={2}>Current Files:</Text>
                     <VStack align="start" gap={2}>
-                      {(
-                        knowledgeBase.files as Array<{
-                          id: string
-                          name: string
-                          data_base64: string
-                          content_type: string
-                        }>
-                      )
+                      {knowledgeBase.files
                         .filter((file) => !removedFileIds.includes(file.id))
                         .map((file) => (
                           <HStack key={file.id} w="full" justify="space-between">
-                            <Link
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              color="blue.500"
-                              _hover={{ textDecoration: "underline" }}
-                              onClick={(e) => {
-                                e.preventDefault()
-                                const byteCharacters = atob(file.data_base64)
-                                const byteNumbers = new Array(byteCharacters.length)
-                                for (let i = 0; i < byteCharacters.length; i++) {
-                                  byteNumbers[i] = byteCharacters.charCodeAt(i)
-                                }
-                                const byteArray = new Uint8Array(byteNumbers)
-                                const blob = new Blob([byteArray], { type: file.content_type })
-                                const url = URL.createObjectURL(blob)
-                                window.open(url, "_blank")
-                              }}
-                            >
-                              {file.name}
-                            </Link>
+                            {/* Use SourceLink component for on-demand loading */}
+                            <SourceLink
+                              sourceId={file.id}
+                              fileName={file.name}
+                              useModal={true}
+                            />
                             <Box
                               as="button"
                               aria-label="Remove file"

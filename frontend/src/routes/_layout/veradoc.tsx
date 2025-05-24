@@ -16,6 +16,7 @@ import {
   Accordion,
 } from "@chakra-ui/react"
 import useCustomToast from "@/hooks/useCustomToast"
+import SourceLink from "@/components/Common/SourceLink"
 import { useState, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import { createFileRoute } from "@tanstack/react-router"
@@ -30,6 +31,24 @@ const VeraDoc = () => {
 
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<any>(null);
   const [knowledgeBases, setKnowledgeBases] = useState<any[]>([]);
+
+  const getDisplayFileName = (source: string): string => {
+    if (!source) return "Unknown";
+    
+    // Clean up temporary file paths
+    if (source.includes('/tmp/') || source.includes('\\tmp\\')) {
+      // First get the filename without the path
+      const filename = source.split('/').pop() || 
+                      source.split('\\').pop() || '';
+      
+      // Then remove everything before and including the first underscore
+      return filename.includes('_') 
+        ? filename.substring(filename.indexOf('_') + 1) 
+        : filename;
+    }
+    
+    return source;
+  };
 
   // Add this effect to fetch knowledge bases when component mounts
   useEffect(() => {
@@ -767,26 +786,20 @@ const components = {
                                     borderRadius="md"
                                     bg="white"
                                   >
-                                    <Text fontWeight="bold" fontSize="sm" color="gray.700">
-                                      Source {cIndex + 1}:
-                                      {citation.metadata?.source && (
+                                    {citation.metadata.source_data_id ? (
+                                        <SourceLink
+                                          sourceId={citation.metadata.source_data_id}
+                                          fileName={getDisplayFileName(citation.metadata.source)}
+                                          ml={1}
+                                          fontWeight="normal"
+                                          color="blue.600"
+                                          useModal={true}
+                                        />
+                                      ) : (
                                         <Text as="span" ml={1} fontWeight="normal" color="blue.600">
-                                          {/* Clean up temporary file paths */}
-                                          {citation.metadata.source.includes('/tmp/') || citation.metadata.source.includes('\\tmp\\')
-                                            ? (() => {
-                                                // First get the filename without the path
-                                                const filename = citation.metadata.source.split('/').pop() || 
-                                                                citation.metadata.source.split('\\').pop() || '';
-                                                
-                                                // Then remove everything before and including the first underscore
-                                                return filename.includes('_') 
-                                                  ? filename.substring(filename.indexOf('_') + 1) 
-                                                  : filename;
-                                              })()
-                                            : citation.metadata.source}
+                                          {getDisplayFileName(citation.metadata.source)}
                                         </Text>
                                       )}
-                                    </Text>
                                     <Box 
                                       mt={2} 
                                       p={2} 
@@ -1009,26 +1022,20 @@ const components = {
                                       borderRadius="md"
                                       bg="white"
                                     >
-                                      <Text fontWeight="bold" fontSize="sm" color="gray.700">
-                                        Source {cIndex + 1}:
-                                        {citation.metadata?.source && (
-                                          <Text as="span" ml={1} fontWeight="normal" color="blue.600">
-                                            {/* Clean up temporary file paths */}
-                                            {citation.metadata.source.includes('/tmp/') || citation.metadata.source.includes('\\tmp\\')
-                                              ? (() => {
-                                                  // First get the filename without the path
-                                                  const filename = citation.metadata.source.split('/').pop() || 
-                                                                  citation.metadata.source.split('\\').pop() || '';
-                                                  
-                                                  // Then remove everything before and including the first underscore
-                                                  return filename.includes('_') 
-                                                    ? filename.substring(filename.indexOf('_') + 1) 
-                                                    : filename;
-                                                })()
-                                              : citation.metadata.source}
-                                          </Text>
-                                        )}
-                                      </Text>
+                                      {citation.metadata.source_data_id ? (
+                                        <SourceLink
+                                          sourceId={citation.metadata.source_data_id}
+                                          fileName={getDisplayFileName(citation.metadata.source)}
+                                          ml={1}
+                                          fontWeight="normal" 
+                                          color="blue.600"
+                                          useModal={true}
+                                        />
+                                      ) : (
+                                        <Text as="span" ml={1} fontWeight="normal" color="blue.600">
+                                          {getDisplayFileName(citation.metadata.source)}
+                                        </Text>
+                                      )}
                                       <Box 
                                         mt={2} 
                                         p={2} 

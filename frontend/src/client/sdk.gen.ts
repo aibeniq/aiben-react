@@ -27,6 +27,8 @@ import type {
   EmbeddingModelsValidateEmbeddingModelResponse,
   EmbeddingModelsCheckApiKeyConfiguredData,
   EmbeddingModelsCheckApiKeyConfiguredResponse,
+  FilesGetSourceContentData,
+  FilesGetSourceContentResponse,
   FormconnectProcessFormData,
   FormconnectProcessFormResponse,
   FormconnectGetFormsResponse,
@@ -408,6 +410,32 @@ export class EmbeddingModelsService {
       url: "/api/v1/embedding-models/check-api-key/{provider}",
       path: {
         provider: data.provider,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
+export class FilesService {
+  /**
+   * Get Source Content
+   * Retrieve a source file by ID.
+   * Only returns files that the user has access to (either owns or has permissions for).
+   * @param data The data for the request.
+   * @param data.sourceId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getSourceContent(
+    data: FilesGetSourceContentData,
+  ): CancelablePromise<FilesGetSourceContentResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/files/source/{source_id}",
+      path: {
+        source_id: data.sourceId,
       },
       errors: {
         422: "Validation Error",

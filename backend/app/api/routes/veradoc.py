@@ -1,5 +1,5 @@
 import uuid
-from app.models import VeraDocRequest, VeraDocResponse, VeraDocChecklist, RagChecklistRequest, EmbeddingModel
+from app.models import VeraDocRequest, VeraDocResponse, VeraDocChecklist, RagChecklistRequest, EmbeddingModel, Source
 
 from app.api.deps import CurrentUser, SessionDep
 
@@ -16,7 +16,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.schema import AIMessage
 from dotenv import load_dotenv
 import os
-
+import re
 import base64
 from tempfile import NamedTemporaryFile
 from pathlib import Path
@@ -26,7 +26,6 @@ from datetime import datetime
 
 import tempfile
 import shutil
-import os
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.chains import LLMChain
@@ -217,10 +216,42 @@ async def process_rag_checklist(
                 # Store source documents for citation
                 source_citations = []
                 for doc in docs:
-                    # Extract metadata and source text
+                    # Ensure source_data_id is included in metadata if available
+                    metadata = doc.metadata.copy()  # Copy to avoid modifying the original
+                    
+                    # If the metadata contains a source path that matches a pattern from a KB
+                    if 'source' in metadata and isinstance(metadata['source'], str):
+                        # Try to find the corresponding source_data_id
+                        source_path = metadata['source']
+                        # Extract just the filename
+                        raw_filename = Path(source_path).name
+                        
+                        # Extract the real filename after the underscore using regex
+                        # This looks for any characters followed by an underscore, then captures everything after
+                        match = re.search(r'^[^_]*_(.+)$', raw_filename)
+                        if match:
+                            # Use the captured group (everything after the underscore)
+                            filename = match.group(1)
+                        else:
+                            # Fallback to the original filename if no underscore found
+                            filename = raw_filename
+                        
+                        # Debug info
+                        print(f"Raw filename: {raw_filename}")
+                        print(f"Extracted filename: {filename}")
+                        
+                        # Try to find the source by the extracted name
+                        source_entry = session.exec(
+                            select(Source)
+                            .where(Source.name == filename)
+                        ).first()
+                        
+                        if source_entry:
+                            metadata['source_data_id'] = str(source_entry.source_data_id)
+                    
                     source = {
                         "content": doc.page_content,
-                        "metadata": doc.metadata
+                        "metadata": metadata
                     }
                     source_citations.append(source)
                 
