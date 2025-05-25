@@ -18,6 +18,7 @@ import { useDropzone } from "react-dropzone"
 
 import { type ApiError, type KnowledgeBasePublic, KnowledgeBasesService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
+import SourceLink from "../Common/SourceLink"
 import { handleError } from "@/utils"
 import {
   DialogBody,
@@ -131,7 +132,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
 
   const onSubmit: SubmitHandler<KnowledgeBaseUpdateForm> = async (data) => {
     console.log("Submitting form data:", data, selectedFiles, removedFileIds)
-
+    
     const hasExistingFiles =
       knowledgeBase?.files &&
       knowledgeBase.files.filter((f) => !removedFileIds.includes(f.id)).length > 0
@@ -264,30 +265,16 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                   <Box w="full">
                     <Text mb={2}>Current Files:</Text>
                     <VStack align="start" gap={2}>
-                      {(
-                        knowledgeBase.files as Array<{
-                          id: string
-                          name: string
-                          url?: string
-                          data?: string // Use raw data as a fallback
-                        }>
-                      )
+                      {knowledgeBase.files
                         .filter((file) => !removedFileIds.includes(file.id))
                         .map((file) => (
                           <HStack key={file.id} w="full" justify="space-between">
-                            <Link
-                              href={
-                                file.data_base64
-                                  ? `data:${file.content_type || "application/octet-stream"};base64,${file.data_base64}`
-                                  : "#"
-                              }
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              color="blue.500"
-                              _hover={{ textDecoration: "underline" }}
-                            >
-                              {file.name}
-                            </Link>
+                            {/* Use SourceLink component for on-demand loading */}
+                            <SourceLink
+                              sourceId={file.id}
+                              fileName={file.name}
+                              useModal={true}
+                            />
                             <Box
                               as="button"
                               aria-label="Remove file"

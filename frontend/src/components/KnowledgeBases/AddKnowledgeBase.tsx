@@ -49,7 +49,7 @@ const AddKnowledgeBase = () => {
     reset,
     formState: { errors, isValid, isSubmitting },
   } = useForm<KnowledgeBaseCreate>({
-    mode: "onBlur",
+    mode: "onSubmit",
     criteriaMode: "all",
     defaultValues: {
       title: "",
@@ -64,11 +64,36 @@ const AddKnowledgeBase = () => {
     enabled: isOpen
   })
 
+  // Set the default embedding model when the component mounts
+  useEffect(() => {
+    if (embeddingModels?.length > 0) {
+      // Find the default model
+      const defaultModel = embeddingModels.find(model => model.is_default)
+      
+      // If a default model exists, use its ID, otherwise use the first model's ID
+      if (defaultModel) {
+        setSelectedEmbeddingModelId(defaultModel.id)
+      } else if (embeddingModels[0]) {
+        setSelectedEmbeddingModelId(embeddingModels[0].id)
+      }
+    }
+  }, [embeddingModels])
+
   // Reset selected files when the popup is closed
   useEffect(() => {
     if (!isOpen) {
       setSelectedFiles([]);
-      setSelectedEmbeddingModelId(null)
+      setSelectedEmbeddingModelId(null);
+
+      // Also reset the form completely, including errors
+      reset({
+        title: "",
+        description: "",
+      }, {
+        keepErrors: false,    // This clears all errors
+        keepDirty: false,     // This resets dirty state
+        keepTouched: false,   // This resets touched state
+      });
     }
   }, [isOpen]);
 
@@ -317,7 +342,6 @@ const AddKnowledgeBase = () => {
               variant="solid"
               type="submit"
               disabled={!isValid || isSubmitting}
-              loading={isSubmitting}
             >
               {isSubmitting ? "Creating..." : "Save"}
             </Button>

@@ -20,7 +20,8 @@ import {
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
+import { CancelablePromise } from "@/client/core/CancelablePromise";
 import { FiPlus, FiSettings, FiCheckCircle, FiXCircle } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -58,6 +59,38 @@ function LlmModels() {
   const [isValidating, setIsValidating] = useState(false);
   const [isModelValid, setIsModelValid] = useState<boolean | null>(null);
   const [validationMessage, setValidationMessage] = useState("");
+
+  const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(true);
+
+  // Add this effect to check API key when provider changes
+  useEffect(() => {
+  if (modelProvider === "openai") {
+    console.log("Checking OpenAI API key configuration...");
+    EmbeddingModelsService.checkApiKeyConfigured({provider: "openai"})
+      .then((response) => {
+        console.log("API key check succeeded:", response);
+        setIsApiKeyConfigured(true);
+      })
+      .catch((error) => {
+        console.error("API key check failed:", error);
+        setIsApiKeyConfigured(false);
+      });
+  } else if (modelProvider === "ollama") {
+    console.log("Checking Ollama server configuration...");
+    EmbeddingModelsService.checkApiKeyConfigured({provider: "ollama"})
+      .then((response) => {
+        console.log("Ollama server check succeeded:", response);
+        setIsApiKeyConfigured(true);
+      })
+      .catch((error) => {
+        console.error("Ollama server check failed:", error);
+        showErrorToast("Ollama server is not available. Please ensure Ollama is running.");
+        setIsApiKeyConfigured(false);
+      });
+  } else {
+    setIsApiKeyConfigured(true);
+  }
+}, [modelProvider]);
   
   const queryClient = useQueryClient();
   const { showSuccessToast, showErrorToast } = useCustomToast();
@@ -109,33 +142,77 @@ function LlmModels() {
     },
   })
 
+  // Mutation to validate a model
   const validateModelMutation = useMutation({
-    mutationFn: (data: { model_id: string; provider: string }) =>
-      LlmModelsService.validateLlmModel({ requestBody: data }),
+    mutationFn: (data: { requestBody: { model_id: string; provider: string } }) => {
+    console.log("The following data will be sent to the server for model validation:", data);
+    return LlmModelsService.validateLlmModel(data);
+  },
     onSuccess: () => {
-      setIsModelValid(true);
-      setValidationMessage("Model is valid and can be loaded.");
+      setIsModelValid(true)
+      setValidationMessage("Model is valid and can be loaded.")
     },
     onError: (error) => {
-      setIsModelValid(false);
-      setValidationMessage(`Invalid model: ${error.message}`);
+      setIsModelValid(false)
+      setValidationMessage(`Invalid model: ${error.message}`)
     },
     onSettled: () => {
-      setIsValidating(false);
+      setIsValidating(false)
     },
-  });
+  })
 
-  const handleValidateModel = () => {
+  const handleValidateModel = async () => {
     if (!modelId.trim()) {
       setIsModelValid(false);
       setValidationMessage("Please enter a model ID");
       return;
     }
+
+    if (modelProvider === "openai" && !isApiKeyConfigured) {
+          showErrorToast("API key is required for OpenAI models and is not configured in the backend");
+          return;
+        }
+
+     // Cancel any existing validation
+    if (currentValidationRef.current) {
+      currentValidationRef.current.cancel();
+    }
+
     setIsValidating(true);
-    validateModelMutation.mutate({
-      model_id: modelId,
-      provider: modelProvider,
+
+    const promise = EmbeddingModelsService.validateEmbeddingModel({
+      requestBody: {
+        model_id: modelId,
+        provider: modelProvider
+      }
     });
+    
+    currentValidationRef.current = promise;
+
+    //validateModelMutation.mutate({
+    //  requestBody: {
+    //  model_id: modelId,
+    //  provider: modelProvider
+    //}
+    //});
+
+    try {
+      await promise;
+      setIsModelValid(true);
+      setValidationMessage("Model is valid and can be loaded.");
+    } catch (error) {
+      // Only show error if it's not a cancellation
+      if (error.name !== "CancelError") {
+        setIsModelValid(false);
+        setValidationMessage(`Invalid model: ${error.message}`);
+      }
+    } finally {
+      // Only reset if this is still the current validation
+      if (currentValidationRef.current === promise) {
+        setIsValidating(false);
+        currentValidationRef.current = null;
+      }
+    }
   };
 
   const resetForm = () => {
@@ -149,6 +226,12 @@ function LlmModels() {
     if (!modelName.trim() || !modelId.trim()) {
       showErrorToast("Please fill in all required fields")
       return
+    }
+
+    // Only check for API key if it's not configured in the backend
+    if (modelProvider === "openai" && !isApiKeyConfigured) {
+      showErrorToast("API key is required for OpenAI models and is not configured in the backend");
+      return;
     }
     
     addModelMutation.mutate({
@@ -168,6 +251,37 @@ function LlmModels() {
       deleteModelMutation.mutate(modelId)
     }
   }
+
+  // Add a reference to store current validation promise
+  const currentValidationRef = useRef<CancelablePromise<any> | null>(null);
+  
+  // Clean up any pending validations when component unmounts
+  useEffect(() => {
+    return () => {
+      if (currentValidationRef.current) {
+        currentValidationRef.current.cancel();
+        currentValidationRef.current = null;
+      }
+    };
+  }, []);
+  
+  // Modify the Dialog to handle validation cancellation
+  const handleModalClose = () => {
+    // Cancel any pending validation
+    if (currentValidationRef.current) {
+      currentValidationRef.current.cancel();
+      currentValidationRef.current = null;
+    }
+    
+    // Reset form state
+    resetForm();
+    setIsValidating(false);
+    setIsModelValid(null);
+    
+    // Close the modal
+    setIsOpen(false);
+  };
+  
   
   return (
     <>
@@ -265,7 +379,16 @@ function LlmModels() {
       )}
       
       {/* Dialog for adding a new LLM */}
-        <Dialog.Root open={isOpen} onOpenChange={(details) => setIsOpen(details.open)}>
+        <Dialog.Root 
+            open={isOpen} 
+            onOpenChange={(details) => {
+              if (!details.open) {
+                handleModalClose();
+              } else {
+                setIsOpen(true);
+              }
+            }}
+          >
           <Dialog.Backdrop />
           <Dialog.Positioner>
           <Dialog.Content size={{ base: "xs", md: "md" }} placement="center">
@@ -304,6 +427,8 @@ function LlmModels() {
                       >
                         <option value="huggingface">HuggingFace</option>
                         <option value="openai">OpenAI</option>
+                        <option value="ollama">Ollama</option>
+                        <option value="replicate">Replicate</option>
                       </select>
                     </Field>
 
@@ -321,8 +446,9 @@ function LlmModels() {
                           onClick={handleValidateModel}
                           isLoading={isValidating}
                           loadingText="Validating"
+                          disabled={!modelId.trim()}
                         >
-                          Validate
+                          {isValidating ? <Spinner size="sm" /> : "Validate"}
                         </Button>
                       </HStack>
                       {isModelValid !== null && (
@@ -393,7 +519,30 @@ function EmbeddingModels() {
   const [validationMessage, setValidationMessage] = useState("")
 
   const [modelProvider, setModelProvider] = useState("huggingface")
-  const [apiKey, setApiKey] = useState("")
+
+  const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(true);
+
+  // Add this effect to check API key when provider changes
+  useEffect(() => {
+    if (modelProvider === "openai") {
+      console.log("Checking API key configuration for OpenAI...");
+      // Check if API key is configured in backend
+      EmbeddingModelsService.checkApiKeyConfigured({provider: "openai"})
+        .then((response) => {
+          console.log("API key check succeeded:", response);
+          setIsApiKeyConfigured(true);
+        })
+        .catch((error) => {
+          console.error("API key check failed:", error); // Log the detailed error
+          console.log("Error response:", error.response); // Detailed error response if available
+          console.log("Error message:", error.message);
+          console.log("Error status:", error.status);
+          setIsApiKeyConfigured(false);
+        });
+    } else {
+      setIsApiKeyConfigured(true);
+    }
+  }, [modelProvider]);
   
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -414,25 +563,37 @@ function EmbeddingModels() {
   
   // Mutation to add a new model
   const addModelMutation = useMutation({
-    mutationFn: (data: { name: string; model_id: string; description: string }) =>
-      EmbeddingModelsService.createEmbeddingModel({ requestBody: data }),
-    onSuccess: () => {
-      showSuccessToast("Model added successfully")
-      resetForm()
-      onClose()
-      queryClient.invalidateQueries({ queryKey: ["embeddingModels"] })
+    mutationFn: (data: { name: string; model_id: string; provider: string; description: string }) => {
+      console.log("Sending data to createEmbeddingModel:", data);
+      return EmbeddingModelsService.createEmbeddingModel({ requestBody: data })
+        .then(response => {
+          console.log("Received successful response:", response);
+          return response;
+        })
+        .catch(error => {
+          console.error("Received error response:", error);
+          throw error;
+        });
+    },
+    onSuccess: (data) => {
+      console.log("Mutation completed successfully with data:", data);
+      showSuccessToast("Model added successfully");
+      resetForm();
+      onClose();
+      queryClient.invalidateQueries({ queryKey: ["embeddingModels"] });
     },
     onError: (error) => {
-      showErrorToast(`Error adding model: ${error.message}`)
+      console.error("Mutation failed with error:", error);
+      showErrorToast(`Error adding model: ${error.message}`);
     },
   })
   
   // Mutation to validate a model
   const validateModelMutation = useMutation({
-    mutationFn: (modelId: string) =>
-      EmbeddingModelsService.validateEmbeddingModel({ requestBody: {
-        model_id: modelId
-      } }),
+    mutationFn: (data: { requestBody: { model_id: string; provider: string } }) => {
+    console.log("The following data will be sent to the server for model validation:", data);
+    return EmbeddingModelsService.validateEmbeddingModel(data);
+  },
     onSuccess: () => {
       setIsModelValid(true)
       setValidationMessage("Model is valid and can be loaded.")
@@ -479,11 +640,18 @@ function EmbeddingModels() {
       setValidationMessage("Please enter a model ID")
       return
     }
+
+    if (modelProvider === "openai" && !isApiKeyConfigured) {
+      showErrorToast("API key is required for OpenAI models and is not configured in the backend");
+      return;
+    }
     
     setIsValidating(true)
     validateModelMutation.mutate({
+      requestBody: {  
         model_id: modelId,
         provider: modelProvider
+      }
     })
   }
   
@@ -494,9 +662,9 @@ function EmbeddingModels() {
         return
     }
     
-    if (modelProvider === "openai" && !apiKey.trim()) {
-        showErrorToast("API key is required for OpenAI models")
-        return
+    if (modelProvider === "openai" && !isApiKeyConfigured) {
+      showErrorToast("API key is required for OpenAI models and is not configured in the backend");
+      return;
     }
     
     addModelMutation.mutate({
@@ -580,10 +748,19 @@ function EmbeddingModels() {
                 </Table.Cell>
                 <Table.Cell>
                   <Badge 
-                    colorPalette={model.provider === "huggingface" ? "teal" : "purple"} 
+                    colorPalette={
+                      model.provider === "huggingface" ? "teal" : 
+                      model.provider === "openai" ? "purple" :
+                      model.provider === "ollama" ? "orange" : 
+                      model.provider === "replicate" ? "red" : "gray"
+                      
+                    } 
                     size="sm"
                   >
-                    {model.provider === "huggingface" ? "HuggingFace" : "OpenAI"}
+                    {model.provider === "huggingface" ? "HuggingFace" : 
+                    model.provider === "openai" ? "OpenAI" : 
+                    model.provider === "ollama" ? "Ollama" :
+                    model.provider === "replicate" ? "Replicate" : model.provider}
                   </Badge>
                 </Table.Cell>
                 <Table.Cell>{model.description}</Table.Cell>
@@ -662,6 +839,8 @@ function EmbeddingModels() {
                       >
                         <option value="huggingface">HuggingFace</option>
                         <option value="openai">OpenAI</option>
+                        <option value="ollama">Ollama</option>
+                        <option value="replicate">Replicate</option>
                       </select>
                     </Field>
 
@@ -679,8 +858,9 @@ function EmbeddingModels() {
                           onClick={handleValidateModel}
                           isLoading={isValidating}
                           loadingText="Validating"
+                          disabled={!modelId.trim()}
                         >
-                          Validate
+                          {isValidating ? <Spinner size="sm" /> : "Validate"}
                         </Button>
                       </HStack>
                       {isModelValid !== null && (

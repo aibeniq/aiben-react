@@ -4,6 +4,12 @@ import type { CancelablePromise } from "./core/CancelablePromise"
 import { OpenAPI } from "./core/OpenAPI"
 import { request as __request } from "./core/request"
 import type {
+  ChatQueryKnowledgeBaseData,
+  ChatQueryKnowledgeBaseResponse,
+  ChatQueryDocumentData,
+  ChatQueryDocumentResponse,
+  ChatQueryTextData,
+  ChatQueryTextResponse,
   EmbeddingModelsGetEmbeddingModelsData,
   EmbeddingModelsGetEmbeddingModelsResponse,
   EmbeddingModelsCreateEmbeddingModelData,
@@ -19,6 +25,10 @@ import type {
   EmbeddingModelsSetDefaultEmbeddingModelResponse,
   EmbeddingModelsValidateEmbeddingModelData,
   EmbeddingModelsValidateEmbeddingModelResponse,
+  EmbeddingModelsCheckApiKeyConfiguredData,
+  EmbeddingModelsCheckApiKeyConfiguredResponse,
+  FilesGetSourceContentData,
+  FilesGetSourceContentResponse,
   FormconnectProcessFormData,
   FormconnectProcessFormResponse,
   FormconnectGetFormsResponse,
@@ -105,6 +115,106 @@ import type {
   VeradocDeleteChecklistData,
   VeradocDeleteChecklistResponse,
 } from "./types.gen"
+
+export class ChatService {
+  /**
+   * Query Knowledge Base
+   * Query a knowledge base with a question.
+   * @param data The data for the request.
+   * @param data.kbId
+   * @param data.question
+   * @param data.chatHistory
+   * @param data.useDefaultModels
+   * @param data.sessionId
+   * @param data.isFollowUp
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static queryKnowledgeBase(
+    data: ChatQueryKnowledgeBaseData,
+  ): CancelablePromise<ChatQueryKnowledgeBaseResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/chat/knowledge-base/{kb_id}",
+      path: {
+        kb_id: data.kbId,
+      },
+      query: {
+        question: data.question,
+        chat_history: data.chatHistory,
+        use_default_models: data.useDefaultModels,
+        session_id: data.sessionId,
+        is_follow_up: data.isFollowUp,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Query Document
+   * Query an uploaded document with a question.
+   * @param data The data for the request.
+   * @param data.question
+   * @param data.chatHistory
+   * @param data.useDefaultModels
+   * @param data.sessionId
+   * @param data.isFollowUp
+   * @param data.formData
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static queryDocument(
+    data: ChatQueryDocumentData = {},
+  ): CancelablePromise<ChatQueryDocumentResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/chat/document",
+      query: {
+        question: data.question,
+        chat_history: data.chatHistory,
+        use_default_models: data.useDefaultModels,
+        session_id: data.sessionId,
+        is_follow_up: data.isFollowUp,
+      },
+      formData: data.formData,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Query Text
+   * Answer a direct text question without a knowledge base or document.
+   * @param data The data for the request.
+   * @param data.question
+   * @param data.chatHistory
+   * @param data.sessionId
+   * @param data.isFollowUp
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static queryText(
+    data: ChatQueryTextData,
+  ): CancelablePromise<ChatQueryTextResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/chat/text",
+      query: {
+        question: data.question,
+        chat_history: data.chatHistory,
+        session_id: data.sessionId,
+        is_follow_up: data.isFollowUp,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
 
 export class EmbeddingModelsService {
   /**
@@ -278,6 +388,55 @@ export class EmbeddingModelsService {
       url: "/api/v1/embedding-models/validate",
       body: data.requestBody,
       mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Check Api Key Configured
+   * Check if the API key for a specific provider is configured in the backend.
+   * @param data The data for the request.
+   * @param data.provider
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static checkApiKeyConfigured(
+    data: EmbeddingModelsCheckApiKeyConfiguredData,
+  ): CancelablePromise<EmbeddingModelsCheckApiKeyConfiguredResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/embedding-models/check-api-key/{provider}",
+      path: {
+        provider: data.provider,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
+export class FilesService {
+  /**
+   * Get Source Content
+   * Retrieve a source file by ID.
+   * Only returns files that the user has access to (either owns or has permissions for).
+   * @param data The data for the request.
+   * @param data.sourceId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getSourceContent(
+    data: FilesGetSourceContentData,
+  ): CancelablePromise<FilesGetSourceContentResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/files/source/{source_id}",
+      path: {
+        source_id: data.sourceId,
+      },
       errors: {
         422: "Validation Error",
       },
@@ -685,7 +844,7 @@ export class KnowledgeBasesService {
 export class LlmModelsService {
   /**
    * Get Llm Models
-   * Get all LLM models.
+   * Get all LLMs.
    * @param data The data for the request.
    * @param data.skip
    * @param data.limit
@@ -710,7 +869,7 @@ export class LlmModelsService {
 
   /**
    * Create Llm Model
-   * Create a new LLM model.
+   * Create a new LLM.
    * @param data The data for the request.
    * @param data.requestBody
    * @returns LlmModelPublic Successful Response
@@ -732,7 +891,7 @@ export class LlmModelsService {
 
   /**
    * Get Default Llm Model
-   * Get the default LLM model.
+   * Get the default LLM.
    * @returns LlmModelPublic Successful Response
    * @throws ApiError
    */
@@ -745,7 +904,7 @@ export class LlmModelsService {
 
   /**
    * Delete Llm Model
-   * Delete an LLM model.
+   * Delete an LLM.
    * @param data The data for the request.
    * @param data.modelId
    * @returns Message Successful Response
@@ -768,7 +927,7 @@ export class LlmModelsService {
 
   /**
    * Validate Llm Model
-   * Validate if an LLM model ID is valid for the specified provider.
+   * Validate if an LLM ID is valid for the specified provider.
    * @param data The data for the request.
    * @param data.requestBody
    * @returns Message Successful Response
@@ -790,7 +949,7 @@ export class LlmModelsService {
 
   /**
    * Set Default Llm Model
-   * Set an LLM model as the default.
+   * Set an LLM as the default.
    * @param data The data for the request.
    * @param data.modelId
    * @returns LlmModelPublic Successful Response
