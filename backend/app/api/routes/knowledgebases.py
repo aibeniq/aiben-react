@@ -26,7 +26,7 @@ from datetime import datetime
 from langchain_community.document_loaders import TextLoader, PyPDFLoader
 import mimetypes
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
 
