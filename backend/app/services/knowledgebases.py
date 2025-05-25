@@ -3,11 +3,17 @@ import uuid
 import hashlib
 from fastapi import UploadFile
 from sqlmodel import select, Session, delete
-from app.models import Source, SourceData, EmbeddingModel
+from app.models import Source, SourceData, EmbeddingModel, KnowledgeBase
 from app.api.deps import CurrentUser
 from io import BytesIO
 import zipfile
 import logging
+import os
+import tempfile
+from langchain_chroma import Chroma
+from app.services.embeddings import load_embeddings_model
+import shutil
+from datetime import datetime
 
 
 logger = logging.getLogger(__name__)
@@ -90,8 +96,118 @@ class KnowledgeBaseService:
             raise
     
     @staticmethod
+    def update_title(session: Session, knowledge_base_id: uuid.UUID, new_title: str) -> KnowledgeBase | None:
+        """Update the title of a knowledge base.
+        
+        Args:
+            session: SQLModel database session
+            knowledge_base_id: UUID of the knowledge base to update
+            new_title: New title for the knowledge base
+            
+        Returns:
+            The updated knowledge base if successful, None if not found
+            
+        Raises:
+            ValueError: If the new title is invalid
+            RuntimeError: If there's a database error
+        """
+        try:
+            if not new_title or not new_title.strip():
+                raise ValueError("Title cannot be empty")
+            
+            if len(new_title) > 255:
+                raise ValueError("Title exceeds maximum length of 255 characters")
+            
+            kb = session.exec(
+                select(KnowledgeBase).where(KnowledgeBase.id == knowledge_base_id)
+            ).first()
+            
+            if not kb:
+                logger.info(f"Knowledge base {knowledge_base_id} not found")
+                return None
+            
+            # Check for duplicate title
+            existing_kb = session.exec(
+                select(KnowledgeBase)
+                .where(
+                    (KnowledgeBase.title == new_title) & 
+                    (KnowledgeBase.id != knowledge_base_id) &
+                    (KnowledgeBase.owner_id == kb.owner_id)
+                )
+            ).first()
+            
+            if existing_kb:
+                raise ValueError(f"A knowledge base with title '{new_title}' already exists")
+            
+            kb.title = new_title
+            kb.date_modified = datetime.now(datetime.UTC)
+            
+            session.commit()
+            return kb
+            
+        except ValueError as e:
+            logger.warning(f"Validation error updating title for knowledge base {knowledge_base_id}: {str(e)}")
+            raise
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error updating title for knowledge base {knowledge_base_id}: {str(e)}")
+            raise RuntimeError(f"Failed to update knowledge base title: {str(e)}")
+        
+    
+    @staticmethod
+    def update_description(session: Session, knowledge_base_id: uuid.UUID, new_description: str) -> KnowledgeBase | None:
+        """Update the description of a knowledge base.
+        
+        Args:
+            session: SQLModel database session
+            knowledge_base_id: UUID of the knowledge base to update
+            new_description: New description for the knowledge base
+            
+        Returns:
+            The updated knowledge base if successful, None if not found
+            
+        Raises:
+            ValueError: If the new description is invalid
+            RuntimeError: If there's a database error
+        """
+        try:            
+            kb = session.exec(
+                select(KnowledgeBase).where(KnowledgeBase.id == knowledge_base_id)
+            ).first()
+            
+            if not kb:
+                logger.info(f"Knowledge base {knowledge_base_id} not found")
+                return None
+            
+            kb.description = new_description
+            kb.date_modified = datetime.now(datetime.UTC)
+            
+            session.commit()
+            return kb
+            
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error updating description for knowledge base {knowledge_base_id}: {str(e)}")
+            raise RuntimeError(f"Failed to update knowledge base description: {str(e)}")
+            
+    
+    @staticmethod
     def delete_source(session: Session, source_id: uuid.UUID) -> Source | None:
-        """Delete a source."""
+        """
+        Delete the source from the knowledge base and update the vector database.
+        It will also delete the source_data from the database if no references to it remain.
+        
+        Args:
+            session: SQLModel database session
+            source_id: UUID of the source to delete
+            
+        Returns:
+            The deleted source if successful, None if source not found
+            
+        Raises:
+            ValueError: If the source or knowledge base is not found
+            RuntimeError: If there's an error with the vector database operations
+        """
         try:
             source_to_delete = session.exec(
                 select(Source).where(Source.id == source_id)
@@ -101,22 +217,67 @@ class KnowledgeBaseService:
                 logger.info(f"Source {source_id} not found")
                 return None
                 
-            source_data_id = source_to_delete.source_data_id
+            kb = session.exec(
+                select(KnowledgeBase).where(KnowledgeBase.id == source_to_delete.knowledge_base_id)
+            ).first()
             
+            if not kb:
+                logger.info(f"Knowledge base {source_to_delete.knowledge_base_id} not found")
+                return None
+
+            # delete from chroma database as well
+            if kb.data:
+                chroma_dir = tempfile.mkdtemp()
+                try:
+                    # extract chroma database
+                    with zipfile.ZipFile(BytesIO(kb.data), 'r') as zip_ref:
+                        zip_ref.extractall(chroma_dir)
+
+                    if not kb.embedding_model:
+                        raise ValueError("Knowledge base has no embedding model configured")
+                        
+                    embeddings, _, _ = load_embeddings_model(
+                        provider=kb.embedding_model.provider,
+                        model_id=kb.embedding_model.model_id
+                    )
+
+                    # initialize and update chroma database
+                    chroma_vector_database = Chroma(persist_directory=chroma_dir, embedding_function=embeddings)
+                    chroma_vector_database.delete(ids=[str(source_to_delete.source_data_id)])
+
+                    # update knowledge base data
+                    zip_buffer = BytesIO()
+                    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+                        for root, _, filenames in os.walk(chroma_dir):
+                            for filename in filenames:
+                                file_path = os.path.join(root, filename)
+                                arcname = os.path.relpath(file_path, chroma_dir)
+                                zip_file.write(file_path, arcname)
+                    zip_buffer.seek(0)
+                    kb.data = zip_buffer.read()
+
+                except Exception as e:
+                    logger.error(f"Error updating Chroma database: {str(e)}")
+                    raise RuntimeError(f"Failed to update vector database: {str(e)}")
+                finally:
+                    shutil.rmtree(chroma_dir)
+
             session.delete(source_to_delete)
             
-            if source_data_id:
+            # delete source_data if no references to it remain
+            if source_to_delete.source_data_id:
                 other_references = session.exec(
-                    select(Source).where(Source.source_data_id == source_data_id)
+                    select(Source).where(Source.source_data_id == source_to_delete.source_data_id)
                 ).all()
                 
-                # delete source_data if it is not referenced by any other source
                 if not other_references:
-                    KnowledgeBaseService._delete_source_data(session, source_data_id)
+                    KnowledgeBaseService._delete_source_data(session, source_to_delete.source_data_id)
             
+            session.commit()
             return source_to_delete
             
         except Exception as e:
+            session.rollback()
             logger.error(f"Error deleting source {source_id}: {str(e)}")
             raise
 
