@@ -12,7 +12,7 @@ const loadDevtools = () =>
       default: () => (
         <>
           <routerDevtools.TanStackRouterDevtools />
-          <reactQueryDevtools.ReactQueryDevtools />
+          {/* <reactQueryDevtools.ReactQueryDevtools /> */}
         </>
       ),
     }

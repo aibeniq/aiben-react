@@ -5,6 +5,8 @@ import Navbar from "@/components/Common/Navbar"
 import Sidebar from "@/components/Common/Sidebar"
 import { isLoggedIn } from "@/hooks/useAuth"
 
+import Chatbot from "@/components/Chatbot/ChatbotMain";
+
 export const Route = createFileRoute("/_layout")({
   component: Layout,
   beforeLoad: async () => {
@@ -24,6 +26,7 @@ function Layout() {
         <Sidebar />
         <Flex flex="1" direction="column" p={4} overflowY="auto">
           <Outlet />
+          <Chatbot />
         </Flex>
       </Flex>
     </Flex>
