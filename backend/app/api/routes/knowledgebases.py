@@ -398,35 +398,51 @@ def update_knowledge_base(
     session: SessionDep,
     current_user: CurrentUser,
     id: uuid.UUID,
-    knowledge_base_in: KnowledgeBaseUpdate = Depends(),
+    kb_update: KnowledgeBaseUpdate = Depends(),
     files: Optional[List[UploadFile]] = None,
 ) -> Any:
     """
     Update a knowledge base.
     """
     print("Now updating knowledge base...")
-    if knowledge_base_in.removed_file_ids is None:
-        knowledge_base_in.removed_file_ids = []
-    print("Source IDs to remove:", knowledge_base_in.removed_file_ids)
-    knowledge_base = session.get(KnowledgeBase, id)
-    if not knowledge_base:
+    print("Knowledge base update:", kb_update)
+    knowledge_base_old = session.get(KnowledgeBase, id)
+    if not knowledge_base_old:
         raise HTTPException(status_code=404, detail="Knowledge base not found")
-    if not current_user.is_superuser and (knowledge_base.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
+    if not current_user.is_superuser and (knowledge_base_old.owner_id != current_user.id):
+        raise HTTPException(status_code=403, detail="Not enough permissions")
     
-    update_dict = knowledge_base_in.model_dump(exclude_unset=True)
-    knowledge_base.sqlmodel_update(update_dict)
-
+    if kb_update.title is not None and kb_update.title != knowledge_base_old.title:
+        KnowledgeBaseService.update_title(
+            session=session,
+            knowledge_base_id=id,
+            new_title=kb_update.title
+        )
+    
+    if kb_update.description is not None and kb_update.description != knowledge_base_old.description:
+        KnowledgeBaseService.update_description(
+            session=session,
+            knowledge_base_id=id,
+            new_description=kb_update.description
+        )
+    
+    removed_file_ids = kb_update.removed_file_ids if kb_update.removed_file_ids else []
+    for file_id in removed_file_ids:
+        KnowledgeBaseService.delete_source(
+            session=session,
+            source_id=file_id
+        )
+    
     # Retrieve the compressed folder from the database
-    if files or knowledge_base_in.removed_file_ids:
+    if files:
         print("Retrieving existing VectorDB...")
         
         # Clear out any existing chroma_db directory
         chroma_dir = tempfile.mkdtemp()
         try:
             # Extract the zipped ChromaDB into the temp directory
-            if knowledge_base.data:
-                with zipfile.ZipFile(io.BytesIO(knowledge_base.data), 'r') as zip_ref:
+            if knowledge_base_old.data:
+                with zipfile.ZipFile(io.BytesIO(knowledge_base_old.data), 'r') as zip_ref:
                     zip_ref.extractall(chroma_dir)
             else:
                 raise HTTPException(status_code=400, detail="Knowledge base has no vector database data")
@@ -434,78 +450,32 @@ def update_knowledge_base(
             # Load the vector database with the SAME model used to create the knowledge base
             embeddings, model_id, provider = load_correct_embeddings_model(
                 session=session,
-                embedding_model_id=knowledge_base_in.embedding_model_id
+                embedding_model_id=knowledge_base_old.embedding_model_id
             )
             
             # Initialize Chroma with the existing database
             chroma_vector_database = Chroma(persist_directory=chroma_dir, embedding_function=embeddings)
 
-            # Process new files (if any)
-            if files:
-                print("Adding new files to VectorDB...")
-                documents = []
-                for file in files:
-                    loaded_documents = load_uploaded_file(file)
-                    documents.extend(loaded_documents)
+            print("Adding new files to VectorDB...")
+            documents = []
+            for file in files:
+                loaded_documents = load_uploaded_file(file)
+                documents.extend(loaded_documents)
 
-                    # Reset the file pointer before passing to create_source_entries
-                    file.file.seek(0)
+                # Reset the file pointer before passing to create_source_entries
+                file.file.seek(0)
 
-                    # Add source entries for the new files
-                    KnowledgeBaseService.create_source_entries(
-                        session=session,
-                        current_user=current_user,
-                        knowledge_base_id=knowledge_base.id,
-                        file=file
-                    )
+                # Add source entries for the new files
+                KnowledgeBaseService.create_source_entries(
+                    session=session,
+                    current_user=current_user,
+                    knowledge_base_id=knowledge_base_old.id,
+                    file=file
+                )
 
                 # Add the new documents to the VectorDB only if we have new files
                 if documents:
                     chroma_vector_database.add_documents(documents)
-
-            # Handle file deletions
-            if knowledge_base_in.removed_file_ids:
-                print("Removing files from VectorDB...")
-                sources_to_remove = session.exec(
-                    select(Source).where(Source.source_data_id.in_(knowledge_base_in.removed_file_ids))
-                ).all()
-
-                print("Sources to remove:", sources_to_remove)
-
-                for source in sources_to_remove:
-                    chroma_vector_database.delete(ids=[str(source.source_data_id)])
-
-                # 1. First, only delete Source entries for THIS specific knowledge base
-                sources_to_delete = session.exec(
-                    select(Source).where(
-                        (Source.source_data_id.in_(knowledge_base_in.removed_file_ids)) & 
-                        (Source.knowledge_base_id == id)
-                    )
-                ).all()
-
-                # 2. Remember which source_data_ids we're removing
-                source_data_ids_to_check = [source.source_data_id for source in sources_to_delete]
-
-                # 3. Delete the specific Source entries (just the associations)
-                session.exec(
-                    delete(Source).where(
-                        (Source.source_data_id.in_(knowledge_base_in.removed_file_ids)) & 
-                        (Source.knowledge_base_id == id)
-                    )
-                )
-
-                # 4. For each source_data_id, check if it's still referenced by any Source
-                for source_data_id in source_data_ids_to_check:
-                    # Count how many Sources still reference this source_data_id
-                    remaining_references = session.exec(
-                        select(func.count()).where(Source.source_data_id == source_data_id)
-                    ).one()
-                    
-                    # If no Sources reference this source_data_id anymore, delete the SourceData
-                    if remaining_references == 0:
-                        session.exec(
-                            delete(SourceData).where(SourceData.id == source_data_id)
-                        )
 
             # Zip the updated VectorDB
             print("Zipping updated VectorDB...")
@@ -520,7 +490,7 @@ def update_knowledge_base(
 
             # Update the knowledge base data in the database
             print("Updating knowledge base data in the database...")
-            knowledge_base.data = zip_buffer.read()
+            knowledge_base_old.data = zip_buffer.read()
 
         except Exception as e:
             # Clean up on error
@@ -537,13 +507,13 @@ def update_knowledge_base(
                 shutil.rmtree(chroma_dir)
 
     # Update the date_modified field
-    knowledge_base.date_modified = datetime.utcnow()
+    knowledge_base_old.date_modified = datetime.now(datetime.UTC)
 
-    session.add(knowledge_base)
+    session.add(knowledge_base_old)
 
     session.commit()
-    session.refresh(knowledge_base)
-    return knowledge_base
+    session.refresh(knowledge_base_old)
+    return knowledge_base_old
 
 
 @router.delete("/{id}")
