@@ -30,6 +30,7 @@ dependencies = [
     "pymupdf==1.25.5",
     "pypdf==5.4.0",
     "langchain-openai==0.3.17",
+    "langchain-chroma>=0.2.4",
 ]
 
 [tool.uv]
