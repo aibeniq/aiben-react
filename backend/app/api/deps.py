@@ -2,7 +2,7 @@ from collections.abc import Generator
 from typing import Annotated
 
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
@@ -12,6 +12,7 @@ from app.core import security
 from app.core.config import settings
 from app.core.db import engine
 from app.models import TokenPayload, User
+from app.services.chroma import ChromaDBService
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
@@ -23,8 +24,14 @@ def get_db() -> Generator[Session, None, None]:
         yield session
 
 
+def get_chroma_service(request: Request) -> ChromaDBService:
+    """Get the ChromaDB service from app state."""
+    return request.app.state.chroma_service
+
+
 SessionDep = Annotated[Session, Depends(get_db)]
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
+ChromaServiceDep = Annotated[ChromaDBService, Depends(get_chroma_service)]
 
 
 def get_current_user(session: SessionDep, token: TokenDep) -> User:
