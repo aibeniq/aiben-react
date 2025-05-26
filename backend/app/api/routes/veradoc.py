@@ -1,8 +1,8 @@
 import uuid
-from app.models import VeraDocRequest, VeraDocResponse, VeraDocChecklist, RagChecklistRequest, EmbeddingModel
+from app.models import VeraDocRequest, VeraDocResponse, VeraDocChecklist, RagChecklistRequest, EmbeddingModel, Source
 
 from app.api.deps import CurrentUser, SessionDep
-
+from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm
@@ -16,7 +16,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.schema import AIMessage
 from dotenv import load_dotenv
 import os
-
+import re
 import base64
 from tempfile import NamedTemporaryFile
 from pathlib import Path
@@ -26,7 +26,6 @@ from datetime import datetime
 
 import tempfile
 import shutil
-import os
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.chains import LLMChain
@@ -40,23 +39,29 @@ load_dotenv(dotenv_path="c:/miniconda/aibeniq-react/.env", override=True)
 
 # Retrieve the OpenAI API key from the environment
 openai_api_key = os.getenv("OPENAI_API_KEY")
-print(openai_api_key)
-if not openai_api_key:
-    raise RuntimeError("OPENAI_API_KEY is not set in the environment variables.")
 
-# Set up OpenAI API key
-os.environ["OPENAI_API_KEY"] = openai_api_key
+# Initialize a flag to track API key status
+is_openai_configured = False
+
+if openai_api_key:
+    # Set up OpenAI API key if available
+    os.environ["OPENAI_API_KEY"] = openai_api_key
+    is_openai_configured = True
+    print("OpenAI API key configured successfully")
+else:
+    print("WARNING: OPENAI_API_KEY is not set in environment variables. Some FormConnect features will be limited.")
+
 router = APIRouter(prefix="/veradoc", tags=["veradoc"])
 
 # Initialize the LLM
 #llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
 
-def generate_template(fields: List[str]) -> Dict[str, str]:
+def generate_template(questions: List[str]) -> Dict[str, str]:
     """
-    Generate a JSON template from a list of fields.
+    Generate a JSON template from a list of questions.
     Each field will have a blank value.
     """
-    return {field: "" for field in fields}
+    return {field: "" for field in questions}
 
 # Add the new endpoint
 @router.post("/process-rag", response_model=VeraDocResponse)
@@ -138,53 +143,16 @@ async def process_rag_checklist(
             
             # 4. Initialize the LLM
             #llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
-            print("Now loading default LLM...")
+            print("Now loading default LLM for session with following info:")
+            print("Session:", session)
             llm = get_default_llm(session)
+            print("LLM successfully loaded.")
             
             # 5. Define the prompts for the different stages
-            context_prompt_template = """
-            CONTEXT:
-            {context}
-            
-            INSTRUCTION: 
-            What necessary information from the context above should be kept in mind when answering the following question? {question} 
-            ONLY INCLUDE POLICY INFORMATION THAT WOULD BE SPECIFICALLY PERTINENT TO THE QUESTION -- do NOT just repeat general requirements.
-            
-            ANSWER:
-            According to the policy context, the following should be kept in mind when answering the question:
-            """
-            
-            context_prompt = ChatPromptTemplate.from_template(context_prompt_template)
-            
-            qa_prompt_template = """
-            Read the following document and answer the following question clearly and concisely in 100 words or less.
-            
-            SAMPLE DOCUMENT: {document_text}
-            
-            QUESTION: {question}
-            
-            Keep the following RELEVANT REQUIREMENTS in mind when answering the question:
-            {question_context}
-            
-            ANSWER:
-            """
-            
-            qa_prompt = ChatPromptTemplate.from_template(qa_prompt_template)
-            
-            final_prompt_template = """
-            According to policy, an acceptable document must have all of the elements described in the following questions.
-            Read the following question-and-answer pairs about a certain proposal and determine whether or not it conforms to the policy.
-            
-            Remember: if any single element is missing from the proposal, it automatically means that the entire proposal does NOT conform to policy.
-            If the plan does not conform to policy, explain why not.
-            
-            {qa_pairs}
-            
-            Based on the question-and-answer pairs above, does the plan follow policy?
-            """
-            
-            final_prompt = ChatPromptTemplate.from_template(final_prompt_template)
-            
+            context_prompt_template = settings.VERADOC_CONTEXT_PROMPT_TEMPLATE
+            qa_prompt_template = settings.VERADOC_QA_PROMPT_TEMPLATE
+            final_prompt_template = settings.VERADOC_FINAL_PROMPT_TEMPLATE
+
             # 6. Process each uploaded file
             qa_pairs = []
             question_list = request.questions.strip().split('\n')
@@ -215,25 +183,103 @@ async def process_rag_checklist(
                 # Store source documents for citation
                 source_citations = []
                 for doc in docs:
-                    # Extract metadata and source text
+                    # Ensure source_data_id is included in metadata if available
+                    metadata = doc.metadata.copy()  # Copy to avoid modifying the original
+                    
+                    # If the metadata contains a source path that matches a pattern from a KB
+                    if 'source' in metadata and isinstance(metadata['source'], str):
+                        # Try to find the corresponding source_data_id
+                        source_path = metadata['source']
+                        # Extract just the filename
+                        raw_filename = Path(source_path).name
+                        
+                        # Extract the real filename after the underscore using regex
+                        # This looks for any characters followed by an underscore, then captures everything after
+                        match = re.search(r'^[^_]*_(.+)$', raw_filename)
+                        if match:
+                            # Use the captured group (everything after the underscore)
+                            filename = match.group(1)
+                        else:
+                            # Fallback to the original filename if no underscore found
+                            filename = raw_filename
+                        
+                        # Debug info
+                        print(f"Raw filename: {raw_filename}")
+                        print(f"Extracted filename: {filename}")
+                        
+                        # Try to find the source by the extracted name
+                        source_entry = session.exec(
+                            select(Source)
+                            .where(Source.name == filename)
+                        ).first()
+                        
+                        if source_entry:
+                            metadata['source_data_id'] = str(source_entry.source_data_id)
+                    
                     source = {
                         "content": doc.page_content,
-                        "metadata": doc.metadata
+                        "metadata": metadata
                     }
                     source_citations.append(source)
                 
                 # Step 2: Get the relevant policy context for this question
-                context_chain = context_prompt | llm
-                context_response = context_chain.invoke({"context": context, "question": question})
-                question_context = context_response.content
+                # Check if the model is a ReplicateWrapper or LangChain LLM
+                is_replicate_model = hasattr(llm, '__class__') and 'ReplicateWrapper' in llm.__class__.__name__
+                
+                if is_replicate_model:
+                    print("Using Replicate model for context chain")
+                    try:
+                        # Format the prompt directly for Replicate
+                        formatted_context_prompt = context_prompt_template.format(
+                            context=context,
+                            question=question
+                        )
+                        question_context = llm.invoke(formatted_context_prompt)
+                        print(f"Got context from Replicate model: {question_context[:100]}...")
+                    except Exception as e:
+                        print(f"Error getting context with Replicate model: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        question_context = "Error retrieving policy context."
+                else:
+                    # Standard LangChain approach
+                    print("Using LangChain model for context chain")
+                    context_prompt = ChatPromptTemplate.from_template(context_prompt_template)
+                    context_chain = context_prompt | llm
+                    context_response = context_chain.invoke({
+                        "context": context, 
+                        "question": question
+                    })
+                    question_context = context_response.content
                 
                 # Step 3: Answer the question based on the uploaded document and policy context
-                qa_chain = qa_prompt | llm
-                qa_response = qa_chain.invoke({
-                    "document_text": document_text,
-                    "question": question,
-                    "question_context": question_context
-                })
+                if is_replicate_model:
+                    print("Using Replicate model for QA chain")
+                    try:
+                        # Format the prompt directly for Replicate
+                        formatted_qa_prompt = qa_prompt_template.format(
+                            document_text=document_text[:10000],  # Limit length to avoid token issues
+                            question=question,
+                            question_context=question_context
+                        )
+                        answer = llm.invoke(formatted_qa_prompt)
+                        print(f"Got answer from Replicate model: {answer[:100]}...")
+                    except Exception as e:
+                        print(f"Error getting answer with Replicate model: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        answer = "Error generating answer."
+                else:
+                    # Standard LangChain approach
+                    print("Using LangChain model for QA chain")
+                    qa_prompt = ChatPromptTemplate.from_template(qa_prompt_template)
+                    qa_chain = qa_prompt | llm
+                    qa_response = qa_chain.invoke({
+                        "document_text": document_text[:10000],  # Limit length to avoid token issues
+                        "question": question,
+                        "question_context": question_context
+                    })
+                    answer = qa_response.content
 
                 print("Source citations for question:", question)
                 for source in source_citations:
@@ -242,7 +288,7 @@ async def process_rag_checklist(
                 # Store the question-answer pair with context
                 qa_pairs.append({
                     "question": question,
-                    "answer": qa_response.content,
+                    "answer": answer,
                     "context": question_context,
                     "source_citations": source_citations
                 })
@@ -252,18 +298,42 @@ async def process_rag_checklist(
             for i, qa in enumerate(qa_pairs):
                 qa_pairs_text += f"Question {i+1}: {qa['question']}\nAnswer: {qa['answer']}\n\n"
             
-            final_chain = final_prompt | llm
-            final_response = final_chain.invoke({"qa_pairs": qa_pairs_text})
+            # Final evaluation
+            if is_replicate_model:
+                print("Using Replicate model for final evaluation")
+                try:
+                    # Format the prompt directly for Replicate
+                    formatted_final_prompt = final_prompt_template.format(
+                        qa_pairs=qa_pairs_text
+                    )
+                    final_evaluation = llm.invoke(formatted_final_prompt)
+                    print(f"Got final evaluation from Replicate model: {final_evaluation[:100]}...")
+                except Exception as e:
+                    print(f"Error getting final evaluation with Replicate model: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    final_evaluation = "Error generating final evaluation."
+            else:
+                # Standard LangChain approach
+                print("Using LangChain model for final evaluation")
+                final_prompt = ChatPromptTemplate.from_template(final_prompt_template)
+                final_chain = final_prompt | llm
+                final_response = final_chain.invoke({
+                    "qa_pairs": qa_pairs_text
+                })
+                final_evaluation = final_response.content
             
             # 9. Compile the results
             result = {
-                "final_evaluation": final_response.content,
+                "final_evaluation": final_evaluation,
                 "qa_pairs": qa_pairs
             }
             
             return VeraDocResponse(results=result)
             
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error processing RAG checklist: {str(e)}")
 
 # Functions related to Checklists
@@ -316,7 +386,7 @@ def update_checklist(checklist_id: uuid.UUID, updated_checklist: VeraDocChecklis
     
     checklist.name = updated_checklist.name
     checklist.description = updated_checklist.description
-    checklist.fields = updated_checklist.fields
+    checklist.questions = updated_checklist.questions
     checklist.date_modified = datetime.utcnow()
     
     session.add(checklist)

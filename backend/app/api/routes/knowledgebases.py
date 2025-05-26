@@ -13,6 +13,7 @@ from io import BytesIO
 from app.api.deps import CurrentUser, SessionDep
 from app.models import KnowledgeBase, KnowledgeBaseCreate, KnowledgeBasePublic, KnowledgeBasesPublic, KnowledgeBaseUpdate, Message, Source, SourceData, EmbeddingModel
 from app.services.embeddings import load_embeddings_model
+from app.core.config import settings
 import hashlib
 
 from app.services.knowledgebases import KnowledgeBaseService
@@ -24,9 +25,11 @@ import tempfile
 from datetime import datetime
 
 from langchain_community.document_loaders import TextLoader, PyPDFLoader
-import mimetypes
+import docx
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
+from langchain.schema.document import Document
+import mimetypes
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
 
@@ -81,6 +84,7 @@ def load_correct_embeddings_model(
             provider=provider,
             model_id=model_id
         )
+        print("Embeddings model loaded successfully.")
     except Exception as e:
         raise HTTPException(
             status_code=400,
@@ -89,6 +93,48 @@ def load_correct_embeddings_model(
 
     print(f"Using embedding model: {model_id}")
     return embeddings, model_id, provider
+
+def extract_text_from_docx(file_path: str, filename: str) -> List[Any]:
+            doc = docx.Document(file_path)
+            
+            full_text = []
+            
+            for para in doc.paragraphs:
+                if para.text.strip():  # Skip empty paragraphs
+                    full_text.append(para.text)
+            
+            for table in doc.tables:
+                for row in table.rows:
+                    row_text = []
+                    for cell in row.cells:
+                        if cell.text.strip():
+                            row_text.append(cell.text.strip())
+                    if row_text:
+                        full_text.append(" | ".join(row_text))
+            
+            combined_text = "\n\n".join(full_text)
+            
+            metadata = {
+                "source": filename,
+                "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            }
+            
+            # Try to get document properties
+            try:
+                core_properties = doc.core_properties
+                if core_properties.title:
+                    metadata["title"] = core_properties.title
+                if core_properties.author:
+                    metadata["author"] = core_properties.author
+                if core_properties.created:
+                    metadata["created"] = str(core_properties.created)
+                if core_properties.modified:
+                    metadata["modified"] = str(core_properties.modified)
+            except Exception as e:
+                print(f"Could not extract document properties: {str(e)}")
+            
+            # Create a Document object compatible with langchain
+            return [Document(page_content=combined_text, metadata=metadata)]
 
 def load_uploaded_file(file: UploadFile) -> List[Any]:
     """
@@ -113,6 +159,9 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
             print("Loading PDF with PyPDFLoader...")
             loader = PyPDFLoader(temp_file_path)
             loaded_documents = loader.load()
+        elif content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" or file.filename.lower().endswith(".docx"):
+            print("Loading DOCX with python-docx library...")
+            loaded_documents = extract_text_from_docx(temp_file_path, file.filename)  
         else:
             print("Loading text with TextLoader...")
             # Try with different encodings if utf-8 fails
@@ -221,42 +270,25 @@ def read_knowledge_base(
         if model:
             embedding_model_name = model.name
     
-    # Get all sources for this knowledge base with SourceData joined
+     # Get all sources for this knowledge base
     sources = session.exec(
-        select(Source, SourceData)
-        .join(SourceData, Source.source_data_id == SourceData.id)
+        select(Source)
         .where(Source.knowledge_base_id == id)
     ).all()
 
     files = []
     for source in sources:
-        try:
-            # Extract the original content from the ZIP
-            zip_data = BytesIO(source.SourceData.data)
-            with zipfile.ZipFile(zip_data, "r") as zip_file:
-                # Get the first file in the archive (which should be the only one)
-                file_info = zip_file.infolist()[0]
-                file_content = zip_file.read(file_info.filename)
-
-                # Determine the proper content type based on the filename
-                content_type = mimetypes.guess_type(source.Source.name)[0] or "application/octet-stream"
-                
-                # Base64 encode the file content
-                import base64
-                files.append({
-                    "id": str(source.Source.source_data_id),
-                    "name": source.Source.name,
-                    "data_base64": base64.b64encode(file_content).decode('utf-8'),
-                    "content_type": content_type  # Default type
-                })
-        except Exception as e:
-            # Log the error but continue processing other files
-            print(f"Error extracting file {source.Source.name}: {str(e)}")
-            continue
+        # Only include metadata, not the actual file content
+        files.append({
+            "id": str(source.source_data_id),
+            "name": source.name,
+            "date_created": source.date_created,
+            # Don't include data_base64 here
+        })
 
     # Construct the response model
     knowledge_base_public = KnowledgeBasePublic(
-        **knowledge_base.model_dump(),  # Copy all fields from the KnowledgeBase object
+        **knowledge_base.model_dump(),
         files=files,
         embedding_model_name=embedding_model_name
     )
@@ -316,7 +348,10 @@ def create_knowledge_base(
     print("Splitting documents...")
 
     # Split documents into chunks using RecursiveCharacterTextSplitter
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=20)
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=settings.DOCUMENT_CHUNK_SIZE, 
+        chunk_overlap=settings.DOCUMENT_CHUNK_OVERLAP
+    )
     splits = text_splitter.split_documents(documents)
 
     print("Initializing embeddings...")
