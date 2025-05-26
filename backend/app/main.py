@@ -2,13 +2,33 @@ import sentry_sdk
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
 from app.api.main import api_router
 from app.core.config import settings
+from app.services.chroma import ChromaDBService
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
     return f"{route.tags[0]}-{route.name}"
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Initialize ChromaDB service
+    try:
+        chroma_service = ChromaDBService()
+        app.state.chroma_service = chroma_service
+        print("ChromaDB service initialized successfully")
+    except Exception as e:
+        print(f"Failed to initialize ChromaDB service: {e}")
+        raise
+    
+    yield
+    
+    # Shutdown: Clean up if needed
+    # ChromaDB service doesn't require explicit cleanup
+    pass
 
 
 if settings.SENTRY_DSN and settings.ENVIRONMENT != "local":
@@ -18,6 +38,7 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     generate_unique_id_function=custom_generate_unique_id,
+    lifespan=lifespan,
 )
 
 # Set all CORS enabled origins
