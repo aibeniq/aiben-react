@@ -1,5 +1,8 @@
 import uuid
+import os
 from typing import Any, List, Optional
+import requests
+import replicate
 
 from fastapi import APIRouter, HTTPException, Depends, Body
 from sqlmodel import select, func
@@ -146,13 +149,69 @@ def create_embedding_model(
     """
     Create a new embedding model.
     """
-    # Check if the model_id is valid by trying to load it
+    # Check if the model_id is valid by trying to load it based on provider
     try:
-        _ = HuggingFaceEmbeddings(model_name=model_in.model_id)
+        if model_in.provider == ModelProvider.HUGGINGFACE:
+            # Validate HuggingFace model
+            _ = HuggingFaceEmbeddings(model_name=model_in.model_id)
+        elif model_in.provider == ModelProvider.OPENAI:
+            # Check if OpenAI API key is configured
+            api_key = os.environ.get("OPENAI_API_KEY")
+            if not api_key:
+                raise HTTPException(
+                    status_code=400,
+                    detail="OpenAI API key is not configured in the environment"
+                )
+            # Validate OpenAI model
+            _ = OpenAIEmbeddings(model=model_in.model_id, openai_api_key=api_key)
+        elif model_in.provider == ModelProvider.OLLAMA:
+            # For Ollama, we can't easily validate without making a call to the Ollama server
+            # So we'll just check if the format looks correct (basic validation)
+            if not model_in.model_id or not isinstance(model_in.model_id, str):
+                raise ValueError("Invalid model ID format for Ollama")
+        elif model_in.provider == ModelProvider.REPLICATE:
+            # Check if Replicate API token is configured
+            api_token = os.environ.get("REPLICATE_API_TOKEN")
+            if not api_token:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Replicate API token is not configured in the environment"
+                )
+                
+            # Validate the Replicate model
+            # We'll use a similar approach to what's in your llms.py validation
+            try:
+                # Just check if the model exists, don't run a full embedding request
+                if ":" in model_in.model_id:
+                    # Model with specific version
+                    owner_model, version = model_in.model_id.split(":")
+                    # Just check metadata
+                    model_info = replicate.models.get(owner_model)
+                    # Verify the version exists
+                    version_exists = False
+                    for v in model_info.versions.list():
+                        if v.id.startswith(version):
+                            version_exists = True
+                            break
+                    if not version_exists:
+                        raise ValueError(f"Version {version} not found for model {owner_model}")
+                else:
+                    # Model without specific version (will use latest)
+                    model_info = replicate.models.get(model_in.model_id)
+                    
+                print(f"Replicate model validation successful: {model_in.model_id}")
+            except Exception as e:
+                print(f"Error validating Replicate model: {str(e)}")
+                raise ValueError(f"Invalid Replicate model: {str(e)}")
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported provider: {model_in.provider}"
+            )
     except Exception as e:
         raise HTTPException(
             status_code=400, 
-            detail=f"Invalid HuggingFace model ID: {str(e)}"
+            detail=f"Invalid {model_in.provider} model ID: {str(e)}"
         )
     
     # If this is set as default, unset any previous default models owned by the user
@@ -314,16 +373,22 @@ def validate_embedding_model(
     """
     Validate if an embedding model ID is valid for the specified provider.
     """
+    print("Validating embedding model with the following parameters:")
+    print("Provider:", model_data.provider)
+    print("Model ID:", model_data.model_id)	
     try:
         # Initialize the embeddings model based on provider
         embeddings = load_embeddings_model(
             provider=model_data.provider,
             model_id=model_data.model_id
         )
+        print("Embeddings model loaded successfully.")
         
         # Test the model with a simple query
         test_query = "This is a test query to validate the embedding model."
         _ = embeddings.embed_query(test_query)
+
+        print("Model validation successful.")
         
         return Message(message=f"Model is valid for provider {model_data.provider}")
     except Exception as e:
@@ -331,3 +396,53 @@ def validate_embedding_model(
             status_code=400, 
             detail=f"Invalid embedding model: {str(e)}"
         )
+    
+@router.get("/check-api-key/{provider}", response_model=Message)
+def check_api_key_configured(provider: str) -> Message:
+    """
+    Check if the API key for a specific provider is configured in the backend.
+    """
+    print("Checking API key configuration for provider:", provider)
+    if provider == "openai":
+        # Check for OpenAI API key in environment
+        print("Checking OpenAI API key configuration...")
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if api_key:
+            return Message(message="API key is configured")
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail="OpenAI API key is not configured in the backend"
+            )
+    elif provider == "ollama":
+        # Check if Ollama server is reachable
+        base_url = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")
+        try:
+            import requests
+            response = requests.get(f"{base_url}/api/tags", timeout=2)
+            if response.status_code == 200:
+                return Message(message="Ollama server is reachable")
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Ollama server returned status {response.status_code}"
+                )
+        except Exception as e:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Cannot connect to Ollama server at {base_url}: {str(e)}"
+            )
+    elif provider == "huggingface":
+        # For HuggingFace, check for token if needed
+        return Message(message="No API key needed for this provider")
+    elif provider == "replicate":
+        api_token = os.environ.get("REPLICATE_API_TOKEN")
+        if api_token:
+            return Message(message="API token is configured")
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail="Replicate API token is not configured in the backend"
+            )
+    else:
+        return Message(message="No API key needed for this provider")
