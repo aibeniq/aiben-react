@@ -1250,7 +1250,7 @@ export class ReportgenieService {
    * Generate Docx
    * Generate a DOCX file from the report content.
    * @param data The data for the request.
-   * @param data.content
+   * @param data.requestBody
    * @returns unknown Successful Response
    * @throws ApiError
    */
@@ -1260,9 +1260,9 @@ export class ReportgenieService {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/reportgenie/generate/docx",
-      query: {
-        content: data.content,
-      },
+      body: data.requestBody,
+      responseType: 'blob',
+      mediaType: "application/json",
       errors: {
         422: "Validation Error",
       },

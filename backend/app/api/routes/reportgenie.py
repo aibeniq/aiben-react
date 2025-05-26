@@ -278,7 +278,7 @@ def delete_outline(outline_id: uuid.UUID, session: SessionDep, current_user: Cur
 async def generate_docx(
     session: SessionDep,
     current_user: CurrentUser,
-    request: DocxRequest = Depends()
+    request: DocxRequest
 ):
     """
     Generate a DOCX file from the report content.
@@ -364,6 +364,24 @@ async def generate_docx(
         print("Saving the document to a BytesIO object...")
         docx_bytes = BytesIO()
         doc.save(docx_bytes)
+        docx_bytes.seek(0)
+
+        # --- CORRUPTION CHECKS ---
+        # 1. Check file size
+        size = docx_bytes.getbuffer().nbytes
+        print(f"DOCX file size: {size} bytes")
+        if size < 1000:
+            print("Warning: DOCX file is very small and may be empty or corrupted.")
+
+        # 2. Try to reload the DOCX to ensure it's readable
+        try:
+            docx_bytes.seek(0)
+            _ = Document(docx_bytes)
+            print("DOCX file passed integrity check (can be opened by python-docx).")
+        except Exception as e:
+            print(f"Integrity check failed: generated DOCX cannot be opened. Error: {e}")
+            raise HTTPException(status_code=500, detail="Generated DOCX file is corrupted.")
+        
         docx_bytes.seek(0)
 
         print("Document saved successfully. Preparing to return as a downloadable file.")

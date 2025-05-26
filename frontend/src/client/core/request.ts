@@ -205,7 +205,8 @@ export const sendRequest = async <T>(
 
   let requestConfig: AxiosRequestConfig = {
     data: body ?? formData,
-    headers,
+    responseType: options.responseType || "json",
+  headers,
     method: options.method,
     signal: controller.signal,
     url,
