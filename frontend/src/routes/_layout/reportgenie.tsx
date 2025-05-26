@@ -21,11 +21,103 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { ReportgenieService, KnowledgeBasesService } from "@/client"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { FiFileText } from "react-icons/fi"
+import { FiFileText, FiCopy, FiCheck, FiDownload } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 
 const ReportGenie = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast();
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const handleCopyReport = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedReport);
+      setCopySuccess(true);
+      
+      // Reset the success icon after 2 seconds
+      setTimeout(() => {
+        setCopySuccess(false);
+      }, 2000);
+      
+      showSuccessToast("Report copied to clipboard");
+    } catch (err) {
+      console.error("Failed to copy report:", err);
+      showErrorToast("Failed to copy report to clipboard");
+    }
+  };
+
+  const handleDownloadReport = async () => {
+    try {
+      setLoadingDownload(true);
+
+      const response = await ReportgenieService.generateDocx({ content: generatedReport });
+      console.log("typeof response:", typeof response);
+      console.log("response instanceof Blob:", response instanceof Blob);
+      console.log("response:", response);
+
+      let blob;
+      if (response instanceof Blob) {
+        console.log("Response is a Blob");
+        blob = response;
+      } else if (response instanceof ArrayBuffer) {
+        console.log("Response is an ArrayBuffer");
+        blob = new Blob([response], {
+          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        });
+      } else {
+        console.log("Response is a string or unexpected type");
+        // If response is a string (shouldn't be, but fallback)
+        blob = new Blob([response], {
+          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        });
+      }
+
+      //const res = await fetch('/api/v1/reportgenie/generate/docx', {
+      //  method: 'POST',
+      //  headers: {
+      //    'Accept': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      //    'Content-Type': 'application/json'
+      //  },
+      //  body: JSON.stringify({ content: generatedReport })
+      //});
+      //const blob2= await res.blob();
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      a.href = url;
+      a.download = `report_${timestamp}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      showSuccessToast("Report downloaded successfully");
+    } catch (err) {
+      console.error("Failed to download report:", err);
+      showErrorToast(`Failed to download report: ${err.message || "Unknown error"}`);
+    } finally {
+      setLoadingDownload(false);
+    }
+  };
+
+  const [loadingDownload, setLoadingDownload] = useState(false);
+
+  const fetchOutlines = async () => {
+    try {
+      console.log("Fetching outlines...");
+      const data = await ReportgenieService.getOutlines();
+      console.log("Fetched outlines:", data);
+      setOutlines(data || []);
+    } catch (error) {
+      console.error("Error fetching outlines:", error);
+      showErrorToast("Failed to fetch outlines");
+    }
+  };
+
+    // Call the function on component mount
+  useEffect(() => {
+    fetchOutlines();
+  }, []);
 
   // Knowledge base selection state
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<any>(null);
@@ -196,7 +288,7 @@ const ReportGenie = () => {
         showSuccessToast("Outline updated successfully");
       } else {
         // Create new outline
-        await ReportgenieService.createOutline({
+        const newOutline = await ReportgenieService.createOutline({
           requestBody: {
             name: outlineName,
             description: outlineDescription,
@@ -206,14 +298,16 @@ const ReportGenie = () => {
         showSuccessToast("Outline saved successfully");
       }
       
-      // Reset form and refresh outlines
+      // Reset form
       setSelectedOutline(null);
       setOutlineName("");
       setOutlineDescription("");
-      await refetchOutlines();
+      
+      // Fetch outlines after saving - this is the key change to match VeraDoc's approach
+      await fetchOutlines();
     } catch (error) {
       console.error("Error saving outline:", error);
-      showErrorToast("Failed to save outline");
+      showErrorToast(`Failed to save outline: ${error.message || "Unknown error"}`);
     }
   };
 
@@ -409,7 +503,7 @@ PROCEDURES: Describes what will happen during the research study."
                 }
 
                 try {
-                  const response = await ReportgenieService.createOutline({
+                  await ReportgenieService.createOutline({
                     requestBody: {
                       name: `${selectedOutline.name} (Copy)`,
                       description: selectedOutline.description,
@@ -417,7 +511,8 @@ PROCEDURES: Describes what will happen during the research study."
                     },
                   });
                   showSuccessToast("Outline copied successfully");
-                  refetchOutlines();
+                  // Fetch outlines directly instead of using refetchOutlines
+                  await fetchOutlines();
                 } catch (error) {
                   console.error("Error copying outline:", error);
                   showErrorToast("Failed to copy outline");
@@ -444,7 +539,8 @@ PROCEDURES: Describes what will happen during the research study."
                   setSections("");
                   setOutlineName("");
                   setOutlineDescription("");
-                  refetchOutlines();
+                  // Fetch outlines directly instead of using refetchOutlines
+                  await fetchOutlines();
                 } catch (error) {
                   console.error("Error deleting outline:", error);
                   showErrorToast("Failed to delete outline");
@@ -474,20 +570,49 @@ PROCEDURES: Describes what will happen during the research study."
         {(generatedReport || sectionResults.length > 0) && (
           <>
             <Separator my={4} />
-            <Heading size="md" mb={4}>Generated Report</Heading>
+            <HStack justify="space-between" align="center" mb={4}>
+            <Heading size="md">Generated Report</Heading>
             
-            <Box
-              border="1px solid"
-              borderColor="gray.200"
-              borderRadius="md"
-              p={4}
-              bg="white"
-              minH="100px"
-              overflowY="auto"
-            >
-              <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                {generatedReport}
-              </ReactMarkdown>
+            {/* Copy button */}
+            {generatedReport && (
+              <HStack spacing={2}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  leftIcon={copySuccess ? <FiCheck color="green" /> : <FiCopy />}
+                  onClick={handleCopyReport}
+                  colorPalette={copySuccess ? "green" : "blue"}
+                >
+                  {copySuccess ? "Copied!" : "Copy Report"}
+                </Button>
+                
+                <Button
+                  size="sm"
+                  variant="outline"
+                  leftIcon={<FiDownload />}
+                  onClick={handleDownloadReport}
+                  isLoading={loadingDownload}
+                  loadingText="Downloading..."
+                  colorPalette="green"
+                >
+                  Download DOCX
+                </Button>
+              </HStack>
+            )}
+          </HStack>
+          
+          <Box
+            border="1px solid"
+            borderColor="gray.200"
+            borderRadius="md"
+            p={4}
+            bg="white"
+            minH="100px"
+            overflowY="auto"
+          >
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+              {generatedReport}
+            </ReactMarkdown>
 
               {/* Detailed section results with sources */}
               {sectionResults.length > 0 && (

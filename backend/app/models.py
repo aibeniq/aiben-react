@@ -380,3 +380,6 @@ class ReportGenieSection(SQLModel):
     title: str
     content: str
     source_citations: List[Dict[str, Any]] = Field(default_factory=list)
+
+class DocxRequest(SQLModel):
+    content: str

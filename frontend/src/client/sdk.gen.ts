@@ -93,6 +93,8 @@ import type {
   ReportgenieUpdateOutlineResponse,
   ReportgenieDeleteOutlineData,
   ReportgenieDeleteOutlineResponse,
+  ReportgenieGenerateDocxData,
+  ReportgenieGenerateDocxResponse,
   UsersReadUsersData,
   UsersReadUsersResponse,
   UsersCreateUserData,
@@ -1237,6 +1239,29 @@ export class ReportgenieService {
       url: "/api/v1/reportgenie/outlines/{outline_id}",
       path: {
         outline_id: data.outlineId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Generate Docx
+   * Generate a DOCX file from the report content.
+   * @param data The data for the request.
+   * @param data.content
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static generateDocx(
+    data: ReportgenieGenerateDocxData,
+  ): CancelablePromise<ReportgenieGenerateDocxResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/reportgenie/generate/docx",
+      query: {
+        content: data.content,
       },
       errors: {
         422: "Validation Error",
