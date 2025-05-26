@@ -624,13 +624,3 @@ class ChromaDBService:
         except Exception as e:
             logger.error(f"ChromaDB: Error deleting collection '{collection_name}': {e}")
             raise RuntimeError(f"Failed to delete collection '{collection_name}': {e}") from e
-
-
-_chroma_service: Optional[ChromaDBService] = None
-
-def get_chroma_service() -> ChromaDBService:
-    """Get the global ChromaDB service instance."""
-    global _chroma_service
-    if _chroma_service is None:
-        _chroma_service = ChromaDBService()
-    return _chroma_service
