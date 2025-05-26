@@ -49,7 +49,7 @@ const ReportGenie = () => {
     try {
       setLoadingDownload(true);
 
-      const response = await ReportgenieService.generateDocx({ content: generatedReport });
+      const response = await ReportgenieService.generateDocx({ requestBody: { content: generatedReport } });
       console.log("typeof response:", typeof response);
       console.log("response instanceof Blob:", response instanceof Blob);
       console.log("response:", response);
@@ -71,15 +71,18 @@ const ReportGenie = () => {
         });
       }
 
-      //const res = await fetch('/api/v1/reportgenie/generate/docx', {
-      //  method: 'POST',
-      //  headers: {
-      //    'Accept': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      //    'Content-Type': 'application/json'
-      //  },
-      //  body: JSON.stringify({ content: generatedReport })
-      //});
-      //const blob2= await res.blob();
+      /*
+      console.log("Now attempting direct API call")
+      const res = await fetch('/api/v1/reportgenie/generate/docx', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ content: generatedReport })
+      });
+      const blob2= await res.blob();
+      */
 
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');

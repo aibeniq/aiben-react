@@ -32,6 +32,10 @@ export type Body_veradoc_process_rag_checklist = {
   handwritten_files?: Array<Blob | File>
 }
 
+export type DocxRequest = {
+  content: string
+}
+
 export type EmbeddingModelCreate = {
   name: string
   model_id: string
@@ -562,7 +566,7 @@ export type ReportgenieDeleteOutlineData = {
 export type ReportgenieDeleteOutlineResponse = unknown
 
 export type ReportgenieGenerateDocxData = {
-  content: string
+  requestBody: DocxRequest
 }
 
 export type ReportgenieGenerateDocxResponse = unknown
