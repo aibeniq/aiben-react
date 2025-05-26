@@ -561,6 +561,12 @@ export type ReportgenieDeleteOutlineData = {
 
 export type ReportgenieDeleteOutlineResponse = unknown
 
+export type ReportgenieGenerateDocxData = {
+  content: string
+}
+
+export type ReportgenieGenerateDocxResponse = unknown
+
 export type UsersReadUsersData = {
   limit?: number
   skip?: number

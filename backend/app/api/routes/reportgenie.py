@@ -1,11 +1,17 @@
 import uuid
-from app.models import ReportGenieRequest, ReportGenieResponse, ReportGenieSection, ReportGenieOutline, Source, KnowledgeBase, EmbeddingModel
+from app.models import ReportGenieRequest, ReportGenieResponse, ReportGenieSection, ReportGenieOutline, Source, KnowledgeBase, EmbeddingModel, DocxRequest
 from pathlib import Path
 import re
 import tempfile
 import zipfile
 from io import BytesIO
 from datetime import datetime
+from fastapi.responses import StreamingResponse
+from docx import Document
+from docx.shared import Inches, Pt
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+import markdown
+from bs4 import BeautifulSoup
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
@@ -266,3 +272,114 @@ def delete_outline(outline_id: uuid.UUID, session: SessionDep, current_user: Cur
     session.delete(outline)
     session.commit()
     return {"message": "Outline deleted successfully."}
+
+
+@router.post("/generate/docx", response_class=StreamingResponse)
+async def generate_docx(
+    session: SessionDep,
+    current_user: CurrentUser,
+    request: DocxRequest = Depends()
+):
+    """
+    Generate a DOCX file from the report content.
+    """
+    print("Now generating DOCX of report...")
+    try:
+        # Get the markdown content from the request
+        if not request.content:
+            raise HTTPException(status_code=400, detail="Report content is required")
+            
+        # Convert markdown to HTML for parsing
+        html_content = markdown.markdown(request.content, extensions=['tables'])
+        soup = BeautifulSoup(html_content, 'html.parser')
+        
+        print("Markdown content converted to HTML successfully.")
+        # Create a new Document
+        doc = Document()
+        
+        print("Adding title and date to the document...")
+        # Add a title
+        title = doc.add_heading('Generated Report', level=0)
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        
+        # Add date
+        date_paragraph = doc.add_paragraph()
+        date_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        date_run = date_paragraph.add_run(f"Generated on: {datetime.now().strftime('%B %d, %Y')}")
+        date_run.italic = True
+        
+        # Add a separator
+        doc.add_paragraph('─' * 50)
+        
+        print("Adding headers, paragraphs, lists, and tables...")
+        # Process all headers and paragraphs in the HTML
+        for element in soup.find_all(['h1', 'h2', 'h3', 'h4', 'p', 'ul', 'ol', 'li', 'table']):
+            if element.name == 'h1':
+                doc.add_heading(element.text, level=1)
+            elif element.name == 'h2':
+                doc.add_heading(element.text, level=2)
+            elif element.name == 'h3':
+                doc.add_heading(element.text, level=3)
+            elif element.name == 'p':
+                doc.add_paragraph(element.text)
+            elif element.name == 'ul':
+                for li in element.find_all('li'):
+                    paragraph = doc.add_paragraph(li.text)
+                    paragraph.style = 'List Bullet'
+            elif element.name == 'ol':
+                for li in element.find_all('li'):
+                    paragraph = doc.add_paragraph(li.text)
+                    paragraph.style = 'List Number'
+            elif element.name == 'table':
+                table_rows = element.find_all('tr')
+                if table_rows:
+                    # Count the number of columns in the first row
+                    first_row = table_rows[0]
+                    columns = len(first_row.find_all(['th', 'td']))
+                    
+                    # Create the table
+                    table = doc.add_table(rows=0, cols=columns)
+                    table.style = 'Table Grid'
+                    
+                    # Process header row
+                    header_cells = first_row.find_all(['th', 'td'])
+                    if header_cells:
+                        header_row = table.add_row().cells
+                        for i, cell in enumerate(header_cells):
+                            if i < len(header_row):
+                                header_row[i].text = cell.text
+                                run = header_row[i].paragraphs[0].runs[0]
+                                run.bold = True
+                    
+                    # Process data rows
+                    for row in table_rows[1:]:
+                        cells = row.find_all('td')
+                        if cells:
+                            row_cells = table.add_row().cells
+                            for i, cell in enumerate(cells):
+                                if i < len(row_cells):
+                                    row_cells[i].text = cell.text
+        
+        # Save the document to a BytesIO object
+        print("Saving the document to a BytesIO object...")
+        docx_bytes = BytesIO()
+        doc.save(docx_bytes)
+        docx_bytes.seek(0)
+
+        print("Document saved successfully. Preparing to return as a downloadable file.")
+        
+        # Create a filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"report_{timestamp}.docx"
+        
+        # Return the document as a downloadable file
+        return StreamingResponse(
+            docx_bytes,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
