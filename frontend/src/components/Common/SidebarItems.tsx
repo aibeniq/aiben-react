@@ -20,16 +20,16 @@ const categories = [
     icon: FiTool,
     items: [
       { icon: FiClipboard, title: "VeraDoc", path: "/veradoc" },
-      { icon: TbPlugConnected, title: "FormConnect", path: "/formconnect" },
       { icon: FiFileText, title: "ReportGenie", path: "/reportgenie" },
+      { icon: TbPlugConnected, title: "FormConnect", path: "/formconnect" },
     ]
   },
   {
     name: "Configurations",
     icon: FiPackage,
     items: [
-      { icon: FiBookOpen, title: "Knowledge Bases", path: "/knowledge-bases" },
       { icon: FiTool, title: "Model Selection", path: "/model-selection" },
+      { icon: FiBookOpen, title: "Knowledge Bases", path: "/knowledge-bases" },
       { icon: FiSettings, title: "User Settings", path: "/settings" },
     ]
   }
