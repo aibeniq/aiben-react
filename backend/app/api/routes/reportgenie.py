@@ -157,8 +157,8 @@ async def generate_report(
                 })
             
             # 7. Compile the final report
-            full_report = "\n\n".join([
-                f"# {section['title']}\n\n{section['content']}"
+            full_report = "\n\n---\n\n".join([
+                section['content'].strip()
                 for section in sections
             ])
             
