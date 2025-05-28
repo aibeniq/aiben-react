@@ -1,5 +1,6 @@
 import uuid
 from app.models import ReportGenieRequest, ReportGenieResponse, ReportGenieSection, ReportGenieOutline, Source, KnowledgeBase, EmbeddingModel, DocxRequest
+from app.api.routes.utils import invoke_llm
 from pathlib import Path
 import re
 import tempfile
@@ -127,27 +128,14 @@ async def generate_report(
                     }
                     source_citations.append(source)
                 
-                # Generate section content using the template
-                is_replicate_model = hasattr(llm, '__class__') and 'ReplicateWrapper' in llm.__class__.__name__
-                
                 # Use the template from config
                 prompt_template = settings.REPORT_GENIE_PROMPT_TEMPLATE
-                
-                if is_replicate_model:
-                    formatted_prompt = prompt_template.format(
-                        context=context,
-                        question=section_description
-                    )
-                    section_content = llm.invoke(formatted_prompt)
-                else:
-                    # Standard LangChain approach
-                    section_prompt = ChatPromptTemplate.from_template(prompt_template)
-                    section_chain = section_prompt | llm
-                    section_response = section_chain.invoke({
-                        "context": context, 
-                        "question": section_description
-                    })
-                    section_content = section_response.content
+
+                section_content = invoke_llm(
+                    llm,
+                    prompt_template,
+                    {"context": context, "question": section_description}
+                )
                 
                 # Store the section with its content and sources
                 sections.append({
