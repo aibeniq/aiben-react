@@ -187,7 +187,7 @@ function LlmModels() {
 
     setIsValidating(true);
 
-    const promise = EmbeddingModelsService.validateEmbeddingModel({
+    const promise = LlmModelsService.validateLlmModel({
       requestBody: {
         model_id: modelId,
         provider: modelProvider

@@ -157,6 +157,52 @@ class Settings(BaseSettings):
     Based on the question-and-answer pairs above, does the plan follow policy?
     """
 
+    FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE: str = """
+    Here is a template of the fields that I want you to extract from this document: {template}
+    Here is the full text of a document: {document_text}
+    Fill out the template based on the fields you can find.
+    """
+
+    FORMCONNECT_HANDWRITTEN_PROMPT_TEMPLATE: str = """
+    Here is a template of the fields that I want you to extract from this image: {template}
+
+    I'm sending you an image with handwritten content.
+
+    For each field in the template, try to locate and extract the corresponding value from the image.
+    Pay special attention to handwritten text and ensure accuracy in your extraction.
+
+    Return your results as a JSON object matching the template structure.
+    """
+
+    FORMCONNECT_COMPARISON_PROMPT_TEMPLATE: str = """
+    I am going to show you information extracted from multiple documents:
+
+    {documents_str}
+
+    Please analyze all the documents and identify any fields that have different values across documents.
+
+    Create a markdown table with the following format:
+    1. First column should be titled "FIELD" and contain the field name
+    2. Each additional column should have the document name as header (e.g., "Document 1", "Document 2")
+    3. Include ONLY fields where there are discrepancies between documents
+
+    After the table, please:
+    1. For each discrepancy, suggest which value is most likely correct and why
+    2. Provide a summary of how consistent the documents are overall
+
+    Example format:
+    ```markdown
+    | FIELD | Document 1 | Document 2 | ... |
+    |-------|------------|------------|-----|
+    | Name  | John Smith | J. Smith   | ... |
+    | Date  | 2023-01-01 | 2023-01-15 | ... |
+    ```
+
+    ONLY return the Markdown table -- do NOT return any other text. 
+    Also, do NOT add tick marks like ``` and the label 'markdown': just give the actual markdown table content as raw text.
+    However, if there are no discrepancies, please state that all fields match across documents.
+    """
+
     REPLICATE_API_TOKEN: str | None = os.getenv("REPLICATE_API_TOKEN")
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:

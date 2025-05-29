@@ -1,10 +1,12 @@
 import replicate  
 import os
+from io import BytesIO
 from app.models import ModelProvider, LlmModel, User
 from langchain_openai import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
+from langchain_core.messages import HumanMessage
 from typing import Optional, Any, Dict
-from app.api.deps import SessionDep
+from app.api.deps import SessionDep, CurrentUser
 from sqlmodel import select
 from langchain_community.llms import Replicate  
 from langchain.schema import HumanMessage
@@ -201,3 +203,130 @@ def get_default_llm(session: SessionDep, current_user) -> Any:
         model_id="gpt-4o-mini",
         temperature=0.0
     )
+
+
+def invoke_llm(llm, prompt, variables=None):
+    """
+    Unified function to invoke either a ReplicateWrapper or LangChain LLM.
+    - llm: The LLM instance.
+    - prompt: Either a string (for Replicate) or a LangChain ChatPromptTemplate.
+    - variables: dict of variables for the prompt (for LangChain).
+    Returns the response content as a string.
+    """
+    # ReplicateWrapper: expects a formatted string prompt
+    if hasattr(llm, '__class__') and 'ReplicateWrapper' in llm.__class__.__name__:
+        if variables:
+            prompt_text = prompt.format(**variables)
+        else:
+            prompt_text = prompt
+        return llm.invoke(prompt_text)
+    else:
+        # LangChain: expects a ChatPromptTemplate and variables
+        if variables is None:
+            variables = {}
+        if hasattr(prompt, "from_template"):
+            # If prompt is a template, build the chain
+            section_prompt = prompt.from_template(prompt.template)
+            chain = section_prompt | llm
+            result = chain.invoke(variables)
+        elif hasattr(prompt, "format_prompt"):
+            # If prompt is already a ChatPromptTemplate
+            chain = prompt | llm
+            result = chain.invoke(variables)
+        elif isinstance(prompt, str):
+            # Create a proper chat message from the string
+            formatted_text = prompt.format(**variables)
+            result = llm.invoke([HumanMessage(content=formatted_text)])
+        else:
+            # If prompt is a plain string, just pass as-is
+            result = llm(prompt)
+        
+        # Extract content from message object if needed
+        if hasattr(result, 'content'):
+            return result.content
+        return result
+        
+
+def invoke_llm_with_image(
+    llm,
+    prompt,
+    variables=None,
+    image_file=None,      # <-- file-like object for Replicate
+    image_base64=None,    # <-- base64 string for OpenAI/LangChain
+    image_type="png"
+):
+    """
+    Unified function to invoke an LLM with an image (for multimodal models).
+    - llm: The LLM instance.
+    - prompt: String or ChatPromptTemplate.
+    - variables: dict for prompt formatting.
+    - image_file: file-like object (for Replicate).
+    - image_base64: base64-encoded image string (for OpenAI/LangChain).
+    - image_type: e.g., "png", "jpeg".
+    Returns the response content as a string.
+    """
+    if hasattr(llm, '__class__') and 'ReplicateWrapper' in llm.__class__.__name__:
+        print("Using ReplicateWrapper for multimodal LLM invocation")
+        
+        if variables:
+            prompt_text = prompt.format(**variables)
+        else:
+            prompt_text = prompt
+
+        # Ensure image_file is a BytesIO object
+        image_io = None
+        if image_file:
+            image_file.seek(0)
+            image_bytes = image_file.read()
+            image_io = BytesIO(image_bytes)
+
+        model_id = llm.model_id if llm.version else llm.owner_model
+        input_params = {
+            "image": image_io,
+            "prompt": prompt_text,
+            "temperature": llm.temperature,
+        }
+        for key, value in llm.kwargs.items():
+            if key not in ["system_prompt"]:
+                input_params[key] = value
+
+        import replicate
+        output = replicate.run(
+            model_id,
+            input=input_params
+        )
+        if isinstance(output, list):
+            return output[0] if len(output) == 1 else "".join(output)
+        return output
+    else:
+        # OpenAI/LangChain expects base64 image and message dicts
+        if variables is None:
+            variables = {}
+
+        # Format the prompt text
+        if hasattr(prompt, "format_prompt"):
+            prompt_obj = prompt.format_prompt(**variables)
+            text_content = prompt_obj.to_messages()[0].content
+        elif isinstance(prompt, str):
+            text_content = prompt.format(**variables)
+        else:
+            text_content = str(prompt)
+
+        messages = [
+            {
+                "type": "text",
+                "text": text_content
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/{image_type};base64,{image_base64}"
+                }
+            }
+        ]
+
+        if hasattr(llm, "__call__"):
+            response = llm(messages)
+            return getattr(response, "content", str(response))
+        else:
+            raise NotImplementedError("This LLM does not support image input.")

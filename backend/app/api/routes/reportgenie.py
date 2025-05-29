@@ -1,6 +1,5 @@
 import uuid
 from app.models import ReportGenieRequest, ReportGenieResponse, ReportGenieSection, ReportGenieOutline, Source, KnowledgeBase, EmbeddingModel, DocxRequest
-from app.api.routes.utils import invoke_llm
 from pathlib import Path
 import re
 import tempfile
@@ -18,7 +17,7 @@ from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
-from app.services.llms import get_default_llm
+from app.services.llms import get_default_llm, invoke_llm
 
 from sqlmodel import Session, select
 from fastapi import APIRouter, Depends, HTTPException
