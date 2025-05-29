@@ -47,6 +47,9 @@ class User(UserBase, table=True):
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
     knowledge_bases: list["KnowledgeBase"] = Relationship(back_populates="owner", cascade_delete=True)
+    #track the user's default models
+    default_llm: Optional[uuid.UUID] = Field(default=None, foreign_key="llmmodel.id")
+    default_embedding_model: Optional[uuid.UUID] = Field(default=None, foreign_key="embeddingmodel.id")
 
 
 # Properties to return via API, id is always required
@@ -285,7 +288,6 @@ class EmbeddingModel(SQLModel, table=True):
         sa_column=Column(ModelProviderType, nullable=False)
     )
     description: str = Field(default="")
-    is_default: bool = Field(default=False)
     owner_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
@@ -296,14 +298,12 @@ class EmbeddingModelCreate(SQLModel):
     model_id: str
     provider: ModelProvider = ModelProvider.HUGGINGFACE
     description: str = ""
-    is_default: bool = False
 
 class EmbeddingModelUpdate(SQLModel):
     name: Optional[str] = None
     model_id: Optional[str] = None
     provider: Optional[ModelProvider] = None
     description: Optional[str] = None
-    is_default: Optional[bool] = None
 
 class EmbeddingModelValidate(SQLModel):
     model_id: str
@@ -327,7 +327,6 @@ class LlmModel(SQLModel, table=True):
         sa_column=Column(ModelProviderType, nullable=False)
     )
     description: str = Field(default="")
-    is_default: bool = Field(default=False)
     owner_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
@@ -337,14 +336,12 @@ class LlmModelCreate(SQLModel):
     model_id: str
     provider: ModelProvider = ModelProvider.OPENAI
     description: str = ""
-    is_default: bool = False
 
 class LlmModelUpdate(SQLModel):
     name: Optional[str] = None
     model_id: Optional[str] = None
     provider: Optional[ModelProvider] = None
     description: Optional[str] = None
-    is_default: Optional[bool] = None
 
 class LlmModelPublic(LlmModel):
     pass

@@ -16,8 +16,9 @@ import {
   Accordion,
 } from "@chakra-ui/react"
 import useCustomToast from "@/hooks/useCustomToast"
+import { CancelablePromise } from "@/client/core/CancelablePromise"
 import SourceLink from "@/components/Common/SourceLink"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useDropzone } from "react-dropzone"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
@@ -31,6 +32,8 @@ const VeraDoc = () => {
 
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<any>(null);
   const [knowledgeBases, setKnowledgeBases] = useState<any[]>([]);
+
+  const ongoingRequest = useRef<CancelablePromise<any> | null>(null)
 
   const getDisplayFileName = (source: string): string => {
     if (!source) return "Unknown";
@@ -186,18 +189,23 @@ const VeraDoc = () => {
     fetchChecklists();
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (ongoingRequest.current) {
+        ongoingRequest.current.cancel()
+      }
+    }
+  }, [])
+
   // Add this mutation hook inside your VeraDoc component, before your handleRun function
   const mutation = useMutation({
     mutationFn: (data: {
-      questions: string;
-      knowledgeBaseId: string;
-      files: File[];
-      handwrittenFiles: File[];
-    }) => {
-      console.log("Now beginning RAG mutation...")
-      
-      // Call the API with the proper structure according to your SDK
-      return VeradocService.processRagChecklist({
+        questions: string;
+        knowledgeBaseId: string;
+        files: File[];
+        handwrittenFiles: File[];
+      }) => {
+      const promise = VeradocService.processRagChecklist({
         questions: data.questions,
         knowledgeBaseId: data.knowledgeBaseId,
         formData: {
@@ -205,6 +213,8 @@ const VeraDoc = () => {
           handwritten_files: data.handwrittenFiles,
         },
       })
+      ongoingRequest.current = promise
+      return promise
     },
     onSuccess: (data) => {
       console.log("Response data:", data)
@@ -219,6 +229,10 @@ const VeraDoc = () => {
       console.log("RAG mutation unsuccessful!")
       setResults(`Error: ${error.message}`)
     },
+    onSettled: () => {
+      ongoingRequest.current = null
+      setLoading(false)
+    }
   })
 
   const addFile = (file: File) => {
