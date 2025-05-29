@@ -1,6 +1,6 @@
 import replicate  
 import os
-from app.models import ModelProvider, LlmModel
+from app.models import ModelProvider, LlmModel, User
 from langchain_openai import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
 from typing import Optional, Any, Dict
@@ -168,29 +168,36 @@ def create_llm(provider: ModelProvider, model_id: str,
         raise ValueError(f"Unsupported LLM provider: {provider}")
     
 
-def get_default_llm(session: SessionDep):
-    """Get the current default LLM from the database."""
-    # Try to get the default model
-    default_model = session.exec(
+def get_default_llm(session: SessionDep, current_user) -> Any:
+    """
+    Get the user's default LLM instance, or fall back to a system default.
+    """
+    user = session.get(User, current_user.id)
+    if user and user.default_llm:
+        model = session.get(LlmModel, user.default_llm)
+        if model:
+            print(f"User default LLM model found: {model.name} ({model.model_id}, provider: {model.provider})")
+            return create_llm(
+                provider=model.provider,
+                model_id=model.model_id,
+                temperature=0.0
+            )
+    # Fallback to system default (first system model)
+    system_default = session.exec(
         select(LlmModel)
-        .where(LlmModel.is_default == True)
+        .where(LlmModel.owner_id.is_(None))
     ).first()
-
-    if default_model:
-        print(f"Loading default LLM model: {default_model.name} ({default_model.model_id}, provider: {default_model.provider})")
-    
-    # If no default model is found, fallback to a hardcoded value
-    if not default_model:
+    if system_default:
+        print(f"System default LLM model found: {system_default.name} ({system_default.model_id}, provider: {system_default.provider})")
         return create_llm(
-            provider=ModelProvider.OPENAI,
-            model_id="gpt-4o-mini",
+            provider=system_default.provider,
+            model_id=system_default.model_id,
             temperature=0.0
         )
-    
-    print(f"Default LLM model found: {default_model.name} ({default_model.model_id}, provider: {default_model.provider})")
-    
+    # Fallback to hardcoded value
+    print("No default LLM found, using hardcoded OpenAI GPT-4o Mini.")
     return create_llm(
-        provider=default_model.provider,
-        model_id=default_model.model_id,
+        provider=ModelProvider.OPENAI,
+        model_id="gpt-4o-mini",
         temperature=0.0
     )

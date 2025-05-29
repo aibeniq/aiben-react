@@ -16,7 +16,8 @@ from app.models import (
     LlmModelsPublic,
     LlmModelsValidate,
     ModelProvider,
-    Message
+    Message,
+    User
 )
 from datetime import datetime
 
@@ -36,28 +37,25 @@ def initialize_default_llm_models(session: SessionDep):
     if existing_count > 0:
         return
     
-    # Add default models
+    # Add system models (no is_default flag)
     default_models = [
         {
             "name": "GPT-4o Mini",
             "model_id": "gpt-4o-mini",
             "provider": ModelProvider.OPENAI,
             "description": "OpenAI's GPT-4o Mini model, good balance of performance and speed.",
-            "is_default": True
         },
         {
             "name": "Llama 3 8B",
             "model_id": "llama3",
             "provider": ModelProvider.OLLAMA,
             "description": "Local Llama 3 8B model running via Ollama.",
-            "is_default": False
         },
         {
             "name": "Mistral 7B",
             "model_id": "mistral",
             "provider": ModelProvider.OLLAMA,
             "description": "Local Mistral 7B model running via Ollama.",
-            "is_default": False
         }
     ]
     
@@ -67,7 +65,7 @@ def initialize_default_llm_models(session: SessionDep):
             model_id=model_data["model_id"],
             provider=model_data["provider"],
             description=model_data["description"],
-            is_default=model_data["is_default"]
+            # No is_default field!
         )
         session.add(model)
     
@@ -95,23 +93,22 @@ def get_llm_models(
     return LlmModelsPublic(data=models)
 
 @router.get("/default", response_model=LlmModelPublic)
-def get_default_llm_model(session: SessionDep) -> LlmModelPublic:
+def get_default_llm_model(session: SessionDep, current_user: CurrentUser) -> LlmModelPublic:
     """
-    Get the default LLM.
+    Get the user's default LLM model (database record).
     """
-    # Initialize default models if none exist
-    initialize_default_llm_models(session)
-    
+    user = session.get(User, current_user.id)
+    if user and user.default_llm:
+        model = session.get(LlmModel, user.default_llm)
+        if model:
+            return model
+    # Fallback to system default (first system model)
     model = session.exec(
         select(LlmModel)
-        .where(LlmModel.is_default == True)
+        .where(LlmModel.owner_id.is_(None))
     ).first()
-    
     if not model:
         raise HTTPException(status_code=404, detail="No default LLM found")
-    
-    print(f"Loading default LLM: {model.name} ({model.model_id}, provider: {model.provider})")
-    
     return model
 
 @router.post("/", response_model=LlmModelPublic)
@@ -273,26 +270,11 @@ def set_default_llm_model(
             detail="Not authorized to modify this model"
         )
     
-    # Get all models (both system and user models)
-    all_models = session.exec(
-        select(LlmModel)
-        .where((LlmModel.owner_id.is_(None)) | 
-               (LlmModel.owner_id == current_user.id))
-    ).all()
-    
-    # Unset all as default
-    for m in all_models:
-        if m.is_default:
-            m.is_default = False
-            m.date_modified = datetime.utcnow()
-            session.add(m)
-    
-    # Set the selected model as default
-    model.is_default = True
-    model.date_modified = datetime.utcnow()
-    session.add(model)
-    
+    user = session.get(User, current_user.id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.default_llm = model.id
+    session.add(user)
     session.commit()
-    session.refresh(model)
-    
+    session.refresh(user)
     return model

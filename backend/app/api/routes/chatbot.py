@@ -4,7 +4,7 @@ from app.services.embeddings import load_embeddings_model
 from app.services.llms import create_llm, get_default_llm
 from app.services.knowledgebases import get_embedding_model
 from app.api.deps import CurrentUser, SessionDep
-from app.models import KnowledgeBase, EmbeddingModel, LlmModel, Source
+from app.models import KnowledgeBase, EmbeddingModel, LlmModel, Source, User
 from sqlmodel import Session, select
 from langchain.chains import RetrievalQA
 from langchain.document_loaders import TextLoader, PyPDFLoader
@@ -200,16 +200,8 @@ async def query_knowledge_base(
             else:
                 raise HTTPException(status_code=400, detail="Knowledge base has no vector database data")
             
-            # 3. Load embedding model and vector database
-            if use_default_models:
-                embedding_model = session.exec(
-                    select(EmbeddingModel).where(EmbeddingModel.is_default == True)
-                ).first()
-                if not embedding_model:
-                    raise HTTPException(status_code=404, detail="No default embedding model found")
-                model_id = embedding_model.model_id
-                provider = embedding_model.provider
-            elif kb.embedding_model_id:
+            # 3. Use knowledge base's embedding model or fallback to default
+            if kb.embedding_model_id:
                 # Use knowledge base's specific model
                 embedding_model = session.get(EmbeddingModel, kb.embedding_model_id)
                 if embedding_model:
@@ -220,6 +212,26 @@ async def query_knowledge_base(
                     embedding_info = get_embedding_model(session)
                     model_id = embedding_info["model_id"]
                     provider = embedding_info["provider"]
+            elif use_default_models:
+                # Get the user's default embedding model
+                user = session.get(User, current_user.id)
+                if user and user.default_embedding_model:
+                    embedding_model = session.get(EmbeddingModel, user.default_embedding_model)
+                    if embedding_model:
+                        model_id = embedding_model.model_id
+                        provider = embedding_model.provider
+                    else:
+                        raise HTTPException(status_code=404, detail="Default embedding model not found for user")
+                else:
+                    # Fallback to system default (first system model)
+                    embedding_model = session.exec(
+                        select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
+                    ).first()
+                    if embedding_model:
+                        model_id = embedding_model.model_id
+                        provider = embedding_model.provider
+                    else:
+                        raise HTTPException(status_code=404, detail="No default embedding model found")
             else:
                 # Fallback
                 embedding_info = get_embedding_model(session)
@@ -234,14 +246,14 @@ async def query_knowledge_base(
             
             # 4. Get the LLM
             if use_default_models:
-                llm = get_default_llm(session)
+                llm = get_default_llm(session, current_user)
                 print("Default LLM model retrieved")
             else:
                 llm_model = session.get(LlmModel, kb.llm_model_id)
                 if llm_model:
                     llm = create_llm(llm_model.provider, llm_model.model_id, temperature=0.0)
                 else:
-                    llm = get_default_llm(session)
+                    llm = get_default_llm(session, current_user)
             
             # Cache the resources
             session_cache.set(session_id, {
@@ -381,6 +393,7 @@ async def query_knowledge_base(
 @router.post("/document")
 async def query_document(
     session: SessionDep,
+    current_user: CurrentUser,
     question: str = None,
     chat_history: str = None,
     use_default_models: bool = False,
@@ -417,20 +430,31 @@ async def query_document(
         # If no cached retriever or this is a new document, set up everything
         if not retriever:
             print("Setting up new resources for document query")
-            # Get the default models
-            embedding_model = session.exec(
-                select(EmbeddingModel).where(EmbeddingModel.is_default == True)
-            ).first()
+            # Get the user's default models
+            user = session.get(User, current_user.id)
+            if user and user.default_embedding_model:
+                embedding_model = session.get(EmbeddingModel, user.default_embedding_model)
+                if not embedding_model:
+                    raise HTTPException(status_code=404, detail="Default embedding model not found for user")
+            else:
+                # Fallback to system default (first system model)
+                embedding_model = session.exec(
+                    select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
+                ).first()
+                if not embedding_model:
+                    raise HTTPException(status_code=404, detail="No default embedding model found")
             
-            if not embedding_model:
-                raise HTTPException(status_code=404, detail="No default embedding model found")
-            
-            llm_model = session.exec(
-                select(LlmModel).where(LlmModel.is_default == True)
-            ).first()
-            
-            if not llm_model:
-                raise HTTPException(status_code=404, detail="No default LLM model found")
+            if user and user.default_llm:
+                llm_model = session.get(LlmModel, user.default_llm)
+                if not llm_model:
+                    raise HTTPException(status_code=404, detail="Default LLM model not found for user")
+            else:
+                # Fallback to system default (first system model)
+                llm_model = session.exec(
+                    select(LlmModel).where(LlmModel.owner_id.is_(None))
+                ).first()
+                if not llm_model:
+                    raise HTTPException(status_code=404, detail="No default LLM model found")
             
             # Save uploaded file temporarily
             with tempfile.NamedTemporaryFile(delete=False) as temp_file:
@@ -643,7 +667,7 @@ async def query_text(
         if not llm:
             print("Setting up new LLM for text query")
             # Get the default LLM model
-            llm = get_default_llm(session)
+            llm = get_default_llm(session, current_user)
             print("Default LLM model retrieved")
             # Cache the LLM
             session_cache.set(session_id, {

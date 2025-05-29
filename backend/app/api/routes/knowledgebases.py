@@ -35,13 +35,15 @@ router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
 
 def load_correct_embeddings_model(
     session: SessionDep,
+    current_user: Any,  # Pass the current user object here
     embedding_model_id: Optional[uuid.UUID] = None
 ) -> Any:
     """
-    Load the correct embeddings model based on the provided embedding_model_id or default model.
+    Load the correct embeddings model based on the provided embedding_model_id or user's default model.
 
     Args:
         session (SessionDep): The database session.
+        current_user: The current user object.
         embedding_model_id (Optional[uuid.UUID]): The ID of the embedding model to load.
 
     Returns:
@@ -61,22 +63,35 @@ def load_correct_embeddings_model(
         model_id = model.model_id
         provider = model.provider
     else:
-        # Get the default embedding model
-        default_model = session.exec(
-            select(EmbeddingModel)
-            .where(EmbeddingModel.is_default == True)
-        ).first()
-
-        print("Default embedding model:", default_model)
-
-        if default_model:
-            model_id = default_model.model_id
-            provider = default_model.provider
+        # Try to get the user's default embedding model
+        user = session.get(User, current_user.id)
+        if user and user.default_embedding_model:
+            model = session.get(EmbeddingModel, user.default_embedding_model)
+            if model:
+                print("Using user's default embedding model:", model)
+                model_id = model.model_id
+                provider = model.provider
+            else:
+                model_id = None
+                provider = None
         else:
-            print("No default embedding model found, using hardcoded value.")
-            # Fallback to hardcoded value if no default model
-            model_id = "all-MiniLM-L6-v2"
-            provider = "huggingface"
+            model_id = None
+            provider = None
+
+        # Fallback to system default if user has no default
+        if not model_id or not provider:
+            default_model = session.exec(
+                select(EmbeddingModel)
+                .where(EmbeddingModel.owner_id.is_(None))
+            ).first()
+            print("System default embedding model:", default_model)
+            if default_model:
+                model_id = default_model.model_id
+                provider = default_model.provider
+            else:
+                print("No default embedding model found, using hardcoded value.")
+                model_id = "all-MiniLM-L6-v2"
+                provider = "huggingface"
 
     # Initialize embeddings with the selected model
     try:
@@ -358,6 +373,7 @@ def create_knowledge_base(
 
     embeddings, model_id, provider = load_correct_embeddings_model(
         session=session,
+        current_user=current_user,  # Pass the current user to load the correct model
         embedding_model_id=knowledge_base_in.embedding_model_id
     )
 
@@ -469,6 +485,7 @@ def update_knowledge_base(
             # Load the vector database with the SAME model used to create the knowledge base
             embeddings, model_id, provider = load_correct_embeddings_model(
                 session=session,
+                current_user=current_user,  # Pass the current
                 embedding_model_id=knowledge_base_in.embedding_model_id
             )
             
