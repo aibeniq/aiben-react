@@ -1,7 +1,8 @@
 import uuid
 from app.models import FormConnectRequest, FormConnectResponse, FormConnectForm, ModelProvider, LlmModel
-from app.services.llms import create_llm, get_default_llm
+from app.services.llms import create_llm, get_default_llm, invoke_llm, invoke_llm_with_image
 from app.api.deps import CurrentUser, SessionDep
+from app.core.config import settings
 
 from sqlmodel import Session, select
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
@@ -60,71 +61,20 @@ async def extract_fields_from_digitized_document(file: UploadFile, template: Dic
         return {k: f"Could not extract: Binary file {file.filename}" for k in template.keys()}
 
     # Create the prompt
-    prompt_text = f"""Here is a template of the fields that I want you to extract from this document: {template}
-    Here is the full text of a document: {text}
-    Fill out the template based on the fields you can find."""
+    prompt_template = settings.FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE
+    variables = {"template": template, "document_text": text}
+    response = invoke_llm(llm, prompt_template, variables)
 
-    # Check if the model is a ReplicateWrapper or LangChain LLM
-    if hasattr(llm, '__class__') and 'ReplicateWrapper' in llm.__class__.__name__:
-        print("Using Replicate model for document extraction")
-        try:
-            # Direct invoke for Replicate models
-            response_text = llm.invoke(prompt_text)
-            
-            # Try to parse JSON from the response
-            try:
-                import json
-                # Try to find JSON in the response
-                import re
-                json_match = re.search(r'```json\s*([\s\S]*?)\s*```', response_text)
-                if json_match:
-                    content_dict = json.loads(json_match.group(1))
-                    return content_dict
-                
-                # If no JSON code block, try direct parsing
-                content_dict = json.loads(response_text)
-                return content_dict
-            except (json.JSONDecodeError, AttributeError):
-                # If parsing fails, return raw content
-                return {"raw_content": str(response_text)}
-                
-        except Exception as e:
-            print(f"Error extracting with Replicate model: {e}")
-            import traceback
-            traceback.print_exc()
-            return {k: f"Error: {str(e)}" for k in template.keys()}
-    else:
-        # Handle LangChain-compatible LLM
-        print("Using LangChain model for document extraction")
-        prompt_template = ChatPromptTemplate.from_template(
-            """Here is a template of the fields that I want you to extract from this document: {template}
-            Here is the full text of a document: {document_text}
-            Fill out the template based on the fields you can find."""
-        )
-        
-        try:
-            prompt = prompt_template.format_prompt(template=template, document_text=text)
-            response = llm(prompt.to_messages())
-            
-            # Try to parse the response as JSON
-            try:
-                import json
-                # The output might already be a dictionary
-                if isinstance(response.content, dict):
-                    return response.content
-                # Otherwise, try to parse it as JSON
-                content_dict = json.loads(response.content)
-                return content_dict
-            except (json.JSONDecodeError, AttributeError):
-                # If JSON parsing fails or response.content is not string-like
-                # Return the content wrapped in a dictionary
-                return {"raw_content": str(response.content)}
-        except Exception as e:
-            print(f"Error extracting with LangChain model: {e}")
-            import traceback
-            traceback.print_exc()
-            return {k: f"Error: {str(e)}" for k in template.keys()}
-        
+    # Try to parse JSON from the response
+    try:
+        import json
+        # The output might already be a dictionary
+        if isinstance(response, dict):
+            return response
+        content_dict = json.loads(response)
+        return content_dict
+    except Exception:
+        return {"raw_content": str(response)}
 
 async def extract_fields_from_handwritten_document(file: UploadFile, template: Dict[str, str], llm) -> Dict[str, str]:
     """
@@ -140,82 +90,35 @@ async def extract_fields_from_handwritten_document(file: UploadFile, template: D
     # Check if the file is an image
     if file_ext in image_extensions:
         try:
-            # For image files, we can directly encode to base64
             img_base64 = base64.b64encode(content).decode('utf-8')
-            
-            # If using Replicate, we need to handle it differently
-            if hasattr(llm, '__class__') and 'ReplicateWrapper' in llm.__class__.__name__:
-                print("WARNING: Replicate models may not support image processing in the same way")
-                print("Using Replicate model for image extraction - text-only fallback")
-                
-                # Fall back to text-only prompt without the image
-                prompt_text = f"""Here is a template of the fields that I want you to extract: {template}
-                
-                NOTE: This was supposed to be an image file with handwritten content, but I'm using a text-only model.
-                If you cannot process images, please respond with 'Cannot process image content'."""
-                
-                try:
-                    response_text = llm.invoke(prompt_text)
-                    return {"raw_content": str(response_text)}
-                except Exception as e:
-                    print(f"Error with Replicate image extraction: {e}")
-                    return {k: "Cannot process image with this model" for k in template.keys()}
-            else:
-                # For LangChain models that support images
-                print("Using LangChain model for image extraction")
-                # Create a prompt for the image
-                prompt_template = ChatPromptTemplate.from_template(
-                    """Here is a template of the fields that I want you to extract from this image: {template}
-                    
-                    I'm sending you an image with handwritten content.
-                    
-                    For each field in the template, try to locate and extract the corresponding value from the image.
-                    Pay special attention to handwritten text and ensure accuracy in your extraction.
-                    
-                    Return your results as a JSON object matching the template structure.
-                    """
-                )
-                
-                # Format the prompt with the template
-                prompt = prompt_template.format_prompt(template=template)
-                
-                # Create a list of messages with text and image
-                messages = prompt.to_messages()
-                
-                # Add the image to the message content
-                if isinstance(messages[0].content, str):
-                    # Convert to multimodal format
-                    content_parts = [
-                        {"type": "text", "text": messages[0].content},
-                        {
-                            "type": "image_url", 
-                            "image_url": {
-                                "url": f"data:image/{file_ext[1:]};base64,{img_base64}"
-                            }
-                        }
-                    ]
-                    
-                    messages[0].content = content_parts
-                
-                # Call the LLM with image capability
-                response = llm(messages)
-                
-                # Parse response as JSON
-                try:
-                    import json
-                    if isinstance(response.content, dict):
-                        return response.content
-                    content_dict = json.loads(response.content)
-                    return content_dict
-                except (json.JSONDecodeError, AttributeError):
-                    return {"raw_content": str(response.content)}
+            prompt_template = settings.FORMCONNECT_HANDWRITTEN_PROMPT_TEMPLATE
+            variables = {"template": template}
+
+            response = invoke_llm_with_image(
+                llm,
+                prompt_template,
+                variables=variables,
+                image_file=file.file,  # <-- file-like object for Replicate
+                image_base64=img_base64,  # <-- base64 string for OpenAI/LangChain
+                image_type=file_ext[1:] if file_ext.startswith('.') else file_ext
+            )
+
+            # Try to parse JSON from the response
+            try:
+                import json
+                if isinstance(response, dict):
+                    return response
+                content_dict = json.loads(response)
+                return content_dict
+            except Exception:
+                return {"raw_content": str(response)}
         except Exception as e:
-            # If image processing fails, return an error
             return {k: f"Error processing image: {str(e)}" for k in template.keys()}
-    
-    # For non-image files or if using Replicate, fall back to text-based extraction
-    await file.seek(0)  # Reset file position
+
+    # Fallback for non-image files
+    await file.seek(0)
     return await extract_fields_from_digitized_document(file, template, llm)
+
 
 async def compare_multiple_documents(documents: List[Dict[str, str]], file_names: List[str], llm) -> str:
     """
@@ -231,61 +134,10 @@ async def compare_multiple_documents(documents: List[Dict[str, str]], file_names
     print("documents_str for comparison:", documents_str[:500])  # Print first 500 chars for debugging
     
     # Create the prompt for multi-document comparison
-    prompt_text = f"""I am going to show you information extracted from multiple documents:
-    
-    {documents_str}
-    
-    Please analyze all the documents and identify any fields that have different values across documents.
-    
-    Create a markdown table with the following format:
-    1. First column should be titled "FIELD" and contain the field name
-    2. Each additional column should have the document name as header (e.g., "Document 1", "Document 2")
-    3. Include ONLY fields where there are discrepancies between documents
-    
-    After the table, please:
-    1. For each discrepancy, suggest which value is most likely correct and why
-    2. Provide a summary of how consistent the documents are overall
-    
-    Example format:
-    ```markdown
-    | FIELD | Document 1 | Document 2 | ... |
-    |-------|------------|------------|-----|
-    | Name  | John Smith | J. Smith   | ... |
-    | Date  | 2023-01-01 | 2023-01-15 | ... |
-    ```
-    
-    ONLY return the Markdown table -- do NOT return any other text. 
-    Also, do NOT add tick marks like ``` and the label 'markdown': just give the actual markdown table content as raw text.
-    However, if there are no discrepancies, please state that all fields match across documents.
-    """
-
-    # Check if the model is a ReplicateWrapper or LangChain LLM
-    if hasattr(llm, '__class__') and 'ReplicateWrapper' in llm.__class__.__name__:
-        print("Using Replicate model for document comparison")
-        try:
-            # Direct invoke for Replicate models
-            response_text = llm.invoke(prompt_text)
-            print("Comparison response from Replicate:", response_text[:100])
-            return response_text
-        except Exception as e:
-            print(f"Error comparing with Replicate model: {e}")
-            import traceback
-            traceback.print_exc()
-            return f"Error comparing documents: {str(e)}"
-    else:
-        # Handle LangChain-compatible LLM
-        print("Using LangChain model for document comparison")
-        try:
-            prompt_template = ChatPromptTemplate.from_template(prompt_text)
-            prompt = prompt_template.format_prompt(documents_str=documents_str)
-            response = llm(prompt.to_messages())
-            print("Comparison response from LangChain:", response.content[:100])
-            return response.content
-        except Exception as e:
-            print(f"Error comparing with LangChain model: {e}")
-            import traceback
-            traceback.print_exc()
-            return f"Error comparing documents: {str(e)}"
+    prompt_template = settings.FORMCONNECT_COMPARISON_PROMPT_TEMPLATE
+    variables = {"documents_str": documents_str}
+    response = invoke_llm(llm, prompt_template, variables)
+    return response
 
 
 @router.post("/process", response_model=FormConnectResponse)
