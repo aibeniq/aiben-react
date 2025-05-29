@@ -17,7 +17,8 @@ from app.models import (
     EmbeddingModelsPublic,
     EmbeddingModelValidate,
     ModelProvider,
-    Message
+    Message,
+    User
 )
 from datetime import datetime
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -32,35 +33,31 @@ def initialize_default_models(session: SessionDep):
     if existing_count > 0:
         return
     
-    # Add default models
+    # Add system models (no is_default flag)
     default_models = [
         {
             "name": "MiniLM-L6-v2",
             "model_id": "all-MiniLM-L6-v2",
-            "provider": ModelProvider.HUGGINGFACE,  # Specify provider explicitly
+            "provider": ModelProvider.HUGGINGFACE,
             "description": "A compact and efficient embedding model, good balance of performance and speed.",
-            "is_default": True
         },
         {
             "name": "MPNet Base v2", 
             "model_id": "all-mpnet-base-v2",
-            "provider": ModelProvider.HUGGINGFACE,  # Specify provider explicitly
+            "provider": ModelProvider.HUGGINGFACE,
             "description": "Higher quality embeddings, but slower and larger than MiniLM.",
-            "is_default": False
         },
         {
             "name": "MiniLM-L12-v2",
             "model_id": "all-MiniLM-L12-v2", 
-            "provider": ModelProvider.HUGGINGFACE,  # Specify provider explicitly
+            "provider": ModelProvider.HUGGINGFACE,
             "description": "Larger version of MiniLM with improved performance.",
-            "is_default": False
         },
         {
             "name": "Ollama - nomic-embed-text",
             "model_id": "nomic-embed-text",
             "provider": ModelProvider.OLLAMA,
             "description": "A local embedding model running via Ollama.",
-            "is_default": False
         }
     ]
     
@@ -70,7 +67,7 @@ def initialize_default_models(session: SessionDep):
             model_id=model_data["model_id"],
             provider=model_data["provider"],
             description=model_data["description"],
-            is_default=model_data["is_default"]
+            # No is_default field!
         )
         session.add(model)
     
@@ -107,6 +104,37 @@ def get_embedding_models(
     
     return EmbeddingModelsPublic(data=models, count=count)
 
+
+
+@router.get("/default", response_model=EmbeddingModelPublic)
+def get_default_embedding_model(
+    session: SessionDep,
+    current_user: CurrentUser
+) -> EmbeddingModelPublic:
+    """
+    Get the user's default embedding model (or system default if not set).
+    """
+    # Initialize default models if none exist
+    initialize_default_models(session)
+
+    # Try to get the user's default embedding model
+    user = session.get(User, current_user.id)
+    if user and user.default_embedding_model:
+        print("Default embedding model found for this user!")
+        model = session.get(EmbeddingModel, user.default_embedding_model)
+        if model:
+            return model
+
+    # Fallback to system default (first system model)
+    model = session.exec(
+        select(EmbeddingModel)
+        .where(EmbeddingModel.owner_id.is_(None))
+    ).first()
+    if not model:
+        raise HTTPException(status_code=404, detail="No default embedding model found")
+    return model
+
+
 @router.get("/{model_id}", response_model=EmbeddingModelPublic)
 def get_embedding_model(
     model_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
@@ -121,24 +149,6 @@ def get_embedding_model(
     # Check if the model is system-owned or owned by the current user
     if model.owner_id is not None and model.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to access this model")
-    
-    return model
-
-@router.get("/default", response_model=EmbeddingModelPublic)
-def get_default_embedding_model(session: SessionDep) -> EmbeddingModelPublic:
-    """
-    Get the default embedding model.
-    """
-    # Initialize default models if none exist
-    initialize_default_models(session)
-    
-    model = session.exec(
-        select(EmbeddingModel)
-        .where(EmbeddingModel.is_default == True)
-    ).first()
-    
-    if not model:
-        raise HTTPException(status_code=404, detail="No default embedding model found")
     
     return model
 
@@ -214,20 +224,6 @@ def create_embedding_model(
             detail=f"Invalid {model_in.provider} model ID: {str(e)}"
         )
     
-    # If this is set as default, unset any previous default models owned by the user
-    if model_in.is_default:
-        previous_defaults = session.exec(
-            select(EmbeddingModel)
-            .where(
-                EmbeddingModel.is_default == True,
-                EmbeddingModel.owner_id == current_user.id
-            )
-        ).all()
-        
-        for model in previous_defaults:
-            model.is_default = False
-            session.add(model)
-    
     # Create the new model
     model = EmbeddingModel(
         **model_in.model_dump(),
@@ -274,21 +270,6 @@ def update_embedding_model(
                 detail=f"Invalid HuggingFace model ID: {str(e)}"
             )
     
-    # If setting as default, unset previous defaults
-    if update_data.get("is_default", False):
-        previous_defaults = session.exec(
-            select(EmbeddingModel)
-            .where(
-                EmbeddingModel.is_default == True,
-                EmbeddingModel.owner_id == current_user.id,
-                EmbeddingModel.id != model_id
-            )
-        ).all()
-        
-        for prev_model in previous_defaults:
-            prev_model.is_default = False
-            session.add(prev_model)
-    
     # Update the model
     for key, value in update_data.items():
         setattr(model, key, value)
@@ -329,7 +310,7 @@ def set_default_embedding_model(
     model_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
 ) -> EmbeddingModelPublic:
     """
-    Set an embedding model as the default.
+    Set an embedding model as the default for the current user.
     """
     model = session.get(EmbeddingModel, model_id)
     if not model:
@@ -342,27 +323,14 @@ def set_default_embedding_model(
             detail="Not authorized to modify this model"
         )
     
-    # Get all models (both system and user models)
-    all_models = session.exec(
-        select(EmbeddingModel)
-        .where((EmbeddingModel.owner_id.is_(None)) | 
-               (EmbeddingModel.owner_id == current_user.id))
-    ).all()
-    
-    # Unset all as default
-    for m in all_models:
-        if m.is_default:
-            m.is_default = False
-            m.date_modified = datetime.utcnow()
-            session.add(m)
-    
-    # Set the selected model as default
-    model.is_default = True
-    model.date_modified = datetime.utcnow()
-    session.add(model)
-    
+    # Set the user's default embedding model
+    user = session.get(User, current_user.id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.default_embedding_model = model.id
+    session.add(user)
     session.commit()
-    session.refresh(model)
+    session.refresh(user)
     
     return model
 

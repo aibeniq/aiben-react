@@ -62,6 +62,11 @@ function LlmModels() {
 
   const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(true);
 
+  const { data: defaultModel } = useQuery({
+    queryKey: ["defaultLlmModel"],
+    queryFn: () => LlmModelsService.getDefaultLlmModel(),
+  })
+
   // Add this effect to check API key when provider changes
   useEffect(() => {
   if (modelProvider === "openai") {
@@ -110,6 +115,7 @@ function LlmModels() {
       resetForm()
       setIsOpen(false)
       queryClient.invalidateQueries({ queryKey: ["llmModels"] })
+      queryClient.invalidateQueries({ queryKey: ["defaultLlmModel"] })
     },
     onError: (error) => {
       showErrorToast(`Error adding LLM: ${error.message}`)
@@ -121,11 +127,12 @@ function LlmModels() {
     mutationFn: (modelId: string) =>
       LlmModelsService.setDefaultLlmModel({ modelId }),
     onSuccess: () => {
-      showSuccessToast("Default LLM updated successfully")
+      showSuccessToast("Default model updated successfully")
       queryClient.invalidateQueries({ queryKey: ["llmModels"] })
+      queryClient.invalidateQueries({ queryKey: ["defaultLlmModel"] }) // <--- add this
     },
     onError: (error) => {
-      showErrorToast(`Error updating default LLM: ${error.message}`)
+      showErrorToast(`Error updating default model: ${error.message}`)
     },
   })
   
@@ -188,13 +195,6 @@ function LlmModels() {
     });
     
     currentValidationRef.current = promise;
-
-    //validateModelMutation.mutate({
-    //  requestBody: {
-    //  model_id: modelId,
-    //  provider: modelProvider
-    //}
-    //});
 
     try {
       await promise;
@@ -344,7 +344,7 @@ function LlmModels() {
                 <Table.Cell>{model.provider}</Table.Cell>
                 <Table.Cell>{model.description}</Table.Cell>
                 <Table.Cell>
-                  {model.is_default ? (
+                  {defaultModel?.id === model.id ? (
                     <Badge colorPalette="green" size="sm">Default</Badge>
                   ) : (
                     <Badge colorPalette="gray" size="sm">Available</Badge>
@@ -352,7 +352,7 @@ function LlmModels() {
                 </Table.Cell>
                 <Table.Cell>
                   <HStack spacing={2}>
-                    {!model.is_default && (
+                    {defaultModel?.id !== model.id && (
                       <Button
                         size="xs"
                         colorPalette="blue"
@@ -522,6 +522,11 @@ function EmbeddingModels() {
 
   const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(true);
 
+  const { data: defaultModel } = useQuery({
+    queryKey: ["defaultEmbeddingModel"],
+    queryFn: () => EmbeddingModelsService.getDefaultEmbeddingModel(),
+  })
+
   // Add this effect to check API key when provider changes
   useEffect(() => {
     if (modelProvider === "openai") {
@@ -614,6 +619,7 @@ function EmbeddingModels() {
     onSuccess: () => {
       showSuccessToast("Default model updated successfully")
       queryClient.invalidateQueries({ queryKey: ["embeddingModels"] })
+      queryClient.invalidateQueries({ queryKey: ["defaultEmbeddingModel"] })
     },
     onError: (error) => {
       showErrorToast(`Error updating default model: ${error.message}`)
@@ -765,7 +771,7 @@ function EmbeddingModels() {
                 </Table.Cell>
                 <Table.Cell>{model.description}</Table.Cell>
                 <Table.Cell>
-                  {model.is_default ? (
+                  {defaultModel?.id === model.id ? (
                         <Badge colorPalette="green" size="sm">Default</Badge>
                     ) : (
                         <Badge colorPalette="gray" size="sm">Available</Badge>
@@ -773,7 +779,7 @@ function EmbeddingModels() {
                 </Table.Cell>
                 <Table.Cell>
                   <HStack spacing={2}>
-                    {!model.is_default && (
+                    {defaultModel?.id !== model.id && (
                       <Button
                         size="xs"
                         colorPalette="blue"

@@ -144,7 +144,7 @@ async def process_rag_checklist(
             #llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
             print("Now loading default LLM for session with following info:")
             print("Session:", session)
-            llm = get_default_llm(session)
+            llm = get_default_llm(session, current_user)
             print("LLM successfully loaded.")
             
             # 5. Define the prompts for the different stages

@@ -125,43 +125,6 @@ async def extract_fields_from_digitized_document(file: UploadFile, template: Dic
             traceback.print_exc()
             return {k: f"Error: {str(e)}" for k in template.keys()}
         
-    """
-    Extract fields from a document using the LLM.
-    """
-    # Read the file content
-    content = await file.read()
-    
-    try:
-        text = content.decode("utf-8")  # Try to decode as UTF-8
-    except UnicodeDecodeError:
-        # If it's not a text file, we could handle binary files differently
-        # For now, just return an error message in the template
-        return {k: f"Could not extract: Binary file {file.filename}" for k in template.keys()}
-
-    # Create the prompt
-    prompt_template = ChatPromptTemplate.from_template(
-        """Here is a template of the fields that I want you to extract from this document: {template}
-        Here is the full text of a document: {document_text}
-        Fill out the template based on the fields you can find."""
-    )
-    prompt = prompt_template.format_prompt(template=template, document_text=text)
-
-    # Call the LLM
-    response = llm(prompt.to_messages())
-    
-    # Try to parse the response as JSON
-    try:
-        import json
-        # The output might already be a dictionary
-        if isinstance(response.content, dict):
-            return response.content
-        # Otherwise, try to parse it as JSON
-        content_dict = json.loads(response.content)
-        return content_dict
-    except (json.JSONDecodeError, AttributeError):
-        # If JSON parsing fails or response.content is not string-like
-        # Return the content wrapped in a dictionary
-        return {"raw_content": str(response.content)}
 
 async def extract_fields_from_handwritten_document(file: UploadFile, template: Dict[str, str], llm) -> Dict[str, str]:
     """
@@ -261,7 +224,11 @@ async def compare_multiple_documents(documents: List[Dict[str, str]], file_names
     # Create a combined representation of all documents
     documents_str = ""
     for i, (doc, name) in enumerate(zip(documents, file_names)):
-        documents_str += f"Document {i+1} ({name}): {doc}\n\n"
+        # Convert dict to string, escaping any curly braces for the formatter
+        doc_str = str(doc).replace("{", "{{").replace("}", "}}")
+        documents_str += f"Document {i+1} ({name}): {doc_str}\n\n"
+
+    print("documents_str for comparison:", documents_str[:500])  # Print first 500 chars for debugging
     
     # Create the prompt for multi-document comparison
     prompt_text = f"""I am going to show you information extracted from multiple documents:
@@ -310,7 +277,7 @@ async def compare_multiple_documents(documents: List[Dict[str, str]], file_names
         print("Using LangChain model for document comparison")
         try:
             prompt_template = ChatPromptTemplate.from_template(prompt_text)
-            prompt = prompt_template.format_prompt()
+            prompt = prompt_template.format_prompt(documents_str=documents_str)
             response = llm(prompt.to_messages())
             print("Comparison response from LangChain:", response.content[:100])
             return response.content
@@ -324,6 +291,7 @@ async def compare_multiple_documents(documents: List[Dict[str, str]], file_names
 @router.post("/process", response_model=FormConnectResponse)
 async def process_form(
     session: SessionDep,
+    current_user: CurrentUser,
     form_connect_in: FormConnectRequest = Depends(),
     digitized_files: List[UploadFile] = File(None),
     handwritten_files: List[UploadFile] = File(None),
@@ -336,7 +304,7 @@ async def process_form(
     - handwritten_files: OCR-based extraction (placeholder)
     """
     # Get the default LLM
-    llm = get_default_llm(session)
+    llm = get_default_llm(session, current_user)
 
     # Log the model type being used
     if hasattr(llm, '__class__') and 'ReplicateWrapper' in llm.__class__.__name__:
