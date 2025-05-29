@@ -81,7 +81,7 @@ async def generate_report(
             retriever = chroma_db.as_retriever(search_kwargs={"k": 5})
             
             # 4. Initialize the LLM
-            llm = get_default_llm(session)
+            llm = get_default_llm(session, current_user)
             
             # 5. Parse the sections outline
             section_list = request.sections.strip().split('\n')

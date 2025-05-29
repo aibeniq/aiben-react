@@ -41,7 +41,6 @@ export type EmbeddingModelCreate = {
   model_id: string
   provider?: ModelProvider
   description?: string
-  is_default?: boolean
 }
 
 export type EmbeddingModelPublic = {
@@ -50,7 +49,6 @@ export type EmbeddingModelPublic = {
   model_id?: string
   provider?: ModelProvider
   description?: string
-  is_default?: boolean
   owner_id?: string | null
   date_created?: string
   date_modified?: string
@@ -66,7 +64,6 @@ export type EmbeddingModelUpdate = {
   model_id?: string | null
   provider?: ModelProvider | null
   description?: string | null
-  is_default?: boolean | null
 }
 
 export type EmbeddingModelValidate = {
@@ -141,7 +138,6 @@ export type LlmModelCreate = {
   model_id: string
   provider?: ModelProvider
   description?: string
-  is_default?: boolean
 }
 
 export type LlmModelPublic = {
@@ -150,7 +146,6 @@ export type LlmModelPublic = {
   model_id?: string
   provider?: ModelProvider
   description?: string
-  is_default?: boolean
   owner_id?: string | null
   date_created?: string
   date_modified?: string

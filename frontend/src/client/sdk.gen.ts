@@ -351,7 +351,7 @@ export class EmbeddingModelsService {
 
   /**
    * Get Default Embedding Model
-   * Get the default embedding model.
+   * Get the user's default embedding model (or system default if not set).
    * @returns EmbeddingModelPublic Successful Response
    * @throws ApiError
    */
@@ -904,7 +904,7 @@ export class LlmModelsService {
 
   /**
    * Get Default Llm Model
-   * Get the default LLM.
+   * Get the user's default LLM model (database record).
    * @returns LlmModelPublic Successful Response
    * @throws ApiError
    */
