@@ -10,6 +10,9 @@ from app.api.deps import SessionDep, CurrentUser
 from sqlmodel import select
 from langchain_community.llms import Replicate  
 from langchain.schema import HumanMessage
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import HumanMessage
+import traceback
 
 class ReplicateWrapper:
     """Wrapper for Replicate API to make it compatible with our interface"""
@@ -245,88 +248,98 @@ def invoke_llm(llm, prompt, variables=None):
         if hasattr(result, 'content'):
             return result.content
         return result
-        
 
 def invoke_llm_with_image(
     llm,
     prompt,
     variables=None,
-    image_file=None,      # <-- file-like object for Replicate
-    image_base64=None,    # <-- base64 string for OpenAI/LangChain
+    image_file=None,
+    image_base64=None,
     image_type="png"
 ):
     """
     Unified function to invoke an LLM with an image (for multimodal models).
-    - llm: The LLM instance.
-    - prompt: String or ChatPromptTemplate.
-    - variables: dict for prompt formatting.
-    - image_file: file-like object (for Replicate).
-    - image_base64: base64-encoded image string (for OpenAI/LangChain).
-    - image_type: e.g., "png", "jpeg".
-    Returns the response content as a string.
     """
+    # First, prepare the text content properly
+    if variables is None:
+        variables = {}
+    
+    # Format the text content based on prompt type and variables
+    if isinstance(prompt, str):
+        text_content = prompt.format(**variables) if variables else prompt
+    else:
+        text_content = str(prompt)
+    
+    # For Replicate models, use their API directly
     if hasattr(llm, '__class__') and 'ReplicateWrapper' in llm.__class__.__name__:
         print("Using ReplicateWrapper for multimodal LLM invocation")
         
-        if variables:
-            prompt_text = prompt.format(**variables)
-        else:
-            prompt_text = prompt
-
-        # Ensure image_file is a BytesIO object
-        image_io = None
-        if image_file:
-            image_file.seek(0)
-            image_bytes = image_file.read()
-            image_io = BytesIO(image_bytes)
-
-        model_id = llm.model_id if llm.version else llm.owner_model
-        input_params = {
-            "image": image_io,
-            "prompt": prompt_text,
-            "temperature": llm.temperature,
-        }
-        for key, value in llm.kwargs.items():
-            if key not in ["system_prompt"]:
-                input_params[key] = value
-
-        import replicate
-        output = replicate.run(
-            model_id,
-            input=input_params
-        )
-        if isinstance(output, list):
-            return output[0] if len(output) == 1 else "".join(output)
-        return output
+        # For Replicate, we can't easily use images, so warn and fall back
+        print("WARNING: Replicate models may not support image processing in the same way")
+        print("Using Replicate model for image extraction - text-only fallback")
+        
+        # Fall back to text-only prompt without the image
+        prompt_text = f"""Here is a template of the fields that I want you to extract: {variables.get('template', {})}
+        
+        NOTE: This was supposed to be an image file with handwritten content, but I'm using a text-only model.
+        If you cannot process images, please respond with 'Cannot process image content'."""
+        
+        try:
+            response_text = llm.invoke(prompt_text)
+            return response_text
+        except Exception as e:
+            print(f"Error with Replicate image extraction: {e}")
+            return f"Error processing image with Replicate: {str(e)}"
+    
+    # For LangChain models that support images
     else:
-        # OpenAI/LangChain expects base64 image and message dicts
-        if variables is None:
-            variables = {}
-
-        # Format the prompt text
-        if hasattr(prompt, "format_prompt"):
-            prompt_obj = prompt.format_prompt(**variables)
-            text_content = prompt_obj.to_messages()[0].content
-        elif isinstance(prompt, str):
-            text_content = prompt.format(**variables)
-        else:
-            text_content = str(prompt)
-
-        messages = [
-            {
-                "type": "text",
-                "text": text_content
-            },
-            {
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:image/{image_type};base64,{image_base64}"
-                }
-            }
-        ]
-
-        if hasattr(llm, "__call__"):
-            response = llm(messages)
-            return getattr(response, "content", str(response))
-        else:
-            raise NotImplementedError("This LLM does not support image input.")
+        print("Using LangChain-based LLM for multimodal invocation")
+        
+        try:           
+            print("Using LangChain model for image extraction")
+            
+            # If we were given a template string, use it directly
+            if isinstance(prompt, str) and prompt:
+                # Create a prompt template from the string
+                prompt_template = ChatPromptTemplate.from_template(prompt)
+                # Format it with variables
+                formatted_prompt = prompt_template.format_prompt(**variables)
+                # Get messages
+                messages = formatted_prompt.to_messages()
+            else:
+                # Create a basic message about the image
+                messages = [HumanMessage(content=text_content)]
+            
+            # Add the image to the first message's content
+            if messages and isinstance(messages[0].content, str):
+                # Convert to multimodal format
+                content_parts = [
+                    {"type": "text", "text": messages[0].content},
+                    {
+                        "type": "image_url", 
+                        "image_url": {
+                            "url": f"data:image/{image_type};base64,{image_base64}"
+                        }
+                    }
+                ]
+                
+                messages[0].content = content_parts
+            
+            print("Messages defined, proceeding to invoke LLM with image...")
+            
+            # Call the LLM with image capability using the newer invoke() method
+            response = llm.invoke(messages)
+            
+            print("Raw response from LangChain:", response)
+            
+            # Extract content from the response object
+            if hasattr(response, "content"):
+                return response.content
+            
+            # Otherwise return the string representation
+            return str(response)
+            
+        except Exception as e:
+            print(f"Error using LangChain for image: {str(e)}")
+            print(traceback.format_exc())
+            return f"Error processing image: {str(e)}"    
