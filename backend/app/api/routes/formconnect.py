@@ -12,6 +12,8 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import AIMessage
 from dotenv import load_dotenv
+
+import json
 import os
 
 import base64
@@ -62,12 +64,11 @@ async def extract_fields_from_digitized_document(file: UploadFile, template: Dic
 
     # Create the prompt
     prompt_template = settings.FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE
-    variables = {"template": template, "document_text": text}
+    variables = {"template": json.dumps(template), "document_text": text}
     response = invoke_llm(llm, prompt_template, variables)
 
     # Try to parse JSON from the response
     try:
-        import json
         # The output might already be a dictionary
         if isinstance(response, dict):
             return response
@@ -75,12 +76,13 @@ async def extract_fields_from_digitized_document(file: UploadFile, template: Dic
         return content_dict
     except Exception:
         return {"raw_content": str(response)}
+    
 
 async def extract_fields_from_handwritten_document(file: UploadFile, template: Dict[str, str], llm) -> Dict[str, str]:
     """
     Extract fields from a handwritten document.
     """
-    # Read the file content
+    print("Now extracting fields from handwritten document:", file.filename)
     content = await file.read()
     
     # Define image file extensions
@@ -91,15 +93,17 @@ async def extract_fields_from_handwritten_document(file: UploadFile, template: D
     if file_ext in image_extensions:
         try:
             img_base64 = base64.b64encode(content).decode('utf-8')
+            
+            # Use the template from config
             prompt_template = settings.FORMCONNECT_HANDWRITTEN_PROMPT_TEMPLATE
             variables = {"template": template}
 
+            print("Now invoking LLM with base-encoded image...")
             response = invoke_llm_with_image(
                 llm,
                 prompt_template,
                 variables=variables,
-                image_file=file.file,  # <-- file-like object for Replicate
-                image_base64=img_base64,  # <-- base64 string for OpenAI/LangChain
+                image_base64=img_base64,
                 image_type=file_ext[1:] if file_ext.startswith('.') else file_ext
             )
 
