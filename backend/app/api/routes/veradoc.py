@@ -5,15 +5,12 @@ from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
-from app.services.llms import get_default_llm
+from app.services.llms import get_default_llm, invoke_llm
 
 from sqlmodel import Session, select
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, Request as FastAPIRequest
 from typing import List, Dict
-
-from langchain.prompts import ChatPromptTemplate
-from langchain.chat_models import ChatOpenAI
-from langchain.schema import AIMessage
+import asyncio
 from dotenv import load_dotenv
 import os
 import re
@@ -23,9 +20,10 @@ from pathlib import Path
 import fitz  # PyMuPDF
 
 from datetime import datetime
-
+from starlette.requests import Request
 import tempfile
 import shutil
+import traceback
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.chains import LLMChain
@@ -67,16 +65,45 @@ def generate_template(questions: List[str]) -> Dict[str, str]:
 async def process_rag_checklist(
     session: SessionDep,
     current_user: CurrentUser,
-    request: RagChecklistRequest = Depends(),
+    request_data: RagChecklistRequest = Depends(),
     files: List[UploadFile] = File(...),
     handwritten_files: List[UploadFile] = File(None),
+    request: FastAPIRequest = None,
 ):
     """
     Process the uploaded files using RAG with a knowledge base.
     """
+    print("process_rag_checklist function invoked!")
+    # Create a cancellation flag
+    cancellation_requested = False
+
     try:
+        print("Setting up disconnect monitor for VeraDoc RAG processing...")
+        # Create a monitor task but don't wait for it
+        disconnect_monitor = None
+        if request:
+            async def monitor_client_disconnect():
+                nonlocal cancellation_requested
+                try:
+                    # Don't create a separate task - just await directly
+                    # This is fine because this whole function runs as a background task
+                    await request.is_disconnected()
+                    
+                    # This only executes after client disconnects
+                    print("Client disconnected, canceling operation...")
+                    cancellation_requested = True
+                except asyncio.CancelledError:
+                    print("Disconnect monitor cancelled because main task completed")
+                except Exception as e:
+                    print(f"Error in disconnect monitoring: {str(e)}")
+            
+            # Start monitoring in background without blocking
+            disconnect_monitor = asyncio.create_task(monitor_client_disconnect())
+
+        print("Processing RAG checklist...")
+
         # 1. Retrieve knowledge base from database
-        kb = session.get(KnowledgeBase, request.knowledge_base_id)
+        kb = session.get(KnowledgeBase, request_data.knowledge_base_id)
         if not kb:
             raise HTTPException(status_code=404, detail="Knowledge base not found")
         
@@ -154,7 +181,7 @@ async def process_rag_checklist(
 
             # 6. Process each uploaded file
             qa_pairs = []
-            question_list = request.questions.strip().split('\n')
+            question_list = request_data.questions.strip().split('\n')
             
             # Get file content
             file = files[0]  # Process the first file for now
@@ -171,6 +198,10 @@ async def process_rag_checklist(
             
             # 7. Process each question using the RAG approach
             for question in question_list:
+                if cancellation_requested:
+                    print("Operation cancelled by client disconnect, stopping processing")
+                    return VeraDocResponse(results={"status": "cancelled", "message": "Operation cancelled by user"})
+                
                 question = question.strip()
                 if not question:
                     continue
@@ -220,65 +251,36 @@ async def process_rag_checklist(
                         "metadata": metadata
                     }
                     source_citations.append(source)
+
+                if cancellation_requested:
+                    print("Operation cancelled by client disconnect, stopping processing")
+                    return VeraDocResponse(results={"status": "cancelled", "message": "Operation cancelled by user"})
                 
                 # Step 2: Get the relevant policy context for this question
-                # Check if the model is a ReplicateWrapper or LangChain LLM
-                is_replicate_model = hasattr(llm, '__class__') and 'ReplicateWrapper' in llm.__class__.__name__
-                
-                if is_replicate_model:
-                    print("Using Replicate model for context chain")
-                    try:
-                        # Format the prompt directly for Replicate
-                        formatted_context_prompt = context_prompt_template.format(
-                            context=context,
-                            question=question
-                        )
-                        question_context = llm.invoke(formatted_context_prompt)
-                        print(f"Got context from Replicate model: {question_context[:100]}...")
-                    except Exception as e:
-                        print(f"Error getting context with Replicate model: {e}")
-                        import traceback
-                        traceback.print_exc()
-                        question_context = "Error retrieving policy context."
-                else:
-                    # Standard LangChain approach
-                    print("Using LangChain model for context chain")
-                    context_prompt = ChatPromptTemplate.from_template(context_prompt_template)
-                    context_chain = context_prompt | llm
-                    context_response = context_chain.invoke({
-                        "context": context, 
-                        "question": question
-                    })
-                    question_context = context_response.content
+                print("Generating context for question...")
+                question_context = invoke_llm(
+                    llm,
+                    context_prompt_template,
+                    {"context": context, "question": question}
+                )
+                print(f"Got context: {question_context[:100]}...")
+
+                if cancellation_requested:
+                    print("Operation cancelled by client disconnect, stopping processing")
+                    return VeraDocResponse(results={"status": "cancelled", "message": "Operation cancelled by user"})
                 
                 # Step 3: Answer the question based on the uploaded document and policy context
-                if is_replicate_model:
-                    print("Using Replicate model for QA chain")
-                    try:
-                        # Format the prompt directly for Replicate
-                        formatted_qa_prompt = qa_prompt_template.format(
-                            document_text=document_text[:10000],  # Limit length to avoid token issues
-                            question=question,
-                            question_context=question_context
-                        )
-                        answer = llm.invoke(formatted_qa_prompt)
-                        print(f"Got answer from Replicate model: {answer[:100]}...")
-                    except Exception as e:
-                        print(f"Error getting answer with Replicate model: {e}")
-                        import traceback
-                        traceback.print_exc()
-                        answer = "Error generating answer."
-                else:
-                    # Standard LangChain approach
-                    print("Using LangChain model for QA chain")
-                    qa_prompt = ChatPromptTemplate.from_template(qa_prompt_template)
-                    qa_chain = qa_prompt | llm
-                    qa_response = qa_chain.invoke({
+                print("Generating answer based on document and context...")
+                answer = invoke_llm(
+                    llm,
+                    qa_prompt_template,
+                    {
                         "document_text": document_text[:10000],  # Limit length to avoid token issues
                         "question": question,
                         "question_context": question_context
-                    })
-                    answer = qa_response.content
+                    }
+                )
+                print(f"Got answer: {answer[:100]}...")
 
                 print("Source citations for question:", question)
                 for source in source_citations:
@@ -293,34 +295,22 @@ async def process_rag_checklist(
                 })
             
             # 8. Generate the final evaluation
+            if cancellation_requested:
+                print("Operation cancelled by client disconnect, stopping processing")
+                return VeraDocResponse(results={"status": "cancelled", "message": "Operation cancelled by user"})
+            
             qa_pairs_text = ""
             for i, qa in enumerate(qa_pairs):
                 qa_pairs_text += f"Question {i+1}: {qa['question']}\nAnswer: {qa['answer']}\n\n"
             
             # Final evaluation
-            if is_replicate_model:
-                print("Using Replicate model for final evaluation")
-                try:
-                    # Format the prompt directly for Replicate
-                    formatted_final_prompt = final_prompt_template.format(
-                        qa_pairs=qa_pairs_text
-                    )
-                    final_evaluation = llm.invoke(formatted_final_prompt)
-                    print(f"Got final evaluation from Replicate model: {final_evaluation[:100]}...")
-                except Exception as e:
-                    print(f"Error getting final evaluation with Replicate model: {e}")
-                    import traceback
-                    traceback.print_exc()
-                    final_evaluation = "Error generating final evaluation."
-            else:
-                # Standard LangChain approach
-                print("Using LangChain model for final evaluation")
-                final_prompt = ChatPromptTemplate.from_template(final_prompt_template)
-                final_chain = final_prompt | llm
-                final_response = final_chain.invoke({
-                    "qa_pairs": qa_pairs_text
-                })
-                final_evaluation = final_response.content
+            print("Generating final evaluation...")
+            final_evaluation = invoke_llm(
+                llm,
+                final_prompt_template,
+                {"qa_pairs": qa_pairs_text}
+            )
+            print(f"Got final evaluation: {final_evaluation[:100]}...")
             
             # 9. Compile the results
             result = {
@@ -331,9 +321,15 @@ async def process_rag_checklist(
             return VeraDocResponse(results=result)
             
     except Exception as e:
-        import traceback
+        print("Error processing RAG checklist:")
+        print(str(e))
+        
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error processing RAG checklist: {str(e)}")
+    finally:
+        # Clean up the disconnect monitor if it exists
+        if disconnect_monitor:
+            disconnect_monitor.cancel()
 
 # Functions related to Checklists
 @router.post("/checklists", response_model=VeraDocChecklist)

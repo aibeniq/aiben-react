@@ -32,8 +32,8 @@ const VeraDoc = () => {
 
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<any>(null);
   const [knowledgeBases, setKnowledgeBases] = useState<any[]>([]);
-
-  const ongoingRequest = useRef<CancelablePromise<any> | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const ongoingRequest = useRef<CancelablePromise<any> | null>(null);
 
   const getDisplayFileName = (source: string): string => {
     if (!source) return "Unknown";
@@ -191,11 +191,15 @@ const VeraDoc = () => {
 
   useEffect(() => {
     return () => {
+      console.log("Component unmounting, cleaning up requests");
       if (ongoingRequest.current) {
-        ongoingRequest.current.cancel()
+        ongoingRequest.current.cancel();
       }
-    }
-  }, [])
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []); // No dependencies, only runs on mount/unmount
 
   // Add this mutation hook inside your VeraDoc component, before your handleRun function
   const mutation = useMutation({
@@ -205,6 +209,20 @@ const VeraDoc = () => {
         files: File[];
         handwrittenFiles: File[];
       }) => {
+      if (ongoingRequest.current) {
+        ongoingRequest.current.cancel();
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      // Create a new controller and store directly in the ref
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      
+      console.log("Creating new request with fresh AbortController");
+      
+      // Create the promise and store it
       const promise = VeradocService.processRagChecklist({
         questions: data.questions,
         knowledgeBaseId: data.knowledgeBaseId,
@@ -212,9 +230,10 @@ const VeraDoc = () => {
           files: data.files,
           handwritten_files: data.handwrittenFiles,
         },
-      })
-      ongoingRequest.current = promise
-      return promise
+      }, { signal: controller.signal });
+      
+      ongoingRequest.current = promise;
+      return promise;
     },
     onSuccess: (data) => {
       console.log("Response data:", data)
@@ -341,12 +360,30 @@ const VeraDoc = () => {
   setBatchResults([]);
   setSelectedBatchResult(0);
   setBatchLoading(true);
+
+  // Cancel any ongoing requests
+  if (ongoingRequest.current) {
+    ongoingRequest.current.cancel();
+  }
+  
+  // Cancel any in-flight fetch requests
+  if (abortControllerRef.current) {
+    abortControllerRef.current.abort();
+  }
+  
+  // Create a new controller and store directly in the ref
+  const controller = new AbortController();
+  abortControllerRef.current = controller;
   
   try {
     const results: string[] = [];
     
     // Process each file individually
     for (let i = 0; i < batchFiles.length; i++) {
+      if (controller.signal.aborted) {
+        console.log("Batch processing aborted");
+        break;
+      }
       const fileItem = batchFiles[i];
       
       // Separate files based on handwritten flag
@@ -369,7 +406,7 @@ const VeraDoc = () => {
           files: requestData.files,
           handwritten_files: requestData.handwrittenFiles,
         },
-      });
+      }, { signal: controller.signal });
       
       // Format the response
       let displayResults = `# Analysis Results for ${fileItem.file.name}\n\n`;
@@ -389,8 +426,13 @@ const VeraDoc = () => {
       setBatchResults(results);
     
   }} catch (error) {
-    console.error("Batch processing error:", error);
-    setResults(`Error processing batch: ${error.message}`);
+    // Handle errors, checking if it's an abort
+    if (error.name === 'AbortError') {
+      console.log("Batch processing was aborted");
+    } else {
+      console.error("Batch processing error:", error);
+      setResults(`Error processing batch: ${error.message}`);
+    }
   } finally {
     setBatchLoading(false);
   }
