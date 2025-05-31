@@ -678,3 +678,18 @@ export type VeradocDeleteChecklistData = {
 }
 
 export type VeradocDeleteChecklistResponse = unknown
+
+export type VeradocGetVeradocHistoryData = {
+  limit?: number
+  skip?: number
+}
+
+export type VeradocGetVeradocHistoryResponse = Array<{
+  [key: string]: unknown
+}>
+
+export type VeradocGetVeradocDetailData = {
+  reportId: string
+}
+
+export type VeradocGetVeradocDetailResponse = unknown
