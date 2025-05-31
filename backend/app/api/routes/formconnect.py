@@ -1,6 +1,6 @@
 import uuid
 from app.models import FormConnectRequest, FormConnectResponse, FormConnectForm, ModelProvider, LlmModel
-from app.services.llms import create_llm, get_default_llm, invoke_llm, invoke_llm_with_image
+from app.services.llms import create_llm, get_default_llm, invoke_llm, invoke_llm_with_image, record_llm_interaction
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 
@@ -229,6 +229,20 @@ async def process_form(
             "comparison": comparison_result,
             "extracted_data": extracted_results
         }
+
+    record_llm_interaction(
+        session=session,
+        user_id=current_user.id,
+        functionality="formconnect",
+        input_data={
+            "fields": form_connect_in.fields,
+            "files": file_names
+        },
+        output_data=result,
+        metadata={
+            "file_count": total_files
+        }
+    )
 
     # Return the comparison results as a dictionary
     return FormConnectResponse(results=result)

@@ -310,6 +310,9 @@ export type EmbeddingModelsCreateEmbeddingModelData = {
 
 export type EmbeddingModelsCreateEmbeddingModelResponse = EmbeddingModelPublic
 
+export type EmbeddingModelsGetDefaultEmbeddingModelResponse =
+  EmbeddingModelPublic
+
 export type EmbeddingModelsGetEmbeddingModelData = {
   modelId: string
 }
@@ -328,9 +331,6 @@ export type EmbeddingModelsDeleteEmbeddingModelData = {
 }
 
 export type EmbeddingModelsDeleteEmbeddingModelResponse = Message
-
-export type EmbeddingModelsGetDefaultEmbeddingModelResponse =
-  EmbeddingModelPublic
 
 export type EmbeddingModelsSetDefaultEmbeddingModelData = {
   modelId: string

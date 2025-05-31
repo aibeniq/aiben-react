@@ -3,7 +3,7 @@ import uuid
 from typing import List, Dict, Any, Optional
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
-from sqlalchemy import LargeBinary, Column, PrimaryKeyConstraint, UniqueConstraint, Enum as SQLAlchemyEnum
+from sqlalchemy import LargeBinary, Column, PrimaryKeyConstraint, UniqueConstraint, Enum as SQLAlchemyEnum, JSON
 from datetime import datetime
 
 # Shared properties
@@ -380,3 +380,15 @@ class ReportGenieSection(SQLModel):
 
 class DocxRequest(SQLModel):
     content: str
+
+class LlmInteraction(SQLModel, table=True):
+    """Records all interactions with LLM services for analytics and auditing."""
+    __tablename__ = "llm_interactions"
+    
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    date_created: datetime = Field(default_factory=datetime.utcnow)
+    user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
+    functionality: str = Field(index=True)  # 'chatbot', 'veradoc', 'formconnect', 'reportgenie'
+    input_data: str = Field(default=None)  # Stores the input prompt/question
+    output_data: str = Field(default=None)  # Stores the generated response
+    extra_data: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))  # For additional info (JSON)

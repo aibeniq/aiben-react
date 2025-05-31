@@ -203,6 +203,50 @@ class Settings(BaseSettings):
     However, if there are no discrepancies, please state that all fields match across documents.
     """
 
+    CHATBOT_REPHRASING_PROMPT_TEMPLATE: str = """
+    You are an AI that rephrases the user's latest question to incorporate relevant context from the conversation history.
+    
+    CONVERSATION HISTORY:
+    {chat_history}
+    
+    CURRENT QUESTION: {question}
+    
+    INSTRUCTIONS:
+    1. Analyze the conversation history and the current question.
+    2. Rewrite the current question to be self-contained, incorporating any relevant context.
+    3. The rephrased question should be answerable without needing to see the conversation history.
+    4. Return ONLY the rephrased question, nothing else.
+    5. If the current question is already self-contained and doesn't reference anything from the history, return it unchanged.
+    
+    REPHRASED QUESTION:
+    """
+    
+    CHATBOT_KB_QA_PROMPT_TEMPLATE: str = """
+    You are a helpful assistant that answers questions based on the provided context.
+    
+    CONTEXT:
+    {context}
+    
+    QUESTION: {question}
+    
+    INSTRUCTIONS:
+    1. Answer the question based ONLY on the information provided in the CONTEXT.
+    2. If the context doesn't contain enough information to answer the question, say "I don't have enough information to answer this question."
+    3. Be concise and to the point.
+    4. Don't make up information or use knowledge outside the provided context.
+    
+    ANSWER:
+    """
+    
+    CHATBOT_GENERAL_QA_PROMPT_TEMPLATE: str = """
+    You are a helpful AI assistant. Answer the following question to the best of your knowledge.
+    If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+    QUESTION: {question}
+
+    ANSWER:
+    """
+
     REPLICATE_API_TOKEN: str | None = os.getenv("REPLICATE_API_TOKEN")
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:

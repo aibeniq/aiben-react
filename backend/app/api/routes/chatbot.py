@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from typing import Optional
 from app.services.embeddings import load_embeddings_model
-from app.services.llms import create_llm, get_default_llm, invoke_llm
+from app.services.llms import create_llm, get_default_llm, invoke_llm, record_llm_interaction
 from app.services.knowledgebases import get_embedding_model
 from app.api.deps import CurrentUser, SessionDep
 from app.models import KnowledgeBase, EmbeddingModel, LlmModel, Source, User
+from app.core.config import settings
 from sqlmodel import Session, select
 from langchain.chains import RetrievalQA
 from langchain.document_loaders import TextLoader, PyPDFLoader
@@ -70,32 +71,13 @@ def rephrase_question_with_context(llm, chat_history, current_question):
         print("No previous context to consider, returning original question")
         return current_question
     
-    # Create the prompt for rephrasing
-    prompt_text = """
-    You are an AI that rephrases the user's latest question to incorporate relevant context from the conversation history.
-    
-    CONVERSATION HISTORY:
-    {chat_history}
-    
-    CURRENT QUESTION: {question}
-    
-    INSTRUCTIONS:
-    1. Analyze the conversation history and the current question.
-    2. Rewrite the current question to be self-contained, incorporating any relevant context.
-    3. The rephrased question should be answerable without needing to see the conversation history.
-    4. Return ONLY the rephrased question, nothing else.
-    5. If the current question is already self-contained and doesn't reference anything from the history, return it unchanged.
-    
-    REPHRASED QUESTION:
-    """
-    
     print("Now rephrasing question with context")
     
     # Use the unified invoke_llm function
     try:
         rephrased_question = invoke_llm(
             llm,
-            prompt_text,
+            settings.CHATBOT_REPHRASING_PROMPT_TEMPLATE,
             {
                 "chat_history": chat_history, 
                 "question": current_question
@@ -293,22 +275,7 @@ async def query_knowledge_base(
             sources.append(source)
         
         # 6. Define prompt for question answering
-        qa_prompt_template = """
-        You are a helpful assistant that answers questions based on the provided context.
-        
-        CONTEXT:
-        {context}
-        
-        QUESTION: {question}
-        
-        INSTRUCTIONS:
-        1. Answer the question based ONLY on the information provided in the CONTEXT.
-        2. If the context doesn't contain enough information to answer the question, say "I don't have enough information to answer this question."
-        3. Be concise and to the point.
-        4. Don't make up information or use knowledge outside the provided context.
-        
-        ANSWER:
-        """
+        qa_prompt_template = settings.CHATBOT_KB_QA_PROMPT_TEMPLATE
         
         # 7. Generate the answer - with branching for different model types
         try:
@@ -328,6 +295,24 @@ async def query_knowledge_base(
                 status_code=500, 
                 detail=f"Error generating answer: {str(e)}"
             )
+        
+        # After generating the answer and before returning:
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="chatbot",
+            input_data={
+                "question": question,
+                "rephrased_question": rephrased_question,
+                "kb_id": kb_id
+            },
+            output_data=answer_content,
+            metadata={
+                "session_id": session_id,
+                "is_follow_up": is_follow_up,
+                "sources": [s["metadata"] for s in sources]
+            }
+        )
         
         return {
             "answer": answer_content,
@@ -499,22 +484,7 @@ async def query_document(
             sources.append(source)
         
         # Define prompt
-        qa_prompt_template = """
-        You are a helpful assistant that answers questions based on the provided context.
-        
-        CONTEXT:
-        {context}
-        
-        QUESTION: {question}
-        
-        INSTRUCTIONS:
-        1. Answer the question based ONLY on the information provided in the CONTEXT.
-        2. If the context doesn't contain enough information to answer the question, say "I don't have enough information to answer this question."
-        3. Be concise and to the point.
-        4. Don't make up information or use knowledge outside the provided context.
-        
-        ANSWER:
-        """
+        qa_prompt_template = settings.CHATBOT_KB_QA_PROMPT_TEMPLATE
         
         # Generate the answer - with branching for different model types
         try:
@@ -537,6 +507,24 @@ async def query_document(
 
         print("Response:", answer_content[:100])
         print("Sources:", len(sources))
+
+        # After generating the answer and before returning:
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="chatbot",
+            input_data={
+                "question": question,
+                "rephrased_question": rephrased_question,
+                "document": file.filename
+            },
+            output_data=answer_content,
+            metadata={
+                "session_id": session_id,
+                "is_follow_up": is_follow_up,
+                "sources": [s["metadata"] for s in sources]
+            }
+        )
         
         return {
             "answer": answer_content,
@@ -619,14 +607,7 @@ async def query_text(
             rephrased_question = question
         
         # Define prompt template for general Q&A
-        qa_prompt_template = """
-        You are a helpful AI assistant. Answer the following question to the best of your knowledge.
-        If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
-        QUESTION: {question}
-
-        ANSWER:
-        """
+        qa_prompt_template = settings.CHATBOT_GENERAL_QA_PROMPT_TEMPLATE
         
         # Handle different model types
         answer_content = ""
@@ -646,6 +627,21 @@ async def query_text(
                 status_code=500, 
                 detail=f"Error generating answer: {str(e)}"
             )
+        
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="chatbot",
+            input_data={
+                "question": question,
+                "rephrased_question": rephrased_question
+            },
+            output_data=answer_content,
+            metadata={
+                "session_id": session_id,
+                "is_follow_up": is_follow_up
+            }
+        )
         
         return {
             "answer": answer_content,

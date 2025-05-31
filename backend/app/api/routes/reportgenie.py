@@ -17,7 +17,7 @@ from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
-from app.services.llms import get_default_llm, invoke_llm
+from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
 
 from sqlmodel import Session, select
 from fastapi import APIRouter, Depends, HTTPException
@@ -153,6 +153,23 @@ async def generate_report(
                 "full_report": full_report,
                 "sections": sections
             }
+
+            record_llm_interaction(
+                session=session,
+                user_id=current_user.id,
+                functionality="reportgenie",
+                input_data={
+                    "sections": request.sections,
+                    "kb_id": request.knowledge_base_id
+                },
+                output_data={
+                    "section_count": len(sections),
+                    "total_length": len(full_report)
+                },
+                metadata={
+                    "kb_name": kb.title
+                }
+            )
             
             return ReportGenieResponse(results=result)
             
