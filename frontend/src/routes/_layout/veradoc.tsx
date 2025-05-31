@@ -654,7 +654,7 @@ const VeraDoc = () => {
           </Field>
 
           <Field label="Questions" required>
-            <VStack align="stretch" gap={3} display="flex" flexDirection="column" width="100%">
+            <VStack align="stretch" gap={0} display="flex" flexDirection="column" width="100%">
               {questionsList.map((question, index) => (
                 <QuestionItem
                   key={index}
@@ -671,6 +671,7 @@ const VeraDoc = () => {
                 onClick={addQuestion}
                 alignSelf="flex-start"
                 colorPalette="blue"
+                marginTop={3}
               >
                 + Add Question
               </Button>
@@ -1328,6 +1329,32 @@ const FileDropzone = ({
   )
 }
 
+// Custom drag handle component (3x2 dots)
+const DragHandle = () => (
+  <Box
+    display="flex"
+    flexDirection="column"
+    gap="2px"
+    p="2px"
+    cursor="grab"
+    opacity={0.4}
+    _hover={{ opacity: 0.8 }}
+  >
+    <Box display="flex" gap="2px">
+      <Box w="3px" h="3px" bg="gray.500" borderRadius="full" />
+      <Box w="3px" h="3px" bg="gray.500" borderRadius="full" />
+    </Box>
+    <Box display="flex" gap="2px">
+      <Box w="3px" h="3px" bg="gray.500" borderRadius="full" />
+      <Box w="3px" h="3px" bg="gray.500" borderRadius="full" />
+    </Box>
+    <Box display="flex" gap="2px">
+      <Box w="3px" h="3px" bg="gray.500" borderRadius="full" />
+      <Box w="3px" h="3px" bg="gray.500" borderRadius="full" />
+    </Box>
+  </Box>
+)
+
 const QuestionItem = ({
   index,
   question,
@@ -1341,41 +1368,82 @@ const QuestionItem = ({
   onRemove: (index: number) => void
   canRemove: boolean
 }) => {
+  const [isHovered, setIsHovered] = useState(false)
+
   return (
     <Box
-      p={3}
-      borderWidth="1px"
+      position="relative"
+      display="flex"
+      p={0}
       borderRadius="md"
-      color="blue.500"
-      bg="gray.50"
-      _hover={{ borderColor: "blue.300" }}
+      bg="transparent"
+      border="1px solid transparent"
+      transition="all 0.2s ease"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <HStack justify="space-between" align="flex-start" gap={3}>
-        <Box flex="1">
-          <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={2}>
-            Question {index + 1}
-          </Text>
+      <HStack align="flex-start" gap={3} w="full">
+        <IconButton
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          size="sm"
+          variant="ghost"
+          colorScheme="gray"
+          aria-label="Remove question"
+          transition="opacity 0.2s ease"
+        >
+          <DragHandle />
+        </IconButton>
+        <Box flex="1" w="full">
           <Input
             value={question}
             onChange={(e) => onUpdate(index, e.target.value)}
             placeholder="Enter your question here..."
             size="md"
+            borderTop="none"
+            borderLeft="none"
+            borderRight="none"
+            borderBottom="1px solid"
+            borderColor="gray.200"
+            bg="transparent"
+            px={0}
+            w="full"
+            _focus={{
+              borderTop: "none",
+              borderLeft: "none",
+              borderRight: "none",
+              borderBottom: "1px solid",
+              boxShadow: "none",
+              outline: "none",
+              borderColor: "gray.200",
+              bg: "transparent",
+              px: 0,
+              w: "full",
+            }}
           />
         </Box>
-        {canRemove && (
-          <IconButton
-            size="sm"
-            variant="ghost"
-            colorScheme="red"
-            aria-label="Remove question"
-            onClick={(e) => {
-              e.stopPropagation()
-              onRemove(index)
-            }}
-          >
-            <FiTrash2 />
-          </IconButton>
-        )}
+
+        <Box opacity={isHovered ? 1 : 0} transition="opacity 0.2s ease" mt={1}>
+          <HStack>
+            {canRemove && (
+              <IconButton
+                size="sm"
+                variant="ghost"
+                colorPalette="red"
+                aria-label="Remove question"
+                opacity={isHovered ? 1 : 0}
+                transition="opacity 0.2s ease"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onRemove(index)
+                }}
+              >
+                <FiTrash2 />
+              </IconButton>
+            )}
+          </HStack>
+        </Box>
       </HStack>
     </Box>
   )
