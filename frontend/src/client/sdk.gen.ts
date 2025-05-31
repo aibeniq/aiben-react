@@ -131,6 +131,10 @@ import type {
   VeradocUpdateChecklistResponse,
   VeradocDeleteChecklistData,
   VeradocDeleteChecklistResponse,
+  VeradocGetVeradocHistoryData,
+  VeradocGetVeradocHistoryResponse,
+  VeradocGetVeradocDetailData,
+  VeradocGetVeradocDetailResponse,
 } from "./types.gen"
 
 export class ChatService {
@@ -1703,6 +1707,54 @@ export class VeradocService {
       url: "/api/v1/veradoc/checklists/{checklist_id}",
       path: {
         checklist_id: data.checklistId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Veradoc History
+   * Retrieve past VeraDoc evaluation history for the current user.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getVeradocHistory(
+    data: VeradocGetVeradocHistoryData = {},
+  ): CancelablePromise<VeradocGetVeradocHistoryResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/veradoc/history",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Veradoc Detail
+   * Retrieve a specific VeraDoc evaluation's full content by ID.
+   * @param data The data for the request.
+   * @param data.reportId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getVeradocDetail(
+    data: VeradocGetVeradocDetailData,
+  ): CancelablePromise<VeradocGetVeradocDetailResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/veradoc/history/{report_id}",
+      path: {
+        report_id: data.reportId,
       },
       errors: {
         422: "Validation Error",

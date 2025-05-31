@@ -1,5 +1,5 @@
 import uuid
-from app.models import VeraDocRequest, VeraDocResponse, VeraDocChecklist, RagChecklistRequest, EmbeddingModel, Source, KnowledgeBase
+from app.models import VeraDocRequest, VeraDocResponse, VeraDocChecklist, RagChecklistRequest, EmbeddingModel, Source, KnowledgeBase, LlmInteraction
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
@@ -9,9 +9,10 @@ from app.services.llms import get_default_llm, invoke_llm, record_llm_interactio
 
 from sqlmodel import Session, select
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, Request as FastAPIRequest
-from typing import List, Dict
+from typing import List, Dict, Any
 import asyncio
 from dotenv import load_dotenv
+import json
 import os
 import re
 import base64
@@ -330,6 +331,9 @@ async def process_rag_checklist(
                 output_data={
                     "final_evaluation": final_evaluation,
                     "qa_count": len(qa_pairs)
+                },
+                metadata={
+                    "qa_pairs": qa_pairs  # Store the full QA pairs with sources for retrieval
                 }
             )
             
@@ -420,3 +424,140 @@ def delete_checklist(checklist_id: uuid.UUID, session: SessionDep, current_user:
     session.delete(checklist)
     session.commit()
     return {"message": "Checklist deleted successfully."}
+
+@router.get("/history", response_model=List[Dict[str, Any]])
+async def get_veradoc_history(
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 20,
+):
+    """Retrieve past VeraDoc evaluation history for the current user."""
+    print("Retrieving VeraDoc history for user: ", current_user.id)
+    
+    try:
+        reports = session.exec(
+            select(LlmInteraction)
+            .where(
+                LlmInteraction.user_id == current_user.id,
+                LlmInteraction.functionality == "veradoc"
+            )
+            .order_by(LlmInteraction.date_created.desc())
+            .offset(skip)
+            .limit(limit)
+        ).all()
+
+        print(f"Found {len(reports)} VeraDoc evaluations for user {current_user.id}")
+        
+        result = []
+        for report in reports:
+            # Initialize variables outside the try block
+            input_data = {}
+            output_data = {}
+            extra_data = {}
+            kb_name = "Unknown Knowledge Base"
+            
+            try:
+                # Parse the input_data and output_data from string to dict
+                input_data = json.loads(report.input_data) if report.input_data else {}
+                output_data = json.loads(report.output_data) if report.output_data else {}
+                extra_data = report.extra_data or {}
+                
+                # Get KB name from input_data
+                if input_data.get("kb_id"):
+                    kb = session.get(KnowledgeBase, input_data.get("kb_id"))
+                    kb_name = kb.title if kb else "Unknown Knowledge Base"
+                    
+                # Create a user-friendly title
+                document_name = input_data.get("document_name", "Unnamed Document")
+                title = f"Evaluation of {document_name}"
+                
+                result.append({
+                    "id": str(report.id),
+                    "date_created": report.date_created,
+                    "title": title,
+                    "document_name": document_name,
+                    "kb_name": kb_name,
+                    "kb_id": input_data.get("kb_id", ""),
+                    "questions": input_data.get("questions", ""),
+                    "qa_count": output_data.get("qa_count", 0),
+                    "final_evaluation": output_data.get("final_evaluation", "")
+                })
+            except Exception as e:
+                # If parsing fails, add a minimal entry
+                print(f"Error processing report {report.id}: {e}")
+                result.append({
+                    "id": str(report.id),
+                    "date_created": report.date_created,
+                    "title": f"Evaluation from {report.date_created.strftime('%Y-%m-%d')}"
+                })
+        
+        return result
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error retrieving VeraDoc history: {str(e)}")
+
+@router.get("/history/{report_id}")
+async def get_veradoc_detail(
+    report_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+):
+    """Retrieve a specific VeraDoc evaluation's full content by ID."""
+    try:
+        report = session.get(LlmInteraction, report_id)
+        if not report:
+            raise HTTPException(status_code=404, detail="Report not found")
+        
+        if report.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="You don't have access to this report")
+        
+        if report.functionality != "veradoc":
+            raise HTTPException(status_code=400, detail="This is not a VeraDoc evaluation")
+        
+        try:
+            input_data = json.loads(report.input_data) if report.input_data else {}
+            output_data = json.loads(report.output_data) if report.output_data else {}
+            extra_data = report.extra_data or {}
+            
+            # For backward compatibility, try to reconstruct full results
+            document_name = input_data.get("document_name", "Unknown Document")
+            kb_name = "Unknown Knowledge Base"
+            
+            # Try to get KB name
+            if input_data.get("kb_id"):
+                kb = session.get(KnowledgeBase, input_data.get("kb_id"))
+                kb_name = kb.title if kb else "Unknown Knowledge Base"
+            
+            # Create a response that matches the structure expected by the frontend
+            result = {
+                "id": str(report.id),
+                "date_created": report.date_created,
+                "document_name": document_name,
+                "kb_name": kb_name,
+                "questions": input_data.get("questions", ""),
+                "results": {
+                    "final_evaluation": output_data.get("final_evaluation", ""),
+                    "qa_pairs": extra_data.get("qa_pairs", [])
+                }
+            }
+            
+            return result
+            
+        except Exception as e:
+            # Fallback if parsing fails
+            return {
+                "id": str(report.id),
+                "date_created": report.date_created,
+                "results": {
+                    "final_evaluation": f"Unable to reconstruct evaluation from {report.date_created}.\n\n"
+                                      f"This might be due to an older format or incomplete data.",
+                    "qa_pairs": []
+                }
+            }
+            
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error retrieving evaluation details: {str(e)}")

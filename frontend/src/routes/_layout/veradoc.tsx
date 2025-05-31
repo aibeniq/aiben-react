@@ -14,6 +14,7 @@ import {
   Separator,
   Table,
   Accordion,
+  Card
 } from "@chakra-ui/react"
 import useCustomToast from "@/hooks/useCustomToast"
 import { CancelablePromise } from "@/client/core/CancelablePromise"
@@ -25,15 +26,75 @@ import { useMutation } from "@tanstack/react-query"
 import { VeradocService, KnowledgeBasesService } from "@/client"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { FiFileText } from "react-icons/fi"
+import { FiFileText, FiDatabase } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
+import { format } from 'date-fns';
+import { useQuery } from "@tanstack/react-query";
 
 const VeraDoc = () => {
 
+  const { showSuccessToast, showErrorToast } = useCustomToast();
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<any>(null);
   const [knowledgeBases, setKnowledgeBases] = useState<any[]>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
   const ongoingRequest = useRef<CancelablePromise<any> | null>(null);
+
+  // Add these state variables to your component
+  const [reportHistory, setReportHistory] = useState<any[]>([]);
+  const [selectedHistoryReport, setSelectedHistoryReport] = useState(null);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+
+  // Add this query to fetch history
+  const historyQuery = useQuery({
+    queryKey: ["veradocHistory"],
+    queryFn: async () => {
+      const response = await VeradocService.getVeradocHistory({ limit: 20 });
+      return response;
+    },
+    enabled: true,
+  });
+
+  // Use a useEffect to handle the data updates
+  useEffect(() => {
+    if (historyQuery.data) {
+      setReportHistory(Array.isArray(historyQuery.data) ? historyQuery.data : []);
+    }
+    setIsHistoryLoading(historyQuery.isLoading);
+  }, [historyQuery.data, historyQuery.isLoading]);
+
+  // Add this function to load a report from history
+  const loadReportFromHistory = async (reportId) => {
+    try {
+      setIsHistoryLoading(true);
+      const report = await VeradocService.getVeradocDetail({ reportId });
+      
+      // Update UI state with the loaded report
+      setResults(report.results.final_evaluation || "");
+      setQaPairs(report.results.qa_pairs || []);
+      setSelectedHistoryReport(report);
+      
+      // If KB ID exists, update the selected knowledge base
+      if (report.kb_id) {
+        const kb = knowledgeBases.find(kb => kb.id === report.kb_id);
+        if (kb) {
+          setSelectedKnowledgeBase(kb);
+          fetchKnowledgeBaseDetails(kb.id);
+        }
+      }
+      
+      // Update questions if they exist
+      if (report.questions) {
+        setQuestions(report.questions);
+      }
+      
+      showSuccessToast("Evaluation loaded successfully");
+    } catch (error) {
+      console.error("Error loading report:", error);
+      showErrorToast("Failed to load evaluation");
+    } finally {
+      setIsHistoryLoading(false);
+    }
+  };
 
   const getDisplayFileName = (source: string): string => {
     if (!source) return "Unknown";
@@ -438,21 +499,29 @@ const VeraDoc = () => {
   }
 };
 
-// Create custom components for table rendering
-const components = {
-  table: (props) => (
-    <Box as="table" width="full" borderWidth="1px" borderRadius="md" overflow="hidden" {...props} />
-  ),
-  thead: (props) => <Box as="thead" bg="gray.100" {...props} />,
-  tbody: (props) => <Box as="tbody" {...props} />,
-  tr: (props) => <Box as="tr" {...props} />,
-  th: (props) => (
-    <Box as="th" p={4} textAlign="left" fontWeight="bold" borderBottomWidth="1px" {...props} />
-  ),
-  td: (props) => (
-    <Box as="td" p={4} borderBottomWidth="1px" {...props} />
-  ),
-};
+  // Create custom components for table rendering
+  const components = {
+    table: (props) => (
+      <Box as="table" width="full" borderWidth="1px" borderRadius="md" overflow="hidden" {...props} />
+    ),
+    thead: (props) => <Box as="thead" bg="gray.100" {...props} />,
+    tbody: (props) => <Box as="tbody" {...props} />,
+    tr: (props) => <Box as="tr" {...props} />,
+    th: (props) => (
+      <Box as="th" p={4} textAlign="left" fontWeight="bold" borderBottomWidth="1px" {...props} />
+    ),
+    td: (props) => (
+      <Box as="td" p={4} borderBottomWidth="1px" {...props} />
+    ),
+  };
+
+
+    // Update your refetch logic when a new evaluation is created
+    useEffect(() => {
+      if (!loading && !batchLoading) {
+        historyQuery.refetch();
+      }
+    }, [loading, batchLoading]);
 
     return (
     <Container maxW="container.xl" py={8}>
@@ -781,114 +850,192 @@ const components = {
             <Separator my={4} />
             <Heading size="md" mb={4}>Results</Heading>
 
-            <Box
-              border="1px solid"
-              borderColor="gray.200"
-              borderRadius="md"
-              p={4}
-              bg="gray.50"
-              minH="100px"
-              maxH="400px"
-              overflowY="auto"
-              position="relative"
-              opacity={loading ? 0.5 : 1}
-            >
-              {loading && (
-                <Box
-                  position="absolute"
-                  top="50%"
-                  left="50%"
-                  transchecklist="translate(-50%, -50%)"
-                  zIndex="1"
-                >
-                  <Spinner size="lg" color="blue.500" />
-                </Box>
-              )}
-              {results ? (
-                <>
-                <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                  {results}
-                </ReactMarkdown>
+            {/* Fixed layout with consistent side-by-side panels */}
+            <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
+              {/* History Panel - Always show this */}
+              <Card.Root width={{ base: "100%", md: "300px" }} height="fit-content">
+                <Card.Header>
+                  <Heading size="sm">Previous Evaluations</Heading>
+                </Card.Header>
+                <Card.Body p={2}>
+                  <VStack align="stretch" spacing={2} maxH="500px" overflowY="auto">
+                    {isHistoryLoading ? (
+                      <Spinner size="sm" />
+                    ) : !reportHistory || reportHistory.length === 0 ? (
+                      <>
+                        <Text fontSize="sm" color="gray.500">No previous evaluations</Text>
+                      </>
+                    ) : (
+                      reportHistory.map(report => (
+                        <Box 
+                          key={report?.id}
+                          p={3}
+                          borderWidth="1px"
+                          borderRadius="md"
+                          cursor="pointer"
+                          bg={selectedHistoryReport?.id === report?.id ? "blue.50" : "white"}
+                          _hover={{ bg: "blue.50" }}
+                          onClick={() => report?.id && loadReportFromHistory(report.id)}
+                        >
+                          <VStack align="start" spacing={1} width="100%">
+                            <HStack spacing={1} width="100%" justify="space-between">
+                              <Text fontSize="xs" color="gray.500">
+                                {report?.date_created ? 
+                                  format(new Date(report.date_created), 'MMM d, yyyy') : 
+                                  "Unknown date"}
+                              </Text>
+                              {report?.qa_count > 0 && (
+                                <Text fontSize="xs" color="gray.500">
+                                  {report.qa_count} question{report.qa_count !== 1 ? 's' : ''}
+                                </Text>
+                              )}
+                            </HStack>
+                            
+                            {/* Document name with icon */}
+                            <HStack spacing={1} width="100%">
+                              <Box as={FiFileText} size="12px" color="blue.500" />
+                              <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
+                                {report.document_name || "Unnamed document"}
+                              </Text>
+                            </HStack>
+                            
+                            {/* KB name with icon */}
+                            {report?.kb_name && (
+                              <HStack spacing={1} width="100%">
+                                <Box as={FiDatabase} size="12px" color="gray.500" />
+                                <Text fontSize="xs" color="gray.600" noOfLines={1}>
+                                  {report.kb_name}
+                                </Text>
+                              </HStack>
+                            )}
+                          </VStack>
+                        </Box>
+                      ))
+                    )}
+                  </VStack>
+                </Card.Body>
+              </Card.Root>
 
-                {qaPairs.length > 0 && (
-                  <Box mt={4}>
-                    {qaPairs.map((pair, index) => (
-                      <Box key={index} mb={4} p={4} borderWidth="1px" borderRadius="md" bg="white">
-                        <Heading as="h3" size="md" mb={2}>
-                          Question {index + 1}: {pair.question}
-                        </Heading>
-                        
-                        <Box mb={3}>
-                          <Text fontWeight="bold">Answer:</Text>
-                          <Text>{pair.answer}</Text>
-                        </Box>
-                        
-                        <Box mb={3}>
-                          <Text fontWeight="bold">Relevant Policy Context:</Text>
-                          <Text>{pair.context}</Text>
-                        </Box>
-                        
-                        {pair.source_citations && pair.source_citations.length > 0 && (
-                          <Accordion.Root type="single" collapsible mt={2}>
-                            <Accordion.Item>
-                              <h2>
-                                <Accordion.ItemTrigger bg="gray.100" _hover={{ bg: "gray.200" }}>
-                                  <Box flex="1" textAlign="left" fontWeight="medium">
-                                    <HStack>
-                                      <FiFileText />
-                                      <Text>View Source Citations ({pair.source_citations.length})</Text>
-                                    </HStack>
-                                  </Box>
-                                </Accordion.ItemTrigger>
-                              </h2>
-                              <Accordion.ItemContent pb={4} bg="gray.50">
-                                {pair.source_citations.map((citation, cIndex) => (
-                                  <Box 
-                                    key={cIndex}
-                                    p={3} 
-                                    mb={2} 
-                                    borderWidth="1px" 
-                                    borderRadius="md"
-                                    bg="white"
-                                  >
-                                    {citation.metadata.source_data_id ? (
-                                        <SourceLink
-                                          sourceId={citation.metadata.source_data_id}
-                                          fileName={getDisplayFileName(citation.metadata.source)}
-                                          ml={1}
-                                          fontWeight="normal"
-                                          color="blue.600"
-                                          useModal={true}
-                                        />
-                                      ) : (
-                                        <Text as="span" ml={1} fontWeight="normal" color="blue.600">
-                                          {getDisplayFileName(citation.metadata.source)}
-                                        </Text>
-                                      )}
-                                    <Box 
-                                      mt={2} 
-                                      p={2} 
-                                      bg="gray.50" 
-                                      borderRadius="sm" 
-                                      fontSize="sm"
-                                      whiteSpace="pre-wrap"
-                                    >
-                                      {citation.content}
-                                    </Box>
-                                  </Box>
-                                ))}
-                              </Accordion.ItemContent>
-                            </Accordion.Item>
-                          </Accordion.Root>
-                        )}
-                      </Box>
-                    ))}
-                  </Box>
+              {/* Results Panel - Always take remaining space */}
+              <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
+                {/* Title for Results */}
+                <Heading size="md" mb={4}>
+                  {selectedHistoryReport ? 
+                    `Evaluation from ${format(new Date(selectedHistoryReport.date_created), 'MMM d, yyyy')} - ${selectedHistoryReport.document_name}` : 
+                    "Results"}
+                </Heading>
+                
+                {/* Results Box - This is the main content area */}
+                <Box
+                  border="1px solid"
+                  borderColor="gray.200"
+                  borderRadius="md"
+                  p={4}
+                  bg="gray.50"
+                  minH="100px"
+                  maxH={{ base: "400px", md: "600px" }}
+                  overflowY="auto"
+                  position="relative"
+                  opacity={loading ? 0.5 : 1}
+                >
+                  {loading && (
+                    <Box
+                      position="absolute"
+                      top="50%"
+                      left="50%"
+                      transform="translate(-50%, -50%)"
+                      zIndex="1"
+                    >
+                      <Spinner size="lg" color="blue.500" />
+                    </Box>
                   )}
-                </>
-              ) : (
-                <Text color="gray.500">Results will appear here after running.</Text>
-              )}
+                  {results ? (
+                    <>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+                      {results}
+                    </ReactMarkdown>
+
+                    {qaPairs.length > 0 && (
+                      <Box mt={4}>
+                        {qaPairs.map((pair, index) => (
+                          <Box key={index} mb={4} p={4} borderWidth="1px" borderRadius="md" bg="white">
+                            <Heading as="h3" size="md" mb={2}>
+                              Question {index + 1}: {pair.question}
+                            </Heading>
+                            
+                            <Box mb={3}>
+                              <Text fontWeight="bold">Answer:</Text>
+                              <Text>{pair.answer}</Text>
+                            </Box>
+                            
+                            <Box mb={3}>
+                              <Text fontWeight="bold">Relevant Policy Context:</Text>
+                              <Text>{pair.context}</Text>
+                            </Box>
+                            
+                            {pair.source_citations && pair.source_citations.length > 0 && (
+                              <Accordion.Root type="single" collapsible mt={2}>
+                                <Accordion.Item>
+                                  <h2>
+                                    <Accordion.ItemTrigger bg="gray.100" _hover={{ bg: "gray.200" }}>
+                                      <Box flex="1" textAlign="left" fontWeight="medium">
+                                        <HStack>
+                                          <FiFileText />
+                                          <Text>View Source Citations ({pair.source_citations.length})</Text>
+                                        </HStack>
+                                      </Box>
+                                    </Accordion.ItemTrigger>
+                                  </h2>
+                                  <Accordion.ItemContent pb={4} bg="gray.50">
+                                    {pair.source_citations.map((citation, cIndex) => (
+                                      <Box 
+                                        key={cIndex}
+                                        p={3} 
+                                        mb={2} 
+                                        borderWidth="1px" 
+                                        borderRadius="md"
+                                        bg="white"
+                                      >
+                                        {citation.metadata.source_data_id ? (
+                                            <SourceLink
+                                              sourceId={citation.metadata.source_data_id}
+                                              fileName={getDisplayFileName(citation.metadata.source)}
+                                              ml={1}
+                                              fontWeight="normal"
+                                              color="blue.600"
+                                              useModal={true}
+                                            />
+                                          ) : (
+                                            <Text as="span" ml={1} fontWeight="normal" color="blue.600">
+                                              {getDisplayFileName(citation.metadata.source)}
+                                            </Text>
+                                          )}
+                                        <Box 
+                                          mt={2} 
+                                          p={2} 
+                                          bg="gray.50" 
+                                          borderRadius="sm" 
+                                          fontSize="sm"
+                                          whiteSpace="pre-wrap"
+                                        >
+                                          {citation.content}
+                                        </Box>
+                                      </Box>
+                                    ))}
+                                  </Accordion.ItemContent>
+                                </Accordion.Item>
+                              </Accordion.Root>
+                            )}
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                    </>
+                  ) : (
+                    <Text color="gray.500">Results will appear here after running.</Text>
+                  )}
+                </Box>
+              </Box>
             </Box>
           </VStack>
         ) : (
