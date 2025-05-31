@@ -25,12 +25,13 @@ import { useMutation } from "@tanstack/react-query"
 import { VeradocService, KnowledgeBasesService } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText, FiPlus, FiTrash2, FiEdit3 } from "react-icons/fi"
+import { FiFileText, FiTrash2 } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 
 const VeraDoc = () => {
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<any>(null)
   const [knowledgeBases, setKnowledgeBases] = useState<any[]>([])
+  const { showErrorToast, showSuccessToast } = useCustomToast()
 
   const getDisplayFileName = (source: string): string => {
     if (!source) return "Unknown"
@@ -643,7 +644,7 @@ const VeraDoc = () => {
                       },
                     })
 
-                    alert("Checklist updated successfully.")
+                    showSuccessToast("Checklist updated successfully.")
                   } else {
                     // Create a new checklist
                     const response = await VeradocService.createChecklist({
@@ -656,7 +657,7 @@ const VeraDoc = () => {
 
                     const newChecklist = await response
                     setChecklists((prev) => [...prev, newChecklist])
-                    alert("Checklist created successfully.")
+                    showSuccessToast("Checklist created successfully.")
                   }
 
                   // Clear the checklist questions and re-fetch the list of checklists
@@ -667,7 +668,7 @@ const VeraDoc = () => {
                   await fetchChecklists()
                 } catch (error) {
                   console.error("Error saving checklist:", error)
-                  alert("Failed to save checklist. Please try again.")
+                  showErrorToast("Failed to save checklist. Please try again.")
                 }
               }}
             >
@@ -679,7 +680,7 @@ const VeraDoc = () => {
               colorPalette="blue"
               onClick={async () => {
                 if (!selectedChecklist) {
-                  alert("Please select a checklist to copy.")
+                  showErrorToast("Please select a checklist to copy.")
                   return
                 }
 
@@ -695,13 +696,13 @@ const VeraDoc = () => {
 
                   const newChecklist = await response
                   setChecklists((prev) => [...prev, newChecklist])
-                  alert("Checklist copied successfully.")
+                  showSuccessToast("Checklist copied successfully.")
 
                   // Re-fetch the list of checklists
                   await fetchChecklists()
                 } catch (error) {
                   console.error("Error copying checklist:", error)
-                  alert("Failed to copy checklist. Please try again.")
+                  showErrorToast("Failed to copy checklist. Please try again.")
                 }
               }}
               isDisabled={!selectedChecklist}
@@ -714,7 +715,7 @@ const VeraDoc = () => {
               colorPalette="red"
               onClick={async () => {
                 if (!selectedChecklist) {
-                  alert("Please select a checklist temmplate to delete.")
+                  showErrorToast("Please select a checklist temmplate to delete.")
                   return
                 }
 
@@ -733,10 +734,10 @@ const VeraDoc = () => {
                   setChecklistName("")
                   setChecklistDescription("")
 
-                  alert("Checklist deleted successfully.")
+                  showSuccessToast("Checklist deleted successfully.")
                 } catch (error) {
                   console.error("Error deleting checklist:", error)
-                  alert("Failed to delete checklist. Please try again.")
+                  showErrorToast("Failed to delete checklist. Please try again.")
                 }
               }}
               isDisabled={!selectedChecklist}
