@@ -5,7 +5,7 @@ from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
-from app.services.llms import get_default_llm, invoke_llm
+from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
 
 from sqlmodel import Session, select
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, Request as FastAPIRequest
@@ -317,6 +317,21 @@ async def process_rag_checklist(
                 "final_evaluation": final_evaluation,
                 "qa_pairs": qa_pairs
             }
+
+            record_llm_interaction(
+                session=session,
+                user_id=current_user.id,
+                functionality="veradoc",
+                input_data={
+                    "questions": request_data.questions,
+                    "document_name": file.filename,
+                    "kb_id": request_data.knowledge_base_id
+                },
+                output_data={
+                    "final_evaluation": final_evaluation,
+                    "qa_count": len(qa_pairs)
+                }
+            )
             
             return VeraDocResponse(results=result)
             

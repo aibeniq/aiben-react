@@ -14,13 +14,13 @@ import type {
   EmbeddingModelsGetEmbeddingModelsResponse,
   EmbeddingModelsCreateEmbeddingModelData,
   EmbeddingModelsCreateEmbeddingModelResponse,
+  EmbeddingModelsGetDefaultEmbeddingModelResponse,
   EmbeddingModelsGetEmbeddingModelData,
   EmbeddingModelsGetEmbeddingModelResponse,
   EmbeddingModelsUpdateEmbeddingModelData,
   EmbeddingModelsUpdateEmbeddingModelResponse,
   EmbeddingModelsDeleteEmbeddingModelData,
   EmbeddingModelsDeleteEmbeddingModelResponse,
-  EmbeddingModelsGetDefaultEmbeddingModelResponse,
   EmbeddingModelsSetDefaultEmbeddingModelData,
   EmbeddingModelsSetDefaultEmbeddingModelResponse,
   EmbeddingModelsValidateEmbeddingModelData,
@@ -278,6 +278,19 @@ export class EmbeddingModelsService {
   }
 
   /**
+   * Get Default Embedding Model
+   * Get the user's default embedding model (or system default if not set).
+   * @returns EmbeddingModelPublic Successful Response
+   * @throws ApiError
+   */
+  public static getDefaultEmbeddingModel(): CancelablePromise<EmbeddingModelsGetDefaultEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/embedding-models/default",
+    })
+  }
+
+  /**
    * Get Embedding Model
    * Get a specific embedding model by ID.
    * @param data The data for the request.
@@ -350,21 +363,8 @@ export class EmbeddingModelsService {
   }
 
   /**
-   * Get Default Embedding Model
-   * Get the user's default embedding model (or system default if not set).
-   * @returns EmbeddingModelPublic Successful Response
-   * @throws ApiError
-   */
-  public static getDefaultEmbeddingModel(): CancelablePromise<EmbeddingModelsGetDefaultEmbeddingModelResponse> {
-    return __request(OpenAPI, {
-      method: "GET",
-      url: "/api/v1/embedding-models/default",
-    })
-  }
-
-  /**
    * Set Default Embedding Model
-   * Set an embedding model as the default.
+   * Set an embedding model as the default for the current user.
    * @param data The data for the request.
    * @param data.modelId
    * @returns EmbeddingModelPublic Successful Response
