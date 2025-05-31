@@ -95,6 +95,10 @@ import type {
   ReportgenieDeleteOutlineResponse,
   ReportgenieGenerateDocxData,
   ReportgenieGenerateDocxResponse,
+  ReportgenieGetReportHistoryData,
+  ReportgenieGetReportHistoryResponse,
+  ReportgenieGetReportDetailData,
+  ReportgenieGetReportDetailResponse,
   UsersReadUsersData,
   UsersReadUsersResponse,
   UsersCreateUserData,
@@ -1120,6 +1124,7 @@ export class ReportgenieService {
    * @param data The data for the request.
    * @param data.knowledgeBaseId
    * @param data.sections
+   * @param data.outlineId
    * @returns ReportGenieResponse Successful Response
    * @throws ApiError
    */
@@ -1132,6 +1137,7 @@ export class ReportgenieService {
       query: {
         knowledge_base_id: data.knowledgeBaseId,
         sections: data.sections,
+        outline_id: data.outlineId,
       },
       errors: {
         422: "Validation Error",
@@ -1263,6 +1269,54 @@ export class ReportgenieService {
       body: data.requestBody,
       responseType: 'blob',
       mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Report History
+   * Retrieve past report generation history for the current user, so user can view.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getReportHistory(
+    data: ReportgenieGetReportHistoryData = {},
+  ): CancelablePromise<ReportgenieGetReportHistoryResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/reportgenie/history",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Report Detail
+   * Retrieve a specific report's full content by ID.
+   * @param data The data for the request.
+   * @param data.reportId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getReportDetail(
+    data: ReportgenieGetReportDetailData,
+  ): CancelablePromise<ReportgenieGetReportDetailResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/reportgenie/history/{report_id}",
+      path: {
+        report_id: data.reportId,
+      },
       errors: {
         422: "Validation Error",
       },

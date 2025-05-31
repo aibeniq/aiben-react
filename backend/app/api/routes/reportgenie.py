@@ -1,9 +1,11 @@
 import uuid
-from app.models import ReportGenieRequest, ReportGenieResponse, ReportGenieSection, ReportGenieOutline, Source, KnowledgeBase, EmbeddingModel, DocxRequest
+from app.models import ReportGenieRequest, ReportGenieResponse, ReportGenieSection, ReportGenieOutline, Source, KnowledgeBase, EmbeddingModel, DocxRequest, LlmInteraction
 from pathlib import Path
 import re
 import tempfile
 import zipfile
+import json
+
 from io import BytesIO
 from datetime import datetime
 from fastapi.responses import StreamingResponse
@@ -154,21 +156,47 @@ async def generate_report(
                 "sections": sections
             }
 
+            # Get outline name if outline_id is provided
+            outline_name = None
+            if hasattr(request, 'outline_id') and request.outline_id:
+                try:
+                    outline = session.get(ReportGenieOutline, request.outline_id)
+                    if outline:
+                        outline_name = outline.name
+                except Exception as e:
+                    print(f"Warning: Error retrieving outline name: {e}")
+            
+            # If no outline_id but we have sections, use first line or "Custom Outline"
+            if not outline_name and request.sections:
+                first_line = request.sections.strip().split('\n')[0]
+                if first_line:
+                    # Extract a name from the first section (limited to 30 chars)
+                    outline_name = first_line[:30] + ("..." if len(first_line) > 30 else "")
+                else:
+                    outline_name = "Custom Outline"
+            
+            # Store the full report and sections data in extra_data for retrieval later
+            detailed_extra_data = {
+                "kb_name": kb.title,
+                "full_report": full_report,
+                "sections": sections,  # This includes section content and sources
+                "outline_name": outline_name  # Add the outline name here
+            }
+
             record_llm_interaction(
                 session=session,
                 user_id=current_user.id,
                 functionality="reportgenie",
                 input_data={
                     "sections": request.sections,
-                    "kb_id": request.knowledge_base_id
+                    "kb_id": request.knowledge_base_id,
+                    "outline_id": request.outline_id if hasattr(request, 'outline_id') else None,
                 },
                 output_data={
                     "section_count": len(sections),
                     "total_length": len(full_report)
                 },
-                metadata={
-                    "kb_name": kb.title
-                }
+                metadata=detailed_extra_data
             )
             
             return ReportGenieResponse(results=result)
@@ -405,3 +433,137 @@ async def generate_docx(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
+    
+
+@router.get("/history", response_model=List[Dict[str, Any]])
+async def get_report_history(
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 20,
+):
+    """Retrieve past report generation history for the current user, so user can view."""
+    print("Retrieving report history for user: ", current_user.id)
+    
+    try:
+        reports = session.exec(
+            select(LlmInteraction)
+            .where(
+                LlmInteraction.user_id == current_user.id,
+                LlmInteraction.functionality == "reportgenie"
+            )
+            .order_by(LlmInteraction.date_created.desc())
+            .offset(skip)
+            .limit(limit)
+        ).all()
+
+        print("Found {} reports for user {}:".format(len(reports), current_user.id))
+        
+        result = []
+        for report in reports:
+            # Parse the input_data and output_data from string to dict if possible
+            try:
+                input_data = json.loads(report.input_data) if report.input_data else {}
+                output_data = json.loads(report.output_data) if report.output_data else {}
+                extra_data = report.extra_data or {}
+                
+                # Create a user-friendly title
+                kb_name = extra_data.get("kb_name", "Unknown Knowledge Base")
+                title = f"Report on {kb_name}"
+                date = report.date_created.strftime("%Y-%m-%d %H:%M")
+                
+                result.append({
+                    "id": str(report.id),
+                    "date_created": report.date_created,
+                    "title": title,
+                    "sections": input_data.get("sections", ""),
+                    "kb_id": input_data.get("kb_id", ""),
+                    "section_count": output_data.get("section_count", 0),
+                    "kb_name": kb_name,
+                    "outline_name": extra_data.get("outline_name", "")
+                })
+            except json.JSONDecodeError:
+                # If JSON parsing fails, use raw data
+                result.append({
+                    "id": str(report.id),
+                    "date_created": report.date_created,
+                    "title": title,
+                    "sections": input_data.get("sections", ""),
+                    "kb_id": input_data.get("kb_id", ""),
+                    "section_count": output_data.get("section_count", 0),
+                    "kb_name": kb_name,
+                    "outline_name": extra_data.get("outline_name", "")
+                })
+        
+        return result
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error retrieving report history: {str(e)}")
+    
+
+@router.get("/history/{report_id}")
+async def get_report_detail(
+    report_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+):
+    """Retrieve a specific report's full content by ID."""
+    try:
+        report = session.get(LlmInteraction, report_id)
+        if not report:
+            raise HTTPException(status_code=404, detail="Report not found")
+        
+        if report.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="You don't have access to this report")
+        
+        if report.functionality != "reportgenie":
+            raise HTTPException(status_code=400, detail="This is not a ReportGenie report")
+        
+        # Try to reconstruct the original report structure
+        try:
+            input_data = json.loads(report.input_data) if report.input_data else {}
+            output_data = json.loads(report.output_data) if report.output_data else {}
+            extra_data = report.extra_data or {}
+            
+            # If we don't have the full report content in extra_data, we need to generate a response
+            # that's compatible with the normal report format
+            kb_name = extra_data.get("kb_name", "Unknown Knowledge Base")
+            
+            # For the frontend to render the report properly, we need to return a structure
+            # that mirrors what the generate_report endpoint returns
+            
+            # Try to get any saved full report content
+            full_report = extra_data.get("full_report", "")
+            
+            # Create a response that matches the structure expected by the frontend
+            result = {
+                "id": str(report.id),
+                "date_created": report.date_created,
+                "kb_name": kb_name,
+                "kb_id": input_data.get("kb_id", ""),
+                "sections": input_data.get("sections", ""),
+                "results": {
+                    "full_report": full_report,
+                    "sections": extra_data.get("sections", [])
+                }
+            }
+            
+            return result
+            
+        except json.JSONDecodeError:
+            # Fallback if JSON parsing fails
+            return {
+                "id": str(report.id),
+                "date_created": report.date_created,
+                "results": {
+                    "full_report": f"Unable to reconstruct report from {report.date_created}.\n\n"
+                                  f"This might be due to an older format or incomplete data.",
+                    "sections": []
+                }
+            }
+            
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error retrieving report details: {str(e)}")

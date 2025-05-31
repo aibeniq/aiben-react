@@ -357,6 +357,7 @@ class LlmModelsValidate(SQLModel):
 class ReportGenieRequest(SQLModel):
     knowledge_base_id: str
     sections: str
+    outline_id: str
 
 # Response model for ReportGenie
 class ReportGenieResponse(SQLModel):

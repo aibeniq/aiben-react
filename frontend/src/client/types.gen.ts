@@ -528,6 +528,7 @@ export type PrivateCreateUserResponse = UserPublic
 
 export type ReportgenieGenerateReportData = {
   knowledgeBaseId: string
+  outlineId: string
   sections: string
 }
 
@@ -565,6 +566,21 @@ export type ReportgenieGenerateDocxData = {
 }
 
 export type ReportgenieGenerateDocxResponse = unknown
+
+export type ReportgenieGetReportHistoryData = {
+  limit?: number
+  skip?: number
+}
+
+export type ReportgenieGetReportHistoryResponse = Array<{
+  [key: string]: unknown
+}>
+
+export type ReportgenieGetReportDetailData = {
+  reportId: string
+}
+
+export type ReportgenieGetReportDetailResponse = unknown
 
 export type UsersReadUsersData = {
   limit?: number
