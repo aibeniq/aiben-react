@@ -25,7 +25,7 @@ import { useMutation } from "@tanstack/react-query"
 import { VeradocService, KnowledgeBasesService } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText, FiTrash2 } from "react-icons/fi"
+import { FiFileText, FiTrash2, FiChevronUp, FiChevronDown } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 
 const VeraDoc = () => {
@@ -226,6 +226,24 @@ const VeraDoc = () => {
 
   const removeQuestion = (index: number) => {
     const newQuestions = questionsList.filter((_, i) => i !== index)
+    updateQuestionsFromList(newQuestions)
+  }
+
+  const moveQuestionUp = (index: number) => {
+    if (index === 0) return // Can't move first item up
+    const newQuestions = [...questionsList]
+    const temp = newQuestions[index]
+    newQuestions[index] = newQuestions[index - 1]
+    newQuestions[index - 1] = temp
+    updateQuestionsFromList(newQuestions)
+  }
+
+  const moveQuestionDown = (index: number) => {
+    if (index === questionsList.length - 1) return // Can't move last item down
+    const newQuestions = [...questionsList]
+    const temp = newQuestions[index]
+    newQuestions[index] = newQuestions[index + 1]
+    newQuestions[index + 1] = temp
     updateQuestionsFromList(newQuestions)
   }
 
@@ -612,7 +630,10 @@ const VeraDoc = () => {
                   question={question}
                   onUpdate={updateQuestion}
                   onRemove={removeQuestion}
+                  onMoveUp={moveQuestionUp}
+                  onMoveDown={moveQuestionDown}
                   canRemove={questionsList.length > 1}
+                  totalQuestions={questionsList.length}
                 />
               ))}
               <Button
@@ -1279,44 +1300,24 @@ const FileDropzone = ({
   )
 }
 
-// Custom drag handle component (3x2 dots)
-const DragHandle = () => (
-  <Box
-    display="flex"
-    flexDirection="column"
-    gap="2px"
-    p="2px"
-    cursor="grab"
-    opacity={0.4}
-    _hover={{ opacity: 0.8 }}
-  >
-    <Box display="flex" gap="2px">
-      <Box w="3px" h="3px" bg="gray.500" borderRadius="full" />
-      <Box w="3px" h="3px" bg="gray.500" borderRadius="full" />
-    </Box>
-    <Box display="flex" gap="2px">
-      <Box w="3px" h="3px" bg="gray.500" borderRadius="full" />
-      <Box w="3px" h="3px" bg="gray.500" borderRadius="full" />
-    </Box>
-    <Box display="flex" gap="2px">
-      <Box w="3px" h="3px" bg="gray.500" borderRadius="full" />
-      <Box w="3px" h="3px" bg="gray.500" borderRadius="full" />
-    </Box>
-  </Box>
-)
-
 const QuestionItem = ({
   index,
   question,
   onUpdate,
   onRemove,
+  onMoveUp,
+  onMoveDown,
   canRemove,
+  totalQuestions,
 }: {
   index: number
   question: string
   onUpdate: (index: number, value: string) => void
   onRemove: (index: number) => void
+  onMoveUp: (index: number) => void
+  onMoveDown: (index: number) => void
   canRemove: boolean
+  totalQuestions: number
 }) => {
   const [isHovered, setIsHovered] = useState(false)
 
@@ -1324,40 +1325,29 @@ const QuestionItem = ({
     <Box
       position="relative"
       display="flex"
-      p={0}
+      py={1}
       borderRadius="md"
       bg="transparent"
-      border="1px solid transparent"
       transition="all 0.2s ease"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <HStack align="flex-start" gap={3} w="full">
-        <IconButton
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          size="sm"
-          variant="ghost"
-          colorScheme="gray"
-          aria-label="Remove question"
-          transition="opacity 0.2s ease"
-        >
-          <DragHandle />
-        </IconButton>
+      <HStack align="center" gap={0} w="full">
         <Box flex="1" w="full">
           <Input
             value={question}
             onChange={(e) => onUpdate(index, e.target.value)}
             placeholder="Enter your question here..."
-            size="md"
+            size="sm"
             borderTop="none"
             borderLeft="none"
             borderRight="none"
             borderBottom="1px solid"
             borderColor="gray.200"
+            borderRadius="none"
             bg="transparent"
-            px={0}
+            px={2}
+            py={0}
             w="full"
             _focus={{
               borderTop: "none",
@@ -1366,33 +1356,69 @@ const QuestionItem = ({
               borderBottom: "1px solid",
               boxShadow: "none",
               outline: "none",
-              borderColor: "gray.200",
               bg: "transparent",
-              px: 0,
-              w: "full",
             }}
           />
         </Box>
 
-        <Box opacity={isHovered ? 1 : 0} transition="opacity 0.2s ease" mt={1}>
-          <HStack>
-            {canRemove && (
-              <IconButton
-                size="sm"
-                variant="ghost"
-                colorPalette="red"
-                aria-label="Remove question"
-                opacity={isHovered ? 1 : 0}
-                transition="opacity 0.2s ease"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onRemove(index)
-                }}
-              >
-                <FiTrash2 />
-              </IconButton>
-            )}
-          </HStack>
+        <VStack containerName="move-question-arrows" gap={0} minW="40px" align="center" py={1}>
+          <IconButton
+            name="move-up-arrow"
+            size="xs"
+            variant="ghost"
+            colorScheme="gray"
+            aria-label="Move question up"
+            onClick={() => onMoveUp(index)}
+            opacity={isHovered && index !== 0 ? 1 : 0}
+            transition="opacity 0.2s ease"
+            h="20px"
+            w="20px"
+            minW="20px"
+            pointerEvents={index === 0 ? "none" : "auto"}
+          >
+            <FiChevronUp size={12} />
+          </IconButton>
+
+          <IconButton
+            name="move-down-arrow"
+            size="xs"
+            variant="ghost"
+            colorScheme="gray"
+            aria-label="Move question down"
+            onClick={() => onMoveDown(index)}
+            pointerEvents={index === totalQuestions - 1 ? "none" : "auto"}
+            opacity={isHovered && index !== totalQuestions - 1 ? 1 : 0}
+            transition="opacity 0.2s ease"
+            h="20px"
+            w="20px"
+            minW="20px"
+          >
+            <FiChevronDown size={12} />
+          </IconButton>
+        </VStack>
+
+        <Box
+          containerName="remove-question-button"
+          opacity={isHovered ? 1 : 0}
+          transition="opacity 0.2s ease"
+        >
+          {canRemove && (
+            <IconButton
+              size="xs"
+              variant="ghost"
+              colorPalette="red"
+              aria-label="Remove question"
+              onClick={(e) => {
+                e.stopPropagation()
+                onRemove(index)
+              }}
+              h="24px"
+              w="24px"
+              minW="24px"
+            >
+              <FiTrash2 size={12} />
+            </IconButton>
+          )}
         </Box>
       </HStack>
     </Box>
