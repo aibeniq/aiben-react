@@ -14,6 +14,7 @@ import {
   Separator,
   Table,
   Accordion,
+  IconButton,
 } from "@chakra-ui/react"
 import useCustomToast from "@/hooks/useCustomToast"
 import SourceLink from "@/components/Common/SourceLink"
@@ -24,7 +25,7 @@ import { useMutation } from "@tanstack/react-query"
 import { VeradocService, KnowledgeBasesService } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText } from "react-icons/fi"
+import { FiFileText, FiPlus, FiTrash2, FiEdit3 } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 
 const VeraDoc = () => {
@@ -172,6 +173,7 @@ const VeraDoc = () => {
   const [checklistDescription, setChecklistDescription] = useState("") // Description of the checklist
 
   const [questions, setQuestions] = useState("")
+  const [questionsList, setQuestionsList] = useState<string[]>([])
   const [results, setResults] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -187,6 +189,44 @@ const VeraDoc = () => {
   useEffect(() => {
     fetchChecklists()
   }, [])
+
+  // Convert questions string to array when questions change
+  useEffect(() => {
+    if (questions) {
+      const questionsArray = questions.split("\n").filter((q) => q.trim() !== "")
+      setQuestionsList(questionsArray.length > 0 ? questionsArray : [""])
+    } else {
+      setQuestionsList([""])
+    }
+  }, [questions])
+
+  // Initialize with one empty question on component mount
+  useEffect(() => {
+    if (questionsList.length === 0) {
+      setQuestionsList([""])
+    }
+  }, [])
+
+  // Convert questions array back to string when questionsList changes
+  const updateQuestionsFromList = (newQuestionsList: string[]) => {
+    setQuestionsList(newQuestionsList)
+    setQuestions(newQuestionsList.join("\n"))
+  }
+
+  const addQuestion = () => {
+    updateQuestionsFromList([...questionsList, ""])
+  }
+
+  const updateQuestion = (index: number, value: string) => {
+    const newQuestions = [...questionsList]
+    newQuestions[index] = value
+    updateQuestionsFromList(newQuestions)
+  }
+
+  const removeQuestion = (index: number) => {
+    const newQuestions = questionsList.filter((_, i) => i !== index)
+    updateQuestionsFromList(newQuestions)
+  }
 
   // Add this mutation hook inside your VeraDoc component, before your handleRun function
   const mutation = useMutation({
@@ -524,7 +564,8 @@ const VeraDoc = () => {
               onChange={(e) => {
                 const checklist = checklists.find((f) => f.id === e.target.value)
                 setSelectedChecklist(checklist)
-                setQuestions(checklist?.questions || "")
+                const checklistQuestions = checklist?.questions || ""
+                setQuestions(checklistQuestions)
                 setChecklistName(checklist?.name || "")
                 setChecklistDescription(checklist?.description || "")
               }}
@@ -562,13 +603,27 @@ const VeraDoc = () => {
           </Field>
 
           <Field label="Questions" required>
-            <Textarea
-              value={"lolo"}
-              onChange={(e) => setQuestions(e.target.value)}
-              placeholder="Enter questions, one per line"
-              rows={6}
-              resize="vertical"
-            />
+            <VStack align="stretch" gap={3} display="flex" flexDirection="column" width="100%">
+              {questionsList.map((question, index) => (
+                <QuestionItem
+                  key={index}
+                  index={index}
+                  question={question}
+                  onUpdate={updateQuestion}
+                  onRemove={removeQuestion}
+                  canRemove={questionsList.length > 1}
+                />
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addQuestion}
+                alignSelf="flex-start"
+                colorPalette="blue"
+              >
+                + Add Question
+              </Button>
+            </VStack>
           </Field>
 
           <HStack spacing={4} pt={2}>
@@ -1217,6 +1272,59 @@ const FileDropzone = ({
           </HStack>
         )}
       </VStack>
+    </Box>
+  )
+}
+
+const QuestionItem = ({
+  index,
+  question,
+  onUpdate,
+  onRemove,
+  canRemove,
+}: {
+  index: number
+  question: string
+  onUpdate: (index: number, value: string) => void
+  onRemove: (index: number) => void
+  canRemove: boolean
+}) => {
+  return (
+    <Box
+      p={3}
+      borderWidth="1px"
+      borderRadius="md"
+      color="blue.500"
+      bg="gray.50"
+      _hover={{ borderColor: "blue.300" }}
+    >
+      <HStack justify="space-between" align="flex-start" gap={3}>
+        <Box flex="1">
+          <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={2}>
+            Question {index + 1}
+          </Text>
+          <Input
+            value={question}
+            onChange={(e) => onUpdate(index, e.target.value)}
+            placeholder="Enter your question here..."
+            size="md"
+          />
+        </Box>
+        {canRemove && (
+          <IconButton
+            size="sm"
+            variant="ghost"
+            colorScheme="red"
+            aria-label="Remove question"
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove(index)
+            }}
+          >
+            <FiTrash2 />
+          </IconButton>
+        )}
+      </HStack>
     </Box>
   )
 }
