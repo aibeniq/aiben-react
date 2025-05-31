@@ -193,7 +193,7 @@ const VeraDoc = () => {
   // Convert questions string to array when questions change
   useEffect(() => {
     if (questions) {
-      const questionsArray = questions.split("\n").filter((q) => q.trim() !== "")
+      const questionsArray = questions.split("\n")
       setQuestionsList(questionsArray.length > 0 ? questionsArray : [""])
     } else {
       setQuestionsList([""])
@@ -632,13 +632,14 @@ const VeraDoc = () => {
               onClick={async () => {
                 try {
                   if (selectedChecklist) {
+                    const trimmedQuestions = questions.trim()
                     // Update the selected checklist
                     await VeradocService.updateChecklist({
                       checklistId: selectedChecklist.id,
                       requestBody: {
                         name: checklistName,
                         description: checklistDescription,
-                        questions,
+                        questions: trimmedQuestions,
                       },
                     })
 
