@@ -15,6 +15,7 @@ import {
   Table,
   Accordion,
   Card
+  IconButton,
 } from "@chakra-ui/react"
 import useCustomToast from "@/hooks/useCustomToast"
 import { CancelablePromise } from "@/client/core/CancelablePromise"
@@ -24,9 +25,9 @@ import { useDropzone } from "react-dropzone"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
 import { VeradocService, KnowledgeBasesService } from "@/client"
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import { FiFileText, FiDatabase } from "react-icons/fi"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import { FiFileText, FiDatabase, FiTrash2, FiChevronUp, FiChevronDown } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 import { format } from 'date-fns';
 import { useQuery } from "@tanstack/react-query";
@@ -97,77 +98,78 @@ const VeraDoc = () => {
   };
 
   const getDisplayFileName = (source: string): string => {
-    if (!source) return "Unknown";
-    
+    if (!source) return "Unknown"
+
     // Clean up temporary file paths
-    if (source.includes('/tmp/') || source.includes('\\tmp\\')) {
+    if (source.includes("/tmp/") || source.includes("\\tmp\\")) {
       // First get the filename without the path
-      const filename = source.split('/').pop() || 
-                      source.split('\\').pop() || '';
-      
+      const filename = source.split("/").pop() || source.split("\\").pop() || ""
+
       // Then remove everything before and including the first underscore
-      return filename.includes('_') 
-        ? filename.substring(filename.indexOf('_') + 1) 
-        : filename;
+      return filename.includes("_") ? filename.substring(filename.indexOf("_") + 1) : filename
     }
-    
-    return source;
-  };
+
+    return source
+  }
 
   // Add this effect to fetch knowledge bases when component mounts
   useEffect(() => {
     const fetchKnowledgeBases = async () => {
       try {
         // Assuming your service has a method to fetch knowledge bases
-        const response = await KnowledgeBasesService.readKnowledgeBases({ 
-          skip: 0, 
-          limit: 100 // Get all knowledge bases
-        });
-        setKnowledgeBases(response.data || []);
+        const response = await KnowledgeBasesService.readKnowledgeBases({
+          skip: 0,
+          limit: 100, // Get all knowledge bases
+        })
+        setKnowledgeBases(response.data || [])
       } catch (error) {
-        console.error("Error fetching knowledge bases:", error);
+        console.error("Error fetching knowledge bases:", error)
       }
-    };
+    }
 
-    fetchKnowledgeBases();
-  }, []);
+    fetchKnowledgeBases()
+  }, [])
 
-    // Add these state variables with your other state definitions
-    const [selectedKnowledgeBaseDetails, setSelectedKnowledgeBaseDetails] = useState<any>(null);
+  // Add these state variables with your other state definitions
+  const [selectedKnowledgeBaseDetails, setSelectedKnowledgeBaseDetails] = useState<any>(null)
 
-    // Add this function to fetch knowledge base details including sources
-    const fetchKnowledgeBaseDetails = async (knowledgeBaseId: string) => {
-      try {
-        const response = await KnowledgeBasesService.readKnowledgeBase({ id: knowledgeBaseId });
-        setSelectedKnowledgeBaseDetails(response);
-      } catch (error) {
-        console.error("Error fetching knowledge base details:", error);
-        showErrorToast("Failed to fetch knowledge base details");
-      }
-    };
+  // Add this function to fetch knowledge base details including sources
+  const fetchKnowledgeBaseDetails = async (knowledgeBaseId: string) => {
+    try {
+      const response = await KnowledgeBasesService.readKnowledgeBase({ id: knowledgeBaseId })
+      setSelectedKnowledgeBaseDetails(response)
+    } catch (error) {
+      console.error("Error fetching knowledge base details:", error)
+      showErrorToast("Failed to fetch knowledge base details")
+    }
+  }
 
-  const [mode, setMode] = useState<"manual" | "batch">("manual"); // Toggle between Manual and Batch Mode
- 
-  const [batchFiles, setBatchFiles] = useState<Array<{
-    file: File;
-    isHandwritten: boolean;
-  }>>([]);
+  const [mode, setMode] = useState<"manual" | "batch">("manual") // Toggle between Manual and Batch Mode
 
-  const [batchResults, setBatchResults] = useState<Array<{ displayResults: string; qaPairs: any[] }>>([]);
-  const [selectedBatchResult, setSelectedBatchResult] = useState<number>(0);
-  const [batchLoading, setBatchLoading] = useState<boolean>(false);
+  const [batchFiles, setBatchFiles] = useState<
+    Array<{
+      file: File
+      isHandwritten: boolean
+    }>
+  >([])
+
+  const [batchResults, setBatchResults] = useState<
+    Array<{ displayResults: string; qaPairs: any[] }>
+  >([])
+  const [selectedBatchResult, setSelectedBatchResult] = useState<number>(0)
+  const [batchLoading, setBatchLoading] = useState<boolean>(false)
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles) => {
       if (acceptedFiles.length > 0) {
         // Convert the new files to our file item format
-        const newFileItems = acceptedFiles.map(file => ({
+        const newFileItems = acceptedFiles.map((file) => ({
           file,
-          isHandwritten: false
-        }));
-        
+          isHandwritten: false,
+        }))
+
         // Add to existing files
-        setBatchFiles(prev => [...prev, ...newFileItems]);
+        setBatchFiles((prev) => [...prev, ...newFileItems])
       }
     },
     accept: {
@@ -178,132 +180,217 @@ const VeraDoc = () => {
       "image/png": [".png"],
     },
     multiple: true,
-  });
+  })
 
   // Add batch uploader
   const addBatchUploader = () => {
-    setBatchFileItems((prev) => [...prev, { files: [], isHandwritten: false }]);
-  };
+    setBatchFileItems((prev) => [...prev, { files: [], isHandwritten: false }])
+  }
 
   // Toggle handwritten status for all files in a batch uploader
   const toggleBatchHandwritten = (index: number) => {
     setBatchFileItems((prev) =>
-      prev.map((item, i) =>
-        i === index ? { ...item, isHandwritten: !item.isHandwritten } : item
-      )
-    );
-  };
+      prev.map((item, i) => (i === index ? { ...item, isHandwritten: !item.isHandwritten } : item)),
+    )
+  }
 
   const removeBatchUploader = (index: number) => {
-    setBatchFileItems((prev) => prev.filter((_, i) => i !== index));
-  };
+    setBatchFileItems((prev) => prev.filter((_, i) => i !== index))
+  }
 
   const addFilesToBatchUploader = (index: number, newFiles: File[]) => {
     setBatchFileItems((prev) =>
       prev.map((item, i) =>
-        i === index ? { 
-          ...item, 
-          files: [...item.files, ...newFiles],
-          isHandwritten: item.isHandwritten  // Preserve the handwritten state
-        } : item
-      )
-    );
-  };
+        i === index
+          ? {
+              ...item,
+              files: [...item.files, ...newFiles],
+              isHandwritten: item.isHandwritten, // Preserve the handwritten state
+            }
+          : item,
+      ),
+    )
+  }
 
   const getBatchSetCount = () => {
     // Find the minimum number of files across all batch uploaders
     // This represents how many complete sets we can process
-    if (!batchFileItems || batchFileItems.length === 0) return 0;
-    
-    // Get the number of files in each uploader
-    const fileCounts = batchFileItems.map(item => item.files.length);
-    
-    // Return the minimum (as we can only process as many complete sets as the column with fewest files)
-    return Math.min(...fileCounts);
-  };
-   
-  const [fileItems, setFileItems] = useState<Array<{
-    file: File;
-    isHandwritten: boolean;
-  }>>([]);
+    if (!batchFileItems || batchFileItems.length === 0) return 0
 
-  const [qaPairs, setQaPairs] = useState<Array<any>>([]);
-  const [checklists, setChecklists] = useState([]); // List of checklists
-  const [selectedChecklist, setSelectedChecklist] = useState(null); // Currently selected checklist
-  const [checklistName, setChecklistName] = useState(""); // Name of the checklist being created/edited
-  const [checklistDescription, setChecklistDescription] = useState(""); // Description of the checklist
+    // Get the number of files in each uploader
+    const fileCounts = batchFileItems.map((item) => item.files.length)
+
+    // Return the minimum (as we can only process as many complete sets as the column with fewest files)
+    return Math.min(...fileCounts)
+  }
+
+  const [fileItems, setFileItems] = useState<
+    Array<{
+      file: File
+      isHandwritten: boolean
+    }>
+  >([])
+
+  const [qaPairs, setQaPairs] = useState<Array<any>>([])
+  const [checklists, setChecklists] = useState([]) // List of checklists
+  const [selectedChecklist, setSelectedChecklist] = useState(null) // Currently selected checklist
+  const [checklistName, setChecklistName] = useState("") // Name of the checklist being created/edited
+  const [checklistDescription, setChecklistDescription] = useState("") // Description of the checklist
 
   const [questions, setQuestions] = useState("")
+  const [questionsList, setQuestionsList] = useState<string[]>([])
   const [results, setResults] = useState("")
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
 
   const fetchChecklists = async () => {
     try {
-      const data = await VeradocService.getChecklists();
-      setChecklists(data);
+      const data = await VeradocService.getChecklists()
+      setChecklists(data)
     } catch (error) {
-      console.error("Error fetching checklists:", error);
+      console.error("Error fetching checklists:", error)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchChecklists();
-  }, []);
+    fetchChecklists()
+  }, [])
 
+  // Convert questions string to array when questions change
   useEffect(() => {
-    return () => {
-      console.log("Component unmounting, cleaning up requests");
-      if (ongoingRequest.current) {
-        ongoingRequest.current.cancel();
+    if (questions) {
+      const questionsArray = questions.split("\n")
+      setQuestionsList(questionsArray.length > 0 ? questionsArray : [""])
+    } else {
+      setQuestionsList([""])
+    }
+  }, [questions])
+
+  // Initialize with one empty question on component mount
+  useEffect(() => {
+    if (questionsList.length === 0) {
+      setQuestionsList([""])
+    }
+  }, [])
+
+  // Convert questions array back to string when questionsList changes
+  const updateQuestionsFromList = (newQuestionsList: string[]) => {
+    setQuestionsList(newQuestionsList)
+    setQuestions(newQuestionsList.join("\n"))
+  }
+
+  const addQuestion = () => {
+    updateQuestionsFromList([...questionsList, ""])
+  }
+
+  const updateQuestion = (index: number, value: string) => {
+    const newQuestions = [...questionsList]
+    newQuestions[index] = value
+    updateQuestionsFromList(newQuestions)
+  }
+
+  const handleQuestionBlur = (index: number, value: string) => {
+    // If the question is empty and it's not the only question, remove it
+    if (value.trim() === "" && questionsList.length > 1) {
+      const newQuestions = questionsList.filter((_, i) => i !== index)
+
+      // Ensure we always have at least one empty question at the end
+      const hasEmptyQuestion = newQuestions.some((q) => q.trim() === "")
+      if (!hasEmptyQuestion) {
+        newQuestions.push("")
       }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+
+      updateQuestionsFromList(newQuestions)
+    }
+  }
+
+  // Use useEffect to automatically add new questions when needed
+  useEffect(() => {
+    // If the last question has content and there's no empty question at the end, add one
+    if (questionsList.length > 0) {
+      const lastQuestion = questionsList[questionsList.length - 1]
+      if (lastQuestion.trim() !== "") {
+        updateQuestionsFromList([...questionsList, ""])
       }
-    };
-  }, []); // No dependencies, only runs on mount/unmount
+    }
+  }, [questionsList])
+
+  const removeQuestion = (index: number) => {
+    // Don't allow removing if it's the only question or if it would leave no empty questions
+    if (questionsList.length <= 1) return
+
+    const newQuestions = questionsList.filter((_, i) => i !== index)
+
+    // Ensure we always have at least one empty question at the end
+    const hasEmptyQuestion = newQuestions.some((q) => q.trim() === "")
+    if (!hasEmptyQuestion && questionsList[questionsList.length - 1].trim() !== "") {
+      newQuestions.push("")
+    }
+
+    updateQuestionsFromList(newQuestions)
+  }
+
+  const moveQuestionUp = (index: number) => {
+    if (index === 0) return // Can't move first item up
+    const newQuestions = [...questionsList]
+    const temp = newQuestions[index]
+    newQuestions[index] = newQuestions[index - 1]
+    newQuestions[index - 1] = temp
+    updateQuestionsFromList(newQuestions)
+  }
+
+  const moveQuestionDown = (index: number) => {
+    if (index === questionsList.length - 1) return // Can't move last item down
+    const newQuestions = [...questionsList]
+    const temp = newQuestions[index]
+    newQuestions[index] = newQuestions[index + 1]
+    newQuestions[index + 1] = temp
+    updateQuestionsFromList(newQuestions)
+  }
 
   // Add this mutation hook inside your VeraDoc component, before your handleRun function
   const mutation = useMutation({
     mutationFn: (data: {
-        questions: string;
-        knowledgeBaseId: string;
-        files: File[];
-        handwrittenFiles: File[];
-      }) => {
+      questions: string
+      knowledgeBaseId: string
+      files: File[]
+      handwrittenFiles: File[]
+    }) => {
       if (ongoingRequest.current) {
-        ongoingRequest.current.cancel();
+        ongoingRequest.current.cancel()
       }
       if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+        abortControllerRef.current.abort()
       }
-      
+
       // Create a new controller and store directly in the ref
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-      
-      console.log("Creating new request with fresh AbortController");
-      
+      const controller = new AbortController()
+      abortControllerRef.current = controller
+
+      console.log("Creating new request with fresh AbortController")
+
       // Create the promise and store it
-      const promise = VeradocService.processRagChecklist({
-        questions: data.questions,
-        knowledgeBaseId: data.knowledgeBaseId,
-        formData: {
-          files: data.files,
-          handwritten_files: data.handwrittenFiles,
+      const promise = VeradocService.processRagChecklist(
+        {
+          questions: data.questions,
+          knowledgeBaseId: data.knowledgeBaseId,
+          formData: {
+            files: data.files,
+            handwritten_files: data.handwrittenFiles,
+          },
         },
-      }, { signal: controller.signal });
-      
-      ongoingRequest.current = promise;
-      return promise;
+        { signal: controller.signal },
+      )
+
+      ongoingRequest.current = promise
+      return promise
     },
     onSuccess: (data) => {
       console.log("Response data:", data)
-      
-      setResults(data.results.final_evaluation);
+
+      setResults(data.results.final_evaluation)
 
       // Store the QA pairs to render with custom components
-      setQaPairs(data.results.qa_pairs || []);
-      
+      setQaPairs(data.results.qa_pairs || [])
     },
     onError: (error) => {
       console.log("RAG mutation unsuccessful!")
@@ -312,27 +399,29 @@ const VeraDoc = () => {
     onSettled: () => {
       ongoingRequest.current = null
       setLoading(false)
-    }
+    },
   })
 
   const addFile = (file: File) => {
-    setFileItems(prevItems => [...prevItems, { file, isHandwritten: false }])
+    setFileItems((prevItems) => [...prevItems, { file, isHandwritten: false }])
   }
 
   const removeFile = (index: number) => {
-    setFileItems(prevItems => prevItems.filter((_, i) => i !== index))
+    setFileItems((prevItems) => prevItems.filter((_, i) => i !== index))
   }
 
   const updateFile = (index: number, file: File) => {
-    setFileItems(prevItems => prevItems.map((item, i) => 
-      i === index ? { ...item, file } : item
-    ))
+    setFileItems((prevItems) =>
+      prevItems.map((item, i) => (i === index ? { ...item, file } : item)),
+    )
   }
 
   const toggleHandwritten = (index: number) => {
-    setFileItems(prevItems => prevItems.map((item, i) => 
-      i === index ? { ...item, isHandwritten: !item.isHandwritten } : item
-    ))
+    setFileItems((prevItems) =>
+      prevItems.map((item, i) =>
+        i === index ? { ...item, isHandwritten: !item.isHandwritten } : item,
+      ),
+    )
   }
 
   const handleAddNewFile = () => {
@@ -342,28 +431,30 @@ const VeraDoc = () => {
 
   const handleRun = async () => {
     if (fileItems.length < 1) {
-      setResults("Please upload at least one file.");
-      return;
+      setResults("Please upload at least one file.")
+      return
     }
 
     if (!questions.trim()) {
-      setResults("Please enter at least one question.");
-      return;
+      setResults("Please enter at least one question.")
+      return
     }
 
     if (!selectedKnowledgeBase?.id) {
-      setResults("Please select a knowledge base for context.");
-      return;
+      setResults("Please select a knowledge base for context.")
+      return
     }
 
     // Filter out placeholder files and separate into regular vs handwritten
-    const validItems = fileItems.filter(item => item.file.size > 0);
-    const regularFiles = validItems.filter(item => !item.isHandwritten).map(item => item.file);
-    const handwrittenFiles = validItems.filter(item => item.isHandwritten).map(item => item.file);
+    const validItems = fileItems.filter((item) => item.file.size > 0)
+    const regularFiles = validItems.filter((item) => !item.isHandwritten).map((item) => item.file)
+    const handwrittenFiles = validItems
+      .filter((item) => item.isHandwritten)
+      .map((item) => item.file)
 
     if (validItems.length < 1) {
-      setResults("Please upload at least one valid file.");
-      return;
+      setResults("Please upload at least one valid file.")
+      return
     }
 
     const requestData = {
@@ -371,28 +462,28 @@ const VeraDoc = () => {
       knowledgeBaseId: selectedKnowledgeBase.id,
       files: regularFiles,
       handwrittenFiles: handwrittenFiles,
-    };
+    }
 
-    console.log("Request Data:", requestData);
+    console.log("Request Data:", requestData)
 
-    setLoading(true); // Set loading to true
+    setLoading(true) // Set loading to true
     mutation.mutate(requestData, {
       onSettled: () => {
-        setLoading(false); // Set loading to false when the process finishes
+        setLoading(false) // Set loading to false when the process finishes
       },
-    });
-  };
+    })
+  }
 
   // Update your isBatchConfigValid function
   const isBatchConfigValid = () => {
-    if (batchFileItems.length < 2) return false;
-    
+    if (batchFileItems.length < 2) return false
+
     // Find the minimum number of files in any column
-    const minFileCount = Math.min(...batchFileItems.map(item => item.files.length));
-    
+    const minFileCount = Math.min(...batchFileItems.map((item) => item.files.length))
+
     // Valid if we have at least one file in each column
-    return minFileCount > 0;
-  };
+    return minFileCount > 0
+  }
 
   useEffect(() => {
     // Start with one empty file slot
@@ -402,102 +493,105 @@ const VeraDoc = () => {
   }, [])
 
   const handleProcessBatch = async () => {
-  if (batchFiles.length === 0) {
-    setResults("Error: Please upload at least one file for batch processing.");
-    return;
-  }
-  
-  if (!questions.trim()) {
-    setResults("Error: Please enter at least one question.");
-    return;
-  }
-
-  if (!selectedKnowledgeBase?.id) {
-    setResults("Error: Please select a knowledge base for context.");
-    return;
-  }
-  
-  // Clear previous results
-  setBatchResults([]);
-  setSelectedBatchResult(0);
-  setBatchLoading(true);
-
-  // Cancel any ongoing requests
-  if (ongoingRequest.current) {
-    ongoingRequest.current.cancel();
-  }
-  
-  // Cancel any in-flight fetch requests
-  if (abortControllerRef.current) {
-    abortControllerRef.current.abort();
-  }
-  
-  // Create a new controller and store directly in the ref
-  const controller = new AbortController();
-  abortControllerRef.current = controller;
-  
-  try {
-    const results: string[] = [];
-    
-    // Process each file individually
-    for (let i = 0; i < batchFiles.length; i++) {
-      if (controller.signal.aborted) {
-        console.log("Batch processing aborted");
-        break;
-      }
-      const fileItem = batchFiles[i];
-      
-      // Separate files based on handwritten flag
-      const regularFiles = fileItem.isHandwritten ? [] : [fileItem.file];
-      const handwrittenFiles = fileItem.isHandwritten ? [fileItem.file] : [];
-      
-      // Process this file
-      const requestData = {
-        questions: questions,
-        knowledgeBaseId: selectedKnowledgeBase.id,
-        files: regularFiles,
-        handwrittenFiles: handwrittenFiles,
-      };
-      
-      // Call the API using our mutation
-      const response = await VeradocService.processRagChecklist({
-        questions: requestData.questions,
-        knowledgeBaseId: requestData.knowledgeBaseId,
-        formData: {
-          files: requestData.files,
-          handwritten_files: requestData.handwrittenFiles,
-        },
-      }, { signal: controller.signal });
-      
-      // Format the response
-      let displayResults = `# Analysis Results for ${fileItem.file.name}\n\n`;
-
-      if (response.results.final_evaluation) {
-        displayResults += "## FINAL EVALUATION\n\n";
-        displayResults += response.results.final_evaluation + "\n\n";
-      }
-
-      // Store the QA pairs in the results array
-      results.push({
-        displayResults,
-        qaPairs: response.results.qa_pairs || []
-      });
-
-      // Update your state for batch results
-      setBatchResults(results);
-    
-  }} catch (error) {
-    // Handle errors, checking if it's an abort
-    if (error.name === 'AbortError') {
-      console.log("Batch processing was aborted");
-    } else {
-      console.error("Batch processing error:", error);
-      setResults(`Error processing batch: ${error.message}`);
+    if (batchFiles.length === 0) {
+      setResults("Error: Please upload at least one file for batch processing.")
+      return
     }
-  } finally {
-    setBatchLoading(false);
+
+    if (!questions.trim()) {
+      setResults("Error: Please enter at least one question.")
+      return
+    }
+
+    if (!selectedKnowledgeBase?.id) {
+      setResults("Error: Please select a knowledge base for context.")
+      return
+    }
+
+    // Clear previous results
+    setBatchResults([])
+    setSelectedBatchResult(0)
+    setBatchLoading(true)
+
+    // Cancel any ongoing requests
+    if (ongoingRequest.current) {
+      ongoingRequest.current.cancel()
+    }
+
+    // Cancel any in-flight fetch requests
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+
+    // Create a new controller and store directly in the ref
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
+    try {
+      const results: string[] = []
+
+      // Process each file individually
+      for (let i = 0; i < batchFiles.length; i++) {
+        if (controller.signal.aborted) {
+          console.log("Batch processing aborted")
+          break
+        }
+        const fileItem = batchFiles[i]
+
+        // Separate files based on handwritten flag
+        const regularFiles = fileItem.isHandwritten ? [] : [fileItem.file]
+        const handwrittenFiles = fileItem.isHandwritten ? [fileItem.file] : []
+
+        // Process this file
+        const requestData = {
+          questions: questions,
+          knowledgeBaseId: selectedKnowledgeBase.id,
+          files: regularFiles,
+          handwrittenFiles: handwrittenFiles,
+        }
+
+        // Call the API using our mutation
+        const response = await VeradocService.processRagChecklist(
+          {
+            questions: requestData.questions,
+            knowledgeBaseId: requestData.knowledgeBaseId,
+            formData: {
+              files: requestData.files,
+              handwritten_files: requestData.handwrittenFiles,
+            },
+          },
+          { signal: controller.signal },
+        )
+
+        // Format the response
+        let displayResults = `# Analysis Results for ${fileItem.file.name}\n\n`
+
+        if (response.results.final_evaluation) {
+          displayResults += "## FINAL EVALUATION\n\n"
+          displayResults += response.results.final_evaluation + "\n\n"
+        }
+
+        // Store the QA pairs in the results array
+        results.push({
+          displayResults,
+          qaPairs: response.results.qa_pairs || [],
+        })
+
+        // Update your state for batch results
+        setBatchResults(results)
+      }
+    } catch (error) {
+      // Handle errors, checking if it's an abort
+      if (error.name === "AbortError") {
+        console.log("Batch processing was aborted")
+      } else {
+        console.error("Batch processing error:", error)
+        setResults(`Error processing batch: ${error.message}`)
+      }
+    } finally {
+      setBatchLoading(false)
+    }
   }
-};
 
   // Create custom components for table rendering
   const components = {
@@ -523,53 +617,55 @@ const VeraDoc = () => {
       }
     }, [loading, batchLoading]);
 
-    return (
+  return (
     <Container maxW="container.xl" py={8}>
       {/* Add this overlay spinner that shows when batchLoading is true */}
-    {batchLoading && (
-      <Box
-        position="absolute"
-        top="0"
-        left="0"
-        right="0"
-        bottom="0"
-        bg="rgba(255, 255, 255, 0.7)"
-        zIndex="10"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        borderRadius="md"
-      >
-        <VStack spacing={4}>
-          <Spinner size="xl" color="blue.500" thickness="4px" />
-          <Text fontWeight="medium">Processing batch files...</Text>
-        </VStack>
-      </Box>
-    )}
+      {batchLoading && (
+        <Box
+          position="absolute"
+          top="0"
+          left="0"
+          right="0"
+          bottom="0"
+          bg="rgba(255, 255, 255, 0.7)"
+          zIndex="10"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          borderRadius="md"
+        >
+          <VStack spacing={4}>
+            <Spinner size="xl" color="blue.500" thickness="4px" />
+            <Text fontWeight="medium">Processing batch files...</Text>
+          </VStack>
+        </Box>
+      )}
 
       <Heading size="xl" mb={6}>
         VeraDoc
       </Heading>
-      
+
       <VStack spacing={6} align="stretch">
         <VStack spacing={4} align="stretch">
-          <Heading size="md" mb={2}>Knowledge Base Selection</Heading>
+          <Heading size="md" mb={2}>
+            Knowledge Base Selection
+          </Heading>
           <Field label="Knowledge Bases" required>
             <select
               value={selectedKnowledgeBase?.id || ""}
               onChange={(e) => {
-                const kb = knowledgeBases.find((kb) => kb.id === e.target.value);
-                setSelectedKnowledgeBase(kb);
+                const kb = knowledgeBases.find((kb) => kb.id === e.target.value)
+                setSelectedKnowledgeBase(kb)
                 // When a knowledge base is selected, fetch its sources
                 if (kb?.id) {
-                  fetchKnowledgeBaseDetails(kb.id);
+                  fetchKnowledgeBaseDetails(kb.id)
                 }
               }}
               style={{
-                width: '100%',
-                padding: '0.5rem',
-                borderRadius: '0.375rem',
-                borderColor: '#E2E8F0',
+                width: "100%",
+                padding: "0.5rem",
+                borderRadius: "0.375rem",
+                borderColor: "#E2E8F0",
               }}
             >
               <option value="">Select a knowledge base</option>
@@ -584,8 +680,11 @@ const VeraDoc = () => {
           {/* Add this table to display knowledge base sources */}
           {selectedKnowledgeBase && selectedKnowledgeBase.id && (
             <Box mt={4}>
-              <Text fontWeight="medium" mb={2}>Sources:</Text>
-              {selectedKnowledgeBaseDetails?.files && selectedKnowledgeBaseDetails.files.length > 0 ? (
+              <Text fontWeight="medium" mb={2}>
+                Sources:
+              </Text>
+              {selectedKnowledgeBaseDetails?.files &&
+              selectedKnowledgeBaseDetails.files.length > 0 ? (
                 <Table.Root variant="simple" size="sm">
                   <Table.Header>
                     <Table.Row>
@@ -606,7 +705,9 @@ const VeraDoc = () => {
                             _hover={{ textDecoration: "underline" }}
                           />
                         </Table.Cell>
-                        <Table.Cell>{new Date(file.date_created || '').toLocaleDateString()}</Table.Cell>
+                        <Table.Cell>
+                          {new Date(file.date_created || "").toLocaleDateString()}
+                        </Table.Cell>
                       </Table.Row>
                     ))}
                   </Table.Body>
@@ -616,29 +717,32 @@ const VeraDoc = () => {
               )}
             </Box>
           )}
-        </VStack>        
+        </VStack>
 
         {/* Separator before Checklist Selection */}
         <Separator my={4} />
 
         {/* Checklist Selection and Management */}
         <VStack spacing={4} align="stretch">
-          <Heading size="md" mb={2}>Checklist Selection</Heading>
+          <Heading size="md" mb={2}>
+            Checklist Selection
+          </Heading>
           <Field label="Checklists" required>
             <select
               value={selectedChecklist?.id || ""}
               onChange={(e) => {
-                const checklist = checklists.find((f) => f.id === e.target.value);
-                setSelectedChecklist(checklist);
-                setQuestions(checklist?.questions || "");
-                setChecklistName(checklist?.name || "");
-                setChecklistDescription(checklist?.description || "");
+                const checklist = checklists.find((f) => f.id === e.target.value)
+                setSelectedChecklist(checklist)
+                const checklistQuestions = checklist?.questions || ""
+                setQuestions(checklistQuestions)
+                setChecklistName(checklist?.name || "")
+                setChecklistDescription(checklist?.description || "")
               }}
               style={{
-                width: '100%',
-                padding: '0.5rem',
-                borderRadius: '0.375rem',
-                borderColor: '#E2E8F0',
+                width: "100%",
+                padding: "0.5rem",
+                borderRadius: "0.375rem",
+                borderColor: "#E2E8F0",
               }}
             >
               <option value="">Select a checklist</option>
@@ -667,33 +771,43 @@ const VeraDoc = () => {
             />
           </Field>
 
-          <Field label="Questions" required>
-            <Textarea
-              value={questions}
-              onChange={(e) => setQuestions(e.target.value)}
-              placeholder="Enter questions, one per line"
-              rows={6}
-              resize="vertical"
-            />
+          <Field label="Checklist" required borderTop="1px solid" py={4}>
+            <VStack align="stretch" gap={0} display="flex" flexDirection="column" width="100%">
+              {questionsList.map((question, index) => (
+                <QuestionItem
+                  key={index}
+                  index={index}
+                  question={question}
+                  onUpdate={updateQuestion}
+                  onBlur={handleQuestionBlur}
+                  onRemove={removeQuestion}
+                  onMoveUp={moveQuestionUp}
+                  onMoveDown={moveQuestionDown}
+                  canRemove={questionsList.length > 1 && question.trim() !== ""}
+                  totalQuestions={questionsList.length}
+                />
+              ))}
+            </VStack>
           </Field>
 
-          <HStack spacing={4} pt={2}>
+          <HStack gap={4} pt={2}>
             <Button
               variant="solid"
               onClick={async () => {
                 try {
                   if (selectedChecklist) {
+                    const trimmedQuestions = questions.trim()
                     // Update the selected checklist
                     await VeradocService.updateChecklist({
                       checklistId: selectedChecklist.id,
                       requestBody: {
                         name: checklistName,
                         description: checklistDescription,
-                        questions,
+                        questions: trimmedQuestions,
                       },
-                    });
+                    })
 
-                    alert("Checklist updated successfully.");
+                    showSuccessToast("Checklist updated successfully.")
                   } else {
                     // Create a new checklist
                     const response = await VeradocService.createChecklist({
@@ -702,22 +816,22 @@ const VeraDoc = () => {
                         description: checklistDescription,
                         questions,
                       },
-                    });
+                    })
 
                     const newChecklist = await response
-                    setChecklists((prev) => [...prev, newChecklist]);
-                    alert("Checklist created successfully.");
+                    setChecklists((prev) => [...prev, newChecklist])
+                    showSuccessToast("Checklist created successfully.")
                   }
 
                   // Clear the checklist questions and re-fetch the list of checklists
-                  setChecklistName("");
-                  setChecklistDescription("");
-                  setQuestions("");
-                  setSelectedChecklist(null);
-                  await fetchChecklists();
+                  setChecklistName("")
+                  setChecklistDescription("")
+                  setQuestions("")
+                  setSelectedChecklist(null)
+                  await fetchChecklists()
                 } catch (error) {
-                  console.error("Error saving checklist:", error);
-                  alert("Failed to save checklist. Please try again.");
+                  console.error("Error saving checklist:", error)
+                  showErrorToast("Failed to save checklist. Please try again.")
                 }
               }}
             >
@@ -729,8 +843,8 @@ const VeraDoc = () => {
               colorPalette="blue"
               onClick={async () => {
                 if (!selectedChecklist) {
-                  alert("Please select a checklist to copy.");
-                  return;
+                  showErrorToast("Please select a checklist to copy.")
+                  return
                 }
 
                 try {
@@ -741,17 +855,17 @@ const VeraDoc = () => {
                       description: selectedChecklist.description,
                       questions: selectedChecklist.questions,
                     },
-                  });
+                  })
 
                   const newChecklist = await response
-                  setChecklists((prev) => [...prev, newChecklist]);
-                  alert("Checklist copied successfully.");
+                  setChecklists((prev) => [...prev, newChecklist])
+                  showSuccessToast("Checklist copied successfully.")
 
                   // Re-fetch the list of checklists
-                  await fetchChecklists();
+                  await fetchChecklists()
                 } catch (error) {
-                  console.error("Error copying checklist:", error);
-                  alert("Failed to copy checklist. Please try again.");
+                  console.error("Error copying checklist:", error)
+                  showErrorToast("Failed to copy checklist. Please try again.")
                 }
               }}
               isDisabled={!selectedChecklist}
@@ -764,27 +878,29 @@ const VeraDoc = () => {
               colorPalette="red"
               onClick={async () => {
                 if (!selectedChecklist) {
-                  alert("Please select a checklist temmplate to delete.");
-                  return;
+                  showErrorToast("Please select a checklist temmplate to delete.")
+                  return
                 }
 
                 try {
                   // Call the deleteChecklist method from VeradocService
-                  await VeradocService.deleteChecklist({ checklistId: selectedChecklist.id });
+                  await VeradocService.deleteChecklist({ checklistId: selectedChecklist.id })
 
                   // Remove the deleted checklist from the list of checklists
-                  setChecklists((prev) => prev.filter((checklist) => checklist.id !== selectedChecklist.id));
+                  setChecklists((prev) =>
+                    prev.filter((checklist) => checklist.id !== selectedChecklist.id),
+                  )
 
                   // Clear the selected checklist and questions
-                  setSelectedChecklist(null);
-                  setQuestions("");
-                  setChecklistName("");
-                  setChecklistDescription("");
+                  setSelectedChecklist(null)
+                  setQuestions("")
+                  setChecklistName("")
+                  setChecklistDescription("")
 
-                  alert("Checklist deleted successfully.");
+                  showSuccessToast("Checklist deleted successfully.")
                 } catch (error) {
-                  console.error("Error deleting checklist:", error);
-                  alert("Failed to delete checklist. Please try again.");
+                  console.error("Error deleting checklist:", error)
+                  showErrorToast("Failed to delete checklist. Please try again.")
                 }
               }}
               isDisabled={!selectedChecklist}
@@ -794,10 +910,11 @@ const VeraDoc = () => {
           </HStack>
         </VStack>
 
-      <Separator my={4} />
-      <Heading size="md" mb={4}>Document Input</Heading>
-      
-        
+        <Separator my={4} />
+        <Heading size="md" mb={4}>
+          Document Input
+        </Heading>
+
         {/* Mode Toggle */}
         <Field>
           <HStack justify="space-between" align="center">
@@ -834,12 +951,13 @@ const VeraDoc = () => {
             ))}
 
             <HStack spacing={4}>
-
               <Button
                 variant="solid"
                 onClick={handleRun}
                 isDisabled={
-                  fileItems.length < 1 || !questions.trim() || !fileItems.some((item) => item.file.size > 0)
+                  fileItems.length < 1 ||
+                  !questions.trim() ||
+                  !fileItems.some((item) => item.file.size > 0)
                 }
                 loading={loading}
               >
@@ -848,7 +966,9 @@ const VeraDoc = () => {
             </HStack>
 
             <Separator my={4} />
-            <Heading size="md" mb={4}>Results</Heading>
+            <Heading size="md" mb={4}>
+              Results
+            </Heading>
 
             {/* Fixed layout with consistent side-by-side panels */}
             <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
@@ -1087,18 +1207,24 @@ const VeraDoc = () => {
                       </Box>
                       <HStack>
                         <ChakraField.Root display="flex" alignItems="center" width="auto">
-                          <ChakraField.Label htmlFor={`batch-handwritten-${index}`} mb="0" fontSize="sm">
+                          <ChakraField.Label
+                            htmlFor={`batch-handwritten-${index}`}
+                            mb="0"
+                            fontSize="sm"
+                          >
                             Handwritten
                           </ChakraField.Label>
                           <Switch.Root id={`batch-handwritten-${index}`} colorPalette="blue">
-                            <Switch.HiddenInput 
-                              checked={fileItem.isHandwritten} 
+                            <Switch.HiddenInput
+                              checked={fileItem.isHandwritten}
                               onChange={() => {
-                                setBatchFiles(prev => 
-                                  prev.map((item, i) => 
-                                    i === index ? { ...item, isHandwritten: !item.isHandwritten } : item
-                                  )
-                                );
+                                setBatchFiles((prev) =>
+                                  prev.map((item, i) =>
+                                    i === index
+                                      ? { ...item, isHandwritten: !item.isHandwritten }
+                                      : item,
+                                  ),
+                                )
                               }}
                             />
                             <Switch.Control>
@@ -1106,11 +1232,11 @@ const VeraDoc = () => {
                             </Switch.Control>
                           </Switch.Root>
                         </ChakraField.Root>
-                        <Button 
-                          size="sm" 
-                          colorPalette="red" 
+                        <Button
+                          size="sm"
+                          colorPalette="red"
                           onClick={() => {
-                            setBatchFiles(prev => prev.filter((_, i) => i !== index));
+                            setBatchFiles((prev) => prev.filter((_, i) => i !== index))
                           }}
                         >
                           Remove
@@ -1124,33 +1250,35 @@ const VeraDoc = () => {
 
             {/* Process Button */}
             <HStack spacing={4}>
-              <Button 
+              <Button
                 variant="solid"
                 colorPalette={batchFiles.length > 0 ? "blue" : "gray"}
                 onClick={handleProcessBatch}
                 isLoading={batchLoading}
                 isDisabled={batchFiles.length === 0}
               >
-                {batchFiles.length > 0 
-                  ? `Process ${batchFiles.length} Files` 
+                {batchFiles.length > 0
+                  ? `Process ${batchFiles.length} Files`
                   : "No Files to Process"}
               </Button>
             </HStack>
 
             {/* Results section */}
             <Separator my={4} />
-            <Heading size="md" mb={4}>Results</Heading>
+            <Heading size="md" mb={4}>
+              Results
+            </Heading>
             <Box>
               {batchResults.length > 0 ? (
                 <Field label="Select File to View Results">
                   <select
                     value={selectedBatchResult}
                     onChange={(e) => setSelectedBatchResult(Number(e.target.value))}
-                    style={{ 
-                      width: '100%',
-                      padding: '0.5rem', 
-                      borderRadius: '0.375rem',
-                      borderColor: '#E2E8F0'
+                    style={{
+                      width: "100%",
+                      padding: "0.5rem",
+                      borderRadius: "0.375rem",
+                      borderColor: "#E2E8F0",
                     }}
                   >
                     {batchResults.map((_, index) => (
@@ -1162,7 +1290,7 @@ const VeraDoc = () => {
                   </select>
                 </Field>
               ) : null}
-              
+
               <Box
                 border="1px solid"
                 borderColor="gray.200"
@@ -1185,31 +1313,37 @@ const VeraDoc = () => {
                   >
                     <Spinner size="lg" color="blue.500" />
                   </Box>
-                ) : (
-                  batchResults.length > 0 ? (
-                    <>
+                ) : batchResults.length > 0 ? (
+                  <>
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
                       {batchResults[selectedBatchResult].displayResults}
                     </ReactMarkdown>
 
                     <Box mt={4}>
                       {batchResults[selectedBatchResult].qaPairs.map((pair, index) => (
-                        <Box key={index} mb={4} p={4} borderWidth="1px" borderRadius="md" bg="white">
+                        <Box
+                          key={index}
+                          mb={4}
+                          p={4}
+                          borderWidth="1px"
+                          borderRadius="md"
+                          bg="white"
+                        >
                           <Heading as="h3" size="md" mb={2}>
                             Question {index + 1}: {pair.question}
                           </Heading>
-                          
+
                           <Box mb={3}>
                             <Text fontWeight="bold">Answer:</Text>
                             <Text>{pair.answer}</Text>
                           </Box>
-                          
+
                           <Box mb={3}>
                             <Text fontWeight="bold">Relevant Policy Context:</Text>
                             <Text>{pair.context}</Text>
                           </Box>
-                          
-                          {pair.source_citations && 
+
+                          {pair.source_citations &&
                             console.log("Source citations:", pair.source_citations)}
                           {pair.source_citations && pair.source_citations.length > 0 && (
                             <Accordion.Root type="single" collapsible mt={2}>
@@ -1219,18 +1353,20 @@ const VeraDoc = () => {
                                     <Box flex="1" textAlign="left" fontWeight="medium">
                                       <HStack>
                                         <FiFileText />
-                                        <Text>View Source Citations ({pair.source_citations.length})</Text>
+                                        <Text>
+                                          View Source Citations ({pair.source_citations.length})
+                                        </Text>
                                       </HStack>
                                     </Box>
                                   </Accordion.ItemTrigger>
                                 </h2>
                                 <Accordion.ItemContent pb={4} bg="gray.50">
                                   {pair.source_citations.map((citation, cIndex) => (
-                                    <Box 
+                                    <Box
                                       key={cIndex}
-                                      p={3} 
-                                      mb={2} 
-                                      borderWidth="1px" 
+                                      p={3}
+                                      mb={2}
+                                      borderWidth="1px"
                                       borderRadius="md"
                                       bg="white"
                                     >
@@ -1239,7 +1375,7 @@ const VeraDoc = () => {
                                           sourceId={citation.metadata.source_data_id}
                                           fileName={getDisplayFileName(citation.metadata.source)}
                                           ml={1}
-                                          fontWeight="normal" 
+                                          fontWeight="normal"
                                           color="blue.600"
                                           useModal={true}
                                         />
@@ -1248,11 +1384,11 @@ const VeraDoc = () => {
                                           {getDisplayFileName(citation.metadata.source)}
                                         </Text>
                                       )}
-                                      <Box 
-                                        mt={2} 
-                                        p={2} 
-                                        bg="gray.50" 
-                                        borderRadius="sm" 
+                                      <Box
+                                        mt={2}
+                                        p={2}
+                                        bg="gray.50"
+                                        borderRadius="sm"
                                         fontSize="sm"
                                         whiteSpace="pre-wrap"
                                       >
@@ -1267,10 +1403,9 @@ const VeraDoc = () => {
                         </Box>
                       ))}
                     </Box>
-                    </>
-                  ) : (
-                    <Text color="gray.500">Results will appear here after processing files.</Text>
-                  )
+                  </>
+                ) : (
+                  <Text color="gray.500">Results will appear here after processing files.</Text>
                 )}
               </Box>
             </Box>
@@ -1281,17 +1416,17 @@ const VeraDoc = () => {
   )
 }
 
-const FileDropzone = ({ 
-  index, 
-  fileItem, 
-  onUpdate, 
-  onRemove, 
-  onToggleHandwritten 
-}: { 
-  index: number, 
-  fileItem: { file: File, isHandwritten: boolean }, 
-  onUpdate: (index: number, file: File) => void,
-  onRemove: (index: number) => void,
+const FileDropzone = ({
+  index,
+  fileItem,
+  onUpdate,
+  onRemove,
+  onToggleHandwritten,
+}: {
+  index: number
+  fileItem: { file: File; isHandwritten: boolean }
+  onUpdate: (index: number, file: File) => void
+  onRemove: (index: number) => void
   onToggleHandwritten: (index: number) => void
 }) => {
   const { getRootProps, getInputProps } = useDropzone({
@@ -1315,7 +1450,7 @@ const FileDropzone = ({
   })
 
   const { file, isHandwritten } = fileItem
-  
+
   // Check if file is a placeholder
   const isPlaceholder = file && file.name === "placeholder" && file.size === 0
 
@@ -1334,13 +1469,12 @@ const FileDropzone = ({
         >
           <input {...getInputProps()} />
           <Text>
-            {file && !isPlaceholder 
-              ? `Selected File: ${file.name}` 
-              : `Drag and drop File ${index + 1} here, or click to browse`
-            }
+            {file && !isPlaceholder
+              ? `Selected File: ${file.name}`
+              : `Drag and drop File ${index + 1} here, or click to browse`}
           </Text>
         </Box>
-        
+
         {/* Only show toggle if a real file is uploaded */}
         {file && !isPlaceholder && (
           <HStack justify="space-between" px={2}>
@@ -1349,19 +1483,19 @@ const FileDropzone = ({
                 Analyze handwriting
               </ChakraField.Label>
               <Switch.Root id={`handwritten-${index}`} colorPalette="blue">
-                <Switch.HiddenInput 
-                  checked={isHandwritten} 
-                  onChange={() => onToggleHandwritten(index)} 
+                <Switch.HiddenInput
+                  checked={isHandwritten}
+                  onChange={() => onToggleHandwritten(index)}
                 />
                 <Switch.Control>
                   <Switch.Thumb />
                 </Switch.Control>
               </Switch.Root>
             </ChakraField.Root>
-            
-            <Button 
-              size="sm" 
-              colorScheme="red" 
+
+            <Button
+              size="sm"
+              colorScheme="red"
               onClick={(e) => {
                 e.stopPropagation()
                 onRemove(index)
@@ -1372,6 +1506,148 @@ const FileDropzone = ({
           </HStack>
         )}
       </VStack>
+    </Box>
+  )
+}
+
+const QuestionItem = ({
+  index,
+  question,
+  onUpdate,
+  onBlur,
+  onRemove,
+  onMoveUp,
+  onMoveDown,
+  canRemove,
+  totalQuestions,
+}: {
+  index: number
+  question: string
+  onUpdate: (index: number, value: string) => void
+  onBlur: (index: number, value: string) => void
+  onRemove: (index: number) => void
+  onMoveUp: (index: number) => void
+  onMoveDown: (index: number) => void
+  canRemove: boolean
+  totalQuestions: number
+}) => {
+  const [isHovered, setIsHovered] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
+
+  const isLastEmptyQuestion = index === totalQuestions - 2
+  const isAddQuestion = index === totalQuestions - 1
+  const placeholderText = "Add question"
+
+  return (
+    <Box
+      position="relative"
+      display="flex"
+      py={1}
+      borderRadius="md"
+      bg="transparent"
+      transition="all 0.2s ease"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      opacity={isAddQuestion && !isFocused && !isHovered ? 0.6 : 1}
+    >
+      <HStack align="center" gap={0} w="full">
+        <Box flex="1" w="full">
+          <Input
+            value={question}
+            onChange={(e) => onUpdate(index, e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={(e) => {
+              setIsFocused(false)
+              onBlur(index, e.target.value)
+            }}
+            placeholder={placeholderText}
+            size="sm"
+            borderTop="none"
+            borderLeft="none"
+            borderRight="none"
+            borderBottom="1px solid"
+            borderColor={isFocused ? "blue.300" : "gray.200"}
+            borderRadius="none"
+            bg="transparent"
+            px={2}
+            py={0}
+            w="full"
+            _focus={{
+              borderTop: "none",
+              borderLeft: "none",
+              borderRight: "none",
+              borderBottom: "1px solid",
+              boxShadow: "none",
+              outline: "none",
+              bg: "transparent",
+            }}
+            _placeholder={{
+              color: isAddQuestion ? "gray.400" : "gray.500",
+              fontStyle: isAddQuestion ? "italic" : "normal",
+            }}
+          />
+        </Box>
+
+        <VStack
+          visibility={isAddQuestion ? "hidden" : "visible"}
+          containerName="move-question-arrows"
+          gap={0}
+          minW="40px"
+          align="center"
+          py={1}
+        >
+          <IconButton
+            name="move-up-arrow"
+            size="xs"
+            variant="ghost"
+            colorScheme="gray"
+            aria-label="Move question up"
+            onClick={() => onMoveUp(index)}
+            opacity={isHovered && index !== 0 ? 1 : 0}
+            h="20px"
+            w="20px"
+            minW="20px"
+            pointerEvents={index === 0 ? "none" : "auto"}
+          >
+            <FiChevronUp size={12} />
+          </IconButton>
+          <IconButton
+            name="move-down-arrow"
+            size="xs"
+            variant="ghost"
+            colorScheme="gray"
+            aria-label="Move question down"
+            onClick={() => onMoveDown(index)}
+            pointerEvents={isLastEmptyQuestion ? "none" : "auto"}
+            opacity={isHovered && !isLastEmptyQuestion ? 1 : 0}
+            h="20px"
+            w="20px"
+            minW="20px"
+          >
+            <FiChevronDown size={12} />
+          </IconButton>
+        </VStack>
+
+        <Box containerName="remove-question-button" opacity={isHovered ? 1 : 0}>
+          {canRemove && (
+            <IconButton
+              size="xs"
+              variant="ghost"
+              colorPalette="red"
+              aria-label="Remove question"
+              onClick={(e) => {
+                e.stopPropagation()
+                onRemove(index)
+              }}
+              h="24px"
+              w="24px"
+              minW="24px"
+            >
+              <FiTrash2 size={12} />
+            </IconButton>
+          )}
+        </Box>
+      </HStack>
     </Box>
   )
 }
