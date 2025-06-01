@@ -227,8 +227,44 @@ const VeraDoc = () => {
     updateQuestionsFromList(newQuestions)
   }
 
+  const handleQuestionBlur = (index: number, value: string) => {
+    // If the question is empty and it's not the only question, remove it
+    if (value.trim() === "" && questionsList.length > 1) {
+      const newQuestions = questionsList.filter((_, i) => i !== index)
+
+      // Ensure we always have at least one empty question at the end
+      const hasEmptyQuestion = newQuestions.some((q) => q.trim() === "")
+      if (!hasEmptyQuestion) {
+        newQuestions.push("")
+      }
+
+      updateQuestionsFromList(newQuestions)
+    }
+  }
+
+  // Use useEffect to automatically add new questions when needed
+  useEffect(() => {
+    // If the last question has content and there's no empty question at the end, add one
+    if (questionsList.length > 0) {
+      const lastQuestion = questionsList[questionsList.length - 1]
+      if (lastQuestion.trim() !== "") {
+        updateQuestionsFromList([...questionsList, ""])
+      }
+    }
+  }, [questionsList])
+
   const removeQuestion = (index: number) => {
+    // Don't allow removing if it's the only question or if it would leave no empty questions
+    if (questionsList.length <= 1) return
+
     const newQuestions = questionsList.filter((_, i) => i !== index)
+
+    // Ensure we always have at least one empty question at the end
+    const hasEmptyQuestion = newQuestions.some((q) => q.trim() === "")
+    if (!hasEmptyQuestion && questionsList[questionsList.length - 1].trim() !== "") {
+      newQuestions.push("")
+    }
+
     updateQuestionsFromList(newQuestions)
   }
 
@@ -671,7 +707,7 @@ const VeraDoc = () => {
             />
           </Field>
 
-          <Field label="Questions" required>
+          <Field label="Checklist" required borderTop="1px solid" py={4}>
             <VStack align="stretch" gap={0} display="flex" flexDirection="column" width="100%">
               {questionsList.map((question, index) => (
                 <QuestionItem
@@ -679,23 +715,14 @@ const VeraDoc = () => {
                   index={index}
                   question={question}
                   onUpdate={updateQuestion}
+                  onBlur={handleQuestionBlur}
                   onRemove={removeQuestion}
                   onMoveUp={moveQuestionUp}
                   onMoveDown={moveQuestionDown}
-                  canRemove={questionsList.length > 1}
+                  canRemove={questionsList.length > 1 && question.trim() !== ""}
                   totalQuestions={questionsList.length}
                 />
               ))}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={addQuestion}
-                alignSelf="flex-start"
-                colorPalette="blue"
-                marginTop={3}
-              >
-                + Add Question
-              </Button>
             </VStack>
           </Field>
 
@@ -1354,6 +1381,7 @@ const QuestionItem = ({
   index,
   question,
   onUpdate,
+  onBlur,
   onRemove,
   onMoveUp,
   onMoveDown,
@@ -1363,6 +1391,7 @@ const QuestionItem = ({
   index: number
   question: string
   onUpdate: (index: number, value: string) => void
+  onBlur: (index: number, value: string) => void
   onRemove: (index: number) => void
   onMoveUp: (index: number) => void
   onMoveDown: (index: number) => void
@@ -1370,6 +1399,11 @@ const QuestionItem = ({
   totalQuestions: number
 }) => {
   const [isHovered, setIsHovered] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
+
+  const isLastEmptyQuestion = index === totalQuestions - 2
+  const isAddQuestion = index === totalQuestions - 1
+  const placeholderText = "Add question"
 
   return (
     <Box
@@ -1381,19 +1415,25 @@ const QuestionItem = ({
       transition="all 0.2s ease"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      opacity={isAddQuestion && !isFocused && !isHovered ? 0.6 : 1}
     >
       <HStack align="center" gap={0} w="full">
         <Box flex="1" w="full">
           <Input
             value={question}
             onChange={(e) => onUpdate(index, e.target.value)}
-            placeholder="Enter your question here..."
+            onFocus={() => setIsFocused(true)}
+            onBlur={(e) => {
+              setIsFocused(false)
+              onBlur(index, e.target.value)
+            }}
+            placeholder={placeholderText}
             size="sm"
             borderTop="none"
             borderLeft="none"
             borderRight="none"
             borderBottom="1px solid"
-            borderColor="gray.200"
+            borderColor={isFocused ? "blue.300" : "gray.200"}
             borderRadius="none"
             bg="transparent"
             px={2}
@@ -1408,10 +1448,21 @@ const QuestionItem = ({
               outline: "none",
               bg: "transparent",
             }}
+            _placeholder={{
+              color: isAddQuestion ? "gray.400" : "gray.500",
+              fontStyle: isAddQuestion ? "italic" : "normal",
+            }}
           />
         </Box>
 
-        <VStack containerName="move-question-arrows" gap={0} minW="40px" align="center" py={1}>
+        <VStack
+          visibility={isAddQuestion ? "hidden" : "visible"}
+          containerName="move-question-arrows"
+          gap={0}
+          minW="40px"
+          align="center"
+          py={1}
+        >
           <IconButton
             name="move-up-arrow"
             size="xs"
@@ -1420,7 +1471,6 @@ const QuestionItem = ({
             aria-label="Move question up"
             onClick={() => onMoveUp(index)}
             opacity={isHovered && index !== 0 ? 1 : 0}
-            transition="opacity 0.2s ease"
             h="20px"
             w="20px"
             minW="20px"
@@ -1428,7 +1478,6 @@ const QuestionItem = ({
           >
             <FiChevronUp size={12} />
           </IconButton>
-
           <IconButton
             name="move-down-arrow"
             size="xs"
@@ -1436,9 +1485,8 @@ const QuestionItem = ({
             colorScheme="gray"
             aria-label="Move question down"
             onClick={() => onMoveDown(index)}
-            pointerEvents={index === totalQuestions - 1 ? "none" : "auto"}
-            opacity={isHovered && index !== totalQuestions - 1 ? 1 : 0}
-            transition="opacity 0.2s ease"
+            pointerEvents={isLastEmptyQuestion ? "none" : "auto"}
+            opacity={isHovered && !isLastEmptyQuestion ? 1 : 0}
             h="20px"
             w="20px"
             minW="20px"
@@ -1447,11 +1495,7 @@ const QuestionItem = ({
           </IconButton>
         </VStack>
 
-        <Box
-          containerName="remove-question-button"
-          opacity={isHovered ? 1 : 0}
-          transition="opacity 0.2s ease"
-        >
+        <Box containerName="remove-question-button" opacity={isHovered ? 1 : 0}>
           {canRemove && (
             <IconButton
               size="xs"
