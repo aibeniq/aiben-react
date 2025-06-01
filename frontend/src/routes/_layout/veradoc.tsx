@@ -14,7 +14,7 @@ import {
   Separator,
   Table,
   Accordion,
-  Card
+  Card,
   IconButton,
 } from "@chakra-ui/react"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -31,6 +31,7 @@ import { FiFileText, FiDatabase, FiTrash2, FiChevronUp, FiChevronDown } from "re
 import { Field } from "../../components/ui/field"
 import { format } from 'date-fns';
 import { useQuery } from "@tanstack/react-query";
+import FeedbackButtons from "@/components/Feedback/FeedbackButtons";
 
 const VeraDoc = () => {
 
@@ -1074,6 +1075,25 @@ const VeraDoc = () => {
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
                       {results}
                     </ReactMarkdown>
+
+                    {selectedHistoryReport?.id && (
+                      <Box
+                        position="sticky"
+                        bottom={4}
+                        right={4}
+                        display="flex"
+                        justifyContent="flex-end"
+                        pointerEvents="auto"
+                        zIndex={10}
+                      >
+                        <FeedbackButtons 
+                          interactionId={selectedHistoryReport.id} 
+                          onFeedbackSubmitted={(type) => {
+                            showSuccessToast(`Thank you for marking this response as ${type}!`);
+                          }}
+                        />
+                      </Box>
+                    )}
 
                     {qaPairs.length > 0 && (
                       <Box mt={4}>

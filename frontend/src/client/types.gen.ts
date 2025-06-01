@@ -351,6 +351,14 @@ export type EmbeddingModelsCheckApiKeyConfiguredData = {
 
 export type EmbeddingModelsCheckApiKeyConfiguredResponse = Message
 
+export type FeedbackSubmitFeedbackData = {
+  feedback: string
+  feedbackText?: string | null
+  interactionId: string
+}
+
+export type FeedbackSubmitFeedbackResponse = Message
+
 export type FilesGetSourceContentData = {
   sourceId: string
 }

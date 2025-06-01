@@ -312,14 +312,8 @@ async def process_rag_checklist(
                 {"qa_pairs": qa_pairs_text}
             )
             print(f"Got final evaluation: {final_evaluation[:100]}...")
-            
-            # 9. Compile the results
-            result = {
-                "final_evaluation": final_evaluation,
-                "qa_pairs": qa_pairs
-            }
 
-            record_llm_interaction(
+            interaction_id = record_llm_interaction(
                 session=session,
                 user_id=current_user.id,
                 functionality="veradoc",
@@ -336,6 +330,13 @@ async def process_rag_checklist(
                     "qa_pairs": qa_pairs  # Store the full QA pairs with sources for retrieval
                 }
             )
+
+            # 9. Compile the results
+            result = {
+                "final_evaluation": final_evaluation,
+                "qa_pairs": qa_pairs,
+                "interaction_id": str(interaction_id)
+            }
             
             return VeraDocResponse(results=result)
             
@@ -539,7 +540,8 @@ async def get_veradoc_detail(
                 "questions": input_data.get("questions", ""),
                 "results": {
                     "final_evaluation": output_data.get("final_evaluation", ""),
-                    "qa_pairs": extra_data.get("qa_pairs", [])
+                    "qa_pairs": extra_data.get("qa_pairs", []),
+                    "interaction_id": str(report.id)
                 }
             }
             

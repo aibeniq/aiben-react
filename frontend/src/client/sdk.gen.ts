@@ -27,6 +27,8 @@ import type {
   EmbeddingModelsValidateEmbeddingModelResponse,
   EmbeddingModelsCheckApiKeyConfiguredData,
   EmbeddingModelsCheckApiKeyConfiguredResponse,
+  FeedbackSubmitFeedbackData,
+  FeedbackSubmitFeedbackResponse,
   FilesGetSourceContentData,
   FilesGetSourceContentResponse,
   FormconnectProcessFormData,
@@ -431,6 +433,35 @@ export class EmbeddingModelsService {
       url: "/api/v1/embedding-models/check-api-key/{provider}",
       path: {
         provider: data.provider,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
+export class FeedbackService {
+  /**
+   * Submit Feedback
+   * Submit feedback for an LLM interaction.
+   * @param data The data for the request.
+   * @param data.interactionId
+   * @param data.feedback
+   * @param data.feedbackText
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static submitFeedback(
+    data: FeedbackSubmitFeedbackData,
+  ): CancelablePromise<FeedbackSubmitFeedbackResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/api/v1/feedback/",
+      query: {
+        interaction_id: data.interactionId,
+        feedback: data.feedback,
+        feedback_text: data.feedbackText,
       },
       errors: {
         422: "Validation Error",
