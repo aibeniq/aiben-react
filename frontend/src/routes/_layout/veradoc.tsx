@@ -29,74 +29,73 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { FiFileText, FiDatabase, FiTrash2, FiChevronUp, FiChevronDown } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
-import { format } from 'date-fns';
-import { useQuery } from "@tanstack/react-query";
-import FeedbackButtons from "@/components/Feedback/FeedbackButtons";
+import { format } from "date-fns"
+import { useQuery } from "@tanstack/react-query"
+import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 
 const VeraDoc = () => {
-
-  const { showSuccessToast, showErrorToast } = useCustomToast();
-  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<any>(null);
-  const [knowledgeBases, setKnowledgeBases] = useState<any[]>([]);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const ongoingRequest = useRef<CancelablePromise<any> | null>(null);
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<any>(null)
+  const [knowledgeBases, setKnowledgeBases] = useState<any[]>([])
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const ongoingRequest = useRef<CancelablePromise<any> | null>(null)
 
   // Add these state variables to your component
-  const [reportHistory, setReportHistory] = useState<any[]>([]);
-  const [selectedHistoryReport, setSelectedHistoryReport] = useState(null);
-  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+  const [reportHistory, setReportHistory] = useState<any[]>([])
+  const [selectedHistoryReport, setSelectedHistoryReport] = useState(null)
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false)
 
   // Add this query to fetch history
   const historyQuery = useQuery({
     queryKey: ["veradocHistory"],
     queryFn: async () => {
-      const response = await VeradocService.getVeradocHistory({ limit: 20 });
-      return response;
+      const response = await VeradocService.getVeradocHistory({ limit: 20 })
+      return response
     },
     enabled: true,
-  });
+  })
 
   // Use a useEffect to handle the data updates
   useEffect(() => {
     if (historyQuery.data) {
-      setReportHistory(Array.isArray(historyQuery.data) ? historyQuery.data : []);
+      setReportHistory(Array.isArray(historyQuery.data) ? historyQuery.data : [])
     }
-    setIsHistoryLoading(historyQuery.isLoading);
-  }, [historyQuery.data, historyQuery.isLoading]);
+    setIsHistoryLoading(historyQuery.isLoading)
+  }, [historyQuery.data, historyQuery.isLoading])
 
   // Add this function to load a report from history
   const loadReportFromHistory = async (reportId) => {
     try {
-      setIsHistoryLoading(true);
-      const report = await VeradocService.getVeradocDetail({ reportId });
-      
+      setIsHistoryLoading(true)
+      const report = await VeradocService.getVeradocDetail({ reportId })
+
       // Update UI state with the loaded report
-      setResults(report.results.final_evaluation || "");
-      setQaPairs(report.results.qa_pairs || []);
-      setSelectedHistoryReport(report);
-      
+      setResults(report.results.final_evaluation || "")
+      setQaPairs(report.results.qa_pairs || [])
+      setSelectedHistoryReport(report)
+
       // If KB ID exists, update the selected knowledge base
       if (report.kb_id) {
-        const kb = knowledgeBases.find(kb => kb.id === report.kb_id);
+        const kb = knowledgeBases.find((kb) => kb.id === report.kb_id)
         if (kb) {
-          setSelectedKnowledgeBase(kb);
-          fetchKnowledgeBaseDetails(kb.id);
+          setSelectedKnowledgeBase(kb)
+          fetchKnowledgeBaseDetails(kb.id)
         }
       }
-      
+
       // Update questions if they exist
       if (report.questions) {
-        setQuestions(report.questions);
+        setQuestions(report.questions)
       }
-      
-      showSuccessToast("Evaluation loaded successfully");
+
+      showSuccessToast("Evaluation loaded successfully")
     } catch (error) {
-      console.error("Error loading report:", error);
-      showErrorToast("Failed to load evaluation");
+      console.error("Error loading report:", error)
+      showErrorToast("Failed to load evaluation")
     } finally {
-      setIsHistoryLoading(false);
+      setIsHistoryLoading(false)
     }
-  };
+  }
 
   const getDisplayFileName = (source: string): string => {
     if (!source) return "Unknown"
@@ -597,7 +596,14 @@ const VeraDoc = () => {
   // Create custom components for table rendering
   const components = {
     table: (props) => (
-      <Box as="table" width="full" borderWidth="1px" borderRadius="md" overflow="hidden" {...props} />
+      <Box
+        as="table"
+        width="full"
+        borderWidth="1px"
+        borderRadius="md"
+        overflow="hidden"
+        {...props}
+      />
     ),
     thead: (props) => <Box as="thead" bg="gray.100" {...props} />,
     tbody: (props) => <Box as="tbody" {...props} />,
@@ -605,18 +611,15 @@ const VeraDoc = () => {
     th: (props) => (
       <Box as="th" p={4} textAlign="left" fontWeight="bold" borderBottomWidth="1px" {...props} />
     ),
-    td: (props) => (
-      <Box as="td" p={4} borderBottomWidth="1px" {...props} />
-    ),
-  };
+    td: (props) => <Box as="td" p={4} borderBottomWidth="1px" {...props} />,
+  }
 
-
-    // Update your refetch logic when a new evaluation is created
-    useEffect(() => {
-      if (!loading && !batchLoading) {
-        historyQuery.refetch();
-      }
-    }, [loading, batchLoading]);
+  // Update your refetch logic when a new evaluation is created
+  useEffect(() => {
+    if (!loading && !batchLoading) {
+      historyQuery.refetch()
+    }
+  }, [loading, batchLoading])
 
   return (
     <Container maxW="container.xl" py={8}>
@@ -721,10 +724,10 @@ const VeraDoc = () => {
         </VStack>
 
         {/* Separator before Checklist Selection */}
-        <Separator my={4} />
+        <Separator my={4} hidden={!selectedKnowledgeBase} />
 
         {/* Checklist Selection and Management */}
-        <VStack spacing={4} align="stretch">
+        <VStack spacing={4} align="stretch" hidden={!selectedKnowledgeBase}>
           <Heading size="md" mb={2}>
             Checklist Selection
           </Heading>
@@ -911,142 +914,429 @@ const VeraDoc = () => {
           </HStack>
         </VStack>
 
-        <Separator my={4} />
-        <Heading size="md" mb={4}>
+        <Separator my={4} hidden={!selectedKnowledgeBase || !selectedChecklist} />
+        <Heading size="md" mb={4} hidden={!selectedKnowledgeBase || !selectedChecklist}>
           Document Input
         </Heading>
 
-        {/* Mode Toggle */}
-        <Field>
-          <HStack justify="space-between" align="center">
-            <Text fontWeight="medium">Mode:</Text>
-            <HStack align="center">
-              <Text>Manual</Text>
-              <Switch.Root id="mode-toggle" colorPalette="teal">
-                <Switch.HiddenInput
-                  checked={mode === "batch"}
-                  onChange={(e) => setMode(e.target.checked ? "batch" : "manual")}
+        <div hidden={!selectedKnowledgeBase || !selectedChecklist}>
+          {/* Mode Toggle */}
+          <Field>
+            <HStack justify="space-between" align="center">
+              <Text fontWeight="medium">Mode:</Text>
+              <HStack align="center">
+                <Text>Manual</Text>
+                <Switch.Root id="mode-toggle" colorPalette="teal">
+                  <Switch.HiddenInput
+                    checked={mode === "batch"}
+                    onChange={(e) => setMode(e.target.checked ? "batch" : "manual")}
+                  />
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch.Root>
+                <Text>Batch</Text>
+              </HStack>
+            </HStack>
+          </Field>
+
+          {/* Conditional Rendering Based on Mode */}
+          {mode === "manual" ? (
+            <VStack spacing={4} align="stretch">
+              {/* Manual Mode UI */}
+              {fileItems.map((fileItem, index) => (
+                <FileDropzone
+                  key={index}
+                  index={index}
+                  fileItem={fileItem}
+                  onUpdate={updateFile}
+                  onRemove={removeFile}
+                  onToggleHandwritten={toggleHandwritten}
                 />
-                <Switch.Control>
-                  <Switch.Thumb />
-                </Switch.Control>
-              </Switch.Root>
-              <Text>Batch</Text>
-            </HStack>
-          </HStack>
-        </Field>
+              ))}
 
-        {/* Conditional Rendering Based on Mode */}
-        {mode === "manual" ? (
-          <VStack spacing={4} align="stretch">
-            {/* Manual Mode UI */}
-            {fileItems.map((fileItem, index) => (
-              <FileDropzone
-                key={index}
-                index={index}
-                fileItem={fileItem}
-                onUpdate={updateFile}
-                onRemove={removeFile}
-                onToggleHandwritten={toggleHandwritten}
-              />
-            ))}
+              <HStack spacing={4}>
+                <Button
+                  variant="solid"
+                  onClick={handleRun}
+                  isDisabled={
+                    fileItems.length < 1 ||
+                    !questions.trim() ||
+                    !fileItems.some((item) => item.file.size > 0)
+                  }
+                  loading={loading}
+                >
+                  Run
+                </Button>
+              </HStack>
 
-            <HStack spacing={4}>
-              <Button
-                variant="solid"
-                onClick={handleRun}
-                isDisabled={
-                  fileItems.length < 1 ||
-                  !questions.trim() ||
-                  !fileItems.some((item) => item.file.size > 0)
-                }
-                loading={loading}
-              >
-                Run
-              </Button>
-            </HStack>
+              <Separator my={4} />
+              <Heading size="md" mb={4}>
+                Results
+              </Heading>
 
-            <Separator my={4} />
-            <Heading size="md" mb={4}>
-              Results
-            </Heading>
-
-            {/* Fixed layout with consistent side-by-side panels */}
-            <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
-              {/* History Panel - Always show this */}
-              <Card.Root width={{ base: "100%", md: "300px" }} height="fit-content">
-                <Card.Header>
-                  <Heading size="sm">Previous Evaluations</Heading>
-                </Card.Header>
-                <Card.Body p={2}>
-                  <VStack align="stretch" spacing={2} maxH="500px" overflowY="auto">
-                    {isHistoryLoading ? (
-                      <Spinner size="sm" />
-                    ) : !reportHistory || reportHistory.length === 0 ? (
-                      <>
-                        <Text fontSize="sm" color="gray.500">No previous evaluations</Text>
-                      </>
-                    ) : (
-                      reportHistory.map(report => (
-                        <Box 
-                          key={report?.id}
-                          p={3}
-                          borderWidth="1px"
-                          borderRadius="md"
-                          cursor="pointer"
-                          bg={selectedHistoryReport?.id === report?.id ? "blue.50" : "white"}
-                          _hover={{ bg: "blue.50" }}
-                          onClick={() => report?.id && loadReportFromHistory(report.id)}
-                        >
-                          <VStack align="start" spacing={1} width="100%">
-                            <HStack spacing={1} width="100%" justify="space-between">
-                              <Text fontSize="xs" color="gray.500">
-                                {report?.date_created ? 
-                                  format(new Date(report.date_created), 'MMM d, yyyy') : 
-                                  "Unknown date"}
-                              </Text>
-                              {report?.qa_count > 0 && (
+              {/* Fixed layout with consistent side-by-side panels */}
+              <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
+                {/* History Panel - Always show this */}
+                <Card.Root width={{ base: "100%", md: "300px" }} height="fit-content">
+                  <Card.Header>
+                    <Heading size="sm">Previous Evaluations</Heading>
+                  </Card.Header>
+                  <Card.Body p={2}>
+                    <VStack align="stretch" spacing={2} maxH="500px" overflowY="auto">
+                      {isHistoryLoading ? (
+                        <Spinner size="sm" />
+                      ) : !reportHistory || reportHistory.length === 0 ? (
+                        <>
+                          <Text fontSize="sm" color="gray.500">
+                            No previous evaluations
+                          </Text>
+                        </>
+                      ) : (
+                        reportHistory.map((report) => (
+                          <Box
+                            key={report?.id}
+                            p={3}
+                            borderWidth="1px"
+                            borderRadius="md"
+                            cursor="pointer"
+                            bg={selectedHistoryReport?.id === report?.id ? "blue.50" : "white"}
+                            _hover={{ bg: "blue.50" }}
+                            onClick={() => report?.id && loadReportFromHistory(report.id)}
+                          >
+                            <VStack align="start" spacing={1} width="100%">
+                              <HStack spacing={1} width="100%" justify="space-between">
                                 <Text fontSize="xs" color="gray.500">
-                                  {report.qa_count} question{report.qa_count !== 1 ? 's' : ''}
+                                  {report?.date_created
+                                    ? format(new Date(report.date_created), "MMM d, yyyy")
+                                    : "Unknown date"}
                                 </Text>
-                              )}
-                            </HStack>
-                            
-                            {/* Document name with icon */}
-                            <HStack spacing={1} width="100%">
-                              <Box as={FiFileText} size="12px" color="blue.500" />
-                              <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
-                                {report.document_name || "Unnamed document"}
-                              </Text>
-                            </HStack>
-                            
-                            {/* KB name with icon */}
-                            {report?.kb_name && (
+                                {report?.qa_count > 0 && (
+                                  <Text fontSize="xs" color="gray.500">
+                                    {report.qa_count} question{report.qa_count !== 1 ? "s" : ""}
+                                  </Text>
+                                )}
+                              </HStack>
+
+                              {/* Document name with icon */}
                               <HStack spacing={1} width="100%">
-                                <Box as={FiDatabase} size="12px" color="gray.500" />
-                                <Text fontSize="xs" color="gray.600" noOfLines={1}>
-                                  {report.kb_name}
+                                <Box as={FiFileText} size="12px" color="blue.500" />
+                                <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
+                                  {report.document_name || "Unnamed document"}
                                 </Text>
                               </HStack>
-                            )}
-                          </VStack>
-                        </Box>
-                      ))
-                    )}
-                  </VStack>
-                </Card.Body>
-              </Card.Root>
 
-              {/* Results Panel - Always take remaining space */}
-              <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
-                {/* Title for Results */}
-                <Heading size="md" mb={4}>
-                  {selectedHistoryReport ? 
-                    `Evaluation from ${format(new Date(selectedHistoryReport.date_created), 'MMM d, yyyy')} - ${selectedHistoryReport.document_name}` : 
-                    "Results"}
-                </Heading>
-                
-                {/* Results Box - This is the main content area */}
+                              {/* KB name with icon */}
+                              {report?.kb_name && (
+                                <HStack spacing={1} width="100%">
+                                  <Box as={FiDatabase} size="12px" color="gray.500" />
+                                  <Text fontSize="xs" color="gray.600" noOfLines={1}>
+                                    {report.kb_name}
+                                  </Text>
+                                </HStack>
+                              )}
+                            </VStack>
+                          </Box>
+                        ))
+                      )}
+                    </VStack>
+                  </Card.Body>
+                </Card.Root>
+
+                {/* Results Panel - Always take remaining space */}
+                <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
+                  {/* Title for Results */}
+                  <Heading size="md" mb={4}>
+                    {selectedHistoryReport
+                      ? `Evaluation from ${format(new Date(selectedHistoryReport.date_created), "MMM d, yyyy")} - ${selectedHistoryReport.document_name}`
+                      : "Results"}
+                  </Heading>
+
+                  {/* Results Box - This is the main content area */}
+                  <Box
+                    border="1px solid"
+                    borderColor="gray.200"
+                    borderRadius="md"
+                    p={4}
+                    bg="gray.50"
+                    minH="100px"
+                    maxH={{ base: "400px", md: "600px" }}
+                    overflowY="auto"
+                    position="relative"
+                    opacity={loading ? 0.5 : 1}
+                  >
+                    {loading && (
+                      <Box
+                        position="absolute"
+                        top="50%"
+                        left="50%"
+                        transform="translate(-50%, -50%)"
+                        zIndex="1"
+                      >
+                        <Spinner size="lg" color="blue.500" />
+                      </Box>
+                    )}
+                    {results ? (
+                      <>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+                          {results}
+                        </ReactMarkdown>
+
+                        {selectedHistoryReport?.id && (
+                          <Box
+                            position="sticky"
+                            bottom={4}
+                            right={4}
+                            display="flex"
+                            justifyContent="flex-end"
+                            pointerEvents="auto"
+                            zIndex={10}
+                          >
+                            <FeedbackButtons
+                              interactionId={selectedHistoryReport.id}
+                              onFeedbackSubmitted={(type) => {
+                                showSuccessToast(`Thank you for marking this response as ${type}!`)
+                              }}
+                            />
+                          </Box>
+                        )}
+
+                        {qaPairs.length > 0 && (
+                          <Box mt={4}>
+                            {qaPairs.map((pair, index) => (
+                              <Box
+                                key={index}
+                                mb={4}
+                                p={4}
+                                borderWidth="1px"
+                                borderRadius="md"
+                                bg="white"
+                              >
+                                <Heading as="h3" size="md" mb={2}>
+                                  Question {index + 1}: {pair.question}
+                                </Heading>
+
+                                <Box mb={3}>
+                                  <Text fontWeight="bold">Answer:</Text>
+                                  <Text>{pair.answer}</Text>
+                                </Box>
+
+                                <Box mb={3}>
+                                  <Text fontWeight="bold">Relevant Policy Context:</Text>
+                                  <Text>{pair.context}</Text>
+                                </Box>
+
+                                {pair.source_citations && pair.source_citations.length > 0 && (
+                                  <Accordion.Root type="single" collapsible mt={2}>
+                                    <Accordion.Item>
+                                      <h2>
+                                        <Accordion.ItemTrigger
+                                          bg="gray.100"
+                                          _hover={{ bg: "gray.200" }}
+                                        >
+                                          <Box flex="1" textAlign="left" fontWeight="medium">
+                                            <HStack>
+                                              <FiFileText />
+                                              <Text>
+                                                View Source Citations (
+                                                {pair.source_citations.length})
+                                              </Text>
+                                            </HStack>
+                                          </Box>
+                                        </Accordion.ItemTrigger>
+                                      </h2>
+                                      <Accordion.ItemContent pb={4} bg="gray.50">
+                                        {pair.source_citations.map((citation, cIndex) => (
+                                          <Box
+                                            key={cIndex}
+                                            p={3}
+                                            mb={2}
+                                            borderWidth="1px"
+                                            borderRadius="md"
+                                            bg="white"
+                                          >
+                                            {citation.metadata.source_data_id ? (
+                                              <SourceLink
+                                                sourceId={citation.metadata.source_data_id}
+                                                fileName={getDisplayFileName(
+                                                  citation.metadata.source,
+                                                )}
+                                                ml={1}
+                                                fontWeight="normal"
+                                                color="blue.600"
+                                                useModal={true}
+                                              />
+                                            ) : (
+                                              <Text
+                                                as="span"
+                                                ml={1}
+                                                fontWeight="normal"
+                                                color="blue.600"
+                                              >
+                                                {getDisplayFileName(citation.metadata.source)}
+                                              </Text>
+                                            )}
+                                            <Box
+                                              mt={2}
+                                              p={2}
+                                              bg="gray.50"
+                                              borderRadius="sm"
+                                              fontSize="sm"
+                                              whiteSpace="pre-wrap"
+                                            >
+                                              {citation.content}
+                                            </Box>
+                                          </Box>
+                                        ))}
+                                      </Accordion.ItemContent>
+                                    </Accordion.Item>
+                                  </Accordion.Root>
+                                )}
+                              </Box>
+                            ))}
+                          </Box>
+                        )}
+                      </>
+                    ) : (
+                      <Text color="gray.500">Results will appear here after running.</Text>
+                    )}
+                  </Box>
+                </Box>
+              </Box>
+            </VStack>
+          ) : (
+            <VStack spacing={4} align="stretch">
+              {/* File Upload Area */}
+              <Box
+                border="2px dashed"
+                borderColor="gray.300"
+                borderRadius="md"
+                p={6}
+                textAlign="center"
+                cursor="pointer"
+                _hover={{ borderColor: "blue.500", bg: "blue.50" }}
+                {...getRootProps()} // Use useDropzone directly in the component
+              >
+                <input {...getInputProps()} />
+                <VStack spacing={2}>
+                  <Text>Drag and drop files here, or click to browse</Text>
+                  <Text fontSize="sm" color="gray.500">
+                    You can upload multiple files at once
+                  </Text>
+                </VStack>
+              </Box>
+
+              {/* Uploaded Files List */}
+              {batchFiles.length > 0 && (
+                <Box>
+                  <Text fontWeight="medium" mb={2}>
+                    Uploaded Files ({batchFiles.length})
+                  </Text>
+                  <VStack align="stretch" spacing={2} maxH="300px" overflowY="auto">
+                    {batchFiles.map((fileItem, index) => (
+                      <HStack
+                        key={fileItem.file.name + index} // More reliable key
+                        justify="space-between"
+                        bg="white"
+                        p={3}
+                        borderRadius="md"
+                        border="1px solid"
+                        borderColor="gray.200"
+                      >
+                        <Box>
+                          <Text fontWeight="medium" noOfLines={1}>
+                            {fileItem.file.name}
+                          </Text>
+                          <Text fontSize="xs" color="gray.500">
+                            {(fileItem.file.size / 1024).toFixed(1)} KB
+                          </Text>
+                        </Box>
+                        <HStack>
+                          <ChakraField.Root display="flex" alignItems="center" width="auto">
+                            <ChakraField.Label
+                              htmlFor={`batch-handwritten-${index}`}
+                              mb="0"
+                              fontSize="sm"
+                            >
+                              Handwritten
+                            </ChakraField.Label>
+                            <Switch.Root id={`batch-handwritten-${index}`} colorPalette="blue">
+                              <Switch.HiddenInput
+                                checked={fileItem.isHandwritten}
+                                onChange={() => {
+                                  setBatchFiles((prev) =>
+                                    prev.map((item, i) =>
+                                      i === index
+                                        ? { ...item, isHandwritten: !item.isHandwritten }
+                                        : item,
+                                    ),
+                                  )
+                                }}
+                              />
+                              <Switch.Control>
+                                <Switch.Thumb />
+                              </Switch.Control>
+                            </Switch.Root>
+                          </ChakraField.Root>
+                          <Button
+                            size="sm"
+                            colorPalette="red"
+                            onClick={() => {
+                              setBatchFiles((prev) => prev.filter((_, i) => i !== index))
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        </HStack>
+                      </HStack>
+                    ))}
+                  </VStack>
+                </Box>
+              )}
+
+              {/* Process Button */}
+              <HStack spacing={4}>
+                <Button
+                  variant="solid"
+                  colorPalette={batchFiles.length > 0 ? "blue" : "gray"}
+                  onClick={handleProcessBatch}
+                  isLoading={batchLoading}
+                  isDisabled={batchFiles.length === 0}
+                >
+                  {batchFiles.length > 0
+                    ? `Process ${batchFiles.length} Files`
+                    : "No Files to Process"}
+                </Button>
+              </HStack>
+
+              {/* Results section */}
+              <Separator my={4} />
+              <Heading size="md" mb={4}>
+                Results
+              </Heading>
+              <Box>
+                {batchResults.length > 0 ? (
+                  <Field label="Select File to View Results">
+                    <select
+                      value={selectedBatchResult}
+                      onChange={(e) => setSelectedBatchResult(Number(e.target.value))}
+                      style={{
+                        width: "100%",
+                        padding: "0.5rem",
+                        borderRadius: "0.375rem",
+                        borderColor: "#E2E8F0",
+                      }}
+                    >
+                      {batchResults.map((_, index) => (
+                        <option key={index} value={index}>
+                          {/* Display file name when available */}
+                          {batchFiles[index]?.file?.name || `File ${index + 1}`}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                ) : null}
+
                 <Box
                   border="1px solid"
                   borderColor="gray.200"
@@ -1054,12 +1344,12 @@ const VeraDoc = () => {
                   p={4}
                   bg="gray.50"
                   minH="100px"
-                  maxH={{ base: "400px", md: "600px" }}
+                  maxH="400px"
                   overflowY="auto"
                   position="relative"
-                  opacity={loading ? 0.5 : 1}
+                  opacity={batchLoading ? 0.5 : 1}
                 >
-                  {loading && (
+                  {batchLoading ? (
                     <Box
                       position="absolute"
                       top="50%"
@@ -1069,92 +1359,90 @@ const VeraDoc = () => {
                     >
                       <Spinner size="lg" color="blue.500" />
                     </Box>
-                  )}
-                  {results ? (
+                  ) : batchResults.length > 0 ? (
                     <>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                      {results}
-                    </ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+                        {batchResults[selectedBatchResult].displayResults}
+                      </ReactMarkdown>
 
-                    {selectedHistoryReport?.id && (
-                      <Box
-                        position="sticky"
-                        bottom={4}
-                        right={4}
-                        display="flex"
-                        justifyContent="flex-end"
-                        pointerEvents="auto"
-                        zIndex={10}
-                      >
-                        <FeedbackButtons 
-                          interactionId={selectedHistoryReport.id} 
-                          onFeedbackSubmitted={(type) => {
-                            showSuccessToast(`Thank you for marking this response as ${type}!`);
-                          }}
-                        />
-                      </Box>
-                    )}
-
-                    {qaPairs.length > 0 && (
                       <Box mt={4}>
-                        {qaPairs.map((pair, index) => (
-                          <Box key={index} mb={4} p={4} borderWidth="1px" borderRadius="md" bg="white">
+                        {batchResults[selectedBatchResult].qaPairs.map((pair, index) => (
+                          <Box
+                            key={index}
+                            mb={4}
+                            p={4}
+                            borderWidth="1px"
+                            borderRadius="md"
+                            bg="white"
+                          >
                             <Heading as="h3" size="md" mb={2}>
                               Question {index + 1}: {pair.question}
                             </Heading>
-                            
+
                             <Box mb={3}>
                               <Text fontWeight="bold">Answer:</Text>
                               <Text>{pair.answer}</Text>
                             </Box>
-                            
+
                             <Box mb={3}>
                               <Text fontWeight="bold">Relevant Policy Context:</Text>
                               <Text>{pair.context}</Text>
                             </Box>
-                            
+
+                            {pair.source_citations &&
+                              console.log("Source citations:", pair.source_citations)}
                             {pair.source_citations && pair.source_citations.length > 0 && (
                               <Accordion.Root type="single" collapsible mt={2}>
                                 <Accordion.Item>
                                   <h2>
-                                    <Accordion.ItemTrigger bg="gray.100" _hover={{ bg: "gray.200" }}>
+                                    <Accordion.ItemTrigger
+                                      bg="gray.100"
+                                      _hover={{ bg: "gray.200" }}
+                                    >
                                       <Box flex="1" textAlign="left" fontWeight="medium">
                                         <HStack>
                                           <FiFileText />
-                                          <Text>View Source Citations ({pair.source_citations.length})</Text>
+                                          <Text>
+                                            View Source Citations ({pair.source_citations.length})
+                                          </Text>
                                         </HStack>
                                       </Box>
                                     </Accordion.ItemTrigger>
                                   </h2>
                                   <Accordion.ItemContent pb={4} bg="gray.50">
                                     {pair.source_citations.map((citation, cIndex) => (
-                                      <Box 
+                                      <Box
                                         key={cIndex}
-                                        p={3} 
-                                        mb={2} 
-                                        borderWidth="1px" 
+                                        p={3}
+                                        mb={2}
+                                        borderWidth="1px"
                                         borderRadius="md"
                                         bg="white"
                                       >
                                         {citation.metadata.source_data_id ? (
-                                            <SourceLink
-                                              sourceId={citation.metadata.source_data_id}
-                                              fileName={getDisplayFileName(citation.metadata.source)}
-                                              ml={1}
-                                              fontWeight="normal"
-                                              color="blue.600"
-                                              useModal={true}
-                                            />
-                                          ) : (
-                                            <Text as="span" ml={1} fontWeight="normal" color="blue.600">
-                                              {getDisplayFileName(citation.metadata.source)}
-                                            </Text>
-                                          )}
-                                        <Box 
-                                          mt={2} 
-                                          p={2} 
-                                          bg="gray.50" 
-                                          borderRadius="sm" 
+                                          <SourceLink
+                                            sourceId={citation.metadata.source_data_id}
+                                            fileName={getDisplayFileName(citation.metadata.source)}
+                                            ml={1}
+                                            fontWeight="normal"
+                                            color="blue.600"
+                                            useModal={true}
+                                          />
+                                        ) : (
+                                          <Text
+                                            as="span"
+                                            ml={1}
+                                            fontWeight="normal"
+                                            color="blue.600"
+                                          >
+                                            {getDisplayFileName(citation.metadata.source)}
+                                          </Text>
+                                        )}
+                                        <Box
+                                          mt={2}
+                                          p={2}
+                                          bg="gray.50"
+                                          borderRadius="sm"
                                           fontSize="sm"
                                           whiteSpace="pre-wrap"
                                         >
@@ -1169,268 +1457,15 @@ const VeraDoc = () => {
                           </Box>
                         ))}
                       </Box>
-                    )}
                     </>
                   ) : (
-                    <Text color="gray.500">Results will appear here after running.</Text>
+                    <Text color="gray.500">Results will appear here after processing files.</Text>
                   )}
                 </Box>
               </Box>
-            </Box>
-          </VStack>
-        ) : (
-          <VStack spacing={4} align="stretch">
-            {/* File Upload Area */}
-            <Box
-              border="2px dashed"
-              borderColor="gray.300"
-              borderRadius="md"
-              p={6}
-              textAlign="center"
-              cursor="pointer"
-              _hover={{ borderColor: "blue.500", bg: "blue.50" }}
-              {...getRootProps()} // Use useDropzone directly in the component
-            >
-              <input {...getInputProps()} />
-              <VStack spacing={2}>
-                <Text>Drag and drop files here, or click to browse</Text>
-                <Text fontSize="sm" color="gray.500">
-                  You can upload multiple files at once
-                </Text>
-              </VStack>
-            </Box>
-
-            {/* Uploaded Files List */}
-            {batchFiles.length > 0 && (
-              <Box>
-                <Text fontWeight="medium" mb={2}>
-                  Uploaded Files ({batchFiles.length})
-                </Text>
-                <VStack align="stretch" spacing={2} maxH="300px" overflowY="auto">
-                  {batchFiles.map((fileItem, index) => (
-                    <HStack
-                      key={fileItem.file.name + index} // More reliable key
-                      justify="space-between"
-                      bg="white"
-                      p={3}
-                      borderRadius="md"
-                      border="1px solid"
-                      borderColor="gray.200"
-                    >
-                      <Box>
-                        <Text fontWeight="medium" noOfLines={1}>
-                          {fileItem.file.name}
-                        </Text>
-                        <Text fontSize="xs" color="gray.500">
-                          {(fileItem.file.size / 1024).toFixed(1)} KB
-                        </Text>
-                      </Box>
-                      <HStack>
-                        <ChakraField.Root display="flex" alignItems="center" width="auto">
-                          <ChakraField.Label
-                            htmlFor={`batch-handwritten-${index}`}
-                            mb="0"
-                            fontSize="sm"
-                          >
-                            Handwritten
-                          </ChakraField.Label>
-                          <Switch.Root id={`batch-handwritten-${index}`} colorPalette="blue">
-                            <Switch.HiddenInput
-                              checked={fileItem.isHandwritten}
-                              onChange={() => {
-                                setBatchFiles((prev) =>
-                                  prev.map((item, i) =>
-                                    i === index
-                                      ? { ...item, isHandwritten: !item.isHandwritten }
-                                      : item,
-                                  ),
-                                )
-                              }}
-                            />
-                            <Switch.Control>
-                              <Switch.Thumb />
-                            </Switch.Control>
-                          </Switch.Root>
-                        </ChakraField.Root>
-                        <Button
-                          size="sm"
-                          colorPalette="red"
-                          onClick={() => {
-                            setBatchFiles((prev) => prev.filter((_, i) => i !== index))
-                          }}
-                        >
-                          Remove
-                        </Button>
-                      </HStack>
-                    </HStack>
-                  ))}
-                </VStack>
-              </Box>
-            )}
-
-            {/* Process Button */}
-            <HStack spacing={4}>
-              <Button
-                variant="solid"
-                colorPalette={batchFiles.length > 0 ? "blue" : "gray"}
-                onClick={handleProcessBatch}
-                isLoading={batchLoading}
-                isDisabled={batchFiles.length === 0}
-              >
-                {batchFiles.length > 0
-                  ? `Process ${batchFiles.length} Files`
-                  : "No Files to Process"}
-              </Button>
-            </HStack>
-
-            {/* Results section */}
-            <Separator my={4} />
-            <Heading size="md" mb={4}>
-              Results
-            </Heading>
-            <Box>
-              {batchResults.length > 0 ? (
-                <Field label="Select File to View Results">
-                  <select
-                    value={selectedBatchResult}
-                    onChange={(e) => setSelectedBatchResult(Number(e.target.value))}
-                    style={{
-                      width: "100%",
-                      padding: "0.5rem",
-                      borderRadius: "0.375rem",
-                      borderColor: "#E2E8F0",
-                    }}
-                  >
-                    {batchResults.map((_, index) => (
-                      <option key={index} value={index}>
-                        {/* Display file name when available */}
-                        {batchFiles[index]?.file?.name || `File ${index + 1}`}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-              ) : null}
-
-              <Box
-                border="1px solid"
-                borderColor="gray.200"
-                borderRadius="md"
-                p={4}
-                bg="gray.50"
-                minH="100px"
-                maxH="400px"
-                overflowY="auto"
-                position="relative"
-                opacity={batchLoading ? 0.5 : 1}
-              >
-                {batchLoading ? (
-                  <Box
-                    position="absolute"
-                    top="50%"
-                    left="50%"
-                    transform="translate(-50%, -50%)"
-                    zIndex="1"
-                  >
-                    <Spinner size="lg" color="blue.500" />
-                  </Box>
-                ) : batchResults.length > 0 ? (
-                  <>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                      {batchResults[selectedBatchResult].displayResults}
-                    </ReactMarkdown>
-
-                    <Box mt={4}>
-                      {batchResults[selectedBatchResult].qaPairs.map((pair, index) => (
-                        <Box
-                          key={index}
-                          mb={4}
-                          p={4}
-                          borderWidth="1px"
-                          borderRadius="md"
-                          bg="white"
-                        >
-                          <Heading as="h3" size="md" mb={2}>
-                            Question {index + 1}: {pair.question}
-                          </Heading>
-
-                          <Box mb={3}>
-                            <Text fontWeight="bold">Answer:</Text>
-                            <Text>{pair.answer}</Text>
-                          </Box>
-
-                          <Box mb={3}>
-                            <Text fontWeight="bold">Relevant Policy Context:</Text>
-                            <Text>{pair.context}</Text>
-                          </Box>
-
-                          {pair.source_citations &&
-                            console.log("Source citations:", pair.source_citations)}
-                          {pair.source_citations && pair.source_citations.length > 0 && (
-                            <Accordion.Root type="single" collapsible mt={2}>
-                              <Accordion.Item>
-                                <h2>
-                                  <Accordion.ItemTrigger bg="gray.100" _hover={{ bg: "gray.200" }}>
-                                    <Box flex="1" textAlign="left" fontWeight="medium">
-                                      <HStack>
-                                        <FiFileText />
-                                        <Text>
-                                          View Source Citations ({pair.source_citations.length})
-                                        </Text>
-                                      </HStack>
-                                    </Box>
-                                  </Accordion.ItemTrigger>
-                                </h2>
-                                <Accordion.ItemContent pb={4} bg="gray.50">
-                                  {pair.source_citations.map((citation, cIndex) => (
-                                    <Box
-                                      key={cIndex}
-                                      p={3}
-                                      mb={2}
-                                      borderWidth="1px"
-                                      borderRadius="md"
-                                      bg="white"
-                                    >
-                                      {citation.metadata.source_data_id ? (
-                                        <SourceLink
-                                          sourceId={citation.metadata.source_data_id}
-                                          fileName={getDisplayFileName(citation.metadata.source)}
-                                          ml={1}
-                                          fontWeight="normal"
-                                          color="blue.600"
-                                          useModal={true}
-                                        />
-                                      ) : (
-                                        <Text as="span" ml={1} fontWeight="normal" color="blue.600">
-                                          {getDisplayFileName(citation.metadata.source)}
-                                        </Text>
-                                      )}
-                                      <Box
-                                        mt={2}
-                                        p={2}
-                                        bg="gray.50"
-                                        borderRadius="sm"
-                                        fontSize="sm"
-                                        whiteSpace="pre-wrap"
-                                      >
-                                        {citation.content}
-                                      </Box>
-                                    </Box>
-                                  ))}
-                                </Accordion.ItemContent>
-                              </Accordion.Item>
-                            </Accordion.Root>
-                          )}
-                        </Box>
-                      ))}
-                    </Box>
-                  </>
-                ) : (
-                  <Text color="gray.500">Results will appear here after processing files.</Text>
-                )}
-              </Box>
-            </Box>
-          </VStack>
-        )}
+            </VStack>
+          )}
+        </div>
       </VStack>
     </Container>
   )
