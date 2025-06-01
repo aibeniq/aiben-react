@@ -380,6 +380,19 @@ def record_llm_interaction(
             output_data = json.dumps(output_data)
         except:
             output_data = str(output_data)
+
+    user = session.get(User, user_id)
+    if user and user.default_llm:
+        model = session.get(LlmModel, user.default_llm)
+        if model:
+            llm_model_id = model.model_id
+            llm_provider = model.provider.value
+    
+    # Add LLM info to metadata
+    if llm_model_id:
+        metadata["llm_model_id"] = llm_model_id
+    if llm_provider:
+        metadata["llm_provider"] = llm_provider
     
     # Create and save interaction record
     interaction = LlmInteraction(
