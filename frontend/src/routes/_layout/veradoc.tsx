@@ -726,7 +726,7 @@ const VeraDoc = () => {
             </VStack>
           </Field>
 
-          <HStack spacing={4} pt={2}>
+          <HStack gap={4} pt={2}>
             <Button
               variant="solid"
               onClick={async () => {
