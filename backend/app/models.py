@@ -252,6 +252,7 @@ class VeraDocRagQA(VeraDocRequest):
 class VeraDocRagResult(VeraDocRequest):
     final_evaluation: str
     qa_pairs: List[VeraDocRagQA]
+    interaction_id: Optional[str] = None
 
 class VeraDocRagResponse(VeraDocRequest):
     results: VeraDocRagResult
@@ -393,3 +394,7 @@ class LlmInteraction(SQLModel, table=True):
     input_data: str = Field(default=None)  # Stores the input prompt/question
     output_data: str = Field(default=None)  # Stores the generated response
     extra_data: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))  # For additional info (JSON)
+    feedback: Optional[str] = Field(default=None)  # 'correct' or 'incorrect'
+    feedback_text: Optional[str] = Field(default=None)  # User's additional comments
+    feedback_date: Optional[datetime] = Field(default=None)  # When feedback was provided
+    
