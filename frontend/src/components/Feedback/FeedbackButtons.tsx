@@ -6,8 +6,10 @@ import {
   Textarea,
   Text,
   Portal,
-  IconButton
+  IconButton,
+  useToast
 } from "@chakra-ui/react";
+import { Tooltip } from "@/components/ui/tooltip";
 import { FiThumbsUp, FiThumbsDown, FiSend } from "react-icons/fi";
 import { FeedbackService } from "@/client";
 import useCustomToast from "@/hooks/useCustomToast";
@@ -15,22 +17,47 @@ import useCustomToast from "@/hooks/useCustomToast";
 interface FeedbackButtonsProps {
   interactionId: string;
   onFeedbackSubmitted?: (type: string) => void;
+  existingFeedback?: {
+    feedback: "correct" | "incorrect" | null;
+    feedbackText?: string;
+    feedbackDate?: string;
+  };
 }
 
-const FeedbackButtons = ({ interactionId, onFeedbackSubmitted }: FeedbackButtonsProps) => {
+const FeedbackButtons = ({ interactionId, onFeedbackSubmitted, existingFeedback }: FeedbackButtonsProps) => {
   // Replace useDisclosure with a simple useState
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [feedbackType, setFeedbackType] = useState<"correct" | "incorrect" | null>(null);
-  const [feedbackText, setFeedbackText] = useState("");
+  const [feedbackType, setFeedbackType] = useState<"correct" | "incorrect" | null>(
+    existingFeedback?.feedback || null
+  );
+  const [feedbackText, setFeedbackText] = useState(existingFeedback?.feedbackText || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showSuccessToast, showErrorToast } = useCustomToast();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Effect to update state when existingFeedback changes
+  useEffect(() => {
+    if (existingFeedback) {
+      setFeedbackType(existingFeedback.feedback);
+      setFeedbackText(existingFeedback.feedbackText || "");
+    }
+  }, [existingFeedback]);
+
   // Open the modal and set the feedback type
   const handleFeedbackClick = (type: "correct" | "incorrect") => {
     console.log("Feedback button clicked:", type);
+    
+    // If this type is already selected and there's existing feedback,
+    // we're editing the current feedback
+    const isEditing = existingFeedback?.feedback === type;
+    
     setFeedbackType(type);
-    setFeedbackText("");
+    
+    // If editing, keep the existing text, otherwise clear it
+    if (!isEditing) {
+      setFeedbackText("");
+    }
+    
     setIsModalOpen(true);
     console.log("Modal should open now for type:", type);
   };
@@ -87,28 +114,56 @@ const FeedbackButtons = ({ interactionId, onFeedbackSubmitted }: FeedbackButtons
         boxShadow="sm"
         border="1px solid"
         borderColor="gray.200"
+      >
+        <Tooltip 
+          label={existingFeedback?.feedback === "correct" ? "Edit your helpful feedback" : "Mark as helpful"}
+          hasArrow
         >
-        <IconButton
+          <IconButton
             aria-label="Mark as helpful"
             size="sm"
-            variant="ghost"
+            variant={feedbackType === "correct" ? "solid" : "ghost"}
             colorPalette="green"
             onClick={() => handleFeedbackClick("correct")}
+          >
+            <FiThumbsUp 
+              size={18} 
+              color={feedbackType === "correct" ? "white" : "green"} 
+            />
+          </IconButton>
+        </Tooltip>
+        
+        <Tooltip 
+          label={existingFeedback?.feedback === "incorrect" ? "Edit your feedback for improvements" : "Mark as not helpful"}
+          hasArrow
         >
-            <FiThumbsUp size={18} color="green" />
-        </IconButton>
-        <IconButton
+          <IconButton
             aria-label="Mark as unhelpful"
             size="sm"
-            variant="ghost"
+            variant={feedbackType === "incorrect" ? "solid" : "ghost"}
             colorPalette="red" 
             onClick={() => handleFeedbackClick("incorrect")}
-        >
-            <FiThumbsDown size={18} color="red" />
-        </IconButton>
-        </HStack>
+          >
+            <FiThumbsDown 
+              size={18} 
+              color={feedbackType === "incorrect" ? "white" : "red"} 
+            />
+          </IconButton>
+        </Tooltip>
+        
+        {existingFeedback?.feedbackDate && (
+          <Tooltip 
+            label={`Feedback submitted on ${new Date(existingFeedback.feedbackDate).toLocaleDateString()} at ${new Date(existingFeedback.feedbackDate).toLocaleTimeString()}`}
+            hasArrow
+          >
+            <Text fontSize="xs" color="gray.500" ml={1}>
+              Feedback saved
+            </Text>
+          </Tooltip>
+        )}
+      </HStack>
 
-      {/* Feedback modal using Portal for better positioning */}
+      {/* Feedback modal using Portal */}
       {isModalOpen && (
         <Portal>
           <Box
@@ -169,7 +224,7 @@ const FeedbackButtons = ({ interactionId, onFeedbackSubmitted }: FeedbackButtons
                   isLoading={isSubmitting}
                   leftIcon={<FiSend />}
                 >
-                  Submit
+                  {existingFeedback?.feedback ? "Update Feedback" : "Submit"}
                 </Button>
               </HStack>
             </Box>

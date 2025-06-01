@@ -1091,6 +1091,11 @@ const VeraDoc = () => {
                           onFeedbackSubmitted={(type) => {
                             showSuccessToast(`Thank you for marking this response as ${type}!`);
                           }}
+                          existingFeedback={selectedHistoryReport.feedback ? {
+                            feedback: selectedHistoryReport.feedback.feedback as "correct" | "incorrect" | null,
+                            feedbackText: selectedHistoryReport.feedback.feedbackText,
+                            feedbackDate: selectedHistoryReport.feedback.feedbackDate
+                          } : undefined}
                         />
                       </Box>
                     )}
