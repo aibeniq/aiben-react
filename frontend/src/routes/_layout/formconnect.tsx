@@ -29,6 +29,7 @@ import { Field } from "../../components/ui/field"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import { format } from "date-fns"
 import useCustomToast from "@/hooks/useCustomToast"
+import { InteractiveList } from "@/components/ui/interactive-list"
 
 const FormConnect = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -526,13 +527,11 @@ const FormConnect = () => {
             />
           </Field>
 
-          <Field label="Fields" required>
-            <Textarea
+          <Field label="Fields" required borderTop="1px solid" py={4}>
+            <InteractiveList
               value={fields}
-              onChange={(e) => setFields(e.target.value)}
-              placeholder="Enter fields, one per line"
-              rows={6}
-              resize="vertical"
+              onChange={setFields}
+              placeholder="Add a field name (e.g. First Name, Address, SSN)"
             />
           </Field>
 
