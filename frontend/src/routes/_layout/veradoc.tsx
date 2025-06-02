@@ -24,7 +24,12 @@ import { useState, useEffect, useRef } from "react"
 import { useDropzone } from "react-dropzone"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
-import { VeradocService, KnowledgeBasesService } from "@/client"
+import {
+  VeradocService,
+  KnowledgeBasesService,
+  KnowledgeBasePublic,
+  VeraDocChecklist,
+} from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { FiFileText, FiDatabase, FiTrash2, FiChevronUp, FiChevronDown } from "react-icons/fi"
@@ -32,20 +37,19 @@ import { Field } from "../../components/ui/field"
 import { format } from "date-fns"
 import { useQuery } from "@tanstack/react-query"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
+import KnowledgeBaseTable from "../../components/Verify/KnowledgeBaseTable"
 
 const VeraDoc = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<any>(null)
-  const [knowledgeBases, setKnowledgeBases] = useState<any[]>([])
+  const [selectedKnowledgeBases, setSelectedKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
+  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
   const abortControllerRef = useRef<AbortController | null>(null)
   const ongoingRequest = useRef<CancelablePromise<any> | null>(null)
 
-  // Add these state variables to your component
   const [reportHistory, setReportHistory] = useState<any[]>([])
   const [selectedHistoryReport, setSelectedHistoryReport] = useState(null)
   const [isHistoryLoading, setIsHistoryLoading] = useState(false)
 
-  // Add this query to fetch history
   const historyQuery = useQuery({
     queryKey: ["veradocHistory"],
     queryFn: async () => {
@@ -55,7 +59,6 @@ const VeraDoc = () => {
     enabled: true,
   })
 
-  // Use a useEffect to handle the data updates
   useEffect(() => {
     if (historyQuery.data) {
       setReportHistory(Array.isArray(historyQuery.data) ? historyQuery.data : [])
@@ -63,13 +66,11 @@ const VeraDoc = () => {
     setIsHistoryLoading(historyQuery.isLoading)
   }, [historyQuery.data, historyQuery.isLoading])
 
-  // Add this function to load a report from history
   const loadReportFromHistory = async (reportId) => {
     try {
       setIsHistoryLoading(true)
       const report = await VeradocService.getVeradocDetail({ reportId })
 
-      // Update UI state with the loaded report
       setResults(report.results.final_evaluation || "")
       setQaPairs(report.results.qa_pairs || [])
       setSelectedHistoryReport(report)
@@ -78,7 +79,7 @@ const VeraDoc = () => {
       if (report.kb_id) {
         const kb = knowledgeBases.find((kb) => kb.id === report.kb_id)
         if (kb) {
-          setSelectedKnowledgeBase(kb)
+          setSelectedKnowledgeBases([kb])
           fetchKnowledgeBaseDetails(kb.id)
         }
       }
@@ -144,7 +145,7 @@ const VeraDoc = () => {
     }
   }
 
-  const [mode, setMode] = useState<"manual" | "batch">("manual") // Toggle between Manual and Batch Mode
+  const [mode, setMode] = useState<"manual" | "batch">("manual")
 
   const [batchFiles, setBatchFiles] = useState<
     Array<{
@@ -232,8 +233,8 @@ const VeraDoc = () => {
   >([])
 
   const [qaPairs, setQaPairs] = useState<Array<any>>([])
-  const [checklists, setChecklists] = useState([]) // List of checklists
-  const [selectedChecklist, setSelectedChecklist] = useState(null) // Currently selected checklist
+  const [checklists, setChecklists] = useState<VeraDocChecklist[]>([]) // List of checklists
+  const [selectedChecklist, setSelectedChecklist] = useState<VeraDocChecklist | null>(null) // Currently selected checklist
   const [checklistName, setChecklistName] = useState("") // Name of the checklist being created/edited
   const [checklistDescription, setChecklistDescription] = useState("") // Description of the checklist
 
@@ -440,7 +441,7 @@ const VeraDoc = () => {
       return
     }
 
-    if (!selectedKnowledgeBase?.id) {
+    if (!selectedKnowledgeBases?.id) {
       setResults("Please select a knowledge base for context.")
       return
     }
@@ -459,7 +460,7 @@ const VeraDoc = () => {
 
     const requestData = {
       questions: questions,
-      knowledgeBaseId: selectedKnowledgeBase.id,
+      knowledgeBaseId: selectedKnowledgeBases.id,
       files: regularFiles,
       handwrittenFiles: handwrittenFiles,
     }
@@ -503,7 +504,7 @@ const VeraDoc = () => {
       return
     }
 
-    if (!selectedKnowledgeBase?.id) {
+    if (!selectedKnowledgeBases?.id) {
       setResults("Error: Please select a knowledge base for context.")
       return
     }
@@ -545,7 +546,7 @@ const VeraDoc = () => {
         // Process this file
         const requestData = {
           questions: questions,
-          knowledgeBaseId: selectedKnowledgeBase.id,
+          knowledgeBaseId: selectedKnowledgeBases.id,
           files: regularFiles,
           handwrittenFiles: handwrittenFiles,
         }
@@ -621,6 +622,92 @@ const VeraDoc = () => {
     }
   }, [loading, batchLoading])
 
+  {
+    /* Mocked knowledge bases for testing */
+  }
+  const mockedKnowledgeBases: KnowledgeBasePublic[] = [
+    {
+      id: "kb1",
+      title: "Company Policies",
+      number_of_sources: 0,
+      owner_id: "1",
+      date_created: "2025-01-01",
+      date_modified: "2025-01-01",
+    },
+    {
+      id: "kb2",
+      title: "Product Documentation",
+      number_of_sources: 0,
+      owner_id: "1",
+      date_created: "2025-01-01",
+      date_modified: "2025-01-01",
+    },
+    {
+      id: "kb3",
+      title: "Employee Handbook",
+      number_of_sources: 0,
+      owner_id: "1",
+      date_created: "2025-01-01",
+      date_modified: "2025-01-01",
+    },
+    {
+      id: "kb4",
+      title: "Technical Specifications",
+      number_of_sources: 0,
+      owner_id: "1",
+      date_created: "2025-01-01",
+      date_modified: "2025-01-01",
+    },
+    {
+      id: "kb5",
+      title: "Customer Support Guide",
+      number_of_sources: 0,
+      owner_id: "1",
+      date_created: "2025-01-01",
+      date_modified: "2025-01-01",
+    },
+    {
+      id: "kb6",
+      title: "Security Protocols",
+      number_of_sources: 0,
+      owner_id: "1",
+      date_created: "2025-01-01",
+      date_modified: "2025-01-01",
+    },
+    {
+      id: "kb7",
+      title: "Training Materials",
+      number_of_sources: 0,
+      owner_id: "1",
+      date_created: "2025-01-01",
+      date_modified: "2025-01-01",
+    },
+    {
+      id: "kb8",
+      title: "API Documentation",
+      number_of_sources: 0,
+      owner_id: "1",
+      date_created: "2025-01-01",
+      date_modified: "2025-01-01",
+    },
+    {
+      id: "kb9",
+      title: "User Manuals",
+      number_of_sources: 0,
+      owner_id: "1",
+      date_created: "2025-01-01",
+      date_modified: "2025-01-01",
+    },
+    {
+      id: "kb10",
+      title: "Compliance Guidelines",
+      number_of_sources: 0,
+      owner_id: "1",
+      date_created: "2025-01-01",
+      date_modified: "2025-01-01",
+    },
+  ]
+
   return (
     <Container maxW="container.xl" py={8}>
       {/* Add this overlay spinner that shows when batchLoading is true */}
@@ -645,155 +732,111 @@ const VeraDoc = () => {
         </Box>
       )}
 
-      <Heading size="xl" mb={6}>
-        VeraDoc
-      </Heading>
-
       <VStack spacing={6} align="stretch">
-        <VStack spacing={4} align="stretch">
-          <Heading size="md" mb={2}>
-            Knowledge Base Selection
+        {/* 1. Knowledge Base Selection */}
+        <VStack
+          spacing={4}
+          align="stretch"
+          width="100%"
+          display="flex"
+          flexDirection="column"
+          mb={4}
+        >
+          <Heading size="md" mb={0} textAlign="center">
+            1. Select knowledge base(s)
           </Heading>
-          <Field label="Knowledge Bases" required>
-            <select
-              value={selectedKnowledgeBase?.id || ""}
-              onChange={(e) => {
-                const kb = knowledgeBases.find((kb) => kb.id === e.target.value)
-                setSelectedKnowledgeBase(kb)
-                // When a knowledge base is selected, fetch its sources
-                if (kb?.id) {
-                  fetchKnowledgeBaseDetails(kb.id)
-                }
-              }}
-              style={{
-                width: "100%",
-                padding: "0.5rem",
-                borderRadius: "0.375rem",
-                borderColor: "#E2E8F0",
-              }}
-            >
-              <option value="">Select a knowledge base</option>
-              {knowledgeBases.map((kb) => (
-                <option key={kb.id} value={kb.id}>
-                  {kb.title}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          {/* Add this table to display knowledge base sources */}
-          {selectedKnowledgeBase && selectedKnowledgeBase.id && (
-            <Box mt={4}>
-              <Text fontWeight="medium" mb={2}>
-                Sources:
-              </Text>
-              {selectedKnowledgeBaseDetails?.files &&
-              selectedKnowledgeBaseDetails.files.length > 0 ? (
-                <Table.Root variant="simple" size="sm">
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.ColumnHeader>Name</Table.ColumnHeader>
-                      <Table.ColumnHeader>Date Added</Table.ColumnHeader>
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    {selectedKnowledgeBaseDetails.files.map((file) => (
-                      <Table.Row key={file.id}>
-                        <Table.Cell>
-                          {/* Make the file name clickable with SourceLink */}
-                          <SourceLink
-                            sourceId={file.id}
-                            fileName={file.name}
-                            useModal={true}
-                            color="blue.600"
-                            _hover={{ textDecoration: "underline" }}
-                          />
-                        </Table.Cell>
-                        <Table.Cell>
-                          {new Date(file.date_created || "").toLocaleDateString()}
-                        </Table.Cell>
-                      </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table.Root>
-              ) : (
-                <Text color="gray.500">No sources found for this knowledge base.</Text>
-              )}
-            </Box>
-          )}
+          <Separator mb={3} />
+          <KnowledgeBaseTable
+            knowledgeBases={mockedKnowledgeBases}
+            selectedKnowledgeBases={selectedKnowledgeBases}
+            onSelectionChange={setSelectedKnowledgeBases}
+          />
         </VStack>
 
-        {/* Separator before Checklist Selection */}
-        <Separator my={4} hidden={!selectedKnowledgeBase} />
-
-        {/* Checklist Selection and Management */}
-        <VStack spacing={4} align="stretch" hidden={!selectedKnowledgeBase}>
-          <Heading size="md" mb={2}>
-            Checklist Selection
+        {/* 2. Checklist Selection and Management */}
+        <VStack
+          align="stretch"
+          mb={4}
+          opacity={selectedKnowledgeBases.length === 0 ? 0.3 : 1}
+          pointerEvents={selectedKnowledgeBases.length === 0 ? "none" : "auto"}
+        >
+          <Heading size="md" mb={0} textAlign="center">
+            2. Choose checklist
           </Heading>
-          <Field label="Checklists" required>
-            <select
-              value={selectedChecklist?.id || ""}
-              onChange={(e) => {
-                const checklist = checklists.find((f) => f.id === e.target.value)
-                setSelectedChecklist(checklist)
-                const checklistQuestions = checklist?.questions || ""
-                setQuestions(checklistQuestions)
-                setChecklistName(checklist?.name || "")
-                setChecklistDescription(checklist?.description || "")
-              }}
-              style={{
-                width: "100%",
-                padding: "0.5rem",
-                borderRadius: "0.375rem",
-                borderColor: "#E2E8F0",
-              }}
-            >
-              <option value="">Select a checklist</option>
-              {checklists.map((checklist) => (
-                <option key={checklist.id} value={checklist.id}>
-                  {checklist.name}
-                </option>
-              ))}
-            </select>
-          </Field>
+          <Separator mb={3} />
+          <HStack align="stretch" gap={4}>
+            <VStack align="stretch" gap={4} flex="1">
+              <Field label="Checklists" required>
+                <select
+                  value={selectedChecklist?.id || ""}
+                  onChange={(e) => {
+                    const checklist = checklists.find((f) => f.id === e.target.value)
+                    setSelectedChecklist(checklist || null)
+                    const checklistQuestions = checklist?.questions || ""
+                    setQuestions(checklistQuestions)
+                    setChecklistName(checklist?.name || "")
+                    setChecklistDescription(checklist?.description || "")
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "0.5rem",
+                    borderRadius: "0.375rem",
+                    borderColor: "#E2E8F0",
+                  }}
+                >
+                  <option value="">Select a checklist</option>
+                  {checklists.map((checklist) => (
+                    <option key={checklist.id} value={checklist.id}>
+                      {checklist.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-          <Field label="Checklist Name" required>
-            <Input
-              value={checklistName}
-              onChange={(e) => setChecklistName(e.target.value)}
-              placeholder="Enter checklist name"
-            />
-          </Field>
-
-          <Field label="Checklist Description">
-            <Textarea
-              value={checklistDescription}
-              onChange={(e) => setChecklistDescription(e.target.value)}
-              placeholder="Enter checklist description"
-              resize="vertical"
-            />
-          </Field>
-
-          <Field label="Checklist" required borderTop="1px solid" py={4}>
-            <VStack align="stretch" gap={0} display="flex" flexDirection="column" width="100%">
-              {questionsList.map((question, index) => (
-                <QuestionItem
-                  key={index}
-                  index={index}
-                  question={question}
-                  onUpdate={updateQuestion}
-                  onBlur={handleQuestionBlur}
-                  onRemove={removeQuestion}
-                  onMoveUp={moveQuestionUp}
-                  onMoveDown={moveQuestionDown}
-                  canRemove={questionsList.length > 1 && question.trim() !== ""}
-                  totalQuestions={questionsList.length}
+              <Field label="Checklist Name" required>
+                <Input
+                  value={checklistName}
+                  onChange={(e) => setChecklistName(e.target.value)}
+                  placeholder="Enter checklist name"
                 />
-              ))}
-            </VStack>
-          </Field>
+              </Field>
 
+              <Field label="Checklist Description">
+                <Textarea
+                  value={checklistDescription}
+                  onChange={(e) => setChecklistDescription(e.target.value)}
+                  placeholder="Enter checklist description"
+                  resize="vertical"
+                />
+              </Field>
+            </VStack>
+            <Field label="Questions" required py={0} flex="1">
+              <VStack
+                align="stretch"
+                gap={0}
+                display="flex"
+                flexDirection="column"
+                width="100%"
+                maxH="200px"
+                overflowY="auto"
+              >
+                {questionsList.map((question, index) => (
+                  <QuestionItem
+                    key={index}
+                    index={index}
+                    question={question}
+                    onUpdate={updateQuestion}
+                    onBlur={handleQuestionBlur}
+                    onRemove={removeQuestion}
+                    onMoveUp={moveQuestionUp}
+                    onMoveDown={moveQuestionDown}
+                    canRemove={questionsList.length > 1 && question.trim() !== ""}
+                    totalQuestions={questionsList.length}
+                  />
+                ))}
+              </VStack>
+            </Field>
+          </HStack>
           <HStack gap={4} pt={2}>
             <Button
               variant="solid"
@@ -914,12 +957,22 @@ const VeraDoc = () => {
           </HStack>
         </VStack>
 
-        <Separator my={4} hidden={!selectedKnowledgeBase || !selectedChecklist} />
-        <Heading size="md" mb={4} hidden={!selectedKnowledgeBase || !selectedChecklist}>
-          Document Input
-        </Heading>
-
-        <div hidden={!selectedKnowledgeBase || !selectedChecklist}>
+        {/* 3. Document Input */}
+        <VStack
+          spacing={4}
+          align="stretch"
+          mb={4}
+          pointerEvents={
+            selectedKnowledgeBases.length === 0 || !selectedChecklist ? "none" : "auto"
+          }
+          opacity={selectedKnowledgeBases.length === 0 || !selectedChecklist ? 0.3 : 1}
+        >
+          <VStack spacing={4} align="stretch">
+            <Heading size="md" mb={0}>
+              3. Document Input
+            </Heading>
+            <Separator mb={3} />
+          </VStack>
           {/* Mode Toggle */}
           <Field>
             <HStack justify="space-between" align="center">
@@ -1465,7 +1518,7 @@ const VeraDoc = () => {
               </Box>
             </VStack>
           )}
-        </div>
+        </VStack>
       </VStack>
     </Container>
   )
