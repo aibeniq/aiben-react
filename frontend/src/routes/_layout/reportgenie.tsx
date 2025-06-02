@@ -26,6 +26,7 @@ import remarkGfm from "remark-gfm"
 import { FiFileText, FiCopy, FiCheck, FiDownload, FiClock, FiEye, FiDatabase } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 import { format } from "date-fns"
+import { InteractiveList } from "@/components/ui/interactive-list"
 
 const ReportGenie = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -575,16 +576,11 @@ const ReportGenie = () => {
           </Field>
 
           {/* Sections input */}
-          <Field label="Sections" required>
-            <Textarea
+          <Field label="Sections" required borderTop="1px solid" py={4}>
+            <InteractiveList
               value={sections}
-              onChange={(e) => setSections(e.target.value)}
-              placeholder="Enter sections, one per line. Example:
-CONTACT INFORMATION: Lists whom to contact with questions about the study, participant rights, or to report a research-related injury.
-PURPOSE: Explains why the study is being done.
-PROCEDURES: Describes what will happen during the research study."
-              rows={8}
-              resize="vertical"
+              onChange={setSections}
+              placeholder="Add a section (e.g. Introduction, Methods, Results)"
             />
           </Field>
 

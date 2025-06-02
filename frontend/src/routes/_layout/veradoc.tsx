@@ -32,6 +32,7 @@ import { Field } from "../../components/ui/field"
 import { format } from "date-fns"
 import { useQuery } from "@tanstack/react-query"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
+import { InteractiveList } from "@/components/ui/interactive-list"
 
 const VeraDoc = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -39,6 +40,8 @@ const VeraDoc = () => {
   const [knowledgeBases, setKnowledgeBases] = useState<any[]>([])
   const abortControllerRef = useRef<AbortController | null>(null)
   const ongoingRequest = useRef<CancelablePromise<any> | null>(null)
+
+  const [questions, setQuestions] = useState("")
 
   // Add these state variables to your component
   const [reportHistory, setReportHistory] = useState<any[]>([])
@@ -237,8 +240,6 @@ const VeraDoc = () => {
   const [checklistName, setChecklistName] = useState("") // Name of the checklist being created/edited
   const [checklistDescription, setChecklistDescription] = useState("") // Description of the checklist
 
-  const [questions, setQuestions] = useState("")
-  const [questionsList, setQuestionsList] = useState<string[]>([])
   const [results, setResults] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -254,98 +255,6 @@ const VeraDoc = () => {
   useEffect(() => {
     fetchChecklists()
   }, [])
-
-  // Convert questions string to array when questions change
-  useEffect(() => {
-    if (questions) {
-      const questionsArray = questions.split("\n")
-      setQuestionsList(questionsArray.length > 0 ? questionsArray : [""])
-    } else {
-      setQuestionsList([""])
-    }
-  }, [questions])
-
-  // Initialize with one empty question on component mount
-  useEffect(() => {
-    if (questionsList.length === 0) {
-      setQuestionsList([""])
-    }
-  }, [])
-
-  // Convert questions array back to string when questionsList changes
-  const updateQuestionsFromList = (newQuestionsList: string[]) => {
-    setQuestionsList(newQuestionsList)
-    setQuestions(newQuestionsList.join("\n"))
-  }
-
-  const addQuestion = () => {
-    updateQuestionsFromList([...questionsList, ""])
-  }
-
-  const updateQuestion = (index: number, value: string) => {
-    const newQuestions = [...questionsList]
-    newQuestions[index] = value
-    updateQuestionsFromList(newQuestions)
-  }
-
-  const handleQuestionBlur = (index: number, value: string) => {
-    // If the question is empty and it's not the only question, remove it
-    if (value.trim() === "" && questionsList.length > 1) {
-      const newQuestions = questionsList.filter((_, i) => i !== index)
-
-      // Ensure we always have at least one empty question at the end
-      const hasEmptyQuestion = newQuestions.some((q) => q.trim() === "")
-      if (!hasEmptyQuestion) {
-        newQuestions.push("")
-      }
-
-      updateQuestionsFromList(newQuestions)
-    }
-  }
-
-  // Use useEffect to automatically add new questions when needed
-  useEffect(() => {
-    // If the last question has content and there's no empty question at the end, add one
-    if (questionsList.length > 0) {
-      const lastQuestion = questionsList[questionsList.length - 1]
-      if (lastQuestion.trim() !== "") {
-        updateQuestionsFromList([...questionsList, ""])
-      }
-    }
-  }, [questionsList])
-
-  const removeQuestion = (index: number) => {
-    // Don't allow removing if it's the only question or if it would leave no empty questions
-    if (questionsList.length <= 1) return
-
-    const newQuestions = questionsList.filter((_, i) => i !== index)
-
-    // Ensure we always have at least one empty question at the end
-    const hasEmptyQuestion = newQuestions.some((q) => q.trim() === "")
-    if (!hasEmptyQuestion && questionsList[questionsList.length - 1].trim() !== "") {
-      newQuestions.push("")
-    }
-
-    updateQuestionsFromList(newQuestions)
-  }
-
-  const moveQuestionUp = (index: number) => {
-    if (index === 0) return // Can't move first item up
-    const newQuestions = [...questionsList]
-    const temp = newQuestions[index]
-    newQuestions[index] = newQuestions[index - 1]
-    newQuestions[index - 1] = temp
-    updateQuestionsFromList(newQuestions)
-  }
-
-  const moveQuestionDown = (index: number) => {
-    if (index === questionsList.length - 1) return // Can't move last item down
-    const newQuestions = [...questionsList]
-    const temp = newQuestions[index]
-    newQuestions[index] = newQuestions[index + 1]
-    newQuestions[index + 1] = temp
-    updateQuestionsFromList(newQuestions)
-  }
 
   // Add this mutation hook inside your VeraDoc component, before your handleRun function
   const mutation = useMutation({
@@ -776,22 +685,12 @@ const VeraDoc = () => {
           </Field>
 
           <Field label="Checklist" required borderTop="1px solid" py={4}>
-            <VStack align="stretch" gap={0} display="flex" flexDirection="column" width="100%">
-              {questionsList.map((question, index) => (
-                <QuestionItem
-                  key={index}
-                  index={index}
-                  question={question}
-                  onUpdate={updateQuestion}
-                  onBlur={handleQuestionBlur}
-                  onRemove={removeQuestion}
-                  onMoveUp={moveQuestionUp}
-                  onMoveDown={moveQuestionDown}
-                  canRemove={questionsList.length > 1 && question.trim() !== ""}
-                  totalQuestions={questionsList.length}
-                />
-              ))}
-            </VStack>
+            <InteractiveList
+              value={questions}
+              onChange={setQuestions}
+              placeholder="Add question"
+              minItems={1}
+            />
           </Field>
 
           <HStack gap={4} pt={2}>
@@ -1562,148 +1461,6 @@ const FileDropzone = ({
           </HStack>
         )}
       </VStack>
-    </Box>
-  )
-}
-
-const QuestionItem = ({
-  index,
-  question,
-  onUpdate,
-  onBlur,
-  onRemove,
-  onMoveUp,
-  onMoveDown,
-  canRemove,
-  totalQuestions,
-}: {
-  index: number
-  question: string
-  onUpdate: (index: number, value: string) => void
-  onBlur: (index: number, value: string) => void
-  onRemove: (index: number) => void
-  onMoveUp: (index: number) => void
-  onMoveDown: (index: number) => void
-  canRemove: boolean
-  totalQuestions: number
-}) => {
-  const [isHovered, setIsHovered] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
-
-  const isLastEmptyQuestion = index === totalQuestions - 2
-  const isAddQuestion = index === totalQuestions - 1
-  const placeholderText = "Add question"
-
-  return (
-    <Box
-      position="relative"
-      display="flex"
-      py={1}
-      borderRadius="md"
-      bg="transparent"
-      transition="all 0.2s ease"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      opacity={isAddQuestion && !isFocused && !isHovered ? 0.6 : 1}
-    >
-      <HStack align="center" gap={0} w="full">
-        <Box flex="1" w="full">
-          <Input
-            value={question}
-            onChange={(e) => onUpdate(index, e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={(e) => {
-              setIsFocused(false)
-              onBlur(index, e.target.value)
-            }}
-            placeholder={placeholderText}
-            size="sm"
-            borderTop="none"
-            borderLeft="none"
-            borderRight="none"
-            borderBottom="1px solid"
-            borderColor={isFocused ? "blue.300" : "gray.200"}
-            borderRadius="none"
-            bg="transparent"
-            px={2}
-            py={0}
-            w="full"
-            _focus={{
-              borderTop: "none",
-              borderLeft: "none",
-              borderRight: "none",
-              borderBottom: "1px solid",
-              boxShadow: "none",
-              outline: "none",
-              bg: "transparent",
-            }}
-            _placeholder={{
-              color: isAddQuestion ? "gray.400" : "gray.500",
-              fontStyle: isAddQuestion ? "italic" : "normal",
-            }}
-          />
-        </Box>
-
-        <VStack
-          visibility={isAddQuestion ? "hidden" : "visible"}
-          containerName="move-question-arrows"
-          gap={0}
-          minW="40px"
-          align="center"
-          py={1}
-        >
-          <IconButton
-            name="move-up-arrow"
-            size="xs"
-            variant="ghost"
-            colorScheme="gray"
-            aria-label="Move question up"
-            onClick={() => onMoveUp(index)}
-            opacity={isHovered && index !== 0 ? 1 : 0}
-            h="20px"
-            w="20px"
-            minW="20px"
-            pointerEvents={index === 0 ? "none" : "auto"}
-          >
-            <FiChevronUp size={12} />
-          </IconButton>
-          <IconButton
-            name="move-down-arrow"
-            size="xs"
-            variant="ghost"
-            colorScheme="gray"
-            aria-label="Move question down"
-            onClick={() => onMoveDown(index)}
-            pointerEvents={isLastEmptyQuestion ? "none" : "auto"}
-            opacity={isHovered && !isLastEmptyQuestion ? 1 : 0}
-            h="20px"
-            w="20px"
-            minW="20px"
-          >
-            <FiChevronDown size={12} />
-          </IconButton>
-        </VStack>
-
-        <Box containerName="remove-question-button" opacity={isHovered ? 1 : 0}>
-          {canRemove && (
-            <IconButton
-              size="xs"
-              variant="ghost"
-              colorPalette="red"
-              aria-label="Remove question"
-              onClick={(e) => {
-                e.stopPropagation()
-                onRemove(index)
-              }}
-              h="24px"
-              w="24px"
-              minW="24px"
-            >
-              <FiTrash2 size={12} />
-            </IconButton>
-          )}
-        </Box>
-      </HStack>
     </Box>
   )
 }
