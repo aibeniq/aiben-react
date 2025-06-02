@@ -105,6 +105,21 @@ import type {
   ReportgenieGetReportHistoryResponse,
   ReportgenieGetReportDetailData,
   ReportgenieGetReportDetailResponse,
+  TwincheckCompareDocumentsData,
+  TwincheckCompareDocumentsResponse,
+  TwincheckGetComparisonHistoryData,
+  TwincheckGetComparisonHistoryResponse,
+  TwincheckGetComparisonDetailData,
+  TwincheckGetComparisonDetailResponse,
+  TwincheckGetComparisonsResponse,
+  TwincheckCreateComparisonData,
+  TwincheckCreateComparisonResponse,
+  TwincheckGetComparisonData,
+  TwincheckGetComparisonResponse,
+  TwincheckUpdateComparisonData,
+  TwincheckUpdateComparisonResponse,
+  TwincheckDeleteComparisonData,
+  TwincheckDeleteComparisonResponse,
   UsersReadUsersData,
   UsersReadUsersResponse,
   UsersCreateUserData,
@@ -1403,6 +1418,189 @@ export class ReportgenieService {
       url: "/api/v1/reportgenie/history/{report_id}",
       path: {
         report_id: data.reportId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
+export class TwincheckService {
+  /**
+   * Compare Documents
+   * Compare two documents based on the provided comparison topics.
+   * @param data The data for the request.
+   * @param data.comparisonTopics
+   * @param data.formData
+   * @returns TwinCheckResponse Successful Response
+   * @throws ApiError
+   */
+  public static compareDocuments(
+    data: TwincheckCompareDocumentsData,
+  ): CancelablePromise<TwincheckCompareDocumentsResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/twincheck/compare",
+      query: {
+        comparison_topics: data.comparisonTopics,
+      },
+      formData: data.formData,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Comparison History
+   * Retrieve past document comparison history for the current user.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getComparisonHistory(
+    data: TwincheckGetComparisonHistoryData = {},
+  ): CancelablePromise<TwincheckGetComparisonHistoryResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/twincheck/history",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Comparison Detail
+   * Retrieve a specific comparison's full content by ID.
+   * @param data The data for the request.
+   * @param data.comparisonId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getComparisonDetail(
+    data: TwincheckGetComparisonDetailData,
+  ): CancelablePromise<TwincheckGetComparisonDetailResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/twincheck/history/{comparison_id}",
+      path: {
+        comparison_id: data.comparisonId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Comparisons
+   * Retrieve all saved comparison topic sets from the database for this user.
+   * @returns TwinCheckTopicList Successful Response
+   * @throws ApiError
+   */
+  public static getComparisons(): CancelablePromise<TwincheckGetComparisonsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/twincheck/comparisons",
+    })
+  }
+
+  /**
+   * Create Comparison
+   * Save a new comparison topic set to the database.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns TwinCheckTopicList Successful Response
+   * @throws ApiError
+   */
+  public static createComparison(
+    data: TwincheckCreateComparisonData,
+  ): CancelablePromise<TwincheckCreateComparisonResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/twincheck/comparisons",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Comparison
+   * Retrieve a specific comparison topic set by ID.
+   * @param data The data for the request.
+   * @param data.comparisonId
+   * @returns TwinCheckTopicList Successful Response
+   * @throws ApiError
+   */
+  public static getComparison(
+    data: TwincheckGetComparisonData,
+  ): CancelablePromise<TwincheckGetComparisonResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/twincheck/comparisons/{comparison_id}",
+      path: {
+        comparison_id: data.comparisonId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Comparison
+   * Update an existing comparison topic set.
+   * @param data The data for the request.
+   * @param data.comparisonId
+   * @param data.requestBody
+   * @returns TwinCheckTopicList Successful Response
+   * @throws ApiError
+   */
+  public static updateComparison(
+    data: TwincheckUpdateComparisonData,
+  ): CancelablePromise<TwincheckUpdateComparisonResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/twincheck/comparisons/{comparison_id}",
+      path: {
+        comparison_id: data.comparisonId,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Comparison
+   * Delete a comparison topic set by ID.
+   * @param data The data for the request.
+   * @param data.comparisonId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static deleteComparison(
+    data: TwincheckDeleteComparisonData,
+  ): CancelablePromise<TwincheckDeleteComparisonResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/twincheck/comparisons/{comparison_id}",
+      path: {
+        comparison_id: data.comparisonId,
       },
       errors: {
         422: "Validation Error",

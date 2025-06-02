@@ -27,6 +27,11 @@ export type Body_login_login_access_token = {
   client_secret?: string | null
 }
 
+export type Body_twincheck_compare_documents = {
+  document1: Blob | File
+  document2: Blob | File
+}
+
 export type Body_veradoc_process_rag_checklist = {
   files: Array<Blob | File>
   handwritten_files?: Array<Blob | File>
@@ -197,6 +202,22 @@ export type ReportGenieResponse = {
 export type Token = {
   access_token: string
   token_type?: string
+}
+
+export type TwinCheckResponse = {
+  results: {
+    [key: string]: unknown
+  }
+}
+
+export type TwinCheckTopicList = {
+  id?: string
+  name: string
+  description?: string | null
+  topics: string
+  owner_id: string
+  date_created?: string
+  date_modified?: string
 }
 
 export type UpdatePassword = {
@@ -604,6 +625,55 @@ export type ReportgenieGetReportDetailData = {
 }
 
 export type ReportgenieGetReportDetailResponse = unknown
+
+export type TwincheckCompareDocumentsData = {
+  comparisonTopics: string
+  formData: Body_twincheck_compare_documents
+}
+
+export type TwincheckCompareDocumentsResponse = TwinCheckResponse
+
+export type TwincheckGetComparisonHistoryData = {
+  limit?: number
+  skip?: number
+}
+
+export type TwincheckGetComparisonHistoryResponse = Array<{
+  [key: string]: unknown
+}>
+
+export type TwincheckGetComparisonDetailData = {
+  comparisonId: string
+}
+
+export type TwincheckGetComparisonDetailResponse = unknown
+
+export type TwincheckGetComparisonsResponse = Array<TwinCheckTopicList>
+
+export type TwincheckCreateComparisonData = {
+  requestBody: TwinCheckTopicList
+}
+
+export type TwincheckCreateComparisonResponse = TwinCheckTopicList
+
+export type TwincheckGetComparisonData = {
+  comparisonId: string
+}
+
+export type TwincheckGetComparisonResponse = TwinCheckTopicList
+
+export type TwincheckUpdateComparisonData = {
+  comparisonId: string
+  requestBody: TwinCheckTopicList
+}
+
+export type TwincheckUpdateComparisonResponse = TwinCheckTopicList
+
+export type TwincheckDeleteComparisonData = {
+  comparisonId: string
+}
+
+export type TwincheckDeleteComparisonResponse = unknown
 
 export type UsersReadUsersData = {
   limit?: number

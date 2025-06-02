@@ -354,7 +354,7 @@ def record_llm_interaction(
     input_data: Any,
     output_data: Any,
     metadata: Optional[Dict[str, Any]] = None
-):
+) -> uuid.UUID:
     """
     Records an interaction with an LLM to the database.
     
@@ -405,3 +405,4 @@ def record_llm_interaction(
     
     session.add(interaction)
     session.commit()
+    return interaction.id
