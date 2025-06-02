@@ -42,6 +42,10 @@ import type {
   FormconnectUpdateFormResponse,
   FormconnectDeleteFormData,
   FormconnectDeleteFormResponse,
+  FormconnectGetFormDetailData,
+  FormconnectGetFormDetailResponse,
+  FormconnectGetFormHistoryData,
+  FormconnectGetFormHistoryResponse,
   ItemsReadItemsData,
   ItemsReadItemsResponse,
   ItemsCreateItemData,
@@ -627,6 +631,54 @@ export class FormconnectService {
       url: "/api/v1/formconnect/forms/{form_id}",
       path: {
         form_id: data.formId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Form Detail
+   * Retrieve a specific form processing's full content by ID.
+   * @param data The data for the request.
+   * @param data.interactionId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getFormDetail(
+    data: FormconnectGetFormDetailData,
+  ): CancelablePromise<FormconnectGetFormDetailResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/formconnect/history/{interaction_id}",
+      path: {
+        interaction_id: data.interactionId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Form History
+   * Retrieve past form processing history for the current user.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getFormHistory(
+    data: FormconnectGetFormHistoryData = {},
+  ): CancelablePromise<FormconnectGetFormHistoryResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/formconnect/history",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
       },
       errors: {
         422: "Validation Error",
