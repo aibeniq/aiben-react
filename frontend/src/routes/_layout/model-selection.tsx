@@ -21,7 +21,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useState, useEffect, useRef } from "react"
-import { CancelablePromise } from "@/client/core/CancelablePromise";
+import { CancelablePromise } from "@/client/core/CancelablePromise"
 import { FiPlus, FiSettings, FiCheckCircle, FiXCircle } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -35,32 +35,36 @@ export const Route = createFileRoute("/_layout/model-selection")({
 
 function ModelSelection() {
   return (
-    <Container maxW="full">
+    <Container maxW="full" p={0}>  {/* Remove any default padding */}
       {/* First section: Embedding Models */}
-      <EmbeddingModels />
-      
+      <Box pt={6}>  {/* Add consistent padding top */}
+        <EmbeddingModels />
+      </Box>
+
       {/* Divider between sections */}
       <Separator my={10} />
-      
+
       {/* Second section: LLMs */}
-      <LlmModels />
+      <Box pb={6}>  {/* Add consistent padding bottom */}
+        <LlmModels />
+      </Box>
     </Container>
-  );
+  )
 }
 
 function LlmModels() {
   // Similar to your EmbeddingModels component but for LLMs
-  const [isOpen, setIsOpen] = useState(false);
-  const [modelName, setModelName] = useState("");
-  const [modelId, setModelId] = useState("");
-  const [modelDescription, setModelDescription] = useState("");
-  const [modelProvider, setModelProvider] = useState("openai");
+  const [isOpen, setIsOpen] = useState(false)
+  const [modelName, setModelName] = useState("")
+  const [modelId, setModelId] = useState("")
+  const [modelDescription, setModelDescription] = useState("")
+  const [modelProvider, setModelProvider] = useState("openai")
 
-  const [isValidating, setIsValidating] = useState(false);
-  const [isModelValid, setIsModelValid] = useState<boolean | null>(null);
-  const [validationMessage, setValidationMessage] = useState("");
+  const [isValidating, setIsValidating] = useState(false)
+  const [isModelValid, setIsModelValid] = useState<boolean | null>(null)
+  const [validationMessage, setValidationMessage] = useState("")
 
-  const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(true);
+  const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(true)
 
   const { data: defaultModel } = useQuery({
     queryKey: ["defaultLlmModel"],
@@ -69,42 +73,42 @@ function LlmModels() {
 
   // Add this effect to check API key when provider changes
   useEffect(() => {
-  if (modelProvider === "openai") {
-    console.log("Checking OpenAI API key configuration...");
-    EmbeddingModelsService.checkApiKeyConfigured({provider: "openai"})
-      .then((response) => {
-        console.log("API key check succeeded:", response);
-        setIsApiKeyConfigured(true);
-      })
-      .catch((error) => {
-        console.error("API key check failed:", error);
-        setIsApiKeyConfigured(false);
-      });
-  } else if (modelProvider === "ollama") {
-    console.log("Checking Ollama server configuration...");
-    EmbeddingModelsService.checkApiKeyConfigured({provider: "ollama"})
-      .then((response) => {
-        console.log("Ollama server check succeeded:", response);
-        setIsApiKeyConfigured(true);
-      })
-      .catch((error) => {
-        console.error("Ollama server check failed:", error);
-        showErrorToast("Ollama server is not available. Please ensure Ollama is running.");
-        setIsApiKeyConfigured(false);
-      });
-  } else {
-    setIsApiKeyConfigured(true);
-  }
-}, [modelProvider]);
-  
-  const queryClient = useQueryClient();
-  const { showSuccessToast, showErrorToast } = useCustomToast();
-  
+    if (modelProvider === "openai") {
+      console.log("Checking OpenAI API key configuration...")
+      EmbeddingModelsService.checkApiKeyConfigured({ provider: "openai" })
+        .then((response) => {
+          console.log("API key check succeeded:", response)
+          setIsApiKeyConfigured(true)
+        })
+        .catch((error) => {
+          console.error("API key check failed:", error)
+          setIsApiKeyConfigured(false)
+        })
+    } else if (modelProvider === "ollama") {
+      console.log("Checking Ollama server configuration...")
+      EmbeddingModelsService.checkApiKeyConfigured({ provider: "ollama" })
+        .then((response) => {
+          console.log("Ollama server check succeeded:", response)
+          setIsApiKeyConfigured(true)
+        })
+        .catch((error) => {
+          console.error("Ollama server check failed:", error)
+          showErrorToast("Ollama server is not available. Please ensure Ollama is running.")
+          setIsApiKeyConfigured(false)
+        })
+    } else {
+      setIsApiKeyConfigured(true)
+    }
+  }, [modelProvider])
+
+  const queryClient = useQueryClient()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+
   // Query to fetch all LLMs
   const { data: modelsData, isLoading } = useQuery({
     queryKey: ["llmModels"],
     queryFn: () => LlmModelsService.getLlmModels(),
-  });
+  })
 
   // Add mutations for adding, updating, deleting models
   const addModelMutation = useMutation({
@@ -124,8 +128,7 @@ function LlmModels() {
 
   // Mutation to set a model as default
   const setDefaultMutation = useMutation({
-    mutationFn: (modelId: string) =>
-      LlmModelsService.setDefaultLlmModel({ modelId }),
+    mutationFn: (modelId: string) => LlmModelsService.setDefaultLlmModel({ modelId }),
     onSuccess: () => {
       showSuccessToast("Default model updated successfully")
       queryClient.invalidateQueries({ queryKey: ["llmModels"] })
@@ -135,11 +138,10 @@ function LlmModels() {
       showErrorToast(`Error updating default model: ${error.message}`)
     },
   })
-  
+
   // Mutation to delete a model
   const deleteModelMutation = useMutation({
-    mutationFn: (modelId: string) =>
-      LlmModelsService.deleteLlmModel({ modelId }),
+    mutationFn: (modelId: string) => LlmModelsService.deleteLlmModel({ modelId }),
     onSuccess: () => {
       showSuccessToast("LLM deleted successfully")
       queryClient.invalidateQueries({ queryKey: ["llmModels"] })
@@ -152,9 +154,9 @@ function LlmModels() {
   // Mutation to validate a model
   const validateModelMutation = useMutation({
     mutationFn: (data: { requestBody: { model_id: string; provider: string } }) => {
-    console.log("The following data will be sent to the server for model validation:", data);
-    return LlmModelsService.validateLlmModel(data);
-  },
+      console.log("The following data will be sent to the server for model validation:", data)
+      return LlmModelsService.validateLlmModel(data)
+    },
     onSuccess: () => {
       setIsModelValid(true)
       setValidationMessage("Model is valid and can be loaded.")
@@ -170,50 +172,50 @@ function LlmModels() {
 
   const handleValidateModel = async () => {
     if (!modelId.trim()) {
-      setIsModelValid(false);
-      setValidationMessage("Please enter a model ID");
-      return;
+      setIsModelValid(false)
+      setValidationMessage("Please enter a model ID")
+      return
     }
 
     if (modelProvider === "openai" && !isApiKeyConfigured) {
-          showErrorToast("API key is required for OpenAI models and is not configured in the backend");
-          return;
-        }
-
-     // Cancel any existing validation
-    if (currentValidationRef.current) {
-      currentValidationRef.current.cancel();
+      showErrorToast("API key is required for OpenAI models and is not configured in the backend")
+      return
     }
 
-    setIsValidating(true);
+    // Cancel any existing validation
+    if (currentValidationRef.current) {
+      currentValidationRef.current.cancel()
+    }
+
+    setIsValidating(true)
 
     const promise = LlmModelsService.validateLlmModel({
       requestBody: {
         model_id: modelId,
-        provider: modelProvider
-      }
-    });
-    
-    currentValidationRef.current = promise;
+        provider: modelProvider,
+      },
+    })
+
+    currentValidationRef.current = promise
 
     try {
-      await promise;
-      setIsModelValid(true);
-      setValidationMessage("Model is valid and can be loaded.");
+      await promise
+      setIsModelValid(true)
+      setValidationMessage("Model is valid and can be loaded.")
     } catch (error) {
       // Only show error if it's not a cancellation
       if (error.name !== "CancelError") {
-        setIsModelValid(false);
-        setValidationMessage(`Invalid model: ${error.message}`);
+        setIsModelValid(false)
+        setValidationMessage(`Invalid model: ${error.message}`)
       }
     } finally {
       // Only reset if this is still the current validation
       if (currentValidationRef.current === promise) {
-        setIsValidating(false);
-        currentValidationRef.current = null;
+        setIsValidating(false)
+        currentValidationRef.current = null
       }
     }
-  };
+  }
 
   const resetForm = () => {
     setModelName("")
@@ -230,22 +232,22 @@ function LlmModels() {
 
     // Only check for API key if it's not configured in the backend
     if (modelProvider === "openai" && !isApiKeyConfigured) {
-      showErrorToast("API key is required for OpenAI models and is not configured in the backend");
-      return;
+      showErrorToast("API key is required for OpenAI models and is not configured in the backend")
+      return
     }
-    
+
     addModelMutation.mutate({
       name: modelName,
       model_id: modelId,
       provider: modelProvider,
-      description: modelDescription
+      description: modelDescription,
     })
   }
 
   const handleSetDefault = (modelId: string) => {
     setDefaultMutation.mutate(modelId)
   }
-  
+
   const handleDeleteModel = (modelId: string) => {
     if (confirm("Are you sure you want to delete this LLM?")) {
       deleteModelMutation.mutate(modelId)
@@ -253,47 +255,46 @@ function LlmModels() {
   }
 
   // Add a reference to store current validation promise
-  const currentValidationRef = useRef<CancelablePromise<any> | null>(null);
-  
+  const currentValidationRef = useRef<CancelablePromise<any> | null>(null)
+
   // Clean up any pending validations when component unmounts
   useEffect(() => {
     return () => {
       if (currentValidationRef.current) {
-        currentValidationRef.current.cancel();
-        currentValidationRef.current = null;
+        currentValidationRef.current.cancel()
+        currentValidationRef.current = null
       }
-    };
-  }, []);
-  
+    }
+  }, [])
+
   // Modify the Dialog to handle validation cancellation
   const handleModalClose = () => {
     // Cancel any pending validation
     if (currentValidationRef.current) {
-      currentValidationRef.current.cancel();
-      currentValidationRef.current = null;
+      currentValidationRef.current.cancel()
+      currentValidationRef.current = null
     }
-    
+
     // Reset form state
-    resetForm();
-    setIsValidating(false);
-    setIsModelValid(null);
-    
+    resetForm()
+    setIsValidating(false)
+    setIsModelValid(null)
+
     // Close the modal
-    setIsOpen(false);
-  };
-  
-  
+    setIsOpen(false)
+  }
+
   return (
     <>
-      <Heading size="lg" mb={6}>
+      <Heading size="lg" mb={2}>
         LLM Management
       </Heading>
-      
+
       <Text mb={4}>
-        Configure and manage the LLMs used for processing tasks.
-        The default model will be used for all operations.
+        Configure and manage the LLMs used for generating text responses. The default model will be used for
+        all operations.
       </Text>
-      
+
       <Button
         leftIcon={<FiPlus />}
         colorPalette="blue"
@@ -305,7 +306,7 @@ function LlmModels() {
       >
         Add New LLM
       </Button>
-      
+
       {isLoading ? (
         <Flex justify="center" align="center" h="200px">
           <Spinner size="lg" />
@@ -317,9 +318,7 @@ function LlmModels() {
               <FiSettings size={24} />
             </EmptyState.Icon>
             <EmptyState.Title>No LLMs configured</EmptyState.Title>
-            <EmptyState.Description>
-              Add a new LLM to get started
-            </EmptyState.Description>
+            <EmptyState.Description>Add a new LLM to get started</EmptyState.Description>
           </EmptyState.Content>
         </EmptyState.Root>
       ) : (
@@ -345,9 +344,13 @@ function LlmModels() {
                 <Table.Cell>{model.description}</Table.Cell>
                 <Table.Cell>
                   {defaultModel?.id === model.id ? (
-                    <Badge colorPalette="green" size="sm">Default</Badge>
+                    <Badge colorPalette="green" size="sm">
+                      Default
+                    </Badge>
                   ) : (
-                    <Badge colorPalette="gray" size="sm">Available</Badge>
+                    <Badge colorPalette="gray" size="sm">
+                      Available
+                    </Badge>
                   )}
                 </Table.Cell>
                 <Table.Cell>
@@ -377,26 +380,26 @@ function LlmModels() {
           </Table.Body>
         </Table.Root>
       )}
-      
+
       {/* Dialog for adding a new LLM */}
-        <Dialog.Root 
-            open={isOpen} 
-            onOpenChange={(details) => {
-              if (!details.open) {
-                handleModalClose();
-              } else {
-                setIsOpen(true);
-              }
-            }}
-          >
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
+      <Dialog.Root
+        open={isOpen}
+        onOpenChange={(details) => {
+          if (!details.open) {
+            handleModalClose()
+          } else {
+            setIsOpen(true)
+          }
+        }}
+      >
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
           <Dialog.Content size={{ base: "xs", md: "md" }} placement="center">
             <Box position="relative">
               <form
                 onSubmit={(e) => {
-                  e.preventDefault();
-                  handleAddModel();
+                  e.preventDefault()
+                  handleAddModel()
                 }}
               >
                 <Dialog.Header>
@@ -417,12 +420,12 @@ function LlmModels() {
                         value={modelProvider}
                         onChange={(e) => setModelProvider(e.target.value)}
                         style={{
-                          width: '100%',
-                          padding: '0.5rem',
-                          borderRadius: '0.375rem',
-                          borderColor: '#E2E8F0',
-                          fontSize: '1rem',
-                          height: '2.5rem',                          
+                          width: "100%",
+                          padding: "0.5rem",
+                          borderRadius: "0.375rem",
+                          borderColor: "#E2E8F0",
+                          fontSize: "1rem",
+                          height: "2.5rem",
                         }}
                       >
                         <option value="huggingface">HuggingFace</option>
@@ -437,8 +440,8 @@ function LlmModels() {
                         <Input
                           value={modelId}
                           onChange={(e) => {
-                            setModelId(e.target.value);
-                            setIsModelValid(null);
+                            setModelId(e.target.value)
+                            setIsModelValid(null)
                           }}
                           placeholder="e.g., sentence-transformers/all-MiniLM-L6-v2"
                         />
@@ -460,9 +463,7 @@ function LlmModels() {
                           color={isModelValid ? "green.700" : "red.700"}
                         >
                           <HStack>
-                            <Box>
-                              {isModelValid ? <FiCheckCircle /> : <FiXCircle />}
-                            </Box>
+                            <Box>{isModelValid ? <FiCheckCircle /> : <FiXCircle />}</Box>
                             <Text fontSize="sm">{validationMessage}</Text>
                           </HStack>
                         </Box>
@@ -485,11 +486,7 @@ function LlmModels() {
                       Cancel
                     </Button>
                   </Dialog.ActionTrigger>
-                  <Button
-                    colorPalette="blue"
-                    type="submit"
-                    isDisabled={!isModelValid}
-                  >
+                  <Button colorPalette="blue" type="submit" isDisabled={!isModelValid}>
                     Add Model
                   </Button>
                 </Dialog.Footer>
@@ -497,20 +494,19 @@ function LlmModels() {
             </Box>
             <Dialog.CloseTrigger />
           </Dialog.Content>
-          </Dialog.Positioner>
-        </Dialog.Root>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </>
-  );
+  )
 }
-
 
 function EmbeddingModels() {
   // Update state management
-    const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
 
-    // Update onOpen and onClose functions
-    const onOpen = () => setIsOpen(true)
-    const onClose = () => setIsOpen(false)
+  // Update onOpen and onClose functions
+  const onOpen = () => setIsOpen(true)
+  const onClose = () => setIsOpen(false)
   const [modelName, setModelName] = useState("")
   const [modelId, setModelId] = useState("")
   const [modelDescription, setModelDescription] = useState("")
@@ -520,7 +516,7 @@ function EmbeddingModels() {
 
   const [modelProvider, setModelProvider] = useState("huggingface")
 
-  const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(true);
+  const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(true)
 
   const { data: defaultModel } = useQuery({
     queryKey: ["defaultEmbeddingModel"],
@@ -530,28 +526,28 @@ function EmbeddingModels() {
   // Add this effect to check API key when provider changes
   useEffect(() => {
     if (modelProvider === "openai") {
-      console.log("Checking API key configuration for OpenAI...");
+      console.log("Checking API key configuration for OpenAI...")
       // Check if API key is configured in backend
-      EmbeddingModelsService.checkApiKeyConfigured({provider: "openai"})
+      EmbeddingModelsService.checkApiKeyConfigured({ provider: "openai" })
         .then((response) => {
-          console.log("API key check succeeded:", response);
-          setIsApiKeyConfigured(true);
+          console.log("API key check succeeded:", response)
+          setIsApiKeyConfigured(true)
         })
         .catch((error) => {
-          console.error("API key check failed:", error); // Log the detailed error
-          console.log("Error response:", error.response); // Detailed error response if available
-          console.log("Error message:", error.message);
-          console.log("Error status:", error.status);
-          setIsApiKeyConfigured(false);
-        });
+          console.error("API key check failed:", error) // Log the detailed error
+          console.log("Error response:", error.response) // Detailed error response if available
+          console.log("Error message:", error.message)
+          console.log("Error status:", error.status)
+          setIsApiKeyConfigured(false)
+        })
     } else {
-      setIsApiKeyConfigured(true);
+      setIsApiKeyConfigured(true)
     }
-  }, [modelProvider]);
-  
+  }, [modelProvider])
+
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  
+
   const resetForm = () => {
     setModelName("")
     setModelId("")
@@ -559,46 +555,51 @@ function EmbeddingModels() {
     setIsModelValid(null)
     setValidationMessage("")
   }
-  
+
   // Query to fetch all embedding models
   const { data: modelsData, isLoading } = useQuery({
     queryKey: ["embeddingModels"],
     queryFn: () => EmbeddingModelsService.getEmbeddingModels(),
   })
-  
+
   // Mutation to add a new model
   const addModelMutation = useMutation({
-    mutationFn: (data: { name: string; model_id: string; provider: string; description: string }) => {
-      console.log("Sending data to createEmbeddingModel:", data);
+    mutationFn: (data: {
+      name: string
+      model_id: string
+      provider: string
+      description: string
+    }) => {
+      console.log("Sending data to createEmbeddingModel:", data)
       return EmbeddingModelsService.createEmbeddingModel({ requestBody: data })
-        .then(response => {
-          console.log("Received successful response:", response);
-          return response;
+        .then((response) => {
+          console.log("Received successful response:", response)
+          return response
         })
-        .catch(error => {
-          console.error("Received error response:", error);
-          throw error;
-        });
+        .catch((error) => {
+          console.error("Received error response:", error)
+          throw error
+        })
     },
     onSuccess: (data) => {
-      console.log("Mutation completed successfully with data:", data);
-      showSuccessToast("Model added successfully");
-      resetForm();
-      onClose();
-      queryClient.invalidateQueries({ queryKey: ["embeddingModels"] });
+      console.log("Mutation completed successfully with data:", data)
+      showSuccessToast("Model added successfully")
+      resetForm()
+      onClose()
+      queryClient.invalidateQueries({ queryKey: ["embeddingModels"] })
     },
     onError: (error) => {
-      console.error("Mutation failed with error:", error);
-      showErrorToast(`Error adding model: ${error.message}`);
+      console.error("Mutation failed with error:", error)
+      showErrorToast(`Error adding model: ${error.message}`)
     },
   })
-  
+
   // Mutation to validate a model
   const validateModelMutation = useMutation({
     mutationFn: (data: { requestBody: { model_id: string; provider: string } }) => {
-    console.log("The following data will be sent to the server for model validation:", data);
-    return EmbeddingModelsService.validateEmbeddingModel(data);
-  },
+      console.log("The following data will be sent to the server for model validation:", data)
+      return EmbeddingModelsService.validateEmbeddingModel(data)
+    },
     onSuccess: () => {
       setIsModelValid(true)
       setValidationMessage("Model is valid and can be loaded.")
@@ -611,11 +612,10 @@ function EmbeddingModels() {
       setIsValidating(false)
     },
   })
-  
+
   // Mutation to set a model as default
   const setDefaultMutation = useMutation({
-    mutationFn: (modelId: string) =>
-      EmbeddingModelsService.setDefaultEmbeddingModel({ modelId }),
+    mutationFn: (modelId: string) => EmbeddingModelsService.setDefaultEmbeddingModel({ modelId }),
     onSuccess: () => {
       showSuccessToast("Default model updated successfully")
       queryClient.invalidateQueries({ queryKey: ["embeddingModels"] })
@@ -625,11 +625,10 @@ function EmbeddingModels() {
       showErrorToast(`Error updating default model: ${error.message}`)
     },
   })
-  
+
   // Mutation to delete a model
   const deleteModelMutation = useMutation({
-    mutationFn: (modelId: string) =>
-      EmbeddingModelsService.deleteEmbeddingModel({ modelId }),
+    mutationFn: (modelId: string) => EmbeddingModelsService.deleteEmbeddingModel({ modelId }),
     onSuccess: () => {
       showSuccessToast("Model deleted successfully")
       queryClient.invalidateQueries({ queryKey: ["embeddingModels"] })
@@ -638,7 +637,7 @@ function EmbeddingModels() {
       showErrorToast(`Error deleting model: ${error.message}`)
     },
   })
-  
+
   // Handler for model validation
   const handleValidateModel = async () => {
     if (!modelId.trim()) {
@@ -648,44 +647,44 @@ function EmbeddingModels() {
     }
 
     if (modelProvider === "openai" && !isApiKeyConfigured) {
-      showErrorToast("API key is required for OpenAI models and is not configured in the backend");
-      return;
+      showErrorToast("API key is required for OpenAI models and is not configured in the backend")
+      return
     }
-    
+
     setIsValidating(true)
     validateModelMutation.mutate({
-      requestBody: {  
-        model_id: modelId,
-        provider: modelProvider
-      }
-    })
-  }
-  
-  // Handler for model submission
-    const handleAddModel = () => {
-    if (!modelName.trim() || !modelId.trim()) {
-        showErrorToast("Please fill in all required fields")
-        return
-    }
-    
-    if (modelProvider === "openai" && !isApiKeyConfigured) {
-      showErrorToast("API key is required for OpenAI models and is not configured in the backend");
-      return;
-    }
-    
-    addModelMutation.mutate({
-        name: modelName,
+      requestBody: {
         model_id: modelId,
         provider: modelProvider,
-        description: modelDescription
+      },
     })
+  }
+
+  // Handler for model submission
+  const handleAddModel = () => {
+    if (!modelName.trim() || !modelId.trim()) {
+      showErrorToast("Please fill in all required fields")
+      return
     }
-  
+
+    if (modelProvider === "openai" && !isApiKeyConfigured) {
+      showErrorToast("API key is required for OpenAI models and is not configured in the backend")
+      return
+    }
+
+    addModelMutation.mutate({
+      name: modelName,
+      model_id: modelId,
+      provider: modelProvider,
+      description: modelDescription,
+    })
+  }
+
   // Handler for setting a model as default
   const handleSetDefault = (modelId: string) => {
     setDefaultMutation.mutate(modelId)
   }
-  
+
   // Handler for deleting a model
   const handleDeleteModel = (modelId: string) => {
     if (confirm("Are you sure you want to delete this model?")) {
@@ -695,126 +694,138 @@ function EmbeddingModels() {
 
   return (
     <>
-    <Container maxW="full">
-      <Heading size="lg" pt={12} mb={6}>
-        Embedding Model Management
-      </Heading>
-      
-      <Text mb={4}>
-        Configure and manage the embedding models used for knowledge base indexing and retrieval.
-        The default model will be used for all new knowledge bases and RAG operations.
-      </Text>
-      
-      <Button
-        leftIcon={<FiPlus />}
-        colorPalette="blue"
-        mb={6}
-        onClick={() => {
-          resetForm()
-          onOpen()
-        }}
-      >
-        Add New Embedding Model
-      </Button>
-      
-      {isLoading ? (
-        <Flex justify="center" align="center" h="200px">
-          <Spinner size="lg" />
-        </Flex>
-      ) : !modelsData || modelsData.data.length === 0 ? (
-        <EmptyState.Root>
-          <EmptyState.Content>
-            <EmptyState.Icon>
-              <FiSettings size={24} />
-            </EmptyState.Icon>
-            <EmptyState.Title>No embedding models configured</EmptyState.Title>
-            <EmptyState.Description>
-              Add a new embedding model to get started
-            </EmptyState.Description>
-          </EmptyState.Content>
-        </EmptyState.Root>
-      ) : (
-        <Table.Root>
-          <Table.Header>
-            <Table.Row>
-              <Table.ColumnHeader>Name</Table.ColumnHeader>
-              <Table.ColumnHeader>Model ID</Table.ColumnHeader>
-              <Table.ColumnHeader>Provider</Table.ColumnHeader>
-              <Table.ColumnHeader>Description</Table.ColumnHeader>
-              <Table.ColumnHeader>Status</Table.ColumnHeader>
-              <Table.ColumnHeader>Actions</Table.ColumnHeader>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {modelsData.data.map((model) => (
-              <Table.Row key={model.id}>
-                <Table.Cell>{model.name}</Table.Cell>
-                <Table.Cell>
-                  <code>{model.model_id}</code>
-                </Table.Cell>
-                <Table.Cell>
-                  <Badge 
-                    colorPalette={
-                      model.provider === "huggingface" ? "teal" : 
-                      model.provider === "openai" ? "purple" :
-                      model.provider === "ollama" ? "orange" : 
-                      model.provider === "replicate" ? "red" : "gray"
-                      
-                    } 
-                    size="sm"
-                  >
-                    {model.provider === "huggingface" ? "HuggingFace" : 
-                    model.provider === "openai" ? "OpenAI" : 
-                    model.provider === "ollama" ? "Ollama" :
-                    model.provider === "replicate" ? "Replicate" : model.provider}
-                  </Badge>
-                </Table.Cell>
-                <Table.Cell>{model.description}</Table.Cell>
-                <Table.Cell>
-                  {defaultModel?.id === model.id ? (
-                        <Badge colorPalette="green" size="sm">Default</Badge>
-                    ) : (
-                        <Badge colorPalette="gray" size="sm">Available</Badge>
-                    )}
-                </Table.Cell>
-                <Table.Cell>
-                  <HStack spacing={2}>
-                    {defaultModel?.id !== model.id && (
-                      <Button
-                        size="xs"
-                        colorPalette="blue"
-                        onClick={() => handleSetDefault(model.id)}
-                      >
-                        Set as Default
-                      </Button>
-                    )}
-                    {model.owner_id && (
-                      <Button
-                        size="xs"
-                        colorPalette="red"
-                        onClick={() => handleDeleteModel(model.id)}
-                      >
-                        Delete
-                      </Button>
-                    )}
-                  </HStack>
-                </Table.Cell>
+        <Heading size="lg" pt={12} mb={2}>
+          Embedding Model Management
+        </Heading>
+
+        <Text mb={4}>
+          Configure and manage the embedding models used for knowledge base indexing and retrieval. 
+          The default model will be used when creating new knowledge bases, but each knowledge 
+          base will continue using its original embedding model even if the default changes later.
+        </Text>
+
+        <Button
+          leftIcon={<FiPlus />}
+          colorPalette="blue"
+          mb={6}
+          onClick={() => {
+            resetForm()
+            onOpen()
+          }}
+        >
+          Add New Embedding Model
+        </Button>
+
+        {isLoading ? (
+          <Flex justify="center" align="center" h="200px">
+            <Spinner size="lg" />
+          </Flex>
+        ) : !modelsData || modelsData.data.length === 0 ? (
+          <EmptyState.Root>
+            <EmptyState.Content>
+              <EmptyState.Icon>
+                <FiSettings size={24} />
+              </EmptyState.Icon>
+              <EmptyState.Title>No embedding models configured</EmptyState.Title>
+              <EmptyState.Description>
+                Add a new embedding model to get started
+              </EmptyState.Description>
+            </EmptyState.Content>
+          </EmptyState.Root>
+        ) : (
+          <Table.Root>
+            <Table.Header>
+              <Table.Row>
+                <Table.ColumnHeader>Name</Table.ColumnHeader>
+                <Table.ColumnHeader>Model ID</Table.ColumnHeader>
+                <Table.ColumnHeader>Provider</Table.ColumnHeader>
+                <Table.ColumnHeader>Description</Table.ColumnHeader>
+                <Table.ColumnHeader>Status</Table.ColumnHeader>
+                <Table.ColumnHeader>Actions</Table.ColumnHeader>
               </Table.Row>
-            ))}
-          </Table.Body>
-        </Table.Root>
-      )}
-    </Container>
-    {/* Dialog for adding a new embedding model */}
-        <Dialog.Root open={isOpen} onOpenChange={(details) => setIsOpen(details.open)}>
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
+            </Table.Header>
+            <Table.Body>
+              {modelsData.data.map((model) => (
+                <Table.Row key={model.id}>
+                  <Table.Cell>{model.name}</Table.Cell>
+                  <Table.Cell>
+                    <code>{model.model_id}</code>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Badge
+                      colorPalette={
+                        model.provider === "huggingface"
+                          ? "teal"
+                          : model.provider === "openai"
+                            ? "purple"
+                            : model.provider === "ollama"
+                              ? "orange"
+                              : model.provider === "replicate"
+                                ? "red"
+                                : "gray"
+                      }
+                      size="sm"
+                    >
+                      {model.provider === "huggingface"
+                        ? "HuggingFace"
+                        : model.provider === "openai"
+                          ? "OpenAI"
+                          : model.provider === "ollama"
+                            ? "Ollama"
+                            : model.provider === "replicate"
+                              ? "Replicate"
+                              : model.provider}
+                    </Badge>
+                  </Table.Cell>
+                  <Table.Cell>{model.description}</Table.Cell>
+                  <Table.Cell>
+                    {defaultModel?.id === model.id ? (
+                      <Badge colorPalette="green" size="sm">
+                        Default
+                      </Badge>
+                    ) : (
+                      <Badge colorPalette="gray" size="sm">
+                        Available
+                      </Badge>
+                    )}
+                  </Table.Cell>
+                  <Table.Cell>
+                    <HStack spacing={2}>
+                      {defaultModel?.id !== model.id && (
+                        <Button
+                          size="xs"
+                          colorPalette="blue"
+                          onClick={() => handleSetDefault(model.id)}
+                        >
+                          Set as Default
+                        </Button>
+                      )}
+                      {model.owner_id && (
+                        <Button
+                          size="xs"
+                          colorPalette="red"
+                          onClick={() => handleDeleteModel(model.id)}
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    </HStack>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table.Root>
+        )}
+      {/* Dialog for adding a new embedding model */}
+      <Dialog.Root open={isOpen} onOpenChange={(details) => setIsOpen(details.open)}>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
           <Dialog.Content size={{ base: "xs", md: "md" }} placement="center">
             <Box position="relative">
               <form
                 onSubmit={(e) => {
-                  e.preventDefault();
-                  handleAddModel();
+                  e.preventDefault()
+                  handleAddModel()
                 }}
               >
                 <Dialog.Header>
@@ -835,12 +846,12 @@ function EmbeddingModels() {
                         value={modelProvider}
                         onChange={(e) => setModelProvider(e.target.value)}
                         style={{
-                          width: '100%',
-                          padding: '0.5rem',
-                          borderRadius: '0.375rem',
-                          borderColor: '#E2E8F0',
-                          fontSize: '1rem',
-                          height: '2.5rem',                          
+                          width: "100%",
+                          padding: "0.5rem",
+                          borderRadius: "0.375rem",
+                          borderColor: "#E2E8F0",
+                          fontSize: "1rem",
+                          height: "2.5rem",
                         }}
                       >
                         <option value="huggingface">HuggingFace</option>
@@ -855,8 +866,8 @@ function EmbeddingModels() {
                         <Input
                           value={modelId}
                           onChange={(e) => {
-                            setModelId(e.target.value);
-                            setIsModelValid(null);
+                            setModelId(e.target.value)
+                            setIsModelValid(null)
                           }}
                           placeholder="e.g., sentence-transformers/all-MiniLM-L6-v2"
                         />
@@ -878,9 +889,7 @@ function EmbeddingModels() {
                           color={isModelValid ? "green.700" : "red.700"}
                         >
                           <HStack>
-                            <Box>
-                              {isModelValid ? <FiCheckCircle /> : <FiXCircle />}
-                            </Box>
+                            <Box>{isModelValid ? <FiCheckCircle /> : <FiXCircle />}</Box>
                             <Text fontSize="sm">{validationMessage}</Text>
                           </HStack>
                         </Box>
@@ -903,11 +912,7 @@ function EmbeddingModels() {
                       Cancel
                     </Button>
                   </Dialog.ActionTrigger>
-                  <Button
-                    colorPalette="blue"
-                    type="submit"
-                    isDisabled={!isModelValid}
-                  >
+                  <Button colorPalette="blue" type="submit" isDisabled={!isModelValid}>
                     Add Model
                   </Button>
                 </Dialog.Footer>
@@ -915,8 +920,8 @@ function EmbeddingModels() {
             </Box>
             <Dialog.CloseTrigger />
           </Dialog.Content>
-          </Dialog.Positioner>
-        </Dialog.Root>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </>
   )
 }
