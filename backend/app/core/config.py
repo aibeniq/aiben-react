@@ -247,6 +247,51 @@ class Settings(BaseSettings):
     ANSWER:
     """
 
+    # TwinCheck prompt templates
+    TWINCHECK_ANALYSIS_PROMPT_TEMPLATE: str = """
+    You are comparing two documents using their diff output:
+    - Document 1: {doc1_name}
+    - Document 2: {doc2_name}
+    
+    In the diff output below:
+    - Lines starting with '- ' are in Document 1 but not in Document 2 (deletions)
+    - Lines starting with '+ ' are in Document 2 but not in Document 1 (additions)
+    - Lines starting with '? ' indicate changes in whitespace or small changes
+    - Lines with no prefix are common to both documents
+    
+    Diff output:
+    {diff_text}
+    
+    Please analyze how these documents differ specifically regarding: "{topic}"
+    
+    Provide a clear, detailed analysis of the differences between the two documents regarding this topic.
+    Refer to specific sections of the documents where relevant differences exist.
+    If there are no differences related to this topic, state that clearly.
+    """
+    
+    TWINCHECK_SUMMARY_PROMPT_TEMPLATE: str = """
+    You are comparing two documents using their diff output:
+    - Document 1: {doc1_name}
+    - Document 2: {doc2_name}
+    
+    In the diff output below:
+    - Lines starting with '- ' are in Document 1 but not in Document 2 (deletions)
+    - Lines starting with '+ ' are in Document 2 but not in Document 1 (additions)
+    - Lines starting with '? ' indicate changes in whitespace or small changes
+    - Lines with no prefix are common to both documents
+    
+    Diff output:
+    {diff_text}
+    
+    The user is particularly interested in these topics:
+    {topics}
+    
+    Please provide a comprehensive summary of all major differences between the two documents. 
+    Focus on structural, content, and semantic differences. 
+    Highlight the most important changes and explain their potential implications.
+    Be clear, concise, and informative.
+    """
+
     REPLICATE_API_TOKEN: str | None = os.getenv("REPLICATE_API_TOKEN")
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:

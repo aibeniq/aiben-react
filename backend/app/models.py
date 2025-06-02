@@ -2,7 +2,7 @@ import enum
 import uuid
 from typing import List, Dict, Any, Optional
 from pydantic import EmailStr
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, Column
 from sqlalchemy import LargeBinary, Column, PrimaryKeyConstraint, UniqueConstraint, Enum as SQLAlchemyEnum, JSON
 from datetime import datetime
 
@@ -397,4 +397,27 @@ class LlmInteraction(SQLModel, table=True):
     feedback: Optional[str] = Field(default=None)  # 'correct' or 'incorrect'
     feedback_text: Optional[str] = Field(default=None)  # User's additional comments
     feedback_date: Optional[datetime] = Field(default=None)  # When feedback was provided
+
+
+# Request model for TwinCheck
+class TwinCheckRequest(SQLModel):
+    comparison_topics: str
+
+# Response model for TwinCheck
+class TwinCheckResponse(SQLModel):
+    results: Dict[str, Any]  # Accept any dictionary structure
+
+# Table for saved comparison topic sets
+class TwinCheckTopicList(SQLModel, table=True):
+    __tablename__ = "twincheck_comparisons"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    name: str = Field(max_length=255, unique=True, nullable=False)
+    description: str | None = Field(default=None, max_length=255)
+    topics: str = Field(nullable=False)  # Store topics as a newline-separated string
+    owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
+    date_created: datetime = Field(default_factory=datetime.utcnow)
+    date_modified: datetime = Field(default_factory=datetime.utcnow)
+
+class TwinCheckRequest(SQLModel):
+    comparison_topics: str
     
