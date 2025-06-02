@@ -20,6 +20,7 @@ import { useState, useEffect } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { ReportgenieService, KnowledgeBasesService } from "@/client"
+import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { FiFileText, FiCopy, FiCheck, FiDownload, FiClock, FiEye, FiDatabase } from "react-icons/fi"
@@ -76,6 +77,7 @@ useEffect(() => {
   
   // Function to load a report from history
   const loadReportFromHistory = async (reportId) => {
+    console.log("Loading report from history with ID:", reportId);
     try {
       setIsHistoryLoading(true);
       const report = await ReportgenieService.getReportDetail({ reportId });
@@ -777,6 +779,31 @@ PROCEDURES: Describes what will happen during the research study."
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
                       {generatedReport}
                     </ReactMarkdown>
+
+                    {/* Add FeedbackButtons here */}
+                    {selectedHistoryReport?.id && (
+                      <Box
+                        position="sticky"
+                        bottom={4}
+                        right={4}
+                        display="flex"
+                        justifyContent="flex-end"
+                        pointerEvents="auto"
+                        zIndex={10}
+                      >
+                        <FeedbackButtons 
+                          interactionId={selectedHistoryReport.id} 
+                          onFeedbackSubmitted={(type) => {
+                            showSuccessToast(`Thank you for marking this response as ${type}!`);
+                          }}
+                          existingFeedback={selectedHistoryReport.feedback ? {
+                            feedback: selectedHistoryReport.feedback.feedback as "correct" | "incorrect" | null,
+                            feedbackText: selectedHistoryReport.feedback.feedbackText,
+                            feedbackDate: selectedHistoryReport.feedback.feedbackDate
+                          } : undefined}
+                        />
+                      </Box>
+                    )}
                     
                     {/* Detailed section results with sources */}
                     {sectionResults.length > 0 && (

@@ -399,6 +399,21 @@ export type FormconnectDeleteFormData = {
 
 export type FormconnectDeleteFormResponse = unknown
 
+export type FormconnectGetFormDetailData = {
+  interactionId: string
+}
+
+export type FormconnectGetFormDetailResponse = unknown
+
+export type FormconnectGetFormHistoryData = {
+  limit?: number
+  skip?: number
+}
+
+export type FormconnectGetFormHistoryResponse = Array<{
+  [key: string]: unknown
+}>
+
 export type ItemsReadItemsData = {
   limit?: number
   skip?: number
