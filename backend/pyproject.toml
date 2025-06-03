@@ -33,7 +33,8 @@ dependencies = [
     "python-docx>=0.8.11,<1.0.0",
     "replicate==1.0.6",
     "markdown == 3.5.2",
-    "beautifulsoup4 == 4.12.2"
+    "beautifulsoup4 == 4.12.2",
+    "langchain-aws==0.2.24",
 ]
 
 [tool.uv]

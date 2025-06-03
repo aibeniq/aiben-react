@@ -15,6 +15,9 @@ from langchain_core.messages import HumanMessage
 import uuid
 import traceback
 import json
+import boto3
+from langchain_community.llms import Bedrock
+from langchain.chains import LLMChain
 
 class ReplicateWrapper:
     """Wrapper for Replicate API to make it compatible with our interface"""
@@ -115,6 +118,108 @@ class ReplicateWrapper:
             print(f"Error running Replicate model: {e}")
             raise
 
+# Create an AWS Bedrock wrapper similar to your ReplicateWrapper
+class BedrockWrapper:
+    """Wrapper for AWS Bedrock API to make it compatible with our interface"""
+    
+    def __init__(self, model_id: str, temperature: float = 0.0, **kwargs):
+        self.model_id = model_id
+        self.temperature = temperature
+        self.kwargs = kwargs
+        
+        # Initialize AWS Bedrock client using environment variables by default
+        self.client = self._initialize_client()
+        
+        # Create the LangChain Bedrock instance
+        self.bedrock = Bedrock(
+            model_id=self.model_id,
+            client=self.client,
+            model_kwargs={"temperature": self.temperature},
+            **{k: v for k, v in kwargs.items() if k not in ["system_prompt"]}
+        )
+    
+    def _initialize_client(self):
+        """Initialize the Bedrock client using the AWS SDK"""
+        # Use AWS credentials from environment variables by default
+        return boto3.client(
+            'bedrock-runtime',
+            region_name=os.environ.get("AWS_REGION", "eu-north-1")
+        )
+    
+    # Add this method to make it work with the | operator
+    def __or__(self, other):
+        # If used with pipe operator, just return the result of invoke directly
+        print("BedrockWrapper: __or__ method called")
+        
+        def chain_func(inputs):
+            print(f"BedrockWrapper chain function called with inputs: {inputs}")
+            # Format prompt from inputs
+            if isinstance(inputs, dict):
+                # Extract all values and join them with newlines
+                prompt_parts = []
+                for key, value in inputs.items():
+                    prompt_parts.append(f"{key}: {value}")
+                prompt = "\n".join(prompt_parts)
+            else:
+                prompt = str(inputs)
+            
+            # Call invoke with the formatted prompt
+            result = self.invoke(prompt)
+            # Return an object with content attribute to mimic LangChain format
+            return type('obj', (object,), {'content': result})
+            
+        return chain_func
+    
+    def invoke(self, prompt):
+        """Run the model with the provided prompt"""
+        if isinstance(prompt, str):
+            input_text = prompt
+            system_prompt = self.kwargs.get("system_prompt", "")
+        elif hasattr(prompt, 'content'):
+            input_text = prompt.content
+            system_prompt = self.kwargs.get("system_prompt", "")
+        else:
+            # Handle list of messages by identifying system and user messages
+            system_messages = [msg.content for msg in prompt if hasattr(msg, 'type') and msg.type == 'system']
+            user_messages = [msg.content for msg in prompt if hasattr(msg, 'content') and not (hasattr(msg, 'type') and msg.type == 'system')]
+            
+            system_prompt = system_messages[0] if system_messages else self.kwargs.get("system_prompt", "")
+            input_text = "\n".join(user_messages)
+        
+        try:
+            # Format prompt based on the model type
+            # Different AWS models have different input formats
+            if "anthropic" in self.model_id:
+                # For Anthropic models (Claude)
+                if system_prompt:
+                    full_prompt = f"System: {system_prompt}\n\nHuman: {input_text}\n\nAssistant:"
+                else:
+                    full_prompt = f"Human: {input_text}\n\nAssistant:"
+            elif "titan" in self.model_id:
+                # For Amazon Titan models
+                if system_prompt:
+                    full_prompt = f"{system_prompt}\n\n{input_text}"
+                else:
+                    full_prompt = input_text
+            else:
+                # Default case for other models
+                if system_prompt:
+                    full_prompt = f"{system_prompt}\n\n{input_text}"
+                else:
+                    full_prompt = input_text
+            
+            # Use the bedrock client to invoke the model
+            response = self.bedrock.invoke(full_prompt)
+            
+            # Parse and return the response
+            return response
+            
+        except Exception as e:
+            print(f"Error calling AWS Bedrock: {e}")
+            print("Exception details:", str(e))
+            raise
+
+
 def create_llm(provider: ModelProvider, model_id: str, 
                temperature: float = 0.0, 
                api_key: Optional[str] = None,
@@ -124,7 +229,23 @@ def create_llm(provider: ModelProvider, model_id: str,
     """
     params = additional_params or {}
     
-    if provider == ModelProvider.OPENAI:
+    if provider == ModelProvider.AWS:
+        print(f"Creating AWS Bedrock LLM wrapper for model: {model_id}")
+        
+        # Check if AWS credentials are configured
+        if not os.environ.get("AWS_ACCESS_KEY_ID") or not os.environ.get("AWS_SECRET_ACCESS_KEY"):
+            print("WARNING: AWS credentials not found in environment variables")
+            
+        # Create BedrockWrapper instance
+        wrapper = BedrockWrapper(
+            model_id=model_id,
+            temperature=temperature,
+            **params
+        )
+        print("AWS Bedrock LLM wrapper created successfully.")
+        return wrapper
+    
+    elif provider == ModelProvider.OPENAI:
         # If API key is provided, use it; otherwise, rely on environment variable
         if api_key:
             return ChatOpenAI(

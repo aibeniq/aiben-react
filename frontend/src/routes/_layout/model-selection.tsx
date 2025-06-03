@@ -35,17 +35,21 @@ export const Route = createFileRoute("/_layout/model-selection")({
 
 function ModelSelection() {
   return (
-    <Container maxW="full" p={0}>  {/* Remove any default padding */}
+    <Container maxW="full" p={0}>
+      {" "}
+      {/* Remove any default padding */}
       {/* First section: Embedding Models */}
-      <Box pt={6}>  {/* Add consistent padding top */}
+      <Box pt={6}>
+        {" "}
+        {/* Add consistent padding top */}
         <EmbeddingModels />
       </Box>
-
       {/* Divider between sections */}
       <Separator my={10} />
-
       {/* Second section: LLMs */}
-      <Box pb={6}>  {/* Add consistent padding bottom */}
+      <Box pb={6}>
+        {" "}
+        {/* Add consistent padding bottom */}
         <LlmModels />
       </Box>
     </Container>
@@ -82,6 +86,18 @@ function LlmModels() {
         })
         .catch((error) => {
           console.error("API key check failed:", error)
+          setIsApiKeyConfigured(false)
+        })
+    } else if (modelProvider === "aws") {
+      console.log("Checking AWS credentials configuration...")
+      EmbeddingModelsService.checkApiKeyConfigured({ provider: "aws" })
+        .then((response) => {
+          console.log("AWS credentials check succeeded:", response)
+          setIsApiKeyConfigured(true)
+        })
+        .catch((error) => {
+          console.error("AWS credentials check failed:", error)
+          showErrorToast("AWS credentials are not configured in the backend. Please add AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to your environment.")
           setIsApiKeyConfigured(false)
         })
     } else if (modelProvider === "ollama") {
@@ -291,8 +307,8 @@ function LlmModels() {
       </Heading>
 
       <Text mb={4}>
-        Configure and manage the LLMs used for generating text responses. The default model will be used for
-        all operations.
+        Configure and manage the LLMs used for generating text responses. The default model will be
+        used for all operations.
       </Text>
 
       <Button
@@ -432,6 +448,7 @@ function LlmModels() {
                         <option value="openai">OpenAI</option>
                         <option value="ollama">Ollama</option>
                         <option value="replicate">Replicate</option>
+                        <option value="aws">AWS Bedrock</option>
                       </select>
                     </Field>
 
@@ -652,6 +669,7 @@ function EmbeddingModels() {
     }
 
     setIsValidating(true)
+    console.log("Validating model with ID:", modelId, "and provider:", modelProvider)
     validateModelMutation.mutate({
       requestBody: {
         model_id: modelId,
@@ -694,128 +712,132 @@ function EmbeddingModels() {
 
   return (
     <>
-        <Heading size="lg" pt={12} mb={2}>
-          Embedding Model Management
-        </Heading>
+      <Heading size="lg" pt={12} mb={2}>
+        Embedding Model Management
+      </Heading>
 
-        <Text mb={4}>
-          Configure and manage the embedding models used for knowledge base indexing and retrieval. 
-          The default model will be used when creating new knowledge bases, but each knowledge 
-          base will continue using its original embedding model even if the default changes later.
-        </Text>
+      <Text mb={4}>
+        Configure and manage the embedding models used for knowledge base indexing and retrieval.
+        The default model will be used when creating new knowledge bases, but each knowledge base
+        will continue using its original embedding model even if the default changes later.
+      </Text>
 
-        <Button
-          leftIcon={<FiPlus />}
-          colorPalette="blue"
-          mb={6}
-          onClick={() => {
-            resetForm()
-            onOpen()
-          }}
-        >
-          Add New Embedding Model
-        </Button>
+      <Button
+        leftIcon={<FiPlus />}
+        colorPalette="blue"
+        mb={6}
+        onClick={() => {
+          resetForm()
+          onOpen()
+        }}
+      >
+        Add New Embedding Model
+      </Button>
 
-        {isLoading ? (
-          <Flex justify="center" align="center" h="200px">
-            <Spinner size="lg" />
-          </Flex>
-        ) : !modelsData || modelsData.data.length === 0 ? (
-          <EmptyState.Root>
-            <EmptyState.Content>
-              <EmptyState.Icon>
-                <FiSettings size={24} />
-              </EmptyState.Icon>
-              <EmptyState.Title>No embedding models configured</EmptyState.Title>
-              <EmptyState.Description>
-                Add a new embedding model to get started
-              </EmptyState.Description>
-            </EmptyState.Content>
-          </EmptyState.Root>
-        ) : (
-          <Table.Root>
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeader>Name</Table.ColumnHeader>
-                <Table.ColumnHeader>Model ID</Table.ColumnHeader>
-                <Table.ColumnHeader>Provider</Table.ColumnHeader>
-                <Table.ColumnHeader>Description</Table.ColumnHeader>
-                <Table.ColumnHeader>Status</Table.ColumnHeader>
-                <Table.ColumnHeader>Actions</Table.ColumnHeader>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {modelsData.data.map((model) => (
-                <Table.Row key={model.id}>
-                  <Table.Cell>{model.name}</Table.Cell>
-                  <Table.Cell>
-                    <code>{model.model_id}</code>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Badge
-                      colorPalette={
-                        model.provider === "huggingface"
-                          ? "teal"
-                          : model.provider === "openai"
-                            ? "purple"
-                            : model.provider === "ollama"
-                              ? "orange"
-                              : model.provider === "replicate"
-                                ? "red"
-                                : "gray"
-                      }
-                      size="sm"
-                    >
-                      {model.provider === "huggingface"
-                        ? "HuggingFace"
+      {isLoading ? (
+        <Flex justify="center" align="center" h="200px">
+          <Spinner size="lg" />
+        </Flex>
+      ) : !modelsData || modelsData.data.length === 0 ? (
+        <EmptyState.Root>
+          <EmptyState.Content>
+            <EmptyState.Icon>
+              <FiSettings size={24} />
+            </EmptyState.Icon>
+            <EmptyState.Title>No embedding models configured</EmptyState.Title>
+            <EmptyState.Description>
+              Add a new embedding model to get started
+            </EmptyState.Description>
+          </EmptyState.Content>
+        </EmptyState.Root>
+      ) : (
+        <Table.Root>
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeader>Name</Table.ColumnHeader>
+              <Table.ColumnHeader>Model ID</Table.ColumnHeader>
+              <Table.ColumnHeader>Provider</Table.ColumnHeader>
+              <Table.ColumnHeader>Description</Table.ColumnHeader>
+              <Table.ColumnHeader>Status</Table.ColumnHeader>
+              <Table.ColumnHeader>Actions</Table.ColumnHeader>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {modelsData.data.map((model) => (
+              <Table.Row key={model.id}>
+                <Table.Cell>{model.name}</Table.Cell>
+                <Table.Cell>
+                  <code>{model.model_id}</code>
+                </Table.Cell>
+                <Table.Cell>
+                  <Badge
+                    colorPalette={
+                      model.provider === "huggingface"
+                        ? "teal"
                         : model.provider === "openai"
-                          ? "OpenAI"
+                          ? "purple"
                           : model.provider === "ollama"
-                            ? "Ollama"
+                            ? "orange"
                             : model.provider === "replicate"
-                              ? "Replicate"
-                              : model.provider}
+                              ? "red"
+                              : model.provider === "aws"
+                                ? "blue"
+                                : "gray"
+                    }
+                    size="sm"
+                  >
+                    {model.provider === "huggingface"
+                      ? "HuggingFace"
+                      : model.provider === "openai"
+                        ? "OpenAI"
+                        : model.provider === "ollama"
+                          ? "Ollama"
+                          : model.provider === "replicate"
+                            ? "Replicate"
+                              : model.provider === "aws"
+                                ? "AWS Bedrock"
+                                : model.provider}
+                  </Badge>
+                </Table.Cell>
+                <Table.Cell>{model.description}</Table.Cell>
+                <Table.Cell>
+                  {defaultModel?.id === model.id ? (
+                    <Badge colorPalette="green" size="sm">
+                      Default
                     </Badge>
-                  </Table.Cell>
-                  <Table.Cell>{model.description}</Table.Cell>
-                  <Table.Cell>
-                    {defaultModel?.id === model.id ? (
-                      <Badge colorPalette="green" size="sm">
-                        Default
-                      </Badge>
-                    ) : (
-                      <Badge colorPalette="gray" size="sm">
-                        Available
-                      </Badge>
+                  ) : (
+                    <Badge colorPalette="gray" size="sm">
+                      Available
+                    </Badge>
+                  )}
+                </Table.Cell>
+                <Table.Cell>
+                  <HStack spacing={2}>
+                    {defaultModel?.id !== model.id && (
+                      <Button
+                        size="xs"
+                        colorPalette="blue"
+                        onClick={() => handleSetDefault(model.id)}
+                      >
+                        Set as Default
+                      </Button>
                     )}
-                  </Table.Cell>
-                  <Table.Cell>
-                    <HStack spacing={2}>
-                      {defaultModel?.id !== model.id && (
-                        <Button
-                          size="xs"
-                          colorPalette="blue"
-                          onClick={() => handleSetDefault(model.id)}
-                        >
-                          Set as Default
-                        </Button>
-                      )}
-                      {model.owner_id && (
-                        <Button
-                          size="xs"
-                          colorPalette="red"
-                          onClick={() => handleDeleteModel(model.id)}
-                        >
-                          Delete
-                        </Button>
-                      )}
-                    </HStack>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table.Root>
-        )}
+                    {model.owner_id && (
+                      <Button
+                        size="xs"
+                        colorPalette="red"
+                        onClick={() => handleDeleteModel(model.id)}
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </HStack>
+                </Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table.Root>
+      )}
       {/* Dialog for adding a new embedding model */}
       <Dialog.Root open={isOpen} onOpenChange={(details) => setIsOpen(details.open)}>
         <Dialog.Backdrop />
@@ -858,6 +880,7 @@ function EmbeddingModels() {
                         <option value="openai">OpenAI</option>
                         <option value="ollama">Ollama</option>
                         <option value="replicate">Replicate</option>
+                        <option value="aws">AWS Bedrock</option>
                       </select>
                     </Field>
 
