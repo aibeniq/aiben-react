@@ -21,11 +21,22 @@ from app.models import (
     Message,
     User
 )
+from app.core.config import settings
 from datetime import datetime
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
 
 router = APIRouter(prefix="/embedding-models", tags=["embedding-models"])
+
+@router.get("/providers", response_model=dict)
+def get_available_providers() -> dict:
+    """
+    Get the list of available model providers for LLMs and embedding models.
+    """
+    return {
+        "llm_providers": settings.llm_providers,
+        "embedding_providers": settings.embedding_providers
+    }
 
 # Initialize with default models
 def initialize_default_models(session: SessionDep):

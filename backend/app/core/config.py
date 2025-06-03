@@ -100,6 +100,23 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
+    #ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
+    #ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
+    ENABLED_LLM_PROVIDERS: str = "openai,aws"
+    ENABLED_EMBEDDING_PROVIDERS: str = "openai,aws"
+
+    @computed_field
+    @property
+    def llm_providers(self) -> list[str]:
+        """Return list of enabled LLM providers"""
+        return [provider.strip() for provider in self.ENABLED_LLM_PROVIDERS.split(",")]
+    
+    @computed_field
+    @property
+    def embedding_providers(self) -> list[str]:
+        """Return list of enabled embedding model providers"""
+        return [provider.strip() for provider in self.ENABLED_EMBEDDING_PROVIDERS.split(",")]
+
     # LLM Templates
     REPORT_GENIE_PROMPT_TEMPLATE: str = """
     REFERENCE INFORMATION:
