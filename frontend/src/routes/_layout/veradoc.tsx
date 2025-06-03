@@ -555,7 +555,8 @@ const VeraDoc = () => {
       )}
 
       <Heading size="xl" mb={6}>
-        VeraDoc
+        {/* VeraDoc */}
+        Review a document
       </Heading>
 
       <VStack spacing={6} align="stretch">
