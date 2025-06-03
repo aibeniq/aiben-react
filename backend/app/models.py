@@ -3,8 +3,16 @@ import uuid
 from typing import List, Dict, Any, Optional
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel, Column
-from sqlalchemy import LargeBinary, Column, PrimaryKeyConstraint, UniqueConstraint, Enum as SQLAlchemyEnum, JSON
+from sqlalchemy import (
+    LargeBinary,
+    Column,
+    PrimaryKeyConstraint,
+    UniqueConstraint,
+    Enum as SQLAlchemyEnum,
+    JSON,
+)
 from datetime import datetime
+
 
 # Shared properties
 class UserBase(SQLModel):
@@ -46,10 +54,14 @@ class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
-    knowledge_bases: list["KnowledgeBase"] = Relationship(back_populates="owner", cascade_delete=True)
-    #track the user's default models
+    knowledge_bases: list["KnowledgeBase"] = Relationship(
+        back_populates="owner", cascade_delete=True
+    )
+    # track the user's default models
     default_llm: Optional[uuid.UUID] = Field(default=None, foreign_key="llmmodel.id")
-    default_embedding_model: Optional[uuid.UUID] = Field(default=None, foreign_key="embeddingmodel.id")
+    default_embedding_model: Optional[uuid.UUID] = Field(
+        default=None, foreign_key="embeddingmodel.id"
+    )
 
 
 # Properties to return via API, id is always required
@@ -118,6 +130,7 @@ class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
 
+
 # classes for Knowledge Bases
 # Shared properties
 class KnowledgeBaseBase(SQLModel):
@@ -127,18 +140,21 @@ class KnowledgeBaseBase(SQLModel):
         default=None, foreign_key="embeddingmodel.id"
     )
     # New property to store file paths or URLs
-    #file_paths: Optional[List[str]] = Field(default=None, sa_column_kwargs={"nullable": True})
+    # file_paths: Optional[List[str]] = Field(default=None, sa_column_kwargs={"nullable": True})
 
 
 # Properties to receive on KnowledgeBase creation
 class KnowledgeBaseCreate(KnowledgeBaseBase):
     embedding_model_id: Optional[uuid.UUID] = None
 
+
 # Properties to receive on KnowledgeBase update
 class KnowledgeBaseUpdate(KnowledgeBaseBase):
     title: str | None = Field(default=None, min_length=1, max_length=255, unique=True)  # type: ignore
     description: str | None = Field(default=None, max_length=255)
-    removed_file_ids: List[str] = Field(default_factory=list)  # List of file IDs to be removed
+    removed_file_ids: List[str] = Field(
+        default_factory=list
+    )  # List of file IDs to be removed
     # Allow updating file paths
     # file_paths: Optional[List[str]] = None
 
@@ -151,7 +167,7 @@ class KnowledgeBase(KnowledgeBaseBase, table=True):
         PrimaryKeyConstraint("id"),
         UniqueConstraint("title", "owner_id", name="uq_knowledgebase_title_owner"),
     )
-    
+
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     owner_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
@@ -160,7 +176,7 @@ class KnowledgeBase(KnowledgeBaseBase, table=True):
     data: bytes | None = Field(default=None, sa_column=LargeBinary)
     date_created: datetime
     date_modified: datetime
-    
+
 
 # Properties to return via API, id is always required
 class KnowledgeBasePublic(KnowledgeBaseBase):
@@ -183,21 +199,18 @@ class KnowledgeBasesPublic(SQLModel):
 class Source(SQLModel, table=True):
     __tablename__ = "sources"
     id: uuid.UUID = Field(primary_key=True, default_factory=uuid.uuid4)
-    source_data_id: uuid.UUID = Field(
-        foreign_key="source-data.id", nullable=False
-    )
+    source_data_id: uuid.UUID = Field(foreign_key="source-data.id", nullable=False)
     knowledge_base_id: uuid.UUID = Field(
-        foreign_key="knowledge-bases.id", 
-        nullable=False, 
+        foreign_key="knowledge-bases.id",
+        nullable=False,
         ondelete="CASCADE",
     )
     owner_id: uuid.UUID = Field(
-        foreign_key="user.id", 
-        nullable=False, 
-        ondelete="CASCADE"
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
     name: str = Field(max_length=255)
     date_created: datetime = Field(default_factory=datetime.utcnow)
+
 
 # This stores the actual file data, not just the metadata
 class SourceData(SQLModel, table=True):
@@ -205,14 +218,17 @@ class SourceData(SQLModel, table=True):
     id: uuid.UUID = Field(primary_key=True)
     data: bytes = Field(sa_column=LargeBinary)
     file_hash: str = Field(max_length=64)  # SHA-256 hash is 64 characters
-    
+
+
 # Request model for FormConnect
 class FormConnectRequest(SQLModel):
     fields: str
 
+
 # Response model for FormConnect
 class FormConnectResponse(SQLModel):
     results: Dict[str, Any]  # Accept any dictionary structure
+
 
 # Form, i.e., list of form fields for FormConnect functionality
 class FormConnectForm(SQLModel, table=True):
@@ -221,17 +237,22 @@ class FormConnectForm(SQLModel, table=True):
     name: str = Field(max_length=255, unique=True, nullable=False)
     description: str | None = Field(default=None, max_length=255)
     fields: str = Field(nullable=False)  # Store fields as a JSON string
-    owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)  # Add owner_id column
+    owner_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False
+    )  # Add owner_id column
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
-   
+
+
 # Request model for VeraDoc
 class VeraDocRequest(SQLModel):
     questions: str
 
+
 # Response model for VeraDoc
 class VeraDocResponse(SQLModel):
     results: Dict[str, Any]  # Accept any dictionary structure
+
 
 # Form, i.e., list of questions for VeraDoc functionality
 class VeraDocChecklist(SQLModel, table=True):
@@ -240,26 +261,33 @@ class VeraDocChecklist(SQLModel, table=True):
     name: str = Field(max_length=255, unique=True, nullable=False)
     description: str | None = Field(default=None, max_length=255)
     questions: str = Field(nullable=False)  # Store questions as a JSON string
-    owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)  # Add owner_id column
+    owner_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False
+    )  # Add owner_id column
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
+
 
 class VeraDocRagQA(VeraDocRequest):
     question: str
     answer: str
     context: Optional[str] = None
 
+
 class VeraDocRagResult(VeraDocRequest):
     final_evaluation: str
     qa_pairs: List[VeraDocRagQA]
     interaction_id: Optional[str] = None
 
+
 class VeraDocRagResponse(VeraDocRequest):
     results: VeraDocRagResult
+
 
 class RagChecklistRequest(VeraDocRequest):
     knowledge_base_id: str
     questions: str
+
 
 # Enum for model providers
 class ModelProvider(str, enum.Enum):
@@ -270,29 +298,34 @@ class ModelProvider(str, enum.Enum):
     AWS = "aws"
     # Add other providers as needed
 
+
 # Define a SQLAlchemy type for the enum
 ModelProviderType = SQLAlchemyEnum(
-    ModelProvider, 
+    ModelProvider,
     name="modelprovider",
     create_constraint=True,
     validate_strings=True,
     native_enum=True,
-    values_callable=lambda x: [e.value for e in x]  # Use enum values instead of names
+    values_callable=lambda x: [e.value for e in x],  # Use enum values instead of names
 )
+
 
 # Update the EmbeddingModel table
 class EmbeddingModel(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str = Field(index=True)  # Human-readable name
-    model_id: str  # Model identifier (e.g., "all-MiniLM-L6-v2" or "text-embedding-3-large")
+    model_id: (
+        str  # Model identifier (e.g., "all-MiniLM-L6-v2" or "text-embedding-3-large")
+    )
     provider: ModelProvider = Field(
         default=ModelProvider.HUGGINGFACE,
-        sa_column=Column(ModelProviderType, nullable=False)
+        sa_column=Column(ModelProviderType, nullable=False),
     )
     description: str = Field(default="")
     owner_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
+
 
 # Update create and update models
 class EmbeddingModelCreate(SQLModel):
@@ -301,24 +334,30 @@ class EmbeddingModelCreate(SQLModel):
     provider: ModelProvider = ModelProvider.HUGGINGFACE
     description: str = ""
 
+
 class EmbeddingModelUpdate(SQLModel):
     name: Optional[str] = None
     model_id: Optional[str] = None
     provider: Optional[ModelProvider] = None
     description: Optional[str] = None
 
+
 class EmbeddingModelValidate(SQLModel):
     model_id: str
     provider: ModelProvider
 
+
 class EmbeddingModelPublic(EmbeddingModel):
     pass
+
 
 class EmbeddingModelsPublic(SQLModel):
     data: List[EmbeddingModelPublic]
     count: int
 
+
 # Add new models for LLM settings
+
 
 class LlmModel(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -326,12 +365,13 @@ class LlmModel(SQLModel, table=True):
     model_id: str  # Model identifier (e.g., "gpt-4o-mini" or "llama3")
     provider: ModelProvider = Field(
         default=ModelProvider.OPENAI,
-        sa_column=Column(ModelProviderType, nullable=False)
+        sa_column=Column(ModelProviderType, nullable=False),
     )
     description: str = Field(default="")
     owner_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
+
 
 class LlmModelCreate(SQLModel):
     name: str
@@ -339,21 +379,26 @@ class LlmModelCreate(SQLModel):
     provider: ModelProvider = ModelProvider.OPENAI
     description: str = ""
 
+
 class LlmModelUpdate(SQLModel):
     name: Optional[str] = None
     model_id: Optional[str] = None
     provider: Optional[ModelProvider] = None
     description: Optional[str] = None
 
+
 class LlmModelPublic(LlmModel):
     pass
+
 
 class LlmModelsPublic(SQLModel):
     data: List[LlmModelPublic]
 
+
 class LlmModelsValidate(SQLModel):
     model_id: str
     provider: ModelProvider
+
 
 # Request model for ReportGenie
 class ReportGenieRequest(SQLModel):
@@ -361,9 +406,11 @@ class ReportGenieRequest(SQLModel):
     sections: str
     outline_id: str
 
+
 # Response model for ReportGenie
 class ReportGenieResponse(SQLModel):
     results: Dict[str, Any]  # Accept any dictionary structure
+
 
 # Form for saving outlines
 class ReportGenieOutline(SQLModel, table=True):
@@ -376,37 +423,49 @@ class ReportGenieOutline(SQLModel, table=True):
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
 
+
 class ReportGenieSection(SQLModel):
     title: str
     content: str
     source_citations: List[Dict[str, Any]] = Field(default_factory=list)
 
+
 class DocxRequest(SQLModel):
     content: str
 
+
 class LlmInteraction(SQLModel, table=True):
     """Records all interactions with LLM services for analytics and auditing."""
+
     __tablename__ = "llm_interactions"
-    
+
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     date_created: datetime = Field(default_factory=datetime.utcnow)
     user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
-    functionality: str = Field(index=True)  # 'chatbot', 'veradoc', 'formconnect', 'reportgenie'
+    functionality: str = Field(
+        index=True
+    )  # 'chatbot', 'veradoc', 'formconnect', 'reportgenie'
     input_data: str = Field(default=None)  # Stores the input prompt/question
     output_data: str = Field(default=None)  # Stores the generated response
-    extra_data: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))  # For additional info (JSON)
+    extra_data: Optional[Dict[str, Any]] = Field(
+        default=None, sa_column=Column(JSON)
+    )  # For additional info (JSON)
     feedback: Optional[str] = Field(default=None)  # 'correct' or 'incorrect'
     feedback_text: Optional[str] = Field(default=None)  # User's additional comments
-    feedback_date: Optional[datetime] = Field(default=None)  # When feedback was provided
+    feedback_date: Optional[datetime] = Field(
+        default=None
+    )  # When feedback was provided
 
 
 # Request model for TwinCheck
 class TwinCheckRequest(SQLModel):
     comparison_topics: str
 
+
 # Response model for TwinCheck
 class TwinCheckResponse(SQLModel):
     results: Dict[str, Any]  # Accept any dictionary structure
+
 
 # Table for saved comparison topic sets
 class TwinCheckTopicList(SQLModel, table=True):
@@ -419,6 +478,6 @@ class TwinCheckTopicList(SQLModel, table=True):
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
 
+
 class TwinCheckRequest(SQLModel):
     comparison_topics: str
-    

@@ -39,9 +39,9 @@ class Settings(BaseSettings):
     FRONTEND_HOST: str = "http://localhost:5173"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
-    BACKEND_CORS_ORIGINS: Annotated[
-        list[AnyUrl] | str, BeforeValidator(parse_cors)
-    ] = []
+    BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = (
+        []
+    )
 
     # Document processing parameters
     DOCUMENT_CHUNK_SIZE: int = 1000
@@ -100,8 +100,8 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
-    #ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
-    #ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
+    # ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
+    # ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
     ENABLED_LLM_PROVIDERS: str = "openai,aws"
     ENABLED_EMBEDDING_PROVIDERS: str = "openai,aws"
 
@@ -110,12 +110,14 @@ class Settings(BaseSettings):
     def llm_providers(self) -> list[str]:
         """Return list of enabled LLM providers"""
         return [provider.strip() for provider in self.ENABLED_LLM_PROVIDERS.split(",")]
-    
+
     @computed_field
     @property
     def embedding_providers(self) -> list[str]:
         """Return list of enabled embedding model providers"""
-        return [provider.strip() for provider in self.ENABLED_EMBEDDING_PROVIDERS.split(",")]
+        return [
+            provider.strip() for provider in self.ENABLED_EMBEDDING_PROVIDERS.split(",")
+        ]
 
     # LLM Templates
     REPORT_GENIE_PROMPT_TEMPLATE: str = """
@@ -148,7 +150,7 @@ class Settings(BaseSettings):
     ANSWER:
     According to the policy context, the following should be kept in mind when answering the question:
     """
-    
+
     VERADOC_QA_PROMPT_TEMPLATE: str = """
     Read the following document and answer the following question clearly and concisely in 100 words or less.
     
@@ -161,7 +163,7 @@ class Settings(BaseSettings):
     
     ANSWER:
     """
-    
+
     VERADOC_FINAL_PROMPT_TEMPLATE: str = """
     According to policy, an acceptable document must have all of the elements described in the following questions.
     Read the following question-and-answer pairs about a certain proposal and determine whether or not it conforms to the policy.
@@ -237,7 +239,7 @@ class Settings(BaseSettings):
     
     REPHRASED QUESTION:
     """
-    
+
     CHATBOT_KB_QA_PROMPT_TEMPLATE: str = """
     You are a helpful assistant that answers questions based on the provided context.
     
@@ -254,7 +256,7 @@ class Settings(BaseSettings):
     
     ANSWER:
     """
-    
+
     CHATBOT_GENERAL_QA_PROMPT_TEMPLATE: str = """
     You are a helpful AI assistant. Answer the following question to the best of your knowledge.
     If you don't know the answer, just say that you don't know, don't try to make up an answer.
@@ -285,7 +287,7 @@ class Settings(BaseSettings):
     Refer to specific sections of the documents where relevant differences exist.
     If there are no differences related to this topic, state that clearly.
     """
-    
+
     TWINCHECK_SUMMARY_PROMPT_TEMPLATE: str = """
     You are comparing two documents using their diff output:
     - Document 1: {doc1_name}
