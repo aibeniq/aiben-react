@@ -1427,9 +1427,9 @@ const FileDropzone = ({
           <Text>
             {file && !isPlaceholder
               ? `Selected File: ${file.name}`
-              // commenting out a 
-              //: `Drag and drop File ${index + 1} here, or click to browse`}
-              : `Drag and drop a document to review here, or click to browse`}
+              : // commenting out a
+                //: `Drag and drop File ${index + 1} here, or click to browse`}
+                `Drag and drop a document to review here, or click to browse`}
           </Text>
         </Box>
 

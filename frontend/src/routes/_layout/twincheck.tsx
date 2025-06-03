@@ -20,7 +20,17 @@ import {
   Switch,
   Separator,
 } from "@chakra-ui/react"
-import { FiUpload, FiFile, FiDatabase, FiClock, FiFileText, FiCheck, FiCopy, FiChevronDown, FiChevronUp } from "react-icons/fi"
+import {
+  FiUpload,
+  FiFile,
+  FiDatabase,
+  FiClock,
+  FiFileText,
+  FiCheck,
+  FiCopy,
+  FiChevronDown,
+  FiChevronUp,
+} from "react-icons/fi"
 import { useDropzone } from "react-dropzone"
 import { format } from "date-fns"
 import { createFileRoute } from "@tanstack/react-router"
@@ -36,24 +46,24 @@ import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 
 const TwinCheck = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  
+
   // File state
   const [document1, setDocument1] = useState<File | null>(null)
   const [document2, setDocument2] = useState<File | null>(null)
-  
+
   // Topics state
   const [topics, setTopics] = useState("")
   const [comparisons, setComparisons] = useState([]) // List of saved comparison topics
   const [selectedComparison, setSelectedComparison] = useState(null) // Currently selected comparison
   const [comparisonName, setComparisonName] = useState("") // Name of the comparison being created/edited
   const [comparisonDescription, setComparisonDescription] = useState("") // Description of the comparison
-  
+
   // Results state
   const [summary, setSummary] = useState("")
   const [topicResults, setTopicResults] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [expandedTopic, setExpandedTopic] = useState<number | null>(null)
-  
+
   // History state
   const [comparisonHistory, setComparisonHistory] = useState<any[]>([])
   const [selectedHistoryItem, setSelectedHistoryItem] = useState(null)
@@ -68,7 +78,7 @@ const TwinCheck = () => {
     },
     enabled: true,
   })
-  
+
   // Update state when history query results change
   useEffect(() => {
     if (historyQuery.data) {
@@ -76,7 +86,7 @@ const TwinCheck = () => {
     }
     setIsHistoryLoading(historyQuery.isLoading)
   }, [historyQuery.data, historyQuery.isLoading])
-  
+
   // Fetch saved comparison topic sets when component mounts
   useEffect(() => {
     const fetchComparisons = async () => {
@@ -87,26 +97,26 @@ const TwinCheck = () => {
         console.error("Error fetching comparisons:", error)
       }
     }
-    
+
     fetchComparisons()
   }, [])
-  
+
   // Function to load a specific comparison from history
   const loadComparisonFromHistory = async (comparisonId) => {
     try {
       setIsHistoryLoading(true)
       const comparison = await TwincheckService.getComparisonDetail({ comparisonId })
-      
+
       // Update UI state with the loaded comparison
       setSummary(comparison.results.summary || "")
       setTopicResults(comparison.results.topic_analysis || [])
       setSelectedHistoryItem(comparison)
-      
+
       // Update topics if they exist
       if (comparison.comparison_topics) {
         setTopics(comparison.comparison_topics)
       }
-      
+
       showSuccessToast("Comparison loaded successfully")
     } catch (error) {
       console.error("Error loading comparison:", error)
@@ -115,10 +125,9 @@ const TwinCheck = () => {
       setIsHistoryLoading(false)
     }
   }
-  
+
   // Mutation for comparing documents
   const mutation = useMutation({
-    
     mutationFn: (data: { comparison_topics: string; document1: File; document2: File }) => {
       return TwincheckService.compareDocuments({
         comparisonTopics: data.comparison_topics,
@@ -130,10 +139,10 @@ const TwinCheck = () => {
     },
     onSuccess: (data) => {
       console.log("Response data:", data)
-      
+
       setSummary(data.results.summary)
       setTopicResults(data.results.topic_analysis || [])
-      
+
       // Reset selected history item since we have a new comparison
       setSelectedHistoryItem(null)
     },
@@ -146,33 +155,33 @@ const TwinCheck = () => {
       historyQuery.refetch()
     },
   })
-  
+
   const handleCompare = async () => {
     if (!document1) {
       showErrorToast("Please upload Document 1")
       return
     }
-    
+
     if (!document2) {
       showErrorToast("Please upload Document 2")
       return
     }
-    
+
     if (!topics.trim()) {
       showErrorToast("Please enter at least one comparison topic")
       return
     }
-    
+
     const requestData = {
       comparison_topics: topics,
       document1: document1,
       document2: document2,
     }
-    
+
     setLoading(true)
     mutation.mutate(requestData)
   }
-  
+
   // Custom components for markdown rendering
   const components = {
     table: (props) => (
@@ -193,7 +202,7 @@ const TwinCheck = () => {
     ),
     td: (props) => <Box as="td" p={4} borderBottomWidth="1px" {...props} />,
   }
-  
+
   return (
     <Container maxW="container.xl" py={8}>
       {/* Loading overlay */}
@@ -217,19 +226,19 @@ const TwinCheck = () => {
           </VStack>
         </Box>
       )}
-      
+
       <Heading size="xl" mb={6}>
         {/* TwinCheck */}
         Compare documents
       </Heading>
-      
+
       <VStack spacing={6} align="stretch">
         {/* Document Upload Section */}
         <VStack spacing={4} align="stretch">
           <Heading size="md" mb={2}>
             Document Selection
           </Heading>
-          
+
           <HStack spacing={6} align="stretch">
             {/* Document 1 Upload */}
             <Box flex="1">
@@ -240,11 +249,13 @@ const TwinCheck = () => {
                 accept={{
                   "application/pdf": [".pdf"],
                   "text/plain": [".txt"],
-                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+                    ".docx",
+                  ],
                 }}
               />
             </Box>
-            
+
             {/* Document 2 Upload */}
             <Box flex="1">
               <FileUploader
@@ -254,21 +265,23 @@ const TwinCheck = () => {
                 accept={{
                   "application/pdf": [".pdf"],
                   "text/plain": [".txt"],
-                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+                    ".docx",
+                  ],
                 }}
               />
             </Box>
           </HStack>
         </VStack>
-        
+
         <Separator my={4} />
-        
+
         {/* Comparison Topics Selection and Management */}
         <VStack spacing={4} align="stretch">
           <Heading size="md" mb={2}>
             Comparison Topics
           </Heading>
-          
+
           <Field label="Saved Topic Lists">
             <select
               value={selectedComparison?.id || ""}
@@ -294,7 +307,7 @@ const TwinCheck = () => {
               ))}
             </select>
           </Field>
-          
+
           <Field label="Topic List Name" required>
             <Input
               value={comparisonName}
@@ -302,7 +315,7 @@ const TwinCheck = () => {
               placeholder="Enter topic list name"
             />
           </Field>
-          
+
           <Field label="Topic List Description">
             <Textarea
               value={comparisonDescription}
@@ -311,7 +324,7 @@ const TwinCheck = () => {
               resize="vertical"
             />
           </Field>
-          
+
           <Field label="Comparison Topics" required borderTop="1px solid" py={4}>
             <InteractiveList
               value={topics}
@@ -320,7 +333,7 @@ const TwinCheck = () => {
               minItems={1}
             />
           </Field>
-          
+
           <HStack spacing={4} pt={2}>
             <Button
               variant="solid"
@@ -348,13 +361,13 @@ const TwinCheck = () => {
                     })
                     showSuccessToast("Topic list saved successfully")
                   }
-                  
+
                   // Clear the comparison fields and re-fetch the list of comparisons
                   setComparisonName("")
                   setComparisonDescription("")
                   setTopics("")
                   setSelectedComparison(null)
-                  
+
                   // Fetch the latest comparisons
                   const updatedComparisons = await TwincheckService.getComparisons()
                   setComparisons(updatedComparisons)
@@ -366,7 +379,7 @@ const TwinCheck = () => {
             >
               {selectedComparison ? "Update Topic List" : "Save Topic List"}
             </Button>
-            
+
             <Button
               variant="subtle"
               colorPalette="blue"
@@ -375,7 +388,7 @@ const TwinCheck = () => {
                   showErrorToast("Please select a topic list to copy.")
                   return
                 }
-                
+
                 try {
                   // Create a copy of the selected comparison
                   await TwincheckService.createComparison({
@@ -386,7 +399,7 @@ const TwinCheck = () => {
                     },
                   })
                   showSuccessToast("Comparison copied successfully")
-                  
+
                   // Re-fetch the list of comparisons
                   const updatedComparisons = await TwincheckService.getComparisons()
                   setComparisons(updatedComparisons)
@@ -399,7 +412,7 @@ const TwinCheck = () => {
             >
               Copy Topic List
             </Button>
-            
+
             <Button
               variant="subtle"
               colorPalette="red"
@@ -408,21 +421,21 @@ const TwinCheck = () => {
                   showErrorToast("Please select a comparison to delete.")
                   return
                 }
-                
+
                 try {
                   await TwincheckService.deleteComparison({ comparisonId: selectedComparison.id })
-                  
+
                   // Remove the deleted comparison from the list
                   setComparisons((prev) =>
                     prev.filter((comparison) => comparison.id !== selectedComparison.id),
                   )
-                  
+
                   // Clear the selected comparison
                   setSelectedComparison(null)
                   setComparisonName("")
                   setComparisonDescription("")
                   setTopics("")
-                  
+
                   showSuccessToast("Comparison deleted successfully")
                 } catch (error) {
                   console.error("Error deleting comparison:", error)
@@ -434,7 +447,7 @@ const TwinCheck = () => {
               Delete Topic List
             </Button>
           </HStack>
-          
+
           {/* Compare Button */}
           <Button
             mt={4}
@@ -448,13 +461,13 @@ const TwinCheck = () => {
             Compare Documents
           </Button>
         </VStack>
-        
+
         {/* Results Section */}
         <Separator my={4} />
         <Heading size="md" mb={4}>
           Results
         </Heading>
-        
+
         <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
           {/* History Panel */}
           <Card.Root width={{ base: "100%", md: "300px" }} height="fit-content">
@@ -494,7 +507,7 @@ const TwinCheck = () => {
                             </Text>
                           )}
                         </HStack>
-                        
+
                         {/* Document names with icons */}
                         <HStack spacing={1} width="100%">
                           <Box as={FiFileText} size="12px" color="blue.500" />
@@ -509,7 +522,7 @@ const TwinCheck = () => {
               </VStack>
             </Card.Body>
           </Card.Root>
-          
+
           {/* Results Content */}
           <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
             {summary || topicResults.length > 0 ? (
@@ -524,7 +537,7 @@ const TwinCheck = () => {
                       : "Comparison Results"}
                   </Heading>
                 </HStack>
-                
+
                 <Box
                   border="1px solid"
                   borderColor="gray.200"
@@ -538,25 +551,19 @@ const TwinCheck = () => {
                   <Heading as="h3" size="md" mb={2}>
                     Summary
                   </Heading>
-                  <Box
-                    p={3}
-                    mb={4}
-                    borderWidth="1px"
-                    borderRadius="md"
-                    bg="gray.50"
-                  >
+                  <Box p={3} mb={4} borderWidth="1px" borderRadius="md" bg="gray.50">
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
                       {summary}
                     </ReactMarkdown>
                   </Box>
-                  
+
                   {/* Topic Analysis Section */}
                   {topicResults.length > 0 && (
                     <Box mt={8}>
                       <Heading as="h3" size="md" mb={4}>
                         Topic Analysis
                       </Heading>
-                      
+
                       {topicResults.map((topicResult, index) => (
                         <Box
                           key={index}
@@ -579,16 +586,14 @@ const TwinCheck = () => {
                             <Box
                               as="span"
                               mr={2}
-                              transform={
-                                expandedTopic === index ? "rotate(90deg)" : "rotate(0deg)"
-                              }
+                              transform={expandedTopic === index ? "rotate(90deg)" : "rotate(0deg)"}
                               transition="transform 0.2s"
                             >
                               ▶
                             </Box>
                             Topic: {topicResult.topic}
                           </Heading>
-                          
+
                           {expandedTopic === index && (
                             <Box mb={4} p={3} borderLeft="4px solid" borderColor="blue.200">
                               <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
@@ -600,7 +605,7 @@ const TwinCheck = () => {
                       ))}
                     </Box>
                   )}
-                  
+
                   {/* Add Feedback Buttons */}
                   {selectedHistoryItem?.id && (
                     <Box
@@ -655,7 +660,8 @@ const TwinCheck = () => {
                   No Comparison Results
                 </Heading>
                 <Text color="gray.500" mb={4} maxW="400px">
-                  Upload two documents and define comparison topics to start a new comparison, or select one of your previous comparisons from the left panel to view it.
+                  Upload two documents and define comparison topics to start a new comparison, or
+                  select one of your previous comparisons from the left panel to view it.
                 </Text>
                 {comparisonHistory && comparisonHistory.length > 0 && (
                   <HStack>
@@ -696,7 +702,7 @@ const FileUploader = ({
     accept,
     multiple: false,
   })
-  
+
   return (
     <Box>
       <Text fontWeight="medium" mb={2}>

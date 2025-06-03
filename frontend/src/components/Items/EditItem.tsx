@@ -1,11 +1,4 @@
-import {
-  Button,
-  ButtonGroup,
-  DialogActionTrigger,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, ButtonGroup, DialogActionTrigger, Input, Text, VStack } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
@@ -128,11 +121,7 @@ const EditItem = ({ item }: EditItemProps) => {
           <DialogFooter gap={2}>
             <ButtonGroup>
               <DialogActionTrigger asChild>
-                <Button
-                  variant="subtle"
-                  colorPalette="gray"
-                  disabled={isSubmitting}
-                >
+                <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
                   Cancel
                 </Button>
               </DialogActionTrigger>

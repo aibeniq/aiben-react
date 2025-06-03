@@ -1,14 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
 
-import {
-  Button,
-  DialogActionTrigger,
-  DialogTitle,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, DialogActionTrigger, DialogTitle, Input, Text, VStack } from "@chakra-ui/react"
 import { useState } from "react"
 import { FaPlus } from "react-icons/fa"
 
@@ -46,8 +39,7 @@ const AddItem = () => {
   })
 
   const mutation = useMutation({
-    mutationFn: (data: ItemCreate) =>
-      ItemsService.createItem({ requestBody: data }),
+    mutationFn: (data: ItemCreate) => ItemsService.createItem({ requestBody: data }),
     onSuccess: () => {
       showSuccessToast("Item created successfully.")
       reset()
@@ -120,20 +112,11 @@ const AddItem = () => {
 
           <DialogFooter gap={2}>
             <DialogActionTrigger asChild>
-              <Button
-                variant="subtle"
-                colorPalette="gray"
-                disabled={isSubmitting}
-              >
+              <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
                 Cancel
               </Button>
             </DialogActionTrigger>
-            <Button
-              variant="solid"
-              type="submit"
-              disabled={!isValid}
-              loading={isSubmitting}
-            >
+            <Button variant="solid" type="submit" disabled={!isValid} loading={isSubmitting}>
               Save
             </Button>
           </DialogFooter>

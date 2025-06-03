@@ -1,10 +1,5 @@
 import axios from "axios"
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse,
-  AxiosInstance,
-} from "axios"
+import type { AxiosError, AxiosRequestConfig, AxiosResponse, AxiosInstance } from "axios"
 
 import { ApiError } from "./ApiError"
 import type { ApiRequestOptions } from "./ApiRequestOptions"
@@ -86,9 +81,7 @@ const getUrl = (config: OpenAPIConfig, options: ApiRequestOptions): string => {
   return options.query ? url + getQueryString(options.query) : url
 }
 
-export const getFormData = (
-  options: ApiRequestOptions,
-): FormData | undefined => {
+export const getFormData = (options: ApiRequestOptions): FormData | undefined => {
   if (options.formData) {
     const formData = new FormData()
 
@@ -206,7 +199,7 @@ export const sendRequest = async <T>(
   let requestConfig: AxiosRequestConfig = {
     data: body ?? formData,
     responseType: options.responseType || "json",
-  headers,
+    headers,
     method: options.method,
     signal: controller.signal,
     url,
@@ -250,10 +243,7 @@ export const getResponseBody = (response: AxiosResponse<unknown>): unknown => {
   return undefined
 }
 
-export const catchErrorCodes = (
-  options: ApiRequestOptions,
-  result: ApiResult,
-): void => {
+export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): void => {
   const errors: Record<number, string> = {
     400: "Bad Request",
     401: "Unauthorized",
@@ -359,10 +349,7 @@ export const request = <T>(
         }
 
         const responseBody = getResponseBody(response)
-        const responseHeader = getResponseHeader(
-          response,
-          options.responseHeader,
-        )
+        const responseHeader = getResponseHeader(response, options.responseHeader)
 
         let transformedBody = responseBody
         if (options.responseTransformer && isSuccess(response.status)) {
