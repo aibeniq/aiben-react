@@ -25,11 +25,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Mobile */}
-      <DrawerRoot
-        placement="start"
-        open={open}
-        onOpenChange={(e) => setOpen(e.open)}
-      >
+      <DrawerRoot placement="start" open={open} onOpenChange={(e) => setOpen(e.open)}>
         <DrawerBackdrop />
         <DrawerTrigger asChild>
           <IconButton

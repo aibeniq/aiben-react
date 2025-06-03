@@ -1,11 +1,4 @@
-import {
-  Container,
-  EmptyState,
-  Flex,
-  Heading,
-  Table,
-  VStack,
-} from "@chakra-ui/react"
+import { Container, EmptyState, Flex, Heading, Table, VStack } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { FiSearch } from "react-icons/fi"
@@ -30,8 +23,7 @@ const PER_PAGE = 5
 
 function getItemsQueryOptions({ page }: { page: number }) {
   return {
-    queryFn: () =>
-      ItemsService.readItems({ skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
+    queryFn: () => ItemsService.readItems({ skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
     queryKey: ["items", { page }],
   }
 }
@@ -71,9 +63,7 @@ function ItemsTable() {
           </EmptyState.Indicator>
           <VStack textAlign="center">
             <EmptyState.Title>You don't have any items yet</EmptyState.Title>
-            <EmptyState.Description>
-              Add a new item to get started
-            </EmptyState.Description>
+            <EmptyState.Description>Add a new item to get started</EmptyState.Description>
           </VStack>
         </EmptyState.Content>
       </EmptyState.Root>
@@ -100,11 +90,7 @@ function ItemsTable() {
               <Table.Cell truncate maxW="sm">
                 {item.title}
               </Table.Cell>
-              <Table.Cell
-                color={!item.description ? "gray" : "inherit"}
-                truncate
-                maxW="30%"
-              >
+              <Table.Cell color={!item.description ? "gray" : "inherit"} truncate maxW="30%">
                 {item.description || "N/A"}
               </Table.Cell>
               <Table.Cell>

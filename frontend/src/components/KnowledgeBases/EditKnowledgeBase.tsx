@@ -278,11 +278,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                         .map((file) => (
                           <HStack key={file.id} w="full" justify="space-between">
                             {/* Use SourceLink component for on-demand loading */}
-                            <SourceLink
-                              sourceId={file.id}
-                              fileName={file.name}
-                              useModal={true}
-                            />
+                            <SourceLink sourceId={file.id} fileName={file.name} useModal={true} />
                             <Box
                               as="button"
                               aria-label="Remove file"

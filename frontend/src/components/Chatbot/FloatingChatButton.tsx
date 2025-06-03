@@ -1,8 +1,8 @@
-import { Circle, Icon } from "@chakra-ui/react";
-import { FaQuestionCircle } from "react-icons/fa";
+import { Circle, Icon } from "@chakra-ui/react"
+import { FaQuestionCircle } from "react-icons/fa"
 
 interface FloatingChatButtonProps {
-  onClick: () => void;
+  onClick: () => void
 }
 
 const FloatingChatButton = ({ onClick }: FloatingChatButtonProps) => {
@@ -24,7 +24,7 @@ const FloatingChatButton = ({ onClick }: FloatingChatButtonProps) => {
     >
       <Icon as={FaQuestionCircle} boxSize="24px" />
     </Circle>
-  );
-};
+  )
+}
 
-export default FloatingChatButton;
+export default FloatingChatButton

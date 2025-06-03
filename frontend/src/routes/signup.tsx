@@ -1,9 +1,5 @@
 import { Container, Flex, Image, Input, Text } from "@chakra-ui/react"
-import {
-  Link as RouterLink,
-  createFileRoute,
-  redirect,
-} from "@tanstack/react-router"
+import { Link as RouterLink, createFileRoute, redirect } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { FiLock, FiUser } from "react-icons/fi"
 
@@ -66,18 +62,8 @@ function SignUp() {
           gap={4}
           centerContent
         >
-          <Image
-            src={Logo}
-            alt="FastAPI logo"
-            height="auto"
-            maxW="2xs"
-            alignSelf="center"
-            mb={4}
-          />
-          <Field
-            invalid={!!errors.full_name}
-            errorText={errors.full_name?.message}
-          >
+          <Image src={Logo} alt="FastAPI logo" height="auto" maxW="2xs" alignSelf="center" mb={4} />
+          <Field invalid={!!errors.full_name} errorText={errors.full_name?.message}>
             <InputGroup w="100%" startElement={<FiUser />}>
               <Input
                 id="full_name"

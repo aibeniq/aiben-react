@@ -69,28 +69,18 @@ const DeleteUser = ({ id }: { id: string }) => {
           </DialogHeader>
           <DialogBody>
             <Text mb={4}>
-              All items associated with this user will also be{" "}
-              <strong>permanently deleted.</strong> Are you sure? You will not
-              be able to undo this action.
+              All items associated with this user will also be <strong>permanently deleted.</strong>{" "}
+              Are you sure? You will not be able to undo this action.
             </Text>
           </DialogBody>
 
           <DialogFooter gap={2}>
             <DialogActionTrigger asChild>
-              <Button
-                variant="subtle"
-                colorPalette="gray"
-                disabled={isSubmitting}
-              >
+              <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
                 Cancel
               </Button>
             </DialogActionTrigger>
-            <Button
-              variant="solid"
-              colorPalette="red"
-              type="submit"
-              loading={isSubmitting}
-            >
+            <Button variant="solid" colorPalette="red" type="submit" loading={isSubmitting}>
               Delete
             </Button>
           </DialogFooter>
