@@ -7,32 +7,32 @@ import {
   Table,
 } from "@chakra-ui/react"
 import { KnowledgeBasePublic } from "@/client"
+import { FiCheck, FiCircle } from "react-icons/fi"
 
 interface TableCardProps {
   knowledgeBases: KnowledgeBasePublic[]
-  selectedKnowledgeBases: KnowledgeBasePublic[]
-  onSelectionChange: (selectedKbs: KnowledgeBasePublic[]) => void
+  selectedKnowledgeBase: KnowledgeBasePublic | null
+  onSelectionChange: (selectedKb: KnowledgeBasePublic | null) => void
   onKnowledgeBaseSelect?: (kb: KnowledgeBasePublic) => void
 }
 
 interface TableHeaderProps {
-  selectedCount: number
-  totalCount: number
+  hasSelection: boolean
 }
 
 interface TableBodyProps {
   knowledgeBases: KnowledgeBasePublic[]
-  selectedIds: string[]
+  selectedId: string
   onRowSelection: (kb: KnowledgeBasePublic, isChecked: boolean) => void
 }
 
-const TableHeader = ({ selectedCount, totalCount }: TableHeaderProps) => {
+const TableHeader = ({ hasSelection }: TableHeaderProps) => {
   return (
     <Table.Header position="sticky" top="0" bg="transparent" zIndex="1">
       <Table.Row>
         <Table.ColumnHeader w="6">
           <span style={{ fontSize: "0.875rem", fontWeight: "medium" }}>
-            {selectedCount}/{totalCount}
+            {hasSelection ? <FiCheck /> : ""}
           </span>
         </Table.ColumnHeader>
         <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
@@ -49,14 +49,15 @@ const TableHeader = ({ selectedCount, totalCount }: TableHeaderProps) => {
   )
 }
 
-const TableBody = ({ knowledgeBases, selectedIds, onRowSelection }: TableBodyProps) => {
+const TableBody = ({ knowledgeBases, selectedId, onRowSelection }: TableBodyProps) => {
   const rows = knowledgeBases.map((kb) => (
-    <Table.Row key={kb.id} data-selected={selectedIds.includes(kb.id) ? "" : undefined}>
+    <Table.Row key={kb.id} data-selected={selectedId === kb.id ? "" : undefined}>
       <Table.Cell>
         <Checkbox.Root
           size="sm"
           top="0.5"
           aria-label="Select row"
+          checked={selectedId === kb.id}
           onCheckedChange={(changes) => {
             onRowSelection(kb, !!changes.checked)
           }}
@@ -76,30 +77,30 @@ const TableBody = ({ knowledgeBases, selectedIds, onRowSelection }: TableBodyPro
 
 const KnowledgeBaseTable = ({
   knowledgeBases,
-  selectedKnowledgeBases,
+  selectedKnowledgeBase,
   onSelectionChange,
   onKnowledgeBaseSelect,
 }: TableCardProps) => {
-  const selectedIds = selectedKnowledgeBases.map((kb) => kb.id)
+  const selectedId = selectedKnowledgeBase?.id || ""
 
   const handleRowSelection = (kb: KnowledgeBasePublic, isChecked: boolean) => {
-    let newSelection: KnowledgeBasePublic[]
+    let newSelection: KnowledgeBasePublic | null
 
     if (isChecked) {
-      newSelection = [...selectedKnowledgeBases, kb]
+      newSelection = kb
       if (onKnowledgeBaseSelect) {
         onKnowledgeBaseSelect(kb)
       }
     } else {
-      newSelection = selectedKnowledgeBases.filter((selected) => selected.id !== kb.id)
+      newSelection = null
     }
 
     onSelectionChange(newSelection)
   }
 
   const sortedKnowledgeBases = [...knowledgeBases].sort((a, b) => {
-    const aSelected = selectedIds.includes(a.id)
-    const bSelected = selectedIds.includes(b.id)
+    const aSelected = selectedId === a.id
+    const bSelected = selectedId === b.id
 
     if (aSelected !== bSelected) {
       return aSelected ? -1 : 1
@@ -107,7 +108,6 @@ const KnowledgeBaseTable = ({
 
     return (a.title || "").localeCompare(b.title || "")
   })
-
   return (
     <>
       <div
@@ -119,11 +119,11 @@ const KnowledgeBaseTable = ({
           width: "100%",
         }}
       >
-        <Table.Root variant="line">
-          <TableHeader selectedCount={selectedIds.length} totalCount={knowledgeBases.length} />
+        <Table.Root variant="line" showColumnBorder>
+          <TableHeader hasSelection={!!selectedId} />
           <TableBody
             knowledgeBases={sortedKnowledgeBases}
-            selectedIds={selectedIds}
+            selectedId={selectedId}
             onRowSelection={handleRowSelection}
           />
         </Table.Root>

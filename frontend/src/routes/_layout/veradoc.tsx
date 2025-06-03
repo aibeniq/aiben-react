@@ -4,7 +4,6 @@ import {
   Container,
   Heading,
   Text,
-  Textarea,
   VStack,
   HStack,
   Switch,
@@ -12,7 +11,6 @@ import {
   Spinner,
   Input,
   Separator,
-  Table,
   Accordion,
   Card,
   IconButton,
@@ -37,14 +35,23 @@ import { Field } from "../../components/ui/field"
 import { format } from "date-fns"
 import { useQuery } from "@tanstack/react-query"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
-import KnowledgeBaseTable from "../../components/Verify/KnowledgeBaseTable"
+import KnowledgeBaseTable from "../../components/Review/KnowledgeBaseTable"
+import ChecklistTable from "../../components/Review/ChecklistTable"
+import SelectionCard from "../../components/Review/SelectionCard"
+import SelectionModal from "../../components/Review/SelectionModal"
 
 const VeraDoc = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const [selectedKnowledgeBases, setSelectedKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
+  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
+    null,
+  )
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
   const abortControllerRef = useRef<AbortController | null>(null)
   const ongoingRequest = useRef<CancelablePromise<any> | null>(null)
+
+  // Add modal state for knowledge base and checklist selection
+  const [showKnowledgeBaseModal, setShowKnowledgeBaseModal] = useState(false)
+  const [showChecklistModal, setShowChecklistModal] = useState(false)
 
   const [reportHistory, setReportHistory] = useState<any[]>([])
   const [selectedHistoryReport, setSelectedHistoryReport] = useState(null)
@@ -79,7 +86,7 @@ const VeraDoc = () => {
       if (report.kb_id) {
         const kb = knowledgeBases.find((kb) => kb.id === report.kb_id)
         if (kb) {
-          setSelectedKnowledgeBases([kb])
+          setSelectedKnowledgeBase(kb)
           fetchKnowledgeBaseDetails(kb.id)
         }
       }
@@ -441,7 +448,7 @@ const VeraDoc = () => {
       return
     }
 
-    if (!selectedKnowledgeBases?.id) {
+    if (!selectedKnowledgeBase) {
       setResults("Please select a knowledge base for context.")
       return
     }
@@ -460,7 +467,7 @@ const VeraDoc = () => {
 
     const requestData = {
       questions: questions,
-      knowledgeBaseId: selectedKnowledgeBases.id,
+      knowledgeBaseId: selectedKnowledgeBase.id,
       files: regularFiles,
       handwrittenFiles: handwrittenFiles,
     }
@@ -504,7 +511,7 @@ const VeraDoc = () => {
       return
     }
 
-    if (!selectedKnowledgeBases?.id) {
+    if (!selectedKnowledgeBase) {
       setResults("Error: Please select a knowledge base for context.")
       return
     }
@@ -546,7 +553,7 @@ const VeraDoc = () => {
         // Process this file
         const requestData = {
           questions: questions,
-          knowledgeBaseId: selectedKnowledgeBases.id,
+          knowledgeBaseId: selectedKnowledgeBase.id,
           files: regularFiles,
           handwrittenFiles: handwrittenFiles,
         }
@@ -732,245 +739,70 @@ const VeraDoc = () => {
         </Box>
       )}
 
-      <VStack spacing={6} align="stretch">
-        {/* 1. Knowledge Base Selection */}
-        <VStack
-          spacing={4}
-          align="stretch"
-          width="100%"
-          display="flex"
-          flexDirection="column"
-          mb={4}
-        >
-          <Heading size="md" mb={0} textAlign="center">
-            1. Select knowledge base(s)
-          </Heading>
-          <Separator mb={3} />
-          <KnowledgeBaseTable
-            knowledgeBases={mockedKnowledgeBases}
-            selectedKnowledgeBases={selectedKnowledgeBases}
-            onSelectionChange={setSelectedKnowledgeBases}
-          />
-        </VStack>
+      <VStack gap={6} align="stretch">
+        <div aria-label="Knowledge Base and Checklist Selection">
+          <VStack gap={4} align="stretch">
+            <SelectionCard
+              title="Knowledge Base"
+              description={
+                selectedKnowledgeBase ? `${selectedKnowledgeBase.title}` : "Click to select"
+              }
+              icon={<FiDatabase size={24} />}
+              isSelected={!!selectedKnowledgeBase}
+              onClick={() => setShowKnowledgeBaseModal(true)}
+            />
 
-        {/* 2. Checklist Selection and Management */}
-        <VStack
-          align="stretch"
-          mb={4}
-          opacity={selectedKnowledgeBases.length === 0 ? 0.3 : 1}
-          pointerEvents={selectedKnowledgeBases.length === 0 ? "none" : "auto"}
-        >
-          <Heading size="md" mb={0} textAlign="center">
-            2. Choose checklist
-          </Heading>
-          <Separator mb={3} />
-          <HStack align="stretch" gap={4}>
-            <VStack align="stretch" gap={4} flex="1">
-              <Field label="Checklists" required>
-                <select
-                  value={selectedChecklist?.id || ""}
-                  onChange={(e) => {
-                    const checklist = checklists.find((f) => f.id === e.target.value)
-                    setSelectedChecklist(checklist || null)
-                    const checklistQuestions = checklist?.questions || ""
-                    setQuestions(checklistQuestions)
-                    setChecklistName(checklist?.name || "")
-                    setChecklistDescription(checklist?.description || "")
-                  }}
-                  style={{
-                    width: "100%",
-                    padding: "0.5rem",
-                    borderRadius: "0.375rem",
-                    borderColor: "#E2E8F0",
-                  }}
-                >
-                  <option value="">Select a checklist</option>
-                  {checklists.map((checklist) => (
-                    <option key={checklist.id} value={checklist.id}>
-                      {checklist.name}
-                    </option>
-                  ))}
-                </select>
-              </Field>
+            <SelectionCard
+              title="Checklist"
+              description={selectedChecklist ? selectedChecklist.name : "Click to select"}
+              icon={<FiFileText size={24} />}
+              isSelected={!!selectedChecklist}
+              isDisabled={!selectedKnowledgeBase}
+              onClick={() => selectedKnowledgeBase && setShowChecklistModal(true)}
+            />
+          </VStack>
 
-              <Field label="Checklist Name" required>
-                <Input
-                  value={checklistName}
-                  onChange={(e) => setChecklistName(e.target.value)}
-                  placeholder="Enter checklist name"
-                />
-              </Field>
+          <SelectionModal
+            isOpen={showKnowledgeBaseModal}
+            onClose={() => setShowKnowledgeBaseModal(false)}
+            title="Select Knowledge Base"
+          >
+            <KnowledgeBaseTable
+              knowledgeBases={mockedKnowledgeBases}
+              selectedKnowledgeBase={selectedKnowledgeBase}
+              onSelectionChange={setSelectedKnowledgeBase}
+            />
+          </SelectionModal>
 
-              <Field label="Checklist Description">
-                <Textarea
-                  value={checklistDescription}
-                  onChange={(e) => setChecklistDescription(e.target.value)}
-                  placeholder="Enter checklist description"
-                  resize="vertical"
-                />
-              </Field>
-            </VStack>
-            <Field label="Questions" required py={0} flex="1">
-              <VStack
-                align="stretch"
-                gap={0}
-                display="flex"
-                flexDirection="column"
-                width="100%"
-                maxH="200px"
-                overflowY="auto"
-              >
-                {questionsList.map((question, index) => (
-                  <QuestionItem
-                    key={index}
-                    index={index}
-                    question={question}
-                    onUpdate={updateQuestion}
-                    onBlur={handleQuestionBlur}
-                    onRemove={removeQuestion}
-                    onMoveUp={moveQuestionUp}
-                    onMoveDown={moveQuestionDown}
-                    canRemove={questionsList.length > 1 && question.trim() !== ""}
-                    totalQuestions={questionsList.length}
-                  />
-                ))}
-              </VStack>
-            </Field>
-          </HStack>
-          <HStack gap={4} pt={2}>
-            <Button
-              variant="solid"
-              onClick={async () => {
-                try {
-                  if (selectedChecklist) {
-                    const trimmedQuestions = questions.trim()
-                    // Update the selected checklist
-                    await VeradocService.updateChecklist({
-                      checklistId: selectedChecklist.id,
-                      requestBody: {
-                        name: checklistName,
-                        description: checklistDescription,
-                        questions: trimmedQuestions,
-                      },
-                    })
-
-                    showSuccessToast("Checklist updated successfully.")
-                  } else {
-                    // Create a new checklist
-                    const response = await VeradocService.createChecklist({
-                      requestBody: {
-                        name: checklistName,
-                        description: checklistDescription,
-                        questions,
-                      },
-                    })
-
-                    const newChecklist = await response
-                    setChecklists((prev) => [...prev, newChecklist])
-                    showSuccessToast("Checklist created successfully.")
-                  }
-
-                  // Clear the checklist questions and re-fetch the list of checklists
-                  setChecklistName("")
-                  setChecklistDescription("")
-                  setQuestions("")
-                  setSelectedChecklist(null)
-                  await fetchChecklists()
-                } catch (error) {
-                  console.error("Error saving checklist:", error)
-                  showErrorToast("Failed to save checklist. Please try again.")
-                }
-              }}
-            >
-              Save Checklist
-            </Button>
-
-            <Button
-              variant="subtle"
-              colorPalette="blue"
-              onClick={async () => {
-                if (!selectedChecklist) {
-                  showErrorToast("Please select a checklist to copy.")
-                  return
-                }
-
-                try {
-                  // Create a copy of the selected checklist
-                  const response = await VeradocService.createChecklist({
-                    requestBody: {
-                      name: `${selectedChecklist.name} (Copy)`,
-                      description: selectedChecklist.description,
-                      questions: selectedChecklist.questions,
-                    },
-                  })
-
-                  const newChecklist = await response
-                  setChecklists((prev) => [...prev, newChecklist])
-                  showSuccessToast("Checklist copied successfully.")
-
-                  // Re-fetch the list of checklists
-                  await fetchChecklists()
-                } catch (error) {
-                  console.error("Error copying checklist:", error)
-                  showErrorToast("Failed to copy checklist. Please try again.")
-                }
-              }}
-              isDisabled={!selectedChecklist}
-            >
-              Copy Checklist
-            </Button>
-
-            <Button
-              variant="subtle"
-              colorPalette="red"
-              onClick={async () => {
-                if (!selectedChecklist) {
-                  showErrorToast("Please select a checklist temmplate to delete.")
-                  return
-                }
-
-                try {
-                  // Call the deleteChecklist method from VeradocService
-                  await VeradocService.deleteChecklist({ checklistId: selectedChecklist.id })
-
-                  // Remove the deleted checklist from the list of checklists
-                  setChecklists((prev) =>
-                    prev.filter((checklist) => checklist.id !== selectedChecklist.id),
-                  )
-
-                  // Clear the selected checklist and questions
-                  setSelectedChecklist(null)
-                  setQuestions("")
-                  setChecklistName("")
-                  setChecklistDescription("")
-
-                  showSuccessToast("Checklist deleted successfully.")
-                } catch (error) {
-                  console.error("Error deleting checklist:", error)
-                  showErrorToast("Failed to delete checklist. Please try again.")
-                }
-              }}
-              isDisabled={!selectedChecklist}
-            >
-              Delete Checklist
-            </Button>
-          </HStack>
-        </VStack>
+          <SelectionModal
+            isOpen={showChecklistModal}
+            onClose={() => setShowChecklistModal(false)}
+            title="Select Checklist"
+          >
+            <ChecklistTable
+              checklists={checklists}
+              selectedChecklist={selectedChecklist}
+              onChecklistChange={setSelectedChecklist}
+              onQuestionsChange={setQuestions}
+              onChecklistsUpdate={fetchChecklists}
+              questions={questions}
+              isDisabled={!selectedKnowledgeBase}
+            />
+          </SelectionModal>
+        </div>
 
         {/* 3. Document Input */}
         <VStack
-          spacing={4}
           align="stretch"
           mb={4}
-          pointerEvents={
-            selectedKnowledgeBases.length === 0 || !selectedChecklist ? "none" : "auto"
-          }
-          opacity={selectedKnowledgeBases.length === 0 || !selectedChecklist ? 0.3 : 1}
+          opacity={!selectedKnowledgeBase || !selectedChecklist ? 0.3 : 1}
+          pointerEvents={!selectedKnowledgeBase || !selectedChecklist ? "none" : "auto"}
         >
-          <VStack spacing={4} align="stretch">
-            <Heading size="md" mb={0}>
-              3. Document Input
-            </Heading>
+          <Separator mb={3} />
+          <Heading size="md" mb={0} textAlign="center">
+            3. Upload document
+          </Heading>
+          <VStack gap={4} align="stretch">
             <Separator mb={3} />
           </VStack>
           {/* Mode Toggle */}
@@ -1334,7 +1166,7 @@ const VeraDoc = () => {
                           <Button
                             size="sm"
                             colorPalette="red"
-                            onClick={() => {
+                            onClick={(e) => {
                               setBatchFiles((prev) => prev.filter((_, i) => i !== index))
                             }}
                           >
@@ -1614,148 +1446,6 @@ const FileDropzone = ({
           </HStack>
         )}
       </VStack>
-    </Box>
-  )
-}
-
-const QuestionItem = ({
-  index,
-  question,
-  onUpdate,
-  onBlur,
-  onRemove,
-  onMoveUp,
-  onMoveDown,
-  canRemove,
-  totalQuestions,
-}: {
-  index: number
-  question: string
-  onUpdate: (index: number, value: string) => void
-  onBlur: (index: number, value: string) => void
-  onRemove: (index: number) => void
-  onMoveUp: (index: number) => void
-  onMoveDown: (index: number) => void
-  canRemove: boolean
-  totalQuestions: number
-}) => {
-  const [isHovered, setIsHovered] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
-
-  const isLastEmptyQuestion = index === totalQuestions - 2
-  const isAddQuestion = index === totalQuestions - 1
-  const placeholderText = "Add question"
-
-  return (
-    <Box
-      position="relative"
-      display="flex"
-      py={1}
-      borderRadius="md"
-      bg="transparent"
-      transition="all 0.2s ease"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      opacity={isAddQuestion && !isFocused && !isHovered ? 0.6 : 1}
-    >
-      <HStack align="center" gap={0} w="full">
-        <Box flex="1" w="full">
-          <Input
-            value={question}
-            onChange={(e) => onUpdate(index, e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={(e) => {
-              setIsFocused(false)
-              onBlur(index, e.target.value)
-            }}
-            placeholder={placeholderText}
-            size="sm"
-            borderTop="none"
-            borderLeft="none"
-            borderRight="none"
-            borderBottom="1px solid"
-            borderColor={isFocused ? "blue.300" : "gray.200"}
-            borderRadius="none"
-            bg="transparent"
-            px={2}
-            py={0}
-            w="full"
-            _focus={{
-              borderTop: "none",
-              borderLeft: "none",
-              borderRight: "none",
-              borderBottom: "1px solid",
-              boxShadow: "none",
-              outline: "none",
-              bg: "transparent",
-            }}
-            _placeholder={{
-              color: isAddQuestion ? "gray.400" : "gray.500",
-              fontStyle: isAddQuestion ? "italic" : "normal",
-            }}
-          />
-        </Box>
-
-        <VStack
-          visibility={isAddQuestion ? "hidden" : "visible"}
-          containerName="move-question-arrows"
-          gap={0}
-          minW="40px"
-          align="center"
-          py={1}
-        >
-          <IconButton
-            name="move-up-arrow"
-            size="xs"
-            variant="ghost"
-            colorScheme="gray"
-            aria-label="Move question up"
-            onClick={() => onMoveUp(index)}
-            opacity={isHovered && index !== 0 ? 1 : 0}
-            h="20px"
-            w="20px"
-            minW="20px"
-            pointerEvents={index === 0 ? "none" : "auto"}
-          >
-            <FiChevronUp size={12} />
-          </IconButton>
-          <IconButton
-            name="move-down-arrow"
-            size="xs"
-            variant="ghost"
-            colorScheme="gray"
-            aria-label="Move question down"
-            onClick={() => onMoveDown(index)}
-            pointerEvents={isLastEmptyQuestion ? "none" : "auto"}
-            opacity={isHovered && !isLastEmptyQuestion ? 1 : 0}
-            h="20px"
-            w="20px"
-            minW="20px"
-          >
-            <FiChevronDown size={12} />
-          </IconButton>
-        </VStack>
-
-        <Box containerName="remove-question-button" opacity={isHovered ? 1 : 0}>
-          {canRemove && (
-            <IconButton
-              size="xs"
-              variant="ghost"
-              colorPalette="red"
-              aria-label="Remove question"
-              onClick={(e) => {
-                e.stopPropagation()
-                onRemove(index)
-              }}
-              h="24px"
-              w="24px"
-              minW="24px"
-            >
-              <FiTrash2 size={12} />
-            </IconButton>
-          )}
-        </Box>
-      </HStack>
     </Box>
   )
 }
