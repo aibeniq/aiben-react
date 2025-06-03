@@ -20,10 +20,10 @@ const categories = [
     name: "Tools",
     icon: FiTool,
     items: [
-      { icon: FiClipboard, title: "VeraDoc", path: "/veradoc" },
-      { icon: FiFileText, title: "ReportGenie", path: "/reportgenie" },
-      { icon: FaBalanceScale, title: "TwinCheck", path: "/twincheck" },
-      { icon: TbPlugConnected, title: "FormConnect", path: "/formconnect" },
+      { icon: FiClipboard, title: "Review a document", path: "/veradoc" },
+      { icon: FiFileText, title: "Generate a document", path: "/reportgenie" },
+      { icon: FaBalanceScale, title: "Compare documents", path: "/twincheck" },
+      { icon: TbPlugConnected, title: "Match fields across documents", path: "/formconnect" },
     ]
   },
   {

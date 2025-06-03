@@ -219,7 +219,8 @@ const TwinCheck = () => {
       )}
       
       <Heading size="xl" mb={6}>
-        TwinCheck
+        {/* TwinCheck */}
+        Compare documents
       </Heading>
       
       <VStack spacing={6} align="stretch">

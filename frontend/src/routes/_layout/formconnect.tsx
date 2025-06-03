@@ -475,7 +475,8 @@ const FormConnect = () => {
       )}
 
       <Heading size="xl" mb={6}>
-        FormConnect
+        {/* FormConnect */}
+        Match fields across documents
       </Heading>
 
       <VStack spacing={6} align="stretch">

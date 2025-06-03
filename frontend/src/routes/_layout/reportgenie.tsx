@@ -449,7 +449,8 @@ const ReportGenie = () => {
       )}
 
       <Heading size="xl" mb={6}>
-        ReportGenie
+        {/* ReportGenie */}
+        Generate a document
       </Heading>
 
       <VStack spacing={6} align="stretch">
