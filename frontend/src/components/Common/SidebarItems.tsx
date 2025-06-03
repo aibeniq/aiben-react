@@ -6,10 +6,10 @@ import {
   FiSettings,
   FiUsers,
   FiBookOpen,
-  FiClipboard,
   FiTool,
   FiPackage,
   FiFilePlus,
+  FiCheckCircle,
 } from "react-icons/fi"
 import { FaBalanceScale } from "react-icons/fa"
 import { TbPlugConnected } from "react-icons/tb"
@@ -27,10 +27,10 @@ const categories = [
     name: "Tools",
     icon: FiTool,
     items: [
-      { icon: FiClipboard, title: "Review a document", path: "/veradoc" },
-      { icon: FiFilePlus, title: "Generate a document", path: "/reportgenie" },
-      { icon: FaBalanceScale, title: "Compare documents", path: "/twincheck" },
-      { icon: TbPlugConnected, title: "Match fields across documents", path: "/formconnect" },
+      { icon: FiCheckCircle, title: "Review", path: "/veradoc" },
+      { icon: FiFilePlus, title: "Generate", path: "/reportgenie" },
+      { icon: FaBalanceScale, title: "Compare", path: "/twincheck" },
+      { icon: TbPlugConnected, title: "Match", path: "/formconnect" },
     ],
   },
   {
