@@ -11,15 +11,15 @@ from sqlmodel import select, func
 from app.api.deps import CurrentUser, SessionDep
 from app.services.embeddings import load_embeddings_model
 from app.models import (
-    EmbeddingModel, 
-    EmbeddingModelCreate, 
+    EmbeddingModel,
+    EmbeddingModelCreate,
     EmbeddingModelUpdate,
     EmbeddingModelPublic,
     EmbeddingModelsPublic,
     EmbeddingModelValidate,
     ModelProvider,
     Message,
-    User
+    User,
 )
 from app.core.config import settings
 from datetime import datetime
@@ -28,6 +28,7 @@ from langchain_openai import OpenAIEmbeddings
 
 router = APIRouter(prefix="/embedding-models", tags=["embedding-models"])
 
+
 @router.get("/providers", response_model=dict)
 def get_available_providers() -> dict:
     """
@@ -35,16 +36,19 @@ def get_available_providers() -> dict:
     """
     return {
         "llm_providers": settings.llm_providers,
-        "embedding_providers": settings.embedding_providers
+        "embedding_providers": settings.embedding_providers,
     }
+
 
 # Initialize with default models
 def initialize_default_models(session: SessionDep):
     # Check if we already have models in the database
-    existing_count = session.exec(select(func.count()).select_from(EmbeddingModel)).one()
+    existing_count = session.exec(
+        select(func.count()).select_from(EmbeddingModel)
+    ).one()
     if existing_count > 0:
         return
-    
+
     # Add system models (no is_default flag)
     default_models = [
         {
@@ -66,14 +70,14 @@ def initialize_default_models(session: SessionDep):
             "description": "OpenAI's compact embedding model with 1536 dimensions. Excellent quality with lower cost and faster performance than the large variant.",
         },
         {
-            "name": "MPNet Base v2", 
+            "name": "MPNet Base v2",
             "model_id": "all-mpnet-base-v2",
             "provider": ModelProvider.HUGGINGFACE,
             "description": "Higher quality embeddings, but slower and larger than MiniLM.",
         },
         {
             "name": "MiniLM-L12-v2",
-            "model_id": "all-MiniLM-L12-v2", 
+            "model_id": "all-MiniLM-L12-v2",
             "provider": ModelProvider.HUGGINGFACE,
             "description": "Larger version of MiniLM with improved performance.",
         },
@@ -84,7 +88,7 @@ def initialize_default_models(session: SessionDep):
             "description": "A local embedding model running via Ollama.",
         },
     ]
-    
+
     for model_data in default_models:
         model = EmbeddingModel(
             name=model_data["name"],
@@ -94,8 +98,9 @@ def initialize_default_models(session: SessionDep):
             # No is_default field!
         )
         session.add(model)
-    
+
     session.commit()
+
 
 @router.get("/", response_model=EmbeddingModelsPublic)
 def get_embedding_models(
@@ -106,34 +111,30 @@ def get_embedding_models(
     """
     # Initialize default models if none exist
     initialize_default_models(session)
-    
+
     # First get system models (no owner_id)
     system_models = session.exec(
-        select(EmbeddingModel)
-        .where(EmbeddingModel.owner_id.is_(None))
+        select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
     ).all()
-    
+
     # Then get user's custom models
     user_models = session.exec(
-        select(EmbeddingModel)
-        .where(EmbeddingModel.owner_id == current_user.id)
+        select(EmbeddingModel).where(EmbeddingModel.owner_id == current_user.id)
     ).all()
-    
+
     # Combine the results
     models = system_models + user_models
     count = len(models)
-    
-    # Apply pagination
-    models = models[skip:skip + limit]
-    
-    return EmbeddingModelsPublic(data=models, count=count)
 
+    # Apply pagination
+    models = models[skip : skip + limit]
+
+    return EmbeddingModelsPublic(data=models, count=count)
 
 
 @router.get("/default", response_model=EmbeddingModelPublic)
 def get_default_embedding_model(
-    session: SessionDep,
-    current_user: CurrentUser
+    session: SessionDep, current_user: CurrentUser
 ) -> EmbeddingModelPublic:
     """
     Get the user's default embedding model (or system default if not set).
@@ -151,8 +152,7 @@ def get_default_embedding_model(
 
     # Fallback to system default (first system model)
     model = session.exec(
-        select(EmbeddingModel)
-        .where(EmbeddingModel.owner_id.is_(None))
+        select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
     ).first()
     if not model:
         raise HTTPException(status_code=404, detail="No default embedding model found")
@@ -169,12 +169,15 @@ def get_embedding_model(
     model = session.get(EmbeddingModel, model_id)
     if not model:
         raise HTTPException(status_code=404, detail="Embedding model not found")
-    
+
     # Check if the model is system-owned or owned by the current user
     if model.owner_id is not None and model.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to access this model")
-    
+        raise HTTPException(
+            status_code=403, detail="Not authorized to access this model"
+        )
+
     return model
+
 
 @router.post("/", response_model=EmbeddingModelPublic)
 def create_embedding_model(
@@ -195,16 +198,26 @@ def create_embedding_model(
             if not aws_access_key or not aws_secret_key:
                 raise HTTPException(
                     status_code=400,
-                    detail="AWS credentials are not configured in the environment"
+                    detail="AWS credentials are not configured in the environment",
                 )
-            
+
             # Basic validation of model ID format
-            valid_model_prefixes = ["amazon.", "anthropic.", "ai21.", "cohere.", "meta."]
-            is_valid_model = any(model_in.model_id.startswith(prefix) for prefix in valid_model_prefixes)
-            
+            valid_model_prefixes = [
+                "amazon.",
+                "anthropic.",
+                "ai21.",
+                "cohere.",
+                "meta.",
+            ]
+            is_valid_model = any(
+                model_in.model_id.startswith(prefix) for prefix in valid_model_prefixes
+            )
+
             if not is_valid_model:
-                raise ValueError(f"Invalid AWS Bedrock model ID format. Expected model ID to start with one of {valid_model_prefixes}")
-            
+                raise ValueError(
+                    f"Invalid AWS Bedrock model ID format. Expected model ID to start with one of {valid_model_prefixes}"
+                )
+
             print(f"AWS Bedrock model validation successful for: {model_in.model_id}")
         elif model_in.provider == ModelProvider.OPENAI:
             # Check if OpenAI API key is configured
@@ -212,7 +225,7 @@ def create_embedding_model(
             if not api_key:
                 raise HTTPException(
                     status_code=400,
-                    detail="OpenAI API key is not configured in the environment"
+                    detail="OpenAI API key is not configured in the environment",
                 )
             # Validate OpenAI model
             _ = OpenAIEmbeddings(model=model_in.model_id, openai_api_key=api_key)
@@ -227,9 +240,9 @@ def create_embedding_model(
             if not api_token:
                 raise HTTPException(
                     status_code=400,
-                    detail="Replicate API token is not configured in the environment"
+                    detail="Replicate API token is not configured in the environment",
                 )
-                
+
             # Validate the Replicate model
             # We'll use a similar approach to what's in your llms.py validation
             try:
@@ -246,46 +259,47 @@ def create_embedding_model(
                             version_exists = True
                             break
                     if not version_exists:
-                        raise ValueError(f"Version {version} not found for model {owner_model}")
+                        raise ValueError(
+                            f"Version {version} not found for model {owner_model}"
+                        )
                 else:
                     # Model without specific version (will use latest)
                     model_info = replicate.models.get(model_in.model_id)
-                    
+
                 print(f"Replicate model validation successful: {model_in.model_id}")
             except Exception as e:
                 print(f"Error validating Replicate model: {str(e)}")
                 raise ValueError(f"Invalid Replicate model: {str(e)}")
         else:
             raise HTTPException(
-                status_code=400,
-                detail=f"Unsupported provider: {model_in.provider}"
+                status_code=400, detail=f"Unsupported provider: {model_in.provider}"
             )
     except Exception as e:
         raise HTTPException(
-            status_code=400, 
-            detail=f"Invalid {model_in.provider} model ID: {str(e)}"
+            status_code=400, detail=f"Invalid {model_in.provider} model ID: {str(e)}"
         )
-    
+
     # Create the new model
     model = EmbeddingModel(
         **model_in.model_dump(),
         owner_id=current_user.id,
         date_created=datetime.utcnow(),
-        date_modified=datetime.utcnow()
+        date_modified=datetime.utcnow(),
     )
-    
+
     session.add(model)
     session.commit()
     session.refresh(model)
-    
+
     return model
+
 
 @router.put("/{model_id}", response_model=EmbeddingModelPublic)
 def update_embedding_model(
     model_id: uuid.UUID,
     model_in: EmbeddingModelUpdate,
     session: SessionDep,
-    current_user: CurrentUser
+    current_user: CurrentUser,
 ) -> EmbeddingModelPublic:
     """
     Update an embedding model.
@@ -293,14 +307,13 @@ def update_embedding_model(
     model = session.get(EmbeddingModel, model_id)
     if not model:
         raise HTTPException(status_code=404, detail="Embedding model not found")
-    
+
     # Check if user owns this model
     if model.owner_id != current_user.id:
         raise HTTPException(
-            status_code=403, 
-            detail="Not authorized to update this model"
+            status_code=403, detail="Not authorized to update this model"
         )
-    
+
     # Check if model_id is changed and valid
     update_data = model_in.model_dump(exclude_unset=True)
     if "model_id" in update_data:
@@ -308,21 +321,21 @@ def update_embedding_model(
             _ = HuggingFaceEmbeddings(model_name=update_data["model_id"])
         except Exception as e:
             raise HTTPException(
-                status_code=400, 
-                detail=f"Invalid HuggingFace model ID: {str(e)}"
+                status_code=400, detail=f"Invalid HuggingFace model ID: {str(e)}"
             )
-    
+
     # Update the model
     for key, value in update_data.items():
         setattr(model, key, value)
-    
+
     model.date_modified = datetime.utcnow()
-    
+
     session.add(model)
     session.commit()
     session.refresh(model)
-    
+
     return model
+
 
 @router.delete("/{model_id}", response_model=Message)
 def delete_embedding_model(
@@ -334,18 +347,18 @@ def delete_embedding_model(
     model = session.get(EmbeddingModel, model_id)
     if not model:
         raise HTTPException(status_code=404, detail="Embedding model not found")
-    
+
     # Only allow deletion of user-owned models
     if model.owner_id != current_user.id:
         raise HTTPException(
-            status_code=403, 
-            detail="Not authorized to delete this model"
+            status_code=403, detail="Not authorized to delete this model"
         )
-    
+
     session.delete(model)
     session.commit()
-    
+
     return Message(message="Embedding model deleted successfully")
+
 
 @router.post("/{model_id}/set-default", response_model=EmbeddingModelPublic)
 def set_default_embedding_model(
@@ -357,14 +370,13 @@ def set_default_embedding_model(
     model = session.get(EmbeddingModel, model_id)
     if not model:
         raise HTTPException(status_code=404, detail="Embedding model not found")
-    
+
     # Check if the model is system-owned or owned by the current user
     if model.owner_id is not None and model.owner_id != current_user.id:
         raise HTTPException(
-            status_code=403, 
-            detail="Not authorized to modify this model"
+            status_code=403, detail="Not authorized to modify this model"
         )
-    
+
     # Set the user's default embedding model
     user = session.get(User, current_user.id)
     if not user:
@@ -373,40 +385,38 @@ def set_default_embedding_model(
     session.add(user)
     session.commit()
     session.refresh(user)
-    
+
     return model
 
+
 @router.post("/validate", response_model=Message)
-def validate_embedding_model(
-    model_data: EmbeddingModelValidate
-) -> Message:
+def validate_embedding_model(model_data: EmbeddingModelValidate) -> Message:
     """
     Validate if an embedding model ID is valid for the specified provider.
     """
     print("Validating embedding model with the following parameters:")
     print("Provider:", model_data.provider)
-    print("Model ID:", model_data.model_id)	
+    print("Model ID:", model_data.model_id)
     try:
         # Initialize the embeddings model based on provider
         embeddings = load_embeddings_model(
-            provider=model_data.provider,
-            model_id=model_data.model_id
+            provider=model_data.provider, model_id=model_data.model_id
         )
         print("Embeddings model loaded successfully.")
-        
+
         # Test the model with a simple query
         test_query = "This is a test query to validate the embedding model."
         _ = embeddings.embed_query(test_query)
 
         print("Model validation successful.")
-        
+
         return Message(message=f"Model is valid for provider {model_data.provider}")
     except Exception as e:
         raise HTTPException(
-            status_code=400, 
-            detail=f"Invalid embedding model: {str(e)}"
+            status_code=400, detail=f"Invalid embedding model: {str(e)}"
         )
-    
+
+
 @router.get("/check-api-key/{provider}", response_model=Message)
 def check_api_key_configured(provider: str) -> Message:
     """
@@ -422,7 +432,7 @@ def check_api_key_configured(provider: str) -> Message:
         else:
             raise HTTPException(
                 status_code=404,
-                detail="OpenAI API key is not configured in the backend"
+                detail="OpenAI API key is not configured in the backend",
             )
     elif provider == "aws":
         # Check for AWS credentials in environment
@@ -433,38 +443,39 @@ def check_api_key_configured(provider: str) -> Message:
             try:
                 # Try to initialize a boto3 client as a basic test
                 client = boto3.client(
-                    'bedrock-runtime', 
-                    region_name=os.environ.get('AWS_REGION', 'eu-north-1')
+                    "bedrock-runtime",
+                    region_name=os.environ.get("AWS_REGION", "eu-north-1"),
                 )
                 # Just check if we can list models as a basic validation
                 return Message(message="AWS credentials are configured")
             except Exception as e:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"AWS credentials are configured but invalid: {str(e)}"
+                    detail=f"AWS credentials are configured but invalid: {str(e)}",
                 )
         else:
             raise HTTPException(
                 status_code=404,
-                detail="AWS credentials are not configured in the backend"
+                detail="AWS credentials are not configured in the backend",
             )
     elif provider == "ollama":
         # Check if Ollama server is reachable
         base_url = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")
         try:
             import requests
+
             response = requests.get(f"{base_url}/api/tags", timeout=2)
             if response.status_code == 200:
                 return Message(message="Ollama server is reachable")
             else:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"Ollama server returned status {response.status_code}"
+                    detail=f"Ollama server returned status {response.status_code}",
                 )
         except Exception as e:
             raise HTTPException(
                 status_code=404,
-                detail=f"Cannot connect to Ollama server at {base_url}: {str(e)}"
+                detail=f"Cannot connect to Ollama server at {base_url}: {str(e)}",
             )
     elif provider == "huggingface":
         # For HuggingFace, check for token if needed
@@ -476,7 +487,7 @@ def check_api_key_configured(provider: str) -> Message:
         else:
             raise HTTPException(
                 status_code=404,
-                detail="Replicate API token is not configured in the backend"
+                detail="Replicate API token is not configured in the backend",
             )
     else:
         return Message(message="No API key needed for this provider")
