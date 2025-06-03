@@ -820,7 +820,7 @@ const VeraDoc = () => {
         </Heading>
 
         {/* Mode Toggle */}
-        <Field>
+        {/* <Field>
           <HStack justify="space-between" align="center">
             <Text fontWeight="medium">Mode:</Text>
             <HStack align="center">
@@ -837,7 +837,7 @@ const VeraDoc = () => {
               <Text>Batch</Text>
             </HStack>
           </HStack>
-        </Field>
+        </Field> */}
 
         {/* Conditional Rendering Based on Mode */}
         {mode === "manual" ? (
@@ -948,7 +948,7 @@ const VeraDoc = () => {
                 <Heading size="md" mb={4}>
                   {selectedHistoryReport
                     ? `Evaluation from ${format(new Date(selectedHistoryReport.date_created), "MMM d, yyyy")} - ${selectedHistoryReport.document_name}`
-                    : "Results"}
+                    : ""}
                 </Heading>
 
                 {/* Results Box - This is the main content area */}
@@ -1162,7 +1162,7 @@ const VeraDoc = () => {
                         </Text>
                       </Box>
                       <HStack>
-                        <ChakraField.Root display="flex" alignItems="center" width="auto">
+                        {/*<ChakraField.Root display="flex" alignItems="center" width="auto">
                           <ChakraField.Label
                             htmlFor={`batch-handwritten-${index}`}
                             mb="0"
@@ -1187,7 +1187,7 @@ const VeraDoc = () => {
                               <Switch.Thumb />
                             </Switch.Control>
                           </Switch.Root>
-                        </ChakraField.Root>
+                        </ChakraField.Root> */}
                         <Button
                           size="sm"
                           colorPalette="red"
@@ -1427,14 +1427,16 @@ const FileDropzone = ({
           <Text>
             {file && !isPlaceholder
               ? `Selected File: ${file.name}`
-              : `Drag and drop File ${index + 1} here, or click to browse`}
+              // commenting out a 
+              //: `Drag and drop File ${index + 1} here, or click to browse`}
+              : `Drag and drop a document to review here, or click to browse`}
           </Text>
         </Box>
 
         {/* Only show toggle if a real file is uploaded */}
         {file && !isPlaceholder && (
-          <HStack justify="space-between" px={2}>
-            <ChakraField.Root display="flex" alignItems="center" width="auto">
+          <HStack justify="flex-end" px={2}>
+            {/* <ChakraField.Root display="flex" alignItems="center" width="auto">
               <ChakraField.Label htmlFor={`handwritten-${index}`} mb="0" fontSize="sm">
                 Analyze handwriting
               </ChakraField.Label>
@@ -1447,11 +1449,11 @@ const FileDropzone = ({
                   <Switch.Thumb />
                 </Switch.Control>
               </Switch.Root>
-            </ChakraField.Root>
+            </ChakraField.Root> */}
 
             <Button
               size="sm"
-              colorScheme="red"
+              colorPalette="red"
               onClick={(e) => {
                 e.stopPropagation()
                 onRemove(index)
