@@ -30,7 +30,7 @@ import remarkGfm from "remark-gfm"
 import { TwincheckService } from "@/client"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { InteractiveList } from "@/components/ui/interactive-list"
-import { Field } from "@/components/ui/Field"
+import { Field } from "@/components/ui/field"
 import useCustomToast from "@/hooks/useCustomToast"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 
