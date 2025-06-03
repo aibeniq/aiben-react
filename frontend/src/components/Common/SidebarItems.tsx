@@ -2,7 +2,6 @@ import { Box, Flex, Icon, Text, Accordion } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Link as RouterLink } from "@tanstack/react-router"
 import {
-  FiBriefcase,
   FiHome,
   FiSettings,
   FiUsers,
@@ -10,7 +9,7 @@ import {
   FiClipboard,
   FiTool,
   FiPackage,
-  FiFileText,
+  FiFilePlus,
 } from "react-icons/fi"
 import { FaBalanceScale } from "react-icons/fa"
 import { TbPlugConnected } from "react-icons/tb"
@@ -29,7 +28,7 @@ const categories = [
     icon: FiTool,
     items: [
       { icon: FiClipboard, title: "Review a document", path: "/veradoc" },
-      { icon: FiFileText, title: "Generate a document", path: "/reportgenie" },
+      { icon: FiFilePlus, title: "Generate a document", path: "/reportgenie" },
       { icon: FaBalanceScale, title: "Compare documents", path: "/twincheck" },
       { icon: TbPlugConnected, title: "Match fields across documents", path: "/formconnect" },
     ],
