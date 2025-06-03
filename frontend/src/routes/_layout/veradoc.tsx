@@ -35,6 +35,7 @@ import { Field } from "../../components/ui/field"
 import { format } from "date-fns"
 import { useQuery } from "@tanstack/react-query"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
+import { InteractiveList } from "@/components/ui/interactive-list"
 import KnowledgeBaseTable from "../../components/Review/KnowledgeBaseTable"
 import ChecklistTable from "../../components/Review/ChecklistTable"
 import SelectionCard from "../../components/Review/SelectionCard"
@@ -52,6 +53,8 @@ const VeraDoc = () => {
   // Add modal state for knowledge base and checklist selection
   const [showKnowledgeBaseModal, setShowKnowledgeBaseModal] = useState(false)
   const [showChecklistModal, setShowChecklistModal] = useState(false)
+
+  const [questions, setQuestions] = useState("")
 
   const [reportHistory, setReportHistory] = useState<any[]>([])
   const [selectedHistoryReport, setSelectedHistoryReport] = useState(null)
@@ -78,6 +81,7 @@ const VeraDoc = () => {
       setIsHistoryLoading(true)
       const report = await VeradocService.getVeradocDetail({ reportId })
 
+      // Update UI state with the loaded report
       setResults(report.results.final_evaluation || "")
       setQaPairs(report.results.qa_pairs || [])
       setSelectedHistoryReport(report)
@@ -245,8 +249,6 @@ const VeraDoc = () => {
   const [checklistName, setChecklistName] = useState("") // Name of the checklist being created/edited
   const [checklistDescription, setChecklistDescription] = useState("") // Description of the checklist
 
-  const [questions, setQuestions] = useState("")
-  const [questionsList, setQuestionsList] = useState<string[]>([])
   const [results, setResults] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -262,98 +264,6 @@ const VeraDoc = () => {
   useEffect(() => {
     fetchChecklists()
   }, [])
-
-  // Convert questions string to array when questions change
-  useEffect(() => {
-    if (questions) {
-      const questionsArray = questions.split("\n")
-      setQuestionsList(questionsArray.length > 0 ? questionsArray : [""])
-    } else {
-      setQuestionsList([""])
-    }
-  }, [questions])
-
-  // Initialize with one empty question on component mount
-  useEffect(() => {
-    if (questionsList.length === 0) {
-      setQuestionsList([""])
-    }
-  }, [])
-
-  // Convert questions array back to string when questionsList changes
-  const updateQuestionsFromList = (newQuestionsList: string[]) => {
-    setQuestionsList(newQuestionsList)
-    setQuestions(newQuestionsList.join("\n"))
-  }
-
-  const addQuestion = () => {
-    updateQuestionsFromList([...questionsList, ""])
-  }
-
-  const updateQuestion = (index: number, value: string) => {
-    const newQuestions = [...questionsList]
-    newQuestions[index] = value
-    updateQuestionsFromList(newQuestions)
-  }
-
-  const handleQuestionBlur = (index: number, value: string) => {
-    // If the question is empty and it's not the only question, remove it
-    if (value.trim() === "" && questionsList.length > 1) {
-      const newQuestions = questionsList.filter((_, i) => i !== index)
-
-      // Ensure we always have at least one empty question at the end
-      const hasEmptyQuestion = newQuestions.some((q) => q.trim() === "")
-      if (!hasEmptyQuestion) {
-        newQuestions.push("")
-      }
-
-      updateQuestionsFromList(newQuestions)
-    }
-  }
-
-  // Use useEffect to automatically add new questions when needed
-  useEffect(() => {
-    // If the last question has content and there's no empty question at the end, add one
-    if (questionsList.length > 0) {
-      const lastQuestion = questionsList[questionsList.length - 1]
-      if (lastQuestion.trim() !== "") {
-        updateQuestionsFromList([...questionsList, ""])
-      }
-    }
-  }, [questionsList])
-
-  const removeQuestion = (index: number) => {
-    // Don't allow removing if it's the only question or if it would leave no empty questions
-    if (questionsList.length <= 1) return
-
-    const newQuestions = questionsList.filter((_, i) => i !== index)
-
-    // Ensure we always have at least one empty question at the end
-    const hasEmptyQuestion = newQuestions.some((q) => q.trim() === "")
-    if (!hasEmptyQuestion && questionsList[questionsList.length - 1].trim() !== "") {
-      newQuestions.push("")
-    }
-
-    updateQuestionsFromList(newQuestions)
-  }
-
-  const moveQuestionUp = (index: number) => {
-    if (index === 0) return // Can't move first item up
-    const newQuestions = [...questionsList]
-    const temp = newQuestions[index]
-    newQuestions[index] = newQuestions[index - 1]
-    newQuestions[index - 1] = temp
-    updateQuestionsFromList(newQuestions)
-  }
-
-  const moveQuestionDown = (index: number) => {
-    if (index === questionsList.length - 1) return // Can't move last item down
-    const newQuestions = [...questionsList]
-    const temp = newQuestions[index]
-    newQuestions[index] = newQuestions[index + 1]
-    newQuestions[index + 1] = temp
-    updateQuestionsFromList(newQuestions)
-  }
 
   // Add this mutation hook inside your VeraDoc component, before your handleRun function
   const mutation = useMutation({
@@ -629,92 +539,6 @@ const VeraDoc = () => {
     }
   }, [loading, batchLoading])
 
-  {
-    /* Mocked knowledge bases for testing */
-  }
-  const mockedKnowledgeBases: KnowledgeBasePublic[] = [
-    {
-      id: "kb1",
-      title: "Company Policies",
-      number_of_sources: 0,
-      owner_id: "1",
-      date_created: "2025-01-01",
-      date_modified: "2025-01-01",
-    },
-    {
-      id: "kb2",
-      title: "Product Documentation",
-      number_of_sources: 0,
-      owner_id: "1",
-      date_created: "2025-01-01",
-      date_modified: "2025-01-01",
-    },
-    {
-      id: "kb3",
-      title: "Employee Handbook",
-      number_of_sources: 0,
-      owner_id: "1",
-      date_created: "2025-01-01",
-      date_modified: "2025-01-01",
-    },
-    {
-      id: "kb4",
-      title: "Technical Specifications",
-      number_of_sources: 0,
-      owner_id: "1",
-      date_created: "2025-01-01",
-      date_modified: "2025-01-01",
-    },
-    {
-      id: "kb5",
-      title: "Customer Support Guide",
-      number_of_sources: 0,
-      owner_id: "1",
-      date_created: "2025-01-01",
-      date_modified: "2025-01-01",
-    },
-    {
-      id: "kb6",
-      title: "Security Protocols",
-      number_of_sources: 0,
-      owner_id: "1",
-      date_created: "2025-01-01",
-      date_modified: "2025-01-01",
-    },
-    {
-      id: "kb7",
-      title: "Training Materials",
-      number_of_sources: 0,
-      owner_id: "1",
-      date_created: "2025-01-01",
-      date_modified: "2025-01-01",
-    },
-    {
-      id: "kb8",
-      title: "API Documentation",
-      number_of_sources: 0,
-      owner_id: "1",
-      date_created: "2025-01-01",
-      date_modified: "2025-01-01",
-    },
-    {
-      id: "kb9",
-      title: "User Manuals",
-      number_of_sources: 0,
-      owner_id: "1",
-      date_created: "2025-01-01",
-      date_modified: "2025-01-01",
-    },
-    {
-      id: "kb10",
-      title: "Compliance Guidelines",
-      number_of_sources: 0,
-      owner_id: "1",
-      date_created: "2025-01-01",
-      date_modified: "2025-01-01",
-    },
-  ]
-
   return (
     <Container maxW="container.xl" py={8}>
       {/* Add this overlay spinner that shows when batchLoading is true */}
@@ -768,7 +592,7 @@ const VeraDoc = () => {
             title="Select Knowledge Base"
           >
             <KnowledgeBaseTable
-              knowledgeBases={mockedKnowledgeBases}
+              knowledgeBases={knowledgeBases}
               selectedKnowledgeBase={selectedKnowledgeBase}
               onSelectionChange={setSelectedKnowledgeBase}
             />
@@ -825,20 +649,14 @@ const VeraDoc = () => {
             </HStack>
           </Field>
 
-          {/* Conditional Rendering Based on Mode */}
-          {mode === "manual" ? (
-            <VStack spacing={4} align="stretch">
-              {/* Manual Mode UI */}
-              {fileItems.map((fileItem, index) => (
-                <FileDropzone
-                  key={index}
-                  index={index}
-                  fileItem={fileItem}
-                  onUpdate={updateFile}
-                  onRemove={removeFile}
-                  onToggleHandwritten={toggleHandwritten}
-                />
-              ))}
+          <Field label="Checklist" required borderTop="1px solid" py={4}>
+            <InteractiveList
+              value={questions}
+              onChange={setQuestions}
+              placeholder="Add question"
+              minItems={1}
+            />
+          </Field>
 
               <HStack spacing={4}>
                 <Button
@@ -849,61 +667,207 @@ const VeraDoc = () => {
                     !questions.trim() ||
                     !fileItems.some((item) => item.file.size > 0)
                   }
-                  loading={loading}
-                >
-                  Run
-                </Button>
-              </HStack>
 
-              <Separator my={4} />
-              <Heading size="md" mb={4}>
-                Results
-              </Heading>
+                  // Clear the checklist questions and re-fetch the list of checklists
+                  setChecklistName("")
+                  setChecklistDescription("")
+                  setQuestions("")
+                  setSelectedChecklist(null)
+                  await fetchChecklists()
+                } catch (error) {
+                  console.error("Error saving checklist:", error)
+                  showErrorToast("Failed to save checklist. Please try again.")
+                }
+              }}
+            >
+              Save Checklist
+            </Button>
 
-              {/* Fixed layout with consistent side-by-side panels */}
-              <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
-                {/* History Panel - Always show this */}
-                <Card.Root width={{ base: "100%", md: "300px" }} height="fit-content">
-                  <Card.Header>
-                    <Heading size="sm">Previous Evaluations</Heading>
-                  </Card.Header>
-                  <Card.Body p={2}>
-                    <VStack align="stretch" spacing={2} maxH="500px" overflowY="auto">
-                      {isHistoryLoading ? (
-                        <Spinner size="sm" />
-                      ) : !reportHistory || reportHistory.length === 0 ? (
-                        <>
-                          <Text fontSize="sm" color="gray.500">
-                            No previous evaluations
-                          </Text>
-                        </>
-                      ) : (
-                        reportHistory.map((report) => (
-                          <Box
-                            key={report?.id}
-                            p={3}
-                            borderWidth="1px"
-                            borderRadius="md"
-                            cursor="pointer"
-                            bg={selectedHistoryReport?.id === report?.id ? "blue.50" : "white"}
-                            _hover={{ bg: "blue.50" }}
-                            onClick={() => report?.id && loadReportFromHistory(report.id)}
-                          >
-                            <VStack align="start" spacing={1} width="100%">
-                              <HStack spacing={1} width="100%" justify="space-between">
+            <Button
+              variant="subtle"
+              colorPalette="blue"
+              onClick={async () => {
+                if (!selectedChecklist) {
+                  showErrorToast("Please select a checklist to copy.")
+                  return
+                }
+
+                try {
+                  // Create a copy of the selected checklist
+                  const response = await VeradocService.createChecklist({
+                    requestBody: {
+                      name: `${selectedChecklist.name} (Copy)`,
+                      description: selectedChecklist.description,
+                      questions: selectedChecklist.questions,
+                    },
+                  })
+
+                  const newChecklist = await response
+                  setChecklists((prev) => [...prev, newChecklist])
+                  showSuccessToast("Checklist copied successfully.")
+
+                  // Re-fetch the list of checklists
+                  await fetchChecklists()
+                } catch (error) {
+                  console.error("Error copying checklist:", error)
+                  showErrorToast("Failed to copy checklist. Please try again.")
+                }
+              }}
+              isDisabled={!selectedChecklist}
+            >
+              Copy Checklist
+            </Button>
+
+            <Button
+              variant="subtle"
+              colorPalette="red"
+              onClick={async () => {
+                if (!selectedChecklist) {
+                  showErrorToast("Please select a checklist temmplate to delete.")
+                  return
+                }
+
+                try {
+                  // Call the deleteChecklist method from VeradocService
+                  await VeradocService.deleteChecklist({ checklistId: selectedChecklist.id })
+
+                  // Remove the deleted checklist from the list of checklists
+                  setChecklists((prev) =>
+                    prev.filter((checklist) => checklist.id !== selectedChecklist.id),
+                  )
+
+                  // Clear the selected checklist and questions
+                  setSelectedChecklist(null)
+                  setQuestions("")
+                  setChecklistName("")
+                  setChecklistDescription("")
+
+                  showSuccessToast("Checklist deleted successfully.")
+                } catch (error) {
+                  console.error("Error deleting checklist:", error)
+                  showErrorToast("Failed to delete checklist. Please try again.")
+                }
+              }}
+              isDisabled={!selectedChecklist}
+            >
+              Delete Checklist
+            </Button>
+          </HStack>
+        </VStack>
+
+        <Separator my={4} />
+        <Heading size="md" mb={4}>
+          Document Input
+        </Heading>
+
+        {/* Mode Toggle */}
+        <Field>
+          <HStack justify="space-between" align="center">
+            <Text fontWeight="medium">Mode:</Text>
+            <HStack align="center">
+              <Text>Manual</Text>
+              <Switch.Root id="mode-toggle" colorPalette="teal">
+                <Switch.HiddenInput
+                  checked={mode === "batch"}
+                  onChange={(e) => setMode(e.target.checked ? "batch" : "manual")}
+                />
+                <Switch.Control>
+                  <Switch.Thumb />
+                </Switch.Control>
+              </Switch.Root>
+              <Text>Batch</Text>
+            </HStack>
+          </HStack>
+        </Field>
+
+        {/* Conditional Rendering Based on Mode */}
+        {mode === "manual" ? (
+          <VStack spacing={4} align="stretch">
+            {/* Manual Mode UI */}
+            {fileItems.map((fileItem, index) => (
+              <FileDropzone
+                key={index}
+                index={index}
+                fileItem={fileItem}
+                onUpdate={updateFile}
+                onRemove={removeFile}
+                onToggleHandwritten={toggleHandwritten}
+              />
+            ))}
+
+            <HStack spacing={4}>
+              <Button
+                variant="solid"
+                onClick={handleRun}
+                isDisabled={
+                  fileItems.length < 1 ||
+                  !questions.trim() ||
+                  !fileItems.some((item) => item.file.size > 0)
+                }
+                loading={loading}
+              >
+                Run
+              </Button>
+            </HStack>
+
+            <Separator my={4} />
+            <Heading size="md" mb={4}>
+              Results
+            </Heading>
+
+            {/* Fixed layout with consistent side-by-side panels */}
+            <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
+              {/* History Panel - Always show this */}
+              <Card.Root width={{ base: "100%", md: "300px" }} height="fit-content">
+                <Card.Header>
+                  <Heading size="sm">Previous Evaluations</Heading>
+                </Card.Header>
+                <Card.Body p={2}>
+                  <VStack align="stretch" spacing={2} maxH="500px" overflowY="auto">
+                    {isHistoryLoading ? (
+                      <Spinner size="sm" />
+                    ) : !reportHistory || reportHistory.length === 0 ? (
+                      <>
+                        <Text fontSize="sm" color="gray.500">
+                          No previous evaluations
+                        </Text>
+                      </>
+                    ) : (
+                      reportHistory.map((report) => (
+                        <Box
+                          key={report?.id}
+                          p={3}
+                          borderWidth="1px"
+                          borderRadius="md"
+                          cursor="pointer"
+                          bg={selectedHistoryReport?.id === report?.id ? "blue.50" : "white"}
+                          _hover={{ bg: "blue.50" }}
+                          onClick={() => report?.id && loadReportFromHistory(report.id)}
+                        >
+                          <VStack align="start" spacing={1} width="100%">
+                            <HStack spacing={1} width="100%" justify="space-between">
+                              <Text fontSize="xs" color="gray.500">
+                                {report?.date_created
+                                  ? format(new Date(report.date_created), "MMM d, yyyy")
+                                  : "Unknown date"}
+                              </Text>
+                              {report?.qa_count > 0 && (
                                 <Text fontSize="xs" color="gray.500">
-                                  {report?.date_created
-                                    ? format(new Date(report.date_created), "MMM d, yyyy")
-                                    : "Unknown date"}
+                                  {report.qa_count} question{report.qa_count !== 1 ? "s" : ""}
                                 </Text>
-                                {report?.qa_count > 0 && (
-                                  <Text fontSize="xs" color="gray.500">
-                                    {report.qa_count} question{report.qa_count !== 1 ? "s" : ""}
-                                  </Text>
-                                )}
-                              </HStack>
+                              )}
+                            </HStack>
 
-                              {/* Document name with icon */}
+                            {/* Document name with icon */}
+                            <HStack spacing={1} width="100%">
+                              <Box as={FiFileText} size="12px" color="blue.500" />
+                              <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
+                                {report.document_name || "Unnamed document"}
+                              </Text>
+                            </HStack>
+
+                            {/* KB name with icon */}
+                            {report?.kb_name && (
                               <HStack spacing={1} width="100%">
                                 <Box as={FiFileText} size="12px" color="blue.500" />
                                 <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
@@ -1176,52 +1140,19 @@ const VeraDoc = () => {
                       </HStack>
                     ))}
                   </VStack>
-                </Box>
-              )}
+                </Card.Body>
+              </Card.Root>
 
-              {/* Process Button */}
-              <HStack spacing={4}>
-                <Button
-                  variant="solid"
-                  colorPalette={batchFiles.length > 0 ? "blue" : "gray"}
-                  onClick={handleProcessBatch}
-                  isLoading={batchLoading}
-                  isDisabled={batchFiles.length === 0}
-                >
-                  {batchFiles.length > 0
-                    ? `Process ${batchFiles.length} Files`
-                    : "No Files to Process"}
-                </Button>
-              </HStack>
+              {/* Results Panel - Always take remaining space */}
+              <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
+                {/* Title for Results */}
+                <Heading size="md" mb={4}>
+                  {selectedHistoryReport
+                    ? `Evaluation from ${format(new Date(selectedHistoryReport.date_created), "MMM d, yyyy")} - ${selectedHistoryReport.document_name}`
+                    : "Results"}
+                </Heading>
 
-              {/* Results section */}
-              <Separator my={4} />
-              <Heading size="md" mb={4}>
-                Results
-              </Heading>
-              <Box>
-                {batchResults.length > 0 ? (
-                  <Field label="Select File to View Results">
-                    <select
-                      value={selectedBatchResult}
-                      onChange={(e) => setSelectedBatchResult(Number(e.target.value))}
-                      style={{
-                        width: "100%",
-                        padding: "0.5rem",
-                        borderRadius: "0.375rem",
-                        borderColor: "#E2E8F0",
-                      }}
-                    >
-                      {batchResults.map((_, index) => (
-                        <option key={index} value={index}>
-                          {/* Display file name when available */}
-                          {batchFiles[index]?.file?.name || `File ${index + 1}`}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                ) : null}
-
+                {/* Results Box - This is the main content area */}
                 <Box
                   border="1px solid"
                   borderColor="gray.200"
@@ -1247,101 +1178,134 @@ const VeraDoc = () => {
                   ) : batchResults.length > 0 ? (
                     <>
                       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                        {batchResults[selectedBatchResult].displayResults}
+                        {results}
                       </ReactMarkdown>
 
-                      <Box mt={4}>
-                        {batchResults[selectedBatchResult].qaPairs.map((pair, index) => (
-                          <Box
-                            key={index}
-                            mb={4}
-                            p={4}
-                            borderWidth="1px"
-                            borderRadius="md"
-                            bg="white"
-                          >
-                            <Heading as="h3" size="md" mb={2}>
-                              Question {index + 1}: {pair.question}
-                            </Heading>
+                      {selectedHistoryReport?.id && (
+                        <Box
+                          position="sticky"
+                          bottom={4}
+                          right={4}
+                          display="flex"
+                          justifyContent="flex-end"
+                          pointerEvents="auto"
+                          zIndex={10}
+                        >
+                          <FeedbackButtons
+                            interactionId={selectedHistoryReport.id}
+                            onFeedbackSubmitted={(type) => {
+                              showSuccessToast(`Thank you for marking this response as ${type}!`)
+                            }}
+                            existingFeedback={
+                              selectedHistoryReport.feedback
+                                ? {
+                                    feedback: selectedHistoryReport.feedback.feedback as
+                                      | "correct"
+                                      | "incorrect"
+                                      | null,
+                                    feedbackText: selectedHistoryReport.feedback.feedbackText,
+                                    feedbackDate: selectedHistoryReport.feedback.feedbackDate,
+                                  }
+                                : undefined
+                            }
+                          />
+                        </Box>
+                      )}
 
-                            <Box mb={3}>
-                              <Text fontWeight="bold">Answer:</Text>
-                              <Text>{pair.answer}</Text>
-                            </Box>
+                      {qaPairs.length > 0 && (
+                        <Box mt={4}>
+                          {qaPairs.map((pair, index) => (
+                            <Box
+                              key={index}
+                              mb={4}
+                              p={4}
+                              borderWidth="1px"
+                              borderRadius="md"
+                              bg="white"
+                            >
+                              <Heading as="h3" size="md" mb={2}>
+                                Question {index + 1}: {pair.question}
+                              </Heading>
 
-                            <Box mb={3}>
-                              <Text fontWeight="bold">Relevant Policy Context:</Text>
-                              <Text>{pair.context}</Text>
-                            </Box>
+                              <Box mb={3}>
+                                <Text fontWeight="bold">Answer:</Text>
+                                <Text>{pair.answer}</Text>
+                              </Box>
 
-                            {pair.source_citations &&
-                              console.log("Source citations:", pair.source_citations)}
-                            {pair.source_citations && pair.source_citations.length > 0 && (
-                              <Accordion.Root type="single" collapsible mt={2}>
-                                <Accordion.Item>
-                                  <h2>
-                                    <Accordion.ItemTrigger
-                                      bg="gray.100"
-                                      _hover={{ bg: "gray.200" }}
-                                    >
-                                      <Box flex="1" textAlign="left" fontWeight="medium">
-                                        <HStack>
-                                          <FiFileText />
-                                          <Text>
-                                            View Source Citations ({pair.source_citations.length})
-                                          </Text>
-                                        </HStack>
-                                      </Box>
-                                    </Accordion.ItemTrigger>
-                                  </h2>
-                                  <Accordion.ItemContent pb={4} bg="gray.50">
-                                    {pair.source_citations.map((citation, cIndex) => (
-                                      <Box
-                                        key={cIndex}
-                                        p={3}
-                                        mb={2}
-                                        borderWidth="1px"
-                                        borderRadius="md"
-                                        bg="white"
+                              <Box mb={3}>
+                                <Text fontWeight="bold">Relevant Policy Context:</Text>
+                                <Text>{pair.context}</Text>
+                              </Box>
+
+                              {pair.source_citations && pair.source_citations.length > 0 && (
+                                <Accordion.Root type="single" collapsible mt={2}>
+                                  <Accordion.Item>
+                                    <h2>
+                                      <Accordion.ItemTrigger
+                                        bg="gray.100"
+                                        _hover={{ bg: "gray.200" }}
                                       >
-                                        {citation.metadata.source_data_id ? (
-                                          <SourceLink
-                                            sourceId={citation.metadata.source_data_id}
-                                            fileName={getDisplayFileName(citation.metadata.source)}
-                                            ml={1}
-                                            fontWeight="normal"
-                                            color="blue.600"
-                                            useModal={true}
-                                          />
-                                        ) : (
-                                          <Text
-                                            as="span"
-                                            ml={1}
-                                            fontWeight="normal"
-                                            color="blue.600"
-                                          >
-                                            {getDisplayFileName(citation.metadata.source)}
-                                          </Text>
-                                        )}
-                                        <Box
-                                          mt={2}
-                                          p={2}
-                                          bg="gray.50"
-                                          borderRadius="sm"
-                                          fontSize="sm"
-                                          whiteSpace="pre-wrap"
-                                        >
-                                          {citation.content}
+                                        <Box flex="1" textAlign="left" fontWeight="medium">
+                                          <HStack>
+                                            <FiFileText />
+                                            <Text>
+                                              View Source Citations ({pair.source_citations.length})
+                                            </Text>
+                                          </HStack>
                                         </Box>
-                                      </Box>
-                                    ))}
-                                  </Accordion.ItemContent>
-                                </Accordion.Item>
-                              </Accordion.Root>
-                            )}
-                          </Box>
-                        ))}
-                      </Box>
+                                      </Accordion.ItemTrigger>
+                                    </h2>
+                                    <Accordion.ItemContent pb={4} bg="gray.50">
+                                      {pair.source_citations.map((citation, cIndex) => (
+                                        <Box
+                                          key={cIndex}
+                                          p={3}
+                                          mb={2}
+                                          borderWidth="1px"
+                                          borderRadius="md"
+                                          bg="white"
+                                        >
+                                          {citation.metadata.source_data_id ? (
+                                            <SourceLink
+                                              sourceId={citation.metadata.source_data_id}
+                                              fileName={getDisplayFileName(
+                                                citation.metadata.source,
+                                              )}
+                                              ml={1}
+                                              fontWeight="normal"
+                                              color="blue.600"
+                                              useModal={true}
+                                            />
+                                          ) : (
+                                            <Text
+                                              as="span"
+                                              ml={1}
+                                              fontWeight="normal"
+                                              color="blue.600"
+                                            >
+                                              {getDisplayFileName(citation.metadata.source)}
+                                            </Text>
+                                          )}
+                                          <Box
+                                            mt={2}
+                                            p={2}
+                                            bg="gray.50"
+                                            borderRadius="sm"
+                                            fontSize="sm"
+                                            whiteSpace="pre-wrap"
+                                          >
+                                            {citation.content}
+                                          </Box>
+                                        </Box>
+                                      ))}
+                                    </Accordion.ItemContent>
+                                  </Accordion.Item>
+                                </Accordion.Root>
+                              )}
+                            </Box>
+                          ))}
+                        </Box>
+                      )}
                     </>
                   ) : (
                     <Text color="gray.500">Results will appear here after processing files.</Text>

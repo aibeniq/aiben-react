@@ -18,6 +18,7 @@ import { Route as LoginImport } from './routes/login'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
 import { Route as LayoutVeradocImport } from './routes/_layout/veradoc'
+import { Route as LayoutTwincheckImport } from './routes/_layout/twincheck'
 import { Route as LayoutSettingsImport } from './routes/_layout/settings'
 import { Route as LayoutReportgenieImport } from './routes/_layout/reportgenie'
 import { Route as LayoutModelSelectionImport } from './routes/_layout/model-selection'
@@ -60,6 +61,11 @@ const LayoutIndexRoute = LayoutIndexImport.update({
 
 const LayoutVeradocRoute = LayoutVeradocImport.update({
   path: '/veradoc',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutTwincheckRoute = LayoutTwincheckImport.update({
+  path: '/twincheck',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -150,6 +156,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/twincheck': {
+      preLoaderRoute: typeof LayoutTwincheckImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/veradoc': {
       preLoaderRoute: typeof LayoutVeradocImport
       parentRoute: typeof LayoutImport
@@ -172,6 +182,7 @@ export const routeTree = rootRoute.addChildren([
     LayoutModelSelectionRoute,
     LayoutReportgenieRoute,
     LayoutSettingsRoute,
+    LayoutTwincheckRoute,
     LayoutVeradocRoute,
     LayoutIndexRoute,
   ]),
