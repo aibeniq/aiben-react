@@ -10,6 +10,7 @@ import {
   FiPackage,
   FiFilePlus,
   FiCheckCircle,
+  FiCpu,
 } from "react-icons/fi"
 import { FaBalanceScale } from "react-icons/fa"
 import { TbPlugConnected } from "react-icons/tb"
@@ -37,7 +38,7 @@ const categories = [
     name: "Configurations",
     icon: FiPackage,
     items: [
-      { icon: FiTool, title: "Model Selection", path: "/model-selection" },
+      { icon: FiCpu, title: "Model Selection", path: "/model-selection" },
       { icon: FiBookOpen, title: "Knowledge Bases", path: "/knowledge-bases" },
       { icon: FiSettings, title: "User Settings", path: "/settings" },
     ],
