@@ -5,7 +5,7 @@ import re
 import tempfile
 import zipfile
 import json
-
+import traceback
 from io import BytesIO
 from datetime import datetime
 from fastapi.responses import StreamingResponse
@@ -530,9 +530,6 @@ async def get_report_detail(
             # that's compatible with the normal report format
             kb_name = extra_data.get("kb_name", "Unknown Knowledge Base")
             
-            # For the frontend to render the report properly, we need to return a structure
-            # that mirrors what the generate_report endpoint returns
-            
             # Try to get any saved full report content
             full_report = extra_data.get("full_report", "")
             
@@ -546,6 +543,12 @@ async def get_report_detail(
                 "results": {
                     "full_report": full_report,
                     "sections": extra_data.get("sections", [])
+                },
+                # Add feedback information
+                "feedback": {
+                    "feedback": report.feedback,
+                    "feedbackText": report.feedback_text,
+                    "feedbackDate": report.feedback_date.isoformat() if report.feedback_date else None
                 }
             }
             
@@ -560,10 +563,15 @@ async def get_report_detail(
                     "full_report": f"Unable to reconstruct report from {report.date_created}.\n\n"
                                   f"This might be due to an older format or incomplete data.",
                     "sections": []
+                },
+                # Add empty feedback object for consistency
+                "feedback": {
+                    "feedback": None,
+                    "feedbackText": None,
+                    "feedbackDate": None
                 }
             }
-            
+        
     except Exception as e:
-        import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error retrieving report details: {str(e)}")

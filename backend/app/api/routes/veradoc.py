@@ -499,6 +499,7 @@ async def get_veradoc_history(
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error retrieving VeraDoc history: {str(e)}")
 
+
 @router.get("/history/{report_id}")
 async def get_veradoc_detail(
     report_id: uuid.UUID,
@@ -542,6 +543,12 @@ async def get_veradoc_detail(
                     "final_evaluation": output_data.get("final_evaluation", ""),
                     "qa_pairs": extra_data.get("qa_pairs", []),
                     "interaction_id": str(report.id)
+                },
+                # Add feedback information
+                "feedback": {
+                    "feedback": report.feedback,
+                    "feedbackText": report.feedback_text,
+                    "feedbackDate": report.feedback_date.isoformat() if report.feedback_date else None
                 }
             }
             

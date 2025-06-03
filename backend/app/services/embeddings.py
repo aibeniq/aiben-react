@@ -6,6 +6,7 @@ from app.models import ModelProvider
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain.embeddings import OllamaEmbeddings
+from langchain_aws import BedrockEmbeddings
 from langchain.embeddings.base import Embeddings
 from typing import Optional, List
 from dotenv import load_dotenv
@@ -34,7 +35,19 @@ def load_embeddings_model(provider: ModelProvider, model_id: str, api_key: Optio
     if provider == ModelProvider.HUGGINGFACE:
         print("Loading HuggingFace embeddings model with model_id:", model_id)
         return HuggingFaceEmbeddings(model_name=model_id)
-    
+    elif provider == ModelProvider.AWS:
+        # Configure AWS Bedrock embeddings
+        region = os.environ.get("AWS_REGION", "eu-north-1")
+        print(f"Loading AWS Bedrock embeddings model with model_id: {model_id}, region: {region}")
+        
+        # If API key is provided, use it; otherwise, rely on environment variable
+        if api_key:
+            print(f"Using provided API key of length: {len(api_key)}")
+            return BedrockEmbeddings(model_id=model_id, region_name=region, api_key=api_key)
+        else:
+            print("Using API key from environment variables")
+            
+            return BedrockEmbeddings(model_id=model_id, region_name=region)
     elif provider == ModelProvider.OPENAI:
         # If API key is provided, use it; otherwise, rely on environment variable
         if api_key:

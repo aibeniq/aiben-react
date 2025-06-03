@@ -1,12 +1,12 @@
 import uuid
-from app.models import FormConnectRequest, FormConnectResponse, FormConnectForm, ModelProvider, LlmModel
+from app.models import FormConnectRequest, FormConnectResponse, FormConnectForm, ModelProvider, LlmModel, LlmInteraction
 from app.services.llms import create_llm, get_default_llm, invoke_llm, invoke_llm_with_image, record_llm_interaction
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 
 from sqlmodel import Session, select
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
-from typing import List, Dict
+from typing import List, Dict, Any
 
 from langchain.prompts import ChatPromptTemplate
 from langchain.chat_models import ChatOpenAI
@@ -321,3 +321,127 @@ def delete_form(form_id: uuid.UUID, session: SessionDep, current_user: CurrentUs
     session.delete(form)
     session.commit()
     return {"message": "Form deleted successfully."}
+
+
+# Add this new endpoint to get history details for a specific form processing
+@router.get("/history/{interaction_id}")
+async def get_form_detail(
+    interaction_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+):
+    """Retrieve a specific form processing's full content by ID."""
+    print("Received interaction ID:", interaction_id)
+    try:
+        report = session.get(LlmInteraction, interaction_id)
+        if not report:
+            raise HTTPException(status_code=404, detail="Form processing result not found")
+        
+        if report.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="You don't have access to this form processing")
+        
+        if report.functionality != "formconnect":
+            raise HTTPException(status_code=400, detail="This is not a FormConnect processing")
+        
+        # Try to reconstruct the original form processing structure
+        try:
+            input_data = json.loads(report.input_data) if report.input_data else {}
+            output_data = json.loads(report.output_data) if report.output_data else {}
+            
+            # Create a response that matches the structure expected by the frontend
+            result = {
+                "id": str(report.id),
+                "date_created": report.date_created,
+                "fields": input_data.get("fields", ""),
+                "file_names": input_data.get("files", []),
+                "results": output_data,
+                # Add feedback information
+                "feedback": {
+                    "feedback": report.feedback,
+                    "feedbackText": report.feedback_text,
+                    "feedbackDate": report.feedback_date.isoformat() if report.feedback_date else None
+                }
+            }
+            
+            return result
+            
+        except json.JSONDecodeError:
+            # Fallback if JSON parsing fails
+            return {
+                "id": str(report.id),
+                "date_created": report.date_created,
+                "results": {
+                    "message": f"Unable to reconstruct form processing from {report.date_created}.\n\n"
+                               f"This might be due to an older format or incomplete data."
+                },
+                # Add empty feedback object for consistency
+                "feedback": {
+                    "feedback": None,
+                    "feedbackText": None,
+                    "feedbackDate": None
+                }
+            }
+            
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error retrieving form processing details: {str(e)}")
+
+# Also add a history endpoint to get a list of past form processing operations
+@router.get("/history", response_model=List[Dict[str, Any]])
+async def get_form_history(
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 20,
+):
+    """Retrieve past form processing history for the current user."""
+    try:
+        interactions = session.exec(
+            select(LlmInteraction)
+            .where(
+                LlmInteraction.user_id == current_user.id,
+                LlmInteraction.functionality == "formconnect"
+            )
+            .order_by(LlmInteraction.date_created.desc())
+            .offset(skip)
+            .limit(limit)
+        ).all()
+        
+        result = []
+        for interaction in interactions:
+            # Parse the input_data and output_data
+            try:
+                input_data = json.loads(interaction.input_data) if interaction.input_data else {}
+                output_data = json.loads(interaction.output_data) if interaction.output_data else {}
+                
+                file_count = len(input_data.get("files", []))
+                fields = input_data.get("fields", "").split("\n")
+                field_count = len([f for f in fields if f.strip()])
+                
+                result.append({
+                    "id": str(interaction.id),
+                    "date_created": interaction.date_created,
+                    "file_names": input_data.get("files", []),
+                    "file_count": file_count,
+                    "field_count": field_count,
+                    "fields": fields,
+                    "has_feedback": interaction.feedback is not None,
+                })
+            except json.JSONDecodeError:
+                # If JSON parsing fails, use minimal information
+                result.append({
+                    "id": str(interaction.id),
+                    "date_created": interaction.date_created,
+                    "file_names": [],
+                    "file_count": 0,
+                    "field_count": 0,
+                    "fields": [],
+                    "has_feedback": interaction.feedback is not None,
+                })
+        
+        return result
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error retrieving form processing history: {str(e)}")
