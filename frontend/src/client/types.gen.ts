@@ -323,6 +323,10 @@ export type ChatQueryTextData = {
 
 export type ChatQueryTextResponse = unknown
 
+export type EmbeddingModelsGetAvailableProvidersResponse = {
+  [key: string]: unknown
+}
+
 export type EmbeddingModelsGetEmbeddingModelsData = {
   limit?: number
   skip?: number
