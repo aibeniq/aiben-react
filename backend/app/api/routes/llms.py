@@ -8,6 +8,9 @@ import traceback
 from fastapi import APIRouter, HTTPException, Depends, Body
 from sqlmodel import select, func
 
+from langchain_aws import ChatBedrock
+from langchain_core.messages import HumanMessage
+
 from app.api.deps import CurrentUser, SessionDep
 from app.services.llms import create_llm
 from app.models import (
@@ -24,13 +27,13 @@ from app.models import (
 from datetime import datetime
 
 
-from langchain_community.chat_models import ChatOllama
+from langchain_community.chat_models import ChatOllama, BedrockChat
 from langchain_huggingface import HuggingFacePipeline
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 from langchain.chains import LLMChain
 from langchain_community.llms import Bedrock
 from langchain_core.prompts import PromptTemplate
-
+from langchain_aws import ChatBedrockConverse
 from langchain_openai import ChatOpenAI
 
 router = APIRouter(prefix="/llm-models", tags=["llm-models"])
@@ -212,32 +215,60 @@ def validate_llm_model(
                 print(bedrock_client.list_foundation_models())
                 
                 # Initialize Bedrock LLM using environment variables
-                # Note: not using credentials_profile_name since we're using env vars
-                bedrock_llm = Bedrock(
-                    model_id=model_id,
-                    region_name=aws_region,
-                    # We'll use the AWS SDK's default credential provider chain
-                    # which will pick up the environment variables
-                )
+                if "anthropic.claude" in model_id:
+                    print(f"Using BedrockChat for Claude model: {model_id}")
+                    # Use BedrockChat for Claude models]
+                    
+                    # Create the bedrock-runtime client for regular operations
+                    runtime_client = boto3.client(
+                        "bedrock-runtime",
+                        aws_access_key_id=aws_access_key,
+                        aws_secret_access_key=aws_secret_key,
+                        region_name=aws_region
+                    )
+                    
+                    bedrock_llm = ChatBedrock(
+                        model_id=model_id,
+                        model_kwargs={"temperature": 0.0},
+                        provider="anthropic" if "claude" in model_id else "amazon",
+                    )
 
-                # Create a very simple prompt template for testing
-                prompt_template = "Complete this sentence in one word: The capital of Canada is"
-                
-                prompt = PromptTemplate(
-                    input_variables=[], template=prompt_template
-                )
-                
-                # Create a chain and invoke it with a simple query
-                chain = LLMChain(llm=bedrock_llm, prompt=prompt)
-                
-                print(f"Sending test query to AWS Bedrock model: {model_id}")
-                # Set a timeout to prevent hanging if the model is invalid
-                response = chain.invoke({})
+                    messages = [
+                        HumanMessage(
+                            content="Translate this sentence from English to French. I love programming."
+                        )
+                    ]
+                    response = bedrock_llm.invoke(messages)
+                    
+                else:
+                    # Use standard Bedrock for other models like Titan
+                    print(f"Using standard Bedrock for model: {model_id}")
+
+                    bedrock_client = boto3.client(
+                        "bedrock-runtime",
+                        aws_access_key_id=aws_access_key,
+                        aws_secret_access_key=aws_secret_key,
+                        region_name=aws_region
+                    )
+
+                    bedrock_llm = Bedrock(
+                        model_id=model_id,
+                        region_name=aws_region,
+                        client=bedrock_client
+                    )
+
+                    prompt_template = "What is the capital city of {country}?"
+
+                    prompt = PromptTemplate(
+                        input_variables=["country"], template=prompt_template
+                    )
+
+                    llm = LLMChain(llm=bedrock_llm, prompt=prompt)
+
+                    response = llm.invoke({"country": "Canada"})
                 
                 print(f"Received response from AWS Bedrock: {response}")
                 print(f"AWS Bedrock model validation successful: {model_id}")
-                
-                validation_message = f"AWS Bedrock model {model_id} is valid"
                 
             except Exception as e:
                 traceback.print_exc()

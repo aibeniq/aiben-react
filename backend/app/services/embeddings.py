@@ -42,6 +42,11 @@ def load_embeddings_model(provider: ModelProvider, model_id: str, api_key: Optio
         
         # If API key is provided, use it; otherwise, rely on environment variable
         if api_key:
+            print(f"Using provided API key of length: {len(api_key)}")
+            return BedrockEmbeddings(model_id=model_id, region_name=region, api_key=api_key)
+        else:
+            print("Using API key from environment variables")
+            
             return BedrockEmbeddings(model_id=model_id, region_name=region)
     elif provider == ModelProvider.OPENAI:
         # If API key is provided, use it; otherwise, rely on environment variable
