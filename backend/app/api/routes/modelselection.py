@@ -54,6 +54,18 @@ def initialize_default_models(session: SessionDep):
             "description": "A compact and efficient embedding model, good balance of performance and speed.",
         },
         {
+            "name": "Amazon Titan 2.0",
+            "model_id": "amazon.titan-embed-text-v2:0",
+            "provider": ModelProvider.AWS,
+            "description": "Amazon's Titan 2.0 embedding model for AWS Bedrock. High-quality text embeddings with 1024 dimensions, optimized for enterprise search and retrieval applications.",
+        },
+        {
+            "name": "OpenAI Embeddings 3 Small",
+            "model_id": "text-embedding-3-small",
+            "provider": ModelProvider.OPENAI,
+            "description": "OpenAI's compact embedding model with 1536 dimensions. Excellent quality with lower cost and faster performance than the large variant.",
+        },
+        {
             "name": "MPNet Base v2", 
             "model_id": "all-mpnet-base-v2",
             "provider": ModelProvider.HUGGINGFACE,
@@ -70,7 +82,7 @@ def initialize_default_models(session: SessionDep):
             "model_id": "nomic-embed-text",
             "provider": ModelProvider.OLLAMA,
             "description": "A local embedding model running via Ollama.",
-        }
+        },
     ]
     
     for model_data in default_models:
