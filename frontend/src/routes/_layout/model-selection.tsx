@@ -20,7 +20,7 @@ import {
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { CancelablePromise } from "@/client/core/CancelablePromise"
 import { FiPlus, FiSettings, FiCheckCircle, FiXCircle } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
@@ -32,6 +32,28 @@ import { LlmModelsService, EmbeddingModelsService } from "@/client"
 export const Route = createFileRoute("/_layout/model-selection")({
   component: ModelSelection,
 })
+
+const getProviderDisplayName = (provider: string) => {
+  switch(provider) {
+    case "huggingface": return "HuggingFace";
+    case "openai": return "OpenAI";
+    case "ollama": return "Ollama";
+    case "replicate": return "Replicate";
+    case "aws": return "AWS Bedrock";
+    default: return provider;
+  }
+};
+
+const getProviderColor = (provider: string) => {
+  switch(provider) {
+    case "huggingface": return "teal";
+    case "openai": return "purple";
+    case "ollama": return "orange";
+    case "replicate": return "red";
+    case "aws": return "blue";
+    default: return "gray";
+  }
+};
 
 function ModelSelection() {
   return (
@@ -58,6 +80,25 @@ function ModelSelection() {
 
 function LlmModels() {
   // Similar to your EmbeddingModels component but for LLMs
+  const [availableProviders, setAvailableProviders] = useState<string[]>([])
+  useEffect(() => {
+    EmbeddingModelsService.getAvailableProviders()
+      .then((response) => {
+        if (response.llm_providers && Array.isArray(response.llm_providers)) {
+          setAvailableProviders(response.llm_providers)
+          // If current provider is not in available list, set to first available
+          if (modelProvider && !response.llm_providers.includes(modelProvider)) {
+            setModelProvider(response.llm_providers[0] || "openai")
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to fetch available providers:", error)
+        // Fallback to defaults
+        setAvailableProviders(["huggingface", "openai", "ollama", "replicate", "aws"])
+      })
+  }, [])
+
   const [isOpen, setIsOpen] = useState(false)
   const [modelName, setModelName] = useState("")
   const [modelId, setModelId] = useState("")
@@ -350,13 +391,22 @@ function LlmModels() {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {modelsData.data.map((model) => (
-              <Table.Row key={model.id}>
-                <Table.Cell>{model.name}</Table.Cell>
+            {modelsData.data
+              .filter(model => availableProviders.includes(model.provider))
+              .map((model) => (
+                <Table.Row key={model.id}>
+                  <Table.Cell>{model.name}</Table.Cell>
                 <Table.Cell>
                   <code>{model.model_id}</code>
                 </Table.Cell>
-                <Table.Cell>{model.provider}</Table.Cell>
+                <Table.Cell>
+                  <Badge
+                    colorPalette={getProviderColor(model.provider)}
+                    size="sm"
+                  >
+                    {getProviderDisplayName(model.provider)}
+                  </Badge>
+                </Table.Cell>
                 <Table.Cell>{model.description}</Table.Cell>
                 <Table.Cell>
                   {defaultModel?.id === model.id ? (
@@ -444,11 +494,21 @@ function LlmModels() {
                           height: "2.5rem",
                         }}
                       >
-                        <option value="huggingface">HuggingFace</option>
-                        <option value="openai">OpenAI</option>
-                        <option value="ollama">Ollama</option>
-                        <option value="replicate">Replicate</option>
-                        <option value="aws">AWS Bedrock</option>
+                        {availableProviders.map(provider => (
+                          <option key={provider} value={provider}>
+                            {provider === "huggingface"
+                              ? "HuggingFace"
+                              : provider === "openai"
+                                ? "OpenAI"
+                                : provider === "ollama"
+                                  ? "Ollama"
+                                  : provider === "replicate"
+                                    ? "Replicate"
+                                    : provider === "aws"
+                                      ? "AWS Bedrock"
+                                      : provider}
+                          </option>
+                        ))}
                       </select>
                     </Field>
 
@@ -518,6 +578,28 @@ function LlmModels() {
 }
 
 function EmbeddingModels() {
+  // Add state for available providers
+  const [availableProviders, setAvailableProviders] = useState<string[]>([])
+
+  // Fetch available providers when component mounts
+  useEffect(() => {
+    EmbeddingModelsService.getAvailableProviders()
+      .then((response) => {
+        if (response.embedding_providers && Array.isArray(response.embedding_providers)) {
+          setAvailableProviders(response.embedding_providers)
+          // If current provider is not in available list, set to first available
+          if (modelProvider && !response.embedding_providers.includes(modelProvider)) {
+            setModelProvider(response.embedding_providers[0] || "openai")
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to fetch available providers:", error)
+        // Fallback to defaults
+        setAvailableProviders(["huggingface", "openai", "ollama", "replicate", "aws"])
+      })
+  }, [])
+  
   // Update state management
   const [isOpen, setIsOpen] = useState(false)
 
@@ -531,7 +613,7 @@ function EmbeddingModels() {
   const [isModelValid, setIsModelValid] = useState<boolean | null>(null)
   const [validationMessage, setValidationMessage] = useState("")
 
-  const [modelProvider, setModelProvider] = useState("huggingface")
+  const [modelProvider, setModelProvider] = useState("openai")
 
   const [isApiKeyConfigured, setIsApiKeyConfigured] = useState(true)
 
@@ -763,40 +845,20 @@ function EmbeddingModels() {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {modelsData.data.map((model) => (
-              <Table.Row key={model.id}>
-                <Table.Cell>{model.name}</Table.Cell>
+            {modelsData.data
+              .filter(model => availableProviders.includes(model.provider))
+              .map((model) => (
+                <Table.Row key={model.id}>
+                  <Table.Cell>{model.name}</Table.Cell>
                 <Table.Cell>
                   <code>{model.model_id}</code>
                 </Table.Cell>
                 <Table.Cell>
                   <Badge
-                    colorPalette={
-                      model.provider === "huggingface"
-                        ? "teal"
-                        : model.provider === "openai"
-                          ? "purple"
-                          : model.provider === "ollama"
-                            ? "orange"
-                            : model.provider === "replicate"
-                              ? "red"
-                              : model.provider === "aws"
-                                ? "blue"
-                                : "gray"
-                    }
+                    colorPalette={getProviderColor(model.provider)}
                     size="sm"
                   >
-                    {model.provider === "huggingface"
-                      ? "HuggingFace"
-                      : model.provider === "openai"
-                        ? "OpenAI"
-                        : model.provider === "ollama"
-                          ? "Ollama"
-                          : model.provider === "replicate"
-                            ? "Replicate"
-                              : model.provider === "aws"
-                                ? "AWS Bedrock"
-                                : model.provider}
+                    {getProviderDisplayName(model.provider)}
                   </Badge>
                 </Table.Cell>
                 <Table.Cell>{model.description}</Table.Cell>
@@ -876,11 +938,21 @@ function EmbeddingModels() {
                           height: "2.5rem",
                         }}
                       >
-                        <option value="huggingface">HuggingFace</option>
-                        <option value="openai">OpenAI</option>
-                        <option value="ollama">Ollama</option>
-                        <option value="replicate">Replicate</option>
-                        <option value="aws">AWS Bedrock</option>
+                        {availableProviders.map(provider => (
+                          <option key={provider} value={provider}>
+                            {provider === "huggingface"
+                              ? "HuggingFace"
+                              : provider === "openai"
+                                ? "OpenAI"
+                                : provider === "ollama"
+                                  ? "Ollama"
+                                  : provider === "replicate"
+                                    ? "Replicate"
+                                    : provider === "aws"
+                                      ? "AWS Bedrock"
+                                      : provider}
+                          </option>
+                        ))}
                       </select>
                     </Field>
 

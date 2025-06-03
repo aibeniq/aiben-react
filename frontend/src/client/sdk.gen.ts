@@ -10,6 +10,7 @@ import type {
   ChatQueryDocumentResponse,
   ChatQueryTextData,
   ChatQueryTextResponse,
+  EmbeddingModelsGetAvailableProvidersResponse,
   EmbeddingModelsGetEmbeddingModelsData,
   EmbeddingModelsGetEmbeddingModelsResponse,
   EmbeddingModelsCreateEmbeddingModelData,
@@ -259,6 +260,19 @@ export class ChatService {
 }
 
 export class EmbeddingModelsService {
+  /**
+   * Get Available Providers
+   * Get the list of available model providers for LLMs and embedding models.
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getAvailableProviders(): CancelablePromise<EmbeddingModelsGetAvailableProvidersResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/embedding-models/providers",
+    })
+  }
+
   /**
    * Get Embedding Models
    * Get all embedding models.
