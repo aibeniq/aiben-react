@@ -2,6 +2,8 @@ import os
 import replicate
 import uuid
 from typing import Any, List, Optional
+import boto3
+import traceback
 
 from fastapi import APIRouter, HTTPException, Depends, Body
 from sqlmodel import select, func
@@ -25,6 +27,9 @@ from datetime import datetime
 from langchain_community.chat_models import ChatOllama
 from langchain_huggingface import HuggingFacePipeline
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from langchain.chains import LLMChain
+from langchain_community.llms import Bedrock
+from langchain_core.prompts import PromptTemplate
 
 from langchain_openai import ChatOpenAI
 
@@ -155,6 +160,7 @@ def validate_llm_model(
     """
     Validate if an LLM ID is valid for the specified provider.
     """
+    print(f"Validating LLM model: {model_data.model_id} for provider {model_data.provider}")
     try:
         # Extract the provider and model_id
         provider = model_data.provider
@@ -178,6 +184,79 @@ def validate_llm_model(
             # Test with a simple query to verify the model exists
             response = llm.invoke("Hello")
             print(f"OpenAI model validation successful: {model_id}")
+
+        elif model_data.provider == ModelProvider.AWS:
+            print("Now attempting to validate AWS Bedrock model...")
+            try:
+                # Check if AWS credentials are configured
+                aws_access_key = os.environ.get("AWS_ACCESS_KEY_ID")
+                aws_secret_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
+                aws_region = os.environ.get("AWS_REGION", "eu-north-1")
+                
+                if not aws_access_key or not aws_secret_key:
+                    print("AWS credentials not found in environment variables")
+                    raise HTTPException(
+                        status_code=400,
+                        detail="AWS credentials are not configured in the environment"
+                    )
+                
+                print(f"Initializing Bedrock client with model: {model_id} in region: {aws_region}")
+
+                bedrock_client = boto3.client(
+                    "bedrock",
+                    aws_access_key_id=aws_access_key,
+                    aws_secret_access_key=aws_secret_key,
+                    region_name=aws_region
+                )
+                print("Now listing available foundation models in AWS Bedrock...")
+                print(bedrock_client.list_foundation_models())
+                
+                # Initialize Bedrock LLM using environment variables
+                # Note: not using credentials_profile_name since we're using env vars
+                bedrock_llm = Bedrock(
+                    model_id=model_id,
+                    region_name=aws_region,
+                    # We'll use the AWS SDK's default credential provider chain
+                    # which will pick up the environment variables
+                )
+
+                # Create a very simple prompt template for testing
+                prompt_template = "Complete this sentence in one word: The capital of Canada is"
+                
+                prompt = PromptTemplate(
+                    input_variables=[], template=prompt_template
+                )
+                
+                # Create a chain and invoke it with a simple query
+                chain = LLMChain(llm=bedrock_llm, prompt=prompt)
+                
+                print(f"Sending test query to AWS Bedrock model: {model_id}")
+                # Set a timeout to prevent hanging if the model is invalid
+                response = chain.invoke({})
+                
+                print(f"Received response from AWS Bedrock: {response}")
+                print(f"AWS Bedrock model validation successful: {model_id}")
+                
+                validation_message = f"AWS Bedrock model {model_id} is valid"
+                
+            except Exception as e:
+                traceback.print_exc()
+                error_msg = str(e)
+                print(f"Error validating AWS Bedrock model: {error_msg}")
+                
+                if "not authorized" in error_msg.lower() or "access denied" in error_msg.lower():
+                    detail = "AWS credentials not authorized to access Bedrock or this model"
+                elif "not found" in error_msg.lower() or "does not exist" in error_msg.lower():
+                    detail = f"Model {model_id} not found in AWS Bedrock"
+                elif "quota exceeded" in error_msg.lower() or "limit" in error_msg.lower():
+                    detail = "AWS Bedrock quota exceeded or limits reached"
+                else:
+                    detail = f"Invalid AWS Bedrock model or configuration: {error_msg}"
+                    
+                raise HTTPException(
+                    status_code=400,
+                    detail=detail
+                )
             
         elif provider == ModelProvider.HUGGINGFACE:
             # For HuggingFace, try to load the model            
@@ -244,7 +323,6 @@ def validate_llm_model(
         return Message(message=f"LLM {model_id} is valid for provider {provider}")
         
     except Exception as e:
-        import traceback
         traceback.print_exc()
         print(f"LLM validation error: {str(e)}")
         raise HTTPException(

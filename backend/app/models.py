@@ -267,6 +267,7 @@ class ModelProvider(str, enum.Enum):
     OPENAI = "openai"
     OLLAMA = "ollama"
     REPLICATE = "replicate"
+    AWS = "aws"
     # Add other providers as needed
 
 # Define a SQLAlchemy type for the enum

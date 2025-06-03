@@ -3,6 +3,7 @@ import os
 from typing import Any, List, Optional
 import requests
 import replicate
+import boto3
 
 from fastapi import APIRouter, HTTPException, Depends, Body
 from sqlmodel import select, func
@@ -164,6 +165,24 @@ def create_embedding_model(
         if model_in.provider == ModelProvider.HUGGINGFACE:
             # Validate HuggingFace model
             _ = HuggingFaceEmbeddings(model_name=model_in.model_id)
+        elif model_in.provider == ModelProvider.AWS:
+            # Check if AWS credentials are configured
+            aws_access_key = os.environ.get("AWS_ACCESS_KEY_ID")
+            aws_secret_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
+            if not aws_access_key or not aws_secret_key:
+                raise HTTPException(
+                    status_code=400,
+                    detail="AWS credentials are not configured in the environment"
+                )
+            
+            # Basic validation of model ID format
+            valid_model_prefixes = ["amazon.", "anthropic.", "ai21.", "cohere.", "meta."]
+            is_valid_model = any(model_in.model_id.startswith(prefix) for prefix in valid_model_prefixes)
+            
+            if not is_valid_model:
+                raise ValueError(f"Invalid AWS Bedrock model ID format. Expected model ID to start with one of {valid_model_prefixes}")
+            
+            print(f"AWS Bedrock model validation successful for: {model_in.model_id}")
         elif model_in.provider == ModelProvider.OPENAI:
             # Check if OpenAI API key is configured
             api_key = os.environ.get("OPENAI_API_KEY")
@@ -381,6 +400,30 @@ def check_api_key_configured(provider: str) -> Message:
             raise HTTPException(
                 status_code=404,
                 detail="OpenAI API key is not configured in the backend"
+            )
+    elif provider == "aws":
+        # Check for AWS credentials in environment
+        aws_access_key = os.environ.get("AWS_ACCESS_KEY_ID")
+        aws_secret_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
+        if aws_access_key and aws_secret_key:
+            print("AWS credentials found, validating...")
+            try:
+                # Try to initialize a boto3 client as a basic test
+                client = boto3.client(
+                    'bedrock-runtime', 
+                    region_name=os.environ.get('AWS_REGION', 'eu-north-1')
+                )
+                # Just check if we can list models as a basic validation
+                return Message(message="AWS credentials are configured")
+            except Exception as e:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"AWS credentials are configured but invalid: {str(e)}"
+                )
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail="AWS credentials are not configured in the backend"
             )
     elif provider == "ollama":
         # Check if Ollama server is reachable

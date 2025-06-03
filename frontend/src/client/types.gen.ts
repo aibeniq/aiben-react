@@ -169,7 +169,12 @@ export type Message = {
   message: string
 }
 
-export type ModelProvider = "huggingface" | "openai" | "ollama" | "replicate"
+export type ModelProvider =
+  | "huggingface"
+  | "openai"
+  | "ollama"
+  | "replicate"
+  | "aws"
 
 export type NewPassword = {
   token: string
