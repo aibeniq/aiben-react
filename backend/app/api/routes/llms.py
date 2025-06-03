@@ -54,6 +54,12 @@ def initialize_default_llm_models(session: SessionDep):
             "description": "OpenAI's GPT-4o Mini model, good balance of performance and speed.",
         },
         {
+            "name": "Claude Sonnet 3.7",
+            "model_id": "arn:aws:bedrock:eu-north-1:888577032067:inference-profile/eu.anthropic.claude-3-7-sonnet-20250219-v1:0",
+            "provider": ModelProvider.AWS,
+            "description": "Anthropic's Claude 3.7 Sonnet model on AWS Bedrock. Highly capable, fast, and excellent at complex reasoning tasks. Great for enterprise use cases requiring advanced reasoning and understanding.",
+        },
+        {
             "name": "Llama 3 8B",
             "model_id": "llama3",
             "provider": ModelProvider.OLLAMA,

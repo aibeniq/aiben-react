@@ -391,13 +391,22 @@ function LlmModels() {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {modelsData.data.map((model) => (
-              <Table.Row key={model.id}>
-                <Table.Cell>{model.name}</Table.Cell>
+            {modelsData.data
+              .filter(model => availableProviders.includes(model.provider))
+              .map((model) => (
+                <Table.Row key={model.id}>
+                  <Table.Cell>{model.name}</Table.Cell>
                 <Table.Cell>
                   <code>{model.model_id}</code>
                 </Table.Cell>
-                <Table.Cell>{model.provider}</Table.Cell>
+                <Table.Cell>
+                  <Badge
+                    colorPalette={getProviderColor(model.provider)}
+                    size="sm"
+                  >
+                    {getProviderDisplayName(model.provider)}
+                  </Badge>
+                </Table.Cell>
                 <Table.Cell>{model.description}</Table.Cell>
                 <Table.Cell>
                   {defaultModel?.id === model.id ? (
@@ -836,9 +845,11 @@ function EmbeddingModels() {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {modelsData.data.map((model) => (
-              <Table.Row key={model.id}>
-                <Table.Cell>{model.name}</Table.Cell>
+            {modelsData.data
+              .filter(model => availableProviders.includes(model.provider))
+              .map((model) => (
+                <Table.Row key={model.id}>
+                  <Table.Cell>{model.name}</Table.Cell>
                 <Table.Cell>
                   <code>{model.model_id}</code>
                 </Table.Cell>
