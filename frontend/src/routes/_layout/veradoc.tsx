@@ -629,6 +629,7 @@ const VeraDoc = () => {
           <VStack gap={4} align="stretch">
             <Separator mb={3} />
           </VStack>
+
           {/* Mode Toggle */}
           <Field>
             <HStack justify="space-between" align="center">
@@ -649,14 +650,20 @@ const VeraDoc = () => {
             </HStack>
           </Field>
 
-          <Field label="Checklist" required borderTop="1px solid" py={4}>
-            <InteractiveList
-              value={questions}
-              onChange={setQuestions}
-              placeholder="Add question"
-              minItems={1}
-            />
-          </Field>
+          {/* Conditional Rendering Based on Mode */}
+          {mode === "manual" ? (
+            <VStack spacing={4} align="stretch">
+              {/* Manual Mode UI */}
+              {fileItems.map((fileItem, index) => (
+                <FileDropzone
+                  key={index}
+                  index={index}
+                  fileItem={fileItem}
+                  onUpdate={updateFile}
+                  onRemove={removeFile}
+                  onToggleHandwritten={toggleHandwritten}
+                />
+              ))}
 
               <HStack spacing={4}>
                 <Button
@@ -667,213 +674,77 @@ const VeraDoc = () => {
                     !questions.trim() ||
                     !fileItems.some((item) => item.file.size > 0)
                   }
+                  loading={loading}
+                >
+                  Run
+                </Button>
+              </HStack>
 
-                  // Clear the checklist questions and re-fetch the list of checklists
-                  setChecklistName("")
-                  setChecklistDescription("")
-                  setQuestions("")
-                  setSelectedChecklist(null)
-                  await fetchChecklists()
-                } catch (error) {
-                  console.error("Error saving checklist:", error)
-                  showErrorToast("Failed to save checklist. Please try again.")
-                }
-              }}
-            >
-              Save Checklist
-            </Button>
+              <Separator my={4} />
+              <Heading size="md" mb={4}>
+                Results
+              </Heading>
 
-            <Button
-              variant="subtle"
-              colorPalette="blue"
-              onClick={async () => {
-                if (!selectedChecklist) {
-                  showErrorToast("Please select a checklist to copy.")
-                  return
-                }
-
-                try {
-                  // Create a copy of the selected checklist
-                  const response = await VeradocService.createChecklist({
-                    requestBody: {
-                      name: `${selectedChecklist.name} (Copy)`,
-                      description: selectedChecklist.description,
-                      questions: selectedChecklist.questions,
-                    },
-                  })
-
-                  const newChecklist = await response
-                  setChecklists((prev) => [...prev, newChecklist])
-                  showSuccessToast("Checklist copied successfully.")
-
-                  // Re-fetch the list of checklists
-                  await fetchChecklists()
-                } catch (error) {
-                  console.error("Error copying checklist:", error)
-                  showErrorToast("Failed to copy checklist. Please try again.")
-                }
-              }}
-              isDisabled={!selectedChecklist}
-            >
-              Copy Checklist
-            </Button>
-
-            <Button
-              variant="subtle"
-              colorPalette="red"
-              onClick={async () => {
-                if (!selectedChecklist) {
-                  showErrorToast("Please select a checklist temmplate to delete.")
-                  return
-                }
-
-                try {
-                  // Call the deleteChecklist method from VeradocService
-                  await VeradocService.deleteChecklist({ checklistId: selectedChecklist.id })
-
-                  // Remove the deleted checklist from the list of checklists
-                  setChecklists((prev) =>
-                    prev.filter((checklist) => checklist.id !== selectedChecklist.id),
-                  )
-
-                  // Clear the selected checklist and questions
-                  setSelectedChecklist(null)
-                  setQuestions("")
-                  setChecklistName("")
-                  setChecklistDescription("")
-
-                  showSuccessToast("Checklist deleted successfully.")
-                } catch (error) {
-                  console.error("Error deleting checklist:", error)
-                  showErrorToast("Failed to delete checklist. Please try again.")
-                }
-              }}
-              isDisabled={!selectedChecklist}
-            >
-              Delete Checklist
-            </Button>
-          </HStack>
-        </VStack>
-
-        <Separator my={4} />
-        <Heading size="md" mb={4}>
-          Document Input
-        </Heading>
-
-        {/* Mode Toggle */}
-        <Field>
-          <HStack justify="space-between" align="center">
-            <Text fontWeight="medium">Mode:</Text>
-            <HStack align="center">
-              <Text>Manual</Text>
-              <Switch.Root id="mode-toggle" colorPalette="teal">
-                <Switch.HiddenInput
-                  checked={mode === "batch"}
-                  onChange={(e) => setMode(e.target.checked ? "batch" : "manual")}
-                />
-                <Switch.Control>
-                  <Switch.Thumb />
-                </Switch.Control>
-              </Switch.Root>
-              <Text>Batch</Text>
-            </HStack>
-          </HStack>
-        </Field>
-
-        {/* Conditional Rendering Based on Mode */}
-        {mode === "manual" ? (
-          <VStack spacing={4} align="stretch">
-            {/* Manual Mode UI */}
-            {fileItems.map((fileItem, index) => (
-              <FileDropzone
-                key={index}
-                index={index}
-                fileItem={fileItem}
-                onUpdate={updateFile}
-                onRemove={removeFile}
-                onToggleHandwritten={toggleHandwritten}
-              />
-            ))}
-
-            <HStack spacing={4}>
-              <Button
-                variant="solid"
-                onClick={handleRun}
-                isDisabled={
-                  fileItems.length < 1 ||
-                  !questions.trim() ||
-                  !fileItems.some((item) => item.file.size > 0)
-                }
-                loading={loading}
-              >
-                Run
-              </Button>
-            </HStack>
-
-            <Separator my={4} />
-            <Heading size="md" mb={4}>
-              Results
-            </Heading>
-
-            {/* Fixed layout with consistent side-by-side panels */}
-            <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
-              {/* History Panel - Always show this */}
-              <Card.Root width={{ base: "100%", md: "300px" }} height="fit-content">
-                <Card.Header>
-                  <Heading size="sm">Previous Evaluations</Heading>
-                </Card.Header>
-                <Card.Body p={2}>
-                  <VStack align="stretch" spacing={2} maxH="500px" overflowY="auto">
-                    {isHistoryLoading ? (
-                      <Spinner size="sm" />
-                    ) : !reportHistory || reportHistory.length === 0 ? (
-                      <>
-                        <Text fontSize="sm" color="gray.500">
-                          No previous evaluations
-                        </Text>
-                      </>
-                    ) : (
-                      reportHistory.map((report) => (
-                        <Box
-                          key={report?.id}
-                          p={3}
-                          borderWidth="1px"
-                          borderRadius="md"
-                          cursor="pointer"
-                          bg={selectedHistoryReport?.id === report?.id ? "blue.50" : "white"}
-                          _hover={{ bg: "blue.50" }}
-                          onClick={() => report?.id && loadReportFromHistory(report.id)}
-                        >
-                          <VStack align="start" spacing={1} width="100%">
-                            <HStack spacing={1} width="100%" justify="space-between">
-                              <Text fontSize="xs" color="gray.500">
-                                {report?.date_created
-                                  ? format(new Date(report.date_created), "MMM d, yyyy")
-                                  : "Unknown date"}
-                              </Text>
-                              {report?.qa_count > 0 && (
+              {/* Fixed layout with consistent side-by-side panels */}
+              <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
+                {/* History Panel - Always show this */}
+                <Card.Root width={{ base: "100%", md: "300px" }} height="fit-content">
+                  <Card.Header>
+                    <Heading size="sm">Previous Evaluations</Heading>
+                  </Card.Header>
+                  <Card.Body p={2}>
+                    <VStack align="stretch" spacing={2} maxH="500px" overflowY="auto">
+                      {isHistoryLoading ? (
+                        <Spinner size="sm" />
+                      ) : !reportHistory || reportHistory.length === 0 ? (
+                        <>
+                          <Text fontSize="sm" color="gray.500">
+                            No previous evaluations
+                          </Text>
+                        </>
+                      ) : (
+                        reportHistory.map((report) => (
+                          <Box
+                            key={report?.id}
+                            p={3}
+                            borderWidth="1px"
+                            borderRadius="md"
+                            cursor="pointer"
+                            bg={selectedHistoryReport?.id === report?.id ? "blue.50" : "white"}
+                            _hover={{ bg: "blue.50" }}
+                            onClick={() => report?.id && loadReportFromHistory(report.id)}
+                          >
+                            <VStack align="start" spacing={1} width="100%">
+                              <HStack spacing={1} width="100%" justify="space-between">
                                 <Text fontSize="xs" color="gray.500">
-                                  {report.qa_count} question{report.qa_count !== 1 ? "s" : ""}
+                                  {report?.date_created
+                                    ? format(new Date(report.date_created), "MMM d, yyyy")
+                                    : "Unknown date"}
                                 </Text>
-                              )}
-                            </HStack>
+                                {report?.qa_count > 0 && (
+                                  <Text fontSize="xs" color="gray.500">
+                                    {report.qa_count} question{report.qa_count !== 1 ? "s" : ""}
+                                  </Text>
+                                )}
+                              </HStack>
 
-                            {/* Document name with icon */}
-                            <HStack spacing={1} width="100%">
-                              <Box as={FiFileText} size="12px" color="blue.500" />
-                              <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
-                                {report.document_name || "Unnamed document"}
-                              </Text>
-                            </HStack>
-
-                            {/* KB name with icon */}
-                            {report?.kb_name && (
+                              {/* Document name with icon */}
                               <HStack spacing={1} width="100%">
                                 <Box as={FiFileText} size="12px" color="blue.500" />
                                 <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
                                   {report.document_name || "Unnamed document"}
                                 </Text>
                               </HStack>
+
+                              {/* KB name with icon */}
+                              {report?.kb_name && (
+                                <HStack spacing={1} width="100%">
+                                  <Box as={FiFileText} size="12px" color="blue.500" />
+                                  <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
+                                    {report.document_name || "Unnamed document"}
+                                  </Text>
+                                </HStack>
+                              )}
 
                               {/* KB name with icon */}
                               {report?.kb_name && (
@@ -1140,8 +1011,8 @@ const VeraDoc = () => {
                       </HStack>
                     ))}
                   </VStack>
-                </Card.Body>
-              </Card.Root>
+                </Box>
+              )}
 
               {/* Results Panel - Always take remaining space */}
               <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
