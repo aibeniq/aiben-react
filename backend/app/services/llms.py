@@ -3,15 +3,15 @@ import os
 from io import BytesIO
 from app.models import ModelProvider, LlmModel, User, LlmInteraction
 from langchain_openai import ChatOpenAI
+from langchain_aws import ChatBedrock
 from langchain_community.chat_models import ChatOllama
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from typing import Optional, Any, Dict
 from app.api.deps import SessionDep, CurrentUser
 from sqlmodel import select, Session
 from langchain_community.llms import Replicate  
 from langchain.schema import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import HumanMessage
 import uuid
 import traceback
 import json
@@ -118,7 +118,7 @@ class ReplicateWrapper:
             print(f"Error running Replicate model: {e}")
             raise
 
-# Create an AWS Bedrock wrapper similar to your ReplicateWrapper
+
 class BedrockWrapper:
     """Wrapper for AWS Bedrock API to make it compatible with our interface"""
     
@@ -130,19 +130,32 @@ class BedrockWrapper:
         # Initialize AWS Bedrock client using environment variables by default
         self.client = self._initialize_client()
         
-        # Create the LangChain Bedrock instance
-        self.bedrock = Bedrock(
-            model_id=self.model_id,
-            client=self.client,
-            model_kwargs={"temperature": self.temperature},
-            **{k: v for k, v in kwargs.items() if k not in ["system_prompt"]}
-        )
+        # Create the appropriate LangChain instance based on model type
+        if "anthropic.claude" in self.model_id:
+            # For Claude models, use ChatBedrock
+            
+            self.bedrock = ChatBedrock(
+                model_id=self.model_id,
+                client=self.client,
+                model_kwargs={"temperature": self.temperature},
+                provider="anthropic",
+                **{k: v for k, v in kwargs.items() if k not in ["system_prompt"]}
+            )
+        else:
+            # For other models like Amazon Titan, use standard Bedrock
+            self.bedrock = Bedrock(
+                model_id=self.model_id,
+                client=self.client,
+                model_kwargs={"temperature": self.temperature},
+                provider="amazon" if "amazon" in self.model_id else None,
+                **{k: v for k, v in kwargs.items() if k not in ["system_prompt"]}
+            )
     
     def _initialize_client(self):
         """Initialize the Bedrock client using the AWS SDK"""
         # Use AWS credentials from environment variables by default
         return boto3.client(
-            'bedrock-runtime',
+            'bedrock-runtime',  # Changed from 'bedrock' to 'bedrock-runtime'
             region_name=os.environ.get("AWS_REGION", "eu-north-1")
         )
     
@@ -172,52 +185,63 @@ class BedrockWrapper:
     
     def invoke(self, prompt):
         """Run the model with the provided prompt"""
-        if isinstance(prompt, str):
-            input_text = prompt
-            system_prompt = self.kwargs.get("system_prompt", "")
-        elif hasattr(prompt, 'content'):
-            input_text = prompt.content
-            system_prompt = self.kwargs.get("system_prompt", "")
-        else:
-            # Handle list of messages by identifying system and user messages
-            system_messages = [msg.content for msg in prompt if hasattr(msg, 'type') and msg.type == 'system']
-            user_messages = [msg.content for msg in prompt if hasattr(msg, 'content') and not (hasattr(msg, 'type') and msg.type == 'system')]
-            
-            system_prompt = system_messages[0] if system_messages else self.kwargs.get("system_prompt", "")
-            input_text = "\n".join(user_messages)
+        system_prompt = self.kwargs.get("system_prompt", "")
         
-        try:
-            # Format prompt based on the model type
-            # Different AWS models have different input formats
-            if "anthropic" in self.model_id:
-                # For Anthropic models (Claude)
-                if system_prompt:
-                    full_prompt = f"System: {system_prompt}\n\nHuman: {input_text}\n\nAssistant:"
-                else:
-                    full_prompt = f"Human: {input_text}\n\nAssistant:"
-            elif "titan" in self.model_id:
-                # For Amazon Titan models
-                if system_prompt:
-                    full_prompt = f"{system_prompt}\n\n{input_text}"
-                else:
-                    full_prompt = input_text
+        # Handle differently based on model type
+        if "anthropic.claude" in self.model_id:
+            # For Claude models using ChatBedrock            
+            # Prepare messages for chat models
+            messages = []
+            
+            # Add system message if provided
+            if system_prompt:
+                messages.append(SystemMessage(content=system_prompt))
+            
+            # Handle different input types
+            if isinstance(prompt, str):
+                messages.append(HumanMessage(content=prompt))
+            elif hasattr(prompt, 'content'):
+                messages.append(HumanMessage(content=prompt.content))
+            elif isinstance(prompt, list):
+                # If prompt is already a list of messages, use it directly
+                # This assumes the messages are already properly formatted
+                messages = prompt
+            
+            try:
+                # Use the ChatBedrock instance to invoke the model
+                response = self.bedrock.invoke(messages)
+                # Return the text content if available, otherwise the whole response
+                return response.content if hasattr(response, 'content') else response
+            except Exception as e:
+                print(f"Error calling AWS Bedrock Chat: {e}")
+                print("Exception details:", str(e))
+                raise
+        else:
+            # For non-Claude models (like Amazon Titan)
+            # Format the text prompt appropriately
+            if isinstance(prompt, str):
+                input_text = prompt
+            elif hasattr(prompt, 'content'):
+                input_text = prompt.content
             else:
-                # Default case for other models
-                if system_prompt:
-                    full_prompt = f"{system_prompt}\n\n{input_text}"
-                else:
-                    full_prompt = input_text
+                # Handle list of messages by extracting text content
+                user_messages = [msg.content for msg in prompt if hasattr(msg, 'content')]
+                input_text = "\n".join(user_messages)
             
-            # Use the bedrock client to invoke the model
-            response = self.bedrock.invoke(full_prompt)
-            
-            # Parse and return the response
-            return response
-            
-        except Exception as e:
-            print(f"Error calling AWS Bedrock: {e}")
-            print("Exception details:", str(e))
-            raise
+            # Add system prompt if available
+            if system_prompt:
+                full_prompt = f"{system_prompt}\n\n{input_text}"
+            else:
+                full_prompt = input_text
+                
+            try:
+                # For standard Bedrock models
+                response = self.bedrock.invoke(full_prompt)
+                return response
+            except Exception as e:
+                print(f"Error calling AWS Bedrock: {e}")
+                print("Exception details:", str(e))
+                raise
 
 
 def create_llm(provider: ModelProvider, model_id: str, 
