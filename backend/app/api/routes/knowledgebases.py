@@ -75,9 +75,8 @@ def load_correct_embeddings_model(
         provider = model.provider
     else:
         # Try to get the user's default embedding model
-        user = session.get(User, current_user.id)
-        if user and user.default_embedding_model:
-            model = session.get(EmbeddingModel, user.default_embedding_model)
+        if current_user and current_user.default_embedding_model:
+            model = session.get(EmbeddingModel, current_user.default_embedding_model)
             if model:
                 print("Using user's default embedding model:", model)
                 model_id = model.model_id
