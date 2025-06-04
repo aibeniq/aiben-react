@@ -5,9 +5,9 @@ import requests
 from app.models import ModelProvider
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
-from langchain.embeddings import OllamaEmbeddings
+from langchain_community.embeddings import OllamaEmbeddings
 from langchain_aws import BedrockEmbeddings
-from langchain.embeddings.base import Embeddings
+from langchain_core.embeddings import Embeddings
 from typing import Optional, List
 from dotenv import load_dotenv
 import json

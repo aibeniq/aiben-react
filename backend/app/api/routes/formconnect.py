@@ -22,7 +22,7 @@ from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from typing import List, Dict, Any
 
 from langchain.prompts import ChatPromptTemplate
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.schema import AIMessage
 from dotenv import load_dotenv
 
