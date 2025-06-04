@@ -16,6 +16,12 @@ sdkContent = sdkContent.replace(
   '$1\n      responseType: \'blob\','
 );
 
+// Patch for VeraDoc
+sdkContent = sdkContent.replace(
+  /(url: "\/api\/v1\/veradoc\/generate\/docx",[\s\S]*?body: data\.requestBody,)/,
+  '$1\n      responseType: \'blob\','
+);
+
 fs.writeFileSync(sdkPath, sdkContent);
 
 // --- Patch request.ts ---

@@ -27,7 +27,16 @@ import { useMutation } from "@tanstack/react-query"
 import { VeradocService, KnowledgeBasesService } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText, FiDatabase, FiTrash2, FiChevronUp, FiChevronDown } from "react-icons/fi"
+import {
+  FiFileText,
+  FiDatabase,
+  FiTrash2,
+  FiChevronUp,
+  FiChevronDown,
+  FiCopy,
+  FiCheck,
+  FiDownload,
+} from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 import { format } from "date-fns"
 import { useQuery } from "@tanstack/react-query"
@@ -40,6 +49,9 @@ const VeraDoc = () => {
   const [knowledgeBases, setKnowledgeBases] = useState<any[]>([])
   const abortControllerRef = useRef<AbortController | null>(null)
   const ongoingRequest = useRef<CancelablePromise<any> | null>(null)
+
+  const [copySuccess, setCopySuccess] = useState(false)
+  const [loadingDownload, setLoadingDownload] = useState(false)
 
   const [questions, setQuestions] = useState("")
 
@@ -65,6 +77,90 @@ const VeraDoc = () => {
     }
     setIsHistoryLoading(historyQuery.isLoading)
   }, [historyQuery.data, historyQuery.isLoading])
+
+  const handleCopyReport = async () => {
+    try {
+      // Prepare combined text with evaluation summary and QA pairs
+      let fullText = `# Evaluation Summary\n\n${results}\n\n# Question-Answer Details\n\n`
+
+      // Add each question and its answer
+      qaPairs.forEach((pair, index) => {
+        fullText += `## Question ${index + 1}: ${pair.question}\n\n`
+        fullText += `### Answer\n${pair.answer}\n\n`
+        fullText += `### Relevant Policy Context\n${pair.context}\n\n`
+      })
+
+      await navigator.clipboard.writeText(fullText)
+      setCopySuccess(true)
+
+      // Reset the success icon after 2 seconds
+      setTimeout(() => {
+        setCopySuccess(false)
+      }, 2000)
+
+      showSuccessToast("Report copied to clipboard")
+    } catch (err) {
+      console.error("Failed to copy report:", err)
+      showErrorToast("Failed to copy report to clipboard")
+    }
+  }
+
+  const handleDownloadReport = async () => {
+    try {
+      setLoadingDownload(true)
+
+      // Prepare combined text with evaluation summary and QA pairs
+      let fullText = `# Evaluation Summary\n\n${results}\n\n# Question-Answer Details\n\n`
+
+      // Add each question and its answer
+      qaPairs.forEach((pair, index) => {
+        fullText += `## Question ${index + 1}: ${pair.question}\n\n`
+        fullText += `### Answer\n${pair.answer}\n\n`
+        fullText += `### Relevant Policy Context\n${pair.context}\n\n`
+      })
+
+      // Create a unique document name
+      const documentName = selectedHistoryReport?.document_name || "Document"
+      const docTitle = `Evaluation of ${documentName}`
+
+      const response = await VeradocService.generateDocx({
+        requestBody: { content: fullText, title: docTitle },
+      })
+
+      let blob
+      if (response instanceof Blob) {
+        console.log("Response is a Blob")
+        blob = response
+      } else if (response instanceof ArrayBuffer) {
+        console.log("Response is an ArrayBuffer")
+        blob = new Blob([response], {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        })
+      } else {
+        console.log("Response is a string or unexpected type")
+        blob = new Blob([response], {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        })
+      }
+
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+      a.href = url
+      a.download = `evaluation_${timestamp}.docx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      showSuccessToast("Evaluation downloaded successfully")
+    } catch (err) {
+      console.error("Failed to download report:", err)
+      showErrorToast(`Failed to download evaluation: ${err.message || "Unknown error"}`)
+    } finally {
+      setLoadingDownload(false)
+    }
+  }
 
   // Add this function to load a report from history
   const loadReportFromHistory = async (reportId) => {
@@ -945,11 +1041,42 @@ const VeraDoc = () => {
               {/* Results Panel - Always take remaining space */}
               <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
                 {/* Title for Results */}
-                <Heading size="md" mb={4}>
-                  {selectedHistoryReport
-                    ? `Evaluation from ${format(new Date(selectedHistoryReport.date_created), "MMM d, yyyy")} - ${selectedHistoryReport.document_name}`
-                    : ""}
-                </Heading>
+                <HStack justify="space-between" align="center" mb={4}>
+                  <Heading size="md">
+                    {selectedHistoryReport
+                      ? `Evaluation from ${format(new Date(selectedHistoryReport.date_created), "MMM d, yyyy")} - ${selectedHistoryReport.document_name}`
+                      : results
+                        ? "Evaluation Results"
+                        : ""}
+                  </Heading>
+
+                  {/* Add Copy and Download buttons */}
+                  {results && (
+                    <HStack spacing={2}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        leftIcon={copySuccess ? <FiCheck color="green" /> : <FiCopy />}
+                        onClick={handleCopyReport}
+                        colorPalette={copySuccess ? "green" : "blue"}
+                      >
+                        {copySuccess ? "Copied!" : "Copy Text"}
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        leftIcon={<FiDownload />}
+                        onClick={handleDownloadReport}
+                        isLoading={loadingDownload}
+                        loadingText="Downloading..."
+                        colorPalette="green"
+                      >
+                        Download DOCX
+                      </Button>
+                    </HStack>
+                  )}
+                </HStack>
 
                 {/* Results Box - This is the main content area */}
                 <Box
