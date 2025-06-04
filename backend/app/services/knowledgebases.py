@@ -140,19 +140,17 @@ class KnowledgeBaseService:
 
 
 # TODO: Move this to embeddings.py
-def get_embedding_model(session):
+def get_embedding_model(session: Session, current_user: CurrentUser):
     """Get the current default embedding model from the database."""
     print("Now determining which embedding model to use...")
 
     # Try to get the default model
-    default_model = session.exec(
-        select(EmbeddingModel).where(EmbeddingModel.is_default == True)
-    ).first()
-
-    # If no default model is found, fallback to a hardcoded value
-    if not default_model:
+    if current_user.default_embedding_model:
+        default_model = session.get(
+            EmbeddingModel, current_user.default_embedding_model
+        )
+        return {"model_id": default_model.model_id, "provider": default_model.provider}
+    else:
         from app.models import ModelProvider
 
         return {"model_id": "all-MiniLM-L6-v2", "provider": ModelProvider.HUGGINGFACE}
-
-    return {"model_id": default_model.model_id, "provider": default_model.provider}
