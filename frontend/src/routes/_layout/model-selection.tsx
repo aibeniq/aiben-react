@@ -34,26 +34,38 @@ export const Route = createFileRoute("/_layout/model-selection")({
 })
 
 const getProviderDisplayName = (provider: string) => {
-  switch(provider) {
-    case "huggingface": return "HuggingFace";
-    case "openai": return "OpenAI";
-    case "ollama": return "Ollama";
-    case "replicate": return "Replicate";
-    case "aws": return "AWS Bedrock";
-    default: return provider;
+  switch (provider) {
+    case "huggingface":
+      return "HuggingFace"
+    case "openai":
+      return "OpenAI"
+    case "ollama":
+      return "Ollama"
+    case "replicate":
+      return "Replicate"
+    case "aws":
+      return "AWS Bedrock"
+    default:
+      return provider
   }
-};
+}
 
 const getProviderColor = (provider: string) => {
-  switch(provider) {
-    case "huggingface": return "teal";
-    case "openai": return "purple";
-    case "ollama": return "orange";
-    case "replicate": return "red";
-    case "aws": return "blue";
-    default: return "gray";
+  switch (provider) {
+    case "huggingface":
+      return "teal"
+    case "openai":
+      return "purple"
+    case "ollama":
+      return "orange"
+    case "replicate":
+      return "red"
+    case "aws":
+      return "blue"
+    default:
+      return "gray"
   }
-};
+}
 
 function ModelSelection() {
   return (
@@ -138,7 +150,9 @@ function LlmModels() {
         })
         .catch((error) => {
           console.error("AWS credentials check failed:", error)
-          showErrorToast("AWS credentials are not configured in the backend. Please add AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to your environment.")
+          showErrorToast(
+            "AWS credentials are not configured in the backend. Please add AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to your environment.",
+          )
           setIsApiKeyConfigured(false)
         })
     } else if (modelProvider === "ollama") {
@@ -392,57 +406,54 @@ function LlmModels() {
           </Table.Header>
           <Table.Body>
             {modelsData.data
-              .filter(model => availableProviders.includes(model.provider))
+              .filter((model) => availableProviders.includes(model.provider))
               .map((model) => (
                 <Table.Row key={model.id}>
                   <Table.Cell>{model.name}</Table.Cell>
-                <Table.Cell>
-                  <code>{model.model_id}</code>
-                </Table.Cell>
-                <Table.Cell>
-                  <Badge
-                    colorPalette={getProviderColor(model.provider)}
-                    size="sm"
-                  >
-                    {getProviderDisplayName(model.provider)}
-                  </Badge>
-                </Table.Cell>
-                <Table.Cell>{model.description}</Table.Cell>
-                <Table.Cell>
-                  {defaultModel?.id === model.id ? (
-                    <Badge colorPalette="green" size="sm">
-                      Default
+                  <Table.Cell>
+                    <code>{model.model_id}</code>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Badge colorPalette={getProviderColor(model.provider)} size="sm">
+                      {getProviderDisplayName(model.provider)}
                     </Badge>
-                  ) : (
-                    <Badge colorPalette="gray" size="sm">
-                      Available
-                    </Badge>
-                  )}
-                </Table.Cell>
-                <Table.Cell>
-                  <HStack spacing={2}>
-                    {defaultModel?.id !== model.id && (
-                      <Button
-                        size="xs"
-                        colorPalette="blue"
-                        onClick={() => handleSetDefault(model.id)}
-                      >
-                        Set as Default
-                      </Button>
+                  </Table.Cell>
+                  <Table.Cell>{model.description}</Table.Cell>
+                  <Table.Cell>
+                    {defaultModel?.id === model.id ? (
+                      <Badge colorPalette="green" size="sm">
+                        Default
+                      </Badge>
+                    ) : (
+                      <Badge colorPalette="gray" size="sm">
+                        Available
+                      </Badge>
                     )}
-                    {model.owner_id && (
-                      <Button
-                        size="xs"
-                        colorPalette="red"
-                        onClick={() => handleDeleteModel(model.id)}
-                      >
-                        Delete
-                      </Button>
-                    )}
-                  </HStack>
-                </Table.Cell>
-              </Table.Row>
-            ))}
+                  </Table.Cell>
+                  <Table.Cell>
+                    <HStack spacing={2}>
+                      {defaultModel?.id !== model.id && (
+                        <Button
+                          size="xs"
+                          colorPalette="blue"
+                          onClick={() => handleSetDefault(model.id)}
+                        >
+                          Set as Default
+                        </Button>
+                      )}
+                      {model.owner_id && (
+                        <Button
+                          size="xs"
+                          colorPalette="red"
+                          onClick={() => handleDeleteModel(model.id)}
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    </HStack>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
           </Table.Body>
         </Table.Root>
       )}
@@ -494,7 +505,7 @@ function LlmModels() {
                           height: "2.5rem",
                         }}
                       >
-                        {availableProviders.map(provider => (
+                        {availableProviders.map((provider) => (
                           <option key={provider} value={provider}>
                             {provider === "huggingface"
                               ? "HuggingFace"
@@ -599,7 +610,7 @@ function EmbeddingModels() {
         setAvailableProviders(["huggingface", "openai", "ollama", "replicate", "aws"])
       })
   }, [])
-  
+
   // Update state management
   const [isOpen, setIsOpen] = useState(false)
 
@@ -846,57 +857,54 @@ function EmbeddingModels() {
           </Table.Header>
           <Table.Body>
             {modelsData.data
-              .filter(model => availableProviders.includes(model.provider))
+              .filter((model) => availableProviders.includes(model.provider))
               .map((model) => (
                 <Table.Row key={model.id}>
                   <Table.Cell>{model.name}</Table.Cell>
-                <Table.Cell>
-                  <code>{model.model_id}</code>
-                </Table.Cell>
-                <Table.Cell>
-                  <Badge
-                    colorPalette={getProviderColor(model.provider)}
-                    size="sm"
-                  >
-                    {getProviderDisplayName(model.provider)}
-                  </Badge>
-                </Table.Cell>
-                <Table.Cell>{model.description}</Table.Cell>
-                <Table.Cell>
-                  {defaultModel?.id === model.id ? (
-                    <Badge colorPalette="green" size="sm">
-                      Default
+                  <Table.Cell>
+                    <code>{model.model_id}</code>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Badge colorPalette={getProviderColor(model.provider)} size="sm">
+                      {getProviderDisplayName(model.provider)}
                     </Badge>
-                  ) : (
-                    <Badge colorPalette="gray" size="sm">
-                      Available
-                    </Badge>
-                  )}
-                </Table.Cell>
-                <Table.Cell>
-                  <HStack spacing={2}>
-                    {defaultModel?.id !== model.id && (
-                      <Button
-                        size="xs"
-                        colorPalette="blue"
-                        onClick={() => handleSetDefault(model.id)}
-                      >
-                        Set as Default
-                      </Button>
+                  </Table.Cell>
+                  <Table.Cell>{model.description}</Table.Cell>
+                  <Table.Cell>
+                    {defaultModel?.id === model.id ? (
+                      <Badge colorPalette="green" size="sm">
+                        Default
+                      </Badge>
+                    ) : (
+                      <Badge colorPalette="gray" size="sm">
+                        Available
+                      </Badge>
                     )}
-                    {model.owner_id && (
-                      <Button
-                        size="xs"
-                        colorPalette="red"
-                        onClick={() => handleDeleteModel(model.id)}
-                      >
-                        Delete
-                      </Button>
-                    )}
-                  </HStack>
-                </Table.Cell>
-              </Table.Row>
-            ))}
+                  </Table.Cell>
+                  <Table.Cell>
+                    <HStack spacing={2}>
+                      {defaultModel?.id !== model.id && (
+                        <Button
+                          size="xs"
+                          colorPalette="blue"
+                          onClick={() => handleSetDefault(model.id)}
+                        >
+                          Set as Default
+                        </Button>
+                      )}
+                      {model.owner_id && (
+                        <Button
+                          size="xs"
+                          colorPalette="red"
+                          onClick={() => handleDeleteModel(model.id)}
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    </HStack>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
           </Table.Body>
         </Table.Root>
       )}
@@ -938,7 +946,7 @@ function EmbeddingModels() {
                           height: "2.5rem",
                         }}
                       >
-                        {availableProviders.map(provider => (
+                        {availableProviders.map((provider) => (
                           <option key={provider} value={provider}>
                             {provider === "huggingface"
                               ? "HuggingFace"

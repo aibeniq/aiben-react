@@ -1,5 +1,15 @@
 import uuid
-from app.models import VeraDocRequest, VeraDocResponse, VeraDocChecklist, RagChecklistRequest, EmbeddingModel, Source, KnowledgeBase, LlmInteraction
+from app.models import (
+    VeraDocRequest,
+    VeraDocResponse,
+    VeraDocChecklist,
+    RagChecklistRequest,
+    EmbeddingModel,
+    Source,
+    KnowledgeBase,
+    LlmInteraction,
+    DocxRequest,
+)
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
@@ -8,7 +18,16 @@ from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
 
 from sqlmodel import Session, select
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, Request as FastAPIRequest
+from fastapi import (
+    APIRouter,
+    UploadFile,
+    File,
+    Form,
+    HTTPException,
+    Depends,
+    Request as FastAPIRequest,
+)
+from fastapi.responses import StreamingResponse
 from typing import List, Dict, Any
 import asyncio
 from dotenv import load_dotenv
@@ -31,6 +50,11 @@ from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 import zipfile
 from io import BytesIO
+from docx import Document
+from docx.shared import Pt
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+import markdown
+from bs4 import BeautifulSoup
 
 # Load environment variables from .env file
 load_dotenv(dotenv_path="c:/miniconda/aibeniq-react/.env", override=True)
@@ -47,12 +71,15 @@ if openai_api_key:
     is_openai_configured = True
     print("OpenAI API key configured successfully")
 else:
-    print("WARNING: OPENAI_API_KEY is not set in environment variables. Some FormConnect features will be limited.")
+    print(
+        "WARNING: OPENAI_API_KEY is not set in environment variables. Some FormConnect features will be limited."
+    )
 
 router = APIRouter(prefix="/veradoc", tags=["veradoc"])
 
 # Initialize the LLM
-#llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+# llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+
 
 def generate_template(questions: List[str]) -> Dict[str, str]:
     """
@@ -60,6 +87,7 @@ def generate_template(questions: List[str]) -> Dict[str, str]:
     Each field will have a blank value.
     """
     return {field: "" for field in questions}
+
 
 # Add the new endpoint
 @router.post("/process-rag", response_model=VeraDocResponse)
@@ -83,13 +111,14 @@ async def process_rag_checklist(
         # Create a monitor task but don't wait for it
         disconnect_monitor = None
         if request:
+
             async def monitor_client_disconnect():
                 nonlocal cancellation_requested
                 try:
                     # Don't create a separate task - just await directly
                     # This is fine because this whole function runs as a background task
                     await request.is_disconnected()
-                    
+
                     # This only executes after client disconnects
                     print("Client disconnected, canceling operation...")
                     cancellation_requested = True
@@ -97,7 +126,7 @@ async def process_rag_checklist(
                     print("Disconnect monitor cancelled because main task completed")
                 except Exception as e:
                     print(f"Error in disconnect monitoring: {str(e)}")
-            
+
             # Start monitoring in background without blocking
             disconnect_monitor = asyncio.create_task(monitor_client_disconnect())
 
@@ -107,19 +136,23 @@ async def process_rag_checklist(
         kb = session.get(KnowledgeBase, request_data.knowledge_base_id)
         if not kb:
             raise HTTPException(status_code=404, detail="Knowledge base not found")
-        
+
         if kb.owner_id != current_user.id:
-            raise HTTPException(status_code=403, detail="You don't have access to this knowledge base")
-        
+            raise HTTPException(
+                status_code=403, detail="You don't have access to this knowledge base"
+            )
+
         # 2. Create a temporary directory for ChromaDB
         with tempfile.TemporaryDirectory() as temp_dir:
             # Extract the zipped ChromaDB into the temp directory
             if kb.data:
-                with zipfile.ZipFile(BytesIO(kb.data), 'r') as zip_ref:
+                with zipfile.ZipFile(BytesIO(kb.data), "r") as zip_ref:
                     zip_ref.extractall(temp_dir)
             else:
-                raise HTTPException(status_code=400, detail="Knowledge base has no vector database data")
-            
+                raise HTTPException(
+                    status_code=400, detail="Knowledge base has no vector database data"
+                )
+
             # 3. Load the vector database with the SAME model used to create the knowledge base
             # Use the knowledge base's specific embedding model if available
             if kb.embedding_model_id:
@@ -128,53 +161,61 @@ async def process_rag_checklist(
                     # Use the KB's original model
                     model_id = embedding_model.model_id
                     provider = embedding_model.provider
-                    print(f"Using knowledge base's original embedding model: {model_id}")
+                    print(
+                        f"Using knowledge base's original embedding model: {model_id}"
+                    )
                 else:
                     # Fallback if the model was deleted from the database
                     embedding_info = get_embedding_model(session)
                     model_id = embedding_info["model_id"]
                     provider = embedding_info["provider"]
-                    print(f"Original embedding model not found, using current default: {model_id}")
+                    print(
+                        f"Original embedding model not found, using current default: {model_id}"
+                    )
             else:
                 # For knowledge bases created before tracking embedding models
                 embedding_info = get_embedding_model(session)
                 model_id = embedding_info["model_id"]
                 provider = embedding_info["provider"]
-                print(f"Knowledge base has no embedding model record, using current default: {embedding_info}")
-            
+                print(
+                    f"Knowledge base has no embedding model record, using current default: {embedding_info}"
+                )
+
             print(f"Initializing embedding model: {model_id} ({provider})")
-            embeddings = load_embeddings_model(
-                provider=provider,
-                model_id=model_id
+            embeddings = load_embeddings_model(provider=provider, model_id=model_id)
+            chroma_db = Chroma(
+                persist_directory=temp_dir, embedding_function=embeddings
             )
-            chroma_db = Chroma(persist_directory=temp_dir, embedding_function=embeddings)
 
             # Print all metadata in the vectorstore
             print("======= CHROMA VECTORDB METADATA CONTENTS =======")
             # Get all documents with their metadata
             all_docs = chroma_db.get()
-            if all_docs and 'metadatas' in all_docs:
-                for i, metadata in enumerate(all_docs['metadatas']):
+            if all_docs and "metadatas" in all_docs:
+                for i, metadata in enumerate(all_docs["metadatas"]):
                     print(f"Document {i+1} Metadata: {metadata}")
                     # If you want to see document content as well
-                    if 'documents' in all_docs and i < len(all_docs['documents']):
-                        doc_preview = all_docs['documents'][i][:200] + "..." if len(all_docs['documents'][i]) > 100 else all_docs['documents'][i]
+                    if "documents" in all_docs and i < len(all_docs["documents"]):
+                        doc_preview = (
+                            all_docs["documents"][i][:200] + "..."
+                            if len(all_docs["documents"][i]) > 100
+                            else all_docs["documents"][i]
+                        )
                         print(f"Content preview: {doc_preview}")
                     print("-" * 50)
             else:
                 print("No documents or metadata found in the vectorstore")
             print("================================================")
 
-
             retriever = chroma_db.as_retriever(search_kwargs={"k": 5})
-            
+
             # 4. Initialize the LLM
-            #llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+            # llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
             print("Now loading default LLM for session with following info:")
             print("Session:", session)
             llm = get_default_llm(session, current_user)
             print("LLM successfully loaded.")
-            
+
             # 5. Define the prompts for the different stages
             context_prompt_template = settings.VERADOC_CONTEXT_PROMPT_TEMPLATE
             qa_prompt_template = settings.VERADOC_QA_PROMPT_TEMPLATE
@@ -182,31 +223,38 @@ async def process_rag_checklist(
 
             # 6. Process each uploaded file
             qa_pairs = []
-            question_list = request_data.questions.strip().split('\n')
-            
+            question_list = request_data.questions.strip().split("\n")
+
             # Get file content
             file = files[0]  # Process the first file for now
             content = await file.read()
             try:
-                document_text = content.decode('utf-8')
+                document_text = content.decode("utf-8")
             except UnicodeDecodeError:
                 # If it's not UTF-8 encoded, it's likely a binary file
                 # For PDFs, you could use PyPDF2 or other libraries to extract text
                 document_text = f"Failed to extract text from {file.filename}"
-            
+
             # Reset file position
             await file.seek(0)
-            
+
             # 7. Process each question using the RAG approach
             for question in question_list:
                 if cancellation_requested:
-                    print("Operation cancelled by client disconnect, stopping processing")
-                    return VeraDocResponse(results={"status": "cancelled", "message": "Operation cancelled by user"})
-                
+                    print(
+                        "Operation cancelled by client disconnect, stopping processing"
+                    )
+                    return VeraDocResponse(
+                        results={
+                            "status": "cancelled",
+                            "message": "Operation cancelled by user",
+                        }
+                    )
+
                 question = question.strip()
                 if not question:
                     continue
-                
+
                 # Step 1: Retrieve relevant context from the knowledge base
                 docs = retriever.get_relevant_documents(question)
                 context = "\n\n".join([doc.page_content for doc in docs])
@@ -215,101 +263,124 @@ async def process_rag_checklist(
                 source_citations = []
                 for doc in docs:
                     # Ensure source_data_id is included in metadata if available
-                    metadata = doc.metadata.copy()  # Copy to avoid modifying the original
-                    
+                    metadata = (
+                        doc.metadata.copy()
+                    )  # Copy to avoid modifying the original
+
                     # If the metadata contains a source path that matches a pattern from a KB
-                    if 'source' in metadata and isinstance(metadata['source'], str):
+                    if "source" in metadata and isinstance(metadata["source"], str):
                         # Try to find the corresponding source_data_id
-                        source_path = metadata['source']
+                        source_path = metadata["source"]
                         # Extract just the filename
                         raw_filename = Path(source_path).name
-                        
+
                         # Extract the real filename after the underscore using regex
                         # This looks for any characters followed by an underscore, then captures everything after
-                        match = re.search(r'^[^_]*_(.+)$', raw_filename)
+                        match = re.search(r"^[^_]*_(.+)$", raw_filename)
                         if match:
                             # Use the captured group (everything after the underscore)
                             filename = match.group(1)
                         else:
                             # Fallback to the original filename if no underscore found
                             filename = raw_filename
-                        
+
                         # Debug info
                         print(f"Raw filename: {raw_filename}")
                         print(f"Extracted filename: {filename}")
-                        
+
                         # Try to find the source by the extracted name
                         source_entry = session.exec(
-                            select(Source)
-                            .where(Source.name == filename)
+                            select(Source).where(Source.name == filename)
                         ).first()
-                        
+
                         if source_entry:
-                            metadata['source_data_id'] = str(source_entry.source_data_id)
-                    
-                    source = {
-                        "content": doc.page_content,
-                        "metadata": metadata
-                    }
+                            metadata["source_data_id"] = str(
+                                source_entry.source_data_id
+                            )
+
+                    source = {"content": doc.page_content, "metadata": metadata}
                     source_citations.append(source)
 
                 if cancellation_requested:
-                    print("Operation cancelled by client disconnect, stopping processing")
-                    return VeraDocResponse(results={"status": "cancelled", "message": "Operation cancelled by user"})
-                
+                    print(
+                        "Operation cancelled by client disconnect, stopping processing"
+                    )
+                    return VeraDocResponse(
+                        results={
+                            "status": "cancelled",
+                            "message": "Operation cancelled by user",
+                        }
+                    )
+
                 # Step 2: Get the relevant policy context for this question
                 print("Generating context for question...")
                 question_context = invoke_llm(
                     llm,
                     context_prompt_template,
-                    {"context": context, "question": question}
+                    {"context": context, "question": question},
                 )
                 print(f"Got context: {question_context[:100]}...")
 
                 if cancellation_requested:
-                    print("Operation cancelled by client disconnect, stopping processing")
-                    return VeraDocResponse(results={"status": "cancelled", "message": "Operation cancelled by user"})
-                
+                    print(
+                        "Operation cancelled by client disconnect, stopping processing"
+                    )
+                    return VeraDocResponse(
+                        results={
+                            "status": "cancelled",
+                            "message": "Operation cancelled by user",
+                        }
+                    )
+
                 # Step 3: Answer the question based on the uploaded document and policy context
                 print("Generating answer based on document and context...")
                 answer = invoke_llm(
                     llm,
                     qa_prompt_template,
                     {
-                        "document_text": document_text[:10000],  # Limit length to avoid token issues
+                        "document_text": document_text[
+                            :10000
+                        ],  # Limit length to avoid token issues
                         "question": question,
-                        "question_context": question_context
-                    }
+                        "question_context": question_context,
+                    },
                 )
                 print(f"Got answer: {answer[:100]}...")
 
                 print("Source citations for question:", question)
-                for source in source_citations:
-                    print(f"Source: {source['metadata'].get('source', 'Unknown')}, Content: {source['content']}")
-                
+                # for source in source_citations:
+                # print(f"Source: {source['metadata'].get('source', 'Unknown')}, Content: {source['content']}")
+
                 # Store the question-answer pair with context
-                qa_pairs.append({
-                    "question": question,
-                    "answer": answer,
-                    "context": question_context,
-                    "source_citations": source_citations
-                })
-            
+                qa_pairs.append(
+                    {
+                        "question": question,
+                        "answer": answer,
+                        "context": question_context,
+                        "source_citations": source_citations,
+                    }
+                )
+
             # 8. Generate the final evaluation
             if cancellation_requested:
                 print("Operation cancelled by client disconnect, stopping processing")
-                return VeraDocResponse(results={"status": "cancelled", "message": "Operation cancelled by user"})
-            
+                return VeraDocResponse(
+                    results={
+                        "status": "cancelled",
+                        "message": "Operation cancelled by user",
+                    }
+                )
+
             qa_pairs_text = ""
             for i, qa in enumerate(qa_pairs):
-                qa_pairs_text += f"Question {i+1}: {qa['question']}\nAnswer: {qa['answer']}\n\n"
-            
+                qa_pairs_text += (
+                    f"Question {i+1}: {qa['question']}\nAnswer: {qa['answer']}\n\n"
+                )
+
             # Final evaluation
             print("Generating final evaluation...")
             final_evaluation = invoke_llm(
-                llm,
-                final_prompt_template,
-                {"qa_pairs": qa_pairs_text}
+                llm, final_prompt_template, {"qa_pairs": qa_pairs_text}
             )
             print(f"Got final evaluation: {final_evaluation[:100]}...")
 
@@ -320,52 +391,64 @@ async def process_rag_checklist(
                 input_data={
                     "questions": request_data.questions,
                     "document_name": file.filename,
-                    "kb_id": request_data.knowledge_base_id
+                    "kb_id": request_data.knowledge_base_id,
                 },
                 output_data={
                     "final_evaluation": final_evaluation,
-                    "qa_count": len(qa_pairs)
+                    "qa_count": len(qa_pairs),
                 },
                 metadata={
                     "qa_pairs": qa_pairs  # Store the full QA pairs with sources for retrieval
-                }
+                },
             )
 
             # 9. Compile the results
             result = {
                 "final_evaluation": final_evaluation,
                 "qa_pairs": qa_pairs,
-                "interaction_id": str(interaction_id)
+                "interaction_id": str(interaction_id),
             }
-            
+
             return VeraDocResponse(results=result)
-            
+
     except Exception as e:
         print("Error processing RAG checklist:")
         print(str(e))
-        
+
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Error processing RAG checklist: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error processing RAG checklist: {str(e)}"
+        )
     finally:
         # Clean up the disconnect monitor if it exists
         if disconnect_monitor:
             disconnect_monitor.cancel()
 
+
 # Functions related to Checklists
 @router.post("/checklists", response_model=VeraDocChecklist)
-def create_checklist(checklist: VeraDocChecklist, session: SessionDep, current_user: CurrentUser,):
+def create_checklist(
+    checklist: VeraDocChecklist,
+    session: SessionDep,
+    current_user: CurrentUser,
+):
     """
     Save a new checklist to the database.
     """
-    existing_checklist = session.exec(select(VeraDocChecklist).where(VeraDocChecklist.name == checklist.name)).first()
+    existing_checklist = session.exec(
+        select(VeraDocChecklist).where(VeraDocChecklist.name == checklist.name)
+    ).first()
     if existing_checklist:
-        raise HTTPException(status_code=400, detail="A checklist with this name already exists.")
-    
+        raise HTTPException(
+            status_code=400, detail="A checklist with this name already exists."
+        )
+
     checklist.owner_id = current_user.id
     session.add(checklist)
     session.commit()
     session.refresh(checklist)
     return checklist
+
 
 @router.get("/checklists", response_model=List[VeraDocChecklist])
 def get_checklists(session: SessionDep, current_user: CurrentUser):
@@ -375,6 +458,7 @@ def get_checklists(session: SessionDep, current_user: CurrentUser):
     return session.exec(
         select(VeraDocChecklist).where(VeraDocChecklist.owner_id == current_user.id)
     ).all()
+
 
 @router.get("/checklists/{checklist_id}", response_model=VeraDocChecklist)
 def get_checklist(checklist_id: uuid.UUID, session: SessionDep):
@@ -386,45 +470,59 @@ def get_checklist(checklist_id: uuid.UUID, session: SessionDep):
         raise HTTPException(status_code=404, detail="Checklist not found.")
     return checklist
 
+
 @router.put("/checklists/{checklist_id}", response_model=VeraDocChecklist)
-def update_checklist(checklist_id: uuid.UUID, updated_checklist: VeraDocChecklist, session: SessionDep, current_user: CurrentUser):
+def update_checklist(
+    checklist_id: uuid.UUID,
+    updated_checklist: VeraDocChecklist,
+    session: SessionDep,
+    current_user: CurrentUser,
+):
     """
     Update an existing checklist.
     """
     checklist = session.get(VeraDocChecklist, checklist_id)
     if not checklist:
         raise HTTPException(status_code=404, detail="Checklist not found.")
-    
+
     # Ensure the current user is the owner of the checklist
     if checklist.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to update this checklist.")
-    
+        raise HTTPException(
+            status_code=403, detail="Not authorized to update this checklist."
+        )
+
     checklist.name = updated_checklist.name
     checklist.description = updated_checklist.description
     checklist.questions = updated_checklist.questions
     checklist.date_modified = datetime.utcnow()
-    
+
     session.add(checklist)
     session.commit()
     session.refresh(checklist)
     return checklist
 
+
 @router.delete("/checklists/{checklist_id}")
-def delete_checklist(checklist_id: uuid.UUID, session: SessionDep, current_user: CurrentUser):
+def delete_checklist(
+    checklist_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
+):
     """
     Delete a checklist by ID.
     """
     checklist = session.get(VeraDocChecklist, checklist_id)
     if not checklist:
         raise HTTPException(status_code=404, detail="Checklist not found.")
-    
+
     # Ensure the current user is the owner of the checklist
     if checklist.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to delete this checklist.")
-    
+        raise HTTPException(
+            status_code=403, detail="Not authorized to delete this checklist."
+        )
+
     session.delete(checklist)
     session.commit()
     return {"message": "Checklist deleted successfully."}
+
 
 @router.get("/history", response_model=List[Dict[str, Any]])
 async def get_veradoc_history(
@@ -435,13 +533,13 @@ async def get_veradoc_history(
 ):
     """Retrieve past VeraDoc evaluation history for the current user."""
     print("Retrieving VeraDoc history for user: ", current_user.id)
-    
+
     try:
         reports = session.exec(
             select(LlmInteraction)
             .where(
                 LlmInteraction.user_id == current_user.id,
-                LlmInteraction.functionality == "veradoc"
+                LlmInteraction.functionality == "veradoc",
             )
             .order_by(LlmInteraction.date_created.desc())
             .offset(skip)
@@ -449,7 +547,7 @@ async def get_veradoc_history(
         ).all()
 
         print(f"Found {len(reports)} VeraDoc evaluations for user {current_user.id}")
-        
+
         result = []
         for report in reports:
             # Initialize variables outside the try block
@@ -457,47 +555,56 @@ async def get_veradoc_history(
             output_data = {}
             extra_data = {}
             kb_name = "Unknown Knowledge Base"
-            
+
             try:
                 # Parse the input_data and output_data from string to dict
                 input_data = json.loads(report.input_data) if report.input_data else {}
-                output_data = json.loads(report.output_data) if report.output_data else {}
+                output_data = (
+                    json.loads(report.output_data) if report.output_data else {}
+                )
                 extra_data = report.extra_data or {}
-                
+
                 # Get KB name from input_data
                 if input_data.get("kb_id"):
                     kb = session.get(KnowledgeBase, input_data.get("kb_id"))
                     kb_name = kb.title if kb else "Unknown Knowledge Base"
-                    
+
                 # Create a user-friendly title
                 document_name = input_data.get("document_name", "Unnamed Document")
                 title = f"Evaluation of {document_name}"
-                
-                result.append({
-                    "id": str(report.id),
-                    "date_created": report.date_created,
-                    "title": title,
-                    "document_name": document_name,
-                    "kb_name": kb_name,
-                    "kb_id": input_data.get("kb_id", ""),
-                    "questions": input_data.get("questions", ""),
-                    "qa_count": output_data.get("qa_count", 0),
-                    "final_evaluation": output_data.get("final_evaluation", "")
-                })
+
+                result.append(
+                    {
+                        "id": str(report.id),
+                        "date_created": report.date_created,
+                        "title": title,
+                        "document_name": document_name,
+                        "kb_name": kb_name,
+                        "kb_id": input_data.get("kb_id", ""),
+                        "questions": input_data.get("questions", ""),
+                        "qa_count": output_data.get("qa_count", 0),
+                        "final_evaluation": output_data.get("final_evaluation", ""),
+                    }
+                )
             except Exception as e:
                 # If parsing fails, add a minimal entry
                 print(f"Error processing report {report.id}: {e}")
-                result.append({
-                    "id": str(report.id),
-                    "date_created": report.date_created,
-                    "title": f"Evaluation from {report.date_created.strftime('%Y-%m-%d')}"
-                })
-        
+                result.append(
+                    {
+                        "id": str(report.id),
+                        "date_created": report.date_created,
+                        "title": f"Evaluation from {report.date_created.strftime('%Y-%m-%d')}",
+                    }
+                )
+
         return result
     except Exception as e:
         import traceback
+
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Error retrieving VeraDoc history: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving VeraDoc history: {str(e)}"
+        )
 
 
 @router.get("/history/{report_id}")
@@ -511,27 +618,31 @@ async def get_veradoc_detail(
         report = session.get(LlmInteraction, report_id)
         if not report:
             raise HTTPException(status_code=404, detail="Report not found")
-        
+
         if report.user_id != current_user.id:
-            raise HTTPException(status_code=403, detail="You don't have access to this report")
-        
+            raise HTTPException(
+                status_code=403, detail="You don't have access to this report"
+            )
+
         if report.functionality != "veradoc":
-            raise HTTPException(status_code=400, detail="This is not a VeraDoc evaluation")
-        
+            raise HTTPException(
+                status_code=400, detail="This is not a VeraDoc evaluation"
+            )
+
         try:
             input_data = json.loads(report.input_data) if report.input_data else {}
             output_data = json.loads(report.output_data) if report.output_data else {}
             extra_data = report.extra_data or {}
-            
+
             # For backward compatibility, try to reconstruct full results
             document_name = input_data.get("document_name", "Unknown Document")
             kb_name = "Unknown Knowledge Base"
-            
+
             # Try to get KB name
             if input_data.get("kb_id"):
                 kb = session.get(KnowledgeBase, input_data.get("kb_id"))
                 kb_name = kb.title if kb else "Unknown Knowledge Base"
-            
+
             # Create a response that matches the structure expected by the frontend
             result = {
                 "id": str(report.id),
@@ -542,18 +653,22 @@ async def get_veradoc_detail(
                 "results": {
                     "final_evaluation": output_data.get("final_evaluation", ""),
                     "qa_pairs": extra_data.get("qa_pairs", []),
-                    "interaction_id": str(report.id)
+                    "interaction_id": str(report.id),
                 },
                 # Add feedback information
                 "feedback": {
                     "feedback": report.feedback,
                     "feedbackText": report.feedback_text,
-                    "feedbackDate": report.feedback_date.isoformat() if report.feedback_date else None
-                }
+                    "feedbackDate": (
+                        report.feedback_date.isoformat()
+                        if report.feedback_date
+                        else None
+                    ),
+                },
             }
-            
+
             return result
-            
+
         except Exception as e:
             # Fallback if parsing fails
             return {
@@ -561,12 +676,154 @@ async def get_veradoc_detail(
                 "date_created": report.date_created,
                 "results": {
                     "final_evaluation": f"Unable to reconstruct evaluation from {report.date_created}.\n\n"
-                                      f"This might be due to an older format or incomplete data.",
-                    "qa_pairs": []
-                }
+                    f"This might be due to an older format or incomplete data.",
+                    "qa_pairs": [],
+                },
             }
-            
+
     except Exception as e:
         import traceback
+
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Error retrieving evaluation details: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving evaluation details: {str(e)}"
+        )
+    
+
+@router.post("/generate/docx", response_class=StreamingResponse)
+async def generate_docx(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a DOCX file from the evaluation content.
+    """
+    print("Now generating DOCX of evaluation...")
+    try:
+        # Get the markdown content from the request
+        if not request.content:
+            raise HTTPException(status_code=400, detail="Report content is required")
+
+        # Convert markdown to HTML for parsing
+        html_content = markdown.markdown(request.content, extensions=["tables"])
+        soup = BeautifulSoup(html_content, "html.parser")
+
+        print("Markdown content converted to HTML successfully.")
+        # Create a new Document
+        doc = Document()
+
+        print("Adding title and date to the document...")
+        # Add a title
+        title_text = request.title if hasattr(request, 'title') and request.title else "Document Evaluation"
+        title = doc.add_heading(title_text, level=0)
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        # Add date
+        date_paragraph = doc.add_paragraph()
+        date_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        date_run = date_paragraph.add_run(
+            f"Generated on: {datetime.now().strftime('%B %d, %Y')}"
+        )
+        date_run.italic = True
+
+        # Add a separator
+        doc.add_paragraph("─" * 50)
+
+        print("Adding headers, paragraphs, lists, and tables...")
+        # Process all headers and paragraphs in the HTML
+        for element in soup.find_all(
+            ["h1", "h2", "h3", "h4", "p", "ul", "ol", "li", "table"]
+        ):
+            if element.name == "h1":
+                doc.add_heading(element.text, level=1)
+            elif element.name == "h2":
+                doc.add_heading(element.text, level=2)
+            elif element.name == "h3":
+                doc.add_heading(element.text, level=3)
+            elif element.name == "p":
+                doc.add_paragraph(element.text)
+            elif element.name == "ul":
+                for li in element.find_all("li"):
+                    paragraph = doc.add_paragraph(li.text)
+                    paragraph.style = "List Bullet"
+            elif element.name == "ol":
+                for li in element.find_all("li"):
+                    paragraph = doc.add_paragraph(li.text)
+                    paragraph.style = "List Number"
+            elif element.name == "table":
+                table_rows = element.find_all("tr")
+                if table_rows:
+                    # Count the number of columns in the first row
+                    first_row = table_rows[0]
+                    columns = len(first_row.find_all(["th", "td"]))
+
+                    # Create the table
+                    table = doc.add_table(rows=0, cols=columns)
+                    table.style = "Table Grid"
+
+                    # Process header row
+                    header_cells = first_row.find_all(["th", "td"])
+                    if header_cells:
+                        header_row = table.add_row().cells
+                        for i, cell in enumerate(header_cells):
+                            if i < len(header_row):
+                                header_row[i].text = cell.text
+                                run = header_row[i].paragraphs[0].runs[0]
+                                run.bold = True
+
+                    # Process data rows
+                    for row in table_rows[1:]:
+                        cells = row.find_all("td")
+                        if cells:
+                            row_cells = table.add_row().cells
+                            for i, cell in enumerate(cells):
+                                if i < len(row_cells):
+                                    row_cells[i].text = cell.text
+
+        # Save the document to a BytesIO object
+        print("Saving the document to a BytesIO object...")
+        docx_bytes = BytesIO()
+        doc.save(docx_bytes)
+        docx_bytes.seek(0)
+
+        # --- CORRUPTION CHECKS ---
+        # 1. Check file size
+        size = docx_bytes.getbuffer().nbytes
+        print(f"DOCX file size: {size} bytes")
+        if size < 1000:
+            print("Warning: DOCX file is very small and may be empty or corrupted.")
+
+        # 2. Try to reload the DOCX to ensure it's readable
+        try:
+            docx_bytes.seek(0)
+            _ = Document(docx_bytes)
+            print("DOCX file passed integrity check (can be opened by python-docx).")
+        except Exception as e:
+            print(
+                f"Integrity check failed: generated DOCX cannot be opened. Error: {e}"
+            )
+            raise HTTPException(
+                status_code=500, detail="Generated DOCX file is corrupted."
+            )
+
+        docx_bytes.seek(0)
+
+        print(
+            "Document saved successfully. Preparing to return as a downloadable file."
+        )
+
+        # Create a filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"evaluation_{timestamp}.docx"
+
+        # Return the document as a downloadable file
+        return StreamingResponse(
+            docx_bytes,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")

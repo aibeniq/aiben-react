@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react"
 import {
   Box,
   Button,
@@ -13,129 +13,130 @@ import {
   Field,
   Portal,
   Accordion,
-} from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
-import { useDropzone } from "react-dropzone";
-import { FaFileUpload, FaPaperPlane, FaTimes, FaTrash } from "react-icons/fa";
-import { FiFileText } from "react-icons/fi";
-import { KnowledgeBasesService, ChatService } from "@/client";
-import SourceLink from "@/components/Common/SourceLink";
+} from "@chakra-ui/react"
+import { useQuery } from "@tanstack/react-query"
+import { useDropzone } from "react-dropzone"
+import { FaFileUpload, FaPaperPlane, FaTimes, FaTrash } from "react-icons/fa"
+import { FiFileText } from "react-icons/fi"
+import { KnowledgeBasesService, ChatService } from "@/client"
+import SourceLink from "@/components/Common/SourceLink"
 
 interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
+  role: "user" | "assistant"
+  content: string
   sources?: Array<{
-    content: string;
-    metadata: Record<string, any>;
-  }>;
-  rephrasedQuestion?: string;
-  sessionId?: string;
+    content: string
+    metadata: Record<string, any>
+  }>
+  rephrasedQuestion?: string
+  sessionId?: string
 }
 
 interface ChatbotPanelProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
 }
 
 const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
-  const [selectedKbId, setSelectedKbId] = useState<string | null>(null);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const panelWidth = useBreakpointValue({ base: "100%", sm: "350px", md: "400px", lg: "450px" });
-  const panelHeight = useBreakpointValue({ base: "75vh", md: "70vh" });
+  const [selectedKbId, setSelectedKbId] = useState<string | null>(null)
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+  const [question, setQuestion] = useState("")
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const panelWidth = useBreakpointValue({ base: "100%", sm: "350px", md: "400px", lg: "450px" })
+  const panelHeight = useBreakpointValue({ base: "75vh", md: "70vh" })
 
-  const [currentKbId, setCurrentKbId] = useState<string | null>(null);
-  const [currentFileName, setCurrentFileName] = useState<string | null>(null);
-  const [sessionId, setSessionId] = useState<string>("");
+  const [currentKbId, setCurrentKbId] = useState<string | null>(null)
+  const [currentFileName, setCurrentFileName] = useState<string | null>(null)
+  const [sessionId, setSessionId] = useState<string>("")
 
   const getDisplayFileName = (source: string): string => {
-  if (!source) return "Unknown";
-  
-  // Clean up temporary file paths
-  if (source.includes('/tmp/') || source.includes('\\tmp\\')) {
+    if (!source) return "Unknown"
+
+    // Clean up temporary file paths
+    if (source.includes("/tmp/") || source.includes("\\tmp\\")) {
       // First get the filename without the path
-      const filename = source.split('/').pop() || 
-                      source.split('\\').pop() || '';
-      
+      const filename = source.split("/").pop() || source.split("\\").pop() || ""
+
       // Then remove everything before and including the first underscore
-      return filename.includes('_') 
-        ? filename.substring(filename.indexOf('_') + 1) 
-        : filename;
+      return filename.includes("_") ? filename.substring(filename.indexOf("_") + 1) : filename
     }
-    
-    return source;
-  };
+
+    return source
+  }
 
   const clearChat = () => {
-    setMessages([]);
-    setSessionId(Math.random().toString(36).substring(2, 15));
-  };
+    setMessages([])
+    setSessionId(Math.random().toString(36).substring(2, 15))
+  }
 
   // Get knowledge bases
   const { data: knowledgeBases = [] } = useQuery({
     queryKey: ["knowledge-bases"],
     queryFn: async () => {
-      const response = await KnowledgeBasesService.readKnowledgeBases({ 
-        skip: 0, 
-        limit: 100 // Get all knowledge bases
-      });
-      return response.data || [];
+      const response = await KnowledgeBasesService.readKnowledgeBases({
+        skip: 0,
+        limit: 100, // Get all knowledge bases
+      })
+      return response.data || []
     },
-    enabled: isOpen
-  });
+    enabled: isOpen,
+  })
 
   // Dropzone for file upload
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
       if (acceptedFiles.length > 0) {
-        setUploadedFile(acceptedFiles[0]);
-        setSelectedKbId(null);
+        setUploadedFile(acceptedFiles[0])
+        setSelectedKbId(null)
       }
     },
     maxFiles: 1,
-  });
+  })
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
     }
-  }, [messages]);
+  }, [messages])
 
   const handleSendMessage = async () => {
-    if (!question.trim()) return;
+    if (!question.trim()) return
 
-    console.log("Current session ID:", sessionId);
-    console.log("Current KB ID:", currentKbId);
-    console.log("Selected KB ID:", selectedKbId);
+    console.log("Current session ID:", sessionId)
+    console.log("Current KB ID:", currentKbId)
+    console.log("Selected KB ID:", selectedKbId)
 
-    const userMessage = question;
-    
+    const userMessage = question
+
     // Add the new user message to chat history
-    const updatedMessages = [...messages, { role: "user", content: userMessage }];
-    setMessages(updatedMessages);
-    setQuestion("");
-    setIsLoading(true);
+    const updatedMessages = [...messages, { role: "user", content: userMessage }]
+    setMessages(updatedMessages)
+    setQuestion("")
+    setIsLoading(true)
 
     try {
-      let response;
-      
-      // Format chat history for API 
+      let response
+
+      // Format chat history for API
       // Only send the last 10 messages to keep context manageable
-      const recentHistory = updatedMessages.slice(-10);
-      const formattedChatHistory = recentHistory.map(msg => {
-        const role = msg.role === "user" ? "User" : "Assistant";
-        return `${role}: ${msg.content}`;
-      }).join("\n\n");
-      
+      const recentHistory = updatedMessages.slice(-10)
+      const formattedChatHistory = recentHistory
+        .map((msg) => {
+          const role = msg.role === "user" ? "User" : "Assistant"
+          return `${role}: ${msg.content}`
+        })
+        .join("\n\n")
+
       // Check if this is a follow-up question with the same resources
-      const isFollowUp = sessionId && ((selectedKbId && selectedKbId === currentKbId) || 
-          (uploadedFile && currentFileName === uploadedFile.name));
-      console.log("Formatted chat history:", formattedChatHistory);
-      console.log("Is follow-up:", isFollowUp);
+      const isFollowUp =
+        sessionId &&
+        ((selectedKbId && selectedKbId === currentKbId) ||
+          (uploadedFile && currentFileName === uploadedFile.name))
+      console.log("Formatted chat history:", formattedChatHistory)
+      console.log("Is follow-up:", isFollowUp)
 
       if (!selectedKbId && !uploadedFile) {
         // New case: No KB or file selected - use direct text query
@@ -143,16 +144,15 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
           question: userMessage,
           chatHistory: formattedChatHistory,
           sessionId: sessionId,
-          isFollowUp: isFollowUp && sessionId ? true : false
-        });
+          isFollowUp: isFollowUp && sessionId ? true : false,
+        })
       } else if (selectedKbId) {
-
         // Set current KB ID if it's changed
         if (currentKbId !== selectedKbId) {
-          setCurrentKbId(selectedKbId);
+          setCurrentKbId(selectedKbId)
           // Generate new session ID when knowledge base changes
-          setSessionId("");  // Clear it and let the server generate a new one
-          console.log("KB changed, clearing session ID");
+          setSessionId("") // Clear it and let the server generate a new one
+          console.log("KB changed, clearing session ID")
         }
 
         response = await ChatService.queryKnowledgeBase({
@@ -160,78 +160,79 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
           question: userMessage,
           chatHistory: formattedChatHistory,
           useDefaultModels: true,
-          sessionId: sessionId,  // Make sure this is being sent correctly
-          isFollowUp: isFollowUp && sessionId ? true : false  // Only true if we have a session ID
-        });
+          sessionId: sessionId, // Make sure this is being sent correctly
+          isFollowUp: isFollowUp && sessionId ? true : false, // Only true if we have a session ID
+        })
       } else if (uploadedFile) {
         // Set current filename if it's changed
         if (currentFileName !== uploadedFile.name) {
-          setCurrentFileName(uploadedFile.name);
+          setCurrentFileName(uploadedFile.name)
           // Don't generate a new session ID here - let the server handle it
-          setSessionId("");  // Clear it and let the server generate a new one
-          console.log("File changed, clearing session ID");
+          setSessionId("") // Clear it and let the server generate a new one
+          console.log("File changed, clearing session ID")
         }
-        const formData = new FormData();
+        const formData = new FormData()
         // Only send the file if this is NOT a follow-up question
         if (!isFollowUp) {
-          formData.append("file", uploadedFile);
+          formData.append("file", uploadedFile)
         }
-        
+
         response = await ChatService.queryDocument({
           question: userMessage,
           chatHistory: formattedChatHistory,
           useDefaultModels: true,
           sessionId: sessionId,
           isFollowUp: isFollowUp === true,
-          formData: isFollowUp ? undefined : { file: uploadedFile }
-        });
+          formData: isFollowUp ? undefined : { file: uploadedFile },
+        })
       }
 
-      console.log("Response:", response);
+      console.log("Response:", response)
 
       if (response?.answer) {
-        console.log("Sources from response:", response.sources);
-  
+        console.log("Sources from response:", response.sources)
+
         // Check if sources have source_data_id
         if (response.sources && response.sources.length > 0) {
-          console.log("First source metadata:", response.sources[0].metadata);
-          console.log("Source has ID:", !!response.sources[0].metadata?.source_data_id);
+          console.log("First source metadata:", response.sources[0].metadata)
+          console.log("Source has ID:", !!response.sources[0].metadata?.source_data_id)
         }
-        
+
         // You can show the rephrased question if you want
-        const rephrasedInfo = response.rephrased_question && 
-          response.rephrased_question !== userMessage ? 
-          `(Interpreted as: "${response.rephrased_question}")` : "";
+        const rephrasedInfo =
+          response.rephrased_question && response.rephrased_question !== userMessage
+            ? `(Interpreted as: "${response.rephrased_question}")`
+            : ""
 
         // Store the session ID from the response
         if (response.session_id) {
-          setSessionId(response.session_id);
-          console.log("Received session ID from server:", response.session_id);
+          setSessionId(response.session_id)
+          console.log("Received session ID from server:", response.session_id)
         }
-        
+
         setMessages((prev) => [
           ...prev,
-          { 
-            role: "assistant", 
+          {
+            role: "assistant",
             content: response.answer + (rephrasedInfo ? `\n\n${rephrasedInfo}` : ""),
             sources: response.sources,
             rephrasedQuestion: response.rephrased_question,
-            sessionId: response.session_id            
-          }
-        ]);
+            sessionId: response.session_id,
+          },
+        ])
       }
     } catch (error) {
-      console.error("Error querying:", error);
+      console.error("Error querying:", error)
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Sorry, I couldn't process your request. Please try again." }
-      ]);
+        { role: "assistant", content: "Sorry, I couldn't process your request. Please try again." },
+      ])
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <Portal>
@@ -251,22 +252,22 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
         display="flex"
         flexDirection="column"
         sx={{
-          '@keyframes slideUp': {
-            '0%': {
+          "@keyframes slideUp": {
+            "0%": {
               opacity: 0,
-              transform: 'translateY(20px)'
+              transform: "translateY(20px)",
             },
-            '100%': {
+            "100%": {
               opacity: 1,
-              transform: 'translateY(0)'
-            }
-          }
+              transform: "translateY(0)",
+            },
+          },
         }}
       >
         {/* Header - Keep fixed */}
-        <Box 
-          p={3} 
-          bg="teal" 
+        <Box
+          p={3}
+          bg="teal"
           color="white"
           display="flex"
           justifyContent="space-between"
@@ -321,19 +322,19 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
               <select
                 value={selectedKbId || ""}
                 onChange={(e) => {
-                  setSelectedKbId(e.target.value || null);
-                  setUploadedFile(null);
+                  setSelectedKbId(e.target.value || null)
+                  setUploadedFile(null)
                 }}
                 disabled={!!uploadedFile}
                 style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  borderRadius: '0.375rem',
-                  borderColor: '#E2E8F0',
+                  width: "100%",
+                  padding: "0.5rem",
+                  borderRadius: "0.375rem",
+                  borderColor: "#E2E8F0",
                 }}
               >
                 <option value="">Choose a knowledge base</option>
-                {knowledgeBases.map(kb => (
+                {knowledgeBases.map((kb) => (
                   <option key={kb.id} value={kb.id}>
                     {kb.title}
                   </option>
@@ -341,16 +342,18 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
               </select>
             </Field.Root>
 
-            <Text fontWeight="medium" alignSelf="flex-start">OR</Text>
+            <Text fontWeight="medium" alignSelf="flex-start">
+              OR
+            </Text>
 
             {/* File Upload */}
             <Box position="relative">
-              <Box 
+              <Box
                 {...getRootProps()}
-                p={3} 
-                border="2px dashed" 
+                p={3}
+                border="2px dashed"
                 borderColor={isDragActive ? "teal" : "gray.300"}
-                borderRadius="md" 
+                borderRadius="md"
                 cursor="pointer"
                 width="100%"
                 bg={uploadedFile ? "green.50" : "transparent"}
@@ -360,15 +363,21 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
               >
                 <input {...getInputProps()} />
                 <VStack spacing={1}>
-                  <Icon as={FaFileUpload} boxSize="20px" color={isDragActive ? "teal" : "gray.500"} />
+                  <Icon
+                    as={FaFileUpload}
+                    boxSize="20px"
+                    color={isDragActive ? "teal" : "gray.500"}
+                  />
                   {uploadedFile ? (
                     <Text fontSize="sm">{uploadedFile.name}</Text>
                   ) : (
-                    <Text fontSize="sm" textAlign="center">Drop a file here, or click to select</Text>
+                    <Text fontSize="sm" textAlign="center">
+                      Drop a file here, or click to select
+                    </Text>
                   )}
                 </VStack>
               </Box>
-              
+
               {/* Remove file button - only shows when a file is uploaded */}
               {uploadedFile && (
                 <Button
@@ -383,8 +392,8 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
                   minWidth="24px"
                   p={0}
                   onClick={(e) => {
-                    e.stopPropagation();
-                    setUploadedFile(null);
+                    e.stopPropagation()
+                    setUploadedFile(null)
                   }}
                   aria-label="Remove file"
                   title="Remove file"
@@ -395,11 +404,11 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
             </Box>
 
             {/* Chat Messages */}
-            <Box 
-              width="100%" 
+            <Box
+              width="100%"
               height="300px"
-              overflowY="auto" 
-              border="1px solid" 
+              overflowY="auto"
+              border="1px solid"
               borderColor="gray.200"
               borderRadius="md"
               p={3}
@@ -407,17 +416,17 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
             >
               {messages.length === 0 ? (
                 <Text color="gray.500" textAlign="center" py={10} fontSize="sm">
-                  {selectedKbId || uploadedFile ? 
-                    "Select a knowledge base or upload a file, then ask a question." :
-                    "Ask me anything! For knowledge base search, select a knowledge base first."}
+                  {selectedKbId || uploadedFile
+                    ? "Select a knowledge base or upload a file, then ask a question."
+                    : "Ask me anything! For knowledge base search, select a knowledge base first."}
                 </Text>
               ) : (
                 <>
                   {messages.map((msg, idx) => (
-                    <Box 
-                      key={idx} 
-                      bg={msg.role === "user" ? "blue.50" : "white"} 
-                      p={2} 
+                    <Box
+                      key={idx}
+                      bg={msg.role === "user" ? "blue.50" : "white"}
+                      p={2}
                       mb={2}
                       borderRadius="md"
                       alignSelf={msg.role === "user" ? "flex-end" : "flex-start"}
@@ -426,7 +435,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
                       width="100%"
                     >
                       <Text fontSize="sm">{msg.content}</Text>
-                      
+
                       {/* Display sources if available */}
                       {msg.sources && msg.sources.length > 0 && (
                         <Accordion.Root type="single" collapsible mt={2}>
@@ -445,19 +454,19 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
                             </h2>
                             <Accordion.ItemContent pb={2} bg="gray.50">
                               {msg.sources.map((source, sIdx) => (
-                                <Box 
+                                <Box
                                   key={sIdx}
-                                  p={2} 
-                                  mb={2} 
-                                  borderWidth="1px" 
+                                  p={2}
+                                  mb={2}
+                                  borderWidth="1px"
                                   borderRadius="md"
                                   bg="white"
                                 >
                                   <Text fontWeight="bold" fontSize="xs" color="gray.700">
                                     Source {sIdx + 1}:
-                                    {source.metadata?.source && (
+                                    {source.metadata?.source &&
                                       // Replace this with our SourceLink if source_data_id is available
-                                      source.metadata.source_data_id ? (
+                                      (source.metadata.source_data_id ? (
                                         <SourceLink
                                           sourceId={source.metadata.source_data_id}
                                           fileName={getDisplayFileName(source.metadata.source)}
@@ -470,14 +479,13 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
                                         <Text as="span" ml={1} fontWeight="normal" color="blue.600">
                                           {getDisplayFileName(source.metadata.source)}
                                         </Text>
-                                      )
-                                    )}
+                                      ))}
                                   </Text>
-                                  <Box 
-                                    mt={1} 
-                                    p={2} 
-                                    bg="gray.50" 
-                                    borderRadius="sm" 
+                                  <Box
+                                    mt={1}
+                                    p={2}
+                                    bg="gray.50"
+                                    borderRadius="sm"
                                     fontSize="xs"
                                     whiteSpace="pre-wrap"
                                   >
@@ -502,14 +510,19 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
             </Box>
           </VStack>
         </Box>
-        
+
         {/* Input area - Keep fixed at bottom */}
         <Box width="100%" bg="white" borderTop="1px solid" borderColor="gray.100" flexShrink={0}>
           <Text fontSize="xs" color="gray.500" px={4} pt={2} pb={1}>
             {selectedKbId ? (
-              <>Using knowledge base: <b>{knowledgeBases.find(kb => kb.id === selectedKbId)?.title}</b></>
+              <>
+                Using knowledge base:{" "}
+                <b>{knowledgeBases.find((kb) => kb.id === selectedKbId)?.title}</b>
+              </>
             ) : uploadedFile ? (
-              <>Using document: <b>{uploadedFile.name}</b></>
+              <>
+                Using document: <b>{uploadedFile.name}</b>
+              </>
             ) : (
               <>Using general AI assistant</>
             )}
@@ -525,8 +538,8 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
               disabled={isLoading}
               fontSize="sm"
             />
-            <Button 
-              colorPalette="teal" 
+            <Button
+              colorPalette="teal"
               onClick={handleSendMessage}
               disabled={!question.trim() || isLoading}
               isLoading={isLoading}
@@ -539,7 +552,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
         </Box>
       </Box>
     </Portal>
-  );
-};
+  )
+}
 
-export default ChatbotPanel;
+export default ChatbotPanel

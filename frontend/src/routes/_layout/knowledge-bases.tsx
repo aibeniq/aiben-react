@@ -1,12 +1,4 @@
-import {
-  Container,
-  EmptyState,
-  Flex,
-  Heading,
-  Table,
-  VStack,
-  Badge
-} from "@chakra-ui/react"
+import { Container, EmptyState, Flex, Heading, Table, VStack, Badge } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { FiSearch } from "react-icons/fi"
@@ -72,9 +64,7 @@ function KnowledgeBasesTable() {
           </EmptyState.Indicator>
           <VStack textAlign="center">
             <EmptyState.Title>You don't have any Knowledge Bases yet</EmptyState.Title>
-            <EmptyState.Description>
-              Add a new Knowledge Base to get started
-            </EmptyState.Description>
+            <EmptyState.Description>Add a new Knowledge Base to get started</EmptyState.Description>
           </VStack>
         </EmptyState.Content>
       </EmptyState.Root>

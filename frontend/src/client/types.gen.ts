@@ -684,6 +684,12 @@ export type TwincheckDeleteComparisonData = {
 
 export type TwincheckDeleteComparisonResponse = unknown
 
+export type TwincheckGenerateDocxData = {
+  requestBody: DocxRequest
+}
+
+export type TwincheckGenerateDocxResponse = unknown
+
 export type UsersReadUsersData = {
   limit?: number
   skip?: number
@@ -795,3 +801,9 @@ export type VeradocGetVeradocDetailData = {
 }
 
 export type VeradocGetVeradocDetailResponse = unknown
+
+export type VeradocGenerateDocxData = {
+  requestBody: DocxRequest
+}
+
+export type VeradocGenerateDocxResponse = unknown

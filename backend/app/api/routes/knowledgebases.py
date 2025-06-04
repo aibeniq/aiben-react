@@ -11,7 +11,17 @@ import shutil
 from io import BytesIO
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import KnowledgeBase, KnowledgeBaseCreate, KnowledgeBasePublic, KnowledgeBasesPublic, KnowledgeBaseUpdate, Message, Source, SourceData, EmbeddingModel
+from app.models import (
+    KnowledgeBase,
+    KnowledgeBaseCreate,
+    KnowledgeBasePublic,
+    KnowledgeBasesPublic,
+    KnowledgeBaseUpdate,
+    Message,
+    Source,
+    SourceData,
+    EmbeddingModel,
+)
 from app.services.embeddings import load_embeddings_model
 from app.core.config import settings
 import hashlib
@@ -33,10 +43,11 @@ import mimetypes
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
 
+
 def load_correct_embeddings_model(
     session: SessionDep,
     current_user: Any,  # Pass the current user object here
-    embedding_model_id: Optional[uuid.UUID] = None
+    embedding_model_id: Optional[uuid.UUID] = None,
 ) -> Any:
     """
     Load the correct embeddings model based on the provided embedding_model_id or user's default model.
@@ -58,7 +69,7 @@ def load_correct_embeddings_model(
         if not model:
             raise HTTPException(
                 status_code=404,
-                detail=f"Embedding model with ID {embedding_model_id} not found"
+                detail=f"Embedding model with ID {embedding_model_id} not found",
             )
         model_id = model.model_id
         provider = model.provider
@@ -81,8 +92,7 @@ def load_correct_embeddings_model(
         # Fallback to system default if user has no default
         if not model_id or not provider:
             default_model = session.exec(
-                select(EmbeddingModel)
-                .where(EmbeddingModel.owner_id.is_(None))
+                select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
             ).first()
             print("System default embedding model:", default_model)
             if default_model:
@@ -95,61 +105,60 @@ def load_correct_embeddings_model(
 
     # Initialize embeddings with the selected model
     try:
-        embeddings = load_embeddings_model(
-            provider=provider,
-            model_id=model_id
-        )
+        embeddings = load_embeddings_model(provider=provider, model_id=model_id)
         print("Embeddings model loaded successfully.")
     except Exception as e:
         raise HTTPException(
             status_code=400,
-            detail=f"Error initializing embedding model {model_id}: {str(e)}"
+            detail=f"Error initializing embedding model {model_id}: {str(e)}",
         )
 
     print(f"Using embedding model: {model_id}")
     return embeddings, model_id, provider
 
+
 def extract_text_from_docx(file_path: str, filename: str) -> List[Any]:
-            doc = docx.Document(file_path)
-            
-            full_text = []
-            
-            for para in doc.paragraphs:
-                if para.text.strip():  # Skip empty paragraphs
-                    full_text.append(para.text)
-            
-            for table in doc.tables:
-                for row in table.rows:
-                    row_text = []
-                    for cell in row.cells:
-                        if cell.text.strip():
-                            row_text.append(cell.text.strip())
-                    if row_text:
-                        full_text.append(" | ".join(row_text))
-            
-            combined_text = "\n\n".join(full_text)
-            
-            metadata = {
-                "source": filename,
-                "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            }
-            
-            # Try to get document properties
-            try:
-                core_properties = doc.core_properties
-                if core_properties.title:
-                    metadata["title"] = core_properties.title
-                if core_properties.author:
-                    metadata["author"] = core_properties.author
-                if core_properties.created:
-                    metadata["created"] = str(core_properties.created)
-                if core_properties.modified:
-                    metadata["modified"] = str(core_properties.modified)
-            except Exception as e:
-                print(f"Could not extract document properties: {str(e)}")
-            
-            # Create a Document object compatible with langchain
-            return [Document(page_content=combined_text, metadata=metadata)]
+    doc = docx.Document(file_path)
+
+    full_text = []
+
+    for para in doc.paragraphs:
+        if para.text.strip():  # Skip empty paragraphs
+            full_text.append(para.text)
+
+    for table in doc.tables:
+        for row in table.rows:
+            row_text = []
+            for cell in row.cells:
+                if cell.text.strip():
+                    row_text.append(cell.text.strip())
+            if row_text:
+                full_text.append(" | ".join(row_text))
+
+    combined_text = "\n\n".join(full_text)
+
+    metadata = {
+        "source": filename,
+        "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    }
+
+    # Try to get document properties
+    try:
+        core_properties = doc.core_properties
+        if core_properties.title:
+            metadata["title"] = core_properties.title
+        if core_properties.author:
+            metadata["author"] = core_properties.author
+        if core_properties.created:
+            metadata["created"] = str(core_properties.created)
+        if core_properties.modified:
+            metadata["modified"] = str(core_properties.modified)
+    except Exception as e:
+        print(f"Could not extract document properties: {str(e)}")
+
+    # Create a Document object compatible with langchain
+    return [Document(page_content=combined_text, metadata=metadata)]
+
 
 def load_uploaded_file(file: UploadFile) -> List[Any]:
     """
@@ -165,8 +174,12 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
     content_type = file.content_type or mimetypes.guess_type(file.filename)[0]
     print(f"Detected content type: {content_type}")
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as temp_file:
-        temp_file.write(file.file.read())  # Write the file content to the temporary file
+    with tempfile.NamedTemporaryFile(
+        delete=False, suffix=f"_{file.filename}"
+    ) as temp_file:
+        temp_file.write(
+            file.file.read()
+        )  # Write the file content to the temporary file
         temp_file_path = temp_file.name
 
     try:
@@ -174,9 +187,13 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
             print("Loading PDF with PyPDFLoader...")
             loader = PyPDFLoader(temp_file_path)
             loaded_documents = loader.load()
-        elif content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" or file.filename.lower().endswith(".docx"):
+        elif (
+            content_type
+            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            or file.filename.lower().endswith(".docx")
+        ):
             print("Loading DOCX with python-docx library...")
-            loaded_documents = extract_text_from_docx(temp_file_path, file.filename)  
+            loaded_documents = extract_text_from_docx(temp_file_path, file.filename)
         else:
             print("Loading text with TextLoader...")
             # Try with different encodings if utf-8 fails
@@ -192,12 +209,12 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
     except Exception as e:
         print(f"Error processing file {file.filename}: {str(e)}")
         raise HTTPException(
-            status_code=400,
-            detail=f"Error processing file {file.filename}: {str(e)}"
+            status_code=400, detail=f"Error processing file {file.filename}: {str(e)}"
         )
     finally:
         # Clean up the temporary file
         os.unlink(temp_file_path)
+
 
 @router.get("/", response_model=KnowledgeBasesPublic)
 def read_knowledge_bases(
@@ -267,6 +284,7 @@ def read_knowledge_bases(
 
     return KnowledgeBasesPublic(data=knowledge_bases, count=count)
 
+
 @router.get("/{id}", response_model=KnowledgeBasePublic)
 def read_knowledge_base(
     session: SessionDep, current_user: CurrentUser, id: uuid.UUID
@@ -277,37 +295,37 @@ def read_knowledge_base(
     knowledge_base = session.get(KnowledgeBase, id)
     if not knowledge_base:
         raise HTTPException(status_code=404, detail="Knowledge base not found")
-    
+
     # Get embedding model name if it exists
     embedding_model_name = None
     if knowledge_base.embedding_model_id:
         model = session.get(EmbeddingModel, knowledge_base.embedding_model_id)
         if model:
             embedding_model_name = model.name
-    
-     # Get all sources for this knowledge base
-    sources = session.exec(
-        select(Source)
-        .where(Source.knowledge_base_id == id)
-    ).all()
+
+    # Get all sources for this knowledge base
+    sources = session.exec(select(Source).where(Source.knowledge_base_id == id)).all()
 
     files = []
     for source in sources:
         # Only include metadata, not the actual file content
-        files.append({
-            "id": str(source.source_data_id),
-            "name": source.name,
-            "date_created": source.date_created,
-            # Don't include data_base64 here
-        })
+        files.append(
+            {
+                "id": str(source.source_data_id),
+                "name": source.name,
+                "date_created": source.date_created,
+                # Don't include data_base64 here
+            }
+        )
 
     # Construct the response model
     knowledge_base_public = KnowledgeBasePublic(
         **knowledge_base.model_dump(),
         files=files,
-        embedding_model_name=embedding_model_name
+        embedding_model_name=embedding_model_name,
     )
     return knowledge_base_public
+
 
 @router.post("/", response_model=KnowledgeBasePublic)
 def create_knowledge_base(
@@ -328,7 +346,7 @@ def create_knowledge_base(
     existing_kb = session.exec(
         select(KnowledgeBase).where(
             KnowledgeBase.title == knowledge_base_in.title,
-            KnowledgeBase.owner_id == current_user.id
+            KnowledgeBase.owner_id == current_user.id,
         )
     ).first()
 
@@ -337,9 +355,9 @@ def create_knowledge_base(
     if existing_kb:
         raise HTTPException(
             status_code=409,  # Using 409 Conflict for duplicate resource
-            detail=f"A knowledge base with the title '{knowledge_base_in.title}' already exists"
+            detail=f"A knowledge base with the title '{knowledge_base_in.title}' already exists",
         )
-    
+
     # Initialize variables for Chroma
     documents = []
 
@@ -364,8 +382,8 @@ def create_knowledge_base(
 
     # Split documents into chunks using RecursiveCharacterTextSplitter
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=settings.DOCUMENT_CHUNK_SIZE, 
-        chunk_overlap=settings.DOCUMENT_CHUNK_OVERLAP
+        chunk_size=settings.DOCUMENT_CHUNK_SIZE,
+        chunk_overlap=settings.DOCUMENT_CHUNK_OVERLAP,
     )
     splits = text_splitter.split_documents(documents)
 
@@ -374,7 +392,7 @@ def create_knowledge_base(
     embeddings, model_id, provider = load_correct_embeddings_model(
         session=session,
         current_user=current_user,  # Pass the current user to load the correct model
-        embedding_model_id=knowledge_base_in.embedding_model_id
+        embedding_model_id=knowledge_base_in.embedding_model_id,
     )
 
     print(f"Using embedding model: {model_id}")
@@ -383,15 +401,16 @@ def create_knowledge_base(
     chroma_dir = tempfile.mkdtemp()
     try:
         # Create Chroma VectorDB from the document splits
-        Chroma.from_documents(documents=splits, embedding=embeddings, persist_directory=chroma_dir)
+        Chroma.from_documents(
+            documents=splits, embedding=embeddings, persist_directory=chroma_dir
+        )
     except Exception as e:
         print(f"Error creating Chroma VectorDB: {str(e)}")
         # Clean up the directory on error
         if os.path.exists(chroma_dir):
             shutil.rmtree(chroma_dir)
         raise HTTPException(
-            status_code=500,
-            detail=f"Error creating vector database: {str(e)}"
+            status_code=500, detail=f"Error creating vector database: {str(e)}"
         )
 
     print("Zipping Chroma database...")
@@ -402,7 +421,9 @@ def create_knowledge_base(
         for root, _, filenames in os.walk(chroma_dir):
             for filename in filenames:
                 file_path = os.path.join(root, filename)
-                arcname = os.path.relpath(file_path, chroma_dir)  # Preserve directory structure
+                arcname = os.path.relpath(
+                    file_path, chroma_dir
+                )  # Preserve directory structure
                 zip_file.write(file_path, arcname)
     zip_buffer.seek(0)
 
@@ -417,7 +438,7 @@ def create_knowledge_base(
             "embedding_model_id": knowledge_base_in.embedding_model_id,
             "date_created": datetime.utcnow(),
             "date_modified": datetime.utcnow(),
-        }
+        },
     )
 
     print("Adding knowledge base to session...")
@@ -435,7 +456,7 @@ def create_knowledge_base(
             session=session,
             current_user=current_user,
             knowledge_base_id=knowledge_base.id,
-            file=file
+            file=file,
         )
 
     session.commit()
@@ -464,33 +485,37 @@ def update_knowledge_base(
         raise HTTPException(status_code=404, detail="Knowledge base not found")
     if not current_user.is_superuser and (knowledge_base.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
-    
+
     update_dict = knowledge_base_in.model_dump(exclude_unset=True)
     knowledge_base.sqlmodel_update(update_dict)
 
     # Retrieve the compressed folder from the database
     if files or knowledge_base_in.removed_file_ids:
         print("Retrieving existing VectorDB...")
-        
+
         # Clear out any existing chroma_db directory
         chroma_dir = tempfile.mkdtemp()
         try:
             # Extract the zipped ChromaDB into the temp directory
             if knowledge_base.data:
-                with zipfile.ZipFile(io.BytesIO(knowledge_base.data), 'r') as zip_ref:
+                with zipfile.ZipFile(io.BytesIO(knowledge_base.data), "r") as zip_ref:
                     zip_ref.extractall(chroma_dir)
             else:
-                raise HTTPException(status_code=400, detail="Knowledge base has no vector database data")
-            
+                raise HTTPException(
+                    status_code=400, detail="Knowledge base has no vector database data"
+                )
+
             # Load the vector database with the SAME model used to create the knowledge base
             embeddings, model_id, provider = load_correct_embeddings_model(
                 session=session,
                 current_user=current_user,  # Pass the current
-                embedding_model_id=knowledge_base_in.embedding_model_id
+                embedding_model_id=knowledge_base_in.embedding_model_id,
             )
-            
+
             # Initialize Chroma with the existing database
-            chroma_vector_database = Chroma(persist_directory=chroma_dir, embedding_function=embeddings)
+            chroma_vector_database = Chroma(
+                persist_directory=chroma_dir, embedding_function=embeddings
+            )
 
             # Process new files (if any)
             if files:
@@ -508,7 +533,7 @@ def update_knowledge_base(
                         session=session,
                         current_user=current_user,
                         knowledge_base_id=knowledge_base.id,
-                        file=file
+                        file=file,
                     )
 
                 # Add the new documents to the VectorDB only if we have new files
@@ -519,7 +544,9 @@ def update_knowledge_base(
             if knowledge_base_in.removed_file_ids:
                 print("Removing files from VectorDB...")
                 sources_to_remove = session.exec(
-                    select(Source).where(Source.source_data_id.in_(knowledge_base_in.removed_file_ids))
+                    select(Source).where(
+                        Source.source_data_id.in_(knowledge_base_in.removed_file_ids)
+                    )
                 ).all()
 
                 print("Sources to remove:", sources_to_remove)
@@ -530,19 +557,21 @@ def update_knowledge_base(
                 # 1. First, only delete Source entries for THIS specific knowledge base
                 sources_to_delete = session.exec(
                     select(Source).where(
-                        (Source.source_data_id.in_(knowledge_base_in.removed_file_ids)) & 
-                        (Source.knowledge_base_id == id)
+                        (Source.source_data_id.in_(knowledge_base_in.removed_file_ids))
+                        & (Source.knowledge_base_id == id)
                     )
                 ).all()
 
                 # 2. Remember which source_data_ids we're removing
-                source_data_ids_to_check = [source.source_data_id for source in sources_to_delete]
+                source_data_ids_to_check = [
+                    source.source_data_id for source in sources_to_delete
+                ]
 
                 # 3. Delete the specific Source entries (just the associations)
                 session.exec(
                     delete(Source).where(
-                        (Source.source_data_id.in_(knowledge_base_in.removed_file_ids)) & 
-                        (Source.knowledge_base_id == id)
+                        (Source.source_data_id.in_(knowledge_base_in.removed_file_ids))
+                        & (Source.knowledge_base_id == id)
                     )
                 )
 
@@ -550,9 +579,11 @@ def update_knowledge_base(
                 for source_data_id in source_data_ids_to_check:
                     # Count how many Sources still reference this source_data_id
                     remaining_references = session.exec(
-                        select(func.count()).where(Source.source_data_id == source_data_id)
+                        select(func.count()).where(
+                            Source.source_data_id == source_data_id
+                        )
                     ).one()
-                    
+
                     # If no Sources reference this source_data_id anymore, delete the SourceData
                     if remaining_references == 0:
                         session.exec(
@@ -579,8 +610,7 @@ def update_knowledge_base(
             if os.path.exists(chroma_dir):
                 shutil.rmtree(chroma_dir)
             raise HTTPException(
-                status_code=500,
-                detail=f"Error updating vector database: {str(e)}"
+                status_code=500, detail=f"Error updating vector database: {str(e)}"
             )
         finally:
             # Clean up regardless of success or failure

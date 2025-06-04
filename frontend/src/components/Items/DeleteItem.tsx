@@ -71,27 +71,18 @@ const DeleteItem = ({ id }: { id: string }) => {
           </DialogHeader>
           <DialogBody>
             <Text mb={4}>
-              This item will be permanently deleted. Are you sure? You will not
-              be able to undo this action.
+              This item will be permanently deleted. Are you sure? You will not be able to undo this
+              action.
             </Text>
           </DialogBody>
 
           <DialogFooter gap={2}>
             <DialogActionTrigger asChild>
-              <Button
-                variant="subtle"
-                colorPalette="gray"
-                disabled={isSubmitting}
-              >
+              <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
                 Cancel
               </Button>
             </DialogActionTrigger>
-            <Button
-              variant="solid"
-              colorPalette="red"
-              type="submit"
-              loading={isSubmitting}
-            >
+            <Button variant="solid" colorPalette="red" type="submit" loading={isSubmitting}>
               Delete
             </Button>
           </DialogFooter>

@@ -14,15 +14,15 @@ from langchain_core.messages import HumanMessage
 from app.api.deps import CurrentUser, SessionDep
 from app.services.llms import create_llm
 from app.models import (
-    LlmModel, 
-    LlmModelCreate, 
+    LlmModel,
+    LlmModelCreate,
     LlmModelUpdate,
     LlmModelPublic,
     LlmModelsPublic,
     LlmModelsValidate,
     ModelProvider,
     Message,
-    User
+    User,
 )
 from datetime import datetime
 
@@ -38,13 +38,14 @@ from langchain_openai import ChatOpenAI
 
 router = APIRouter(prefix="/llm-models", tags=["llm-models"])
 
+
 # Initialize with default models
 def initialize_default_llm_models(session: SessionDep):
     # Check if we already have models in the database
     existing_count = session.exec(select(func.count()).select_from(LlmModel)).one()
     if existing_count > 0:
         return
-    
+
     # Add system models (no is_default flag)
     default_models = [
         {
@@ -70,9 +71,9 @@ def initialize_default_llm_models(session: SessionDep):
             "model_id": "mistral",
             "provider": ModelProvider.OLLAMA,
             "description": "Local Mistral 7B model running via Ollama.",
-        }
+        },
     ]
-    
+
     for model_data in default_models:
         model = LlmModel(
             name=model_data["name"],
@@ -82,8 +83,9 @@ def initialize_default_llm_models(session: SessionDep):
             # No is_default field!
         )
         session.add(model)
-    
+
     session.commit()
+
 
 @router.get("/", response_model=LlmModelsPublic)
 def get_llm_models(
@@ -94,20 +96,22 @@ def get_llm_models(
     """
     # Initialize default models if none exist
     initialize_default_llm_models(session)
-    
+
     # Get models (both system and user-specific)
     models = session.exec(
         select(LlmModel)
-        .where((LlmModel.owner_id.is_(None)) | 
-               (LlmModel.owner_id == current_user.id))
+        .where((LlmModel.owner_id.is_(None)) | (LlmModel.owner_id == current_user.id))
         .offset(skip)
         .limit(limit)
     ).all()
-    
+
     return LlmModelsPublic(data=models)
 
+
 @router.get("/default", response_model=LlmModelPublic)
-def get_default_llm_model(session: SessionDep, current_user: CurrentUser) -> LlmModelPublic:
+def get_default_llm_model(
+    session: SessionDep, current_user: CurrentUser
+) -> LlmModelPublic:
     """
     Get the user's default LLM model (database record).
     """
@@ -117,13 +121,11 @@ def get_default_llm_model(session: SessionDep, current_user: CurrentUser) -> Llm
         if model:
             return model
     # Fallback to system default (first system model)
-    model = session.exec(
-        select(LlmModel)
-        .where(LlmModel.owner_id.is_(None))
-    ).first()
+    model = session.exec(select(LlmModel).where(LlmModel.owner_id.is_(None))).first()
     if not model:
         raise HTTPException(status_code=404, detail="No default LLM found")
     return model
+
 
 @router.post("/", response_model=LlmModelPublic)
 def create_llm_model(
@@ -138,12 +140,13 @@ def create_llm_model(
         **model_in.model_dump(),
         owner_id=current_user.id,
         date_created=datetime.utcnow(),
-        date_modified=datetime.utcnow()
+        date_modified=datetime.utcnow(),
     )
     session.add(model)
     session.commit()
     session.refresh(model)
     return model
+
 
 @router.delete("/{model_id}", response_model=Message)
 def delete_llm_model(
@@ -156,10 +159,13 @@ def delete_llm_model(
     if not model:
         raise HTTPException(status_code=404, detail="LLM not found")
     if model.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to delete this model")
+        raise HTTPException(
+            status_code=403, detail="Not authorized to delete this model"
+        )
     session.delete(model)
     session.commit()
     return Message(message="LLM deleted successfully")
+
 
 @router.post("/validate", response_model=Message)
 def validate_llm_model(
@@ -169,27 +175,29 @@ def validate_llm_model(
     """
     Validate if an LLM ID is valid for the specified provider.
     """
-    print(f"Validating LLM model: {model_data.model_id} for provider {model_data.provider}")
+    print(
+        f"Validating LLM model: {model_data.model_id} for provider {model_data.provider}"
+    )
     try:
         # Extract the provider and model_id
         provider = model_data.provider
         model_id = model_data.model_id
-        
+
         print(f"Validating LLM: {model_id} (provider: {provider})")
-        
+
         if provider == ModelProvider.OPENAI:
             # For OpenAI, attempt to create the model with a simple test
-            
+
             # Get API key from environment or request
-            #api_key = None  # You can add API key passing if needed
-            
+            # api_key = None  # You can add API key passing if needed
+
             llm = ChatOpenAI(
                 model=model_id,
                 temperature=0.0,
-                #openai_api_key=api_key,
-                max_tokens=5  # Minimum tokens for test
+                # openai_api_key=api_key,
+                max_tokens=5,  # Minimum tokens for test
             )
-            
+
             # Test with a simple query to verify the model exists
             response = llm.invoke("Hello")
             print(f"OpenAI model validation successful: {model_id}")
@@ -201,38 +209,40 @@ def validate_llm_model(
                 aws_access_key = os.environ.get("AWS_ACCESS_KEY_ID")
                 aws_secret_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
                 aws_region = os.environ.get("AWS_REGION", "eu-north-1")
-                
+
                 if not aws_access_key or not aws_secret_key:
                     print("AWS credentials not found in environment variables")
                     raise HTTPException(
                         status_code=400,
-                        detail="AWS credentials are not configured in the environment"
+                        detail="AWS credentials are not configured in the environment",
                     )
-                
-                print(f"Initializing Bedrock client with model: {model_id} in region: {aws_region}")
+
+                print(
+                    f"Initializing Bedrock client with model: {model_id} in region: {aws_region}"
+                )
 
                 bedrock_client = boto3.client(
                     "bedrock",
                     aws_access_key_id=aws_access_key,
                     aws_secret_access_key=aws_secret_key,
-                    region_name=aws_region
+                    region_name=aws_region,
                 )
                 print("Now listing available foundation models in AWS Bedrock...")
                 print(bedrock_client.list_foundation_models())
-                
+
                 # Initialize Bedrock LLM using environment variables
                 if "anthropic.claude" in model_id:
                     print(f"Using BedrockChat for Claude model: {model_id}")
                     # Use BedrockChat for Claude models]
-                    
+
                     # Create the bedrock-runtime client for regular operations
                     runtime_client = boto3.client(
                         "bedrock-runtime",
                         aws_access_key_id=aws_access_key,
                         aws_secret_access_key=aws_secret_key,
-                        region_name=aws_region
+                        region_name=aws_region,
                     )
-                    
+
                     bedrock_llm = ChatBedrock(
                         model_id=model_id,
                         model_kwargs={"temperature": 0.0},
@@ -245,7 +255,7 @@ def validate_llm_model(
                         )
                     ]
                     response = bedrock_llm.invoke(messages)
-                    
+
                 else:
                     # Use standard Bedrock for other models like Titan
                     print(f"Using standard Bedrock for model: {model_id}")
@@ -254,13 +264,11 @@ def validate_llm_model(
                         "bedrock-runtime",
                         aws_access_key_id=aws_access_key,
                         aws_secret_access_key=aws_secret_key,
-                        region_name=aws_region
+                        region_name=aws_region,
                     )
 
                     bedrock_llm = Bedrock(
-                        model_id=model_id,
-                        region_name=aws_region,
-                        client=bedrock_client
+                        model_id=model_id, region_name=aws_region, client=bedrock_client
                     )
 
                     prompt_template = "What is the capital city of {country}?"
@@ -272,43 +280,51 @@ def validate_llm_model(
                     llm = LLMChain(llm=bedrock_llm, prompt=prompt)
 
                     response = llm.invoke({"country": "Canada"})
-                
+
                 print(f"Received response from AWS Bedrock: {response}")
                 print(f"AWS Bedrock model validation successful: {model_id}")
-                
+
             except Exception as e:
                 traceback.print_exc()
                 error_msg = str(e)
                 print(f"Error validating AWS Bedrock model: {error_msg}")
-                
-                if "not authorized" in error_msg.lower() or "access denied" in error_msg.lower():
-                    detail = "AWS credentials not authorized to access Bedrock or this model"
-                elif "not found" in error_msg.lower() or "does not exist" in error_msg.lower():
+
+                if (
+                    "not authorized" in error_msg.lower()
+                    or "access denied" in error_msg.lower()
+                ):
+                    detail = (
+                        "AWS credentials not authorized to access Bedrock or this model"
+                    )
+                elif (
+                    "not found" in error_msg.lower()
+                    or "does not exist" in error_msg.lower()
+                ):
                     detail = f"Model {model_id} not found in AWS Bedrock"
-                elif "quota exceeded" in error_msg.lower() or "limit" in error_msg.lower():
+                elif (
+                    "quota exceeded" in error_msg.lower()
+                    or "limit" in error_msg.lower()
+                ):
                     detail = "AWS Bedrock quota exceeded or limits reached"
                 else:
                     detail = f"Invalid AWS Bedrock model or configuration: {error_msg}"
-                    
-                raise HTTPException(
-                    status_code=400,
-                    detail=detail
-                )
-            
+
+                raise HTTPException(status_code=400, detail=detail)
+
         elif provider == ModelProvider.HUGGINGFACE:
-            # For HuggingFace, try to load the model            
+            # For HuggingFace, try to load the model
             print(f"Loading HuggingFace model: {model_id}")
-            
+
             # Just check if the model exists - don't fully load it to save resources
             tokenizer = AutoTokenizer.from_pretrained(model_id)
             print(f"HuggingFace tokenizer loaded successfully for {model_id}")
-            
+
             # Optional: Check model card to verify it's a language model
             # from huggingface_hub import model_info
             # info = model_info(model_id)
             # if "text-generation" not in info.pipeline_tag and "text2text-generation" not in info.pipeline_tag:
             #     raise ValueError(f"Model {model_id} is not a language model")
-            
+
         elif provider == ModelProvider.OLLAMA:
             # For Ollama, check if the model is available
             base_url = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")
@@ -317,56 +333,52 @@ def validate_llm_model(
                 model=model_id,
                 temperature=0.0,
                 # Use default Ollama URL, or configure as needed
-                base_url=base_url
+                base_url=base_url,
             )
-            
+
             # Simple test to verify the model is available
             response = llm.invoke("Hello")
             print(f"Ollama model validation successful: {model_id}")
-        
+
         elif provider == ModelProvider.REPLICATE:
-            try:                
+            try:
                 # Check if API token is configured
                 if "REPLICATE_API_TOKEN" not in os.environ:
-                    raise ValueError("REPLICATE_API_TOKEN not set in environment variables")
-                
+                    raise ValueError(
+                        "REPLICATE_API_TOKEN not set in environment variables"
+                    )
+
                 # Try to get model info - this will fail if the model doesn't exist
                 # Parse model ID to get the correct format
                 if ":" in model_id:
                     owner_model, version = model_id.split(":")
                     # Get the model directly with version
                     output = replicate.run(
-                        model_id,
-                        input={"prompt": "Hello"},
-                        use_file_output=False
+                        model_id, input={"prompt": "Hello"}, use_file_output=False
                     )
                 else:
                     # Try using the model without explicit version
                     output = replicate.run(
-                        model_id,
-                        input={"prompt": "Hello"},
-                        use_file_output=False
+                        model_id, input={"prompt": "Hello"}, use_file_output=False
                     )
-                
+
                 print(f"Replicate model validation successful: {model_id}")
-            
+
             except Exception as e:
                 print(f"Error validating Replicate model: {str(e)}")
                 raise ValueError(f"Invalid Replicate model: {str(e)}")
-            
+
         else:
             raise ValueError(f"Unsupported provider: {provider}")
-        
+
         return Message(message=f"LLM {model_id} is valid for provider {provider}")
-        
+
     except Exception as e:
         traceback.print_exc()
         print(f"LLM validation error: {str(e)}")
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid LLM: {str(e)}"
-        )
-    
+        raise HTTPException(status_code=400, detail=f"Invalid LLM: {str(e)}")
+
+
 @router.post("/{model_id}/set-default", response_model=LlmModelPublic)
 def set_default_llm_model(
     model_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
@@ -377,14 +389,13 @@ def set_default_llm_model(
     model = session.get(LlmModel, model_id)
     if not model:
         raise HTTPException(status_code=404, detail="LLM not found")
-    
+
     # Check if the model is system-owned or owned by the current user
     if model.owner_id is not None and model.owner_id != current_user.id:
         raise HTTPException(
-            status_code=403, 
-            detail="Not authorized to modify this model"
+            status_code=403, detail="Not authorized to modify this model"
         )
-    
+
     user = session.get(User, current_user.id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

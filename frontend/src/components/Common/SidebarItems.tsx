@@ -1,9 +1,19 @@
 import { Box, Flex, Icon, Text, Accordion } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Link as RouterLink } from "@tanstack/react-router"
-import { FiBriefcase, FiHome, FiSettings, FiUsers, FiBookOpen, FiClipboard, FiTool, FiPackage, FiFileText } from "react-icons/fi"
-import { FaBalanceScale } from "react-icons/fa";
-import { TbPlugConnected } from "react-icons/tb";
+import {
+  FiHome,
+  FiSettings,
+  FiUsers,
+  FiBookOpen,
+  FiTool,
+  FiPackage,
+  FiFilePlus,
+  FiCheckCircle,
+  FiCpu,
+} from "react-icons/fi"
+import { FaBalanceScale } from "react-icons/fa"
+import { TbPlugConnected } from "react-icons/tb"
 import type { IconType } from "react-icons/lib"
 
 import type { UserPublic } from "@/client"
@@ -12,33 +22,31 @@ import type { UserPublic } from "@/client"
 const categories = [
   {
     name: null, // No category header for these items
-    items: [
-      { icon: FiHome, title: "Dashboard", path: "/" },
-    ]
+    items: [{ icon: FiHome, title: "Dashboard", path: "/" }],
   },
   {
     name: "Tools",
     icon: FiTool,
     items: [
-      { icon: FiClipboard, title: "Review a document", path: "/veradoc" },
-      { icon: FiFileText, title: "Generate a document", path: "/reportgenie" },
-      { icon: FaBalanceScale, title: "Compare documents", path: "/twincheck" },
-      { icon: TbPlugConnected, title: "Match fields across documents", path: "/formconnect" },
-    ]
+      { icon: FiCheckCircle, title: "Review", path: "/veradoc" },
+      { icon: FiFilePlus, title: "Generate", path: "/reportgenie" },
+      { icon: FaBalanceScale, title: "Compare", path: "/twincheck" },
+      { icon: TbPlugConnected, title: "Match", path: "/formconnect" },
+    ],
   },
   {
     name: "Configurations",
     icon: FiPackage,
     items: [
-      { icon: FiTool, title: "Model Selection", path: "/model-selection" },
+      { icon: FiCpu, title: "Model Selection", path: "/model-selection" },
       { icon: FiBookOpen, title: "Knowledge Bases", path: "/knowledge-bases" },
       { icon: FiSettings, title: "User Settings", path: "/settings" },
-    ]
-  }
-];
+    ],
+  },
+]
 
 // Admin item for superusers
-const adminItem = { icon: FiUsers, title: "Admin", path: "/admin" };
+const adminItem = { icon: FiUsers, title: "Admin", path: "/admin" }
 
 interface SidebarItemsProps {
   onClose?: () => void
@@ -61,14 +69,14 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
 
   // Add admin item for superusers
-  const finalCategories = [...categories];
+  const finalCategories = [...categories]
   if (currentUser?.is_superuser) {
     finalCategories.push({
       name: null,
-      items: [adminItem]
-    });
+      items: [adminItem],
+    })
   }
-  
+
   return (
     <Box>
       {finalCategories.map((category, index) => (
@@ -78,10 +86,12 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
             <Accordion.Root multiple defaultValue={["tools", "configurations"]}>
               <Accordion.Item border="none" value={category.name.toLowerCase()}>
                 <Accordion.ItemTrigger px={4} py={2} _hover={{ bg: "gray.subtle" }}>
-                  <Box as="span" flex='1' textAlign='left'>
+                  <Box as="span" flex="1" textAlign="left">
                     <Flex alignItems="center">
                       {category.icon && <Icon as={category.icon} mr={2} />}
-                      <Text fontSize="xs" fontWeight="bold">{category.name}</Text>
+                      <Text fontSize="xs" fontWeight="bold">
+                        {category.name}
+                      </Text>
                     </Flex>
                   </Box>
                 </Accordion.ItemTrigger>

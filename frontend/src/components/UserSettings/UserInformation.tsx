@@ -1,22 +1,9 @@
-import {
-  Box,
-  Button,
-  Container,
-  Flex,
-  Heading,
-  Input,
-  Text,
-} from "@chakra-ui/react"
+import { Box, Button, Container, Flex, Heading, Input, Text } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
 
-import {
-  type ApiError,
-  type UserPublic,
-  type UserUpdateMe,
-  UsersService,
-} from "@/client"
+import { type ApiError, type UserPublic, type UserUpdateMe, UsersService } from "@/client"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { emailPattern, handleError } from "@/utils"
@@ -47,8 +34,7 @@ const UserInformation = () => {
   }
 
   const mutation = useMutation({
-    mutationFn: (data: UserUpdateMe) =>
-      UsersService.updateUserMe({ requestBody: data }),
+    mutationFn: (data: UserUpdateMe) => UsersService.updateUserMe({ requestBody: data }),
     onSuccess: () => {
       showSuccessToast("User updated successfully.")
     },
@@ -75,18 +61,10 @@ const UserInformation = () => {
         <Heading size="sm" py={4}>
           User Information
         </Heading>
-        <Box
-          w={{ sm: "full", md: "sm" }}
-          as="form"
-          onSubmit={handleSubmit(onSubmit)}
-        >
+        <Box w={{ sm: "full", md: "sm" }} as="form" onSubmit={handleSubmit(onSubmit)}>
           <Field label="Full name">
             {editMode ? (
-              <Input
-                {...register("full_name", { maxLength: 30 })}
-                type="text"
-                size="md"
-              />
+              <Input {...register("full_name", { maxLength: 30 })} type="text" size="md" />
             ) : (
               <Text
                 fontSize="md"
@@ -99,12 +77,7 @@ const UserInformation = () => {
               </Text>
             )}
           </Field>
-          <Field
-            mt={4}
-            label="Email"
-            invalid={!!errors.email}
-            errorText={errors.email?.message}
-          >
+          <Field mt={4} label="Email" invalid={!!errors.email} errorText={errors.email?.message}>
             {editMode ? (
               <Input
                 {...register("email", {
