@@ -684,6 +684,12 @@ export type TwincheckDeleteComparisonData = {
 
 export type TwincheckDeleteComparisonResponse = unknown
 
+export type TwincheckGenerateDocxData = {
+  requestBody: DocxRequest
+}
+
+export type TwincheckGenerateDocxResponse = unknown
+
 export type UsersReadUsersData = {
   limit?: number
   skip?: number
