@@ -3,10 +3,19 @@ const fs = require('fs');
 // --- Patch sdk.gen.ts ---
 const sdkPath = './src/client/sdk.gen.ts';
 let sdkContent = fs.readFileSync(sdkPath, 'utf8');
+
+// Patch for ReportGenie
 sdkContent = sdkContent.replace(
   /(url: "\/api\/v1\/reportgenie\/generate\/docx",[\s\S]*?body: data\.requestBody,)/,
   '$1\n      responseType: \'blob\','
 );
+
+// Patch for TwinCheck
+sdkContent = sdkContent.replace(
+  /(url: "\/api\/v1\/twincheck\/generate\/docx",[\s\S]*?body: data\.requestBody,)/,
+  '$1\n      responseType: \'blob\','
+);
+
 fs.writeFileSync(sdkPath, sdkContent);
 
 // --- Patch request.ts ---

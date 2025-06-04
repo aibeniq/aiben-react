@@ -30,6 +30,7 @@ import {
   FiCopy,
   FiChevronDown,
   FiChevronUp,
+  FiDownload,
 } from "react-icons/fi"
 import { useDropzone } from "react-dropzone"
 import { format } from "date-fns"
@@ -46,6 +47,9 @@ import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 
 const TwinCheck = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
+
+  const [copySuccess, setCopySuccess] = useState(false)
+  const [loadingDownload, setLoadingDownload] = useState(false)
 
   // File state
   const [document1, setDocument1] = useState<File | null>(null)
@@ -78,6 +82,89 @@ const TwinCheck = () => {
     },
     enabled: true,
   })
+
+  // Function to copy report to clipboard
+  const handleCopyReport = async () => {
+    try {
+      // Prepare combined text with summary and all topic analyses
+      let fullText = `# Summary\n\n${summary}\n\n# Topic Analysis\n\n`
+
+      // Add each topic and its analysis
+      topicResults.forEach((topic, index) => {
+        fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
+      })
+
+      await navigator.clipboard.writeText(fullText)
+      setCopySuccess(true)
+
+      // Reset the success icon after 2 seconds
+      setTimeout(() => {
+        setCopySuccess(false)
+      }, 2000)
+
+      showSuccessToast("Comparison results copied to clipboard")
+    } catch (err) {
+      console.error("Failed to copy report:", err)
+      showErrorToast("Failed to copy report to clipboard")
+    }
+  }
+
+  // Function to download report as DOCX
+  const handleDownloadReport = async () => {
+    try {
+      setLoadingDownload(true)
+
+      // Prepare combined text with summary and all topic analyses
+      let fullText = `# Summary\n\n${summary}\n\n# Topic Analysis\n\n`
+
+      // Add each topic and its analysis
+      topicResults.forEach((topic, index) => {
+        fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
+      })
+
+      // Create a unique document name with document titles if available
+      const doc1Name = document1?.name || selectedHistoryItem?.document1_name || "Document1"
+      const doc2Name = document2?.name || selectedHistoryItem?.document2_name || "Document2"
+      const docTitle = `Comparison of ${doc1Name} and ${doc2Name}`
+
+      const response = await TwincheckService.generateDocx({
+        requestBody: { content: fullText, title: docTitle },
+      })
+
+      let blob
+      if (response instanceof Blob) {
+        console.log("Response is a Blob")
+        blob = response
+      } else if (response instanceof ArrayBuffer) {
+        console.log("Response is an ArrayBuffer")
+        blob = new Blob([response], {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        })
+      } else {
+        console.log("Response is a string or unexpected type")
+        blob = new Blob([response], {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        })
+      }
+
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+      a.href = url
+      a.download = `comparison_${timestamp}.docx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      showSuccessToast("Comparison downloaded successfully")
+    } catch (err) {
+      console.error("Failed to download report:", err)
+      showErrorToast(`Failed to download report: ${err.message || "Unknown error"}`)
+    } finally {
+      setLoadingDownload(false)
+    }
+  }
 
   // Update state when history query results change
   useEffect(() => {
@@ -467,6 +554,44 @@ const TwinCheck = () => {
         <Heading size="md" mb={4}>
           Results
         </Heading>
+
+        <HStack justify="space-between" align="center" mb={4}>
+          <Heading size="md">
+            {selectedHistoryItem
+              ? `Comparison from ${format(
+                  new Date(selectedHistoryItem.date_created),
+                  "MMM d, yyyy",
+                )}`
+              : "Comparison Results"}
+          </Heading>
+
+          {/* Copy and download buttons */}
+          {summary && (
+            <HStack spacing={2}>
+              <Button
+                size="sm"
+                variant="outline"
+                leftIcon={copySuccess ? <FiCheck color="green" /> : <FiCopy />}
+                onClick={handleCopyReport}
+                colorPalette={copySuccess ? "green" : "blue"}
+              >
+                {copySuccess ? "Copied!" : "Copy Text"}
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                leftIcon={<FiDownload />}
+                onClick={handleDownloadReport}
+                isLoading={loadingDownload}
+                loadingText="Downloading..."
+                colorPalette="green"
+              >
+                Download DOCX
+              </Button>
+            </HStack>
+          )}
+        </HStack>
 
         <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
           {/* History Panel */}
