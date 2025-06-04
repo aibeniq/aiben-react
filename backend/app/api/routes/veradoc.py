@@ -167,7 +167,7 @@ async def process_rag_checklist(
                     )
                 else:
                     # Fallback if the model was deleted from the database
-                    embedding_info = get_embedding_model(session)
+                    embedding_info = get_embedding_model(session, current_user)
                     model_id = embedding_info["model_id"]
                     provider = embedding_info["provider"]
                     print(
@@ -175,7 +175,7 @@ async def process_rag_checklist(
                     )
             else:
                 # For knowledge bases created before tracking embedding models
-                embedding_info = get_embedding_model(session)
+                embedding_info = get_embedding_model(session, current_user)
                 model_id = embedding_info["model_id"]
                 provider = embedding_info["provider"]
                 print(
@@ -192,7 +192,7 @@ async def process_rag_checklist(
             print("======= CHROMA VECTORDB METADATA CONTENTS =======")
             # Get all documents with their metadata
             all_docs = chroma_db.get()
-            if all_docs and "metadatas" in all_docs:
+            if all_docs and "metadatas" in all_docs and False:
                 for i, metadata in enumerate(all_docs["metadatas"]):
                     print(f"Document {i+1} Metadata: {metadata}")
                     # If you want to see document content as well
