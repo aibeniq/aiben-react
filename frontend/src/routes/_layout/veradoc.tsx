@@ -9,11 +9,9 @@ import {
   Switch,
   Field as ChakraField,
   Spinner,
-  Input,
   Separator,
   Accordion,
   Card,
-  IconButton,
 } from "@chakra-ui/react"
 import useCustomToast from "@/hooks/useCustomToast"
 import { CancelablePromise } from "@/client/core/CancelablePromise"
@@ -27,24 +25,16 @@ import {
   KnowledgeBasesService,
   KnowledgeBasePublic,
   VeraDocChecklist,
+  VeradocGetVeradocHistoryResponse,
+  VeradocGetVeradocDetailResponse,
 } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import {
-  FiFileText,
-  FiDatabase,
-  FiTrash2,
-  FiChevronUp,
-  FiChevronDown,
-  FiCopy,
-  FiCheck,
-  FiDownload,
-} from "react-icons/fi"
+import { FiFileText, FiDatabase, FiCopy, FiCheck, FiDownload } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 import { format } from "date-fns"
 import { useQuery } from "@tanstack/react-query"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
-import { InteractiveList } from "@/components/ui/interactive-list"
 import KnowledgeBaseTable from "../../components/Review/KnowledgeBaseTable"
 import ChecklistTable from "../../components/Review/ChecklistTable"
 import SelectionCard from "../../components/Review/SelectionCard"
@@ -67,8 +57,9 @@ const VeraDoc = () => {
 
   const [questions, setQuestions] = useState("")
 
-  const [reportHistory, setReportHistory] = useState<any[]>([])
-  const [selectedHistoryReport, setSelectedHistoryReport] = useState(null)
+  const [reportHistory, setReportHistory] = useState<VeradocGetVeradocHistoryResponse>([])
+  const [selectedHistoryReport, setSelectedHistoryReport] =
+    useState<VeradocGetVeradocDetailResponse | null>(null)
   const [isHistoryLoading, setIsHistoryLoading] = useState(false)
 
   const historyQuery = useQuery({
@@ -86,7 +77,6 @@ const VeraDoc = () => {
     }
     setIsHistoryLoading(historyQuery.isLoading)
   }, [historyQuery.data, historyQuery.isLoading])
-
 
   const handleCopyReport = async () => {
     try {
@@ -134,7 +124,7 @@ const VeraDoc = () => {
       const docTitle = `Evaluation of ${documentName}`
 
       const response = await VeradocService.generateDocx({
-        requestBody: { content: fullText, title: docTitle },
+        requestBody: { content: fullText },
       })
 
       let blob
@@ -173,7 +163,7 @@ const VeraDoc = () => {
   }
 
   // Add this function to load a report from history
-  const loadReportFromHistory = async (reportId) => {
+  const loadReportFromHistory = async (reportId: string) => {
     try {
       setIsHistoryLoading(true)
       const report = await VeradocService.getVeradocDetail({ reportId })
