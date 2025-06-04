@@ -1,6 +1,22 @@
 from fastapi import APIRouter
 
-from app.api.routes import items, login, private, users, utils, knowledgebases, formconnect, reportgenie, veradoc, modelselection, llms, chatbot, sourceretrieval, feedback, twincheck
+from app.api.routes import (
+    items,
+    login,
+    private,
+    users,
+    utils,
+    knowledgebases,
+    formconnect,
+    reportgenie,
+    veradoc,
+    modelselection,
+    llms,
+    chatbot,
+    sourceretrieval,
+    feedback,
+    twincheck,
+)
 from app.core.config import settings
 
 api_router = APIRouter()

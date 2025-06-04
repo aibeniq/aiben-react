@@ -26,8 +26,7 @@ const ChangePassword = () => {
   })
 
   const mutation = useMutation({
-    mutationFn: (data: UpdatePassword) =>
-      UsersService.updatePasswordMe({ requestBody: data }),
+    mutationFn: (data: UpdatePassword) => UsersService.updatePasswordMe({ requestBody: data }),
     onSuccess: () => {
       showSuccessToast("Password updated successfully.")
       reset()
@@ -71,13 +70,7 @@ const ChangePassword = () => {
               errors={errors}
             />
           </VStack>
-          <Button
-            variant="solid"
-            mt={4}
-            type="submit"
-            loading={isSubmitting}
-            disabled={!isValid}
-          >
+          <Button variant="solid" mt={4} type="submit" loading={isSubmitting} disabled={!isValid}>
             Save
           </Button>
         </Box>

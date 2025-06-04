@@ -121,6 +121,8 @@ import type {
   TwincheckUpdateComparisonResponse,
   TwincheckDeleteComparisonData,
   TwincheckDeleteComparisonResponse,
+  TwincheckGenerateDocxData,
+  TwincheckGenerateDocxResponse,
   UsersReadUsersData,
   UsersReadUsersResponse,
   UsersCreateUserData,
@@ -157,6 +159,8 @@ import type {
   VeradocGetVeradocHistoryResponse,
   VeradocGetVeradocDetailData,
   VeradocGetVeradocDetailResponse,
+  VeradocGenerateDocxData,
+  VeradocGenerateDocxResponse,
 } from "./types.gen"
 
 export class ChatService {
@@ -1444,6 +1448,7 @@ export class TwincheckService {
   /**
    * Compare Documents
    * Compare two documents based on the provided comparison topics.
+   * Supports PDF, DOCX, and plain text files.
    * @param data The data for the request.
    * @param data.comparisonTopics
    * @param data.formData
@@ -1616,6 +1621,29 @@ export class TwincheckService {
       path: {
         comparison_id: data.comparisonId,
       },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Generate Docx
+   * Generate a DOCX file from the comparison content.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static generateDocx(
+    data: TwincheckGenerateDocxData,
+  ): CancelablePromise<TwincheckGenerateDocxResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/twincheck/generate/docx",
+      body: data.requestBody,
+      responseType: 'blob',
+      mediaType: "application/json",
       errors: {
         422: "Validation Error",
       },
@@ -2051,6 +2079,29 @@ export class VeradocService {
       path: {
         report_id: data.reportId,
       },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Generate Docx
+   * Generate a DOCX file from the evaluation content.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static generateDocx(
+    data: VeradocGenerateDocxData,
+  ): CancelablePromise<VeradocGenerateDocxResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/veradoc/generate/docx",
+      body: data.requestBody,
+      responseType: 'blob',
+      mediaType: "application/json",
       errors: {
         422: "Validation Error",
       },

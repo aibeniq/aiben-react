@@ -1,12 +1,12 @@
-import { Link, LinkProps, useDisclosure } from "@chakra-ui/react";
-import { useFileViewer } from "@/hooks/useFileViewer";
-import FileViewerModal from "./FileViewerModal";
-import { useState } from "react";
+import { Link, LinkProps, useDisclosure } from "@chakra-ui/react"
+import { useFileViewer } from "@/hooks/useFileViewer"
+import FileViewerModal from "./FileViewerModal"
+import { useState } from "react"
 
 interface SourceLinkProps extends LinkProps {
-  sourceId: string;
-  fileName: string;
-  useModal?: boolean;
+  sourceId: string
+  fileName: string
+  useModal?: boolean
 }
 
 const SourceLink: React.FC<SourceLinkProps> = ({
@@ -16,41 +16,41 @@ const SourceLink: React.FC<SourceLinkProps> = ({
   ...rest
 }) => {
   // In Chakra UI v3, we need to manually manage this state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const { viewFile, viewFileInModal, currentFile, isLoading, clearFile } = useFileViewer();
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const { viewFile, viewFileInModal, currentFile, isLoading, clearFile } = useFileViewer()
+  const [isLoadingFile, setIsLoadingFile] = useState(false)
 
   const handleClick = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    console.log("SourceLink clicked:", { sourceId, fileName, useModal });
-    setIsLoadingFile(true);
-    
+    console.log("SourceLink clicked:", { sourceId, fileName, useModal })
+    setIsLoadingFile(true)
+
     if (useModal) {
       try {
-        await viewFileInModal(sourceId);
+        await viewFileInModal(sourceId)
         // Only open modal after successfully fetching file
-        setIsModalOpen(true);
+        setIsModalOpen(true)
       } catch (error) {
-        console.error("Error loading file in modal:", error);
+        console.error("Error loading file in modal:", error)
       }
     } else {
       try {
-        await viewFile(sourceId);
+        await viewFile(sourceId)
       } catch (error) {
-        console.error("Error loading file:", error);
+        console.error("Error loading file:", error)
       }
     }
-    
-    setIsLoadingFile(false);
-  };
+
+    setIsLoadingFile(false)
+  }
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
-    clearFile();
-  };
+    setIsModalOpen(false)
+    clearFile()
+  }
 
-  console.log("Current file state:", { currentFile, isLoading, isModalOpen });
+  console.log("Current file state:", { currentFile, isLoading, isModalOpen })
 
   return (
     <>
@@ -62,7 +62,7 @@ const SourceLink: React.FC<SourceLinkProps> = ({
       >
         {isLoadingFile ? "Loading..." : fileName}
       </Link>
-      
+
       {useModal && currentFile && (
         <FileViewerModal
           isOpen={isModalOpen}
@@ -72,7 +72,7 @@ const SourceLink: React.FC<SourceLinkProps> = ({
         />
       )}
     </>
-  );
-};
+  )
+}
 
-export default SourceLink;
+export default SourceLink
