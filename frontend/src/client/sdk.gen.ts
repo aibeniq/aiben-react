@@ -159,6 +159,8 @@ import type {
   VeradocGetVeradocHistoryResponse,
   VeradocGetVeradocDetailData,
   VeradocGetVeradocDetailResponse,
+  VeradocGenerateDocxData,
+  VeradocGenerateDocxResponse,
 } from "./types.gen"
 
 export class ChatService {
@@ -2077,6 +2079,29 @@ export class VeradocService {
       path: {
         report_id: data.reportId,
       },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Generate Docx
+   * Generate a DOCX file from the evaluation content.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static generateDocx(
+    data: VeradocGenerateDocxData,
+  ): CancelablePromise<VeradocGenerateDocxResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/veradoc/generate/docx",
+      body: data.requestBody,
+      responseType: 'blob',
+      mediaType: "application/json",
       errors: {
         422: "Validation Error",
       },

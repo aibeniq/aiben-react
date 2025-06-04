@@ -801,3 +801,9 @@ export type VeradocGetVeradocDetailData = {
 }
 
 export type VeradocGetVeradocDetailResponse = unknown
+
+export type VeradocGenerateDocxData = {
+  requestBody: DocxRequest
+}
+
+export type VeradocGenerateDocxResponse = unknown
