@@ -4,6 +4,10 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import json
 import traceback
+import tempfile
+import os
+import docx
+import io
 
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
 from sqlmodel import Session, select
@@ -18,8 +22,80 @@ from app.models import (
 )
 from app.core.config import settings
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from langchain_community.document_loaders import PyPDFLoader
+import mimetypes
 
 router = APIRouter(prefix="/twincheck", tags=["twincheck"])
+
+
+def extract_text_from_file(file: UploadFile) -> str:
+    """
+    Extract text content from uploaded files based on their type.
+    Supports PDF, DOCX, and plain text files.
+    """
+    content_type = file.content_type or mimetypes.guess_type(file.filename)[0]
+    print(f"Processing file: {file.filename} with content type: {content_type}")
+
+    # Create a temporary file to store the content
+    with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as temp_file:
+        # Read the file content and write to temp file
+        file_content = file.file.read()
+        temp_file.write(file_content)
+        temp_file_path = temp_file.name
+
+    try:
+        # Process based on file type
+        if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
+            print("Loading PDF with PyPDFLoader...")
+            loader = PyPDFLoader(temp_file_path)
+            pages = loader.load()
+            # Combine all page contents
+            text = "\n\n".join([page.page_content for page in pages])
+            
+        elif (content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" or 
+              file.filename.lower().endswith(".docx")):
+            print("Loading DOCX with python-docx library...")
+            doc = docx.Document(temp_file_path)
+            
+            # Extract text from paragraphs
+            paragraphs = [para.text for para in doc.paragraphs if para.text.strip()]
+            
+            # Extract text from tables
+            tables_text = []
+            for table in doc.tables:
+                for row in table.rows:
+                    row_text = []
+                    for cell in row.cells:
+                        if cell.text.strip():
+                            row_text.append(cell.text.strip())
+                    if row_text:
+                        tables_text.append(" | ".join(row_text))
+            
+            # Combine all text
+            text = "\n\n".join(paragraphs + tables_text)
+            
+        else:
+            # Assume it's a text file
+            print("Loading as text file...")
+            # Try with different encodings
+            try:
+                with open(temp_file_path, 'r', encoding='utf-8') as f:
+                    text = f.read()
+            except UnicodeDecodeError:
+                with open(temp_file_path, 'r', encoding='latin-1') as f:
+                    text = f.read()
+        
+        return text
+    
+    except Exception as e:
+        print(f"Error processing file {file.filename}: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"Error processing file {file.filename}: {str(e)}"
+        )
+    finally:
+        # Clean up the temporary file
+        if os.path.exists(temp_file_path):
+            os.unlink(temp_file_path)
 
 
 # Process documents for comparison
@@ -33,22 +109,19 @@ async def compare_documents(
 ):
     """
     Compare two documents based on the provided comparison topics.
+    Supports PDF, DOCX, and plain text files.
     """
     try:
-        # Read the file contents
-        doc1_content = await document1.read()
-        doc2_content = await document2.read()
-
-        # Try to decode as text files
-        try:
-            doc1_text = doc1_content.decode("utf-8")
-            doc2_text = doc2_content.decode("utf-8")
-        except UnicodeDecodeError:
-            # For binary files like PDFs, you might need to extract text
-            # This is a placeholder - implement actual text extraction for your file types
-            raise HTTPException(
-                status_code=400, detail="Only text files are supported at this time"
-            )
+        # Reset file pointers (in case they were read elsewhere)
+        document1.file.seek(0)
+        document2.file.seek(0)
+        
+        # Extract text from both documents
+        doc1_text = extract_text_from_file(document1)
+        
+        # Reset file pointer for document2
+        document2.file.seek(0)
+        doc2_text = extract_text_from_file(document2)
 
         # Split files into lines for diffing
         doc1_lines = doc1_text.splitlines()
@@ -146,7 +219,6 @@ async def compare_documents(
         raise HTTPException(
             status_code=500, detail=f"Error comparing documents: {str(e)}"
         )
-
 
 # Get history of comparison operations
 @router.get("/history", response_model=List[Dict[str, Any]])
