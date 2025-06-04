@@ -718,6 +718,7 @@ const VeraDoc = () => {
           </VStack>
 
           {/* Mode Toggle */}
+          {/*
           <Field>
             <HStack justify="space-between" align="center">
               <Text fontWeight="medium">Mode:</Text>
@@ -736,6 +737,7 @@ const VeraDoc = () => {
               </HStack>
             </HStack>
           </Field>
+          */}
 
           {/* Conditional Rendering Based on Mode */}
           {mode === "manual" ? (

@@ -127,6 +127,8 @@ const AddKnowledgeBase = () => {
       setIsOpen(false)
     },
     onError: (err: ApiError) => {
+      reset(undefined, { keepValues: true })
+
       if (err.status === 409) {
         // Handle duplicate title error specifically
         showErrorToast(
