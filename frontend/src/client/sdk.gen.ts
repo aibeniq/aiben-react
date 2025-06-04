@@ -2067,7 +2067,7 @@ export class VeradocService {
    * Retrieve a specific VeraDoc evaluation's full content by ID.
    * @param data The data for the request.
    * @param data.reportId
-   * @returns unknown Successful Response
+   * @returns VeraDocDetailResponse Successful Response
    * @throws ApiError
    */
   public static getVeradocDetail(

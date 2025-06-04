@@ -9,6 +9,7 @@ from app.models import (
     KnowledgeBase,
     LlmInteraction,
     DocxRequest,
+    VeraDocDetailResponse,
 )
 
 from app.api.deps import CurrentUser, SessionDep
@@ -607,7 +608,7 @@ async def get_veradoc_history(
         )
 
 
-@router.get("/history/{report_id}")
+@router.get("/history/{report_id}", response_model=VeraDocDetailResponse)
 async def get_veradoc_detail(
     report_id: uuid.UUID,
     session: SessionDep,
@@ -639,8 +640,9 @@ async def get_veradoc_detail(
             kb_name = "Unknown Knowledge Base"
 
             # Try to get KB name
-            if input_data.get("kb_id"):
-                kb = session.get(KnowledgeBase, input_data.get("kb_id"))
+            kb_id = input_data.get("kb_id")
+            if kb_id:
+                kb = session.get(KnowledgeBase, kb_id)
                 kb_name = kb.title if kb else "Unknown Knowledge Base"
 
             # Create a response that matches the structure expected by the frontend
@@ -649,6 +651,7 @@ async def get_veradoc_detail(
                 "date_created": report.date_created,
                 "document_name": document_name,
                 "kb_name": kb_name,
+                "kb_id": kb_id,
                 "questions": input_data.get("questions", ""),
                 "results": {
                     "final_evaluation": output_data.get("final_evaluation", ""),
@@ -688,7 +691,7 @@ async def get_veradoc_detail(
         raise HTTPException(
             status_code=500, detail=f"Error retrieving evaluation details: {str(e)}"
         )
-    
+
 
 @router.post("/generate/docx", response_class=StreamingResponse)
 async def generate_docx(
@@ -713,7 +716,11 @@ async def generate_docx(
 
         print("Adding title and date to the document...")
         # Add a title
-        title_text = request.title if hasattr(request, 'title') and request.title else "Document Evaluation"
+        title_text = (
+            request.title
+            if hasattr(request, "title") and request.title
+            else "Document Evaluation"
+        )
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 

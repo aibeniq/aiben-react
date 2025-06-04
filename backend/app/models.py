@@ -254,6 +254,30 @@ class VeraDocResponse(SQLModel):
     results: Dict[str, Any]  # Accept any dictionary structure
 
 
+# Response model for VeraDoc detail endpoint
+class VeraDocDetailFeedback(SQLModel):
+    feedback: Optional[str] = None
+    feedbackText: Optional[str] = None
+    feedbackDate: Optional[str] = None
+
+
+class VeraDocDetailResults(SQLModel):
+    final_evaluation: str
+    qa_pairs: List[Dict[str, Any]] = Field(default_factory=list)
+    interaction_id: str
+
+
+class VeraDocDetailResponse(SQLModel):
+    id: str
+    date_created: datetime
+    document_name: Optional[str] = None
+    kb_name: Optional[str] = None
+    kb_id: Optional[str] = None
+    questions: Optional[str] = None
+    results: VeraDocDetailResults
+    feedback: VeraDocDetailFeedback
+
+
 # Form, i.e., list of questions for VeraDoc functionality
 class VeraDocChecklist(SQLModel, table=True):
     __tablename__ = "questions"

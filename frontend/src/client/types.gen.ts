@@ -286,6 +286,31 @@ export type VeraDocChecklist = {
   date_modified?: string
 }
 
+export type VeraDocDetailFeedback = {
+  feedback?: string | null
+  feedbackText?: string | null
+  feedbackDate?: string | null
+}
+
+export type VeraDocDetailResponse = {
+  id: string
+  date_created: string
+  document_name?: string | null
+  kb_name?: string | null
+  kb_id?: string | null
+  questions?: string | null
+  results: VeraDocDetailResults
+  feedback: VeraDocDetailFeedback
+}
+
+export type VeraDocDetailResults = {
+  final_evaluation: string
+  qa_pairs?: Array<{
+    [key: string]: unknown
+  }>
+  interaction_id: string
+}
+
 export type VeraDocResponse = {
   results: {
     [key: string]: unknown
@@ -800,7 +825,7 @@ export type VeradocGetVeradocDetailData = {
   reportId: string
 }
 
-export type VeradocGetVeradocDetailResponse = unknown
+export type VeradocGetVeradocDetailResponse = VeraDocDetailResponse
 
 export type VeradocGenerateDocxData = {
   requestBody: DocxRequest
