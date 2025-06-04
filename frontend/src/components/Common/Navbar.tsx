@@ -2,6 +2,7 @@ import { Flex, Image, useBreakpointValue } from "@chakra-ui/react"
 import { Link } from "@tanstack/react-router"
 
 // import Logo from "/assets/images/aiben-logo-new.png"
+import Logo from "/assets/images/aiben-logo-horizontal.png"
 import UserMenu from "./UserMenu"
 
 function Navbar() {
