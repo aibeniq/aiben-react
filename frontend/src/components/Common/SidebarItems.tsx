@@ -11,6 +11,7 @@ import {
   FiFilePlus,
   FiCheckCircle,
   FiCpu,
+  FiArchive,
 } from "react-icons/fi"
 import { FaBalanceScale } from "react-icons/fa"
 import { TbPlugConnected } from "react-icons/tb"
@@ -19,7 +20,7 @@ import type { IconType } from "react-icons/lib"
 import type { UserPublic } from "@/client"
 
 // Define categories with their items
-const categories = [
+export const categories: Category[] = [
   {
     name: null, // No category header for these items
     items: [{ icon: FiHome, title: "Dashboard", path: "/" }],
@@ -40,7 +41,8 @@ const categories = [
     items: [
       { icon: FiCpu, title: "Model Selection", path: "/model-selection" },
       { icon: FiBookOpen, title: "Knowledge Bases", path: "/knowledge-bases" },
-      { icon: FiSettings, title: "User Settings", path: "/settings" },
+      { icon: FiArchive, title: "Archive", path: "/archive" },
+      { icon: FiSettings, title: "Settings", path: "/settings" },
     ],
   },
 ]
