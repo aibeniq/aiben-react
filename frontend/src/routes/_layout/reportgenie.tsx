@@ -12,7 +12,6 @@ import {
   Separator,
   Table,
   Accordion,
-  Card,
 } from "@chakra-ui/react"
 import useCustomToast from "@/hooks/useCustomToast"
 import SourceLink from "@/components/Common/SourceLink"
@@ -23,7 +22,7 @@ import { ReportgenieService, KnowledgeBasesService } from "@/client"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText, FiCopy, FiCheck, FiDownload, FiClock, FiEye, FiDatabase } from "react-icons/fi"
+import { FiFileText, FiCopy, FiCheck, FiDownload } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 import { format } from "date-fns"
 import { InteractiveList } from "@/components/ui/interactive-list"
@@ -31,84 +30,6 @@ import { InteractiveList } from "@/components/ui/interactive-list"
 const ReportGenie = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [copySuccess, setCopySuccess] = useState(false)
-
-  const [reportHistory, setReportHistory] = useState<any[]>([])
-  const [selectedHistoryReport, setSelectedHistoryReport] = useState(null)
-  const [isHistoryLoading, setIsHistoryLoading] = useState(false)
-
-  const historyQuery = useQuery({
-    queryKey: ["reportHistory"],
-    queryFn: async () => {
-      console.log("Fetching report history...")
-      const response = await ReportgenieService.getReportHistory({ limit: 10 })
-      console.log("Raw API response:", response)
-      return response
-    },
-    enabled: true, // Make sure the query is enabled by default
-  })
-
-  // Then use a useEffect to handle the data updates
-  useEffect(() => {
-    if (historyQuery.data) {
-      console.log("Setting report history from query data:", historyQuery.data)
-      setReportHistory(Array.isArray(historyQuery.data) ? historyQuery.data : [])
-    }
-  }, [historyQuery.data])
-
-  // Add an effect to handle loading state
-  useEffect(() => {
-    setIsHistoryLoading(historyQuery.isLoading)
-  }, [historyQuery.isLoading])
-
-  // Add an effect to handle errors
-  useEffect(() => {
-    if (historyQuery.error) {
-      console.error("Error fetching report history:", historyQuery.error)
-      showErrorToast("Failed to fetch report history")
-      setReportHistory([])
-    }
-  }, [historyQuery.error])
-
-  // Use this to set loading state at the start of the query
-  useEffect(() => {
-    if (historyQuery.isLoading) {
-      setIsHistoryLoading(true)
-    }
-  }, [historyQuery.isLoading])
-
-  // Function to load a report from history
-  const loadReportFromHistory = async (reportId) => {
-    console.log("Loading report from history with ID:", reportId)
-    try {
-      setIsHistoryLoading(true)
-      const report = await ReportgenieService.getReportDetail({ reportId })
-
-      // Update UI state with the loaded report
-      setGeneratedReport(report.results.full_report || "")
-      setSectionResults(report.results.sections || [])
-      setSelectedHistoryReport(report)
-
-      // If KB ID exists, update the selected knowledge base
-      if (report.kb_id) {
-        const kb = knowledgeBases.find((kb) => kb.id === report.kb_id)
-        if (kb) {
-          setSelectedKnowledgeBase(kb)
-        }
-      }
-
-      // Update sections if they exist
-      if (report.sections) {
-        setSections(report.sections)
-      }
-
-      showSuccessToast("Report loaded successfully")
-    } catch (error) {
-      console.error("Error loading report:", error)
-      showErrorToast("Failed to load report")
-    } finally {
-      setIsHistoryLoading(false)
-    }
-  }
 
   const handleCopyReport = async () => {
     try {
@@ -318,8 +239,6 @@ const ReportGenie = () => {
       return
     }
 
-    setSelectedHistoryReport(null)
-
     console.log("Outline ID:", selectedOutline?.id)
 
     const requestData = {
@@ -334,14 +253,9 @@ const ReportGenie = () => {
     mutation.mutate(requestData, {
       onSettled: () => {
         setLoading(false)
-        historyQuery.refetch()
       },
     })
   }
-
-  useEffect(() => {
-    historyQuery.refetch()
-  }, [])
 
   // Handle saving an outline
   const handleSaveOutline = async () => {
@@ -413,17 +327,6 @@ const ReportGenie = () => {
     td: (props) => <Box as="td" p={4} borderBottomWidth="1px" {...props} />,
   }
 
-  console.log(
-    "Rendering with reportHistory:",
-    reportHistory,
-    "isArray:",
-    Array.isArray(reportHistory),
-    "length:",
-    reportHistory?.length || 0,
-    "isHistoryLoading:",
-    isHistoryLoading,
-  )
-
   return (
     <Container maxW="container.xl" py={8}>
       {/* Loading overlay while report generates */}
@@ -447,11 +350,6 @@ const ReportGenie = () => {
           </VStack>
         </Box>
       )}
-
-      <Heading size="xl" mb={6}>
-        {/* ReportGenie */}
-        Generate a document
-      </Heading>
 
       <VStack spacing={6} align="stretch">
         {/* Knowledge Base Selection Section */}
@@ -669,84 +567,12 @@ const ReportGenie = () => {
           <Separator my={4} />
 
           <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
-            {/* History Panel - Always show this */}
-            <Card.Root width={{ base: "100%", md: "300px" }} height="fit-content">
-              <Card.Header>
-                <Heading size="sm">Previous Reports</Heading>
-              </Card.Header>
-              <Card.Body p={2}>
-                <VStack align="stretch" spacing={2} maxH="500px" overflowY="auto">
-                  {isHistoryLoading ? (
-                    <Spinner size="sm" />
-                  ) : !reportHistory || reportHistory.length === 0 ? (
-                    <>
-                      <Text fontSize="sm" color="gray.500">
-                        No previous reports
-                      </Text>
-                    </>
-                  ) : (
-                    reportHistory.map((report) => (
-                      <Box
-                        key={report?.id}
-                        p={3}
-                        borderWidth="1px"
-                        borderRadius="md"
-                        cursor="pointer"
-                        bg={selectedHistoryReport?.id === report?.id ? "blue.50" : "white"}
-                        _hover={{ bg: "blue.50" }}
-                        onClick={() => report?.id && loadReportFromHistory(report.id)}
-                      >
-                        <VStack align="start" spacing={1} width="100%">
-                          <HStack spacing={1} width="100%" justify="space-between">
-                            <Text fontSize="xs" color="gray.500">
-                              {report?.date_created
-                                ? format(new Date(report.date_created), "MMM d, yyyy")
-                                : "Unknown date"}
-                            </Text>
-                            {report?.section_count > 0 && (
-                              <Text fontSize="xs" color="gray.500">
-                                {report.section_count} sections
-                              </Text>
-                            )}
-                          </HStack>
-
-                          {/* KB name with icon */}
-                          {report?.kb_name && (
-                            <HStack spacing={1} width="100%">
-                              <Box as={FiDatabase} size="12px" color="blue.500" />
-                              <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
-                                {report.kb_name}
-                              </Text>
-                            </HStack>
-                          )}
-
-                          {/* Outline name with icon */}
-                          <HStack spacing={1} width="100%">
-                            <Box as={FiFileText} size="12px" color="gray.500" />
-                            <Text fontSize="xs" color="gray.600" noOfLines={1}>
-                              {report?.outline_name || "Custom outline"}
-                            </Text>
-                          </HStack>
-                        </VStack>
-                      </Box>
-                    ))
-                  )}
-                </VStack>
-              </Card.Body>
-            </Card.Root>
-
             {/* Report Content - Show placeholder if no report */}
             <Box flex="1">
               {generatedReport || sectionResults.length > 0 ? (
                 <>
                   <HStack justify="space-between" align="center" mb={4}>
-                    <Heading size="md">
-                      {selectedHistoryReport
-                        ? `Report from ${format(new Date(selectedHistoryReport.date_created), "MMM d, yyyy")}` +
-                          `${selectedHistoryReport.kb_name ? ` - Knowledge Base: "${selectedHistoryReport.kb_name}"` : ""}` +
-                          `${selectedHistoryReport.sections?.split("\n")[0] ? ` - Outline: "${selectedHistoryReport.sections.split("\n")[0].slice(0, 20)}${selectedHistoryReport.sections.split("\n")[0].length > 20 ? "..." : ""}"` : ""}`
-                        : "Generated Report"}
-                    </Heading>
+                    <Heading size="md">Generated Report</Heading>
 
                     {/* Copy and download buttons */}
                     {generatedReport && (
@@ -789,38 +615,6 @@ const ReportGenie = () => {
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
                       {generatedReport}
                     </ReactMarkdown>
-
-                    {/* Add FeedbackButtons here */}
-                    {selectedHistoryReport?.id && (
-                      <Box
-                        position="sticky"
-                        bottom={4}
-                        right={4}
-                        display="flex"
-                        justifyContent="flex-end"
-                        pointerEvents="auto"
-                        zIndex={10}
-                      >
-                        <FeedbackButtons
-                          interactionId={selectedHistoryReport.id}
-                          onFeedbackSubmitted={(type) => {
-                            showSuccessToast(`Thank you for marking this response as ${type}!`)
-                          }}
-                          existingFeedback={
-                            selectedHistoryReport.feedback
-                              ? {
-                                  feedback: selectedHistoryReport.feedback.feedback as
-                                    | "correct"
-                                    | "incorrect"
-                                    | null,
-                                  feedbackText: selectedHistoryReport.feedback.feedbackText,
-                                  feedbackDate: selectedHistoryReport.feedback.feedbackDate,
-                                }
-                              : undefined
-                          }
-                        />
-                      </Box>
-                    )}
 
                     {/* Detailed section results with sources */}
                     {sectionResults.length > 0 && (
@@ -965,18 +759,8 @@ const ReportGenie = () => {
                     No Report Selected
                   </Heading>
                   <Text color="gray.500" mb={4} maxW="400px">
-                    Complete the form above to generate a new report, or select one of your previous
-                    reports from the left panel to view it.
+                    Complete the form above to generate a new report.
                   </Text>
-                  {reportHistory && reportHistory.length > 0 && (
-                    <HStack>
-                      <FiClock size={14} />
-                      <Text fontSize="sm" color="gray.500">
-                        You have {reportHistory.length} previously generated{" "}
-                        {reportHistory.length === 1 ? "report" : "reports"}
-                      </Text>
-                    </HStack>
-                  )}
                 </Box>
               )}
             </Box>

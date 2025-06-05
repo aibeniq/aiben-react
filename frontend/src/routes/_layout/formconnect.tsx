@@ -23,8 +23,7 @@ import { FormconnectService } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
-import { FaPlus, FaArrowsAlt } from "react-icons/fa"
-import { FiFileText, FiClock, FiCheckCircle } from "react-icons/fi"
+import { FaPlus } from "react-icons/fa"
 import { Field } from "../../components/ui/field"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import { format } from "date-fns"
@@ -33,77 +32,6 @@ import { InteractiveList } from "@/components/ui/interactive-list"
 
 const FormConnect = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  // Add state variables for history
-  const [formHistory, setFormHistory] = useState<any[]>([])
-  const [selectedHistoryItem, setSelectedHistoryItem] = useState(null)
-  const [isHistoryLoading, setIsHistoryLoading] = useState(false)
-
-  // Add history query
-  const historyQuery = useQuery({
-    queryKey: ["formHistory"],
-    queryFn: async () => {
-      const response = await FormconnectService.getFormHistory({ limit: 20 })
-      return response
-    },
-    enabled: true,
-  })
-
-  // Update state when history query results change
-  useEffect(() => {
-    if (historyQuery.data) {
-      setFormHistory(Array.isArray(historyQuery.data) ? historyQuery.data : [])
-    }
-    setIsHistoryLoading(historyQuery.isLoading)
-  }, [historyQuery.data, historyQuery.isLoading])
-
-  // Add function to load a specific form processing
-  const loadFormFromHistory = async (reportId) => {
-    console.log("Loading form processing for report ID:", reportId)
-    try {
-      // Show loading state
-      setIsHistoryLoading(true)
-
-      // Make API call directly following ReportGenie's pattern
-      const formDetail = await FormconnectService.getFormDetail({
-        interactionId: reportId, // Use 'reportId' parameter name to match what your backend expects
-      })
-
-      console.log("Loaded form detail:", formDetail)
-
-      // Update UI state with the loaded form processing
-      if (formDetail.fields) {
-        setFields(formDetail.fields)
-      }
-
-      // Set results based on the response structure
-      if (formDetail.results) {
-        if (formDetail.results.comparison) {
-          setResults(formDetail.results.comparison)
-        } else if (formDetail.results.message) {
-          // Format the message with the extracted data if available
-          const extractedDataText = formDetail.results.extracted_data
-            ? `\n\n${JSON.stringify(formDetail.results.extracted_data, null, 2)}`
-            : ""
-          setResults(`${formDetail.results.message}${extractedDataText}`)
-        } else {
-          // Fall back to stringifying the entire results object
-          setResults(JSON.stringify(formDetail.results, null, 2))
-        }
-      }
-
-      // Store the loaded history item
-      setSelectedHistoryItem(formDetail)
-
-      // Show success message
-      showSuccessToast("Form processing loaded successfully")
-    } catch (error) {
-      console.error("Error loading form processing:", error)
-      showErrorToast("Failed to load form processing")
-    } finally {
-      setIsHistoryLoading(false)
-    }
-  }
-
   const [mode, setMode] = useState<"manual" | "batch">("manual") // Toggle between Manual and Batch Mode
   // Update the state definition to include isHandwritten at the item level
   const [batchFileItems, setBatchFileItems] = useState<
@@ -213,13 +141,6 @@ const FormConnect = () => {
   const [results, setResults] = useState("")
   const [loading, setLoading] = useState(false)
 
-  // Refetch history after a new form is processed
-  useEffect(() => {
-    if (!loading && !batchLoading) {
-      historyQuery.refetch()
-    }
-  }, [loading, batchLoading])
-
   const fetchForms = async () => {
     try {
       const data = await FormconnectService.getForms()
@@ -315,8 +236,6 @@ const FormConnect = () => {
       digitized_files: digitizedFiles,
       handwritten_files: handwrittenFiles,
     }
-
-    console.log("Request Data:", requestData)
 
     setLoading(true) // Set loading to true
     mutation.mutate(requestData, {
@@ -473,11 +392,6 @@ const FormConnect = () => {
           </VStack>
         </Box>
       )}
-
-      <Heading size="xl" mb={6}>
-        {/* FormConnect */}
-        Match fields across documents
-      </Heading>
 
       <VStack spacing={6} align="stretch">
         {/* Form Selection and Management */}
@@ -718,78 +632,12 @@ const FormConnect = () => {
             </HStack>
 
             <Separator my={4} />
-            <Heading size="md" mb={4}>
-              Results
-            </Heading>
 
             <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
-              {/* History Panel - identical to the one in batch mode */}
-              <Card.Root width={{ base: "100%", md: "300px" }} height="fit-content">
-                <Card.Header>
-                  <Heading size="sm">Previous Form Processing</Heading>
-                </Card.Header>
-                <Card.Body p={2}>
-                  <VStack align="stretch" spacing={2} maxH="500px" overflowY="auto">
-                    {isHistoryLoading ? (
-                      <Spinner size="sm" />
-                    ) : !formHistory || formHistory.length === 0 ? (
-                      <Text fontSize="sm" color="gray.500">
-                        No previous form processing
-                      </Text>
-                    ) : (
-                      formHistory.map((item) => (
-                        <Box
-                          key={item?.id}
-                          p={3}
-                          borderWidth="1px"
-                          borderRadius="md"
-                          cursor="pointer"
-                          bg={selectedHistoryItem?.id === item?.id ? "blue.50" : "white"}
-                          _hover={{ bg: "blue.50" }}
-                          onClick={() => item?.id && loadFormFromHistory(item.id)}
-                        >
-                          <VStack align="start" spacing={1} width="100%">
-                            <HStack spacing={1} width="100%" justify="space-between">
-                              <Text fontSize="xs" color="gray.500">
-                                {item?.date_created
-                                  ? format(new Date(item.date_created), "MMM d, yyyy")
-                                  : "Unknown date"}
-                              </Text>
-                              {item?.has_feedback && (
-                                <Box
-                                  as={FiCheckCircle}
-                                  size="14px"
-                                  color="green.500"
-                                  title="Has feedback"
-                                />
-                              )}
-                            </HStack>
-
-                            <HStack spacing={1} width="100%">
-                              <Box as={FiFileText} size="12px" color="blue.500" />
-                              <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
-                                {item?.file_count} {item?.file_count === 1 ? "file" : "files"}
-                              </Text>
-                            </HStack>
-
-                            <Text fontSize="xs" color="gray.600" noOfLines={1}>
-                              {item?.field_count} {item?.field_count === 1 ? "field" : "fields"}
-                            </Text>
-                          </VStack>
-                        </Box>
-                      ))
-                    )}
-                  </VStack>
-                </Card.Body>
-              </Card.Root>
-
               {/* Results Box */}
               <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
-                {/* Optional Title for Results */}
                 <Heading size="md" mb={4}>
-                  {selectedHistoryItem
-                    ? `Processing from ${format(new Date(selectedHistoryItem.date_created), "MMM d, yyyy")}`
-                    : "Results"}
+                  Results
                 </Heading>
 
                 {/* Results display with feedback buttons */}
@@ -821,41 +669,6 @@ const FormConnect = () => {
                       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
                         {results}
                       </ReactMarkdown>
-
-                      {/* Add feedback buttons when viewing a history item */}
-                      {selectedHistoryItem?.id && (
-                        <Box
-                          position="sticky"
-                          bottom={4}
-                          right={4}
-                          display="flex"
-                          justifyContent="flex-end"
-                          pointerEvents="auto"
-                          zIndex={10}
-                        >
-                          <FeedbackButtons
-                            interactionId={selectedHistoryItem.id}
-                            onFeedbackSubmitted={(type) => {
-                              showSuccessToast(`Thank you for marking this response as ${type}!`)
-
-                              // Optionally refresh the history to show updated feedback status
-                              historyQuery.refetch()
-                            }}
-                            existingFeedback={
-                              selectedHistoryItem.feedback
-                                ? {
-                                    feedback: selectedHistoryItem.feedback.feedback as
-                                      | "correct"
-                                      | "incorrect"
-                                      | null,
-                                    feedbackText: selectedHistoryItem.feedback.feedbackText,
-                                    feedbackDate: selectedHistoryItem.feedback.feedbackDate,
-                                  }
-                                : undefined
-                            }
-                          />
-                        </Box>
-                      )}
                     </>
                   ) : (
                     <Text color="gray.500">Results will appear here after running.</Text>
