@@ -161,14 +161,12 @@ const VeraDoc = () => {
     return source
   }
 
-  // Add this effect to fetch knowledge bases when component mounts
   useEffect(() => {
     const fetchKnowledgeBases = async () => {
       try {
-        // Assuming your service has a method to fetch knowledge bases
         const response = await KnowledgeBasesService.readKnowledgeBases({
           skip: 0,
-          limit: 100, // Get all knowledge bases
+          limit: 100,
         })
         setKnowledgeBases(response.data || [])
       } catch (error) {
@@ -178,20 +176,6 @@ const VeraDoc = () => {
 
     fetchKnowledgeBases()
   }, [])
-
-  // Add these state variables with your other state definitions
-  const [selectedKnowledgeBaseDetails, setSelectedKnowledgeBaseDetails] = useState<any>(null)
-
-  // Add this function to fetch knowledge base details including sources
-  const fetchKnowledgeBaseDetails = async (knowledgeBaseId: string) => {
-    try {
-      const response = await KnowledgeBasesService.readKnowledgeBase({ id: knowledgeBaseId })
-      setSelectedKnowledgeBaseDetails(response)
-    } catch (error) {
-      console.error("Error fetching knowledge base details:", error)
-      showErrorToast("Failed to fetch knowledge base details")
-    }
-  }
 
   const fetchChecklists = async () => {
     try {
