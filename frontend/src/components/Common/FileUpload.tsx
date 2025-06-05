@@ -150,7 +150,7 @@ const FileUpload = ({
                     _hover={{ borderColor: "gray.300", bg: "gray.100" }}
                   >
                     <HStack gap={3} flex="1" minW="0">
-                      <Box p={2} borderRadius="md" bg="blue.100" color="blue.600">
+                      <Box p={2} borderRadius="md" color="rgba(0, 65, 72, 0.7)">
                         <FiFile size={16} />
                       </Box>
                       <Box flex="1" minW="0">

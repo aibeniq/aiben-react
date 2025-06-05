@@ -586,7 +586,6 @@ const VeraDoc = () => {
               description={selectedChecklist ? selectedChecklist.name : "Click to select"}
               icon={<FiFileText size={24} />}
               isSelected={!!selectedChecklist}
-              isDisabled={!selectedKnowledgeBase}
               onClick={() => selectedKnowledgeBase && setShowChecklistModal(true)}
             />
 
@@ -654,13 +653,17 @@ const VeraDoc = () => {
             </Button>
           </HStack>
 
-          <Separator my={4} />
-
-          {/* Results Panel */}
-          <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
-            {/* Results Panel - Always take remaining space */}
+          <Box
+            border="1px solid"
+            borderColor="gray.200"
+            borderRadius="md"
+            p={4}
+            mt={4}
+            display="flex"
+            flexDirection={{ base: "column", md: "row" }}
+            gap={4}
+          >
             <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
-              {/* Title for Results */}
               <HStack justify="space-between" align="center" mb={4}>
                 <Heading size="md">
                   {fileItems.length > 1 ? "Batch Processing Results" : "Results"}

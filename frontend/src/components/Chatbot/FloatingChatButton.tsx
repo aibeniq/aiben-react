@@ -13,12 +13,12 @@ const FloatingChatButton = ({ onClick }: FloatingChatButtonProps) => {
       bottom="4"
       right="4"
       size="50px"
-      bg="teal"
+      bg="rgba(0, 65, 72, 0.9)"
       color="white"
       boxShadow="lg"
       zIndex="overlay"
       onClick={onClick}
-      _hover={{ bg: "blue.600" }}
+      _hover={{ bg: "rgba(0, 65, 72, 0.7)" }}
       transition="all 0.2s"
       aria-label="Get help"
     >

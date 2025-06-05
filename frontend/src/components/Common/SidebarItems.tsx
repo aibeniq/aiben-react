@@ -110,8 +110,8 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
                         pl={8} // Extra padding to indicate nesting
                         pr={4}
                         py={2}
-                        bg={isActiveItem(item.path) ? "blue.subtle" : "transparent"}
-                        color={isActiveItem(item.path) ? "blue.fg" : "inherit"}
+                        bg={isActiveItem(item.path) ? "gray.100" : "transparent"}
+                        color={isActiveItem(item.path) ? "rgba(0, 65, 72, 1.0)" : "inherit"}
                         _hover={{
                           background: isActiveItem(item.path) ? "blue.subtle" : "gray.subtle",
                         }}
