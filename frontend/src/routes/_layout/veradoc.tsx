@@ -39,6 +39,7 @@ import KnowledgeBaseTable from "../../components/Review/KnowledgeBaseTable"
 import ChecklistTable from "../../components/Review/ChecklistTable"
 import SelectionCard from "../../components/Review/SelectionCard"
 import SelectionModal from "../../components/Review/SelectionModal"
+import HistoryPanel from "../../components/Archive/HistoryPanel"
 
 const VeraDoc = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -651,8 +652,8 @@ const VeraDoc = () => {
       )}
 
       <VStack gap={6} align="stretch">
-        <div aria-label="Knowledge Base and Checklist Selection">
-          <VStack gap={4} align="stretch">
+        <HStack width="100%" justify="space-between">
+          <VStack gap={4} align="stretch" flex={1}>
             <SelectionCard
               title="Knowledge Base"
               description={
@@ -673,34 +674,41 @@ const VeraDoc = () => {
             />
           </VStack>
 
-          <SelectionModal
-            isOpen={showKnowledgeBaseModal}
-            onClose={() => setShowKnowledgeBaseModal(false)}
-            title="Select Knowledge Base"
-          >
-            <KnowledgeBaseTable
-              knowledgeBases={knowledgeBases}
-              selectedKnowledgeBase={selectedKnowledgeBase}
-              onSelectionChange={setSelectedKnowledgeBase}
-            />
-          </SelectionModal>
+          {/* <HistoryPanel
+            reportHistory={reportHistory}
+            selectedHistoryReport={selectedHistoryReport}
+            isHistoryLoading={isHistoryLoading}
+            onLoadReport={loadReportFromHistory}
+          /> */}
+        </HStack>
 
-          <SelectionModal
-            isOpen={showChecklistModal}
-            onClose={() => setShowChecklistModal(false)}
-            title="Select Checklist"
-          >
-            <ChecklistTable
-              checklists={checklists}
-              selectedChecklist={selectedChecklist}
-              onChecklistChange={setSelectedChecklist}
-              onQuestionsChange={setQuestions}
-              onChecklistsUpdate={fetchChecklists}
-              questions={questions}
-              isDisabled={!selectedKnowledgeBase}
-            />
-          </SelectionModal>
-        </div>
+        <SelectionModal
+          isOpen={showKnowledgeBaseModal}
+          onClose={() => setShowKnowledgeBaseModal(false)}
+          title="Select Knowledge Base"
+        >
+          <KnowledgeBaseTable
+            knowledgeBases={knowledgeBases}
+            selectedKnowledgeBase={selectedKnowledgeBase}
+            onSelectionChange={setSelectedKnowledgeBase}
+          />
+        </SelectionModal>
+
+        <SelectionModal
+          isOpen={showChecklistModal}
+          onClose={() => setShowChecklistModal(false)}
+          title="Select Checklist"
+        >
+          <ChecklistTable
+            checklists={checklists}
+            selectedChecklist={selectedChecklist}
+            onChecklistChange={setSelectedChecklist}
+            onQuestionsChange={setQuestions}
+            onChecklistsUpdate={fetchChecklists}
+            questions={questions}
+            isDisabled={!selectedKnowledgeBase}
+          />
+        </SelectionModal>
 
         {/* 3. Document Input */}
         <VStack
@@ -768,88 +776,9 @@ const VeraDoc = () => {
               </HStack>
 
               <Separator my={4} />
-              <Heading size="md" mb={4}>
-                Results
-              </Heading>
 
-              {/* Fixed layout with consistent side-by-side panels */}
+              {/* Results Panel */}
               <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
-                {/* History Panel - Always show this */}
-                <Card.Root width={{ base: "100%", md: "300px" }} height="fit-content">
-                  <Card.Header>
-                    <Heading size="sm">Previous Evaluations</Heading>
-                  </Card.Header>
-                  <Card.Body p={2}>
-                    <VStack align="stretch" spacing={2} maxH="500px" overflowY="auto">
-                      {isHistoryLoading ? (
-                        <Spinner size="sm" />
-                      ) : !reportHistory || reportHistory.length === 0 ? (
-                        <>
-                          <Text fontSize="sm" color="gray.500">
-                            No previous evaluations
-                          </Text>
-                        </>
-                      ) : (
-                        reportHistory.map((report) => (
-                          <Box
-                            key={report?.id}
-                            p={3}
-                            borderWidth="1px"
-                            borderRadius="md"
-                            cursor="pointer"
-                            bg={selectedHistoryReport?.id === report?.id ? "blue.50" : "white"}
-                            _hover={{ bg: "blue.50" }}
-                            onClick={() => report?.id && loadReportFromHistory(report.id)}
-                          >
-                            <VStack align="start" spacing={1} width="100%">
-                              <HStack spacing={1} width="100%" justify="space-between">
-                                <Text fontSize="xs" color="gray.500">
-                                  {report?.date_created
-                                    ? format(new Date(report.date_created), "MMM d, yyyy")
-                                    : "Unknown date"}
-                                </Text>
-                                {report?.qa_count > 0 && (
-                                  <Text fontSize="xs" color="gray.500">
-                                    {report.qa_count} question{report.qa_count !== 1 ? "s" : ""}
-                                  </Text>
-                                )}
-                              </HStack>
-
-                              {/* Document name with icon */}
-                              <HStack spacing={1} width="100%">
-                                <Box as={FiFileText} size="12px" color="blue.500" />
-                                <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
-                                  {report.document_name || "Unnamed document"}
-                                </Text>
-                              </HStack>
-
-                              {/* KB name with icon */}
-                              {report?.kb_name && (
-                                <HStack spacing={1} width="100%">
-                                  <Box as={FiFileText} size="12px" color="blue.500" />
-                                  <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
-                                    {report.document_name || "Unnamed document"}
-                                  </Text>
-                                </HStack>
-                              )}
-
-                              {/* KB name with icon */}
-                              {report?.kb_name && (
-                                <HStack spacing={1} width="100%">
-                                  <Box as={FiDatabase} size="12px" color="gray.500" />
-                                  <Text fontSize="xs" color="gray.600" noOfLines={1}>
-                                    {report.kb_name}
-                                  </Text>
-                                </HStack>
-                              )}
-                            </VStack>
-                          </Box>
-                        ))
-                      )}
-                    </VStack>
-                  </Card.Body>
-                </Card.Root>
-
                 {/* Results Panel - Always take remaining space */}
                 <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
                   {/* Title for Results */}

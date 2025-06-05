@@ -1,0 +1,79 @@
+import React, { ReactNode } from "react"
+import { Box } from "@chakra-ui/react"
+import ResultsHeader from "./Utils/ResultsHeader"
+import FeedbackButtons from "../Feedback/FeedbackButtons"
+
+interface BaseResultsContainerProps {
+  children: ReactNode
+  selectedReport?: any
+  copySuccess: boolean
+  loadingDownload: boolean
+  onCopyReport: () => void
+  onDownloadReport: () => void
+  onFeedbackSubmitted: (type: string) => void
+  showFeedback?: boolean
+}
+
+const BaseResultsContainer: React.FC<BaseResultsContainerProps> = ({
+  children,
+  selectedReport,
+  copySuccess,
+  loadingDownload,
+  onCopyReport,
+  onDownloadReport,
+  onFeedbackSubmitted,
+  showFeedback = true,
+}) => {
+  return (
+    <Box
+      border="1px solid"
+      borderColor="gray.200"
+      borderRadius="md"
+      p={4}
+      bg="gray.50"
+      minH="100px"
+      maxH="600px"
+      overflowY="auto"
+      position="relative"
+    >
+      <Box position="absolute" left={4} top={4} right={4} zIndex={20}>
+        <ResultsHeader
+          copySuccess={copySuccess}
+          loadingDownload={loadingDownload}
+          onCopyReport={onCopyReport}
+          onDownloadReport={onDownloadReport}
+        />
+      </Box>
+
+      <Box mt={12}>{children}</Box>
+
+      {showFeedback && selectedReport?.id && (
+        <Box
+          position="sticky"
+          bottom={4}
+          right={4}
+          display="flex"
+          justifyContent="flex-end"
+          pointerEvents="auto"
+          zIndex={10}
+        >
+          <FeedbackButtons
+            interactionId={selectedReport.id}
+            onFeedbackSubmitted={onFeedbackSubmitted}
+            existingFeedback={
+              selectedReport.feedback
+                ? {
+                    feedback: selectedReport.feedback.feedback as "correct" | "incorrect" | null,
+                    feedbackText: selectedReport.feedback.feedbackText || undefined,
+                    feedbackDate: selectedReport.feedback.feedbackDate || undefined,
+                  }
+                : undefined
+            }
+          />
+        </Box>
+      )}
+    </Box>
+  )
+}
+
+export default BaseResultsContainer
