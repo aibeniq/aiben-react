@@ -22,6 +22,10 @@ const SelectionCard = ({
   return (
     <Card.Root
       flex="1"
+      _hover={{
+        borderColor: "gray.300",
+        bg: "gray.50",
+      }}
       cursor={isDisabled ? "not-allowed" : "pointer"}
       onClick={isDisabled ? undefined : onClick}
       opacity={isDisabled ? 0.5 : 1}
@@ -32,8 +36,8 @@ const SelectionCard = ({
             <Box
               p={3}
               borderRadius="full"
-              bg={isSelected ? "green.100" : "gray.100"}
-              color={isSelected ? "green.600" : "gray.500"}
+              bg={isSelected ? "rgba(0, 65, 72, 0.9)" : "gray.100"}
+              color={isSelected ? "white" : "gray.500"}
             >
               {icon}
             </Box>
@@ -45,7 +49,7 @@ const SelectionCard = ({
             </VStack>
           </HStack>
 
-          <Box color={isSelected ? "green.500" : "gray.400"} ml="auto">
+          <Box color={isSelected ? "rgba(0, 65, 72, 0.9)" : "gray.400"} ml="auto">
             {isSelected ? <FiCheck size={16} /> : ""}
           </Box>
         </HStack>

@@ -93,8 +93,8 @@ const FileUpload = ({
           borderColor: isDragActive ? "blue.500" : "gray.300",
           bg: isDragActive ? "blue.50" : "gray.50",
         }}
-        borderColor={isDragActive ? "blue.500" : hasFiles ? "green.200" : "gray.200"}
-        bg={isDragActive ? "blue.50" : hasFiles ? "green.50" : "white"}
+        borderColor={isDragActive ? "blue.500" : hasFiles ? "rgba(0, 65, 72, 0.2)" : "gray.200"}
+        bg={isDragActive ? "blue.50" : hasFiles ? "rgba(0, 65, 72, 0.0)" : "white"}
         {...getRootProps()}
       >
         <input {...getInputProps()} />
@@ -104,8 +104,8 @@ const FileUpload = ({
               <Box
                 p={3}
                 borderRadius="full"
-                bg={hasFiles ? "green.100" : isDragActive ? "blue.100" : "gray.100"}
-                color={hasFiles ? "green.600" : isDragActive ? "blue.600" : "gray.500"}
+                bg={hasFiles ? "rgba(0, 65, 72, 0.9)" : isDragActive ? "blue.100" : "gray.100"}
+                color={hasFiles ? "white" : isDragActive ? "blue.600" : "gray.500"}
               >
                 <FiUpload size={24} />
               </Box>
@@ -120,15 +120,10 @@ const FileUpload = ({
                     ? "Drop the files here..."
                     : "Click to add more files or drag and drop"}
                 </Text>
-                {/* {Object.keys(acceptedFileTypes).length > 0 && !hasFiles && (
-                  <Text fontSize="xs" color="gray.400">
-                    Supported: {Object.values(acceptedFileTypes).flat().join(", ")}
-                  </Text>
-                )} */}
               </VStack>
             </HStack>
 
-            <Box color={hasFiles ? "green.500" : "gray.400"} ml="auto">
+            <Box color={hasFiles ? "rgba(0, 65, 72, 0.9)" : "gray.400"} ml="auto">
               {hasFiles ? <FiCheck size={16} /> : ""}
             </Box>
           </HStack>
