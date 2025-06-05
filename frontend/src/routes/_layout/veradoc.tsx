@@ -9,6 +9,7 @@ import {
   Spinner,
   Separator,
   Accordion,
+  Tabs,
 } from "@chakra-ui/react"
 import useCustomToast from "@/hooks/useCustomToast"
 import { CancelablePromise } from "@/client/core/CancelablePromise"
@@ -40,7 +41,6 @@ const VeraDoc = () => {
   const abortControllerRef = useRef<AbortController | null>(null)
   const ongoingRequest = useRef<CancelablePromise<any> | null>(null)
 
-  // Add modal state for knowledge base and checklist selection
   const [showKnowledgeBaseModal, setShowKnowledgeBaseModal] = useState(false)
   const [showChecklistModal, setShowChecklistModal] = useState(false)
   const [copySuccess, setCopySuccess] = useState(false)
@@ -48,33 +48,30 @@ const VeraDoc = () => {
 
   const [questions, setQuestions] = useState("")
 
-  // File management state - using the new FileItem interface
   const [fileItems, setFileItems] = useState<FileItem[]>([])
 
-  // Batch processing state
-  const [batchResults, setBatchResults] = useState<
-    Array<{ displayResults: string; qaPairs: any[] }>
+  // Unified results state - array format for both single and batch processing
+  const [results, setResults] = useState<
+    Array<{ filename: string; displayResults: string; qaPairs: any[] }>
   >([])
-  const [selectedBatchResult, setSelectedBatchResult] = useState<number>(0)
-  const [batchLoading, setBatchLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
 
-  const [qaPairs, setQaPairs] = useState<Array<any>>([])
   const [checklists, setChecklists] = useState<VeraDocChecklist[]>([])
   const [selectedChecklist, setSelectedChecklist] = useState<VeraDocChecklist | null>(null)
 
-  const [results, setResults] = useState("")
-  const [loading, setLoading] = useState(false)
-
   const handleCopyReport = async () => {
     try {
-      // Prepare combined text with evaluation summary and QA pairs
-      let fullText = `# Evaluation Summary\n\n${results}\n\n# Question-Answer Details\n\n`
+      let fullText = `# Evaluation Summary\n\n`
 
-      // Add each question and its answer
-      qaPairs.forEach((pair, index) => {
-        fullText += `## Question ${index + 1}: ${pair.question}\n\n`
-        fullText += `### Answer\n${pair.answer}\n\n`
-        fullText += `### Relevant Policy Context\n${pair.context}\n\n`
+      // Add each result's display content and QA pairs
+      results.forEach((result, resultIndex) => {
+        fullText += result.displayResults + "\n\n"
+
+        result.qaPairs.forEach((pair, pairIndex) => {
+          fullText += `## Question ${pairIndex + 1}: ${pair.question}\n\n`
+          fullText += `### Answer\n${pair.answer}\n\n`
+          fullText += `### Relevant Policy Context\n${pair.context}\n\n`
+        })
       })
 
       await navigator.clipboard.writeText(fullText)
@@ -97,13 +94,17 @@ const VeraDoc = () => {
       setLoadingDownload(true)
 
       // Prepare combined text with evaluation summary and QA pairs
-      let fullText = `# Evaluation Summary\n\n${results}\n\n# Question-Answer Details\n\n`
+      let fullText = `# Evaluation Summary\n\n`
 
-      // Add each question and its answer
-      qaPairs.forEach((pair, index) => {
-        fullText += `## Question ${index + 1}: ${pair.question}\n\n`
-        fullText += `### Answer\n${pair.answer}\n\n`
-        fullText += `### Relevant Policy Context\n${pair.context}\n\n`
+      // Add each result's display content and QA pairs
+      results.forEach((result, resultIndex) => {
+        fullText += result.displayResults + "\n\n"
+
+        result.qaPairs.forEach((pair, pairIndex) => {
+          fullText += `## Question ${pairIndex + 1}: ${pair.question}\n\n`
+          fullText += `### Answer\n${pair.answer}\n\n`
+          fullText += `### Relevant Policy Context\n${pair.context}\n\n`
+        })
       })
 
       const response = await VeradocService.generateDocx({
@@ -242,14 +243,23 @@ const VeraDoc = () => {
     onSuccess: (data: any) => {
       console.log("Response data:", data)
 
-      setResults(data.results.final_evaluation)
+      const singleResult = {
+        filename: data.results.filename,
+        displayResults: data.results.final_evaluation || "",
+        qaPairs: (data.results.qa_pairs as any[]) || [],
+      }
 
-      // Store the QA pairs to render with custom components
-      setQaPairs(data.results.qa_pairs || [])
+      setResults([singleResult])
     },
     onError: (error) => {
       console.log("RAG mutation unsuccessful!")
-      setResults(`Error: ${error.message}`)
+      // Convert error to array format
+      const errorResult = {
+        filename: "Error",
+        displayResults: `Error: ${error.message}`,
+        qaPairs: [],
+      }
+      setResults([errorResult])
     },
     onSettled: () => {
       ongoingRequest.current = null
@@ -259,17 +269,32 @@ const VeraDoc = () => {
 
   const handleRun = async () => {
     if (fileItems.length < 1) {
-      setResults("Please upload at least one file.")
+      const errorResult = {
+        filename: "Error",
+        displayResults: "Please upload at least one file.",
+        qaPairs: [],
+      }
+      setResults([errorResult])
       return
     }
 
     if (!questions.trim()) {
-      setResults("Please enter at least one question.")
+      const errorResult = {
+        filename: "Error",
+        displayResults: "Please enter at least one question.",
+        qaPairs: [],
+      }
+      setResults([errorResult])
       return
     }
 
     if (!selectedKnowledgeBase) {
-      setResults("Please select a knowledge base for context.")
+      const errorResult = {
+        filename: "Error",
+        displayResults: "Please select a knowledge base for context.",
+        qaPairs: [],
+      }
+      setResults([errorResult])
       return
     }
 
@@ -281,7 +306,12 @@ const VeraDoc = () => {
       .map((item) => item.file)
 
     if (validItems.length < 1) {
-      setResults("Please upload at least one valid file.")
+      const errorResult = {
+        filename: "Error",
+        displayResults: "Please upload at least one valid file.",
+        qaPairs: [],
+      }
+      setResults([errorResult])
       return
     }
 
@@ -304,24 +334,38 @@ const VeraDoc = () => {
 
   const handleProcessBatch = async () => {
     if (fileItems.length === 0) {
-      setResults("Error: Please upload at least one file for batch processing.")
+      const errorResult = {
+        filename: "Error",
+        displayResults: "Error: Please upload at least one file for batch processing.",
+        qaPairs: [],
+      }
+      setResults([errorResult])
       return
     }
 
     if (!questions.trim()) {
-      setResults("Error: Please enter at least one question.")
+      const errorResult = {
+        filename: "Error",
+        displayResults: "Error: Please enter at least one question.",
+        qaPairs: [],
+      }
+      setResults([errorResult])
       return
     }
 
     if (!selectedKnowledgeBase) {
-      setResults("Error: Please select a knowledge base for context.")
+      const errorResult = {
+        filename: "Error",
+        displayResults: "Error: Please select a knowledge base for context.",
+        qaPairs: [],
+      }
+      setResults([errorResult])
       return
     }
 
     // Clear previous results
-    setBatchResults([])
-    setSelectedBatchResult(0)
-    setBatchLoading(true)
+    setResults([])
+    setLoading(true)
 
     // Cancel any ongoing requests
     if (ongoingRequest.current) {
@@ -338,7 +382,11 @@ const VeraDoc = () => {
     abortControllerRef.current = controller
 
     try {
-      const results: Array<{ displayResults: string; qaPairs: any[] }> = []
+      const batchResults: Array<{
+        filename: string
+        displayResults: string
+        qaPairs: any[]
+      }> = []
 
       // Process each file individually
       for (let i = 0; i < fileItems.length; i++) {
@@ -370,8 +418,7 @@ const VeraDoc = () => {
           },
         })
 
-        // Format the response
-        let displayResults = `# Analysis Results for ${fileItem.file.name}\n\n`
+        let displayResults = ""
 
         if (response.results.final_evaluation) {
           displayResults += "## FINAL EVALUATION\n\n"
@@ -379,13 +426,14 @@ const VeraDoc = () => {
         }
 
         // Store the QA pairs in the results array
-        results.push({
+        batchResults.push({
+          filename: fileItem.file.name,
           displayResults,
-          qaPairs: response.results.qa_pairs || [],
+          qaPairs: (response.results.qa_pairs as any[]) || [],
         })
 
         // Update your state for batch results
-        setBatchResults(results)
+        setResults([...batchResults])
       }
     } catch (error: any) {
       // Handle errors, checking if it's an abort
@@ -393,10 +441,15 @@ const VeraDoc = () => {
         console.log("Batch processing was aborted")
       } else {
         console.error("Batch processing error:", error)
-        setResults(`Error processing batch: ${error.message}`)
+        const errorResult = {
+          filename: "Error",
+          displayResults: `Error processing batch: ${error.message}`,
+          qaPairs: [],
+        }
+        setResults([errorResult])
       }
     } finally {
-      setBatchLoading(false)
+      setLoading(false)
     }
   }
 
@@ -421,10 +474,94 @@ const VeraDoc = () => {
     td: (props: any) => <Box as="td" p={4} borderBottomWidth="1px" {...props} />,
   }
 
+  // Function to render results content
+  const renderResultsContent = (
+    result: { displayResults: string; qaPairs: any[] },
+    resultIndex: number,
+  ) => (
+    <Box key={resultIndex}>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+        {result.displayResults}
+      </ReactMarkdown>
+
+      {result.qaPairs.map((pair, pairIndex) => (
+        <Box
+          key={`${resultIndex}-${pairIndex}`}
+          mt={4}
+          p={4}
+          borderWidth="1px"
+          borderRadius="md"
+          bg="white"
+        >
+          <Heading as="h3" size="md" mb={2}>
+            Question {pairIndex + 1}: {pair.question}
+          </Heading>
+
+          <Box mb={3}>
+            <Text fontWeight="bold">Answer:</Text>
+            <Text>{pair.answer}</Text>
+          </Box>
+
+          <Box mb={3}>
+            <Text fontWeight="bold">Relevant Policy Context:</Text>
+            <Text>{pair.context}</Text>
+          </Box>
+
+          {pair.source_citations && pair.source_citations.length > 0 && (
+            <Accordion.Root multiple>
+              <Accordion.Item value={`citations-${resultIndex}-${pairIndex}`}>
+                <h2>
+                  <Accordion.ItemTrigger bg="gray.100" _hover={{ bg: "gray.200" }}>
+                    <Box flex="1" textAlign="left" fontWeight="medium">
+                      <HStack>
+                        <FiFileText />
+                        <Text>View Source Citations ({pair.source_citations.length})</Text>
+                      </HStack>
+                    </Box>
+                  </Accordion.ItemTrigger>
+                </h2>
+                <Accordion.ItemContent pb={4} bg="gray.50">
+                  {pair.source_citations.map((citation: any, cIndex: number) => (
+                    <Box key={cIndex} p={3} mb={2} borderWidth="1px" borderRadius="md" bg="white">
+                      {citation.metadata.source_data_id ? (
+                        <SourceLink
+                          sourceId={citation.metadata.source_data_id}
+                          fileName={getDisplayFileName(citation.metadata.source)}
+                          ml={1}
+                          fontWeight="normal"
+                          color="blue.600"
+                          useModal={true}
+                        />
+                      ) : (
+                        <Text as="span" ml={1} fontWeight="normal" color="blue.600">
+                          {getDisplayFileName(citation.metadata.source)}
+                        </Text>
+                      )}
+                      <Box
+                        mt={2}
+                        p={2}
+                        bg="gray.50"
+                        borderRadius="sm"
+                        fontSize="sm"
+                        whiteSpace="pre-wrap"
+                      >
+                        {citation.content}
+                      </Box>
+                    </Box>
+                  ))}
+                </Accordion.ItemContent>
+              </Accordion.Item>
+            </Accordion.Root>
+          )}
+        </Box>
+      ))}
+    </Box>
+  )
+
   return (
     <Container maxW="container.xl" py={8}>
-      {/* Add this overlay spinner that shows when batchLoading is true */}
-      {batchLoading && (
+      {/* Add this overlay spinner that shows when loading is true */}
+      {loading && (
         <Box
           position="absolute"
           top="0"
@@ -440,7 +577,7 @@ const VeraDoc = () => {
         >
           <VStack gap={4}>
             <Spinner size="xl" color="blue.500" />
-            <Text fontWeight="medium">Processing batch files...</Text>
+            <Text fontWeight="medium">Processing files...</Text>
           </VStack>
         </Box>
       )}
@@ -519,7 +656,7 @@ const VeraDoc = () => {
                 !questions.trim() ||
                 !fileItems.some((item) => item.file.size > 0)
               }
-              loading={loading || batchLoading}
+              loading={loading}
             >
               Run
             </Button>
@@ -534,11 +671,11 @@ const VeraDoc = () => {
               {/* Title for Results */}
               <HStack justify="space-between" align="center" mb={4}>
                 <Heading size="md">
-                  {mode === "batch" ? "Batch Processing Results" : "Results"}
+                  {fileItems.length > 1 ? "Batch Processing Results" : "Results"}
                 </Heading>
 
                 {/* Add Copy and Download buttons */}
-                {results && (
+                {results.length > 0 && (
                   <HStack gap={2}>
                     <Button
                       size="sm"
@@ -575,9 +712,9 @@ const VeraDoc = () => {
                 maxH={{ base: "400px", md: "600px" }}
                 overflowY="auto"
                 position="relative"
-                opacity={loading || batchLoading ? 0.5 : 1}
+                opacity={loading ? 0.5 : 1}
               >
-                {(loading || batchLoading) && (
+                {loading && (
                   <Box
                     position="absolute"
                     top="50%"
@@ -588,104 +725,27 @@ const VeraDoc = () => {
                     <Spinner size="lg" color="blue.500" />
                   </Box>
                 )}
-                {results ? (
+                {results.length > 0 ? (
                   <>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                      {results}
-                    </ReactMarkdown>
+                    <Tabs.Root defaultValue="0">
+                      <Tabs.List>
+                        {results.map((result, index) => {
+                          const fileName = result.filename
 
-                    {qaPairs.length > 0 && (
-                      <Box mt={4}>
-                        {qaPairs.map((pair, index) => (
-                          <Box
-                            key={index}
-                            mb={4}
-                            p={4}
-                            borderWidth="1px"
-                            borderRadius="md"
-                            bg="white"
-                          >
-                            <Heading as="h3" size="md" mb={2}>
-                              Question {index + 1}: {pair.question}
-                            </Heading>
+                          return (
+                            <Tabs.Trigger key={index} value={index.toString()}>
+                              {fileName}
+                            </Tabs.Trigger>
+                          )
+                        })}
+                      </Tabs.List>
 
-                            <Box mb={3}>
-                              <Text fontWeight="bold">Answer:</Text>
-                              <Text>{pair.answer}</Text>
-                            </Box>
-
-                            <Box mb={3}>
-                              <Text fontWeight="bold">Relevant Policy Context:</Text>
-                              <Text>{pair.context}</Text>
-                            </Box>
-
-                            {pair.source_citations && pair.source_citations.length > 0 && (
-                              <Accordion.Root multiple>
-                                <Accordion.Item value={`citations-${index}`}>
-                                  <h2>
-                                    <Accordion.ItemTrigger
-                                      bg="gray.100"
-                                      _hover={{ bg: "gray.200" }}
-                                    >
-                                      <Box flex="1" textAlign="left" fontWeight="medium">
-                                        <HStack>
-                                          <FiFileText />
-                                          <Text>
-                                            View Source Citations ({pair.source_citations.length})
-                                          </Text>
-                                        </HStack>
-                                      </Box>
-                                    </Accordion.ItemTrigger>
-                                  </h2>
-                                  <Accordion.ItemContent pb={4} bg="gray.50">
-                                    {pair.source_citations.map((citation: any, cIndex: number) => (
-                                      <Box
-                                        key={cIndex}
-                                        p={3}
-                                        mb={2}
-                                        borderWidth="1px"
-                                        borderRadius="md"
-                                        bg="white"
-                                      >
-                                        {citation.metadata.source_data_id ? (
-                                          <SourceLink
-                                            sourceId={citation.metadata.source_data_id}
-                                            fileName={getDisplayFileName(citation.metadata.source)}
-                                            ml={1}
-                                            fontWeight="normal"
-                                            color="blue.600"
-                                            useModal={true}
-                                          />
-                                        ) : (
-                                          <Text
-                                            as="span"
-                                            ml={1}
-                                            fontWeight="normal"
-                                            color="blue.600"
-                                          >
-                                            {getDisplayFileName(citation.metadata.source)}
-                                          </Text>
-                                        )}
-                                        <Box
-                                          mt={2}
-                                          p={2}
-                                          bg="gray.50"
-                                          borderRadius="sm"
-                                          fontSize="sm"
-                                          whiteSpace="pre-wrap"
-                                        >
-                                          {citation.content}
-                                        </Box>
-                                      </Box>
-                                    ))}
-                                  </Accordion.ItemContent>
-                                </Accordion.Item>
-                              </Accordion.Root>
-                            )}
-                          </Box>
-                        ))}
-                      </Box>
-                    )}
+                      {results.map((result, index) => (
+                        <Tabs.Content key={index} value={index.toString()}>
+                          {renderResultsContent(result, index)}
+                        </Tabs.Content>
+                      ))}
+                    </Tabs.Root>
                   </>
                 ) : (
                   <Text color="gray.500">Results will appear here after running.</Text>
