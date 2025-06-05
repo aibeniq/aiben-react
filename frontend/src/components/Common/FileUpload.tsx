@@ -20,10 +20,8 @@ export interface FileItem {
 interface FileUploadProps {
   files: FileItem[]
   onFilesChange: (files: FileItem[]) => void
-  multiple?: boolean
   acceptedFileTypes?: Record<string, string[]>
   maxFiles?: number
-  placeholder?: string
   showHandwrittenToggle?: boolean
 }
 
@@ -42,10 +40,8 @@ const defaultAcceptedTypes = {
 const FileUpload = ({
   files,
   onFilesChange,
-  multiple = true,
   acceptedFileTypes = defaultAcceptedTypes,
   maxFiles,
-  placeholder = "Drag and drop files here, or click to browse",
   showHandwrittenToggle = true,
 }: FileUploadProps) => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -56,20 +52,15 @@ const FileUpload = ({
           isHandwritten: false,
         }))
 
-        if (multiple) {
-          const updatedFiles = [...files, ...newFileItems]
-          if (maxFiles && updatedFiles.length > maxFiles) {
-            onFilesChange(updatedFiles.slice(0, maxFiles))
-          } else {
-            onFilesChange(updatedFiles)
-          }
+        const updatedFiles = [...files, ...newFileItems]
+        if (maxFiles && updatedFiles.length > maxFiles) {
+          onFilesChange(updatedFiles.slice(0, maxFiles))
         } else {
-          onFilesChange([newFileItems[0]])
+          onFilesChange(updatedFiles)
         }
       }
     },
     accept: acceptedFileTypes,
-    multiple,
   })
 
   const removeFile = (index: number) => {
@@ -96,7 +87,6 @@ const FileUpload = ({
 
   return (
     <VStack align="stretch" gap={4}>
-      {/* File Upload Card - Styled like SelectionCard */}
       <Card.Root
         cursor="pointer"
         _hover={{
@@ -128,9 +118,7 @@ const FileUpload = ({
                 <Text fontSize="sm" color="gray.600">
                   {isDragActive
                     ? "Drop the files here..."
-                    : hasFiles
-                      ? "Click to add more files or drag and drop"
-                      : placeholder}
+                    : "Click to add more files or drag and drop"}
                 </Text>
                 {/* {Object.keys(acceptedFileTypes).length > 0 && !hasFiles && (
                   <Text fontSize="xs" color="gray.400">
@@ -147,7 +135,6 @@ const FileUpload = ({
         </Card.Body>
       </Card.Root>
 
-      {/* Uploaded Files List */}
       {files.length > 0 && (
         <Card.Root>
           <Card.Body p={4}>

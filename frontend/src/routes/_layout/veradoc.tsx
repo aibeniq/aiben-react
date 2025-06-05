@@ -477,12 +477,6 @@ const VeraDoc = () => {
             <FileUpload
               files={fileItems}
               onFilesChange={setFileItems}
-              multiple={mode === "batch"}
-              placeholder={
-                mode === "manual"
-                  ? "Drag and drop a document to review here, or click to browse"
-                  : "Drag and drop files here, or click to browse"
-              }
               showHandwrittenToggle={true}
             />
           </VStack>
@@ -545,7 +539,7 @@ const VeraDoc = () => {
           <HStack gap={4}>
             <Button
               variant="solid"
-              onClick={mode === "manual" ? handleRun : handleProcessBatch}
+              onClick={fileItems.length > 0 ? handleProcessBatch : handleRun}
               disabled={
                 fileItems.length < 1 ||
                 !questions.trim() ||
