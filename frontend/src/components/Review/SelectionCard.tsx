@@ -24,7 +24,7 @@ const SelectionCard = ({
       flex="1"
       _hover={{
         borderColor: "gray.300",
-        bg: "gray.50",
+        bg: isDisabled ? "transparent" : "gray.100",
       }}
       cursor={isDisabled ? "not-allowed" : "pointer"}
       onClick={isDisabled ? undefined : onClick}

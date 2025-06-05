@@ -561,7 +561,9 @@ const VeraDoc = () => {
         >
           <VStack gap={4}>
             <Spinner size="xl" color="blue.500" />
-            <Text fontWeight="medium">Processing files...</Text>
+            <Text fontWeight="medium">
+              {fileItems.length > 1 ? "Processing files..." : "Processing file..."}
+            </Text>
           </VStack>
         </Box>
       )}
@@ -631,7 +633,7 @@ const VeraDoc = () => {
           opacity={!selectedKnowledgeBase || !selectedChecklist ? 0.3 : 1}
           pointerEvents={!selectedKnowledgeBase || !selectedChecklist ? "none" : "auto"}
         >
-          <HStack gap={4}>
+          <HStack gap={4} justify="center">
             <Button
               variant="solid"
               onClick={fileItems.length > 0 ? handleProcessBatch : handleRun}
@@ -641,6 +643,12 @@ const VeraDoc = () => {
                 !fileItems.some((item) => item.file.size > 0)
               }
               loading={loading}
+              color="white"
+              bg="rgba(0, 65, 72, 0.9)"
+              width="20%"
+              _hover={{
+                bg: "rgba(0, 65, 72, 0.85)",
+              }}
             >
               Run
             </Button>
@@ -718,7 +726,7 @@ const VeraDoc = () => {
 
                           return (
                             <Tabs.Trigger key={index} value={index.toString()}>
-                              {fileName}
+                              {fileName.length > 30 ? `${fileName.slice(0, 30)}...` : fileName}
                             </Tabs.Trigger>
                           )
                         })}
