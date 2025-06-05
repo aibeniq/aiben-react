@@ -19,7 +19,14 @@ const UserMenu = () => {
       <Flex>
         <MenuRoot>
           <MenuTrigger asChild p={2}>
-            <Button data-testid="user-menu" variant="solid" maxW="sm" truncate>
+            <Button
+              data-testid="user-menu"
+              variant="solid"
+              maxW="sm"
+              truncate
+              bg="rgba(0, 65, 72, 0.9)"
+              _hover={{ bg: "rgba(0, 65, 72, 0.8)" }}
+            >
               <FaUserAstronaut fontSize="18" />
               <Text>{user?.full_name || "User"}</Text>
             </Button>
