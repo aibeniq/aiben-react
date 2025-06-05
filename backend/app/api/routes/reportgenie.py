@@ -82,11 +82,11 @@ async def generate_report(
                         f"Using knowledge base's original embedding model: {model_id}"
                     )
                 else:
-                    embedding_info = get_embedding_model(session)
+                    embedding_info = get_embedding_model(session, current_user)
                     model_id = embedding_info["model_id"]
                     provider = embedding_info["provider"]
             else:
-                embedding_info = get_embedding_model(session)
+                embedding_info = get_embedding_model(session, current_user)
                 model_id = embedding_info["model_id"]
                 provider = embedding_info["provider"]
 
