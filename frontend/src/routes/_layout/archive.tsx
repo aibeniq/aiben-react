@@ -12,6 +12,7 @@ import { Box, Container, VStack, Tabs } from "@chakra-ui/react"
 import { FiCheckCircle, FiFilePlus } from "react-icons/fi"
 import { FaBalanceScale } from "react-icons/fa"
 import { TbPlugConnected } from "react-icons/tb"
+import { VeradocService, ReportgenieService, TwincheckService } from "../../client"
 
 export const Route = createFileRoute("/_layout/archive")({
   component: Archive,
@@ -80,7 +81,114 @@ function Archive() {
   }
 
   const handleDownloadReport = async () => {
-    showErrorToast("Download functionality not implemented yet")
+    const selectedReport = getSelectedReport()
+    if (!selectedReport) return
+
+    try {
+      setLoadingDownload(true)
+      let response
+      let fullText = ""
+      let docTitle = ""
+
+      if (activeTab === "review" && veradoc.selectedReport) {
+        // Prepare combined text with evaluation summary and QA pairs
+        fullText = `# Evaluation Summary\n\n${veradoc.selectedReport.results.final_evaluation || ""}\n\n# Question-Answer Details\n\n`
+        const qaPairs = veradoc.selectedReport.results.qa_pairs || []
+        qaPairs.forEach((pair: any, index: number) => {
+          fullText += `## Question ${index + 1}: ${pair.question}\n\n`
+          fullText += `### Answer\n${pair.answer}\n\n`
+          fullText += `### Relevant Policy Context\n${pair.context}\n\n`
+        })
+
+        const documentName = veradoc.selectedReport.document_name || "Document"
+        docTitle = `Evaluation of ${documentName}`
+
+        response = await VeradocService.generateDocx({
+          requestBody: { content: fullText },
+        })
+      } else if (activeTab === "generate" && reportgenie.selectedReport) {
+        fullText =
+          reportgenie.selectedReport.results?.full_report ||
+          reportgenie.selectedReport.full_report ||
+          reportgenie.selectedReport.content ||
+          ""
+
+        response = await ReportgenieService.generateDocx({
+          requestBody: { content: fullText },
+        })
+      } else if (activeTab === "compare" && twincheck.selectedReport) {
+        // Prepare combined text with summary and all topic analyses
+        fullText = `# Summary\n\n${twincheck.selectedReport.results?.summary || ""}\n\n# Topic Analysis\n\n`
+        const topicResults = twincheck.selectedReport.results?.topic_analysis || []
+        topicResults.forEach((topic: any) => {
+          fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
+        })
+
+        const doc1Name = twincheck.selectedReport.document1_name || "Document1"
+        const doc2Name = twincheck.selectedReport.document2_name || "Document2"
+        docTitle = `Comparison of ${doc1Name} and ${doc2Name}`
+
+        response = await TwincheckService.generateDocx({
+          requestBody: { content: fullText },
+        })
+      } else if (activeTab === "match" && formconnect.selectedReport) {
+        // FormConnect doesn't have generateDocx, show error message
+        showErrorToast("Download functionality is not available for Form Processing results")
+        return
+      }
+
+      if (!response) return
+
+      // Handle the response blob
+      let blob
+      if (response instanceof Blob) {
+        blob = response
+      } else if (response instanceof ArrayBuffer) {
+        blob = new Blob([response], {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        })
+      } else {
+        blob = new Blob([response], {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        })
+      }
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+      a.href = url
+
+      // Set filename based on tool type
+      let filename = ""
+      switch (activeTab) {
+        case "review":
+          filename = `evaluation_${timestamp}.docx`
+          break
+        case "generate":
+          filename = `report_${timestamp}.docx`
+          break
+        case "compare":
+          filename = `comparison_${timestamp}.docx`
+          break
+        default:
+          filename = `document_${timestamp}.docx`
+      }
+
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      showSuccessToast("Document downloaded successfully")
+    } catch (err) {
+      console.error("Failed to download report:", err)
+      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+      showErrorToast(`Failed to download document: ${errorMessage}`)
+    } finally {
+      setLoadingDownload(false)
+    }
   }
 
   const getSelectedReport = () => {
