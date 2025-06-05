@@ -6,8 +6,6 @@ import {
   Text,
   VStack,
   HStack,
-  Switch,
-  Field as ChakraField,
   Spinner,
   Separator,
   Accordion,
@@ -28,7 +26,6 @@ import {
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { FiFileText, FiDatabase, FiCopy, FiCheck, FiDownload } from "react-icons/fi"
-import { Field } from "../../components/ui/field"
 import KnowledgeBaseTable from "../../components/Review/KnowledgeBaseTable"
 import ChecklistTable from "../../components/Review/ChecklistTable"
 import SelectionCard from "../../components/Review/SelectionCard"
@@ -53,7 +50,6 @@ const VeraDoc = () => {
 
   // File management state - using the new FileItem interface
   const [fileItems, setFileItems] = useState<FileItem[]>([])
-  const [mode, setMode] = useState<"manual" | "batch">("manual")
 
   // Batch processing state
   const [batchResults, setBatchResults] = useState<
@@ -65,8 +61,6 @@ const VeraDoc = () => {
   const [qaPairs, setQaPairs] = useState<Array<any>>([])
   const [checklists, setChecklists] = useState<VeraDocChecklist[]>([])
   const [selectedChecklist, setSelectedChecklist] = useState<VeraDocChecklist | null>(null)
-  const [checklistName, setChecklistName] = useState("")
-  const [checklistDescription, setChecklistDescription] = useState("")
 
   const [results, setResults] = useState("")
   const [loading, setLoading] = useState(false)
@@ -516,26 +510,6 @@ const VeraDoc = () => {
           opacity={!selectedKnowledgeBase || !selectedChecklist ? 0.3 : 1}
           pointerEvents={!selectedKnowledgeBase || !selectedChecklist ? "none" : "auto"}
         >
-          {/* Mode Toggle */}
-          {/* <Field>
-            <HStack justify="space-between" align="center">
-              <Text fontWeight="medium">Mode:</Text>
-              <HStack align="center">
-                <Text>Manual</Text>
-                <Switch.Root id="mode-toggle" colorPalette="teal">
-                  <Switch.HiddenInput
-                    checked={mode === "batch"}
-                    onChange={(e) => setMode(e.target.checked ? "batch" : "manual")}
-                  />
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch.Root>
-                <Text>Batch</Text>
-              </HStack>
-            </HStack>
-          </Field> */}
-
           <HStack gap={4}>
             <Button
               variant="solid"
