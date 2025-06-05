@@ -1,6 +1,6 @@
 import { Box, Flex, Icon, Text, Accordion } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
-import { Link as RouterLink } from "@tanstack/react-router"
+import { Link as RouterLink, useRouterState } from "@tanstack/react-router"
 import {
   FiHome,
   FiSettings,
@@ -69,6 +69,7 @@ interface Category {
 const SidebarItems = ({ onClose }: SidebarItemsProps) => {
   const queryClient = useQueryClient()
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
+  const routerState = useRouterState()
 
   // Add admin item for superusers
   const finalCategories = [...categories]
@@ -77,6 +78,10 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
       name: null,
       items: [adminItem],
     })
+  }
+
+  const isActiveItem = (itemPath: string) => {
+    return routerState.location.pathname === itemPath
   }
 
   return (
@@ -105,11 +110,14 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
                         pl={8} // Extra padding to indicate nesting
                         pr={4}
                         py={2}
+                        bg={isActiveItem(item.path) ? "blue.subtle" : "transparent"}
+                        color={isActiveItem(item.path) ? "blue.fg" : "inherit"}
                         _hover={{
-                          background: "gray.subtle",
+                          background: isActiveItem(item.path) ? "blue.subtle" : "gray.subtle",
                         }}
                         alignItems="center"
                         fontSize="sm"
+                        fontWeight={isActiveItem(item.path) ? "semibold" : "normal"}
                       >
                         <Icon as={item.icon} alignSelf="center" />
                         <Text ml={2}>{item.title}</Text>
@@ -133,11 +141,14 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
                     gap={4}
                     px={4}
                     py={2}
+                    bg={isActiveItem(item.path) ? "blue.subtle" : "transparent"}
+                    color={isActiveItem(item.path) ? "blue.fg" : "inherit"}
                     _hover={{
-                      background: "gray.subtle",
+                      background: isActiveItem(item.path) ? "blue.subtle" : "gray.subtle",
                     }}
                     alignItems="center"
                     fontSize="sm"
+                    fontWeight={isActiveItem(item.path) ? "semibold" : "normal"}
                   >
                     <Icon as={item.icon} alignSelf="center" />
                     <Text ml={2}>{item.title}</Text>
