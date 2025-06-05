@@ -11,7 +11,6 @@ import {
   Spinner,
   Separator,
   Accordion,
-  Card,
 } from "@chakra-ui/react"
 import useCustomToast from "@/hooks/useCustomToast"
 import { CancelablePromise } from "@/client/core/CancelablePromise"
@@ -25,21 +24,15 @@ import {
   KnowledgeBasesService,
   KnowledgeBasePublic,
   VeraDocChecklist,
-  VeradocGetVeradocHistoryResponse,
-  VeradocGetVeradocDetailResponse,
 } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { FiFileText, FiDatabase, FiCopy, FiCheck, FiDownload } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
-import { format } from "date-fns"
-import { useQuery } from "@tanstack/react-query"
-import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import KnowledgeBaseTable from "../../components/Review/KnowledgeBaseTable"
 import ChecklistTable from "../../components/Review/ChecklistTable"
 import SelectionCard from "../../components/Review/SelectionCard"
 import SelectionModal from "../../components/Review/SelectionModal"
-import HistoryPanel from "../../components/Archive/HistoryPanel"
 
 const VeraDoc = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -57,27 +50,6 @@ const VeraDoc = () => {
   const [loadingDownload, setLoadingDownload] = useState(false)
 
   const [questions, setQuestions] = useState("")
-
-  const [reportHistory, setReportHistory] = useState<VeradocGetVeradocHistoryResponse>([])
-  const [selectedHistoryReport, setSelectedHistoryReport] =
-    useState<VeradocGetVeradocDetailResponse | null>(null)
-  const [isHistoryLoading, setIsHistoryLoading] = useState(false)
-
-  const historyQuery = useQuery({
-    queryKey: ["veradocHistory"],
-    queryFn: async () => {
-      const response = await VeradocService.getVeradocHistory({ limit: 20 })
-      return response
-    },
-    enabled: true,
-  })
-
-  useEffect(() => {
-    if (historyQuery.data) {
-      setReportHistory(Array.isArray(historyQuery.data) ? historyQuery.data : [])
-    }
-    setIsHistoryLoading(historyQuery.isLoading)
-  }, [historyQuery.data, historyQuery.isLoading])
 
   const handleCopyReport = async () => {
     try {
@@ -120,10 +92,6 @@ const VeraDoc = () => {
         fullText += `### Relevant Policy Context\n${pair.context}\n\n`
       })
 
-      // Create a unique document name
-      const documentName = selectedHistoryReport?.document_name || "Document"
-      const docTitle = `Evaluation of ${documentName}`
-
       const response = await VeradocService.generateDocx({
         requestBody: { content: fullText },
       })
@@ -160,40 +128,6 @@ const VeraDoc = () => {
       showErrorToast(`Failed to download evaluation: ${err.message || "Unknown error"}`)
     } finally {
       setLoadingDownload(false)
-    }
-  }
-
-  // Add this function to load a report from history
-  const loadReportFromHistory = async (reportId: string) => {
-    try {
-      setIsHistoryLoading(true)
-      const report = await VeradocService.getVeradocDetail({ reportId })
-
-      // Update UI state with the loaded report
-      setResults(report.results.final_evaluation || "")
-      setQaPairs(report.results.qa_pairs || [])
-      setSelectedHistoryReport(report)
-
-      // If KB ID exists, update the selected knowledge base
-      if (report.kb_id) {
-        const kb = knowledgeBases.find((kb) => kb.id === report.kb_id)
-        if (kb) {
-          setSelectedKnowledgeBase(kb)
-          fetchKnowledgeBaseDetails(kb.id)
-        }
-      }
-
-      // Update questions if they exist
-      if (report.questions) {
-        setQuestions(report.questions)
-      }
-
-      showSuccessToast("Evaluation loaded successfully")
-    } catch (error) {
-      console.error("Error loading report:", error)
-      showErrorToast("Failed to load evaluation")
-    } finally {
-      setIsHistoryLoading(false)
     }
   }
 
@@ -620,13 +554,6 @@ const VeraDoc = () => {
     td: (props) => <Box as="td" p={4} borderBottomWidth="1px" {...props} />,
   }
 
-  // Update your refetch logic when a new evaluation is created
-  useEffect(() => {
-    if (!loading && !batchLoading) {
-      historyQuery.refetch()
-    }
-  }, [loading, batchLoading])
-
   return (
     <Container maxW="container.xl" py={8}>
       {/* Add this overlay spinner that shows when batchLoading is true */}
@@ -673,13 +600,6 @@ const VeraDoc = () => {
               onClick={() => selectedKnowledgeBase && setShowChecklistModal(true)}
             />
           </VStack>
-
-          {/* <HistoryPanel
-            reportHistory={reportHistory}
-            selectedHistoryReport={selectedHistoryReport}
-            isHistoryLoading={isHistoryLoading}
-            onLoadReport={loadReportFromHistory}
-          /> */}
         </HStack>
 
         <SelectionModal
@@ -783,9 +703,7 @@ const VeraDoc = () => {
                 <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
                   {/* Title for Results */}
                   <Heading size="md" mb={4}>
-                    {selectedHistoryReport
-                      ? `Evaluation from ${format(new Date(selectedHistoryReport.date_created), "MMM d, yyyy")} - ${selectedHistoryReport.document_name}`
-                      : "Results"}
+                    Results
                   </Heading>
 
                   {/* Results Box - This is the main content area */}
@@ -817,25 +735,6 @@ const VeraDoc = () => {
                         <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
                           {results}
                         </ReactMarkdown>
-
-                        {selectedHistoryReport?.id && (
-                          <Box
-                            position="sticky"
-                            bottom={4}
-                            right={4}
-                            display="flex"
-                            justifyContent="flex-end"
-                            pointerEvents="auto"
-                            zIndex={10}
-                          >
-                            <FeedbackButtons
-                              interactionId={selectedHistoryReport.id}
-                              onFeedbackSubmitted={(type) => {
-                                showSuccessToast(`Thank you for marking this response as ${type}!`)
-                              }}
-                            />
-                          </Box>
-                        )}
 
                         {qaPairs.length > 0 && (
                           <Box mt={4}>
@@ -1034,13 +933,7 @@ const VeraDoc = () => {
               <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
                 {/* Title for Results */}
                 <HStack justify="space-between" align="center" mb={4}>
-                  <Heading size="md">
-                    {selectedHistoryReport
-                      ? `Evaluation from ${format(new Date(selectedHistoryReport.date_created), "MMM d, yyyy")} - ${selectedHistoryReport.document_name}`
-                      : results
-                        ? "Evaluation Results"
-                        : ""}
-                  </Heading>
+                  <Heading size="md">Evaluation Results</Heading>
 
                   {/* Add Copy and Download buttons */}
                   {results && (
@@ -1098,37 +991,6 @@ const VeraDoc = () => {
                       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
                         {results}
                       </ReactMarkdown>
-
-                      {selectedHistoryReport?.id && (
-                        <Box
-                          position="sticky"
-                          bottom={4}
-                          right={4}
-                          display="flex"
-                          justifyContent="flex-end"
-                          pointerEvents="auto"
-                          zIndex={10}
-                        >
-                          <FeedbackButtons
-                            interactionId={selectedHistoryReport.id}
-                            onFeedbackSubmitted={(type) => {
-                              showSuccessToast(`Thank you for marking this response as ${type}!`)
-                            }}
-                            existingFeedback={
-                              selectedHistoryReport.feedback
-                                ? {
-                                    feedback: selectedHistoryReport.feedback.feedback as
-                                      | "correct"
-                                      | "incorrect"
-                                      | null,
-                                    feedbackText: selectedHistoryReport.feedback.feedbackText,
-                                    feedbackDate: selectedHistoryReport.feedback.feedbackDate,
-                                  }
-                                : undefined
-                            }
-                          />
-                        </Box>
-                      )}
 
                       {qaPairs.length > 0 && (
                         <Box mt={4}>
@@ -1302,21 +1164,6 @@ const FileDropzone = ({
         {/* Only show toggle if a real file is uploaded */}
         {file && !isPlaceholder && (
           <HStack justify="flex-end" px={2}>
-            {/* <ChakraField.Root display="flex" alignItems="center" width="auto">
-              <ChakraField.Label htmlFor={`handwritten-${index}`} mb="0" fontSize="sm">
-                Analyze handwriting
-              </ChakraField.Label>
-              <Switch.Root id={`handwritten-${index}`} colorPalette="blue">
-                <Switch.HiddenInput
-                  checked={isHandwritten}
-                  onChange={() => onToggleHandwritten(index)}
-                />
-                <Switch.Control>
-                  <Switch.Thumb />
-                </Switch.Control>
-              </Switch.Root>
-            </ChakraField.Root> */}
-
             <Button
               size="sm"
               colorPalette="red"

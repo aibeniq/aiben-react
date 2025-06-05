@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import {
   Box,
   Button,
@@ -10,28 +10,9 @@ import {
   Input,
   Textarea,
   Spinner,
-  Link,
-  Card,
-  IconButton,
-  Accordion,
-  Tabs,
-  Table,
-  Field as ChakraField,
-  Switch,
   Separator,
 } from "@chakra-ui/react"
-import {
-  FiUpload,
-  FiFile,
-  FiDatabase,
-  FiClock,
-  FiFileText,
-  FiCheck,
-  FiCopy,
-  FiChevronDown,
-  FiChevronUp,
-  FiDownload,
-} from "react-icons/fi"
+import { FiUpload, FiFile, FiFileText, FiCheck, FiCopy, FiDownload } from "react-icons/fi"
 import { useDropzone } from "react-dropzone"
 import { format } from "date-fns"
 import { createFileRoute } from "@tanstack/react-router"
@@ -67,21 +48,6 @@ const TwinCheck = () => {
   const [topicResults, setTopicResults] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [expandedTopic, setExpandedTopic] = useState<number | null>(null)
-
-  // History state
-  const [comparisonHistory, setComparisonHistory] = useState<any[]>([])
-  const [selectedHistoryItem, setSelectedHistoryItem] = useState(null)
-  const [isHistoryLoading, setIsHistoryLoading] = useState(false)
-
-  // Fetch history
-  const historyQuery = useQuery({
-    queryKey: ["twincheckHistory"],
-    queryFn: async () => {
-      const response = await TwincheckService.getComparisonHistory({ limit: 20 })
-      return response
-    },
-    enabled: true,
-  })
 
   // Function to copy report to clipboard
   const handleCopyReport = async () => {
@@ -123,8 +89,8 @@ const TwinCheck = () => {
       })
 
       // Create a unique document name with document titles if available
-      const doc1Name = document1?.name || selectedHistoryItem?.document1_name || "Document1"
-      const doc2Name = document2?.name || selectedHistoryItem?.document2_name || "Document2"
+      const doc1Name = document1?.name || "Document1"
+      const doc2Name = document2?.name || "Document2"
       const docTitle = `Comparison of ${doc1Name} and ${doc2Name}`
 
       const response = await TwincheckService.generateDocx({
@@ -166,14 +132,6 @@ const TwinCheck = () => {
     }
   }
 
-  // Update state when history query results change
-  useEffect(() => {
-    if (historyQuery.data) {
-      setComparisonHistory(Array.isArray(historyQuery.data) ? historyQuery.data : [])
-    }
-    setIsHistoryLoading(historyQuery.isLoading)
-  }, [historyQuery.data, historyQuery.isLoading])
-
   // Fetch saved comparison topic sets when component mounts
   useEffect(() => {
     const fetchComparisons = async () => {
@@ -187,31 +145,6 @@ const TwinCheck = () => {
 
     fetchComparisons()
   }, [])
-
-  // Function to load a specific comparison from history
-  const loadComparisonFromHistory = async (comparisonId) => {
-    try {
-      setIsHistoryLoading(true)
-      const comparison = await TwincheckService.getComparisonDetail({ comparisonId })
-
-      // Update UI state with the loaded comparison
-      setSummary(comparison.results.summary || "")
-      setTopicResults(comparison.results.topic_analysis || [])
-      setSelectedHistoryItem(comparison)
-
-      // Update topics if they exist
-      if (comparison.comparison_topics) {
-        setTopics(comparison.comparison_topics)
-      }
-
-      showSuccessToast("Comparison loaded successfully")
-    } catch (error) {
-      console.error("Error loading comparison:", error)
-      showErrorToast("Failed to load comparison")
-    } finally {
-      setIsHistoryLoading(false)
-    }
-  }
 
   // Mutation for comparing documents
   const mutation = useMutation({
@@ -229,9 +162,6 @@ const TwinCheck = () => {
 
       setSummary(data.results.summary)
       setTopicResults(data.results.topic_analysis || [])
-
-      // Reset selected history item since we have a new comparison
-      setSelectedHistoryItem(null)
     },
     onError: (error) => {
       console.log("Comparison failed!")
@@ -239,7 +169,6 @@ const TwinCheck = () => {
     },
     onSettled: () => {
       setLoading(false)
-      historyQuery.refetch()
     },
   })
 
@@ -313,11 +242,6 @@ const TwinCheck = () => {
           </VStack>
         </Box>
       )}
-
-      <Heading size="xl" mb={6}>
-        {/* TwinCheck */}
-        Compare documents
-      </Heading>
 
       <VStack spacing={6} align="stretch">
         {/* Document Upload Section */}
@@ -551,19 +475,9 @@ const TwinCheck = () => {
 
         {/* Results Section */}
         <Separator my={4} />
-        <Heading size="md" mb={4}>
-          Results
-        </Heading>
 
         <HStack justify="space-between" align="center" mb={4}>
-          <Heading size="md">
-            {selectedHistoryItem
-              ? `Comparison from ${format(
-                  new Date(selectedHistoryItem.date_created),
-                  "MMM d, yyyy",
-                )}`
-              : "Comparison Results"}
-          </Heading>
+          <Heading size="md">Comparison Results</Heading>
 
           {/* Copy and download buttons */}
           {summary && (
@@ -594,73 +508,12 @@ const TwinCheck = () => {
         </HStack>
 
         <Box display="flex" flexDirection={{ base: "column", md: "row" }} gap={4}>
-          {/* History Panel */}
-          <Card.Root width={{ base: "100%", md: "300px" }} height="fit-content">
-            <Card.Header>
-              <Heading size="sm">Previous Comparisons</Heading>
-            </Card.Header>
-            <Card.Body p={2}>
-              <VStack align="stretch" spacing={2} maxH="500px" overflowY="auto">
-                {isHistoryLoading ? (
-                  <Spinner size="sm" />
-                ) : !comparisonHistory || comparisonHistory.length === 0 ? (
-                  <Text fontSize="sm" color="gray.500">
-                    No previous comparisons
-                  </Text>
-                ) : (
-                  comparisonHistory.map((item) => (
-                    <Box
-                      key={item?.id}
-                      p={3}
-                      borderWidth="1px"
-                      borderRadius="md"
-                      cursor="pointer"
-                      bg={selectedHistoryItem?.id === item?.id ? "blue.50" : "white"}
-                      _hover={{ bg: "blue.50" }}
-                      onClick={() => item?.id && loadComparisonFromHistory(item.id)}
-                    >
-                      <VStack align="start" spacing={1} width="100%">
-                        <HStack spacing={1} width="100%" justify="space-between">
-                          <Text fontSize="xs" color="gray.500">
-                            {item?.date_created
-                              ? format(new Date(item.date_created), "MMM d, yyyy")
-                              : "Unknown date"}
-                          </Text>
-                          {item?.topic_count > 0 && (
-                            <Text fontSize="xs" color="gray.500">
-                              {item.topic_count} topics
-                            </Text>
-                          )}
-                        </HStack>
-
-                        {/* Document names with icons */}
-                        <HStack spacing={1} width="100%">
-                          <Box as={FiFileText} size="12px" color="blue.500" />
-                          <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
-                            {item.document1_name} vs {item.document2_name}
-                          </Text>
-                        </HStack>
-                      </VStack>
-                    </Box>
-                  ))
-                )}
-              </VStack>
-            </Card.Body>
-          </Card.Root>
-
           {/* Results Content */}
           <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
             {summary || topicResults.length > 0 ? (
               <>
                 <HStack justify="space-between" align="center" mb={4}>
-                  <Heading size="md">
-                    {selectedHistoryItem
-                      ? `Comparison from ${format(
-                          new Date(selectedHistoryItem.date_created),
-                          "MMM d, yyyy",
-                        )}`
-                      : "Comparison Results"}
-                  </Heading>
+                  <Heading size="md">Comparison Results</Heading>
                 </HStack>
 
                 <Box
@@ -730,38 +583,6 @@ const TwinCheck = () => {
                       ))}
                     </Box>
                   )}
-
-                  {/* Add Feedback Buttons */}
-                  {selectedHistoryItem?.id && (
-                    <Box
-                      position="sticky"
-                      bottom={4}
-                      right={4}
-                      display="flex"
-                      justifyContent="flex-end"
-                      pointerEvents="auto"
-                      zIndex={10}
-                    >
-                      <FeedbackButtons
-                        interactionId={selectedHistoryItem.id}
-                        onFeedbackSubmitted={(type) => {
-                          showSuccessToast(`Thank you for marking this response as ${type}!`)
-                        }}
-                        existingFeedback={
-                          selectedHistoryItem.feedback
-                            ? {
-                                feedback: selectedHistoryItem.feedback.feedback as
-                                  | "correct"
-                                  | "incorrect"
-                                  | null,
-                                feedbackText: selectedHistoryItem.feedback.feedbackText,
-                                feedbackDate: selectedHistoryItem.feedback.feedbackDate,
-                              }
-                            : undefined
-                        }
-                      />
-                    </Box>
-                  )}
                 </Box>
               </>
             ) : (
@@ -785,18 +606,8 @@ const TwinCheck = () => {
                   No Comparison Results
                 </Heading>
                 <Text color="gray.500" mb={4} maxW="400px">
-                  Upload two documents and define comparison topics to start a new comparison, or
-                  select one of your previous comparisons from the left panel to view it.
+                  Upload two documents and define comparison topics to start a new comparison.
                 </Text>
-                {comparisonHistory && comparisonHistory.length > 0 && (
-                  <HStack>
-                    <FiClock size={14} />
-                    <Text fontSize="sm" color="gray.500">
-                      You have {comparisonHistory.length} previously performed{" "}
-                      {comparisonHistory.length === 1 ? "comparison" : "comparisons"}
-                    </Text>
-                  </HStack>
-                )}
               </Box>
             )}
           </Box>
