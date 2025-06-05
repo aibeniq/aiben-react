@@ -472,6 +472,19 @@ const VeraDoc = () => {
               isDisabled={!selectedKnowledgeBase}
               onClick={() => selectedKnowledgeBase && setShowChecklistModal(true)}
             />
+
+            {/* File Upload Component */}
+            <FileUpload
+              files={fileItems}
+              onFilesChange={setFileItems}
+              multiple={mode === "batch"}
+              placeholder={
+                mode === "manual"
+                  ? "Drag and drop a document to review here, or click to browse"
+                  : "Drag and drop files here, or click to browse"
+              }
+              showHandwrittenToggle={true}
+            />
           </VStack>
         </HStack>
 
@@ -503,23 +516,14 @@ const VeraDoc = () => {
           />
         </SelectionModal>
 
-        {/* 3. Document Input */}
         <VStack
           align="stretch"
           mb={4}
           opacity={!selectedKnowledgeBase || !selectedChecklist ? 0.3 : 1}
           pointerEvents={!selectedKnowledgeBase || !selectedChecklist ? "none" : "auto"}
         >
-          <Separator mb={3} />
-          <Heading size="md" mb={0} textAlign="center">
-            3. Upload document
-          </Heading>
-          <VStack gap={4} align="stretch">
-            <Separator mb={3} />
-          </VStack>
-
           {/* Mode Toggle */}
-          <Field>
+          {/* <Field>
             <HStack justify="space-between" align="center">
               <Text fontWeight="medium">Mode:</Text>
               <HStack align="center">
@@ -536,20 +540,7 @@ const VeraDoc = () => {
                 <Text>Batch</Text>
               </HStack>
             </HStack>
-          </Field>
-
-          {/* File Upload Component */}
-          <FileUpload
-            files={fileItems}
-            onFilesChange={setFileItems}
-            multiple={mode === "batch"}
-            placeholder={
-              mode === "manual"
-                ? "Drag and drop a document to review here, or click to browse"
-                : "Drag and drop files here, or click to browse"
-            }
-            showHandwrittenToggle={true}
-          />
+          </Field> */}
 
           <HStack gap={4}>
             <Button
