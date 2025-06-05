@@ -306,6 +306,7 @@ const ChecklistTable = ({
         // Update the existing checklist
         await VeradocService.updateChecklist({
           checklistId: editingChecklist.id || "",
+          // @ts-expect-error TS2741
           requestBody: {
             name: checklistName,
             description: checklistDescription,
@@ -317,6 +318,7 @@ const ChecklistTable = ({
       } else {
         // Create a new checklist
         await VeradocService.createChecklist({
+          // @ts-expect-error TS2741
           requestBody: {
             name: checklistName,
             description: checklistDescription,

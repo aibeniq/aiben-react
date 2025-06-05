@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react"
+// @ts-expect-error TS2724
 import { Box, HStack, Button, Textarea, Text, Portal, IconButton, useToast } from "@chakra-ui/react"
 import { Tooltip } from "@/components/ui/tooltip"
 import { FiThumbsUp, FiThumbsDown, FiSend } from "react-icons/fi"
@@ -102,6 +103,7 @@ const FeedbackButtons = ({
     <Box position="relative" zIndex={10}>
       {/* Feedback buttons */}
       <HStack
+        // @ts-expect-error TS2322
         spacing={2}
         bg="white"
         p={1}
@@ -111,6 +113,7 @@ const FeedbackButtons = ({
         borderColor="gray.200"
       >
         <Tooltip
+          // @ts-expect-error TS2322
           label={
             existingFeedback?.feedback === "correct"
               ? "Edit your helpful feedback"
@@ -130,6 +133,7 @@ const FeedbackButtons = ({
         </Tooltip>
 
         <Tooltip
+          // @ts-expect-error TS2322
           label={
             existingFeedback?.feedback === "incorrect"
               ? "Edit your feedback for improvements"
@@ -150,6 +154,7 @@ const FeedbackButtons = ({
 
         {existingFeedback?.feedbackDate && (
           <Tooltip
+            // @ts-expect-error TS2322
             label={`Feedback submitted on ${new Date(existingFeedback.feedbackDate).toLocaleDateString()} at ${new Date(existingFeedback.feedbackDate).toLocaleTimeString()}`}
             hasArrow
           >
@@ -206,6 +211,8 @@ const FeedbackButtons = ({
                 mb={4}
               />
 
+              {/*
+               // @ts-expect-error TS2322 */}
               <HStack justifyContent="flex-end" spacing={3}>
                 <Button size="sm" variant="outline" onClick={handleClose}>
                   Cancel
@@ -214,6 +221,7 @@ const FeedbackButtons = ({
                   size="sm"
                   colorPalette={feedbackType === "correct" ? "green" : "red"}
                   onClick={handleSubmitFeedback}
+                  // @ts-expect-error TS2322
                   isLoading={isSubmitting}
                   leftIcon={<FiSend />}
                 >

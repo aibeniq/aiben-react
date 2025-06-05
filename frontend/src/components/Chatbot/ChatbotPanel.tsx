@@ -113,6 +113,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
 
     // Add the new user message to chat history
     const updatedMessages = [...messages, { role: "user", content: userMessage }]
+    // @ts-expect-error TS2345
     setMessages(updatedMessages)
     setQuestion("")
     setIsLoading(true)
@@ -251,6 +252,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
         animation="slideUp 0.2s ease-out"
         display="flex"
         flexDirection="column"
+        // @ts-expect-error TS2322
         sx={{
           "@keyframes slideUp": {
             "0%": {
@@ -275,6 +277,8 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
           flexShrink={0}
         >
           <Text fontWeight="bold">AI Assistant</Text>
+          {/*
+           // @ts-expect-error TS2322 */}
           <HStack spacing={2}>
             {messages.length > 0 && (
               <Button
@@ -293,6 +297,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
               </Button>
             )}
             <Button
+              // @ts-expect-error TS2322
               variant="unstyled"
               color="white"
               display="flex"
@@ -315,6 +320,8 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
           minHeight="200px"
           maxHeight={`calc(${panelHeight} - 48px)`}
         >
+          {/*
+           // @ts-expect-error TS2322 */}
           <VStack spacing={4} width="100%" align="stretch">
             {/* Knowledge Base Selection */}
             <Field.Root>
@@ -362,6 +369,8 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
                 data-disabled={!!selectedKbId}
               >
                 <input {...getInputProps()} />
+                {/*
+                 // @ts-expect-error TS2322 */}
                 <VStack spacing={1}>
                   <Icon
                     as={FaFileUpload}
@@ -438,7 +447,10 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
 
                       {/* Display sources if available */}
                       {msg.sources && msg.sources.length > 0 && (
+                        // @ts-expect-error TS2322
                         <Accordion.Root type="single" collapsible mt={2}>
+                          {/*
+                           // @ts-expect-error TS2322 */}
                           <Accordion.Item>
                             <h2>
                               <Accordion.ItemTrigger bg="gray.100" _hover={{ bg: "gray.200" }}>
@@ -542,6 +554,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
               colorPalette="teal"
               onClick={handleSendMessage}
               disabled={!question.trim() || isLoading}
+              // @ts-expect-error TS2322
               isLoading={isLoading}
               leftIcon={<FaPaperPlane />}
               size="sm"

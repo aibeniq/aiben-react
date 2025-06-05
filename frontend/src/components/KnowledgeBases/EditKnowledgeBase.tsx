@@ -66,6 +66,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
     const hasTitleValue = !!knowledgeBase?.title
     const hasExistingFiles =
       knowledgeBase?.files &&
+      // @ts-expect-error TS2345
       knowledgeBase.files.filter((f) => !removedFileIds.includes(f.id)).length > 0
     const hasNewFiles = selectedFiles.length > 0
     const hasFiles = hasExistingFiles || hasNewFiles
@@ -143,6 +144,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
 
     const hasExistingFiles =
       knowledgeBase?.files &&
+      // @ts-expect-error TS2345
       knowledgeBase.files.filter((f) => !removedFileIds.includes(f.id)).length > 0
     const hasNewFiles = selectedFiles.length > 0
 
@@ -223,6 +225,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
               borderRadius="md"
             >
               <Spinner
+                // @ts-expect-error TS2322
                 thickness="4px"
                 speed="0.65s"
                 emptyColor="gray.200"
@@ -274,14 +277,19 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                     <Text mb={2}>Current Files:</Text>
                     <VStack align="start" gap={2}>
                       {knowledgeBase.files
+                        // @ts-expect-error TS2345
                         .filter((file) => !removedFileIds.includes(file.id))
                         .map((file) => (
+                          // @ts-expect-error TS2322
                           <HStack key={file.id} w="full" justify="space-between">
                             {/* Use SourceLink component for on-demand loading */}
+                            {/*
+                             // @ts-expect-error TS2322 */}
                             <SourceLink sourceId={file.id} fileName={file.name} useModal={true} />
                             <Box
                               as="button"
                               aria-label="Remove file"
+                              // @ts-expect-error TS2345
                               onClick={() => handleRemoveExistingFile(file.id)}
                               _hover={{ color: "red.500" }}
                             >

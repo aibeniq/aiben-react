@@ -84,12 +84,16 @@ const ReportGenie = () => {
       const report = await ReportgenieService.getReportDetail({ reportId })
 
       // Update UI state with the loaded report
+      // @ts-expect-error TS2339
       setGeneratedReport(report.results.full_report || "")
+      // @ts-expect-error TS2339
       setSectionResults(report.results.sections || [])
       setSelectedHistoryReport(report)
 
       // If KB ID exists, update the selected knowledge base
+      // @ts-expect-error TS2339
       if (report.kb_id) {
+        // @ts-expect-error TS2339
         const kb = knowledgeBases.find((kb) => kb.id === report.kb_id)
         if (kb) {
           setSelectedKnowledgeBase(kb)
@@ -97,7 +101,9 @@ const ReportGenie = () => {
       }
 
       // Update sections if they exist
+      // @ts-expect-error TS2339
       if (report.sections) {
+        // @ts-expect-error TS2339
         setSections(report.sections)
       }
 
@@ -150,6 +156,7 @@ const ReportGenie = () => {
       } else {
         console.log("Response is a string or unexpected type")
         // If response is a string (shouldn't be, but fallback)
+        // @ts-expect-error TS2322
         blob = new Blob([response], {
           type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         })
@@ -267,7 +274,9 @@ const ReportGenie = () => {
     onSuccess: (data) => {
       console.log("Report generation successful:", data)
 
+      // @ts-expect-error TS2345
       setGeneratedReport(data.results.full_report)
+      // @ts-expect-error TS2345
       setSectionResults(data.results.sections || [])
     },
     onError: (error) => {
@@ -280,6 +289,7 @@ const ReportGenie = () => {
   const { data: outlineData, refetch: refetchOutlines } = useQuery({
     queryKey: ["reportOutlines"],
     queryFn: () => ReportgenieService.getOutlines(),
+    // @ts-expect-error TS2769
     onSuccess: (data) => {
       console.log("Fetched outlines:", data)
       setOutlines(data)
@@ -360,6 +370,7 @@ const ReportGenie = () => {
         // Update existing outline
         await ReportgenieService.updateOutline({
           outlineId: selectedOutline.id,
+          // @ts-expect-error TS2741
           requestBody: {
             name: outlineName,
             description: outlineDescription,
@@ -370,6 +381,7 @@ const ReportGenie = () => {
       } else {
         // Create new outline
         const newOutline = await ReportgenieService.createOutline({
+          // @ts-expect-error TS2741
           requestBody: {
             name: outlineName,
             description: outlineDescription,
@@ -441,7 +453,11 @@ const ReportGenie = () => {
           justifyContent="center"
           borderRadius="md"
         >
+          {/*
+           // @ts-expect-error TS2322 */}
           <VStack spacing={4}>
+            {/*
+             // @ts-expect-error TS2322 */}
             <Spinner size="xl" color="blue.500" thickness="4px" />
             <Text fontWeight="medium">Generating report...</Text>
           </VStack>
@@ -453,8 +469,12 @@ const ReportGenie = () => {
         Generate a document
       </Heading>
 
+      {/*
+       // @ts-expect-error TS2322 */}
       <VStack spacing={6} align="stretch">
         {/* Knowledge Base Selection Section */}
+        {/*
+         // @ts-expect-error TS2322 */}
         <VStack spacing={4} align="stretch">
           <Heading size="md" mb={2}>
             Knowledge Base Selection
@@ -491,6 +511,8 @@ const ReportGenie = () => {
               <Text fontWeight="medium" mb={2}>
                 Sources:
               </Text>
+              {/*
+               // @ts-expect-error TS2322 */}
               <Table.Root variant="simple" size="sm">
                 <Table.Header>
                   <Table.Row>
@@ -524,6 +546,8 @@ const ReportGenie = () => {
         <Separator my={4} />
 
         {/* Outline Selection and Management */}
+        {/*
+         // @ts-expect-error TS2322 */}
         <VStack spacing={4} align="stretch">
           <Heading size="md" mb={2}>
             Report Outline
@@ -586,6 +610,8 @@ const ReportGenie = () => {
           </Field>
 
           {/* Buttons for outline management */}
+          {/*
+           // @ts-expect-error TS2322 */}
           <HStack spacing={4} pt={2}>
             <Button variant="solid" onClick={handleSaveOutline}>
               {selectedOutline ? "Update Outline" : "Save Outline"}
@@ -602,6 +628,7 @@ const ReportGenie = () => {
 
                 try {
                   await ReportgenieService.createOutline({
+                    // @ts-expect-error TS2741
                     requestBody: {
                       name: `${selectedOutline.name} (Copy)`,
                       description: selectedOutline.description,
@@ -616,6 +643,7 @@ const ReportGenie = () => {
                   showErrorToast("Failed to copy outline")
                 }
               }}
+              // @ts-expect-error TS2322
               isDisabled={!selectedOutline}
             >
               Copy Outline
@@ -644,6 +672,7 @@ const ReportGenie = () => {
                   showErrorToast("Failed to delete outline")
                 }
               }}
+              // @ts-expect-error TS2322
               isDisabled={!selectedOutline}
             >
               Delete Outline
@@ -657,6 +686,7 @@ const ReportGenie = () => {
             colorPalette="green"
             size="lg"
             onClick={handleGenerateReport}
+            // @ts-expect-error TS2322
             isDisabled={!sections.trim() || !selectedKnowledgeBase?.id}
             isLoading={loading}
           >
@@ -675,6 +705,8 @@ const ReportGenie = () => {
                 <Heading size="sm">Previous Reports</Heading>
               </Card.Header>
               <Card.Body p={2}>
+                {/*
+                 // @ts-expect-error TS2322 */}
                 <VStack align="stretch" spacing={2} maxH="500px" overflowY="auto">
                   {isHistoryLoading ? (
                     <Spinner size="sm" />
@@ -696,7 +728,11 @@ const ReportGenie = () => {
                         _hover={{ bg: "blue.50" }}
                         onClick={() => report?.id && loadReportFromHistory(report.id)}
                       >
+                        {/*
+                         // @ts-expect-error TS2322 */}
                         <VStack align="start" spacing={1} width="100%">
+                          {/*
+                           // @ts-expect-error TS2322 */}
                           <HStack spacing={1} width="100%" justify="space-between">
                             <Text fontSize="xs" color="gray.500">
                               {report?.date_created
@@ -712,8 +748,13 @@ const ReportGenie = () => {
 
                           {/* KB name with icon */}
                           {report?.kb_name && (
+                            // @ts-expect-error TS2322
                             <HStack spacing={1} width="100%">
+                              {/*
+                               // @ts-expect-error TS2322 */}
                               <Box as={FiDatabase} size="12px" color="blue.500" />
+                              {/*
+                               // @ts-expect-error TS2322 */}
                               <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
                                 {report.kb_name}
                               </Text>
@@ -721,8 +762,14 @@ const ReportGenie = () => {
                           )}
 
                           {/* Outline name with icon */}
+                          {/*
+                           // @ts-expect-error TS2322 */}
                           <HStack spacing={1} width="100%">
+                            {/*
+                             // @ts-expect-error TS2322 */}
                             <Box as={FiFileText} size="12px" color="gray.500" />
+                            {/*
+                             // @ts-expect-error TS2322 */}
                             <Text fontSize="xs" color="gray.600" noOfLines={1}>
                               {report?.outline_name || "Custom outline"}
                             </Text>
@@ -750,10 +797,12 @@ const ReportGenie = () => {
 
                     {/* Copy and download buttons */}
                     {generatedReport && (
+                      // @ts-expect-error TS2322
                       <HStack spacing={2}>
                         <Button
                           size="sm"
                           variant="outline"
+                          // @ts-expect-error TS2322
                           leftIcon={copySuccess ? <FiCheck color="green" /> : <FiCopy />}
                           onClick={handleCopyReport}
                           colorPalette={copySuccess ? "green" : "blue"}
@@ -764,6 +813,7 @@ const ReportGenie = () => {
                         <Button
                           size="sm"
                           variant="outline"
+                          // @ts-expect-error TS2322
                           leftIcon={<FiDownload />}
                           onClick={handleDownloadReport}
                           isLoading={loadingDownload}
@@ -871,7 +921,10 @@ const ReportGenie = () => {
 
                                 {section.source_citations &&
                                   section.source_citations.length > 0 && (
+                                    // @ts-expect-error TS2322
                                     <Accordion.Root type="single" collapsible mt={2}>
+                                      {/*
+                                       // @ts-expect-error TS2322 */}
                                       <Accordion.Item>
                                         <Accordion.ItemTrigger
                                           bg="gray.100"

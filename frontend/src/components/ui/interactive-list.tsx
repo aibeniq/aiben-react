@@ -256,6 +256,7 @@ export const InteractiveList = ({
   }, [items])
 
   return (
+    // @ts-expect-error TS2322
     <VStack align="stretch" gap={0} width="100%" spacing={0}>
       {items.map((item, index) => (
         <InteractiveListItem

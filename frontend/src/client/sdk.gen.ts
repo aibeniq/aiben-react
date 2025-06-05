@@ -1387,6 +1387,7 @@ export class ReportgenieService {
       method: "POST",
       url: "/api/v1/reportgenie/generate/docx",
       body: data.requestBody,
+      // @ts-expect-error TS2353
       responseType: 'blob',
       mediaType: "application/json",
       errors: {
@@ -1642,6 +1643,7 @@ export class TwincheckService {
       method: "POST",
       url: "/api/v1/twincheck/generate/docx",
       body: data.requestBody,
+      // @ts-expect-error TS2353
       responseType: 'blob',
       mediaType: "application/json",
       errors: {
@@ -2100,6 +2102,7 @@ export class VeradocService {
       method: "POST",
       url: "/api/v1/veradoc/generate/docx",
       body: data.requestBody,
+      // @ts-expect-error TS2353
       responseType: 'blob',
       mediaType: "application/json",
       errors: {

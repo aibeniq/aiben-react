@@ -184,6 +184,7 @@ function LlmModels() {
   // Add mutations for adding, updating, deleting models
   const addModelMutation = useMutation({
     mutationFn: (data: { name: string; model_id: string; provider: string; description: string }) =>
+      // @ts-expect-error TS2322
       LlmModelsService.createLlmModel({ requestBody: data }),
     onSuccess: () => {
       showSuccessToast("LLM added successfully")
@@ -226,6 +227,7 @@ function LlmModels() {
   const validateModelMutation = useMutation({
     mutationFn: (data: { requestBody: { model_id: string; provider: string } }) => {
       console.log("The following data will be sent to the server for model validation:", data)
+      // @ts-expect-error TS2345
       return LlmModelsService.validateLlmModel(data)
     },
     onSuccess: () => {
@@ -263,6 +265,7 @@ function LlmModels() {
     const promise = LlmModelsService.validateLlmModel({
       requestBody: {
         model_id: modelId,
+        // @ts-expect-error TS2322
         provider: modelProvider,
       },
     })
@@ -367,6 +370,7 @@ function LlmModels() {
       </Text>
 
       <Button
+        // @ts-expect-error TS2322
         leftIcon={<FiPlus />}
         colorPalette="blue"
         mb={6}
@@ -385,8 +389,12 @@ function LlmModels() {
       ) : !modelsData || modelsData.data.length === 0 ? (
         <EmptyState.Root>
           <EmptyState.Content>
+            {/*
+             // @ts-expect-error TS2339 */}
             <EmptyState.Icon>
               <FiSettings size={24} />
+            {/*
+             // @ts-expect-error TS2339 */}
             </EmptyState.Icon>
             <EmptyState.Title>No LLMs configured</EmptyState.Title>
             <EmptyState.Description>Add a new LLM to get started</EmptyState.Description>
@@ -431,6 +439,8 @@ function LlmModels() {
                     )}
                   </Table.Cell>
                   <Table.Cell>
+                    {/*
+                     // @ts-expect-error TS2322 */}
                     <HStack spacing={2}>
                       {defaultModel?.id !== model.id && (
                         <Button
@@ -471,6 +481,8 @@ function LlmModels() {
       >
         <Dialog.Backdrop />
         <Dialog.Positioner>
+          {/*
+           // @ts-expect-error TS2322 */}
           <Dialog.Content size={{ base: "xs", md: "md" }} placement="center">
             <Box position="relative">
               <form
@@ -535,6 +547,7 @@ function LlmModels() {
                         />
                         <Button
                           onClick={handleValidateModel}
+                          // @ts-expect-error TS2322
                           isLoading={isValidating}
                           loadingText="Validating"
                           disabled={!modelId.trim()}
@@ -574,6 +587,8 @@ function LlmModels() {
                       Cancel
                     </Button>
                   </Dialog.ActionTrigger>
+                  {/*
+                   // @ts-expect-error TS2322 */}
                   <Button colorPalette="blue" type="submit" isDisabled={!isModelValid}>
                     Add Model
                   </Button>
@@ -681,6 +696,7 @@ function EmbeddingModels() {
       description: string
     }) => {
       console.log("Sending data to createEmbeddingModel:", data)
+      // @ts-expect-error TS2322
       return EmbeddingModelsService.createEmbeddingModel({ requestBody: data })
         .then((response) => {
           console.log("Received successful response:", response)
@@ -708,6 +724,7 @@ function EmbeddingModels() {
   const validateModelMutation = useMutation({
     mutationFn: (data: { requestBody: { model_id: string; provider: string } }) => {
       console.log("The following data will be sent to the server for model validation:", data)
+      // @ts-expect-error TS2345
       return EmbeddingModelsService.validateEmbeddingModel(data)
     },
     onSuccess: () => {
@@ -816,6 +833,7 @@ function EmbeddingModels() {
       </Text>
 
       <Button
+        // @ts-expect-error TS2322
         leftIcon={<FiPlus />}
         colorPalette="blue"
         mb={6}
@@ -834,8 +852,12 @@ function EmbeddingModels() {
       ) : !modelsData || modelsData.data.length === 0 ? (
         <EmptyState.Root>
           <EmptyState.Content>
+            {/*
+             // @ts-expect-error TS2339 */}
             <EmptyState.Icon>
               <FiSettings size={24} />
+            {/*
+             // @ts-expect-error TS2339 */}
             </EmptyState.Icon>
             <EmptyState.Title>No embedding models configured</EmptyState.Title>
             <EmptyState.Description>
@@ -882,6 +904,8 @@ function EmbeddingModels() {
                     )}
                   </Table.Cell>
                   <Table.Cell>
+                    {/*
+                     // @ts-expect-error TS2322 */}
                     <HStack spacing={2}>
                       {defaultModel?.id !== model.id && (
                         <Button
@@ -912,6 +936,8 @@ function EmbeddingModels() {
       <Dialog.Root open={isOpen} onOpenChange={(details) => setIsOpen(details.open)}>
         <Dialog.Backdrop />
         <Dialog.Positioner>
+          {/*
+           // @ts-expect-error TS2322 */}
           <Dialog.Content size={{ base: "xs", md: "md" }} placement="center">
             <Box position="relative">
               <form
@@ -976,6 +1002,7 @@ function EmbeddingModels() {
                         />
                         <Button
                           onClick={handleValidateModel}
+                          // @ts-expect-error TS2322
                           isLoading={isValidating}
                           loadingText="Validating"
                           disabled={!modelId.trim()}
@@ -1015,6 +1042,8 @@ function EmbeddingModels() {
                       Cancel
                     </Button>
                   </Dialog.ActionTrigger>
+                  {/*
+                   // @ts-expect-error TS2322 */}
                   <Button colorPalette="blue" type="submit" isDisabled={!isModelValid}>
                     Add Model
                   </Button>

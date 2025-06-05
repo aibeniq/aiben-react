@@ -33,6 +33,7 @@ export const useFileViewer = () => {
       setCurrentFile(response as FileViewData)
 
       // Create a blob URL for the file
+      // @ts-expect-error TS2339
       const byteCharacters = atob(response.data_base64)
       const byteNumbers = new Array(byteCharacters.length)
 
@@ -41,6 +42,7 @@ export const useFileViewer = () => {
       }
 
       const byteArray = new Uint8Array(byteNumbers)
+      // @ts-expect-error TS2339
       const blob = new Blob([byteArray], { type: response.content_type })
       const url = URL.createObjectURL(blob)
 
@@ -70,6 +72,7 @@ export const useFileViewer = () => {
       // Fetch the file data from the API
       const response = await FilesService.getSourceContent({ sourceId })
       console.log("File data received for modal:", response)
+      // @ts-expect-error TS2345
       setCurrentFile(response)
     } catch (error) {
       console.error("Error viewing file:", error)

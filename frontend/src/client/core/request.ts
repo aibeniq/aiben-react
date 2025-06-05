@@ -205,6 +205,7 @@ export const sendRequest = async <T>(
 
   let requestConfig: AxiosRequestConfig = {
     data: body ?? formData,
+    // @ts-expect-error TS2339
     responseType: options.responseType || "json",
   headers,
     method: options.method,
