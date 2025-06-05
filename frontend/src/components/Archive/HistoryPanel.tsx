@@ -1,3 +1,4 @@
+import React from "react"
 import { Box, Card, Heading, Text, VStack, HStack, Spinner } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { FiFileText, FiDatabase } from "react-icons/fi"
@@ -87,7 +88,7 @@ const HistoryPanel = ({
                   <HStack gap={1} width="100%" justify="space-between">
                     <Text fontSize="xs" color="gray.500">
                       {item?.date_created
-                        ? format(new Date(item.date_created as string), "MMM d, yyyy")
+                        ? format(new Date(item.date_created as string), "dd/MM/yyyy HH:mm")
                         : "Unknown date"}
                     </Text>
                     {getMetadata(item) && (
@@ -97,7 +98,6 @@ const HistoryPanel = ({
                     )}
                   </HStack>
 
-                  {/* Main title with icon */}
                   <HStack gap={1} width="100%">
                     <FiFileText size={12} color="blue" />
                     <Text fontWeight="medium" fontSize="sm" lineClamp={1}>
@@ -105,7 +105,6 @@ const HistoryPanel = ({
                     </Text>
                   </HStack>
 
-                  {/* Subtitle with icon */}
                   {getSubtitle(item) && (
                     <HStack gap={1} width="100%">
                       <FiDatabase size={12} color="gray" />
