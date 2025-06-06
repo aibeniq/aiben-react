@@ -8,19 +8,17 @@ import {
   HStack,
   Input,
   Dialog,
-  SimpleGrid,
   Spinner,
   Table,
   Badge,
   Text,
   Textarea,
-  useDisclosure,
   VStack,
   Separator,
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useState, useEffect, useRef, useMemo } from "react"
+import { useState, useEffect, useRef } from "react"
 import { CancelablePromise } from "@/client/core/CancelablePromise"
 import { FiPlus, FiSettings, FiCheckCircle, FiXCircle } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
@@ -28,6 +26,7 @@ import useCustomToast from "@/hooks/useCustomToast"
 
 // This will need to be added to your SDK client
 import { LlmModelsService, EmbeddingModelsService } from "@/client"
+import { ModelProvider } from "@/client/types.gen"
 
 export const Route = createFileRoute("/_layout/model-selection")({
   component: ModelSelection,
@@ -69,23 +68,19 @@ const getProviderColor = (provider: string) => {
 
 function ModelSelection() {
   return (
-    <Container maxW="full" p={0}>
-      {" "}
-      {/* Remove any default padding */}
-      {/* First section: Embedding Models */}
-      <Box pt={6}>
-        {" "}
-        {/* Add consistent padding top */}
-        <EmbeddingModels />
-      </Box>
-      {/* Divider between sections */}
-      <Separator my={10} />
-      {/* Second section: LLMs */}
-      <Box pb={6}>
-        {" "}
-        {/* Add consistent padding bottom */}
-        <LlmModels />
-      </Box>
+    <Container maxW="container.xl" py={8}>
+      <VStack gap={6} align="stretch">
+        {/* First section: Embedding Models */}
+        <Box>
+          <EmbeddingModels />
+        </Box>
+        {/* Divider between sections */}
+        <Separator my={4} />
+        {/* Second section: LLMs */}
+        <Box>
+          <LlmModels />
+        </Box>
+      </VStack>
     </Container>
   )
 }
@@ -184,7 +179,7 @@ function LlmModels() {
   // Add mutations for adding, updating, deleting models
   const addModelMutation = useMutation({
     mutationFn: (data: { name: string; model_id: string; provider: string; description: string }) =>
-      LlmModelsService.createLlmModel({ requestBody: data }),
+      LlmModelsService.createLlmModel({ requestBody: { ...data, provider: data.provider as any } }),
     onSuccess: () => {
       showSuccessToast("LLM added successfully")
       resetForm()
@@ -222,25 +217,6 @@ function LlmModels() {
     },
   })
 
-  // Mutation to validate a model
-  const validateModelMutation = useMutation({
-    mutationFn: (data: { requestBody: { model_id: string; provider: string } }) => {
-      console.log("The following data will be sent to the server for model validation:", data)
-      return LlmModelsService.validateLlmModel(data)
-    },
-    onSuccess: () => {
-      setIsModelValid(true)
-      setValidationMessage("Model is valid and can be loaded.")
-    },
-    onError: (error) => {
-      setIsModelValid(false)
-      setValidationMessage(`Invalid model: ${error.message}`)
-    },
-    onSettled: () => {
-      setIsValidating(false)
-    },
-  })
-
   const handleValidateModel = async () => {
     if (!modelId.trim()) {
       setIsModelValid(false)
@@ -263,7 +239,7 @@ function LlmModels() {
     const promise = LlmModelsService.validateLlmModel({
       requestBody: {
         model_id: modelId,
-        provider: modelProvider,
+        provider: modelProvider as any,
       },
     })
 
@@ -273,7 +249,7 @@ function LlmModels() {
       await promise
       setIsModelValid(true)
       setValidationMessage("Model is valid and can be loaded.")
-    } catch (error) {
+    } catch (error: any) {
       // Only show error if it's not a cancellation
       if (error.name !== "CancelError") {
         setIsModelValid(false)
@@ -356,235 +332,260 @@ function LlmModels() {
   }
 
   return (
-    <>
-      <Heading size="lg" mb={2}>
-        LLM Management
-      </Heading>
+    <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={6} bg="white">
+      <VStack gap={4} align="stretch">
+        <Box>
+          <Heading size="lg" mb={2}>
+            LLM Management
+          </Heading>
+          <Text mb={4}>
+            Configure and manage the LLMs used for generating text responses. The default model will
+            be used for all operations.
+          </Text>
+        </Box>
 
-      <Text mb={4}>
-        Configure and manage the LLMs used for generating text responses. The default model will be
-        used for all operations.
-      </Text>
-
-      <Button
-        leftIcon={<FiPlus />}
-        colorPalette="blue"
-        mb={6}
-        onClick={() => {
-          resetForm()
-          setIsOpen(true)
-        }}
-      >
-        Add New LLM
-      </Button>
-
-      {isLoading ? (
-        <Flex justify="center" align="center" h="200px">
-          <Spinner size="lg" />
-        </Flex>
-      ) : !modelsData || modelsData.data.length === 0 ? (
-        <EmptyState.Root>
-          <EmptyState.Content>
-            <EmptyState.Icon>
-              <FiSettings size={24} />
-            </EmptyState.Icon>
-            <EmptyState.Title>No LLMs configured</EmptyState.Title>
-            <EmptyState.Description>Add a new LLM to get started</EmptyState.Description>
-          </EmptyState.Content>
-        </EmptyState.Root>
-      ) : (
-        <Table.Root>
-          <Table.Header>
-            <Table.Row>
-              <Table.ColumnHeader>Name</Table.ColumnHeader>
-              <Table.ColumnHeader>Model ID</Table.ColumnHeader>
-              <Table.ColumnHeader>Provider</Table.ColumnHeader>
-              <Table.ColumnHeader>Description</Table.ColumnHeader>
-              <Table.ColumnHeader>Status</Table.ColumnHeader>
-              <Table.ColumnHeader>Actions</Table.ColumnHeader>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {modelsData.data
-              .filter((model) => availableProviders.includes(model.provider))
-              .map((model) => (
-                <Table.Row key={model.id}>
-                  <Table.Cell>{model.name}</Table.Cell>
-                  <Table.Cell>
-                    <code>{model.model_id}</code>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Badge colorPalette={getProviderColor(model.provider)} size="sm">
-                      {getProviderDisplayName(model.provider)}
-                    </Badge>
-                  </Table.Cell>
-                  <Table.Cell>{model.description}</Table.Cell>
-                  <Table.Cell>
-                    {defaultModel?.id === model.id ? (
-                      <Badge colorPalette="green" size="sm">
-                        Default
-                      </Badge>
-                    ) : (
-                      <Badge colorPalette="gray" size="sm">
-                        Available
-                      </Badge>
-                    )}
-                  </Table.Cell>
-                  <Table.Cell>
-                    <HStack spacing={2}>
-                      {defaultModel?.id !== model.id && (
-                        <Button
-                          size="xs"
-                          colorPalette="blue"
-                          onClick={() => handleSetDefault(model.id)}
-                        >
-                          Set as Default
-                        </Button>
-                      )}
-                      {model.owner_id && (
-                        <Button
-                          size="xs"
-                          colorPalette="red"
-                          onClick={() => handleDeleteModel(model.id)}
-                        >
-                          Delete
-                        </Button>
-                      )}
-                    </HStack>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-          </Table.Body>
-        </Table.Root>
-      )}
-
-      {/* Dialog for adding a new LLM */}
-      <Dialog.Root
-        open={isOpen}
-        onOpenChange={(details) => {
-          if (!details.open) {
-            handleModalClose()
-          } else {
+        <Button
+          variant="solid"
+          color="white"
+          bg="rgba(0, 65, 72, 0.9)"
+          _hover={{
+            bg: "rgba(0, 65, 72, 0.85)",
+          }}
+          mb={6}
+          onClick={() => {
+            resetForm()
             setIsOpen(true)
-          }
-        }}
-      >
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content size={{ base: "xs", md: "md" }} placement="center">
-            <Box position="relative">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  handleAddModel()
-                }}
-              >
-                <Dialog.Header>
-                  <Dialog.Title>Add New LLM</Dialog.Title>
-                </Dialog.Header>
-                <Dialog.Body>
-                  <VStack gap={4}>
-                    <Field label="Display Name" required>
-                      <Input
-                        value={modelName}
-                        onChange={(e) => setModelName(e.target.value)}
-                        placeholder="e.g., My Custom Model"
-                      />
-                    </Field>
+          }}
+        >
+          <FiPlus />
+          Add New LLM
+        </Button>
 
-                    <Field label="Provider" required>
-                      <select
-                        value={modelProvider}
-                        onChange={(e) => setModelProvider(e.target.value)}
-                        style={{
-                          width: "100%",
-                          padding: "0.5rem",
-                          borderRadius: "0.375rem",
-                          borderColor: "#E2E8F0",
-                          fontSize: "1rem",
-                          height: "2.5rem",
-                        }}
-                      >
-                        {availableProviders.map((provider) => (
-                          <option key={provider} value={provider}>
-                            {provider === "huggingface"
-                              ? "HuggingFace"
-                              : provider === "openai"
-                                ? "OpenAI"
-                                : provider === "ollama"
-                                  ? "Ollama"
-                                  : provider === "replicate"
-                                    ? "Replicate"
-                                    : provider === "aws"
-                                      ? "AWS Bedrock"
-                                      : provider}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-
-                    <Field label="Model ID" required>
-                      <HStack>
-                        <Input
-                          value={modelId}
-                          onChange={(e) => {
-                            setModelId(e.target.value)
-                            setIsModelValid(null)
-                          }}
-                          placeholder="e.g., sentence-transformers/all-MiniLM-L6-v2"
-                        />
-                        <Button
-                          onClick={handleValidateModel}
-                          isLoading={isValidating}
-                          loadingText="Validating"
-                          disabled={!modelId.trim()}
-                        >
-                          {isValidating ? <Spinner size="sm" /> : "Validate"}
-                        </Button>
-                      </HStack>
-                      {isModelValid !== null && (
-                        <Box
-                          mt={2}
-                          p={2}
-                          borderRadius="md"
-                          bg={isModelValid ? "green.50" : "red.50"}
-                          color={isModelValid ? "green.700" : "red.700"}
-                        >
-                          <HStack>
-                            <Box>{isModelValid ? <FiCheckCircle /> : <FiXCircle />}</Box>
-                            <Text fontSize="sm">{validationMessage}</Text>
-                          </HStack>
-                        </Box>
+        {isLoading ? (
+          <Flex justify="center" align="center" h="200px">
+            <Spinner size="lg" />
+          </Flex>
+        ) : !modelsData || modelsData.data.length === 0 ? (
+          <EmptyState.Root>
+            <EmptyState.Content>
+              <EmptyState.Indicator>
+                <FiSettings size={24} />
+              </EmptyState.Indicator>
+              <EmptyState.Title>No LLMs configured</EmptyState.Title>
+              <EmptyState.Description>Add a new LLM to get started</EmptyState.Description>
+            </EmptyState.Content>
+          </EmptyState.Root>
+        ) : (
+          <Table.Root>
+            <Table.Header>
+              <Table.Row>
+                <Table.ColumnHeader>Name</Table.ColumnHeader>
+                <Table.ColumnHeader>Model ID</Table.ColumnHeader>
+                <Table.ColumnHeader>Provider</Table.ColumnHeader>
+                <Table.ColumnHeader>Description</Table.ColumnHeader>
+                <Table.ColumnHeader>Status</Table.ColumnHeader>
+                <Table.ColumnHeader>Actions</Table.ColumnHeader>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {modelsData.data
+                .filter(
+                  (model): model is typeof model & { provider: string } =>
+                    model.provider !== undefined && availableProviders.includes(model.provider),
+                )
+                .map((model) => (
+                  <Table.Row key={model.id}>
+                    <Table.Cell>{model.name}</Table.Cell>
+                    <Table.Cell>
+                      <code>{model.model_id}</code>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Badge colorPalette={getProviderColor(model.provider)} size="sm">
+                        {getProviderDisplayName(model.provider)}
+                      </Badge>
+                    </Table.Cell>
+                    <Table.Cell>{model.description}</Table.Cell>
+                    <Table.Cell>
+                      {defaultModel?.id === model.id ? (
+                        <Badge colorPalette="green" size="sm">
+                          Default
+                        </Badge>
+                      ) : (
+                        <Badge colorPalette="gray" size="sm">
+                          Available
+                        </Badge>
                       )}
-                    </Field>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <HStack gap={2}>
+                        {defaultModel?.id !== model.id && (
+                          <Button
+                            size="xs"
+                            colorPalette="blue"
+                            onClick={() => model.id && handleSetDefault(model.id)}
+                          >
+                            Set as Default
+                          </Button>
+                        )}
+                        {model.owner_id && (
+                          <Button
+                            size="xs"
+                            colorPalette="red"
+                            onClick={() => model.id && handleDeleteModel(model.id)}
+                          >
+                            Delete
+                          </Button>
+                        )}
+                      </HStack>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+            </Table.Body>
+          </Table.Root>
+        )}
 
-                    <Field label="Description">
-                      <Textarea
-                        value={modelDescription}
-                        onChange={(e) => setModelDescription(e.target.value)}
-                        placeholder="Describe the model, its characteristics, and when to use it"
-                        rows={3}
-                      />
-                    </Field>
-                  </VStack>
-                </Dialog.Body>
-                <Dialog.Footer gap={2}>
-                  <Dialog.ActionTrigger asChild>
-                    <Button variant="subtle" colorPalette="gray">
-                      Cancel
+        <Dialog.Root
+          open={isOpen}
+          onOpenChange={(details) => {
+            if (!details.open) {
+              handleModalClose()
+            } else {
+              setIsOpen(true)
+            }
+          }}
+        >
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Box position="relative">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    handleAddModel()
+                  }}
+                >
+                  <Dialog.Header>
+                    <Dialog.Title>Add New LLM</Dialog.Title>
+                  </Dialog.Header>
+                  <Dialog.Body>
+                    <VStack gap={4}>
+                      <Field label="Display Name" required>
+                        <Input
+                          value={modelName}
+                          onChange={(e) => setModelName(e.target.value)}
+                          placeholder="e.g., My Custom Model"
+                        />
+                      </Field>
+
+                      <Field label="Provider" required>
+                        <select
+                          value={modelProvider}
+                          onChange={(e) => setModelProvider(e.target.value)}
+                          style={{
+                            width: "100%",
+                            padding: "0.5rem",
+                            borderRadius: "0.375rem",
+                            borderColor: "#E2E8F0",
+                            fontSize: "1rem",
+                            height: "2.5rem",
+                          }}
+                        >
+                          {availableProviders.map((provider) => (
+                            <option key={provider} value={provider}>
+                              {provider === "huggingface"
+                                ? "HuggingFace"
+                                : provider === "openai"
+                                  ? "OpenAI"
+                                  : provider === "ollama"
+                                    ? "Ollama"
+                                    : provider === "replicate"
+                                      ? "Replicate"
+                                      : provider === "aws"
+                                        ? "AWS Bedrock"
+                                        : provider}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+
+                      <Field label="Model ID" required>
+                        <HStack>
+                          <Input
+                            value={modelId}
+                            onChange={(e) => {
+                              setModelId(e.target.value)
+                              setIsModelValid(null)
+                            }}
+                            placeholder="e.g., sentence-transformers/all-MiniLM-L6-v2"
+                          />
+                          <Button
+                            onClick={handleValidateModel}
+                            loading={isValidating}
+                            loadingText="Validating"
+                            disabled={!modelId.trim()}
+                            variant="outline"
+                            color="rgba(0, 65, 72, 0.9)"
+                            borderColor="rgba(0, 65, 72, 0.9)"
+                            _hover={{
+                              bg: "gray.100",
+                            }}
+                          >
+                            {isValidating ? <Spinner size="sm" /> : "Validate"}
+                          </Button>
+                        </HStack>
+                        {isModelValid !== null && (
+                          <Box
+                            mt={2}
+                            p={2}
+                            borderRadius="md"
+                            bg={isModelValid ? "green.50" : "red.50"}
+                            color={isModelValid ? "green.700" : "red.700"}
+                          >
+                            <HStack>
+                              <Box>{isModelValid ? <FiCheckCircle /> : <FiXCircle />}</Box>
+                              <Text fontSize="sm">{validationMessage}</Text>
+                            </HStack>
+                          </Box>
+                        )}
+                      </Field>
+
+                      <Field label="Description">
+                        <Textarea
+                          value={modelDescription}
+                          onChange={(e) => setModelDescription(e.target.value)}
+                          placeholder="Describe the model, its characteristics, and when to use it"
+                          rows={3}
+                        />
+                      </Field>
+                    </VStack>
+                  </Dialog.Body>
+                  <Dialog.Footer gap={2}>
+                    <Dialog.ActionTrigger asChild>
+                      <Button variant="subtle" colorPalette="gray">
+                        Cancel
+                      </Button>
+                    </Dialog.ActionTrigger>
+                    <Button
+                      variant="solid"
+                      color="white"
+                      bg="rgba(0, 65, 72, 0.9)"
+                      _hover={{
+                        bg: "rgba(0, 65, 72, 0.85)",
+                      }}
+                      type="submit"
+                      disabled={!isModelValid}
+                    >
+                      Add Model
                     </Button>
-                  </Dialog.ActionTrigger>
-                  <Button colorPalette="blue" type="submit" isDisabled={!isModelValid}>
-                    Add Model
-                  </Button>
-                </Dialog.Footer>
-              </form>
-            </Box>
-            <Dialog.CloseTrigger />
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Dialog.Root>
-    </>
+                  </Dialog.Footer>
+                </form>
+              </Box>
+              <Dialog.CloseTrigger />
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
+      </VStack>
+    </Box>
   )
 }
 
@@ -681,7 +682,9 @@ function EmbeddingModels() {
       description: string
     }) => {
       console.log("Sending data to createEmbeddingModel:", data)
-      return EmbeddingModelsService.createEmbeddingModel({ requestBody: data })
+      return EmbeddingModelsService.createEmbeddingModel({
+        requestBody: { ...data, provider: data.provider as ModelProvider },
+      })
         .then((response) => {
           console.log("Received successful response:", response)
           return response
@@ -708,7 +711,12 @@ function EmbeddingModels() {
   const validateModelMutation = useMutation({
     mutationFn: (data: { requestBody: { model_id: string; provider: string } }) => {
       console.log("The following data will be sent to the server for model validation:", data)
-      return EmbeddingModelsService.validateEmbeddingModel(data)
+      return EmbeddingModelsService.validateEmbeddingModel({
+        requestBody: {
+          ...data.requestBody,
+          provider: data.requestBody.provider as ModelProvider,
+        },
+      })
     },
     onSuccess: () => {
       setIsModelValid(true)
@@ -804,227 +812,254 @@ function EmbeddingModels() {
   }
 
   return (
-    <>
-      <Heading size="lg" pt={12} mb={2}>
-        Embedding Model Management
-      </Heading>
+    <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={6} bg="white">
+      <VStack gap={4} align="stretch">
+        <Box>
+          <Heading size="lg" mb={2}>
+            Embedding Model Management
+          </Heading>
+          <Text mb={4}>
+            Configure and manage the embedding models used for knowledge base indexing and
+            retrieval. The default model will be used when creating new knowledge bases, but each
+            knowledge base will continue using its original embedding model even if the default
+            changes later.
+          </Text>
+        </Box>
 
-      <Text mb={4}>
-        Configure and manage the embedding models used for knowledge base indexing and retrieval.
-        The default model will be used when creating new knowledge bases, but each knowledge base
-        will continue using its original embedding model even if the default changes later.
-      </Text>
+        <Button
+          variant="solid"
+          color="white"
+          bg="rgba(0, 65, 72, 0.9)"
+          _hover={{
+            bg: "rgba(0, 65, 72, 0.85)",
+          }}
+          mb={6}
+          onClick={() => {
+            resetForm()
+            onOpen()
+          }}
+        >
+          <FiPlus />
+          Add Embedding Model
+        </Button>
 
-      <Button
-        leftIcon={<FiPlus />}
-        colorPalette="blue"
-        mb={6}
-        onClick={() => {
-          resetForm()
-          onOpen()
-        }}
-      >
-        Add New Embedding Model
-      </Button>
-
-      {isLoading ? (
-        <Flex justify="center" align="center" h="200px">
-          <Spinner size="lg" />
-        </Flex>
-      ) : !modelsData || modelsData.data.length === 0 ? (
-        <EmptyState.Root>
-          <EmptyState.Content>
-            <EmptyState.Icon>
-              <FiSettings size={24} />
-            </EmptyState.Icon>
-            <EmptyState.Title>No embedding models configured</EmptyState.Title>
-            <EmptyState.Description>
-              Add a new embedding model to get started
-            </EmptyState.Description>
-          </EmptyState.Content>
-        </EmptyState.Root>
-      ) : (
-        <Table.Root>
-          <Table.Header>
-            <Table.Row>
-              <Table.ColumnHeader>Name</Table.ColumnHeader>
-              <Table.ColumnHeader>Model ID</Table.ColumnHeader>
-              <Table.ColumnHeader>Provider</Table.ColumnHeader>
-              <Table.ColumnHeader>Description</Table.ColumnHeader>
-              <Table.ColumnHeader>Status</Table.ColumnHeader>
-              <Table.ColumnHeader>Actions</Table.ColumnHeader>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {modelsData.data
-              .filter((model) => availableProviders.includes(model.provider))
-              .map((model) => (
-                <Table.Row key={model.id}>
-                  <Table.Cell>{model.name}</Table.Cell>
-                  <Table.Cell>
-                    <code>{model.model_id}</code>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Badge colorPalette={getProviderColor(model.provider)} size="sm">
-                      {getProviderDisplayName(model.provider)}
-                    </Badge>
-                  </Table.Cell>
-                  <Table.Cell>{model.description}</Table.Cell>
-                  <Table.Cell>
-                    {defaultModel?.id === model.id ? (
-                      <Badge colorPalette="green" size="sm">
-                        Default
+        {isLoading ? (
+          <Flex justify="center" align="center" h="200px">
+            <Spinner size="lg" />
+          </Flex>
+        ) : !modelsData || modelsData.data.length === 0 ? (
+          <EmptyState.Root>
+            <EmptyState.Content>
+              <EmptyState.Indicator>
+                <FiSettings size={24} />
+              </EmptyState.Indicator>
+              <EmptyState.Title>No embedding models configured</EmptyState.Title>
+              <EmptyState.Description>
+                Add a new embedding model to get started
+              </EmptyState.Description>
+            </EmptyState.Content>
+          </EmptyState.Root>
+        ) : (
+          <Table.Root>
+            <Table.Header>
+              <Table.Row>
+                <Table.ColumnHeader>Name</Table.ColumnHeader>
+                <Table.ColumnHeader>Model ID</Table.ColumnHeader>
+                <Table.ColumnHeader>Provider</Table.ColumnHeader>
+                <Table.ColumnHeader>Description</Table.ColumnHeader>
+                <Table.ColumnHeader>Status</Table.ColumnHeader>
+                <Table.ColumnHeader>Actions</Table.ColumnHeader>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {modelsData.data
+                .filter(
+                  (model): model is typeof model & { provider: string } =>
+                    model.provider !== undefined && availableProviders.includes(model.provider),
+                )
+                .map((model) => (
+                  <Table.Row key={model.id}>
+                    <Table.Cell>{model.name}</Table.Cell>
+                    <Table.Cell>
+                      <code>{model.model_id}</code>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Badge colorPalette={getProviderColor(model.provider)} size="sm">
+                        {getProviderDisplayName(model.provider)}
                       </Badge>
-                    ) : (
-                      <Badge colorPalette="gray" size="sm">
-                        Available
-                      </Badge>
-                    )}
-                  </Table.Cell>
-                  <Table.Cell>
-                    <HStack spacing={2}>
-                      {defaultModel?.id !== model.id && (
-                        <Button
-                          size="xs"
-                          colorPalette="blue"
-                          onClick={() => handleSetDefault(model.id)}
-                        >
-                          Set as Default
-                        </Button>
+                    </Table.Cell>
+                    <Table.Cell>{model.description}</Table.Cell>
+                    <Table.Cell>
+                      {defaultModel?.id === model.id ? (
+                        <Badge colorPalette="green" size="sm">
+                          Default
+                        </Badge>
+                      ) : (
+                        <Badge colorPalette="gray" size="sm">
+                          Available
+                        </Badge>
                       )}
-                      {model.owner_id && (
-                        <Button
-                          size="xs"
-                          colorPalette="red"
-                          onClick={() => handleDeleteModel(model.id)}
-                        >
-                          Delete
-                        </Button>
-                      )}
-                    </HStack>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-          </Table.Body>
-        </Table.Root>
-      )}
-      {/* Dialog for adding a new embedding model */}
-      <Dialog.Root open={isOpen} onOpenChange={(details) => setIsOpen(details.open)}>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content size={{ base: "xs", md: "md" }} placement="center">
-            <Box position="relative">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  handleAddModel()
-                }}
-              >
-                <Dialog.Header>
-                  <Dialog.Title>Add Embedding Model</Dialog.Title>
-                </Dialog.Header>
-                <Dialog.Body>
-                  <VStack gap={4}>
-                    <Field label="Display Name" required>
-                      <Input
-                        value={modelName}
-                        onChange={(e) => setModelName(e.target.value)}
-                        placeholder="e.g., My Custom Model"
-                      />
-                    </Field>
-
-                    <Field label="Provider" required>
-                      <select
-                        value={modelProvider}
-                        onChange={(e) => setModelProvider(e.target.value)}
-                        style={{
-                          width: "100%",
-                          padding: "0.5rem",
-                          borderRadius: "0.375rem",
-                          borderColor: "#E2E8F0",
-                          fontSize: "1rem",
-                          height: "2.5rem",
-                        }}
-                      >
-                        {availableProviders.map((provider) => (
-                          <option key={provider} value={provider}>
-                            {provider === "huggingface"
-                              ? "HuggingFace"
-                              : provider === "openai"
-                                ? "OpenAI"
-                                : provider === "ollama"
-                                  ? "Ollama"
-                                  : provider === "replicate"
-                                    ? "Replicate"
-                                    : provider === "aws"
-                                      ? "AWS Bedrock"
-                                      : provider}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-
-                    <Field label="Model ID" required>
-                      <HStack>
-                        <Input
-                          value={modelId}
-                          onChange={(e) => {
-                            setModelId(e.target.value)
-                            setIsModelValid(null)
-                          }}
-                          placeholder="e.g., sentence-transformers/all-MiniLM-L6-v2"
-                        />
-                        <Button
-                          onClick={handleValidateModel}
-                          isLoading={isValidating}
-                          loadingText="Validating"
-                          disabled={!modelId.trim()}
-                        >
-                          {isValidating ? <Spinner size="sm" /> : "Validate"}
-                        </Button>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <HStack gap={2}>
+                        {defaultModel?.id !== model.id && (
+                          <Button
+                            size="xs"
+                            colorPalette="blue"
+                            onClick={() => model.id && handleSetDefault(model.id)}
+                          >
+                            Set as Default
+                          </Button>
+                        )}
+                        {model.owner_id && (
+                          <Button
+                            size="xs"
+                            colorPalette="red"
+                            onClick={() => model.id && handleDeleteModel(model.id)}
+                          >
+                            Delete
+                          </Button>
+                        )}
                       </HStack>
-                      {isModelValid !== null && (
-                        <Box
-                          mt={2}
-                          p={2}
-                          borderRadius="md"
-                          bg={isModelValid ? "green.50" : "red.50"}
-                          color={isModelValid ? "green.700" : "red.700"}
-                        >
-                          <HStack>
-                            <Box>{isModelValid ? <FiCheckCircle /> : <FiXCircle />}</Box>
-                            <Text fontSize="sm">{validationMessage}</Text>
-                          </HStack>
-                        </Box>
-                      )}
-                    </Field>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+            </Table.Body>
+          </Table.Root>
+        )}
+        {/* Dialog for adding a new embedding model */}
+        <Dialog.Root open={isOpen} onOpenChange={(details) => setIsOpen(details.open)}>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Box position="relative">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    handleAddModel()
+                  }}
+                >
+                  <Dialog.Header>
+                    <Dialog.Title>Add Embedding Model</Dialog.Title>
+                  </Dialog.Header>
+                  <Dialog.Body>
+                    <VStack gap={4}>
+                      <Field label="Display Name" required>
+                        <Input
+                          value={modelName}
+                          onChange={(e) => setModelName(e.target.value)}
+                          placeholder="e.g., My Custom Model"
+                        />
+                      </Field>
 
-                    <Field label="Description">
-                      <Textarea
-                        value={modelDescription}
-                        onChange={(e) => setModelDescription(e.target.value)}
-                        placeholder="Describe the model, its characteristics, and when to use it"
-                        rows={3}
-                      />
-                    </Field>
-                  </VStack>
-                </Dialog.Body>
-                <Dialog.Footer gap={2}>
-                  <Dialog.ActionTrigger asChild>
-                    <Button variant="subtle" colorPalette="gray">
-                      Cancel
+                      <Field label="Provider" required>
+                        <select
+                          value={modelProvider}
+                          onChange={(e) => setModelProvider(e.target.value)}
+                          style={{
+                            width: "100%",
+                            padding: "0.5rem",
+                            borderRadius: "0.375rem",
+                            borderColor: "#E2E8F0",
+                            fontSize: "1rem",
+                            height: "2.5rem",
+                          }}
+                        >
+                          {availableProviders.map((provider) => (
+                            <option key={provider} value={provider}>
+                              {provider === "huggingface"
+                                ? "HuggingFace"
+                                : provider === "openai"
+                                  ? "OpenAI"
+                                  : provider === "ollama"
+                                    ? "Ollama"
+                                    : provider === "replicate"
+                                      ? "Replicate"
+                                      : provider === "aws"
+                                        ? "AWS Bedrock"
+                                        : provider}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+
+                      <Field label="Model ID" required>
+                        <HStack>
+                          <Input
+                            value={modelId}
+                            onChange={(e) => {
+                              setModelId(e.target.value)
+                              setIsModelValid(null)
+                            }}
+                            placeholder="e.g., sentence-transformers/all-MiniLM-L6-v2"
+                          />
+                          <Button
+                            onClick={handleValidateModel}
+                            loading={isValidating}
+                            loadingText="Validating"
+                            disabled={!modelId.trim()}
+                            variant="outline"
+                            color="rgba(0, 65, 72, 0.9)"
+                            borderColor="rgba(0, 65, 72, 0.9)"
+                            _hover={{
+                              bg: "gray.100",
+                            }}
+                          >
+                            {isValidating ? <Spinner size="sm" /> : "Validate"}
+                          </Button>
+                        </HStack>
+                        {isModelValid !== null && (
+                          <Box
+                            mt={2}
+                            p={2}
+                            borderRadius="md"
+                            bg={isModelValid ? "green.50" : "red.50"}
+                            color={isModelValid ? "green.700" : "red.700"}
+                          >
+                            <HStack>
+                              <Box>{isModelValid ? <FiCheckCircle /> : <FiXCircle />}</Box>
+                              <Text fontSize="sm">{validationMessage}</Text>
+                            </HStack>
+                          </Box>
+                        )}
+                      </Field>
+
+                      <Field label="Description">
+                        <Textarea
+                          value={modelDescription}
+                          onChange={(e) => setModelDescription(e.target.value)}
+                          placeholder="Describe the model, its characteristics, and when to use it"
+                          rows={3}
+                        />
+                      </Field>
+                    </VStack>
+                  </Dialog.Body>
+                  <Dialog.Footer gap={2}>
+                    <Dialog.ActionTrigger asChild>
+                      <Button variant="subtle" colorPalette="gray">
+                        Cancel
+                      </Button>
+                    </Dialog.ActionTrigger>
+                    <Button
+                      variant="solid"
+                      color="white"
+                      bg="rgba(0, 65, 72, 0.9)"
+                      _hover={{
+                        bg: "rgba(0, 65, 72, 0.85)",
+                      }}
+                      type="submit"
+                      disabled={!isModelValid}
+                    >
+                      Add Model
                     </Button>
-                  </Dialog.ActionTrigger>
-                  <Button colorPalette="blue" type="submit" isDisabled={!isModelValid}>
-                    Add Model
-                  </Button>
-                </Dialog.Footer>
-              </form>
-            </Box>
-            <Dialog.CloseTrigger />
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Dialog.Root>
-    </>
+                  </Dialog.Footer>
+                </form>
+              </Box>
+              <Dialog.CloseTrigger />
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
+      </VStack>
+    </Box>
   )
 }

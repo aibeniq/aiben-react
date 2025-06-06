@@ -1,4 +1,4 @@
-import { Container, Heading, Tabs } from "@chakra-ui/react"
+import { Container, Heading, Tabs, VStack, Box } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
 
 import Appearance from "@/components/UserSettings/Appearance"
@@ -27,25 +27,30 @@ function UserSettings() {
   }
 
   return (
-    <Container maxW="full">
-      <Heading size="lg" textAlign={{ base: "center", md: "left" }} py={12}>
-        User Settings
-      </Heading>
-
-      <Tabs.Root defaultValue="my-profile" variant="subtle">
-        <Tabs.List>
-          {finalTabs.map((tab) => (
-            <Tabs.Trigger key={tab.value} value={tab.value}>
-              {tab.title}
-            </Tabs.Trigger>
-          ))}
-        </Tabs.List>
-        {finalTabs.map((tab) => (
-          <Tabs.Content key={tab.value} value={tab.value}>
-            <tab.component />
-          </Tabs.Content>
-        ))}
-      </Tabs.Root>
+    <Container maxW="container.xl" py={8}>
+      <VStack gap={6} align="stretch">
+        <Box>
+          <Heading size="lg" mb={4}>
+            User Settings
+          </Heading>
+        </Box>
+        <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4} bg="white">
+          <Tabs.Root defaultValue="my-profile" variant="subtle">
+            <Tabs.List>
+              {finalTabs.map((tab) => (
+                <Tabs.Trigger key={tab.value} value={tab.value}>
+                  {tab.title}
+                </Tabs.Trigger>
+              ))}
+            </Tabs.List>
+            {finalTabs.map((tab) => (
+              <Tabs.Content key={tab.value} value={tab.value}>
+                <tab.component />
+              </Tabs.Content>
+            ))}
+          </Tabs.Root>
+        </Box>
+      </VStack>
     </Container>
   )
 }

@@ -52,7 +52,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
-  const { data: knowledgeBase, isLoading } = useQuery({
+  const { data: knowledgeBase } = useQuery({
     queryKey: ["knowledge-base", item.id],
     queryFn: async () => {
       console.log("Fetching knowledge base with ID:", item.id)
@@ -66,7 +66,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
     const hasTitleValue = !!knowledgeBase?.title
     const hasExistingFiles =
       knowledgeBase?.files &&
-      knowledgeBase.files.filter((f) => !removedFileIds.includes(f.id)).length > 0
+      knowledgeBase.files.filter((f: any) => !removedFileIds.includes(f.id)).length > 0
     const hasNewFiles = selectedFiles.length > 0
     const hasFiles = hasExistingFiles || hasNewFiles
 
@@ -83,7 +83,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isValid: hookFormIsValid, isSubmitting },
+    formState: { errors, isSubmitting },
   } = useForm<KnowledgeBaseUpdateForm>({
     mode: "onBlur",
     criteriaMode: "all",
@@ -143,7 +143,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
 
     const hasExistingFiles =
       knowledgeBase?.files &&
-      knowledgeBase.files.filter((f) => !removedFileIds.includes(f.id)).length > 0
+      knowledgeBase.files.filter((f: any) => !removedFileIds.includes(f.id)).length > 0
     const hasNewFiles = selectedFiles.length > 0
 
     if (!hasExistingFiles && !hasNewFiles) {
@@ -222,13 +222,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
               justifyContent="center"
               borderRadius="md"
             >
-              <Spinner
-                thickness="4px"
-                speed="0.65s"
-                emptyColor="gray.200"
-                color="blue.500"
-                size="xl"
-              />
+              <Spinner size="xl" />
             </Box>
           )}
 
@@ -274,8 +268,8 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                     <Text mb={2}>Current Files:</Text>
                     <VStack align="start" gap={2}>
                       {knowledgeBase.files
-                        .filter((file) => !removedFileIds.includes(file.id))
-                        .map((file) => (
+                        .filter((file: any) => !removedFileIds.includes(file.id))
+                        .map((file: any) => (
                           <HStack key={file.id} w="full" justify="space-between">
                             {/* Use SourceLink component for on-demand loading */}
                             <SourceLink sourceId={file.id} fileName={file.name} useModal={true} />
@@ -353,6 +347,11 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                 </DialogActionTrigger>
                 <Button
                   variant="solid"
+                  color="white"
+                  bg="rgba(0, 65, 72, 0.9)"
+                  _hover={{
+                    bg: "rgba(0, 65, 72, 0.85)",
+                  }}
                   type="submit"
                   disabled={!formIsValid || isSubmitting}
                   loading={isSubmitting}
