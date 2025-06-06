@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import { HStack, VStack, Input, IconButton } from "@chakra-ui/react"
 import { FiChevronUp, FiChevronDown, FiTrash2 } from "react-icons/fi"
 
