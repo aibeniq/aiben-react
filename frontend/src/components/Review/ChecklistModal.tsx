@@ -11,6 +11,8 @@ import {
 import { Field } from "../ui/field"
 import { VeraDocChecklist } from "../../client"
 import QuestionItem from "./QuestionItem"
+import CancelButton from "../ui/cancel-button"
+import ConfirmButton from "../ui/confirm-button"
 
 interface ChecklistModalProps {
   isOpen: boolean
@@ -111,26 +113,13 @@ const ChecklistModal = ({
 
             <Dialog.Footer>
               <Dialog.ActionTrigger asChild>
-                <Button
-                  variant="outline"
-                  onClick={onClose}
-                  bg="transparent"
-                  color="gray.500"
-                  border="1px solid"
-                  borderColor="gray.500"
-                  _hover={{ bg: "gray.100" }}
-                >
+                <CancelButton onClick={onClose} size="md">
                   Cancel
-                </Button>
+                </CancelButton>
               </Dialog.ActionTrigger>
-              <Button
-                onClick={onSave}
-                bg="rgba(0, 65, 72, 0.9)"
-                color="white"
-                _hover={{ bg: "rgba(0, 65, 72, 0.8)" }}
-              >
+              <ConfirmButton onClick={onSave} size="md">
                 {editingChecklist ? "Update Checklist" : "Create Checklist"}
-              </Button>
+              </ConfirmButton>
             </Dialog.Footer>
 
             <Dialog.CloseTrigger asChild>
