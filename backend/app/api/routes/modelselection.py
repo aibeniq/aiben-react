@@ -1,11 +1,10 @@
 import uuid
 import os
-from typing import Any, List, Optional
-import requests
+from typing import List, Dict
 import replicate
 import boto3
 
-from fastapi import APIRouter, HTTPException, Depends, Body
+from fastapi import APIRouter, HTTPException
 from sqlmodel import select, func
 
 from app.api.deps import CurrentUser, SessionDep
@@ -29,8 +28,8 @@ from langchain_openai import OpenAIEmbeddings
 router = APIRouter(prefix="/embedding-models", tags=["embedding-models"])
 
 
-@router.get("/providers", response_model=dict)
-def get_available_providers() -> dict:
+@router.get("/providers", response_model=Dict[str, List[str]])
+def get_available_providers() -> Dict[str, List[str]]:
     """
     Get the list of available model providers for LLMs and embedding models.
     """

@@ -627,7 +627,7 @@ def update_knowledge_base(
     return knowledge_base
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", response_model=Message)
 def delete_knowledge_base(
     session: SessionDep, current_user: CurrentUser, id: uuid.UUID
 ) -> Message:

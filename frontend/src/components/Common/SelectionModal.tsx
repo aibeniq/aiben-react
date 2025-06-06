@@ -1,5 +1,5 @@
 import React from "react"
-import { Button, Card, Heading, HStack, IconButton } from "@chakra-ui/react"
+import { Card, Heading, HStack, IconButton } from "@chakra-ui/react"
 import { FiX } from "react-icons/fi"
 import ConfirmButton from "../ui/confirm-button"
 

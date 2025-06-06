@@ -1,9 +1,9 @@
 import { Dialog, Box, Spinner, Text, Image, Button } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
-import { type FileViewData } from "@/hooks/useFileViewer"
+import { FilesGetSourceContentResponse } from "@/client"
 
 interface FileViewerModalProps {
-  file: FileViewData | null
+  file: FilesGetSourceContentResponse | null
   isOpen: boolean
   isLoading: boolean
   onClose: () => void
@@ -108,7 +108,7 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({ file, isOpen, isLoadi
   console.log("Modal rendering with isOpen:", isOpen)
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={({ open }) => !open && onClose()} size="5xl">
+    <Dialog.Root open={isOpen} onOpenChange={({ open }) => !open && onClose()} size="xl">
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
@@ -129,7 +129,7 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({ file, isOpen, isLoadi
               Close
             </Button>
             {file && (
-              <Button colorPalette="blue" onClick={downloadFile} isDisabled={!fileUrl}>
+              <Button colorPalette="blue" onClick={downloadFile} disabled={!fileUrl}>
                 Download
               </Button>
             )}

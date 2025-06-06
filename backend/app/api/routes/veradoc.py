@@ -1,6 +1,5 @@
 import uuid
 from app.models import (
-    VeraDocRequest,
     VeraDocResponse,
     VeraDocChecklist,
     RagChecklistRequest,
@@ -10,6 +9,7 @@ from app.models import (
     LlmInteraction,
     DocxRequest,
     VeraDocDetailResponse,
+    Message,
 )
 
 from app.api.deps import CurrentUser, SessionDep
@@ -18,12 +18,11 @@ from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
 
-from sqlmodel import Session, select
+from sqlmodel import select
 from fastapi import (
     APIRouter,
     UploadFile,
     File,
-    Form,
     HTTPException,
     Depends,
     Request as FastAPIRequest,
@@ -35,24 +34,16 @@ from dotenv import load_dotenv
 import json
 import os
 import re
-import base64
-from tempfile import NamedTemporaryFile
 from pathlib import Path
-import fitz  # PyMuPDF
 
 from datetime import datetime
 from starlette.requests import Request
 import tempfile
-import shutil
 import traceback
 from langchain_community.vectorstores import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain.chains import LLMChain
-from langchain.prompts import PromptTemplate
 import zipfile
 from io import BytesIO
 from docx import Document
-from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import markdown
 from bs4 import BeautifulSoup
@@ -503,7 +494,7 @@ def update_checklist(
     return checklist
 
 
-@router.delete("/checklists/{checklist_id}")
+@router.delete("/checklists/{checklist_id}", response_model=Message)
 def delete_checklist(
     checklist_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
 ):
@@ -522,7 +513,7 @@ def delete_checklist(
 
     session.delete(checklist)
     session.commit()
-    return {"message": "Checklist deleted successfully."}
+    return Message(message="Checklist deleted successfully.")
 
 
 @router.get("/history", response_model=List[Dict[str, Any]])

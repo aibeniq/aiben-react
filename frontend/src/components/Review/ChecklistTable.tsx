@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { Button, HStack, IconButton, Table, Checkbox } from "@chakra-ui/react"
 import { FiEye, FiCopy, FiTrash2, FiPlus } from "react-icons/fi"
 import { VeraDocChecklist, VeradocService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
-import QuestionItem from "./QuestionItem"
 import ChecklistModal from "./ChecklistModal"
 
 interface ChecklistTableProps {

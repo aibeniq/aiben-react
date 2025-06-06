@@ -3,12 +3,11 @@ from app.models import (
     FormConnectRequest,
     FormConnectResponse,
     FormConnectForm,
-    ModelProvider,
-    LlmModel,
+    FormConnectDetailResponse,
     LlmInteraction,
+    Message,
 )
 from app.services.llms import (
-    create_llm,
     get_default_llm,
     invoke_llm,
     invoke_llm_with_image,
@@ -372,7 +371,7 @@ def update_form(
     return form
 
 
-@router.delete("/forms/{form_id}")
+@router.delete("/forms/{form_id}", response_model=Message)
 def delete_form(form_id: uuid.UUID, session: SessionDep, current_user: CurrentUser):
     """
     Delete a form by ID.
@@ -389,11 +388,11 @@ def delete_form(form_id: uuid.UUID, session: SessionDep, current_user: CurrentUs
 
     session.delete(form)
     session.commit()
-    return {"message": "Form deleted successfully."}
+    return Message(message="Form deleted successfully.")
 
 
 # Add this new endpoint to get history details for a specific form processing
-@router.get("/history/{interaction_id}")
+@router.get("/history/{interaction_id}", response_model=FormConnectDetailResponse)
 async def get_form_detail(
     interaction_id: uuid.UUID,
     session: SessionDep,

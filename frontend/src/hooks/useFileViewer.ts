@@ -1,17 +1,10 @@
 import { useState } from "react"
-import { FilesService } from "@/client"
+import { FilesGetSourceContentResponse, FilesService } from "@/client"
 import useCustomToast from "./useCustomToast"
-
-export interface FileViewData {
-  id: string
-  name: string
-  data_base64: string
-  content_type: string
-}
 
 export const useFileViewer = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [currentFile, setCurrentFile] = useState<FileViewData | null>(null)
+  const [currentFile, setCurrentFile] = useState<FilesGetSourceContentResponse | null>(null)
   const { showErrorToast } = useCustomToast()
 
   /**
@@ -30,7 +23,7 @@ export const useFileViewer = () => {
       // Fetch the file data from the API
       const response = await FilesService.getSourceContent({ sourceId })
       console.log("File data received:", response)
-      setCurrentFile(response as FileViewData)
+      setCurrentFile(response)
 
       // Create a blob URL for the file
       const byteCharacters = atob(response.data_base64)
