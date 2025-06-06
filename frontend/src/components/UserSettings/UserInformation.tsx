@@ -1,4 +1,4 @@
-import { Box, Button, Container, Flex, Heading, Input, Text } from "@chakra-ui/react"
+import { Box, Button, Flex, Heading, Input, Text, VStack } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
@@ -56,12 +56,10 @@ const UserInformation = () => {
   }
 
   return (
-    <>
-      <Container maxW="full">
-        <Heading size="sm" py={4}>
-          User Information
-        </Heading>
-        <Box w={{ sm: "full", md: "sm" }} as="form" onSubmit={handleSubmit(onSubmit)}>
+    <VStack gap={6} align="stretch" py={4}>
+      <Heading size="sm">User Information</Heading>
+      <Box w={{ sm: "full", md: "md" }} as="form" onSubmit={handleSubmit(onSubmit)}>
+        <VStack gap={4} align="stretch">
           <Field label="Full name">
             {editMode ? (
               <Input {...register("full_name", { maxLength: 30 })} type="text" size="md" />
@@ -77,7 +75,7 @@ const UserInformation = () => {
               </Text>
             )}
           </Field>
-          <Field mt={4} label="Email" invalid={!!errors.email} errorText={errors.email?.message}>
+          <Field label="Email" invalid={!!errors.email} errorText={errors.email?.message}>
             {editMode ? (
               <Input
                 {...register("email", {
@@ -93,13 +91,18 @@ const UserInformation = () => {
               </Text>
             )}
           </Field>
-          <Flex mt={4} gap={3}>
+          <Flex gap={3}>
             <Button
               variant="solid"
               onClick={toggleEditMode}
               type={editMode ? "button" : "submit"}
               loading={editMode ? isSubmitting : false}
               disabled={editMode ? !isDirty || !getValues("email") : false}
+              bg="rgba(0, 65, 72, 0.9)"
+              color="white"
+              _hover={{
+                bg: "rgba(0, 65, 72, 0.85)",
+              }}
             >
               {editMode ? "Save" : "Edit"}
             </Button>
@@ -114,9 +117,9 @@ const UserInformation = () => {
               </Button>
             )}
           </Flex>
-        </Box>
-      </Container>
-    </>
+        </VStack>
+      </Box>
+    </VStack>
   )
 }
 

@@ -196,7 +196,16 @@ const AddKnowledgeBase = () => {
       onOpenChange={({ open }) => setIsOpen(open)}
     >
       <DialogTrigger asChild>
-        <Button value="add-item" my={4}>
+        <Button
+          variant="solid"
+          color="white"
+          bg="rgba(0, 65, 72, 0.9)"
+          _hover={{
+            bg: "rgba(0, 65, 72, 0.85)",
+          }}
+          value="add-item"
+          my={4}
+        >
           <FaPlus fontSize="16px" />
           Add Knowledge Base
         </Button>
@@ -339,7 +348,16 @@ const AddKnowledgeBase = () => {
                   Cancel
                 </Button>
               </DialogActionTrigger>
-              <Button variant="solid" type="submit" disabled={!isValid || isSubmitting}>
+              <Button
+                variant="solid"
+                color="white"
+                bg="rgba(0, 65, 72, 0.9)"
+                _hover={{
+                  bg: "rgba(0, 65, 72, 0.85)",
+                }}
+                type="submit"
+                disabled={!isValid || isSubmitting}
+              >
                 {isSubmitting ? "Creating..." : "Save"}
               </Button>
             </DialogFooter>
