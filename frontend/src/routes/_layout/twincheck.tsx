@@ -326,7 +326,7 @@ const TwinCheck = () => {
           >
             <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
               <HStack justify="space-between" align="center" mb={4}>
-                <Heading size="md">Comparison Results</Heading>
+                <Heading size="md">Results</Heading>
 
                 {summary && (
                   <HStack gap={2}>
