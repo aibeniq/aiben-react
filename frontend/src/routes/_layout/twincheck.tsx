@@ -45,7 +45,7 @@ const TwinCheck = () => {
       let fullText = `# Summary\n\n${summary}\n\n# Topic Analysis\n\n`
 
       // Add each topic and its analysis
-      topicResults.forEach((topic, index) => {
+      topicResults.forEach((topic) => {
         fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
       })
 
@@ -73,7 +73,7 @@ const TwinCheck = () => {
       let fullText = `# Summary\n\n${summary}\n\n# Topic Analysis\n\n`
 
       // Add each topic and its analysis
-      topicResults.forEach((topic, index) => {
+      topicResults.forEach((topic) => {
         fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
       })
 
