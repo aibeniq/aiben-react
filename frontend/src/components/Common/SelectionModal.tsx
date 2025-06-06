@@ -1,6 +1,7 @@
 import React from "react"
 import { Button, Card, Heading, HStack, IconButton } from "@chakra-ui/react"
 import { FiX } from "react-icons/fi"
+import ConfirmButton from "../ui/confirm-button"
 
 interface SelectionModalProps {
   isOpen: boolean
@@ -39,14 +40,9 @@ const SelectionModal = ({ isOpen, onClose, title, children }: SelectionModalProp
         </Card.Header>
         <Card.Body>{children}</Card.Body>
         <Card.Footer justifyContent="flex-end">
-          <Button
-            onClick={onClose}
-            bg="rgba(0, 65, 72, 0.9)"
-            color="white"
-            _hover={{ bg: "rgba(0, 65, 72, 0.8)" }}
-          >
+          <ConfirmButton onClick={onClose} size="md">
             Done
-          </Button>
+          </ConfirmButton>
         </Card.Footer>
       </Card.Root>
     </div>
