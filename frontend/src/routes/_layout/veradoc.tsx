@@ -27,10 +27,10 @@ import {
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { FiFileText, FiDatabase, FiCopy, FiCheck } from "react-icons/fi"
-import KnowledgeBaseTable from "../../components/Review/KnowledgeBaseTable"
+import KnowledgeBaseTable from "../../components/Common/KnowledgeBaseTable"
 import ChecklistTable from "../../components/Review/ChecklistTable"
-import SelectionCard from "../../components/Review/SelectionCard"
-import SelectionModal from "../../components/Review/SelectionModal"
+import SelectionCard from "../../components/Common/SelectionCard"
+import SelectionModal from "../../components/Common/SelectionModal"
 
 const VeraDoc = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -607,7 +607,7 @@ const VeraDoc = () => {
               description={selectedChecklist ? selectedChecklist.name : "Click to select"}
               icon={<FiFileText size={24} />}
               isSelected={!!selectedChecklist}
-              onClick={() => selectedKnowledgeBase && setShowChecklistModal(true)}
+              onClick={() => setShowChecklistModal(true)}
             />
 
             {/* File Upload Component */}
@@ -643,7 +643,6 @@ const VeraDoc = () => {
             onQuestionsChange={setQuestions}
             onChecklistsUpdate={fetchChecklists}
             questions={questions}
-            isDisabled={!selectedKnowledgeBase}
           />
         </SelectionModal>
 
