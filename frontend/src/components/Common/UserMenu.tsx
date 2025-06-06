@@ -1,6 +1,5 @@
 import { Box, Button, Flex, Text } from "@chakra-ui/react"
 import { Link } from "@tanstack/react-router"
-import { FaUserAstronaut } from "react-icons/fa"
 import { FiLogOut, FiUser } from "react-icons/fi"
 
 import useAuth from "@/hooks/useAuth"
@@ -27,7 +26,7 @@ const UserMenu = () => {
               bg="rgba(0, 65, 72, 0.9)"
               _hover={{ bg: "rgba(0, 65, 72, 0.8)" }}
             >
-              <FaUserAstronaut fontSize="18" />
+              <FiUser fontSize="18" />
               <Text>{user?.full_name || "User"}</Text>
             </Button>
           </MenuTrigger>

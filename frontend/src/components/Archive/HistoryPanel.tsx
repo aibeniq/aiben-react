@@ -66,7 +66,7 @@ const HistoryPanel = ({
       <Card.Body p={2}>
         <VStack align="stretch" gap={2} height="540px" overflowY="auto">
           {isHistoryLoading ? (
-            <Spinner size="sm" />
+            <Spinner size="sm" alignSelf="center" justifySelf="center" />
           ) : !reportHistory || reportHistory.length === 0 ? (
             <Text fontSize="sm" color="gray.500">
               {emptyMessage}

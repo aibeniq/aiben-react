@@ -38,8 +38,15 @@ const SelectionModal = ({ isOpen, onClose, title, children }: SelectionModalProp
           </HStack>
         </Card.Header>
         <Card.Body>{children}</Card.Body>
-        <Card.Footer>
-          <Button onClick={onClose}>Done</Button>
+        <Card.Footer justifyContent="flex-end">
+          <Button
+            onClick={onClose}
+            bg="rgba(0, 65, 72, 0.9)"
+            color="white"
+            _hover={{ bg: "rgba(0, 65, 72, 0.8)" }}
+          >
+            Done
+          </Button>
         </Card.Footer>
       </Card.Root>
     </div>
