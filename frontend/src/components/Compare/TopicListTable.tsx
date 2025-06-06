@@ -148,7 +148,6 @@ const TopicListTable = ({
   onTopicListChange,
   onTopicsChange,
   onTopicListsUpdate,
-  topics,
   isDisabled = false,
 }: TopicListTableProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()

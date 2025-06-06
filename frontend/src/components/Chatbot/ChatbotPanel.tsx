@@ -16,10 +16,11 @@ import {
 } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { useDropzone } from "react-dropzone"
-import { FaFileUpload, FaPaperPlane, FaTimes, FaTrash } from "react-icons/fa"
+import { FaFileUpload, FaTimes, FaTrash } from "react-icons/fa"
 import { FiFileText } from "react-icons/fi"
 import { KnowledgeBasesService, ChatService } from "@/client"
 import SourceLink from "@/components/Common/SourceLink"
+import { css } from "@emotion/react"
 
 interface ChatMessage {
   role: "user" | "assistant"
@@ -71,6 +72,41 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
     setSessionId(Math.random().toString(36).substring(2, 15))
   }
 
+  const handleChatbotResponse = (response: any, userMessage: string) => {
+    if (!response?.answer) return
+
+    console.log("Sources from response:", response.sources)
+
+    // Check if sources have source_data_id
+    if (response.sources && response.sources.length > 0) {
+      console.log("First source metadata:", response.sources[0].metadata)
+      console.log("Source has ID:", !!response.sources[0].metadata?.source_data_id)
+    }
+
+    // You can show the rephrased question if you want
+    const rephrasedInfo =
+      response.rephrased_question && response.rephrased_question !== userMessage
+        ? `(Interpreted as: "${response.rephrased_question}")`
+        : ""
+
+    // Store the session ID from the response
+    if (response.session_id) {
+      setSessionId(response.session_id)
+      console.log("Received session ID from server:", response.session_id)
+    }
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: response.answer + (rephrasedInfo ? `\n\n${rephrasedInfo}` : ""),
+        sources: response.sources,
+        rephrasedQuestion: response.rephrased_question,
+        sessionId: response.session_id,
+      },
+    ])
+  }
+
   // Get knowledge bases
   const { data: knowledgeBases = [] } = useQuery({
     queryKey: ["knowledge-bases"],
@@ -112,14 +148,13 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
     const userMessage = question
 
     // Add the new user message to chat history
-    const updatedMessages = [...messages, { role: "user", content: userMessage }]
+    const newMessage: ChatMessage = { role: "user", content: userMessage }
+    const updatedMessages = [...messages, newMessage]
     setMessages(updatedMessages)
     setQuestion("")
     setIsLoading(true)
 
     try {
-      let response
-
       // Format chat history for API
       // Only send the last 10 messages to keep context manageable
       const recentHistory = updatedMessages.slice(-10)
@@ -140,12 +175,15 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
 
       if (!selectedKbId && !uploadedFile) {
         // New case: No KB or file selected - use direct text query
-        response = await ChatService.queryText({
+        const response = await ChatService.queryText({
           question: userMessage,
           chatHistory: formattedChatHistory,
           sessionId: sessionId,
           isFollowUp: isFollowUp && sessionId ? true : false,
         })
+
+        console.log("Response:", response)
+        handleChatbotResponse(response as any, userMessage)
       } else if (selectedKbId) {
         // Set current KB ID if it's changed
         if (currentKbId !== selectedKbId) {
@@ -155,7 +193,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
           console.log("KB changed, clearing session ID")
         }
 
-        response = await ChatService.queryKnowledgeBase({
+        const response = await ChatService.queryKnowledgeBase({
           kbId: selectedKbId,
           question: userMessage,
           chatHistory: formattedChatHistory,
@@ -163,6 +201,9 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
           sessionId: sessionId, // Make sure this is being sent correctly
           isFollowUp: isFollowUp && sessionId ? true : false, // Only true if we have a session ID
         })
+
+        console.log("Response:", response)
+        handleChatbotResponse(response as any, userMessage)
       } else if (uploadedFile) {
         // Set current filename if it's changed
         if (currentFileName !== uploadedFile.name) {
@@ -177,7 +218,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
           formData.append("file", uploadedFile)
         }
 
-        response = await ChatService.queryDocument({
+        const response = await ChatService.queryDocument({
           question: userMessage,
           chatHistory: formattedChatHistory,
           useDefaultModels: true,
@@ -185,41 +226,9 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
           isFollowUp: isFollowUp === true,
           formData: isFollowUp ? undefined : { file: uploadedFile },
         })
-      }
 
-      console.log("Response:", response)
-
-      if (response?.answer) {
-        console.log("Sources from response:", response.sources)
-
-        // Check if sources have source_data_id
-        if (response.sources && response.sources.length > 0) {
-          console.log("First source metadata:", response.sources[0].metadata)
-          console.log("Source has ID:", !!response.sources[0].metadata?.source_data_id)
-        }
-
-        // You can show the rephrased question if you want
-        const rephrasedInfo =
-          response.rephrased_question && response.rephrased_question !== userMessage
-            ? `(Interpreted as: "${response.rephrased_question}")`
-            : ""
-
-        // Store the session ID from the response
-        if (response.session_id) {
-          setSessionId(response.session_id)
-          console.log("Received session ID from server:", response.session_id)
-        }
-
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: response.answer + (rephrasedInfo ? `\n\n${rephrasedInfo}` : ""),
-            sources: response.sources,
-            rephrasedQuestion: response.rephrased_question,
-            sessionId: response.session_id,
-          },
-        ])
+        console.log("Response:", response)
+        handleChatbotResponse(response as any, userMessage)
       }
     } catch (error) {
       console.error("Error querying:", error)
@@ -251,18 +260,18 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
         animation="slideUp 0.2s ease-out"
         display="flex"
         flexDirection="column"
-        sx={{
-          "@keyframes slideUp": {
-            "0%": {
-              opacity: 0,
-              transform: "translateY(20px)",
-            },
-            "100%": {
-              opacity: 1,
-              transform: "translateY(0)",
-            },
-          },
-        }}
+        css={css`
+          @keyframes slideUp {
+            0% {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}
       >
         {/* Header - Keep fixed */}
         <Box
@@ -275,7 +284,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
           flexShrink={0}
         >
           <Text fontWeight="bold">AI Assistant</Text>
-          <HStack spacing={2}>
+          <HStack gap={2}>
             {messages.length > 0 && (
               <Button
                 variant="ghost"
@@ -293,7 +302,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
               </Button>
             )}
             <Button
-              variant="unstyled"
+              variant="ghost"
               color="white"
               display="flex"
               alignItems="center"
@@ -315,7 +324,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
           minHeight="200px"
           maxHeight={`calc(${panelHeight} - 48px)`}
         >
-          <VStack spacing={4} width="100%" align="stretch">
+          <VStack gap={4} width="100%" align="stretch">
             {/* Knowledge Base Selection */}
             <Field.Root>
               <Field.Label>Select Knowledge Base</Field.Label>
@@ -362,7 +371,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
                 data-disabled={!!selectedKbId}
               >
                 <input {...getInputProps()} />
-                <VStack spacing={1}>
+                <VStack gap={1}>
                   <Icon
                     as={FaFileUpload}
                     boxSize="20px"
@@ -438,8 +447,8 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
 
                       {/* Display sources if available */}
                       {msg.sources && msg.sources.length > 0 && (
-                        <Accordion.Root type="single" collapsible mt={2}>
-                          <Accordion.Item>
+                        <Accordion.Root collapsible mt={2}>
+                          <Accordion.Item value="sources">
                             <h2>
                               <Accordion.ItemTrigger bg="gray.100" _hover={{ bg: "gray.200" }}>
                                 <Box flex="1" textAlign="left" fontWeight="medium">
@@ -542,8 +551,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
               colorPalette="teal"
               onClick={handleSendMessage}
               disabled={!question.trim() || isLoading}
-              isLoading={isLoading}
-              leftIcon={<FaPaperPlane />}
+              loading={isLoading}
               size="sm"
             >
               Send

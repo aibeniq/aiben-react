@@ -1,4 +1,3 @@
-import React from "react"
 import { Box, Card, Heading, Text, VStack, HStack, Spinner } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { FiFileText, FiDatabase } from "react-icons/fi"

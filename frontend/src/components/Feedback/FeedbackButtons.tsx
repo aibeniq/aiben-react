@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react"
-import { Box, HStack, Button, Textarea, Text, Portal, IconButton, useToast } from "@chakra-ui/react"
+import { Box, HStack, Button, Textarea, Text, Portal, IconButton } from "@chakra-ui/react"
 import { Tooltip } from "@/components/ui/tooltip"
-import { FiThumbsUp, FiThumbsDown, FiSend } from "react-icons/fi"
+import { FiThumbsUp, FiThumbsDown } from "react-icons/fi"
 import { FeedbackService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
 
@@ -102,7 +102,7 @@ const FeedbackButtons = ({
     <Box position="relative" zIndex={10}>
       {/* Feedback buttons */}
       <HStack
-        spacing={2}
+        gap={2}
         bg="white"
         p={1}
         borderRadius="md"
@@ -111,12 +111,12 @@ const FeedbackButtons = ({
         borderColor="gray.200"
       >
         <Tooltip
-          label={
+          content={
             existingFeedback?.feedback === "correct"
               ? "Edit your helpful feedback"
               : "Mark as helpful"
           }
-          hasArrow
+          showArrow
         >
           <IconButton
             aria-label="Mark as helpful"
@@ -130,12 +130,12 @@ const FeedbackButtons = ({
         </Tooltip>
 
         <Tooltip
-          label={
+          content={
             existingFeedback?.feedback === "incorrect"
               ? "Edit your feedback for improvements"
               : "Mark as not helpful"
           }
-          hasArrow
+          showArrow
         >
           <IconButton
             aria-label="Mark as unhelpful"
@@ -150,8 +150,8 @@ const FeedbackButtons = ({
 
         {existingFeedback?.feedbackDate && (
           <Tooltip
-            label={`Feedback submitted on ${new Date(existingFeedback.feedbackDate).toLocaleDateString()} at ${new Date(existingFeedback.feedbackDate).toLocaleTimeString()}`}
-            hasArrow
+            content={`Feedback submitted on ${new Date(existingFeedback.feedbackDate).toLocaleDateString()} at ${new Date(existingFeedback.feedbackDate).toLocaleTimeString()}`}
+            showArrow
           >
             <Text fontSize="xs" color="gray.500" ml={1}>
               Feedback saved
@@ -206,7 +206,7 @@ const FeedbackButtons = ({
                 mb={4}
               />
 
-              <HStack justifyContent="flex-end" spacing={3}>
+              <HStack justifyContent="flex-end" gap={3}>
                 <Button size="sm" variant="outline" onClick={handleClose}>
                   Cancel
                 </Button>
@@ -214,8 +214,7 @@ const FeedbackButtons = ({
                   size="sm"
                   colorPalette={feedbackType === "correct" ? "green" : "red"}
                   onClick={handleSubmitFeedback}
-                  isLoading={isSubmitting}
-                  leftIcon={<FiSend />}
+                  loading={isSubmitting}
                 >
                   {existingFeedback?.feedback ? "Update Feedback" : "Submit"}
                 </Button>

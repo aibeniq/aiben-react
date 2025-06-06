@@ -220,6 +220,14 @@ class SourceData(SQLModel, table=True):
     file_hash: str = Field(max_length=64)  # SHA-256 hash is 64 characters
 
 
+# Response model for source content retrieval
+class SourceContentResponse(SQLModel):
+    id: str
+    name: str
+    data_base64: str
+    content_type: str
+
+
 # Request model for FormConnect
 class FormConnectRequest(SQLModel):
     fields: str
@@ -228,6 +236,21 @@ class FormConnectRequest(SQLModel):
 # Response model for FormConnect
 class FormConnectResponse(SQLModel):
     results: Dict[str, Any]  # Accept any dictionary structure
+
+
+class FormConnectDetailFeedback(SQLModel):
+    feedback: Optional[str] = None
+    feedbackText: Optional[str] = None
+    feedbackDate: Optional[str] = None
+
+
+class FormConnectDetailResponse(SQLModel):
+    id: str
+    date_created: datetime
+    fields: str
+    file_names: List[str]
+    results: Dict[str, Any]
+    feedback: FormConnectDetailFeedback
 
 
 # Form, i.e., list of form fields for FormConnect functionality
@@ -454,6 +477,27 @@ class ReportGenieSection(SQLModel):
     source_citations: List[Dict[str, Any]] = Field(default_factory=list)
 
 
+class ReportGenieDetailFeedback(SQLModel):
+    feedback: Optional[str] = None
+    feedbackText: Optional[str] = None
+    feedbackDate: Optional[str] = None
+
+
+class ReportGenieDetailResults(SQLModel):
+    full_report: str
+    sections: List[Dict[str, Any]] = Field(default_factory=list)
+
+
+class ReportGenieDetailResponse(SQLModel):
+    id: str
+    date_created: datetime
+    kb_name: str
+    kb_id: str
+    sections: str
+    results: ReportGenieDetailResults
+    feedback: ReportGenieDetailFeedback
+
+
 class DocxRequest(SQLModel):
     content: str
 
@@ -505,3 +549,25 @@ class TwinCheckTopicList(SQLModel, table=True):
 
 class TwinCheckRequest(SQLModel):
     comparison_topics: str
+
+
+class TwinCheckDetailFeedback(SQLModel):
+    feedback: Optional[str] = None
+    feedbackText: Optional[str] = None
+    feedbackDate: Optional[str] = None
+
+
+class TwinCheckDetailResults(SQLModel):
+    summary: str
+    topic_analysis: List[Dict[str, Any]] = Field(default_factory=list)
+    interaction_id: str
+
+
+class TwinCheckDetailResponse(SQLModel):
+    id: str
+    date_created: datetime
+    document1_name: str
+    document2_name: str
+    comparison_topics: str
+    results: TwinCheckDetailResults
+    feedback: TwinCheckDetailFeedback

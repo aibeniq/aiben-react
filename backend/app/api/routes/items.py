@@ -95,7 +95,7 @@ def update_item(
     return item
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", response_model=Message)
 def delete_item(
     session: SessionDep, current_user: CurrentUser, id: uuid.UUID
 ) -> Message:

@@ -1,4 +1,3 @@
-import React from "react"
 import BaseResultsContainer from "../../components/Archive/BaseResultsContainer"
 import ToolTab from "../../components/Archive/ToolTab"
 import VeradocResults from "../../components/Archive/Results/VeradocResults"
@@ -88,7 +87,6 @@ function Archive() {
       setLoadingDownload(true)
       let response
       let fullText = ""
-      let docTitle = ""
 
       if (activeTab === "review" && veradoc.selectedReport) {
         // Prepare combined text with evaluation summary and QA pairs
@@ -99,9 +97,6 @@ function Archive() {
           fullText += `### Answer\n${pair.answer}\n\n`
           fullText += `### Relevant Policy Context\n${pair.context}\n\n`
         })
-
-        const documentName = veradoc.selectedReport.document_name || "Document"
-        docTitle = `Evaluation of ${documentName}`
 
         response = await VeradocService.generateDocx({
           requestBody: { content: fullText },
@@ -124,10 +119,6 @@ function Archive() {
           fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
         })
 
-        const doc1Name = twincheck.selectedReport.document1_name || "Document1"
-        const doc2Name = twincheck.selectedReport.document2_name || "Document2"
-        docTitle = `Comparison of ${doc1Name} and ${doc2Name}`
-
         response = await TwincheckService.generateDocx({
           requestBody: { content: fullText },
         })
@@ -148,7 +139,7 @@ function Archive() {
           type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         })
       } else {
-        blob = new Blob([response], {
+        blob = new Blob([response as BlobPart], {
           type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         })
       }

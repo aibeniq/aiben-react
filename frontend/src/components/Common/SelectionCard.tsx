@@ -1,6 +1,6 @@
 import React from "react"
 import { Box, Card, Heading, Text, VStack, HStack } from "@chakra-ui/react"
-import { FiCheck, FiX } from "react-icons/fi"
+import { FiCheck } from "react-icons/fi"
 
 interface SelectionCardProps {
   title: string
