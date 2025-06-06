@@ -1,4 +1,3 @@
-import React from "react"
 import {
   Button,
   HStack,
@@ -112,11 +111,24 @@ const ChecklistModal = ({
 
             <Dialog.Footer>
               <Dialog.ActionTrigger asChild>
-                <Button variant="outline" onClick={onClose}>
+                <Button
+                  variant="outline"
+                  onClick={onClose}
+                  bg="transparent"
+                  color="gray.500"
+                  border="1px solid"
+                  borderColor="gray.500"
+                  _hover={{ bg: "gray.100" }}
+                >
                   Cancel
                 </Button>
               </Dialog.ActionTrigger>
-              <Button onClick={onSave}>
+              <Button
+                onClick={onSave}
+                bg="rgba(0, 65, 72, 0.9)"
+                color="white"
+                _hover={{ bg: "rgba(0, 65, 72, 0.8)" }}
+              >
                 {editingChecklist ? "Update Checklist" : "Create Checklist"}
               </Button>
             </Dialog.Footer>

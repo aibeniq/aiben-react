@@ -15,6 +15,7 @@ import {
 } from "@chakra-ui/react"
 import useCustomToast from "@/hooks/useCustomToast"
 import SourceLink from "@/components/Common/SourceLink"
+import DownloadButton from "@/components/ui/download-button"
 import { useState, useEffect } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation, useQuery } from "@tanstack/react-query"
@@ -22,7 +23,7 @@ import { ReportgenieService, KnowledgeBasesService } from "@/client"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText, FiCopy, FiCheck, FiDownload } from "react-icons/fi"
+import { FiFileText, FiCopy, FiCheck } from "react-icons/fi"
 import { Field } from "../../components/ui/field"
 import { format } from "date-fns"
 import { InteractiveList } from "@/components/ui/interactive-list"
@@ -587,17 +588,13 @@ const ReportGenie = () => {
                           {copySuccess ? "Report text copied!" : "Copy Report Text"}
                         </Button>
 
-                        <Button
+                        <DownloadButton
                           size="sm"
-                          variant="outline"
-                          leftIcon={<FiDownload />}
                           onClick={handleDownloadReport}
-                          isLoading={loadingDownload}
-                          loadingText="Downloading..."
-                          colorPalette="green"
+                          loading={loadingDownload}
                         >
                           Download DOCX
-                        </Button>
+                        </DownloadButton>
                       </HStack>
                     )}
                   </HStack>

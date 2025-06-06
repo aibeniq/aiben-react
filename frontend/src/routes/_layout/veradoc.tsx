@@ -7,7 +7,6 @@ import {
   VStack,
   HStack,
   Spinner,
-  Separator,
   Accordion,
   Tabs,
 } from "@chakra-ui/react"
@@ -15,6 +14,7 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { CancelablePromise } from "@/client/core/CancelablePromise"
 import SourceLink from "@/components/Common/SourceLink"
 import FileUpload, { FileItem } from "@/components/Common/FileUpload"
+import DownloadButton from "@/components/ui/download-button"
 import { useState, useEffect, useRef } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
@@ -26,7 +26,7 @@ import {
 } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText, FiDatabase, FiCopy, FiCheck, FiDownload } from "react-icons/fi"
+import { FiFileText, FiDatabase, FiCopy, FiCheck } from "react-icons/fi"
 import KnowledgeBaseTable from "../../components/Review/KnowledgeBaseTable"
 import ChecklistTable from "../../components/Review/ChecklistTable"
 import SelectionCard from "../../components/Review/SelectionCard"
@@ -55,23 +55,37 @@ const VeraDoc = () => {
     Array<{ filename: string; displayResults: string; qaPairs: any[] }>
   >([])
   const [loading, setLoading] = useState<boolean>(false)
+  const [activeTab, setActiveTab] = useState<number>(0)
 
   const [checklists, setChecklists] = useState<VeraDocChecklist[]>([])
   const [selectedChecklist, setSelectedChecklist] = useState<VeraDocChecklist | null>(null)
 
+  // Reset active tab when results change
+  useEffect(() => {
+    if (results.length > 0) {
+      setActiveTab(0)
+    }
+  }, [results.length])
+
   const handleCopyReport = async () => {
     try {
+      const activeTabIndex = activeTab
+      const activeResult = results[activeTabIndex]
+
+      if (!activeResult) {
+        showErrorToast("No active result to copy")
+        return
+      }
+
       let fullText = `# Evaluation Summary\n\n`
 
-      // Add each result's display content and QA pairs
-      results.forEach((result, resultIndex) => {
-        fullText += result.displayResults + "\n\n"
+      // Add the active result's display content and QA pairs
+      fullText += activeResult.displayResults + "\n\n"
 
-        result.qaPairs.forEach((pair, pairIndex) => {
-          fullText += `## Question ${pairIndex + 1}: ${pair.question}\n\n`
-          fullText += `### Answer\n${pair.answer}\n\n`
-          fullText += `### Relevant Policy Context\n${pair.context}\n\n`
-        })
+      activeResult.qaPairs.forEach((pair, pairIndex) => {
+        fullText += `## Question ${pairIndex + 1}: ${pair.question}\n\n`
+        fullText += `### Answer\n${pair.answer}\n\n`
+        fullText += `### Relevant Policy Context\n${pair.context}\n\n`
       })
 
       await navigator.clipboard.writeText(fullText)
@@ -93,18 +107,24 @@ const VeraDoc = () => {
     try {
       setLoadingDownload(true)
 
-      // Prepare combined text with evaluation summary and QA pairs
+      const activeTabIndex = activeTab
+      const activeResult = results[activeTabIndex]
+
+      if (!activeResult) {
+        showErrorToast("No active result to download")
+        return
+      }
+
+      // Prepare combined text with evaluation summary and QA pairs for active tab only
       let fullText = `# Evaluation Summary\n\n`
 
-      // Add each result's display content and QA pairs
-      results.forEach((result, resultIndex) => {
-        fullText += result.displayResults + "\n\n"
+      // Add the active result's display content and QA pairs
+      fullText += activeResult.displayResults + "\n\n"
 
-        result.qaPairs.forEach((pair, pairIndex) => {
-          fullText += `## Question ${pairIndex + 1}: ${pair.question}\n\n`
-          fullText += `### Answer\n${pair.answer}\n\n`
-          fullText += `### Relevant Policy Context\n${pair.context}\n\n`
-        })
+      activeResult.qaPairs.forEach((pair, pairIndex) => {
+        fullText += `## Question ${pairIndex + 1}: ${pair.question}\n\n`
+        fullText += `### Answer\n${pair.answer}\n\n`
+        fullText += `### Relevant Policy Context\n${pair.context}\n\n`
       })
 
       const response = await VeradocService.generateDocx({
@@ -130,8 +150,9 @@ const VeraDoc = () => {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement("a")
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+      const filename = activeResult.filename.replace(/[^a-zA-Z0-9]/g, "_")
       a.href = url
-      a.download = `evaluation_${timestamp}.docx`
+      a.download = `Evaluation_${filename}_${timestamp}.docx`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
@@ -669,34 +690,29 @@ const VeraDoc = () => {
                   {fileItems.length > 1 ? "Batch Processing Results" : "Results"}
                 </Heading>
 
-                {/* Add Copy and Download buttons */}
                 {results.length > 0 && (
                   <HStack gap={2}>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={handleCopyReport}
-                      colorPalette={copySuccess ? "green" : "blue"}
+                      colorPalette={copySuccess ? "rgba(0, 65, 72, 0.9)" : "blue"}
                     >
                       {copySuccess ? <FiCheck color="green" /> : <FiCopy />}
                       {copySuccess ? "Copied!" : "Copy Text"}
                     </Button>
 
-                    <Button
+                    <DownloadButton
                       size="sm"
-                      variant="outline"
                       onClick={handleDownloadReport}
                       loading={loadingDownload}
-                      colorPalette="green"
                     >
-                      <FiDownload />
                       Download DOCX
-                    </Button>
+                    </DownloadButton>
                   </HStack>
                 )}
               </HStack>
 
-              {/* Results Box - This is the main content area */}
               <Box
                 border="1px solid"
                 borderColor="gray.200"
@@ -722,7 +738,11 @@ const VeraDoc = () => {
                 )}
                 {results.length > 0 ? (
                   <>
-                    <Tabs.Root defaultValue="0">
+                    <Tabs.Root
+                      defaultValue="0"
+                      value={activeTab.toString()}
+                      onValueChange={(details) => setActiveTab(parseInt(details.value))}
+                    >
                       <Tabs.List>
                         {results.map((result, index) => {
                           const fileName = result.filename

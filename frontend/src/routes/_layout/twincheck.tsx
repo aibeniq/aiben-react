@@ -11,8 +11,9 @@ import {
   Textarea,
   Spinner,
   Separator,
+  Accordion,
 } from "@chakra-ui/react"
-import { FiUpload, FiFile, FiFileText, FiCheck, FiCopy, FiDownload } from "react-icons/fi"
+import { FiUpload, FiFile, FiFileText, FiCheck, FiCopy } from "react-icons/fi"
 import { useDropzone } from "react-dropzone"
 import { format } from "date-fns"
 import { createFileRoute } from "@tanstack/react-router"
@@ -25,6 +26,10 @@ import { InteractiveList } from "@/components/ui/interactive-list"
 import { Field } from "@/components/ui/Field"
 import useCustomToast from "@/hooks/useCustomToast"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
+import SourceLink from "@/components/Common/SourceLink"
+import FileUpload, { FileItem } from "@/components/Common/FileUpload"
+import DownloadButton from "@/components/ui/download-button"
+import { CancelablePromise } from "@/client/core/CancelablePromise"
 
 const TwinCheck = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -492,17 +497,9 @@ const TwinCheck = () => {
                 {copySuccess ? "Copied!" : "Copy Text"}
               </Button>
 
-              <Button
-                size="sm"
-                variant="outline"
-                leftIcon={<FiDownload />}
-                onClick={handleDownloadReport}
-                isLoading={loadingDownload}
-                loadingText="Downloading..."
-                colorPalette="green"
-              >
+              <DownloadButton size="sm" onClick={handleDownloadReport} loading={loadingDownload}>
                 Download DOCX
-              </Button>
+              </DownloadButton>
             </HStack>
           )}
         </HStack>
