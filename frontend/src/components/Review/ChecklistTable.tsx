@@ -310,6 +310,7 @@ const ChecklistTable = ({
             name: checklistName,
             description: checklistDescription,
             questions: trimmedQuestions,
+            owner_id: editingChecklist.owner_id || "",
           },
         })
 
@@ -321,6 +322,7 @@ const ChecklistTable = ({
             name: checklistName,
             description: checklistDescription,
             questions: questionsString,
+            owner_id: "",
           },
         })
 

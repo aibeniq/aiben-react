@@ -175,7 +175,7 @@ const OutlineTable = ({
           name: `${outline.name} (Copy)`,
           description: outline.description || "",
           sections: outline.sections,
-          owner_id: outline.owner_id,
+          owner_id: outline.owner_id || "",
         },
       })
       showSuccessToast("Outline copied successfully")
@@ -227,7 +227,7 @@ const OutlineTable = ({
             name: outlineName,
             description: outlineDescription,
             sections: sections,
-            owner_id: editingOutline.owner_id,
+            owner_id: editingOutline.owner_id || "",
           },
         })
         showSuccessToast("Outline updated successfully")

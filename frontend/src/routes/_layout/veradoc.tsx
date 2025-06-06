@@ -50,7 +50,6 @@ const VeraDoc = () => {
 
   const [fileItems, setFileItems] = useState<FileItem[]>([])
 
-  // Unified results state - array format for both single and batch processing
   const [results, setResults] = useState<
     Array<{ filename: string; displayResults: string; qaPairs: any[] }>
   >([])
@@ -115,10 +114,7 @@ const VeraDoc = () => {
         return
       }
 
-      // Prepare combined text with evaluation summary and QA pairs for active tab only
       let fullText = `# Evaluation Summary\n\n`
-
-      // Add the active result's display content and QA pairs
       fullText += activeResult.displayResults + "\n\n"
 
       activeResult.qaPairs.forEach((pair, pairIndex) => {
