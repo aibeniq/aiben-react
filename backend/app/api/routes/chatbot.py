@@ -10,7 +10,7 @@ from app.services.llms import (
 )
 from app.services.knowledgebases import get_embedding_model
 from app.api.deps import CurrentUser, SessionDep
-from app.models import KnowledgeBase, EmbeddingModel, LlmModel, Source, User
+from app.models import KnowledgeBase, EmbeddingModel, LlmModel, Source as SourceORM, User
 from app.core.config import settings
 from sqlmodel import select
 
@@ -336,7 +336,7 @@ async def query_knowledge_base(
 
                 # Try to find the source by name
                 source_entry = session.exec(
-                    select(Source).where(Source.name == filename)
+                    select(SourceORM).where(SourceORM.name == filename)
                 ).first()
 
                 if source_entry:
