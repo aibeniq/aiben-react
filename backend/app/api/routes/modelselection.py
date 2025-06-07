@@ -1,15 +1,13 @@
 import uuid
 import os
-from typing import Any, List, Optional
-import requests
 import replicate
 import boto3
 
-from fastapi import APIRouter, HTTPException, Depends, Body
+from fastapi import APIRouter, HTTPException
 from sqlmodel import select, func
 
 from app.api.deps import CurrentUser, SessionDep
-from app.services.embeddings import load_embeddings_model
+from backend.app.services.embeddings.embeddings import load_embeddings_model
 from app.models import (
     EmbeddingModel,
     EmbeddingModelCreate,

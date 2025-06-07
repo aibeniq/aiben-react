@@ -8,7 +8,6 @@ import zipfile
 import io
 import os
 import shutil
-from io import BytesIO
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
@@ -22,11 +21,10 @@ from app.models import (
     SourceData,
     EmbeddingModel,
 )
-from app.services.embeddings import load_embeddings_model
+from backend.app.services.embeddings.embeddings import load_embeddings_model
 from app.core.config import settings
-import hashlib
 
-from app.services.knowledgebases import KnowledgeBaseService
+from backend.app.services.knowledgebases.knowledgebases import KnowledgeBaseService
 
 from sqlalchemy.sql import func
 

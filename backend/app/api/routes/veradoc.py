@@ -14,9 +14,13 @@ from app.models import (
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
-from app.services.knowledgebases import get_embedding_model
-from app.services.embeddings import load_embeddings_model
-from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from backend.app.services.knowledgebases.knowledgebases import get_embedding_model
+from backend.app.services.embeddings.embeddings import load_embeddings_model
+from backend.app.services.llms.llms import (
+    get_default_llm,
+    invoke_llm,
+    record_llm_interaction,
+)
 
 from sqlmodel import Session, select
 from fastapi import (
