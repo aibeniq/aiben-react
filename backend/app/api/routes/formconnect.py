@@ -7,7 +7,7 @@ from app.models import (
     LlmModel,
     LlmInteraction,
 )
-from app.services.llms import (
+from backend.app.services.llms.llms import (
     create_llm,
     get_default_llm,
     invoke_llm,

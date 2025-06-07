@@ -1,25 +1,22 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
-from typing import Optional
-from app.services.embeddings import load_embeddings_model
-from app.services.llms import (
+from fastapi import APIRouter, UploadFile, File, HTTPException
+from backend.app.services.embeddings.embeddings import load_embeddings_model
+from backend.app.services.llms.llms import (
     create_llm,
     get_default_llm,
     invoke_llm,
     record_llm_interaction,
 )
-from app.services.knowledgebases import get_embedding_model
+from backend.app.services.knowledgebases.knowledgebases import get_embedding_model
 from app.api.deps import CurrentUser, SessionDep
 from app.models import KnowledgeBase, EmbeddingModel, LlmModel, Source, User
 from app.core.config import settings
-from sqlmodel import Session, select
-from langchain.chains import RetrievalQA
+from sqlmodel import select
 
 
 from langchain_community.document_loaders import PyPDFLoader
 
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
 from langchain_community.vectorstores import Chroma
 import tempfile
 import os

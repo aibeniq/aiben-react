@@ -1,22 +1,19 @@
 import os
 import replicate
 import uuid
-from typing import Any, List, Optional
 import boto3
 import traceback
 
-from fastapi import APIRouter, HTTPException, Depends, Body
+from fastapi import APIRouter, HTTPException
 from sqlmodel import select, func
 
 from langchain_aws import ChatBedrock
 from langchain_core.messages import HumanMessage
 
 from app.api.deps import CurrentUser, SessionDep
-from app.services.llms import create_llm
 from app.models import (
     LlmModel,
     LlmModelCreate,
-    LlmModelUpdate,
     LlmModelPublic,
     LlmModelsPublic,
     LlmModelsValidate,
@@ -27,13 +24,12 @@ from app.models import (
 from datetime import datetime
 
 
-from langchain_community.chat_models import ChatOllama, BedrockChat
-from langchain_huggingface import HuggingFacePipeline
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from langchain_community.chat_models import ChatOllama
+from transformers import AutoTokenizer
 from langchain.chains import LLMChain
 from langchain_community.llms import Bedrock
 from langchain_core.prompts import PromptTemplate
-from langchain_aws import ChatBedrockConverse
+from langchain_aws import ChatBedrock
 from langchain_openai import ChatOpenAI
 
 router = APIRouter(prefix="/llm-models", tags=["llm-models"])

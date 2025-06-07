@@ -1,6 +1,6 @@
 import uuid
 import difflib
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from datetime import datetime
 import json
 import traceback
@@ -10,14 +10,13 @@ import docx
 import io
 from io import BytesIO
 from docx import Document
-from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import markdown
 from bs4 import BeautifulSoup
 
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
 from fastapi.responses import StreamingResponse
-from sqlmodel import Session, select
+from sqlmodel import select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
@@ -26,10 +25,14 @@ from app.models import (
     TwinCheckTopicList,
     LlmInteraction,
     TwinCheckRequest,
-    DocxRequest
+    DocxRequest,
 )
 from app.core.config import settings
-from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from backend.app.services.llms.llms import (
+    get_default_llm,
+    invoke_llm,
+    record_llm_interaction,
+)
 from langchain_community.document_loaders import PyPDFLoader
 import mimetypes
 
@@ -45,7 +48,9 @@ def extract_text_from_file(file: UploadFile) -> str:
     print(f"Processing file: {file.filename} with content type: {content_type}")
 
     # Create a temporary file to store the content
-    with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as temp_file:
+    with tempfile.NamedTemporaryFile(
+        delete=False, suffix=f"_{file.filename}"
+    ) as temp_file:
         # Read the file content and write to temp file
         file_content = file.file.read()
         temp_file.write(file_content)
@@ -59,15 +64,18 @@ def extract_text_from_file(file: UploadFile) -> str:
             pages = loader.load()
             # Combine all page contents
             text = "\n\n".join([page.page_content for page in pages])
-            
-        elif (content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" or 
-              file.filename.lower().endswith(".docx")):
+
+        elif (
+            content_type
+            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            or file.filename.lower().endswith(".docx")
+        ):
             print("Loading DOCX with python-docx library...")
             doc = docx.Document(temp_file_path)
-            
+
             # Extract text from paragraphs
             paragraphs = [para.text for para in doc.paragraphs if para.text.strip()]
-            
+
             # Extract text from tables
             tables_text = []
             for table in doc.tables:
@@ -78,23 +86,23 @@ def extract_text_from_file(file: UploadFile) -> str:
                             row_text.append(cell.text.strip())
                     if row_text:
                         tables_text.append(" | ".join(row_text))
-            
+
             # Combine all text
             text = "\n\n".join(paragraphs + tables_text)
-            
+
         else:
             # Assume it's a text file
             print("Loading as text file...")
             # Try with different encodings
             try:
-                with open(temp_file_path, 'r', encoding='utf-8') as f:
+                with open(temp_file_path, "r", encoding="utf-8") as f:
                     text = f.read()
             except UnicodeDecodeError:
-                with open(temp_file_path, 'r', encoding='latin-1') as f:
+                with open(temp_file_path, "r", encoding="latin-1") as f:
                     text = f.read()
-        
+
         return text
-    
+
     except Exception as e:
         print(f"Error processing file {file.filename}: {str(e)}")
         raise HTTPException(
@@ -123,10 +131,10 @@ async def compare_documents(
         # Reset file pointers (in case they were read elsewhere)
         document1.file.seek(0)
         document2.file.seek(0)
-        
+
         # Extract text from both documents
         doc1_text = extract_text_from_file(document1)
-        
+
         # Reset file pointer for document2
         document2.file.seek(0)
         doc2_text = extract_text_from_file(document2)
@@ -227,6 +235,7 @@ async def compare_documents(
         raise HTTPException(
             status_code=500, detail=f"Error comparing documents: {str(e)}"
         )
+
 
 # Get history of comparison operations
 @router.get("/history", response_model=List[Dict[str, Any]])
@@ -504,7 +513,11 @@ async def generate_docx(
 
         print("Adding title and date to the document...")
         # Add a title
-        title_text = request.title if hasattr(request, 'title') and request.title else "Document Comparison"
+        title_text = (
+            request.title
+            if hasattr(request, "title") and request.title
+            else "Document Comparison"
+        )
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
