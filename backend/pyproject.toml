@@ -24,7 +24,7 @@ dependencies = [
     # David adding in genAI-related packages
     "langchain-community==0.3.19",
     "langchain-text-splitters==0.3.6",
-    "langchain-huggingface==0.2.0",
+    #"langchain-huggingface==0.2.0",
     "chromadb==1.0.9",
     "openai==1.68.2",
     "pymupdf==1.25.5",

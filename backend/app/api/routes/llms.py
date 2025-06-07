@@ -28,8 +28,8 @@ from datetime import datetime
 
 
 from langchain_community.chat_models import ChatOllama, BedrockChat
-from langchain_huggingface import HuggingFacePipeline
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+#from langchain_huggingface import HuggingFacePipeline
+#from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 from langchain.chains import LLMChain
 from langchain_community.llms import Bedrock
 from langchain_core.prompts import PromptTemplate

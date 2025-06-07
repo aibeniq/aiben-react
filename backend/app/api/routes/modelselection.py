@@ -23,7 +23,7 @@ from app.models import (
 )
 from app.core.config import settings
 from datetime import datetime
-from langchain_huggingface import HuggingFaceEmbeddings
+#from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
 
 router = APIRouter(prefix="/embedding-models", tags=["embedding-models"])

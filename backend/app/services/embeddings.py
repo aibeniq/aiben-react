@@ -3,7 +3,7 @@ from pathlib import Path
 import replicate
 import requests
 from app.models import ModelProvider
-from langchain_huggingface import HuggingFaceEmbeddings
+#from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_aws import BedrockEmbeddings
