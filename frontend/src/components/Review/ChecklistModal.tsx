@@ -4,6 +4,7 @@ import { VeraDocChecklist } from "../../client"
 import QuestionItem from "./QuestionItem"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
+import { css } from "@emotion/react"
 
 interface ChecklistModalProps {
   isOpen: boolean
@@ -52,7 +53,7 @@ const ChecklistModal = ({
 
             <Dialog.Body>
               <VStack align="stretch" gap={4}>
-                <HStack align="stretch" gap={4}>
+                <VStack align="stretch" gap={4}>
                   <VStack align="stretch" gap={4} flex="1">
                     <Field label="Checklist Name" required>
                       <Input
@@ -79,8 +80,20 @@ const ChecklistModal = ({
                       display="flex"
                       flexDirection="column"
                       width="100%"
-                      maxH="300px"
-                      overflowY="auto"
+                      maxH="260px"
+                      overflowY="scroll"
+                      css={{
+                        "&:after": {
+                          content: '""',
+                          position: "absolute",
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          height: "25px",
+                          background: "linear-gradient(to top, white, transparent)",
+                          pointerEvents: "none",
+                        },
+                      }}
                     >
                       {questionsList.map((question, index) => (
                         <QuestionItem
@@ -98,7 +111,7 @@ const ChecklistModal = ({
                       ))}
                     </VStack>
                   </Field>
-                </HStack>
+                </VStack>
               </VStack>
             </Dialog.Body>
 
