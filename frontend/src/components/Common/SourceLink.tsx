@@ -1,4 +1,4 @@
-import { Link, LinkProps, useDisclosure } from "@chakra-ui/react"
+import { Link, LinkProps } from "@chakra-ui/react"
 import { useFileViewer } from "@/hooks/useFileViewer"
 import FileViewerModal from "./FileViewerModal"
 import { useState } from "react"
@@ -20,7 +20,7 @@ const SourceLink: React.FC<SourceLinkProps> = ({
   const { viewFile, viewFileInModal, currentFile, isLoading, clearFile } = useFileViewer()
   const [isLoadingFile, setIsLoadingFile] = useState(false)
 
-  const handleClick = async (e) => {
+  const handleClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
 
     console.log("SourceLink clicked:", { sourceId, fileName, useModal })

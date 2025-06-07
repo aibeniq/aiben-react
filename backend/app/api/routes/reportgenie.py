@@ -2,13 +2,14 @@ import uuid
 from app.models import (
     ReportGenieRequest,
     ReportGenieResponse,
-    ReportGenieSection,
     ReportGenieOutline,
+    ReportGenieDetailResponse,
     Source,
     KnowledgeBase,
     EmbeddingModel,
     DocxRequest,
     LlmInteraction,
+    Message,
 )
 from pathlib import Path
 import re
@@ -20,7 +21,6 @@ from io import BytesIO
 from datetime import datetime
 from fastapi.responses import StreamingResponse
 from docx import Document
-from docx.shared import Inches, Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import markdown
 from bs4 import BeautifulSoup
@@ -31,11 +31,10 @@ from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
 
-from sqlmodel import Session, select
+from sqlmodel import select
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List, Dict, Any
 
-from langchain.prompts import ChatPromptTemplate
 from langchain_community.vectorstores import Chroma
 
 router = APIRouter(prefix="/reportgenie", tags=["reportgenie"])
@@ -82,11 +81,11 @@ async def generate_report(
                         f"Using knowledge base's original embedding model: {model_id}"
                     )
                 else:
-                    embedding_info = get_embedding_model(session)
+                    embedding_info = get_embedding_model(session, current_user)
                     model_id = embedding_info["model_id"]
                     provider = embedding_info["provider"]
             else:
-                embedding_info = get_embedding_model(session)
+                embedding_info = get_embedding_model(session, current_user)
                 model_id = embedding_info["model_id"]
                 provider = embedding_info["provider"]
 
@@ -331,7 +330,7 @@ def update_outline(
     return outline
 
 
-@router.delete("/outlines/{outline_id}")
+@router.delete("/outlines/{outline_id}", response_model=Message)
 def delete_outline(
     outline_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
 ):
@@ -350,7 +349,7 @@ def delete_outline(
 
     session.delete(outline)
     session.commit()
-    return {"message": "Outline deleted successfully."}
+    return Message(message="Outline deleted successfully.")
 
 
 @router.post("/generate/docx", response_class=StreamingResponse)
@@ -567,7 +566,7 @@ async def get_report_history(
         )
 
 
-@router.get("/history/{report_id}")
+@router.get("/history/{report_id}", response_model=ReportGenieDetailResponse)
 async def get_report_detail(
     report_id: uuid.UUID,
     session: SessionDep,

@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
-from typing import Optional
+from fastapi import APIRouter, UploadFile, File, HTTPException
+from typing import Optional, List
+from pydantic import BaseModel
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import (
     create_llm,
@@ -9,17 +10,14 @@ from app.services.llms import (
 )
 from app.services.knowledgebases import get_embedding_model
 from app.api.deps import CurrentUser, SessionDep
-from app.models import KnowledgeBase, EmbeddingModel, LlmModel, Source, User
+from app.models import KnowledgeBase, EmbeddingModel, LlmModel, Source as SourceORM, User
 from app.core.config import settings
-from sqlmodel import Session, select
-from langchain.chains import RetrievalQA
-
+from sqlmodel import select
 
 from langchain_community.document_loaders import PyPDFLoader
 
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
 from langchain_community.vectorstores import Chroma
 import tempfile
 import os
@@ -33,6 +31,52 @@ import threading
 from pathlib import Path
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+
+
+# Response models for chatbot endpoints
+class SourceMetadata(BaseModel):
+    """Metadata for document sources"""
+
+    source: Optional[str] = None
+    source_data_id: Optional[str] = None
+    page: Optional[int] = None
+    # Allow additional fields since metadata can contain various keys
+
+    class Config:
+        extra = "allow"
+
+
+class Source(BaseModel):
+    """Source document snippet with metadata"""
+
+    content: str
+    metadata: SourceMetadata
+
+
+class QueryResponse(BaseModel):
+    """Response model for knowledge base query endpoint"""
+
+    answer: str
+    sources: List[Source]
+    session_id: str
+    rephrased_question: str
+
+
+class DocumentQueryResponse(BaseModel):
+    """Response model for document query endpoint"""
+
+    answer: str
+    sources: List[Source]
+    session_id: str
+    rephrased_question: str
+
+
+class TextQueryResponse(BaseModel):
+    """Response model for text query endpoint"""
+
+    answer: str
+    session_id: str
+    rephrased_question: str
 
 
 # Create a simple cache for vector databases and retrievers
@@ -103,7 +147,7 @@ def rephrase_question_with_context(llm, chat_history, current_question):
         return current_question
 
 
-@router.post("/knowledge-base/{kb_id}")
+@router.post("/knowledge-base/{kb_id}", response_model=QueryResponse)
 async def query_knowledge_base(
     session: SessionDep,
     current_user: CurrentUser,
@@ -292,7 +336,7 @@ async def query_knowledge_base(
 
                 # Try to find the source by name
                 source_entry = session.exec(
-                    select(Source).where(Source.name == filename)
+                    select(SourceORM).where(SourceORM.name == filename)
                 ).first()
 
                 if source_entry:
@@ -364,7 +408,7 @@ async def query_knowledge_base(
         )
 
 
-@router.post("/document")
+@router.post("/document", response_model=DocumentQueryResponse)
 async def query_document(
     session: SessionDep,
     current_user: CurrentUser,
@@ -613,7 +657,7 @@ async def startup_event():
     asyncio.create_task(cleanup_sessions())
 
 
-@router.post("/text")
+@router.post("/text", response_model=TextQueryResponse)
 async def query_text(
     session: SessionDep,
     current_user: CurrentUser,

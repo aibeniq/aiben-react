@@ -2,7 +2,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, Depends
 from sqlmodel import Session, select
 from app.api.deps import CurrentUser, SessionDep
-from app.models import Source, SourceData, KnowledgeBase
+from app.models import Source, SourceData, KnowledgeBase, SourceContentResponse
 import zipfile
 from io import BytesIO
 import base64
@@ -11,12 +11,12 @@ import mimetypes
 router = APIRouter(prefix="/files", tags=["files"])
 
 
-@router.get("/source/{source_id}")
+@router.get("/source/{source_id}", response_model=SourceContentResponse)
 async def get_source_content(
     source_id: uuid.UUID,
     session: SessionDep,
     current_user: CurrentUser,
-):
+) -> SourceContentResponse:
     """
     Retrieve a source file by ID.
     Only returns files that the user has access to (either owns or has permissions for).

@@ -37,6 +37,16 @@ export type Body_veradoc_process_rag_checklist = {
   handwritten_files?: Array<Blob | File>
 }
 
+/**
+ * Response model for document query endpoint
+ */
+export type DocumentQueryResponse = {
+  answer: string
+  sources: Array<Source>
+  session_id: string
+  rephrased_question: string
+}
+
 export type DocxRequest = {
   content: string
 }
@@ -74,6 +84,23 @@ export type EmbeddingModelUpdate = {
 export type EmbeddingModelValidate = {
   model_id: string
   provider: ModelProvider
+}
+
+export type FormConnectDetailFeedback = {
+  feedback?: string | null
+  feedbackText?: string | null
+  feedbackDate?: string | null
+}
+
+export type FormConnectDetailResponse = {
+  id: string
+  date_created: string
+  fields: string
+  file_names: Array<string>
+  results: {
+    [key: string]: unknown
+  }
+  feedback: FormConnectDetailFeedback
 }
 
 export type FormConnectForm = {
@@ -188,6 +215,39 @@ export type PrivateUserCreate = {
   is_verified?: boolean
 }
 
+/**
+ * Response model for knowledge base query endpoint
+ */
+export type QueryResponse = {
+  answer: string
+  sources: Array<Source>
+  session_id: string
+  rephrased_question: string
+}
+
+export type ReportGenieDetailFeedback = {
+  feedback?: string | null
+  feedbackText?: string | null
+  feedbackDate?: string | null
+}
+
+export type ReportGenieDetailResponse = {
+  id: string
+  date_created: string
+  kb_name: string
+  kb_id: string
+  sections: string
+  results: ReportGenieDetailResults
+  feedback: ReportGenieDetailFeedback
+}
+
+export type ReportGenieDetailResults = {
+  full_report: string
+  sections?: Array<{
+    [key: string]: unknown
+  }>
+}
+
 export type ReportGenieOutline = {
   id?: string
   name: string
@@ -204,9 +264,67 @@ export type ReportGenieResponse = {
   }
 }
 
+/**
+ * Source document snippet with metadata
+ */
+export type Source = {
+  content: string
+  metadata: SourceMetadata
+}
+
+export type SourceContentResponse = {
+  id: string
+  name: string
+  data_base64: string
+  content_type: string
+}
+
+/**
+ * Metadata for document sources
+ */
+export type SourceMetadata = {
+  source?: string | null
+  source_data_id?: string | null
+  page?: number | null
+  [key: string]: unknown
+}
+
+/**
+ * Response model for text query endpoint
+ */
+export type TextQueryResponse = {
+  answer: string
+  session_id: string
+  rephrased_question: string
+}
+
 export type Token = {
   access_token: string
   token_type?: string
+}
+
+export type TwinCheckDetailFeedback = {
+  feedback?: string | null
+  feedbackText?: string | null
+  feedbackDate?: string | null
+}
+
+export type TwinCheckDetailResponse = {
+  id: string
+  date_created: string
+  document1_name: string
+  document2_name: string
+  comparison_topics: string
+  results: TwinCheckDetailResults
+  feedback: TwinCheckDetailFeedback
+}
+
+export type TwinCheckDetailResults = {
+  summary: string
+  topic_analysis?: Array<{
+    [key: string]: unknown
+  }>
+  interaction_id: string
 }
 
 export type TwinCheckResponse = {
@@ -326,7 +444,7 @@ export type ChatQueryKnowledgeBaseData = {
   useDefaultModels?: boolean
 }
 
-export type ChatQueryKnowledgeBaseResponse = unknown
+export type ChatQueryKnowledgeBaseResponse = QueryResponse
 
 export type ChatQueryDocumentData = {
   chatHistory?: string
@@ -337,7 +455,7 @@ export type ChatQueryDocumentData = {
   useDefaultModels?: boolean
 }
 
-export type ChatQueryDocumentResponse = unknown
+export type ChatQueryDocumentResponse = DocumentQueryResponse
 
 export type ChatQueryTextData = {
   chatHistory?: string
@@ -346,10 +464,10 @@ export type ChatQueryTextData = {
   sessionId?: string
 }
 
-export type ChatQueryTextResponse = unknown
+export type ChatQueryTextResponse = TextQueryResponse
 
 export type EmbeddingModelsGetAvailableProvidersResponse = {
-  [key: string]: unknown
+  [key: string]: Array<string>
 }
 
 export type EmbeddingModelsGetEmbeddingModelsData = {
@@ -418,7 +536,7 @@ export type FilesGetSourceContentData = {
   sourceId: string
 }
 
-export type FilesGetSourceContentResponse = unknown
+export type FilesGetSourceContentResponse = SourceContentResponse
 
 export type FormconnectProcessFormData = {
   fields: string
@@ -452,13 +570,13 @@ export type FormconnectDeleteFormData = {
   formId: string
 }
 
-export type FormconnectDeleteFormResponse = unknown
+export type FormconnectDeleteFormResponse = Message
 
 export type FormconnectGetFormDetailData = {
   interactionId: string
 }
 
-export type FormconnectGetFormDetailResponse = unknown
+export type FormconnectGetFormDetailResponse = FormConnectDetailResponse
 
 export type FormconnectGetFormHistoryData = {
   limit?: number
@@ -637,7 +755,7 @@ export type ReportgenieDeleteOutlineData = {
   outlineId: string
 }
 
-export type ReportgenieDeleteOutlineResponse = unknown
+export type ReportgenieDeleteOutlineResponse = Message
 
 export type ReportgenieGenerateDocxData = {
   requestBody: DocxRequest
@@ -658,7 +776,7 @@ export type ReportgenieGetReportDetailData = {
   reportId: string
 }
 
-export type ReportgenieGetReportDetailResponse = unknown
+export type ReportgenieGetReportDetailResponse = ReportGenieDetailResponse
 
 export type TwincheckCompareDocumentsData = {
   comparisonTopics: string
@@ -680,7 +798,7 @@ export type TwincheckGetComparisonDetailData = {
   comparisonId: string
 }
 
-export type TwincheckGetComparisonDetailResponse = unknown
+export type TwincheckGetComparisonDetailResponse = TwinCheckDetailResponse
 
 export type TwincheckGetComparisonsResponse = Array<TwinCheckTopicList>
 
@@ -707,7 +825,7 @@ export type TwincheckDeleteComparisonData = {
   comparisonId: string
 }
 
-export type TwincheckDeleteComparisonResponse = unknown
+export type TwincheckDeleteComparisonResponse = Message
 
 export type TwincheckGenerateDocxData = {
   requestBody: DocxRequest
@@ -810,7 +928,7 @@ export type VeradocDeleteChecklistData = {
   checklistId: string
 }
 
-export type VeradocDeleteChecklistResponse = unknown
+export type VeradocDeleteChecklistResponse = Message
 
 export type VeradocGetVeradocHistoryData = {
   limit?: number
