@@ -12,6 +12,7 @@ router = APIRouter(prefix="/utils", tags=["utils"])
     "/test-email/",
     dependencies=[Depends(get_current_active_superuser)],
     status_code=201,
+    response_model=Message,
 )
 def test_email(email_to: EmailStr) -> Message:
     """
@@ -26,6 +27,6 @@ def test_email(email_to: EmailStr) -> Message:
     return Message(message="Test email sent")
 
 
-@router.get("/health-check/")
+@router.get("/health-check/", response_model=bool)
 async def health_check() -> bool:
     return True

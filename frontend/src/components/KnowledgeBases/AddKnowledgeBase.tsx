@@ -17,7 +17,7 @@ import {
 import { useState, useEffect } from "react"
 import { FaPlus, FaTrash } from "react-icons/fa"
 
-import { type KnowledgeBaseCreate, KnowledgeBasesService, EmbeddingModelsService } from "@/client"
+import { KnowledgeBasesService, EmbeddingModelsService } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
@@ -64,20 +64,20 @@ const AddKnowledgeBase = () => {
     enabled: isOpen,
   })
 
+  const { data: defaultModel } = useQuery({
+    queryKey: ["default-embedding-model"],
+    queryFn: () => EmbeddingModelsService.getDefaultEmbeddingModel(),
+    enabled: isOpen,
+  })
+
   // Set the default embedding model when the component mounts
   useEffect(() => {
-    if (embeddingModels?.length > 0) {
-      // Find the default model
-      const defaultModel = embeddingModels.find((model) => model.is_default)
-
-      // If a default model exists, use its ID, otherwise use the first model's ID
-      if (defaultModel) {
-        setSelectedEmbeddingModelId(defaultModel.id)
-      } else if (embeddingModels[0]) {
-        setSelectedEmbeddingModelId(embeddingModels[0].id)
-      }
+    if (defaultModel?.id) {
+      setSelectedEmbeddingModelId(defaultModel.id)
+    } else if (embeddingModels?.length > 0 && embeddingModels[0]?.id) {
+      setSelectedEmbeddingModelId(embeddingModels[0].id)
     }
-  }, [embeddingModels])
+  }, [embeddingModels, defaultModel])
 
   // Reset selected files when the popup is closed
   useEffect(() => {
@@ -198,7 +198,16 @@ const AddKnowledgeBase = () => {
       onOpenChange={({ open }) => setIsOpen(open)}
     >
       <DialogTrigger asChild>
-        <Button value="add-item" my={4}>
+        <Button
+          variant="solid"
+          color="white"
+          bg="rgba(0, 65, 72, 0.9)"
+          _hover={{
+            bg: "rgba(0, 65, 72, 0.85)",
+          }}
+          value="add-item"
+          my={4}
+        >
           <FaPlus fontSize="16px" />
           Add Knowledge Base
         </Button>
@@ -219,13 +228,7 @@ const AddKnowledgeBase = () => {
               justifyContent="center"
               borderRadius="md"
             >
-              <Spinner
-                thickness="4px"
-                speed="0.65s"
-                emptyColor="gray.200"
-                color="blue.500"
-                size="xl"
-              />
+              <Spinner color="blue.500" size="xl" />
             </Box>
           )}
 
@@ -278,7 +281,8 @@ const AddKnowledgeBase = () => {
                   >
                     {embeddingModels.map((model) => (
                       <option key={model.id} value={model.id}>
-                        {model.name} ({model.provider}) {model.is_default ? "(Default)" : ""}
+                        {model.name} ({model.provider}){" "}
+                        {defaultModel?.id === model.id ? "(Default)" : ""}
                       </option>
                     ))}
                   </select>
@@ -341,7 +345,16 @@ const AddKnowledgeBase = () => {
                   Cancel
                 </Button>
               </DialogActionTrigger>
-              <Button variant="solid" type="submit" disabled={!isValid || isSubmitting}>
+              <Button
+                variant="solid"
+                color="white"
+                bg="rgba(0, 65, 72, 0.9)"
+                _hover={{
+                  bg: "rgba(0, 65, 72, 0.85)",
+                }}
+                type="submit"
+                disabled={!isValid || isSubmitting}
+              >
                 {isSubmitting ? "Creating..." : "Save"}
               </Button>
             </DialogFooter>

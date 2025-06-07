@@ -1,4 +1,4 @@
-import { Container, EmptyState, Flex, Heading, Table, VStack, Badge } from "@chakra-ui/react"
+import { Container, EmptyState, Flex, Heading, Table, VStack, Badge, Box } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { FiSearch } from "react-icons/fi"
@@ -140,12 +140,18 @@ function KnowledgeBasesTable() {
 
 function KnowledgeBases() {
   return (
-    <Container maxW="full">
-      <Heading size="lg" pt={12}>
-        Knowledge Base Management
-      </Heading>
-      <AddKnowledgeBase />
-      <KnowledgeBasesTable />
+    <Container maxW="container.xl" py={8}>
+      <VStack gap={6} align="stretch">
+        <Box>
+          <Heading size="lg" mb={4}>
+            Knowledge Base Management
+          </Heading>
+          <AddKnowledgeBase />
+        </Box>
+        <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4} bg="white">
+          <KnowledgeBasesTable />
+        </Box>
+      </VStack>
     </Container>
   )
 }

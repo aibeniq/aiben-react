@@ -256,7 +256,7 @@ export const InteractiveList = ({
   }, [items])
 
   return (
-    <VStack align="stretch" gap={0} width="100%" spacing={0}>
+    <VStack align="stretch" width="100%" gap={0}>
       {items.map((item, index) => (
         <InteractiveListItem
           key={index}

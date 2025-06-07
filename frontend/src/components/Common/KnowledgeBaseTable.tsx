@@ -1,13 +1,6 @@
-import {
-  ActionBar as ActionBarChakra,
-  Button,
-  Checkbox,
-  Kbd,
-  Portal,
-  Table,
-} from "@chakra-ui/react"
+import { Checkbox, Table } from "@chakra-ui/react"
 import { KnowledgeBasePublic } from "@/client"
-import { FiCheck, FiCircle } from "react-icons/fi"
+import { FiCheck } from "react-icons/fi"
 
 interface TableCardProps {
   knowledgeBases: KnowledgeBasePublic[]
@@ -133,33 +126,33 @@ const KnowledgeBaseTable = ({
   )
 }
 
-const ActionBar = ({
-  hasSelection,
-  selectedIds,
-}: {
-  hasSelection: boolean
-  selectedIds: string[]
-}) => {
-  return (
-    <ActionBarChakra.Root open={hasSelection}>
-      <Portal>
-        <ActionBarChakra.Positioner>
-          <ActionBarChakra.Content>
-            <ActionBarChakra.SelectionTrigger>
-              {selectedIds.length} selected
-            </ActionBarChakra.SelectionTrigger>
-            <ActionBarChakra.Separator />
-            <Button variant="outline" size="sm">
-              Process <Kbd>⌘P</Kbd>
-            </Button>
-            <Button variant="outline" size="sm">
-              Export <Kbd>⌘E</Kbd>
-            </Button>
-          </ActionBarChakra.Content>
-        </ActionBarChakra.Positioner>
-      </Portal>
-    </ActionBarChakra.Root>
-  )
-}
+// const ActionBar = ({
+//   hasSelection,
+//   selectedIds,
+// }: {
+//   hasSelection: boolean
+//   selectedIds: string[]
+// }) => {
+//   return (
+//     <ActionBarChakra.Root open={hasSelection}>
+//       <Portal>
+//         <ActionBarChakra.Positioner>
+//           <ActionBarChakra.Content>
+//             <ActionBarChakra.SelectionTrigger>
+//               {selectedIds.length} selected
+//             </ActionBarChakra.SelectionTrigger>
+//             <ActionBarChakra.Separator />
+//             <Button variant="outline" size="sm">
+//               Process <Kbd>⌘P</Kbd>
+//             </Button>
+//             <Button variant="outline" size="sm">
+//               Export <Kbd>⌘E</Kbd>
+//             </Button>
+//           </ActionBarChakra.Content>
+//         </ActionBarChakra.Positioner>
+//       </Portal>
+//     </ActionBarChakra.Root>
+//   )
+// }
 
 export default KnowledgeBaseTable

@@ -174,7 +174,7 @@ export class ChatService {
    * @param data.useDefaultModels
    * @param data.sessionId
    * @param data.isFollowUp
-   * @returns unknown Successful Response
+   * @returns QueryResponse Successful Response
    * @throws ApiError
    */
   public static queryKnowledgeBase(
@@ -209,7 +209,7 @@ export class ChatService {
    * @param data.sessionId
    * @param data.isFollowUp
    * @param data.formData
-   * @returns unknown Successful Response
+   * @returns DocumentQueryResponse Successful Response
    * @throws ApiError
    */
   public static queryDocument(
@@ -241,7 +241,7 @@ export class ChatService {
    * @param data.chatHistory
    * @param data.sessionId
    * @param data.isFollowUp
-   * @returns unknown Successful Response
+   * @returns TextQueryResponse Successful Response
    * @throws ApiError
    */
   public static queryText(
@@ -267,7 +267,7 @@ export class EmbeddingModelsService {
   /**
    * Get Available Providers
    * Get the list of available model providers for LLMs and embedding models.
-   * @returns unknown Successful Response
+   * @returns string Successful Response
    * @throws ApiError
    */
   public static getAvailableProviders(): CancelablePromise<EmbeddingModelsGetAvailableProvidersResponse> {
@@ -514,7 +514,7 @@ export class FilesService {
    * Only returns files that the user has access to (either owns or has permissions for).
    * @param data The data for the request.
    * @param data.sourceId
-   * @returns unknown Successful Response
+   * @returns SourceContentResponse Successful Response
    * @throws ApiError
    */
   public static getSourceContent(
@@ -653,7 +653,7 @@ export class FormconnectService {
    * Delete a form by ID.
    * @param data The data for the request.
    * @param data.formId
-   * @returns unknown Successful Response
+   * @returns Message Successful Response
    * @throws ApiError
    */
   public static deleteForm(
@@ -676,7 +676,7 @@ export class FormconnectService {
    * Retrieve a specific form processing's full content by ID.
    * @param data The data for the request.
    * @param data.interactionId
-   * @returns unknown Successful Response
+   * @returns FormConnectDetailResponse Successful Response
    * @throws ApiError
    */
   public static getFormDetail(
@@ -1354,7 +1354,7 @@ export class ReportgenieService {
    * Delete an outline by ID.
    * @param data The data for the request.
    * @param data.outlineId
-   * @returns unknown Successful Response
+   * @returns Message Successful Response
    * @throws ApiError
    */
   public static deleteOutline(
@@ -1425,7 +1425,7 @@ export class ReportgenieService {
    * Retrieve a specific report's full content by ID.
    * @param data The data for the request.
    * @param data.reportId
-   * @returns unknown Successful Response
+   * @returns ReportGenieDetailResponse Successful Response
    * @throws ApiError
    */
   public static getReportDetail(
@@ -1502,7 +1502,7 @@ export class TwincheckService {
    * Retrieve a specific comparison's full content by ID.
    * @param data The data for the request.
    * @param data.comparisonId
-   * @returns unknown Successful Response
+   * @returns TwinCheckDetailResponse Successful Response
    * @throws ApiError
    */
   public static getComparisonDetail(
@@ -1609,7 +1609,7 @@ export class TwincheckService {
    * Delete a comparison topic set by ID.
    * @param data The data for the request.
    * @param data.comparisonId
-   * @returns unknown Successful Response
+   * @returns Message Successful Response
    * @throws ApiError
    */
   public static deleteComparison(
@@ -2019,7 +2019,7 @@ export class VeradocService {
    * Delete a checklist by ID.
    * @param data The data for the request.
    * @param data.checklistId
-   * @returns unknown Successful Response
+   * @returns Message Successful Response
    * @throws ApiError
    */
   public static deleteChecklist(
