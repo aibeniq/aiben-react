@@ -1,10 +1,9 @@
-import { HStack, VStack, Input, Textarea, Dialog, Portal, CloseButton } from "@chakra-ui/react"
+import { VStack, Input, Textarea, Dialog, Portal, CloseButton } from "@chakra-ui/react"
 import { Field } from "../ui/field"
 import { VeraDocChecklist } from "../../client"
 import QuestionItem from "./QuestionItem"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
-import { css } from "@emotion/react"
 
 interface ChecklistModalProps {
   isOpen: boolean
