@@ -36,7 +36,7 @@ import fitz  # PyMuPDF
 from datetime import datetime
 
 # Load environment variables from .env file
-load_dotenv(dotenv_path="c:/miniconda/aibeniq-react/.env", override=True)
+load_dotenv(dotenv_path="c:/miniconda/aibeniq-react/.env", override=False)
 
 # Retrieve the OpenAI API key from the environment
 openai_api_key = os.getenv("OPENAI_API_KEY")
