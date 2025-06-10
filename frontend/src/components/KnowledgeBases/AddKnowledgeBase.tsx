@@ -41,6 +41,7 @@ const AddKnowledgeBase = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]) // State for managing selected files
   const [selectedEmbeddingModelId, setSelectedEmbeddingModelId] = useState<string | null>(null)
+  const [availableProviders, setAvailableProviders] = useState<string[]>([]); //only show Embedding Model providers allowed in config.py
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const {
@@ -70,6 +71,23 @@ const AddKnowledgeBase = () => {
     enabled: isOpen,
   })
 
+  // determine which embedding models are allowed
+  useEffect(() => {
+    EmbeddingModelsService.getAvailableProviders()
+      .then((response) => {
+        if (response.embedding_providers && Array.isArray(response.embedding_providers)) {
+          setAvailableProviders(response.embedding_providers);
+        } else {
+          setAvailableProviders(["openai", "aws"]); // fallback
+        }
+      })
+      .catch(() => setAvailableProviders(["openai", "aws"]));
+  }, []);
+
+  const filteredEmbeddingModels = embeddingModels.filter(
+    (model) => availableProviders.includes(model.provider)
+  );
+
   // Set the default embedding model when the component mounts
   useEffect(() => {
     if (defaultModel?.id) {
@@ -78,6 +96,14 @@ const AddKnowledgeBase = () => {
       setSelectedEmbeddingModelId(embeddingModels[0].id)
     }
   }, [embeddingModels, defaultModel])
+
+  useEffect(() => {
+    if (defaultModel?.id) {
+      setSelectedEmbeddingModelId(defaultModel.id);
+    } else if (filteredEmbeddingModels?.length > 0 && filteredEmbeddingModels[0]?.id) {
+      setSelectedEmbeddingModelId(filteredEmbeddingModels[0].id);
+    }
+  }, [filteredEmbeddingModels, defaultModel]);
 
   // Reset selected files when the popup is closed
   useEffect(() => {
@@ -279,7 +305,7 @@ const AddKnowledgeBase = () => {
                       borderColor: "#E2E8F0",
                     }}
                   >
-                    {embeddingModels.map((model) => (
+                    {filteredEmbeddingModels.map((model) => (
                       <option key={model.id} value={model.id}>
                         {model.name} ({model.provider}){" "}
                         {defaultModel?.id === model.id ? "(Default)" : ""}
