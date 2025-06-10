@@ -41,7 +41,7 @@ const AddKnowledgeBase = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]) // State for managing selected files
   const [selectedEmbeddingModelId, setSelectedEmbeddingModelId] = useState<string | null>(null)
-  const [availableProviders, setAvailableProviders] = useState<string[]>([]); //only show Embedding Model providers allowed in config.py
+  const [availableProviders, setAvailableProviders] = useState<string[]>([]) //only show Embedding Model providers allowed in config.py
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const {
@@ -76,34 +76,33 @@ const AddKnowledgeBase = () => {
     EmbeddingModelsService.getAvailableProviders()
       .then((response) => {
         if (response.embedding_providers && Array.isArray(response.embedding_providers)) {
-          setAvailableProviders(response.embedding_providers);
+          setAvailableProviders(response.embedding_providers)
         } else {
-          setAvailableProviders(["openai", "aws"]); // fallback
+          setAvailableProviders(["openai", "aws"]) // fallback
         }
       })
-      .catch(() => setAvailableProviders(["openai", "aws"]));
-  }, []);
+      .catch(() => setAvailableProviders(["openai", "aws"]))
+  }, [])
 
   const filteredEmbeddingModels = embeddingModels.filter(
-    (model) => model.provider && availableProviders.includes(model.provider)
-  );
+    (model) => model.provider && availableProviders.includes(model.provider),
+  )
 
   // Set the default embedding model when the component mounts
   useEffect(() => {
-    if (defaultModel?.id) {
-      setSelectedEmbeddingModelId(defaultModel.id)
-    } else if (embeddingModels?.length > 0 && embeddingModels[0]?.id) {
-      setSelectedEmbeddingModelId(embeddingModels[0].id)
+    if (
+      isOpen &&
+      !selectedEmbeddingModelId && // Only set if not already selected
+      (defaultModel?.id || filteredEmbeddingModels?.length > 0)
+    ) {
+      if (defaultModel?.id) {
+        setSelectedEmbeddingModelId(defaultModel.id)
+      } else if (filteredEmbeddingModels?.length > 0 && filteredEmbeddingModels[0]?.id) {
+        setSelectedEmbeddingModelId(filteredEmbeddingModels[0].id)
+      }
     }
-  }, [embeddingModels, defaultModel])
-
-  useEffect(() => {
-    if (defaultModel?.id) {
-      setSelectedEmbeddingModelId(defaultModel.id);
-    } else if (filteredEmbeddingModels?.length > 0 && filteredEmbeddingModels[0]?.id) {
-      setSelectedEmbeddingModelId(filteredEmbeddingModels[0].id);
-    }
-  }, [filteredEmbeddingModels, defaultModel]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, defaultModel, filteredEmbeddingModels])
 
   // Reset selected files when the popup is closed
   useEffect(() => {
