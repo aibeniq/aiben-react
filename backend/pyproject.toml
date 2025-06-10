@@ -27,7 +27,7 @@ dependencies = [
     #"langchain-huggingface==0.2.0", MADE OPTIONAL
     "chromadb==1.0.9",
     "openai==1.68.2",
-    "pymupdf==1.25.5",
+    "pymupdf==1.26.0",
     "pypdf==5.4.0",
     "langchain-openai==0.3.17",
     "python-docx>=0.8.11,<1.0.0",
