@@ -85,7 +85,7 @@ const AddKnowledgeBase = () => {
   }, []);
 
   const filteredEmbeddingModels = embeddingModels.filter(
-    (model) => availableProviders.includes(model.provider)
+    (model) => model.provider && availableProviders.includes(model.provider)
   );
 
   // Set the default embedding model when the component mounts

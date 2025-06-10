@@ -4,6 +4,9 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app/
 
+#argument for whether to install huggingface
+ARG INSTALL_HUGGINGFACE=false
+
 # Install uv
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
 COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /uvx /bin/
@@ -25,7 +28,11 @@ ENV UV_LINK_MODE=copy
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-project
+    if [ "$INSTALL_HUGGINGFACE" = "true" ]; then \
+      uv sync --extra huggingface --frozen --no-install-project; \
+    else \
+      uv sync --frozen --no-install-project; \
+    fi
 
 ENV PYTHONPATH=/app
 

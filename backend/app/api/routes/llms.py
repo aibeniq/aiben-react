@@ -28,8 +28,6 @@ from datetime import datetime
 
 
 from langchain_community.chat_models import ChatOllama, BedrockChat
-from langchain_huggingface import HuggingFacePipeline
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 from langchain.chains import LLMChain
 from langchain_community.llms import Bedrock
 from langchain_core.prompts import PromptTemplate
@@ -312,6 +310,9 @@ def validate_llm_model(
                 raise HTTPException(status_code=400, detail=detail)
 
         elif provider == ModelProvider.HUGGINGFACE:
+            #only import HERE, to avoid errors in API-only builds
+            from langchain_huggingface import HuggingFacePipeline
+            from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
             # For HuggingFace, try to load the model
             print(f"Loading HuggingFace model: {model_id}")
 

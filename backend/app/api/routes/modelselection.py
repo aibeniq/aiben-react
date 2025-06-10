@@ -22,7 +22,6 @@ from app.models import (
 )
 from app.core.config import settings
 from datetime import datetime
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
 
 router = APIRouter(prefix="/embedding-models", tags=["embedding-models"])
@@ -188,6 +187,8 @@ def create_embedding_model(
     # Check if the model_id is valid by trying to load it based on provider
     try:
         if model_in.provider == ModelProvider.HUGGINGFACE:
+            #only import here, to avoid errors in API-only builds
+            from langchain_huggingface import HuggingFaceEmbeddings
             # Validate HuggingFace model
             _ = HuggingFaceEmbeddings(model_name=model_in.model_id)
         elif model_in.provider == ModelProvider.AWS:
