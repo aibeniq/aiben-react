@@ -39,12 +39,6 @@ router = APIRouter(prefix="/llm-models", tags=["llm-models"])
 
 # Initialize with default models
 def initialize_default_llm_models(session: SessionDep):
-    # Check if we already have models in the database
-    existing_count = session.exec(select(func.count()).select_from(LlmModel)).one()
-    if existing_count > 0:
-        return
-
-    # Add system models (no is_default flag)
     default_models = [
         {
             "name": "GPT-4o Mini",
@@ -73,14 +67,22 @@ def initialize_default_llm_models(session: SessionDep):
     ]
 
     for model_data in default_models:
-        model = LlmModel(
-            name=model_data["name"],
-            model_id=model_data["model_id"],
-            provider=model_data["provider"],
-            description=model_data["description"],
-            # No is_default field!
-        )
-        session.add(model)
+        # Check if this default LLM model already exists (system model: owner_id is None)
+        exists = session.exec(
+            select(LlmModel).where(
+                LlmModel.model_id == model_data["model_id"],
+                LlmModel.provider == model_data["provider"],
+                LlmModel.owner_id.is_(None),
+            )
+        ).first()
+        if not exists:
+            model = LlmModel(
+                name=model_data["name"],
+                model_id=model_data["model_id"],
+                provider=model_data["provider"],
+                description=model_data["description"],
+            )
+            session.add(model)
 
     session.commit()
 

@@ -40,14 +40,7 @@ def get_available_providers() -> Dict[str, List[str]]:
 
 # Initialize with default models
 def initialize_default_models(session: SessionDep):
-    # Check if we already have models in the database
-    existing_count = session.exec(
-        select(func.count()).select_from(EmbeddingModel)
-    ).one()
-    if existing_count > 0:
-        return
-
-    # Add system models (no is_default flag)
+    # List of default models to ensure exist
     default_models = [
         {
             "name": "MiniLM-L6-v2",
@@ -88,17 +81,24 @@ def initialize_default_models(session: SessionDep):
     ]
 
     for model_data in default_models:
-        model = EmbeddingModel(
-            name=model_data["name"],
-            model_id=model_data["model_id"],
-            provider=model_data["provider"],
-            description=model_data["description"],
-            # No is_default field!
-        )
-        session.add(model)
+        # Check if this default model already exists (system model: owner_id is None)
+        exists = session.exec(
+            select(EmbeddingModel).where(
+                EmbeddingModel.model_id == model_data["model_id"],
+                EmbeddingModel.provider == model_data["provider"],
+                EmbeddingModel.owner_id.is_(None),
+            )
+        ).first()
+        if not exists:
+            model = EmbeddingModel(
+                name=model_data["name"],
+                model_id=model_data["model_id"],
+                provider=model_data["provider"],
+                description=model_data["description"],
+            )
+            session.add(model)
 
     session.commit()
-
 
 @router.get("/", response_model=EmbeddingModelsPublic)
 def get_embedding_models(
