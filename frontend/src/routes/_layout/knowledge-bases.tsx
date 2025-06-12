@@ -148,7 +148,7 @@ function KnowledgeBases() {
           </Heading>
           <AddKnowledgeBase />
         </Box>
-        <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4} bg="white">
+        <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4} bg="bg">
           <KnowledgeBasesTable />
         </Box>
       </VStack>

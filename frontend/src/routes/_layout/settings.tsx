@@ -34,7 +34,7 @@ function UserSettings() {
             User Settings
           </Heading>
         </Box>
-        <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4} bg="white">
+        <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4} bg="bg">
           <Tabs.Root defaultValue="my-profile" variant="subtle">
             <Tabs.List>
               {finalTabs.map((tab) => (

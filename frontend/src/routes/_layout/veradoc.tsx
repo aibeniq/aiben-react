@@ -466,7 +466,7 @@ const VeraDoc = () => {
         {...props}
       />
     ),
-    thead: (props: any) => <Box as="thead" bg="gray.100" {...props} />,
+    thead: (props: any) => <Box as="thead" bg="surface" {...props} />,
     tbody: (props: any) => <Box as="tbody" {...props} />,
     tr: (props: any) => <Box as="tr" {...props} />,
     th: (props: any) => (
@@ -492,7 +492,7 @@ const VeraDoc = () => {
           p={4}
           borderWidth="1px"
           borderRadius="md"
-          bg="white"
+          bg="bg"
         >
           <Heading as="h3" size="md" mb={2}>
             Question {pairIndex + 1}: {pair.question}
@@ -512,7 +512,7 @@ const VeraDoc = () => {
             <Accordion.Root multiple>
               <Accordion.Item value={`citations-${resultIndex}-${pairIndex}`}>
                 <h2>
-                  <Accordion.ItemTrigger bg="gray.100" _hover={{ bg: "gray.200" }}>
+                  <Accordion.ItemTrigger bg="surface" _hover={{ bg: "panel" }}>
                     <Box flex="1" textAlign="left" fontWeight="medium">
                       <HStack>
                         <FiFileText />
@@ -521,9 +521,9 @@ const VeraDoc = () => {
                     </Box>
                   </Accordion.ItemTrigger>
                 </h2>
-                <Accordion.ItemContent pb={4} bg="gray.50">
+                <Accordion.ItemContent pb={4} bg="surface">
                   {pair.source_citations.map((citation: any, cIndex: number) => (
-                    <Box key={cIndex} p={3} mb={2} borderWidth="1px" borderRadius="md" bg="white">
+                    <Box key={cIndex} p={3} mb={2} borderWidth="1px" borderRadius="md" bg="bg">
                       {citation.metadata.source_data_id ? (
                         <SourceLink
                           sourceId={citation.metadata.source_data_id}
@@ -541,7 +541,7 @@ const VeraDoc = () => {
                       <Box
                         mt={2}
                         p={2}
-                        bg="gray.50"
+                        bg="surface"
                         borderRadius="sm"
                         fontSize="sm"
                         whiteSpace="pre-wrap"
@@ -713,7 +713,7 @@ const VeraDoc = () => {
                 borderColor="gray.200"
                 borderRadius="md"
                 p={4}
-                bg="gray.50"
+                bg="surface"
                 minH="100px"
                 maxH={{ base: "400px", md: "600px" }}
                 overflowY="auto"

@@ -11,7 +11,7 @@ const TopicAnalysisDisplay: React.FC<TopicAnalysisDisplayProps> = ({ topicAnalys
   return (
     <Box mt={4}>
       {topicAnalysis.map((topic: any, index: number) => (
-        <Box key={index} mb={4} p={4} borderWidth="1px" borderRadius="md" bg="white">
+        <Box key={index} mb={4} p={4} borderWidth="1px" borderRadius="md" bg="bg">
           <Heading as="h3" size="md" mb={2}>
             Topic: {topic.topic}
           </Heading>

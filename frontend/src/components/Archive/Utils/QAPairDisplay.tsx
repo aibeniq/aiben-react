@@ -9,7 +9,7 @@ interface QAPairDisplayProps {
 
 const QAPairDisplay: React.FC<QAPairDisplayProps> = ({ pair, index }) => {
   return (
-    <Box mb={4} p={4} borderWidth="1px" borderRadius="md" bg="white">
+    <Box mb={4} p={4} borderWidth="1px" borderRadius="md" bg="bg">
       <Heading as="h3" size="md" mb={2}>
         Question {index + 1}: {pair.question}
       </Heading>

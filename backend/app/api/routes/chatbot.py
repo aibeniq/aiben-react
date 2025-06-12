@@ -566,7 +566,7 @@ async def query_document(
                 # Try to find the corresponding source_data_id
                 source_path = metadata["source"]
                 source_entry = session.exec(
-                    select(Source).where(Source.name == Path(source_path).name)
+                    select(SourceORM).where(SourceORM.name == Path(source_path).name)
                 ).first()
 
                 if source_entry:

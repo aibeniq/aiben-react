@@ -251,7 +251,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
         width={panelWidth}
         height="auto"
         maxHeight={panelHeight}
-        bg="white"
+        bg="bg"
         borderRadius="xl"
         boxShadow="xl"
         overflow="hidden"
@@ -416,7 +416,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
               borderColor="gray.200"
               borderRadius="md"
               p={3}
-              bg="gray.50"
+              bg="surface"
             >
               {messages.length === 0 ? (
                 <Text color="gray.500" textAlign="center" py={10} fontSize="sm">
@@ -429,7 +429,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
                   {messages.map((msg, idx) => (
                     <Box
                       key={idx}
-                      bg={msg.role === "user" ? "blue.50" : "white"}
+                      bg={msg.role === "user" ? "accent.subtle" : "bg"}
                       p={2}
                       mb={2}
                       borderRadius="md"
@@ -445,7 +445,10 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
                         <Accordion.Root collapsible mt={2}>
                           <Accordion.Item value="sources">
                             <h2>
-                              <Accordion.ItemTrigger bg="gray.100" _hover={{ bg: "gray.200" }}>
+                              <Accordion.ItemTrigger
+                                bg="gray.100 _dark:gray.700"
+                                _hover={{ bg: "gray.200 _dark:gray.600" }}
+                              >
                                 <Box flex="1" textAlign="left" fontWeight="medium">
                                   <HStack>
                                     <Icon as={FiFileText} />
@@ -456,7 +459,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
                                 </Box>
                               </Accordion.ItemTrigger>
                             </h2>
-                            <Accordion.ItemContent pb={2} bg="gray.50">
+                            <Accordion.ItemContent pb={2} bg="gray.50 _dark:gray.900">
                               {msg.sources.map((source, sIdx) => (
                                 <Box
                                   key={sIdx}
@@ -464,7 +467,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
                                   mb={2}
                                   borderWidth="1px"
                                   borderRadius="md"
-                                  bg="white"
+                                  bg="bg"
                                 >
                                   <Text fontWeight="bold" fontSize="xs" color="gray.700">
                                     Source {sIdx + 1}:
@@ -488,7 +491,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
                                   <Box
                                     mt={1}
                                     p={2}
-                                    bg="gray.50"
+                                    bg="gray.50 _dark:gray.900"
                                     borderRadius="sm"
                                     fontSize="xs"
                                     whiteSpace="pre-wrap"
@@ -516,7 +519,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
         </Box>
 
         {/* Input area - Keep fixed at bottom */}
-        <Box width="100%" bg="white" borderTop="1px solid" borderColor="gray.100" flexShrink={0}>
+        <Box width="100%" bg="bg" borderTop="1px solid" borderColor="gray.100" flexShrink={0}>
           <Text fontSize="xs" color="gray.500" px={4} pt={2} pb={1}>
             {selectedKbId ? (
               <>
@@ -541,6 +544,12 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
               rows={2}
               disabled={isLoading}
               fontSize="sm"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault()
+                  handleSendMessage()
+                }
+              }}
             />
             <Button
               colorPalette="teal"
