@@ -91,7 +91,7 @@ const FileUpload = ({
         cursor="pointer"
         _hover={{
           borderColor: isDragActive ? "blue.500" : "gray.300",
-          bg: isDragActive ? "blue.50" : "gray.50",
+          bg: isDragActive ? "blue.50" : "gray.subtle",
         }}
         borderColor={isDragActive ? "blue.500" : hasFiles ? "rgba(0, 65, 72, 0.2)" : "gray.200"}
         bg={isDragActive ? "blue.50" : "surface"}

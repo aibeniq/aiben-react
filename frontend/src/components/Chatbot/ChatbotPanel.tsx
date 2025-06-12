@@ -429,7 +429,7 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
                   {messages.map((msg, idx) => (
                     <Box
                       key={idx}
-                      bg={msg.role === "user" ? "accent.subtle" : "bg"}
+                      bg={msg.role === "user" ? "gray.subtle" : "panel"}
                       p={2}
                       mb={2}
                       borderRadius="md"
