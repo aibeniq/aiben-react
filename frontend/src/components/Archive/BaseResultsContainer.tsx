@@ -27,10 +27,10 @@ const BaseResultsContainer: React.FC<BaseResultsContainerProps> = ({
   return (
     <Box
       border="1px solid"
-      borderColor="gray.200"
+      borderColor="border"
       borderRadius="md"
       p={4}
-      bg="gray.50"
+      bg="surface"
       minH="100px"
       maxH="600px"
       overflowY="auto"

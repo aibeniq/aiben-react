@@ -219,7 +219,7 @@ const ReportGenie = () => {
         {...props}
       />
     ),
-    thead: (props: any) => <Box as="thead" bg="gray.100" {...props} />,
+    thead: (props: any) => <Box as="thead" bg="surface" {...props} />,
     tbody: (props: any) => <Box as="tbody" {...props} />,
     tr: (props: any) => <Box as="tr" {...props} />,
     th: (props: any) => (
@@ -327,7 +327,7 @@ const ReportGenie = () => {
 
           <Box
             border="1px solid"
-            borderColor="gray.200"
+            borderColor="border"
             borderRadius="md"
             p={4}
             mt={4}
@@ -364,10 +364,10 @@ const ReportGenie = () => {
 
               <Box
                 border="1px solid"
-                borderColor="gray.200"
+                borderColor="border"
                 borderRadius="md"
                 p={4}
-                bg="gray.50"
+                bg="surface"
                 minH="100px"
                 maxH={{ base: "400px", md: "600px" }}
                 overflowY="auto"
@@ -405,8 +405,8 @@ const ReportGenie = () => {
                             p={5}
                             borderWidth="1px"
                             borderRadius="md"
-                            bg={expandedSection === index ? "gray.50" : "white"}
-                            _hover={{ bg: "gray.50" }}
+                            bg={expandedSection === index ? "surface" : "bg"}
+                            _hover={{ bg: "surface" }}
                           >
                             <Heading
                               as="h4"
@@ -444,8 +444,8 @@ const ReportGenie = () => {
                                       <Accordion.Item value={`citations-${index}`}>
                                         <h2>
                                           <Accordion.ItemTrigger
-                                            bg="gray.100"
-                                            _hover={{ bg: "gray.200" }}
+                                            bg="surface"
+                                            _hover={{ bg: "panel" }}
                                           >
                                             <Box flex="1" textAlign="left" fontWeight="medium">
                                               <HStack>
@@ -458,7 +458,7 @@ const ReportGenie = () => {
                                             </Box>
                                           </Accordion.ItemTrigger>
                                         </h2>
-                                        <Accordion.ItemContent pb={4} bg="gray.50">
+                                        <Accordion.ItemContent pb={4} bg="surface">
                                           {section.source_citations.map(
                                             (citation: any, cIndex: number) => (
                                               <Box
@@ -467,7 +467,7 @@ const ReportGenie = () => {
                                                 mb={2}
                                                 borderWidth="1px"
                                                 borderRadius="md"
-                                                bg="white"
+                                                bg="bg"
                                               >
                                                 {citation.metadata?.source_data_id ? (
                                                   <SourceLink
@@ -495,7 +495,7 @@ const ReportGenie = () => {
                                                 <Box
                                                   mt={2}
                                                   p={2}
-                                                  bg="gray.50"
+                                                  bg="surface"
                                                   borderRadius="sm"
                                                   fontSize="sm"
                                                   whiteSpace="pre-wrap"

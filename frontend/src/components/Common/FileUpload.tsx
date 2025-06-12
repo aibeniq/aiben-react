@@ -94,7 +94,7 @@ const FileUpload = ({
           bg: isDragActive ? "blue.50" : "gray.50",
         }}
         borderColor={isDragActive ? "blue.500" : hasFiles ? "rgba(0, 65, 72, 0.2)" : "gray.200"}
-        bg={isDragActive ? "blue.50" : hasFiles ? "rgba(0, 65, 72, 0.0)" : "white"}
+        bg={isDragActive ? "blue.50" : "surface"}
         {...getRootProps()}
       >
         <input {...getInputProps()} />
@@ -131,7 +131,7 @@ const FileUpload = ({
       </Card.Root>
 
       {files.length > 0 && (
-        <Card.Root>
+        <Card.Root bg="surface">
           <Card.Body p={4}>
             <VStack align="stretch" gap={3}>
               <Text fontWeight="medium" color="gray.700">
@@ -142,7 +142,7 @@ const FileUpload = ({
                   <HStack
                     key={`${fileItem.file.name}-${index}`}
                     justify="space-between"
-                    bg="gray.50"
+                    bg="surface"
                     p={3}
                     borderRadius="md"
                     border="1px solid"

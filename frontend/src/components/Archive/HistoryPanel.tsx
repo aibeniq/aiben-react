@@ -78,8 +78,8 @@ const HistoryPanel = ({
                 borderWidth="1px"
                 borderRadius="md"
                 cursor="pointer"
-                bg={selectedHistoryReport?.id === item?.id ? "blue.50" : "white"}
-                _hover={{ bg: "blue.50" }}
+                bg={selectedHistoryReport?.id === item?.id ? "accent.subtle" : "surface"}
+                _hover={{ bg: "accent.subtle" }}
                 onClick={() => item?.id && onLoadReport(item.id)}
                 flexShrink={0}
               >

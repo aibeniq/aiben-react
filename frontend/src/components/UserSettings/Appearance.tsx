@@ -1,6 +1,5 @@
 import { Heading, Stack, VStack } from "@chakra-ui/react"
 import { useTheme } from "next-themes"
-
 import { Radio, RadioGroup } from "@/components/ui/radio"
 
 const Appearance = () => {
@@ -8,7 +7,9 @@ const Appearance = () => {
 
   return (
     <VStack gap={6} align="stretch" py={4}>
-      <Heading size="sm">Appearance</Heading>
+      <Heading size="sm" color="fg">
+        Appearance
+      </Heading>
 
       <RadioGroup
         onValueChange={(e) => setTheme(e.value || "system")}
@@ -16,9 +17,15 @@ const Appearance = () => {
         colorPalette="teal"
       >
         <Stack>
-          <Radio value="system">System</Radio>
-          <Radio value="light">Light Mode</Radio>
-          <Radio value="dark">Dark Mode</Radio>
+          <Radio value="system" color="fg">
+            System
+          </Radio>
+          <Radio value="light" color="fg">
+            Light Mode
+          </Radio>
+          <Radio value="dark" color="fg">
+            Dark Mode
+          </Radio>
         </Stack>
       </RadioGroup>
     </VStack>

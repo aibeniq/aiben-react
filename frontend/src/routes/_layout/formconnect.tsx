@@ -186,7 +186,7 @@ const FormConnect = () => {
                 borderColor="gray.200"
                 borderRadius="md"
                 p={4}
-                bg="gray.50"
+                bg="surface"
                 minH="100px"
                 maxH={{ base: "400px", md: "600px" }}
                 overflowY="auto"

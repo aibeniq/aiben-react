@@ -25,7 +25,7 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
     <Accordion.Root collapsible mt={2}>
       <Accordion.Item value={accordionValue}>
         <h2>
-          <Accordion.ItemTrigger bg="gray.100" _hover={{ bg: "gray.200" }}>
+          <Accordion.ItemTrigger bg="surface" _hover={{ bg: "panel" }}>
             <Box flex="1" textAlign="left" fontWeight="medium">
               <HStack>
                 <FiFileText />
@@ -34,9 +34,9 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
             </Box>
           </Accordion.ItemTrigger>
         </h2>
-        <Accordion.ItemContent pb={4} bg="gray.50">
+        <Accordion.ItemContent pb={4} bg="surface">
           {sourceCitations.map((citation: any, cIndex: number) => (
-            <Box key={cIndex} p={3} mb={2} borderWidth="1px" borderRadius="md" bg="white">
+            <Box key={cIndex} p={3} mb={2} borderWidth="1px" borderRadius="md" bg="bg">
               {citation.metadata.source_data_id ? (
                 <SourceLink
                   sourceId={citation.metadata.source_data_id}
@@ -51,7 +51,7 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
                   {getDisplayFileName(citation.metadata.source)}
                 </Text>
               )}
-              <Box mt={2} p={2} bg="gray.50" borderRadius="sm" fontSize="sm" whiteSpace="pre-wrap">
+              <Box mt={2} p={2} bg="surface" borderRadius="sm" fontSize="sm" whiteSpace="pre-wrap">
                 {citation.content}
               </Box>
             </Box>

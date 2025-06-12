@@ -332,7 +332,7 @@ function LlmModels() {
   }
 
   return (
-    <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={6} bg="white">
+    <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={6} bg="bg">
       <VStack gap={4} align="stretch">
         <Box>
           <Heading size="lg" mb={2}>
@@ -812,7 +812,7 @@ function EmbeddingModels() {
   }
 
   return (
-    <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={6} bg="white">
+    <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={6} bg="bg">
       <VStack gap={4} align="stretch">
         <Box>
           <Heading size="lg" mb={2}>

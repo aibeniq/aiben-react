@@ -196,7 +196,7 @@ const TwinCheck = () => {
         {...props}
       />
     ),
-    thead: (props: any) => <Box as="thead" bg="gray.100" {...props} />,
+    thead: (props: any) => <Box as="thead" bg="surface" {...props} />,
     tbody: (props: any) => <Box as="tbody" {...props} />,
     tr: (props: any) => <Box as="tr" {...props} />,
     th: (props: any) => (
@@ -356,7 +356,7 @@ const TwinCheck = () => {
                 borderColor="gray.200"
                 borderRadius="md"
                 p={4}
-                bg="gray.50"
+                bg="surface"
                 minH="100px"
                 maxH={{ base: "400px", md: "600px" }}
                 overflowY="auto"
@@ -380,7 +380,7 @@ const TwinCheck = () => {
                     <Heading as="h3" size="md" mb={2}>
                       Summary
                     </Heading>
-                    <Box p={3} mb={4} borderWidth="1px" borderRadius="md" bg="white">
+                    <Box p={3} mb={4} borderWidth="1px" borderRadius="md" bg="bg">
                       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
                         {summary}
                       </ReactMarkdown>
@@ -400,8 +400,8 @@ const TwinCheck = () => {
                             p={5}
                             borderWidth="1px"
                             borderRadius="md"
-                            bg={expandedTopic === index ? "gray.50" : "white"}
-                            _hover={{ bg: "gray.50" }}
+                            bg={expandedTopic === index ? "surface" : "bg"}
+                            _hover={{ bg: "surface" }}
                           >
                             <Heading
                               as="h4"
@@ -487,7 +487,7 @@ const FileUploader = ({
         textAlign="center"
         cursor="pointer"
         _hover={{ borderColor: "blue.500" }}
-        bg={file ? "blue.50" : "transparent"}
+        bg={file ? "accent.subtle" : "surface"}
         transition="all 0.2s"
       >
         <input {...getInputProps()} />

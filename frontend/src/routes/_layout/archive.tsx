@@ -205,14 +205,23 @@ function Archive() {
         borderWidth="1px"
         borderRadius="md"
         overflow="hidden"
+        bg="surface"
         {...props}
       />
     ),
-    thead: (props: any) => <Box as="thead" bg="gray.100" {...props} />,
-    tbody: (props: any) => <Box as="tbody" {...props} />,
+    thead: (props: any) => <Box as="thead" bg="panel" {...props} />,
+    tbody: (props: any) => <Box as="tbody" bg="panel" {...props} />,
     tr: (props: any) => <Box as="tr" {...props} />,
     th: (props: any) => (
-      <Box as="th" p={4} textAlign="left" fontWeight="bold" borderBottomWidth="1px" {...props} />
+      <Box
+        as="th"
+        p={4}
+        textAlign="left"
+        fontWeight="bold"
+        borderBottomWidth="1px"
+        bg="panel"
+        {...props}
+      />
     ),
     td: (props: any) => <Box as="td" p={4} borderBottomWidth="1px" {...props} />,
   }

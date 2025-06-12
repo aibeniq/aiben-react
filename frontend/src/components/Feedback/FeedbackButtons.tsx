@@ -103,7 +103,7 @@ const FeedbackButtons = ({
       {/* Feedback buttons */}
       <HStack
         gap={2}
-        bg="white"
+        bg="bg"
         p={1}
         borderRadius="md"
         boxShadow="sm"
@@ -177,7 +177,7 @@ const FeedbackButtons = ({
             onClick={handleClose}
           >
             <Box
-              bg="white"
+              bg="bg"
               borderRadius="md"
               maxWidth="90vw"
               width="400px"
