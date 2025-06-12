@@ -529,6 +529,6 @@ const ReportGenie = () => {
 }
 
 // Export the Route for compatibility with the routing system
-export const Route = createFileRoute("/_layout/reportgenie")({
+export const Route = createFileRoute("/_layout/generate")({
   component: ReportGenie,
 })

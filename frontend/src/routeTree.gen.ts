@@ -17,14 +17,14 @@ import { Route as RecoverPasswordImport } from './routes/recover-password'
 import { Route as LoginImport } from './routes/login'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
-import { Route as LayoutVeradocImport } from './routes/_layout/veradoc'
-import { Route as LayoutTwincheckImport } from './routes/_layout/twincheck'
 import { Route as LayoutSettingsImport } from './routes/_layout/settings'
-import { Route as LayoutReportgenieImport } from './routes/_layout/reportgenie'
+import { Route as LayoutReviewImport } from './routes/_layout/review'
 import { Route as LayoutModelSelectionImport } from './routes/_layout/model-selection'
+import { Route as LayoutMatchImport } from './routes/_layout/match'
 import { Route as LayoutKnowledgeBasesImport } from './routes/_layout/knowledge-bases'
 import { Route as LayoutItemsImport } from './routes/_layout/items'
-import { Route as LayoutFormconnectImport } from './routes/_layout/formconnect'
+import { Route as LayoutGenerateImport } from './routes/_layout/generate'
+import { Route as LayoutCompareImport } from './routes/_layout/compare'
 import { Route as LayoutArchiveImport } from './routes/_layout/archive'
 import { Route as LayoutAdminImport } from './routes/_layout/admin'
 
@@ -60,28 +60,23 @@ const LayoutIndexRoute = LayoutIndexImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
-const LayoutVeradocRoute = LayoutVeradocImport.update({
-  path: '/veradoc',
-  getParentRoute: () => LayoutRoute,
-} as any)
-
-const LayoutTwincheckRoute = LayoutTwincheckImport.update({
-  path: '/twincheck',
-  getParentRoute: () => LayoutRoute,
-} as any)
-
 const LayoutSettingsRoute = LayoutSettingsImport.update({
   path: '/settings',
   getParentRoute: () => LayoutRoute,
 } as any)
 
-const LayoutReportgenieRoute = LayoutReportgenieImport.update({
-  path: '/reportgenie',
+const LayoutReviewRoute = LayoutReviewImport.update({
+  path: '/review',
   getParentRoute: () => LayoutRoute,
 } as any)
 
 const LayoutModelSelectionRoute = LayoutModelSelectionImport.update({
   path: '/model-selection',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutMatchRoute = LayoutMatchImport.update({
+  path: '/match',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -95,8 +90,13 @@ const LayoutItemsRoute = LayoutItemsImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
-const LayoutFormconnectRoute = LayoutFormconnectImport.update({
-  path: '/formconnect',
+const LayoutGenerateRoute = LayoutGenerateImport.update({
+  path: '/generate',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutCompareRoute = LayoutCompareImport.update({
+  path: '/compare',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -142,8 +142,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutArchiveImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/formconnect': {
-      preLoaderRoute: typeof LayoutFormconnectImport
+    '/_layout/compare': {
+      preLoaderRoute: typeof LayoutCompareImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/generate': {
+      preLoaderRoute: typeof LayoutGenerateImport
       parentRoute: typeof LayoutImport
     }
     '/_layout/items': {
@@ -154,24 +158,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutKnowledgeBasesImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/match': {
+      preLoaderRoute: typeof LayoutMatchImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/model-selection': {
       preLoaderRoute: typeof LayoutModelSelectionImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/reportgenie': {
-      preLoaderRoute: typeof LayoutReportgenieImport
+    '/_layout/review': {
+      preLoaderRoute: typeof LayoutReviewImport
       parentRoute: typeof LayoutImport
     }
     '/_layout/settings': {
       preLoaderRoute: typeof LayoutSettingsImport
-      parentRoute: typeof LayoutImport
-    }
-    '/_layout/twincheck': {
-      preLoaderRoute: typeof LayoutTwincheckImport
-      parentRoute: typeof LayoutImport
-    }
-    '/_layout/veradoc': {
-      preLoaderRoute: typeof LayoutVeradocImport
       parentRoute: typeof LayoutImport
     }
     '/_layout/': {
@@ -187,14 +187,14 @@ export const routeTree = rootRoute.addChildren([
   LayoutRoute.addChildren([
     LayoutAdminRoute,
     LayoutArchiveRoute,
-    LayoutFormconnectRoute,
+    LayoutCompareRoute,
+    LayoutGenerateRoute,
     LayoutItemsRoute,
     LayoutKnowledgeBasesRoute,
+    LayoutMatchRoute,
     LayoutModelSelectionRoute,
-    LayoutReportgenieRoute,
+    LayoutReviewRoute,
     LayoutSettingsRoute,
-    LayoutTwincheckRoute,
-    LayoutVeradocRoute,
     LayoutIndexRoute,
   ]),
   LoginRoute,

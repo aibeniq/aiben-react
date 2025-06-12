@@ -219,6 +219,6 @@ const FormConnect = () => {
 }
 
 // Export the Route for compatibility with the routing system
-export const Route = createFileRoute("/_layout/formconnect")({
+export const Route = createFileRoute("/_layout/match")({
   component: FormConnect,
 })

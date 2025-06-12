@@ -770,6 +770,6 @@ const VeraDoc = () => {
 }
 
 // Export the Route for compatibility with the routing system
-export const Route = createFileRoute("/_layout/veradoc")({
+export const Route = createFileRoute("/_layout/review")({
   component: VeraDoc,
 })
