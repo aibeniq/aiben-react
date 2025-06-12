@@ -515,6 +515,6 @@ const FileUploader = ({
   )
 }
 
-export const Route = createFileRoute("/_layout/twincheck")({
+export const Route = createFileRoute("/_layout/compare")({
   component: TwinCheck,
 })

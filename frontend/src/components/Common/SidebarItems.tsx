@@ -29,10 +29,10 @@ export const categories: Category[] = [
     name: "Tools",
     icon: FiTool,
     items: [
-      { icon: FiCheckCircle, title: "Review", path: "/veradoc" },
-      { icon: FiFilePlus, title: "Generate", path: "/reportgenie" },
-      { icon: FaBalanceScale, title: "Compare", path: "/twincheck" },
-      { icon: TbPlugConnected, title: "Match", path: "/formconnect" },
+      { icon: FiCheckCircle, title: "Review", path: "/review" },
+      { icon: FiFilePlus, title: "Generate", path: "/generate" },
+      { icon: FaBalanceScale, title: "Compare", path: "/compare" },
+      { icon: TbPlugConnected, title: "Match", path: "/match" },
     ],
   },
   {
