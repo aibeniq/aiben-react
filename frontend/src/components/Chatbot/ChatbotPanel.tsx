@@ -259,14 +259,6 @@ const ChatbotPanel = ({ isOpen, onClose }: ChatbotPanelProps) => {
         animation="slideUp 0.2s ease-out"
         display="flex"
         flexDirection="column"
-        // @ts-expect-error
-        sx={{
-          "@keyframes slideUp": {
-            from: { opacity: 0, transform: "translateY(20px)" },
-            to: { opacity: 1, transform: "translateY(0)" },
-          },
-          animation: "slideUp 0.2s ease-out",
-        }}
       >
         {/* Header - Keep fixed */}
         <Box
