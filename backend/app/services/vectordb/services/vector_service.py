@@ -34,13 +34,7 @@ from ..config.schemas import (
     validate_collections_exist,
     get_vector_name,
 )
-from ..vectorizers.embeddings_service_adapter import (
-    EmbeddingsServiceAdapter,
-    create_embeddings_adapter,
-)
-from ..services.chunking import ChunkingService
-from ..services.deduplication import DeduplicationService
-from ..utils.filters import FilterBuilder
+from ..embeddings import EmbeddingService, generate_content_hash, split_text_into_chunks
 from app.models import ModelProvider
 
 logger = logging.getLogger(__name__)
@@ -51,10 +45,7 @@ class VectorDBService:
 
     def __init__(self):
         self.client = None
-        self.chunking_service = ChunkingService()
-        self.dedup_service = DeduplicationService()
-        self.filter_builder = FilterBuilder()
-        self._vectorizers: Dict[str, Any] = {}
+        self.embedding_service = EmbeddingService()
 
     @asynccontextmanager
     async def get_client(self):
@@ -67,25 +58,9 @@ class VectorDBService:
             logger.error(f"Weaviate client error: {e}")
             raise
 
-    async def _get_vectorizer(
-        self, model_name: str, provider: ModelProvider, api_key: Optional[str] = None
-    ) -> EmbeddingsServiceAdapter:
-        """Get or create a vectorizer for the specified model"""
-        cache_key = f"{provider.value}:{model_name}"
-
-        if cache_key not in self._vectorizers:
-            vectorizer = create_embeddings_adapter(
-                model_name=model_name,
-                provider=provider,
-                api_key=api_key,
-                batch_size=settings.batch_size,
-                max_retries=settings.retry_attempts,
-                retry_delay=settings.retry_delay,
-            )
-            await vectorizer.initialize()
-            self._vectorizers[cache_key] = vectorizer
-
-        return self._vectorizers[cache_key]
+    def _determine_provider(self, model_name: str) -> ModelProvider:
+        """Determine provider from model name"""
+        return self.embedding_service.determine_provider(model_name)
 
     async def _ensure_collections_exist(self, org_id: str, embedding_models: List[str]):
         """Ensure collections exist for the organization"""
@@ -112,10 +87,10 @@ class VectorDBService:
             )
 
             # Generate content hash for deduplication
-            content_hash = self.dedup_service.generate_content_hash(request.content)
+            content_hash = generate_content_hash(request.content)
 
             # Check if source already exists
-            existing_source_id = await self.dedup_service.check_source_exists(
+            existing_source_id = await self._check_source_exists(
                 request.org_id, content_hash
             )
 
@@ -167,7 +142,7 @@ class VectorDBService:
                 source_id = sources_collection.data.insert(source_properties)
 
                 # Split content into chunks
-                chunks = await self.chunking_service.split_content(
+                chunks = self._create_chunks(
                     content=request.content,
                     source_id=source_id,
                     chunk_size=request.chunk_size or settings.default_chunk_size,
@@ -199,6 +174,91 @@ class VectorDBService:
             logger.error(f"Error adding source: {e}")
             raise VectorDBError(f"Failed to add source: {str(e)}")
 
+    def _create_chunks(
+        self, content: str, source_id: str, chunk_size: int, chunk_overlap: int
+    ) -> List[Dict]:
+        """Create chunks from content"""
+        chunk_texts = split_text_into_chunks(
+            content=content, chunk_size=chunk_size, chunk_overlap=chunk_overlap
+        )
+
+        chunks = []
+        for index, text in enumerate(chunk_texts):
+            chunks.append(
+                {
+                    "content": text,
+                    "source_id": source_id,
+                    "chunk_index": index,
+                    "chunk_size": len(text.split()),
+                    "content_hash": generate_content_hash(text),
+                }
+            )
+
+        return chunks
+
+    async def _check_source_exists(
+        self, org_id: str, content_hash: str
+    ) -> Optional[str]:
+        """Check if a source with the given content hash already exists"""
+        try:
+            async with self.get_client() as client:
+                collection_names = get_collection_names(org_id)
+                sources_collection = client.collections.get(collection_names["sources"])
+
+                result = sources_collection.query.fetch_objects(
+                    where=Filter.by_property("content_hash").equal(content_hash),
+                    limit=1,
+                )
+
+                if result.objects:
+                    return str(result.objects[0].uuid)
+
+                return None
+        except Exception as e:
+            logger.error(f"Error checking source existence: {e}")
+            return None
+
+    def _build_filters(self, filter_params: Optional[FilterParams]) -> Optional[Filter]:
+        """Build Weaviate filters from filter parameters"""
+        if not filter_params:
+            return None
+
+        filters = []
+
+        if filter_params.user_id:
+            filters.append(
+                Filter.by_property("created_by_user_id").equal(filter_params.user_id)
+            )
+
+        if filter_params.knowledge_base_ids:
+            filters.append(
+                Filter.by_property("knowledge_base_id").contains_any(
+                    filter_params.knowledge_base_ids
+                )
+            )
+
+        if filter_params.source_ids:
+            filters.append(
+                Filter.by_property("source_id").contains_any(filter_params.source_ids)
+            )
+
+        if filter_params.access_users:
+            filters.append(
+                Filter.by_property("access_users").contains_any(
+                    filter_params.access_users
+                )
+            )
+
+        if not filters:
+            return None
+
+        # Combine filters with AND
+        result_filter = filters[0]
+        for f in filters[1:]:
+            result_filter = result_filter & f
+
+        return result_filter
+
     async def _batch_add_chunks(
         self,
         org_id: str,
@@ -214,15 +274,6 @@ class VectorDBService:
             collection_names = get_collection_names(org_id)
             chunks_collection = client.collections.get(collection_names["chunks"])
 
-            # Prepare vectorizers for all models
-            vectorizers = {}
-            for model_name in embedding_models:
-                # Determine provider from model name (you may want to make this configurable)
-                provider = self._determine_provider(model_name)
-                vectorizers[model_name] = await self._get_vectorizer(
-                    model_name, provider
-                )
-
             # Process chunks in batches
             chunks_created = 0
             batch_size = settings.batch_size
@@ -233,15 +284,16 @@ class VectorDBService:
                 # Generate embeddings for all models
                 batch_data = []
                 for chunk in batch_chunks:
-                    chunk_hash = self.dedup_service.generate_content_hash(
-                        chunk["content"]
-                    )
-
                     # Generate embeddings for all models
                     vectors = {}
-                    for model_name, vectorizer in vectorizers.items():
+                    for model_name in embedding_models:
                         try:
-                            vector = await vectorizer.embed_text(chunk["content"])
+                            provider = self._determine_provider(model_name)
+                            vector = await self.embedding_service.get_single_embedding(
+                                text=chunk["content"],
+                                model_name=model_name,
+                                provider=provider,
+                            )
                             vectors[get_vector_name(model_name)] = vector
                         except Exception as e:
                             logger.error(
@@ -252,7 +304,7 @@ class VectorDBService:
 
                     if not vectors:
                         logger.warning(
-                            f"No embeddings generated for chunk {chunk['index']}"
+                            f"No embeddings generated for chunk {chunk['chunk_index']}"
                         )
                         continue
 
@@ -261,13 +313,13 @@ class VectorDBService:
                             "properties": {
                                 "content": chunk["content"],
                                 "source_id": chunk["source_id"],
-                                "chunk_index": chunk["index"],
-                                "chunk_size": len(chunk["content"]),
+                                "chunk_index": chunk["chunk_index"],
+                                "chunk_size": chunk["chunk_size"],
                                 "knowledge_base_id": knowledge_base_id,
                                 "created_by_user_id": user_id,
                                 "created_at": datetime.utcnow(),
                                 "access_users": access_users,
-                                "content_hash": chunk_hash,
+                                "content_hash": chunk["content_hash"],
                                 "embedding_models": list(vectors.keys()),
                                 **chunk.get("metadata", {}),
                             },
@@ -317,7 +369,7 @@ class VectorDBService:
                 chunks_collection = client.collections.get(collection_names["chunks"])
 
                 # Build filters
-                weaviate_filters = self.filter_builder.build_filters(request.filters)
+                weaviate_filters = self._build_filters(request.filters)
 
                 # Determine vector name for the embedding model
                 vector_name = get_vector_name(request.embedding_model)

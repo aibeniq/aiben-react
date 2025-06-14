@@ -2,7 +2,8 @@
 Configuration settings for Vector Database Service
 """
 
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 from typing import Dict
 
 
