@@ -165,6 +165,7 @@ const OutlineTable = ({
     setEditingOutline(outline)
     setOutlineName(outline.name)
     setOutlineDescription(outline.description || "")
+    onSectionsChange(outline.sections || "")
     setIsModalOpen(true)
   }
 

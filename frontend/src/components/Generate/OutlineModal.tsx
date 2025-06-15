@@ -1,5 +1,6 @@
 import { HStack, VStack, Input, Textarea, Dialog, Portal, CloseButton } from "@chakra-ui/react"
 import { Field } from "../ui/field"
+import { Box } from "@chakra-ui/react"
 import { ReportGenieOutline } from "../../client"
 import { InteractiveList } from "../ui/interactive-list"
 import CancelButton from "../ui/cancel-button"
@@ -37,7 +38,7 @@ const OutlineModal = ({
       <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && onClose()}>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content maxW="2xl" maxH="80vh">
+          <Dialog.Content maxW="4xl" maxH="80vh">
             <Dialog.Header>
               <Dialog.Title>{editingOutline ? "Edit Outline" : "Create New Outline"}</Dialog.Title>
               <Dialog.CloseTrigger asChild>
@@ -65,11 +66,21 @@ const OutlineModal = ({
                 </Field>
 
                 <Field label="Sections" required>
-                  <InteractiveList
-                    value={sections}
-                    onChange={onSectionsChange}
-                    placeholder="Add a section (e.g. Introduction, Methods, Results)"
-                  />
+                  <Box
+                    maxH="260px"
+                    overflowY="auto"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    borderRadius="md"
+                    position="relative"
+                    width="full"
+                  >
+                    <InteractiveList
+                      value={sections}
+                      onChange={onSectionsChange}
+                      placeholder="Add a section (e.g. Introduction, Methods, Results)"
+                    />
+                  </Box>
                 </Field>
               </VStack>
             </Dialog.Body>
