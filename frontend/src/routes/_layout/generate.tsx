@@ -50,14 +50,14 @@ const ReportGenie = () => {
   const [selectedOutline, setSelectedOutline] = useState<ReportGenieOutline | null>(null)
 
   // Results state
-  const [generatedReport, setGeneratedReport] = useState("")
+  const [generatedDocument, setGeneratedDocument] = useState("")
   const [sectionResults, setSectionResults] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [expandedSection, setExpandedSection] = useState<number | null>(null)
 
-  const handleCopyReport = async () => {
+  const handleCopyDocument = async () => {
     try {
-      await navigator.clipboard.writeText(generatedReport)
+      await navigator.clipboard.writeText(generatedDocument)
       setCopySuccess(true)
 
       // Reset the success icon after 2 seconds
@@ -65,19 +65,19 @@ const ReportGenie = () => {
         setCopySuccess(false)
       }, 2000)
 
-      showSuccessToast("Report copied to clipboard")
+      showSuccessToast("Document copied to clipboard")
     } catch (err) {
-      console.error("Failed to copy report:", err)
-      showErrorToast("Failed to copy report to clipboard")
+      console.error("Failed to copy document:", err)
+      showErrorToast("Failed to copy document to clipboard")
     }
   }
 
-  const handleDownloadReport = async () => {
+  const handleDownloadDocument = async () => {
     try {
       setLoadingDownload(true)
 
       const response = await ReportgenieService.generateDocx({
-        requestBody: { content: generatedReport },
+        requestBody: { content: generatedDocument },
       })
 
       let blob
@@ -97,16 +97,16 @@ const ReportGenie = () => {
       const a = document.createElement("a")
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
       a.href = url
-      a.download = `report_${timestamp}.docx`
+      a.download = `document_${timestamp}.docx`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
 
-      showSuccessToast("Report downloaded successfully")
+      showSuccessToast("Document downloaded successfully")
     } catch (err: any) {
-      console.error("Failed to download report:", err)
-      showErrorToast(`Failed to download report: ${err.message || "Unknown error"}`)
+      console.error("Failed to download document:", err)
+      showErrorToast(`Failed to download document: ${err.message || "Unknown error"}`)
     } finally {
       setLoadingDownload(false)
     }
@@ -153,7 +153,7 @@ const ReportGenie = () => {
     fetchOutlines()
   }, [])
 
-  // Mutation hook for generating the report
+  // Mutation hook for generating the document
   const mutation = useMutation({
     mutationFn: (data: { sections: string; knowledgeBaseId: string; outlineId?: string }) => {
       if (data.outlineId) {
@@ -173,16 +173,16 @@ const ReportGenie = () => {
       }
     },
     onSuccess: (data: any) => {
-      setGeneratedReport(data.results.full_report)
+      setGeneratedDocument(data.results.full_report)
       setSectionResults(data.results.sections || [])
     },
     onError: (error: any) => {
-      showErrorToast(`Failed to generate report: ${error.message}`)
+      showErrorToast(`Failed to generate document: ${error.message}`)
     },
   })
 
-  // Handle generating the report
-  const handleGenerateReport = async () => {
+  // Handle generating the document
+  const handleGenerateDocument = async () => {
     if (!sections.trim()) {
       showErrorToast("Please enter at least one section")
       return
@@ -230,7 +230,7 @@ const ReportGenie = () => {
 
   return (
     <Container maxW="container.xl" py={8}>
-      {/* Loading overlay while report generates */}
+      {/* Loading overlay while document generates */}
       {loading && (
         <Box
           position="absolute"
@@ -247,7 +247,7 @@ const ReportGenie = () => {
         >
           <VStack gap={4}>
             <Spinner size="xl" color="blue.500" />
-            <Text fontWeight="medium">Generating report...</Text>
+            <Text fontWeight="medium">Generating document...</Text>
           </VStack>
         </Box>
       )}
@@ -266,7 +266,7 @@ const ReportGenie = () => {
             />
 
             <SelectionCard
-              title="Report Outline"
+              title="Document Outline"
               description={selectedOutline ? selectedOutline.name : "Click to select"}
               icon={<FiFileText size={24} />}
               isSelected={!!selectedOutline}
@@ -290,7 +290,7 @@ const ReportGenie = () => {
         <SelectionModal
           isOpen={showOutlineModal}
           onClose={() => setShowOutlineModal(false)}
-          title="Select Report Outline"
+          title="Select Document Outline"
         >
           <OutlineTable
             outlines={outlines}
@@ -311,7 +311,7 @@ const ReportGenie = () => {
           <HStack gap={4} justify="center">
             <Button
               variant="solid"
-              onClick={handleGenerateReport}
+              onClick={handleGenerateDocument}
               disabled={!sections.trim() || !selectedKnowledgeBase?.id}
               loading={loading}
               color="white"
@@ -321,7 +321,7 @@ const ReportGenie = () => {
                 bg: "rgba(0, 65, 72, 0.85)",
               }}
             >
-              Generate Report
+              Generate
             </Button>
           </HStack>
 
@@ -339,12 +339,12 @@ const ReportGenie = () => {
               <HStack justify="space-between" align="center" mb={4}>
                 <Heading size="md">Results</Heading>
 
-                {generatedReport && (
+                {generatedDocument && (
                   <HStack gap={2}>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={handleCopyReport}
+                      onClick={handleCopyDocument}
                       colorPalette={copySuccess ? "green" : "blue"}
                     >
                       {copySuccess ? <FiCheck color="green" /> : <FiCopy />}
@@ -353,7 +353,7 @@ const ReportGenie = () => {
 
                     <DownloadButton
                       size="sm"
-                      onClick={handleDownloadReport}
+                      onClick={handleDownloadDocument}
                       loading={loadingDownload}
                     >
                       Download DOCX
@@ -385,10 +385,10 @@ const ReportGenie = () => {
                     <Spinner size="lg" color="blue.500" />
                   </Box>
                 )}
-                {generatedReport || sectionResults.length > 0 ? (
+                {generatedDocument || sectionResults.length > 0 ? (
                   <>
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                      {generatedReport}
+                      {generatedDocument}
                     </ReactMarkdown>
 
                     {/* Detailed section results with sources */}
@@ -517,7 +517,9 @@ const ReportGenie = () => {
                     )}
                   </>
                 ) : (
-                  <Text color="gray.500">Results will appear here after generating a report.</Text>
+                  <Text color="gray.500">
+                    Results will appear here after generating a document.
+                  </Text>
                 )}
               </Box>
             </Box>
