@@ -116,13 +116,7 @@ services:
       - REPLICATE_API_TOKEN
 
     healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "-f",
-          "http://localhost:8000/api/v1/utils/health-check/",
-        ]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -148,7 +142,7 @@ services:
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.middlewares=https-redirect
 
   frontend:
-    #profiles: ["frontend"]
+    profiles: ["frontend"]
     image: "${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}"
     restart: always
     networks:
@@ -201,7 +195,7 @@ services:
     networks:
       - default
     healthcheck:
-      test: 
+      test:
         - "CMD-SHELL"
         - "bash -c '</dev/tcp/localhost/11434' || exit 1"
       interval: 30s
