@@ -1,5 +1,5 @@
-import { Circle, Icon } from "@chakra-ui/react"
-import { FaQuestionCircle } from "react-icons/fa"
+import { IconButton } from "@chakra-ui/react"
+import { FiMessageSquare } from "react-icons/fi"
 
 interface FloatingChatButtonProps {
   onClick: () => void
@@ -7,12 +7,11 @@ interface FloatingChatButtonProps {
 
 const FloatingChatButton = ({ onClick }: FloatingChatButtonProps) => {
   return (
-    <Circle
-      as="button"
+    <IconButton
       position="fixed"
       bottom="4"
       right="4"
-      size="50px"
+      size="lg"
       bg="rgba(0, 65, 72, 0.9)"
       color="white"
       boxShadow="lg"
@@ -21,9 +20,12 @@ const FloatingChatButton = ({ onClick }: FloatingChatButtonProps) => {
       _hover={{ bg: "rgba(0, 65, 72, 0.7)" }}
       transition="all 0.2s"
       aria-label="Get help"
-    >
-      <Icon as={FaQuestionCircle} boxSize="24px" />
-    </Circle>
+      as={FiMessageSquare}
+      rounded="full"
+      width="56px"
+      height="56px"
+      p={3}
+    />
   )
 }
 
