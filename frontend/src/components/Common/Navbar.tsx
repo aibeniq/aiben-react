@@ -18,7 +18,7 @@ function Navbar() {
       bg="bg.muted"
       w="100%"
       top={0}
-      p={4}
+      px={4}
     >
       <Link to="/">
         <Image src={Logo} alt="Logo" maxW="3xs" p={2} />
