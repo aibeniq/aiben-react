@@ -162,7 +162,7 @@ const FormConnect = () => {
                 bg: "rgba(0, 65, 72, 0.85)",
               }}
             >
-              Run
+              Match
             </Button>
           </HStack>
 
