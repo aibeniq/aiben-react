@@ -310,7 +310,7 @@ const TwinCheck = () => {
                 bg: "rgba(0, 65, 72, 0.85)",
               }}
             >
-              Compare Documents
+              Compare
             </Button>
           </HStack>
 
