@@ -1,4 +1,4 @@
-import { Container, HStack, Image, Input, Text } from "@chakra-ui/react"
+import { Box, Container, HStack, Image, Input, Text } from "@chakra-ui/react"
 import { Link as RouterLink, createFileRoute, redirect } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { FiLock, FiMail } from "react-icons/fi"
@@ -44,6 +44,7 @@ function Login() {
     resetError()
 
     try {
+      console.log(data)
       await loginMutation.mutateAsync(data)
     } catch {
       // error is handled by useAuth hook
@@ -106,7 +107,7 @@ function Login() {
         </Button>
         <HStack gap={1}>
           <Text>Don't have an account? </Text>
-          <Text>
+          <Box>
             <RouterLink to="/signup" className="main-link" style={{ width: "fit-content" }}>
               <Text
                 color="rgba(0, 65, 72, 0.8)"
@@ -116,7 +117,7 @@ function Login() {
                 Sign Up
               </Text>
             </RouterLink>
-          </Text>
+          </Box>
         </HStack>
       </Container>
     </>
