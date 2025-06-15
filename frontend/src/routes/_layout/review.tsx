@@ -665,7 +665,7 @@ const VeraDoc = () => {
                 bg: "rgba(0, 65, 72, 0.85)",
               }}
             >
-              Run
+              Review
             </Button>
           </HStack>
 
@@ -681,9 +681,7 @@ const VeraDoc = () => {
           >
             <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
               <HStack justify="space-between" align="center" mb={4}>
-                <Heading size="md">
-                  {fileItems.length > 1 ? "Batch Processing Results" : "Results"}
-                </Heading>
+                <Heading size="md">Results</Heading>
 
                 {results.length > 0 && (
                   <HStack gap={2}>
