@@ -1,4 +1,4 @@
-import { Container, Image, Input, Text } from "@chakra-ui/react"
+import { Container, HStack, Image, Input, Text } from "@chakra-ui/react"
 import { Link as RouterLink, createFileRoute, redirect } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { FiLock, FiMail } from "react-icons/fi"
@@ -62,7 +62,7 @@ function Login() {
         gap={4}
         centerContent
       >
-        <Image src={Logo} alt="FastAPI logo" height="auto" maxW="2xs" alignSelf="center" mb={4} />
+        <Image src={Logo} alt="FastAPI logo" height="auto" maxW="2xs" alignSelf="center" />
         <Field invalid={!!errors.username} errorText={errors.username?.message || !!error}>
           <InputGroup w="100%" startElement={<FiMail />}>
             <Input
@@ -83,18 +83,41 @@ function Login() {
           placeholder="Password"
           errors={errors}
         />
-        <RouterLink to="/recover-password" className="main-link">
-          Forgot Password?
+        <RouterLink to="/recover-password" className="main-link" style={{ width: "fit-content" }}>
+          <Text
+            color="rgba(0, 65, 72, 0.8)"
+            fontSize="sm"
+            _hover={{ textDecoration: "underline" }}
+            width="fit-content"
+            alignSelf="flex-end"
+          >
+            Forgot Password?
+          </Text>
         </RouterLink>
-        <Button variant="solid" type="submit" loading={isSubmitting} size="md">
+        <Button
+          variant="solid"
+          type="submit"
+          loading={isSubmitting}
+          size="md"
+          bg="rgba(0, 65, 72, 0.9)"
+          _hover={{ bg: "rgba(0, 65, 72, 0.8)" }}
+        >
           Log In
         </Button>
-        <Text>
-          Don't have an account?{" "}
-          <RouterLink to="/signup" className="main-link">
-            Sign Up
-          </RouterLink>
-        </Text>
+        <HStack gap={1}>
+          <Text>Don't have an account? </Text>
+          <Text>
+            <RouterLink to="/signup" className="main-link" style={{ width: "fit-content" }}>
+              <Text
+                color="rgba(0, 65, 72, 0.8)"
+                fontSize="sm"
+                _hover={{ textDecoration: "underline" }}
+              >
+                Sign Up
+              </Text>
+            </RouterLink>
+          </Text>
+        </HStack>
       </Container>
     </>
   )
