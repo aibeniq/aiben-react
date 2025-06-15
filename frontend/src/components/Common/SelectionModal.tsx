@@ -1,6 +1,5 @@
 import React from "react"
-import { Card, Heading, HStack, IconButton } from "@chakra-ui/react"
-import { FiX } from "react-icons/fi"
+import { Card, CloseButton, Heading, HStack } from "@chakra-ui/react"
 import ConfirmButton from "../ui/confirm-button"
 
 interface SelectionModalProps {
@@ -33,9 +32,7 @@ const SelectionModal = ({ isOpen, onClose, title, children }: SelectionModalProp
         <Card.Header>
           <HStack justify="space-between" align="center">
             <Heading size="lg">{title}</Heading>
-            <IconButton size="sm" variant="ghost" onClick={onClose} aria-label="Close modal">
-              <FiX />
-            </IconButton>
+            <CloseButton size="xl" onClick={onClose} variant="ghost" />
           </HStack>
         </Card.Header>
         <Card.Body>{children}</Card.Body>
