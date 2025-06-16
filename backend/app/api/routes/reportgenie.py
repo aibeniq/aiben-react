@@ -30,6 +30,9 @@ from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from app.services.retrievers import (
+    create_ensemble_retriever,
+)  # Import the ensemble retriever
 
 from sqlmodel import select
 from fastapi import APIRouter, Depends, HTTPException
