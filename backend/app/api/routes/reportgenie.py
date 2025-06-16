@@ -97,7 +97,12 @@ async def generate_report(
             chroma_db = Chroma(
                 persist_directory=temp_dir, embedding_function=embeddings
             )
-            retriever = chroma_db.as_retriever(search_kwargs={"k": 5})
+            retriever = create_ensemble_retriever(
+                chroma_db=chroma_db,
+                vector_weight=0.7,
+                keyword_weight=0.3,
+                search_kwargs={"k": 5},
+            )
 
             # 4. Initialize the LLM
             llm = get_default_llm(session, current_user)
