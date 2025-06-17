@@ -533,32 +533,73 @@ async def get_report_history(
                 title = f"Report on {kb_name}"
                 date = report.date_created.strftime("%Y-%m-%d %H:%M")
 
-                result.append(
-                    {
-                        "id": str(report.id),
-                        "date_created": report.date_created,
-                        "title": title,
-                        "sections": input_data.get("sections", ""),
-                        "kb_id": input_data.get("kb_id", ""),
-                        "section_count": output_data.get("section_count", 0),
-                        "kb_name": kb_name,
-                        "outline_name": extra_data.get("outline_name", ""),
+                # Create the result item
+                result_item = {
+                    "id": str(report.id),
+                    "date_created": report.date_created,
+                    "title": title,
+                    "sections": input_data.get("sections", ""),
+                    "kb_id": input_data.get("kb_id", ""),
+                    "section_count": output_data.get("section_count", 0),
+                    "kb_name": kb_name,
+                    "outline_name": extra_data.get("outline_name", ""),
+                    "has_feedback": report.feedback is not None,
+                }
+
+                # Add feedback information if exists
+                if report.feedback:
+                    result_item["feedback"] = {
+                        "feedback": report.feedback,
+                        "feedbackText": report.feedback_text,
                     }
-                )
+                
+                # Add user info for all-users view
+                if show_all:
+                    from app.models import User  # Import here to avoid circular imports
+
+                    user = session.get(User, report.user_id)
+                    user_name = (
+                        f"{user.full_name or 'User'} ({user.email})"
+                        if user
+                        else "Unknown User"
+                    )
+                    result_item["user_name"] = user_name
+                
+                result.append(result_item)
             except json.JSONDecodeError:
                 # If JSON parsing fails, use raw data
-                result.append(
-                    {
-                        "id": str(report.id),
-                        "date_created": report.date_created,
-                        "title": title,
-                        "sections": input_data.get("sections", ""),
-                        "kb_id": input_data.get("kb_id", ""),
-                        "section_count": output_data.get("section_count", 0),
-                        "kb_name": kb_name,
-                        "outline_name": extra_data.get("outline_name", ""),
+                result_item = {
+                    "id": str(report.id),
+                    "date_created": report.date_created,
+                    "title": f"Report from {report.date_created.strftime('%Y-%m-%d')}",
+                    "sections": "",
+                    "kb_id": "",
+                    "section_count": 0,
+                    "kb_name": "Unknown Knowledge Base",
+                    "outline_name": "",
+                    "has_feedback": report.feedback is not None,
+                }
+                
+                # Add feedback information if exists
+                if report.feedback:
+                    result_item["feedback"] = {
+                        "feedback": report.feedback,
+                        "feedbackText": report.feedback_text,
                     }
-                )
+                    
+                # Add user info for all-users view
+                if show_all:
+                    from app.models import User  # Import here to avoid circular imports
+                    
+                    user = session.get(User, report.user_id)
+                    user_name = (
+                        f"{user.full_name or 'User'} ({user.email})"
+                        if user
+                        else "Unknown User"
+                    )
+                    result_item["user_name"] = user_name
+                    
+                result.append(result_item)
 
         return result
     except Exception as e:

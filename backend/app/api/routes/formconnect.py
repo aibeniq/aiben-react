@@ -526,6 +526,13 @@ async def get_form_history(
                     "has_feedback": interaction.feedback is not None,
                 }
 
+                # Add feedback information if exists
+                if interaction.feedback:
+                    result_item["feedback"] = {
+                        "feedback": interaction.feedback,
+                        "feedbackText": interaction.feedback_text,
+                    }
+
                 # Add user info for all-users view
                 if show_all:
                     from app.models import User  # Import here to avoid circular imports

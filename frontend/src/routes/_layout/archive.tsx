@@ -274,10 +274,15 @@ function Archive() {
   return (
     <Container maxW="container.xl" py={8}>
       <VStack gap={6} align="stretch">
-        <Tabs.Root value={activeTab} onValueChange={(e) => {
-            console.log(`Tab changed from ${activeTab} to ${e.value}, showAllUsers is: ${showAllUsers}`);
-            setActiveTab(e.value);
-          }}>
+        <Tabs.Root
+          value={activeTab}
+          onValueChange={(e) => {
+            console.log(
+              `Tab changed from ${activeTab} to ${e.value}, showAllUsers is: ${showAllUsers}`,
+            )
+            setActiveTab(e.value)
+          }}
+        >
           <Tabs.List>
             <Tabs.Trigger value="review">
               <FiCheckCircle />

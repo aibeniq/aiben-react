@@ -579,7 +579,15 @@ async def get_veradoc_history(
                     "questions": input_data.get("questions", ""),
                     "qa_count": output_data.get("qa_count", 0),
                     "final_evaluation": output_data.get("final_evaluation", ""),
+                    "has_feedback": report.feedback is not None,
                 }
+
+                # Add feedback information if exists
+                if report.feedback:
+                    result_item["feedback"] = {
+                        "feedback": report.feedback,
+                        "feedbackText": report.feedback_text,
+                    }
 
                 # Add user info for all-users view
                 if show_all:

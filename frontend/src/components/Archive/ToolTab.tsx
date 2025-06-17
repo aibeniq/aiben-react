@@ -24,8 +24,8 @@ const ToolTab: React.FC<ToolTabProps> = ({
   onToggleShowAllUsers,
 }) => {
   // Log when the component renders with showAllUsers prop
-  console.log(`ToolTab rendering with showAllUsers: ${showAllUsers}`);
-  
+  console.log(`ToolTab rendering with showAllUsers: ${showAllUsers}`)
+
   return (
     <HStack gap={4} align="stretch" height="fit-content">
       <Box minW="300px" maxW="400px" w="300px" flexShrink={0}>

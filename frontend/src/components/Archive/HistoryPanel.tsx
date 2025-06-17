@@ -2,7 +2,7 @@ import { Box, Card, Heading, Text, VStack, HStack, Spinner } from "@chakra-ui/re
 import { Switch } from "@chakra-ui/react"
 import { Tooltip } from "@/components/ui/tooltip"
 import { format } from "date-fns"
-import { FiFileText, FiDatabase, FiUsers } from "react-icons/fi"
+import { FiFileText, FiDatabase, FiUsers, FiThumbsUp, FiThumbsDown } from "react-icons/fi"
 
 interface HistoryPanelProps {
   reportHistory: any[]
@@ -77,13 +77,21 @@ const HistoryPanel = ({
                   All Users
                 </Text>
                 {/* Key added to force remounting when showAllUsers changes */}
-                <Switch.Root key={`switch-${showAllUsers}`} size="sm" colorPalette="blue" checked={showAllUsers}>
-                  <Switch.HiddenInput 
-                    checked={showAllUsers} 
+                <Switch.Root
+                  key={`switch-${showAllUsers}`}
+                  size="sm"
+                  colorPalette="blue"
+                  checked={showAllUsers}
+                >
+                  <Switch.HiddenInput
+                    checked={showAllUsers}
                     onChange={() => {
-                      console.log("HistoryPanel toggle clicked, current showAllUsers:", showAllUsers);
-                      if (onToggleShowAllUsers) onToggleShowAllUsers();
-                    }} 
+                      console.log(
+                        "HistoryPanel toggle clicked, current showAllUsers:",
+                        showAllUsers,
+                      )
+                      if (onToggleShowAllUsers) onToggleShowAllUsers()
+                    }}
                   />
                   <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
                     <Switch.Thumb />
@@ -139,11 +147,45 @@ const HistoryPanel = ({
                     </HStack>
                   )}
 
-                  <HStack gap={1} width="100%">
-                    <FiFileText size={12} color="blue" />
-                    <Text fontWeight="medium" fontSize="sm" lineClamp={1}>
-                      {getDisplayTitle(item)}
-                    </Text>
+                  <HStack gap={1} width="100%" justify="space-between">
+                    <HStack gap={1}>
+                      <FiFileText size={12} color="blue" />
+                      <Text fontWeight="medium" fontSize="sm" lineClamp={1}>
+                        {getDisplayTitle(item)}
+                      </Text>
+                    </HStack>
+
+                    {/* Show feedback icon if feedback exists */}
+                    {item?.has_feedback && (
+                      <Tooltip
+                        content={
+                          typeof item.feedback === "object" && item.feedback?.feedback === "correct"
+                            ? "Positive feedback"
+                            : typeof item.feedback === "object" &&
+                                item.feedback?.feedback === "incorrect"
+                              ? "Negative feedback"
+                              : item.feedback === "correct" || item.feedback === "positive"
+                                ? "Positive feedback"
+                                : item.feedback === "incorrect" || item.feedback === "negative"
+                                  ? "Negative feedback"
+                                  : "Has feedback"
+                        }
+                      >
+                        {typeof item.feedback === "object" &&
+                        item.feedback?.feedback === "correct" ? (
+                          <FiThumbsUp size={14} color="green" />
+                        ) : typeof item.feedback === "object" &&
+                          item.feedback?.feedback === "incorrect" ? (
+                          <FiThumbsDown size={14} color="red" />
+                        ) : item.feedback === "correct" || item.feedback === "positive" ? (
+                          <FiThumbsUp size={14} color="green" />
+                        ) : item.feedback === "incorrect" || item.feedback === "negative" ? (
+                          <FiThumbsDown size={14} color="red" />
+                        ) : (
+                          <FiThumbsUp size={14} color="green" opacity={0.7} />
+                        )}
+                      </Tooltip>
+                    )}
                   </HStack>
 
                   {getSubtitle(item) && (
