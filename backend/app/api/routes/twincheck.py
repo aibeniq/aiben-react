@@ -287,6 +287,13 @@ async def get_comparison_history(
                     "has_feedback": comparison.feedback is not None,
                 }
 
+                # Add feedback information if exists
+                if comparison.feedback:
+                    result_item["feedback"] = {
+                        "feedback": comparison.feedback,
+                        "feedbackText": comparison.feedback_text,
+                    }
+
                 # Add user info for all-users view
                 if show_all:
                     from app.models import User  # Import here to avoid circular imports
@@ -311,6 +318,13 @@ async def get_comparison_history(
                     "topic_count": 0,
                     "has_feedback": comparison.feedback is not None,
                 }
+
+                # Add feedback information if exists
+                if comparison.feedback:
+                    result_item["feedback"] = {
+                        "feedback": comparison.feedback,
+                        "feedbackText": comparison.feedback_text,
+                    }
 
                 # Add user info for all-users view
                 if show_all:
