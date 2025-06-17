@@ -496,20 +496,24 @@ async def get_report_history(
     current_user: CurrentUser,
     skip: int = 0,
     limit: int = 20,
+    show_all: bool = False,
 ):
-    """Retrieve past report generation history for the current user, so user can view."""
-    print("Retrieving report history for user: ", current_user.id)
+    """Retrieve past report generation history for the current user or all users."""
+    print("Retrieving report history. Show all:", show_all)
 
     try:
+        # Start with base query
+        query = select(LlmInteraction).where(
+            LlmInteraction.functionality == "reportgenie"
+        )
+
+        # Only filter by user if not showing all users
+        if not show_all:
+            query = query.where(LlmInteraction.user_id == current_user.id)
+
+        # Add ordering and pagination
         reports = session.exec(
-            select(LlmInteraction)
-            .where(
-                LlmInteraction.user_id == current_user.id,
-                LlmInteraction.functionality == "reportgenie",
-            )
-            .order_by(LlmInteraction.date_created.desc())
-            .offset(skip)
-            .limit(limit)
+            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
         ).all()
 
         print("Found {} reports for user {}:".format(len(reports), current_user.id))
@@ -578,10 +582,11 @@ async def get_report_detail(
         if not report:
             raise HTTPException(status_code=404, detail="Report not found")
 
-        if report.user_id != current_user.id:
-            raise HTTPException(
-                status_code=403, detail="You don't have access to this report"
-            )
+        # Because we now allow viewing others' outputs, no longer need to ensure this
+        # if report.user_id != current_user.id:
+        #    raise HTTPException(
+        #        status_code=403, detail="You don't have access to this report"
+        #    )
 
         if report.functionality != "reportgenie":
             raise HTTPException(

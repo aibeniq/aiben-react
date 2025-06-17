@@ -10,6 +10,7 @@ from app.models import (
     DocxRequest,
     VeraDocDetailResponse,
     Message,
+    User,
 )
 
 from app.api.deps import CurrentUser, SessionDep
@@ -522,20 +523,22 @@ async def get_veradoc_history(
     current_user: CurrentUser,
     skip: int = 0,
     limit: int = 20,
+    show_all: bool = False,
 ):
-    """Retrieve past VeraDoc evaluation history for the current user."""
-    print("Retrieving VeraDoc history for user: ", current_user.id)
+    """Retrieve past VeraDoc evaluation history for the current user or all users."""
+    print("Retrieving VeraDoc history. Show all:", show_all)
 
     try:
+        # Start with base query
+        query = select(LlmInteraction).where(LlmInteraction.functionality == "veradoc")
+
+        # Only filter by user if not showing all users
+        if not show_all:
+            query = query.where(LlmInteraction.user_id == current_user.id)
+
+        # Add ordering and pagination
         reports = session.exec(
-            select(LlmInteraction)
-            .where(
-                LlmInteraction.user_id == current_user.id,
-                LlmInteraction.functionality == "veradoc",
-            )
-            .order_by(LlmInteraction.date_created.desc())
-            .offset(skip)
-            .limit(limit)
+            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
         ).all()
 
         print(f"Found {len(reports)} VeraDoc evaluations for user {current_user.id}")
@@ -565,19 +568,30 @@ async def get_veradoc_history(
                 document_name = input_data.get("document_name", "Unnamed Document")
                 title = f"Evaluation of {document_name}"
 
-                result.append(
-                    {
-                        "id": str(report.id),
-                        "date_created": report.date_created,
-                        "title": title,
-                        "document_name": document_name,
-                        "kb_name": kb_name,
-                        "kb_id": input_data.get("kb_id", ""),
-                        "questions": input_data.get("questions", ""),
-                        "qa_count": output_data.get("qa_count", 0),
-                        "final_evaluation": output_data.get("final_evaluation", ""),
-                    }
-                )
+                # Create result item
+                result_item = {
+                    "id": str(report.id),
+                    "date_created": report.date_created,
+                    "title": title,
+                    "document_name": document_name,
+                    "kb_name": kb_name,
+                    "kb_id": input_data.get("kb_id", ""),
+                    "questions": input_data.get("questions", ""),
+                    "qa_count": output_data.get("qa_count", 0),
+                    "final_evaluation": output_data.get("final_evaluation", ""),
+                }
+
+                # Add user info for all-users view
+                if show_all:
+                    user = session.get(User, report.user_id)
+                    user_name = (
+                        f"{user.full_name or 'User'} ({user.email})"
+                        if user
+                        else "Unknown User"
+                    )
+                    result_item["user_name"] = user_name
+
+                result.append(result_item)
             except Exception as e:
                 # If parsing fails, add a minimal entry
                 print(f"Error processing report {report.id}: {e}")
@@ -611,10 +625,11 @@ async def get_veradoc_detail(
         if not report:
             raise HTTPException(status_code=404, detail="Report not found")
 
-        if report.user_id != current_user.id:
-            raise HTTPException(
-                status_code=403, detail="You don't have access to this report"
-            )
+        # No longer need to check this as we may now view others' outputs
+        # if report.user_id != current_user.id:
+        #    raise HTTPException(
+        #        status_code=403, detail="You don't have access to this report"
+        #    )
 
         if report.functionality != "veradoc":
             raise HTTPException(

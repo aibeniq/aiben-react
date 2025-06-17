@@ -1,6 +1,8 @@
 import { Box, Card, Heading, Text, VStack, HStack, Spinner } from "@chakra-ui/react"
+import { Switch } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
 import { format } from "date-fns"
-import { FiFileText, FiDatabase } from "react-icons/fi"
+import { FiFileText, FiDatabase, FiUsers } from "react-icons/fi"
 
 interface HistoryPanelProps {
   reportHistory: any[]
@@ -8,6 +10,8 @@ interface HistoryPanelProps {
   isHistoryLoading: boolean
   onLoadReport: (reportId: string) => void
   emptyMessage?: string
+  showAllUsers?: boolean
+  onToggleShowAllUsers?: () => void
 }
 
 const HistoryPanel = ({
@@ -16,6 +20,8 @@ const HistoryPanel = ({
   isHistoryLoading,
   onLoadReport,
   emptyMessage = "No previous items",
+  showAllUsers = false,
+  onToggleShowAllUsers,
 }: HistoryPanelProps) => {
   const getDisplayTitle = (item: any) => {
     // Try different possible title fields
@@ -60,7 +66,33 @@ const HistoryPanel = ({
   return (
     <Card.Root height="fit-content">
       <Card.Header pb={2}>
-        <Heading size="md">History</Heading>
+        <HStack justifyContent="space-between" width="100%">
+          <Heading size="md">History</Heading>
+          {onToggleShowAllUsers && (
+            <Tooltip
+              content={showAllUsers ? "Viewing all users' history" : "Viewing only my history"}
+            >
+              <HStack gap={2}>
+                <Text fontSize="xs" color="gray.500">
+                  All Users
+                </Text>
+                {/* Key added to force remounting when showAllUsers changes */}
+                <Switch.Root key={`switch-${showAllUsers}`} size="sm" colorPalette="blue" checked={showAllUsers}>
+                  <Switch.HiddenInput 
+                    checked={showAllUsers} 
+                    onChange={() => {
+                      console.log("HistoryPanel toggle clicked, current showAllUsers:", showAllUsers);
+                      if (onToggleShowAllUsers) onToggleShowAllUsers();
+                    }} 
+                  />
+                  <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch.Root>
+              </HStack>
+            </Tooltip>
+          )}
+        </HStack>
       </Card.Header>
       <Card.Body p={2}>
         <VStack align="stretch" gap={2} height="540px" overflowY="auto">
@@ -96,6 +128,16 @@ const HistoryPanel = ({
                       </Text>
                     )}
                   </HStack>
+
+                  {/* Show user info when viewing all users */}
+                  {showAllUsers && item?.user_name && (
+                    <HStack gap={1} width="100%">
+                      <FiUsers size={12} />
+                      <Text fontSize="xs" color="gray.500">
+                        {item.user_name}
+                      </Text>
+                    </HStack>
+                  )}
 
                   <HStack gap={1} width="100%">
                     <FiFileText size={12} color="blue" />

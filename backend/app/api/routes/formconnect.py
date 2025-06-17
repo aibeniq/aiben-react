@@ -407,10 +407,11 @@ async def get_form_detail(
                 status_code=404, detail="Form processing result not found"
             )
 
-        if report.user_id != current_user.id:
-            raise HTTPException(
-                status_code=403, detail="You don't have access to this form processing"
-            )
+        # No longer need to check this as we now allow viewing other users' outputs
+        # if report.user_id != current_user.id:
+        #    raise HTTPException(
+        #        status_code=403, detail="You don't have access to this form processing"
+        #    )
 
         if report.functionality != "formconnect":
             raise HTTPException(
@@ -477,18 +478,24 @@ async def get_form_history(
     current_user: CurrentUser,
     skip: int = 0,
     limit: int = 20,
+    show_all: bool = False,
 ):
-    """Retrieve past form processing history for the current user."""
+    """Retrieve past form processing history for the current user or all users."""
+    print("Retrieving FormConnect history. Show all:", show_all)
+
     try:
+        # Start with base query
+        query = select(LlmInteraction).where(
+            LlmInteraction.functionality == "formconnect"
+        )
+
+        # Only filter by user if not showing all users
+        if not show_all:
+            query = query.where(LlmInteraction.user_id == current_user.id)
+
+        # Add ordering and pagination
         interactions = session.exec(
-            select(LlmInteraction)
-            .where(
-                LlmInteraction.user_id == current_user.id,
-                LlmInteraction.functionality == "formconnect",
-            )
-            .order_by(LlmInteraction.date_created.desc())
-            .offset(skip)
-            .limit(limit)
+            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
         ).all()
 
         result = []
@@ -508,30 +515,56 @@ async def get_form_history(
                 fields = input_data.get("fields", "").split("\n")
                 field_count = len([f for f in fields if f.strip()])
 
-                result.append(
-                    {
-                        "id": str(interaction.id),
-                        "date_created": interaction.date_created,
-                        "file_names": input_data.get("files", []),
-                        "file_count": file_count,
-                        "field_count": field_count,
-                        "fields": fields,
-                        "has_feedback": interaction.feedback is not None,
-                    }
-                )
+                # Create result item
+                result_item = {
+                    "id": str(interaction.id),
+                    "date_created": interaction.date_created,
+                    "file_names": input_data.get("files", []),
+                    "file_count": file_count,
+                    "field_count": field_count,
+                    "fields": fields,
+                    "has_feedback": interaction.feedback is not None,
+                }
+
+                # Add user info for all-users view
+                if show_all:
+                    from app.models import User  # Import here to avoid circular imports
+
+                    user = session.get(User, interaction.user_id)
+                    user_name = (
+                        f"{user.full_name or 'User'} ({user.email})"
+                        if user
+                        else "Unknown User"
+                    )
+                    result_item["user_name"] = user_name
+
+                result.append(result_item)
             except json.JSONDecodeError:
                 # If JSON parsing fails, use minimal information
-                result.append(
-                    {
-                        "id": str(interaction.id),
-                        "date_created": interaction.date_created,
-                        "file_names": [],
-                        "file_count": 0,
-                        "field_count": 0,
-                        "fields": [],
-                        "has_feedback": interaction.feedback is not None,
-                    }
-                )
+                # Create result item with minimal info
+                result_item = {
+                    "id": str(interaction.id),
+                    "date_created": interaction.date_created,
+                    "file_names": [],
+                    "file_count": 0,
+                    "field_count": 0,
+                    "fields": [],
+                    "has_feedback": interaction.feedback is not None,
+                }
+
+                # Add user info for all-users view
+                if show_all:
+                    from app.models import User  # Import here to avoid circular imports
+
+                    user = session.get(User, interaction.user_id)
+                    user_name = (
+                        f"{user.full_name or 'User'} ({user.email})"
+                        if user
+                        else "Unknown User"
+                    )
+                    result_item["user_name"] = user_name
+
+                result.append(result_item)
 
         return result
     except Exception as e:
