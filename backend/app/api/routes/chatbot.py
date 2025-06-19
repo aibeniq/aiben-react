@@ -9,8 +9,17 @@ from app.services.llms import (
     record_llm_interaction,
 )
 from app.services.knowledgebases import get_embedding_model
+from app.services.retrievers import (
+    create_ensemble_retriever,
+)  # Import the ensemble retriever
 from app.api.deps import CurrentUser, SessionDep
-from app.models import KnowledgeBase, EmbeddingModel, LlmModel, Source as SourceORM, User
+from app.models import (
+    KnowledgeBase,
+    EmbeddingModel,
+    LlmModel,
+    Source as SourceORM,
+    User,
+)
 from app.core.config import settings
 from sqlmodel import select
 
@@ -268,7 +277,14 @@ async def query_knowledge_base(
             chroma_db = Chroma(
                 persist_directory=temp_dir, embedding_function=embeddings
             )
-            retriever = chroma_db.as_retriever(search_kwargs={"k": 5})
+
+            # Create a hybrid retriever that combines vector-based and keyword-based retrieval
+            retriever = create_ensemble_retriever(
+                chroma_db=chroma_db,
+                vector_weight=0.7,  # Weight for vector-based retrieval
+                keyword_weight=0.3,  # Weight for keyword-based retrieval
+                search_kwargs={"k": 5},  # Search parameters
+            )
 
             # 4. Get the LLM
             if use_default_models:
@@ -518,7 +534,13 @@ async def query_document(
             vector_store = Chroma.from_documents(
                 documents=chunks, embedding=embeddings, persist_directory=vector_dir
             )
-            retriever = vector_store.as_retriever(search_kwargs={"k": 5})
+            # Create a hybrid retriever that combines vector-based and keyword-based retrieval
+            retriever = create_ensemble_retriever(
+                chroma_db=vector_store,
+                vector_weight=0.7,  # Weight for vector-based retrieval
+                keyword_weight=0.3,  # Weight for keyword-based retrieval
+                search_kwargs={"k": 5},  # Search parameters
+            )
 
             # Create LLM
             llm = create_llm(

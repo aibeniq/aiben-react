@@ -30,6 +30,9 @@ from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from app.services.retrievers import (
+    create_ensemble_retriever,
+)  # Import the ensemble retriever
 
 from sqlmodel import select
 from fastapi import APIRouter, Depends, HTTPException
@@ -94,7 +97,12 @@ async def generate_report(
             chroma_db = Chroma(
                 persist_directory=temp_dir, embedding_function=embeddings
             )
-            retriever = chroma_db.as_retriever(search_kwargs={"k": 5})
+            retriever = create_ensemble_retriever(
+                chroma_db=chroma_db,
+                vector_weight=0.7,
+                keyword_weight=0.3,
+                search_kwargs={"k": 5},
+            )
 
             # 4. Initialize the LLM
             llm = get_default_llm(session, current_user)

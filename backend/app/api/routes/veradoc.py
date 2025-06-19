@@ -18,6 +18,9 @@ from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from app.services.retrievers import (
+    create_ensemble_retriever,
+)  # Import the ensemble retriever
 
 from sqlmodel import select
 from fastapi import (
@@ -200,7 +203,13 @@ async def process_rag_checklist(
                 print("No documents or metadata found in the vectorstore")
             print("================================================")
 
-            retriever = chroma_db.as_retriever(search_kwargs={"k": 5})
+            # Create a hybrid retriever that combines vector-based and keyword-based retrieval
+            retriever = create_ensemble_retriever(
+                chroma_db=chroma_db,
+                vector_weight=0.7,  # Weight for vector-based retrieval
+                keyword_weight=0.3,  # Weight for keyword-based retrieval
+                search_kwargs={"k": 5},  # Search parameters
+            )
 
             # 4. Initialize the LLM
             # llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
