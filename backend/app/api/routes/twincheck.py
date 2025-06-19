@@ -242,18 +242,24 @@ async def get_comparison_history(
     current_user: CurrentUser,
     skip: int = 0,
     limit: int = 20,
+    show_all: bool = False,
 ):
-    """Retrieve past document comparison history for the current user."""
+    """Retrieve past document comparison history for the current user or all users."""
+    print("Retrieving TwinCheck history. Show all:", show_all)
+
     try:
+        # Start with base query
+        query = select(LlmInteraction).where(
+            LlmInteraction.functionality == "twincheck"
+        )
+
+        # Only filter by user if not showing all users
+        if not show_all:
+            query = query.where(LlmInteraction.user_id == current_user.id)
+
+        # Add ordering and pagination
         comparisons = session.exec(
-            select(LlmInteraction)
-            .where(
-                LlmInteraction.user_id == current_user.id,
-                LlmInteraction.functionality == "twincheck",
-            )
-            .order_by(LlmInteraction.date_created.desc())
-            .offset(skip)
-            .limit(limit)
+            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
         ).all()
 
         result = []
@@ -266,33 +272,73 @@ async def get_comparison_history(
                     json.loads(comparison.output_data) if comparison.output_data else {}
                 )
 
-                result.append(
-                    {
-                        "id": str(comparison.id),
-                        "date_created": comparison.date_created,
-                        "document1_name": input_data.get(
-                            "document1_name", "Unknown Document 1"
-                        ),
-                        "document2_name": input_data.get(
-                            "document2_name", "Unknown Document 2"
-                        ),
-                        "comparison_topics": input_data.get("comparison_topics", ""),
-                        "topic_count": output_data.get("topic_count", 0),
-                        "has_feedback": comparison.feedback is not None,
+                # Create result item
+                result_item = {
+                    "id": str(comparison.id),
+                    "date_created": comparison.date_created,
+                    "document1_name": input_data.get(
+                        "document1_name", "Unknown Document 1"
+                    ),
+                    "document2_name": input_data.get(
+                        "document2_name", "Unknown Document 2"
+                    ),
+                    "comparison_topics": input_data.get("comparison_topics", ""),
+                    "topic_count": output_data.get("topic_count", 0),
+                    "has_feedback": comparison.feedback is not None,
+                }
+
+                # Add feedback information if exists
+                if comparison.feedback:
+                    result_item["feedback"] = {
+                        "feedback": comparison.feedback,
+                        "feedbackText": comparison.feedback_text,
                     }
-                )
+
+                # Add user info for all-users view
+                if show_all:
+                    from app.models import User  # Import here to avoid circular imports
+
+                    user = session.get(User, comparison.user_id)
+                    user_name = (
+                        f"{user.full_name or 'User'} ({user.email})"
+                        if user
+                        else "Unknown User"
+                    )
+                    result_item["user_name"] = user_name
+
+                result.append(result_item)
             except json.JSONDecodeError:
                 # If JSON parsing fails, use minimal information
-                result.append(
-                    {
-                        "id": str(comparison.id),
-                        "date_created": comparison.date_created,
-                        "document1_name": "Unknown Document 1",
-                        "document2_name": "Unknown Document 2",
-                        "topic_count": 0,
-                        "has_feedback": comparison.feedback is not None,
+                # Create result item with minimal info
+                result_item = {
+                    "id": str(comparison.id),
+                    "date_created": comparison.date_created,
+                    "document1_name": "Unknown Document 1",
+                    "document2_name": "Unknown Document 2",
+                    "topic_count": 0,
+                    "has_feedback": comparison.feedback is not None,
+                }
+
+                # Add feedback information if exists
+                if comparison.feedback:
+                    result_item["feedback"] = {
+                        "feedback": comparison.feedback,
+                        "feedbackText": comparison.feedback_text,
                     }
-                )
+
+                # Add user info for all-users view
+                if show_all:
+                    from app.models import User  # Import here to avoid circular imports
+
+                    user = session.get(User, comparison.user_id)
+                    user_name = (
+                        f"{user.full_name or 'User'} ({user.email})"
+                        if user
+                        else "Unknown User"
+                    )
+                    result_item["user_name"] = user_name
+
+                result.append(result_item)
 
         return result
     except Exception as e:
@@ -315,10 +361,11 @@ async def get_comparison_detail(
         if not comparison:
             raise HTTPException(status_code=404, detail="Comparison not found")
 
-        if comparison.user_id != current_user.id:
-            raise HTTPException(
-                status_code=403, detail="You don't have access to this comparison"
-            )
+        # No longer need to check this since we now allow viewing others' outputs
+        # if comparison.user_id != current_user.id:
+        #    raise HTTPException(
+        #        status_code=403, detail="You don't have access to this comparison"
+        #    )
 
         if comparison.functionality != "twincheck":
             raise HTTPException(
