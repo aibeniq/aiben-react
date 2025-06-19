@@ -31,6 +31,8 @@ interface UseToolArchiveReturn {
   setCopySuccess: (success: boolean) => void
   loadingDownload: boolean
   setLoadingDownload: (loading: boolean) => void
+  showAllUsers: boolean
+  toggleShowAllUsers: () => void
 }
 
 export const useToolArchive = (): UseToolArchiveReturn => {
@@ -60,13 +62,29 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   // UI state
   const [copySuccess, setCopySuccess] = useState(false)
   const [loadingDownload, setLoadingDownload] = useState(false)
-  const [activeTab, setActiveTab] = useState("review")
+  const [activeTab, setActiveTabInternal] = useState("review")
+  const [showAllUsers, setShowAllUsers] = useState(false)
+
+  // Wrapper for setActiveTab to log state changes
+  const setActiveTab = (newTab: string) => {
+    console.log(`Setting active tab to ${newTab}, showAllUsers is currently: ${showAllUsers}`);
+    setActiveTabInternal(newTab);
+  }
+
+  // Toggle handler for showing all users
+  const toggleShowAllUsers = () => {
+    console.log("All Users toggle clicked. New value:", !showAllUsers);
+    setShowAllUsers(prev => !prev);
+  }
 
   // Veradoc history query
   const veradocHistoryQuery = useQuery({
-    queryKey: ["veradocHistory"],
+    queryKey: ["veradocHistory", showAllUsers],
     queryFn: async () => {
-      const response = await VeradocService.getVeradocHistory({ limit: 20 })
+      const response = await VeradocService.getVeradocHistory({ 
+        limit: 20,
+        showAll: showAllUsers 
+      })
       return response
     },
     enabled: true,
@@ -74,9 +92,12 @@ export const useToolArchive = (): UseToolArchiveReturn => {
 
   // ReportGenie history query
   const reportgenieHistoryQuery = useQuery({
-    queryKey: ["reportgenieHistory"],
+    queryKey: ["reportgenieHistory", showAllUsers],
     queryFn: async () => {
-      const response = await ReportgenieService.getReportHistory({ limit: 20 })
+      const response = await ReportgenieService.getReportHistory({ 
+        limit: 20,
+        showAll: showAllUsers 
+      })
       return response
     },
     enabled: true,
@@ -84,9 +105,12 @@ export const useToolArchive = (): UseToolArchiveReturn => {
 
   // TwinCheck history query
   const twincheckHistoryQuery = useQuery({
-    queryKey: ["twincheckHistory"],
+    queryKey: ["twincheckHistory", showAllUsers],
     queryFn: async () => {
-      const response = await TwincheckService.getComparisonHistory({ limit: 20 })
+      const response = await TwincheckService.getComparisonHistory({ 
+        limit: 20,
+        showAll: showAllUsers 
+      })
       return response
     },
     enabled: true,
@@ -94,9 +118,12 @@ export const useToolArchive = (): UseToolArchiveReturn => {
 
   // FormConnect history query
   const formconnectHistoryQuery = useQuery({
-    queryKey: ["formconnectHistory"],
+    queryKey: ["formconnectHistory", showAllUsers],
     queryFn: async () => {
-      const response = await FormconnectService.getFormHistory({ limit: 20 })
+      const response = await FormconnectService.getFormHistory({ 
+        limit: 20,
+        showAll: showAllUsers 
+      })
       return response
     },
     enabled: true,
@@ -225,5 +252,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     setCopySuccess,
     loadingDownload,
     setLoadingDownload,
+    showAllUsers,
+    toggleShowAllUsers
   }
 }

@@ -29,6 +29,8 @@ function Archive() {
     setCopySuccess,
     loadingDownload,
     setLoadingDownload,
+    showAllUsers,
+    toggleShowAllUsers,
   } = useToolArchive()
 
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -272,7 +274,15 @@ function Archive() {
   return (
     <Container maxW="container.xl" py={8}>
       <VStack gap={6} align="stretch">
-        <Tabs.Root value={activeTab} onValueChange={(e) => setActiveTab(e.value)}>
+        <Tabs.Root
+          value={activeTab}
+          onValueChange={(e) => {
+            console.log(
+              `Tab changed from ${activeTab} to ${e.value}, showAllUsers is: ${showAllUsers}`,
+            )
+            setActiveTab(e.value)
+          }}
+        >
           <Tabs.List>
             <Tabs.Trigger value="review">
               <FiCheckCircle />
@@ -299,6 +309,8 @@ function Archive() {
               isHistoryLoading={veradoc.isLoading}
               onLoadReport={veradoc.loadReport}
               emptyMessage="No previous evaluations"
+              showAllUsers={showAllUsers}
+              onToggleShowAllUsers={toggleShowAllUsers}
             >
               {renderResults()}
             </ToolTab>
@@ -311,6 +323,8 @@ function Archive() {
               isHistoryLoading={reportgenie.isLoading}
               onLoadReport={reportgenie.loadReport}
               emptyMessage="No previous reports"
+              showAllUsers={showAllUsers}
+              onToggleShowAllUsers={toggleShowAllUsers}
             >
               {renderResults()}
             </ToolTab>
@@ -323,6 +337,8 @@ function Archive() {
               isHistoryLoading={twincheck.isLoading}
               onLoadReport={twincheck.loadReport}
               emptyMessage="No previous comparisons"
+              showAllUsers={showAllUsers}
+              onToggleShowAllUsers={toggleShowAllUsers}
             >
               {renderResults()}
             </ToolTab>
@@ -335,6 +351,8 @@ function Archive() {
               isHistoryLoading={formconnect.isLoading}
               onLoadReport={formconnect.loadReport}
               emptyMessage="No previous form processing"
+              showAllUsers={showAllUsers}
+              onToggleShowAllUsers={toggleShowAllUsers}
             >
               {renderResults()}
             </ToolTab>
