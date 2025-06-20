@@ -1,5 +1,31 @@
 # Vector Database Service
 
+## 🎯 TLDR
+
+```python
+# Initialize service
+vector_service = VectorDBService(client=weaviate_client, org_id="your_org_id")
+
+# Add a document
+response = await vector_service.add_source(AddSourceRequest(
+    content="Your document content",
+    source_type="document",
+    created_by_user_id="user123",
+    access_users=["user123"],
+    embedding_models=["text-embedding-3-small"]
+))
+
+# Search documents (filters are required)
+results = await vector_service.search_chunks(SearchRequest(
+    query_vector=your_vector,
+    embedding_model="text-embedding-3-small",
+    filter_params=FilterParams(
+        access_users=["user123"]
+    ),
+    limit=5
+))
+```
+
 ## 🎯 Overview
 
 This service provides straightforward CRUD operations for vector-based document storage and retrieval, optimized for simplicity and performance rather than enterprise abstractions.
@@ -7,7 +33,7 @@ This service provides straightforward CRUD operations for vector-based document 
 ### Key Features
 
 - **Simple CRUD Operations**: Add, search, and remove documents with embeddings
-- **Multiple Search Types**: Semantic, keyword, and hybrid search capabilities
+- **Semantic Search**: Vector-based similarity search using multiple embedding models
 - **Multi-Model Support**: Use different embedding models simultaneously
 - **Automatic Chunking**: Smart text splitting with configurable overlap
 - **Deduplication**: Prevents duplicate content storage
@@ -18,11 +44,15 @@ This service provides straightforward CRUD operations for vector-based document 
 
 ```
 vectordb/
-├── services/vector_service.py    # Main VectorDBService class
-├── embeddings.py                 # Simplified embedding integration
-├── core/models.py               # Request/response models
-├── config/settings.py           # Configuration management
-└── config/schemas.py            # Weaviate schema definitions
+├── core/
+│   ├── vector_service.py    # Main VectorDBService class
+│   ├── models.py           # Request/response models
+│   └── exceptions.py       # Custom exceptions
+├── config/
+│   ├── settings.py        # Configuration management
+│   └── schemas.py         # Weaviate schema definitions
+└── utils/
+    └── chunking.py        # Text chunking utilities
 ```
 
 ## 🚀 Quick Start
@@ -31,34 +61,36 @@ vectordb/
 
 ```python
 from app.services.vectordb import VectorDBService, AddSourceRequest, SearchRequest
+import weaviate
+
+# Initialize Weaviate client
+client = weaviate.connect_to_local()  # or appropriate connection method
 
 # Initialize service
-vector_service = VectorDBService()
+vector_service = VectorDBService(client=client, org_id="your_org_id")
 
 # Add a document
 add_request = AddSourceRequest(
-    org_id="your_org_id",
-    source_path="document.pdf",
     content="Your document content here...",
-    embedding_models=["text-embedding-3-small"],
-    user_id="user123",
-    knowledge_base_id="kb456"
+    source_type="document",
+    created_by_user_id="user123",
+    access_users=["user123"],
+    embedding_models=["text-embedding-3-small"]
 )
 
 response = await vector_service.add_source(add_request)
-print(f"Added source: {response.source_id} with {response.chunks_created} chunks")
+print(f"Added source: {response.source_id}")
 
 # Search documents
 search_request = SearchRequest(
-    query="What is machine learning?",
-    org_id="your_org_id",
+    query_vector=[0.1, 0.2, ...],  # Your query vector
     embedding_model="text-embedding-3-small",
     limit=5
 )
 
 results = await vector_service.search_chunks(search_request)
-for result in results.results:
-    print(f"Score: {result.score:.3f} - {result.content[:100]}...")
+for chunk in results.chunks:
+    print(f"Score: {chunk['score']:.3f} - {chunk['content'][:100]}...")
 ```
 
 ## 📋 API Reference
@@ -71,110 +103,100 @@ The main service class providing all vector database operations.
 
 ##### `add_source(request: AddSourceRequest) -> AddSourceResponse`
 
-Add a new document source with automatic chunking and embedding generation.
+Add a new document source with automatic chunking and embedding generation. If the source already exists (based on content hash), it will be reused.
 
-**Parameters:**
+**Required Parameters:**
 
-- `org_id`: Organization identifier
-- `source_path`: Path or identifier for the source
 - `content`: Text content to be indexed
+- `source_type`: Type of the source (e.g., "document", "webpage")
+- `created_by_user_id`: User adding the content
+- `access_users`: List of users with access to the content
 - `embedding_models`: List of embedding models to use
-- `user_id`: User adding the content
-- `knowledge_base_id`: Knowledge base identifier
-- `metadata`: Optional source metadata
+
+**Optional Parameters:**
+
+- `source_path`: Path to the source file (if applicable)
+- `file_size`: File size in bytes
+- `mime_type`: MIME type of the content
+- `title`: Document title
+- `author`: Document author
+- `description`: Document description
+- `tags`: List of tags
+- `custom_metadata`: Additional metadata as key-value pairs
 - `chunk_size`: Chunk size in words (default: 1000)
-- `chunk_overlap`: Overlap between chunks (default: 200)
 
 **Returns:**
 
+- `success`: Whether the operation succeeded
 - `source_id`: Generated unique identifier
-- `chunks_created`: Number of chunks created
-- `processing_time_ms`: Processing time
-- `was_duplicate`: Whether content was already present
+- `message`: Status message
 
 ##### `search_chunks(request: SearchRequest) -> SearchResponse`
 
-Search through indexed content using various search strategies.
+Search through indexed content using vector similarity. Filters are required to ensure proper access control and result relevance.
 
-**Parameters:**
+**Required Parameters:**
 
-- `query`: Search query text
-- `org_id`: Organization identifier
+- `query_vector`: Vector representation of the query
 - `embedding_model`: Model used for semantic search
-- `search_type`: `SEMANTIC`, `KEYWORD`, or `HYBRID`
-- `filters`: Optional filtering parameters
-- `limit`: Maximum results (1-100)
-- `alpha`: Hybrid search weighting (0.0-1.0)
+- `filter_params`: Filter parameters for access control and result filtering
+  - `source_ids`: Optional list of specific source IDs to search in
+  - `created_by_user_id`: Optional user ID that created the content
+  - `access_users`: Optional list of users with access to the content
+  - `tags`: Optional list of tags to filter by
+
+**Optional Parameters:**
+
+- `limit`: Maximum results (default: 10)
+- `offset`: Result offset for pagination
 
 **Returns:**
 
-- `results`: List of search results with scores
-- `total_results`: Number of results found
-- `processing_time_ms`: Search time
+- `success`: Whether the search succeeded
+- `chunks`: List of matching chunks with scores
+- `total`: Total number of results
+- `message`: Status message
+
+**Example:**
+
+```python
+# Search with filters
+search_request = SearchRequest(
+    query_vector=your_vector,
+    embedding_model="text-embedding-3-small",
+    filter_params=FilterParams(
+        created_by_user_id="user123",
+        access_users=["user123"],
+        tags=["important"]
+    ),
+    limit=5
+)
+
+results = await vector_service.search_chunks(search_request)
+```
 
 ##### `remove_source(request: RemoveSourceRequest) -> RemoveSourceResponse`
 
-Remove a source and all associated chunks.
+Remove a source and all its associated chunks.
 
 **Parameters:**
 
-- `org_id`: Organization identifier
 - `source_id`: Source to remove
-- `user_id`: User requesting removal
 
 **Returns:**
 
 - `success`: Whether removal succeeded
-- `chunks_removed`: Number of chunks deleted
-- `processing_time_ms`: Processing time
+- `message`: Status message
 
-##### `health_check() -> Dict[str, Any]`
+##### `health_check() -> HealthCheckResponse`
 
 Check service health and connectivity.
 
 **Returns:**
 
 - `status`: Overall health status
-- `weaviate_connected`: Database connectivity
-- `embedding_services`: Model availability
-- `timestamp`: Check timestamp
-
-## 🔍 Search Types
-
-### Semantic Search
-
-Uses embedding vectors for contextual similarity matching.
-
-```python
-SearchRequest(
-    query="machine learning algorithms",
-    search_type=SearchType.SEMANTIC,
-    embedding_model="text-embedding-3-small"
-)
-```
-
-### Keyword Search
-
-Traditional BM25-based text matching.
-
-```python
-SearchRequest(
-    query="neural networks",
-    search_type=SearchType.KEYWORD
-)
-```
-
-### Hybrid Search
-
-Combines semantic and keyword search with configurable weighting.
-
-```python
-SearchRequest(
-    query="deep learning",
-    search_type=SearchType.HYBRID,
-    alpha=0.7  # 70% semantic, 30% keyword
-)
-```
+- `message`: Status message
+- `details`: Additional health check details
 
 ## 🎛️ Configuration
 
@@ -187,58 +209,89 @@ WEAVIATE_API_KEY=your_api_key
 
 # Embedding Configuration
 OPENAI_API_KEY=your_openai_key
-OPENAI_EMBEDDING_MODEL=text-embedding-3-small
-
-# Chunking Configuration
-DEFAULT_CHUNK_SIZE=1000
-DEFAULT_CHUNK_OVERLAP=200
-MAX_CHUNK_SIZE=8000
-
-# Performance Settings
-BATCH_SIZE=50
-MAX_CONCURRENT_EMBEDDINGS=10
-RETRY_ATTEMPTS=3
+AWS_REGION=eu-north-1
+OLLAMA_BASE_URL=http://ollama:11434
+REPLICATE_API_TOKEN=your_replicate_token
 ```
 
 ### Supported Embedding Models
 
-```python
-# OpenAI Models (recommended)
-"text-embedding-3-small"    # 1536 dims, cost-effective
-"text-embedding-3-large"    # 3072 dims, higher quality
-"text-embedding-ada-002"    # 1536 dims, legacy
+The service uses the external embeddings service which supports:
 
-# Custom models supported via existing embeddings service
-```
+- **OpenAI Models**
+
+  - `text-embedding-3-small` (1536 dims)
+  - `text-embedding-3-large` (3072 dims)
+  - `text-embedding-ada-002` (1536 dims)
+
+- **HuggingFace Models**
+
+  - Any model from HuggingFace's model hub
+
+- **AWS Bedrock Models**
+
+  - Amazon Titan Embedding models
+
+- **Ollama Models**
+
+  - Any model available in your Ollama instance
+
+- **Replicate Models**
+  - Any embedding model available on Replicate
 
 ## 🔒 Access Control & Filtering
 
 ### Filter Options
 
+Filters are required for all search operations to ensure proper access control and result relevance. The `FilterParams` class provides the following options:
+
 ```python
 from app.services.vectordb.core.models import FilterParams
 
+# Basic access control
 filters = FilterParams(
-    user_id="specific_user",
-    knowledge_base_ids=["kb1", "kb2"],
-    source_ids=["source1", "source2"],
-    access_users=["user1", "user2"]
+    created_by_user_id="user123",
+    access_users=["user123"]
+)
+
+# Advanced filtering
+filters = FilterParams(
+    source_ids=["source1", "source2"],  # Search in specific sources
+    created_by_user_id="user123",       # Content created by specific user
+    access_users=["user1", "user2"],    # Content accessible to specific users
+    tags=["tag1", "tag2"]              # Content with specific tags
 )
 
 search_request = SearchRequest(
-    query="your query",
-    org_id="org_id",
-    filters=filters
+    query_vector=your_vector,
+    embedding_model="text-embedding-3-small",
+    filter_params=filters
 )
 ```
+
+### Filter Best Practices
+
+1. **Access Control**
+
+   - Always include `access_users` to ensure users can only access content they're authorized to view
+   - Use `created_by_user_id` to filter content by creator
+
+2. **Performance**
+
+   - Use `source_ids` to limit search scope when you know which sources to search in
+   - Combine multiple filters for more precise results
+
+3. **Organization**
+   - Use tags to categorize and filter content
+   - Consider using consistent tag naming conventions
 
 ## 📊 Performance Considerations
 
 ### Batch Processing
 
 - Documents are processed in configurable batches
-- Concurrent embedding generation with rate limiting
 - Automatic retry logic with exponential backoff
+- Efficient chunk management and deduplication
 
 ### Optimization Tips
 
@@ -254,17 +307,13 @@ The service uses structured exceptions:
 ```python
 from app.services.vectordb.core.exceptions import (
     VectorDBError,
-    CollectionNotFoundError,
-    EmbeddingError
+    RetryableError
 )
 
 try:
     response = await vector_service.add_source(request)
-except CollectionNotFoundError:
-    # Handle missing collections
-    pass
-except EmbeddingError:
-    # Handle embedding generation failures
+except RetryableError:
+    # Handle retryable errors
     pass
 except VectorDBError as e:
     # Handle general vector DB errors
@@ -287,9 +336,11 @@ health = await vector_service.health_check()
 print(f"Service status: {health['status']}")
 
 # Test embedding generation
-from app.services.vectordb.embeddings import EmbeddingService
-embedding_service = EmbeddingService()
-# Test basic functionality
+from app.services.embeddings.embeddings import load_embeddings_model
+embedding_model = load_embeddings_model(
+    provider=ModelProvider.OPENAI,
+    model_id="text-embedding-3-small"
+)
 ```
 
 ## 📈 Monitoring

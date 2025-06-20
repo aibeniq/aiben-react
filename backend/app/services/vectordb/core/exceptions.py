@@ -21,8 +21,20 @@ class EmbeddingError(VectorDBError):
     pass
 
 
-class ConfigurationError(VectorDBError):
-    """Raised when configuration is invalid"""
+class SearchError(VectorDBError):
+    """Raised when there is an error during search operations"""
+
+    pass
+
+
+class BatchOperationError(VectorDBError):
+    """Raised when there is an error during batch operations"""
+
+    pass
+
+
+class ConnectionError(VectorDBError):
+    """Raised when there is an error connecting to Weaviate"""
 
     pass
 
@@ -33,8 +45,50 @@ class ValidationError(VectorDBError):
     pass
 
 
-class ConnectionError(VectorDBError):
-    """Raised when connection to Weaviate fails"""
+class AccessControlError(VectorDBError):
+    """Raised when access control checks fail"""
+
+    pass
+
+
+class RateLimitError(VectorDBError):
+    """Raised when rate limits are exceeded"""
+
+    pass
+
+
+class RetryableError(VectorDBError):
+    """Base class for errors that can be retried"""
+
+    pass
+
+
+class TemporaryConnectionError(RetryableError):
+    """Raised for temporary connection issues"""
+
+    pass
+
+
+class EmbeddingServiceUnavailable(RetryableError):
+    """Raised when embedding service is temporarily unavailable"""
+
+    pass
+
+
+class WeaviateServiceUnavailable(RetryableError):
+    """Raised when Weaviate service is temporarily unavailable"""
+
+    pass
+
+
+class BatchProcessingError(RetryableError):
+    """Raised when batch processing encounters temporary issues"""
+
+    pass
+
+
+class ConfigurationError(VectorDBError):
+    """Raised when configuration is invalid"""
 
     pass
 

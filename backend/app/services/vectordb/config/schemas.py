@@ -4,7 +4,8 @@ Weaviate schema definitions for Vector Database Service
 
 from weaviate.classes.config import Configure, Property, DataType, ReferenceProperty
 from typing import List, Dict
-from .settings import SUPPORTED_EMBEDDING_MODELS, get_model_config
+from .settings import get_model_config
+from weaviate.classes.query import Filter
 
 
 def get_sources_schema() -> Dict:
@@ -14,7 +15,6 @@ def get_sources_schema() -> Dict:
             Property(name="source_path", data_type=DataType.TEXT),
             Property(name="content_hash", data_type=DataType.TEXT),
             Property(name="source_type", data_type=DataType.TEXT),
-            Property(name="knowledge_base_id", data_type=DataType.TEXT),
             Property(name="created_by_user_id", data_type=DataType.TEXT),
             Property(name="created_at", data_type=DataType.DATE),
             Property(name="updated_at", data_type=DataType.DATE),
@@ -72,18 +72,17 @@ def get_chunks_schema(embedding_models: List[str]) -> Dict:
             Property(name="source_id", data_type=DataType.TEXT),
             Property(name="chunk_index", data_type=DataType.INT),
             Property(name="chunk_size", data_type=DataType.INT),
-            Property(name="knowledge_base_id", data_type=DataType.TEXT),
             Property(name="created_by_user_id", data_type=DataType.TEXT),
             Property(name="created_at", data_type=DataType.DATE),
             Property(name="access_users", data_type=DataType.TEXT_ARRAY),
             Property(name="content_hash", data_type=DataType.TEXT),
             Property(name="embedding_models", data_type=DataType.TEXT_ARRAY),
-            # Chunk metadata
+            Property(name="tags", data_type=DataType.TEXT_ARRAY),
+            Property(name="custom_metadata", data_type=DataType.OBJECT),
+            # Auto-generated metadata
             Property(name="section", data_type=DataType.TEXT),
             Property(name="page_number", data_type=DataType.INT),
             Property(name="line_number", data_type=DataType.INT),
-            Property(name="tags", data_type=DataType.TEXT_ARRAY),
-            Property(name="custom_metadata", data_type=DataType.OBJECT),
         ],
         "references": [
             ReferenceProperty(name="belongsToSource", target_collection="sources")
@@ -152,9 +151,25 @@ def add_embedding_model_to_collection(client, org_id: str, embedding_model: str)
     else:
         new_vectorizer = Configure.NamedVectors.none(name=vector_name)
 
-    # Note: This would require updating the collection schema
-    # The actual Weaviate API for adding vectors to existing collections
-    # may vary - this is a conceptual implementation
+    # Update collection configuration
+    config = chunks_collection.config.get()
+    current_vectors = (
+        config.vectorizer_config if hasattr(config, "vectorizer_config") else []
+    )
+
+    # Add new vectorizer to existing configuration
+    updated_vectors = list(current_vectors) + [new_vectorizer]
+
+    # Update collection with new vectorizer configuration
+    chunks_collection.config.update(vectorizer_config=updated_vectors)
+
+    # Update existing chunks to include new embedding model
+    chunks_collection.data.update_many(
+        where=Filter.by_property("embedding_models").not_contains(embedding_model),
+        properties={
+            "embedding_models": [embedding_model]  # This will append to existing models
+        },
+    )
 
 
 def validate_collections_exist(client, org_id: str) -> Dict[str, bool]:
@@ -181,12 +196,6 @@ def get_collection_info(client, org_id: str) -> Dict:
                 "name": collection_name,
                 "exists": True,
                 "properties": [prop.name for prop in config.properties],
-                "vectorizers": (
-                    [v.name for v in config.vectorizer_config]
-                    if hasattr(config, "vectorizer_config")
-                    else []
-                ),
-                "total_objects": None,  # Would need to query to get count
             }
         else:
             info["collections"][collection_type] = {
