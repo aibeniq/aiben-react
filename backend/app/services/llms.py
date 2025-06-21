@@ -8,6 +8,7 @@ from langchain_community.chat_models import ChatOllama
 from langchain_core.messages import HumanMessage, SystemMessage
 from typing import Optional, Any, Dict
 from app.api.deps import SessionDep, CurrentUser
+from app.core.config import settings
 from sqlmodel import select, Session
 from langchain_community.llms import Replicate
 from langchain.schema import HumanMessage
@@ -329,35 +330,41 @@ def create_llm(
 
 def get_default_llm(session: SessionDep, current_user) -> Any:
     """
-    Get the user's default LLM instance, or fall back to a system default.
+    Get the user's default LLM instance, or fall back to a system default
+    that's enabled in the configuration.
     """
+    # Try to get the user's configured default LLM
     user = session.get(User, current_user.id)
     if user and user.default_llm:
         model = session.get(LlmModel, user.default_llm)
         if model:
-            print(
-                f"User default LLM model found: {model.name} ({model.model_id}, provider: {model.provider})"
-            )
             return create_llm(
                 provider=model.provider, model_id=model.model_id, temperature=0.0
             )
-    # Fallback to system default (first system model)
-    system_default = session.exec(
+
+    # Get enabled providers from config
+    enabled_providers = settings.llm_providers
+
+    # Get all system default models
+    system_defaults = session.exec(
         select(LlmModel).where(LlmModel.owner_id.is_(None))
-    ).first()
-    if system_default:
-        print(
-            f"System default LLM model found: {system_default.name} ({system_default.model_id}, provider: {system_default.provider})"
-        )
-        return create_llm(
-            provider=system_default.provider,
-            model_id=system_default.model_id,
-            temperature=0.0,
-        )
-    # Fallback to hardcoded value
-    print("No default LLM found, using hardcoded OpenAI GPT-4o Mini.")
-    return create_llm(
-        provider=ModelProvider.OPENAI, model_id="gpt-4o-mini", temperature=0.0
+    ).all()
+
+    # First try: Find the first system model with an enabled provider
+    for model in system_defaults:
+        if model.provider.value.lower() in enabled_providers:
+            print(f"Using system default LLM: {model.name} ({model.provider.value})")
+            return create_llm(
+                provider=model.provider,
+                model_id=model.model_id,
+                temperature=0.0,
+            )
+
+    # If no enabled system models found, raise a helpful error
+    enabled_str = ", ".join(enabled_providers)
+    raise ValueError(
+        f"No default LLM available for enabled providers ({enabled_str}). "
+        f"Please check your configuration or add system default models."
     )
 
 

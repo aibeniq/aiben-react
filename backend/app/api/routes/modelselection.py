@@ -100,6 +100,7 @@ def initialize_default_models(session: SessionDep):
 
     session.commit()
 
+
 @router.get("/", response_model=EmbeddingModelsPublic)
 def get_embedding_models(
     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
@@ -149,12 +150,29 @@ def get_default_embedding_model(
             return model
 
     # Fallback to system default (first system model)
-    model = session.exec(
+    enabled_providers = settings.embedding_providers
+
+    # Get all system default embedding models
+    system_defaults = session.exec(
         select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
-    ).first()
-    if not model:
-        raise HTTPException(status_code=404, detail="No default embedding model found")
-    return model
+    ).all()
+
+    # Find the first system model with an enabled provider
+    for model in system_defaults:
+        if model.provider.value.lower() in enabled_providers:
+            print(
+                f"Using system default embedding model: {model.name} ({model.provider.value})"
+            )
+            return load_embeddings_model(
+                provider=model.provider, model_id=model.model_id
+            )
+
+    # If no enabled system models found, raise a helpful error
+    enabled_str = ", ".join(enabled_providers)
+    raise ValueError(
+        f"No default embedding model available for enabled providers ({enabled_str}). "
+        f"Please check your configuration or add system default embedding models."
+    )
 
 
 @router.get("/{model_id}", response_model=EmbeddingModelPublic)
@@ -187,8 +205,9 @@ def create_embedding_model(
     # Check if the model_id is valid by trying to load it based on provider
     try:
         if model_in.provider == ModelProvider.HUGGINGFACE:
-            #only import here, to avoid errors in API-only builds
+            # only import here, to avoid errors in API-only builds
             from langchain_huggingface import HuggingFaceEmbeddings
+
             # Validate HuggingFace model
             _ = HuggingFaceEmbeddings(model_name=model_in.model_id)
         elif model_in.provider == ModelProvider.AWS:
