@@ -3,6 +3,7 @@ from pathlib import Path
 import replicate
 import requests
 from app.models import ModelProvider
+from app.core.config import settings
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_aws import BedrockEmbeddings
@@ -35,8 +36,9 @@ def load_embeddings_model(
     load_dotenv(dotenv_path=os.path.join(root_dir, ".env"), override=True)
 
     if provider == ModelProvider.HUGGINGFACE:
-        #only load this here, to prevent errors in API-only builds
+        # only load this here, to prevent errors in API-only builds
         from langchain_huggingface import HuggingFaceEmbeddings
+
         print("Loading HuggingFace embeddings model with model_id:", model_id)
         return HuggingFaceEmbeddings(model_name=model_id)
     elif provider == ModelProvider.AWS:
