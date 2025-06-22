@@ -1,15 +1,28 @@
+## TODOS
+# TODO: use embedding service
+# TODO: add types to chunks
+# TODO: use environment variables
+# TODO: modularize
+# TODO: search methods
+# TODO: better filtering
+# TODO: initialize on fastapi startup
+# TODO: add auth?
+
 ## Milvus client
 
-from pymilvus import MilvusClient
+from pymilvus import MilvusClient, CollectionSchema, FieldSchema, DataType
+import os
+from openai import OpenAI
+from typing import List, Dict, Any, Optional
 
-client = MilvusClient("http://localhost:19530")  # TODO: add auth
+# Initialize clients
+client = MilvusClient("http://localhost:19530")
+embedding_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-if client.has_collection(collection_name="test_collection"):
-    client.drop_collection(collection_name="test_collection")
+# Collection name
+COLLECTION_NAME = "knowledge_base_collection"
 
 ## Schema
-from pymilvus import CollectionSchema, FieldSchema, DataType
-
 fields = [
     FieldSchema(
         name="id",
@@ -88,99 +101,172 @@ fields = [
     ),
 ]
 
-schema = CollectionSchema(fields=fields, description="schema for test_collection")
-
-## Collection
-client.create_collection(
-    collection_name="test_collection",
-    schema=schema,
-    # consistency_level="Strong",
-)
-
-## Embedding
-import os
-from openai import OpenAI
-
-embedding_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+schema = CollectionSchema(fields=fields, description="schema for base collection")
 
 
-def get_embedding(text, model="text-embedding-3-small"):
+def get_embedding(text: str, model: str = "text-embedding-3-small") -> List[float]:
     text = text.replace("\n", " ")
     return (
         embedding_client.embeddings.create(input=[text], model=model).data[0].embedding
     )
 
 
-## Documents
-docs = [
-    (
-        "KB1",
-        "Artificial intelligence was founded as an academic discipline in 1956.",
-        ["AI", "academic", "discipline"],
-        1718851200,
-        1718851200,
-    ),
-    (
-        "KB2",
-        "Alan Turing was the first person to conduct substantial research in AI.",
-        ["AI", "research", "Turing"],
-        1718851200,
-        1718851200,
-    ),
-    (
-        "KB1",
-        "Born in Maida Vale, London, Turing was raised in southern England.",
-        ["London", "Turing", "England"],
-        1718851200,
-        1718851200,
-    ),
-]
+def init_collection() -> bool:
+    """Initialize the collection if it doesn't exist and set up indexes."""
+    try:
+        # Check if collection exists
+        if client.has_collection(collection_name=COLLECTION_NAME):
+            print(f"Collection '{COLLECTION_NAME}' already exists.")
+            return True
 
-res = client.insert(
-    collection_name="test_collection",
-    data=[
-        {
-            "knowledge_base_id": knowledge_base_id,
-            "vector": get_embedding(doc),
-            "content": doc,
-            "tags": tags,
-            "created_at": created_at,
-            "updated_at": updated_at,
+        print(f"Creating collection '{COLLECTION_NAME}'...")
+
+        # Create collection
+        client.create_collection(
+            collection_name=COLLECTION_NAME,
+            schema=schema,
+        )
+
+        # Create index parameters
+        index_params = client.prepare_index_params()
+
+        # Add indexes
+        index_params.add_index(field_name="id", index_type="STL_SORT")
+
+        index_params.add_index(
+            field_name="vector",
+            index_type="HNSW",
+            metric_type="COSINE",
+            params={"M": 16, "efConstruction": 500},
+        )
+
+        # Create indexes
+        client.create_index(
+            collection_name=COLLECTION_NAME, index_params=index_params, sync=True
+        )
+
+        print(f"Collection '{COLLECTION_NAME}' created successfully with indexes.")
+        return True
+
+    except Exception as e:
+        print(f"Error initializing collection: {e}")
+        return False
+
+
+def add_chunks(chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Add chunks to the collection.
+
+    Args:
+        chunks: List of dictionaries containing chunk data. Each chunk should have:
+            - knowledge_base_id: str
+            - content: str
+            - tags: List[str] (optional, defaults to [])
+            - title: str (optional, defaults to "")
+            - summary: str (optional, defaults to "")
+            - author: str (optional, defaults to "")
+            - url: str (optional, defaults to "")
+            - created_at: int (timestamp)
+            - updated_at: int (timestamp)
+
+    Returns:
+        Dictionary with insertion results
+    """
+    try:
+        # Ensure collection exists and is loaded
+        if not client.has_collection(collection_name=COLLECTION_NAME):
+            if not init_collection():
+                return {"success": False, "error": "Failed to initialize collection"}
+
+        # Load collection if not already loaded
+        client.load_collection(collection_name=COLLECTION_NAME)
+
+        # Prepare data for insertion
+        data_to_insert = []
+        for chunk in chunks:
+            # Generate embedding for content
+            embedding = get_embedding(chunk["content"])
+
+            # Prepare chunk data with defaults
+            chunk_data = {
+                "knowledge_base_id": chunk["knowledge_base_id"],
+                "vector": embedding,
+                "content": chunk["content"],
+                "tags": chunk.get("tags", []),
+                "title": chunk.get("title", ""),
+                "summary": chunk.get("summary", ""),
+                "author": chunk.get("author", ""),
+                "url": chunk.get("url", ""),
+                "created_at": chunk["created_at"],
+                "updated_at": chunk["updated_at"],
+            }
+            data_to_insert.append(chunk_data)
+
+        # Insert data
+        result = client.insert(
+            collection_name=COLLECTION_NAME,
+            data=data_to_insert,
+        )
+
+        return {
+            "success": True,
+            "inserted_count": len(data_to_insert),
+            "result": result,
         }
-        for knowledge_base_id, doc, tags, created_at, updated_at in docs
-    ],
-)
-print(res)
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 
-# Create index parameters
-index_params = client.prepare_index_params()
+def search_chunks(
+    query: str,
+    knowledge_base_id: Optional[str] = None,
+    limit: int = 10,
+    output_fields: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """
+    Search for similar chunks in the collection.
 
-# Add indexes
-index_params.add_index(field_name="id", index_type="STL_SORT")
+    Args:
+        query: Search query text
+        knowledge_base_id: Optional filter by knowledge base ID
+        limit: Maximum number of results to return
+        output_fields: List of fields to return in results
 
-index_params.add_index(
-    field_name="vector",
-    index_type="HNSW",
-    metric_type="COSINE",
-    params={"M": 16, "efConstruction": 500},
-)
+    Returns:
+        Dictionary with search results
+    """
+    try:
+        # Ensure collection is loaded
+        client.load_collection(collection_name=COLLECTION_NAME)
 
-# Create indexes
-client.create_index(
-    collection_name="test_collection", index_params=index_params, sync=False
-)
+        # Generate embedding for query
+        query_embedding = get_embedding(query)
 
-## Load collection before searching
-client.load_collection(collection_name="test_collection")
+        # Prepare filter
+        filter_expr = None
+        if knowledge_base_id:
+            filter_expr = f"knowledge_base_id == '{knowledge_base_id}'"
 
-## Search
+        # Set default output fields
+        if output_fields is None:
+            output_fields = ["content", "tags", "title", "knowledge_base_id"]
 
-res = client.search(
-    collection_name="test_collection",
-    data=[get_embedding("Alan Turing")],
-    filter="knowledge_base_id == 'KB1'",
-    limit=2,
-    output_fields=["content", "tags"],
-)
-print(res)
+        # Perform search
+        results = client.search(
+            collection_name=COLLECTION_NAME,
+            data=[query_embedding],
+            filter=filter_expr,
+            limit=limit,
+            output_fields=output_fields,
+        )
+
+        return {"success": True, "results": results[0] if results else []}
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+# Initialize collection on module import
+if __name__ == "__main__":
+    init_collection()
