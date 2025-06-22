@@ -173,7 +173,6 @@ class KnowledgeBase(KnowledgeBaseBase, table=True):
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
     owner: User | None = Relationship(back_populates="knowledge_bases")
-    data: bytes | None = Field(default=None, sa_column=LargeBinary)
     date_created: datetime
     date_modified: datetime
 
