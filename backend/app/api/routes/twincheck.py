@@ -14,6 +14,7 @@ from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import markdown
 from bs4 import BeautifulSoup
+import tiktoken
 
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
 from fastapi.responses import StreamingResponse
@@ -33,6 +34,10 @@ from app.core.config import settings
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
 from langchain_community.document_loaders import PyPDFLoader
 import mimetypes
+import logging
+
+# Configure logging for TwinCheck
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/twincheck", tags=["twincheck"])
 
@@ -112,6 +117,101 @@ def extract_text_from_file(file: UploadFile) -> str:
             os.unlink(temp_file_path)
 
 
+# Estimate the number of tokens in a text string.
+# Uses tiktoken for accurate token counting.
+def estimate_tokens(text: str, model: str = "gpt-4") -> int:
+    try:
+        # Try to get the encoding for the specific model
+        if "gpt-4" in model.lower():
+            encoding = tiktoken.encoding_for_model("gpt-4")
+        elif "gpt-3.5" in model.lower():
+            encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
+        else:
+            # Default to cl100k_base encoding used by most modern models
+            encoding = tiktoken.get_encoding("cl100k_base")
+
+        return len(encoding.encode(text))
+    except Exception as e:
+        # Fallback: rough estimation (1 token ≈ 4 characters)
+        print(f"Token estimation error: {e}, using fallback method")
+        return len(text) // 4
+
+
+def chunk_diff_text(diff_text: str, max_tokens: int = None) -> List[str]:
+    """
+    Split diff text into chunks that don't exceed the token limit.
+    Tries to preserve diff context by splitting at natural boundaries.
+    """
+    if max_tokens is None:
+        max_tokens = settings.TWINCHECK_MAX_TOKENS_PER_CHUNK
+
+    if estimate_tokens(diff_text) <= max_tokens:
+        return [diff_text]
+
+    chunks = []
+    lines = diff_text.split("\n")
+    current_chunk = []
+    current_tokens = 0
+
+    # Reserve tokens for prompt template and overhead
+    chunk_token_limit = max_tokens - settings.TWINCHECK_PROMPT_RESERVE_TOKENS
+
+    for line in lines:
+        line_tokens = estimate_tokens(line + "\n")
+
+        # If adding this line would exceed the limit, start a new chunk
+        if current_tokens + line_tokens > chunk_token_limit and current_chunk:
+            chunks.append("\n".join(current_chunk))
+            current_chunk = []
+            current_tokens = 0
+
+        current_chunk.append(line)
+        current_tokens += line_tokens
+
+    # Add the last chunk if it has content
+    if current_chunk:
+        chunks.append("\n".join(current_chunk))
+
+    return chunks
+
+
+def create_synthesis_prompt(
+    chunk_results: List[Dict[str, Any]], doc1_name: str, doc2_name: str, topics: str
+) -> str:
+    """
+    Create a prompt for synthesizing multiple chunk analysis results.
+    """
+    return f"""
+    You are synthesizing analysis results from multiple chunks of a document comparison.
+
+    Documents compared:
+    - Document 1: {doc1_name}
+    - Document 2: {doc2_name}
+
+    Topics of interest: {topics}
+
+    Below are the analysis results from each chunk:
+
+    {"=" * 50}
+
+    {chr(10).join(
+        [f"CHUNK {i+1} ANALYSIS:{chr(10)}{result['analysis']}{chr(10)}{chr(10)}"
+         for i, result in enumerate(chunk_results)]
+    )}
+
+    {"=" * 50}
+
+    Please provide a comprehensive synthesis that:
+    1. Combines all the chunk analyses into a coherent overview
+    2. Identifies patterns and themes across all chunks
+    3. Highlights the most significant differences between the documents
+    4. Removes any redundancy or overlap between chunk analyses
+    5. Provides clear, actionable insights about the document differences
+
+    Your synthesis should be well-structured and comprehensive while avoiding repetition.
+    """
+
+
 # Process documents for comparison
 @router.post("/compare", response_model=TwinCheckResponse)
 async def compare_documents(
@@ -146,6 +246,8 @@ async def compare_documents(
         diff_result = list(differ.compare(doc1_lines, doc2_lines))
         diff_text = "\n".join(diff_result)
 
+        print(f"Generated diff text with {estimate_tokens(diff_text)} estimated tokens")
+
         # Load the LLM model
         llm = get_default_llm(session, current_user)
 
@@ -153,50 +255,163 @@ async def compare_documents(
         topic_list = request.comparison_topics.strip().split("\n")
         topic_analysis = []
 
+        # Check if we need to chunk the diff text
+        diff_chunks = chunk_diff_text(diff_text)
+        is_chunked = len(diff_chunks) > 1
+
+        print(f"Split diff into {len(diff_chunks)} chunks")
+
         # Process each topic with the LLM
         for topic in topic_list:
             if not topic.strip():
                 continue
 
-            # Define prompt template for topic analysis
-            prompt_template = settings.TWINCHECK_ANALYSIS_PROMPT_TEMPLATE
+            print(f"Processing topic: {topic}")
 
-            # Generate analysis for this topic
-            try:
-                topic_result = invoke_llm(
-                    llm,
-                    prompt_template,
-                    {
-                        "diff_text": diff_text,
-                        "topic": topic,
-                        "doc1_name": document1.filename,
-                        "doc2_name": document2.filename,
-                    },
-                )
+            if is_chunked:
+                # Process each chunk for this topic
+                chunk_results = []
 
-                # Add to results
-                topic_analysis.append({"topic": topic, "analysis": topic_result})
+                for i, chunk in enumerate(diff_chunks):
+                    print(
+                        f"  Processing chunk {i+1}/{len(diff_chunks)} for topic: {topic}"
+                    )
 
-            except Exception as e:
-                topic_analysis.append(
-                    {
-                        "topic": topic,
-                        "analysis": f"Error analyzing this topic: {str(e)}",
-                    }
-                )
+                    try:
+                        chunk_result = invoke_llm(
+                            llm,
+                            settings.TWINCHECK_ANALYSIS_PROMPT_TEMPLATE,
+                            {
+                                "diff_text": chunk,
+                                "topic": topic,
+                                "doc1_name": document1.filename,
+                                "doc2_name": document2.filename,
+                            },
+                        )
+
+                        chunk_results.append(
+                            {"chunk_index": i + 1, "analysis": chunk_result}
+                        )
+
+                    except Exception as e:
+                        chunk_results.append(
+                            {
+                                "chunk_index": i + 1,
+                                "analysis": f"Error analyzing chunk {i+1}: {str(e)}",
+                            }
+                        )
+
+                # Synthesize the chunk results for this topic
+                try:
+                    synthesis_prompt = create_synthesis_prompt(
+                        chunk_results, document1.filename, document2.filename, topic
+                    )
+
+                    print(
+                        f"  Synthesizing {len(chunk_results)} chunk results for topic: {topic}"
+                    )
+
+                    synthesized_result = invoke_llm(llm, synthesis_prompt, {})
+
+                    topic_analysis.append(
+                        {
+                            "topic": topic,
+                            "analysis": synthesized_result,
+                            "chunk_count": len(diff_chunks),
+                        }
+                    )
+
+                except Exception as e:
+                    # Fallback: combine chunk results manually
+                    combined_analysis = (
+                        f"Analysis from {len(chunk_results)} chunks:\n\n"
+                    )
+                    for result in chunk_results:
+                        combined_analysis += (
+                            f"Chunk {result['chunk_index']}:\n{result['analysis']}\n\n"
+                        )
+
+                    topic_analysis.append(
+                        {
+                            "topic": topic,
+                            "analysis": combined_analysis,
+                            "chunk_count": len(diff_chunks),
+                            "synthesis_error": str(e),
+                        }
+                    )
+            else:
+                # Single chunk processing (original behavior)
+                try:
+                    topic_result = invoke_llm(
+                        llm,
+                        settings.TWINCHECK_ANALYSIS_PROMPT_TEMPLATE,
+                        {
+                            "diff_text": diff_text,
+                            "topic": topic,
+                            "doc1_name": document1.filename,
+                            "doc2_name": document2.filename,
+                        },
+                    )
+
+                    topic_analysis.append({"topic": topic, "analysis": topic_result})
+
+                except Exception as e:
+                    topic_analysis.append(
+                        {
+                            "topic": topic,
+                            "analysis": f"Error analyzing this topic: {str(e)}",
+                        }
+                    )
 
         # Create a comprehensive summary
-        summary_prompt_template = settings.TWINCHECK_SUMMARY_PROMPT_TEMPLATE
-        summary = invoke_llm(
-            llm,
-            summary_prompt_template,
-            {
-                "diff_text": diff_text,
-                "doc1_name": document1.filename,
-                "doc2_name": document2.filename,
-                "topics": request.comparison_topics,
-            },
-        )
+        if is_chunked:
+            # For chunked processing, create summary from topic analyses
+            print("Creating summary from topic analyses (chunked mode)")
+
+            topic_summaries = "\n\n".join(
+                [f"Topic: {ta['topic']}\n{ta['analysis']}" for ta in topic_analysis]
+            )
+
+            summary_prompt = f"""
+            You are creating a comprehensive summary of a document comparison that was processed in chunks due to size.
+            
+            Documents compared:
+            - Document 1: {document1.filename}
+            - Document 2: {document2.filename}
+            
+            The comparison was processed in {len(diff_chunks)} chunks and analyzed across the following topics:
+            {request.comparison_topics}
+            
+            Below are the detailed topic analyses:
+            
+            {topic_summaries}
+            
+            Please provide a comprehensive executive summary that:
+            1. Highlights the most significant overall differences between the documents
+            2. Synthesizes patterns across all topic analyses
+            3. Provides clear, actionable insights about the document comparison
+            4. Is well-structured and avoids repetition
+            
+            Focus on the big picture and most important differences.
+            """
+
+            try:
+                summary = invoke_llm(llm, summary_prompt, {})
+            except Exception as e:
+                summary = f"Summary generation error: {str(e)}\n\nPlease refer to the individual topic analyses below for detailed insights."
+        else:
+            # Single chunk processing (original behavior)
+            print("Creating summary from diff text (single chunk mode)")
+            summary = invoke_llm(
+                llm,
+                settings.TWINCHECK_SUMMARY_PROMPT_TEMPLATE,
+                {
+                    "diff_text": diff_text,
+                    "doc1_name": document1.filename,
+                    "doc2_name": document2.filename,
+                    "topics": request.comparison_topics,
+                },
+            )
 
         # Record this interaction for history
         interaction_id = record_llm_interaction(
@@ -212,6 +427,9 @@ async def compare_documents(
             metadata={
                 "topic_analysis": topic_analysis,  # Store detailed analysis for retrieval
                 "diff_stats": {
+                    "total_tokens": estimate_tokens(diff_text),
+                    "chunk_count": len(diff_chunks),
+                    "was_chunked": is_chunked,
                     "additions": diff_text.count("\n+ "),
                     "deletions": diff_text.count("\n- "),
                     "changes": diff_text.count("\n? "),
@@ -224,6 +442,11 @@ async def compare_documents(
             "summary": summary,
             "topic_analysis": topic_analysis,
             "interaction_id": str(interaction_id) if interaction_id else None,
+            "processing_info": {
+                "was_chunked": is_chunked,
+                "chunk_count": len(diff_chunks),
+                "estimated_tokens": estimate_tokens(diff_text),
+            },
         }
 
         return TwinCheckResponse(results=result)

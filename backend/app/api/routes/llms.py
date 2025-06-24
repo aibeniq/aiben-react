@@ -196,6 +196,8 @@ def validate_llm_model(
                 temperature=0.0,
                 # openai_api_key=api_key,
                 max_tokens=5,  # Minimum tokens for test
+                max_retries=0,  # Disable OpenAI's internal retries for validation
+                request_timeout=30,  # Set reasonable timeout
             )
 
             # Test with a simple query to verify the model exists
@@ -312,9 +314,10 @@ def validate_llm_model(
                 raise HTTPException(status_code=400, detail=detail)
 
         elif provider == ModelProvider.HUGGINGFACE:
-            #only import HERE, to avoid errors in API-only builds
+            # only import HERE, to avoid errors in API-only builds
             from langchain_huggingface import HuggingFacePipeline
             from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+
             # For HuggingFace, try to load the model
             print(f"Loading HuggingFace model: {model_id}")
 
