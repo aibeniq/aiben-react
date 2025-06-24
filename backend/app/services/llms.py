@@ -19,6 +19,11 @@ import json
 import boto3
 from langchain_community.llms import Bedrock
 from langchain.chains import LLMChain
+from app.services.retry_utils import (
+    retry_openai_api,
+    retry_aws_api,
+    retry_replicate_api,
+)
 
 
 class ReplicateWrapper:
@@ -60,6 +65,7 @@ class ReplicateWrapper:
 
         return chain_func
 
+    @retry_replicate_api(min_wait=1, max_wait=60, max_attempts=6)
     def invoke(self, prompt):
         """Run the model with the provided prompt"""
         if isinstance(prompt, str):
@@ -198,6 +204,7 @@ class BedrockWrapper:
 
         return chain_func
 
+    @retry_aws_api(min_wait=1, max_wait=30, max_attempts=10)
     def invoke(self, prompt):
         """Run the model with the provided prompt"""
         system_prompt = self.kwargs.get("system_prompt", "")
@@ -289,15 +296,24 @@ def create_llm(
 
     elif provider == ModelProvider.OPENAI:
         # If API key is provided, use it; otherwise, rely on environment variable
+        # Disable OpenAI's built-in retries to avoid conflicts with Tenacity
         if api_key:
             return ChatOpenAI(
                 model=model_id,
                 temperature=temperature,
                 openai_api_key=api_key,
+                max_retries=0,  # Disable OpenAI's internal retries
+                request_timeout=30,  # Set reasonable timeout
                 **params,
             )
         else:
-            return ChatOpenAI(model=model_id, temperature=temperature, **params)
+            return ChatOpenAI(
+                model=model_id,
+                temperature=temperature,
+                max_retries=0,  # Disable OpenAI's internal retries
+                request_timeout=30,  # Set reasonable timeout
+                **params,
+            )
 
     elif provider == ModelProvider.OLLAMA:
         # Configure Ollama
@@ -376,38 +392,69 @@ def invoke_llm(llm, prompt, variables=None):
     - variables: dict of variables for the prompt (for LangChain).
     Returns the response content as a string.
     """
-    # ReplicateWrapper: expects a formatted string prompt
+    # ReplicateWrapper: expects a formatted string prompt (already has retry logic)
     if hasattr(llm, "__class__") and "ReplicateWrapper" in llm.__class__.__name__:
         if variables:
             prompt_text = prompt.format(**variables)
         else:
             prompt_text = prompt
         return llm.invoke(prompt_text)
+
+    # BedrockWrapper: already has retry logic
+    elif hasattr(llm, "__class__") and "BedrockWrapper" in llm.__class__.__name__:
+        if variables:
+            prompt_text = (
+                prompt.format(**variables) if isinstance(prompt, str) else prompt
+            )
+        else:
+            prompt_text = prompt
+        return llm.invoke(prompt_text)
+
     else:
-        # LangChain: expects a ChatPromptTemplate and variables
+        # LangChain models: add retry logic based on model type
         if variables is None:
             variables = {}
-        if hasattr(prompt, "from_template"):
-            # If prompt is a template, build the chain
-            section_prompt = prompt.from_template(prompt.template)
-            chain = section_prompt | llm
-            result = chain.invoke(variables)
-        elif hasattr(prompt, "format_prompt"):
-            # If prompt is already a ChatPromptTemplate
-            chain = prompt | llm
-            result = chain.invoke(variables)
-        elif isinstance(prompt, str):
-            # Create a proper chat message from the string
-            formatted_text = prompt.format(**variables)
-            result = llm.invoke([HumanMessage(content=formatted_text)])
-        else:
-            # If prompt is a plain string, just pass as-is
-            result = llm(prompt)
 
-        # Extract content from message object if needed
-        if hasattr(result, "content"):
-            return result.content
-        return result
+        # Determine if this is an OpenAI model and add appropriate retry logic
+        model_class_name = llm.__class__.__name__
+
+        def _invoke_langchain_model():
+            if hasattr(prompt, "from_template"):
+                # If prompt is a template, build the chain
+                section_prompt = prompt.from_template(prompt.template)
+                chain = section_prompt | llm
+                result = chain.invoke(variables)
+            elif hasattr(prompt, "format_prompt"):
+                # If prompt is already a ChatPromptTemplate
+                chain = prompt | llm
+                result = chain.invoke(variables)
+            elif isinstance(prompt, str):
+                # Create a proper chat message from the string
+                formatted_text = prompt.format(**variables)
+                result = llm.invoke([HumanMessage(content=formatted_text)])
+            else:
+                # If prompt is a plain string, just pass as-is
+                result = llm(prompt)
+
+            # Extract content from message object if needed
+            if hasattr(result, "content"):
+                return result.content
+            return result
+
+        # Apply appropriate retry logic based on model type
+        if "ChatOpenAI" in model_class_name or "OpenAI" in model_class_name:
+            # Apply OpenAI retry logic
+            return retry_openai_api(min_wait=1, max_wait=60, max_attempts=6)(
+                _invoke_langchain_model
+            )()
+        elif "ChatBedrock" in model_class_name or "Bedrock" in model_class_name:
+            # Apply AWS retry logic
+            return retry_aws_api(min_wait=1, max_wait=30, max_attempts=10)(
+                _invoke_langchain_model
+            )()
+        else:
+            # For other models (like Ollama), no retry logic needed
+            return _invoke_langchain_model()
 
 
 def invoke_llm_with_image(
@@ -453,7 +500,7 @@ def invoke_llm_with_image(
     else:
         print("Using LangChain-based LLM for multimodal invocation")
 
-        try:
+        def _invoke_multimodal_langchain():
             print("Using LangChain model for image extraction")
 
             # If we were given a template string, use it directly
@@ -489,6 +536,31 @@ def invoke_llm_with_image(
             response = llm.invoke(messages)
 
             print("Raw response from LangChain:", response)
+
+            # Extract content from the response object
+            if hasattr(response, "content"):
+                return response.content
+
+            # Otherwise return the string representation
+            return str(response)
+
+        try:
+            # Apply appropriate retry logic based on model type
+            model_class_name = llm.__class__.__name__
+
+            if "ChatOpenAI" in model_class_name or "OpenAI" in model_class_name:
+                # Apply OpenAI retry logic
+                return retry_openai_api(min_wait=1, max_wait=60, max_attempts=6)(
+                    _invoke_multimodal_langchain
+                )()
+            elif "ChatBedrock" in model_class_name or "Bedrock" in model_class_name:
+                # Apply AWS retry logic
+                return retry_aws_api(min_wait=1, max_wait=30, max_attempts=10)(
+                    _invoke_multimodal_langchain
+                )()
+            else:
+                # For other models, no retry logic needed
+                return _invoke_multimodal_langchain()
 
             # Extract content from the response object
             if hasattr(response, "content"):

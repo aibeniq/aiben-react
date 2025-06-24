@@ -11,6 +11,11 @@ from langchain_core.embeddings import Embeddings
 from typing import Optional, List
 from dotenv import load_dotenv
 import json
+from app.services.retry_utils import (
+    retry_openai_api,
+    retry_aws_api,
+    retry_replicate_api,
+)
 
 
 def load_embeddings_model(
@@ -42,28 +47,21 @@ def load_embeddings_model(
         print("Loading HuggingFace embeddings model with model_id:", model_id)
         return HuggingFaceEmbeddings(model_name=model_id)
     elif provider == ModelProvider.AWS:
-        # Configure AWS Bedrock embeddings
+        # Configure AWS Bedrock embeddings with retry logic
         region = os.environ.get("AWS_REGION", "eu-north-1")
         print(
             f"Loading AWS Bedrock embeddings model with model_id: {model_id}, region: {region}"
         )
 
-        # If API key is provided, use it; otherwise, rely on environment variable
-        if api_key:
-            print(f"Using provided API key of length: {len(api_key)}")
-            return BedrockEmbeddings(
-                model_id=model_id, region_name=region, api_key=api_key
-            )
-        else:
-            print("Using API key from environment variables")
+        # Return retry-enabled wrapper
+        return RetryBedrockEmbeddings(
+            model_id=model_id, region_name=region, api_key=api_key
+        )
 
-            return BedrockEmbeddings(model_id=model_id, region_name=region)
     elif provider == ModelProvider.OPENAI:
-        # If API key is provided, use it; otherwise, rely on environment variable
-        if api_key:
-            return OpenAIEmbeddings(model=model_id, openai_api_key=api_key)
-        else:
-            return OpenAIEmbeddings(model=model_id)
+        # Return retry-enabled wrapper for OpenAI embeddings
+        print(f"Loading OpenAI embeddings model with model_id: {model_id}")
+        return RetryOpenAIEmbeddings(model=model_id, openai_api_key=api_key)
 
     elif provider == ModelProvider.OLLAMA:
         # Configure Ollama embeddings
@@ -176,6 +174,7 @@ class ReplicateEmbeddings(Embeddings):
 
         self.model_id = model_id
 
+    @retry_replicate_api(min_wait=1, max_wait=60, max_attempts=6)
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         """Embed a list of texts."""
         print(f"Embedding {len(texts)} documents using Replicate...")
@@ -257,6 +256,7 @@ class ReplicateEmbeddings(Embeddings):
 
             return embeddings
 
+    @retry_replicate_api(min_wait=1, max_wait=60, max_attempts=6)
     def embed_query(self, text: str) -> List[float]:
         """Embed a query text."""
         # Run the Replicate model to get embeddings
@@ -434,3 +434,53 @@ class ReplicateEmbeddings(Embeddings):
 
         except Exception as e:
             raise ValueError(f"Error getting embeddings from Replicate: {str(e)}")
+
+
+class RetryOpenAIEmbeddings:
+    """OpenAI embeddings wrapper with retry logic."""
+
+    def __init__(self, model: str, openai_api_key: Optional[str] = None):
+        from langchain_openai import OpenAIEmbeddings
+
+        self.embeddings = OpenAIEmbeddings(
+            model=model,
+            openai_api_key=openai_api_key,
+            max_retries=0,  # Disable OpenAI's internal retries
+            request_timeout=30,  # Set reasonable timeout
+        )
+
+    @retry_openai_api(min_wait=5, max_wait=120, max_attempts=5)
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        """Embed a list of documents with retry logic."""
+        return self.embeddings.embed_documents(texts)
+
+    @retry_openai_api(min_wait=5, max_wait=120, max_attempts=5)
+    def embed_query(self, text: str) -> List[float]:
+        """Embed a query text with retry logic."""
+        return self.embeddings.embed_query(text)
+
+
+class RetryBedrockEmbeddings:
+    """AWS Bedrock embeddings wrapper with retry logic."""
+
+    def __init__(self, model_id: str, region_name: str, api_key: Optional[str] = None):
+        from langchain_aws import BedrockEmbeddings
+
+        if api_key:
+            self.embeddings = BedrockEmbeddings(
+                model_id=model_id, region_name=region_name, api_key=api_key
+            )
+        else:
+            self.embeddings = BedrockEmbeddings(
+                model_id=model_id, region_name=region_name
+            )
+
+    @retry_aws_api(min_wait=1, max_wait=30, max_attempts=10)
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        """Embed a list of documents with retry logic."""
+        return self.embeddings.embed_documents(texts)
+
+    @retry_aws_api(min_wait=1, max_wait=30, max_attempts=10)
+    def embed_query(self, text: str) -> List[float]:
+        """Embed a query text with retry logic."""
+        return self.embeddings.embed_query(text)

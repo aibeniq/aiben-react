@@ -330,6 +330,11 @@ class Settings(BaseSettings):
     Be clear, concise, and informative.
     """
 
+    # TwinCheck chunk processing settings
+    # Reduced to accommodate 128K token limit with generous reserves for prompt template
+    TWINCHECK_MAX_TOKENS_PER_CHUNK: int = 100000  # Reduced from 150K to 100K
+    TWINCHECK_PROMPT_RESERVE_TOKENS: int = 20000  # Increased from 5K to 20K for safety
+
     REPLICATE_API_TOKEN: str | None = os.getenv("REPLICATE_API_TOKEN")
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:

@@ -37,11 +37,17 @@ class UserRegister(SQLModel):
 class UserUpdate(UserBase):
     email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore
     password: str | None = Field(default=None, min_length=8, max_length=40)
+    preferred_language: str | None = Field(default=None, max_length=10)
+
+
+class LanguageUpdate(SQLModel):
+    preferred_language: str
 
 
 class UserUpdateMe(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     email: EmailStr | None = Field(default=None, max_length=255)
+    preferred_language: str | None = Field(default=None, max_length=10)
 
 
 class UpdatePassword(SQLModel):
@@ -62,11 +68,14 @@ class User(UserBase, table=True):
     default_embedding_model: Optional[uuid.UUID] = Field(
         default=None, foreign_key="embeddingmodel.id"
     )
+    # user's preferred language for UI and LLM templates
+    preferred_language: str = Field(default="en", max_length=10)
 
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
     id: uuid.UUID
+    preferred_language: str
 
 
 class UsersPublic(SQLModel):
@@ -440,6 +449,7 @@ class LlmModelPublic(LlmModel):
 
 class LlmModelsPublic(SQLModel):
     data: List[LlmModelPublic]
+    count: int
 
 
 class LlmModelsValidate(SQLModel):

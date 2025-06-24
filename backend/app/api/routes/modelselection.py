@@ -246,8 +246,13 @@ def create_embedding_model(
                     status_code=400,
                     detail="OpenAI API key is not configured in the environment",
                 )
-            # Validate OpenAI model
-            _ = OpenAIEmbeddings(model=model_in.model_id, openai_api_key=api_key)
+            # Validate OpenAI model - disable retries to avoid conflicts
+            _ = OpenAIEmbeddings(
+                model=model_in.model_id,
+                openai_api_key=api_key,
+                max_retries=0,  # Disable OpenAI's internal retries for validation
+                request_timeout=30,  # Set reasonable timeout
+            )
         elif model_in.provider == ModelProvider.OLLAMA:
             # For Ollama, we can't easily validate without making a call to the Ollama server
             # So we'll just check if the format looks correct (basic validation)

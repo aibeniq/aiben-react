@@ -23,10 +23,36 @@ from app.models import (
     UsersPublic,
     UserUpdate,
     UserUpdateMe,
+    LanguageUpdate,
 )
 from app.utils import generate_new_account_email, send_email
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+
+@router.put("/me/language", response_model=User)
+def update_language(
+    language_update: LanguageUpdate,
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> Any:
+    """Update current user language preference."""
+
+    # Validate the language code
+    supported_languages = ["en", "fi", "de", "pl", "ru", "ar"]
+    if language_update.preferred_language not in supported_languages:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Language not supported. Choose from: {', '.join(supported_languages)}",
+        )
+
+    # Update user's language preference
+    user = session.get(User, current_user.id)
+    user.preferred_language = language_update.preferred_language
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
 
 
 @router.get(
