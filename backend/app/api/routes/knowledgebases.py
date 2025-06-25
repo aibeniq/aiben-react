@@ -337,36 +337,115 @@ def create_knowledge_base(
     """
     Create new knowledge base with a compressed folder with the Chroma VectorDB.
     """
-
-    print("Received the following metadata for the knowledge base:")
-    print(knowledge_base_in)
-
     # Check if a knowledge base with this title already exists for this user
-    existing_kb = session.exec(
-        select(KnowledgeBase).where(
-            KnowledgeBase.title == knowledge_base_in.title,
-            KnowledgeBase.owner_id == current_user.id,
-        )
-    ).first()
-
-    print("Checking for existing knowledge base")
+    existing_kb = KnowledgeBaseService.check_existing_knowledge_base(
+        session=session,
+        title=knowledge_base_in.title,
+        owner_id=current_user.id,
+    )
 
     if existing_kb:
         raise HTTPException(
-            status_code=409,  # Using 409 Conflict for duplicate resource
+            status_code=409,
             detail=f"A knowledge base with the title '{knowledge_base_in.title}' already exists",
         )
 
-    # Initialize variables for Chroma
+    # 1. Create KB (KB service method needs to be created)
+    # 2. Add sources to the knowledge base (KB service)
+    # 3. Add files to vector database (vectordb service)
+    # 4. Return knowledge base
+
+    # 1) Create empty knowledge base
+    knowledge_base = KnowledgeBaseService.create_knowledge_base(
+        session=session,
+        knowledge_base_in=knowledge_base_in,
+        current_user=current_user,
+    )
+
+    # 2) Add sources to the knowledge base (KB service)
     documents = []
 
-    # Process each uploaded file
     for file in files:
+        print(f"Processing file: {file.filename}")
+
+        # Load documents from file
         loaded_documents = load_uploaded_file(file)
         documents.extend(loaded_documents)
 
         # Reset the file pointer before passing to create_source_entries
         file.file.seek(0)
+
+        # Store the actual document file as source entries
+        KnowledgeBaseService.create_source_entries(
+            session=session,
+            current_user=current_user,
+            knowledge_base_id=knowledge_base.id,
+            file=file,
+        )
+
+    # STEP 3: Add files to vector database (vectordb service)
+    print("Adding files to vector database...")
+
+    # Split documents into chunks using RecursiveCharacterTextSplitter
+    print("Splitting documents...")
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=settings.DOCUMENT_CHUNK_SIZE,
+        chunk_overlap=settings.DOCUMENT_CHUNK_OVERLAP,
+    )
+    splits = text_splitter.split_documents(documents)
+
+    # Initialize embeddings
+    print("Initializing embeddings...")
+    embeddings, model_id, provider = load_correct_embeddings_model(
+        session=session,
+        current_user=current_user,  # Pass the current user to load the correct model
+        embedding_model_id=knowledge_base_in.embedding_model_id,
+    )
+    print(f"Using embedding model: {model_id}")
+
+    # Import vectordb functions
+    from app.services.vectordb.main import add_chunks, init_collection
+    import time
+
+    # Initialize the collection if it doesn't exist
+    init_collection()
+
+    # Prepare chunks for the vectordb
+    print("Preparing chunks for vector database...")
+    current_time = int(time.time())
+    chunks_to_add = []
+
+    for split in splits:
+        chunk_data = {
+            "knowledge_base_id": str(knowledge_base.id),  # Use actual knowledge base ID
+            "content": split.page_content,
+            "tags": [],
+            "title": split.metadata.get("title", ""),
+            "summary": "",
+            "author": split.metadata.get("author", ""),
+            "url": split.metadata.get("source", ""),
+            "created_at": current_time,
+            "updated_at": current_time,
+        }
+        chunks_to_add.append(chunk_data)
+
+    # Add chunks to vectordb
+    try:
+        print("Adding chunks to vector database...")
+        result = add_chunks(chunks_to_add)
+        if not result["success"]:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error adding chunks to vector database: {result.get('error', 'Unknown error')}",
+            )
+        print(
+            f"Successfully added {result['inserted_count']} chunks to vector database"
+        )
+    except Exception as e:
+        print(f"Error adding chunks to vector database: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error adding chunks to vector database: {str(e)}"
+        )
 
     # Clean up temporary files
     for root, dirs, files_in_dir in os.walk(tempfile.gettempdir()):
@@ -377,87 +456,7 @@ def create_knowledge_base(
                 except:
                     pass
 
-    print("Splitting documents...")
-
-    # Split documents into chunks using RecursiveCharacterTextSplitter
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=settings.DOCUMENT_CHUNK_SIZE,
-        chunk_overlap=settings.DOCUMENT_CHUNK_OVERLAP,
-    )
-    splits = text_splitter.split_documents(documents)
-
-    print("Initializing embeddings...")
-
-    embeddings, model_id, provider = load_correct_embeddings_model(
-        session=session,
-        current_user=current_user,  # Pass the current user to load the correct model
-        embedding_model_id=knowledge_base_in.embedding_model_id,
-    )
-
-    print(f"Using embedding model: {model_id}")
-
-    # Clear out any existing chroma_db directory
-    chroma_dir = tempfile.mkdtemp()
-    try:
-        # Create Chroma VectorDB from the document splits
-        Chroma.from_documents(
-            documents=splits, embedding=embeddings, persist_directory=chroma_dir
-        )
-    except Exception as e:
-        print(f"Error creating Chroma VectorDB: {str(e)}")
-        # Clean up the directory on error
-        if os.path.exists(chroma_dir):
-            shutil.rmtree(chroma_dir)
-        raise HTTPException(
-            status_code=500, detail=f"Error creating vector database: {str(e)}"
-        )
-
-    print("Zipping Chroma database...")
-
-    # Compress the Chroma database directory into a zip file
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-        for root, _, filenames in os.walk(chroma_dir):
-            for filename in filenames:
-                file_path = os.path.join(root, filename)
-                arcname = os.path.relpath(
-                    file_path, chroma_dir
-                )  # Preserve directory structure
-                zip_file.write(file_path, arcname)
-    zip_buffer.seek(0)
-
-    print("Validating knowledge base...")
-
-    # Use model_validate to create and validate the knowledge base
-    knowledge_base = KnowledgeBase.model_validate(
-        knowledge_base_in,
-        update={
-            "owner_id": current_user.id,
-            "data": zip_buffer.read(),
-            "embedding_model_id": knowledge_base_in.embedding_model_id,
-            "date_created": datetime.utcnow(),
-            "date_modified": datetime.utcnow(),
-        },
-    )
-
-    print("Adding knowledge base to session...")
-
-    session.add(knowledge_base)
-
-    session.flush()  # This ensures the knowledge_base.id is available
-
-    # Process each file
-    for file in files:
-        print(f"Received file: {file}")
-        print(f"Type of file: {type(file)}")
-
-        KnowledgeBaseService.create_source_entries(
-            session=session,
-            current_user=current_user,
-            knowledge_base_id=knowledge_base.id,
-            file=file,
-        )
-
+    # STEP 4: Return knowledge base
     session.commit()
     session.refresh(knowledge_base)
     return knowledge_base

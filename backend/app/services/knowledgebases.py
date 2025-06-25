@@ -3,17 +3,96 @@ import uuid
 import hashlib
 from fastapi import UploadFile
 from sqlmodel import select, Session, delete
-from app.models import Source, SourceData, EmbeddingModel
+from app.models import (
+    Source,
+    SourceData,
+    EmbeddingModel,
+    KnowledgeBase,
+    KnowledgeBaseCreate,
+)
 from app.api.deps import CurrentUser
 from io import BytesIO
 import zipfile
 import logging
+from datetime import datetime
 
 
 logger = logging.getLogger(__name__)
 
 
 class KnowledgeBaseService:
+    @staticmethod
+    def check_existing_knowledge_base(
+        *,
+        session: Session,
+        title: str,
+        owner_id: uuid.UUID,
+    ) -> KnowledgeBase | None:
+        """
+        Check if a knowledge base with the given title already exists for the user.
+
+        Args:
+            session: Database session
+            title: Knowledge base title to check
+            owner_id: ID of the knowledge base owner
+
+        Returns:
+            KnowledgeBase if found, None otherwise
+        """
+        try:
+            existing_kb = session.exec(
+                select(KnowledgeBase).where(
+                    KnowledgeBase.title == title,
+                    KnowledgeBase.owner_id == owner_id,
+                )
+            ).first()
+            return existing_kb
+        except Exception as e:
+            logger.error(
+                f"Error checking for existing knowledge base '{title}': {str(e)}"
+            )
+            raise
+
+    @staticmethod
+    def create_knowledge_base(
+        *,
+        session: Session,
+        knowledge_base_in: KnowledgeBaseCreate,
+        current_user: CurrentUser,
+    ) -> KnowledgeBase:
+        """
+        Create a new knowledge base.
+
+        Args:
+            session: Database session
+            knowledge_base_in: Knowledge base creation data
+            current_user: Current authenticated user
+
+        Returns:
+            Created KnowledgeBase instance
+        """
+        try:
+            # Use model_validate to create and validate the knowledge base
+            knowledge_base = KnowledgeBase.model_validate(
+                knowledge_base_in,
+                update={
+                    "owner_id": current_user.id,
+                    "embedding_model_id": knowledge_base_in.embedding_model_id,
+                    "date_created": datetime.utcnow(),
+                    "date_modified": datetime.utcnow(),
+                },
+            )
+
+            session.add(knowledge_base)
+            session.flush()  # This ensures the knowledge_base.id is available
+
+            return knowledge_base
+        except Exception as e:
+            logger.error(
+                f"Error creating knowledge base '{knowledge_base_in.title}': {str(e)}"
+            )
+            raise
+
     @staticmethod
     def create_source_entries(
         *,
