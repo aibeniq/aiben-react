@@ -165,6 +165,10 @@ export type KnowledgeBasesPublic = {
   count: number
 }
 
+export type LanguageUpdate = {
+  preferred_language: string
+}
+
 export type LlmModelCreate = {
   name: string
   model_id: string
@@ -185,6 +189,7 @@ export type LlmModelPublic = {
 
 export type LlmModelsPublic = {
   data: Array<LlmModelPublic>
+  count: number
 }
 
 export type LlmModelsValidate = {
@@ -348,6 +353,18 @@ export type UpdatePassword = {
   new_password: string
 }
 
+export type User = {
+  email: string
+  is_active?: boolean
+  is_superuser?: boolean
+  full_name?: string | null
+  id?: string
+  hashed_password: string
+  default_llm?: string | null
+  default_embedding_model?: string | null
+  preferred_language?: string
+}
+
 export type UserCreate = {
   email: string
   is_active?: boolean
@@ -362,6 +379,7 @@ export type UserPublic = {
   is_superuser?: boolean
   full_name?: string | null
   id: string
+  preferred_language: string
 }
 
 export type UserRegister = {
@@ -381,11 +399,13 @@ export type UserUpdate = {
   is_superuser?: boolean
   full_name?: string | null
   password?: string | null
+  preferred_language?: string | null
 }
 
 export type UserUpdateMe = {
   full_name?: string | null
   email?: string | null
+  preferred_language?: string | null
 }
 
 export type ValidationError = {
@@ -764,6 +784,12 @@ export type ReportgenieGenerateDocxData = {
 
 export type ReportgenieGenerateDocxResponse = unknown
 
+export type ReportgenieGenerateCsvData = {
+  requestBody: DocxRequest
+}
+
+export type ReportgenieGenerateCsvResponse = unknown
+
 export type ReportgenieGetReportHistoryData = {
   limit?: number
   showAll?: boolean
@@ -835,6 +861,12 @@ export type TwincheckGenerateDocxData = {
 }
 
 export type TwincheckGenerateDocxResponse = unknown
+
+export type UsersUpdateLanguageData = {
+  requestBody: LanguageUpdate
+}
+
+export type UsersUpdateLanguageResponse = User
 
 export type UsersReadUsersData = {
   limit?: number

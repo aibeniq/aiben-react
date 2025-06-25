@@ -129,10 +129,9 @@ class Settings(BaseSettings):
 
     The content should:
     1. Be written in plain language (8th-grade reading level)
-    2. Include all legally required elements for this section
-    3. Follow standard consent form conventions
-    4. Be concise yet thorough
-    5. Use second-person perspective (addressing "you" - the participant)
+    2. Be concise yet thorough
+    3. Be limited to the specific section requested
+    4. Use second-person perspective (addressing "you" - the participant)
 
     FORMAT OUTPUT AS A PROPERLY FORMATTED CONSENT FORM SECTION with an appropriate heading and content.
 

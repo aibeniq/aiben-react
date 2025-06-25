@@ -17,7 +17,8 @@ import tempfile
 import zipfile
 import json
 import traceback
-from io import BytesIO
+import csv
+from io import BytesIO, StringIO
 from datetime import datetime
 from fastapi.responses import StreamingResponse
 from docx import Document
@@ -498,6 +499,104 @@ async def generate_docx(
         raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
 
 
+@router.post("/generate/csv", response_class=StreamingResponse)
+async def generate_csv(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a CSV file from the report content with sections, content, and citations.
+    """
+    print("Now generating CSV of report...")
+    try:
+        # Get the content from the request - this should be the full report JSON or the report ID
+        if not request.content:
+            raise HTTPException(status_code=400, detail="Report content is required")
+
+        # For CSV generation, we need the structured sections data, not just the markdown text
+        # The request.content should contain either the report ID or the full sections data
+
+        # Create CSV content
+        csv_buffer = StringIO()
+        csv_writer = csv.writer(csv_buffer)
+
+        # Write header
+        csv_writer.writerow(["Prompt", "Content", "Citations"])
+
+        try:
+            # Try to parse the content as JSON (sections data)
+            data = json.loads(request.content)
+
+            if "sections" in data:
+                sections = data["sections"]
+            else:
+                # If it's just a list of sections
+                sections = data if isinstance(data, list) else []
+
+        except json.JSONDecodeError:
+            # If it's not JSON, try to extract from a report ID or return error
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid content format. Expected JSON with sections data.",
+            )
+
+        # Process each section
+        for section in sections:
+            prompt = section.get("title", "")
+            content = section.get("content", "").replace("\n", " ").replace("\r", " ")
+
+            # Extract citations
+            citations = []
+            if "source_citations" in section:
+                for citation in section["source_citations"]:
+                    source_name = "Unknown"
+                    if citation.get("metadata", {}).get("source"):
+                        source_path = citation["metadata"]["source"]
+                        # Extract filename from path
+                        source_name = source_path.split("/")[-1].split("\\")[-1]
+                        # Remove UUID prefix if present
+                        if "_" in source_name:
+                            source_name = source_name.split("_", 1)[1]
+
+                    citation_text = (
+                        citation.get("content", "")
+                        .replace("\n", " ")
+                        .replace("\r", " ")
+                    )
+                    citations.append(f"{source_name}: {citation_text}")
+
+            citations_text = " | ".join(citations) if citations else "No citations"
+
+            # Write row
+            csv_writer.writerow([prompt, content, citations_text])
+
+        # Get CSV content
+        csv_content = csv_buffer.getvalue()
+        csv_buffer.close()
+
+        # Create BytesIO object for the response
+        csv_bytes = BytesIO(csv_content.encode("utf-8"))
+        csv_bytes.seek(0)
+
+        print("CSV file generated successfully.")
+
+        # Create filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"report_{timestamp}.csv"
+
+        # Return the CSV as a downloadable file
+        return StreamingResponse(
+            csv_bytes,
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generating CSV: {str(e)}")
+
+
 @router.get("/history", response_model=List[Dict[str, Any]])
 async def get_report_history(
     session: SessionDep,
@@ -560,7 +659,7 @@ async def get_report_history(
                         "feedback": report.feedback,
                         "feedbackText": report.feedback_text,
                     }
-                
+
                 # Add user info for all-users view
                 if show_all:
                     from app.models import User  # Import here to avoid circular imports
@@ -572,7 +671,7 @@ async def get_report_history(
                         else "Unknown User"
                     )
                     result_item["user_name"] = user_name
-                
+
                 result.append(result_item)
             except json.JSONDecodeError:
                 # If JSON parsing fails, use raw data
@@ -587,18 +686,18 @@ async def get_report_history(
                     "outline_name": "",
                     "has_feedback": report.feedback is not None,
                 }
-                
+
                 # Add feedback information if exists
                 if report.feedback:
                     result_item["feedback"] = {
                         "feedback": report.feedback,
                         "feedbackText": report.feedback_text,
                     }
-                    
+
                 # Add user info for all-users view
                 if show_all:
                     from app.models import User  # Import here to avoid circular imports
-                    
+
                     user = session.get(User, report.user_id)
                     user_name = (
                         f"{user.full_name or 'User'} ({user.email})"
@@ -606,7 +705,7 @@ async def get_report_history(
                         else "Unknown User"
                     )
                     result_item["user_name"] = user_name
-                    
+
                 result.append(result_item)
 
         return result

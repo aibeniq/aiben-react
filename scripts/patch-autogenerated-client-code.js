@@ -4,9 +4,15 @@ const fs = require("fs")
 const sdkPath = "./src/client/sdk.gen.ts"
 let sdkContent = fs.readFileSync(sdkPath, "utf8")
 
-// Patch for ReportGenie
+// Patch for ReportGenie DOCX
 sdkContent = sdkContent.replace(
   /(url: "\/api\/v1\/reportgenie\/generate\/docx",[\s\S]*?body: data\.requestBody,)/,
+  "$1\n      responseType: 'blob',",
+)
+
+// Patch for ReportGenie CSV
+sdkContent = sdkContent.replace(
+  /(url: "\/api\/v1\/reportgenie\/generate\/csv",[\s\S]*?body: data\.requestBody,)/,
   "$1\n      responseType: 'blob',",
 )
 
