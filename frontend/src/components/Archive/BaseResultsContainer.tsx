@@ -8,8 +8,11 @@ interface BaseResultsContainerProps {
   selectedReport?: any
   copySuccess: boolean
   loadingDownload: boolean
+  loadingCsvDownload?: boolean
   onCopyReport: () => void
   onDownloadReport: () => void
+  onDownloadCsv?: () => void
+  showCsvDownload?: boolean
   onFeedbackSubmitted: (type: string) => void
   showFeedback?: boolean
 }
@@ -19,8 +22,11 @@ const BaseResultsContainer: React.FC<BaseResultsContainerProps> = ({
   selectedReport,
   copySuccess,
   loadingDownload,
+  loadingCsvDownload,
   onCopyReport,
   onDownloadReport,
+  onDownloadCsv,
+  showCsvDownload,
   onFeedbackSubmitted,
   showFeedback = true,
 }) => {
@@ -40,8 +46,11 @@ const BaseResultsContainer: React.FC<BaseResultsContainerProps> = ({
         <ResultsHeader
           copySuccess={copySuccess}
           loadingDownload={loadingDownload}
+          loadingCsvDownload={loadingCsvDownload}
           onCopyReport={onCopyReport}
           onDownloadReport={onDownloadReport}
+          onDownloadCsv={onDownloadCsv}
+          showCsvDownload={showCsvDownload}
         />
       </Box>
 

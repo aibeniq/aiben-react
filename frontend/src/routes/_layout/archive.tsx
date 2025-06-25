@@ -12,6 +12,7 @@ import { FiCheckCircle, FiFilePlus } from "react-icons/fi"
 import { FaBalanceScale } from "react-icons/fa"
 import { TbPlugConnected } from "react-icons/tb"
 import { VeradocService, ReportgenieService, TwincheckService } from "../../client"
+import { useState } from "react"
 
 export const Route = createFileRoute("/_layout/archive")({
   component: Archive,
@@ -34,6 +35,7 @@ function Archive() {
   } = useToolArchive()
 
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
 
   // Copy and download functions
   const handleCopyReport = async () => {
@@ -184,6 +186,87 @@ function Archive() {
     }
   }
 
+  // Add CSV download function
+  // Add CSV download function
+  const handleDownloadCsv = async () => {
+    const selectedReport = getSelectedReport()
+    if (!selectedReport || activeTab !== "generate") return
+
+    try {
+      setLoadingCsvDownload(true)
+      console.log("Starting CSV download...")
+      console.log("Selected report:", selectedReport)
+
+      // Prepare the sections data for CSV generation
+      const csvData = {
+        sections: selectedReport.results?.sections || [],
+      }
+      console.log("CSV data to send:", csvData)
+      console.log("Number of sections:", csvData.sections.length)
+
+      const response = await ReportgenieService.generateCsv({
+        requestBody: { content: JSON.stringify(csvData) },
+      })
+
+      console.log("Received CSV response:", response)
+      console.log("Response type:", typeof response)
+      console.log("Response instanceof Blob:", response instanceof Blob)
+      console.log("Response instanceof ArrayBuffer:", response instanceof ArrayBuffer)
+
+      // Handle the response blob
+      let blob
+      if (response instanceof Blob) {
+        console.log("Response is already a Blob")
+        blob = response
+      } else if (response instanceof ArrayBuffer) {
+        console.log("Converting ArrayBuffer to Blob")
+        blob = new Blob([response], { type: "text/csv" })
+      } else {
+        console.log("Converting unknown response type to Blob")
+        blob = new Blob([response as BlobPart], { type: "text/csv" })
+      }
+
+      console.log("Final blob:", blob)
+      console.log("Blob size:", blob.size)
+      console.log("Blob type:", blob.type)
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      console.log("Created object URL:", url)
+
+      const a = document.createElement("a")
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+      const filename = `report_${timestamp}.csv`
+
+      a.href = url
+      a.download = filename
+
+      console.log("Download filename:", filename)
+      console.log("About to trigger download...")
+
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      console.log("Download triggered successfully")
+      showSuccessToast("CSV downloaded successfully")
+    } catch (err) {
+      console.error("Failed to download CSV:", err)
+      console.error("Error details:", {
+        message: err instanceof Error ? err.message : "Unknown error",
+        stack: err instanceof Error ? err.stack : undefined,
+        name: err instanceof Error ? err.name : undefined,
+      })
+
+      const errorMessage = err instanceof Error ? err.message : "Unknown error"
+      showErrorToast(`Failed to download CSV: ${errorMessage}`)
+    } finally {
+      console.log("CSV download process completed")
+      setLoadingCsvDownload(false)
+    }
+  }
+
   const getSelectedReport = () => {
     switch (activeTab) {
       case "review":
@@ -260,8 +343,11 @@ function Archive() {
         selectedReport={selectedReport}
         copySuccess={copySuccess}
         loadingDownload={loadingDownload}
+        loadingCsvDownload={loadingCsvDownload}
         onCopyReport={handleCopyReport}
         onDownloadReport={handleDownloadReport}
+        onDownloadCsv={handleDownloadCsv}
+        showCsvDownload={activeTab === "generate"}
         onFeedbackSubmitted={(type) => {
           showSuccessToast(`Thank you for marking this response as ${type}!`)
         }}

@@ -6,15 +6,21 @@ import DownloadButton from "../../ui/download-button"
 interface ResultsHeaderProps {
   copySuccess: boolean
   loadingDownload: boolean
+  loadingCsvDownload?: boolean
   onCopyReport: () => void
   onDownloadReport: () => void
+  onDownloadCsv?: () => void
+  showCsvDownload?: boolean
 }
 
 const ResultsHeader: React.FC<ResultsHeaderProps> = ({
   copySuccess,
   loadingDownload,
+  loadingCsvDownload,
   onCopyReport,
   onDownloadReport,
+  onDownloadCsv,
+  showCsvDownload,
 }) => {
   return (
     <HStack justify="space-between" align="center" width="100%">
@@ -32,6 +38,11 @@ const ResultsHeader: React.FC<ResultsHeaderProps> = ({
         <DownloadButton size="sm" onClick={onDownloadReport} loading={loadingDownload}>
           Download DOCX
         </DownloadButton>
+        {showCsvDownload && onDownloadCsv && (
+          <DownloadButton size="sm" onClick={onDownloadCsv} loading={loadingCsvDownload}>
+            Download CSV
+          </DownloadButton>
+        )}
       </HStack>
     </HStack>
   )

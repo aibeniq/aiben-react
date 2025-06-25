@@ -102,6 +102,8 @@ import type {
   ReportgenieDeleteOutlineResponse,
   ReportgenieGenerateDocxData,
   ReportgenieGenerateDocxResponse,
+  ReportgenieGenerateCsvData,
+  ReportgenieGenerateCsvResponse,
   ReportgenieGetReportHistoryData,
   ReportgenieGetReportHistoryResponse,
   ReportgenieGetReportDetailData,
@@ -123,6 +125,8 @@ import type {
   TwincheckDeleteComparisonResponse,
   TwincheckGenerateDocxData,
   TwincheckGenerateDocxResponse,
+  UsersUpdateLanguageData,
+  UsersUpdateLanguageResponse,
   UsersReadUsersData,
   UsersReadUsersResponse,
   UsersCreateUserData,
@@ -1398,6 +1402,29 @@ export class ReportgenieService {
   }
 
   /**
+   * Generate Csv
+   * Generate a CSV file from the report content with sections, content, and citations.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static generateCsv(
+    data: ReportgenieGenerateCsvData,
+  ): CancelablePromise<ReportgenieGenerateCsvResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/reportgenie/generate/csv",
+      body: data.requestBody,
+      responseType: 'blob',
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
    * Get Report History
    * Retrieve past report generation history for the current user or all users.
    * @param data The data for the request.
@@ -1658,6 +1685,28 @@ export class TwincheckService {
 }
 
 export class UsersService {
+  /**
+   * Update Language
+   * Update current user language preference.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns User Successful Response
+   * @throws ApiError
+   */
+  public static updateLanguage(
+    data: UsersUpdateLanguageData,
+  ): CancelablePromise<UsersUpdateLanguageResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/users/me/language",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
   /**
    * Read Users
    * Retrieve users.

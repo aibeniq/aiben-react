@@ -33,6 +33,7 @@ const ReportGenie = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [copySuccess, setCopySuccess] = useState(false)
   const [loadingDownload, setLoadingDownload] = useState(false)
+  const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
 
   // Modal states
   const [showKnowledgeBaseModal, setShowKnowledgeBaseModal] = useState(false)
@@ -109,6 +110,51 @@ const ReportGenie = () => {
       showErrorToast(`Failed to download document: ${err.message || "Unknown error"}`)
     } finally {
       setLoadingDownload(false)
+    }
+  }
+
+  const handleDownloadCsv = async () => {
+    try {
+      setLoadingCsvDownload(true)
+
+      // Prepare the sections data for CSV generation
+      const csvData = {
+        sections: sectionResults,
+      }
+
+      const response = await ReportgenieService.generateCsv({
+        requestBody: { content: JSON.stringify(csvData) },
+      })
+
+      let blob
+      if (response instanceof Blob) {
+        blob = response
+      } else if (response instanceof ArrayBuffer) {
+        blob = new Blob([response], {
+          type: "text/csv",
+        })
+      } else {
+        blob = new Blob([response as any], {
+          type: "text/csv",
+        })
+      }
+
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+      a.href = url
+      a.download = `report_${timestamp}.csv`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      showSuccessToast("CSV downloaded successfully")
+    } catch (err: any) {
+      console.error("Failed to download CSV:", err)
+      showErrorToast(`Failed to download CSV: ${err.message || "Unknown error"}`)
+    } finally {
+      setLoadingCsvDownload(false)
     }
   }
 
@@ -357,6 +403,14 @@ const ReportGenie = () => {
                       loading={loadingDownload}
                     >
                       Download DOCX
+                    </DownloadButton>
+
+                    <DownloadButton
+                      size="sm"
+                      onClick={handleDownloadCsv}
+                      loading={loadingCsvDownload}
+                    >
+                      Download CSV
                     </DownloadButton>
                   </HStack>
                 )}
