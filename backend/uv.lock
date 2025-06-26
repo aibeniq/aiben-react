@@ -223,7 +223,7 @@ requires-dist = [
     { name = "langchain-openai", specifier = "==0.3.17" },
     { name = "langchain-text-splitters", specifier = "==0.3.6" },
     { name = "markdown", specifier = "==3.5.2" },
-    { name = "openai", specifier = "==1.68.2" },
+    { name = "openai", specifier = "==1.92.0" },
     { name = "passlib", extras = ["bcrypt"], specifier = ">=1.7.4,<2.0.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.1.13,<4.0.0" },
     { name = "pydantic", specifier = ">2.0" },
@@ -2288,7 +2288,7 @@ wheels = [
 
 [[package]]
 name = "openai"
-version = "1.68.2"
+version = "1.92.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -2300,9 +2300,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3f/6b/6b002d5d38794645437ae3ddb42083059d556558493408d39a0fcea608bc/openai-1.68.2.tar.gz", hash = "sha256:b720f0a95a1dbe1429c0d9bb62096a0d98057bcda82516f6e8af10284bdd5b19", size = 413429, upload-time = "2025-03-21T14:44:35.088Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/37/3f/75ad8dfe1ee4e6daacebc5a8145878c00b22c4b89e3446228d3ffccbf726/openai-1.92.0.tar.gz", hash = "sha256:acaf4ee5fca8611a09035e37ceb69a352b4a84e25b103f0fc1ccc696bf9a16f0", size = 485264, upload-time = "2025-06-26T16:57:18.996Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fd/34/cebce15f64eb4a3d609a83ac3568d43005cc9a1cba9d7fde5590fd415423/openai-1.68.2-py3-none-any.whl", hash = "sha256:24484cb5c9a33b58576fdc5acf0e5f92603024a4e39d0b99793dfa1eb14c2b36", size = 606073, upload-time = "2025-03-21T14:44:32.785Z" },
+    { url = "https://files.pythonhosted.org/packages/68/66/8f85019b7943e4976d931fdb0e2b973090b4dac999c3e90844d2336f1184/openai-1.92.0-py3-none-any.whl", hash = "sha256:99210715bad1a4de5a387993aca7e4e8e5a742f1e185eefe2f805001cc2c21f3", size = 753397, upload-time = "2025-06-26T16:57:17.038Z" },
 ]
 
 [[package]]
