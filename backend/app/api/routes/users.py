@@ -25,7 +25,7 @@ from app.models import (
     UserUpdateMe,
     LanguageUpdate,
 )
-from app.utils import generate_new_account_email, send_email
+from app.utils.email_utils import generate_new_account_email, send_email
 
 router = APIRouter(prefix="/users", tags=["users"])
 
