@@ -472,18 +472,58 @@ const ReportGenie = () => {
                               cursor="pointer"
                               display="flex"
                               alignItems="center"
+                              justifyContent="space-between"
                             >
-                              <Box
-                                as="span"
-                                mr={2}
-                                transform={
-                                  expandedSection === index ? "rotate(90deg)" : "rotate(0deg)"
-                                }
-                                transition="transform 0.2s"
-                              >
-                                ▶
-                              </Box>
-                              Section {index + 1}: {section.title}
+                              <HStack>
+                                <Box
+                                  as="span"
+                                  mr={2}
+                                  transform={
+                                    expandedSection === index ? "rotate(90deg)" : "rotate(0deg)"
+                                  }
+                                  transition="transform 0.2s"
+                                >
+                                  ▶
+                                </Box>
+                                <Text>
+                                  Section {index + 1}: {section.title}
+                                </Text>
+                              </HStack>
+                              <HStack>
+                                {section.consult_documents !== false ? (
+                                  <Box
+                                    as="span"
+                                    fontSize="xs"
+                                    color="green.600"
+                                    bg="green.50"
+                                    px={2}
+                                    py={1}
+                                    borderRadius="md"
+                                    display="flex"
+                                    alignItems="center"
+                                    gap={1}
+                                  >
+                                    <FiDatabase size={12} />
+                                    <Text>KB Generated</Text>
+                                  </Box>
+                                ) : (
+                                  <Box
+                                    as="span"
+                                    fontSize="xs"
+                                    color="gray.600"
+                                    bg="gray.50"
+                                    px={2}
+                                    py={1}
+                                    borderRadius="md"
+                                    display="flex"
+                                    alignItems="center"
+                                    gap={1}
+                                  >
+                                    <FiFileText size={12} />
+                                    <Text>Raw Text</Text>
+                                  </Box>
+                                )}
+                              </HStack>
                             </Heading>
 
                             {expandedSection === index && (
@@ -493,7 +533,8 @@ const ReportGenie = () => {
                                 </Box>
 
                                 {section.source_citations &&
-                                  section.source_citations.length > 0 && (
+                                  section.source_citations.length > 0 &&
+                                  section.consult_documents !== false && (
                                     <Accordion.Root multiple>
                                       <Accordion.Item value={`citations-${index}`}>
                                         <h2>

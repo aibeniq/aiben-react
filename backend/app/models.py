@@ -464,6 +464,13 @@ class ReportGenieRequest(SQLModel):
     outline_id: str
 
 
+# Model for structured section data
+class ReportGenieSectionItem(SQLModel):
+    id: str
+    text: str
+    consultDocuments: bool = True
+
+
 # Response model for ReportGenie
 class ReportGenieResponse(SQLModel):
     results: Dict[str, Any]  # Accept any dictionary structure
@@ -475,7 +482,9 @@ class ReportGenieOutline(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str = Field(max_length=255, unique=True, nullable=False)
     description: str | None = Field(default=None, max_length=255)
-    sections: str = Field(nullable=False)  # Store sections outline as a string
+    sections: str = Field(
+        nullable=False
+    )  # Store sections outline as JSON string with consultDocuments flags
     owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
