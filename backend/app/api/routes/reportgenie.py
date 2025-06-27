@@ -108,57 +108,89 @@ async def generate_report(
             # 4. Initialize the LLM
             llm = get_default_llm(session, current_user)
 
-            # 5. Parse the sections outline
-            section_list = request.sections.strip().split("\n")
+            # 5. Parse the sections outline - handle both old string format and new structured format
+            try:
+                # Try to parse as JSON first (new structured format)
+                sections_data = json.loads(request.sections)
+                if isinstance(sections_data, list) and all(
+                    isinstance(item, dict)
+                    and "text" in item
+                    and "consultDocuments" in item
+                    for item in sections_data
+                ):
+                    section_items = sections_data
+                else:
+                    # Fallback to string format
+                    section_list = request.sections.strip().split("\n")
+                    section_items = [
+                        {"text": section.strip(), "consultDocuments": True}
+                        for section in section_list
+                        if section.strip()
+                    ]
+            except (json.JSONDecodeError, TypeError):
+                # Fallback to string format for backward compatibility
+                section_list = request.sections.strip().split("\n")
+                section_items = [
+                    {"text": section.strip(), "consultDocuments": True}
+                    for section in section_list
+                    if section.strip()
+                ]
 
             # 6. Process each section
             sections = []
 
-            for section_description in section_list:
-                section_description = section_description.strip()
+            for section_item in section_items:
+                section_description = section_item["text"]
+                consult_documents = section_item.get("consultDocuments", True)
+
                 if not section_description:
                     continue
 
-                # Retrieve relevant context from the knowledge base
-                docs = retriever.get_relevant_documents(section_description)
-                context = "\n\n".join([doc.page_content for doc in docs])
+                if consult_documents:
+                    # Retrieve relevant context from the knowledge base and generate content
+                    docs = retriever.get_relevant_documents(section_description)
+                    context = "\n\n".join([doc.page_content for doc in docs])
 
-                # Store source documents for citation
-                source_citations = []
-                for doc in docs:
-                    metadata = doc.metadata.copy()
+                    # Store source documents for citation
+                    source_citations = []
+                    for doc in docs:
+                        metadata = doc.metadata.copy()
 
-                    if "source" in metadata and isinstance(metadata["source"], str):
-                        source_path = metadata["source"]
-                        raw_filename = Path(source_path).name
+                        if "source" in metadata and isinstance(metadata["source"], str):
+                            source_path = metadata["source"]
+                            raw_filename = Path(source_path).name
 
-                        # Extract the real filename after the underscore using regex
-                        match = re.search(r"^[^_]*_(.+)$", raw_filename)
-                        if match:
-                            filename = match.group(1)
-                        else:
-                            filename = raw_filename
+                            # Extract the real filename after the underscore using regex
+                            match = re.search(r"^[^_]*_(.+)$", raw_filename)
+                            if match:
+                                filename = match.group(1)
+                            else:
+                                filename = raw_filename
 
-                        source_entry = session.exec(
-                            select(Source).where(Source.name == filename)
-                        ).first()
+                            source_entry = session.exec(
+                                select(Source).where(Source.name == filename)
+                            ).first()
 
-                        if source_entry:
-                            metadata["source_data_id"] = str(
-                                source_entry.source_data_id
-                            )
+                            if source_entry:
+                                metadata["source_data_id"] = str(
+                                    source_entry.source_data_id
+                                )
 
-                    source = {"content": doc.page_content, "metadata": metadata}
-                    source_citations.append(source)
+                        source = {"content": doc.page_content, "metadata": metadata}
+                        source_citations.append(source)
 
-                # Use the template from config
-                prompt_template = settings.REPORT_GENIE_PROMPT_TEMPLATE
+                    # Use the template from config
+                    prompt_template = settings.REPORT_GENIE_PROMPT_TEMPLATE
 
-                section_content = invoke_llm(
-                    llm,
-                    prompt_template,
-                    {"context": context, "question": section_description},
-                )
+                    section_content = invoke_llm(
+                        llm,
+                        prompt_template,
+                        {"context": context, "question": section_description},
+                    )
+                else:
+                    # Use raw text directly without consulting knowledge base
+                    section_content = section_description
+                    source_citations = []
 
                 # Store the section with its content and sources
                 sections.append(
@@ -166,6 +198,7 @@ async def generate_report(
                         "title": section_description,
                         "content": section_content,
                         "source_citations": source_citations,
+                        "consult_documents": consult_documents,
                     }
                 )
 
