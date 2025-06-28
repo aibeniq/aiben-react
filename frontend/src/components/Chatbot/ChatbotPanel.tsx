@@ -1,4 +1,4 @@
-import { Box, Button, HStack, Text, Icon, Show } from "@chakra-ui/react"
+import { Box, Button, HStack, Text, Icon, Show, RadioGroup } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { FiTrash } from "react-icons/fi"
 import { KnowledgeBasesService } from "@/client"
@@ -36,6 +36,8 @@ interface ChatbotPanelProps {
   setShowKnowledgeBaseModal: (show: boolean) => void
   clearChat: () => void
   handleSendMessage: () => Promise<void>
+  searchMode: "vector" | "full_text"
+  setSearchMode: (mode: "vector" | "full_text") => void
 }
 
 const ChatbotPanel = ({
@@ -55,6 +57,8 @@ const ChatbotPanel = ({
   setShowKnowledgeBaseModal,
   clearChat,
   handleSendMessage,
+  searchMode,
+  setSearchMode,
 }: ChatbotPanelProps) => {
   // Get knowledge bases
   const { data: knowledgeBases = [] } = useQuery({
@@ -116,6 +120,32 @@ const ChatbotPanel = ({
               </Button>
             </Show>
           </HStack>
+        </Box>
+
+        {/* Search Mode Toggle */}
+        <Box px={4} pt={2} pb={1} bg="bg" borderBottom="1px solid" borderColor="gray.100">
+          <RadioGroup.Root
+            value={searchMode}
+            onValueChange={(details) => setSearchMode(details.value as "vector" | "full_text")}
+            size="sm"
+            colorPalette="teal"
+          >
+            <HStack gap={4}>
+              <Text fontSize="xs" color="gray.600" fontWeight="medium">
+                Search Mode:
+              </Text>
+              <RadioGroup.Item value="vector">
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemControl />
+                <RadioGroup.ItemText fontSize="xs">Vector Search</RadioGroup.ItemText>
+              </RadioGroup.Item>
+              <RadioGroup.Item value="full_text">
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemControl />
+                <RadioGroup.ItemText fontSize="xs">Full Text Scan</RadioGroup.ItemText>
+              </RadioGroup.Item>
+            </HStack>
+          </RadioGroup.Root>
         </Box>
 
         <Box p={4} overflowY="auto" flex="1" height="100%">

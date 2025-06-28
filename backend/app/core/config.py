@@ -44,8 +44,10 @@ class Settings(BaseSettings):
     )
 
     # Document processing parameters
-    DOCUMENT_CHUNK_SIZE: int = 1000
-    DOCUMENT_CHUNK_OVERLAP: int = 200
+    FULL_SCAN_DOCUMENT_CHUNK_SIZE: int = 100000
+    FULL_SCAN_DOCUMENT_CHUNK_OVERLAP: int = 200
+    RAG_DOCUMENT_CHUNK_SIZE: int = 1000
+    RAG_DOCUMENT_CHUNK_OVERLAP: int = 200
     RAG_NUM_CHUNKS: int = 25  # Number of chunks to retrieve for RAG search
 
     @computed_field  # type: ignore[prop-decorator]
@@ -362,6 +364,61 @@ class Settings(BaseSettings):
         )
 
         return self
+
+    REPORT_GENIE_SYNTHESIS_PROMPT_TEMPLATE: str = """
+    You are an AI assistant synthesizing analysis from multiple text chunks to answer a question.
+
+    QUESTION: {question}
+
+    ANALYSIS FROM CHUNKS:
+    {chunk_analyses}
+
+    INSTRUCTIONS:
+    1. Review the analysis from all text chunks.
+    2. Combine the information to form a comprehensive and coherent answer to the original QUESTION.
+    3. Do not include information that is not supported by the provided analysis.
+    4. If the combined analysis does not provide a clear answer, state that the information could not be fully determined from the text.
+    5. Synthesize the information, do not just list the findings from each chunk.
+
+    SYNTHESIZED ANSWER:
+    """
+
+    # Full text scan template for chat functionality
+    CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE: str = """
+    You are an AI assistant analyzing a text chunk to answer a specific question.
+
+    TEXT CHUNK:
+    {chunk}
+
+    QUESTION: {question}
+
+    INSTRUCTIONS:
+    1. Analyze the text chunk to find information relevant to the question.
+    2. If the chunk contains relevant information, provide a clear and concise answer based only on that information.
+    3. If the chunk does not contain relevant information, respond with "No relevant information found in this chunk."
+    4. Do not make assumptions or add information not present in the text chunk.
+
+    ANALYSIS:
+    """
+
+    CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE: str = """
+    You are an AI assistant synthesizing analysis from multiple text chunks to answer a question.
+
+    QUESTION: {question}
+
+    ANALYSIS FROM TEXT CHUNKS:
+    {chunk_analyses}
+
+    INSTRUCTIONS:
+    1. Review the analysis from all text chunks.
+    2. Combine the information to form a comprehensive and coherent answer to the original QUESTION.
+    3. Only include information that is supported by the provided chunk analyses.
+    4. If the combined analysis does not provide sufficient information to answer the question, state that clearly.
+    5. Synthesize the information, do not just list the findings from each chunk.
+    6. Provide a well-structured, coherent response.
+
+    SYNTHESIZED ANSWER:
+    """
 
 
 settings = Settings()  # type: ignore

@@ -27,6 +27,7 @@ const ChatbotMain = () => {
   const [currentKbId, setCurrentKbId] = useState<string | null>(null)
   const [currentFileName, setCurrentFileName] = useState<string | null>(null)
   const [sessionId, setSessionId] = useState<string>("")
+  const [searchMode, setSearchMode] = useState<"vector" | "full_text">("vector")
 
   const clearChat = () => {
     setMessages([])
@@ -132,6 +133,7 @@ const ChatbotMain = () => {
           useDefaultModels: true,
           sessionId: sessionId, // Make sure this is being sent correctly
           isFollowUp: isFollowUp && sessionId ? true : false, // Only true if we have a session ID
+          searchMode: searchMode, // Pass the search mode
         })
 
         console.log("Response:", response)
@@ -157,6 +159,7 @@ const ChatbotMain = () => {
           sessionId: sessionId,
           isFollowUp: isFollowUp === true,
           formData: isFollowUp ? undefined : { file: uploadedFile },
+          searchMode: searchMode, // Pass the search mode
         })
 
         console.log("Response:", response)
@@ -205,6 +208,8 @@ const ChatbotMain = () => {
               setShowKnowledgeBaseModal={setShowKnowledgeBaseModal}
               clearChat={clearChat}
               handleSendMessage={handleSendMessage}
+              searchMode={searchMode}
+              setSearchMode={setSearchMode}
             />
           </Drawer.Content>
         </Drawer.Positioner>

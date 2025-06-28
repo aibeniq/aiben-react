@@ -460,6 +460,7 @@ export type ChatQueryKnowledgeBaseData = {
   isFollowUp?: boolean
   kbId: string
   question: string
+  searchMode?: string
   sessionId?: string
   useDefaultModels?: boolean
 }
@@ -471,6 +472,7 @@ export type ChatQueryDocumentData = {
   formData?: Body_chat_query_document
   isFollowUp?: boolean
   question?: string
+  searchMode?: string
   sessionId?: string
   useDefaultModels?: boolean
 }

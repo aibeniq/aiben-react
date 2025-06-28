@@ -381,8 +381,8 @@ def create_knowledge_base(
 
     # Split documents into chunks using RecursiveCharacterTextSplitter
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=settings.DOCUMENT_CHUNK_SIZE,
-        chunk_overlap=settings.DOCUMENT_CHUNK_OVERLAP,
+        chunk_size=settings.RAG_DOCUMENT_CHUNK_SIZE,
+        chunk_overlap=settings.RAG_DOCUMENT_CHUNK_OVERLAP,
     )
     splits = text_splitter.split_documents(documents)
 
