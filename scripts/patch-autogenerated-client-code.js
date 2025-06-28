@@ -22,9 +22,15 @@ sdkContent = sdkContent.replace(
   "$1\n      responseType: 'blob',",
 )
 
-// Patch for VeraDoc
+// Patch for VeraDoc DOCX
 sdkContent = sdkContent.replace(
   /(url: "\/api\/v1\/veradoc\/generate\/docx",[\s\S]*?body: data\.requestBody,)/,
+  "$1\n      responseType: 'blob',",
+)
+
+// Patch for VeraDoc CSV
+sdkContent = sdkContent.replace(
+  /(url: "\/api\/v1\/veradoc\/generate\/csv",[\s\S]*?body: data\.requestBody,)/,
   "$1\n      responseType: 'blob',",
 )
 
