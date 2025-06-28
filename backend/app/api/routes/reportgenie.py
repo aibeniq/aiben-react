@@ -113,108 +113,55 @@ async def generate_report(
 
                     text_chunks = chunk_text(
                         all_source_text,
-                        max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE,
+                        max_tokens=settings.DOCUMENT_CHUNK_SIZE,
                     )
                     chunk_analyses = []
                     for chunk in text_chunks:
                         analysis = invoke_llm(
                             llm,
-                            settings.FULL_TEXT_ANALYSIS_PROMPT_TEMPLATE,
-                            {"text_chunk": chunk, "topic": section_description},
+                            settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
+                            {"chunk": chunk, "question": section_description},
                         )
                         chunk_analyses.append(analysis)
 
-                    synthesis_prompt = (
-                        settings.REPORT_GENIE_SYNTHESIS_PROMPT_TEMPLATE.format(
-                            question=section_description,
-                            chunk_analyses="\n---\n".join(chunk_analyses),
-                        )
+                    # Synthesize the chunk analyses
+                    synthesized_answer = invoke_llm(
+                        llm,
+                        settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+                        {
+                            "chunk_analyses": "\n\n".join(chunk_analyses),
+                            "question": section_description,
+                        },
                     )
-                    section_content = invoke_llm(llm, synthesis_prompt, {})
-                    source_citations = (
-                        []
-                    )  # Citations are handled differently in full text
 
-                else:  # Default to vector search
-                    # Vector Search Logic (existing logic)
-                    with tempfile.TemporaryDirectory() as temp_dir:
-                        if kb.data:
-                            with zipfile.ZipFile(BytesIO(kb.data), "r") as zip_ref:
-                                zip_ref.extractall(temp_dir)
-                        else:
-                            raise HTTPException(
-                                status_code=400,
-                                detail="Knowledge base has no vector database data",
-                            )
+                    sections.append(
+                        {
+                            "title": section_description,
+                            "content": synthesized_answer,
+                            "consult_documents": True,
+                        }
+                    )
+                else:
+                    # Vector Search Logic
+                    print(f"Performing Vector Search for: {section_description}")
+                    retriever = create_ensemble_retriever(kb, session, current_user)
+                    search_results = retriever.retrieve(
+                        section_description, k=settings.RAG_NUM_CHUNKS
+                    )
 
-                        if kb.embedding_model_id:
-                            embedding_model = session.get(
-                                EmbeddingModel, kb.embedding_model_id
-                            )
-                            if embedding_model:
-                                model_id = embedding_model.model_id
-                                provider = embedding_model.provider
-                            else:
-                                embedding_info = get_embedding_model(
-                                    session, current_user
-                                )
-                                model_id = embedding_info["model_id"]
-                                provider = embedding_info["provider"]
-                        else:
-                            embedding_info = get_embedding_model(session, current_user)
-                            model_id = embedding_info["model_id"]
-                            provider = embedding_info["provider"]
+                    synthesized_answer = invoke_llm(
+                        llm,
+                        settings.REPORT_GENIE_SYNTHESIS_PROMPT_TEMPLATE,
+                        {"context": search_results, "question": section_description},
+                    )
 
-                        embeddings = load_embeddings_model(
-                            provider=provider, model_id=model_id
-                        )
-                        chroma_db = Chroma(
-                            persist_directory=temp_dir, embedding_function=embeddings
-                        )
-                        retriever = create_ensemble_retriever(
-                            chroma_db=chroma_db,
-                            vector_weight=0.7,
-                            keyword_weight=0.3,
-                            search_kwargs={"k": settings.RAG_NUM_CHUNKS},
-                        )
-
-                        docs = retriever.get_relevant_documents(section_description)
-                        context = "\n\n".join([doc.page_content for doc in docs])
-
-                        source_citations = []
-                        for doc in docs:
-                            metadata = doc.metadata.copy()
-                            if "source" in metadata and isinstance(
-                                metadata["source"], str
-                            ):
-                                source_path = metadata["source"]
-                                raw_filename = Path(source_path).name
-                                match = re.search(r"^[^_]*_(.+)$", raw_filename)
-                                if match:
-                                    filename = match.group(1)
-                                else:
-                                    filename = raw_filename
-                                source_entry = session.exec(
-                                    select(Source).where(Source.name == filename)
-                                ).first()
-                                if source_entry:
-                                    metadata["source_data_id"] = str(
-                                        source_entry.source_data_id
-                                    )
-                            source = {"content": doc.page_content, "metadata": metadata}
-                            source_citations.append(source)
-
-                        prompt_template = settings.REPORT_GENIE_PROMPT_TEMPLATE
-                        section_content = invoke_llm(
-                            llm,
-                            prompt_template,
-                            {
-                                "context": context,
-                                "question": section_description,
-                                "draft_report": draft_report,
-                            },
-                        )
-
+                    sections.append(
+                        {
+                            "title": section_description,
+                            "content": synthesized_answer,
+                            "consult_documents": True,
+                        }
+                    )
             else:
                 # Use raw text directly without consulting knowledge base
                 section_content = section_description
