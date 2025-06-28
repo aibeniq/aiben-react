@@ -283,7 +283,7 @@ async def query_knowledge_base(
                 chroma_db=chroma_db,
                 vector_weight=0.7,  # Weight for vector-based retrieval
                 keyword_weight=0.3,  # Weight for keyword-based retrieval
-                search_kwargs={"k": 5},  # Search parameters
+                search_kwargs={"k": settings.RAG_NUM_CHUNKS},  # Use config value
             )
 
             # 4. Get the LLM

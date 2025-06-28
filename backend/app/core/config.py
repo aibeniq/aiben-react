@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     # Document processing parameters
     DOCUMENT_CHUNK_SIZE: int = 1000
     DOCUMENT_CHUNK_OVERLAP: int = 200
+    RAG_NUM_CHUNKS: int = 25  # Number of chunks to retrieve for RAG search
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -130,8 +131,9 @@ class Settings(BaseSettings):
     The content should:
     1. Be written in plain language (8th-grade reading level)
     2. Be concise yet thorough
-    3. Be limited to the specific section requested
+    3. Be limited to the specific section requested -- don't keep adding unnecessary/unrequested language like "Your participation is important, and we appreciate your commitment to this investigation."
     4. Use second-person perspective (addressing "you" - the participant)
+    5. Should not make any claims that are not supported by the provided context
 
     FORMAT OUTPUT AS A PROPERLY FORMATTED CONSENT FORM SECTION with an appropriate heading and content.
 

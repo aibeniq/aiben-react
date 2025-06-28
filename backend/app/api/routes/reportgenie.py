@@ -100,9 +100,9 @@ async def generate_report(
             )
             retriever = create_ensemble_retriever(
                 chroma_db=chroma_db,
-                vector_weight=0.7,
-                keyword_weight=0.3,
-                search_kwargs={"k": 5},
+                vector_weight=0.5,  # Weight for vector-based retrieval
+                keyword_weight=0.5,  # Weight for keyword-based retrieval
+                search_kwargs={"k": settings.RAG_NUM_CHUNKS},  # Use config value
             )
 
             # 4. Initialize the LLM
@@ -187,15 +187,18 @@ async def generate_report(
                         prompt_template,
                         {"context": context, "question": section_description},
                     )
+                    section_title = section_description
                 else:
                     # Use raw text directly without consulting knowledge base
                     section_content = section_description
                     source_citations = []
+                    # If the raw text is a markdown header, clean it for the title
+                    section_title = section_description
 
                 # Store the section with its content and sources
                 sections.append(
                     {
-                        "title": section_description,
+                        "title": section_title,
                         "content": section_content,
                         "source_citations": source_citations,
                         "consult_documents": consult_documents,
@@ -405,10 +408,14 @@ async def generate_docx(
     try:
         # Get the markdown content from the request
         if not request.content:
-            raise HTTPException(status_code=400, detail="Report content is required")
+            raise HTTPException(
+                status_code=400, detail="No content provided for DOCX generation."
+            )
 
         # Convert markdown to HTML for parsing
-        html_content = markdown.markdown(request.content, extensions=["tables"])
+        html_content = markdown.markdown(
+            request.content, extensions=["tables", "fenced_code"]
+        )
         soup = BeautifulSoup(html_content, "html.parser")
 
         print("Markdown content converted to HTML successfully.")
@@ -417,8 +424,9 @@ async def generate_docx(
 
         print("Adding title and date to the document...")
         # Add a title
-        title = doc.add_heading("Generated Report", level=0)
-        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        doc.add_heading("Generated Report", level=0).alignment = (
+            WD_ALIGN_PARAGRAPH.CENTER
+        )
 
         # Add date
         date_paragraph = doc.add_paragraph()
@@ -427,109 +435,57 @@ async def generate_docx(
             f"Generated on: {datetime.now().strftime('%B %d, %Y')}"
         )
         date_run.italic = True
+        doc.add_paragraph()  # Add a space after the date
 
-        # Add a separator
-        doc.add_paragraph("─" * 50)
-
-        print("Adding headers, paragraphs, lists, and tables...")
-        # Process all headers and paragraphs in the HTML
-        for element in soup.find_all(
-            ["h1", "h2", "h3", "h4", "p", "ul", "ol", "li", "table"]
-        ):
-            if element.name == "h1":
-                doc.add_heading(element.text, level=1)
-            elif element.name == "h2":
-                doc.add_heading(element.text, level=2)
-            elif element.name == "h3":
-                doc.add_heading(element.text, level=3)
+        # Process each element from the parsed HTML
+        for element in soup.find_all(True, recursive=False):
+            if element.name.startswith("h") and element.name[1:].isdigit():
+                level = int(element.name[1:])
+                doc.add_heading(element.get_text(strip=True), level=level)
             elif element.name == "p":
-                doc.add_paragraph(element.text)
-            elif element.name == "ul":
-                for li in element.find_all("li"):
-                    paragraph = doc.add_paragraph(li.text)
-                    paragraph.style = "List Bullet"
-            elif element.name == "ol":
-                for li in element.find_all("li"):
-                    paragraph = doc.add_paragraph(li.text)
-                    paragraph.style = "List Number"
+                if element.get_text(strip=True):  # Avoid empty paragraphs
+                    doc.add_paragraph(element.get_text())
+            elif element.name == "hr":
+                doc.add_paragraph("---")  # Visual separator
             elif element.name == "table":
-                table_rows = element.find_all("tr")
-                if table_rows:
-                    # Count the number of columns in the first row
-                    first_row = table_rows[0]
-                    columns = len(first_row.find_all(["th", "td"]))
+                headers = [th.get_text(strip=True) for th in element.find_all("th")]
+                if not headers:
+                    continue
 
-                    # Create the table
-                    table = doc.add_table(rows=0, cols=columns)
-                    table.style = "Table Grid"
+                table = doc.add_table(rows=1, cols=len(headers))
+                table.style = "Table Grid"
+                hdr_cells = table.rows[0].cells
+                for i, h in enumerate(headers):
+                    hdr_cells[i].text = h
 
-                    # Process header row
-                    header_cells = first_row.find_all(["th", "td"])
-                    if header_cells:
-                        header_row = table.add_row().cells
-                        for i, cell in enumerate(header_cells):
-                            if i < len(header_row):
-                                header_row[i].text = cell.text
-                                run = header_row[i].paragraphs[0].runs[0]
-                                run.bold = True
+                for row in element.find("tbody").find_all("tr"):
+                    row_cells = table.add_row().cells
+                    for i, td in enumerate(row.find_all("td")):
+                        row_cells[i].text = td.get_text(strip=True)
+            elif element.name in ["ul", "ol"]:
+                for li in element.find_all("li"):
+                    doc.add_paragraph(li.get_text(strip=True), style="List Bullet")
 
-                    # Process data rows
-                    for row in table_rows[1:]:
-                        cells = row.find_all("td")
-                        if cells:
-                            row_cells = table.add_row().cells
-                            for i, cell in enumerate(cells):
-                                if i < len(row_cells):
-                                    row_cells[i].text = cell.text
+        # Save the document to a memory stream
+        file_stream = BytesIO()
+        doc.save(file_stream)
+        file_stream.seek(0)
 
-        # Save the document to a BytesIO object
-        print("Saving the document to a BytesIO object...")
-        docx_bytes = BytesIO()
-        doc.save(docx_bytes)
-        docx_bytes.seek(0)
-
-        # --- CORRUPTION CHECKS ---
-        # 1. Check file size
-        size = docx_bytes.getbuffer().nbytes
-        print(f"DOCX file size: {size} bytes")
-        if size < 1000:
-            print("Warning: DOCX file is very small and may be empty or corrupted.")
-
-        # 2. Try to reload the DOCX to ensure it's readable
-        try:
-            docx_bytes.seek(0)
-            _ = Document(docx_bytes)
-            print("DOCX file passed integrity check (can be opened by python-docx).")
-        except Exception as e:
-            print(
-                f"Integrity check failed: generated DOCX cannot be opened. Error: {e}"
-            )
-            raise HTTPException(
-                status_code=500, detail="Generated DOCX file is corrupted."
-            )
-
-        docx_bytes.seek(0)
-
-        print(
-            "Document saved successfully. Preparing to return as a downloadable file."
-        )
-
-        # Create a filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"report_{timestamp}.docx"
-
-        # Return the document as a downloadable file
+        print("DOCX file generated and ready for streaming.")
+        # Return as a streaming response
         return StreamingResponse(
-            docx_bytes,
+            file_stream,
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            headers={"Content-Disposition": f"attachment; filename={filename}"},
+            headers={
+                "Content-Disposition": f"attachment; filename=generated_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
+            },
         )
 
     except Exception as e:
-        import traceback
-
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error generating DOCX file: {str(e)}"
+        )
 
 
 @router.post("/generate/csv", response_class=StreamingResponse)

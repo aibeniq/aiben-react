@@ -85,15 +85,17 @@ def create_ensemble_retriever(
     Returns:
         An EnsembleRetriever that combines both approaches
     """
+    from app.core.config import settings
+
     if search_kwargs is None:
-        search_kwargs = {"k": 5}
+        search_kwargs = {"k": settings.RAG_NUM_CHUNKS}
 
     # Create the vector-based retriever from ChromaDB
     vector_retriever = chroma_db.as_retriever(search_kwargs=search_kwargs)
 
     # Create the keyword-based BM25 retriever
     keyword_retriever = BM25KeywordRetriever.from_chroma(
-        chroma_db, k=search_kwargs.get("k", 5)
+        chroma_db, k=search_kwargs.get("k", settings.RAG_NUM_CHUNKS)
     )
 
     # Combine them in an ensemble with specified weights
