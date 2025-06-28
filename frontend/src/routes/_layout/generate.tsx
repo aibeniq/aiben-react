@@ -9,6 +9,7 @@ import {
   Spinner,
   Accordion,
 } from "@chakra-ui/react"
+import { Radio, RadioGroup } from "../../components/ui/radio"
 import useCustomToast from "@/hooks/useCustomToast"
 import SourceLink from "@/components/Common/SourceLink"
 import DownloadButton from "@/components/ui/download-button"
@@ -55,6 +56,9 @@ const ReportGenie = () => {
   const [sectionResults, setSectionResults] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [expandedSection, setExpandedSection] = useState<number | null>(null)
+
+  // Search mode state
+  const [searchMode, setSearchMode] = useState("vector") // Default to vector search
 
   const handleCopyDocument = async () => {
     try {
@@ -243,6 +247,7 @@ const ReportGenie = () => {
       sections: sections,
       knowledgeBaseId: selectedKnowledgeBase.id,
       outlineId: selectedOutline?.id,
+      searchMode: searchMode, // Pass the selected search mode to the backend
     }
 
     setLoading(true)
@@ -318,6 +323,23 @@ const ReportGenie = () => {
               isSelected={!!selectedOutline}
               onClick={() => setShowOutlineModal(true)}
             />
+
+            {/* Add toggle for search mode */}
+            <Box>
+              <Text fontWeight="medium" mb={2}>
+                Search Mode
+              </Text>
+              <RadioGroup
+                onValueChange={(details) => setSearchMode(details.value)}
+                value={searchMode}
+                defaultValue="vector"
+              >
+                <HStack gap={4}>
+                  <Radio value="vector">Vector Search</Radio>
+                  <Radio value="full_text">Full Document Scan</Radio>
+                </HStack>
+              </RadioGroup>
+            </Box>
           </VStack>
         </HStack>
 

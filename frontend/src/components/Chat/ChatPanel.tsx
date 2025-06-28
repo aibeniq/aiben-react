@@ -5,21 +5,12 @@ import useCustomToast from "../../hooks/useCustomToast"
 import ChatMessage from "./ChatMessage"
 import KnowledgeBaseTable from "../KnowledgeBase/KnowledgeBaseTable"
 import SelectionModal from "../ui/selection-modal"
-import {
-  Button,
-  HStack,
-  IconButton,
-  Input,
-  Radio,
-  RadioGroup,
-  useDisclosure,
-  VStack,
-  Box,
-} from "@chakra-ui/react"
+import { Button, HStack, IconButton, Input, useDisclosure, VStack, Box } from "@chakra-ui/react"
 import { useEffect, useRef, useState } from "react"
 import { CloseButton } from "../ui/CloseButton"
 import { Drawer } from "../ui/Drawer"
 import { Portal } from "../ui/Portal"
+import { Radio, RadioGroup } from "../ui/radio"
 
 interface Message {
   role: "user" | "assistant"
@@ -67,14 +58,13 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
       <Button colorScheme="blue" onClick={handleSend} leftIcon={<FiSend />}>
         Send
       </Button>
-      <RadioGroup onChange={setSearchMode} value={searchMode}>
-        <HStack spacing={4}>
-          <Radio value="vector" icon={<FaBrain />}>
-            Vector
-          </Radio>
-          <Radio value="full_text" icon={<FiFileText />}>
-            Full Text
-          </Radio>
+      <RadioGroup
+        onValueChange={(details) => setSearchMode(details.value as "vector" | "full_text")}
+        value={searchMode}
+      >
+        <HStack gap={4}>
+          <Radio value="vector">Vector</Radio>
+          <Radio value="full_text">Full Text</Radio>
         </HStack>
       </RadioGroup>
     </HStack>
@@ -181,18 +171,15 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                         colorScheme="blue"
                       />
                     </HStack>
-                    <RadioGroup onChange={setSearchType} value={searchType}>
-                      <HStack spacing={4}>
-                        <Radio value="vector">
-                          <HStack spacing={1} alignItems="center">
-                            <FaBrain /> <Text fontSize="sm">Vector Search</Text>
-                          </HStack>
-                        </Radio>
-                        <Radio value="full_text">
-                          <HStack spacing={1} alignItems="center">
-                            <FiFileText /> <Text fontSize="sm">Full Text Scan</Text>
-                          </HStack>
-                        </Radio>
+                    <RadioGroup
+                      onValueChange={(details) =>
+                        setSearchType(details.value as "vector" | "full_text")
+                      }
+                      value={searchType}
+                    >
+                      <HStack gap={4}>
+                        <Radio value="vector">Vector Search</Radio>
+                        <Radio value="full_text">Full Text Scan</Radio>
                       </HStack>
                     </RadioGroup>
                   </VStack>

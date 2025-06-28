@@ -32,6 +32,7 @@ from langchain_community.vectorstores import Chroma
 import tempfile
 import os
 import zipfile
+import traceback
 from io import BytesIO
 import asyncio
 import uuid
@@ -723,8 +724,6 @@ async def query_knowledge_base(
 
     except Exception as e:
         # Don't delete the temp dir on error if it's cached
-        import traceback
-
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error querying knowledge base: {str(e)}"
@@ -767,7 +766,12 @@ async def query_document(
         )
 
     # Handle full text scan mode
-    if search_mode == "full_text" and file:
+    if search_mode == "full_text":
+        if not file:
+            raise HTTPException(
+                status_code=400,
+                detail="For full-text scan, please upload a document.",
+            )
         return await _handle_full_text_document_query(
             session,
             current_user,
@@ -980,8 +984,6 @@ async def query_document(
         }
 
     except Exception as e:
-        import traceback
-
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error querying document: {str(e)}"
@@ -1132,8 +1134,6 @@ async def chat(
             )
 
     except Exception as e:
-        import traceback
-
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error in chat: {str(e)}")
 

@@ -147,8 +147,9 @@ const ChatbotMain = () => {
           console.log("File changed, clearing session ID")
         }
         const formData = new FormData()
-        // Only send the file if this is NOT a follow-up question
-        if (!isFollowUp) {
+        // For full-text mode, always send the file since it's needed for each query
+        // For vector mode, only send the file if this is NOT a follow-up question
+        if (searchMode === "full_text" || !isFollowUp) {
           formData.append("file", uploadedFile)
         }
 
@@ -158,7 +159,7 @@ const ChatbotMain = () => {
           useDefaultModels: true,
           sessionId: sessionId,
           isFollowUp: isFollowUp === true,
-          formData: isFollowUp ? undefined : { file: uploadedFile },
+          formData: searchMode === "full_text" || !isFollowUp ? { file: uploadedFile } : undefined,
           searchMode: searchMode, // Pass the search mode
         })
 
