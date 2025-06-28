@@ -11,6 +11,9 @@ from app.models import (
     VeraDocDetailResponse,
     Message,
     User,
+    OptimizeChecklistRequest,
+    ChecklistSuggestion,
+    OptimizedChecklistResponse,
 )
 
 from app.api.deps import CurrentUser, SessionDep
@@ -40,20 +43,19 @@ import os
 import re
 from pathlib import Path
 import csv
+import zipfile
+import traceback
 from io import BytesIO, StringIO
 
 from datetime import datetime
 from starlette.requests import Request
 import tempfile
 import traceback
+import markdown
 from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
-import zipfile
-from io import BytesIO
 from docx import Document  # For .docx file handling
-from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-import markdown
 from bs4 import BeautifulSoup
 
 # Load environment variables from .env file
@@ -162,6 +164,75 @@ def generate_template(questions: List[str]) -> Dict[str, str]:
     Each field will have a blank value.
     """
     return {field: "" for field in questions}
+
+
+def parse_optimization_response(
+    llm_response: str, original_qa: dict
+) -> ChecklistSuggestion:
+    """Parse the LLM optimization response into a structured suggestion."""
+    try:
+        lines = llm_response.strip().split("\n")
+        revised_question = original_qa["question"]  # Default to original
+        reason = "No changes suggested"
+        needs_revision = False
+
+        for line in lines:
+            line = line.strip()
+            if line.startswith("REVISED_QUESTION:"):
+                revised_question = line.replace("REVISED_QUESTION:", "").strip()
+            elif line.startswith("REASON:"):
+                reason = line.replace("REASON:", "").strip()
+            elif line.startswith("NEEDS_REVISION:"):
+                needs_revision_str = line.replace("NEEDS_REVISION:", "").strip().lower()
+                needs_revision = needs_revision_str in ["yes", "true", "1"]
+
+        return ChecklistSuggestion(
+            original_question=original_qa["question"],
+            suggested_question=revised_question,
+            reason=reason,
+            current_answer=original_qa["answer"],
+            needs_revision=needs_revision,
+        )
+    except Exception as e:
+        print(f"Error parsing optimization response: {e}")
+        return ChecklistSuggestion(
+            original_question=original_qa["question"],
+            suggested_question=original_qa["question"],
+            reason=f"Error parsing suggestion: {str(e)}",
+            current_answer=original_qa["answer"],
+            needs_revision=False,
+        )
+
+
+def needs_optimization(answer: str) -> bool:
+    """Determine if a checklist question needs optimization based on the answer."""
+    answer_lower = answer.lower()
+    negative_indicators = [
+        "no",
+        "not",
+        "insufficient",
+        "missing",
+        "absent",
+        "lacks",
+        "does not",
+        "doesn't",
+        "cannot",
+        "can't",
+        "unable",
+        "fails",
+        "inadequate",
+        "incomplete",
+        "unclear",
+        "vague",
+        "poorly",
+    ]
+
+    # Check if any negative indicators are present
+    for indicator in negative_indicators:
+        if indicator in answer_lower:
+            return True
+
+    return False
 
 
 # Add the new endpoint
@@ -803,6 +874,235 @@ async def get_veradoc_detail(
         raise HTTPException(
             status_code=500, detail=f"Error retrieving evaluation details: {str(e)}"
         )
+
+
+@router.post("/optimize-checklist", response_model=OptimizedChecklistResponse)
+async def optimize_checklist(
+    session: SessionDep,
+    current_user: CurrentUser,
+    request_data: OptimizeChecklistRequest = Depends(),
+    files: List[UploadFile] = File(...),
+    request: FastAPIRequest = None,
+):
+    """
+    Optimize checklist questions by testing them against a document that should meet all requirements.
+    Suggests revisions for questions that resulted in negative answers.
+    """
+    print("optimize_checklist function invoked!")
+    cancellation_requested = False
+
+    try:
+        print("Setting up disconnect monitor for checklist optimization...")
+        disconnect_monitor = None
+        if request:
+
+            async def monitor_client_disconnect():
+                nonlocal cancellation_requested
+                try:
+                    await request.is_disconnected()
+                    print("Client disconnected, canceling optimization...")
+                    cancellation_requested = True
+                except asyncio.CancelledError:
+                    print("Disconnect monitor cancelled because main task completed")
+                except Exception as e:
+                    print(f"Error in disconnect monitoring: {str(e)}")
+
+            disconnect_monitor = asyncio.create_task(monitor_client_disconnect())
+
+        print("Starting checklist optimization...")
+
+        # 1. Retrieve knowledge base
+        kb = session.get(KnowledgeBase, request_data.knowledge_base_id)
+        if not kb:
+            raise HTTPException(status_code=404, detail="Knowledge base not found")
+
+        if kb.owner_id != current_user.id:
+            raise HTTPException(
+                status_code=403, detail="You don't have access to this knowledge base"
+            )
+
+        # 2. Set up the same infrastructure as process_rag_checklist
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Extract ChromaDB
+            if kb.data:
+                with zipfile.ZipFile(BytesIO(kb.data), "r") as zip_ref:
+                    zip_ref.extractall(temp_dir)
+            else:
+                raise HTTPException(
+                    status_code=400, detail="Knowledge base has no vector database data"
+                )
+
+            # Load embeddings and vector database
+            if kb.embedding_model_id:
+                embedding_model = session.get(EmbeddingModel, kb.embedding_model_id)
+                if embedding_model:
+                    model_id = embedding_model.model_id
+                    provider = embedding_model.provider
+                else:
+                    embedding_info = get_embedding_model(session, current_user)
+                    model_id = embedding_info["model_id"]
+                    provider = embedding_info["provider"]
+            else:
+                embedding_info = get_embedding_model(session, current_user)
+                model_id = embedding_info["model_id"]
+                provider = embedding_info["provider"]
+
+            embeddings = load_embeddings_model(provider=provider, model_id=model_id)
+            chroma_db = Chroma(
+                persist_directory=temp_dir, embedding_function=embeddings
+            )
+
+            # Create retriever
+            retriever = create_ensemble_retriever(
+                chroma_db=chroma_db,
+                vector_weight=0.7,
+                keyword_weight=0.3,
+                search_kwargs={"k": settings.RAG_NUM_CHUNKS},
+            )
+
+            # Initialize LLM
+            llm = get_default_llm(session, current_user)
+
+            # 3. Process the test document
+            file = files[0]
+            content = await file.read()
+            document_text = extract_text_from_file(content, file.filename)
+            print(
+                f"Processing test document: {file.filename} ({len(document_text)} characters)"
+            )
+
+            # 4. Run the review process with current questions
+            question_list = request_data.questions.strip().split("\n")
+            qa_results = []
+
+            context_prompt_template = settings.VERADOC_CONTEXT_PROMPT_TEMPLATE
+            qa_prompt_template = settings.VERADOC_QA_PROMPT_TEMPLATE
+            optimize_prompt_template = settings.VERADOC_OPTIMIZE_PROMPT_TEMPLATE
+
+            print(f"Evaluating {len(question_list)} questions...")
+
+            for question in question_list:
+                if cancellation_requested:
+                    print("Operation cancelled by client disconnect")
+                    raise HTTPException(
+                        status_code=408, detail="Operation cancelled by user"
+                    )
+
+                question = question.strip()
+                if not question:
+                    continue
+
+                # Get relevant context
+                docs = retriever.get_relevant_documents(question)
+                context = "\n\n".join([doc.page_content for doc in docs])
+
+                # Generate policy context
+                question_context = invoke_llm(
+                    llm,
+                    context_prompt_template,
+                    {"context": context, "question": question},
+                )
+
+                # Generate answer
+                answer = invoke_llm(
+                    llm,
+                    qa_prompt_template,
+                    {
+                        "document_text": document_text[:10000],
+                        "question": question,
+                        "question_context": question_context,
+                    },
+                )
+
+                qa_results.append(
+                    {
+                        "question": question,
+                        "answer": answer,
+                        "context": question_context,
+                    }
+                )
+
+                print(
+                    f"Question: {question[:50]}... -> {'NEEDS OPTIMIZATION' if needs_optimization(answer) else 'OK'}"
+                )
+
+            # 5. Generate optimization suggestions
+            suggestions = []
+            optimization_count = 0
+
+            for qa in qa_results:
+                if cancellation_requested:
+                    print("Operation cancelled by client disconnect")
+                    raise HTTPException(
+                        status_code=408, detail="Operation cancelled by user"
+                    )
+
+                if needs_optimization(qa["answer"]):
+                    optimization_count += 1
+                    print(
+                        f"Generating suggestion for question: {qa['question'][:50]}..."
+                    )
+
+                    # Generate optimization suggestion
+                    suggestion_response = invoke_llm(
+                        llm,
+                        optimize_prompt_template,
+                        {
+                            "original_question": qa["question"],
+                            "generated_answer": qa["answer"],
+                            "document_context": qa["context"],
+                        },
+                    )
+
+                    suggestion = parse_optimization_response(suggestion_response, qa)
+                    suggestions.append(suggestion)
+                else:
+                    # Question is already working well
+                    suggestions.append(
+                        ChecklistSuggestion(
+                            original_question=qa["question"],
+                            suggested_question=qa["question"],
+                            reason="Question already generates positive responses",
+                            current_answer=qa["answer"],
+                            needs_revision=False,
+                        )
+                    )
+
+            # 6. Compile results
+            original_questions = [qa["question"] for qa in qa_results]
+            optimized_questions = [s.suggested_question for s in suggestions]
+
+            analysis_summary = f"""
+Checklist Optimization Analysis:
+- Total questions evaluated: {len(original_questions)}
+- Questions needing optimization: {optimization_count}
+- Questions working well: {len(original_questions) - optimization_count}
+- Test document: {file.filename}
+
+The optimization process identified questions that resulted in negative responses when evaluating a document that should meet all requirements. Suggested revisions aim to make requirements more achievable while maintaining their intent.
+            """.strip()
+
+            print(
+                f"Optimization complete: {optimization_count}/{len(original_questions)} questions optimized"
+            )
+
+            return OptimizedChecklistResponse(
+                original_questions=original_questions,
+                suggestions=suggestions,
+                optimized_questions=optimized_questions,
+                analysis_summary=analysis_summary,
+            )
+
+    except Exception as e:
+        print("Error in checklist optimization:")
+        print(str(e))
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error optimizing checklist: {str(e)}"
+        )
+    finally:
+        if disconnect_monitor:
+            disconnect_monitor.cancel()
 
 
 @router.post("/generate/docx", response_class=StreamingResponse)

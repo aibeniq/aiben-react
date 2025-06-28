@@ -165,6 +165,8 @@ import type {
   VeradocGetVeradocHistoryResponse,
   VeradocGetVeradocDetailData,
   VeradocGetVeradocDetailResponse,
+  VeradocOptimizeChecklistData,
+  VeradocOptimizeChecklistResponse,
   VeradocGenerateDocxData,
   VeradocGenerateDocxResponse,
   VeradocGenerateCsvData,
@@ -2166,6 +2168,37 @@ export class VeradocService {
       path: {
         report_id: data.reportId,
       },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Optimize Checklist
+   * Optimize checklist questions by testing them against a document that should meet all requirements.
+   * Suggests revisions for questions that resulted in negative answers.
+   * @param data The data for the request.
+   * @param data.knowledgeBaseId
+   * @param data.questions
+   * @param data.formData
+   * @param data.targetAnswers
+   * @returns OptimizedChecklistResponse Successful Response
+   * @throws ApiError
+   */
+  public static optimizeChecklist(
+    data: VeradocOptimizeChecklistData,
+  ): CancelablePromise<VeradocOptimizeChecklistResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/veradoc/optimize-checklist",
+      query: {
+        knowledge_base_id: data.knowledgeBaseId,
+        questions: data.questions,
+        target_answers: data.targetAnswers,
+      },
+      formData: data.formData,
+      mediaType: "multipart/form-data",
       errors: {
         422: "Validation Error",
       },

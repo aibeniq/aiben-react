@@ -195,61 +195,127 @@ async def _handle_full_text_kb_query(
     all_chunk_analyses = []
     source_citations = []
 
+    print(f"Processing {len(sources)} sources from knowledge base {kb.title}")
+
     for source in sources:
+        print(f"Processing source: {source.name}")
         # Get source data
         source_data = session.get(SourceData, source.source_data_id)
         if not source_data:
+            print(f"No source data found for source {source.name}")
             continue
+
+        print(
+            f"Found source data for {source.name}, size: {len(source_data.data) if source_data.data else 0} bytes"
+        )
 
         # Extract text from the source
         try:
-            zip_data = BytesIO(source_data.data)
-            with zipfile.ZipFile(zip_data, "r") as zip_file:
-                file_content = ""
-                for file_name in zip_file.namelist():
-                    if file_name.endswith(".txt"):
-                        with zip_file.open(file_name) as f:
-                            file_content += f.read().decode("utf-8", errors="ignore")
+            # The source_data.data contains the file as a ZIP, we need to extract it first
+            from app.api.routes.veradoc import extract_text_from_file
 
-                if file_content.strip():
-                    # Chunk the text
-                    chunks = chunk_text(
-                        file_content, max_tokens=settings.RAG_DOCUMENT_CHUNK_SIZE
+            # Debug: Check the first few bytes of the data
+            data_header = source_data.data[:20] if source_data.data else b""
+            print(f"Data header for {source.name}: {data_header}")
+
+            # Check if this is actually a ZIP file
+            if not source_data.data.startswith(b"PK"):
+                print(
+                    f"WARNING: {source.name} does not appear to be a ZIP file, trying direct extraction"
+                )
+                file_content = extract_text_from_file(source_data.data, source.name)
+            else:
+                # Extract the file content from the ZIP
+                zip_data = BytesIO(source_data.data)
+                with zipfile.ZipFile(zip_data, "r") as zip_file:
+                    # Get the first file in the archive (there should only be one)
+                    file_info = zip_file.infolist()[0]
+                    print(f"Extracting file: {file_info.filename} from ZIP")
+                    raw_file_content = zip_file.read(file_info.filename)
+                    print(f"Extracted {len(raw_file_content)} bytes from ZIP")
+
+                    # Check the header of the extracted content
+                    extracted_header = (
+                        raw_file_content[:20] if raw_file_content else b""
+                    )
+                    print(f"Extracted file header: {extracted_header}")
+
+                    # Now extract text from the raw file content
+                    file_content = extract_text_from_file(raw_file_content, source.name)
+
+        except zipfile.BadZipFile as e:
+            print(f"Error extracting ZIP file for source {source.name}: {e}")
+            print(
+                f"Data starts with: {source_data.data[:50] if source_data.data else 'No data'}"
+            )
+            # Try direct extraction as fallback
+            try:
+                print(f"Attempting direct text extraction for {source.name}")
+                file_content = extract_text_from_file(source_data.data, source.name)
+            except Exception as fallback_e:
+                print(
+                    f"Fallback extraction also failed for {source.name}: {fallback_e}"
+                )
+                file_content = f"Failed to extract from {source.name}: ZIP error: {str(e)}, Direct error: {str(fallback_e)}"
+        except Exception as e:
+            print(f"Error extracting text from source {source.name}: {e}")
+            file_content = f"Failed to extract text from {source.name}: {str(e)}"
+
+        if (
+            file_content.strip()
+            and not file_content.startswith("Failed to extract")
+            and not file_content.startswith("Unable to extract")
+        ):
+            print(
+                f"Successfully extracted {len(file_content)} characters from {source.name}"
+            )
+            # Chunk the text
+            chunks = chunk_text(
+                file_content, max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE
+            )
+            print(f"Created {len(chunks)} chunks from {source.name}")
+
+            # Analyze each chunk
+            for i, chunk in enumerate(chunks):
+                try:
+                    print(f"Analyzing chunk {i+1}/{len(chunks)} from {source.name}")
+                    chunk_analysis = invoke_llm(
+                        llm,
+                        settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
+                        {"chunk": chunk, "question": rephrased_question},
                     )
 
-                    # Analyze each chunk
-                    for chunk in chunks:
-                        try:
-                            chunk_analysis = invoke_llm(
-                                llm,
-                                settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
-                                {"chunk": chunk, "question": rephrased_question},
-                            )
+                    if "No relevant information found" not in chunk_analysis:
+                        print(
+                            f"Found relevant information in chunk {i+1} from {source.name}"
+                        )
+                        all_chunk_analyses.append(chunk_analysis)
+                        source_citations.append(
+                            {
+                                "content": (
+                                    chunk[:300] + "..." if len(chunk) > 300 else chunk
+                                ),
+                                "metadata": {
+                                    "source": source.name,
+                                    "source_data_id": str(source.source_data_id),
+                                },
+                            }
+                        )
+                    else:
+                        print(
+                            f"No relevant information found in chunk {i+1} from {source.name}"
+                        )
+                except Exception as e:
+                    print(f"Error analyzing chunk {i+1} from {source.name}: {e}")
+                    continue
+        else:
+            print(
+                f"Could not extract text from source {source.name}: {file_content[:100] if file_content else 'No content'}"
+            )
 
-                            if "No relevant information found" not in chunk_analysis:
-                                all_chunk_analyses.append(chunk_analysis)
-                                source_citations.append(
-                                    {
-                                        "content": (
-                                            chunk[:300] + "..."
-                                            if len(chunk) > 300
-                                            else chunk
-                                        ),
-                                        "metadata": {
-                                            "source": source.name,
-                                            "source_data_id": str(
-                                                source.source_data_id
-                                            ),
-                                        },
-                                    }
-                                )
-                        except Exception as e:
-                            print(f"Error analyzing chunk: {e}")
-                            continue
-
-        except Exception as e:
-            print(f"Error processing source {source.name}: {e}")
-            continue
+    print(
+        f"Full text scan complete. Found {len(all_chunk_analyses)} relevant chunk analyses."
+    )
 
     if not all_chunk_analyses:
         final_answer = "I couldn't find relevant information to answer your question in the knowledge base."

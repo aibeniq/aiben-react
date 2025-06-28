@@ -194,6 +194,32 @@ class Settings(BaseSettings):
     Based on the question-and-answer pairs above, does the plan follow policy?
     """
 
+    VERADOC_OPTIMIZE_PROMPT_TEMPLATE: str = """
+    INSTRUCTION: 
+    You are an AI assistant that helps optimize review checklist questions to be more appropriate for document evaluation.
+
+    You have been given a checklist question and the answer that was generated when evaluating a document that SHOULD meet all requirements. If the answer indicates the requirement was NOT met (contains "no", "insufficient", "missing", etc.), you need to suggest a revised question that is less stringent but still meaningful.
+
+    ORIGINAL QUESTION:
+    {original_question}
+
+    GENERATED ANSWER:
+    {generated_answer}
+
+    DOCUMENT CONTEXT:
+    {document_context}
+
+    TASK:
+    If the answer suggests the requirement was not met, provide a revised question that would be more likely to result in a "yes" answer for similar documents, while still maintaining the intent of the original requirement.
+
+    If the answer already indicates the requirement was met, return the original question unchanged.
+
+    FORMAT YOUR RESPONSE EXACTLY AS FOLLOWS:
+    REVISED_QUESTION: [your revised question here]
+    REASON: [brief explanation of why you made this change]
+    NEEDS_REVISION: [yes/no]
+    """
+
     FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE: str = """
     Here is a template of the fields that I want you to extract from this document: {template}
     Here is the full text of a document: {document_text}
