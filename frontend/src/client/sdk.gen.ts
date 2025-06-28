@@ -10,6 +10,8 @@ import type {
   ChatQueryDocumentResponse,
   ChatQueryTextData,
   ChatQueryTextResponse,
+  ChatChatData,
+  ChatChatResponse,
   EmbeddingModelsGetAvailableProvidersResponse,
   EmbeddingModelsGetEmbeddingModelsData,
   EmbeddingModelsGetEmbeddingModelsResponse,
@@ -207,7 +209,7 @@ export class ChatService {
 
   /**
    * Query Document
-   * Query an uploaded document with a question using either vector search or full text scan.
+   * Query uploaded documents with a question using either vector search or full text scan.
    * @param data The data for the request.
    * @param data.question
    * @param data.chatHistory
@@ -264,6 +266,26 @@ export class ChatService {
         session_id: data.sessionId,
         is_follow_up: data.isFollowUp,
       },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Chat
+   * Main chat endpoint that routes to appropriate handlers based on context.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns QueryResponse Successful Response
+   * @throws ApiError
+   */
+  public static chat(data: ChatChatData): CancelablePromise<ChatChatResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/chat/",
+      body: data.requestBody,
+      mediaType: "application/json",
       errors: {
         422: "Validation Error",
       },
@@ -1255,6 +1277,7 @@ export class ReportgenieService {
    * @param data.knowledgeBaseId
    * @param data.sections
    * @param data.outlineId
+   * @param data.searchMode
    * @returns ReportGenieResponse Successful Response
    * @throws ApiError
    */
@@ -1268,6 +1291,7 @@ export class ReportgenieService {
         knowledge_base_id: data.knowledgeBaseId,
         sections: data.sections,
         outline_id: data.outlineId,
+        search_mode: data.searchMode,
       },
       errors: {
         422: "Validation Error",
