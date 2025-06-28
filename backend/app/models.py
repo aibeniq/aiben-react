@@ -591,3 +591,25 @@ class TwinCheckDetailResponse(SQLModel):
     comparison_topics: str
     results: TwinCheckDetailResults
     feedback: TwinCheckDetailFeedback
+
+
+# New models for VeraDoc checklist optimization
+class OptimizeChecklistRequest(SQLModel):
+    knowledge_base_id: str
+    questions: str  # Current checklist questions (newline-separated)
+    target_answers: str = "yes"  # Expected answers for the good document
+
+
+class ChecklistSuggestion(SQLModel):
+    original_question: str
+    suggested_question: str
+    reason: str
+    current_answer: str
+    needs_revision: bool
+
+
+class OptimizedChecklistResponse(SQLModel):
+    original_questions: List[str]
+    suggestions: List[ChecklistSuggestion]
+    optimized_questions: List[str]
+    analysis_summary: str

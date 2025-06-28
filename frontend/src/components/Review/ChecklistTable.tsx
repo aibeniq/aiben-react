@@ -13,10 +13,15 @@ interface ChecklistTableProps {
   onChecklistsUpdate: () => void
   questions: string
   isDisabled?: boolean
+  // New props for optimization
+  knowledgeBases?: any[]
+  selectedKnowledgeBase?: any
 }
 
 interface ChecklistTableHeaderProps {
   onCreateNew: () => void
+  onCopyQuestions: () => void
+  hasSelectedChecklist: boolean
 }
 
 interface ChecklistTableBodyProps {
@@ -29,7 +34,11 @@ interface ChecklistTableBodyProps {
   onDeleteChecklist: (checklist: VeraDocChecklist) => void
 }
 
-const ChecklistTableHeader = ({ onCreateNew }: ChecklistTableHeaderProps) => {
+const ChecklistTableHeader = ({
+  onCreateNew,
+  onCopyQuestions,
+  hasSelectedChecklist,
+}: ChecklistTableHeaderProps) => {
   return (
     <Table.Header position="sticky" top="0" bg="transparent" zIndex="1">
       <Table.Row>
@@ -40,10 +49,22 @@ const ChecklistTableHeader = ({ onCreateNew }: ChecklistTableHeaderProps) => {
         <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
           Description
         </Table.ColumnHeader>
-        <Table.ColumnHeader w="32" style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
-          <Button size="sm" onClick={onCreateNew} ml="auto" variant="ghost">
-            <FiPlus size={14} />
-          </Button>
+        <Table.ColumnHeader w="40" style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+          <HStack gap={1} ml="auto">
+            <IconButton
+              size="xs"
+              onClick={onCopyQuestions}
+              variant="ghost"
+              disabled={!hasSelectedChecklist}
+              aria-label="Copy questions as text"
+              title="Copy all questions as text"
+            >
+              <FiCopy size={12} />
+            </IconButton>
+            <Button size="sm" onClick={onCreateNew} variant="ghost">
+              <FiPlus size={14} />
+            </Button>
+          </HStack>
         </Table.ColumnHeader>
       </Table.Row>
     </Table.Header>
@@ -149,6 +170,8 @@ const ChecklistTable = ({
   onQuestionsChange,
   onChecklistsUpdate,
   isDisabled = false,
+  knowledgeBases: _knowledgeBases = [],
+  selectedKnowledgeBase = null,
 }: ChecklistTableProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [checklistName, setChecklistName] = useState("")
@@ -348,6 +371,21 @@ const ChecklistTable = ({
     setEditingChecklist(null)
   }
 
+  const handleCopyQuestions = async () => {
+    if (!selectedChecklist || !selectedChecklist.questions) {
+      showErrorToast("No questions to copy")
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(selectedChecklist.questions)
+      showSuccessToast("Questions copied to clipboard!")
+    } catch (error) {
+      console.error("Error copying questions:", error)
+      showErrorToast("Failed to copy questions to clipboard")
+    }
+  }
+
   return (
     <div style={{ opacity: isDisabled ? 0.3 : 1, pointerEvents: isDisabled ? "none" : "auto" }}>
       {/* Checklist Table */}
@@ -361,7 +399,11 @@ const ChecklistTable = ({
         }}
       >
         <Table.Root variant="line">
-          <ChecklistTableHeader onCreateNew={handleCreateNew} />
+          <ChecklistTableHeader
+            onCreateNew={handleCreateNew}
+            onCopyQuestions={handleCopyQuestions}
+            hasSelectedChecklist={!!selectedChecklist}
+          />
           <ChecklistTableBody
             checklists={checklists}
             selectedChecklist={selectedChecklist}
@@ -390,6 +432,8 @@ const ChecklistTable = ({
         removeQuestion={removeQuestion}
         moveQuestionUp={moveQuestionUp}
         moveQuestionDown={moveQuestionDown}
+        knowledgeBases={_knowledgeBases}
+        selectedKnowledgeBase={selectedKnowledgeBase}
       />
     </div>
   )

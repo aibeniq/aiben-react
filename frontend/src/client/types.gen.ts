@@ -32,6 +32,10 @@ export type Body_twincheck_compare_documents = {
   document2: Blob | File
 }
 
+export type Body_veradoc_optimize_checklist = {
+  files: Array<Blob | File>
+}
+
 export type Body_veradoc_process_rag_checklist = {
   files: Array<Blob | File>
   handwritten_files?: Array<Blob | File>
@@ -47,6 +51,14 @@ export type ChatRequest = {
   chat_history?: string | null
   session_id?: string | null
   is_follow_up?: boolean
+}
+
+export type ChecklistSuggestion = {
+  original_question: string
+  suggested_question: string
+  reason: string
+  current_answer: string
+  needs_revision: boolean
 }
 
 /**
@@ -223,6 +235,13 @@ export type ModelProvider =
 export type NewPassword = {
   token: string
   new_password: string
+}
+
+export type OptimizedChecklistResponse = {
+  original_questions: Array<string>
+  suggestions: Array<ChecklistSuggestion>
+  optimized_questions: Array<string>
+  analysis_summary: string
 }
 
 export type PrivateUserCreate = {
@@ -1001,6 +1020,15 @@ export type VeradocGetVeradocDetailData = {
 }
 
 export type VeradocGetVeradocDetailResponse = VeraDocDetailResponse
+
+export type VeradocOptimizeChecklistData = {
+  formData: Body_veradoc_optimize_checklist
+  knowledgeBaseId: string
+  questions: string
+  targetAnswers?: string
+}
+
+export type VeradocOptimizeChecklistResponse = OptimizedChecklistResponse
 
 export type VeradocGenerateDocxData = {
   requestBody: DocxRequest
