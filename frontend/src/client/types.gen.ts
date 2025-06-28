@@ -1007,3 +1007,9 @@ export type VeradocGenerateDocxData = {
 }
 
 export type VeradocGenerateDocxResponse = unknown
+
+export type VeradocGenerateCsvData = {
+  requestBody: DocxRequest
+}
+
+export type VeradocGenerateCsvResponse = unknown

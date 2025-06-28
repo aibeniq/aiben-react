@@ -190,23 +190,42 @@ function Archive() {
   // Add CSV download function
   const handleDownloadCsv = async () => {
     const selectedReport = getSelectedReport()
-    if (!selectedReport || activeTab !== "generate") return
+    if (!selectedReport) return
 
     try {
       setLoadingCsvDownload(true)
       console.log("Starting CSV download...")
       console.log("Selected report:", selectedReport)
 
-      // Prepare the sections data for CSV generation
-      const csvData = {
-        sections: selectedReport.results?.sections || [],
-      }
-      console.log("CSV data to send:", csvData)
-      console.log("Number of sections:", csvData.sections.length)
+      let response
 
-      const response = await ReportgenieService.generateCsv({
-        requestBody: { content: JSON.stringify(csvData) },
-      })
+      if (activeTab === "generate") {
+        // ReportGenie CSV download
+        const csvData = {
+          sections: selectedReport.results?.sections || [],
+        }
+        console.log("CSV data to send:", csvData)
+        console.log("Number of sections:", csvData.sections.length)
+
+        response = await ReportgenieService.generateCsv({
+          requestBody: { content: JSON.stringify(csvData) },
+        })
+      } else if (activeTab === "review") {
+        // VeraDoc CSV download
+        const csvData = {
+          qa_pairs: selectedReport.results?.qa_pairs || [],
+          final_evaluation: selectedReport.results?.final_evaluation || "",
+        }
+        console.log("VeraDoc CSV data to send:", csvData)
+        console.log("Number of QA pairs:", csvData.qa_pairs.length)
+
+        response = await VeradocService.generateCsv({
+          requestBody: { content: JSON.stringify(csvData) },
+        })
+      } else {
+        showErrorToast("CSV download not available for this type of report")
+        return
+      }
 
       console.log("Received CSV response:", response)
       console.log("Response type:", typeof response)
@@ -236,7 +255,8 @@ function Archive() {
 
       const a = document.createElement("a")
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
-      const filename = `report_${timestamp}.csv`
+      const filename =
+        activeTab === "generate" ? `report_${timestamp}.csv` : `veradoc_review_${timestamp}.csv`
 
       a.href = url
       a.download = filename
@@ -347,7 +367,7 @@ function Archive() {
         onCopyReport={handleCopyReport}
         onDownloadReport={handleDownloadReport}
         onDownloadCsv={handleDownloadCsv}
-        showCsvDownload={activeTab === "generate"}
+        showCsvDownload={activeTab === "generate" || activeTab === "review"}
         onFeedbackSubmitted={(type) => {
           showSuccessToast(`Thank you for marking this response as ${type}!`)
         }}

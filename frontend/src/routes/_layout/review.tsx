@@ -45,6 +45,7 @@ const VeraDoc = () => {
   const [showChecklistModal, setShowChecklistModal] = useState(false)
   const [copySuccess, setCopySuccess] = useState(false)
   const [loadingDownload, setLoadingDownload] = useState(false)
+  const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
 
   const [questions, setQuestions] = useState("")
 
@@ -160,6 +161,61 @@ const VeraDoc = () => {
       showErrorToast(`Failed to download evaluation: ${err.message || "Unknown error"}`)
     } finally {
       setLoadingDownload(false)
+    }
+  }
+
+  const handleDownloadCsv = async () => {
+    try {
+      setLoadingCsvDownload(true)
+
+      const activeTabIndex = activeTab
+      const activeResult = results[activeTabIndex]
+
+      if (!activeResult) {
+        showErrorToast("No active result to download")
+        return
+      }
+
+      // Prepare the data for CSV generation
+      const csvData = {
+        qa_pairs: activeResult.qaPairs,
+        final_evaluation: activeResult.displayResults,
+      }
+
+      const response = await VeradocService.generateCsv({
+        requestBody: { content: JSON.stringify(csvData) },
+      })
+
+      let blob
+      if (response instanceof Blob) {
+        blob = response
+      } else if (response instanceof ArrayBuffer) {
+        blob = new Blob([response], {
+          type: "text/csv",
+        })
+      } else {
+        blob = new Blob([response as any], {
+          type: "text/csv",
+        })
+      }
+
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+      const filename = activeResult.filename.replace(/[^a-zA-Z0-9]/g, "_")
+      a.href = url
+      a.download = `VeraDoc_Review_${filename}_${timestamp}.csv`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      showSuccessToast("CSV downloaded successfully")
+    } catch (err: any) {
+      console.error("Failed to download CSV:", err)
+      showErrorToast(`Failed to download CSV: ${err.message || "Unknown error"}`)
+    } finally {
+      setLoadingCsvDownload(false)
     }
   }
 
@@ -701,6 +757,14 @@ const VeraDoc = () => {
                       loading={loadingDownload}
                     >
                       Download DOCX
+                    </DownloadButton>
+
+                    <DownloadButton
+                      size="sm"
+                      onClick={handleDownloadCsv}
+                      loading={loadingCsvDownload}
+                    >
+                      Download CSV
                     </DownloadButton>
                   </HStack>
                 )}

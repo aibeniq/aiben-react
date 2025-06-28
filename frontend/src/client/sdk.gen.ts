@@ -167,6 +167,8 @@ import type {
   VeradocGetVeradocDetailResponse,
   VeradocGenerateDocxData,
   VeradocGenerateDocxResponse,
+  VeradocGenerateCsvData,
+  VeradocGenerateCsvResponse,
 } from "./types.gen"
 
 export class ChatService {
@@ -2184,6 +2186,30 @@ export class VeradocService {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/veradoc/generate/docx",
+      body: data.requestBody,
+      responseType: 'blob',
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Generate Csv
+   * Generate a CSV file from VeraDoc review results with columns for:
+   * Checklist Question, Policy Context, Citations, Answer, and Final Evaluation.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static generateCsv(
+    data: VeradocGenerateCsvData,
+  ): CancelablePromise<VeradocGenerateCsvResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/veradoc/generate/csv",
       body: data.requestBody,
       responseType: 'blob',
       mediaType: "application/json",

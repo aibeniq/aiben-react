@@ -39,6 +39,8 @@ import json
 import os
 import re
 from pathlib import Path
+import csv
+from io import BytesIO, StringIO
 
 from datetime import datetime
 from starlette.requests import Request
@@ -944,3 +946,126 @@ async def generate_docx(
 
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
+
+
+@router.post("/generate/csv", response_class=StreamingResponse)
+async def generate_csv(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a CSV file from VeraDoc review results with columns for:
+    Checklist Question, Policy Context, Citations, Answer, and Final Evaluation.
+    """
+    print("Now generating CSV of VeraDoc review...")
+    try:
+        # Get the content from the request - this should be the full review JSON
+        if not request.content:
+            raise HTTPException(status_code=400, detail="Review content is required")
+
+        # Create CSV content
+        csv_buffer = StringIO()
+        csv_writer = csv.writer(csv_buffer)
+
+        # Write header with VeraDoc-specific columns
+        csv_writer.writerow(
+            [
+                "Checklist Question",
+                "Policy Context",
+                "Citations",
+                "Answer",
+                "Final Evaluation",
+            ]
+        )
+
+        try:
+            # Parse the content as JSON (review data)
+            data = json.loads(request.content)
+
+            # Extract QA pairs and final evaluation
+            qa_pairs = data.get("qa_pairs", [])
+            final_evaluation = data.get(
+                "final_evaluation", "No final evaluation provided"
+            )
+
+            # Process each QA pair
+            for qa in qa_pairs:
+                question = qa.get("question", "")
+                answer = qa.get("answer", "")
+                context = qa.get("context", "")
+
+                # Extract citations
+                citations = []
+                if "source_citations" in qa:
+                    for citation in qa["source_citations"]:
+                        source_name = "Unknown"
+                        if citation.get("metadata", {}).get("source"):
+                            source_path = citation["metadata"]["source"]
+                            # Extract filename from path
+                            source_name = source_path.split("/")[-1].split("\\")[-1]
+                            # Remove UUID prefix if present
+                            if "_" in source_name:
+                                source_name = source_name.split("_", 1)[1]
+
+                        citation_text = (
+                            citation.get("content", "")
+                            .replace("\n", " ")
+                            .replace("\r", " ")
+                        )
+                        citations.append(f"{source_name}: {citation_text}")
+
+                citations_text = " | ".join(citations) if citations else "No citations"
+
+                # Clean up text fields
+                question_clean = question.replace("\n", " ").replace("\r", " ")
+                answer_clean = answer.replace("\n", " ").replace("\r", " ")
+                context_clean = context.replace("\n", " ").replace("\r", " ")
+
+                # For the final evaluation, we'll include it for each row
+                # (since it's a summary of all QA pairs)
+                final_eval_clean = final_evaluation.replace("\n", " ").replace(
+                    "\r", " "
+                )
+
+                # Write row
+                csv_writer.writerow(
+                    [
+                        question_clean,
+                        context_clean,
+                        citations_text,
+                        answer_clean,
+                        final_eval_clean,
+                    ]
+                )
+
+        except json.JSONDecodeError:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid content format. Expected JSON with VeraDoc review data.",
+            )
+
+        # Get CSV content
+        csv_content = csv_buffer.getvalue()
+        csv_buffer.close()
+
+        # Create BytesIO object for the response
+        csv_bytes = BytesIO(csv_content.encode("utf-8"))
+        csv_bytes.seek(0)
+
+        print("VeraDoc CSV file generated successfully.")
+
+        # Create filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"veradoc_review_{timestamp}.csv"
+
+        # Return the CSV as a downloadable file
+        return StreamingResponse(
+            csv_bytes,
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generating CSV: {str(e)}")
