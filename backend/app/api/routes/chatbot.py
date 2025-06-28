@@ -18,6 +18,7 @@ from app.models import (
     EmbeddingModel,
     LlmModel,
     Source as SourceORM,
+    SourceData,
     User,
 )
 from app.core.config import settings
@@ -40,6 +41,18 @@ import threading
 from pathlib import Path
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+
+
+# Request models for chat endpoints
+class ChatRequest(BaseModel):
+    """Request model for general chat endpoint"""
+
+    prompt: str
+    knowledge_base_id: Optional[str] = None
+    search_type: str = "vector"  # "vector" or "full_text"
+    chat_history: Optional[str] = None
+    session_id: Optional[str] = None
+    is_follow_up: bool = False
 
 
 # Response models for chatbot endpoints
@@ -128,6 +141,278 @@ class SessionCache:
 session_cache = SessionCache()
 
 
+async def _handle_full_text_kb_query(
+    session: SessionDep,
+    current_user: CurrentUser,
+    kb_id: str,
+    question: str,
+    chat_history: str = None,
+    use_default_models: bool = False,
+    session_id: str = None,
+    is_follow_up: bool = False,
+):
+    """Handle full text scan for knowledge base query."""
+    from app.services.text_processing import chunk_text
+
+    # Get the knowledge base
+    kb = session.get(KnowledgeBase, kb_id)
+    if not kb:
+        raise HTTPException(status_code=404, detail="Knowledge base not found")
+
+    # Check access rights
+    if kb.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="You don't have access to this knowledge base",
+        )
+
+    # Get LLM
+    llm = get_default_llm(session, current_user)
+
+    # Rephrase the question using chat history if available
+    if chat_history:
+        rephrased_question = rephrase_question_with_context(llm, chat_history, question)
+    else:
+        rephrased_question = question
+
+    # Get all source files from the knowledge base
+    sources = session.exec(
+        select(SourceORM).where(SourceORM.knowledge_base_id == kb.id)
+    ).all()
+
+    if not sources:
+        raise HTTPException(
+            status_code=404, detail="No sources found in knowledge base"
+        )
+
+    # Extract text from all files and process chunks
+    all_chunk_analyses = []
+    source_citations = []
+
+    for source in sources:
+        # Get source data
+        source_data = session.get(SourceData, source.source_data_id)
+        if not source_data:
+            continue
+
+        # Extract text from the source
+        try:
+            zip_data = BytesIO(source_data.data)
+            with zipfile.ZipFile(zip_data, "r") as zip_file:
+                file_content = ""
+                for file_name in zip_file.namelist():
+                    if file_name.endswith(".txt"):
+                        with zip_file.open(file_name) as f:
+                            file_content += f.read().decode("utf-8", errors="ignore")
+
+                if file_content.strip():
+                    # Chunk the text
+                    chunks = chunk_text(
+                        file_content, max_tokens=settings.RAG_DOCUMENT_CHUNK_SIZE
+                    )
+
+                    # Analyze each chunk
+                    for chunk in chunks:
+                        try:
+                            chunk_analysis = invoke_llm(
+                                llm,
+                                settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
+                                {"chunk": chunk, "question": rephrased_question},
+                            )
+
+                            if "No relevant information found" not in chunk_analysis:
+                                all_chunk_analyses.append(chunk_analysis)
+                                source_citations.append(
+                                    {
+                                        "content": (
+                                            chunk[:300] + "..."
+                                            if len(chunk) > 300
+                                            else chunk
+                                        ),
+                                        "metadata": {
+                                            "source": source.name,
+                                            "source_data_id": str(
+                                                source.source_data_id
+                                            ),
+                                        },
+                                    }
+                                )
+                        except Exception as e:
+                            print(f"Error analyzing chunk: {e}")
+                            continue
+
+        except Exception as e:
+            print(f"Error processing source {source.name}: {e}")
+            continue
+
+    if not all_chunk_analyses:
+        final_answer = "I couldn't find relevant information to answer your question in the knowledge base."
+        sources = []
+    else:
+        # Synthesize all chunk analyses
+        chunk_analyses_text = "\n\n".join(
+            [
+                f"Analysis {i+1}: {analysis}"
+                for i, analysis in enumerate(all_chunk_analyses)
+            ]
+        )
+
+        final_answer = invoke_llm(
+            llm,
+            settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+            {"question": rephrased_question, "chunk_analyses": chunk_analyses_text},
+        )
+
+    # Record the interaction
+    record_llm_interaction(
+        session=session,
+        user_id=current_user.id,
+        functionality="chatbot_full_text",
+        input_data={
+            "question": question,
+            "rephrased_question": rephrased_question,
+            "kb_id": kb_id,
+            "search_mode": "full_text",
+        },
+        output_data=final_answer,
+        metadata={
+            "session_id": session_id,
+            "is_follow_up": is_follow_up,
+            "chunk_count": len(all_chunk_analyses),
+        },
+    )
+
+    return {
+        "answer": final_answer,
+        "sources": source_citations,
+        "session_id": session_id,
+        "rephrased_question": rephrased_question,
+    }
+
+
+async def _handle_full_text_document_query(
+    session: SessionDep,
+    current_user: CurrentUser,
+    file: UploadFile,
+    question: str,
+    chat_history: str = None,
+    use_default_models: bool = False,
+    session_id: str = None,
+    is_follow_up: bool = False,
+):
+    """Handle full text scan for document query."""
+    from app.services.text_processing import chunk_text
+
+    # Get LLM
+    llm = get_default_llm(session, current_user)
+
+    # Rephrase the question using chat history if available
+    if chat_history:
+        rephrased_question = rephrase_question_with_context(llm, chat_history, question)
+    else:
+        rephrased_question = question
+
+    # Save uploaded file temporarily and extract text
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_file.write(await file.read())
+        temp_path = temp_file.name
+
+    try:
+        # Extract text from file
+        if file.filename.endswith(".pdf"):
+            loader = PyPDFLoader(temp_path)
+        else:
+            loader = TextLoader(temp_path)
+
+        documents = loader.load()
+        full_text = "\n\n".join([doc.page_content for doc in documents])
+
+        # Chunk the text
+        chunks = chunk_text(
+            full_text, max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE
+        )
+
+        # Analyze each chunk
+        chunk_analyses = []
+        source_citations = []
+
+        for i, chunk in enumerate(chunks):
+            try:
+                chunk_analysis = invoke_llm(
+                    llm,
+                    settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
+                    {"chunk": chunk, "question": rephrased_question},
+                )
+
+                if "No relevant information found" not in chunk_analysis:
+                    chunk_analyses.append(chunk_analysis)
+                    source_citations.append(
+                        {
+                            "content": (
+                                chunk[:300] + "..." if len(chunk) > 300 else chunk
+                            ),
+                            "metadata": {
+                                "source": file.filename,
+                                "chunk": i + 1,
+                            },
+                        }
+                    )
+            except Exception as e:
+                print(f"Error analyzing chunk {i}: {e}")
+                continue
+
+        if not chunk_analyses:
+            final_answer = "I couldn't find relevant information to answer your question in the document."
+            sources = []
+        else:
+            # Synthesize all chunk analyses
+            chunk_analyses_text = "\n\n".join(
+                [
+                    f"Analysis {i+1}: {analysis}"
+                    for i, analysis in enumerate(chunk_analyses)
+                ]
+            )
+
+            final_answer = invoke_llm(
+                llm,
+                settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+                {"question": rephrased_question, "chunk_analyses": chunk_analyses_text},
+            )
+
+        # Record the interaction
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="chatbot_full_text",
+            input_data={
+                "question": question,
+                "rephrased_question": rephrased_question,
+                "document": file.filename,
+                "search_mode": "full_text",
+            },
+            output_data=final_answer,
+            metadata={
+                "session_id": session_id,
+                "is_follow_up": is_follow_up,
+                "chunk_count": len(chunk_analyses),
+            },
+        )
+
+        return {
+            "answer": final_answer,
+            "sources": source_citations,
+            "session_id": session_id,
+            "rephrased_question": rephrased_question,
+        }
+
+    finally:
+        # Clean up temp file
+        try:
+            os.unlink(temp_path)
+        except Exception as e:
+            print(f"Error removing temporary file: {e}")
+
+
 def rephrase_question_with_context(llm, chat_history, current_question):
     """Rephrase the user's latest question considering previous chat context"""
 
@@ -166,17 +451,39 @@ async def query_knowledge_base(
     use_default_models: bool = False,
     session_id: str = None,
     is_follow_up: bool = False,
+    search_mode: str = "vector",  # Add search mode parameter
 ):
-    """Query a knowledge base with a question."""
+    """Query a knowledge base with a question using either vector search or full text scan."""
     try:
         print(
-            f"Received request - session_id: {session_id}, is_follow_up: {is_follow_up}"
+            f"Received request - session_id: {session_id}, is_follow_up: {is_follow_up}, search_mode: {search_mode}"
         )
 
         # Generate a session ID if not provided
         if not session_id:
             session_id = str(uuid.uuid4())
 
+        # Validate search mode
+        if search_mode not in ["vector", "full_text"]:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid search mode. Must be 'vector' or 'full_text'",
+            )
+
+        # Handle full text scan mode
+        if search_mode == "full_text":
+            return await _handle_full_text_kb_query(
+                session,
+                current_user,
+                kb_id,
+                question,
+                chat_history,
+                use_default_models,
+                session_id,
+                is_follow_up,
+            )
+
+        # Continue with existing vector search implementation
         # Check if we have a cached retriever for this session
         cached_data = session_cache.get(session_id)
         print(
@@ -433,9 +740,10 @@ async def query_document(
     use_default_models: bool = False,
     session_id: str = None,
     is_follow_up: bool = False,
+    search_mode: str = "vector",  # Add search mode parameter
     file: UploadFile = File(None),
 ):
-    """Query an uploaded document with a question."""
+    """Query an uploaded document with a question using either vector search or full text scan."""
     if not question:
         raise HTTPException(status_code=400, detail="Question is required")
 
@@ -451,6 +759,27 @@ async def query_document(
             status_code=400, detail="File is required for initial questions"
         )
 
+    # Validate search mode
+    if search_mode not in ["vector", "full_text"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid search mode. Must be 'vector' or 'full_text'",
+        )
+
+    # Handle full text scan mode
+    if search_mode == "full_text" and file:
+        return await _handle_full_text_document_query(
+            session,
+            current_user,
+            file,
+            question,
+            chat_history,
+            use_default_models,
+            session_id,
+            is_follow_up,
+        )
+
+    # Continue with existing vector search implementation
     try:
         # Check if we have a cached retriever for this session
         retriever = None
@@ -667,18 +996,6 @@ async def query_document(
                 print(f"Error removing temporary file: {e}")
 
 
-# Add a cleanup task that runs periodically
-@router.on_event("startup")
-async def startup_event():
-    async def cleanup_sessions():
-        while True:
-            await asyncio.sleep(1800)  # 30 minutes
-            session_cache.cleanup()
-            print("Session cache cleanup performed")
-
-    asyncio.create_task(cleanup_sessions())
-
-
 @router.post("/text", response_model=TextQueryResponse)
 async def query_text(
     session: SessionDep,
@@ -768,3 +1085,66 @@ async def query_text(
         raise HTTPException(
             status_code=500, detail=f"Error processing question: {str(e)}"
         )
+
+
+@router.post("/", response_model=QueryResponse)
+async def chat(
+    session: SessionDep,
+    current_user: CurrentUser,
+    request: ChatRequest,
+):
+    """Main chat endpoint that routes to appropriate handlers based on context."""
+    try:
+        print(f"Received chat request: {request}")
+
+        # Generate session ID if not provided
+        session_id = request.session_id or str(uuid.uuid4())
+
+        if request.knowledge_base_id:
+            # Route to knowledge base query
+            return await query_knowledge_base(
+                session=session,
+                current_user=current_user,
+                kb_id=request.knowledge_base_id,
+                question=request.prompt,
+                chat_history=request.chat_history,
+                session_id=session_id,
+                is_follow_up=request.is_follow_up,
+                search_mode=request.search_type,
+            )
+        else:
+            # Route to text query (general chat without KB)
+            response = await query_text(
+                session=session,
+                current_user=current_user,
+                question=request.prompt,
+                chat_history=request.chat_history,
+                session_id=session_id,
+                is_follow_up=request.is_follow_up,
+            )
+
+            # Convert TextQueryResponse to QueryResponse format
+            return QueryResponse(
+                answer=response.answer,
+                sources=[],  # Text queries don't have sources
+                session_id=response.session_id,
+                rephrased_question=response.rephrased_question,
+            )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error in chat: {str(e)}")
+
+
+# Add a cleanup task that runs periodically
+@router.on_event("startup")
+async def startup_event():
+    async def cleanup_sessions():
+        while True:
+            await asyncio.sleep(1800)  # 30 minutes
+            session_cache.cleanup()
+            print("Session cache cleanup performed")
+
+    asyncio.create_task(cleanup_sessions())

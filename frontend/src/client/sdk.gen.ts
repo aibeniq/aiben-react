@@ -170,7 +170,7 @@ import type {
 export class ChatService {
   /**
    * Query Knowledge Base
-   * Query a knowledge base with a question.
+   * Query a knowledge base with a question using either vector search or full text scan.
    * @param data The data for the request.
    * @param data.kbId
    * @param data.question
@@ -178,6 +178,7 @@ export class ChatService {
    * @param data.useDefaultModels
    * @param data.sessionId
    * @param data.isFollowUp
+   * @param data.searchMode
    * @returns QueryResponse Successful Response
    * @throws ApiError
    */
@@ -196,6 +197,7 @@ export class ChatService {
         use_default_models: data.useDefaultModels,
         session_id: data.sessionId,
         is_follow_up: data.isFollowUp,
+        search_mode: data.searchMode,
       },
       errors: {
         422: "Validation Error",
@@ -205,13 +207,14 @@ export class ChatService {
 
   /**
    * Query Document
-   * Query an uploaded document with a question.
+   * Query an uploaded document with a question using either vector search or full text scan.
    * @param data The data for the request.
    * @param data.question
    * @param data.chatHistory
    * @param data.useDefaultModels
    * @param data.sessionId
    * @param data.isFollowUp
+   * @param data.searchMode
    * @param data.formData
    * @returns DocumentQueryResponse Successful Response
    * @throws ApiError
@@ -228,6 +231,7 @@ export class ChatService {
         use_default_models: data.useDefaultModels,
         session_id: data.sessionId,
         is_follow_up: data.isFollowUp,
+        search_mode: data.searchMode,
       },
       formData: data.formData,
       mediaType: "multipart/form-data",
