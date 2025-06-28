@@ -31,6 +31,11 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
     return source
   }
 
+  // Filter for sections that have source citations to display them separately
+  const sectionsWithSources = sections.filter(
+    (section: any) => section.consult_documents !== false && section.source_citations?.length > 0,
+  )
+
   return (
     <>
       {results && (
@@ -40,12 +45,12 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
       )}
 
       {/* Render sections with citations if present */}
-      {sections.length > 0 && (
+      {sectionsWithSources.length > 0 && (
         <Box mt={8}>
           <Heading as="h3" size="md" mb={4}>
             Sections with Sources
           </Heading>
-          {sections.map((section: any, index: number) => (
+          {sectionsWithSources.map((section: any, index: number) => (
             <Box
               key={index}
               mb={6}
@@ -78,41 +83,6 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
                     Section {index + 1}: {section.title}
                   </Text>
                 </HStack>
-                <HStack>
-                  {section.consult_documents !== false ? (
-                    <Box
-                      as="span"
-                      fontSize="xs"
-                      color="green.600"
-                      bg="green.50"
-                      px={2}
-                      py={1}
-                      borderRadius="md"
-                      display="flex"
-                      alignItems="center"
-                      gap={1}
-                    >
-                      <Box as="span">🔍</Box>
-                      <Text>KB Generated</Text>
-                    </Box>
-                  ) : (
-                    <Box
-                      as="span"
-                      fontSize="xs"
-                      color="gray.600"
-                      bg="gray.50"
-                      px={2}
-                      py={1}
-                      borderRadius="md"
-                      display="flex"
-                      alignItems="center"
-                      gap={1}
-                    >
-                      <Box as="span">📝</Box>
-                      <Text>Raw Text</Text>
-                    </Box>
-                  )}
-                </HStack>
               </Heading>
 
               {expandedSection === index && (
@@ -121,63 +91,61 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
                     <Text whiteSpace="pre-wrap">{section.content}</Text>
                   </Box>
 
-                  {section.source_citations &&
-                    section.source_citations.length > 0 &&
-                    section.consult_documents !== false && (
-                      <Accordion.Root multiple>
-                        <Accordion.Item value={`citations-${index}`}>
-                          <h2>
-                            <Accordion.ItemTrigger bg="surface" _hover={{ bg: "panel" }}>
-                              <Box flex="1" textAlign="left" fontWeight="medium">
-                                <HStack>
-                                  <FiFileText />
-                                  <Text>
-                                    View Source Citations ({section.source_citations.length})
-                                  </Text>
-                                </HStack>
-                              </Box>
-                            </Accordion.ItemTrigger>
-                          </h2>
-                          <Accordion.ItemContent pb={4} bg="surface">
-                            {section.source_citations.map((citation: any, cIndex: number) => (
+                  {section.source_citations && section.source_citations.length > 0 && (
+                    <Accordion.Root multiple>
+                      <Accordion.Item value={`citations-${index}`}>
+                        <h2>
+                          <Accordion.ItemTrigger bg="surface" _hover={{ bg: "panel" }}>
+                            <Box flex="1" textAlign="left" fontWeight="medium">
+                              <HStack>
+                                <FiFileText />
+                                <Text>
+                                  View Source Citations ({section.source_citations.length})
+                                </Text>
+                              </HStack>
+                            </Box>
+                          </Accordion.ItemTrigger>
+                        </h2>
+                        <Accordion.ItemContent pb={4} bg="surface">
+                          {section.source_citations.map((citation: any, cIndex: number) => (
+                            <Box
+                              key={cIndex}
+                              p={3}
+                              mb={2}
+                              borderWidth="1px"
+                              borderRadius="md"
+                              bg="bg"
+                            >
+                              {citation.metadata?.source_data_id ? (
+                                <SourceLink
+                                  sourceId={citation.metadata.source_data_id}
+                                  fileName={getDisplayFileName(citation.metadata.source)}
+                                  ml={1}
+                                  fontWeight="normal"
+                                  color="blue.600"
+                                  useModal={true}
+                                />
+                              ) : (
+                                <Text as="span" ml={1} fontWeight="normal" color="blue.600">
+                                  {getDisplayFileName(citation.metadata?.source || "Unknown")}
+                                </Text>
+                              )}
                               <Box
-                                key={cIndex}
-                                p={3}
-                                mb={2}
-                                borderWidth="1px"
-                                borderRadius="md"
-                                bg="bg"
+                                mt={2}
+                                p={2}
+                                bg="surface"
+                                borderRadius="sm"
+                                fontSize="sm"
+                                whiteSpace="pre-wrap"
                               >
-                                {citation.metadata?.source_data_id ? (
-                                  <SourceLink
-                                    sourceId={citation.metadata.source_data_id}
-                                    fileName={getDisplayFileName(citation.metadata.source)}
-                                    ml={1}
-                                    fontWeight="normal"
-                                    color="blue.600"
-                                    useModal={true}
-                                  />
-                                ) : (
-                                  <Text as="span" ml={1} fontWeight="normal" color="blue.600">
-                                    {getDisplayFileName(citation.metadata?.source || "Unknown")}
-                                  </Text>
-                                )}
-                                <Box
-                                  mt={2}
-                                  p={2}
-                                  bg="surface"
-                                  borderRadius="sm"
-                                  fontSize="sm"
-                                  whiteSpace="pre-wrap"
-                                >
-                                  {citation.content}
-                                </Box>
+                                {citation.content}
                               </Box>
-                            ))}
-                          </Accordion.ItemContent>
-                        </Accordion.Item>
-                      </Accordion.Root>
-                    )}
+                            </Box>
+                          ))}
+                        </Accordion.ItemContent>
+                      </Accordion.Item>
+                    </Accordion.Root>
+                  )}
                 </>
               )}
             </Box>
