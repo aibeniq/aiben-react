@@ -45,8 +45,10 @@ from starlette.requests import Request
 import tempfile
 import traceback
 from langchain_community.vectorstores import Chroma
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
 import zipfile
 from io import BytesIO
+from docx import Document  # For .docx file handling
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import markdown
@@ -70,6 +72,81 @@ else:
     print(
         "WARNING: OPENAI_API_KEY is not set in environment variables. Some FormConnect features will be limited."
     )
+
+
+def extract_text_from_file(file_content: bytes, filename: str) -> str:
+    """Extract text from various file formats."""
+    try:
+        # Determine file type from extension
+        file_ext = Path(filename).suffix.lower()
+
+        if file_ext == ".pdf":
+            # Handle PDF files
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+                temp_file.write(file_content)
+                temp_file_path = temp_file.name
+
+            try:
+                loader = PyPDFLoader(temp_file_path)
+                documents = loader.load()
+                text = "\n\n".join([doc.page_content for doc in documents])
+                return text
+            finally:
+                os.unlink(temp_file_path)
+
+        elif file_ext in [".docx", ".doc"]:
+            # Handle Word documents
+            with tempfile.NamedTemporaryFile(
+                delete=False, suffix=file_ext
+            ) as temp_file:
+                temp_file.write(file_content)
+                temp_file_path = temp_file.name
+
+            try:
+                if file_ext == ".docx":
+                    doc = Document(temp_file_path)
+                    text_parts = []
+                    for paragraph in doc.paragraphs:
+                        if paragraph.text.strip():
+                            text_parts.append(paragraph.text)
+
+                    # Also extract text from tables
+                    for table in doc.tables:
+                        for row in table.rows:
+                            for cell in row.cells:
+                                if cell.text.strip():
+                                    text_parts.append(cell.text)
+
+                    return "\n\n".join(text_parts)
+                else:
+                    # For .doc files, fall back to textloader
+                    loader = TextLoader(temp_file_path)
+                    documents = loader.load()
+                    return "\n\n".join([doc.page_content for doc in documents])
+            finally:
+                os.unlink(temp_file_path)
+
+        elif file_ext in [".txt", ".md"]:
+            # Handle text files
+            try:
+                return file_content.decode("utf-8")
+            except UnicodeDecodeError:
+                return file_content.decode("latin-1")
+
+        else:
+            # Try to decode as text for unknown file types
+            try:
+                return file_content.decode("utf-8")
+            except UnicodeDecodeError:
+                try:
+                    return file_content.decode("latin-1")
+                except UnicodeDecodeError:
+                    return f"Unable to extract text from {filename} - unsupported file format"
+
+    except Exception as e:
+        print(f"Error extracting text from {filename}: {e}")
+        return f"Failed to extract text from {filename}: {str(e)}"
+
 
 router = APIRouter(prefix="/veradoc", tags=["veradoc"])
 
@@ -230,12 +307,10 @@ async def process_rag_checklist(
             # Get file content
             file = files[0]  # Process the first file for now
             content = await file.read()
-            try:
-                document_text = content.decode("utf-8")
-            except UnicodeDecodeError:
-                # If it's not UTF-8 encoded, it's likely a binary file
-                # For PDFs, you could use PyPDF2 or other libraries to extract text
-                document_text = f"Failed to extract text from {file.filename}"
+
+            # Extract text using the new extraction function
+            document_text = extract_text_from_file(content, file.filename)
+            print(f"Extracted {len(document_text)} characters from {file.filename}")
 
             # Reset file position
             await file.seek(0)
@@ -336,6 +411,18 @@ async def process_rag_checklist(
 
                 # Step 3: Answer the question based on the uploaded document and policy context
                 print("Generating answer based on document and context...")
+                # DEBUG: Print the full prompt sent to the LLM
+                try:
+                    rendered_prompt = qa_prompt_template.format(
+                        document_text=document_text[:10000],
+                        question=question,
+                        question_context=question_context,
+                    )
+                except Exception as e:
+                    rendered_prompt = f"[ERROR rendering prompt: {e}]"
+                print("\n===== VERADOC_QA_PROMPT_TEMPLATE PROMPT SENT TO LLM =====\n")
+                print(rendered_prompt)
+                print("\n========================================================\n")
                 answer = invoke_llm(
                     llm,
                     qa_prompt_template,

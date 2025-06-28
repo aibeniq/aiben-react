@@ -147,36 +147,26 @@ class Settings(BaseSettings):
     """
 
     VERADOC_CONTEXT_PROMPT_TEMPLATE: str = """
-    CONTEXT:
-    {context}
-    
     INSTRUCTION: 
-    What necessary information from the context above should be kept in mind when answering the following question? {question} 
+    You are an AI assistant that helps answer questions about documents that are under review based on specific policy regulations.
+    You are answering a certain question about a document, but you need to check the policy regulations to make sure that you are taking into account the full policy context.
+
+    What necessary information from the context below should be kept in mind when answering the following question? {question} 
+
+    SOURCE POLICY CITATIONS:
+    {context}
     ONLY INCLUDE POLICY INFORMATION THAT WOULD BE SPECIFICALLY PERTINENT TO THE QUESTION -- do NOT just repeat general requirements.
     
     ANSWER:
     According to the policy context, the following should be kept in mind when answering the question:
     """
 
-    # VERADOC_QA_PROMPT_TEMPLATE: str = """
-    # Read the following document and answer the following question clearly and concisely in 100 words or less.
-    #
-    # SAMPLE DOCUMENT: {document_text}
-    #
-    # QUESTION: {question}
-    #
-    # Keep the following RELEVANT REQUIREMENTS in mind when answering the question:
-    # {question_context}
-    #
-    # ANSWER:
-    # """
-
     VERADOC_QA_PROMPT_TEMPLATE: str = """
+        INSTRUCTION: 
+        You are an AI assistant that helps answer questions about documents based on specific policy regulations.
         Read the following document and answer the question below clearly and concisely in 100 words or less.
-
-        When answering, assess whether the document provides *explicit and verifiable evidence* that the relevant requirements are fully met. Do **not** assume compliance based on general statements or references (e.g., to Good Clinical Practice or regulatory standards) unless the document clearly explains how the requirements are operationalized.
-
         If the document does not contain sufficient detail to confirm that a requirement is met, state that the information is insufficient, even if the requirement is mentioned.
+        You will also be provided with some policy context to help you in your determination.
 
         SAMPLE DOCUMENT:
         {document_text}
@@ -191,6 +181,8 @@ class Settings(BaseSettings):
     """
 
     VERADOC_FINAL_PROMPT_TEMPLATE: str = """
+    INSTRUCTION: 
+    You are an AI assistant that helps answer questions about documents based on specific policy regulations.
     According to policy, an acceptable document must have all of the elements described in the following questions.
     Read the following question-and-answer pairs about a certain proposal and determine whether or not it conforms to the policy.
     
