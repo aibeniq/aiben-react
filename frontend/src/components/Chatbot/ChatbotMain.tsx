@@ -18,14 +18,14 @@ interface ChatMessage {
 const ChatbotMain = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedKbId, setSelectedKbId] = useState<string | null>(null)
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [question, setQuestion] = useState("")
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [showKnowledgeBaseModal, setShowKnowledgeBaseModal] = useState(false)
   const [currentKbId, setCurrentKbId] = useState<string | null>(null)
-  const [currentFileName, setCurrentFileName] = useState<string | null>(null)
+  const [currentFileNames, setCurrentFileNames] = useState<string[]>([])
   const [sessionId, setSessionId] = useState<string>("")
   const [searchMode, setSearchMode] = useState<"vector" | "full_text">("vector")
 
@@ -33,7 +33,7 @@ const ChatbotMain = () => {
     setMessages([])
     setSessionId(Math.random().toString(36).substring(2, 15))
     setSelectedKbId(null)
-    setUploadedFile(null)
+    setUploadedFiles([])
   }
 
   const handleChatbotResponse = (response: any, userMessage: string) => {
@@ -99,14 +99,18 @@ const ChatbotMain = () => {
         .join("\n\n")
 
       // Check if this is a follow-up question with the same resources
+      const currentFileNamesStr = uploadedFiles
+        .map((f) => f.name)
+        .sort()
+        .join(",")
       const isFollowUp =
         sessionId &&
         ((selectedKbId && selectedKbId === currentKbId) ||
-          (uploadedFile && currentFileName === uploadedFile.name))
+          (uploadedFiles.length > 0 && currentFileNames.sort().join(",") === currentFileNamesStr))
       console.log("Formatted chat history:", formattedChatHistory)
       console.log("Is follow-up:", isFollowUp)
 
-      if (!selectedKbId && !uploadedFile) {
+      if (!selectedKbId && uploadedFiles.length === 0) {
         // New case: No KB or file selected - use direct text query
         const response = await ChatService.queryText({
           question: userMessage,
@@ -138,19 +142,26 @@ const ChatbotMain = () => {
 
         console.log("Response:", response)
         handleChatbotResponse(response as any, userMessage)
-      } else if (uploadedFile) {
-        // Set current filename if it's changed
-        if (currentFileName !== uploadedFile.name) {
-          setCurrentFileName(uploadedFile.name)
+      } else if (uploadedFiles.length > 0) {
+        // Set current filenames if they've changed
+        const newFileNamesStr = uploadedFiles
+          .map((f) => f.name)
+          .sort()
+          .join(",")
+        if (currentFileNames.sort().join(",") !== newFileNamesStr) {
+          setCurrentFileNames(uploadedFiles.map((f) => f.name))
           // Don't generate a new session ID here - let the server handle it
           setSessionId("") // Clear it and let the server generate a new one
-          console.log("File changed, clearing session ID")
+          console.log("Files changed, clearing session ID")
         }
+
         const formData = new FormData()
-        // For full-text mode, always send the file since it's needed for each query
-        // For vector mode, only send the file if this is NOT a follow-up question
+        // For full-text mode, always send the files since they're needed for each query
+        // For vector mode, only send the files if this is NOT a follow-up question
         if (searchMode === "full_text" || !isFollowUp) {
-          formData.append("file", uploadedFile)
+          uploadedFiles.forEach((file) => {
+            formData.append("files", file)
+          })
         }
 
         const response = await ChatService.queryDocument({
@@ -159,7 +170,8 @@ const ChatbotMain = () => {
           useDefaultModels: true,
           sessionId: sessionId,
           isFollowUp: isFollowUp === true,
-          formData: searchMode === "full_text" || !isFollowUp ? { file: uploadedFile } : undefined,
+          formData:
+            searchMode === "full_text" || !isFollowUp ? { files: uploadedFiles } : undefined,
           searchMode: searchMode, // Pass the search mode
         })
 
@@ -201,10 +213,10 @@ const ChatbotMain = () => {
               messagesEndRef={messagesEndRef}
               selectedKbId={selectedKbId}
               setSelectedKbId={setSelectedKbId}
-              uploadedFile={uploadedFile}
-              setUploadedFile={setUploadedFile}
+              uploadedFiles={uploadedFiles}
+              setUploadedFiles={setUploadedFiles}
               setCurrentKbId={setCurrentKbId}
-              setCurrentFileName={setCurrentFileName}
+              setCurrentFileNames={setCurrentFileNames}
               showKnowledgeBaseModal={showKnowledgeBaseModal}
               setShowKnowledgeBaseModal={setShowKnowledgeBaseModal}
               clearChat={clearChat}

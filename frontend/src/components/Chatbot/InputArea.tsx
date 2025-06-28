@@ -2,6 +2,7 @@ import React, { useRef } from "react"
 import { Button, Textarea, HStack, Icon, Box } from "@chakra-ui/react"
 import { FiSend } from "react-icons/fi"
 import SourcePopover from "@/components/Chatbot/SourcePopover"
+import useCustomToast from "@/hooks/useCustomToast"
 
 interface InputAreaProps {
   value: string
@@ -11,7 +12,7 @@ interface InputAreaProps {
   isSendDisabled?: boolean
   placeholder?: string
   setShowKnowledgeBaseModal: (show: boolean) => void
-  setUploadedFile: (file: File | null) => void
+  setUploadedFiles: (files: File[]) => void
 }
 
 const InputArea: React.FC<InputAreaProps> = ({
@@ -22,17 +23,34 @@ const InputArea: React.FC<InputAreaProps> = ({
   isSendDisabled = false,
   placeholder = "Ask a question...",
   setShowKnowledgeBaseModal,
-  setUploadedFile,
+  setUploadedFiles,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { showSuccessToast, showErrorToast } = useCustomToast()
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log("handleFileSelect called")
-    const file = event.target.files?.[0]
-    console.log("Selected file:", file)
-    if (file && setUploadedFile) {
-      console.log("Setting uploaded file:", file.name)
-      setUploadedFile(file)
+    const files = Array.from(event.target.files || [])
+    console.log("Selected files:", files)
+
+    if (files.length === 0) return
+
+    // Check file size limit (10MB per file)
+    const maxSize = 10 * 1024 * 1024 // 10MB
+    const oversizedFiles = files.filter((file) => file.size > maxSize)
+
+    if (oversizedFiles.length > 0) {
+      showErrorToast(`Some files are too large. Maximum size is 10MB per file.`)
+      return
+    }
+
+    if (files.length > 0 && setUploadedFiles) {
+      console.log(
+        "Setting uploaded files:",
+        files.map((f) => f.name),
+      )
+      setUploadedFiles(files)
+      showSuccessToast(`${files.length} file${files.length > 1 ? "s" : ""} selected successfully.`)
     }
   }
 
@@ -61,7 +79,8 @@ const InputArea: React.FC<InputAreaProps> = ({
         ref={fileInputRef}
         onChange={handleFileSelect}
         style={{ display: "none" }}
-        accept="*/*"
+        accept=".pdf,.txt,.docx,.doc,.rtf"
+        multiple
       />
       <Textarea
         value={value}

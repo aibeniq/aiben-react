@@ -18,7 +18,7 @@ interface ChatMessagesProps {
   messages: ChatMessage[]
   isLoading: boolean
   selectedKbId: string | null
-  uploadedFile: File | null
+  uploadedFiles: File[]
   messagesEndRef: React.RefObject<HTMLDivElement>
 }
 
@@ -35,14 +35,14 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
   messages,
   isLoading,
   selectedKbId,
-  uploadedFile,
+  uploadedFiles,
   messagesEndRef,
 }) => (
   <>
     <Show when={messages.length === 0}>
       <Text color="gray.500" textAlign="center" py={10} fontSize="sm">
-        {selectedKbId || uploadedFile
-          ? "Select a knowledge base or upload a file, then ask a question."
+        {selectedKbId || uploadedFiles.length > 0
+          ? "Select a knowledge base or upload files, then ask a question."
           : "Ask me anything! For knowledge base search, select a knowledge base first."}
       </Text>
     </Show>

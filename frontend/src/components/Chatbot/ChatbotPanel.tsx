@@ -29,10 +29,10 @@ interface ChatbotPanelProps {
   messagesEndRef: React.RefObject<HTMLDivElement>
   selectedKbId: string | null
   setSelectedKbId: (id: string | null) => void
-  uploadedFile: File | null
-  setUploadedFile: (file: File | null) => void
+  uploadedFiles: File[]
+  setUploadedFiles: (files: File[]) => void
   setCurrentKbId: (id: string | null) => void
-  setCurrentFileName: (name: string | null) => void
+  setCurrentFileNames: (names: string[]) => void
   showKnowledgeBaseModal: boolean
   setShowKnowledgeBaseModal: (show: boolean) => void
   clearChat: () => void
@@ -50,10 +50,10 @@ const ChatbotPanel = ({
   messagesEndRef,
   selectedKbId,
   setSelectedKbId,
-  uploadedFile,
-  setUploadedFile,
+  uploadedFiles,
+  setUploadedFiles,
   setCurrentKbId,
-  setCurrentFileName,
+  setCurrentFileNames,
   showKnowledgeBaseModal,
   setShowKnowledgeBaseModal,
   clearChat,
@@ -151,7 +151,7 @@ const ChatbotPanel = ({
               messages={messages}
               isLoading={isLoading}
               selectedKbId={selectedKbId}
-              uploadedFile={uploadedFile}
+              uploadedFiles={uploadedFiles}
               messagesEndRef={messagesEndRef}
             />
           </Box>
@@ -173,7 +173,7 @@ const ChatbotPanel = ({
               isLoading={isLoading}
               isSendDisabled={!question.trim() || isLoading}
               setShowKnowledgeBaseModal={setShowKnowledgeBaseModal}
-              setUploadedFile={setUploadedFile}
+              setUploadedFiles={setUploadedFiles}
             />
           </Box>
           <HStack gap={2} fontSize="xs" color="gray.500" pl={5} pb={3}>
@@ -182,14 +182,15 @@ const ChatbotPanel = ({
                 Using knowledge base:{" "}
                 <b>{knowledgeBases.find((kb) => kb.id === selectedKbId)?.title}</b>
               </Text>
-            ) : uploadedFile ? (
+            ) : uploadedFiles.length > 0 ? (
               <Text>
-                Using document: <b>{uploadedFile.name}</b>
+                Using {uploadedFiles.length} document{uploadedFiles.length > 1 ? "s" : ""}:{" "}
+                <b>{uploadedFiles.map((f) => f.name).join(", ")}</b>
               </Text>
             ) : (
               <Text>Using general AI assistant</Text>
             )}
-            <Show when={selectedKbId || uploadedFile}>
+            <Show when={selectedKbId || uploadedFiles.length > 0}>
               <Text
                 as="span"
                 color="blue.500"
@@ -198,8 +199,8 @@ const ChatbotPanel = ({
                 onClick={() => {
                   setSelectedKbId(null)
                   setCurrentKbId(null)
-                  setUploadedFile(null)
-                  setCurrentFileName(null)
+                  setUploadedFiles([])
+                  setCurrentFileNames([])
                 }}
               >
                 Remove
@@ -221,7 +222,7 @@ const ChatbotPanel = ({
           }
           onSelectionChange={(kb) => {
             setSelectedKbId(kb?.id || null)
-            setUploadedFile(null)
+            setUploadedFiles([])
           }}
         />
       </SelectionModal>

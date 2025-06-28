@@ -1,6 +1,11 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from typing import Optional, List
 from pydantic import BaseModel
+import tempfile
+import os
+import uuid
+import traceback
+import re
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import (
     create_llm,
@@ -294,14 +299,14 @@ async def _handle_full_text_kb_query(
 async def _handle_full_text_document_query(
     session: SessionDep,
     current_user: CurrentUser,
-    file: UploadFile,
+    files: List[UploadFile],
     question: str,
     chat_history: str = None,
     use_default_models: bool = False,
     session_id: str = None,
     is_follow_up: bool = False,
 ):
-    """Handle full text scan for document query."""
+    """Handle full text scan for document query with multiple files."""
     from app.services.text_processing import chunk_text
 
     # Get LLM
@@ -313,72 +318,121 @@ async def _handle_full_text_document_query(
     else:
         rephrased_question = question
 
-    # Save uploaded file temporarily and extract text
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        temp_file.write(await file.read())
-        temp_path = temp_file.name
+    # Process each file independently
+    all_document_analyses = []
+    all_source_citations = []
+    temp_paths = []
 
     try:
-        # Extract text from file
-        if file.filename.endswith(".pdf"):
-            loader = PyPDFLoader(temp_path)
-        else:
-            loader = TextLoader(temp_path)
+        # Process each file
+        for file_idx, file in enumerate(files):
+            # Save uploaded file temporarily and extract text
+            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                temp_file.write(await file.read())
+                temp_path = temp_file.name
+                temp_paths.append(temp_path)
 
-        documents = loader.load()
-        full_text = "\n\n".join([doc.page_content for doc in documents])
+            # Extract text from file
+            if file.filename.endswith(".pdf"):
+                loader = PyPDFLoader(temp_path)
+            else:
+                loader = TextLoader(temp_path)
 
-        # Chunk the text
-        chunks = chunk_text(
-            full_text, max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE
-        )
+            documents = loader.load()
+            full_text = "\n\n".join([doc.page_content for doc in documents])
 
-        # Analyze each chunk
-        chunk_analyses = []
-        source_citations = []
+            # Chunk the text
+            chunks = chunk_text(
+                full_text, max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE
+            )
 
-        for i, chunk in enumerate(chunks):
-            try:
-                chunk_analysis = invoke_llm(
-                    llm,
-                    settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
-                    {"chunk": chunk, "question": rephrased_question},
+            # Analyze each chunk for this file
+            file_chunk_analyses = []
+            file_source_citations = []
+
+            for i, chunk in enumerate(chunks):
+                try:
+                    chunk_analysis = invoke_llm(
+                        llm,
+                        settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
+                        {"chunk": chunk, "question": rephrased_question},
+                    )
+
+                    if "No relevant information found" not in chunk_analysis:
+                        file_chunk_analyses.append(chunk_analysis)
+                        file_source_citations.append(
+                            {
+                                "content": (
+                                    chunk[:300] + "..." if len(chunk) > 300 else chunk
+                                ),
+                                "metadata": {
+                                    "source": file.filename,
+                                    "chunk": i + 1,
+                                    "file_index": file_idx + 1,
+                                },
+                            }
+                        )
+                except Exception as e:
+                    print(f"Error analyzing chunk {i} in file {file.filename}: {e}")
+                    continue
+
+            # If we found relevant chunks in this file, create a document-level analysis
+            if file_chunk_analyses:
+                # Synthesize chunks for this specific document
+                file_chunk_analyses_text = "\n\n".join(
+                    [
+                        f"Chunk {i+1}: {analysis}"
+                        for i, analysis in enumerate(file_chunk_analyses)
+                    ]
                 )
 
-                if "No relevant information found" not in chunk_analysis:
-                    chunk_analyses.append(chunk_analysis)
-                    source_citations.append(
-                        {
-                            "content": (
-                                chunk[:300] + "..." if len(chunk) > 300 else chunk
-                            ),
-                            "metadata": {
-                                "source": file.filename,
-                                "chunk": i + 1,
-                            },
-                        }
-                    )
-            except Exception as e:
-                print(f"Error analyzing chunk {i}: {e}")
-                continue
+                # Create a document-level analysis
+                document_analysis = invoke_llm(
+                    llm,
+                    settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+                    {
+                        "question": rephrased_question,
+                        "chunk_analyses": file_chunk_analyses_text,
+                    },
+                )
 
-        if not chunk_analyses:
-            final_answer = "I couldn't find relevant information to answer your question in the document."
+                # Store the analysis for this document
+                all_document_analyses.append(
+                    {"filename": file.filename, "analysis": document_analysis}
+                )
+
+                # Add source citations for this file
+                all_source_citations.extend(file_source_citations)
+
+        # If no documents had relevant information
+        if not all_document_analyses:
+            final_answer = "I couldn't find relevant information to answer your question in any of the uploaded documents."
             sources = []
+        elif len(all_document_analyses) == 1:
+            # If only one document had relevant information, use its analysis directly
+            final_answer = all_document_analyses[0]["analysis"]
+            sources = all_source_citations
         else:
-            # Synthesize all chunk analyses
-            chunk_analyses_text = "\n\n".join(
+            # If multiple documents have relevant information, synthesize across documents
+            document_analyses_text = "\n\n".join(
                 [
-                    f"Analysis {i+1}: {analysis}"
-                    for i, analysis in enumerate(chunk_analyses)
+                    f"Document '{doc['filename']}' Analysis: {doc['analysis']}"
+                    for doc in all_document_analyses
                 ]
             )
 
+            # Create a final synthesis across all documents
             final_answer = invoke_llm(
                 llm,
-                settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
-                {"question": rephrased_question, "chunk_analyses": chunk_analyses_text},
+                f"""Based on the following analyses from multiple documents, provide a comprehensive answer to the question: {rephrased_question}
+
+Document Analyses:
+{{document_analyses}}
+
+Please synthesize the information from all documents into a coherent, comprehensive answer. If there are contradictions between documents, note them. If documents complement each other, combine the insights.""",
+                {"document_analyses": document_analyses_text},
             )
+            sources = all_source_citations
 
         # Record the interaction
         record_llm_interaction(
@@ -388,30 +442,32 @@ async def _handle_full_text_document_query(
             input_data={
                 "question": question,
                 "rephrased_question": rephrased_question,
-                "document": file.filename,
+                "documents": [file.filename for file in files],
                 "search_mode": "full_text",
             },
             output_data=final_answer,
             metadata={
                 "session_id": session_id,
                 "is_follow_up": is_follow_up,
-                "chunk_count": len(chunk_analyses),
+                "document_count": len(files),
+                "relevant_documents": len(all_document_analyses),
             },
         )
 
         return {
             "answer": final_answer,
-            "sources": source_citations,
+            "sources": sources,
             "session_id": session_id,
             "rephrased_question": rephrased_question,
         }
 
     finally:
-        # Clean up temp file
-        try:
-            os.unlink(temp_path)
-        except Exception as e:
-            print(f"Error removing temporary file: {e}")
+        # Clean up temp files
+        for temp_path in temp_paths:
+            try:
+                os.unlink(temp_path)
+            except Exception as e:
+                print(f"Error removing temporary file {temp_path}: {e}")
 
 
 def rephrase_question_with_context(llm, chat_history, current_question):
@@ -740,9 +796,9 @@ async def query_document(
     session_id: str = None,
     is_follow_up: bool = False,
     search_mode: str = "vector",  # Add search mode parameter
-    file: UploadFile = File(None),
+    files: List[UploadFile] = File(None),
 ):
-    """Query an uploaded document with a question using either vector search or full text scan."""
+    """Query uploaded documents with a question using either vector search or full text scan."""
     if not question:
         raise HTTPException(status_code=400, detail="Question is required")
 
@@ -752,10 +808,11 @@ async def query_document(
             status_code=400, detail="Session ID required for follow-up questions"
         )
 
-    # If not a follow-up, we need a file
-    if not is_follow_up and not file:
+    # If not a follow-up, we need at least one file
+    if not is_follow_up and (not files or len(files) == 0):
         raise HTTPException(
-            status_code=400, detail="File is required for initial questions"
+            status_code=400,
+            detail="At least one file is required for initial questions",
         )
 
     # Validate search mode
@@ -767,15 +824,15 @@ async def query_document(
 
     # Handle full text scan mode
     if search_mode == "full_text":
-        if not file:
+        if not files or len(files) == 0:
             raise HTTPException(
                 status_code=400,
-                detail="For full-text scan, please upload a document.",
+                detail="For full-text scan, please upload at least one document.",
             )
         return await _handle_full_text_document_query(
             session,
             current_user,
-            file,
+            files,
             question,
             chat_history,
             use_default_models,
@@ -788,7 +845,7 @@ async def query_document(
         # Check if we have a cached retriever for this session
         retriever = None
         llm = None
-        temp_path = None
+        temp_paths = []
 
         if is_follow_up and session_id:
             print("Using cached resources for follow-up question")
@@ -838,24 +895,39 @@ async def query_document(
                         status_code=404, detail="No default LLM model found"
                     )
 
-            # Save uploaded file temporarily
-            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-                temp_file.write(await file.read())
-                temp_path = temp_file.name
+            # Process all uploaded files and combine them into a single document collection
+            all_documents = []
 
-            # Detect file type and use appropriate loader
-            if file.filename.endswith(".pdf"):
-                loader = PyPDFLoader(temp_path)
-            else:
-                # Default to text loader for other files
-                loader = TextLoader(temp_path)
+            for file in files:
+                # Save uploaded file temporarily
+                with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                    temp_file.write(await file.read())
+                    temp_path = temp_file.name
+                    temp_paths.append(temp_path)
 
-            # Load and split the document
-            documents = loader.load()
+                # Detect file type and use appropriate loader
+                if file.filename.endswith(".pdf"):
+                    loader = PyPDFLoader(temp_path)
+                else:
+                    # Default to text loader for other files
+                    loader = TextLoader(temp_path)
+
+                # Load and split the document
+                documents = loader.load()
+
+                # Add file source information to metadata
+                for doc in documents:
+                    if not hasattr(doc, "metadata") or doc.metadata is None:
+                        doc.metadata = {}
+                    doc.metadata["source_filename"] = file.filename
+
+                all_documents.extend(documents)
+
+            # Split all documents
             text_splitter = RecursiveCharacterTextSplitter(
                 chunk_size=1000, chunk_overlap=200
             )
-            chunks = text_splitter.split_documents(documents)
+            chunks = text_splitter.split_documents(all_documents)
 
             # Create embeddings
             embeddings = load_embeddings_model(
@@ -893,7 +965,7 @@ async def query_document(
                     "retriever": retriever,
                     "llm": llm,
                     "vector_dir": vector_dir,
-                    "temp_path": temp_path,
+                    "temp_paths": temp_paths,
                 },
             )
 
@@ -966,7 +1038,7 @@ async def query_document(
             input_data={
                 "question": question,
                 "rephrased_question": rephrased_question,
-                "document": file.filename,
+                "documents": [file.filename for file in files],
             },
             output_data=answer_content,
             metadata={
@@ -991,11 +1063,12 @@ async def query_document(
 
     finally:
         # Only clean up temp files if not cached
-        if temp_path and not is_follow_up and not session_cache.get(session_id):
-            try:
-                os.unlink(temp_path)
-            except Exception as e:
-                print(f"Error removing temporary file: {e}")
+        if temp_paths and not is_follow_up and not session_cache.get(session_id):
+            for temp_path in temp_paths:
+                try:
+                    os.unlink(temp_path)
+                except Exception as e:
+                    print(f"Error removing temporary file {temp_path}: {e}")
 
 
 @router.post("/text", response_model=TextQueryResponse)
