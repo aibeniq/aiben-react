@@ -122,6 +122,9 @@ class Settings(BaseSettings):
 
     # LLM Templates
     REPORT_GENIE_PROMPT_TEMPLATE: str = """
+    DRAFT OF REPORT SO FAR:
+    {report_draft}
+
     REFERENCE INFORMATION:
     {context}
 
@@ -134,6 +137,7 @@ class Settings(BaseSettings):
     3. Be limited to the specific section requested -- don't keep adding unnecessary/unrequested language like "Your participation is important, and we appreciate your commitment to this investigation."
     4. Use second-person perspective (addressing "you" - the participant)
     5. Should not make any claims that are not supported by the provided context
+    6. Keep in mind what has already been generated in the report, and don't be redundant when writing the new section.
 
     FORMAT OUTPUT AS A PROPERLY FORMATTED CONSENT FORM SECTION with an appropriate heading and content.
 

@@ -138,6 +138,7 @@ async def generate_report(
 
             # 6. Process each section
             sections = []
+            report_draft = ""
 
             for section_item in section_items:
                 section_description = section_item["text"]
@@ -185,7 +186,11 @@ async def generate_report(
                     section_content = invoke_llm(
                         llm,
                         prompt_template,
-                        {"context": context, "question": section_description},
+                        {
+                            "context": context,
+                            "question": section_description,
+                            "report_draft": report_draft,
+                        },
                     )
                     section_title = section_description
                 else:
@@ -193,6 +198,7 @@ async def generate_report(
                     section_content = section_description
                     source_citations = []
                     # If the raw text is a markdown header, clean it for the title
+                    # The title should be the original description to preserve markdown
                     section_title = section_description
 
                 # Store the section with its content and sources
@@ -204,6 +210,8 @@ async def generate_report(
                         "consult_documents": consult_documents,
                     }
                 )
+                # Append the newly generated section to the draft for the next iteration
+                report_draft += f"\n\n---\n\n{section_content}"
 
             # 7. Compile the final report
             full_report = "\n\n---\n\n".join(
