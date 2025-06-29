@@ -292,9 +292,7 @@ async def _handle_full_text_kb_query(
                         all_chunk_analyses.append(chunk_analysis)
                         source_citations.append(
                             {
-                                "content": (
-                                    chunk[:300] + "..." if len(chunk) > 300 else chunk
-                                ),
+                                "content": chunk,  # Remove 300 character truncation
                                 "metadata": {
                                     "source": source.name,
                                     "source_data_id": str(source.source_data_id),
@@ -428,9 +426,7 @@ async def _handle_full_text_document_query(
                         file_chunk_analyses.append(chunk_analysis)
                         file_source_citations.append(
                             {
-                                "content": (
-                                    chunk[:300] + "..." if len(chunk) > 300 else chunk
-                                ),
+                                "content": chunk,  # Remove 300 character truncation
                                 "metadata": {
                                     "source": file.filename,
                                     "chunk": i + 1,
@@ -792,11 +788,7 @@ async def query_knowledge_base(
                     print(f"No source entry found for filename: {filename}")
 
             source = {
-                "content": (
-                    doc.page_content[:300] + "..."
-                    if len(doc.page_content) > 300
-                    else doc.page_content
-                ),
+                "content": doc.page_content,  # Remove 300 character truncation
                 "metadata": metadata,
             }
             sources.append(source)
@@ -1066,11 +1058,7 @@ async def query_document(
                     metadata["source_data_id"] = str(source_entry.source_data_id)
 
             source = {
-                "content": (
-                    doc.page_content[:300] + "..."
-                    if len(doc.page_content) > 300
-                    else doc.page_content
-                ),
+                "content": doc.page_content,  # Remove 300 character truncation
                 "metadata": metadata,
             }
             sources.append(source)

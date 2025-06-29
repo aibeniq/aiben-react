@@ -69,6 +69,28 @@ const VeraDoc = () => {
   const [checklists, setChecklists] = useState<VeraDocChecklist[]>([])
   const [selectedChecklist, setSelectedChecklist] = useState<VeraDocChecklist | null>(null)
 
+  // State to track which citations are expanded - using object instead of Set
+  const [expandedCitations, setExpandedCitations] = useState<Record<string, boolean>>({})
+
+  // Function to toggle citation expansion
+  const toggleCitationExpansion = (
+    resultIndex: number,
+    pairIndex: number,
+    citationIndex: number,
+  ) => {
+    const citationKey = `${resultIndex}-${pairIndex}-${citationIndex}`
+    setExpandedCitations((prev) => ({
+      ...prev,
+      [citationKey]: !prev[citationKey],
+    }))
+  }
+
+  // Function to check if a citation is expanded
+  const isCitationExpanded = (resultIndex: number, pairIndex: number, citationIndex: number) => {
+    const citationKey = `${resultIndex}-${pairIndex}-${citationIndex}`
+    return expandedCitations[citationKey] || false
+  }
+
   // Reset active tab when results change
   useEffect(() => {
     if (results.length > 0) {
@@ -593,34 +615,62 @@ const VeraDoc = () => {
                   </Accordion.ItemTrigger>
                 </h2>
                 <Accordion.ItemContent pb={4} bg="surface">
-                  {pair.source_citations.map((citation: any, cIndex: number) => (
-                    <Box key={cIndex} p={3} mb={2} borderWidth="1px" borderRadius="md" bg="bg">
-                      {citation.metadata.source_data_id ? (
-                        <SourceLink
-                          sourceId={citation.metadata.source_data_id}
-                          fileName={getDisplayFileName(citation.metadata.source)}
-                          ml={1}
-                          fontWeight="normal"
-                          color="blue.600"
-                          useModal={true}
-                        />
-                      ) : (
-                        <Text as="span" ml={1} fontWeight="normal" color="blue.600">
-                          {getDisplayFileName(citation.metadata.source)}
-                        </Text>
-                      )}
+                  {pair.source_citations.map((citation: any, cIndex: number) => {
+                    const isExpanded = isCitationExpanded(resultIndex, pairIndex, cIndex)
+                    const citationText = citation.content
+                    const shouldTruncate = citationText.length > 300
+                    const displayText =
+                      shouldTruncate && !isExpanded
+                        ? citationText.substring(0, 300) + "..."
+                        : citationText
+
+                    return (
                       <Box
-                        mt={2}
-                        p={2}
-                        bg="surface"
-                        borderRadius="sm"
-                        fontSize="sm"
-                        whiteSpace="pre-wrap"
+                        key={`${resultIndex}-${pairIndex}-${cIndex}`}
+                        p={3}
+                        mb={2}
+                        borderWidth="1px"
+                        borderRadius="md"
+                        bg="bg"
                       >
-                        {citation.content}
+                        {citation.metadata.source_data_id ? (
+                          <SourceLink
+                            sourceId={citation.metadata.source_data_id}
+                            fileName={getDisplayFileName(citation.metadata.source)}
+                            ml={1}
+                            fontWeight="normal"
+                            color="blue.600"
+                            useModal={true}
+                          />
+                        ) : (
+                          <Text as="span" ml={1} fontWeight="normal" color="blue.600">
+                            {getDisplayFileName(citation.metadata.source)}
+                          </Text>
+                        )}
+                        <Box
+                          mt={2}
+                          p={2}
+                          bg="surface"
+                          borderRadius="sm"
+                          fontSize="sm"
+                          whiteSpace="pre-wrap"
+                        >
+                          {displayText}
+                        </Box>
+                        {shouldTruncate && (
+                          <Button
+                            size="xs"
+                            variant="ghost"
+                            mt={1}
+                            onClick={() => toggleCitationExpansion(resultIndex, pairIndex, cIndex)}
+                            colorPalette="blue"
+                          >
+                            {isExpanded ? "Show Less" : "Read More"}
+                          </Button>
+                        )}
                       </Box>
-                    </Box>
-                  ))}
+                    )
+                  })}
                 </Accordion.ItemContent>
               </Accordion.Item>
             </Accordion.Root>

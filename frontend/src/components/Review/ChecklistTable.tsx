@@ -226,13 +226,18 @@ const ChecklistTable = ({
   // Update local state when editingChecklist changes
   useEffect(() => {
     if (editingChecklist) {
+      console.log("Loading checklist for editing:", editingChecklist)
       setChecklistName(editingChecklist.name || "")
       setChecklistDescription(editingChecklist.description || "")
       const checklistQuestions = editingChecklist.questions || ""
+      console.log("Raw questions from database:", checklistQuestions)
+
       if (checklistQuestions) {
         // Try to parse as structured data first
         try {
           const parsedQuestions = JSON.parse(checklistQuestions)
+          console.log("Parsed questions:", parsedQuestions)
+
           if (
             Array.isArray(parsedQuestions) &&
             parsedQuestions.every(
@@ -246,6 +251,7 @@ const ChecklistTable = ({
               text: q.text,
               consultDocuments: q.consultDocuments,
             }))
+            console.log("Setting structured data:", structuredData)
             setQuestionsList(questionsArray.length > 0 ? questionsArray : [""])
             setQuestionsData(
               structuredData.length > 0
@@ -305,6 +311,7 @@ const ChecklistTable = ({
 
   // Function to update questionsData
   const updateQuestionsData = (newData: QuestionData[]) => {
+    console.log("updateQuestionsData called with:", newData)
     setQuestionsData(newData)
     setQuestionsList(newData.map((q) => q.text))
   }
@@ -456,6 +463,10 @@ const ChecklistTable = ({
         .filter((q) => q.text.trim() !== "")
         .map(({ text, consultDocuments }) => ({ text, consultDocuments }))
       const questionsJson = JSON.stringify(nonEmptyQuestionsData)
+
+      console.log("Saving checklist with questionsData:", questionsData)
+      console.log("Filtered nonEmptyQuestionsData:", nonEmptyQuestionsData)
+      console.log("Final questionsJson to save:", questionsJson)
 
       if (editingChecklist) {
         // Update the existing checklist
