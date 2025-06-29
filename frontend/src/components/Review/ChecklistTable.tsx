@@ -428,6 +428,7 @@ const ChecklistTable = ({
         setChecklistDescription={setChecklistDescription}
         questionsList={questionsList}
         updateQuestion={updateQuestion}
+        updateQuestionsList={updateQuestionsFromList} // Add this new prop
         handleQuestionBlur={handleQuestionBlur}
         removeQuestion={removeQuestion}
         moveQuestionUp={moveQuestionUp}

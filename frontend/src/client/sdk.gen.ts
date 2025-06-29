@@ -171,6 +171,8 @@ import type {
   VeradocGenerateDocxResponse,
   VeradocGenerateCsvData,
   VeradocGenerateCsvResponse,
+  VeradocGenerateQuestionsData,
+  VeradocGenerateQuestionsResponse,
 } from "./types.gen"
 
 export class ChatService {
@@ -2245,6 +2247,28 @@ export class VeradocService {
       url: "/api/v1/veradoc/generate/csv",
       body: data.requestBody,
       responseType: 'blob',
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Generate Questions
+   * Generate checklist questions based on a description using LLM.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns GenerateQuestionsResponse Successful Response
+   * @throws ApiError
+   */
+  public static generateQuestions(
+    data: VeradocGenerateQuestionsData,
+  ): CancelablePromise<VeradocGenerateQuestionsResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/veradoc/generate-questions",
+      body: data.requestBody,
       mediaType: "application/json",
       errors: {
         422: "Validation Error",

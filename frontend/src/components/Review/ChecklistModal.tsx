@@ -16,7 +16,7 @@ import {
   Separator,
 } from "@chakra-ui/react"
 import { Field } from "../ui/field"
-import { FiCopy, FiCheck } from "react-icons/fi"
+import { FiCopy, FiCheck, FiEdit3, FiSave, FiX } from "react-icons/fi"
 import { VeraDocChecklist, VeradocService } from "../../client"
 import QuestionItem from "./QuestionItem"
 import CancelButton from "../ui/cancel-button"
@@ -35,6 +35,7 @@ interface ChecklistModalProps {
   setChecklistDescription: (description: string) => void
   questionsList: string[]
   updateQuestion: (index: number, value: string) => void
+  updateQuestionsList: (newQuestions: string[]) => void // Add this new prop
   handleQuestionBlur: (index: number, value: string) => void
   removeQuestion: (index: number) => void
   moveQuestionUp: (index: number) => void
@@ -67,6 +68,7 @@ const ChecklistModal = ({
   setChecklistDescription,
   questionsList,
   updateQuestion,
+  updateQuestionsList, // Add this new prop
   handleQuestionBlur,
   removeQuestion,
   moveQuestionUp,
@@ -82,6 +84,14 @@ const ChecklistModal = ({
   const [suggestions, setSuggestions] = useState<ChecklistSuggestion[]>([])
   const [acceptedSuggestions, setAcceptedSuggestions] = useState<Set<number>>(new Set())
   const [showOptimizeSection, setShowOptimizeSection] = useState(false)
+
+  // State for editing suggestions
+  const [editingSuggestions, setEditingSuggestions] = useState<Map<number, string>>(new Map())
+  const [editingModes, setEditingModes] = useState<Set<number>>(new Set())
+
+  // Generate questions state
+  const [generating, setGenerating] = useState(false)
+  const [questionsKey, setQuestionsKey] = useState(0)
 
   const handleCopyQuestions = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -166,13 +176,55 @@ const ChecklistModal = ({
     setAcceptedSuggestions(newAccepted)
   }
 
+  const startEditingSuggestion = (index: number) => {
+    const newEditingModes = new Set(editingModes)
+    newEditingModes.add(index)
+    setEditingModes(newEditingModes)
+
+    // Initialize with the current suggested question if not already editing
+    if (!editingSuggestions.has(index)) {
+      const newEditingSuggestions = new Map(editingSuggestions)
+      newEditingSuggestions.set(index, suggestions[index].suggested_question)
+      setEditingSuggestions(newEditingSuggestions)
+    }
+  }
+
+  const cancelEditingSuggestion = (index: number) => {
+    const newEditingModes = new Set(editingModes)
+    newEditingModes.delete(index)
+    setEditingModes(newEditingModes)
+
+    // Reset to original suggestion
+    const newEditingSuggestions = new Map(editingSuggestions)
+    newEditingSuggestions.set(index, suggestions[index].suggested_question)
+    setEditingSuggestions(newEditingSuggestions)
+  }
+
+  const saveEditedSuggestion = (index: number) => {
+    const newEditingModes = new Set(editingModes)
+    newEditingModes.delete(index)
+    setEditingModes(newEditingModes)
+    // The edited text is already saved in editingSuggestions map
+  }
+
+  const updateEditingSuggestion = (index: number, value: string) => {
+    const newEditingSuggestions = new Map(editingSuggestions)
+    newEditingSuggestions.set(index, value)
+    setEditingSuggestions(newEditingSuggestions)
+  }
+
+  const getSuggestionText = (index: number) => {
+    return editingSuggestions.get(index) || suggestions[index]?.suggested_question || ""
+  }
+
   const handleApplySuggestions = () => {
     if (suggestions.length === 0) return
 
     // Update questions in real-time based on accepted suggestions
     suggestions.forEach((suggestion, index) => {
       if (acceptedSuggestions.has(index) && suggestion.needs_revision) {
-        updateQuestion(index, suggestion.suggested_question)
+        // Use edited suggestion if available, otherwise use original suggestion
+        updateQuestion(index, getSuggestionText(index))
       }
     })
 
@@ -182,8 +234,70 @@ const ChecklistModal = ({
     setFileItems([])
     setSuggestions([])
     setAcceptedSuggestions(new Set())
+    setEditingSuggestions(new Map())
+    setEditingModes(new Set())
     setShowOptimizeSection(false)
   }
+
+  const handleGenerateQuestions = async () => {
+    if (!checklistDescription.trim()) {
+      showErrorToast("Please enter a checklist description first")
+      return
+    }
+
+    // Validate minimum length requirement
+    if (checklistDescription.trim().length < 10) {
+      showErrorToast("Please enter a more detailed description (at least 10 characters)")
+      return
+    }
+
+    setGenerating(true)
+
+    try {
+      const response = await VeradocService.generateQuestions({
+        requestBody: {
+          description: checklistDescription.trim(),
+          checklist_type: "general",
+          // Remove num_questions - let LLM decide based on description complexity
+        },
+      })
+
+      // Replace current questions with generated ones
+      const generatedQuestions = response.questions || []
+      if (generatedQuestions.length > 0) {
+        // Create new questions array with generated questions plus one empty question at the end
+        const newQuestions = [...generatedQuestions, ""]
+
+        // Replace the entire questions list
+        updateQuestionsList(newQuestions)
+
+        // Force re-render of question items
+        setQuestionsKey((prev) => prev + 1)
+
+        showSuccessToast(`Generated ${generatedQuestions.length} questions from description`)
+      } else {
+        showErrorToast("No questions were generated. Please try with a more detailed description.")
+      }
+    } catch (error: any) {
+      console.error("Error generating questions:", error)
+
+      // Handle specific error types
+      if (error.status === 422) {
+        showErrorToast(
+          "Invalid request. Please check that your description meets the requirements.",
+        )
+      } else if (error.status === 401) {
+        showErrorToast("You need to be logged in to generate questions.")
+      } else if (error.status === 500) {
+        showErrorToast("Server error. Please try again later or contact support.")
+      } else {
+        showErrorToast(`Failed to generate questions: ${error.message || "Unknown error"}`)
+      }
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   return (
     <Dialog.Root open={isOpen} onOpenChange={(e) => (e.open ? null : onClose())}>
       <Portal>
@@ -208,13 +322,46 @@ const ChecklistModal = ({
                       />
                     </Field>
 
-                    <Field label="Checklist Description">
+                    <Field
+                      label={
+                        <HStack justify="space-between" w="full">
+                          <span>Checklist Description</span>
+                          <Button
+                            size="xs"
+                            onClick={handleGenerateQuestions}
+                            disabled={
+                              !checklistDescription.trim() ||
+                              checklistDescription.trim().length < 10 ||
+                              generating
+                            }
+                            loading={generating}
+                            variant="outline"
+                            colorPalette="green"
+                            title={
+                              checklistDescription.trim().length < 10
+                                ? "Description must be at least 10 characters to generate questions"
+                                : "Generate questions based on the description"
+                            }
+                          >
+                            {generating ? "Generating..." : "Generate Questions"}
+                          </Button>
+                        </HStack>
+                      }
+                    >
                       <Textarea
                         value={checklistDescription}
                         onChange={(e) => setChecklistDescription(e.target.value)}
-                        placeholder="Enter checklist description"
+                        placeholder="Enter checklist description to auto-generate questions (minimum 10 characters)..."
                         resize="vertical"
+                        rows={3}
                       />
+                      {checklistDescription.trim().length > 0 &&
+                        checklistDescription.trim().length < 10 && (
+                          <Text fontSize="xs" color="orange.600">
+                            Description needs at least {10 - checklistDescription.trim().length}{" "}
+                            more characters to generate questions
+                          </Text>
+                        )}
                     </Field>
                   </VStack>
 
@@ -272,7 +419,7 @@ const ChecklistModal = ({
                     >
                       {questionsList.map((question, index) => (
                         <QuestionItem
-                          key={index}
+                          key={`${questionsKey}-${index}`}
                           index={index}
                           question={question}
                           onUpdate={updateQuestion}
@@ -388,19 +535,73 @@ const ChecklistModal = ({
                                       {suggestion.needs_revision ? (
                                         <>
                                           <Box>
-                                            <Text fontSize="xs" fontWeight="medium" mb={1}>
-                                              Suggested:
-                                            </Text>
-                                            <Text
-                                              fontSize="xs"
-                                              p={2}
-                                              bg="blue.50"
-                                              borderRadius="sm"
-                                              border="1px solid"
-                                              borderColor="blue.200"
-                                            >
-                                              {suggestion.suggested_question}
-                                            </Text>
+                                            <HStack justify="space-between" mb={1}>
+                                              <Text fontSize="xs" fontWeight="medium">
+                                                Suggested:
+                                              </Text>
+                                              {!editingModes.has(index) ? (
+                                                <IconButton
+                                                  size="xs"
+                                                  variant="ghost"
+                                                  aria-label="Edit suggestion"
+                                                  onClick={() => startEditingSuggestion(index)}
+                                                >
+                                                  <FiEdit3 size={10} />
+                                                </IconButton>
+                                              ) : (
+                                                <HStack gap={1}>
+                                                  <IconButton
+                                                    size="xs"
+                                                    variant="ghost"
+                                                    colorPalette="green"
+                                                    aria-label="Save changes"
+                                                    onClick={() => saveEditedSuggestion(index)}
+                                                  >
+                                                    <FiSave size={10} />
+                                                  </IconButton>
+                                                  <IconButton
+                                                    size="xs"
+                                                    variant="ghost"
+                                                    colorPalette="red"
+                                                    aria-label="Cancel editing"
+                                                    onClick={() => cancelEditingSuggestion(index)}
+                                                  >
+                                                    <FiX size={10} />
+                                                  </IconButton>
+                                                </HStack>
+                                              )}
+                                            </HStack>
+
+                                            {editingModes.has(index) ? (
+                                              <Textarea
+                                                value={getSuggestionText(index)}
+                                                onChange={(e) =>
+                                                  updateEditingSuggestion(index, e.target.value)
+                                                }
+                                                fontSize="xs"
+                                                p={2}
+                                                bg="blue.50"
+                                                borderRadius="sm"
+                                                border="1px solid"
+                                                borderColor="blue.200"
+                                                resize="vertical"
+                                                rows={2}
+                                              />
+                                            ) : (
+                                              <Text
+                                                fontSize="xs"
+                                                p={2}
+                                                bg="blue.50"
+                                                borderRadius="sm"
+                                                border="1px solid"
+                                                borderColor="blue.200"
+                                                cursor="pointer"
+                                                onClick={() => startEditingSuggestion(index)}
+                                                _hover={{ bg: "blue.100" }}
+                                              >
+                                                {getSuggestionText(index)}
+                                              </Text>
+                                            )}
                                           </Box>
 
                                           <Box>

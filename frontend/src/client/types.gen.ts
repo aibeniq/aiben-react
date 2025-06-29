@@ -143,6 +143,17 @@ export type FormConnectResponse = {
   }
 }
 
+export type GenerateQuestionsRequest = {
+  description: string
+  num_questions?: number
+  checklist_type?: string
+}
+
+export type GenerateQuestionsResponse = {
+  questions: Array<string>
+  description_analysis: string
+}
+
 export type HTTPValidationError = {
   detail?: Array<ValidationError>
 }
@@ -1041,3 +1052,9 @@ export type VeradocGenerateCsvData = {
 }
 
 export type VeradocGenerateCsvResponse = unknown
+
+export type VeradocGenerateQuestionsData = {
+  requestBody: GenerateQuestionsRequest
+}
+
+export type VeradocGenerateQuestionsResponse = GenerateQuestionsResponse

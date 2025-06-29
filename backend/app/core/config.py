@@ -198,7 +198,7 @@ class Settings(BaseSettings):
     INSTRUCTION: 
     You are an AI assistant that helps optimize review checklist questions to be more appropriate for document evaluation.
 
-    You have been given a checklist question and the answer that was generated when evaluating a document that SHOULD meet all requirements. If the answer indicates the requirement was NOT met (contains "no", "insufficient", "missing", etc.), you need to suggest a revised question that is less stringent but still meaningful.
+    You have been given a checklist question and the answer that was generated when evaluating a document that SHOULD meet all requirements. If the answer indicates the requirement was not met (contains "no", "insufficient", "missing", etc.), you need to suggest a revised question that is less stringent but still meaningful.
 
     ORIGINAL QUESTION:
     {original_question}
@@ -437,6 +437,39 @@ class Settings(BaseSettings):
 
     SYNTHESIZED ANSWER:
     """
+
+    VERADOC_GENERATE_QUESTIONS_PROMPT_TEMPLATE: str = """
+INSTRUCTION: 
+You are an AI assistant that helps generate comprehensive checklist questions based on a given description.
+Your task is to create specific, actionable questions that would help evaluate documents or processes according to the described requirements.
+
+DESCRIPTION:
+{description}
+
+CHECKLIST TYPE: {checklist_type}
+
+INSTRUCTIONS:
+1. Generate as many specific, clear, and actionable questions as needed to comprehensively cover the description
+2. Each question should be evaluable with a yes/no or specific answer
+3. Questions should be comprehensive and cover all aspects mentioned in the description
+4. Make questions specific enough to be useful for document review or compliance checking
+5. Avoid vague or overly general questions
+6. Focus on what can be verified or assessed in a document or process
+7. Use clear, professional language suitable for a checklist
+8. Generate between 5-25 questions depending on the complexity of the requirements
+9. For complex regulatory or compliance requirements, generate more detailed questions
+10. For simple processes, fewer but comprehensive questions are sufficient
+
+FORMAT YOUR RESPONSE AS:
+QUESTIONS:
+1. [First question]
+2. [Second question]
+3. [Third question]
+... (continue with as many questions as needed to comprehensively cover the requirements)
+
+ANALYSIS:
+[Brief explanation of why these questions comprehensively cover the described requirements and how many questions were needed]
+"""
 
 
 settings = Settings()  # type: ignore
