@@ -1,4 +1,21 @@
+import re
+import json
+import csv
 import uuid
+import zipfile
+import tempfile
+import traceback
+import asyncio
+import os
+import markdown
+from pathlib import Path
+from io import BytesIO, StringIO
+from datetime import datetime
+from fastapi.responses import StreamingResponse
+from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from bs4 import BeautifulSoup
+
 from app.models import (
     ReportGenieRequest,
     ReportGenieResponse,
@@ -16,21 +33,6 @@ from app.models import (
     OutlineSuggestion,
     OptimizedOutlineResponse,
 )
-from pathlib import Path
-import re
-import tempfile
-import zipfile
-import json
-import traceback
-import csv
-from io import BytesIO, StringIO
-from datetime import datetime
-from fastapi.responses import StreamingResponse
-from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-import markdown
-from bs4 import BeautifulSoup
-
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
@@ -51,13 +53,28 @@ from fastapi import (
     Request as FastAPIRequest,
 )
 from typing import List, Dict, Any, Optional
-import asyncio
 
 from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
-import os
 
 router = APIRouter(prefix="/reportgenie", tags=["reportgenie"])
+
+
+def sanitize_text_for_json(text: str) -> str:
+    """Sanitize text to prevent JSON parsing issues with control characters."""
+    # Replace smart quotes and apostrophes with regular ones
+    text = text.replace(""", "'").replace(""", "'")
+    text = text.replace('"', '"').replace('"', '"')
+    text = text.replace("–", "-").replace("—", "-")
+    text = text.replace("ʼ", "'")  # This specific character from the logs
+
+    # Remove control characters (characters 0-31 except tab, newline, carriage return)
+    text = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]", "", text)
+
+    # Replace any remaining problematic Unicode characters
+    text = text.encode("ascii", errors="ignore").decode("ascii")
+
+    return text
 
 
 def extract_text_from_file(file_content: bytes, filename: str) -> str:
@@ -1047,6 +1064,17 @@ async def optimize_outline(
             file = files[0]
             content = await file.read()
             ground_truth_text = extract_text_from_file(content, file.filename)
+
+            # NEW: Sanitize the ground-truth text to prevent JSON parsing issues
+            ground_truth_text = sanitize_text_for_json(ground_truth_text)
+
+            print(f"DIAGNOSTIC INFO:")
+            print(
+                f"- Number of sections: {len(current_sections) if 'current_sections' in locals() else 'Not yet parsed'}"
+            )
+            print(f"- Ground truth document size: {len(ground_truth_text)} characters")
+            print(f"- Sanitization applied to prevent JSON parsing issues")
+
             print(
                 f"Processing ground-truth document: {file.filename} ({len(ground_truth_text)} characters)"
             )
@@ -1054,6 +1082,26 @@ async def optimize_outline(
             # 4. Parse current outline sections
             current_sections = json.loads(request_data.sections)
             print(f"Optimizing {len(current_sections)} outline sections...")
+
+            # Add limits to prevent oversized processing
+            # MAX_SECTIONS = 50  # Adjust based on testing
+            MAX_DOCUMENT_SIZE = 500000  # 500KB limit
+
+            # if len(current_sections) > MAX_SECTIONS:
+            #    raise HTTPException(
+            #        status_code=413,
+            #        detail=f"Too many sections. Maximum {MAX_SECTIONS} allowed.",
+            #    )
+
+            if len(ground_truth_text) > MAX_DOCUMENT_SIZE:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"Document too large. Maximum {MAX_DOCUMENT_SIZE} characters allowed.",
+                )
+
+            print(
+                f"✓ Size validation passed: {len(current_sections)} sections, {len(ground_truth_text)} chars"
+            )
 
             # 5. Generate report content for each section using current outline
             generated_sections = {}
@@ -1133,7 +1181,7 @@ async def optimize_outline(
                 )
 
             # Split ground-truth into large chunks (up to 100,000 characters)
-            max_chunk_size = 100000  # 100,000 characters per chunk
+            max_chunk_size = 50000  # 100,000 characters per chunk
             ground_truth_chunks = []
 
             # Split by paragraphs first to avoid breaking sentences/paragraphs
@@ -1227,6 +1275,10 @@ This context shows how the document has been mapped so far. Consider:
                 # Pre-calculate values for the prompt to avoid f-string issues
                 chunk_size = len(chunk)
                 chunk_preview = chunk[:6000] if chunk_size > 6000 else chunk
+
+                # NEW: Sanitize the chunk preview to prevent JSON parsing issues
+                chunk_preview = sanitize_text_for_json(chunk_preview)
+
                 truncation_note = (
                     f"...[CONTENT TRUNCATED - showing first 6000 chars of {chunk_size} total]"
                     if chunk_size > 6000
@@ -1282,16 +1334,32 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
 """
 
                 # Log the exact prompt being sent to the LLM
+                prompt_size = len(mapping_prompt)
+                estimated_tokens = prompt_size // 4  # Rough estimate: 4 chars per token
                 print("=" * 80)
                 print(
                     f"SENDING MAPPING PROMPT TO LLM (Chunk {chunk_idx + 1}/{len(ground_truth_chunks)}):"
                 )
+                print(f"Prompt size: {prompt_size} chars (~{estimated_tokens} tokens)")
+                if estimated_tokens > 30000:  # Warning threshold
+                    print(f"WARNING: Prompt may exceed token limits!")
                 print("=" * 80)
                 print(mapping_prompt)
                 print("=" * 80)
 
-                # Call LLM directly since we have a fully formatted prompt
-                mapping_response = llm.invoke(mapping_prompt).content
+                # Check for potential LLM issues before calling
+                try:
+                    # Call LLM directly since we have a fully formatted prompt
+                    mapping_response = llm.invoke(mapping_prompt).content
+                except Exception as llm_error:
+                    print(f"LLM ERROR: {str(llm_error)}")
+                    print(f"Prompt was {prompt_size} characters")
+                    if "token" in str(llm_error).lower():
+                        print("ERROR: Likely token limit exceeded!")
+                    raise HTTPException(
+                        status_code=413,
+                        detail=f"Content too large for processing: {str(llm_error)}",
+                    )
 
                 # Log the raw response from the LLM
                 print("=" * 80)
@@ -1320,6 +1388,9 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                         response_text = response_text[:-3]  # Remove closing ```
 
                     response_text = response_text.strip()
+
+                    # NEW: Additional sanitization of the response text
+                    response_text = sanitize_text_for_json(response_text)
 
                     json_response = json.loads(response_text)
 
@@ -1366,16 +1437,26 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
 
                 except json.JSONDecodeError as e:
                     print(f"✗ JSON parsing failed: {e}")
-                    print(f"Raw response was: {mapping_response[:200]}...")
-                    if "response_text" in locals():
-                        print(f"Cleaned response was: {response_text[:200]}...")
+                    print(f"Raw response was: {mapping_response[:500]}...")
+                    print(f"Cleaned response was: {response_text[:500]}...")
+
+                    # NEW: Try to identify the problematic character
+                    try:
+                        # Find the character at the error position if available
+                        if hasattr(e, "pos") and e.pos < len(response_text):
+                            problem_char = response_text[e.pos]
+                            print(
+                                f"Problematic character at position {e.pos}: '{problem_char}' (ord: {ord(problem_char)})"
+                            )
+                    except:
+                        pass
+
                     # Keep empty lists for fallback
                 except Exception as e:
                     print(f"✗ Error processing JSON response: {e}")
                     if "response_text" in locals():
-                        print(f"Cleaned response was: {response_text[:200]}...")
+                        print(f"Cleaned response was: {response_text[:500]}...")
                     # Keep empty lists for fallback
-
                 # Enhanced fallback logic if JSON parsing failed
                 if not assigned_sections:
                     print(
@@ -1714,3 +1795,20 @@ Content Extraction:
     finally:
         if disconnect_monitor:
             disconnect_monitor.cancel()
+
+
+def sanitize_text_for_json(text: str) -> str:
+    """Sanitize text to prevent JSON parsing issues with control characters."""
+    # Replace smart quotes and apostrophes with regular ones
+    text = text.replace(""", "'").replace(""", "'")
+    text = text.replace('"', '"').replace('"', '"')
+    text = text.replace("–", "-").replace("—", "-")
+    text = text.replace("ʼ", "'")  # This specific character from the logs
+
+    # Remove control characters (characters 0-31 except tab, newline, carriage return)
+    text = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]", "", text)
+
+    # Replace any remaining problematic Unicode characters
+    text = text.encode("ascii", errors="ignore").decode("ascii")
+
+    return text
