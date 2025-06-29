@@ -177,6 +177,8 @@ class Settings(BaseSettings):
         RELEVANT REQUIREMENTS:
         {question_context}
 
+        {custom_instructions_section}
+
         ANSWER:
     """
 

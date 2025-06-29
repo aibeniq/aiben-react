@@ -9,6 +9,7 @@ import {
   Spinner,
   Accordion,
   Tabs,
+  Textarea,
 } from "@chakra-ui/react"
 import useCustomToast from "@/hooks/useCustomToast"
 import { CancelablePromise } from "@/client/core/CancelablePromise"
@@ -48,6 +49,7 @@ const VeraDoc = () => {
   const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
 
   const [questions, setQuestions] = useState("")
+  const [customInstructions, setCustomInstructions] = useState("")
 
   const [fileItems, setFileItems] = useState<FileItem[]>([])
 
@@ -270,6 +272,7 @@ const VeraDoc = () => {
       knowledgeBaseId: string
       files: File[]
       handwrittenFiles: File[]
+      customInstructions?: string
     }) => {
       if (ongoingRequest.current) {
         ongoingRequest.current.cancel()
@@ -288,6 +291,7 @@ const VeraDoc = () => {
       const promise = VeradocService.processRagChecklist({
         questions: data.questions,
         knowledgeBaseId: data.knowledgeBaseId,
+        customInstructions: data.customInstructions,
         formData: {
           files: data.files,
           handwritten_files: data.handwrittenFiles,
@@ -377,6 +381,7 @@ const VeraDoc = () => {
       knowledgeBaseId: selectedKnowledgeBase.id,
       files: regularFiles,
       handwrittenFiles: handwrittenFiles,
+      customInstructions: customInstructions.trim() || undefined,
     }
 
     console.log("Request Data:", requestData)
@@ -463,12 +468,14 @@ const VeraDoc = () => {
           knowledgeBaseId: selectedKnowledgeBase.id,
           files: regularFiles,
           handwrittenFiles: handwrittenFiles,
+          customInstructions: customInstructions.trim() || undefined,
         }
 
         // Call the API using our mutation
         const response = await VeradocService.processRagChecklist({
           questions: requestData.questions,
           knowledgeBaseId: requestData.knowledgeBaseId,
+          customInstructions: requestData.customInstructions,
           formData: {
             files: requestData.files,
             handwritten_files: requestData.handwrittenFiles,
@@ -668,6 +675,30 @@ const VeraDoc = () => {
               onFilesChange={setFileItems}
               showHandwrittenToggle={true}
             />
+
+            {/* Custom Instructions Text Box */}
+            <Box width="100%" mt={4}>
+              <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
+                Custom Instructions (Optional)
+              </Text>
+              <Textarea
+                value={customInstructions}
+                onChange={(e) => setCustomInstructions(e.target.value)}
+                placeholder="Enter any additional instructions that should be considered when answering the checklist questions..."
+                rows={3}
+                resize="vertical"
+                bg="white"
+                borderColor="gray.300"
+                _hover={{ borderColor: "gray.400" }}
+                _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                fontSize="sm"
+                maxLength={2000}
+              />
+              <Text fontSize="xs" color="gray.500" mt={1}>
+                {customInstructions.length}/2000 characters. These instructions will be appended to
+                each question when processing.
+              </Text>
+            </Box>
           </VStack>
         </HStack>
 

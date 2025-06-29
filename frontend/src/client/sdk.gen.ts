@@ -2010,6 +2010,7 @@ export class VeradocService {
       query: {
         questions: data.questions,
         knowledge_base_id: data.knowledgeBaseId,
+        custom_instructions: data.customInstructions,
       },
       formData: data.formData,
       mediaType: "multipart/form-data",
