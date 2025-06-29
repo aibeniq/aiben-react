@@ -2199,6 +2199,7 @@ export class VeradocService {
         knowledge_base_id: data.knowledgeBaseId,
         questions: data.questions,
         target_answers: data.targetAnswers,
+        custom_instructions: data.customInstructions,
       },
       formData: data.formData,
       mediaType: "multipart/form-data",

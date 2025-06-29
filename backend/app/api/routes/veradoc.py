@@ -1025,6 +1025,14 @@ async def optimize_checklist(
                     {"context": context, "question": question},
                 )
 
+                # Prepare custom instructions section if provided
+                custom_instructions_section = ""
+                if (
+                    request_data.custom_instructions
+                    and request_data.custom_instructions.strip()
+                ):
+                    custom_instructions_section = f"\nADDITIONAL INSTRUCTIONS:\n{request_data.custom_instructions.strip()}\n"
+
                 # Generate answer
                 answer = invoke_llm(
                     llm,
@@ -1033,6 +1041,7 @@ async def optimize_checklist(
                         "document_text": document_text[:10000],
                         "question": question,
                         "question_context": question_context,
+                        "custom_instructions_section": custom_instructions_section,
                     },
                 )
 
