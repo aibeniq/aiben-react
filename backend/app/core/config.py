@@ -180,6 +180,7 @@ class Settings(BaseSettings):
         Additional instructions for answering the question:
         {custom_instructions_section}
 
+        Now begin your answer with either YES or NO.
         ANSWER:
     """
 
@@ -201,7 +202,7 @@ class Settings(BaseSettings):
     INSTRUCTION: 
     You are an AI assistant that helps optimize review checklist questions to be more appropriate for document evaluation.
 
-    You have been given a checklist question and the answer that was generated when evaluating a document that SHOULD meet all requirements. If the answer indicates the requirement was not met (contains "no", "insufficient", "missing", etc.), you need to suggest a revised question that is less stringent but still meaningful.
+    You have been given a checklist question and the answer that was generated when evaluating a document that SHOULD meet all requirements. If the answer indicates the requirement was NOT met (starts with NO rather than YES), you need to suggest a revised question that is less stringent but still meaningful.
 
     ORIGINAL QUESTION:
     {original_question}
@@ -213,9 +214,9 @@ class Settings(BaseSettings):
     {document_context}
 
     TASK:
-    If the answer suggests the requirement was not met, provide a revised question that would be more likely to result in a "yes" answer for similar documents, while still maintaining the intent of the original requirement.
+    If the answer begins with NO and suggests the requirement was not met, provide a revised question that would be more likely to result in a "yes" answer for similar documents, while still maintaining the intent of the original requirement.
 
-    If the answer already indicates the requirement was met, return the original question unchanged.
+    If the answer begins with YES and indicates the requirement was met, return the original question unchanged.
 
     FORMAT YOUR RESPONSE EXACTLY AS FOLLOWS:
     REVISED_QUESTION: [your revised question here]
@@ -472,6 +473,40 @@ QUESTIONS:
 
 ANALYSIS:
 [Brief explanation of why these questions comprehensively cover the described requirements and how many questions were needed]
+"""
+
+    REPORTGENIE_GENERATE_OUTLINE_PROMPT_TEMPLATE: str = """
+INSTRUCTION: 
+You are an AI assistant that helps generate comprehensive section outlines for reports based on a given description.
+Your task is to create specific, meaningful section descriptions that would help structure a comprehensive report according to the outlined requirements.
+
+OUTLINE DESCRIPTION:
+{description}
+
+REPORT TYPE: {report_type}
+
+INSTRUCTIONS:
+1. Generate as many specific, clear, and meaningful sections as needed to comprehensively cover the outline description
+2. Each section should represent a distinct topic or area that would be covered in the report
+3. Sections should be comprehensive and cover all aspects mentioned in the outline description
+4. Make section descriptions specific enough to be useful for report generation
+5. Avoid vague or overly general section descriptions
+6. Focus on what would be meaningful content areas for a structured report
+7. Use clear, professional language suitable for report sections
+8. Generate between 3-15 sections depending on the complexity of the requirements
+9. For complex topics, generate more detailed sections with specific focus areas
+10. For simple topics, fewer but comprehensive sections are sufficient
+11. Each section should be a concise description (1-2 sentences) of what that section would cover
+
+FORMAT YOUR RESPONSE AS:
+SECTIONS:
+1. [First section description]
+2. [Second section description]
+3. [Third section description]
+... (continue with as many sections as needed to comprehensively cover the outline)
+
+ANALYSIS:
+[Brief explanation of why these sections comprehensively cover the outlined requirements and how the sections work together to form a complete report structure]
 """
 
 
