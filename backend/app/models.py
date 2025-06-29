@@ -279,6 +279,7 @@ class FormConnectForm(SQLModel, table=True):
 # Request model for VeraDoc
 class VeraDocRequest(SQLModel):
     questions: str
+    custom_instructions: Optional[str] = Field(default=None, max_length=2000)
 
 
 # Response model for VeraDoc

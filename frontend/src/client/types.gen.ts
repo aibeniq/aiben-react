@@ -982,6 +982,7 @@ export type UtilsTestEmailResponse = Message
 export type UtilsHealthCheckResponse = boolean
 
 export type VeradocProcessRagChecklistData = {
+  customInstructions?: string
   formData: Body_veradoc_process_rag_checklist
   knowledgeBaseId: string
   questions: string

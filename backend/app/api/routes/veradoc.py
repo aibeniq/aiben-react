@@ -486,12 +486,22 @@ async def process_rag_checklist(
 
                 # Step 3: Answer the question based on the uploaded document and policy context
                 print("Generating answer based on document and context...")
+
+                # Prepare custom instructions section
+                custom_instructions_section = ""
+                if (
+                    hasattr(request_data, "custom_instructions")
+                    and request_data.custom_instructions
+                ):
+                    custom_instructions_section = f"\nADDITIONAL INSTRUCTIONS:\n{request_data.custom_instructions.strip()}\n"
+
                 # DEBUG: Print the full prompt sent to the LLM
                 try:
                     rendered_prompt = qa_prompt_template.format(
                         document_text=document_text[:10000],
                         question=question,
                         question_context=question_context,
+                        custom_instructions_section=custom_instructions_section,
                     )
                 except Exception as e:
                     rendered_prompt = f"[ERROR rendering prompt: {e}]"
@@ -507,6 +517,7 @@ async def process_rag_checklist(
                         ],  # Limit length to avoid token issues
                         "question": question,
                         "question_context": question_context,
+                        "custom_instructions_section": custom_instructions_section,
                     },
                 )
                 print(f"Got answer: {answer[:100]}...")
