@@ -509,5 +509,34 @@ ANALYSIS:
 [Brief explanation of why these sections comprehensively cover the outlined requirements and how the sections work together to form a complete report structure]
 """
 
+    REPORTGENIE_OPTIMIZE_OUTLINE_PROMPT_TEMPLATE: str = """
+INSTRUCTION:
+You are an AI assistant that helps optimize report outline sections by comparing generated report content to a ground-truth reference document. Your task is to suggest improved section descriptions that would lead to better report generation.
+
+ORIGINAL SECTION: {original_section}
+
+GENERATED CONTENT FOR THIS SECTION:
+{generated_content}
+
+RELEVANT CONTENT FROM GROUND-TRUTH DOCUMENT:
+{ground_truth_content}
+
+INSTRUCTIONS:
+1. Compare the generated content to the relevant ground-truth content
+2. Identify gaps, deficiencies, or areas where the generated content doesn't match the quality/scope of the ground-truth
+3. Determine if the original section description led to adequate content generation
+4. If the generated content is lacking compared to ground-truth, suggest an improved section description
+5. The improved description should guide the AI to generate content more similar to the ground-truth
+6. Focus on being specific about what content should be included
+7. Consider depth, scope, specific details, and coverage areas
+8. If the generated content is already good, indicate no revision is needed
+
+FORMAT YOUR RESPONSE AS:
+NEEDS_REVISION: [Yes/No]
+SUGGESTED_SECTION: [Improved section description if revision needed, otherwise same as original]
+REASON: [Brief explanation of why the revision would improve content generation, or why no revision is needed]
+ANALYSIS: [Detailed comparison of generated vs ground-truth content and how the suggested revision addresses identified gaps]
+"""
+
 
 settings = Settings()  # type: ignore

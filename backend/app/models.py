@@ -619,6 +619,30 @@ class OptimizedChecklistResponse(SQLModel):
     analysis_summary: str
 
 
+# New models for ReportGenie outline optimization
+class OptimizeOutlineRequest(SQLModel):
+    knowledge_base_id: str
+    outline_id: str  # ID of the outline to optimize
+    sections: str  # Current outline sections (JSON string)
+    custom_instructions: Optional[str] = Field(default=None, max_length=2000)
+
+
+class OutlineSuggestion(SQLModel):
+    original_section: str
+    suggested_section: str
+    reason: str
+    current_output: str
+    ground_truth_content: str
+    needs_revision: bool
+
+
+class OptimizedOutlineResponse(SQLModel):
+    original_sections: List[str]
+    suggestions: List[OutlineSuggestion]
+    optimized_sections: List[str]
+    analysis_summary: str
+
+
 class GenerateQuestionsRequest(SQLModel):
     description: str = Field(min_length=10, max_length=20000)
     num_questions: Optional[int] = Field(

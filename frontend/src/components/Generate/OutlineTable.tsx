@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Button, HStack, IconButton, Table, Checkbox } from "@chakra-ui/react"
 import { FiEye, FiCopy, FiTrash2, FiPlus } from "react-icons/fi"
-import { ReportGenieOutline, ReportgenieService } from "../../client"
+import { ReportGenieOutline, ReportgenieService, KnowledgeBasePublic } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import OutlineModal from "./OutlineModal"
 
@@ -13,6 +13,7 @@ interface OutlineTableProps {
   onOutlinesUpdate: () => void
   sections: string
   isDisabled?: boolean
+  selectedKnowledgeBase?: KnowledgeBasePublic | null
 }
 
 interface OutlineTableHeaderProps {
@@ -154,6 +155,7 @@ const OutlineTable = ({
   onOutlinesUpdate,
   sections,
   isDisabled = false,
+  selectedKnowledgeBase,
 }: OutlineTableProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -296,6 +298,7 @@ const OutlineTable = ({
         setOutlineDescription={setOutlineDescription}
         sections={sections}
         onSectionsChange={onSectionsChange}
+        selectedKnowledgeBase={selectedKnowledgeBase}
       />
     </div>
   )

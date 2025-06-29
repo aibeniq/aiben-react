@@ -10,10 +10,11 @@ import {
 } from "@chakra-ui/react"
 import { Field } from "../ui/field"
 import { Box, Text } from "@chakra-ui/react"
-import { ReportGenieOutline } from "../../client"
+import { ReportGenieOutline, KnowledgeBasePublic } from "../../client"
 import SectionEditor from "./SectionEditor" // Import SectionEditor instead of InteractiveList
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
+import OptimizeOutlineModal from "./OptimizeOutlineModal"
 import { useState } from "react"
 import { ReportgenieService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
@@ -29,6 +30,7 @@ interface OutlineModalProps {
   setOutlineDescription: (description: string) => void
   sections: string
   onSectionsChange: (sections: string) => void
+  selectedKnowledgeBase?: KnowledgeBasePublic | null
 }
 
 const OutlineModal = ({
@@ -42,11 +44,13 @@ const OutlineModal = ({
   setOutlineDescription,
   sections,
   onSectionsChange,
+  selectedKnowledgeBase,
 }: OutlineModalProps) => {
   console.log("Parent: sections prop value", sections)
 
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [generating, setGenerating] = useState(false)
+  const [showOptimizeModal, setShowOptimizeModal] = useState(false)
 
   const handleGenerateOutline = async () => {
     if (!outlineDescription.trim()) {
@@ -109,6 +113,25 @@ const OutlineModal = ({
     }
   }
 
+  const handleOptimizeClick = () => {
+    if (!selectedKnowledgeBase) {
+      showErrorToast("Please select a knowledge base first to optimize the outline.")
+      return
+    }
+
+    if (!editingOutline?.id) {
+      showErrorToast("Please save the outline first before optimizing.")
+      return
+    }
+
+    if (!sections.trim()) {
+      showErrorToast("Please add some sections to the outline before optimizing.")
+      return
+    }
+
+    setShowOptimizeModal(true)
+  }
+
   if (!isOpen) return null
 
   return (
@@ -155,25 +178,51 @@ const OutlineModal = ({
                   label={
                     <HStack justify="space-between" w="full">
                       <span>Sections</span>
-                      <Button
-                        size="xs"
-                        onClick={handleGenerateOutline}
-                        disabled={
-                          !outlineDescription.trim() ||
-                          outlineDescription.trim().length < 10 ||
-                          generating
-                        }
-                        loading={generating}
-                        variant="outline"
-                        colorPalette="green"
-                        title={
-                          outlineDescription.trim().length < 10
-                            ? "Description must be at least 10 characters to generate sections"
-                            : "Generate sections based on the description"
-                        }
-                      >
-                        {generating ? "Generating..." : "Generate Outline"}
-                      </Button>
+                      <HStack gap={2}>
+                        <Button
+                          size="xs"
+                          onClick={handleGenerateOutline}
+                          disabled={
+                            !outlineDescription.trim() ||
+                            outlineDescription.trim().length < 10 ||
+                            generating
+                          }
+                          loading={generating}
+                          variant="outline"
+                          colorPalette="green"
+                          title={
+                            outlineDescription.trim().length < 10
+                              ? "Description must be at least 10 characters to generate sections"
+                              : "Generate sections based on the description"
+                          }
+                        >
+                          {generating ? "Generating..." : "Generate Outline"}
+                        </Button>
+
+                        <Button
+                          size="xs"
+                          onClick={handleOptimizeClick}
+                          disabled={
+                            !selectedKnowledgeBase ||
+                            !editingOutline?.id ||
+                            !sections.trim() ||
+                            generating
+                          }
+                          variant="outline"
+                          colorPalette="blue"
+                          title={
+                            !selectedKnowledgeBase
+                              ? "Select a knowledge base first"
+                              : !editingOutline?.id
+                                ? "Save the outline first"
+                                : !sections.trim()
+                                  ? "Add sections to optimize"
+                                  : "Optimize sections using ground-truth document"
+                          }
+                        >
+                          Optimize
+                        </Button>
+                      </HStack>
                     </HStack>
                   }
                   required
@@ -204,6 +253,18 @@ const OutlineModal = ({
           </Dialog.Content>
         </Dialog.Positioner>
       </Dialog.Root>
+
+      {/* Optimize Outline Modal */}
+      {selectedKnowledgeBase && editingOutline?.id && (
+        <OptimizeOutlineModal
+          isOpen={showOptimizeModal}
+          onClose={() => setShowOptimizeModal(false)}
+          knowledgeBaseId={selectedKnowledgeBase.id}
+          outlineId={editingOutline.id}
+          currentSections={sections}
+          onOptimizedSections={onSectionsChange}
+        />
+      )}
     </Portal>
   )
 }

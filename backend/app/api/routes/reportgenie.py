@@ -12,6 +12,9 @@ from app.models import (
     Message,
     GenerateOutlineRequest,
     GenerateOutlineResponse,
+    OptimizeOutlineRequest,
+    OutlineSuggestion,
+    OptimizedOutlineResponse,
 )
 from pathlib import Path
 import re
@@ -39,12 +42,88 @@ from app.services.retrievers import (
 from app.services.text_processing import chunk_text, estimate_tokens
 
 from sqlmodel import select
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List, Dict, Any
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    UploadFile,
+    File,
+    Request as FastAPIRequest,
+)
+from typing import List, Dict, Any, Optional
+import asyncio
 
 from langchain_community.vectorstores import Chroma
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
+import os
 
 router = APIRouter(prefix="/reportgenie", tags=["reportgenie"])
+
+
+def extract_text_from_file(file_content: bytes, filename: str) -> str:
+    """Extract text from various file formats."""
+    try:
+        # Determine file type from extension
+        file_ext = Path(filename).suffix.lower()
+
+        if file_ext == ".pdf":
+            # Handle PDF files
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+                temp_file.write(file_content)
+                temp_file_path = temp_file.name
+
+            try:
+                loader = PyPDFLoader(temp_file_path)
+                documents = loader.load()
+                text = "\n\n".join([doc.page_content for doc in documents])
+                return text
+            finally:
+                os.unlink(temp_file_path)
+
+        elif file_ext in [".docx", ".doc"]:
+            # Handle Word documents
+            with tempfile.NamedTemporaryFile(
+                delete=False, suffix=file_ext
+            ) as temp_file:
+                temp_file.write(file_content)
+                temp_file_path = temp_file.name
+
+            try:
+                if file_ext == ".docx":
+                    doc = Document(temp_file_path)
+                    text_parts = []
+                    for paragraph in doc.paragraphs:
+                        if paragraph.text.strip():
+                            text_parts.append(paragraph.text)
+
+                    # Also extract text from tables
+                    for table in doc.tables:
+                        for row in table.rows:
+                            for cell in row.cells:
+                                if cell.text.strip():
+                                    text_parts.append(cell.text)
+
+                    return "\n\n".join(text_parts)
+                else:
+                    # For .doc files, fall back to textloader
+                    loader = TextLoader(temp_file_path)
+                    documents = loader.load()
+                    return "\n\n".join([doc.page_content for doc in documents])
+            finally:
+                os.unlink(temp_file_path)
+
+        elif file_ext == ".txt":
+            # Handle text files
+            return file_content.decode("utf-8", errors="ignore")
+
+        else:
+            # For other formats, try to decode as text
+            return file_content.decode("utf-8", errors="ignore")
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=400, detail=f"Error extracting text from {filename}: {str(e)}"
+        )
 
 
 @router.post("/generate", response_model=ReportGenieResponse)
@@ -875,3 +954,269 @@ async def get_report_detail(
         raise HTTPException(
             status_code=500, detail=f"Error retrieving report details: {str(e)}"
         )
+
+
+@router.post("/optimize-outline", response_model=OptimizedOutlineResponse)
+async def optimize_outline(
+    session: SessionDep,
+    current_user: CurrentUser,
+    request_data: OptimizeOutlineRequest = Depends(),
+    files: List[UploadFile] = File(...),
+    request: FastAPIRequest = None,
+):
+    """
+    Optimize outline sections by testing them against a ground-truth document.
+    Generates a report with current outline and compares it to the ground-truth to suggest improvements.
+    """
+    print("optimize_outline function invoked!")
+    cancellation_requested = False
+
+    try:
+        print("Setting up disconnect monitor for outline optimization...")
+        disconnect_monitor = None
+        if request:
+
+            async def monitor_client_disconnect():
+                nonlocal cancellation_requested
+                try:
+                    await request.is_disconnected()
+                    print("Client disconnected, canceling optimization...")
+                    cancellation_requested = True
+                except asyncio.CancelledError:
+                    print("Disconnect monitor cancelled because main task completed")
+                except Exception as e:
+                    print(f"Error in disconnect monitoring: {str(e)}")
+
+            disconnect_monitor = asyncio.create_task(monitor_client_disconnect())
+
+        print("Starting outline optimization...")
+
+        # 1. Retrieve knowledge base
+        kb = session.get(KnowledgeBase, request_data.knowledge_base_id)
+        if not kb:
+            raise HTTPException(status_code=404, detail="Knowledge base not found")
+
+        if kb.owner_id != current_user.id:
+            raise HTTPException(
+                status_code=403, detail="You don't have access to this knowledge base"
+            )
+
+        # 2. Set up the same infrastructure as generate_report
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Extract ChromaDB
+            if kb.data:
+                with zipfile.ZipFile(BytesIO(kb.data), "r") as zip_ref:
+                    zip_ref.extractall(temp_dir)
+            else:
+                raise HTTPException(
+                    status_code=400, detail="Knowledge base has no vector database data"
+                )
+
+            # Load embeddings and vector database
+            if kb.embedding_model_id:
+                embedding_model = session.get(EmbeddingModel, kb.embedding_model_id)
+                if embedding_model:
+                    model_id = embedding_model.model_id
+                    provider = embedding_model.provider
+                else:
+                    embedding_info = get_embedding_model(session, current_user)
+                    model_id = embedding_info["model_id"]
+                    provider = embedding_info["provider"]
+            else:
+                embedding_info = get_embedding_model(session, current_user)
+                model_id = embedding_info["model_id"]
+                provider = embedding_info["provider"]
+
+            embeddings = load_embeddings_model(provider=provider, model_id=model_id)
+            chroma_db = Chroma(
+                persist_directory=temp_dir, embedding_function=embeddings
+            )
+
+            # Create retriever
+            retriever = create_ensemble_retriever(
+                chroma_db=chroma_db,
+                vector_weight=0.7,
+                keyword_weight=0.3,
+                search_kwargs={"k": settings.RAG_NUM_CHUNKS},
+            )
+
+            # Initialize LLM
+            llm = get_default_llm(session, current_user)
+
+            # 3. Process the ground-truth document
+            file = files[0]
+            content = await file.read()
+            ground_truth_text = extract_text_from_file(content, file.filename)
+            print(
+                f"Processing ground-truth document: {file.filename} ({len(ground_truth_text)} characters)"
+            )
+
+            # 4. Parse current outline sections
+            current_sections = json.loads(request_data.sections)
+            print(f"Optimizing {len(current_sections)} outline sections...")
+
+            # 5. Generate report content for each section using current outline
+            generated_sections = {}
+
+            for section in current_sections:
+                if cancellation_requested:
+                    print("Operation cancelled by client disconnect")
+                    raise HTTPException(
+                        status_code=408, detail="Operation cancelled by user"
+                    )
+
+                section_description = section["text"].strip()
+                if not section_description:
+                    continue
+
+                print(f"Generating content for section: {section_description[:50]}...")
+
+                # Get relevant context for this section
+                docs = retriever.get_relevant_documents(section_description)
+                context = "\n\n".join([doc.page_content for doc in docs])
+
+                # Build the report draft so far (all previous sections)
+                report_draft = ""
+                for prev_section, prev_content in generated_sections.items():
+                    if prev_content:
+                        report_draft += f"\n\n## {prev_section}\n\n{prev_content}"
+
+                # Generate content for this section
+                generated_content = invoke_llm(
+                    llm,
+                    settings.REPORT_GENIE_PROMPT_TEMPLATE,
+                    {
+                        "report_draft": report_draft,
+                        "context": context,
+                        "question": section_description,
+                    },
+                )
+
+                generated_sections[section_description] = generated_content
+                print(f"Generated {len(generated_content)} characters for section")
+
+            # 6. Compare each section's generated content to ground-truth and suggest optimizations
+            suggestions = []
+            optimization_count = 0
+
+            for section_description, generated_content in generated_sections.items():
+                if cancellation_requested:
+                    print("Operation cancelled by client disconnect")
+                    raise HTTPException(
+                        status_code=408, detail="Operation cancelled by user"
+                    )
+
+                print(f"Analyzing section: {section_description[:50]}...")
+
+                # Find relevant content from ground-truth for this section
+                # Simple approach: use section description to find relevant parts of ground-truth
+                relevant_docs = retriever.get_relevant_documents(section_description)
+                ground_truth_context = "\n\n".join(
+                    [doc.page_content for doc in relevant_docs]
+                )
+
+                # If no specific context found, use a broader search
+                if not ground_truth_context.strip():
+                    # Create a more general query from the section description
+                    words = section_description.split()[:5]  # Use first 5 words
+                    general_query = " ".join(words)
+                    general_docs = retriever.get_relevant_documents(general_query)
+                    ground_truth_context = "\n\n".join(
+                        [doc.page_content for doc in general_docs]
+                    )
+
+                # Generate optimization suggestion
+                suggestion_response = invoke_llm(
+                    llm,
+                    settings.REPORTGENIE_OPTIMIZE_OUTLINE_PROMPT_TEMPLATE,
+                    {
+                        "original_section": section_description,
+                        "generated_content": generated_content[
+                            :2000
+                        ],  # Limit to avoid token limits
+                        "ground_truth_content": ground_truth_context[
+                            :2000
+                        ],  # Limit to avoid token limits
+                    },
+                )
+
+                # Parse the response
+                needs_revision = "NEEDS_REVISION: Yes" in suggestion_response
+
+                # Extract suggested section
+                suggested_section = section_description  # Default to original
+                if "SUGGESTED_SECTION:" in suggestion_response:
+                    lines = suggestion_response.split("\n")
+                    for line in lines:
+                        if line.startswith("SUGGESTED_SECTION:"):
+                            suggested_section = line.replace(
+                                "SUGGESTED_SECTION:", ""
+                            ).strip()
+                            break
+
+                # Extract reason
+                reason = "No specific reason provided"
+                if "REASON:" in suggestion_response:
+                    lines = suggestion_response.split("\n")
+                    for line in lines:
+                        if line.startswith("REASON:"):
+                            reason = line.replace("REASON:", "").strip()
+                            break
+
+                if needs_revision:
+                    optimization_count += 1
+
+                suggestions.append(
+                    OutlineSuggestion(
+                        original_section=section_description,
+                        suggested_section=suggested_section,
+                        reason=reason,
+                        current_output=generated_content[
+                            :1000
+                        ],  # Show first 1000 chars
+                        ground_truth_content=ground_truth_context[
+                            :1000
+                        ],  # Show first 1000 chars
+                        needs_revision=needs_revision,
+                    )
+                )
+
+                print(
+                    f"Section analysis complete: {'NEEDS OPTIMIZATION' if needs_revision else 'OK'}"
+                )
+
+            # 7. Compile results
+            original_sections = list(generated_sections.keys())
+            optimized_sections = [s.suggested_section for s in suggestions]
+
+            analysis_summary = f"""
+Outline Optimization Analysis:
+- Total sections evaluated: {len(original_sections)}
+- Sections needing optimization: {optimization_count}
+- Sections working well: {len(original_sections) - optimization_count}
+- Ground-truth document: {file.filename}
+
+The optimization process generated content for each section using the current outline and knowledge base, then compared it to relevant content from the ground-truth document. Suggested revisions aim to improve section descriptions to generate content more similar to the ground-truth quality and scope.
+            """.strip()
+
+            print(
+                f"Optimization complete: {optimization_count}/{len(original_sections)} sections optimized"
+            )
+
+            return OptimizedOutlineResponse(
+                original_sections=original_sections,
+                suggestions=suggestions,
+                optimized_sections=optimized_sections,
+                analysis_summary=analysis_summary,
+            )
+
+    except Exception as e:
+        print("Error in outline optimization:")
+        print(str(e))
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error optimizing outline: {str(e)}"
+        )
+    finally:
+        if disconnect_monitor:
+            disconnect_monitor.cancel()

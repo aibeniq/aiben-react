@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ChatQueryKnowledgeBaseData, ChatQueryKnowledgeBaseResponse, ChatQueryDocumentData, ChatQueryDocumentResponse, ChatQueryTextData, ChatQueryTextResponse, ChatChatData, ChatChatResponse, EmbeddingModelsGetAvailableProvidersResponse, EmbeddingModelsGetEmbeddingModelsData, EmbeddingModelsGetEmbeddingModelsResponse, EmbeddingModelsCreateEmbeddingModelData, EmbeddingModelsCreateEmbeddingModelResponse, EmbeddingModelsGetDefaultEmbeddingModelResponse, EmbeddingModelsGetEmbeddingModelData, EmbeddingModelsGetEmbeddingModelResponse, EmbeddingModelsUpdateEmbeddingModelData, EmbeddingModelsUpdateEmbeddingModelResponse, EmbeddingModelsDeleteEmbeddingModelData, EmbeddingModelsDeleteEmbeddingModelResponse, EmbeddingModelsSetDefaultEmbeddingModelData, EmbeddingModelsSetDefaultEmbeddingModelResponse, EmbeddingModelsValidateEmbeddingModelData, EmbeddingModelsValidateEmbeddingModelResponse, EmbeddingModelsCheckApiKeyConfiguredData, EmbeddingModelsCheckApiKeyConfiguredResponse, FeedbackSubmitFeedbackData, FeedbackSubmitFeedbackResponse, FilesGetSourceContentData, FilesGetSourceContentResponse, FormconnectProcessFormData, FormconnectProcessFormResponse, FormconnectGetFormsResponse, FormconnectCreateFormData, FormconnectCreateFormResponse, FormconnectGetFormData, FormconnectGetFormResponse, FormconnectUpdateFormData, FormconnectUpdateFormResponse, FormconnectDeleteFormData, FormconnectDeleteFormResponse, FormconnectGetFormDetailData, FormconnectGetFormDetailResponse, FormconnectGetFormHistoryData, FormconnectGetFormHistoryResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, KnowledgeBasesReadKnowledgeBasesData, KnowledgeBasesReadKnowledgeBasesResponse, KnowledgeBasesCreateKnowledgeBaseData, KnowledgeBasesCreateKnowledgeBaseResponse, KnowledgeBasesReadKnowledgeBaseData, KnowledgeBasesReadKnowledgeBaseResponse, KnowledgeBasesUpdateKnowledgeBaseData, KnowledgeBasesUpdateKnowledgeBaseResponse, KnowledgeBasesDeleteKnowledgeBaseData, KnowledgeBasesDeleteKnowledgeBaseResponse, LlmModelsGetLlmModelsData, LlmModelsGetLlmModelsResponse, LlmModelsCreateLlmModelData, LlmModelsCreateLlmModelResponse, LlmModelsGetDefaultLlmModelResponse, LlmModelsDeleteLlmModelData, LlmModelsDeleteLlmModelResponse, LlmModelsValidateLlmModelData, LlmModelsValidateLlmModelResponse, LlmModelsSetDefaultLlmModelData, LlmModelsSetDefaultLlmModelResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, ReportgenieGenerateReportData, ReportgenieGenerateReportResponse, ReportgenieGetOutlinesResponse, ReportgenieCreateOutlineData, ReportgenieCreateOutlineResponse, ReportgenieGetOutlineData, ReportgenieGetOutlineResponse, ReportgenieUpdateOutlineData, ReportgenieUpdateOutlineResponse, ReportgenieDeleteOutlineData, ReportgenieDeleteOutlineResponse, ReportgenieGenerateDocxData, ReportgenieGenerateDocxResponse, ReportgenieGenerateCsvData, ReportgenieGenerateCsvResponse, ReportgenieGenerateOutlineData, ReportgenieGenerateOutlineResponse, ReportgenieGetReportHistoryData, ReportgenieGetReportHistoryResponse, ReportgenieGetReportDetailData, ReportgenieGetReportDetailResponse, TwincheckCompareDocumentsData, TwincheckCompareDocumentsResponse, TwincheckGetComparisonHistoryData, TwincheckGetComparisonHistoryResponse, TwincheckGetComparisonDetailData, TwincheckGetComparisonDetailResponse, TwincheckGetComparisonsResponse, TwincheckCreateComparisonData, TwincheckCreateComparisonResponse, TwincheckGetComparisonData, TwincheckGetComparisonResponse, TwincheckUpdateComparisonData, TwincheckUpdateComparisonResponse, TwincheckDeleteComparisonData, TwincheckDeleteComparisonResponse, TwincheckGenerateDocxData, TwincheckGenerateDocxResponse, UsersUpdateLanguageData, UsersUpdateLanguageResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, VeradocProcessRagChecklistData, VeradocProcessRagChecklistResponse, VeradocGetChecklistsResponse, VeradocCreateChecklistData, VeradocCreateChecklistResponse, VeradocGetChecklistData, VeradocGetChecklistResponse, VeradocUpdateChecklistData, VeradocUpdateChecklistResponse, VeradocDeleteChecklistData, VeradocDeleteChecklistResponse, VeradocGetVeradocHistoryData, VeradocGetVeradocHistoryResponse, VeradocGetVeradocDetailData, VeradocGetVeradocDetailResponse, VeradocOptimizeChecklistData, VeradocOptimizeChecklistResponse, VeradocGenerateDocxData, VeradocGenerateDocxResponse, VeradocGenerateCsvData, VeradocGenerateCsvResponse, VeradocGenerateQuestionsData, VeradocGenerateQuestionsResponse } from './types.gen';
+import type { ChatQueryKnowledgeBaseData, ChatQueryKnowledgeBaseResponse, ChatQueryDocumentData, ChatQueryDocumentResponse, ChatQueryTextData, ChatQueryTextResponse, ChatChatData, ChatChatResponse, EmbeddingModelsGetAvailableProvidersResponse, EmbeddingModelsGetEmbeddingModelsData, EmbeddingModelsGetEmbeddingModelsResponse, EmbeddingModelsCreateEmbeddingModelData, EmbeddingModelsCreateEmbeddingModelResponse, EmbeddingModelsGetDefaultEmbeddingModelResponse, EmbeddingModelsGetEmbeddingModelData, EmbeddingModelsGetEmbeddingModelResponse, EmbeddingModelsUpdateEmbeddingModelData, EmbeddingModelsUpdateEmbeddingModelResponse, EmbeddingModelsDeleteEmbeddingModelData, EmbeddingModelsDeleteEmbeddingModelResponse, EmbeddingModelsSetDefaultEmbeddingModelData, EmbeddingModelsSetDefaultEmbeddingModelResponse, EmbeddingModelsValidateEmbeddingModelData, EmbeddingModelsValidateEmbeddingModelResponse, EmbeddingModelsCheckApiKeyConfiguredData, EmbeddingModelsCheckApiKeyConfiguredResponse, FeedbackSubmitFeedbackData, FeedbackSubmitFeedbackResponse, FilesGetSourceContentData, FilesGetSourceContentResponse, FormconnectProcessFormData, FormconnectProcessFormResponse, FormconnectGetFormsResponse, FormconnectCreateFormData, FormconnectCreateFormResponse, FormconnectGetFormData, FormconnectGetFormResponse, FormconnectUpdateFormData, FormconnectUpdateFormResponse, FormconnectDeleteFormData, FormconnectDeleteFormResponse, FormconnectGetFormDetailData, FormconnectGetFormDetailResponse, FormconnectGetFormHistoryData, FormconnectGetFormHistoryResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, KnowledgeBasesReadKnowledgeBasesData, KnowledgeBasesReadKnowledgeBasesResponse, KnowledgeBasesCreateKnowledgeBaseData, KnowledgeBasesCreateKnowledgeBaseResponse, KnowledgeBasesReadKnowledgeBaseData, KnowledgeBasesReadKnowledgeBaseResponse, KnowledgeBasesUpdateKnowledgeBaseData, KnowledgeBasesUpdateKnowledgeBaseResponse, KnowledgeBasesDeleteKnowledgeBaseData, KnowledgeBasesDeleteKnowledgeBaseResponse, LlmModelsGetLlmModelsData, LlmModelsGetLlmModelsResponse, LlmModelsCreateLlmModelData, LlmModelsCreateLlmModelResponse, LlmModelsGetDefaultLlmModelResponse, LlmModelsDeleteLlmModelData, LlmModelsDeleteLlmModelResponse, LlmModelsValidateLlmModelData, LlmModelsValidateLlmModelResponse, LlmModelsSetDefaultLlmModelData, LlmModelsSetDefaultLlmModelResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, ReportgenieGenerateReportData, ReportgenieGenerateReportResponse, ReportgenieGetOutlinesResponse, ReportgenieCreateOutlineData, ReportgenieCreateOutlineResponse, ReportgenieGetOutlineData, ReportgenieGetOutlineResponse, ReportgenieUpdateOutlineData, ReportgenieUpdateOutlineResponse, ReportgenieDeleteOutlineData, ReportgenieDeleteOutlineResponse, ReportgenieGenerateOutlineData, ReportgenieGenerateOutlineResponse, ReportgenieGenerateDocxData, ReportgenieGenerateDocxResponse, ReportgenieGenerateCsvData, ReportgenieGenerateCsvResponse, ReportgenieGetReportHistoryData, ReportgenieGetReportHistoryResponse, ReportgenieGetReportDetailData, ReportgenieGetReportDetailResponse, ReportgenieOptimizeOutlineData, ReportgenieOptimizeOutlineResponse, TwincheckCompareDocumentsData, TwincheckCompareDocumentsResponse, TwincheckGetComparisonHistoryData, TwincheckGetComparisonHistoryResponse, TwincheckGetComparisonDetailData, TwincheckGetComparisonDetailResponse, TwincheckGetComparisonsResponse, TwincheckCreateComparisonData, TwincheckCreateComparisonResponse, TwincheckGetComparisonData, TwincheckGetComparisonResponse, TwincheckUpdateComparisonData, TwincheckUpdateComparisonResponse, TwincheckDeleteComparisonData, TwincheckDeleteComparisonResponse, TwincheckGenerateDocxData, TwincheckGenerateDocxResponse, UsersUpdateLanguageData, UsersUpdateLanguageResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, VeradocProcessRagChecklistData, VeradocProcessRagChecklistResponse, VeradocGetChecklistsResponse, VeradocCreateChecklistData, VeradocCreateChecklistResponse, VeradocGetChecklistData, VeradocGetChecklistResponse, VeradocUpdateChecklistData, VeradocUpdateChecklistResponse, VeradocDeleteChecklistData, VeradocDeleteChecklistResponse, VeradocGetVeradocHistoryData, VeradocGetVeradocHistoryResponse, VeradocGetVeradocDetailData, VeradocGetVeradocDetailResponse, VeradocOptimizeChecklistData, VeradocOptimizeChecklistResponse, VeradocGenerateDocxData, VeradocGenerateDocxResponse, VeradocGenerateCsvData, VeradocGenerateCsvResponse, VeradocGenerateQuestionsData, VeradocGenerateQuestionsResponse } from './types.gen';
 
 export class ChatService {
     /**
@@ -1163,6 +1163,26 @@ export class ReportgenieService {
     }
     
     /**
+     * Generate Outline
+     * Generate outline sections based on a description using LLM.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns GenerateOutlineResponse Successful Response
+     * @throws ApiError
+     */
+    public static generateOutline(data: ReportgenieGenerateOutlineData): CancelablePromise<ReportgenieGenerateOutlineResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/reportgenie/generate-outline',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
      * Generate Docx
      * Generate a DOCX file from the report content.
      * @param data The data for the request.
@@ -1194,26 +1214,6 @@ export class ReportgenieService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reportgenie/generate/csv',
-            body: data.requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-    
-    /**
-     * Generate Outline
-     * Generate outline sections based on a description using LLM.
-     * @param data The data for the request.
-     * @param data.requestBody
-     * @returns GenerateOutlineResponse Successful Response
-     * @throws ApiError
-     */
-    public static generateOutline(data: ReportgenieGenerateOutlineData): CancelablePromise<ReportgenieGenerateOutlineResponse> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/v1/reportgenie/generate-outline',
             body: data.requestBody,
             mediaType: 'application/json',
             errors: {
@@ -1262,6 +1262,37 @@ export class ReportgenieService {
             path: {
                 report_id: data.reportId
             },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Optimize Outline
+     * Optimize outline sections by testing them against a ground-truth document.
+     * Generates a report with current outline and compares it to the ground-truth to suggest improvements.
+     * @param data The data for the request.
+     * @param data.knowledgeBaseId
+     * @param data.outlineId
+     * @param data.sections
+     * @param data.formData
+     * @param data.customInstructions
+     * @returns OptimizedOutlineResponse Successful Response
+     * @throws ApiError
+     */
+    public static optimizeOutline(data: ReportgenieOptimizeOutlineData): CancelablePromise<ReportgenieOptimizeOutlineResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/reportgenie/optimize-outline',
+            query: {
+                knowledge_base_id: data.knowledgeBaseId,
+                outline_id: data.outlineId,
+                sections: data.sections,
+                custom_instructions: data.customInstructions
+            },
+            formData: data.formData,
+            mediaType: 'multipart/form-data',
             errors: {
                 422: 'Validation Error'
             }
@@ -1725,6 +1756,7 @@ export class VeradocService {
      * @param data.questions
      * @param data.knowledgeBaseId
      * @param data.formData
+     * @param data.customInstructions
      * @returns VeraDocResponse Successful Response
      * @throws ApiError
      */
@@ -1734,6 +1766,7 @@ export class VeradocService {
             url: '/api/v1/veradoc/process-rag',
             query: {
                 questions: data.questions,
+                custom_instructions: data.customInstructions,
                 knowledge_base_id: data.knowledgeBaseId
             },
             formData: data.formData,
@@ -1898,6 +1931,7 @@ export class VeradocService {
      * @param data.questions
      * @param data.formData
      * @param data.targetAnswers
+     * @param data.customInstructions
      * @returns OptimizedChecklistResponse Successful Response
      * @throws ApiError
      */
@@ -1908,7 +1942,8 @@ export class VeradocService {
             query: {
                 knowledge_base_id: data.knowledgeBaseId,
                 questions: data.questions,
-                target_answers: data.targetAnswers
+                target_answers: data.targetAnswers,
+                custom_instructions: data.customInstructions
             },
             formData: data.formData,
             mediaType: 'multipart/form-data',

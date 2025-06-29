@@ -27,6 +27,10 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+export type Body_reportgenie_optimize_outline = {
+    files: Array<((Blob | File))>;
+};
+
 export type Body_twincheck_compare_documents = {
     document1: (Blob | File);
     document2: (Blob | File);
@@ -143,25 +147,25 @@ export type FormConnectResponse = {
     };
 };
 
-export type GenerateQuestionsRequest = {
-    description: string;
-    num_questions?: number;
-    checklist_type?: string;
-};
-
-export type GenerateQuestionsResponse = {
-    questions: Array<(string)>;
-    description_analysis: string;
-};
-
 export type GenerateOutlineRequest = {
     description: string;
-    num_sections?: number;
+    num_sections?: (number | null);
     report_type?: string;
 };
 
 export type GenerateOutlineResponse = {
     sections: Array<(string)>;
+    description_analysis: string;
+};
+
+export type GenerateQuestionsRequest = {
+    description: string;
+    num_questions?: (number | null);
+    checklist_type?: string;
+};
+
+export type GenerateQuestionsResponse = {
+    questions: Array<(string)>;
     description_analysis: string;
 };
 
@@ -259,6 +263,22 @@ export type OptimizedChecklistResponse = {
     suggestions: Array<ChecklistSuggestion>;
     optimized_questions: Array<(string)>;
     analysis_summary: string;
+};
+
+export type OptimizedOutlineResponse = {
+    original_sections: Array<(string)>;
+    suggestions: Array<OutlineSuggestion>;
+    optimized_sections: Array<(string)>;
+    analysis_summary: string;
+};
+
+export type OutlineSuggestion = {
+    original_section: string;
+    suggested_section: string;
+    reason: string;
+    current_output: string;
+    ground_truth_content: string;
+    needs_revision: boolean;
 };
 
 export type PrivateUserCreate = {
@@ -833,6 +853,12 @@ export type ReportgenieDeleteOutlineData = {
 
 export type ReportgenieDeleteOutlineResponse = (Message);
 
+export type ReportgenieGenerateOutlineData = {
+    requestBody: GenerateOutlineRequest;
+};
+
+export type ReportgenieGenerateOutlineResponse = (GenerateOutlineResponse);
+
 export type ReportgenieGenerateDocxData = {
     requestBody: DocxRequest;
 };
@@ -844,12 +870,6 @@ export type ReportgenieGenerateCsvData = {
 };
 
 export type ReportgenieGenerateCsvResponse = (unknown);
-
-export type ReportgenieGenerateOutlineData = {
-    requestBody: GenerateOutlineRequest;
-};
-
-export type ReportgenieGenerateOutlineResponse = (GenerateOutlineResponse);
 
 export type ReportgenieGetReportHistoryData = {
     limit?: number;
@@ -866,6 +886,16 @@ export type ReportgenieGetReportDetailData = {
 };
 
 export type ReportgenieGetReportDetailResponse = (ReportGenieDetailResponse);
+
+export type ReportgenieOptimizeOutlineData = {
+    customInstructions?: (string | null);
+    formData: Body_reportgenie_optimize_outline;
+    knowledgeBaseId: string;
+    outlineId: string;
+    sections: string;
+};
+
+export type ReportgenieOptimizeOutlineResponse = (OptimizedOutlineResponse);
 
 export type TwincheckCompareDocumentsData = {
     comparisonTopics: string;
@@ -992,6 +1022,7 @@ export type UtilsTestEmailResponse = (Message);
 export type UtilsHealthCheckResponse = (boolean);
 
 export type VeradocProcessRagChecklistData = {
+    customInstructions?: (string | null);
     formData: Body_veradoc_process_rag_checklist;
     knowledgeBaseId: string;
     questions: string;
@@ -1043,6 +1074,7 @@ export type VeradocGetVeradocDetailData = {
 export type VeradocGetVeradocDetailResponse = (VeraDocDetailResponse);
 
 export type VeradocOptimizeChecklistData = {
+    customInstructions?: (string | null);
     formData: Body_veradoc_optimize_checklist;
     knowledgeBaseId: string;
     questions: string;
