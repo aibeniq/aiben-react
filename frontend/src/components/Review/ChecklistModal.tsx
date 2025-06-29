@@ -89,6 +89,9 @@ const ChecklistModal = ({
   const [editingSuggestions, setEditingSuggestions] = useState<Map<number, string>>(new Map())
   const [editingModes, setEditingModes] = useState<Set<number>>(new Set())
 
+  // State for expanding current answers
+  const [expandedAnswers, setExpandedAnswers] = useState<Set<number>>(new Set())
+
   // Generate questions state
   const [generating, setGenerating] = useState(false)
   const [questionsKey, setQuestionsKey] = useState(0)
@@ -217,16 +220,40 @@ const ChecklistModal = ({
     return editingSuggestions.get(index) || suggestions[index]?.suggested_question || ""
   }
 
+  const toggleAnswerExpansion = (index: number) => {
+    const newExpanded = new Set(expandedAnswers)
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index)
+    } else {
+      newExpanded.add(index)
+    }
+    setExpandedAnswers(newExpanded)
+  }
+
   const handleApplySuggestions = () => {
     if (suggestions.length === 0) return
 
-    // Update questions in real-time based on accepted suggestions
+    // Create a map of original questions to their suggestions
+    const suggestionMap = new Map<string, string>()
+
     suggestions.forEach((suggestion, index) => {
       if (acceptedSuggestions.has(index) && suggestion.needs_revision) {
         // Use edited suggestion if available, otherwise use original suggestion
-        updateQuestion(index, getSuggestionText(index))
+        suggestionMap.set(suggestion.original_question, getSuggestionText(index))
       }
     })
+
+    // Update the questions list by finding and replacing the original questions
+    const updatedQuestions = questionsList.map((question) => {
+      const trimmedQuestion = question.trim()
+      if (trimmedQuestion && suggestionMap.has(trimmedQuestion)) {
+        return suggestionMap.get(trimmedQuestion) || question
+      }
+      return question
+    })
+
+    // Update the questions list with the optimized questions
+    updateQuestionsList(updatedQuestions)
 
     showSuccessToast(`Applied ${acceptedSuggestions.size} optimization suggestions`)
 
@@ -236,6 +263,7 @@ const ChecklistModal = ({
     setAcceptedSuggestions(new Set())
     setEditingSuggestions(new Map())
     setEditingModes(new Set())
+    setExpandedAnswers(new Set())
     setShowOptimizeSection(false)
   }
 
@@ -611,6 +639,42 @@ const ChecklistModal = ({
                                             <Text fontSize="xs" color="gray.600">
                                               {suggestion.reason}
                                             </Text>
+                                          </Box>
+
+                                          <Box>
+                                            <Text fontSize="xs" fontWeight="medium" mb={1}>
+                                              Current Answer (why this needs optimization):
+                                            </Text>
+                                            <Box
+                                              p={2}
+                                              bg="orange.50"
+                                              borderRadius="sm"
+                                              border="1px solid"
+                                              borderColor="orange.200"
+                                            >
+                                              <Text fontSize="xs" color="gray.600">
+                                                {expandedAnswers.has(index)
+                                                  ? suggestion.current_answer
+                                                  : suggestion.current_answer.substring(0, 300)}
+                                                {!expandedAnswers.has(index) &&
+                                                suggestion.current_answer.length > 300
+                                                  ? "..."
+                                                  : ""}
+                                              </Text>
+                                              {suggestion.current_answer.length > 300 && (
+                                                <Button
+                                                  size="xs"
+                                                  variant="ghost"
+                                                  mt={1}
+                                                  onClick={() => toggleAnswerExpansion(index)}
+                                                  colorPalette="orange"
+                                                >
+                                                  {expandedAnswers.has(index)
+                                                    ? "Show Less"
+                                                    : "Show More"}
+                                                </Button>
+                                              )}
+                                            </Box>
                                           </Box>
                                         </>
                                       ) : (
