@@ -90,9 +90,11 @@ const ChecklistModal = ({
 
   // Handler for consult documents toggle
   const handleConsultDocumentsChange = (id: string, value: boolean) => {
+    console.log("Toggle changed for question ID:", id, "new value:", value)
     const newData = questionsData.map((item) =>
       item.id === id ? { ...item, consultDocuments: value } : item,
     )
+    console.log("Updated questionsData:", newData)
     updateQuestionsData(newData)
   }
 

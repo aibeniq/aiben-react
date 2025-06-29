@@ -717,6 +717,12 @@ def update_checklist(
     if description and len(description) > 255:
         description = description[:252] + "..."
     checklist.description = description
+
+    # Debug logging to see what questions data is being received
+    print(
+        f"Updating checklist {checklist_id} with questions: {updated_checklist.questions}"
+    )
+
     checklist.questions = updated_checklist.questions
     checklist.date_modified = datetime.utcnow()
 

@@ -60,6 +60,24 @@ const ReportGenie = () => {
   // Search mode state
   const [searchMode, setSearchMode] = useState("vector") // Default to vector search
 
+  // State to track which citations are expanded - using object instead of Set
+  const [expandedCitations, setExpandedCitations] = useState<Record<string, boolean>>({})
+
+  // Function to toggle citation expansion
+  const toggleCitationExpansion = (sectionIndex: number, citationIndex: number) => {
+    const citationKey = `${sectionIndex}-${citationIndex}`
+    setExpandedCitations((prev) => ({
+      ...prev,
+      [citationKey]: !prev[citationKey],
+    }))
+  }
+
+  // Function to check if a citation is expanded
+  const isCitationExpanded = (sectionIndex: number, citationIndex: number) => {
+    const citationKey = `${sectionIndex}-${citationIndex}`
+    return expandedCitations[citationKey] || false
+  }
+
   const handleCopyDocument = async () => {
     try {
       await navigator.clipboard.writeText(generatedDocument)
@@ -330,7 +348,7 @@ const ReportGenie = () => {
                 Search Mode
               </Text>
               <RadioGroup
-                onValueChange={(details) => setSearchMode(details.value)}
+                onValueChange={(details) => setSearchMode(details.value || "vector")}
                 value={searchMode}
                 defaultValue="vector"
               >
@@ -577,50 +595,73 @@ const ReportGenie = () => {
                                         </h2>
                                         <Accordion.ItemContent pb={4} bg="surface">
                                           {section.source_citations.map(
-                                            (citation: any, cIndex: number) => (
-                                              <Box
-                                                key={cIndex}
-                                                p={3}
-                                                mb={2}
-                                                borderWidth="1px"
-                                                borderRadius="md"
-                                                bg="bg"
-                                              >
-                                                {citation.metadata?.source_data_id ? (
-                                                  <SourceLink
-                                                    sourceId={citation.metadata.source_data_id}
-                                                    fileName={getDisplayFileName(
-                                                      citation.metadata.source,
-                                                    )}
-                                                    ml={1}
-                                                    fontWeight="normal"
-                                                    color="blue.600"
-                                                    useModal={true}
-                                                  />
-                                                ) : (
-                                                  <Text
-                                                    as="span"
-                                                    ml={1}
-                                                    fontWeight="normal"
-                                                    color="blue.600"
-                                                  >
-                                                    {getDisplayFileName(
-                                                      citation.metadata?.source || "Unknown",
-                                                    )}
-                                                  </Text>
-                                                )}
+                                            (citation: any, cIndex: number) => {
+                                              const isExpanded = isCitationExpanded(index, cIndex)
+                                              const citationText = citation.content
+                                              const shouldTruncate = citationText.length > 300
+                                              const displayText =
+                                                shouldTruncate && !isExpanded
+                                                  ? citationText.substring(0, 300) + "..."
+                                                  : citationText
+
+                                              return (
                                                 <Box
-                                                  mt={2}
-                                                  p={2}
-                                                  bg="surface"
-                                                  borderRadius="sm"
-                                                  fontSize="sm"
-                                                  whiteSpace="pre-wrap"
+                                                  key={`${index}-${cIndex}`}
+                                                  p={3}
+                                                  mb={2}
+                                                  borderWidth="1px"
+                                                  borderRadius="md"
+                                                  bg="bg"
                                                 >
-                                                  {citation.content}
+                                                  {citation.metadata?.source_data_id ? (
+                                                    <SourceLink
+                                                      sourceId={citation.metadata.source_data_id}
+                                                      fileName={getDisplayFileName(
+                                                        citation.metadata.source,
+                                                      )}
+                                                      ml={1}
+                                                      fontWeight="normal"
+                                                      color="blue.600"
+                                                      useModal={true}
+                                                    />
+                                                  ) : (
+                                                    <Text
+                                                      as="span"
+                                                      ml={1}
+                                                      fontWeight="normal"
+                                                      color="blue.600"
+                                                    >
+                                                      {getDisplayFileName(
+                                                        citation.metadata?.source || "Unknown",
+                                                      )}
+                                                    </Text>
+                                                  )}
+                                                  <Box
+                                                    mt={2}
+                                                    p={2}
+                                                    bg="surface"
+                                                    borderRadius="sm"
+                                                    fontSize="sm"
+                                                    whiteSpace="pre-wrap"
+                                                  >
+                                                    {displayText}
+                                                  </Box>
+                                                  {shouldTruncate && (
+                                                    <Button
+                                                      size="xs"
+                                                      variant="ghost"
+                                                      mt={1}
+                                                      onClick={() =>
+                                                        toggleCitationExpansion(index, cIndex)
+                                                      }
+                                                      colorPalette="blue"
+                                                    >
+                                                      {isExpanded ? "Show Less" : "Read More"}
+                                                    </Button>
+                                                  )}
                                                 </Box>
-                                              </Box>
-                                            ),
+                                              )
+                                            },
                                           )}
                                         </Accordion.ItemContent>
                                       </Accordion.Item>

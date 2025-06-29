@@ -1,5 +1,5 @@
-import React from "react"
-import { Box, Text, HStack, Accordion } from "@chakra-ui/react"
+import React, { useState } from "react"
+import { Box, Text, HStack, Accordion, Button } from "@chakra-ui/react"
 import { FiFileText } from "react-icons/fi"
 import SourceLink from "../../Common/SourceLink"
 
@@ -12,6 +12,22 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
   sourceCitations,
   accordionValue,
 }) => {
+  // State to track which citations are expanded - using object instead of Set
+  const [expandedCitations, setExpandedCitations] = useState<Record<number, boolean>>({})
+
+  // Function to toggle citation expansion
+  const toggleCitationExpansion = (citationIndex: number) => {
+    setExpandedCitations((prev) => ({
+      ...prev,
+      [citationIndex]: !prev[citationIndex],
+    }))
+  }
+
+  // Function to check if a citation is expanded
+  const isCitationExpanded = (citationIndex: number) => {
+    return expandedCitations[citationIndex] || false
+  }
+
   const getDisplayFileName = (source: string): string => {
     if (!source) return "Unknown"
     if (source.includes("/tmp/") || source.includes("\\tmp\\")) {
@@ -35,27 +51,53 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
           </Accordion.ItemTrigger>
         </h2>
         <Accordion.ItemContent pb={4} bg="surface">
-          {sourceCitations.map((citation: any, cIndex: number) => (
-            <Box key={cIndex} p={3} mb={2} borderWidth="1px" borderRadius="md" bg="bg">
-              {citation.metadata.source_data_id ? (
-                <SourceLink
-                  sourceId={citation.metadata.source_data_id}
-                  fileName={getDisplayFileName(citation.metadata.source)}
-                  ml={1}
-                  fontWeight="normal"
-                  color="blue.600"
-                  useModal={true}
-                />
-              ) : (
-                <Text as="span" ml={1} fontWeight="normal" color="blue.600">
-                  {getDisplayFileName(citation.metadata.source)}
-                </Text>
-              )}
-              <Box mt={2} p={2} bg="surface" borderRadius="sm" fontSize="sm" whiteSpace="pre-wrap">
-                {citation.content}
+          {sourceCitations.map((citation: any, cIndex: number) => {
+            const isExpanded = isCitationExpanded(cIndex)
+            const citationText = citation.content
+            const shouldTruncate = citationText.length > 300
+            const displayText =
+              shouldTruncate && !isExpanded ? citationText.substring(0, 300) + "..." : citationText
+
+            return (
+              <Box key={cIndex} p={3} mb={2} borderWidth="1px" borderRadius="md" bg="bg">
+                {citation.metadata.source_data_id ? (
+                  <SourceLink
+                    sourceId={citation.metadata.source_data_id}
+                    fileName={getDisplayFileName(citation.metadata.source)}
+                    ml={1}
+                    fontWeight="normal"
+                    color="blue.600"
+                    useModal={true}
+                  />
+                ) : (
+                  <Text as="span" ml={1} fontWeight="normal" color="blue.600">
+                    {getDisplayFileName(citation.metadata.source)}
+                  </Text>
+                )}
+                <Box
+                  mt={2}
+                  p={2}
+                  bg="surface"
+                  borderRadius="sm"
+                  fontSize="sm"
+                  whiteSpace="pre-wrap"
+                >
+                  {displayText}
+                </Box>
+                {shouldTruncate && (
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    mt={1}
+                    onClick={() => toggleCitationExpansion(cIndex)}
+                    colorPalette="blue"
+                  >
+                    {isExpanded ? "Show Less" : "Read More"}
+                  </Button>
+                )}
               </Box>
-            </Box>
-          ))}
+            )
+          })}
         </Accordion.ItemContent>
       </Accordion.Item>
     </Accordion.Root>
