@@ -84,6 +84,7 @@ const ChecklistModal = ({
   const [suggestions, setSuggestions] = useState<ChecklistSuggestion[]>([])
   const [acceptedSuggestions, setAcceptedSuggestions] = useState<Set<number>>(new Set())
   const [showOptimizeSection, setShowOptimizeSection] = useState(false)
+  const [customInstructions, setCustomInstructions] = useState("")
 
   // State for editing suggestions
   const [editingSuggestions, setEditingSuggestions] = useState<Map<number, string>>(new Map())
@@ -146,6 +147,7 @@ const ChecklistModal = ({
       const response = await VeradocService.optimizeChecklist({
         questions: currentQuestions,
         knowledgeBaseId: selectedKnowledgeBase.id,
+        customInstructions: customInstructions.trim() || undefined,
         formData: {
           files: regularFiles,
         },
@@ -259,6 +261,7 @@ const ChecklistModal = ({
 
     // Clear optimization state
     setFileItems([])
+    setCustomInstructions("")
     setSuggestions([])
     setAcceptedSuggestions(new Set())
     setEditingSuggestions(new Map())
@@ -478,6 +481,30 @@ const ChecklistModal = ({
                           onFilesChange={setFileItems}
                           showHandwrittenToggle={false}
                         />
+                      </Box>
+
+                      {/* Custom Instructions */}
+                      <Box>
+                        <Text mb={2} fontSize="sm" fontWeight="medium" color="gray.700">
+                          Custom Instructions (Optional)
+                        </Text>
+                        <Textarea
+                          value={customInstructions}
+                          onChange={(e) => setCustomInstructions(e.target.value)}
+                          placeholder="Enter any additional instructions for optimization analysis (e.g., 'Focus on pediatric study requirements' or 'Ensure questions are suitable for regulatory compliance')..."
+                          rows={3}
+                          resize="vertical"
+                          bg="white"
+                          borderColor="gray.300"
+                          _hover={{ borderColor: "gray.400" }}
+                          _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                          fontSize="sm"
+                          maxLength={2000}
+                        />
+                        <Text fontSize="xs" color="gray.500" mt={1}>
+                          {customInstructions.length}/2000 characters. These instructions will be
+                          considered when analyzing questions.
+                        </Text>
                       </Box>
 
                       <HStack justify="space-between">

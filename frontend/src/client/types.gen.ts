@@ -1034,6 +1034,7 @@ export type VeradocGetVeradocDetailData = {
 export type VeradocGetVeradocDetailResponse = VeraDocDetailResponse
 
 export type VeradocOptimizeChecklistData = {
+  customInstructions?: string
   formData: Body_veradoc_optimize_checklist
   knowledgeBaseId: string
   questions: string
