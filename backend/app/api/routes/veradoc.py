@@ -14,6 +14,8 @@ from app.models import (
     OptimizeChecklistRequest,
     ChecklistSuggestion,
     OptimizedChecklistResponse,
+    GenerateQuestionsRequest,
+    GenerateQuestionsResponse,
 )
 
 from app.api.deps import CurrentUser, SessionDep
@@ -606,6 +608,10 @@ def create_checklist(
         )
 
     checklist.owner_id = current_user.id
+    # Temporarily truncate description to fit current database constraint
+    # TODO: Remove this after running migration to increase description length
+    if checklist.description and len(checklist.description) > 255:
+        checklist.description = checklist.description[:252] + "..."
     session.add(checklist)
     session.commit()
     session.refresh(checklist)
@@ -654,7 +660,12 @@ def update_checklist(
         )
 
     checklist.name = updated_checklist.name
-    checklist.description = updated_checklist.description
+    # Temporarily truncate description to fit current database constraint
+    # TODO: Remove this after running migration to increase description length
+    description = updated_checklist.description
+    if description and len(description) > 255:
+        description = description[:252] + "..."
+    checklist.description = description
     checklist.questions = updated_checklist.questions
     checklist.date_modified = datetime.utcnow()
 
@@ -1369,3 +1380,114 @@ async def generate_csv(
 
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error generating CSV: {str(e)}")
+
+
+@router.post("/generate-questions", response_model=GenerateQuestionsResponse)
+def generate_questions(
+    request_data: GenerateQuestionsRequest,
+    session: SessionDep,
+    current_user: CurrentUser,
+):
+    """
+    Generate checklist questions based on a description using LLM.
+    """
+    try:
+        # Get the default LLM
+        llm = get_default_llm(session, current_user)
+
+        # Prepare variables for the prompt
+        prompt_variables = {
+            "description": request_data.description,
+            "checklist_type": request_data.checklist_type,
+        }
+
+        # Generate questions using the LLM
+        questions_response = invoke_llm(
+            llm,
+            settings.VERADOC_GENERATE_QUESTIONS_PROMPT_TEMPLATE,
+            prompt_variables,
+        )
+
+        # Parse the response to extract questions and analysis
+        questions = []
+        analysis = ""
+
+        lines = questions_response.strip().split("\n")
+        in_questions_section = False
+        in_analysis_section = False
+
+        for line in lines:
+            line = line.strip()
+            if line.startswith("QUESTIONS:"):
+                in_questions_section = True
+                in_analysis_section = False
+                continue
+            elif line.startswith("ANALYSIS:"):
+                in_questions_section = False
+                in_analysis_section = True
+                continue
+
+            if in_questions_section:
+                # Extract questions (numbered list)
+                if re.match(r"^\d+\.\s+", line):
+                    question = re.sub(r"^\d+\.\s+", "", line)
+                    if question.strip():
+                        questions.append(question.strip())
+            elif in_analysis_section:
+                if line:
+                    if analysis:
+                        analysis += " " + line
+                    else:
+                        analysis = line
+
+        # If parsing failed, try simpler approach
+        if not questions:
+            # Split by lines and look for numbered items
+            for line in lines:
+                line = line.strip()
+                if re.match(r"^\d+\.\s+", line):
+                    question = re.sub(r"^\d+\.\s+", "", line)
+                    if question.strip():
+                        questions.append(question.strip())
+
+        # Ensure we have some questions
+        if not questions:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate questions from the description. Please try with a more detailed description.",
+            )
+
+        # Apply user-specified limit if provided, otherwise use all generated questions
+        if request_data.num_questions:
+            questions = questions[: request_data.num_questions]
+
+        if not analysis:
+            analysis = f"Generated {len(questions)} questions based on the provided description to ensure comprehensive evaluation coverage."
+
+        # Record the interaction
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="generate_checklist_questions",
+            input_data={
+                "description": request_data.description,
+                "requested_questions": request_data.num_questions,
+                "checklist_type": request_data.checklist_type,
+            },
+            output_data={
+                "questions_count": len(questions),
+                "analysis": analysis,
+            },
+            metadata={},
+        )
+
+        return GenerateQuestionsResponse(
+            questions=questions, description_analysis=analysis
+        )
+
+    except Exception as e:
+        print(f"Error generating questions: {e}")
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error generating questions: {str(e)}"
+        )

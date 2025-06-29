@@ -315,7 +315,7 @@ class VeraDocChecklist(SQLModel, table=True):
     __tablename__ = "questions"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str = Field(max_length=255, unique=True, nullable=False)
-    description: str | None = Field(default=None, max_length=255)
+    description: str | None = Field(default=None, max_length=20000)
     questions: str = Field(nullable=False)  # Store questions as a JSON string
     owner_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False
@@ -613,3 +613,18 @@ class OptimizedChecklistResponse(SQLModel):
     suggestions: List[ChecklistSuggestion]
     optimized_questions: List[str]
     analysis_summary: str
+
+
+class GenerateQuestionsRequest(SQLModel):
+    description: str = Field(min_length=10, max_length=20000)
+    num_questions: Optional[int] = Field(
+        default=None, ge=1, le=50
+    )  # Optional - LLM will decide if not specified
+    checklist_type: str = Field(
+        default="general"
+    )  # Type of checklist (general, compliance, technical, etc.)
+
+
+class GenerateQuestionsResponse(SQLModel):
+    questions: List[str]
+    description_analysis: str

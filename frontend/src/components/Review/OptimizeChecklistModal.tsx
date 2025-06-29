@@ -1,7 +1,18 @@
 import { useState } from "react"
-import { Box, Button, VStack, HStack, Text, Spinner, Card, Separator } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  VStack,
+  HStack,
+  Text,
+  Spinner,
+  Card,
+  Separator,
+  Textarea,
+  IconButton,
+} from "@chakra-ui/react"
 import { DialogBody, DialogContent, DialogHeader, DialogRoot, DialogTitle } from "@chakra-ui/react"
-import { FiCheck } from "react-icons/fi"
+import { FiCheck, FiEdit3, FiSave, FiX } from "react-icons/fi"
 import { VeraDocChecklist, VeradocService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import FileUpload from "../Common/FileUpload"
@@ -39,6 +50,10 @@ const OptimizeChecklistModal = ({
   const [loading, setLoading] = useState(false)
   const [suggestions, setSuggestions] = useState<ChecklistSuggestion[]>([])
   const [acceptedSuggestions, setAcceptedSuggestions] = useState<Set<number>>(new Set())
+
+  // State for editing suggestions
+  const [editingSuggestions, setEditingSuggestions] = useState<Map<number, string>>(new Map())
+  const [editingModes, setEditingModes] = useState<Set<number>>(new Set())
 
   const handleOptimize = async () => {
     if (!checklist) {
@@ -99,12 +114,54 @@ const OptimizeChecklistModal = ({
     setAcceptedSuggestions(newAccepted)
   }
 
+  const startEditingSuggestion = (index: number) => {
+    const newEditingModes = new Set(editingModes)
+    newEditingModes.add(index)
+    setEditingModes(newEditingModes)
+
+    // Initialize with the current suggested question if not already editing
+    if (!editingSuggestions.has(index)) {
+      const newEditingSuggestions = new Map(editingSuggestions)
+      newEditingSuggestions.set(index, suggestions[index].suggested_question)
+      setEditingSuggestions(newEditingSuggestions)
+    }
+  }
+
+  const cancelEditingSuggestion = (index: number) => {
+    const newEditingModes = new Set(editingModes)
+    newEditingModes.delete(index)
+    setEditingModes(newEditingModes)
+
+    // Reset to original suggestion
+    const newEditingSuggestions = new Map(editingSuggestions)
+    newEditingSuggestions.set(index, suggestions[index].suggested_question)
+    setEditingSuggestions(newEditingSuggestions)
+  }
+
+  const saveEditedSuggestion = (index: number) => {
+    const newEditingModes = new Set(editingModes)
+    newEditingModes.delete(index)
+    setEditingModes(newEditingModes)
+    // The edited text is already saved in editingSuggestions map
+  }
+
+  const updateEditingSuggestion = (index: number, value: string) => {
+    const newEditingSuggestions = new Map(editingSuggestions)
+    newEditingSuggestions.set(index, value)
+    setEditingSuggestions(newEditingSuggestions)
+  }
+
+  const getSuggestionText = (index: number) => {
+    return editingSuggestions.get(index) || suggestions[index]?.suggested_question || ""
+  }
+
   const handleApplySuggestions = () => {
     if (suggestions.length === 0) return
 
     const optimizedQuestions = suggestions.map((suggestion, index) => {
       if (acceptedSuggestions.has(index) && suggestion.needs_revision) {
-        return suggestion.suggested_question
+        // Use edited suggestion if available, otherwise use original suggestion
+        return getSuggestionText(index)
       }
       return suggestion.original_question
     })
@@ -118,6 +175,8 @@ const OptimizeChecklistModal = ({
     setFileItems([])
     setSuggestions([])
     setAcceptedSuggestions(new Set())
+    setEditingSuggestions(new Map())
+    setEditingModes(new Set())
     onClose()
   }
 
@@ -215,19 +274,73 @@ const OptimizeChecklistModal = ({
                             {suggestion.needs_revision ? (
                               <>
                                 <Box>
-                                  <Text fontSize="sm" fontWeight="medium" mb={1}>
-                                    Suggested Question:
-                                  </Text>
-                                  <Text
-                                    fontSize="sm"
-                                    p={2}
-                                    bg="blue.50"
-                                    borderRadius="md"
-                                    border="1px solid"
-                                    borderColor="blue.200"
-                                  >
-                                    {suggestion.suggested_question}
-                                  </Text>
+                                  <HStack justify="space-between" mb={1}>
+                                    <Text fontSize="sm" fontWeight="medium">
+                                      Suggested Question:
+                                    </Text>
+                                    {!editingModes.has(index) ? (
+                                      <IconButton
+                                        size="xs"
+                                        variant="ghost"
+                                        aria-label="Edit suggestion"
+                                        onClick={() => startEditingSuggestion(index)}
+                                      >
+                                        <FiEdit3 size={12} />
+                                      </IconButton>
+                                    ) : (
+                                      <HStack gap={1}>
+                                        <IconButton
+                                          size="xs"
+                                          variant="ghost"
+                                          colorPalette="green"
+                                          aria-label="Save changes"
+                                          onClick={() => saveEditedSuggestion(index)}
+                                        >
+                                          <FiSave size={12} />
+                                        </IconButton>
+                                        <IconButton
+                                          size="xs"
+                                          variant="ghost"
+                                          colorPalette="red"
+                                          aria-label="Cancel editing"
+                                          onClick={() => cancelEditingSuggestion(index)}
+                                        >
+                                          <FiX size={12} />
+                                        </IconButton>
+                                      </HStack>
+                                    )}
+                                  </HStack>
+
+                                  {editingModes.has(index) ? (
+                                    <Textarea
+                                      value={getSuggestionText(index)}
+                                      onChange={(e) =>
+                                        updateEditingSuggestion(index, e.target.value)
+                                      }
+                                      fontSize="sm"
+                                      p={2}
+                                      bg="blue.50"
+                                      borderRadius="md"
+                                      border="1px solid"
+                                      borderColor="blue.200"
+                                      resize="vertical"
+                                      rows={3}
+                                    />
+                                  ) : (
+                                    <Text
+                                      fontSize="sm"
+                                      p={2}
+                                      bg="blue.50"
+                                      borderRadius="md"
+                                      border="1px solid"
+                                      borderColor="blue.200"
+                                      cursor="pointer"
+                                      onClick={() => startEditingSuggestion(index)}
+                                      _hover={{ bg: "blue.100" }}
+                                    >
+                                      {getSuggestionText(index)}
+                                    </Text>
+                                  )}
                                 </Box>
 
                                 <Box>
