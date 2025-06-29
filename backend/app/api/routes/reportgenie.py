@@ -10,6 +10,8 @@ from app.models import (
     DocxRequest,
     LlmInteraction,
     Message,
+    GenerateOutlineRequest,
+    GenerateOutlineResponse,
 )
 from pathlib import Path
 import re
@@ -368,6 +370,115 @@ def delete_outline(
     session.delete(outline)
     session.commit()
     return Message(message="Outline deleted successfully.")
+
+
+@router.post("/generate-outline", response_model=GenerateOutlineResponse)
+def generate_outline(
+    request_data: GenerateOutlineRequest,
+    session: SessionDep,
+    current_user: CurrentUser,
+):
+    """
+    Generate outline sections based on a description using LLM.
+    """
+    try:
+        # Get the default LLM
+        llm = get_default_llm(session, current_user)
+
+        # Prepare variables for the prompt
+        prompt_variables = {
+            "description": request_data.description,
+            "report_type": request_data.report_type,
+        }
+
+        # Generate outline sections using the LLM
+        outline_response = invoke_llm(
+            llm,
+            settings.REPORTGENIE_GENERATE_OUTLINE_PROMPT_TEMPLATE,
+            prompt_variables,
+        )
+
+        # Parse the response to extract sections and analysis
+        sections = []
+        analysis = ""
+
+        lines = outline_response.strip().split("\n")
+        in_sections_section = False
+        in_analysis_section = False
+
+        for line in lines:
+            line = line.strip()
+            if line.startswith("SECTIONS:"):
+                in_sections_section = True
+                in_analysis_section = False
+                continue
+            elif line.startswith("ANALYSIS:"):
+                in_sections_section = False
+                in_analysis_section = True
+                continue
+
+            if in_sections_section:
+                # Extract sections (numbered list)
+                if re.match(r"^\d+\.\s+", line):
+                    section = re.sub(r"^\d+\.\s+", "", line)
+                    if section.strip():
+                        sections.append(section.strip())
+            elif in_analysis_section:
+                if line:
+                    if analysis:
+                        analysis += " " + line
+                    else:
+                        analysis = line
+
+        # If parsing failed, try simpler approach
+        if not sections:
+            # Split by lines and look for numbered items
+            for line in lines:
+                line = line.strip()
+                if re.match(r"^\d+\.\s+", line):
+                    section = re.sub(r"^\d+\.\s+", "", line)
+                    if section.strip():
+                        sections.append(section.strip())
+
+        # Ensure we have some sections
+        if not sections:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate sections from the description. Please try with a more detailed description.",
+            )
+
+        # Apply user-specified limit if provided, otherwise use all generated sections
+        if request_data.num_sections:
+            sections = sections[: request_data.num_sections]
+
+        if not analysis:
+            analysis = f"Generated {len(sections)} sections based on the provided description to ensure comprehensive report structure coverage."
+
+        # Record the interaction
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="generate_outline_sections",
+            input_data={
+                "description": request_data.description,
+                "requested_sections": request_data.num_sections,
+                "report_type": request_data.report_type,
+            },
+            output_data={
+                "sections_count": len(sections),
+                "analysis": analysis,
+            },
+            metadata={},
+        )
+
+        return GenerateOutlineResponse(sections=sections, description_analysis=analysis)
+
+    except Exception as e:
+        print(f"Error generating outline: {e}")
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error generating outline: {str(e)}"
+        )
 
 
 @router.post("/generate/docx", response_class=StreamingResponse)

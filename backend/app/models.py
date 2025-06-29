@@ -632,3 +632,18 @@ class GenerateQuestionsRequest(SQLModel):
 class GenerateQuestionsResponse(SQLModel):
     questions: List[str]
     description_analysis: str
+
+
+class GenerateOutlineRequest(SQLModel):
+    description: str = Field(min_length=10, max_length=20000)
+    num_sections: Optional[int] = Field(
+        default=None, ge=1, le=20
+    )  # Optional - LLM will decide if not specified
+    report_type: str = Field(
+        default="general"
+    )  # Type of report (general, compliance, technical, research, etc.)
+
+
+class GenerateOutlineResponse(SQLModel):
+    sections: List[str]
+    description_analysis: str

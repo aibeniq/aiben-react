@@ -1,10 +1,22 @@
-import { HStack, VStack, Input, Textarea, Dialog, Portal, CloseButton } from "@chakra-ui/react"
+import {
+  HStack,
+  VStack,
+  Input,
+  Textarea,
+  Dialog,
+  Portal,
+  CloseButton,
+  Button,
+} from "@chakra-ui/react"
 import { Field } from "../ui/field"
-import { Box } from "@chakra-ui/react"
+import { Box, Text } from "@chakra-ui/react"
 import { ReportGenieOutline } from "../../client"
 import SectionEditor from "./SectionEditor" // Import SectionEditor instead of InteractiveList
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
+import { useState } from "react"
+import { ReportgenieService } from "../../client"
+import useCustomToast from "../../hooks/useCustomToast"
 
 interface OutlineModalProps {
   isOpen: boolean
@@ -32,6 +44,70 @@ const OutlineModal = ({
   onSectionsChange,
 }: OutlineModalProps) => {
   console.log("Parent: sections prop value", sections)
+
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const [generating, setGenerating] = useState(false)
+
+  const handleGenerateOutline = async () => {
+    if (!outlineDescription.trim()) {
+      showErrorToast("Please enter an outline description first")
+      return
+    }
+
+    // Validate minimum length requirement
+    if (outlineDescription.trim().length < 10) {
+      showErrorToast("Please enter a more detailed description (at least 10 characters)")
+      return
+    }
+
+    setGenerating(true)
+
+    try {
+      const response = await ReportgenieService.generateOutline({
+        requestBody: {
+          description: outlineDescription.trim(),
+          report_type: "general",
+          // Let LLM decide the number of sections based on description complexity
+        },
+      })
+
+      // Replace current sections with generated ones
+      const generatedSections = response.sections || []
+      if (generatedSections.length > 0) {
+        // Create structured section data with all sections having consultDocuments: true by default
+        const structuredSections = generatedSections.map((section) => ({
+          id: crypto.randomUUID(),
+          text: section,
+          consultDocuments: true,
+        }))
+
+        // Convert to JSON string format expected by the section editor
+        const sectionsString = JSON.stringify(structuredSections)
+        onSectionsChange(sectionsString)
+
+        showSuccessToast(`Generated ${generatedSections.length} sections from description`)
+      } else {
+        showErrorToast("No sections were generated. Please try with a more detailed description.")
+      }
+    } catch (error: any) {
+      console.error("Error generating outline:", error)
+
+      // Handle specific error types
+      if (error.status === 422) {
+        showErrorToast(
+          "Invalid request. Please check that your description meets the requirements.",
+        )
+      } else if (error.status === 401) {
+        showErrorToast("You need to be logged in to generate outline.")
+      } else if (error.status === 500) {
+        showErrorToast("Server error. Please try again later or contact support.")
+      } else {
+        showErrorToast(`Failed to generate outline: ${error.message || "Unknown error"}`)
+      }
+    } finally {
+      setGenerating(false)
+    }
+  }
 
   if (!isOpen) return null
 
@@ -62,12 +138,46 @@ const OutlineModal = ({
                   <Textarea
                     value={outlineDescription}
                     onChange={(e) => setOutlineDescription(e.target.value)}
-                    placeholder="Enter outline description"
+                    placeholder="Enter outline description to auto-generate sections (minimum 10 characters)..."
                     resize="vertical"
+                    rows={3}
                   />
+                  {outlineDescription.trim().length > 0 &&
+                    outlineDescription.trim().length < 10 && (
+                      <Text fontSize="xs" color="orange.600">
+                        Description needs at least {10 - outlineDescription.trim().length} more
+                        characters to generate sections
+                      </Text>
+                    )}
                 </Field>
 
-                <Field label="Sections" required>
+                <Field
+                  label={
+                    <HStack justify="space-between" w="full">
+                      <span>Sections</span>
+                      <Button
+                        size="xs"
+                        onClick={handleGenerateOutline}
+                        disabled={
+                          !outlineDescription.trim() ||
+                          outlineDescription.trim().length < 10 ||
+                          generating
+                        }
+                        loading={generating}
+                        variant="outline"
+                        colorPalette="green"
+                        title={
+                          outlineDescription.trim().length < 10
+                            ? "Description must be at least 10 characters to generate sections"
+                            : "Generate sections based on the description"
+                        }
+                      >
+                        {generating ? "Generating..." : "Generate Outline"}
+                      </Button>
+                    </HStack>
+                  }
+                  required
+                >
                   <Box
                     border="1px solid"
                     borderColor="gray.200"
