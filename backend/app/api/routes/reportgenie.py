@@ -1111,6 +1111,27 @@ async def optimize_outline(
                 "Mapping ground-truth document to outline sections using large-chunk strategy..."
             )
 
+            # Get list of section descriptions in order with their consult_documents flag
+            section_descriptions = []
+            section_consult_flags = []
+            for section in current_sections:
+                section_descriptions.append(section["text"].strip())
+                section_consult_flags.append(section.get("consultDocuments", True))
+
+            # Log section types for debugging
+            topic_sections = sum(1 for flag in section_consult_flags if flag)
+            literal_sections = len(section_consult_flags) - topic_sections
+            print(
+                f"Section types: {topic_sections} TOPIC/CONCEPT sections, {literal_sections} LITERAL TEXT sections"
+            )
+            for i, (section, consult_docs) in enumerate(
+                zip(section_descriptions, section_consult_flags)
+            ):
+                section_type = "TOPIC" if consult_docs else "LITERAL"
+                print(
+                    f"  {i+1}. [{section_type}] {section[:50]}{'...' if len(section) > 50 else ''}"
+                )
+
             # Split ground-truth into large chunks (up to 100,000 characters)
             max_chunk_size = 100000  # 100,000 characters per chunk
             ground_truth_chunks = []
@@ -1142,19 +1163,16 @@ async def optimize_outline(
                 f"Split ground-truth into {len(ground_truth_chunks)} large chunks (avg {len(ground_truth_text)//len(ground_truth_chunks) if ground_truth_chunks else 0} chars per chunk)"
             )
 
-            # Get list of section descriptions in order
-            section_descriptions = list(generated_sections.keys())
-
             # Map each chunk to the most appropriate section
             section_to_chunks = {section: [] for section in section_descriptions}
+            section_to_content = {
+                section: [] for section in section_descriptions
+            }  # NEW: For actual section content
 
-            # Track previous mapping decisions for context (enhanced tracking)
+            # Track previous mapping decisions for context
             previous_mappings = []
             chunk_mapping_stats = {
                 "total": 0,
-                "high_confidence": 0,
-                "medium_confidence": 0,
-                "low_confidence": 0,
             }
 
             for chunk_idx, chunk in enumerate(ground_truth_chunks):
@@ -1176,13 +1194,21 @@ async def optimize_outline(
                     context_summary = []
 
                     for pm in recent_mappings:
-                        section_names = [
-                            section_descriptions[i - 1]
-                            for i in pm["assigned_sections"]
-                            if 1 <= i <= len(section_descriptions)
-                        ]
+                        section_names_with_types = []
+                        for i in pm["assigned_sections"]:
+                            if 1 <= i <= len(section_descriptions):
+                                section_name = section_descriptions[i - 1]
+                                section_type = (
+                                    "[TOPIC]"
+                                    if section_consult_flags[i - 1]
+                                    else "[LITERAL]"
+                                )
+                                section_names_with_types.append(
+                                    f"{section_type} {section_name}"
+                                )
+
                         context_summary.append(
-                            f"Chunk {pm['chunk_idx']}: Mapped to sections {pm['assigned_sections']} ({', '.join(section_names[:2])}{'...' if len(section_names) > 2 else ''}) - {pm['confidence']} confidence"
+                            f"Chunk {pm['chunk_idx']}: Mapped to sections {pm['assigned_sections']} ({', '.join(section_names_with_types[:2])}{'...' if len(section_names_with_types) > 2 else ''})"
                         )
 
                     context_info = f"""
@@ -1190,11 +1216,11 @@ PREVIOUS MAPPING DECISIONS (Last {len(recent_mappings)} chunks):
 {chr(10).join(context_summary)}
 
 MAPPING PROGRESS: {len(previous_mappings)}/{len(ground_truth_chunks)} chunks processed
-CONFIDENCE DISTRIBUTION: {chunk_mapping_stats['high_confidence']} High, {chunk_mapping_stats['medium_confidence']} Medium, {chunk_mapping_stats['low_confidence']} Low
 
 This context shows how the document has been mapped so far. Consider:
 - Sequential flow: Later chunks typically map to later sections
 - Content continuity: Related content often spans adjacent chunks
+- Section types: [TOPIC] sections need conceptual matches, [LITERAL] sections need exact text matches
 - Previous patterns: Maintain consistency with established mapping logic
 """
 
@@ -1213,113 +1239,144 @@ This context shows how the document has been mapped so far. Consider:
                     else "- First chunk: Set the mapping foundation for subsequent chunks"
                 )
 
-                # Use enhanced LLM prompt with context for chunks after the first
+                # Build outline sections list with consult documents information
+                outline_sections_text = []
+                for i, (section, consult_docs) in enumerate(
+                    zip(section_descriptions, section_consult_flags)
+                ):
+                    if consult_docs:
+                        section_type = "[TOPIC/CONCEPT]"
+                        instruction = (
+                            "Look for content that relates to this topic/concept"
+                        )
+                    else:
+                        section_type = "[LITERAL TEXT]"
+                        instruction = "Look for content that matches this text exactly or nearly exactly"
+                    outline_sections_text.append(
+                        f"{i+1}. {section_type} {section} - {instruction}"
+                    )
+
+                # Use simplified JSON-based mapping prompt - create fully formatted string
                 mapping_prompt = f"""
-TASK: Map this ground-truth document chunk to the most appropriate outline section(s).
+Analyze this document chunk and identify the individual sections within it. Extract the actual text content for each section and map it to exactly one outline section.
 
-OUTLINE SECTIONS (in order):
-{chr(10).join([f"{i+1}. {section}" for i, section in enumerate(section_descriptions)])}
+OUTLINE SECTIONS (with mapping guidance):
+{chr(10).join(outline_sections_text)}
 
-{context_info}
-
-GROUND-TRUTH CHUNK ({chunk_idx + 1} of {len(ground_truth_chunks)}, {chunk_size} characters):
+DOCUMENT CHUNK ({chunk_idx + 1} of {len(ground_truth_chunks)}):
 {chunk_preview}
 {truncation_note}
 
-DOCUMENT CONTEXT:
-- This is chunk {chunk_idx + 1} out of {len(ground_truth_chunks)} sequential chunks from a ground-truth document
-- Chunk size: {chunk_size:,} characters (max {max_chunk_size:,} per chunk)
-- Document position: {document_position_percent:.1%} through the document
-- Sequential order: Chunks are in document order, so position matters for mapping
-- Content coherence: Large chunks preserve paragraph boundaries and logical flow
-{mapping_context_note}
+MAPPING INSTRUCTIONS:
+1. Look for discrete sections in the chunk (titles, headers, paragraphs, topic changes)
+2. For each section you identify, extract the ACTUAL TEXT CONTENT from the document
+3. Determine which outline section (1-{len(section_descriptions)}) it best matches:
+   - For [TOPIC/CONCEPT] sections: Match content that discusses the same topic/concept, even if wording differs
+   - For [LITERAL TEXT] sections: Match content that contains the same or very similar text/wording
+4. Respond with valid JSON only
 
-ENHANCED MAPPING INSTRUCTIONS:
-1. Analyze the chunk's main topics, themes, concepts, and structural elements
-2. Consider the chunk's position in the document sequence (early/middle/late content)
-3. Match content to outline sections that would naturally include this information
-4. For document progression: early chunks → early sections, later chunks → later sections
-5. Large chunks often contain complete subsections - consider section boundaries
-6. You can assign to multiple sections if content clearly spans topics, but prefer focused assignments
-7. Use previous mapping context to maintain consistency and avoid conflicts
-8. Consider both content similarity AND logical document structure
+RESPONSE FORMAT (JSON only):
+{{"mappings": [{{"section_content": "the actual text content extracted from the document section", "outline_section": 1}}, {{"section_content": "the actual text content from another document section", "outline_section": 2}}]}}
 
-RESPONSE FORMAT (be precise and detailed):
-SECTIONS: [comma-separated list of section numbers, e.g., "1" or "2,3"]
-REASONING: [detailed explanation: what content themes were found, why they map to these sections, how this fits with document progression and any context from previous mappings]
-CONFIDENCE: [High/Medium/Low - High: very clear match, Medium: reasonable match with some uncertainty, Low: best guess or positional mapping]
+IMPORTANT: "section_content" must contain the actual text from the document, not a description or summary.
 """
 
-                mapping_response = invoke_llm(llm, mapping_prompt, {})
+                # Log the exact prompt being sent to the LLM
+                print("=" * 80)
+                print(
+                    f"SENDING MAPPING PROMPT TO LLM (Chunk {chunk_idx + 1}/{len(ground_truth_chunks)}):"
+                )
+                print("=" * 80)
+                print(mapping_prompt)
+                print("=" * 80)
 
-                # Parse the mapping response with enhanced error handling
+                # Call LLM directly since we have a fully formatted prompt
+                mapping_response = llm.invoke(mapping_prompt).content
+
+                # Log the raw response from the LLM
+                print("=" * 80)
+                print(
+                    f"RAW LLM MAPPING RESPONSE (Chunk {chunk_idx + 1}/{len(ground_truth_chunks)}):"
+                )
+                print("=" * 80)
+                print(mapping_response)
+                print("=" * 80)
+
+                # Parse JSON response from LLM
                 assigned_sections = []
-                confidence = "Medium"
-                reasoning = "No reasoning provided"
+                document_sections_identified = []
 
-                if "SECTIONS:" in mapping_response:
-                    try:
-                        sections_line = (
-                            mapping_response.split("SECTIONS:")[1]
-                            .split("REASONING:")[0]
-                            .strip()
-                        )
-                        # Extract section numbers, handling various formats
-                        section_numbers = []
-                        for part in (
-                            sections_line.replace("[", "")
-                            .replace("]", "")
-                            .replace('"', "")
-                            .replace("'", "")
-                            .split(",")
-                        ):
-                            part = part.strip()
-                            if part.isdigit():
-                                section_numbers.append(int(part))
-                            elif "-" in part and all(
-                                x.isdigit() for x in part.split("-")
-                            ):
-                                # Handle ranges like "2-4"
-                                start, end = map(int, part.split("-"))
-                                section_numbers.extend(range(start, end + 1))
+                try:
+                    # Try to parse as JSON - handle markdown code blocks
+                    response_text = mapping_response.strip()
 
-                        for section_num in section_numbers:
-                            if 1 <= section_num <= len(section_descriptions):
-                                section_desc = section_descriptions[section_num - 1]
+                    # Remove markdown code blocks if present
+                    if response_text.startswith("```json"):
+                        response_text = response_text[7:]  # Remove ```json
+                    elif response_text.startswith("```"):
+                        response_text = response_text[3:]  # Remove ```
+
+                    if response_text.endswith("```"):
+                        response_text = response_text[:-3]  # Remove closing ```
+
+                    response_text = response_text.strip()
+
+                    json_response = json.loads(response_text)
+
+                    if "mappings" in json_response:
+                        for mapping in json_response["mappings"]:
+                            section_content = mapping.get("section_content", "").strip()
+                            outline_section_num = mapping.get("outline_section", 0)
+
+                            # Record the identified section content
+                            if section_content:
+                                document_sections_identified.append(
+                                    section_content[:100] + "..."
+                                    if len(section_content) > 100
+                                    else section_content
+                                )
+
+                            # Map to actual section description and collect content
+                            if 1 <= outline_section_num <= len(section_descriptions):
+                                section_desc = section_descriptions[
+                                    outline_section_num - 1
+                                ]
                                 if section_desc not in assigned_sections:
                                     assigned_sections.append(section_desc)
 
-                        # Extract reasoning if available
-                        if "REASONING:" in mapping_response:
-                            reasoning_part = mapping_response.split("REASONING:")[1]
-                            if "CONFIDENCE:" in reasoning_part:
-                                reasoning = reasoning_part.split("CONFIDENCE:")[
-                                    0
-                                ].strip()
-                            else:
-                                reasoning = reasoning_part.strip()
+                                # NEW: Store the actual section content
+                                if section_content:
+                                    section_to_content[section_desc].append(
+                                        section_content
+                                    )
 
-                        # Extract confidence if available
-                        if "CONFIDENCE:" in mapping_response:
-                            confidence_part = mapping_response.split("CONFIDENCE:")[
-                                1
-                            ].strip()
-                            # Normalize confidence values
-                            confidence_lower = confidence_part.lower()
-                            if "high" in confidence_lower:
-                                confidence = "High"
-                            elif "low" in confidence_lower:
-                                confidence = "Low"
-                            else:
-                                confidence = "Medium"
+                    print(
+                        f"✓ JSON parsing successful. Found {len(document_sections_identified)} document sections mapping to {len(assigned_sections)} outline sections"
+                    )
 
-                    except Exception as e:
-                        print(
-                            f"Warning: Could not parse section mapping for chunk {chunk_idx + 1}: {e}"
-                        )
-                        print(f"Raw response: {mapping_response[:200]}...")
+                    # Log extracted content summary
+                    total_extracted_chars = sum(
+                        len(content)
+                        for section_content_list in section_to_content.values()
+                        for content in section_content_list
+                    )
+                    print(
+                        f"✓ Extracted {total_extracted_chars} characters of actual section content"
+                    )
 
-                # Enhanced fallback logic for large chunks with better positioning
+                except json.JSONDecodeError as e:
+                    print(f"✗ JSON parsing failed: {e}")
+                    print(f"Raw response was: {mapping_response[:200]}...")
+                    if "response_text" in locals():
+                        print(f"Cleaned response was: {response_text[:200]}...")
+                    # Keep empty lists for fallback
+                except Exception as e:
+                    print(f"✗ Error processing JSON response: {e}")
+                    if "response_text" in locals():
+                        print(f"Cleaned response was: {response_text[:200]}...")
+                    # Keep empty lists for fallback
+
+                # Enhanced fallback logic if JSON parsing failed
                 if not assigned_sections:
                     print(
                         f"No sections assigned by LLM for chunk {chunk_idx + 1}, using enhanced fallback..."
@@ -1333,12 +1390,29 @@ CONFIDENCE: [High/Medium/Low - High: very clear match, Medium: reasonable match 
                         :2000
                     ].lower()  # Analyze first 2000 chars for keywords
 
-                    # Try to match chunk content to section keywords
+                    # Try to match chunk content to section keywords with consult documents consideration
                     section_scores = []
-                    for i, section_desc in enumerate(section_descriptions):
-                        section_words = set(section_desc.lower().split())
-                        chunk_words = set(chunk_lower.split())
-                        overlap = len(section_words.intersection(chunk_words))
+                    for i, (section_desc, consult_docs) in enumerate(
+                        zip(section_descriptions, section_consult_flags)
+                    ):
+                        if consult_docs:
+                            # For topic/concept sections, do semantic word overlap
+                            section_words = set(section_desc.lower().split())
+                            chunk_words = set(chunk_lower.split())
+                            overlap = len(section_words.intersection(chunk_words))
+                        else:
+                            # For literal text sections, look for exact/near-exact substring matches
+                            if section_desc.lower() in chunk_lower:
+                                overlap = 100  # High score for exact match
+                            elif any(
+                                word in chunk_lower
+                                for word in section_desc.lower().split()
+                                if len(word) > 3
+                            ):
+                                overlap = 50  # Medium score for partial match
+                            else:
+                                overlap = 0  # No match
+
                         section_scores.append((i, overlap))
 
                     # Sort by overlap score
@@ -1350,7 +1424,12 @@ CONFIDENCE: [High/Medium/Low - High: very clear match, Medium: reasonable match 
                         assigned_sections = [
                             section_descriptions[best_content_match[0]]
                         ]
-                        reasoning = f"Fallback: Content analysis found {best_content_match[1]} keyword matches with section {best_content_match[0] + 1}"
+                        match_type = (
+                            "exact text"
+                            if section_consult_flags[best_content_match[0]] == False
+                            else "topic"
+                        )
+                        reasoning = f"Fallback: Content analysis found {match_type} match (score: {best_content_match[1]}) with section {best_content_match[0] + 1}"
                     else:
                         # Use positional fallback with improved logic
                         if chunk_idx == 0:
@@ -1362,7 +1441,7 @@ CONFIDENCE: [High/Medium/Low - High: very clear match, Medium: reasonable match 
                             assigned_sections = [section_descriptions[-1]]
                             reasoning = "Fallback: Last chunk mapped to last section"
                         else:
-                            # Middle chunks: proportional mapping with adjacent section consideration
+                            # Middle chunks: proportional mapping
                             primary_section_index = min(
                                 int(chunk_position * len(section_descriptions)),
                                 len(section_descriptions) - 1,
@@ -1370,55 +1449,44 @@ CONFIDENCE: [High/Medium/Low - High: very clear match, Medium: reasonable match 
                             assigned_sections = [
                                 section_descriptions[primary_section_index]
                             ]
+                            reasoning = f"Fallback: Positional mapping for chunk at {chunk_position:.1%} position"
 
-                            # For large chunks in middle, consider adjacent sections
-                            if len(chunk) > 50000 and len(section_descriptions) > 2:
-                                if primary_section_index > 0:
-                                    assigned_sections.insert(
-                                        0,
-                                        section_descriptions[primary_section_index - 1],
-                                    )
-                                elif (
-                                    primary_section_index
-                                    < len(section_descriptions) - 1
-                                ):
-                                    assigned_sections.append(
-                                        section_descriptions[primary_section_index + 1]
-                                    )
-
-                            reasoning = f"Fallback: Positional mapping for chunk at {chunk_position:.1%} position (size {len(chunk):,} chars)"
-
-                    confidence = "Low"
+                    document_sections_identified = [
+                        "Fallback: No sections identified by LLM"
+                    ]
                     print(
                         f"Fallback mapping: Assigned chunk {chunk_idx + 1} to {[section_descriptions.index(s) + 1 for s in assigned_sections]} - {reasoning}"
                     )
                 else:
+                    reasoning = f"JSON parsing successful: {len(document_sections_identified)} sections identified"
                     print(
-                        f"LLM mapping: Chunk {chunk_idx + 1} → sections {[section_descriptions.index(s) + 1 for s in assigned_sections]} ({confidence} confidence)"
+                        f"LLM mapping: Chunk {chunk_idx + 1} → sections {[section_descriptions.index(s) + 1 for s in assigned_sections]}"
+                    )
+                    print(
+                        f"Document sections identified: {', '.join(document_sections_identified[:3])}{'...' if len(document_sections_identified) > 3 else ''}"
                     )
 
                 # Update mapping statistics
                 chunk_mapping_stats["total"] += 1
-                if confidence == "High":
-                    chunk_mapping_stats["high_confidence"] += 1
-                elif confidence == "Medium":
-                    chunk_mapping_stats["medium_confidence"] += 1
-                else:
-                    chunk_mapping_stats["low_confidence"] += 1
+                # Note: No longer tracking confidence levels in simplified approach
 
-                # Record this mapping decision for future context (enhanced tracking)
+                # Record this mapping decision for future context
                 mapping_decision = {
                     "chunk_idx": chunk_idx + 1,
                     "assigned_sections": [
                         section_descriptions.index(s) + 1 for s in assigned_sections
                     ],
-                    "confidence": confidence,
                     "reasoning": (
                         reasoning[:150] + "..." if len(reasoning) > 150 else reasoning
                     ),
                     "chunk_size": len(chunk),
                     "document_position": chunk_idx / len(ground_truth_chunks),
                     "fallback_used": "Fallback" in reasoning,
+                    "document_sections_identified": (
+                        document_sections_identified[:3]
+                        if document_sections_identified
+                        else []
+                    ),
                 }
                 previous_mappings.append(mapping_decision)
 
@@ -1428,8 +1496,8 @@ CONFIDENCE: [High/Medium/Low - High: very clear match, Medium: reasonable match 
                         "content": chunk,
                         "chunk_index": chunk_idx,
                         "chunk_size": len(chunk),
-                        "confidence": confidence,
                         "reasoning": reasoning,
+                        "document_sections_identified": document_sections_identified,
                         "mapping_context": len(previous_mappings)
                         > 1,  # Whether context was available
                         "document_position": chunk_idx / len(ground_truth_chunks),
@@ -1447,6 +1515,17 @@ CONFIDENCE: [High/Medium/Low - High: very clear match, Medium: reasonable match 
                 "Ground-truth mapping complete. Generating optimization suggestions..."
             )
 
+            # Debug: Print content extraction summary
+            total_content_extracted = sum(
+                len(content_list) for content_list in section_to_content.values()
+            )
+            sections_with_content = sum(
+                1 for content_list in section_to_content.values() if content_list
+            )
+            print(
+                f"Content extraction summary: {total_content_extracted} total sections extracted, {sections_with_content}/{len(section_descriptions)} outline sections have mapped content"
+            )
+
             # 7. Compare each section's generated content to its mapped ground-truth chunks
             suggestions = []
             optimization_count = 0
@@ -1462,33 +1541,24 @@ CONFIDENCE: [High/Medium/Low - High: very clear match, Medium: reasonable match 
 
                 # Get the mapped ground-truth content for this section
                 mapped_chunks = section_to_chunks.get(section_description, [])
-                ground_truth_context = "\n\n".join(
-                    [
-                        chunk["content"] if isinstance(chunk, dict) else chunk
-                        for chunk in mapped_chunks
-                    ]
-                )
+                mapped_content = section_to_content.get(section_description, [])
+
+                # Use actual extracted content if available, otherwise fall back to chunks
+                if mapped_content:
+                    ground_truth_context = "\n\n".join(mapped_content)
+                else:
+                    ground_truth_context = "\n\n".join(
+                        [
+                            chunk["content"] if isinstance(chunk, dict) else chunk
+                            for chunk in mapped_chunks
+                        ]
+                    )
 
                 # Create an enhanced summary of the mapping for debugging and analysis
                 mapping_summary = ""
-                if mapped_chunks:
+                if mapped_chunks or mapped_content:
                     chunk_count = len(mapped_chunks)
-                    high_confidence = sum(
-                        1
-                        for chunk in mapped_chunks
-                        if isinstance(chunk, dict) and chunk.get("confidence") == "High"
-                    )
-                    medium_confidence = sum(
-                        1
-                        for chunk in mapped_chunks
-                        if isinstance(chunk, dict)
-                        and chunk.get("confidence") == "Medium"
-                    )
-                    low_confidence = sum(
-                        1
-                        for chunk in mapped_chunks
-                        if isinstance(chunk, dict) and chunk.get("confidence") == "Low"
-                    )
+                    content_count = len(mapped_content)
                     fallback_count = sum(
                         1
                         for chunk in mapped_chunks
@@ -1504,7 +1574,13 @@ CONFIDENCE: [High/Medium/Low - High: very clear match, Medium: reasonable match 
                         for chunk in mapped_chunks
                     )
 
-                    mapping_summary = f" (mapped {chunk_count} chunks: {high_confidence}H/{medium_confidence}M/{low_confidence}L confidence, {fallback_count} fallback, {total_content_size:,} chars total)"
+                    extracted_content_size = sum(
+                        len(content) for content in mapped_content
+                    )
+
+                    mapping_summary = f"Mapped {chunk_count} chunks → {content_count} extracted sections (total: {total_content_size} chars → {extracted_content_size} chars)"
+                else:
+                    mapping_summary = "No content mapped to this section"
 
                 # If no chunks were mapped to this section, use a fallback
                 if not ground_truth_context.strip():
@@ -1514,7 +1590,7 @@ CONFIDENCE: [High/Medium/Low - High: very clear match, Medium: reasonable match 
                     )
                 else:
                     print(
-                        f"Mapped content to section: {section_description[:30]}...{mapping_summary}"
+                        f"Mapped content to section: {section_description[:30]}... {mapping_summary}"
                     )
 
                 # Generate optimization suggestion
@@ -1594,20 +1670,13 @@ CONFIDENCE: [High/Medium/Low - High: very clear match, Medium: reasonable match 
                 )
             )
 
-            # Confidence distribution
-            confidence_distribution = {
-                "high": chunk_mapping_stats["high_confidence"],
-                "medium": chunk_mapping_stats["medium_confidence"],
-                "low": chunk_mapping_stats["low_confidence"],
-            }
-
             # Calculate coverage metrics
             coverage_percentage = (
                 (unique_chunks_mapped / total_chunks * 100) if total_chunks > 0 else 0
             )
 
             analysis_summary = f"""
-Enhanced Sequential Mapping Analysis:
+Enhanced Content Extraction Analysis:
 - Total sections evaluated: {len(original_sections)}
 - Sections needing optimization: {optimization_count}
 - Sections working well: {len(original_sections) - optimization_count}
@@ -1619,12 +1688,9 @@ Ground-truth Processing:
 - Chunk instances mapped: {mapped_chunk_instances} (chunks can map to multiple sections)
 - Coverage: {coverage_percentage:.1f}% of document mapped
 
-Mapping Quality:
-- High confidence mappings: {confidence_distribution['high']} ({confidence_distribution['high']/total_chunks*100:.1f}%)
-- Medium confidence mappings: {confidence_distribution['medium']} ({confidence_distribution['medium']/total_chunks*100:.1f}%)
-- Low confidence mappings: {confidence_distribution['low']} ({confidence_distribution['low']/total_chunks*100:.1f}%)
-
-Method: Advanced sequential chunking with context-aware mapping. Each large chunk (up to 100K chars) is intelligently mapped to outline sections using AI analysis with context from previous mapping decisions. This provides structured, flow-aware optimization suggestions based on the actual organization and progression of the reference document.
+Content Extraction:
+- Actual section content extracted from {sum(len(content_list) for content_list in section_to_content.values())} document sections
+- Method: Enhanced JSON-based mapping with actual content extraction - each chunk is analyzed to identify and extract the actual text content of individual document sections, which are then mapped to outline sections for precise comparison.
             """.strip()
 
             print(
