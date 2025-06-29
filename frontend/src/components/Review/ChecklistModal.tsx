@@ -34,8 +34,10 @@ interface ChecklistModalProps {
   checklistDescription: string
   setChecklistDescription: (description: string) => void
   questionsList: string[]
+  questionsData: QuestionData[]
   updateQuestion: (index: number, value: string) => void
-  updateQuestionsList: (newQuestions: string[]) => void // Add this new prop
+  updateQuestionsList: (newQuestions: string[]) => void
+  updateQuestionsData: (newData: QuestionData[]) => void
   handleQuestionBlur: (index: number, value: string) => void
   removeQuestion: (index: number) => void
   moveQuestionUp: (index: number) => void
@@ -50,6 +52,12 @@ interface ChecklistSuggestion {
   reason: string
   current_answer: string
   needs_revision: boolean
+}
+
+interface QuestionData {
+  id: string
+  text: string
+  consultDocuments: boolean
 }
 
 interface FileItem {
@@ -67,8 +75,10 @@ const ChecklistModal = ({
   checklistDescription,
   setChecklistDescription,
   questionsList,
+  questionsData,
   updateQuestion,
-  updateQuestionsList, // Add this new prop
+  updateQuestionsList,
+  updateQuestionsData,
   handleQuestionBlur,
   removeQuestion,
   moveQuestionUp,
@@ -77,6 +87,14 @@ const ChecklistModal = ({
   selectedKnowledgeBase,
 }: ChecklistModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
+
+  // Handler for consult documents toggle
+  const handleConsultDocumentsChange = (id: string, value: boolean) => {
+    const newData = questionsData.map((item) =>
+      item.id === id ? { ...item, consultDocuments: value } : item,
+    )
+    updateQuestionsData(newData)
+  }
 
   // Optimization state
   const [fileItems, setFileItems] = useState<FileItem[]>([])
@@ -451,13 +469,16 @@ const ChecklistModal = ({
                       {questionsList.map((question, index) => (
                         <QuestionItem
                           key={`${questionsKey}-${index}`}
+                          id={questionsData[index]?.id || crypto.randomUUID()}
                           index={index}
                           question={question}
+                          consultDocuments={questionsData[index]?.consultDocuments ?? true}
                           onUpdate={updateQuestion}
                           onBlur={handleQuestionBlur}
                           onRemove={removeQuestion}
                           onMoveUp={moveQuestionUp}
                           onMoveDown={moveQuestionDown}
+                          onConsultDocumentsChange={handleConsultDocumentsChange}
                           canRemove={questionsList.length > 1 && question.trim() !== ""}
                           totalQuestions={questionsList.length}
                         />
@@ -491,7 +512,7 @@ const ChecklistModal = ({
                         <Textarea
                           value={customInstructions}
                           onChange={(e) => setCustomInstructions(e.target.value)}
-                          placeholder="Enter any additional instructions for optimization analysis (e.g., 'Focus on pediatric study requirements' or 'Ensure questions are suitable for regulatory compliance')..."
+                          placeholder="Enter any additional instructions that should be considered when answering the checklist questions..."
                           rows={3}
                           resize="vertical"
                           bg="white"
@@ -503,7 +524,7 @@ const ChecklistModal = ({
                         />
                         <Text fontSize="xs" color="gray.500" mt={1}>
                           {customInstructions.length}/2000 characters. These instructions will be
-                          considered when analyzing questions.
+                          used during optimization analysis to simulate realistic review conditions.
                         </Text>
                       </Box>
 

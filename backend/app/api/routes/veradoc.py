@@ -1,4 +1,5 @@
 import uuid
+import json
 from app.models import (
     VeraDocResponse,
     VeraDocChecklist,
@@ -377,7 +378,29 @@ async def process_rag_checklist(
 
             # 6. Process each uploaded file
             qa_pairs = []
-            question_list = request_data.questions.strip().split("\n")
+
+            # Parse questions - support both legacy string format and new structured format
+            try:
+                # Try to parse as structured JSON format
+                questions_data = json.loads(request_data.questions)
+                if isinstance(questions_data, list) and all(
+                    isinstance(item, dict)
+                    and "text" in item
+                    and "consultDocuments" in item
+                    for item in questions_data
+                ):
+                    # New structured format
+                    question_list = questions_data
+                else:
+                    raise ValueError("Not structured format")
+            except (json.JSONDecodeError, ValueError):
+                # Fallback to legacy string format
+                question_texts = request_data.questions.strip().split("\n")
+                question_list = [
+                    {"text": q.strip(), "consultDocuments": True}
+                    for q in question_texts
+                    if q.strip()
+                ]
 
             # Get file content
             file = files[0]  # Process the first file for now
@@ -391,7 +414,7 @@ async def process_rag_checklist(
             await file.seek(0)
 
             # 7. Process each question using the RAG approach
-            for question in question_list:
+            for question_item in question_list:
                 if cancellation_requested:
                     print(
                         "Operation cancelled by client disconnect, stopping processing"
@@ -403,75 +426,92 @@ async def process_rag_checklist(
                         }
                     )
 
-                question = question.strip()
-                if not question:
+                question_text = question_item.get("text", "").strip()
+                consult_documents = question_item.get("consultDocuments", True)
+
+                if not question_text:
                     continue
 
-                # Step 1: Retrieve relevant context from the knowledge base
-                docs = retriever.get_relevant_documents(question)
-                context = "\n\n".join([doc.page_content for doc in docs])
-
-                # Store source documents for citation
-                source_citations = []
-                for doc in docs:
-                    # Ensure source_data_id is included in metadata if available
-                    metadata = (
-                        doc.metadata.copy()
-                    )  # Copy to avoid modifying the original
-
-                    # If the metadata contains a source path that matches a pattern from a KB
-                    if "source" in metadata and isinstance(metadata["source"], str):
-                        # Try to find the corresponding source_data_id
-                        source_path = metadata["source"]
-                        # Extract just the filename
-                        raw_filename = Path(source_path).name
-
-                        # Extract the real filename after the underscore using regex
-                        # This looks for any characters followed by an underscore, then captures everything after
-                        match = re.search(r"^[^_]*_(.+)$", raw_filename)
-                        if match:
-                            # Use the captured group (everything after the underscore)
-                            filename = match.group(1)
-                        else:
-                            # Fallback to the original filename if no underscore found
-                            filename = raw_filename
-
-                        # Debug info
-                        print(f"Raw filename: {raw_filename}")
-                        print(f"Extracted filename: {filename}")
-
-                        # Try to find the source by the extracted name
-                        source_entry = session.exec(
-                            select(Source).where(Source.name == filename)
-                        ).first()
-
-                        if source_entry:
-                            metadata["source_data_id"] = str(
-                                source_entry.source_data_id
-                            )
-
-                    source = {"content": doc.page_content, "metadata": metadata}
-                    source_citations.append(source)
-
-                if cancellation_requested:
-                    print(
-                        "Operation cancelled by client disconnect, stopping processing"
-                    )
-                    return VeraDocResponse(
-                        results={
-                            "status": "cancelled",
-                            "message": "Operation cancelled by user",
-                        }
-                    )
-
-                # Step 2: Get the relevant policy context for this question
-                print("Generating context for question...")
-                question_context = invoke_llm(
-                    llm,
-                    context_prompt_template,
-                    {"context": context, "question": question},
+                print(
+                    f"Processing question: {question_text[:50]}... (consult documents: {consult_documents})"
                 )
-                print(f"Got context: {question_context[:100]}...")
+
+                if consult_documents:
+                    # Standard process: retrieve context from knowledge base
+                    # Step 1: Retrieve relevant context from the knowledge base
+                    docs = retriever.get_relevant_documents(question_text)
+                    context = "\n\n".join([doc.page_content for doc in docs])
+
+                    # Store source documents for citation
+                    source_citations = []
+                    for doc in docs:
+                        # Ensure source_data_id is included in metadata if available
+                        metadata = (
+                            doc.metadata.copy()
+                        )  # Copy to avoid modifying the original
+
+                        # If the metadata contains a source path that matches a pattern from a KB
+                        if "source" in metadata and isinstance(metadata["source"], str):
+                            # Try to find the corresponding source_data_id
+                            source_path = metadata["source"]
+                            # Extract just the filename
+                            raw_filename = Path(source_path).name
+
+                            # Extract the real filename after the underscore using regex
+                            # This looks for any characters followed by an underscore, then captures everything after
+                            match = re.search(r"^[^_]*_(.+)$", raw_filename)
+                            if match:
+                                # Use the captured group (everything after the underscore)
+                                filename = match.group(1)
+                            else:
+                                # Fallback to the original filename if no underscore found
+                                filename = raw_filename
+
+                            # Debug info
+                            print(f"Raw filename: {raw_filename}")
+                            print(f"Extracted filename: {filename}")
+
+                            # Try to find the source by the extracted name
+                            source_entry = session.exec(
+                                select(Source).where(Source.name == filename)
+                            ).first()
+
+                            if source_entry:
+                                metadata["source_data_id"] = str(
+                                    source_entry.source_data_id
+                                )
+
+                        source = {"content": doc.page_content, "metadata": metadata}
+                        source_citations.append(source)
+
+                    if cancellation_requested:
+                        print(
+                            "Operation cancelled by client disconnect, stopping processing"
+                        )
+                        return VeraDocResponse(
+                            results={
+                                "status": "cancelled",
+                                "message": "Operation cancelled by user",
+                            }
+                        )
+
+                    # Step 2: Get the relevant policy context for this question
+                    print("Generating context for question...")
+                    question_context = invoke_llm(
+                        llm,
+                        context_prompt_template,
+                        {"context": context, "question": question_text},
+                    )
+                    print(f"Got context: {question_context[:100]}...")
+                else:
+                    # Skip knowledge base consultation - use empty context and citations
+                    question_context = (
+                        "No policy context consultation requested for this question."
+                    )
+                    source_citations = []
+                    print(
+                        f"Skipping document consultation for question: {question_text[:50]}..."
+                    )
 
                 if cancellation_requested:
                     print(
@@ -499,7 +539,7 @@ async def process_rag_checklist(
                 try:
                     rendered_prompt = qa_prompt_template.format(
                         document_text=document_text[:10000],
-                        question=question,
+                        question=question_text,
                         question_context=question_context,
                         custom_instructions_section=custom_instructions_section,
                     )
@@ -515,21 +555,21 @@ async def process_rag_checklist(
                         "document_text": document_text[
                             :10000
                         ],  # Limit length to avoid token issues
-                        "question": question,
+                        "question": question_text,
                         "question_context": question_context,
                         "custom_instructions_section": custom_instructions_section,
                     },
                 )
                 print(f"Got answer: {answer[:100]}...")
 
-                print("Source citations for question:", question)
+                print("Source citations for question:", question_text)
                 # for source in source_citations:
                 # print(f"Source: {source['metadata'].get('source', 'Unknown')}, Content: {source['content']}")
 
                 # Store the question-answer pair with context
                 qa_pairs.append(
                     {
-                        "question": question,
+                        "question": question_text,
                         "answer": answer,
                         "context": question_context,
                         "source_citations": source_citations,

@@ -317,7 +317,9 @@ class VeraDocChecklist(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str = Field(max_length=255, unique=True, nullable=False)
     description: str | None = Field(default=None, max_length=20000)
-    questions: str = Field(nullable=False)  # Store questions as a JSON string
+    questions: str = Field(
+        nullable=False
+    )  # Store questions as a JSON string with consultDocuments flags
     owner_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False
     )  # Add owner_id column
