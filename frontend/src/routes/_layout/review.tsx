@@ -33,6 +33,12 @@ import ChecklistTable from "../../components/Review/ChecklistTable"
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
 
+interface QuestionData {
+  id: string
+  text: string
+  consultDocuments: boolean
+}
+
 const VeraDoc = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
@@ -49,6 +55,7 @@ const VeraDoc = () => {
   const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
 
   const [questions, setQuestions] = useState("")
+  const [structuredQuestions, setStructuredQuestions] = useState<QuestionData[]>([])
   const [customInstructions, setCustomInstructions] = useState("")
 
   const [fileItems, setFileItems] = useState<FileItem[]>([])
@@ -377,7 +384,7 @@ const VeraDoc = () => {
     }
 
     const requestData = {
-      questions: questions,
+      questions: structuredQuestions.length > 0 ? JSON.stringify(structuredQuestions) : questions,
       knowledgeBaseId: selectedKnowledgeBase.id,
       files: regularFiles,
       handwrittenFiles: handwrittenFiles,
@@ -464,7 +471,8 @@ const VeraDoc = () => {
 
         // Process this file
         const requestData = {
-          questions: questions,
+          questions:
+            structuredQuestions.length > 0 ? JSON.stringify(structuredQuestions) : questions,
           knowledgeBaseId: selectedKnowledgeBase.id,
           files: regularFiles,
           handwrittenFiles: handwrittenFiles,
@@ -724,6 +732,7 @@ const VeraDoc = () => {
             selectedChecklist={selectedChecklist}
             onChecklistChange={setSelectedChecklist}
             onQuestionsChange={setQuestions}
+            onStructuredQuestionsChange={setStructuredQuestions}
             onChecklistsUpdate={fetchChecklists}
             questions={questions}
             knowledgeBases={knowledgeBases}

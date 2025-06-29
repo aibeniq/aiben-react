@@ -1,27 +1,33 @@
 import { useState } from "react"
-import { HStack, VStack, Input, IconButton } from "@chakra-ui/react"
+import { HStack, VStack, Input, IconButton, Box, Text, Switch } from "@chakra-ui/react"
 import { FiChevronUp, FiChevronDown, FiTrash2 } from "react-icons/fi"
 
 interface QuestionItemProps {
+  id: string
   index: number
   question: string
+  consultDocuments?: boolean
   onUpdate: (index: number, value: string) => void
   onBlur: (index: number, value: string) => void
   onRemove: (index: number) => void
   onMoveUp: (index: number) => void
   onMoveDown: (index: number) => void
+  onConsultDocumentsChange?: (id: string, value: boolean) => void
   canRemove: boolean
   totalQuestions: number
 }
 
 const QuestionItem = ({
+  id,
   index,
   question,
+  consultDocuments = true,
   onUpdate,
   onBlur,
   onRemove,
   onMoveUp,
   onMoveDown,
+  onConsultDocumentsChange,
   canRemove,
   totalQuestions,
 }: QuestionItemProps) => {
@@ -48,6 +54,30 @@ const QuestionItem = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       <HStack align="center" gap={0} w="full">
+        {/* Consult Documents Toggle - only show for existing questions */}
+        {!isAddQuestion && onConsultDocumentsChange && (
+          <Box minW="120px" mr={2}>
+            <Switch.Root
+              ids={{
+                root: `switch-root-${id}`,
+                hiddenInput: `switch-input-${id}`,
+              }}
+              checked={consultDocuments}
+              onCheckedChange={(details) => {
+                onConsultDocumentsChange(id, !!details.checked)
+              }}
+              size="sm"
+              colorPalette="teal"
+            >
+              <Switch.HiddenInput />
+              <Switch.Control />
+              <Switch.Label>
+                <Text fontSize="xs">Consult docs</Text>
+              </Switch.Label>
+            </Switch.Root>
+          </Box>
+        )}
+
         <div style={{ flex: "1", width: "100%" }}>
           <Input
             value={question}

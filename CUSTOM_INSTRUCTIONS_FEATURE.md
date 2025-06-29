@@ -8,6 +8,8 @@ This document describes the implementation of the Custom Instructions feature fo
 
 The Custom Instructions feature adds a text box to the Review UI where users can enter optional instructions that will be considered when answering individual checklist questions. These instructions are appended to the prompt template when using the `VERADOC_QA_PROMPT_TEMPLATE`.
 
+**Important Note**: The custom instructions functionality is identical in both Review and Optimization modes. In optimization mode, the custom instructions simulate the exact same review conditions that would be used during actual document reviews, ensuring realistic optimization analysis.
+
 ## Implementation Details
 
 ### Backend Changes
@@ -109,11 +111,13 @@ The Custom Instructions feature adds a text box to the Review UI where users can
 1. User selects a checklist to optimize
 2. User uploads a test document that SHOULD meet all requirements
 3. User enters optional custom instructions such as:
-   - "This is a Phase I oncology study, consider early-phase trial requirements"
-   - "Apply FDA guidance for pediatric studies when analyzing questions"
-   - "Focus on patient safety considerations in the optimization analysis"
+   - "Consider this is a pediatric study when evaluating age-related requirements"
+   - "This protocol is for a low-risk intervention, apply appropriate risk assessment criteria"
+   - "Focus on international regulatory requirements rather than US-specific guidelines"
 4. User clicks "Optimize Checklist" to analyze questions with the custom instructions considered
 5. System provides suggestions for improving questions that may have generated negative responses
+
+**Note**: The custom instructions in optimization mode are exactly the same as those used in review mode. They simulate realistic review conditions to ensure the optimization analysis reflects how questions would actually perform during document reviews.
 
 ## Technical Notes
 

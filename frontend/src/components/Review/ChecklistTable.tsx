@@ -5,11 +5,18 @@ import { VeraDocChecklist, VeradocService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import ChecklistModal from "./ChecklistModal"
 
+interface QuestionData {
+  id: string
+  text: string
+  consultDocuments: boolean
+}
+
 interface ChecklistTableProps {
   checklists: VeraDocChecklist[]
   selectedChecklist: VeraDocChecklist | null
   onChecklistChange: (checklist: VeraDocChecklist | null) => void
   onQuestionsChange: (questions: string) => void
+  onStructuredQuestionsChange?: (questions: QuestionData[]) => void
   onChecklistsUpdate: () => void
   questions: string
   isDisabled?: boolean
@@ -29,6 +36,7 @@ interface ChecklistTableBodyProps {
   selectedChecklist: VeraDocChecklist | null
   onChecklistChange: (checklist: VeraDocChecklist | null) => void
   onQuestionsChange: (questions: string) => void
+  onStructuredQuestionsChange?: (questions: QuestionData[]) => void
   onViewChecklist: (checklist: VeraDocChecklist) => void
   onCopyChecklist: (checklist: VeraDocChecklist) => void
   onDeleteChecklist: (checklist: VeraDocChecklist) => void
@@ -76,6 +84,7 @@ const ChecklistTableBody = ({
   selectedChecklist,
   onChecklistChange,
   onQuestionsChange,
+  onStructuredQuestionsChange,
   onViewChecklist,
   onCopyChecklist,
   onDeleteChecklist,
@@ -109,9 +118,41 @@ const ChecklistTableBody = ({
                 if (details.checked) {
                   onChecklistChange(checklist)
                   onQuestionsChange(checklist.questions || "")
+
+                  // Parse and provide structured questions
+                  if (onStructuredQuestionsChange) {
+                    try {
+                      const parsedQuestions = JSON.parse(checklist.questions || "[]")
+                      if (
+                        Array.isArray(parsedQuestions) &&
+                        parsedQuestions.every(
+                          (q) => typeof q === "object" && "text" in q && "consultDocuments" in q,
+                        )
+                      ) {
+                        // It's structured data
+                        onStructuredQuestionsChange(parsedQuestions)
+                      } else {
+                        throw new Error("Not structured format")
+                      }
+                    } catch {
+                      // Fallback for legacy format
+                      const questionsArray = (checklist.questions || "")
+                        .split("\n")
+                        .filter((q) => q.trim())
+                      const structuredData = questionsArray.map((text) => ({
+                        id: crypto.randomUUID(),
+                        text,
+                        consultDocuments: true, // Default for legacy
+                      }))
+                      onStructuredQuestionsChange(structuredData)
+                    }
+                  }
                 } else {
                   onChecklistChange(null)
                   onQuestionsChange("")
+                  if (onStructuredQuestionsChange) {
+                    onStructuredQuestionsChange([])
+                  }
                 }
               }}
             >
@@ -168,6 +209,7 @@ const ChecklistTable = ({
   selectedChecklist,
   onChecklistChange,
   onQuestionsChange,
+  onStructuredQuestionsChange,
   onChecklistsUpdate,
   isDisabled = false,
   knowledgeBases: _knowledgeBases = [],
@@ -177,6 +219,7 @@ const ChecklistTable = ({
   const [checklistName, setChecklistName] = useState("")
   const [checklistDescription, setChecklistDescription] = useState("")
   const [questionsList, setQuestionsList] = useState<string[]>([])
+  const [questionsData, setQuestionsData] = useState<QuestionData[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingChecklist, setEditingChecklist] = useState<VeraDocChecklist | null>(null)
 
@@ -187,15 +230,52 @@ const ChecklistTable = ({
       setChecklistDescription(editingChecklist.description || "")
       const checklistQuestions = editingChecklist.questions || ""
       if (checklistQuestions) {
-        const questionsArray = checklistQuestions.split("\n")
-        setQuestionsList(questionsArray.length > 0 ? questionsArray : [""])
+        // Try to parse as structured data first
+        try {
+          const parsedQuestions = JSON.parse(checklistQuestions)
+          if (
+            Array.isArray(parsedQuestions) &&
+            parsedQuestions.every(
+              (q) => typeof q === "object" && "text" in q && "consultDocuments" in q,
+            )
+          ) {
+            // It's structured data
+            const questionsArray = parsedQuestions.map((q) => q.text)
+            const structuredData = parsedQuestions.map((q) => ({
+              id: q.id || crypto.randomUUID(),
+              text: q.text,
+              consultDocuments: q.consultDocuments,
+            }))
+            setQuestionsList(questionsArray.length > 0 ? questionsArray : [""])
+            setQuestionsData(
+              structuredData.length > 0
+                ? structuredData
+                : [{ id: crypto.randomUUID(), text: "", consultDocuments: true }],
+            )
+          } else {
+            throw new Error("Not structured format")
+          }
+        } catch {
+          // Fall back to legacy string format
+          const questionsArray = checklistQuestions.split("\n")
+          setQuestionsList(questionsArray.length > 0 ? questionsArray : [""])
+          setQuestionsData(
+            questionsArray.map((text) => ({
+              id: crypto.randomUUID(),
+              text,
+              consultDocuments: true,
+            })),
+          )
+        }
       } else {
         setQuestionsList([""])
+        setQuestionsData([{ id: crypto.randomUUID(), text: "", consultDocuments: true }])
       }
     } else {
       setChecklistName("")
       setChecklistDescription("")
       setQuestionsList([""])
+      setQuestionsData([{ id: crypto.randomUUID(), text: "", consultDocuments: true }])
     }
   }, [editingChecklist])
 
@@ -203,12 +283,30 @@ const ChecklistTable = ({
   useEffect(() => {
     if (questionsList.length === 0) {
       setQuestionsList([""])
+      setQuestionsData([{ id: crypto.randomUUID(), text: "", consultDocuments: true }])
     }
   }, [])
+
+  // Function to sync questionsData with questionsList
+  const syncQuestionsData = (newQuestionsList: string[]) => {
+    const newQuestionsData = newQuestionsList.map((text, index) => ({
+      id: questionsData[index]?.id || crypto.randomUUID(),
+      text,
+      consultDocuments: questionsData[index]?.consultDocuments ?? true,
+    }))
+    setQuestionsData(newQuestionsData)
+  }
 
   // Convert questions array back to string when questionsList changes
   const updateQuestionsFromList = (newQuestionsList: string[]) => {
     setQuestionsList(newQuestionsList)
+    syncQuestionsData(newQuestionsList)
+  }
+
+  // Function to update questionsData
+  const updateQuestionsData = (newData: QuestionData[]) => {
+    setQuestionsData(newData)
+    setQuestionsList(newData.map((q) => q.text))
   }
 
   const updateQuestion = (index: number, value: string) => {
@@ -221,14 +319,17 @@ const ChecklistTable = ({
     // If the question is empty and it's not the only question, remove it
     if (value.trim() === "" && questionsList.length > 1) {
       const newQuestions = questionsList.filter((_, i) => i !== index)
+      const newData = questionsData.filter((_, i) => i !== index)
 
       // Ensure we always have at least one empty question at the end
       const hasEmptyQuestion = newQuestions.some((q) => q.trim() === "")
       if (!hasEmptyQuestion) {
         newQuestions.push("")
+        newData.push({ id: crypto.randomUUID(), text: "", consultDocuments: true })
       }
 
-      updateQuestionsFromList(newQuestions)
+      setQuestionsList(newQuestions)
+      setQuestionsData(newData)
     }
   }
 
@@ -238,7 +339,13 @@ const ChecklistTable = ({
     if (questionsList.length > 0) {
       const lastQuestion = questionsList[questionsList.length - 1]
       if (lastQuestion.trim() !== "") {
-        updateQuestionsFromList([...questionsList, ""])
+        const newQuestions = [...questionsList, ""]
+        const newData = [
+          ...questionsData,
+          { id: crypto.randomUUID(), text: "", consultDocuments: true },
+        ]
+        setQuestionsList(newQuestions)
+        setQuestionsData(newData)
       }
     }
   }, [questionsList])
@@ -248,32 +355,55 @@ const ChecklistTable = ({
     if (questionsList.length <= 1) return
 
     const newQuestions = questionsList.filter((_, i) => i !== index)
+    const newData = questionsData.filter((_, i) => i !== index)
 
     // Ensure we always have at least one empty question at the end
     const hasEmptyQuestion = newQuestions.some((q) => q.trim() === "")
     if (!hasEmptyQuestion && questionsList[questionsList.length - 1].trim() !== "") {
       newQuestions.push("")
+      newData.push({ id: crypto.randomUUID(), text: "", consultDocuments: true })
     }
 
-    updateQuestionsFromList(newQuestions)
+    setQuestionsList(newQuestions)
+    setQuestionsData(newData)
   }
 
   const moveQuestionUp = (index: number) => {
     if (index === 0) return // Can't move first item up
     const newQuestions = [...questionsList]
-    const temp = newQuestions[index]
+    const newData = [...questionsData]
+
+    // Swap questions
+    const tempQuestion = newQuestions[index]
     newQuestions[index] = newQuestions[index - 1]
-    newQuestions[index - 1] = temp
-    updateQuestionsFromList(newQuestions)
+    newQuestions[index - 1] = tempQuestion
+
+    // Swap data
+    const tempData = newData[index]
+    newData[index] = newData[index - 1]
+    newData[index - 1] = tempData
+
+    setQuestionsList(newQuestions)
+    setQuestionsData(newData)
   }
 
   const moveQuestionDown = (index: number) => {
     if (index === questionsList.length - 1) return // Can't move last item down
     const newQuestions = [...questionsList]
-    const temp = newQuestions[index]
+    const newData = [...questionsData]
+
+    // Swap questions
+    const tempQuestion = newQuestions[index]
     newQuestions[index] = newQuestions[index + 1]
-    newQuestions[index + 1] = temp
-    updateQuestionsFromList(newQuestions)
+    newQuestions[index + 1] = tempQuestion
+
+    // Swap data
+    const tempData = newData[index]
+    newData[index] = newData[index + 1]
+    newData[index + 1] = tempData
+
+    setQuestionsList(newQuestions)
+    setQuestionsData(newData)
   }
 
   const handleViewChecklist = (checklist: VeraDocChecklist) => {
@@ -321,17 +451,20 @@ const ChecklistTable = ({
 
   const handleSaveChecklist = async () => {
     try {
-      const questionsString = questionsList.join("\n")
+      // Filter out empty questions and serialize as structured JSON without IDs
+      const nonEmptyQuestionsData = questionsData
+        .filter((q) => q.text.trim() !== "")
+        .map(({ text, consultDocuments }) => ({ text, consultDocuments }))
+      const questionsJson = JSON.stringify(nonEmptyQuestionsData)
 
       if (editingChecklist) {
-        const trimmedQuestions = questionsString.trim()
         // Update the existing checklist
         await VeradocService.updateChecklist({
           checklistId: editingChecklist.id || "",
           requestBody: {
             name: checklistName,
             description: checklistDescription,
-            questions: trimmedQuestions,
+            questions: questionsJson,
             owner_id: editingChecklist.owner_id || "",
           },
         })
@@ -343,7 +476,7 @@ const ChecklistTable = ({
           requestBody: {
             name: checklistName,
             description: checklistDescription,
-            questions: questionsString,
+            questions: questionsJson,
             owner_id: "",
           },
         })
@@ -409,6 +542,7 @@ const ChecklistTable = ({
             selectedChecklist={selectedChecklist}
             onChecklistChange={onChecklistChange}
             onQuestionsChange={onQuestionsChange}
+            onStructuredQuestionsChange={onStructuredQuestionsChange}
             onViewChecklist={handleViewChecklist}
             onCopyChecklist={handleCopyChecklist}
             onDeleteChecklist={handleDeleteChecklist}
@@ -427,8 +561,10 @@ const ChecklistTable = ({
         checklistDescription={checklistDescription}
         setChecklistDescription={setChecklistDescription}
         questionsList={questionsList}
+        questionsData={questionsData}
         updateQuestion={updateQuestion}
-        updateQuestionsList={updateQuestionsFromList} // Add this new prop
+        updateQuestionsList={updateQuestionsFromList}
+        updateQuestionsData={updateQuestionsData}
         handleQuestionBlur={handleQuestionBlur}
         removeQuestion={removeQuestion}
         moveQuestionUp={moveQuestionUp}
