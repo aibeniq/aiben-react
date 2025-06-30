@@ -141,6 +141,8 @@ class Settings(BaseSettings):
     5. Should not make any claims that are not supported by the provided context
     6. Keep in mind what has already been generated in the report, and don't be redundant when writing the new section.
 
+    {custom_instructions}
+
     FORMAT OUTPUT AS A PROPERLY FORMATTED CONSENT FORM SECTION with an appropriate heading and content.
 
     SECTION CONTENT:
@@ -520,6 +522,8 @@ GENERATED CONTENT FOR THIS SECTION:
 
 RELEVANT CONTENT FROM GROUND-TRUTH DOCUMENT:
 {ground_truth_content}
+
+{custom_instructions}
 
 INSTRUCTIONS:
 1. Compare the generated content to the relevant ground-truth content

@@ -50,6 +50,7 @@ from fastapi import (
     HTTPException,
     UploadFile,
     File,
+    Form,
     Request as FastAPIRequest,
 )
 from typing import List, Dict, Any, Optional
@@ -147,14 +148,17 @@ def extract_text_from_file(file_content: bytes, filename: str) -> str:
 async def generate_report(
     session: SessionDep,
     current_user: CurrentUser,
-    request: ReportGenieRequest = Depends(),
+    knowledge_base_id: str = Form(...),
+    sections: str = Form(...),
+    outline_id: str = Form(...),
+    search_mode: str = Form("vector"),  # Default to vector search
 ):
     """
     Generate a report based on sections outline and knowledge base search results.
     """
     try:
         # 1. Retrieve knowledge base from database
-        kb = session.get(KnowledgeBase, request.knowledge_base_id)
+        kb = session.get(KnowledgeBase, knowledge_base_id)
         if not kb:
             raise HTTPException(status_code=404, detail="Knowledge base not found")
 
@@ -168,7 +172,7 @@ async def generate_report(
 
         # Parse sections
         try:
-            sections_data = json.loads(request.sections)
+            sections_data = json.loads(sections)
             if isinstance(sections_data, list) and all(
                 isinstance(item, dict) and "text" in item and "consultDocuments" in item
                 for item in sections_data
@@ -177,7 +181,7 @@ async def generate_report(
             else:
                 raise ValueError("Invalid sections format")
         except (json.JSONDecodeError, TypeError, ValueError):
-            section_list = request.sections.strip().split("\n")
+            section_list = sections.strip().split("\n")
             section_items = [
                 {"text": section.strip(), "consultDocuments": True}
                 for section in section_list
@@ -196,6 +200,10 @@ async def generate_report(
             if not section_description:
                 continue
 
+            # Initialize variables for this section
+            section_content = ""
+            source_citations = []
+
             if consult_documents:
                 if search_type == "full_text":
                     # Full Text Scan Logic
@@ -211,7 +219,7 @@ async def generate_report(
 
                     text_chunks = chunk_text(
                         all_source_text,
-                        max_tokens=settings.DOCUMENT_CHUNK_SIZE,
+                        max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE,
                     )
                     chunk_analyses = []
                     for chunk in text_chunks:
@@ -223,43 +231,108 @@ async def generate_report(
                         chunk_analyses.append(analysis)
 
                     # Synthesize the chunk analyses
-                    synthesized_answer = invoke_llm(
-                        llm,
-                        settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
-                        {
-                            "chunk_analyses": "\n\n".join(chunk_analyses),
-                            "question": section_description,
-                        },
-                    )
+                    print(f"About to synthesize {len(chunk_analyses)} chunk analyses")
 
-                    sections.append(
-                        {
-                            "title": section_description,
-                            "content": synthesized_answer,
-                            "consult_documents": True,
-                        }
-                    )
+                    if not chunk_analyses:
+                        print("No chunk analyses found - using fallback message")
+                        section_content = "No relevant information found in the knowledge base to answer this question."
+                        source_citations = []
+                    else:
+                        chunk_analyses_text = "\n\n".join(chunk_analyses)
+                        print(
+                            f"Template variables: chunk_analyses={len(chunk_analyses_text)} chars, question={len(section_description)} chars"
+                        )
+
+                        try:
+                            synthesized_answer = invoke_llm(
+                                llm,
+                                settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+                                {
+                                    "chunk_analyses": "\n\n".join(chunk_analyses),
+                                    "question": section_description,
+                                },
+                            )
+                            section_content = synthesized_answer
+                            source_citations = []  # Add proper citations if needed
+                        except Exception as e:
+                            print(f"Error in synthesis: {e}")
+                            print(
+                                f"Template: {settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE}"
+                            )
+                            raise
                 else:
                     # Vector Search Logic
                     print(f"Performing Vector Search for: {section_description}")
-                    retriever = create_ensemble_retriever(kb, session, current_user)
-                    search_results = retriever.retrieve(
-                        section_description, k=settings.RAG_NUM_CHUNKS
-                    )
 
-                    synthesized_answer = invoke_llm(
-                        llm,
-                        settings.REPORT_GENIE_SYNTHESIS_PROMPT_TEMPLATE,
-                        {"context": search_results, "question": section_description},
-                    )
+                    # Set up ChromaDB and retriever (similar to optimize_outline)
+                    with tempfile.TemporaryDirectory() as temp_dir:
+                        # Extract ChromaDB
+                        if kb.data:
+                            with zipfile.ZipFile(BytesIO(kb.data), "r") as zip_ref:
+                                zip_ref.extractall(temp_dir)
+                        else:
+                            raise HTTPException(
+                                status_code=400,
+                                detail="Knowledge base has no vector database data",
+                            )
 
-                    sections.append(
-                        {
-                            "title": section_description,
-                            "content": synthesized_answer,
-                            "consult_documents": True,
-                        }
-                    )
+                        # Load embeddings and vector database
+                        if kb.embedding_model_id:
+                            embedding_model = session.get(
+                                EmbeddingModel, kb.embedding_model_id
+                            )
+                            if embedding_model:
+                                model_id = embedding_model.model_id
+                                provider = embedding_model.provider
+                            else:
+                                embedding_info = get_embedding_model(
+                                    session, current_user
+                                )
+                                model_id = embedding_info["model_id"]
+                                provider = embedding_info["provider"]
+                        else:
+                            embedding_info = get_embedding_model(session, current_user)
+                            model_id = embedding_info["model_id"]
+                            provider = embedding_info["provider"]
+
+                        embeddings = load_embeddings_model(
+                            provider=provider, model_id=model_id
+                        )
+                        chroma_db = Chroma(
+                            persist_directory=temp_dir, embedding_function=embeddings
+                        )
+
+                        # Create retriever with proper parameters
+                        retriever = create_ensemble_retriever(
+                            chroma_db=chroma_db,
+                            vector_weight=0.7,
+                            keyword_weight=0.3,
+                            search_kwargs={"k": settings.RAG_NUM_CHUNKS},
+                        )
+
+                        # Use the retriever's get_relevant_documents method
+                        search_results = retriever.get_relevant_documents(
+                            section_description
+                        )
+
+                        # Format search results for the synthesis prompt
+                        context = "\n\n".join(
+                            [doc.page_content for doc in search_results]
+                        )
+
+                        synthesized_answer = invoke_llm(
+                            llm,
+                            settings.REPORT_GENIE_PROMPT_TEMPLATE,
+                            {
+                                "report_draft": draft_report,
+                                "context": context,
+                                "question": section_description,
+                                "custom_instructions": "",
+                            },
+                        )
+
+                        section_content = synthesized_answer
+                        source_citations = []  # Add proper citations if needed
             else:
                 # Use raw text directly without consulting knowledge base
                 section_content = section_description
@@ -287,17 +360,17 @@ async def generate_report(
 
         # Get outline name if outline_id is provided
         outline_name = None
-        if hasattr(request, "outline_id") and request.outline_id:
+        if outline_id:
             try:
-                outline = session.get(ReportGenieOutline, request.outline_id)
+                outline = session.get(ReportGenieOutline, outline_id)
                 if outline:
                     outline_name = outline.name
             except Exception as e:
                 print(f"Warning: Error retrieving outline name: {e}")
 
         # If no outline_id but we have sections, use first line or "Custom Outline"
-        if not outline_name and request.sections:
-            first_line = request.sections.strip().split("\n")[0]
+        if not outline_name and sections:
+            first_line = sections.strip().split("\n")[0]
             if first_line:
                 # Extract a name from the first section (limited to 30 chars)
                 outline_name = first_line[:30] + ("..." if len(first_line) > 30 else "")
@@ -317,11 +390,9 @@ async def generate_report(
             user_id=current_user.id,
             functionality="reportgenie",
             input_data={
-                "sections": request.sections,
-                "kb_id": request.knowledge_base_id,
-                "outline_id": (
-                    request.outline_id if hasattr(request, "outline_id") else None
-                ),
+                "sections": sections,
+                "kb_id": knowledge_base_id,
+                "outline_id": outline_id,
             },
             output_data={
                 "section_count": len(sections),
@@ -1008,6 +1079,15 @@ async def optimize_outline(
 
         print("Starting outline optimization...")
 
+        # Debug: Log custom instructions
+        if request_data.custom_instructions:
+            print(f"Custom instructions received: {request_data.custom_instructions}")
+            print(
+                "✓ Custom instructions will be applied to content generation and optimization analysis"
+            )
+        else:
+            print("No custom instructions provided - using default prompts")
+
         # 1. Retrieve knowledge base
         kb = session.get(KnowledgeBase, request_data.knowledge_base_id)
         if not kb:
@@ -1105,6 +1185,7 @@ async def optimize_outline(
 
             # 5. Generate report content for each section using current outline
             generated_sections = {}
+            section_consult_settings = {}  # Track which sections consult documents
 
             for section in current_sections:
                 if cancellation_requested:
@@ -1115,6 +1196,9 @@ async def optimize_outline(
 
                 section_description = section["text"].strip()
                 consult_documents = section.get("consultDocuments", True)
+
+                # Store the consult documents setting for this section
+                section_consult_settings[section_description] = consult_documents
 
                 if not section_description:
                     continue
@@ -1133,14 +1217,27 @@ async def optimize_outline(
                             report_draft += f"\n\n## {prev_section}\n\n{prev_content}"
 
                     # Generate content for this section using LLM
+                    template_vars = {
+                        "report_draft": report_draft,
+                        "context": context,
+                        "question": section_description,
+                    }
+
+                    # Add custom instructions if provided
+                    if request_data.custom_instructions:
+                        template_vars["custom_instructions"] = (
+                            f"\nADDITIONAL CUSTOM INSTRUCTIONS:\n{request_data.custom_instructions}\n"
+                        )
+                        print(
+                            f"✓ Applying custom instructions to content generation for section: {section_description[:30]}..."
+                        )
+                    else:
+                        template_vars["custom_instructions"] = ""
+
                     generated_content = invoke_llm(
                         llm,
                         settings.REPORT_GENIE_PROMPT_TEMPLATE,
-                        {
-                            "report_draft": report_draft,
-                            "context": context,
-                            "question": section_description,
-                        },
+                        template_vars,
                     )
                     print(
                         f"Generated {len(generated_content)} characters for section using knowledge base"
@@ -1618,6 +1715,18 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                         status_code=408, detail="Operation cancelled by user"
                     )
 
+                # Check if this section consults documents
+                consults_documents = section_consult_settings.get(
+                    section_description, True
+                )
+
+                if not consults_documents:
+                    # Skip optimization and exclude from results for sections that don't consult documents
+                    print(
+                        f"Skipping optimization and excluding from results: {section_description[:50]}..."
+                    )
+                    continue
+
                 print(f"Analyzing section: {section_description[:50]}...")
 
                 # Get the mapped ground-truth content for this section
@@ -1675,18 +1784,31 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                     )
 
                 # Generate optimization suggestion
+                template_vars = {
+                    "original_section": section_description,
+                    "generated_content": generated_content[
+                        :2000
+                    ],  # Limit to avoid token limits
+                    "ground_truth_content": ground_truth_context[
+                        :2000
+                    ],  # Limit to avoid token limits
+                }
+
+                # Add custom instructions if provided
+                if request_data.custom_instructions:
+                    template_vars["custom_instructions"] = (
+                        f"\nADDITIONAL CUSTOM INSTRUCTIONS FOR OPTIMIZATION:\n{request_data.custom_instructions}\n"
+                    )
+                    print(
+                        f"✓ Applying custom instructions to optimization analysis for section: {section_description[:30]}..."
+                    )
+                else:
+                    template_vars["custom_instructions"] = ""
+
                 suggestion_response = invoke_llm(
                     llm,
                     settings.REPORTGENIE_OPTIMIZE_OUTLINE_PROMPT_TEMPLATE,
-                    {
-                        "original_section": section_description,
-                        "generated_content": generated_content[
-                            :2000
-                        ],  # Limit to avoid token limits
-                        "ground_truth_content": ground_truth_context[
-                            :2000
-                        ],  # Limit to avoid token limits
-                    },
+                    template_vars,
                 )
 
                 # Parse the response
@@ -1756,11 +1878,24 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                 (unique_chunks_mapped / total_chunks * 100) if total_chunks > 0 else 0
             )
 
+            # Calculate section type statistics
+            sections_that_consult_docs = sum(
+                1 for consults in section_consult_settings.values() if consults
+            )
+            sections_that_dont_consult_docs = (
+                len(section_consult_settings) - sections_that_consult_docs
+            )
+            sections_actually_optimized = len(
+                [s for s in suggestions if s.needs_revision]
+            )
+
             analysis_summary = f"""
 Enhanced Content Extraction Analysis:
-- Total sections evaluated: {len(original_sections)}
-- Sections needing optimization: {optimization_count}
-- Sections working well: {len(original_sections) - optimization_count}
+- Total outline sections: {len(original_sections)}
+- Sections that consult documents (shown in results): {sections_that_consult_docs}
+- Sections that don't consult documents (excluded from results): {sections_that_dont_consult_docs}
+- Sections needing optimization: {sections_actually_optimized}
+- Sections working well: {sections_that_consult_docs - sections_actually_optimized}
 
 Ground-truth Processing:
 - Document: {file.filename}
@@ -1772,10 +1907,11 @@ Ground-truth Processing:
 Content Extraction:
 - Actual section content extracted from {sum(len(content_list) for content_list in section_to_content.values())} document sections
 - Method: Enhanced JSON-based mapping with actual content extraction - each chunk is analyzed to identify and extract the actual text content of individual document sections, which are then mapped to outline sections for precise comparison.
+- Note: Sections with 'Consult Documents' set to false are mapped but excluded from optimization results.
             """.strip()
 
             print(
-                f"Optimization complete: {optimization_count}/{len(original_sections)} sections optimized"
+                f"Optimization complete: {sections_actually_optimized}/{sections_that_consult_docs} document-consulting sections optimized ({sections_that_dont_consult_docs} non-consulting sections excluded from results)"
             )
 
             return OptimizedOutlineResponse(

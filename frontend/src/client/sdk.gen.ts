@@ -1051,12 +1051,13 @@ export class ReportgenieService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reportgenie/generate',
-            query: {
+            formData: {
                 knowledge_base_id: data.knowledgeBaseId,
                 sections: data.sections,
                 outline_id: data.outlineId,
                 search_mode: data.searchMode
             },
+            mediaType: 'multipart/form-data',
             errors: {
                 422: 'Validation Error'
             }
