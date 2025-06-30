@@ -1008,6 +1008,15 @@ async def optimize_outline(
 
         print("Starting outline optimization...")
 
+        # Debug: Log custom instructions
+        if request_data.custom_instructions:
+            print(f"Custom instructions received: {request_data.custom_instructions}")
+            print(
+                "✓ Custom instructions will be applied to content generation and optimization analysis"
+            )
+        else:
+            print("No custom instructions provided - using default prompts")
+
         # 1. Retrieve knowledge base
         kb = session.get(KnowledgeBase, request_data.knowledge_base_id)
         if not kb:
@@ -1105,6 +1114,7 @@ async def optimize_outline(
 
             # 5. Generate report content for each section using current outline
             generated_sections = {}
+            section_consult_settings = {}  # Track which sections consult documents
 
             for section in current_sections:
                 if cancellation_requested:
@@ -1115,6 +1125,9 @@ async def optimize_outline(
 
                 section_description = section["text"].strip()
                 consult_documents = section.get("consultDocuments", True)
+
+                # Store the consult documents setting for this section
+                section_consult_settings[section_description] = consult_documents
 
                 if not section_description:
                     continue
@@ -1133,14 +1146,27 @@ async def optimize_outline(
                             report_draft += f"\n\n## {prev_section}\n\n{prev_content}"
 
                     # Generate content for this section using LLM
+                    template_vars = {
+                        "report_draft": report_draft,
+                        "context": context,
+                        "question": section_description,
+                    }
+
+                    # Add custom instructions if provided
+                    if request_data.custom_instructions:
+                        template_vars["custom_instructions"] = (
+                            f"\nADDITIONAL CUSTOM INSTRUCTIONS:\n{request_data.custom_instructions}\n"
+                        )
+                        print(
+                            f"✓ Applying custom instructions to content generation for section: {section_description[:30]}..."
+                        )
+                    else:
+                        template_vars["custom_instructions"] = ""
+
                     generated_content = invoke_llm(
                         llm,
                         settings.REPORT_GENIE_PROMPT_TEMPLATE,
-                        {
-                            "report_draft": report_draft,
-                            "context": context,
-                            "question": section_description,
-                        },
+                        template_vars,
                     )
                     print(
                         f"Generated {len(generated_content)} characters for section using knowledge base"
@@ -1618,6 +1644,18 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                         status_code=408, detail="Operation cancelled by user"
                     )
 
+                # Check if this section consults documents
+                consults_documents = section_consult_settings.get(
+                    section_description, True
+                )
+
+                if not consults_documents:
+                    # Skip optimization and exclude from results for sections that don't consult documents
+                    print(
+                        f"Skipping optimization and excluding from results: {section_description[:50]}..."
+                    )
+                    continue
+
                 print(f"Analyzing section: {section_description[:50]}...")
 
                 # Get the mapped ground-truth content for this section
@@ -1675,18 +1713,31 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                     )
 
                 # Generate optimization suggestion
+                template_vars = {
+                    "original_section": section_description,
+                    "generated_content": generated_content[
+                        :2000
+                    ],  # Limit to avoid token limits
+                    "ground_truth_content": ground_truth_context[
+                        :2000
+                    ],  # Limit to avoid token limits
+                }
+
+                # Add custom instructions if provided
+                if request_data.custom_instructions:
+                    template_vars["custom_instructions"] = (
+                        f"\nADDITIONAL CUSTOM INSTRUCTIONS FOR OPTIMIZATION:\n{request_data.custom_instructions}\n"
+                    )
+                    print(
+                        f"✓ Applying custom instructions to optimization analysis for section: {section_description[:30]}..."
+                    )
+                else:
+                    template_vars["custom_instructions"] = ""
+
                 suggestion_response = invoke_llm(
                     llm,
                     settings.REPORTGENIE_OPTIMIZE_OUTLINE_PROMPT_TEMPLATE,
-                    {
-                        "original_section": section_description,
-                        "generated_content": generated_content[
-                            :2000
-                        ],  # Limit to avoid token limits
-                        "ground_truth_content": ground_truth_context[
-                            :2000
-                        ],  # Limit to avoid token limits
-                    },
+                    template_vars,
                 )
 
                 # Parse the response
@@ -1756,11 +1807,24 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                 (unique_chunks_mapped / total_chunks * 100) if total_chunks > 0 else 0
             )
 
+            # Calculate section type statistics
+            sections_that_consult_docs = sum(
+                1 for consults in section_consult_settings.values() if consults
+            )
+            sections_that_dont_consult_docs = (
+                len(section_consult_settings) - sections_that_consult_docs
+            )
+            sections_actually_optimized = len(
+                [s for s in suggestions if s.needs_revision]
+            )
+
             analysis_summary = f"""
 Enhanced Content Extraction Analysis:
-- Total sections evaluated: {len(original_sections)}
-- Sections needing optimization: {optimization_count}
-- Sections working well: {len(original_sections) - optimization_count}
+- Total outline sections: {len(original_sections)}
+- Sections that consult documents (shown in results): {sections_that_consult_docs}
+- Sections that don't consult documents (excluded from results): {sections_that_dont_consult_docs}
+- Sections needing optimization: {sections_actually_optimized}
+- Sections working well: {sections_that_consult_docs - sections_actually_optimized}
 
 Ground-truth Processing:
 - Document: {file.filename}
@@ -1772,10 +1836,11 @@ Ground-truth Processing:
 Content Extraction:
 - Actual section content extracted from {sum(len(content_list) for content_list in section_to_content.values())} document sections
 - Method: Enhanced JSON-based mapping with actual content extraction - each chunk is analyzed to identify and extract the actual text content of individual document sections, which are then mapped to outline sections for precise comparison.
+- Note: Sections with 'Consult Documents' set to false are mapped but excluded from optimization results.
             """.strip()
 
             print(
-                f"Optimization complete: {optimization_count}/{len(original_sections)} sections optimized"
+                f"Optimization complete: {sections_actually_optimized}/{sections_that_consult_docs} document-consulting sections optimized ({sections_that_dont_consult_docs} non-consulting sections excluded from results)"
             )
 
             return OptimizedOutlineResponse(
