@@ -1,10 +1,22 @@
-import { VStack, HStack, Dialog, Portal, Text, Box, Textarea } from "@chakra-ui/react"
+import {
+  VStack,
+  HStack,
+  Dialog,
+  Portal,
+  Text,
+  Box,
+  Textarea,
+  IconButton,
+  Button,
+  Card,
+} from "@chakra-ui/react"
 import { Field } from "../ui/field"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
 import { useState } from "react"
 import { ReportgenieService, OptimizedOutlineResponse, OutlineSuggestion } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
+import { FiCheck, FiEdit3, FiSave, FiX } from "react-icons/fi"
 
 interface OptimizeOutlineModalProps {
   isOpen: boolean
@@ -32,6 +44,76 @@ const OptimizeOutlineModal = ({
   )
   const [showResults, setShowResults] = useState(false)
 
+  // State for editing suggestions
+  const [acceptedSuggestions, setAcceptedSuggestions] = useState<Set<number>>(new Set())
+  const [editingSuggestions, setEditingSuggestions] = useState<Map<number, string>>(new Map())
+  const [editingModes, setEditingModes] = useState<Set<number>>(new Set())
+  const [expandedContent, setExpandedContent] = useState<Set<number>>(new Set())
+
+  const toggleSuggestion = (index: number) => {
+    const newAccepted = new Set(acceptedSuggestions)
+    if (newAccepted.has(index)) {
+      newAccepted.delete(index)
+    } else {
+      newAccepted.add(index)
+    }
+    setAcceptedSuggestions(newAccepted)
+  }
+
+  const startEditingSuggestion = (index: number) => {
+    const newEditingModes = new Set(editingModes)
+    newEditingModes.add(index)
+    setEditingModes(newEditingModes)
+
+    // Initialize with the current suggested section if not already editing
+    if (!editingSuggestions.has(index)) {
+      const newEditingSuggestions = new Map(editingSuggestions)
+      const suggestion = optimizationResults?.suggestions[index]
+      newEditingSuggestions.set(index, suggestion?.suggested_section || "")
+      setEditingSuggestions(newEditingSuggestions)
+    }
+  }
+
+  const cancelEditingSuggestion = (index: number) => {
+    const newEditingModes = new Set(editingModes)
+    newEditingModes.delete(index)
+    setEditingModes(newEditingModes)
+
+    // Reset to original suggestion
+    const newEditingSuggestions = new Map(editingSuggestions)
+    const suggestion = optimizationResults?.suggestions[index]
+    newEditingSuggestions.set(index, suggestion?.suggested_section || "")
+    setEditingSuggestions(newEditingSuggestions)
+  }
+
+  const saveEditedSuggestion = (index: number) => {
+    const newEditingModes = new Set(editingModes)
+    newEditingModes.delete(index)
+    setEditingModes(newEditingModes)
+    // The edited text is already saved in editingSuggestions map
+  }
+
+  const updateEditingSuggestion = (index: number, value: string) => {
+    const newEditingSuggestions = new Map(editingSuggestions)
+    newEditingSuggestions.set(index, value)
+    setEditingSuggestions(newEditingSuggestions)
+  }
+
+  const getSuggestionText = (index: number) => {
+    const suggestion = optimizationResults?.suggestions[index]
+    return editingSuggestions.get(index) || suggestion?.suggested_section || ""
+  }
+
+  const toggleContentExpansion = (index: number) => {
+    const newExpanded = new Set(expandedContent)
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index)
+    } else {
+      newExpanded.add(index)
+    }
+    setExpandedContent(newExpanded)
+  }
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (files && files.length > 0) {
@@ -57,6 +139,16 @@ const OptimizeOutlineModal = ({
 
       setOptimizationResults(result)
       setShowResults(true)
+
+      // Initialize all suggestions that need revision as accepted by default
+      const needsRevisionIndices = new Set<number>()
+      result.suggestions.forEach((suggestion: OutlineSuggestion, index: number) => {
+        if (suggestion.needs_revision) {
+          needsRevisionIndices.add(index)
+        }
+      })
+      setAcceptedSuggestions(needsRevisionIndices)
+
       showSuccessToast(
         `Optimization complete! Found suggestions for ${result.suggestions.filter((s: OutlineSuggestion) => s.needs_revision).length} sections.`,
       )
@@ -82,11 +174,22 @@ const OptimizeOutlineModal = ({
   }
 
   const handleApplyOptimizations = () => {
-    if (optimizationResults) {
-      onOptimizedSections(JSON.stringify(optimizationResults.optimized_sections))
-      showSuccessToast("Optimized sections applied!")
-      handleClose()
-    }
+    if (!optimizationResults) return
+
+    // Create optimized sections using only accepted suggestions
+    const optimizedSections = optimizationResults.suggestions.map(
+      (suggestion: OutlineSuggestion, index: number) => {
+        if (acceptedSuggestions.has(index) && suggestion.needs_revision) {
+          // Use edited suggestion if available, otherwise use original suggestion
+          return getSuggestionText(index)
+        }
+        return suggestion.original_section
+      },
+    )
+
+    onOptimizedSections(JSON.stringify(optimizedSections))
+    showSuccessToast(`Applied ${acceptedSuggestions.size} optimization suggestions`)
+    handleClose()
   }
 
   const handleClose = () => {
@@ -94,6 +197,10 @@ const OptimizeOutlineModal = ({
     setCustomInstructions("")
     setOptimizationResults(null)
     setShowResults(false)
+    setAcceptedSuggestions(new Set())
+    setEditingSuggestions(new Map())
+    setEditingModes(new Set())
+    setExpandedContent(new Set())
     onClose()
   }
 
@@ -193,98 +300,190 @@ const OptimizeOutlineModal = ({
                   <VStack gap={4} align="stretch">
                     {optimizationResults?.suggestions.map(
                       (suggestion: OutlineSuggestion, index: number) => (
-                        <Box
+                        <Card.Root
                           key={index}
-                          p={4}
-                          border="1px solid"
-                          borderColor={suggestion.needs_revision ? "orange.200" : "green.200"}
-                          borderRadius="md"
-                          bg={suggestion.needs_revision ? "orange.50" : "green.50"}
+                          variant={suggestion.needs_revision ? "elevated" : "subtle"}
                         >
-                          <HStack justify="space-between" mb={2}>
-                            <Text fontWeight="semibold" fontSize="sm">
-                              Section {index + 1}
-                            </Text>
-                            <Text
-                              fontSize="xs"
-                              px={2}
-                              py={1}
-                              borderRadius="md"
-                              bg={suggestion.needs_revision ? "orange.100" : "green.100"}
-                              color={suggestion.needs_revision ? "orange.700" : "green.700"}
-                            >
-                              {suggestion.needs_revision ? "Needs Revision" : "Good as is"}
-                            </Text>
-                          </HStack>
+                          <Card.Body>
+                            <VStack gap={3} align="stretch">
+                              <HStack justify="space-between">
+                                <Text fontWeight="bold" fontSize="sm" color="gray.600">
+                                  Section {index + 1}
+                                </Text>
+                                {suggestion.needs_revision && (
+                                  <Button
+                                    size="sm"
+                                    variant={acceptedSuggestions.has(index) ? "solid" : "outline"}
+                                    colorPalette={acceptedSuggestions.has(index) ? "green" : "blue"}
+                                    onClick={() => toggleSuggestion(index)}
+                                  >
+                                    {acceptedSuggestions.has(index) ? (
+                                      <>
+                                        <FiCheck size={14} /> Accepted
+                                      </>
+                                    ) : (
+                                      "Accept"
+                                    )}
+                                  </Button>
+                                )}
+                              </HStack>
 
-                          <VStack gap={3} align="stretch">
-                            <Box>
-                              <Text fontSize="xs" fontWeight="medium" color="gray.600">
-                                Original Section Description:
-                              </Text>
-                              <Text fontSize="sm">{suggestion.original_section}</Text>
-                            </Box>
-
-                            {suggestion.needs_revision && (
                               <Box>
-                                <Text fontSize="xs" fontWeight="medium" color="gray.600">
-                                  Suggested Section Description:
+                                <Text fontSize="xs" fontWeight="medium" color="gray.600" mb={1}>
+                                  Original Section Description:
                                 </Text>
-                                <Text fontSize="sm" fontWeight="medium" color="orange.700">
-                                  {suggestion.suggested_section}
-                                </Text>
-                              </Box>
-                            )}
-
-                            <Box>
-                              <Text fontSize="xs" fontWeight="medium" color="gray.600">
-                                Reason:
-                              </Text>
-                              <Text fontSize="sm">{suggestion.reason}</Text>
-                            </Box>
-
-                            <Box>
-                              <Text fontSize="xs" fontWeight="medium" color="gray.600">
-                                Generated Content (with current description):
-                              </Text>
-                              <Box
-                                fontSize="sm"
-                                p={2}
-                                bg="gray.50"
-                                borderRadius="md"
-                                maxH="150px"
-                                overflowY="auto"
-                                border="1px solid"
-                                borderColor="gray.200"
-                              >
-                                <Text whiteSpace="pre-wrap">
-                                  {suggestion.current_output || "No content generated"}
+                                <Text fontSize="sm" p={2} bg="gray.50" borderRadius="md">
+                                  {suggestion.original_section}
                                 </Text>
                               </Box>
-                            </Box>
 
-                            <Box>
-                              <Text fontSize="xs" fontWeight="medium" color="gray.600">
-                                Ground-Truth Content (from uploaded document):
-                              </Text>
-                              <Box
-                                fontSize="sm"
-                                p={2}
-                                bg="blue.50"
-                                borderRadius="md"
-                                maxH="150px"
-                                overflowY="auto"
-                                border="1px solid"
-                                borderColor="blue.200"
-                              >
-                                <Text whiteSpace="pre-wrap">
-                                  {suggestion.ground_truth_content ||
-                                    "No relevant ground-truth content found"}
+                              {suggestion.needs_revision ? (
+                                <>
+                                  <Box>
+                                    <HStack justify="space-between" mb={1}>
+                                      <Text fontSize="xs" fontWeight="medium" color="gray.600">
+                                        Suggested Section Description:
+                                      </Text>
+                                      {!editingModes.has(index) ? (
+                                        <IconButton
+                                          size="xs"
+                                          variant="ghost"
+                                          aria-label="Edit suggestion"
+                                          onClick={() => startEditingSuggestion(index)}
+                                        >
+                                          <FiEdit3 size={12} />
+                                        </IconButton>
+                                      ) : (
+                                        <HStack gap={1}>
+                                          <IconButton
+                                            size="xs"
+                                            variant="ghost"
+                                            colorPalette="green"
+                                            aria-label="Save changes"
+                                            onClick={() => saveEditedSuggestion(index)}
+                                          >
+                                            <FiSave size={12} />
+                                          </IconButton>
+                                          <IconButton
+                                            size="xs"
+                                            variant="ghost"
+                                            colorPalette="red"
+                                            aria-label="Cancel editing"
+                                            onClick={() => cancelEditingSuggestion(index)}
+                                          >
+                                            <FiX size={12} />
+                                          </IconButton>
+                                        </HStack>
+                                      )}
+                                    </HStack>
+
+                                    {editingModes.has(index) ? (
+                                      <Textarea
+                                        value={getSuggestionText(index)}
+                                        onChange={(e) =>
+                                          updateEditingSuggestion(index, e.target.value)
+                                        }
+                                        fontSize="sm"
+                                        p={2}
+                                        bg="blue.50"
+                                        borderRadius="md"
+                                        border="1px solid"
+                                        borderColor="blue.200"
+                                        resize="vertical"
+                                        rows={3}
+                                      />
+                                    ) : (
+                                      <Text
+                                        fontSize="sm"
+                                        p={2}
+                                        bg="blue.50"
+                                        borderRadius="md"
+                                        border="1px solid"
+                                        borderColor="blue.200"
+                                        cursor="pointer"
+                                        onClick={() => startEditingSuggestion(index)}
+                                        _hover={{ bg: "blue.100" }}
+                                      >
+                                        {getSuggestionText(index)}
+                                      </Text>
+                                    )}
+                                  </Box>
+
+                                  <Box>
+                                    <Text fontSize="xs" fontWeight="medium" color="gray.600" mb={1}>
+                                      Reason for Change:
+                                    </Text>
+                                    <Text fontSize="sm" color="gray.600">
+                                      {suggestion.reason}
+                                    </Text>
+                                  </Box>
+                                </>
+                              ) : (
+                                <Box>
+                                  <Text fontSize="sm" color="green.600" fontWeight="medium">
+                                    ✓ This section is already well-optimized
+                                  </Text>
+                                </Box>
+                              )}
+
+                              <Box>
+                                <Text fontSize="xs" fontWeight="medium" color="gray.600" mb={1}>
+                                  Generated Content (with current description):
                                 </Text>
+                                <Box
+                                  fontSize="sm"
+                                  p={2}
+                                  bg="gray.50"
+                                  borderRadius="md"
+                                  border="1px solid"
+                                  borderColor="gray.200"
+                                >
+                                  <Text whiteSpace="pre-wrap">
+                                    {expandedContent.has(index)
+                                      ? suggestion.current_output || "No content generated"
+                                      : (
+                                          suggestion.current_output || "No content generated"
+                                        ).substring(0, 300)}
+                                    {!expandedContent.has(index) &&
+                                    (suggestion.current_output || "").length > 300
+                                      ? "..."
+                                      : ""}
+                                  </Text>
+                                  {(suggestion.current_output || "").length > 300 && (
+                                    <Button
+                                      size="xs"
+                                      variant="ghost"
+                                      mt={1}
+                                      onClick={() => toggleContentExpansion(index)}
+                                      colorPalette="gray"
+                                    >
+                                      {expandedContent.has(index) ? "Show Less" : "Show More"}
+                                    </Button>
+                                  )}
+                                </Box>
                               </Box>
-                            </Box>
-                          </VStack>
-                        </Box>
+
+                              <Box>
+                                <Text fontSize="xs" fontWeight="medium" color="gray.600" mb={1}>
+                                  Ground-Truth Content (from uploaded document):
+                                </Text>
+                                <Box
+                                  fontSize="sm"
+                                  p={2}
+                                  bg="blue.50"
+                                  borderRadius="md"
+                                  border="1px solid"
+                                  borderColor="blue.200"
+                                >
+                                  <Text whiteSpace="pre-wrap">
+                                    {suggestion.ground_truth_content ||
+                                      "No relevant ground-truth content found"}
+                                  </Text>
+                                </Box>
+                              </Box>
+                            </VStack>
+                          </Card.Body>
+                        </Card.Root>
                       ),
                     )}
                   </VStack>
@@ -311,9 +510,10 @@ const OptimizeOutlineModal = ({
                   <ConfirmButton
                     onClick={handleApplyOptimizations}
                     size="md"
-                    disabled={!optimizationResults?.suggestions.some((s: any) => s.needs_revision)}
+                    disabled={acceptedSuggestions.size === 0}
                   >
-                    Apply Optimizations
+                    Apply {acceptedSuggestions.size} Optimization
+                    {acceptedSuggestions.size !== 1 ? "s" : ""}
                   </ConfirmButton>
                 )}
               </HStack>
