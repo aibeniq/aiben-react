@@ -82,7 +82,7 @@ services:
       timeout: 20s
       retries: 3
     ports:
-      - "19530:19530"
+      - "${MILVUS_PORT:-19530}:19530"
       - "9091:9091"
     depends_on:
       milvus-etcd:
@@ -185,6 +185,8 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
+      - MILVUS_URL=${MILVUS_URL}
+      - MILVUS_PORT=${MILVUS_PORT}
       - OPENAI_API_KEY
       - REPLICATE_API_TOKEN
 
