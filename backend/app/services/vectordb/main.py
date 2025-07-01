@@ -204,15 +204,19 @@ class VectorDBService:
             # generate embedding for query
             query_embedding = self.embedding_model.embed_query(query)
 
-            # Prepare filter
-            filters = []
+            # prepare filter
+            filter_expr = []
+            filter_params = {}
             if knowledge_base_id:
-                filters.append(f"knowledge_base_id == '{knowledge_base_id}'")
+                filter_expr.append("knowledge_base_id == {kb_id}")
+                filter_params["kb_id"] = knowledge_base_id
             if user_id:
-                filters.append(f"user_id == '{user_id}'")
+                filter_expr.append("user_id == {user_id}")
+                filter_params["user_id"] = user_id
             if source_id:
-                filters.append(f"source_id == '{source_id}'")
-            filter_expr = " AND ".join(filters) if filters else None
+                filter_expr.append("source_id == {source_id}")
+                filter_params["source_id"] = source_id
+            filter_expr = " AND ".join(filter_expr) if filter_expr else None
 
             # set default output fields
             if output_fields is None:
@@ -230,6 +234,7 @@ class VectorDBService:
                 collection_name=BASE_COLLECTION_NAME,
                 data=[query_embedding],
                 filter=filter_expr,
+                filter_params=filter_params if filter_params else None,
                 limit=limit,
                 output_fields=output_fields,
             )
