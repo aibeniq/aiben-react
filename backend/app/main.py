@@ -2,9 +2,37 @@ import sentry_sdk
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+import logging
 
 from app.api.main import api_router
 from app.core.config import settings
+from app.services.vectordb.main import VectorDBService
+
+
+class AppState:
+    vector_db_service: VectorDBService | None = None
+
+
+app_state = AppState()
+
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        logger.info("Initializing vector database service")
+        app_state.vector_db_service = VectorDBService()
+        logger.info("Vector database service initialized")
+        yield  # before yield = startup, after yield = shutdown
+    except Exception as e:
+        logger.error(f"Error initializing vector database service: {e}")
+        raise
+    finally:
+        logger.info("Closing vector database service")
+        app_state.vector_db_service.client.close()
+        logger.info("Vector database service closed")
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -18,6 +46,7 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     generate_unique_id_function=custom_generate_unique_id,
+    lifespan=lifespan,
 )
 
 # Set all CORS enabled origins

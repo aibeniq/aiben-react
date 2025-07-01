@@ -12,6 +12,8 @@ from app.core import security
 from app.core.config import settings
 from app.core.db import engine
 from app.models import TokenPayload, User
+from app.main import app_state
+from app.services.vectordb.main import VectorDBService
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
@@ -55,3 +57,14 @@ def get_current_active_superuser(current_user: CurrentUser) -> User:
             status_code=403, detail="The user doesn't have enough privileges"
         )
     return current_user
+
+
+def get_vector_db_service() -> VectorDBService:
+    if not app_state.vector_db_service:
+        raise HTTPException(
+            status_code=500, detail="Vector database service not initialized"
+        )
+    return app_state.vector_db_service
+
+
+VectorDBDep = Annotated[VectorDBService, Depends(get_vector_db_service)]
