@@ -1777,7 +1777,6 @@ export class TwincheckService {
       method: "POST",
       url: "/api/v1/twincheck/generate/docx",
       body: data.requestBody,
-      responseType: 'blob',
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
@@ -2294,7 +2293,6 @@ export class VeradocService {
       method: "POST",
       url: "/api/v1/veradoc/generate/docx",
       body: data.requestBody,
-      responseType: 'blob',
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
@@ -2318,7 +2316,6 @@ export class VeradocService {
       method: "POST",
       url: "/api/v1/veradoc/generate/csv",
       body: data.requestBody,
-      responseType: 'blob',
       mediaType: "application/json",
       errors: {
         422: "Validation Error",

@@ -8,6 +8,7 @@ import {
   HStack,
   Spinner,
   Accordion,
+  Textarea,
 } from "@chakra-ui/react"
 import { Radio, RadioGroup } from "../../components/ui/radio"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -59,6 +60,9 @@ const ReportGenie = () => {
 
   // Search mode state
   const [searchMode, setSearchMode] = useState("vector") // Default to vector search
+
+  // Custom instructions state
+  const [customInstructions, setCustomInstructions] = useState("")
 
   // State to track which citations are expanded - using object instead of Set
   const [expandedCitations, setExpandedCitations] = useState<Record<string, boolean>>({})
@@ -254,12 +258,14 @@ const ReportGenie = () => {
       knowledgeBaseId: string
       outlineId?: string
       searchMode?: string
+      customInstructions?: string
     }) => {
       const formData = {
         knowledge_base_id: data.knowledgeBaseId,
         sections: data.sections,
         outline_id: data.outlineId || "",
         search_mode: data.searchMode || "vector",
+        custom_instructions: data.customInstructions || undefined,
       }
 
       return ReportgenieService.generateReport({
@@ -292,6 +298,7 @@ const ReportGenie = () => {
       knowledgeBaseId: selectedKnowledgeBase.id,
       outlineId: selectedOutline?.id,
       searchMode: searchMode, // Pass the selected search mode to the backend
+      customInstructions: customInstructions.trim() || undefined,
     }
 
     setLoading(true)
@@ -383,6 +390,30 @@ const ReportGenie = () => {
                   <Radio value="full_text">Full Document Scan</Radio>
                 </HStack>
               </RadioGroup>
+            </Box>
+
+            {/* Custom Instructions Text Box */}
+            <Box width="100%">
+              <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
+                Custom Instructions (Optional)
+              </Text>
+              <Textarea
+                value={customInstructions}
+                onChange={(e) => setCustomInstructions(e.target.value)}
+                placeholder="Enter any additional instructions that should be considered when generating each section of the report..."
+                rows={3}
+                resize="vertical"
+                bg="white"
+                borderColor="gray.300"
+                _hover={{ borderColor: "gray.400" }}
+                _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                fontSize="sm"
+                maxLength={2000}
+              />
+              <Text fontSize="xs" color="gray.500" mt={1}>
+                {customInstructions.length}/2000 characters. These instructions will be added to the
+                prompt when generating each section.
+              </Text>
             </Box>
           </VStack>
         </HStack>

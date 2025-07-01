@@ -467,6 +467,7 @@ class ReportGenieRequest(SQLModel):
     sections: str
     outline_id: str
     search_mode: str = "vector"  # Default to vector search
+    custom_instructions: Optional[str] = None
 
 
 # Model for structured section data

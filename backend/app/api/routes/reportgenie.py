@@ -153,11 +153,16 @@ async def generate_report(
     sections: str = Form(...),
     outline_id: str = Form(...),
     search_mode: str = Form("vector"),  # Default to vector search
+    custom_instructions: Optional[str] = Form(None),
 ):
     """
     Generate a report based on sections outline and knowledge base search results.
     """
     try:
+        # Debug: Log custom instructions if provided
+        if custom_instructions:
+            print(f"Custom instructions received for generate: {custom_instructions}")
+
         # 1. Retrieve knowledge base from database
         kb = session.get(KnowledgeBase, knowledge_base_id)
         if not kb:
@@ -355,7 +360,11 @@ async def generate_report(
                                 "report_draft": draft_report,
                                 "context": context,
                                 "question": section_description,
-                                "custom_instructions": "",
+                                "custom_instructions": (
+                                    f"\nADDITIONAL CUSTOM INSTRUCTIONS:\n{custom_instructions}\n"
+                                    if custom_instructions
+                                    else ""
+                                ),
                             },
                         )
 
