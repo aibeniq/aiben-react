@@ -163,7 +163,50 @@ class VectorDBService:
             logger.error(f"Error adding chunks: {e}")
             return {"success": False, "error": str(e)}
 
-    def search_chunks(
+    def delete_chunks(
+        self,
+        knowledge_base_id: Optional[str] = None,
+        user_id: Optional[str] = None,
+        source_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Delete chunks from the collection."""
+        try:
+            assert (
+                knowledge_base_id or user_id or source_id
+            ), "At least one of knowledge_base_id, user_id, or source_id must be provided"
+
+            # ensure collection is loaded
+            self.client.load_collection(collection_name=BASE_COLLECTION_NAME)
+
+            # prepare filter
+            filter_expr = []
+            filter_params = {}
+            if knowledge_base_id:
+                filter_expr.append("knowledge_base_id == {kb_id}")
+                filter_params["kb_id"] = knowledge_base_id
+            if user_id:
+                filter_expr.append("user_id == {user_id}")
+                filter_params["user_id"] = user_id
+            if source_id:
+                filter_expr.append("source_id == {source_id}")
+                filter_params["source_id"] = source_id
+            filter_expr = " AND ".join(filter_expr) if filter_expr else None
+
+            # delete chunks
+            self.client.delete(
+                collection_name=BASE_COLLECTION_NAME,
+                filter=filter_expr,
+                filter_params=filter_params if filter_params else None,
+            )
+
+            logger.info(f"Successfully deleted chunks")
+            return {"success": True}
+
+        except Exception as e:
+            logger.error(f"Error deleting chunks: {e}")
+            return {"success": False, "error": str(e)}
+
+    def search_semantic(
         self,
         query: str,
         knowledge_base_id: Optional[str] = None,
@@ -241,7 +284,6 @@ class VectorDBService:
             logger.error(f"Error searching chunks: {e}")
             return {"success": False, "error": str(e)}
 
-    def delete_chunks(
         self,
         knowledge_base_id: Optional[str] = None,
         user_id: Optional[str] = None,
