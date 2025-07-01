@@ -625,6 +625,7 @@ class OptimizeOutlineRequest(SQLModel):
     outline_id: str  # ID of the outline to optimize
     sections: str  # Current outline sections (JSON string)
     custom_instructions: Optional[str] = Field(default=None, max_length=2000)
+    search_mode: str = Field(default="vector")  # "vector" or "full_text"
 
 
 class OutlineSuggestion(SQLModel):

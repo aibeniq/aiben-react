@@ -1448,6 +1448,121 @@ async def generate_csv(
         raise HTTPException(status_code=500, detail=f"Error generating CSV: {str(e)}")
 
 
+@router.post("/optimization/csv", response_class=StreamingResponse)
+async def generate_optimization_csv(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a CSV file from checklist optimization results with columns for:
+    Question Number, Original Question, Suggested Question, Needs Revision, Reason, Current Answer.
+    """
+    print("Now generating CSV of checklist optimization results...")
+    try:
+        # Get the content from the request - this should be the optimization results JSON
+        if not request.content:
+            raise HTTPException(
+                status_code=400, detail="Optimization content is required"
+            )
+
+        # Create CSV content
+        csv_buffer = StringIO()
+        csv_writer = csv.writer(csv_buffer)
+
+        # Write header with optimization-specific columns
+        csv_writer.writerow(
+            [
+                "Question Number",
+                "Original Question",
+                "Suggested Question",
+                "Needs Revision",
+                "Reason",
+                "Current Answer",
+                "Analysis Summary",
+            ]
+        )
+
+        try:
+            # Parse the content as JSON (optimization results data)
+            data = json.loads(request.content)
+
+            # Extract suggestions and analysis summary
+            suggestions = data.get("suggestions", [])
+            analysis_summary = data.get(
+                "analysis_summary", "No analysis summary provided"
+            )
+
+            # Process each suggestion
+            for index, suggestion in enumerate(suggestions, 1):
+                original_question = suggestion.get("original_question", "")
+                suggested_question = suggestion.get("suggested_question", "")
+                needs_revision = suggestion.get("needs_revision", False)
+                reason = suggestion.get("reason", "")
+                current_answer = suggestion.get("current_answer", "")
+
+                # Clean up text fields (remove newlines and carriage returns for CSV)
+                original_question_clean = original_question.replace("\n", " ").replace(
+                    "\r", " "
+                )
+                suggested_question_clean = suggested_question.replace(
+                    "\n", " "
+                ).replace("\r", " ")
+                reason_clean = reason.replace("\n", " ").replace("\r", " ")
+                current_answer_clean = current_answer.replace("\n", " ").replace(
+                    "\r", " "
+                )
+                analysis_summary_clean = analysis_summary.replace("\n", " ").replace(
+                    "\r", " "
+                )
+
+                # Write row
+                csv_writer.writerow(
+                    [
+                        index,
+                        original_question_clean,
+                        suggested_question_clean,
+                        "Yes" if needs_revision else "No",
+                        reason_clean,
+                        current_answer_clean,
+                        analysis_summary_clean,
+                    ]
+                )
+
+        except json.JSONDecodeError:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid content format. Expected JSON with checklist optimization data.",
+            )
+
+        # Get CSV content
+        csv_content = csv_buffer.getvalue()
+        csv_buffer.close()
+
+        # Create BytesIO object for the response
+        csv_bytes = BytesIO(csv_content.encode("utf-8"))
+        csv_bytes.seek(0)
+
+        print("Checklist optimization CSV file generated successfully.")
+
+        # Create filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"checklist_optimization_{timestamp}.csv"
+
+        # Return the CSV as a downloadable file
+        return StreamingResponse(
+            csv_bytes,
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error generating optimization CSV: {str(e)}"
+        )
+
+
 @router.post("/generate-questions", response_model=GenerateQuestionsResponse)
 def generate_questions(
     request_data: GenerateQuestionsRequest,

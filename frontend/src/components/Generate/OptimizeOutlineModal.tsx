@@ -11,12 +11,13 @@ import {
   Card,
 } from "@chakra-ui/react"
 import { Field } from "../ui/field"
+import { Radio, RadioGroup } from "../ui/radio"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
 import { useState } from "react"
 import { ReportgenieService, OptimizedOutlineResponse, OutlineSuggestion } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
-import { FiCheck, FiEdit3, FiSave, FiX } from "react-icons/fi"
+import { FiCheck, FiEdit3, FiSave, FiX, FiDownload } from "react-icons/fi"
 
 interface OptimizeOutlineModalProps {
   isOpen: boolean
@@ -39,6 +40,7 @@ const OptimizeOutlineModal = ({
   const [optimizing, setOptimizing] = useState(false)
   const [customInstructions, setCustomInstructions] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [searchMode, setSearchMode] = useState<string>("vector") // Add search mode state
   const [optimizationResults, setOptimizationResults] = useState<OptimizedOutlineResponse | null>(
     null,
   )
@@ -49,6 +51,7 @@ const OptimizeOutlineModal = ({
   const [editingSuggestions, setEditingSuggestions] = useState<Map<number, string>>(new Map())
   const [editingModes, setEditingModes] = useState<Set<number>>(new Set())
   const [expandedContent, setExpandedContent] = useState<Set<number>>(new Set())
+  const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
 
   const toggleSuggestion = (index: number) => {
     const newAccepted = new Set(acceptedSuggestions)
@@ -128,13 +131,17 @@ const OptimizeOutlineModal = ({
     }
 
     try {
-      setOptimizing(true) // Use SDK method following the optimize-checklist pattern
+      setOptimizing(true)
+      // Format the request to match the expected form data structure
       const result = await ReportgenieService.optimizeOutline({
-        knowledgeBaseId: knowledgeBaseId,
-        outlineId: outlineId,
-        sections: currentSections,
-        customInstructions: customInstructions || undefined,
-        formData: { files: [selectedFile] },
+        formData: {
+          knowledge_base_id: knowledgeBaseId,
+          outline_id: outlineId,
+          sections: currentSections,
+          custom_instructions: customInstructions || undefined,
+          search_mode: searchMode,
+          files: [selectedFile],
+        },
       })
 
       setOptimizationResults(result)
@@ -192,15 +199,60 @@ const OptimizeOutlineModal = ({
     handleClose()
   }
 
+  const handleDownloadCsv = async () => {
+    if (!optimizationResults || optimizationResults.suggestions.length === 0) {
+      showErrorToast("No optimization results to download")
+      return
+    }
+
+    setLoadingCsvDownload(true)
+
+    try {
+      // Create the data structure expected by the backend
+      const csvData = {
+        suggestions: optimizationResults.suggestions,
+        analysis_summary:
+          optimizationResults.analysis_summary || "Outline optimization results export",
+      }
+
+      const response = await ReportgenieService.generateOutlineOptimizationCsv({
+        requestBody: { content: JSON.stringify(csvData) },
+      })
+
+      // Handle the blob response
+      const blob = new Blob([response as any], { type: "text/csv" })
+      const url = window.URL.createObjectURL(blob)
+
+      // Create download link
+      const a = document.createElement("a")
+      a.href = url
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").split("T")[0]
+      a.download = `outline_optimization_${timestamp}.csv`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      showSuccessToast("CSV downloaded successfully")
+    } catch (error: any) {
+      console.error("Error downloading CSV:", error)
+      showErrorToast(`Failed to download CSV: ${error.message || "Unknown error"}`)
+    } finally {
+      setLoadingCsvDownload(false)
+    }
+  }
+
   const handleClose = () => {
     setSelectedFile(null)
     setCustomInstructions("")
+    setSearchMode("vector") // Reset search mode
     setOptimizationResults(null)
     setShowResults(false)
     setAcceptedSuggestions(new Set())
     setEditingSuggestions(new Map())
     setEditingModes(new Set())
     setExpandedContent(new Set())
+    setLoadingCsvDownload(false)
     onClose()
   }
 
@@ -248,6 +300,19 @@ const OptimizeOutlineModal = ({
                     )}
                   </Field>
 
+                  <Field label="Search Mode" helperText="Choose how to analyze the knowledge base">
+                    <RadioGroup
+                      onValueChange={(details) => setSearchMode(details.value || "vector")}
+                      value={searchMode}
+                      defaultValue="vector"
+                    >
+                      <HStack gap={4}>
+                        <Radio value="vector">Vector Search</Radio>
+                        <Radio value="full_text">Full Document Scan</Radio>
+                      </HStack>
+                    </RadioGroup>
+                  </Field>
+
                   <Field
                     label="Custom Instructions (Optional)"
                     helperText="Provide additional guidance for the optimization process"
@@ -288,14 +353,39 @@ const OptimizeOutlineModal = ({
                 </VStack>
               ) : (
                 <VStack gap={6} align="stretch">
-                  <Box>
-                    <Text fontSize="lg" fontWeight="semibold" mb={2}>
-                      Optimization Results
-                    </Text>
-                    <Text fontSize="sm" color="gray.600" mb={4}>
-                      {optimizationResults?.analysis_summary}
-                    </Text>
-                  </Box>
+                  <HStack justify="space-between" align="center">
+                    <VStack align="start" gap={1}>
+                      <Text fontSize="lg" fontWeight="semibold">
+                        Optimization Results
+                      </Text>
+                      <Text fontSize="sm" color="gray.600">
+                        {
+                          optimizationResults?.suggestions.filter(
+                            (s: OutlineSuggestion) => s.needs_revision,
+                          ).length
+                        }{" "}
+                        sections need optimization
+                      </Text>
+                    </VStack>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleDownloadCsv}
+                      loading={loadingCsvDownload}
+                      colorPalette="green"
+                    >
+                      <FiDownload />
+                      Download CSV
+                    </Button>
+                  </HStack>
+
+                  {optimizationResults?.analysis_summary && (
+                    <Box>
+                      <Text fontSize="sm" color="gray.600">
+                        {optimizationResults.analysis_summary}
+                      </Text>
+                    </Box>
+                  )}
 
                   <VStack gap={4} align="stretch">
                     {optimizationResults?.suggestions.map(

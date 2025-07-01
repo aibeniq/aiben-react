@@ -223,22 +223,22 @@ const ReportGenie = () => {
 
   // Mutation hook for generating the document
   const mutation = useMutation({
-    mutationFn: (data: { sections: string; knowledgeBaseId: string; outlineId?: string }) => {
-      if (data.outlineId) {
-        return ReportgenieService.generateReport({
-          sections: data.sections,
-          knowledgeBaseId: data.knowledgeBaseId,
-          outlineId: data.outlineId,
-        })
-      } else {
-        // For now, we'll pass an empty string as outlineId when not provided
-        // This might need to be adjusted based on backend requirements
-        return ReportgenieService.generateReport({
-          sections: data.sections,
-          knowledgeBaseId: data.knowledgeBaseId,
-          outlineId: "",
-        })
+    mutationFn: (data: {
+      sections: string
+      knowledgeBaseId: string
+      outlineId?: string
+      searchMode?: string
+    }) => {
+      const formData = {
+        knowledge_base_id: data.knowledgeBaseId,
+        sections: data.sections,
+        outline_id: data.outlineId || "",
+        search_mode: data.searchMode || "vector",
       }
+
+      return ReportgenieService.generateReport({
+        formData: formData,
+      })
     },
     onSuccess: (data: any) => {
       setGeneratedDocument(data.results.full_report)

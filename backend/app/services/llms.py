@@ -303,7 +303,7 @@ def create_llm(
                 temperature=temperature,
                 openai_api_key=api_key,
                 max_retries=0,  # Disable OpenAI's internal retries
-                request_timeout=30,  # Set reasonable timeout
+                request_timeout=settings.OPENAI_TIMEOUT,  # Use configurable timeout (10 minutes)
                 **params,
             )
         else:
@@ -311,7 +311,7 @@ def create_llm(
                 model=model_id,
                 temperature=temperature,
                 max_retries=0,  # Disable OpenAI's internal retries
-                request_timeout=30,  # Set reasonable timeout
+                request_timeout=settings.OPENAI_TIMEOUT,  # Use configurable timeout (10 minutes)
                 **params,
             )
 
