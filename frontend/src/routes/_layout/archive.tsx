@@ -134,22 +134,36 @@ function Archive() {
 
       if (!response) return
 
+      console.log("Received DOCX response:", response)
+      console.log("Response type:", typeof response)
+      console.log("Response instanceof Blob:", response instanceof Blob)
+      console.log("Response instanceof ArrayBuffer:", response instanceof ArrayBuffer)
+
       // Handle the response blob
       let blob
       if (response instanceof Blob) {
+        console.log("Response is already a Blob")
         blob = response
       } else if (response instanceof ArrayBuffer) {
+        console.log("Converting ArrayBuffer to Blob")
         blob = new Blob([response], {
           type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         })
       } else {
+        console.log("Converting unknown response type to Blob")
         blob = new Blob([response as BlobPart], {
           type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         })
       }
 
+      console.log("Final DOCX blob:", blob)
+      console.log("Blob size:", blob.size)
+      console.log("Blob type:", blob.type)
+
       // Create download link
       const url = window.URL.createObjectURL(blob)
+      console.log("Created DOCX object URL:", url)
+
       const a = document.createElement("a")
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
       a.href = url
@@ -170,18 +184,29 @@ function Archive() {
           filename = `document_${timestamp}.docx`
       }
 
+      console.log("DOCX download filename:", filename)
+      console.log("About to trigger DOCX download...")
+
       a.download = filename
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
 
+      console.log("DOCX download triggered successfully")
       showSuccessToast("Document downloaded successfully")
     } catch (err) {
       console.error("Failed to download report:", err)
+      console.error("Error details:", {
+        message: err instanceof Error ? err.message : "Unknown error",
+        stack: err instanceof Error ? err.stack : undefined,
+        name: err instanceof Error ? err.name : undefined,
+      })
+
       const errorMessage = err instanceof Error ? err.message : "Unknown error"
       showErrorToast(`Failed to download document: ${errorMessage}`)
     } finally {
+      console.log("DOCX download process completed")
       setLoadingDownload(false)
     }
   }

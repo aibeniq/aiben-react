@@ -146,8 +146,6 @@ class Settings(BaseSettings):
 
     {custom_instructions}
 
-    IMPORTANT: Do NOT create headers or section titles for the generated content. Provide only the section text directly without any headers, headings, or section titles.
-
     SECTION CONTENT:
     """
 

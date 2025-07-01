@@ -999,6 +999,12 @@ async def get_report_history(
                 )
                 extra_data = report.extra_data or {}
 
+                # Debug: Check the type of sections data in history
+                sections_data = input_data.get("sections", "")
+                print(
+                    f"Debug - History Report {report.id}: sections type = {type(sections_data)}"
+                )
+
                 # Create a user-friendly title
                 kb_name = extra_data.get("kb_name", "Unknown Knowledge Base")
                 title = f"Report on {kb_name}"
@@ -1009,7 +1015,11 @@ async def get_report_history(
                     "id": str(report.id),
                     "date_created": report.date_created,
                     "title": title,
-                    "sections": input_data.get("sections", ""),
+                    "sections": (
+                        input_data.get("sections", "")
+                        if isinstance(input_data.get("sections", ""), str)
+                        else json.dumps(input_data.get("sections", []))
+                    ),
                     "kb_id": input_data.get("kb_id", ""),
                     "section_count": output_data.get("section_count", 0),
                     "kb_name": kb_name,
@@ -1111,6 +1121,12 @@ async def get_report_detail(
             output_data = json.loads(report.output_data) if report.output_data else {}
             extra_data = report.extra_data or {}
 
+            # Debug: Check the type of sections data
+            sections_data = input_data.get("sections", "")
+            print(
+                f"Debug - Report {report.id}: sections type = {type(sections_data)}, value = {repr(sections_data)[:200]}"
+            )
+
             # If we don't have the full report content in extra_data, we need to generate a response
             # that's compatible with the normal report format
             kb_name = extra_data.get("kb_name", "Unknown Knowledge Base")
@@ -1124,7 +1140,11 @@ async def get_report_detail(
                 "date_created": report.date_created,
                 "kb_name": kb_name,
                 "kb_id": input_data.get("kb_id", ""),
-                "sections": input_data.get("sections", ""),
+                "sections": (
+                    input_data.get("sections", "")
+                    if isinstance(input_data.get("sections", ""), str)
+                    else json.dumps(input_data.get("sections", []))
+                ),
                 "results": {
                     "full_report": full_report,
                     "sections": extra_data.get("sections", []),
@@ -1148,6 +1168,9 @@ async def get_report_detail(
             return {
                 "id": str(report.id),
                 "date_created": report.date_created,
+                "kb_name": "Unknown Knowledge Base",
+                "kb_id": "",
+                "sections": "",
                 "results": {
                     "full_report": f"Unable to reconstruct report from {report.date_created}.\n\n"
                     f"This might be due to an older format or incomplete data.",

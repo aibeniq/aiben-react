@@ -103,34 +103,60 @@ const ReportGenie = () => {
         requestBody: { content: generatedDocument },
       })
 
+      console.log("Received DOCX response:", response)
+      console.log("Response type:", typeof response)
+      console.log("Response instanceof Blob:", response instanceof Blob)
+      console.log("Response instanceof ArrayBuffer:", response instanceof ArrayBuffer)
+
       let blob
       if (response instanceof Blob) {
+        console.log("Response is already a Blob")
         blob = response
       } else if (response instanceof ArrayBuffer) {
+        console.log("Converting ArrayBuffer to Blob")
         blob = new Blob([response], {
           type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         })
       } else {
+        console.log("Converting unknown response type to Blob")
         blob = new Blob([response as any], {
           type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         })
       }
 
+      console.log("Final DOCX blob:", blob)
+      console.log("Blob size:", blob.size)
+      console.log("Blob type:", blob.type)
+
       const url = window.URL.createObjectURL(blob)
+      console.log("Created DOCX object URL:", url)
+
       const a = document.createElement("a")
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
       a.href = url
       a.download = `document_${timestamp}.docx`
+
+      console.log("DOCX download filename:", `document_${timestamp}.docx`)
+      console.log("About to trigger DOCX download...")
+
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
 
+      console.log("DOCX download triggered successfully")
       showSuccessToast("Document downloaded successfully")
     } catch (err: any) {
       console.error("Failed to download document:", err)
+      console.error("Error details:", {
+        message: err instanceof Error ? err.message : "Unknown error",
+        stack: err instanceof Error ? err.stack : undefined,
+        name: err instanceof Error ? err.name : undefined,
+      })
+
       showErrorToast(`Failed to download document: ${err.message || "Unknown error"}`)
     } finally {
+      console.log("DOCX download process completed")
       setLoadingDownload(false)
     }
   }
