@@ -593,7 +593,11 @@ async def generate_outline(
                     try:
                         # Read and process the file content
                         file_content = await file.read()
-                        if file.content_type == "application/pdf":
+                        filename = file.filename.lower() if file.filename else ""
+
+                        if file.content_type == "application/pdf" or filename.endswith(
+                            ".pdf"
+                        ):
                             # Extract text from PDF
                             import fitz  # PyMuPDF
 
@@ -602,11 +606,37 @@ async def generate_outline(
                             for page in pdf_doc:
                                 file_text += page.get_text()
                             pdf_doc.close()
-                        elif file.content_type == "text/plain":
+                        elif (
+                            file.content_type
+                            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            or filename.endswith((".docx", ".doc"))
+                        ):
+                            # Extract text from DOCX/DOC files
+                            # Create a BytesIO object from the file content
+                            doc_stream = BytesIO(file_content)
+                            doc = Document(doc_stream)
+
+                            # Extract text from all paragraphs
+                            doc_text_parts = []
+                            for paragraph in doc.paragraphs:
+                                if paragraph.text.strip():
+                                    doc_text_parts.append(paragraph.text.strip())
+
+                            file_text = "\n".join(doc_text_parts)
+                            print(
+                                f"Successfully extracted text from DOCX: {len(file_text)} characters"
+                            )
+
+                        elif file.content_type == "text/plain" or filename.endswith(
+                            (".txt", ".md")
+                        ):
                             # Handle text file
                             file_text = file_content.decode("utf-8", errors="ignore")
                         else:
-                            # Try to decode as text anyway
+                            # For unknown file types, try to decode as text but warn about it
+                            print(
+                                f"Warning: Unknown file type for {file.filename} (content-type: {file.content_type}), attempting text decode"
+                            )
                             file_text = file_content.decode("utf-8", errors="ignore")
 
                         if file_text.strip():
@@ -616,7 +646,9 @@ async def generate_outline(
                             )
 
                     except Exception as e:
-                        print(f"Error processing file {file.filename}: {e}")
+                        print(f"Error processing file {file.filename}: {str(e)}")
+                        # Add the error info to the document content so user knows what happened
+                        example_document_content += f"\n\n--- Error processing {file.filename} ---\nError: {str(e)}\n"
                         continue
 
         # Prepare variables for the prompt
@@ -640,6 +672,14 @@ async def generate_outline(
             "example_instruction": example_instruction,
             "example_analysis_instruction": example_analysis_instruction,
         }
+
+        # Format the prompt with variables to show what exactly is being sent to the LLM
+        formatted_prompt = settings.REPORTGENIE_GENERATE_OUTLINE_PROMPT_TEMPLATE.format(
+            **prompt_variables
+        )
+        print("=== OUTLINE GENERATION PROMPT SENT TO LLM ===")
+        print(formatted_prompt)
+        print("=== END OF PROMPT ===")
 
         # Generate outline sections using the LLM
         outline_response = invoke_llm(
