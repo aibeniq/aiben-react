@@ -30,4 +30,5 @@ class ChunkData(BaseModel):
 
 
 class EmbeddedChunkData(ChunkData):
-    vector: List[float] = Field(..., description="Embedding vector")
+    dense: List[float] = Field(..., description="Dense embedding vector")
+    # no sparse field as milvus adds it on insertion
