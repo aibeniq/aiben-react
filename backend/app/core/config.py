@@ -500,16 +500,18 @@ INSTRUCTIONS:
 5. Avoid vague or overly general section descriptions
 6. Focus on what would be meaningful content areas for a structured report
 7. Use clear, professional language suitable for report sections
-8. Generate between 3-15 sections depending on the complexity of the requirements
-9. For complex topics, generate more detailed sections with specific focus areas
-10. For simple topics, fewer but comprehensive sections are sufficient
-11. Each section should be a concise description (1-2 sentences) of what that section would cover{example_instruction}
+8. If an example document is provided, generate approximately the same number of sections as shown in the example document structure to match its format and depth
+9. For each section, provide not just a title but also a detailed description that includes:
+   - The specific topics and subtopics that should be covered in that section
+   - The general scope and depth of content expected
+   - Approximate length or detail level (e.g., brief overview, detailed analysis, comprehensive review)
+10. Each section description should be substantive (3-5 sentences) explaining what content would be included{example_instruction}
 
 FORMAT YOUR RESPONSE AS:
 SECTIONS:
-1. [First section description]
-2. [Second section description]
-3. [Third section description]
+1. [Section Title]: [Detailed description of what this section should cover, including specific topics, scope, and expected depth/length of content]
+2. [Section Title]: [Detailed description of what this section should cover, including specific topics, scope, and expected depth/length of content]
+3. [Section Title]: [Detailed description of what this section should cover, including specific topics, scope, and expected depth/length of content]
 ... (continue with as many sections as needed to comprehensively cover the outline)
 
 ANALYSIS:
