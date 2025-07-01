@@ -1,8 +1,8 @@
 # NOTE: uses text-embedding-3-small for embeddings
 # NOTE: supports only one collection for now (and thus one embedding model)
 
-# TODO: search methods
 # TODO: initialize on fastapi startup
+# TODO: support multiple collections (and thus multiple embedding models)
 # TODO: add auth?
 
 ## Milvus client
@@ -14,7 +14,7 @@ from app.services.vectordb.config import (
     MILVUS_SCHEMA,
     BASE_COLLECTION_NAME,
     MILVUS_URL,
-    EMBEDDING_MODEL,
+    get_embedding_model,
     BM25_FUNCTION,
 )
 
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class VectorDBService:
-    """Vector database service for managing document chunks and embeddings."""
+    """Service for interacting with the vector database."""
 
     def __init__(self):
         """Initialize the vector database service."""
@@ -32,8 +32,8 @@ class VectorDBService:
             logger.info(f"Connected to Milvus at {MILVUS_URL}")
 
             # initialize embedding model
-            self.embedding_model = EMBEDDING_MODEL
-            logger.info(f"Loaded embedding model: {EMBEDDING_MODEL}")
+            self.embedding_model = get_embedding_model()
+            logger.info(f"Loaded embedding model: {self.embedding_model}")
 
             # create collection schema
             self.schema = CollectionSchema(
@@ -41,7 +41,7 @@ class VectorDBService:
             )
             self.schema.add_function(BM25_FUNCTION)  # for keyword search
 
-            # initialize collection
+            # initialize base collection
             self._init_collection()
 
             self.default_output_fields = [
@@ -58,7 +58,7 @@ class VectorDBService:
             raise
 
     def _init_collection(self) -> bool:
-        """Initialize the collection if it doesn't exist and set up indexes."""
+        """Initialize the base collection if it doesn't exist and set up indexes."""
         try:
             # check if collection exists
             if self.client.has_collection(collection_name=BASE_COLLECTION_NAME):

@@ -6,11 +6,15 @@ from app.services.embeddings import load_embeddings_model
 EMBEDDING_PROVIDER = "openai"
 EMBEDDING_MODEL = "text-embedding-3-small"
 EMBEDDING_DIM = 1536
-EMBEDDING_MODEL = load_embeddings_model(
-    provider=EMBEDDING_PROVIDER,
-    model_id=EMBEDDING_MODEL,
-    api_key=os.getenv("OPENAI_API_KEY"),
-)
+
+
+def get_embedding_model():
+    return load_embeddings_model(
+        provider=EMBEDDING_PROVIDER,
+        model_id=EMBEDDING_MODEL,
+        api_key=os.getenv("OPENAI_API_KEY"),
+    )
+
 
 # bm25 function for keyword search
 BM25_FUNCTION = Function(
