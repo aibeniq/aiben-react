@@ -159,6 +159,11 @@ const VeraDoc = () => {
         requestBody: { content: fullText },
       })
 
+      console.log("Received DOCX response:", response)
+      console.log("Response type:", typeof response)
+      console.log("Response instanceof Blob:", response instanceof Blob)
+      console.log("Response instanceof ArrayBuffer:", response instanceof ArrayBuffer)
+
       let blob
       if (response instanceof Blob) {
         console.log("Response is a Blob")
@@ -175,22 +180,39 @@ const VeraDoc = () => {
         })
       }
 
+      console.log("Final DOCX blob:", blob)
+      console.log("Blob size:", blob.size)
+      console.log("Blob type:", blob.type)
+
       const url = window.URL.createObjectURL(blob)
+      console.log("Created DOCX object URL:", url)
       const a = document.createElement("a")
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
       const filename = activeResult.filename.replace(/[^a-zA-Z0-9]/g, "_")
       a.href = url
       a.download = `Evaluation_${filename}_${timestamp}.docx`
+
+      console.log("DOCX download filename:", `Evaluation_${filename}_${timestamp}.docx`)
+      console.log("About to trigger DOCX download...")
+
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
 
+      console.log("DOCX download triggered successfully")
       showSuccessToast("Evaluation downloaded successfully")
     } catch (err: any) {
       console.error("Failed to download report:", err)
+      console.error("Error details:", {
+        message: err instanceof Error ? err.message : "Unknown error",
+        stack: err instanceof Error ? err.stack : undefined,
+        name: err instanceof Error ? err.name : undefined,
+      })
+
       showErrorToast(`Failed to download evaluation: ${err.message || "Unknown error"}`)
     } finally {
+      console.log("DOCX download process completed")
       setLoadingDownload(false)
     }
   }
