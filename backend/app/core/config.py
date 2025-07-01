@@ -108,6 +108,9 @@ class Settings(BaseSettings):
     ENABLED_LLM_PROVIDERS: str = "openai,aws"
     ENABLED_EMBEDDING_PROVIDERS: str = "openai,aws"
 
+    # OpenAI API Configuration
+    OPENAI_TIMEOUT: int = 600  # 10 minutes timeout for OpenAI API calls
+
     @computed_field
     @property
     def llm_providers(self) -> list[str]:
@@ -513,7 +516,7 @@ ANALYSIS:
 
     REPORTGENIE_OPTIMIZE_OUTLINE_PROMPT_TEMPLATE: str = """
 INSTRUCTION:
-You are an AI assistant that helps optimize report outline sections by comparing generated report content to a ground-truth reference document. Your task is to suggest improved section descriptions that would lead to better report generation.
+You are an expert at analyzing content quality and suggesting improvements to report outline sections by comparing generated report content to a ground-truth reference document.
 
 ORIGINAL SECTION: {original_section}
 
@@ -525,21 +528,38 @@ RELEVANT CONTENT FROM GROUND-TRUTH DOCUMENT:
 
 {custom_instructions}
 
+ANALYSIS GUIDELINES:
+Compare the generated content to the ground truth and determine if revision is needed.
+
+ONLY set NEEDS_REVISION to YES if there are SIGNIFICANT issues:
+- Major information gaps (missing key points from ground truth)
+- Substantially different scope or focus that makes content less useful
+- Quality issues that would materially impact report effectiveness
+- Clear misalignment with the intended purpose of the section
+- Generated content covers fundamentally different topics than ground truth
+
+DO NOT revise for minor differences:
+- Small wording variations or stylistic differences
+- Different but equivalent phrasing that conveys the same information
+- Minor detail variations if core information is adequately covered
+- Reorganized content that still addresses the same key points
+- Acceptable alternative approaches to the same topic
+
+THRESHOLD: Be conservative - only suggest revisions for substantial improvements that would meaningfully enhance the report quality.
+
 INSTRUCTIONS:
 1. Compare the generated content to the relevant ground-truth content
-2. Identify gaps, deficiencies, or areas where the generated content doesn't match the quality/scope of the ground-truth
-3. Determine if the original section description led to adequate content generation
-4. If the generated content is lacking compared to ground-truth, suggest an improved section description
-5. The improved description should guide the AI to generate content more similar to the ground-truth
-6. Focus on being specific about what content should be included
-7. Consider depth, scope, specific details, and coverage areas
-8. If the generated content is already good, indicate no revision is needed
+2. Assess whether there are significant gaps, deficiencies, or scope misalignments
+3. Only suggest a revision if the improvement would be substantial and meaningful
+4. If suggesting a revision, provide a specific improved section description
+5. Focus on what content should be included to better match the ground-truth scope and quality
+6. If the generated content adequately covers the key points, indicate no revision is needed
 
 FORMAT YOUR RESPONSE AS:
 NEEDS_REVISION: [Yes/No]
 SUGGESTED_SECTION: [Improved section description if revision needed, otherwise same as original]
-REASON: [Brief explanation of why the revision would improve content generation, or why no revision is needed]
-ANALYSIS: [Detailed comparison of generated vs ground-truth content and how the suggested revision addresses identified gaps]
+REASON: [Specific explanation of significant gaps requiring revision, or why current content is adequate]
+QUALITY_GAP_SEVERITY: [none/minor/moderate/significant]
 """
 
 

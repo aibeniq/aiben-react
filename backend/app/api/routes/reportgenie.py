@@ -22,6 +22,7 @@ from app.models import (
     ReportGenieOutline,
     ReportGenieDetailResponse,
     Source,
+    SourceData,
     KnowledgeBase,
     EmbeddingModel,
     DocxRequest,
@@ -213,9 +214,36 @@ async def generate_report(
                         select(Source).where(Source.knowledge_base_id == kb.id)
                     ).all()
                     for source in sources:
-                        all_source_text += (
-                            f"\n\n--- Source: {source.name} ---\n\n{source.content}"
-                        )
+                        # Get source data
+                        source_data = session.get(SourceData, source.source_data_id)
+                        if not source_data:
+                            print(f"No source data found for source {source.name}")
+                            continue
+
+                        try:
+                            # Extract text from the source data
+                            if not source_data.data.startswith(b"PK"):
+                                # Direct file extraction
+                                file_content = extract_text_from_file(
+                                    source_data.data, source.name
+                                )
+                            else:
+                                # Extract from ZIP file
+                                zip_data = BytesIO(source_data.data)
+                                with zipfile.ZipFile(zip_data, "r") as zip_file:
+                                    file_info = zip_file.infolist()[0]
+                                    raw_file_content = zip_file.read(file_info.filename)
+                                    file_content = extract_text_from_file(
+                                        raw_file_content, source.name
+                                    )
+
+                            all_source_text += (
+                                f"\n\n--- Source: {source.name} ---\n\n{file_content}"
+                            )
+                        except Exception as e:
+                            print(f"Error extracting content from {source.name}: {e}")
+                            # Continue with other sources instead of failing completely
+                            continue
 
                     text_chunks = chunk_text(
                         all_source_text,
@@ -1048,7 +1076,11 @@ async def get_report_detail(
 async def optimize_outline(
     session: SessionDep,
     current_user: CurrentUser,
-    request_data: OptimizeOutlineRequest = Depends(),
+    knowledge_base_id: str = Form(...),
+    outline_id: str = Form(...),
+    sections: str = Form(...),
+    custom_instructions: Optional[str] = Form(None),
+    search_mode: str = Form("vector"),  # Add search_mode as Form parameter
     files: List[UploadFile] = File(...),
     request: FastAPIRequest = None,
 ):
@@ -1080,8 +1112,8 @@ async def optimize_outline(
         print("Starting outline optimization...")
 
         # Debug: Log custom instructions
-        if request_data.custom_instructions:
-            print(f"Custom instructions received: {request_data.custom_instructions}")
+        if custom_instructions:
+            print(f"Custom instructions received: {custom_instructions}")
             print(
                 "✓ Custom instructions will be applied to content generation and optimization analysis"
             )
@@ -1089,7 +1121,7 @@ async def optimize_outline(
             print("No custom instructions provided - using default prompts")
 
         # 1. Retrieve knowledge base
-        kb = session.get(KnowledgeBase, request_data.knowledge_base_id)
+        kb = session.get(KnowledgeBase, knowledge_base_id)
         if not kb:
             raise HTTPException(status_code=404, detail="Knowledge base not found")
 
@@ -1160,7 +1192,7 @@ async def optimize_outline(
             )
 
             # 4. Parse current outline sections
-            current_sections = json.loads(request_data.sections)
+            current_sections = json.loads(sections)
             print(f"Optimizing {len(current_sections)} outline sections...")
 
             # Add limits to prevent oversized processing
@@ -1206,42 +1238,130 @@ async def optimize_outline(
                 print(f"Generating content for section: {section_description[:50]}...")
 
                 if consult_documents:
-                    # Get relevant context for this section from knowledge base
-                    docs = retriever.get_relevant_documents(section_description)
-                    context = "\n\n".join([doc.page_content for doc in docs])
+                    # Check search mode to determine which method to use
+                    # Use the search_mode parameter directly
 
-                    # Build the report draft so far (all previous sections)
-                    report_draft = ""
-                    for prev_section, prev_content in generated_sections.items():
-                        if prev_content:
-                            report_draft += f"\n\n## {prev_section}\n\n{prev_content}"
-
-                    # Generate content for this section using LLM
-                    template_vars = {
-                        "report_draft": report_draft,
-                        "context": context,
-                        "question": section_description,
-                    }
-
-                    # Add custom instructions if provided
-                    if request_data.custom_instructions:
-                        template_vars["custom_instructions"] = (
-                            f"\nADDITIONAL CUSTOM INSTRUCTIONS:\n{request_data.custom_instructions}\n"
-                        )
+                    if search_mode == "full_text":
+                        # Full Text Scan Logic (similar to main generate functionality)
                         print(
-                            f"✓ Applying custom instructions to content generation for section: {section_description[:30]}..."
+                            f"Performing Full Text Scan for section: {section_description[:50]}..."
+                        )
+
+                        # Get all source documents
+                        all_source_text = ""
+                        sources = session.exec(
+                            select(Source).where(Source.knowledge_base_id == kb.id)
+                        ).all()
+                        for source in sources:
+                            # Get source data
+                            source_data = session.get(SourceData, source.source_data_id)
+                            if not source_data:
+                                print(f"No source data found for source {source.name}")
+                                continue
+
+                            try:
+                                # Extract text from the source data
+                                if not source_data.data.startswith(b"PK"):
+                                    # Direct file extraction
+                                    file_content = extract_text_from_file(
+                                        source_data.data, source.name
+                                    )
+                                else:
+                                    # Extract from ZIP file
+                                    zip_data = BytesIO(source_data.data)
+                                    with zipfile.ZipFile(zip_data, "r") as zip_file:
+                                        file_info = zip_file.infolist()[0]
+                                        raw_file_content = zip_file.read(
+                                            file_info.filename
+                                        )
+                                        file_content = extract_text_from_file(
+                                            raw_file_content, source.name
+                                        )
+
+                                all_source_text += f"\n\n--- Source: {source.name} ---\n\n{file_content}"
+                            except Exception as e:
+                                print(
+                                    f"Error extracting content from {source.name}: {e}"
+                                )
+                                # Continue with other sources instead of failing completely
+                                continue
+
+                        # Split into chunks and analyze each chunk
+                        text_chunks = chunk_text(
+                            all_source_text,
+                            max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE,
+                        )
+                        chunk_analyses = []
+                        for chunk in text_chunks:
+                            analysis = invoke_llm(
+                                llm,
+                                settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
+                                {"chunk": chunk, "question": section_description},
+                            )
+                            chunk_analyses.append(analysis)
+
+                        # Synthesize the chunk analyses
+                        if not chunk_analyses:
+                            generated_content = "No relevant information found in the knowledge base to answer this question."
+                        else:
+                            chunk_analyses_text = "\n\n".join(chunk_analyses)
+                            synthesized_answer = invoke_llm(
+                                llm,
+                                settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+                                {
+                                    "chunk_analyses": chunk_analyses_text,
+                                    "question": section_description,
+                                },
+                            )
+                            generated_content = synthesized_answer
+
+                        print(
+                            f"Generated {len(generated_content)} characters for section using full text scan"
                         )
                     else:
-                        template_vars["custom_instructions"] = ""
+                        # Vector Search Logic (existing code)
+                        print(
+                            f"Performing Vector Search for section: {section_description[:50]}..."
+                        )
 
-                    generated_content = invoke_llm(
-                        llm,
-                        settings.REPORT_GENIE_PROMPT_TEMPLATE,
-                        template_vars,
-                    )
-                    print(
-                        f"Generated {len(generated_content)} characters for section using knowledge base"
-                    )
+                        # Get relevant context for this section from knowledge base
+                        docs = retriever.get_relevant_documents(section_description)
+                        context = "\n\n".join([doc.page_content for doc in docs])
+
+                        # Build the report draft so far (all previous sections)
+                        report_draft = ""
+                        for prev_section, prev_content in generated_sections.items():
+                            if prev_content:
+                                report_draft += (
+                                    f"\n\n## {prev_section}\n\n{prev_content}"
+                                )
+
+                        # Generate content for this section using LLM
+                        template_vars = {
+                            "report_draft": report_draft,
+                            "context": context,
+                            "question": section_description,
+                        }
+
+                        # Add custom instructions if provided
+                        if custom_instructions:
+                            template_vars["custom_instructions"] = (
+                                f"\nADDITIONAL CUSTOM INSTRUCTIONS:\n{custom_instructions}\n"
+                            )
+                            print(
+                                f"✓ Applying custom instructions to content generation for section: {section_description[:30]}..."
+                            )
+                        else:
+                            template_vars["custom_instructions"] = ""
+
+                        generated_content = invoke_llm(
+                            llm,
+                            settings.REPORT_GENIE_PROMPT_TEMPLATE,
+                            template_vars,
+                        )
+                        print(
+                            f"Generated {len(generated_content)} characters for section using vector search"
+                        )
                 else:
                     # Use the section description directly as content (no document consultation)
                     generated_content = section_description
@@ -1257,11 +1377,41 @@ async def optimize_outline(
             )
 
             # Get list of section descriptions in order with their consult_documents flag
-            section_descriptions = []
-            section_consult_flags = []
-            for section in current_sections:
-                section_descriptions.append(section["text"].strip())
-                section_consult_flags.append(section.get("consultDocuments", True))
+            # Create two separate lists to handle the numbering mismatch issue:
+            # 1. all_section_descriptions: For LLM mapping (includes ALL sections)
+            # 2. consulting_section_descriptions: For optimization results (only consultDocuments: true)
+
+            all_section_descriptions = []  # For LLM mapping (includes ALL sections)
+            all_section_consult_flags = []
+            consulting_section_descriptions = (
+                []
+            )  # For optimization results (only consultDocuments: true)
+            section_index_mapping = (
+                {}
+            )  # Maps section_desc to original index for debugging
+
+            for i, section in enumerate(current_sections):
+                section_desc = section["text"].strip()
+                consult_docs = section.get("consultDocuments", True)
+
+                # Add to complete list for LLM mapping
+                all_section_descriptions.append(section_desc)
+                all_section_consult_flags.append(consult_docs)
+                section_index_mapping[section_desc] = i + 1
+
+                # Add to consulting list for optimization results
+                if consult_docs:
+                    consulting_section_descriptions.append(section_desc)
+
+            # Use all sections for LLM mapping to ensure proper boundary awareness
+            section_descriptions = all_section_descriptions
+            section_consult_flags = all_section_consult_flags
+
+            print(f"Section mapping setup:")
+            print(f"- Total sections for LLM mapping: {len(all_section_descriptions)}")
+            print(
+                f"- Sections for optimization results: {len(consulting_section_descriptions)}"
+            )
 
             # Log section types for debugging
             topic_sections = sum(1 for flag in section_consult_flags if flag)
@@ -1371,16 +1521,11 @@ This context shows how the document has been mapped so far. Consider:
 
                 # Pre-calculate values for the prompt to avoid f-string issues
                 chunk_size = len(chunk)
-                chunk_preview = chunk[:6000] if chunk_size > 6000 else chunk
+                # Use the full chunk content instead of truncating
+                chunk_content = sanitize_text_for_json(chunk)
 
-                # NEW: Sanitize the chunk preview to prevent JSON parsing issues
-                chunk_preview = sanitize_text_for_json(chunk_preview)
-
-                truncation_note = (
-                    f"...[CONTENT TRUNCATED - showing first 6000 chars of {chunk_size} total]"
-                    if chunk_size > 6000
-                    else ""
-                )
+                # No truncation - we send the full chunk to the LLM
+                truncation_note = ""
                 document_position_percent = (chunk_idx + 1) / len(ground_truth_chunks)
                 mapping_context_note = (
                     "- Mapping context: Previous chunks have established patterns - maintain logical consistency"
@@ -1388,8 +1533,8 @@ This context shows how the document has been mapped so far. Consider:
                     else "- First chunk: Set the mapping foundation for subsequent chunks"
                 )
 
-                # Build outline sections list with consult documents information
-                outline_sections_text = []
+                # Build outline sections list with boundary awareness (next section context)
+                outline_sections_with_boundaries = []
                 for i, (section, consult_docs) in enumerate(
                     zip(section_descriptions, section_consult_flags)
                 ):
@@ -1401,19 +1546,40 @@ This context shows how the document has been mapped so far. Consider:
                     else:
                         section_type = "[LITERAL TEXT]"
                         instruction = "Look for content that matches this text exactly or nearly exactly"
-                    outline_sections_text.append(
-                        f"{i+1}. {section_type} {section} - {instruction}"
+
+                    # Add next section context for boundary awareness
+                    next_section_info = ""
+                    if i < len(section_descriptions) - 1:
+                        next_section = section_descriptions[i + 1]
+                        next_consult_docs = section_consult_flags[i + 1]
+                        next_type = (
+                            "[TOPIC/CONCEPT]" if next_consult_docs else "[LITERAL TEXT]"
+                        )
+                        next_section_info = (
+                            f" | NEXT SECTION: {i+2}. {next_type} {next_section}"
+                        )
+                    else:
+                        next_section_info = " | NEXT SECTION: [END OF OUTLINE]"
+
+                    outline_sections_with_boundaries.append(
+                        f"{i+1}. {section_type} {section} - {instruction}{next_section_info}"
                     )
 
-                # Use simplified JSON-based mapping prompt - create fully formatted string
+                # Enhanced mapping prompt with boundary awareness
                 mapping_prompt = f"""
 Analyze this document chunk and identify the individual sections within it. Extract the actual text content for each section and map it to exactly one outline section.
 
-OUTLINE SECTIONS (with mapping guidance):
-{chr(10).join(outline_sections_text)}
+IMPORTANT BOUNDARY RULES:
+- When mapping content to a section, consider where that section should END based on the NEXT SECTION information
+- Do NOT assign content to a section if it clearly belongs to the next section's topic/scope
+- Stop assigning content to a section when you encounter content that better fits the next section
+- If content spans multiple sections, assign it to the most appropriate primary section
+
+OUTLINE SECTIONS (with next section boundaries):
+{chr(10).join(outline_sections_with_boundaries)}
 
 DOCUMENT CHUNK ({chunk_idx + 1} of {len(ground_truth_chunks)}):
-{chunk_preview}
+{chunk_content}
 {truncation_note}
 
 MAPPING INSTRUCTIONS:
@@ -1422,12 +1588,17 @@ MAPPING INSTRUCTIONS:
 3. Determine which outline section (1-{len(section_descriptions)}) it best matches:
    - For [TOPIC/CONCEPT] sections: Match content that discusses the same topic/concept, even if wording differs
    - For [LITERAL TEXT] sections: Match content that contains the same or very similar text/wording
-4. Respond with valid JSON only
+4. CRITICAL: When assigning content to a section, check if any content better belongs to the NEXT SECTION
+5. STOP assigning content to a section when you encounter content that transitions to the next section's topic
+6. Respond with valid JSON only
 
 RESPONSE FORMAT (JSON only):
-{{"mappings": [{{"section_content": "the actual text content extracted from the document section", "outline_section": 1}}, {{"section_content": "the actual text content from another document section", "outline_section": 2}}]}}
+{{"mappings": [{{"section_content": "the actual text extracted from the document section", "outline_section": 1, "boundary_reasoning": "why this content belongs to this section and not the next"}}, {{"section_content": "the actual text from another document section", "outline_section": 2, "boundary_reasoning": "reasoning for section assignment and boundary decision"}}]}}
 
-IMPORTANT: "section_content" must contain the actual text from the document, not a description or summary.
+IMPORTANT: 
+- "section_content" must contain the actual text from the document, not a description or summary
+- "boundary_reasoning" should explain why this content belongs to the assigned section and not the next section
+- Be conservative: if content could belong to either section, assign it to the earlier section but mention the ambiguity
 """
 
                 # Log the exact prompt being sent to the LLM
@@ -1467,6 +1638,48 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                 print(mapping_response)
                 print("=" * 80)
 
+                # Save the mapping response to a .txt file for inspection
+                try:
+                    import os
+                    from datetime import datetime
+
+                    # Create a timestamp for unique filenames
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+                    # Create filename with chunk info
+                    response_filename = f"llm_mapping_response_chunk_{chunk_idx + 1}_of_{len(ground_truth_chunks)}_{timestamp}.txt"
+
+                    # Save to the backend directory (where this file is located)
+                    backend_dir = os.path.dirname(os.path.abspath(__file__))
+                    response_filepath = os.path.join(backend_dir, response_filename)
+
+                    # Create the full content to save
+                    file_content = f"""LLM MAPPING RESPONSE
+Chunk: {chunk_idx + 1} of {len(ground_truth_chunks)}
+Timestamp: {datetime.now().isoformat()}
+Ground-truth document: {file.filename}
+Chunk size: {len(chunk)} characters
+Prompt size: {prompt_size} characters (~{estimated_tokens} tokens)
+
+=== MAPPING PROMPT SENT TO LLM ===
+{mapping_prompt}
+
+=== RAW LLM RESPONSE ===
+{mapping_response}
+
+=== END OF RESPONSE ===
+"""
+
+                    with open(response_filepath, "w", encoding="utf-8") as f:
+                        f.write(file_content)
+
+                    print(f"✓ Saved mapping response to: {response_filename}")
+
+                except Exception as save_error:
+                    print(
+                        f"Warning: Could not save mapping response to file: {save_error}"
+                    )
+
                 # Parse JSON response from LLM
                 assigned_sections = []
                 document_sections_identified = []
@@ -1495,13 +1708,24 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                         for mapping in json_response["mappings"]:
                             section_content = mapping.get("section_content", "").strip()
                             outline_section_num = mapping.get("outline_section", 0)
+                            boundary_reasoning = mapping.get(
+                                "boundary_reasoning", "No reasoning provided"
+                            )
 
-                            # Record the identified section content
+                            # Record the identified section content with boundary reasoning
                             if section_content:
-                                document_sections_identified.append(
+                                content_preview = (
                                     section_content[:100] + "..."
                                     if len(section_content) > 100
                                     else section_content
+                                )
+                                reasoning_preview = (
+                                    boundary_reasoning[:50] + "..."
+                                    if len(boundary_reasoning) > 50
+                                    else boundary_reasoning
+                                )
+                                document_sections_identified.append(
+                                    f"{content_preview} [Boundary: {reasoning_preview}]"
                                 )
 
                             # Map to actual section description and collect content
@@ -1509,28 +1733,48 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                                 section_desc = section_descriptions[
                                     outline_section_num - 1
                                 ]
+
+                                # Debug: Log the mapping with original section index
+                                original_section_index = section_index_mapping.get(
+                                    section_desc, "unknown"
+                                )
+                                # print(
+                                #    f"✓ LLM mapped section {outline_section_num} to description: '{section_desc[:50]}...'"
+                                # )
+                                # print(
+                                #    f"✓ Original section index: {original_section_index}"
+                                # )
+                                # print(f"✓ Content length: {len(section_content)} chars")
+                                # print(
+                                #    f"✓ Section consultDocuments: {section_consult_flags[outline_section_num - 1]}"
+                                # )
+
                                 if section_desc not in assigned_sections:
                                     assigned_sections.append(section_desc)
 
-                                # NEW: Store the actual section content
+                                # Store the actual section content (clean, without boundary reasoning)
                                 if section_content:
+                                    # Store only the clean content for optimization analysis
                                     section_to_content[section_desc].append(
                                         section_content
                                     )
+                                    # print(
+                                    #    f"✓ Stored content for section: '{section_desc[:30]}...' ({len(section_content)} chars)"
+                                    # )
 
-                    print(
-                        f"✓ JSON parsing successful. Found {len(document_sections_identified)} document sections mapping to {len(assigned_sections)} outline sections"
-                    )
+                    # print(
+                    #    f"✓ Enhanced boundary-aware JSON parsing successful. Found {len(document_sections_identified)} document sections mapping to {len(assigned_sections)} outline sections"
+                    # )
 
-                    # Log extracted content summary
+                    # Log extracted content summary with boundary awareness
                     total_extracted_chars = sum(
                         len(content)
                         for section_content_list in section_to_content.values()
                         for content in section_content_list
                     )
-                    print(
-                        f"✓ Extracted {total_extracted_chars} characters of actual section content"
-                    )
+                    # print(
+                    #    f"✓ Extracted {total_extracted_chars} characters of section content with boundary reasoning"
+                    # )
 
                 except json.JSONDecodeError as e:
                     print(f"✗ JSON parsing failed: {e}")
@@ -1635,6 +1879,11 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                     print(
                         f"Fallback mapping: Assigned chunk {chunk_idx + 1} to {[section_descriptions.index(s) + 1 for s in assigned_sections]} - {reasoning}"
                     )
+
+                    # IMPORTANT: Also populate section_to_content for fallback cases
+                    # This ensures later sections get ground-truth content even if JSON parsing failed
+                    for section_desc in assigned_sections:
+                        section_to_content[section_desc].append(chunk)
                 else:
                     reasoning = f"JSON parsing successful: {len(document_sections_identified)} sections identified"
                     print(
@@ -1693,7 +1942,7 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                 "Ground-truth mapping complete. Generating optimization suggestions..."
             )
 
-            # Debug: Print content extraction summary
+            # Debug: Print content extraction summary with section details
             total_content_extracted = sum(
                 len(content_list) for content_list in section_to_content.values()
             )
@@ -1704,44 +1953,81 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                 f"Content extraction summary: {total_content_extracted} total sections extracted, {sections_with_content}/{len(section_descriptions)} outline sections have mapped content"
             )
 
+            # Debug: Show which sections have content mapped to them
+            print("MAPPING RESULTS BY SECTION:")
+            for i, section_desc in enumerate(section_descriptions):
+                consult_flag = section_consult_flags[i]
+                content_pieces = len(section_to_content.get(section_desc, []))
+                chunk_pieces = len(section_to_chunks.get(section_desc, []))
+                total_content_size = sum(
+                    len(content) for content in section_to_content.get(section_desc, [])
+                )
+
+                section_type = "CONSULT" if consult_flag else "NO-CONSULT"
+                print(
+                    f"  Section {i+1} [{section_type}]: '{section_desc[:40]}...' - {content_pieces} content pieces ({total_content_size} chars), {chunk_pieces} chunks"
+                )
+
+                # Show a preview of the first content piece if available
+                if section_to_content.get(section_desc):
+                    first_content = section_to_content[section_desc][0]
+                    preview = (
+                        first_content[:100] + "..."
+                        if len(first_content) > 100
+                        else first_content
+                    )
+                    print(f"    Preview: {preview}")
+                else:
+                    print(f"    No content mapped to this section")
+            print("END MAPPING RESULTS")
+
             # 7. Compare each section's generated content to its mapped ground-truth chunks
+            # Only process sections that consult documents to avoid numbering mismatches
             suggestions = []
             optimization_count = 0
 
-            for section_description, generated_content in generated_sections.items():
+            # Process only consulting sections to ensure consistent numbering
+            for section_description in consulting_section_descriptions:
                 if cancellation_requested:
                     print("Operation cancelled by client disconnect")
                     raise HTTPException(
                         status_code=408, detail="Operation cancelled by user"
                     )
 
-                # Check if this section consults documents
-                consults_documents = section_consult_settings.get(
-                    section_description, True
-                )
+                # Get the generated content for this section
+                generated_content = generated_sections.get(section_description, "")
 
-                if not consults_documents:
-                    # Skip optimization and exclude from results for sections that don't consult documents
-                    print(
-                        f"Skipping optimization and excluding from results: {section_description[:50]}..."
-                    )
-                    continue
-
-                print(f"Analyzing section: {section_description[:50]}...")
+                # This section definitely consults documents (since it's in consulting_section_descriptions)
+                print(f"Analyzing consulting section: {section_description[:50]}...")
 
                 # Get the mapped ground-truth content for this section
+                # Use the SAME section_description that was used as key during mapping
                 mapped_chunks = section_to_chunks.get(section_description, [])
                 mapped_content = section_to_content.get(section_description, [])
+
+                # Debug: Log what we found
+                print(
+                    f"✓ Looking up content for section: '{section_description[:30]}...'"
+                )
+                print(
+                    f"✓ Found {len(mapped_content)} content pieces, {len(mapped_chunks)} chunks"
+                )
 
                 # Use actual extracted content if available, otherwise fall back to chunks
                 if mapped_content:
                     ground_truth_context = "\n\n".join(mapped_content)
+                    print(
+                        f"✓ Using mapped content: {len(ground_truth_context)} characters"
+                    )
                 else:
                     ground_truth_context = "\n\n".join(
                         [
                             chunk["content"] if isinstance(chunk, dict) else chunk
                             for chunk in mapped_chunks
                         ]
+                    )
+                    print(
+                        f"✓ Using chunk content: {len(ground_truth_context)} characters"
                     )
 
                 # Create an enhanced summary of the mapping for debugging and analysis
@@ -1795,9 +2081,9 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                 }
 
                 # Add custom instructions if provided
-                if request_data.custom_instructions:
+                if custom_instructions:
                     template_vars["custom_instructions"] = (
-                        f"\nADDITIONAL CUSTOM INSTRUCTIONS FOR OPTIMIZATION:\n{request_data.custom_instructions}\n"
+                        f"\nADDITIONAL CUSTOM INSTRUCTIONS FOR OPTIMIZATION:\n{custom_instructions}\n"
                     )
                     print(
                         f"✓ Applying custom instructions to optimization analysis for section: {section_description[:30]}..."
@@ -1811,28 +2097,49 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                     template_vars,
                 )
 
-                # Parse the response
-                needs_revision = "NEEDS_REVISION: Yes" in suggestion_response
+                # Parse the response with improved logic
+                lines = suggestion_response.split("\n")
+
+                # Extract needs revision (check for both "Yes" and case variations)
+                needs_revision = False
+                for line in lines:
+                    if line.startswith("NEEDS_REVISION:"):
+                        revision_value = (
+                            line.replace("NEEDS_REVISION:", "").strip().lower()
+                        )
+                        needs_revision = revision_value in ["yes", "true", "y"]
+                        break
 
                 # Extract suggested section
                 suggested_section = section_description  # Default to original
-                if "SUGGESTED_SECTION:" in suggestion_response:
-                    lines = suggestion_response.split("\n")
-                    for line in lines:
-                        if line.startswith("SUGGESTED_SECTION:"):
-                            suggested_section = line.replace(
-                                "SUGGESTED_SECTION:", ""
-                            ).strip()
-                            break
+                for line in lines:
+                    if line.startswith("SUGGESTED_SECTION:"):
+                        suggested_section = line.replace(
+                            "SUGGESTED_SECTION:", ""
+                        ).strip()
+                        break
 
                 # Extract reason
                 reason = "No specific reason provided"
-                if "REASON:" in suggestion_response:
-                    lines = suggestion_response.split("\n")
-                    for line in lines:
-                        if line.startswith("REASON:"):
-                            reason = line.replace("REASON:", "").strip()
-                            break
+                for line in lines:
+                    if line.startswith("REASON:"):
+                        reason = line.replace("REASON:", "").strip()
+                        break
+
+                # Extract quality gap severity (new field)
+                quality_gap_severity = "unknown"
+                for line in lines:
+                    if line.startswith("QUALITY_GAP_SEVERITY:"):
+                        quality_gap_severity = (
+                            line.replace("QUALITY_GAP_SEVERITY:", "").strip().lower()
+                        )
+                        break
+
+                # Log the analysis results for debugging
+                print(
+                    f"Optimization analysis for section '{section_description[:30]}...': "
+                    f"needs_revision={needs_revision}, quality_gap={quality_gap_severity}"
+                )
 
                 if needs_revision:
                     optimization_count += 1
@@ -1856,8 +2163,8 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                     f"Section analysis complete: {'NEEDS OPTIMIZATION' if needs_revision else 'OK'}"
                 )
 
-            # 7. Compile results
-            original_sections = list(generated_sections.keys())
+            # 7. Compile results - Use the pre-defined consulting sections list
+            # This ensures consistent section handling between mapping and optimization phases
             optimized_sections = [s.suggested_section for s in suggestions]
 
             # Calculate enhanced mapping statistics
@@ -1878,12 +2185,11 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
                 (unique_chunks_mapped / total_chunks * 100) if total_chunks > 0 else 0
             )
 
-            # Calculate section type statistics
-            sections_that_consult_docs = sum(
-                1 for consults in section_consult_settings.values() if consults
-            )
+            # Calculate section type statistics using the original sections
+            total_sections_in_outline = len(current_sections)
+            sections_that_consult_docs = len(consulting_section_descriptions)
             sections_that_dont_consult_docs = (
-                len(section_consult_settings) - sections_that_consult_docs
+                total_sections_in_outline - sections_that_consult_docs
             )
             sections_actually_optimized = len(
                 [s for s in suggestions if s.needs_revision]
@@ -1891,8 +2197,8 @@ IMPORTANT: "section_content" must contain the actual text from the document, not
 
             analysis_summary = f"""
 Enhanced Content Extraction Analysis:
-- Total outline sections: {len(original_sections)}
-- Sections that consult documents (shown in results): {sections_that_consult_docs}
+- Total outline sections: {total_sections_in_outline}
+- Sections that consult documents (included in results): {sections_that_consult_docs}
 - Sections that don't consult documents (excluded from results): {sections_that_dont_consult_docs}
 - Sections needing optimization: {sections_actually_optimized}
 - Sections working well: {sections_that_consult_docs - sections_actually_optimized}
@@ -1905,8 +2211,9 @@ Ground-truth Processing:
 - Coverage: {coverage_percentage:.1f}% of document mapped
 
 Content Extraction:
-- Actual section content extracted from {sum(len(content_list) for content_list in section_to_content.values())} document sections
-- Method: Enhanced JSON-based mapping with actual content extraction - each chunk is analyzed to identify and extract the actual text content of individual document sections, which are then mapped to outline sections for precise comparison.
+- LLM mapped content to ALL {total_sections_in_outline} sections (including non-consulting ones)
+- Only {sections_that_consult_docs} consulting sections analyzed for optimization
+- Method: Complete section mapping with selective optimization analysis
 - Note: Sections with 'Consult Documents' set to false are mapped but excluded from optimization results.
             """.strip()
 
@@ -1915,8 +2222,8 @@ Content Extraction:
             )
 
             return OptimizedOutlineResponse(
-                original_sections=original_sections,
-                suggestions=suggestions,
+                original_sections=consulting_section_descriptions,  # Only return consulting sections
+                suggestions=suggestions,  # Already filtered to only consulting sections
                 optimized_sections=optimized_sections,
                 analysis_summary=analysis_summary,
             )
@@ -1931,6 +2238,127 @@ Content Extraction:
     finally:
         if disconnect_monitor:
             disconnect_monitor.cancel()
+
+
+@router.post("/optimize-outline/csv", response_class=StreamingResponse)
+async def generate_outline_optimization_csv(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a CSV file from outline optimization results with columns for:
+    Section Number, Original Section, Suggested Section, Needs Revision, Reason, Current Output, Ground Truth Content.
+    """
+    print("Now generating CSV of outline optimization results...")
+    try:
+        # Get the content from the request - this should be the optimization results JSON
+        if not request.content:
+            raise HTTPException(
+                status_code=400, detail="Optimization content is required"
+            )
+
+        # Create CSV content
+        csv_buffer = StringIO()
+        csv_writer = csv.writer(csv_buffer)
+
+        # Write header with optimization-specific columns
+        csv_writer.writerow(
+            [
+                "Section Number",
+                "Original Section",
+                "Suggested Section",
+                "Needs Revision",
+                "Reason",
+                "Current Output",
+                "Ground Truth Content",
+                "Analysis Summary",
+            ]
+        )
+
+        try:
+            # Parse the content as JSON (optimization results data)
+            data = json.loads(request.content)
+
+            # Extract suggestions and analysis summary
+            suggestions = data.get("suggestions", [])
+            analysis_summary = data.get(
+                "analysis_summary", "No analysis summary provided"
+            )
+
+            # Process each suggestion
+            for index, suggestion in enumerate(suggestions, 1):
+                original_section = suggestion.get("original_section", "")
+                suggested_section = suggestion.get("suggested_section", "")
+                needs_revision = suggestion.get("needs_revision", False)
+                reason = suggestion.get("reason", "")
+                current_output = suggestion.get("current_output", "")
+                ground_truth_content = suggestion.get("ground_truth_content", "")
+
+                # Clean up text fields (remove newlines and carriage returns for CSV)
+                original_section_clean = original_section.replace("\n", " ").replace(
+                    "\r", " "
+                )
+                suggested_section_clean = suggested_section.replace("\n", " ").replace(
+                    "\r", " "
+                )
+                reason_clean = reason.replace("\n", " ").replace("\r", " ")
+                current_output_clean = current_output.replace("\n", " ").replace(
+                    "\r", " "
+                )
+                ground_truth_content_clean = ground_truth_content.replace(
+                    "\n", " "
+                ).replace("\r", " ")
+                analysis_summary_clean = analysis_summary.replace("\n", " ").replace(
+                    "\r", " "
+                )
+
+                # Write row
+                csv_writer.writerow(
+                    [
+                        index,
+                        original_section_clean,
+                        suggested_section_clean,
+                        "Yes" if needs_revision else "No",
+                        reason_clean,
+                        current_output_clean,
+                        ground_truth_content_clean,
+                        analysis_summary_clean,
+                    ]
+                )
+
+        except json.JSONDecodeError:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid content format. Expected JSON with outline optimization data.",
+            )
+
+        # Get CSV content
+        csv_content = csv_buffer.getvalue()
+        csv_buffer.close()
+
+        # Create BytesIO object for the response
+        csv_bytes = BytesIO(csv_content.encode("utf-8"))
+        csv_bytes.seek(0)
+
+        print("Outline optimization CSV file generated successfully.")
+
+        # Create filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"outline_optimization_{timestamp}.csv"
+
+        # Return the CSV as a downloadable file
+        return StreamingResponse(
+            csv_bytes,
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error generating optimization CSV: {str(e)}"
+        )
 
 
 def sanitize_text_for_json(text: str) -> str:

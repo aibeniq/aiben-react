@@ -12,7 +12,7 @@ import {
   IconButton,
 } from "@chakra-ui/react"
 import { DialogBody, DialogContent, DialogHeader, DialogRoot, DialogTitle } from "@chakra-ui/react"
-import { FiCheck, FiEdit3, FiSave, FiX } from "react-icons/fi"
+import { FiCheck, FiEdit3, FiSave, FiX, FiDownload } from "react-icons/fi"
 import { VeraDocChecklist, VeradocService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import FileUpload from "../Common/FileUpload"
@@ -50,6 +50,7 @@ const OptimizeChecklistModal = ({
   const [loading, setLoading] = useState(false)
   const [suggestions, setSuggestions] = useState<ChecklistSuggestion[]>([])
   const [acceptedSuggestions, setAcceptedSuggestions] = useState<Set<number>>(new Set())
+  const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
 
   // State for editing suggestions
   const [editingSuggestions, setEditingSuggestions] = useState<Map<number, string>>(new Map())
@@ -195,6 +196,48 @@ const OptimizeChecklistModal = ({
     handleClose()
   }
 
+  const handleDownloadCsv = async () => {
+    if (suggestions.length === 0) {
+      showErrorToast("No optimization results to download")
+      return
+    }
+
+    setLoadingCsvDownload(true)
+
+    try {
+      // Create the data structure expected by the backend
+      const csvData = {
+        suggestions: suggestions,
+        analysis_summary: "Checklist optimization results export", // You could store this from the optimization response
+      }
+
+      const response = await VeradocService.generateOptimizationCsv({
+        requestBody: { content: JSON.stringify(csvData) },
+      })
+
+      // Handle the blob response
+      const blob = new Blob([response as any], { type: "text/csv" })
+      const url = window.URL.createObjectURL(blob)
+
+      // Create download link
+      const a = document.createElement("a")
+      a.href = url
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").split("T")[0]
+      a.download = `checklist_optimization_${timestamp}.csv`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      showSuccessToast("CSV downloaded successfully")
+    } catch (error: any) {
+      console.error("Error downloading CSV:", error)
+      showErrorToast(`Failed to download CSV: ${error.message || "Unknown error"}`)
+    } finally {
+      setLoadingCsvDownload(false)
+    }
+  }
+
   const handleClose = () => {
     setFileItems([])
     setSuggestions([])
@@ -202,6 +245,7 @@ const OptimizeChecklistModal = ({
     setEditingSuggestions(new Map())
     setEditingModes(new Set())
     setExpandedAnswers(new Set())
+    setLoadingCsvDownload(false)
     onClose()
   }
 
@@ -249,12 +293,25 @@ const OptimizeChecklistModal = ({
               <VStack gap={4} align="stretch" flex={1} overflow="hidden">
                 <Separator />
                 <HStack justify="space-between" flexShrink={0}>
-                  <Text fontSize="lg" fontWeight="bold">
-                    Optimization Suggestions
-                  </Text>
-                  <Text fontSize="sm" color="gray.600">
-                    {suggestions.filter((s) => s.needs_revision).length} questions need optimization
-                  </Text>
+                  <VStack align="start" gap={1}>
+                    <Text fontSize="lg" fontWeight="bold">
+                      Optimization Suggestions
+                    </Text>
+                    <Text fontSize="sm" color="gray.600">
+                      {suggestions.filter((s) => s.needs_revision).length} questions need
+                      optimization
+                    </Text>
+                  </VStack>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleDownloadCsv}
+                    loading={loadingCsvDownload}
+                    colorPalette="green"
+                  >
+                    <FiDownload />
+                    Download CSV
+                  </Button>
                 </HStack>{" "}
                 <Box flex={1} overflow="auto" pr={2}>
                   <VStack gap={4} align="stretch">
