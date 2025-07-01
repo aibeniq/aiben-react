@@ -44,6 +44,15 @@ class VectorDBService:
             # initialize collection
             self._init_collection()
 
+            self.default_output_fields = [
+                "content",
+                "tags",
+                "title",
+                "knowledge_base_id",
+                "user_id",
+                "source_id",
+            ]
+
         except Exception as e:
             logger.error(f"Failed to initialize VectorDBService: {e}")
             raise
@@ -255,17 +264,6 @@ class VectorDBService:
                 filter_params["source_id"] = source_id
             filter_expr = " AND ".join(filter_expr) if filter_expr else None
 
-            # set default output fields
-            if output_fields is None:
-                output_fields = [
-                    "content",
-                    "tags",
-                    "title",
-                    "knowledge_base_id",
-                    "user_id",
-                    "source_id",
-                ]
-
             # perform search
             results = self.client.search(
                 collection_name=BASE_COLLECTION_NAME,
@@ -274,7 +272,11 @@ class VectorDBService:
                 filter=filter_expr,
                 filter_params=filter_params if filter_params else None,
                 limit=limit,
-                output_fields=output_fields,
+                output_fields=(
+                    output_fields
+                    if output_fields is not None
+                    else self.default_output_fields
+                ),
             )
 
             logger.info(
@@ -339,7 +341,11 @@ class VectorDBService:
                 filter=filter_expr,
                 filter_params=filter_params if filter_params else None,
                 limit=limit,
-                output_fields=output_fields,
+                output_fields=(
+                    output_fields
+                    if output_fields is not None
+                    else self.default_output_fields
+                ),
             )
 
             logger.info(
@@ -405,17 +411,6 @@ class VectorDBService:
                 filter_params["source_id"] = source_id
             filter_expr = " AND ".join(filter_expr) if filter_expr else None
 
-            # set default output fields
-            if output_fields is None:
-                output_fields = [
-                    "content",
-                    "tags",
-                    "title",
-                    "knowledge_base_id",
-                    "user_id",
-                    "source_id",
-                ]
-
             # perform hybrid search using Milvus native hybrid search
             dense_search_params = {
                 "data": [embedded_query],
@@ -446,7 +441,11 @@ class VectorDBService:
                 reqs=[dense_request, sparse_request],
                 ranker=ranker,
                 limit=limit,
-                output_fields=output_fields,
+                output_fields=(
+                    output_fields
+                    if output_fields is not None
+                    else self.default_output_fields
+                ),
             )
 
             logger.info(
