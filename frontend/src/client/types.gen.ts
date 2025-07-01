@@ -27,6 +27,13 @@ export type Body_login_login_access_token = {
   client_secret?: string | null
 }
 
+export type Body_reportgenie_generate_outline = {
+  description: string
+  report_type?: string
+  num_sections?: number | null
+  files?: Array<Blob | File>
+}
+
 export type Body_reportgenie_generate_report = {
   knowledge_base_id: string
   sections: string
@@ -157,12 +164,6 @@ export type FormConnectResponse = {
   results: {
     [key: string]: unknown
   }
-}
-
-export type GenerateOutlineRequest = {
-  description: string
-  num_sections?: number | null
-  report_type?: string
 }
 
 export type GenerateOutlineResponse = {
@@ -870,7 +871,7 @@ export type ReportgenieDeleteOutlineData = {
 export type ReportgenieDeleteOutlineResponse = Message
 
 export type ReportgenieGenerateOutlineData = {
-  requestBody: GenerateOutlineRequest
+  formData: Body_reportgenie_generate_outline
 }
 
 export type ReportgenieGenerateOutlineResponse = GenerateOutlineResponse

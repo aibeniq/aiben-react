@@ -380,7 +380,7 @@ async def generate_report(
             draft_report += f"\n\n## {section_title}\n\n{section_content}"
 
         # 7. Compile the final report
-        full_report = "\n\n---\n\n".join(
+        full_report = "\n\n\n\n".join(
             [section["content"].strip() for section in sections]
         )
 
@@ -568,22 +568,77 @@ def delete_outline(
 
 
 @router.post("/generate-outline", response_model=GenerateOutlineResponse)
-def generate_outline(
-    request_data: GenerateOutlineRequest,
+async def generate_outline(
     session: SessionDep,
     current_user: CurrentUser,
+    description: str = Form(...),
+    report_type: str = Form(default="general"),
+    num_sections: Optional[int] = Form(default=None),
+    files: List[UploadFile] = File(default=[]),
 ):
     """
-    Generate outline sections based on a description using LLM.
+    Generate outline sections based on a description using LLM, with optional example document.
     """
     try:
         # Get the default LLM
         llm = get_default_llm(session, current_user)
 
+        # Process uploaded files to extract example document content
+        example_document_content = ""
+        if files:
+            print(f"Processing {len(files)} uploaded files for outline generation")
+
+            for file in files:
+                if file.size > 0:
+                    try:
+                        # Read and process the file content
+                        file_content = await file.read()
+                        if file.content_type == "application/pdf":
+                            # Extract text from PDF
+                            import fitz  # PyMuPDF
+
+                            pdf_doc = fitz.open(stream=file_content, filetype="pdf")
+                            file_text = ""
+                            for page in pdf_doc:
+                                file_text += page.get_text()
+                            pdf_doc.close()
+                        elif file.content_type == "text/plain":
+                            # Handle text file
+                            file_text = file_content.decode("utf-8", errors="ignore")
+                        else:
+                            # Try to decode as text anyway
+                            file_text = file_content.decode("utf-8", errors="ignore")
+
+                        if file_text.strip():
+                            example_document_content += f"\n\n--- Content from {file.filename} ---\n{file_text.strip()}"
+                            print(
+                                f"Extracted {len(file_text)} characters from {file.filename}"
+                            )
+
+                    except Exception as e:
+                        print(f"Error processing file {file.filename}: {e}")
+                        continue
+
         # Prepare variables for the prompt
+        if example_document_content:
+            example_document_section = (
+                f"EXAMPLE DOCUMENT FOR REFERENCE:\n{example_document_content}"
+            )
+            example_instruction = "\n12. Use the example document provided above as inspiration for the type of content organization and structure, but adapt the sections to match the specific requirements in the outline description"
+            example_analysis_instruction = (
+                ". Briefly mention how the example document influenced the structure"
+            )
+        else:
+            example_document_section = ""
+            example_instruction = ""
+            example_analysis_instruction = ""
+
         prompt_variables = {
-            "description": request_data.description,
-            "report_type": request_data.report_type,
+            "description": description,
+            "report_type": report_type,
+            "example_document": example_document_section,
+            "example_instruction": example_instruction,
+            "example_analysis_instruction": example_analysis_instruction,
         }
 
         # Generate outline sections using the LLM
@@ -643,8 +698,8 @@ def generate_outline(
             )
 
         # Apply user-specified limit if provided, otherwise use all generated sections
-        if request_data.num_sections:
-            sections = sections[: request_data.num_sections]
+        if num_sections:
+            sections = sections[:num_sections]
 
         if not analysis:
             analysis = f"Generated {len(sections)} sections based on the provided description to ensure comprehensive report structure coverage."
@@ -655,9 +710,10 @@ def generate_outline(
             user_id=current_user.id,
             functionality="generate_outline_sections",
             input_data={
-                "description": request_data.description,
-                "requested_sections": request_data.num_sections,
-                "report_type": request_data.report_type,
+                "description": description,
+                "requested_sections": num_sections,
+                "report_type": report_type,
+                "has_example_document": bool(example_document_content),
             },
             output_data={
                 "sections_count": len(sections),

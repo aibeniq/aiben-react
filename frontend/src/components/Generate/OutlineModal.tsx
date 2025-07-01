@@ -7,14 +7,16 @@ import {
   Portal,
   CloseButton,
   Button,
+  Text,
+  Box,
 } from "@chakra-ui/react"
 import { Field } from "../ui/field"
-import { Box, Text } from "@chakra-ui/react"
 import { ReportGenieOutline, KnowledgeBasePublic } from "../../client"
 import SectionEditor from "./SectionEditor" // Import SectionEditor instead of InteractiveList
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
 import OptimizeOutlineModal from "./OptimizeOutlineModal"
+import FileUpload, { FileItem } from "../Common/FileUpload"
 import { useState } from "react"
 import { ReportgenieService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
@@ -51,6 +53,7 @@ const OutlineModal = ({
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [generating, setGenerating] = useState(false)
   const [showOptimizeModal, setShowOptimizeModal] = useState(false)
+  const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
 
   const handleGenerateOutline = async () => {
     if (!outlineDescription.trim()) {
@@ -67,11 +70,14 @@ const OutlineModal = ({
     setGenerating(true)
 
     try {
+      // Extract files from FileItem objects for the API call
+      const files = exampleFiles.map((item) => item.file)
+
       const response = await ReportgenieService.generateOutline({
-        requestBody: {
+        formData: {
           description: outlineDescription.trim(),
           report_type: "general",
-          // Let LLM decide the number of sections based on description complexity
+          files: files.length > 0 ? files : undefined,
         },
       })
 
@@ -132,11 +138,16 @@ const OutlineModal = ({
     setShowOptimizeModal(true)
   }
 
+  const handleClose = () => {
+    setExampleFiles([])
+    onClose()
+  }
+
   if (!isOpen) return null
 
   return (
     <Portal>
-      <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && onClose()}>
+      <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && handleClose()}>
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content maxW="4xl" maxH="80vh">
@@ -172,6 +183,21 @@ const OutlineModal = ({
                         characters to generate sections
                       </Text>
                     )}
+                </Field>
+
+                <Field label="Example Document (Optional)">
+                  <VStack align="stretch" gap={2}>
+                    <Text fontSize="sm" color="gray.600">
+                      Upload an example document to help the AI understand the desired structure and
+                      style.
+                    </Text>
+                    <FileUpload
+                      files={exampleFiles}
+                      onFilesChange={setExampleFiles}
+                      maxFiles={1}
+                      showHandwrittenToggle={false}
+                    />
+                  </VStack>
                 </Field>
 
                 <Field
@@ -242,7 +268,7 @@ const OutlineModal = ({
 
             <Dialog.Footer>
               <HStack gap={3}>
-                <CancelButton onClick={onClose} size="md">
+                <CancelButton onClick={handleClose} size="md">
                   Cancel
                 </CancelButton>
                 <ConfirmButton onClick={onSave} size="md">
