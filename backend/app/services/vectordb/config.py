@@ -35,10 +35,16 @@ MILVUS_SCHEMA = [
         auto_id=True,
     ),
     FieldSchema(
-        name="vector",
+        name="dense",
         dtype=DataType.FLOAT_VECTOR,
-        description="embedding vector",
+        description="dense embedding vector",
         dim=EMBEDDING_DIM,
+        nullable=False,
+    ),
+    FieldSchema(
+        name="sparse",
+        dtype=DataType.SPARSE_FLOAT_VECTOR,
+        description="sparse vector for BM25 search",
         nullable=False,
     ),
     FieldSchema(
@@ -47,6 +53,7 @@ MILVUS_SCHEMA = [
         max_length=65535,
         description="content of the chunk",
         nullable=False,
+        enable_analyzer=True,
     ),
     FieldSchema(
         name="knowledge_base_id",

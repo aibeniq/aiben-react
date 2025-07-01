@@ -71,10 +71,17 @@ class VectorDBService:
             index_params.add_index(field_name="id", index_type="STL_SORT")
 
             index_params.add_index(
-                field_name="vector",
+                field_name="dense",
                 index_type="HNSW",
                 metric_type="COSINE",
                 params={"M": 16, "efConstruction": 500},
+            )
+
+            index_params.add_index(
+                field_name="sparse",
+                index_type="SPARSE_INVERTED_INDEX",
+                metric_type="BM25",
+                params={"inverted_index_algo": "DAAT_MAXSCORE"},
             )
 
             index_params.add_index(
@@ -143,7 +150,7 @@ class VectorDBService:
             )
 
             for chunk, embedding in zip(chunks, embeddings):
-                chunk_data = EmbeddedChunkData(**chunk.model_dump(), vector=embedding)
+                chunk_data = EmbeddedChunkData(**chunk.model_dump(), dense=embedding)
                 data_to_insert.append(chunk_data)
 
             # insert data
@@ -216,7 +223,7 @@ class VectorDBService:
         output_fields: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
-        Search for similar chunks in the collection.
+        Semantic similarity search.
 
         Args:
             query: Search query text
@@ -269,6 +276,7 @@ class VectorDBService:
             results = self.client.search(
                 collection_name=BASE_COLLECTION_NAME,
                 data=[query_embedding],
+                anns_field="dense",
                 filter=filter_expr,
                 filter_params=filter_params if filter_params else None,
                 limit=limit,
@@ -284,12 +292,29 @@ class VectorDBService:
             logger.error(f"Error searching chunks: {e}")
             return {"success": False, "error": str(e)}
 
+    def search_keyword(
         self,
+        query: str,
         knowledge_base_id: Optional[str] = None,
         user_id: Optional[str] = None,
         source_id: Optional[str] = None,
+        limit: int = 10,
+        output_fields: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
-        """Delete chunks from the collection."""
+        """
+        Keyword search.
+
+        Args:
+            query: Search query text
+            knowledge_base_id: Optional filter by knowledge base ID
+            user_id: Optional filter by user ID
+            source_id: Optional filter by source ID
+            limit: Maximum number of results to return
+            output_fields: List of fields to return in results
+
+        Returns:
+            Dictionary with search results
+        """
         try:
             assert (
                 knowledge_base_id or user_id or source_id
@@ -312,16 +337,22 @@ class VectorDBService:
                 filter_params["source_id"] = source_id
             filter_expr = " AND ".join(filter_expr) if filter_expr else None
 
-            # delete chunks
-            self.client.delete(
+            # perform search
+            results = self.client.search(
                 collection_name=BASE_COLLECTION_NAME,
+                data=[query],
+                anns_field="sparse",
                 filter=filter_expr,
                 filter_params=filter_params if filter_params else None,
+                limit=limit,
+                output_fields=output_fields,
             )
 
-            logger.info(f"Successfully deleted chunks")
-            return {"success": True}
+            logger.info(
+                f"Search completed with {len(results[0]) if results else 0} results"
+            )
+            return {"success": True, "results": results[0] if results else []}
 
         except Exception as e:
-            logger.error(f"Error deleting chunks: {e}")
+            logger.error(f"Error searching chunks: {e}")
             return {"success": False, "error": str(e)}
