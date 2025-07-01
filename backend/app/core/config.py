@@ -146,7 +146,7 @@ class Settings(BaseSettings):
 
     {custom_instructions}
 
-    FORMAT OUTPUT AS A PROPERLY FORMATTED CONSENT FORM SECTION with an appropriate heading and content.
+    IMPORTANT: Do NOT create headers or section titles for the generated content. Provide only the section text directly without any headers, headings, or section titles.
 
     SECTION CONTENT:
     """
@@ -490,6 +490,8 @@ OUTLINE DESCRIPTION:
 
 REPORT TYPE: {report_type}
 
+{example_document}
+
 INSTRUCTIONS:
 1. Generate as many specific, clear, and meaningful sections as needed to comprehensively cover the outline description
 2. Each section should represent a distinct topic or area that would be covered in the report
@@ -501,7 +503,7 @@ INSTRUCTIONS:
 8. Generate between 3-15 sections depending on the complexity of the requirements
 9. For complex topics, generate more detailed sections with specific focus areas
 10. For simple topics, fewer but comprehensive sections are sufficient
-11. Each section should be a concise description (1-2 sentences) of what that section would cover
+11. Each section should be a concise description (1-2 sentences) of what that section would cover{example_instruction}
 
 FORMAT YOUR RESPONSE AS:
 SECTIONS:
@@ -511,7 +513,7 @@ SECTIONS:
 ... (continue with as many sections as needed to comprehensively cover the outline)
 
 ANALYSIS:
-[Brief explanation of why these sections comprehensively cover the outlined requirements and how the sections work together to form a complete report structure]
+[Brief explanation of why these sections comprehensively cover the outlined requirements and how the sections work together to form a complete report structure{example_analysis_instruction}]
 """
 
     REPORTGENIE_OPTIMIZE_OUTLINE_PROMPT_TEMPLATE: str = """

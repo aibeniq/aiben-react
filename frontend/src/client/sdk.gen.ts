@@ -1415,9 +1415,9 @@ export class ReportgenieService {
 
   /**
    * Generate Outline
-   * Generate outline sections based on a description using LLM.
+   * Generate outline sections based on a description using LLM, with optional example document.
    * @param data The data for the request.
-   * @param data.requestBody
+   * @param data.formData
    * @returns GenerateOutlineResponse Successful Response
    * @throws ApiError
    */
@@ -1427,8 +1427,8 @@ export class ReportgenieService {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/reportgenie/generate-outline",
-      body: data.requestBody,
-      mediaType: "application/json",
+      formData: data.formData,
+      mediaType: "multipart/form-data",
       errors: {
         422: "Validation Error",
       },
@@ -1569,7 +1569,6 @@ export class ReportgenieService {
       method: "POST",
       url: "/api/v1/reportgenie/optimize-outline/csv",
       body: data.requestBody,
-      responseType: 'blob',
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
