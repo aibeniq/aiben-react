@@ -6,18 +6,15 @@
 # TODO: add auth?
 
 ## Milvus client
-from app.services.embeddings import load_embeddings_model
 from pymilvus import MilvusClient, CollectionSchema
-import os
 import logging
 from typing import List, Dict, Any, Optional
 from app.services.vectordb.types import ChunkData, EmbeddedChunkData
 from app.services.vectordb.config import (
     MILVUS_SCHEMA,
-    EMBEDDING_MODEL,
-    EMBEDDING_PROVIDER,
     BASE_COLLECTION_NAME,
     MILVUS_URL,
+    EMBEDDING_MODEL,
 )
 
 logger = logging.getLogger(__name__)
@@ -34,14 +31,8 @@ class VectorDBService:
             logger.info(f"Connected to Milvus at {MILVUS_URL}")
 
             # initialize embedding model
-            self.embedding_model = load_embeddings_model(
-                provider=EMBEDDING_PROVIDER,
-                model_id=EMBEDDING_MODEL,
-                api_key=os.getenv("OPENAI_API_KEY"),
-            )
-            logger.info(
-                f"Loaded embedding model: {EMBEDDING_PROVIDER}/{EMBEDDING_MODEL}"
-            )
+            self.embedding_model = EMBEDDING_MODEL
+            logger.info(f"Loaded embedding model: {EMBEDDING_MODEL}")
 
             # create collection schema
             self.schema = CollectionSchema(
