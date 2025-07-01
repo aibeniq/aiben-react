@@ -1,4 +1,4 @@
-from pymilvus import FieldSchema, DataType
+from pymilvus import FieldSchema, DataType, Function, FunctionType
 import os
 from app.services.embeddings import load_embeddings_model
 
@@ -12,6 +12,13 @@ EMBEDDING_MODEL = load_embeddings_model(
     api_key=os.getenv("OPENAI_API_KEY"),
 )
 
+# bm25 function for keyword search
+BM25_FUNCTION = Function(
+    name="text_bm25_emb",
+    input_field_names=["content"],
+    output_field_names=["sparse"],
+    function_type=FunctionType.BM25,
+)
 
 # this is initialized for every vector db service
 BASE_COLLECTION_NAME = "base"

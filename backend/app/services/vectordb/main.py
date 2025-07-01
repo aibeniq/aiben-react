@@ -15,6 +15,7 @@ from app.services.vectordb.config import (
     BASE_COLLECTION_NAME,
     MILVUS_URL,
     EMBEDDING_MODEL,
+    BM25_FUNCTION,
 )
 
 logger = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ class VectorDBService:
             self.schema = CollectionSchema(
                 fields=MILVUS_SCHEMA, description="schema for base collection"
             )
+            self.schema.add_function(BM25_FUNCTION)  # for keyword search
 
             # initialize collection
             self._init_collection()
