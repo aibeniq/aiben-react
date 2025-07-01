@@ -86,20 +86,14 @@ class VectorDBService:
 
             index_params.add_index(
                 field_name="knowledge_base_id",
-                index_type="FLAT",
-                metric_type="COSINE",
             )
 
             index_params.add_index(
                 field_name="user_id",
-                index_type="FLAT",
-                metric_type="COSINE",
             )
 
             index_params.add_index(
                 field_name="source_id",
-                index_type="FLAT",
-                metric_type="COSINE",
             )
 
             # create indexes
