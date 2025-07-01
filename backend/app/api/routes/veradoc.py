@@ -538,7 +538,7 @@ async def process_rag_checklist(
                 # DEBUG: Print the full prompt sent to the LLM
                 try:
                     rendered_prompt = qa_prompt_template.format(
-                        document_text=document_text[:10000],
+                        document_text=document_text,
                         question=question_text,
                         question_context=question_context,
                         custom_instructions_section=custom_instructions_section,
@@ -552,9 +552,7 @@ async def process_rag_checklist(
                     llm,
                     qa_prompt_template,
                     {
-                        "document_text": document_text[
-                            :10000
-                        ],  # Limit length to avoid token issues
+                        "document_text": document_text,
                         "question": question_text,
                         "question_context": question_context,
                         "custom_instructions_section": custom_instructions_section,
