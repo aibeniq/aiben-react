@@ -1,10 +1,17 @@
 from pymilvus import FieldSchema, DataType
 import os
+from app.services.embeddings import load_embeddings_model
 
 # embedding model
 EMBEDDING_PROVIDER = "openai"
 EMBEDDING_MODEL = "text-embedding-3-small"
 EMBEDDING_DIM = 1536
+EMBEDDING_MODEL = load_embeddings_model(
+    provider=EMBEDDING_PROVIDER,
+    model_id=EMBEDDING_MODEL,
+    api_key=os.getenv("OPENAI_API_KEY"),
+)
+
 
 # this is initialized for every vector db service
 BASE_COLLECTION_NAME = "base"
