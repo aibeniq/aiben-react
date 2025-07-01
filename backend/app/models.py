@@ -10,6 +10,7 @@ from sqlalchemy import (
     UniqueConstraint,
     Enum as SQLAlchemyEnum,
     JSON,
+    Text,
 )
 from datetime import datetime
 
@@ -485,10 +486,10 @@ class ReportGenieOutline(SQLModel, table=True):
     __tablename__ = "reportgenie_outlines"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str = Field(max_length=255, unique=True, nullable=False)
-    description: str | None = Field(default=None, max_length=255)
+    description: str | None = Field(default=None, sa_type=Text())
     sections: str = Field(
-        nullable=False
-    )  # Store sections outline as JSON string with consultDocuments flags
+        nullable=False, sa_type=Text()
+    )  # Store sections outline as JSON string with consultDocuments flags - use TEXT type for longer content
     owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
