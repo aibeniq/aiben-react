@@ -1,4 +1,5 @@
 # NOTE: uses text-embedding-3-small for embeddings
+# NOTE: supports only one collection for now (and thus one embedding model)
 
 # TODO: search methods
 # TODO: initialize on fastapi startup
@@ -15,7 +16,7 @@ from app.services.vectordb.config import (
     MILVUS_SCHEMA,
     EMBEDDING_MODEL,
     EMBEDDING_PROVIDER,
-    DEFAULT_COLLECTION_NAME,
+    BASE_COLLECTION_NAME,
     MILVUS_URL,
 )
 
@@ -25,10 +26,7 @@ logger = logging.getLogger(__name__)
 class VectorDBService:
     """Vector database service for managing document chunks and embeddings."""
 
-    def __init__(
-        self,
-        collection_name: str = DEFAULT_COLLECTION_NAME,
-    ):
+    def __init__(self):
         """Initialize the vector database service."""
         try:
             # initialize Milvus client using config
@@ -51,25 +49,25 @@ class VectorDBService:
             )
 
             # initialize collection
-            self.init_collection()
+            self._init_collection()
 
         except Exception as e:
             logger.error(f"Failed to initialize VectorDBService: {e}")
             raise
 
-    def init_collection(self, collection_name: str = DEFAULT_COLLECTION_NAME) -> bool:
+    def _init_collection(self) -> bool:
         """Initialize the collection if it doesn't exist and set up indexes."""
         try:
             # check if collection exists
-            if self.client.has_collection(collection_name=collection_name):
-                logger.info(f"Collection '{collection_name}' already exists.")
+            if self.client.has_collection(collection_name=BASE_COLLECTION_NAME):
+                logger.info(f"Collection '{BASE_COLLECTION_NAME}' already exists.")
                 return True
 
-            logger.info(f"Creating collection '{collection_name}'...")
+            logger.info(f"Creating collection '{BASE_COLLECTION_NAME}'...")
 
             # create collection
             self.client.create_collection(
-                collection_name=collection_name,
+                collection_name=BASE_COLLECTION_NAME,
                 schema=self.schema,
             )
 
@@ -106,11 +104,13 @@ class VectorDBService:
 
             # create indexes
             self.client.create_index(
-                collection_name=collection_name, index_params=index_params, sync=True
+                collection_name=BASE_COLLECTION_NAME,
+                index_params=index_params,
+                sync=True,
             )
 
             logger.info(
-                f"Collection '{collection_name}' created successfully with indexes."
+                f"Collection '{BASE_COLLECTION_NAME}' created successfully with indexes."
             )
             return True
 
@@ -121,7 +121,6 @@ class VectorDBService:
     def add_chunks(
         self,
         chunks: List[ChunkData],
-        collection_name: str = DEFAULT_COLLECTION_NAME,
     ) -> Dict[str, Any]:
         """
         Add chunks to the collection.
@@ -134,15 +133,15 @@ class VectorDBService:
         """
         try:
             # ensure collection exists and is loaded
-            if not self.client.has_collection(collection_name=collection_name):
-                if not self.init_collection():
+            if not self.client.has_collection(collection_name=BASE_COLLECTION_NAME):
+                if not self._init_collection():
                     return {
                         "success": False,
                         "error": "Failed to initialize collection",
                     }
 
             # load collection if not already loaded
-            self.client.load_collection(collection_name=collection_name)
+            self.client.load_collection(collection_name=BASE_COLLECTION_NAME)
 
             # prepare data for insertion
             data_to_insert: List[EmbeddedChunkData] = []
@@ -156,7 +155,7 @@ class VectorDBService:
 
             # insert data
             result = self.client.insert(
-                collection_name=collection_name,
+                collection_name=BASE_COLLECTION_NAME,
                 data=data_to_insert,
             )
 
@@ -179,7 +178,6 @@ class VectorDBService:
         source_id: Optional[str] = None,
         limit: int = 10,
         output_fields: Optional[List[str]] = None,
-        collection_name: str = DEFAULT_COLLECTION_NAME,
     ) -> Dict[str, Any]:
         """
         Search for similar chunks in the collection.
@@ -197,7 +195,7 @@ class VectorDBService:
         """
         try:
             # ensure collection is loaded
-            self.client.load_collection(collection_name=collection_name)
+            self.client.load_collection(collection_name=BASE_COLLECTION_NAME)
 
             # generate embedding for query
             query_embedding = self.embedding_model.embed_query(query)
@@ -225,7 +223,7 @@ class VectorDBService:
 
             # perform search
             results = self.client.search(
-                collection_name=collection_name,
+                collection_name=BASE_COLLECTION_NAME,
                 data=[query_embedding],
                 filter=filter_expr,
                 limit=limit,

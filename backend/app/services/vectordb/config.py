@@ -1,18 +1,18 @@
 from pymilvus import FieldSchema, DataType
 import os
 
-# Embedding model
+# embedding model
 EMBEDDING_PROVIDER = "openai"
 EMBEDDING_MODEL = "text-embedding-3-small"
 EMBEDDING_DIM = 1536
 
-# Collection name
-DEFAULT_COLLECTION_NAME = "knowledge_base_collection"
+# this is initialized for every vector db service
+BASE_COLLECTION_NAME = "base"
 
-# Milvus URL
+# milvus URL
 MILVUS_URL = os.getenv("MILVUS_URL", "http://localhost:19530")
 
-# Milvus schema
+# milvus schema
 MILVUS_SCHEMA = [
     FieldSchema(
         name="id",
