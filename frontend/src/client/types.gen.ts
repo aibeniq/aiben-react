@@ -39,6 +39,7 @@ export type Body_reportgenie_generate_report = {
   sections: string
   outline_id: string
   search_mode?: string
+  custom_instructions?: string | null
 }
 
 export type Body_reportgenie_optimize_outline = {
