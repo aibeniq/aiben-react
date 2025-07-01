@@ -194,6 +194,10 @@ class VectorDBService:
             Dictionary with search results
         """
         try:
+            assert (
+                knowledge_base_id or user_id or source_id
+            ), "At least one of knowledge_base_id, user_id, or source_id must be provided"
+
             # ensure collection is loaded
             self.client.load_collection(collection_name=BASE_COLLECTION_NAME)
 
