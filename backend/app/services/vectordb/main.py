@@ -6,7 +6,7 @@
 # TODO: add auth?
 
 ## Milvus client
-from pymilvus import MilvusClient, CollectionSchema
+from pymilvus import MilvusClient, CollectionSchema, AnnSearchRequest, WeightedRanker
 import logging
 from typing import List, Dict, Any, Optional
 from app.services.vectordb.types import ChunkData, EmbeddedChunkData
@@ -349,4 +349,112 @@ class VectorDBService:
 
         except Exception as e:
             logger.error(f"Error searching chunks: {e}")
+            return {"success": False, "error": str(e)}
+
+    def search_hybrid(
+        self,
+        query: str,
+        knowledge_base_id: Optional[str] = None,
+        user_id: Optional[str] = None,
+        source_id: Optional[str] = None,
+        limit: int = 10,
+        output_fields: Optional[List[str]] = None,
+        alpha: float = 0.5,
+        rerank_k: int = 20,
+    ) -> Dict[str, Any]:
+        """
+        Hybrid search combining semantic and keyword search.
+
+        Args:
+            query: Search query text
+            knowledge_base_id: Optional filter by knowledge base ID
+            user_id: Optional filter by user ID
+            source_id: Optional filter by source ID
+            limit: Maximum number of results to return
+            output_fields: List of fields to return in results
+            alpha: Weight for semantic search results (0.0-1.0)
+            rerank_k: Number of candidates to retrieve before reranking
+
+        Returns:
+            Dictionary with search results
+        """
+        try:
+            assert (
+                knowledge_base_id or user_id or source_id
+            ), "At least one of knowledge_base_id, user_id, or source_id must be provided"
+
+            assert 0.0 <= alpha <= 1.0, "alpha must be between 0.0 and 1.0"
+
+            # ensure collection is loaded
+            self.client.load_collection(collection_name=BASE_COLLECTION_NAME)
+
+            # generate embedding for query (semantic search)
+            embedded_query = self.embedding_model.embed_query(query)
+
+            # prepare filter
+            filter_expr = []
+            filter_params = {}
+            if knowledge_base_id:
+                filter_expr.append("knowledge_base_id == {kb_id}")
+                filter_params["kb_id"] = knowledge_base_id
+            if user_id:
+                filter_expr.append("user_id == {user_id}")
+                filter_params["user_id"] = user_id
+            if source_id:
+                filter_expr.append("source_id == {source_id}")
+                filter_params["source_id"] = source_id
+            filter_expr = " AND ".join(filter_expr) if filter_expr else None
+
+            # set default output fields
+            if output_fields is None:
+                output_fields = [
+                    "content",
+                    "tags",
+                    "title",
+                    "knowledge_base_id",
+                    "user_id",
+                    "source_id",
+                ]
+
+            # perform hybrid search using Milvus native hybrid search
+            dense_search_params = {
+                "data": [embedded_query],
+                "anns_field": "dense",
+                "metric_type": "COSINE",
+                "param": {"M": 16, "efConstruction": 500},
+                "limit": rerank_k,
+                "expr": filter_expr,
+                "expr_params": filter_params if filter_params else None,
+            }
+            sparse_search_params = {
+                "data": [query],
+                "anns_field": "sparse",
+                "param": {"drop_ratio_search": 0.2},
+                "limit": rerank_k,
+                "expr": filter_expr,
+                "expr_params": filter_params if filter_params else None,
+            }
+
+            dense_request = AnnSearchRequest(**dense_search_params)
+            sparse_request = AnnSearchRequest(**sparse_search_params)
+
+            ranker = WeightedRanker(alpha, 1 - alpha)
+
+            # execute hybrid search
+            results = self.client.hybrid_search(
+                collection_name=BASE_COLLECTION_NAME,
+                reqs=[dense_request, sparse_request],
+                ranker=ranker,
+                limit=limit,
+                output_fields=output_fields,
+            )
+
+            logger.info(
+                f"Hybrid search completed with {len(results[0]) if results else 0} results "
+                f"(alpha={alpha})"
+            )
+            return {"success": True, "results": results[0] if results else []}
+
+        except Exception as e:
+            logger.error(f"Error in hybrid search: {e}")
             return {"success": False, "error": str(e)}
