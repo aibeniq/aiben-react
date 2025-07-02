@@ -1,7 +1,5 @@
-# NOTE: uses text-embedding-3-small for embeddings
 # NOTE: when adding new fields, update both the ChunkData and Milvus schema
 
-from pymilvus import FieldSchema, DataType
 from typing import List
 from pydantic import BaseModel, Field
 import time
