@@ -11,7 +11,7 @@ BM25_FUNCTION = Function(
 )
 
 # milvus URL
-MILVUS_URL = os.getenv("MILVUS_URL", "http://localhost:19530")
+MILVUS_URL = os.getenv("MILVUS_URL", "http://milvus:19530")
 
 # milvus schema without dense vector field (added separately for each embedding model & collection)
 MILVUS_SCHEMA_TEMPLATE = [

@@ -147,6 +147,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
+      - MILVUS_URL=http://milvus:19530
 
   backend:
     image: "${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}"
@@ -188,7 +189,7 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
-      - MILVUS_URL=${MILVUS_URL}
+      - MILVUS_URL=http://milvus:19530
       - OPENAI_API_KEY
       - REPLICATE_API_TOKEN
 
