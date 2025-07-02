@@ -8,7 +8,19 @@ from pymilvus import (
     FieldSchema,
     DataType,
 )
+from fastapi import UploadFile
+import mimetypes
+import tempfile
+import os
+from langchain_core.documents import Document
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from fastapi import HTTPException
+import docx
+import time
+from app.core.config import settings
 
+from app.services.knowledgebases import KnowledgeBaseService
 from app.services.vectordb.types import ChunkData, EmbeddedChunkData
 from app.services.embeddings import EmbeddingService
 from app.services.vectordb.config import (
@@ -18,6 +30,105 @@ from app.services.vectordb.config import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def extract_text_from_docx(file_path: str, filename: str) -> List[Any]:
+    doc = docx.Document(file_path)
+
+    full_text = []
+
+    for para in doc.paragraphs:
+        if para.text.strip():  # Skip empty paragraphs
+            full_text.append(para.text)
+
+    for table in doc.tables:
+        for row in table.rows:
+            row_text = []
+            for cell in row.cells:
+                if cell.text.strip():
+                    row_text.append(cell.text.strip())
+            if row_text:
+                full_text.append(" | ".join(row_text))
+
+    combined_text = "\n\n".join(full_text)
+
+    metadata = {
+        "source": filename,
+        "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    }
+
+    # Try to get document properties
+    try:
+        core_properties = doc.core_properties
+        if core_properties.title:
+            metadata["title"] = core_properties.title
+        if core_properties.author:
+            metadata["author"] = core_properties.author
+        if core_properties.created:
+            metadata["created"] = str(core_properties.created)
+        if core_properties.modified:
+            metadata["modified"] = str(core_properties.modified)
+    except Exception as e:
+        print(f"Could not extract document properties: {str(e)}")
+
+    # Create a Document object compatible with langchain
+    return [Document(page_content=combined_text, metadata=metadata)]
+
+
+def load_uploaded_file(file: UploadFile) -> List[Any]:
+    """
+    Load an uploaded file based on its type (e.g., PDF, text file).
+
+    Args:
+        file (UploadFile): The uploaded file to process.
+
+    Returns:
+        List[Any]: A list of loaded documents from the file.
+    """
+    print(f"Processing file: {file.filename}")
+    content_type = file.content_type or mimetypes.guess_type(file.filename)[0]
+    print(f"Detected content type: {content_type}")
+
+    with tempfile.NamedTemporaryFile(
+        delete=False, suffix=f"_{file.filename}"
+    ) as temp_file:
+        temp_file.write(
+            file.file.read()
+        )  # Write the file content to the temporary file
+        temp_file_path = temp_file.name
+
+    try:
+        if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
+            print("Loading PDF with PyPDFLoader...")
+            loader = PyPDFLoader(temp_file_path)
+            loaded_documents = loader.load()
+        elif (
+            content_type
+            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            or file.filename.lower().endswith(".docx")
+        ):
+            print("Loading DOCX with python-docx library...")
+            loaded_documents = extract_text_from_docx(temp_file_path, file.filename)
+        else:
+            print("Loading text with TextLoader...")
+            # Try with different encodings if utf-8 fails
+            try:
+                loader = TextLoader(temp_file_path, encoding="utf-8")
+                loaded_documents = loader.load()
+            except UnicodeDecodeError:
+                print("UTF-8 decoding failed. Retrying with Latin-1 encoding...")
+                loader = TextLoader(temp_file_path, encoding="latin-1")
+                loaded_documents = loader.load()
+
+        return loaded_documents
+    except Exception as e:
+        print(f"Error processing file {file.filename}: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"Error processing file {file.filename}: {str(e)}"
+        )
+    finally:
+        # Clean up the temporary file
+        os.unlink(temp_file_path)
 
 
 class VectorDBService:
@@ -167,7 +278,65 @@ class VectorDBService:
             logger.error(f"Error initializing collection '{collection_name}': {e}")
             return False
 
-    def add_chunks(
+    def add_file(
+        self,
+        file: UploadFile,
+        knowledge_base_id: str,
+        user_id: str,
+        source_id: str,
+    ) -> None:
+        """Add files to the collection."""
+
+        documents = []
+
+        # Load documents from file
+        loaded_documents = load_uploaded_file(file)  # TODO: switch to docling
+        documents.extend(loaded_documents)
+
+        # Split documents into chunks using RecursiveCharacterTextSplitter
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=settings.DOCUMENT_CHUNK_SIZE,
+            chunk_overlap=settings.DOCUMENT_CHUNK_OVERLAP,
+        )
+        splits = text_splitter.split_documents(documents)
+
+        chunks_to_add: List[ChunkData] = []
+        for split in splits:
+            chunk_data = ChunkData(
+                knowledge_base_id=str(knowledge_base_id),
+                source_id=str(source_id),
+                user_id=str(user_id),
+                content=split.page_content,
+                tags=[],
+                title=split.metadata.get("title", ""),
+                summary="",
+                author=split.metadata.get("author", ""),
+                url=split.metadata.get("source", ""),
+                created_at=int(time.time()),
+                updated_at=int(time.time()),
+            )
+            chunks_to_add.append(chunk_data)
+
+        self._add_chunks(
+            chunks_to_add,
+            embedding_model_id=EmbeddingService.get_default_model(),  # TODO: use user default (and make required)
+        )
+
+    def delete_source(self, source_id: str) -> None:
+        """Delete a file from the collection."""
+        self._delete_chunks(
+            source_id=source_id,
+            embedding_model_id=EmbeddingService.get_default_model(),  # TODO: use user default (and make required))
+        )
+
+    def delete_knowledge_base(self, knowledge_base_id: str) -> None:
+        """Delete a knowledge base from the collection."""
+        self._delete_chunks(
+            knowledge_base_id=knowledge_base_id,
+            embedding_model_id=EmbeddingService.get_default_model(),  # TODO: use user default (and make required))
+        )
+
+    def _add_chunks(
         self,
         chunks: List[ChunkData],
         embedding_model_id: str,
@@ -232,7 +401,7 @@ class VectorDBService:
             logger.error(f"Error adding chunks to {collection_name}: {e}")
             return {"success": False, "error": str(e)}
 
-    def delete_chunks(
+    def _delete_chunks(
         self,
         embedding_model_id: str,
         knowledge_base_id: Optional[str] = None,
