@@ -13,6 +13,12 @@ import json
 from dataclasses import dataclass
 
 
+# TODO: remove (mock)
+def load_embeddings_model(provider: str, model_id: str) -> Embeddings:
+    """Load an embedding model by ID."""
+    return EmbeddingService.get_model(model_id)
+
+
 @dataclass
 class EmbeddingModelSpec:
     """Specification for an embedding model."""
@@ -64,6 +70,11 @@ class EmbeddingService:
     def list_available_models(cls) -> List[str]:
         """Get list of available model IDs."""
         return list(cls.AVAILABLE_MODELS.keys())
+
+    @classmethod
+    def get_default_model(cls) -> str:
+        """Get the default model ID."""
+        return "openai-text-3-small"  # TODO: make this configurable
 
     @classmethod
     def get_model_spec(cls, model_id: str) -> Optional[EmbeddingModelSpec]:

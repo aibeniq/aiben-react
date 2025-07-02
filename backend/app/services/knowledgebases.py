@@ -22,36 +22,27 @@ logger = logging.getLogger(__name__)
 
 class KnowledgeBaseService:
     @staticmethod
-    def check_existing_knowledge_base(
+    def get_by_title(
         *,
         session: Session,
         title: str,
         owner_id: uuid.UUID,
     ) -> KnowledgeBase | None:
-        """
-        Check if a knowledge base with the given title already exists for the user.
-
-        Args:
-            session: Database session
-            title: Knowledge base title to check
-            owner_id: ID of the knowledge base owner
-
-        Returns:
-            KnowledgeBase if found, None otherwise
-        """
+        """Get a knowledge base by title."""
         try:
-            existing_kb = session.exec(
+            return session.exec(
                 select(KnowledgeBase).where(
-                    KnowledgeBase.title == title,
-                    KnowledgeBase.owner_id == owner_id,
+                    KnowledgeBase.title == title, KnowledgeBase.owner_id == owner_id
                 )
             ).first()
-            return existing_kb
         except Exception as e:
-            logger.error(
-                f"Error checking for existing knowledge base '{title}': {str(e)}"
-            )
+            logger.error(f"Error getting knowledge base by title '{title}': {str(e)}")
             raise
+
+    @staticmethod
+    def get_by_id(session: Session, id: uuid.UUID) -> KnowledgeBase | None:
+        """Get a knowledge base by id."""
+        return session.exec(select(KnowledgeBase).where(KnowledgeBase.id == id)).first()
 
     @staticmethod
     def create_knowledge_base(
@@ -94,13 +85,27 @@ class KnowledgeBaseService:
             raise
 
     @staticmethod
-    def create_source_entries(
+    def delete_knowledge_base(
+        *,
+        session: Session,
+        knowledge_base_id: uuid.UUID,
+    ) -> None:
+        """Delete a knowledge base."""
+        knowledge_base = KnowledgeBaseService.get_by_id(
+            session=session, id=knowledge_base_id
+        )
+        if not knowledge_base:
+            raise ValueError(f"Knowledge base {knowledge_base_id} not found")
+        session.delete(knowledge_base)
+
+    @staticmethod
+    def add_source(
         *,
         session: Session,
         current_user: CurrentUser,
         knowledge_base_id: uuid.UUID,
         file: UploadFile,
-    ) -> None:
+    ) -> Source:
         """
         Create source and source_data entries for a single file.
 
@@ -155,6 +160,9 @@ class KnowledgeBaseService:
             session.add(source)
 
         file.file.seek(0)
+        session.flush()
+
+        return source
 
     @staticmethod
     def get_source_by_id(session: Session, source_id: uuid.UUID) -> Source | None:
@@ -166,16 +174,28 @@ class KnowledgeBaseService:
             raise
 
     @staticmethod
-    def delete_source(session: Session, source_id: uuid.UUID) -> Source | None:
-        """Delete a source."""
+    def get_sources(session: Session, knowledge_base_id: uuid.UUID) -> List[Source]:
+        """Get all sources for a knowledge base."""
+        return session.exec(
+            select(Source).where(Source.knowledge_base_id == knowledge_base_id)
+        ).all()
+
+    @staticmethod
+    def delete_source_by_id(
+        session: Session, source_id: uuid.UUID, knowledge_base_id: uuid.UUID
+    ) -> Source:
+        """Delete a source by id."""
         try:
             source_to_delete = session.exec(
-                select(Source).where(Source.id == source_id)
+                select(Source).where(
+                    Source.id == source_id,
+                    Source.knowledge_base_id == knowledge_base_id,
+                )
             ).first()
 
             if not source_to_delete:
                 logger.info(f"Source {source_id} not found")
-                return None
+                raise ValueError(f"Source {source_id} not found")
 
             source_data_id = source_to_delete.source_data_id
 
