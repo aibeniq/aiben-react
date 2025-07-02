@@ -11,8 +11,8 @@ from sqlmodel import Session
 from app.core import security
 from app.core.config import settings
 from app.core.db import engine
+from app.core.app_state import app_state
 from app.models import TokenPayload, User
-from app.main import app_state
 from app.services.vectordb.main import VectorDBService
 
 reusable_oauth2 = OAuth2PasswordBearer(
