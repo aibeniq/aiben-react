@@ -1,19 +1,5 @@
 from pymilvus import FieldSchema, DataType, Function, FunctionType
 import os
-from app.services.embeddings import load_embeddings_model
-
-# embedding model
-EMBEDDING_PROVIDER = "openai"
-EMBEDDING_MODEL = "text-embedding-3-small"
-EMBEDDING_DIM = 1536
-
-
-def get_embedding_model():
-    return load_embeddings_model(
-        provider=EMBEDDING_PROVIDER,
-        model_id=EMBEDDING_MODEL,
-        api_key=os.getenv("OPENAI_API_KEY"),
-    )
 
 
 # bm25 function for keyword search
@@ -24,26 +10,16 @@ BM25_FUNCTION = Function(
     function_type=FunctionType.BM25,
 )
 
-# this is initialized for every vector db service
-BASE_COLLECTION_NAME = "base"
-
 # milvus URL
 MILVUS_URL = os.getenv("MILVUS_URL", "http://localhost:19530")
 
-# milvus schema
-MILVUS_SCHEMA = [
+# milvus schema without dense vector field (added separately for each embedding model & collection)
+MILVUS_SCHEMA_TEMPLATE = [
     FieldSchema(
         name="id",
         dtype=DataType.INT64,
         is_primary=True,
         auto_id=True,
-    ),
-    FieldSchema(
-        name="dense",
-        dtype=DataType.FLOAT_VECTOR,
-        description="dense embedding vector",
-        dim=EMBEDDING_DIM,
-        nullable=False,
     ),
     FieldSchema(
         name="sparse",
