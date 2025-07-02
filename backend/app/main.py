@@ -7,32 +7,37 @@ import logging
 
 from app.api.main import api_router
 from app.core.config import settings
+from app.core.app_state import app_state
 from app.services.vectordb.main import VectorDBService
-
-
-class AppState:
-    vector_db_service: VectorDBService | None = None
-
-
-app_state = AppState()
 
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Initialize vector database service
     try:
         logger.info("Initializing vector database service")
         app_state.vector_db_service = VectorDBService()
-        logger.info("Vector database service initialized")
-        yield  # before yield = startup, after yield = shutdown
+        logger.info("Vector database service initialized successfully")
     except Exception as e:
         logger.error(f"Error initializing vector database service: {e}")
         raise
+
+    try:
+        yield  # before yield = startup, after yield = shutdown
     finally:
         logger.info("Closing vector database service")
-        app_state.vector_db_service.client.close()
-        logger.info("Vector database service closed")
+        if app_state.vector_db_service and hasattr(
+            app_state.vector_db_service, "client"
+        ):
+            try:
+                app_state.vector_db_service.client.close()
+                logger.info("Vector database service closed")
+            except Exception as e:
+                logger.error(f"Error closing vector database service: {e}")
+        else:
+            logger.info("Vector database service was not initialized, nothing to close")
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
