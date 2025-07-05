@@ -1216,6 +1216,7 @@ export class ReportgenieService {
       url: "/api/v1/reportgenie/generate/docx",
       body: data.requestBody,
       mediaType: "application/json",
+      responseType: "blob",
       errors: {
         422: "Validation Error",
       },
@@ -1470,6 +1471,7 @@ export class TwincheckService {
       url: "/api/v1/twincheck/generate/docx",
       body: data.requestBody,
       mediaType: "application/json",
+      responseType: "blob",
       errors: {
         422: "Validation Error",
       },
