@@ -40,7 +40,9 @@ interface KnowledgeBaseCreate {
 const AddKnowledgeBase = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]) // State for managing selected files
-  const [selectedEmbeddingModelId, setSelectedEmbeddingModelId] = useState<string | null>(null)
+  const [selectedEmbeddingModelId, setSelectedEmbeddingModelId] = useState<string | undefined>(
+    undefined,
+  )
   const [availableProviders, setAvailableProviders] = useState<string[]>([]) //only show Embedding Model providers allowed in config.py
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -60,7 +62,7 @@ const AddKnowledgeBase = () => {
 
   const { data: embeddingModels = [] } = useQuery({
     queryKey: ["embedding-models"],
-    queryFn: () => EmbeddingModelsService.getEmbeddingModels().then((res) => res.data),
+    queryFn: () => EmbeddingModelsService.getEmbeddingModelsRegistry(),
     // Don't fetch if modal is closed
     enabled: isOpen,
   })
@@ -75,8 +77,8 @@ const AddKnowledgeBase = () => {
   useEffect(() => {
     EmbeddingModelsService.getAvailableProviders()
       .then((response) => {
-        if (response.embedding_providers && Array.isArray(response.embedding_providers)) {
-          setAvailableProviders(response.embedding_providers)
+        if (response && Array.isArray(response)) {
+          setAvailableProviders(response)
         } else {
           setAvailableProviders(["openai", "aws"]) // fallback
         }
@@ -108,7 +110,7 @@ const AddKnowledgeBase = () => {
   useEffect(() => {
     if (!isOpen) {
       setSelectedFiles([])
-      setSelectedEmbeddingModelId(null)
+      setSelectedEmbeddingModelId(undefined)
 
       // Also reset the form completely, including errors
       reset(
@@ -129,7 +131,7 @@ const AddKnowledgeBase = () => {
     mutationFn: (data: {
       title: string
       description: string
-      embedding_model_id: string | null
+      embedding_model_id: string | undefined
       files: File[]
     }) => {
       console.log("Now beginning mutation...")
@@ -148,7 +150,7 @@ const AddKnowledgeBase = () => {
       showSuccessToast("Knowledge Base created successfully.")
       reset()
       setSelectedFiles([]) // Reset selected files after successful creation
-      setSelectedEmbeddingModelId(null)
+      setSelectedEmbeddingModelId(undefined)
       setIsOpen(false)
     },
     onError: (err: ApiError) => {
@@ -296,7 +298,7 @@ const AddKnowledgeBase = () => {
                 <Field label="Embedding Model">
                   <select
                     value={selectedEmbeddingModelId || ""}
-                    onChange={(e) => setSelectedEmbeddingModelId(e.target.value || null)}
+                    onChange={(e) => setSelectedEmbeddingModelId(e.target.value || undefined)}
                     style={{
                       width: "100%",
                       padding: "0.5rem",
@@ -306,8 +308,8 @@ const AddKnowledgeBase = () => {
                   >
                     {filteredEmbeddingModels.map((model) => (
                       <option key={model.id} value={model.id}>
-                        {model.name} ({model.provider}){" "}
-                        {defaultModel?.id === model.id ? "(Default)" : ""}
+                        {model.provider} | {model.model_name}
+                        {defaultModel?.id === model.id ? " (default)" : ""}
                       </option>
                     ))}
                   </select>
