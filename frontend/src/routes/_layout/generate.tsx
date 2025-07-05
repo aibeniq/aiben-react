@@ -10,10 +10,10 @@ import {
   Accordion,
   Textarea,
 } from "@chakra-ui/react"
-import { Radio, RadioGroup } from "../../components/ui/radio"
 import useCustomToast from "@/hooks/useCustomToast"
 import SourceLink from "@/components/Common/SourceLink"
 import DownloadButton from "@/components/ui/download-button"
+import SearchModeToggle from "@/components/Common/SearchModeToggle"
 import { useState, useEffect } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
@@ -59,7 +59,7 @@ const ReportGenie = () => {
   const [expandedSection, setExpandedSection] = useState<number | null>(null)
 
   // Search mode state
-  const [searchMode, setSearchMode] = useState("vector") // Default to vector search
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector") // Default to vector search
 
   // Custom instructions state
   const [customInstructions, setCustomInstructions] = useState("")
@@ -264,7 +264,7 @@ const ReportGenie = () => {
         knowledge_base_id: data.knowledgeBaseId,
         sections: data.sections,
         outline_id: data.outlineId || "",
-        search_mode: data.searchMode || "vector",
+        search_mode: data.searchMode === "full_scan" ? "full_text" : data.searchMode || "vector", // Map full_scan to full_text for ReportGenie backend
         custom_instructions: data.customInstructions || undefined,
       }
 
@@ -375,22 +375,7 @@ const ReportGenie = () => {
               onClick={() => setShowOutlineModal(true)}
             />
 
-            {/* Add toggle for search mode */}
-            <Box>
-              <Text fontWeight="medium" mb={2}>
-                Search Mode
-              </Text>
-              <RadioGroup
-                onValueChange={(details) => setSearchMode(details.value || "vector")}
-                value={searchMode}
-                defaultValue="vector"
-              >
-                <HStack gap={4}>
-                  <Radio value="vector">Vector Search</Radio>
-                  <Radio value="full_text">Full Document Scan</Radio>
-                </HStack>
-              </RadioGroup>
-            </Box>
+            <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
 
             {/* Custom Instructions Text Box */}
             <Box width="100%">
