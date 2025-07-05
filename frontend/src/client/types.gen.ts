@@ -143,34 +143,22 @@ export type KnowledgeBasesPublic = {
   count: number
 }
 
-export type LlmModelCreate = {
-  name: string
-  model_id: string
-  provider?: LlmProvider
-  description?: string
+/**
+ * Model for LLM model information.
+ */
+export type LlmModelInfo = {
+  id: string
+  provider: string
+  model_name: string
+  context_length?: number | null
+  max_output_tokens?: number | null
+  cost_per_1k_input_tokens?: number | null
+  cost_per_1k_output_tokens?: number | null
+  supports_streaming?: boolean
+  supports_function_calling?: boolean
+  supports_vision?: boolean
+  description?: string | null
 }
-
-export type LlmModelPublic = {
-  id?: string
-  name?: string
-  model_id?: string
-  provider?: LlmProvider
-  description?: string
-  owner_id?: string | null
-  date_created?: string
-  date_modified?: string
-}
-
-export type LlmModelsPublic = {
-  data: Array<LlmModelPublic>
-}
-
-export type LlmModelsValidate = {
-  model_id: string
-  provider: LlmProvider
-}
-
-export type LlmProvider = "huggingface" | "openai" | "ollama" | "replicate" | "aws"
 
 export type Message = {
   message: string
@@ -447,7 +435,8 @@ export type ChatQueryTextResponse = TextQueryResponse
 
 export type EmbeddingModelsGetAvailableProvidersResponse = Array<string>
 
-export type EmbeddingModelsGetEmbeddingModelsRegistryResponse = Array<EmbeddingModelInfo>
+export type EmbeddingModelsGetEmbeddingModelsRegistryResponse =
+  Array<EmbeddingModelInfo>
 
 export type EmbeddingModelsGetDefaultEmbeddingModelResponse = EmbeddingModelInfo
 
@@ -456,7 +445,7 @@ export type EmbeddingModelsGetLlmModelsData = {
   skip?: number
 }
 
-export type EmbeddingModelsGetLlmModelsResponse = LlmModelsPublic
+export type EmbeddingModelsGetLlmModelsResponse = Array<LlmModelInfo>
 
 export type FeedbackSubmitFeedbackData = {
   feedback: string
@@ -590,38 +579,29 @@ export type KnowledgeBasesDeleteKnowledgeBaseData = {
 
 export type KnowledgeBasesDeleteKnowledgeBaseResponse = Message
 
-export type LlmModelsGetLlmModelsData = {
-  limit?: number
-  skip?: number
-}
+export type LlmModelsGetLlmModelsResponse = Array<LlmModelInfo>
 
-export type LlmModelsGetLlmModelsResponse = LlmModelsPublic
+export type LlmModelsGetAvailableProvidersResponse = Array<string>
 
-export type LlmModelsCreateLlmModelData = {
-  requestBody: LlmModelCreate
-}
+export type LlmModelsGetDefaultLlmModelResponse = LlmModelInfo
 
-export type LlmModelsCreateLlmModelResponse = LlmModelPublic
-
-export type LlmModelsGetDefaultLlmModelResponse = LlmModelPublic
-
-export type LlmModelsDeleteLlmModelData = {
+export type LlmModelsValidateLlmModelData = {
   modelId: string
 }
 
-export type LlmModelsDeleteLlmModelResponse = Message
+export type LlmModelsValidateLlmModelResponse = Message
 
-export type LlmModelsValidateLlmModelData = {
-  requestBody: LlmModelsValidate
+export type LlmModelsCheckApiKeyConfiguredData = {
+  provider: string
 }
 
-export type LlmModelsValidateLlmModelResponse = Message
+export type LlmModelsCheckApiKeyConfiguredResponse = Message
 
 export type LlmModelsSetDefaultLlmModelData = {
   modelId: string
 }
 
-export type LlmModelsSetDefaultLlmModelResponse = LlmModelPublic
+export type LlmModelsSetDefaultLlmModelResponse = LlmModelInfo
 
 export type LoginLoginAccessTokenData = {
   formData: Body_login_login_access_token

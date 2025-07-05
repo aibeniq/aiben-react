@@ -54,15 +54,13 @@ import type {
   KnowledgeBasesUpdateKnowledgeBaseResponse,
   KnowledgeBasesDeleteKnowledgeBaseData,
   KnowledgeBasesDeleteKnowledgeBaseResponse,
-  LlmModelsGetLlmModelsData,
   LlmModelsGetLlmModelsResponse,
-  LlmModelsCreateLlmModelData,
-  LlmModelsCreateLlmModelResponse,
+  LlmModelsGetAvailableProvidersResponse,
   LlmModelsGetDefaultLlmModelResponse,
-  LlmModelsDeleteLlmModelData,
-  LlmModelsDeleteLlmModelResponse,
   LlmModelsValidateLlmModelData,
   LlmModelsValidateLlmModelResponse,
+  LlmModelsCheckApiKeyConfiguredData,
+  LlmModelsCheckApiKeyConfiguredResponse,
   LlmModelsSetDefaultLlmModelData,
   LlmModelsSetDefaultLlmModelResponse,
   LoginLoginAccessTokenData,
@@ -294,7 +292,7 @@ export class EmbeddingModelsService {
    * @param data The data for the request.
    * @param data.skip
    * @param data.limit
-   * @returns LlmModelsPublic Successful Response
+   * @returns LlmModelInfo Successful Response
    * @throws ApiError
    */
   public static getLlmModels(
@@ -302,7 +300,7 @@ export class EmbeddingModelsService {
   ): CancelablePromise<EmbeddingModelsGetLlmModelsResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/embedding-models/llm/",
+      url: "/api/v1/embedding-models/llm",
       query: {
         skip: data.skip,
         limit: data.limit,
@@ -808,54 +806,33 @@ export class LlmModelsService {
   /**
    * Get Llm Models
    * Get all LLMs.
-   * @param data The data for the request.
-   * @param data.skip
-   * @param data.limit
-   * @returns LlmModelsPublic Successful Response
+   * @returns LlmModelInfo Successful Response
    * @throws ApiError
    */
-  public static getLlmModels(
-    data: LlmModelsGetLlmModelsData = {},
-  ): CancelablePromise<LlmModelsGetLlmModelsResponse> {
+  public static getLlmModels(): CancelablePromise<LlmModelsGetLlmModelsResponse> {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/llm-models/",
-      query: {
-        skip: data.skip,
-        limit: data.limit,
-      },
-      errors: {
-        422: "Validation Error",
-      },
     })
   }
 
   /**
-   * Create Llm Model
-   * Create a new LLM.
-   * @param data The data for the request.
-   * @param data.requestBody
-   * @returns LlmModelPublic Successful Response
+   * Get Available Providers
+   * Get all available LLM providers.
+   * @returns string Successful Response
    * @throws ApiError
    */
-  public static createLlmModel(
-    data: LlmModelsCreateLlmModelData,
-  ): CancelablePromise<LlmModelsCreateLlmModelResponse> {
+  public static getAvailableProviders(): CancelablePromise<LlmModelsGetAvailableProvidersResponse> {
     return __request(OpenAPI, {
-      method: "POST",
-      url: "/api/v1/llm-models/",
-      body: data.requestBody,
-      mediaType: "application/json",
-      errors: {
-        422: "Validation Error",
-      },
+      method: "GET",
+      url: "/api/v1/llm-models/providers",
     })
   }
 
   /**
    * Get Default Llm Model
    * Get the user's default LLM model (database record).
-   * @returns LlmModelPublic Successful Response
+   * @returns LlmModelInfo Successful Response
    * @throws ApiError
    */
   public static getDefaultLlmModel(): CancelablePromise<LlmModelsGetDefaultLlmModelResponse> {
@@ -866,33 +843,10 @@ export class LlmModelsService {
   }
 
   /**
-   * Delete Llm Model
-   * Delete an LLM.
-   * @param data The data for the request.
-   * @param data.modelId
-   * @returns Message Successful Response
-   * @throws ApiError
-   */
-  public static deleteLlmModel(
-    data: LlmModelsDeleteLlmModelData,
-  ): CancelablePromise<LlmModelsDeleteLlmModelResponse> {
-    return __request(OpenAPI, {
-      method: "DELETE",
-      url: "/api/v1/llm-models/{model_id}",
-      path: {
-        model_id: data.modelId,
-      },
-      errors: {
-        422: "Validation Error",
-      },
-    })
-  }
-
-  /**
    * Validate Llm Model
    * Validate if an LLM ID is valid for the specified provider.
    * @param data The data for the request.
-   * @param data.requestBody
+   * @param data.modelId
    * @returns Message Successful Response
    * @throws ApiError
    */
@@ -902,8 +856,32 @@ export class LlmModelsService {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/llm-models/validate",
-      body: data.requestBody,
-      mediaType: "application/json",
+      query: {
+        model_id: data.modelId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Check Api Key Configured
+   * Check if API key is configured for the specified provider.
+   * @param data The data for the request.
+   * @param data.provider
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static checkApiKeyConfigured(
+    data: LlmModelsCheckApiKeyConfiguredData,
+  ): CancelablePromise<LlmModelsCheckApiKeyConfiguredResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/llm-models/check-api-key",
+      query: {
+        provider: data.provider,
+      },
       errors: {
         422: "Validation Error",
       },
@@ -915,7 +893,7 @@ export class LlmModelsService {
    * Set an LLM as the default.
    * @param data The data for the request.
    * @param data.modelId
-   * @returns LlmModelPublic Successful Response
+   * @returns LlmModelInfo Successful Response
    * @throws ApiError
    */
   public static setDefaultLlmModel(
