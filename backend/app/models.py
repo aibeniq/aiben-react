@@ -172,9 +172,9 @@ class KnowledgeBaseCreate(KnowledgeBaseBase):
 class KnowledgeBaseUpdate(SQLModel):
     title: str | None = Field(default=None, min_length=1, max_length=255, unique=True)  # type: ignore
     description: str | None = Field(default=None, max_length=255)
-    removed_file_ids: List[str] = Field(
-        default_factory=list
-    )  # List of file IDs to be removed
+    removed_file_ids: List[str] | None = Field(
+        default=None
+    )  # List of file IDs to be removed (optional)
     # Allow updating file paths
     # file_paths: Optional[List[str]] = None
 
