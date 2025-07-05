@@ -22,7 +22,7 @@ from bs4 import BeautifulSoup
 
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
 from app.core.config import settings
-from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from app.services.llms.main import LlmService
 from app.services.embeddings import EmbeddingService
 
 from sqlmodel import select
@@ -69,7 +69,7 @@ async def generate_report(
             )
 
         # 4. Initialize the LLM
-        llm = get_default_llm(session, current_user)
+        llm = LlmService.get_user_default_model(session, current_user.id)
 
         # 5. Parse the sections outline
         section_list = request.sections.strip().split("\n")
@@ -133,8 +133,7 @@ async def generate_report(
             # use the template from config
             prompt_template = settings.REPORT_GENIE_PROMPT_TEMPLATE
 
-            section_content = invoke_llm(
-                llm,
+            section_content = llm.invoke(
                 prompt_template,
                 {"context": context, "question": section_description},
             )
@@ -182,7 +181,7 @@ async def generate_report(
             "outline_name": outline_name,  # add the outline name here
         }
 
-        record_llm_interaction(
+        LlmService.record_llm_interaction(
             session=session,
             user_id=current_user.id,
             functionality="reportgenie",
