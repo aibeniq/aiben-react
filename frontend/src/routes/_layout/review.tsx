@@ -15,6 +15,7 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { CancelablePromise } from "@/client/core/CancelablePromise"
 import SourceLink from "@/components/Common/SourceLink"
 import FileUpload, { FileItem } from "@/components/Common/FileUpload"
+import SearchModeToggle from "@/components/Common/SearchModeToggle"
 import DownloadButton from "@/components/ui/download-button"
 import { useState, useEffect, useRef } from "react"
 import { createFileRoute } from "@tanstack/react-router"
@@ -68,6 +69,9 @@ const VeraDoc = () => {
 
   const [checklists, setChecklists] = useState<VeraDocChecklist[]>([])
   const [selectedChecklist, setSelectedChecklist] = useState<VeraDocChecklist | null>(null)
+
+  // Search mode state for main review functionality
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
 
   // State to track which citations are expanded - using object instead of Set
   const [expandedCitations, setExpandedCitations] = useState<Record<string, boolean>>({})
@@ -324,6 +328,7 @@ const VeraDoc = () => {
       files: File[]
       handwrittenFiles: File[]
       customInstructions?: string
+      searchMode?: string
     }) => {
       if (ongoingRequest.current) {
         ongoingRequest.current.cancel()
@@ -337,12 +342,14 @@ const VeraDoc = () => {
       abortControllerRef.current = controller
 
       console.log("Creating new request with fresh AbortController")
+      console.log("Search mode being sent to backend:", data.searchMode)
 
       // Create the promise and store it
       const promise = VeradocService.processRagChecklist({
         questions: data.questions,
         knowledgeBaseId: data.knowledgeBaseId,
         customInstructions: data.customInstructions,
+        searchMode: data.searchMode,
         formData: {
           files: data.files,
           handwritten_files: data.handwrittenFiles,
@@ -362,6 +369,10 @@ const VeraDoc = () => {
       }
 
       setResults([singleResult])
+
+      // Show success message with search mode information
+      const searchMethod = searchMode === "vector" ? "vector search" : "full document scan"
+      showSuccessToast(`Document review completed using ${searchMethod}`)
     },
     onError: (error) => {
       console.log("RAG mutation unsuccessful!")
@@ -433,6 +444,7 @@ const VeraDoc = () => {
       files: regularFiles,
       handwrittenFiles: handwrittenFiles,
       customInstructions: customInstructions.trim() || undefined,
+      searchMode: searchMode,
     }
 
     console.log("Request Data:", requestData)
@@ -521,6 +533,7 @@ const VeraDoc = () => {
           files: regularFiles,
           handwrittenFiles: handwrittenFiles,
           customInstructions: customInstructions.trim() || undefined,
+          searchMode: searchMode,
         }
 
         // Call the API using our mutation
@@ -528,6 +541,7 @@ const VeraDoc = () => {
           questions: requestData.questions,
           knowledgeBaseId: requestData.knowledgeBaseId,
           customInstructions: requestData.customInstructions,
+          searchMode: requestData.searchMode,
           formData: {
             files: requestData.files,
             handwritten_files: requestData.handwrittenFiles,
@@ -550,6 +564,14 @@ const VeraDoc = () => {
 
         // Update your state for batch results
         setResults([...batchResults])
+      }
+
+      // Show success message for batch processing
+      if (batchResults.length > 0) {
+        const searchMethod = searchMode === "vector" ? "vector search" : "full document scan"
+        showSuccessToast(
+          `Batch processing completed for ${batchResults.length} files using ${searchMethod}`,
+        )
       }
     } catch (error: any) {
       // Handle errors, checking if it's an abort
@@ -777,6 +799,18 @@ const VeraDoc = () => {
               <Text fontSize="xs" color="gray.500" mt={1}>
                 {customInstructions.length}/2000 characters. These instructions will be appended to
                 each question when processing.
+              </Text>
+            </Box>
+
+            {/* Search Mode Toggle */}
+            <Box width="100%" mt={4}>
+              <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
+                Search Mode
+              </Text>
+              <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
+              <Text fontSize="xs" color="gray.500" mt={1}>
+                Vector search provides fast, targeted results. Full document scan reviews all
+                content in the knowledge base.
               </Text>
             </Box>
           </VStack>

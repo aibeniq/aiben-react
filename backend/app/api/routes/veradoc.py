@@ -54,10 +54,10 @@ from io import BytesIO, StringIO
 from datetime import datetime
 from starlette.requests import Request
 import tempfile
-import traceback
 import markdown
 from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_core.documents import Document as LangchainDocument
 from docx import Document  # For .docx file handling
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from bs4 import BeautifulSoup
@@ -253,6 +253,28 @@ async def process_rag_checklist(
     Process the uploaded files using RAG with a knowledge base.
     """
     print("process_rag_checklist function invoked!")
+    print(f"Received search_mode: {request_data.search_mode}")
+    print(
+        f"Request data: knowledge_base_id={request_data.knowledge_base_id}, questions length={len(request_data.questions)}"
+    )
+
+    # Input validation
+    if not request_data.knowledge_base_id:
+        raise HTTPException(status_code=400, detail="Knowledge base ID is required")
+
+    if not request_data.questions or not request_data.questions.strip():
+        raise HTTPException(status_code=400, detail="Questions are required")
+
+    if not files or len(files) == 0:
+        raise HTTPException(status_code=400, detail="At least one file is required")
+
+    # Validate search mode
+    if request_data.search_mode not in ["vector", "full_scan"]:
+        print(
+            f"Warning: Invalid search mode '{request_data.search_mode}', defaulting to 'vector'"
+        )
+        request_data.search_mode = "vector"
+
     # Create a cancellation flag
     cancellation_requested = False
 
@@ -357,13 +379,167 @@ async def process_rag_checklist(
                 print("No documents or metadata found in the vectorstore")
             print("================================================")
 
-            # Create a hybrid retriever that combines vector-based and keyword-based retrieval
-            retriever = create_ensemble_retriever(
-                chroma_db=chroma_db,
-                vector_weight=0.7,  # Weight for vector-based retrieval
-                keyword_weight=0.3,  # Weight for keyword-based retrieval
-                search_kwargs={"k": settings.RAG_NUM_CHUNKS},  # Use config value
-            )
+            # Create retriever based on search mode
+            try:
+                if request_data.search_mode == "full_scan":
+                    # Full document scan: retrieve all documents from the knowledge base
+                    print("Using full document scan mode")
+
+                    # Test ChromaDB collection access first
+                    try:
+                        # Try multiple ways to get collection count
+                        if hasattr(chroma_db, "_collection") and hasattr(
+                            chroma_db._collection, "count"
+                        ):
+                            collection_count = chroma_db._collection.count()
+                        else:
+                            # Fallback: try to get a small sample to test access
+                            test_data = chroma_db.get(limit=1)
+                            collection_count = (
+                                len(test_data.get("documents", [])) if test_data else 0
+                            )
+
+                        print(
+                            f"Knowledge base collection has {collection_count} documents"
+                        )
+
+                        if collection_count == 0:
+                            print(
+                                f"Warning: Knowledge base '{request_data.knowledge_base_id}' appears to be empty"
+                            )
+                            # Don't raise error, let it proceed with empty results
+
+                    except Exception as count_error:
+                        print(f"Warning: Could not get collection count: {count_error}")
+                        # Continue anyway - the get_relevant_documents method will handle empty collections
+
+                    # Create a simple retriever that returns all documents
+                    class FullScanRetriever:
+                        def __init__(self, chroma_db):
+                            self.chroma_db = chroma_db
+
+                        def get_relevant_documents(self, query):
+                            try:
+                                print(
+                                    f"FullScanRetriever: Processing query '{query[:50]}...'"
+                                )
+
+                                # Return all documents in the knowledge base with better error handling
+                                try:
+                                    all_data = self.chroma_db.get()
+                                except Exception as get_error:
+                                    print(
+                                        f"Error getting documents from ChromaDB: {get_error}"
+                                    )
+                                    return []
+
+                                # Convert to Document objects similar to vector search
+                                documents = []
+
+                                if (
+                                    all_data
+                                    and "documents" in all_data
+                                    and all_data["documents"]
+                                ):
+                                    print(
+                                        f"FullScanRetriever: Found {len(all_data['documents'])} total documents"
+                                    )
+
+                                    for i, doc_content in enumerate(
+                                        all_data["documents"]
+                                    ):
+                                        try:
+                                            # Safely get metadata
+                                            metadata = {}
+                                            if (
+                                                "metadatas" in all_data
+                                                and isinstance(
+                                                    all_data["metadatas"], list
+                                                )
+                                                and i < len(all_data["metadatas"])
+                                                and all_data["metadatas"][i] is not None
+                                            ):
+
+                                                raw_metadata = all_data["metadatas"][i]
+                                                if isinstance(raw_metadata, dict):
+                                                    metadata = raw_metadata
+                                                else:
+                                                    print(
+                                                        f"Warning: Metadata at index {i} is not a dict: {type(raw_metadata)}"
+                                                    )
+                                                    metadata = {}
+
+                                            # Ensure doc_content is a string
+                                            content = (
+                                                str(doc_content)
+                                                if doc_content is not None
+                                                else ""
+                                            )
+
+                                            if (
+                                                content
+                                            ):  # Only add documents with content
+                                                documents.append(
+                                                    LangchainDocument(
+                                                        page_content=content,
+                                                        metadata=metadata,
+                                                    )
+                                                )
+                                        except Exception as doc_error:
+                                            print(
+                                                f"Error processing document {i}: {doc_error}"
+                                            )
+                                            # Continue processing other documents instead of failing
+                                            continue
+                                else:
+                                    print(
+                                        "FullScanRetriever: No documents found in knowledge base"
+                                    )
+
+                                print(
+                                    f"FullScanRetriever: Returning {len(documents)} documents"
+                                )
+                                return documents
+
+                            except Exception as e:
+                                print(
+                                    f"Error in FullScanRetriever.get_relevant_documents: {e}"
+                                )
+                                import traceback
+
+                                traceback.print_exc()
+                                # Return empty list instead of raising exception
+                                return []
+
+                    retriever = FullScanRetriever(chroma_db)
+                else:
+                    # Vector search mode (default)
+                    print("Using vector search mode")
+                    try:
+                        retriever = create_ensemble_retriever(
+                            chroma_db=chroma_db,
+                            vector_weight=0.7,  # Weight for vector-based retrieval
+                            keyword_weight=0.3,  # Weight for keyword-based retrieval
+                            search_kwargs={
+                                "k": settings.RAG_NUM_CHUNKS
+                            },  # Use config value
+                        )
+                        print("Ensemble retriever created successfully")
+                    except Exception as retriever_error:
+                        print(f"Error creating ensemble retriever: {retriever_error}")
+                        # Fallback to basic vector retriever
+                        retriever = chroma_db.as_retriever(
+                            search_kwargs={"k": settings.RAG_NUM_CHUNKS}
+                        )
+                        print("Using fallback vector retriever")
+
+            except Exception as retriever_setup_error:
+                print(f"Error setting up retriever: {retriever_setup_error}")
+                traceback.print_exc()
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to set up document retriever: {str(retriever_setup_error)}",
+                )
 
             # 4. Initialize the LLM
             # llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
@@ -404,86 +580,193 @@ async def process_rag_checklist(
                 ]
 
             # Get file content
-            file = files[0]  # Process the first file for now
-            content = await file.read()
-
-            # Extract text using the new extraction function
-            document_text = extract_text_from_file(content, file.filename)
-            print(f"Extracted {len(document_text)} characters from {file.filename}")
-
-            # Reset file position
-            await file.seek(0)
-
-            # 7. Process each question using the RAG approach
-            for question_item in question_list:
-                if cancellation_requested:
-                    print(
-                        "Operation cancelled by client disconnect, stopping processing"
-                    )
-                    return VeraDocResponse(
-                        results={
-                            "status": "cancelled",
-                            "message": "Operation cancelled by user",
-                        }
-                    )
-
-                question_text = question_item.get("text", "").strip()
-                consult_documents = question_item.get("consultDocuments", True)
-
-                if not question_text:
-                    continue
-
-                print(
-                    f"Processing question: {question_text[:50]}... (consult documents: {consult_documents})"
+            if not files or len(files) == 0:
+                raise HTTPException(
+                    status_code=400, detail="No files provided for processing"
                 )
 
-                if consult_documents:
-                    # Standard process: retrieve context from knowledge base
-                    # Step 1: Retrieve relevant context from the knowledge base
-                    docs = retriever.get_relevant_documents(question_text)
-                    context = "\n\n".join([doc.page_content for doc in docs])
+            file = files[0]  # Process the first file for now
 
-                    # Store source documents for citation
-                    source_citations = []
-                    for doc in docs:
-                        # Ensure source_data_id is included in metadata if available
-                        metadata = (
-                            doc.metadata.copy()
-                        )  # Copy to avoid modifying the original
+            try:
+                content = await file.read()
+                if not content:
+                    raise HTTPException(
+                        status_code=400, detail="File appears to be empty"
+                    )
 
-                        # If the metadata contains a source path that matches a pattern from a KB
-                        if "source" in metadata and isinstance(metadata["source"], str):
-                            # Try to find the corresponding source_data_id
-                            source_path = metadata["source"]
-                            # Extract just the filename
-                            raw_filename = Path(source_path).name
+                # Extract text using the extraction function
+                document_text = extract_text_from_file(content, file.filename)
+                if not document_text or document_text.strip() == "":
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Could not extract text from file {file.filename}",
+                    )
 
-                            # Extract the real filename after the underscore using regex
-                            # This looks for any characters followed by an underscore, then captures everything after
-                            match = re.search(r"^[^_]*_(.+)$", raw_filename)
-                            if match:
-                                # Use the captured group (everything after the underscore)
-                                filename = match.group(1)
+                print(f"Extracted {len(document_text)} characters from {file.filename}")
+
+                # Reset file position
+                await file.seek(0)
+
+            except Exception as file_error:
+                print(f"Error processing file {file.filename}: {file_error}")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Error processing file {file.filename}: {str(file_error)}",
+                )
+
+            # 7. Process each question using the RAG approach
+            for i, question_item in enumerate(question_list):
+                try:
+                    if cancellation_requested:
+                        print(
+                            "Operation cancelled by client disconnect, stopping processing"
+                        )
+                        return VeraDocResponse(
+                            results={
+                                "status": "cancelled",
+                                "message": "Operation cancelled by user",
+                            }
+                        )
+
+                    question_text = question_item.get("text", "").strip()
+                    consult_documents = question_item.get("consultDocuments", True)
+
+                    if not question_text:
+                        print(f"Skipping empty question at index {i}")
+                        continue
+
+                    print(
+                        f"Processing question {i+1}/{len(question_list)}: {question_text[:50]}... (consult documents: {consult_documents})"
+                    )
+
+                    if consult_documents:
+                        # Standard process: retrieve context from knowledge base
+                        try:
+                            # Step 1: Retrieve relevant context from the knowledge base
+                            docs = retriever.get_relevant_documents(question_text)
+
+                            if not docs:
+                                print(
+                                    f"No documents retrieved for question: {question_text[:50]}..."
+                                )
+                                context = "No relevant documents found in the knowledge base for this question."
+                                source_citations = []
                             else:
-                                # Fallback to the original filename if no underscore found
-                                filename = raw_filename
-
-                            # Debug info
-                            print(f"Raw filename: {raw_filename}")
-                            print(f"Extracted filename: {filename}")
-
-                            # Try to find the source by the extracted name
-                            source_entry = session.exec(
-                                select(Source).where(Source.name == filename)
-                            ).first()
-
-                            if source_entry:
-                                metadata["source_data_id"] = str(
-                                    source_entry.source_data_id
+                                context = "\n\n".join(
+                                    [
+                                        doc.page_content
+                                        for doc in docs
+                                        if doc.page_content
+                                    ]
+                                )
+                                print(
+                                    f"Retrieved {len(docs)} documents, context length: {len(context)} characters"
                                 )
 
-                        source = {"content": doc.page_content, "metadata": metadata}
-                        source_citations.append(source)
+                                # Store source documents for citation
+                                source_citations = []
+                                for doc in docs:
+                                    try:
+                                        # Ensure source_data_id is included in metadata if available
+                                        metadata = (
+                                            doc.metadata.copy()
+                                            if hasattr(doc, "metadata") and doc.metadata
+                                            else {}
+                                        )  # Copy to avoid modifying the original
+
+                                        # If the metadata contains a source path that matches a pattern from a KB
+                                        if "source" in metadata and isinstance(
+                                            metadata["source"], str
+                                        ):
+                                            # Try to find the corresponding source_data_id
+                                            source_path = metadata["source"]
+                                            # Extract just the filename
+                                            raw_filename = Path(source_path).name
+
+                                            # Extract the real filename after the underscore using regex
+                                            # This looks for any characters followed by an underscore, then captures everything after
+                                            match = re.search(
+                                                r"^[^_]*_(.+)$", raw_filename
+                                            )
+                                            if match:
+                                                # Use the captured group (everything after the underscore)
+                                                filename = match.group(1)
+                                            else:
+                                                # Fallback to the original filename if no underscore found
+                                                filename = raw_filename
+
+                                            # Debug info
+                                            print(f"Raw filename: {raw_filename}")
+                                            print(f"Extracted filename: {filename}")
+
+                                            # Try to find the source by the extracted name
+                                            try:
+                                                source_entry = session.exec(
+                                                    select(Source).where(
+                                                        Source.name == filename
+                                                    )
+                                                ).first()
+
+                                                if source_entry:
+                                                    metadata["source_data_id"] = str(
+                                                        source_entry.source_data_id
+                                                    )
+                                            except Exception as source_lookup_error:
+                                                print(
+                                                    f"Error looking up source: {source_lookup_error}"
+                                                )
+
+                                        source = {
+                                            "content": doc.page_content or "",
+                                            "metadata": metadata,
+                                        }
+                                        source_citations.append(source)
+                                    except Exception as citation_error:
+                                        print(
+                                            f"Error processing citation: {citation_error}"
+                                        )
+                                        continue
+                        except Exception as retrieval_error:
+                            print(
+                                f"Error retrieving documents for question '{question_text[:50]}...': {retrieval_error}"
+                            )
+                            context = "Error occurred while retrieving relevant documents from the knowledge base."
+                            source_citations = []
+
+                        if cancellation_requested:
+                            print(
+                                "Operation cancelled by client disconnect, stopping processing"
+                            )
+                            return VeraDocResponse(
+                                results={
+                                    "status": "cancelled",
+                                    "message": "Operation cancelled by user",
+                                }
+                            )
+
+                        try:
+                            # Step 2: Get the relevant policy context for this question
+                            print("Generating context for question...")
+                            question_context = invoke_llm(
+                                llm,
+                                context_prompt_template,
+                                {"context": context, "question": question_text},
+                            )
+                            print(f"Got context: {question_context[:100]}...")
+                        except Exception as context_error:
+                            print(
+                                f"Error generating context for question: {context_error}"
+                            )
+                            question_context = (
+                                f"Error generating context: {str(context_error)}"
+                            )
+                    else:
+                        # Skip knowledge base consultation - use empty context and citations
+                        question_context = "No policy context consultation requested for this question."
+                        source_citations = []
+                        print(
+                            f"Skipping document consultation for question: {question_text[:50]}..."
+                        )
 
                     if cancellation_requested:
                         print(
@@ -496,84 +779,82 @@ async def process_rag_checklist(
                             }
                         )
 
-                    # Step 2: Get the relevant policy context for this question
-                    print("Generating context for question...")
-                    question_context = invoke_llm(
-                        llm,
-                        context_prompt_template,
-                        {"context": context, "question": question_text},
-                    )
-                    print(f"Got context: {question_context[:100]}...")
-                else:
-                    # Skip knowledge base consultation - use empty context and citations
-                    question_context = (
-                        "No policy context consultation requested for this question."
-                    )
-                    source_citations = []
+                    # Step 3: Answer the question based on the uploaded document and policy context
+                    print("Generating answer based on document and context...")
+
+                    # Prepare custom instructions section
+                    custom_instructions_section = ""
+                    if (
+                        hasattr(request_data, "custom_instructions")
+                        and request_data.custom_instructions
+                    ):
+                        custom_instructions_section = f"\nADDITIONAL INSTRUCTIONS:\n{request_data.custom_instructions.strip()}\n"
+
+                    # DEBUG: Print the full prompt sent to the LLM
+                    try:
+                        rendered_prompt = qa_prompt_template.format(
+                            document_text=document_text,
+                            question=question_text,
+                            question_context=question_context,
+                            custom_instructions_section=custom_instructions_section,
+                        )
+                    except Exception as e:
+                        rendered_prompt = f"[ERROR rendering prompt: {e}]"
                     print(
-                        f"Skipping document consultation for question: {question_text[:50]}..."
+                        "\n===== VERADOC_QA_PROMPT_TEMPLATE PROMPT SENT TO LLM =====\n"
+                    )
+                    print(rendered_prompt)
+                    print(
+                        "\n========================================================\n"
                     )
 
-                if cancellation_requested:
-                    print(
-                        "Operation cancelled by client disconnect, stopping processing"
-                    )
-                    return VeraDocResponse(
-                        results={
-                            "status": "cancelled",
-                            "message": "Operation cancelled by user",
+                    try:
+                        answer = invoke_llm(
+                            llm,
+                            qa_prompt_template,
+                            {
+                                "document_text": document_text,
+                                "question": question_text,
+                                "question_context": question_context,
+                                "custom_instructions_section": custom_instructions_section,
+                            },
+                        )
+                        print(f"Got answer: {answer[:100]}...")
+                    except Exception as answer_error:
+                        print(f"Error generating answer for question: {answer_error}")
+                        answer = f"Error generating answer: {str(answer_error)}"
+
+                    print("Source citations for question:", question_text)
+                    # for source in source_citations:
+                    # print(f"Source: {source['metadata'].get('source', 'Unknown')}, Content: {source['content']}")
+
+                    # Store the question-answer pair with context
+                    qa_pairs.append(
+                        {
+                            "question": question_text,
+                            "answer": answer,
+                            "context": question_context,
+                            "source_citations": source_citations,
                         }
                     )
 
-                # Step 3: Answer the question based on the uploaded document and policy context
-                print("Generating answer based on document and context...")
-
-                # Prepare custom instructions section
-                custom_instructions_section = ""
-                if (
-                    hasattr(request_data, "custom_instructions")
-                    and request_data.custom_instructions
-                ):
-                    custom_instructions_section = f"\nADDITIONAL INSTRUCTIONS:\n{request_data.custom_instructions.strip()}\n"
-
-                # DEBUG: Print the full prompt sent to the LLM
-                try:
-                    rendered_prompt = qa_prompt_template.format(
-                        document_text=document_text,
-                        question=question_text,
-                        question_context=question_context,
-                        custom_instructions_section=custom_instructions_section,
+                except Exception as question_processing_error:
+                    print(
+                        f"Error processing question '{question_text[:50]}...': {question_processing_error}"
                     )
-                except Exception as e:
-                    rendered_prompt = f"[ERROR rendering prompt: {e}]"
-                print("\n===== VERADOC_QA_PROMPT_TEMPLATE PROMPT SENT TO LLM =====\n")
-                print(rendered_prompt)
-                print("\n========================================================\n")
-                answer = invoke_llm(
-                    llm,
-                    qa_prompt_template,
-                    {
-                        "document_text": document_text,
-                        "question": question_text,
-                        "question_context": question_context,
-                        "custom_instructions_section": custom_instructions_section,
-                    },
-                )
-                print(f"Got answer: {answer[:100]}...")
+                    import traceback
 
-                print("Source citations for question:", question_text)
-                # for source in source_citations:
-                # print(f"Source: {source['metadata'].get('source', 'Unknown')}, Content: {source['content']}")
-
-                # Store the question-answer pair with context
-                qa_pairs.append(
-                    {
-                        "question": question_text,
-                        "answer": answer,
-                        "context": question_context,
-                        "source_citations": source_citations,
-                    }
-                )
+                    traceback.print_exc()
+                    # Add error result instead of failing completely
+                    qa_pairs.append(
+                        {
+                            "question": question_text,
+                            "answer": f"Error processing this question: {str(question_processing_error)}",
+                            "context": "Error occurred during processing",
+                            "source_citations": [],
+                        }
+                    )
+                    continue
 
             # 8. Generate the final evaluation
             if cancellation_requested:
@@ -592,35 +873,47 @@ async def process_rag_checklist(
                 )
 
             # Final evaluation
-            print("Generating final evaluation...")
-            final_evaluation = invoke_llm(
-                llm, final_prompt_template, {"qa_pairs": qa_pairs_text}
-            )
-            print(f"Got final evaluation: {final_evaluation[:100]}...")
+            try:
+                print("Generating final evaluation...")
+                final_evaluation = invoke_llm(
+                    llm, final_prompt_template, {"qa_pairs": qa_pairs_text}
+                )
+                print(f"Got final evaluation: {final_evaluation[:100]}...")
+            except Exception as final_eval_error:
+                print(f"Error generating final evaluation: {final_eval_error}")
+                final_evaluation = (
+                    f"Error generating final evaluation: {str(final_eval_error)}"
+                )
 
-            interaction_id = record_llm_interaction(
-                session=session,
-                user_id=current_user.id,
-                functionality="veradoc",
-                input_data={
-                    "questions": request_data.questions,
-                    "document_name": file.filename,
-                    "kb_id": request_data.knowledge_base_id,
-                },
-                output_data={
-                    "final_evaluation": final_evaluation,
-                    "qa_count": len(qa_pairs),
-                },
-                metadata={
-                    "qa_pairs": qa_pairs  # Store the full QA pairs with sources for retrieval
-                },
-            )
+            try:
+                interaction_id = record_llm_interaction(
+                    session=session,
+                    user_id=current_user.id,
+                    functionality="veradoc",
+                    input_data={
+                        "questions": request_data.questions,
+                        "document_name": file.filename,
+                        "kb_id": request_data.knowledge_base_id,
+                        "search_mode": request_data.search_mode,
+                    },
+                    output_data={
+                        "final_evaluation": final_evaluation,
+                        "qa_count": len(qa_pairs),
+                    },
+                    metadata={
+                        "qa_pairs": qa_pairs  # Store the full QA pairs with sources for retrieval
+                    },
+                )
+            except Exception as interaction_error:
+                print(f"Error recording interaction: {interaction_error}")
+                interaction_id = None
 
             # 9. Compile the results
             result = {
+                "filename": file.filename,
                 "final_evaluation": final_evaluation,
                 "qa_pairs": qa_pairs,
-                "interaction_id": str(interaction_id),
+                "interaction_id": str(interaction_id) if interaction_id else None,
             }
 
             return VeraDocResponse(results=result)
@@ -1902,48 +2195,6 @@ async def generate_questions(
 
     except Exception as e:
         print(f"Error generating questions: {e}")
-        traceback.print_exc()
-        raise HTTPException(
-            status_code=500, detail=f"Error generating questions: {str(e)}"
-        )
-        if request.num_questions:
-            questions = questions[: request.num_questions]
-
-        if not analysis:
-            analysis_text = f"Generated {len(questions)} questions based on the provided description"
-            if request.knowledge_base_id:
-                knowledge_base = session.get(KnowledgeBase, request.knowledge_base_id)
-                if knowledge_base:
-                    analysis_text += f" and reference documents from knowledge base '{knowledge_base.title}'"
-            analysis_text += " to ensure comprehensive evaluation coverage."
-            analysis = analysis_text
-
-        # Record the interaction
-        record_llm_interaction(
-            session=session,
-            user_id=current_user.id,
-            functionality="generate_checklist_questions",
-            input_data={
-                "description": request.description,
-                "requested_questions": request.num_questions,
-                "checklist_type": request.checklist_type,
-                "knowledge_base_id": request.knowledge_base_id,
-            },
-            output_data={
-                "questions_count": len(questions),
-                "analysis": analysis,
-            },
-            metadata={},
-        )
-
-        return GenerateQuestionsResponse(
-            questions=questions, description_analysis=analysis
-        )
-
-    except Exception as e:
-        print(f"Error generating questions: {e}")
-        import traceback
-
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error generating questions: {str(e)}"

@@ -9,28 +9,27 @@ interface CancelButtonProps {
   children?: React.ReactNode
 }
 
-const CancelButton: React.FC<CancelButtonProps> = ({
-  onClick,
-  loading = false,
-  disabled = false,
-  size = "sm",
-  children = "Cancel",
-}) => {
-  return (
-    <Button
-      size={size}
-      variant="outline"
-      onClick={onClick}
-      loading={loading}
-      disabled={disabled}
-      colorPalette="gray"
-      border="1px solid"
-      borderColor="gray.300"
-      _hover={{ bg: "gray.50" }}
-    >
-      {children}
-    </Button>
-  )
-}
+const CancelButton = React.forwardRef<HTMLButtonElement, CancelButtonProps>(
+  ({ onClick, loading = false, disabled = false, size = "sm", children = "Cancel" }, ref) => {
+    return (
+      <Button
+        ref={ref}
+        size={size}
+        variant="outline"
+        onClick={onClick}
+        loading={loading}
+        disabled={disabled}
+        colorPalette="gray"
+        border="1px solid"
+        borderColor="gray.300"
+        _hover={{ bg: "gray.50" }}
+      >
+        {children}
+      </Button>
+    )
+  },
+)
+
+CancelButton.displayName = "CancelButton"
 
 export default CancelButton

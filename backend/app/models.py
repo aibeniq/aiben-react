@@ -360,6 +360,7 @@ class VeraDocRagResponse(VeraDocRequest):
 class RagChecklistRequest(VeraDocRequest):
     knowledge_base_id: str
     questions: str
+    search_mode: Literal["vector", "full_scan"] = Field(default="vector")
 
 
 # Enum for model providers

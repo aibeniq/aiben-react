@@ -166,15 +166,10 @@ const FileUpload = ({
                     <HStack gap={2} flexShrink={0}>
                       {showHandwrittenToggle && (
                         <ChakraField.Root display="flex" alignItems="center" width="auto">
-                          <ChakraField.Label
-                            htmlFor={`handwritten-${index}`}
-                            mb="0"
-                            fontSize="sm"
-                            mr={2}
-                          >
+                          <ChakraField.Label mb="0" fontSize="sm" mr={2}>
                             Handwritten
                           </ChakraField.Label>
-                          <Switch.Root id={`handwritten-${index}`} colorPalette="blue">
+                          <Switch.Root colorPalette="blue">
                             <Switch.HiddenInput
                               checked={fileItem.isHandwritten}
                               onChange={() => toggleHandwritten(index)}
