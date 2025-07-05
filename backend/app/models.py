@@ -1,6 +1,6 @@
 import enum
 import uuid
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Literal
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel, Column
 from sqlalchemy import (
@@ -282,6 +282,7 @@ class GenerateFormFieldsRequest(SQLModel):
     description: str = Field(min_length=10, max_length=2000)
     num_fields: Optional[int] = Field(default=None, ge=1, le=50)
     knowledge_base_id: Optional[uuid.UUID] = None
+    search_mode: Literal["vector", "full_scan"] = Field(default="vector")
 
 
 class GenerateFormFieldsResponse(SQLModel):
@@ -478,7 +479,7 @@ class ReportGenieRequest(SQLModel):
     knowledge_base_id: str
     sections: str
     outline_id: str
-    search_mode: str = "vector"  # Default to vector search
+    search_mode: Literal["vector", "full_scan"] = Field(default="vector")
     custom_instructions: Optional[str] = None
 
 
@@ -639,7 +640,7 @@ class OptimizeOutlineRequest(SQLModel):
     outline_id: str  # ID of the outline to optimize
     sections: str  # Current outline sections (JSON string)
     custom_instructions: Optional[str] = Field(default=None, max_length=2000)
-    search_mode: str = Field(default="vector")  # "vector" or "full_text"
+    search_mode: Literal["vector", "full_scan"] = Field(default="vector")
 
 
 class OutlineSuggestion(SQLModel):
@@ -669,6 +670,7 @@ class GenerateTopicsRequest(SQLModel):
     knowledge_base_id: Optional[str] = Field(
         default=None
     )  # Optional - Knowledge base to use as reference
+    search_mode: Literal["vector", "full_scan"] = Field(default="vector")
 
 
 class GenerateTopicsResponse(SQLModel):
@@ -687,6 +689,7 @@ class GenerateQuestionsRequest(SQLModel):
     knowledge_base_id: Optional[str] = Field(
         default=None
     )  # Optional - Knowledge base to use as reference
+    search_mode: Literal["vector", "full_scan"] = Field(default="vector")
 
 
 class GenerateQuestionsResponse(SQLModel):
@@ -705,6 +708,7 @@ class GenerateOutlineRequest(SQLModel):
     knowledge_base_id: Optional[str] = Field(
         default=None
     )  # Optional - Knowledge base to use as reference
+    search_mode: Literal["vector", "full_scan"] = Field(default="vector")
 
 
 class GenerateOutlineResponse(SQLModel):

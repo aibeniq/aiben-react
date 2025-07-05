@@ -32,6 +32,7 @@ export type Body_reportgenie_generate_outline = {
     report_type?: string;
     num_sections?: (number | null);
     files?: Array<((Blob | File))>;
+    search_mode?: string;
 };
 
 export type Body_reportgenie_generate_report = {
@@ -61,6 +62,7 @@ export type Body_twincheck_generate_topics = {
     comparison_type?: string;
     num_topics?: (number | null);
     files?: Array<((Blob | File))>;
+    search_mode?: string;
 };
 
 export type Body_veradoc_generate_questions_with_files = {
@@ -186,6 +188,7 @@ export type GenerateOutlineRequest = {
     num_sections?: (number | null);
     report_type?: string;
     knowledge_base_id?: (string | null);
+    search_mode?: string;
 };
 
 export type GenerateOutlineResponse = {
@@ -198,6 +201,7 @@ export type GenerateQuestionsRequest = {
     num_questions?: (number | null);
     checklist_type?: string;
     knowledge_base_id?: (string | null);
+    search_mode?: string;
 };
 
 export type GenerateQuestionsResponse = {
@@ -210,6 +214,7 @@ export type GenerateTopicsRequest = {
     num_topics?: (number | null);
     comparison_type?: string;
     knowledge_base_id?: (string | null);
+    search_mode?: string;
 };
 
 export type GenerateTopicsResponse = {

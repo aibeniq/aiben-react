@@ -1066,80 +1066,36 @@ async def generate_topics_json(
             "knowledge_base_content": "",
         }
 
-        # If knowledge base is specified, retrieve relevant content
+        # If knowledge base is specified, retrieve content using selected search mode
         if request.knowledge_base_id:
             try:
-                # Get the knowledge base
-                knowledge_base = session.exec(
-                    select(KnowledgeBase).where(
-                        KnowledgeBase.id == request.knowledge_base_id
-                    )
-                ).first()
-
-                if not knowledge_base:
-                    raise HTTPException(
-                        status_code=404, detail="Knowledge base not found"
-                    )
-
-                # Load embedding model - use the knowledge base's specific embedding model if available
-                if knowledge_base.embedding_model_id:
-                    embedding_model = session.get(
-                        EmbeddingModel, knowledge_base.embedding_model_id
-                    )
-                    if embedding_model:
-                        # Use the KB's original model
-                        model_id = embedding_model.model_id
-                        provider = embedding_model.provider
-                        print(
-                            f"Using knowledge base's original embedding model: {model_id}"
-                        )
-                    else:
-                        # Fallback if the model was deleted from the database
-                        embedding_info = get_embedding_model(session, current_user)
-                        model_id = embedding_info["model_id"]
-                        provider = embedding_info["provider"]
-                        print(
-                            f"Original embedding model not found, using current default: {model_id}"
-                        )
-                else:
-                    # For knowledge bases created before tracking embedding models
-                    embedding_info = get_embedding_model(session, current_user)
-                    model_id = embedding_info["model_id"]
-                    provider = embedding_info["provider"]
-                    print(
-                        f"Knowledge base has no embedding model record, using current default: {embedding_info}"
-                    )
-
-                embeddings = load_embeddings_model(provider=provider, model_id=model_id)
-
-                # Create retriever for the knowledge base
-                retriever = create_ensemble_retriever(
-                    knowledge_base.id, embeddings, k=8
+                from app.services.content_retrieval import (
+                    retrieve_knowledge_base_content,
                 )
 
-                # Retrieve relevant content from knowledge base
-                retrieved_docs = retriever.get_relevant_documents(request.description)
+                content, instruction = await retrieve_knowledge_base_content(
+                    session=session,
+                    current_user=current_user,
+                    knowledge_base_id=request.knowledge_base_id,
+                    search_mode=request.search_mode,
+                    query=request.description,
+                )
 
-                if retrieved_docs:
-                    knowledge_base_content = "\n\n".join(
-                        [
-                            f"Source: {doc.metadata.get('source', 'Unknown')}\nContent: {doc.page_content}"
-                            for doc in retrieved_docs[:5]  # Limit to top 5 results
-                        ]
-                    )
-
+                if content:
                     prompt_variables["knowledge_base_content"] = (
-                        f"REFERENCE DOCUMENTS FROM KNOWLEDGE BASE:\n{knowledge_base_content}"
+                        f"REFERENCE DOCUMENTS FROM KNOWLEDGE BASE:\n{content}"
                     )
                     prompt_variables["knowledge_base_instruction"] = (
-                        "\n12. Use the reference documents from the knowledge base above as inspiration for the type of comparison topics and scope, adapting the topics to match the specific requirements in the description"
+                        f"\n12. {instruction} Use them as inspiration for the type of comparison topics and scope, "
+                        f"adapting the topics to match the specific requirements in the description. "
+                        f"Search mode used: {request.search_mode}"
                     )
                     prompt_variables["example_analysis_instruction"] = (
-                        ". Briefly mention how the knowledge base content influenced the topic selection"
+                        f". Briefly mention how the knowledge base content (using {request.search_mode}) influenced the topic selection"
                     )
 
             except Exception as e:
-                print(f"Error retrieving from knowledge base: {str(e)}")
+                logger.warning(f"Error retrieving from knowledge base: {str(e)}")
                 # Continue without knowledge base content rather than failing
                 pass
 
@@ -1204,22 +1160,26 @@ async def generate_topics_json(
             topics = topics[: request.num_topics]
 
         if not analysis:
-            analysis = f"Generated {len(topics)} comparison topics based on the provided description to ensure comprehensive document comparison coverage."
+            search_method = (
+                "vector search"
+                if request.search_mode == "vector"
+                else "full document scan"
+            )
+            analysis = f"Generated {len(topics)} comparison topics based on the provided description using {search_method}"
             if request.knowledge_base_id:
-                analysis += (
-                    " Used knowledge base reference for enhanced topic selection."
-                )
+                analysis += " with knowledge base reference."
 
         # Record the interaction
         record_llm_interaction(
             session=session,
             user_id=current_user.id,
-            functionality="generate_comparison_topics_json",
+            functionality="generate_topics",
             input_data={
                 "description": request.description,
-                "requested_topics": request.num_topics,
                 "comparison_type": request.comparison_type,
+                "requested_topics": request.num_topics,
                 "knowledge_base_id": request.knowledge_base_id,
+                "search_mode": request.search_mode,
             },
             output_data={
                 "topics_count": len(topics),
@@ -1231,7 +1191,7 @@ async def generate_topics_json(
         return GenerateTopicsResponse(topics=topics, description_analysis=analysis)
 
     except Exception as e:
-        print(f"Error generating topics: {e}")
+        logger.error(f"Error generating topics: {e}")
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error generating topics: {str(e)}"

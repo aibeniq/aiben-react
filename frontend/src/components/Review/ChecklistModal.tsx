@@ -23,6 +23,7 @@ import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
 import useCustomToast from "../../hooks/useCustomToast"
 import FileUpload from "../Common/FileUpload"
+import SearchModeToggle from "../Common/SearchModeToggle"
 
 interface ChecklistModalProps {
   isOpen: boolean
@@ -119,6 +120,7 @@ const ChecklistModal = ({
   const [referenceFiles, setReferenceFiles] = useState<FileItem[]>([])
   const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<any>(null)
   const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
 
   const handleCopyQuestions = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -329,7 +331,7 @@ const ChecklistModal = ({
         formData.append("description", checklistDescription.trim())
         formData.append("checklist_type", "general")
 
-        regularFiles.forEach((file, index) => {
+        regularFiles.forEach((file) => {
           formData.append(`files`, file)
         })
 
@@ -359,6 +361,7 @@ const ChecklistModal = ({
             description: checklistDescription.trim(),
             checklist_type: "general",
             knowledge_base_id: referenceKnowledgeBase.id,
+            search_mode: searchMode,
           },
         })
       } else {
@@ -367,6 +370,7 @@ const ChecklistModal = ({
           requestBody: {
             description: checklistDescription.trim(),
             checklist_type: "general",
+            search_mode: searchMode,
           },
         })
       }
@@ -389,6 +393,7 @@ const ChecklistModal = ({
         } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
           successMessage += ` using Knowledge Base "${referenceKnowledgeBase.title}"`
         }
+        successMessage += ` (${searchMode === "vector" ? "vector search" : "full document scan"})`
 
         showSuccessToast(successMessage)
       } else {
@@ -499,6 +504,8 @@ const ChecklistModal = ({
                         )}
                     </Field>
 
+                    <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
+
                     <Field label="Reference Documents (Optional)">
                       <VStack align="stretch" gap={3}>
                         <Text fontSize="sm" color="gray.600">
@@ -566,7 +573,7 @@ const ChecklistModal = ({
                                         {kb.title}
                                       </Text>
                                       {kb.description && (
-                                        <Text fontSize="xs" color="gray.600" noOfLines={2}>
+                                        <Text fontSize="xs" color="gray.600" lineClamp={2}>
                                           {kb.description}
                                         </Text>
                                       )}

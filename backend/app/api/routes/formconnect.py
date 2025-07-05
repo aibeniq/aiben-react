@@ -615,76 +615,31 @@ async def generate_form_fields(
             "knowledge_base_content": "",
         }
 
-        # If knowledge base is specified, retrieve relevant content
+        # If knowledge base is specified, retrieve content using selected search mode
         if request.knowledge_base_id:
             try:
-                # Get the knowledge base
-                knowledge_base = session.exec(
-                    select(KnowledgeBase).where(
-                        KnowledgeBase.id == request.knowledge_base_id
-                    )
-                ).first()
-
-                if not knowledge_base:
-                    raise HTTPException(
-                        status_code=404, detail="Knowledge base not found"
-                    )
-
-                # Load embedding model - use the knowledge base's specific embedding model if available
-                if knowledge_base.embedding_model_id:
-                    embedding_model = session.get(
-                        EmbeddingModel, knowledge_base.embedding_model_id
-                    )
-                    if embedding_model:
-                        # Use the KB's original model
-                        model_id = embedding_model.model_id
-                        provider = embedding_model.provider
-                        print(
-                            f"Using knowledge base's original embedding model: {model_id}"
-                        )
-                    else:
-                        # Fallback if the model was deleted from the database
-                        embedding_info = get_embedding_model(session, current_user)
-                        model_id = embedding_info["model_id"]
-                        provider = embedding_info["provider"]
-                        print(
-                            f"Original embedding model not found, using current default: {model_id}"
-                        )
-                else:
-                    # For knowledge bases created before tracking embedding models
-                    embedding_info = get_embedding_model(session, current_user)
-                    model_id = embedding_info["model_id"]
-                    provider = embedding_info["provider"]
-                    print(
-                        f"Knowledge base has no embedding model record, using current default: {embedding_info}"
-                    )
-
-                embeddings = load_embeddings_model(provider=provider, model_id=model_id)
-
-                # Create retriever for the knowledge base
-                retriever = create_ensemble_retriever(
-                    knowledge_base.id, embeddings, k=8
+                from app.services.content_retrieval import (
+                    retrieve_knowledge_base_content,
                 )
 
-                # Retrieve relevant content from knowledge base
-                retrieved_docs = retriever.get_relevant_documents(request.description)
+                content, instruction = await retrieve_knowledge_base_content(
+                    session=session,
+                    current_user=current_user,
+                    knowledge_base_id=str(request.knowledge_base_id),
+                    search_mode=request.search_mode,
+                    query=request.description,
+                )
 
-                if retrieved_docs:
-                    knowledge_base_content = "\n\n".join(
-                        [
-                            f"Source: {doc.metadata.get('source', 'Unknown')}\nContent: {doc.page_content}"
-                            for doc in retrieved_docs[:5]  # Limit to top 5 results
-                        ]
-                    )
-
+                if content:
                     prompt_variables["knowledge_base_content"] = (
-                        f"REFERENCE DOCUMENTS FROM KNOWLEDGE BASE:\n{knowledge_base_content}"
+                        f"REFERENCE DOCUMENTS FROM KNOWLEDGE BASE:\n{content}"
                     )
                     prompt_variables["knowledge_base_instruction"] = (
-                        "\n11. Use the reference documents from the knowledge base above as examples to understand the types of fields that are typically found in similar documents"
+                        f"\n11. {instruction} Use them as examples to understand the types of fields "
+                        f"that are typically found in similar documents. Search mode used: {request.search_mode}"
                     )
                     prompt_variables["analysis_instruction"] = (
-                        ". Briefly mention how the knowledge base content influenced the field selection"
+                        f". Briefly mention how the knowledge base content (using {request.search_mode}) influenced the field selection"
                     )
 
             except Exception as e:
@@ -753,11 +708,14 @@ async def generate_form_fields(
             fields = fields[: request.num_fields]
 
         if not analysis:
-            analysis = f"Generated {len(fields)} form fields based on the provided description to enable structured data extraction from relevant documents."
+            search_method = (
+                "vector search"
+                if request.search_mode == "vector"
+                else "full document scan"
+            )
+            analysis = f"Generated {len(fields)} form fields based on the provided description using {search_method}"
             if request.knowledge_base_id:
-                analysis += (
-                    " Used knowledge base reference for enhanced field selection."
-                )
+                analysis += " with knowledge base reference."
 
         # Record the interaction
         record_llm_interaction(
@@ -767,7 +725,12 @@ async def generate_form_fields(
             input_data={
                 "description": request.description,
                 "requested_fields": request.num_fields,
-                "knowledge_base_id": request.knowledge_base_id,
+                "knowledge_base_id": (
+                    str(request.knowledge_base_id)
+                    if request.knowledge_base_id
+                    else None
+                ),
+                "search_mode": request.search_mode,
             },
             output_data={
                 "fields_count": len(fields),

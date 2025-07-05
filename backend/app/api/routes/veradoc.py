@@ -1779,57 +1779,28 @@ async def generate_questions(
             "additional_instructions": "",
         }
 
-        # If knowledge base is provided, retrieve relevant documents
+        # If knowledge base is provided, retrieve content using selected search mode
         if request.knowledge_base_id:
             try:
-                # Get the knowledge base
-                knowledge_base = session.get(KnowledgeBase, request.knowledge_base_id)
-                if not knowledge_base:
-                    raise HTTPException(
-                        status_code=404, detail="Knowledge base not found"
-                    )
-
-                # Check if user has access to this knowledge base
-                if knowledge_base.owner_id != current_user.id:
-                    raise HTTPException(
-                        status_code=403, detail="Access denied to knowledge base"
-                    )
-
-                # Get the embedding model
-                embedding_model = get_embedding_model(
-                    session, knowledge_base.embedding_model_id
-                )
-                embeddings_model = load_embeddings_model(embedding_model)
-
-                # Create retriever
-                retriever = create_ensemble_retriever(
-                    str(knowledge_base.id),
-                    embeddings_model,
-                    k=10,  # Retrieve more documents for question generation
+                from app.services.content_retrieval import (
+                    retrieve_knowledge_base_content,
                 )
 
-                # Use the description as query to get relevant documents
-                docs = retriever.invoke(request.description)
+                content, instruction = await retrieve_knowledge_base_content(
+                    session=session,
+                    current_user=current_user,
+                    knowledge_base_id=request.knowledge_base_id,
+                    search_mode=request.search_mode,
+                    query=request.description,
+                )
 
-                if docs:
-                    # Format reference content
-                    reference_content = []
-                    for i, doc in enumerate(docs[:5], 1):  # Limit to top 5 documents
-                        content = doc.page_content.strip()
-                        if content:
-                            reference_content.append(
-                                f"Reference Document {i}:\n{content}"
-                            )
-
-                    if reference_content:
-                        prompt_variables["reference_documents_instruction"] = (
-                            "Use the following reference documents to inform the questions you generate. "
-                            "The questions should be relevant to the description while also considering "
-                            "the content and requirements found in these reference documents:"
-                        )
-                        prompt_variables["reference_documents_content"] = "\n\n".join(
-                            reference_content
-                        )
+                if content:
+                    prompt_variables["reference_documents_content"] = content
+                    prompt_variables["reference_documents_instruction"] = (
+                        f"{instruction} The questions should be relevant to the description while also "
+                        f"considering the content and requirements found in these reference documents. "
+                        f"Search mode used: {request.search_mode}"
+                    )
 
             except Exception as e:
                 print(f"Error retrieving knowledge base documents: {e}")
@@ -1863,17 +1834,27 @@ async def generate_questions(
                 continue
 
             if in_questions_section:
-                # Extract question from numbered format
-                if line:
-                    # Remove leading numbers, dots, dashes, etc.
-                    question = re.sub(r"^\d+\.\s*", "", line)
-                    question = re.sub(r"^-\s*", "", question)
-                    question = re.sub(r"^\*\s*", "", question)
+                # Extract questions (numbered list)
+                if re.match(r"^\d+\.\s+", line):
+                    question = re.sub(r"^\d+\.\s+", "", line)
                     if question.strip():
                         questions.append(question.strip())
-
             elif in_analysis_section:
-                analysis += line + " "
+                if line:
+                    if analysis:
+                        analysis += " " + line
+                    else:
+                        analysis = line
+
+        # If parsing failed, try simpler approach
+        if not questions:
+            # Split by lines and look for numbered items
+            for line in lines:
+                line = line.strip()
+                if re.match(r"^\d+\.\s+", line):
+                    question = re.sub(r"^\d+\.\s+", "", line)
+                    if question.strip():
+                        questions.append(question.strip())
 
         # Ensure we have some questions
         if not questions:
@@ -1883,6 +1864,48 @@ async def generate_questions(
             )
 
         # Apply user-specified limit if provided, otherwise use all generated questions
+        if request.num_questions:
+            questions = questions[: request.num_questions]
+
+        if not analysis:
+            search_method = (
+                "vector search"
+                if request.search_mode == "vector"
+                else "full document scan"
+            )
+            analysis = f"Generated {len(questions)} checklist questions based on the provided description using {search_method}"
+            if request.knowledge_base_id:
+                analysis += " with knowledge base reference."
+
+        # Record the interaction
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="generate_checklist_questions",
+            input_data={
+                "description": request.description,
+                "checklist_type": request.checklist_type,
+                "requested_questions": request.num_questions,
+                "knowledge_base_id": request.knowledge_base_id,
+                "search_mode": request.search_mode,
+            },
+            output_data={
+                "questions_count": len(questions),
+                "analysis": analysis,
+            },
+            metadata={},
+        )
+
+        return GenerateQuestionsResponse(
+            questions=questions, description_analysis=analysis
+        )
+
+    except Exception as e:
+        print(f"Error generating questions: {e}")
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error generating questions: {str(e)}"
+        )
         if request.num_questions:
             questions = questions[: request.num_questions]
 
