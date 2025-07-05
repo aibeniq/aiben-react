@@ -29,7 +29,7 @@ from app.models import (
     Message,
 )
 from app.core.config import settings
-from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from app.services.llms import LlmService
 from langchain_community.document_loaders import PyPDFLoader
 import mimetypes
 
@@ -146,7 +146,7 @@ async def compare_documents(
         diff_text = "\n".join(diff_result)
 
         # Load the LLM model
-        llm = get_default_llm(session, current_user)
+        llm = LlmService.get_user_default_model(session, current_user.id)
 
         # Parse comparison topics
         topic_list = request.comparison_topics.strip().split("\n")
@@ -162,8 +162,7 @@ async def compare_documents(
 
             # Generate analysis for this topic
             try:
-                topic_result = invoke_llm(
-                    llm,
+                topic_result = llm.invoke(
                     prompt_template,
                     {
                         "diff_text": diff_text,
@@ -186,8 +185,7 @@ async def compare_documents(
 
         # Create a comprehensive summary
         summary_prompt_template = settings.TWINCHECK_SUMMARY_PROMPT_TEMPLATE
-        summary = invoke_llm(
-            llm,
+        summary = llm.invoke(
             summary_prompt_template,
             {
                 "diff_text": diff_text,
@@ -198,7 +196,7 @@ async def compare_documents(
         )
 
         # Record this interaction for history
-        interaction_id = record_llm_interaction(
+        interaction_id = LlmService.record_llm_interaction(
             session=session,
             user_id=current_user.id,
             functionality="twincheck",
