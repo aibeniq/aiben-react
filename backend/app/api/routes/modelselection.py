@@ -1,13 +1,9 @@
 from typing import List
 from fastapi import APIRouter
-from sqlmodel import select
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import (
-    LlmModel,
-    LlmModelsPublic,
-)
 from app.services.embeddings import EmbeddingService, EmbeddingModelInfo
+from app.services.llms import LlmModelInfo, LlmService
 
 router = APIRouter(prefix="/embedding-models", tags=["embedding-models"])
 
@@ -43,28 +39,9 @@ def get_default_embedding_model() -> EmbeddingModelInfo:
 # TODO: this doesn't belong here.. or we need to modify the prefix
 
 
-@router.get("/llm/", response_model=LlmModelsPublic)
+@router.get("/llm", response_model=List[LlmModelInfo])
 def get_llm_models(
     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
-) -> LlmModelsPublic:
-    """
-    Get all LLM models.
-    """
-    # First get system models (no owner_id)
-    system_models = session.exec(
-        select(LlmModel).where(LlmModel.owner_id.is_(None))
-    ).all()
-
-    # Then get user's custom models
-    user_models = session.exec(
-        select(LlmModel).where(LlmModel.owner_id == current_user.id)
-    ).all()
-
-    # Combine the results
-    models = system_models + user_models
-    count = len(models)
-
-    # Apply pagination
-    models = models[skip : skip + limit]
-
-    return LlmModelsPublic(data=models, count=count)
+) -> List[LlmModelInfo]:
+    """Get all LLM models."""
+    return LlmService.get_models()
