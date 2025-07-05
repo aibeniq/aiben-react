@@ -646,6 +646,21 @@ class OptimizedOutlineResponse(SQLModel):
     analysis_summary: str
 
 
+class GenerateTopicsRequest(SQLModel):
+    description: str = Field(min_length=10, max_length=20000)
+    num_topics: Optional[int] = Field(
+        default=None, ge=1, le=20
+    )  # Optional - LLM will decide if not specified
+    comparison_type: str = Field(
+        default="general"
+    )  # Type of comparison (general, compliance, technical, regulatory, etc.)
+
+
+class GenerateTopicsResponse(SQLModel):
+    topics: List[str]
+    description_analysis: str
+
+
 class GenerateQuestionsRequest(SQLModel):
     description: str = Field(min_length=10, max_length=20000)
     num_questions: Optional[int] = Field(
@@ -654,6 +669,9 @@ class GenerateQuestionsRequest(SQLModel):
     checklist_type: str = Field(
         default="general"
     )  # Type of checklist (general, compliance, technical, etc.)
+    knowledge_base_id: Optional[str] = Field(
+        default=None
+    )  # Optional - Knowledge base to use as reference
 
 
 class GenerateQuestionsResponse(SQLModel):

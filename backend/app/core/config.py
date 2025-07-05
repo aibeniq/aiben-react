@@ -127,21 +127,27 @@ class Settings(BaseSettings):
 
     # LLM Templates
     REPORT_GENIE_PROMPT_TEMPLATE: str = """
+    You are drafting an Informed Consent Form for a clinical study.
+    
     DRAFT OF REPORT SO FAR:
     {report_draft}
+
+    TASK:
+    You will be shown some reference information and then asked to write a clear and comprehensive section for a research participation consent form. 
+    
+    The section to create is: {question}
 
     REFERENCE INFORMATION:
     {context}
 
     TASK:
-    Based on the reference information above, write a clear and comprehensive section for a research participation consent form. The section to create is: {question}
-
+    
     The content should:
     1. Be written in plain language (8th-grade reading level)
     2. Be concise yet thorough
     3. Be limited to the specific section requested -- don't keep adding unnecessary/unrequested language like "Your participation is important, and we appreciate your commitment to this investigation."
     4. Use second-person perspective (addressing "you" - the participant)
-    5. Should not make any claims that are not supported by the provided context
+    5. Should not make any claims that are not supported by the provided reference information
     6. Keep in mind what has already been generated in the report, and don't be redundant when writing the new section.
 
     {custom_instructions}
@@ -455,6 +461,10 @@ DESCRIPTION:
 
 CHECKLIST TYPE: {checklist_type}
 
+{reference_documents_instruction}
+
+{reference_documents_content}
+
 INSTRUCTIONS:
 1. Generate as many specific, clear, and actionable questions as needed to comprehensively cover the description
 2. Each question should be evaluable with a yes/no or specific answer
@@ -466,6 +476,7 @@ INSTRUCTIONS:
 8. Generate between 5-25 questions depending on the complexity of the requirements
 9. For complex regulatory or compliance requirements, generate more detailed questions
 10. For simple processes, fewer but comprehensive questions are sufficient
+{additional_instructions}
 
 FORMAT YOUR RESPONSE AS:
 QUESTIONS:
@@ -476,6 +487,43 @@ QUESTIONS:
 
 ANALYSIS:
 [Brief explanation of why these questions comprehensively cover the described requirements and how many questions were needed]
+"""
+
+    TWINCHECK_GENERATE_TOPICS_PROMPT_TEMPLATE: str = """
+INSTRUCTION: 
+You are an AI assistant that helps generate comprehensive comparison topics for document analysis based on a given description.
+Your task is to create specific, actionable topics that would help compare two documents effectively according to the described comparison requirements.
+
+DESCRIPTION:
+{description}
+
+COMPARISON TYPE: {comparison_type}
+
+{example_document}
+
+INSTRUCTIONS:
+1. Generate as many specific, clear, and actionable comparison topics as needed to comprehensively cover the description
+2. Each topic should represent a distinct area of comparison between two documents
+3. Topics should be comprehensive and cover all aspects mentioned in the description
+4. Make topics specific enough to be useful for meaningful document comparison
+5. Avoid vague or overly general topics
+6. Focus on what can be compared, contrasted, or analyzed between documents
+7. Use clear, professional language suitable for document comparison analysis
+8. Generate between 3-15 topics depending on the complexity of the comparison requirements
+9. For complex regulatory or compliance comparisons, generate more detailed topics
+10. For simple comparisons, fewer but comprehensive topics are sufficient
+11. Consider both content-based comparisons (what is included/excluded) and structural comparisons (how information is organized)
+12. Include topics that would reveal differences in approach, methodology, compliance, or implementation{example_instruction}
+
+FORMAT YOUR RESPONSE AS:
+TOPICS:
+1. [First topic for comparison]
+2. [Second topic for comparison]
+3. [Third topic for comparison]
+... (continue with as many topics as needed to comprehensively cover the comparison requirements)
+
+ANALYSIS:
+[Brief explanation of why these topics comprehensively cover the described comparison requirements and how they would help identify meaningful differences between documents{example_analysis_instruction}]
 """
 
     REPORTGENIE_GENERATE_OUTLINE_PROMPT_TEMPLATE: str = """

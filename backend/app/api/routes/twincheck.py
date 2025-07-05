@@ -1,5 +1,6 @@
 import uuid
 import difflib
+import re
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import json
@@ -29,6 +30,8 @@ from app.models import (
     LlmInteraction,
     DocxRequest,
     Message,
+    GenerateTopicsRequest,
+    GenerateTopicsResponse,
 )
 from app.core.config import settings
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
@@ -899,3 +902,138 @@ async def generate_docx(
 
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
+
+
+@router.post("/generate-topics", response_model=GenerateTopicsResponse)
+def generate_topics(
+    session: SessionDep,
+    current_user: CurrentUser,
+    description: str = Form(...),
+    comparison_type: str = Form("general"),
+    num_topics: Optional[int] = Form(None),
+    files: List[UploadFile] = File(default=[]),
+):
+    """
+    Generate comparison topics based on a description using LLM, with optional example document.
+    """
+    try:
+        # Get the default LLM
+        llm = get_default_llm(session, current_user)
+
+        # Extract text from example document if provided
+        example_document = ""
+        example_instruction = ""
+        example_analysis_instruction = ""
+
+        if files and len(files) > 0:
+            file = files[0]
+            if file.size > 0:
+                content = file.file.read()
+                example_document = extract_text_from_file(file)
+                example_instruction = f" and use the uploaded example document ({file.filename}) as a reference for the appropriate scope and depth of comparison topics"
+                example_analysis_instruction = f" and explain how they align with the scope shown in the example document ({file.filename})"
+                # Reset file pointer in case it's used elsewhere
+                file.file.seek(0)
+
+        # Prepare variables for the prompt
+        prompt_variables = {
+            "description": description,
+            "comparison_type": comparison_type,
+            "example_document": (
+                f"EXAMPLE DOCUMENT: {file.filename}\n{example_document}\n"
+                if example_document
+                else ""
+            ),
+            "example_instruction": example_instruction,
+            "example_analysis_instruction": example_analysis_instruction,
+        }
+
+        # Generate topics using the LLM
+        topics_response = invoke_llm(
+            llm,
+            settings.TWINCHECK_GENERATE_TOPICS_PROMPT_TEMPLATE,
+            prompt_variables,
+        )
+
+        # Parse the response to extract topics and analysis
+        topics = []
+        analysis = ""
+
+        lines = topics_response.strip().split("\n")
+        in_topics_section = False
+        in_analysis_section = False
+
+        for line in lines:
+            line = line.strip()
+            if line.startswith("TOPICS:"):
+                in_topics_section = True
+                in_analysis_section = False
+                continue
+            elif line.startswith("ANALYSIS:"):
+                in_topics_section = False
+                in_analysis_section = True
+                continue
+
+            if in_topics_section:
+                # Extract topics (numbered list)
+                if re.match(r"^\d+\.\s+", line):
+                    topic = re.sub(r"^\d+\.\s+", "", line)
+                    if topic.strip():
+                        topics.append(topic.strip())
+            elif in_analysis_section:
+                if line:
+                    if analysis:
+                        analysis += " " + line
+                    else:
+                        analysis = line
+
+        # If parsing failed, try simpler approach
+        if not topics:
+            # Split by lines and look for numbered items
+            for line in lines:
+                line = line.strip()
+                if re.match(r"^\d+\.\s+", line):
+                    topic = re.sub(r"^\d+\.\s+", "", line)
+                    if topic.strip():
+                        topics.append(topic.strip())
+
+        # Ensure we have some topics
+        if not topics:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate topics from the description. Please try with a more detailed description.",
+            )
+
+        # Apply user-specified limit if provided, otherwise use all generated topics
+        if num_topics:
+            topics = topics[:num_topics]
+
+        if not analysis:
+            analysis = f"Generated {len(topics)} comparison topics based on the provided description to ensure comprehensive document comparison coverage."
+
+        # Record the interaction
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="generate_comparison_topics",
+            input_data={
+                "description": description,
+                "requested_topics": num_topics,
+                "comparison_type": comparison_type,
+                "has_example_document": len(files) > 0 and files[0].size > 0,
+            },
+            output_data={
+                "topics_count": len(topics),
+                "analysis": analysis,
+            },
+            metadata={},
+        )
+
+        return GenerateTopicsResponse(topics=topics, description_analysis=analysis)
+
+    except Exception as e:
+        print(f"Error generating topics: {e}")
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error generating topics: {str(e)}"
+        )
