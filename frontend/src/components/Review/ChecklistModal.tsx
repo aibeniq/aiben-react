@@ -116,6 +116,9 @@ const ChecklistModal = ({
   // Generate questions state
   const [generating, setGenerating] = useState(false)
   const [questionsKey, setQuestionsKey] = useState(0)
+  const [referenceFiles, setReferenceFiles] = useState<FileItem[]>([])
+  const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<any>(null)
+  const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
 
   const handleCopyQuestions = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -302,16 +305,63 @@ const ChecklistModal = ({
       return
     }
 
+    // Validate reference requirements if any are selected
+    if (referenceMode === "files" && referenceFiles.length === 0) {
+      // Files mode but no files - this is okay, just use description
+    } else if (referenceMode === "knowledge-base" && !referenceKnowledgeBase) {
+      showErrorToast("Please select a Knowledge Base or switch to file upload mode")
+      return
+    }
+
     setGenerating(true)
 
     try {
-      const response = await VeradocService.generateQuestions({
-        requestBody: {
-          description: checklistDescription.trim(),
-          checklist_type: "general",
-          // Remove num_questions - let LLM decide based on description complexity
-        },
-      })
+      let response
+
+      if (referenceMode === "files" && referenceFiles.length > 0) {
+        // Use the file upload endpoint
+        const regularFiles = referenceFiles
+          .filter((item) => item.file.size > 0)
+          .map((item) => item.file)
+
+        // Create FormData for file upload
+        const formData = new FormData()
+        formData.append("description", checklistDescription.trim())
+        formData.append("checklist_type", "general")
+
+        regularFiles.forEach((file, index) => {
+          formData.append(`files`, file)
+        })
+
+        // Use fetch directly since the SDK might not support FormData properly
+        const apiResponse = await fetch("/api/v1/generate-questions-with-files", {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!apiResponse.ok) {
+          throw new Error(`HTTP ${apiResponse.status}: ${apiResponse.statusText}`)
+        }
+
+        response = await apiResponse.json()
+      } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
+        // Use the SDK method with knowledge base reference
+        response = await VeradocService.generateQuestions({
+          requestBody: {
+            description: checklistDescription.trim(),
+            checklist_type: "general",
+            knowledge_base_id: referenceKnowledgeBase.id,
+          },
+        })
+      } else {
+        // Use the basic SDK method without references
+        response = await VeradocService.generateQuestions({
+          requestBody: {
+            description: checklistDescription.trim(),
+            checklist_type: "general",
+          },
+        })
+      }
 
       // Replace current questions with generated ones
       const generatedQuestions = response.questions || []
@@ -325,7 +375,14 @@ const ChecklistModal = ({
         // Force re-render of question items
         setQuestionsKey((prev) => prev + 1)
 
-        showSuccessToast(`Generated ${generatedQuestions.length} questions from description`)
+        let successMessage = `Generated ${generatedQuestions.length} questions from description`
+        if (referenceMode === "files" && referenceFiles.length > 0) {
+          successMessage += ` and ${referenceFiles.length} reference file(s)`
+        } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
+          successMessage += ` using Knowledge Base "${referenceKnowledgeBase.title}"`
+        }
+
+        showSuccessToast(successMessage)
       } else {
         showErrorToast("No questions were generated. Please try with a more detailed description.")
       }
@@ -349,19 +406,38 @@ const ChecklistModal = ({
     }
   }
 
+  const handleClose = () => {
+    // Clear reference files and knowledge base when closing
+    setReferenceFiles([])
+    setReferenceKnowledgeBase(null)
+    setReferenceMode("files")
+    onClose()
+  }
+
+  // Handler for reference mode changes
+  const handleReferenceModeChange = (mode: "files" | "knowledge-base") => {
+    setReferenceMode(mode)
+    // Clear the opposite mode's selection
+    if (mode === "files") {
+      setReferenceKnowledgeBase(null)
+    } else {
+      setReferenceFiles([])
+    }
+  }
+
   return (
-    <Dialog.Root open={isOpen} onOpenChange={(e) => (e.open ? null : onClose())}>
+    <Dialog.Root open={isOpen} onOpenChange={(e) => (e.open ? null : handleClose())}>
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content maxW="4xl" maxH="90vh">
+          <Dialog.Content maxW="6xl" maxH="95vh" minH="80vh">
             <Dialog.Header>
               <Dialog.Title>
                 {editingChecklist ? "Edit Checklist" : "Create New Checklist"}
               </Dialog.Title>
             </Dialog.Header>
 
-            <Dialog.Body>
+            <Dialog.Body overflowY="auto" maxH="calc(95vh - 120px)">
               <VStack align="stretch" gap={4}>
                 <VStack align="stretch" gap={4}>
                   <VStack align="stretch" gap={4} flex="1">
@@ -413,6 +489,100 @@ const ChecklistModal = ({
                             more characters to generate questions
                           </Text>
                         )}
+                    </Field>
+
+                    <Field label="Reference Documents (Optional)">
+                      <VStack align="stretch" gap={3}>
+                        <Text fontSize="sm" color="gray.600">
+                          Upload reference documents or select a Knowledge Base to help the AI
+                          understand additional requirements for the checklist questions.
+                        </Text>
+
+                        {/* Toggle between files and knowledge base */}
+                        <HStack gap={4}>
+                          <Button
+                            size="sm"
+                            variant={referenceMode === "files" ? "solid" : "outline"}
+                            colorPalette={referenceMode === "files" ? "blue" : "gray"}
+                            onClick={() => handleReferenceModeChange("files")}
+                          >
+                            Upload Files
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={referenceMode === "knowledge-base" ? "solid" : "outline"}
+                            colorPalette={referenceMode === "knowledge-base" ? "blue" : "gray"}
+                            onClick={() => handleReferenceModeChange("knowledge-base")}
+                            disabled={!knowledgeBases || knowledgeBases.length === 0}
+                          >
+                            Select Knowledge Base
+                          </Button>
+                        </HStack>
+
+                        {referenceMode === "files" ? (
+                          <FileUpload
+                            files={referenceFiles}
+                            onFilesChange={setReferenceFiles}
+                            maxFiles={5}
+                            showHandwrittenToggle={false}
+                          />
+                        ) : (
+                          <VStack align="stretch" gap={2}>
+                            {knowledgeBases && knowledgeBases.length > 0 ? (
+                              <VStack align="stretch" gap={2}>
+                                <Text fontSize="xs" color="gray.600">
+                                  Select a Knowledge Base to use as reference for generating
+                                  questions:
+                                </Text>
+                                <Box
+                                  maxH="120px"
+                                  overflowY="auto"
+                                  border="1px solid"
+                                  borderColor="gray.200"
+                                  borderRadius="md"
+                                >
+                                  {knowledgeBases.map((kb) => (
+                                    <Box
+                                      key={kb.id}
+                                      p={2}
+                                      cursor="pointer"
+                                      _hover={{ bg: "gray.50" }}
+                                      bg={
+                                        referenceKnowledgeBase?.id === kb.id ? "blue.50" : "white"
+                                      }
+                                      borderBottom="1px solid"
+                                      borderColor="gray.100"
+                                      onClick={() => setReferenceKnowledgeBase(kb)}
+                                    >
+                                      <Text fontSize="sm" fontWeight="medium">
+                                        {kb.title}
+                                      </Text>
+                                      {kb.description && (
+                                        <Text fontSize="xs" color="gray.600" noOfLines={2}>
+                                          {kb.description}
+                                        </Text>
+                                      )}
+                                      <Text fontSize="xs" color="gray.500">
+                                        {kb.number_of_sources || 0} sources
+                                      </Text>
+                                    </Box>
+                                  ))}
+                                </Box>
+                                {referenceKnowledgeBase && (
+                                  <Text fontSize="xs" color="green.600">
+                                    Selected: {referenceKnowledgeBase.title}
+                                  </Text>
+                                )}
+                              </VStack>
+                            ) : (
+                              <Text fontSize="sm" color="gray.500">
+                                No Knowledge Bases available. Create one first or switch to file
+                                upload.
+                              </Text>
+                            )}
+                          </VStack>
+                        )}
+                      </VStack>
                     </Field>
                   </VStack>
 
@@ -758,7 +928,7 @@ const ChecklistModal = ({
 
             <Dialog.Footer>
               <Dialog.ActionTrigger asChild>
-                <CancelButton onClick={onClose} size="md">
+                <CancelButton onClick={handleClose} size="md">
                   Cancel
                 </CancelButton>
               </Dialog.ActionTrigger>
