@@ -14,6 +14,7 @@ from sqlalchemy import (
 )
 
 from app.services.embeddings import EmbeddingModelInfo, EmbeddingService
+from app.core.config import settings
 
 
 # Shared properties
@@ -24,6 +25,9 @@ class UserBase(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     default_embedding_model: str = Field(
         default_factory=lambda: EmbeddingService.get_default_model().id, max_length=100
+    )
+    default_llm: str = Field(
+        default_factory=lambda: settings.DEFAULT_LLM_MODEL, max_length=100
     )
 
     @field_validator("default_embedding_model")
@@ -72,8 +76,6 @@ class User(UserBase, table=True):
     knowledge_bases: list["KnowledgeBase"] = Relationship(
         back_populates="owner", cascade_delete=True
     )
-    # track the user's default models
-    default_llm: Optional[uuid.UUID] = Field(default=None, foreign_key="llmmodel.id")
 
 
 # Properties to return via API, id is always required
