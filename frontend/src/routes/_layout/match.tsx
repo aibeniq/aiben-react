@@ -2,7 +2,12 @@ import { Box, Button, Container, Heading, Text, VStack, HStack, Spinner } from "
 import { useState, useEffect } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
-import { FormconnectService, FormConnectForm } from "@/client"
+import {
+  FormconnectService,
+  FormConnectForm,
+  KnowledgeBasesService,
+  KnowledgeBasePublic,
+} from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { FiFileText } from "react-icons/fi"
@@ -21,6 +26,17 @@ const FormConnect = () => {
   const [results, setResults] = useState("")
   const [loading, setLoading] = useState(false)
   const [showFormModal, setShowFormModal] = useState(false)
+  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
+
+  const fetchKnowledgeBases = async () => {
+    try {
+      const data = await KnowledgeBasesService.readKnowledgeBases()
+      setKnowledgeBases(data.data || [])
+    } catch (error) {
+      console.error("Error fetching knowledge bases:", error)
+      setKnowledgeBases([])
+    }
+  }
 
   const fetchForms = async () => {
     try {
@@ -33,6 +49,7 @@ const FormConnect = () => {
 
   useEffect(() => {
     fetchForms()
+    fetchKnowledgeBases()
   }, [])
 
   const mutation = useMutation({
@@ -136,6 +153,7 @@ const FormConnect = () => {
             setFormName={setFormName}
             formDescription={formDescription}
             setFormDescription={setFormDescription}
+            knowledgeBases={knowledgeBases}
           />
         </SelectionModal>
 

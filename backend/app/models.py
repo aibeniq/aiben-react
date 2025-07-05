@@ -277,6 +277,18 @@ class FormConnectForm(SQLModel, table=True):
     date_modified: datetime = Field(default_factory=datetime.utcnow)
 
 
+# Request models for generating form fields
+class GenerateFormFieldsRequest(SQLModel):
+    description: str = Field(min_length=10, max_length=2000)
+    num_fields: Optional[int] = Field(default=None, ge=1, le=50)
+    knowledge_base_id: Optional[uuid.UUID] = None
+
+
+class GenerateFormFieldsResponse(SQLModel):
+    fields: List[str]
+    description_analysis: str
+
+
 # Request model for VeraDoc
 class VeraDocRequest(SQLModel):
     questions: str
@@ -654,6 +666,9 @@ class GenerateTopicsRequest(SQLModel):
     comparison_type: str = Field(
         default="general"
     )  # Type of comparison (general, compliance, technical, regulatory, etc.)
+    knowledge_base_id: Optional[str] = Field(
+        default=None
+    )  # Optional - Knowledge base to use as reference
 
 
 class GenerateTopicsResponse(SQLModel):
