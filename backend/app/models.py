@@ -1,7 +1,7 @@
 import enum
 import uuid
 from typing import List, Dict, Any, Optional
-from pydantic import EmailStr
+from pydantic import EmailStr, field_validator
 from sqlmodel import Field, Relationship, SQLModel, Column
 from sqlalchemy import (
     LargeBinary,
@@ -11,7 +11,8 @@ from sqlalchemy import (
     Enum as SQLAlchemyEnum,
     JSON,
 )
-from datetime import datetime
+
+from app.services.embeddings import EmbeddingModelInfo, EmbeddingService
 
 
 # Shared properties
@@ -20,6 +21,19 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
+    default_embedding_model: str = Field(
+        default_factory=lambda: EmbeddingService.get_default_model().id, max_length=100
+    )
+
+    @field_validator("default_embedding_model")
+    @classmethod
+    def validate_embedding_model(cls, v: str) -> str:
+        if not EmbeddingService.is_valid_model_id(v):
+            available_models = EmbeddingService.get_model_ids()
+            raise ValueError(
+                f"Invalid embedding model ID '{v}'. Available models: {', '.join(available_models)}"
+            )
+        return v
 
 
 # Properties to receive via API on creation
@@ -59,9 +73,6 @@ class User(UserBase, table=True):
     )
     # track the user's default models
     default_llm: Optional[uuid.UUID] = Field(default=None, foreign_key="llmmodel.id")
-    default_embedding_model: Optional[uuid.UUID] = Field(
-        default=None, foreign_key="embeddingmodel.id"
-    )
 
 
 # Properties to return via API, id is always required
@@ -136,20 +147,28 @@ class NewPassword(SQLModel):
 class KnowledgeBaseBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=255)
-    embedding_model_id: Optional[uuid.UUID] = Field(
-        default=None, foreign_key="embeddingmodel.id"
+    embedding_model_id: str = Field(
+        default_factory=lambda: EmbeddingService.get_default_model().id, max_length=100
     )
-    # New property to store file paths or URLs
-    # file_paths: Optional[List[str]] = Field(default=None, sa_column_kwargs={"nullable": True})
+
+    @field_validator("embedding_model_id")
+    @classmethod
+    def validate_embedding_model(cls, v: str) -> str:
+        if not EmbeddingService.is_valid_model_id(v):
+            available_models = EmbeddingService.get_model_ids()
+            raise ValueError(
+                f"Invalid embedding model ID '{v}'. Available models: {', '.join(available_models)}"
+            )
+        return v
 
 
 # Properties to receive on KnowledgeBase creation
 class KnowledgeBaseCreate(KnowledgeBaseBase):
-    embedding_model_id: Optional[uuid.UUID] = None
+    pass
 
 
 # Properties to receive on KnowledgeBase update
-class KnowledgeBaseUpdate(KnowledgeBaseBase):
+class KnowledgeBaseUpdate(SQLModel):
     title: str | None = Field(default=None, min_length=1, max_length=255, unique=True)  # type: ignore
     description: str | None = Field(default=None, max_length=255)
     removed_file_ids: List[str] = Field(
@@ -185,8 +204,7 @@ class KnowledgeBasePublic(KnowledgeBaseBase):
     date_created: datetime
     date_modified: datetime
     number_of_sources: int = Field(default=0)
-    embedding_model_id: Optional[uuid.UUID] = None
-    embedding_model_name: Optional[str] = Field(default=None)
+    embedding_model: EmbeddingModelInfo
 
 
 class KnowledgeBasesPublic(SQLModel):
