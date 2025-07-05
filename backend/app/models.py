@@ -1,5 +1,6 @@
 import enum
 import uuid
+from datetime import datetime
 from typing import List, Dict, Any, Optional
 from pydantic import EmailStr, field_validator
 from sqlmodel import Field, Relationship, SQLModel, Column
@@ -353,8 +354,8 @@ class RagChecklistRequest(VeraDocRequest):
     questions: str
 
 
-# Enum for model providers
-class ModelProvider(str, enum.Enum):
+# Enum for LLM providers (embeddings handled by embedding service)
+class LlmProvider(str, enum.Enum):
     HUGGINGFACE = "huggingface"
     OPENAI = "openai"
     OLLAMA = "ollama"
@@ -364,9 +365,9 @@ class ModelProvider(str, enum.Enum):
 
 
 # Define a SQLAlchemy type for the enum
-ModelProviderType = SQLAlchemyEnum(
-    ModelProvider,
-    name="modelprovider",
+LlmProviderType = SQLAlchemyEnum(
+    LlmProvider,
+    name="llmprovider",
     create_constraint=True,
     validate_strings=True,
     native_enum=True,
@@ -374,62 +375,13 @@ ModelProviderType = SQLAlchemyEnum(
 )
 
 
-# Update the EmbeddingModel table
-class EmbeddingModel(SQLModel, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    name: str = Field(index=True)  # Human-readable name
-    model_id: (
-        str  # Model identifier (e.g., "all-MiniLM-L6-v2" or "text-embedding-3-large")
-    )
-    provider: ModelProvider = Field(
-        default=ModelProvider.HUGGINGFACE,
-        sa_column=Column(ModelProviderType, nullable=False),
-    )
-    description: str = Field(default="")
-    owner_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
-    date_created: datetime = Field(default_factory=datetime.utcnow)
-    date_modified: datetime = Field(default_factory=datetime.utcnow)
-
-
-# Update create and update models
-class EmbeddingModelCreate(SQLModel):
-    name: str
-    model_id: str
-    provider: ModelProvider = ModelProvider.HUGGINGFACE
-    description: str = ""
-
-
-class EmbeddingModelUpdate(SQLModel):
-    name: Optional[str] = None
-    model_id: Optional[str] = None
-    provider: Optional[ModelProvider] = None
-    description: Optional[str] = None
-
-
-class EmbeddingModelValidate(SQLModel):
-    model_id: str
-    provider: ModelProvider
-
-
-class EmbeddingModelPublic(EmbeddingModel):
-    pass
-
-
-class EmbeddingModelsPublic(SQLModel):
-    data: List[EmbeddingModelPublic]
-    count: int
-
-
-# Add new models for LLM settings
-
-
 class LlmModel(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str = Field(index=True)  # Human-readable name
     model_id: str  # Model identifier (e.g., "gpt-4o-mini" or "llama3")
-    provider: ModelProvider = Field(
-        default=ModelProvider.OPENAI,
-        sa_column=Column(ModelProviderType, nullable=False),
+    provider: LlmProvider = Field(
+        default=LlmProvider.OPENAI,
+        sa_column=Column(LlmProviderType, nullable=False),
     )
     description: str = Field(default="")
     owner_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
@@ -440,14 +392,14 @@ class LlmModel(SQLModel, table=True):
 class LlmModelCreate(SQLModel):
     name: str
     model_id: str
-    provider: ModelProvider = ModelProvider.OPENAI
+    provider: LlmProvider = LlmProvider.OPENAI
     description: str = ""
 
 
 class LlmModelUpdate(SQLModel):
     name: Optional[str] = None
     model_id: Optional[str] = None
-    provider: Optional[ModelProvider] = None
+    provider: Optional[LlmProvider] = None
     description: Optional[str] = None
 
 
@@ -461,7 +413,7 @@ class LlmModelsPublic(SQLModel):
 
 class LlmModelsValidate(SQLModel):
     model_id: str
-    provider: ModelProvider
+    provider: LlmProvider
 
 
 # Request model for ReportGenie
