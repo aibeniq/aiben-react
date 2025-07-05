@@ -17,6 +17,7 @@ import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
 import FileUpload, { FileItem } from "../Common/FileUpload"
 import useCustomToast from "../../hooks/useCustomToast"
+import SearchModeToggle from "../Common/SearchModeToggle"
 
 interface TopicListModalProps {
   isOpen: boolean
@@ -64,6 +65,7 @@ const TopicListModal = ({
   const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     selectedKnowledgeBase || null,
   )
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
 
   // Set reference mode based on preselected knowledge base
   useEffect(() => {
@@ -114,6 +116,7 @@ const TopicListModal = ({
             description: topicListDescription.trim(),
             comparison_type: "general",
             knowledge_base_id: referenceKnowledgeBase.id,
+            search_mode: searchMode,
           },
         })
       } else {
@@ -122,6 +125,7 @@ const TopicListModal = ({
           formData: {
             description: topicListDescription.trim(),
             comparison_type: "general",
+            search_mode: searchMode,
           },
         })
       }
@@ -133,7 +137,15 @@ const TopicListModal = ({
         const newTopicsList = [...generatedTopics, ""]
         updateTopicsFromList(newTopicsList)
 
-        showSuccessToast(`Generated ${generatedTopics.length} topics from description`)
+        let successMessage = `Generated ${generatedTopics.length} topics from description`
+        if (referenceMode === "files" && exampleFiles.length > 0) {
+          successMessage += ` and ${exampleFiles.length} example file(s)`
+        } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
+          successMessage += ` using Knowledge Base "${referenceKnowledgeBase.title}"`
+        }
+        successMessage += ` (${searchMode === "vector" ? "vector search" : "full document scan"})`
+
+        showSuccessToast(successMessage)
       } else {
         showErrorToast("No topics were generated. Please try with a more detailed description.")
       }
@@ -223,6 +235,8 @@ const TopicListModal = ({
                           </Text>
                         )}
                     </Field>
+
+                    <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
 
                     <Field label="Reference for Topic Generation (Optional)">
                       <VStack align="stretch" gap={3}>

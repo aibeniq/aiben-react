@@ -20,6 +20,7 @@ import FileUpload, { FileItem } from "../Common/FileUpload"
 import { useState } from "react"
 import { ReportgenieService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
+import SearchModeToggle from "../Common/SearchModeToggle"
 
 interface OutlineModalProps {
   isOpen: boolean
@@ -60,6 +61,7 @@ const OutlineModal = ({
   const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     null,
   )
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
 
   const handleGenerateOutline = async () => {
     if (!outlineDescription.trim()) {
@@ -104,6 +106,7 @@ const OutlineModal = ({
             description: outlineDescription.trim(),
             report_type: "general",
             knowledge_base_id: referenceKnowledgeBase.id,
+            search_mode: searchMode,
           },
         })
       } else {
@@ -112,6 +115,7 @@ const OutlineModal = ({
           formData: {
             description: outlineDescription.trim(),
             report_type: "general",
+            search_mode: searchMode,
           },
         })
       }
@@ -136,6 +140,7 @@ const OutlineModal = ({
         } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
           successMessage += ` using Knowledge Base "${referenceKnowledgeBase.title}"`
         }
+        successMessage += ` (${searchMode === "vector" ? "vector search" : "full document scan"})`
 
         showSuccessToast(successMessage)
       } else {
@@ -237,6 +242,8 @@ const OutlineModal = ({
                       </Text>
                     )}
                 </Field>
+
+                <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
 
                 <Field label="Reference Documents (Optional)">
                   <VStack align="stretch" gap={3}>

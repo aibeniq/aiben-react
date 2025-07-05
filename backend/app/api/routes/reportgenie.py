@@ -598,51 +598,32 @@ async def generate_outline_json(
             "knowledge_base_content": "",
         }
 
-        # If knowledge base is specified, retrieve relevant content
+        # If knowledge base is specified, retrieve content using selected search mode
         if request.knowledge_base_id:
             try:
-                # Get the knowledge base
-                knowledge_base = session.exec(
-                    select(KnowledgeBase).where(
-                        KnowledgeBase.id == request.knowledge_base_id
-                    )
-                ).first()
-
-                if not knowledge_base:
-                    raise HTTPException(
-                        status_code=404, detail="Knowledge base not found"
-                    )
-
-                # Load embedding model
-                embedding_model = get_embedding_model(
-                    session, knowledge_base.embedding_model_id
-                )
-                embeddings = load_embeddings_model(embedding_model.model_name)
-
-                # Create retriever for the knowledge base
-                retriever = create_ensemble_retriever(
-                    knowledge_base.id, embeddings, k=8
+                from app.services.content_retrieval import (
+                    retrieve_knowledge_base_content,
                 )
 
-                # Retrieve relevant content from knowledge base
-                retrieved_docs = retriever.get_relevant_documents(request.description)
+                content, instruction = await retrieve_knowledge_base_content(
+                    session=session,
+                    current_user=current_user,
+                    knowledge_base_id=request.knowledge_base_id,
+                    search_mode=request.search_mode,
+                    query=request.description,
+                )
 
-                if retrieved_docs:
-                    knowledge_base_content = "\n\n".join(
-                        [
-                            f"Source: {doc.metadata.get('source', 'Unknown')}\nContent: {doc.page_content}"
-                            for doc in retrieved_docs[:5]  # Limit to top 5 results
-                        ]
-                    )
-
+                if content:
                     prompt_variables["knowledge_base_content"] = (
-                        f"REFERENCE DOCUMENTS FROM KNOWLEDGE BASE:\n{knowledge_base_content}"
+                        f"REFERENCE DOCUMENTS FROM KNOWLEDGE BASE:\n{content}"
                     )
                     prompt_variables["knowledge_base_instruction"] = (
-                        "\n12. Use the reference documents from the knowledge base above as inspiration for the type of content organization and structure, adapting the sections to match the specific requirements in the outline description"
+                        f"\n12. {instruction} Use them as examples for the type of structure, "
+                        f"sections, and content organization that would be appropriate. "
+                        f"Search mode used: {request.search_mode}"
                     )
                     prompt_variables["example_analysis_instruction"] = (
-                        ". Briefly mention how the knowledge base content influenced the structure"
+                        f". Briefly mention how the knowledge base content (using {request.search_mode}) influenced the outline structure"
                     )
 
             except Exception as e:
@@ -650,7 +631,7 @@ async def generate_outline_json(
                 # Continue without knowledge base content rather than failing
                 pass
 
-        # Generate outline sections using the LLM
+        # Generate outline using the LLM
         outline_response = invoke_llm(
             llm,
             settings.REPORTGENIE_GENERATE_OUTLINE_PROMPT_TEMPLATE,
@@ -703,7 +684,7 @@ async def generate_outline_json(
         if not sections:
             raise HTTPException(
                 status_code=500,
-                detail="Failed to generate sections from the description. Please try with a more detailed description.",
+                detail="Failed to generate outline from the description. Please try with a more detailed description.",
             )
 
         # Apply user-specified limit if provided, otherwise use all generated sections
@@ -711,20 +692,26 @@ async def generate_outline_json(
             sections = sections[: request.num_sections]
 
         if not analysis:
-            analysis = f"Generated {len(sections)} sections based on the provided description to ensure comprehensive report structure coverage."
+            search_method = (
+                "vector search"
+                if request.search_mode == "vector"
+                else "full document scan"
+            )
+            analysis = f"Generated {len(sections)} outline sections based on the provided description using {search_method}"
             if request.knowledge_base_id:
-                analysis += " Used knowledge base reference for enhanced structure."
+                analysis += " with knowledge base reference."
 
         # Record the interaction
         record_llm_interaction(
             session=session,
             user_id=current_user.id,
-            functionality="generate_outline_sections_json",
+            functionality="generate_outline",
             input_data={
                 "description": request.description,
-                "requested_sections": request.num_sections,
                 "report_type": request.report_type,
+                "requested_sections": request.num_sections,
                 "knowledge_base_id": request.knowledge_base_id,
+                "search_mode": request.search_mode,
             },
             output_data={
                 "sections_count": len(sections),

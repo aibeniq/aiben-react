@@ -17,6 +17,7 @@ import { InteractiveList } from "../ui/interactive-list"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
 import FileUpload, { FileItem } from "../Common/FileUpload"
+import SearchModeToggle from "../Common/SearchModeToggle"
 import useCustomToast from "../../hooks/useCustomToast"
 
 interface FormTemplateModalProps {
@@ -55,6 +56,7 @@ const FormTemplateModal = ({
   const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     selectedKnowledgeBase || null,
   )
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
 
   // Set reference mode based on preselected knowledge base
   useEffect(() => {
@@ -108,6 +110,7 @@ const FormTemplateModal = ({
           description: formDescription.trim(),
           num_fields: 15, // Default number of fields
           knowledge_base_id: referenceKnowledgeBase.id,
+          search_mode: searchMode,
         }
 
         response = await fetch(apiUrl, {
@@ -120,6 +123,7 @@ const FormTemplateModal = ({
         const requestData = {
           description: formDescription.trim(),
           num_fields: 15, // Default number of fields
+          search_mode: searchMode,
         }
 
         response = await fetch(apiUrl, {
@@ -140,7 +144,16 @@ const FormTemplateModal = ({
       if (generatedFields.length > 0) {
         const fieldsString = generatedFields.join("\n")
         onFieldsChange(fieldsString)
-        showSuccessToast(`Generated ${generatedFields.length} form fields from description`)
+
+        const searchMethodText = searchMode === "vector" ? "vector search" : "full document scan"
+        const referenceText =
+          referenceMode === "knowledge-base" && referenceKnowledgeBase
+            ? ` using ${searchMethodText} on knowledge base`
+            : ""
+
+        showSuccessToast(
+          `Generated ${generatedFields.length} form fields from description${referenceText}`,
+        )
       } else {
         showErrorToast("No fields were generated. Please try with a more detailed description.")
       }
@@ -213,6 +226,8 @@ const FormTemplateModal = ({
                         rows={3}
                       />
                     </Field>
+
+                    <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
 
                     {/* Generate Fields Section */}
                     <Field label="Generate Fields from Reference">
