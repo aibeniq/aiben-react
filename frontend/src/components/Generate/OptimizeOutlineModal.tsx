@@ -11,9 +11,9 @@ import {
   Card,
 } from "@chakra-ui/react"
 import { Field } from "../ui/field"
-import { Radio, RadioGroup } from "../ui/radio"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
+import SearchModeToggle from "../Common/SearchModeToggle"
 import { useState } from "react"
 import { ReportgenieService, OptimizedOutlineResponse, OutlineSuggestion } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
@@ -40,7 +40,7 @@ const OptimizeOutlineModal = ({
   const [optimizing, setOptimizing] = useState(false)
   const [customInstructions, setCustomInstructions] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [searchMode, setSearchMode] = useState<string>("vector") // Add search mode state
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector") // Add search mode state
   const [optimizationResults, setOptimizationResults] = useState<OptimizedOutlineResponse | null>(
     null,
   )
@@ -139,7 +139,7 @@ const OptimizeOutlineModal = ({
           outline_id: outlineId,
           sections: currentSections,
           custom_instructions: customInstructions || undefined,
-          search_mode: searchMode,
+          search_mode: searchMode === "full_scan" ? "full_text" : searchMode, // Map full_scan to full_text for ReportGenie backend
           files: [selectedFile],
         },
       })
@@ -300,18 +300,7 @@ const OptimizeOutlineModal = ({
                     )}
                   </Field>
 
-                  <Field label="Search Mode" helperText="Choose how to analyze the knowledge base">
-                    <RadioGroup
-                      onValueChange={(details) => setSearchMode(details.value || "vector")}
-                      value={searchMode}
-                      defaultValue="vector"
-                    >
-                      <HStack gap={4}>
-                        <Radio value="vector">Vector Search</Radio>
-                        <Radio value="full_text">Full Document Scan</Radio>
-                      </HStack>
-                    </RadioGroup>
-                  </Field>
+                  <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
 
                   <Field
                     label="Custom Instructions (Optional)"

@@ -1,30 +1,30 @@
 import { HStack, Text, VStack } from "@chakra-ui/react"
 import { Radio, RadioGroup } from "../ui/radio"
 
-interface SearchModeToggleProps {
-  searchMode: "vector" | "full_scan"
-  onSearchModeChange: (mode: "vector" | "full_scan") => void
+interface ReportGenieSearchModeToggleProps {
+  searchMode: "vector" | "full_text"
+  onSearchModeChange: (mode: "vector" | "full_text") => void
   isDisabled?: boolean
 }
 
-const SearchModeToggle = ({
+const ReportGenieSearchModeToggle = ({
   searchMode,
   onSearchModeChange,
   isDisabled = false,
-}: SearchModeToggleProps) => {
+}: ReportGenieSearchModeToggleProps) => {
   return (
     <VStack align="stretch" gap={2}>
       <Text fontSize="sm" fontWeight="medium">
         Search Mode
       </Text>
       <RadioGroup
-        onValueChange={(details) => onSearchModeChange(details.value as "vector" | "full_scan")}
+        onValueChange={(details) => onSearchModeChange(details.value as "vector" | "full_text")}
         value={searchMode}
         disabled={isDisabled}
       >
         <HStack gap={4}>
           <Radio value="vector">Vector Search</Radio>
-          <Radio value="full_scan">Full Document Scan</Radio>
+          <Radio value="full_text">Full Document Scan</Radio>
         </HStack>
       </RadioGroup>
       <Text fontSize="xs" color="gray.500">
@@ -36,4 +36,4 @@ const SearchModeToggle = ({
   )
 }
 
-export default SearchModeToggle
+export default ReportGenieSearchModeToggle
