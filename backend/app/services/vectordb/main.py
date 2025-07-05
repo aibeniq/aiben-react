@@ -149,6 +149,7 @@ class VectorDBService:
                 "content",
                 "tags",
                 "title",
+                "url",
                 "knowledge_base_id",
                 "user_id",
                 "source_id",
