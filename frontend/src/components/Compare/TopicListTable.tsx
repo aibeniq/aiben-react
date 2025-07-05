@@ -15,6 +15,7 @@ interface TopicListTableProps {
   isDisabled?: boolean
   selectedKnowledgeBase?: KnowledgeBasePublic | null
   knowledgeBases?: KnowledgeBasePublic[]
+  searchMode?: "vector" | "full_scan"
 }
 
 interface TopicListTableHeaderProps {
@@ -153,6 +154,7 @@ const TopicListTable = ({
   isDisabled = false,
   selectedKnowledgeBase,
   knowledgeBases,
+  searchMode = "vector",
 }: TopicListTableProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [topicListName, setTopicListName] = useState("")
@@ -397,6 +399,7 @@ const TopicListTable = ({
         moveTopicDown={moveTopicDown}
         selectedKnowledgeBase={selectedKnowledgeBase}
         knowledgeBases={knowledgeBases}
+        searchMode={searchMode}
       />
     </div>
   )

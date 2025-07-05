@@ -241,6 +241,7 @@ class SourceContentResponse(SQLModel):
 # Request model for FormConnect
 class FormConnectRequest(SQLModel):
     fields: str
+    search_mode: Literal["vector", "full_scan"] = Field(default="vector")
 
 
 # Response model for FormConnect

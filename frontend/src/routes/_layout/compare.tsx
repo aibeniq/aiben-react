@@ -18,6 +18,7 @@ import DownloadButton from "@/components/ui/download-button"
 import SelectionCard from "@/components/Common/SelectionCard"
 import SelectionModal from "@/components/Common/SelectionModal"
 import TopicListTable from "@/components/Compare/TopicListTable"
+import SearchModeToggle from "@/components/Common/SearchModeToggle"
 
 const TwinCheck = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -42,6 +43,9 @@ const TwinCheck = () => {
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     null,
   )
+
+  // Search mode state
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
 
   // Results state
   const [summary, setSummary] = useState("")
@@ -284,6 +288,8 @@ const TwinCheck = () => {
               onClick={() => setShowTopicListModal(true)}
             />
 
+            <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
+
             <VStack gap={4} align="stretch">
               <HStack gap={6} align="stretch">
                 <Box flex="1">
@@ -334,6 +340,7 @@ const TwinCheck = () => {
             topics={topics}
             selectedKnowledgeBase={selectedKnowledgeBase}
             knowledgeBases={knowledgeBases}
+            searchMode={searchMode}
           />
         </SelectionModal>
 
