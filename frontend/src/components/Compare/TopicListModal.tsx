@@ -105,7 +105,6 @@ const TopicListModal = ({
         // Use the existing file upload endpoint
         const files = exampleFiles.map((item) => item.file)
         response = await TwincheckService.generateTopics({
-          searchMode: searchMode,
           formData: {
             description: topicListDescription.trim(),
             comparison_type: "general",
@@ -125,7 +124,6 @@ const TopicListModal = ({
       } else {
         // Use the basic file upload endpoint without files
         response = await TwincheckService.generateTopics({
-          searchMode: searchMode,
           formData: {
             description: topicListDescription.trim(),
             comparison_type: "general",

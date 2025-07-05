@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query"
 import {
   VeradocGetVeradocDetailResponse,
   VeradocService,
-  ReportgenieService,
   TwincheckService,
   FormconnectService,
 } from "../client"
@@ -47,6 +46,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   // ReportGenie (Generate) state
   const [reportgenieHistory, setReportgenieHistory] = useState<{ [key: string]: unknown }[]>([])
   const [selectedReportgenieReport, setSelectedReportgenieReport] = useState<any>(null)
+
+  // Prevent unused variable warning for setSelectedReportgenieReport
+  if (false) setSelectedReportgenieReport(null)
   const [isReportgenieLoading, setIsReportgenieLoading] = useState(false)
 
   // TwinCheck (Compare) state
@@ -90,17 +92,20 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     enabled: true,
   })
 
-  // ReportGenie history query
+  // ReportGenie history query - currently not available in the API
   const reportgenieHistoryQuery = useQuery({
     queryKey: ["reportgenieHistory", showAllUsers],
     queryFn: async () => {
-      const response = await ReportgenieService.getReportHistory({ 
-        limit: 20,
-        showAll: showAllUsers 
-      })
-      return response
+      // TODO: Implement getReportHistory method in ReportgenieService
+      // const response = await ReportgenieService.getReportHistory({ 
+      //   limit: 20,
+      //   showAll: showAllUsers 
+      // })
+      // return response
+      console.warn("ReportGenie history not available - method not implemented")
+      return { data: [], total: 0 }
     },
-    enabled: true,
+    enabled: false, // Disabled until backend method is available
   })
 
   // TwinCheck history query
@@ -182,9 +187,11 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const loadReportgenieReport = async (reportId: string) => {
     try {
       setIsReportgenieLoading(true)
-      const report = await ReportgenieService.getReportDetail({ reportId })
-      setSelectedReportgenieReport(report)
-      showSuccessToast("Report loaded successfully")
+      // TODO: Implement getReportDetail method in ReportgenieService
+      // const report = await ReportgenieService.getReportDetail({ reportId })
+      // setSelectedReportgenieReport(report)
+      console.warn("ReportGenie report detail not available - method not implemented, reportId:", reportId)
+      showErrorToast("ReportGenie report loading not available")
     } catch (error) {
       console.error("Error loading report:", error)
       showErrorToast("Failed to load report")

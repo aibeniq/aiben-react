@@ -115,7 +115,6 @@ const OutlineModal = ({
           formData: {
             description: outlineDescription.trim(),
             report_type: "general",
-            search_mode: searchMode,
           },
         })
       }

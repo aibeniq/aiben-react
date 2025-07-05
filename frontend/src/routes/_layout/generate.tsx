@@ -19,6 +19,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
 import {
   ReportgenieService,
+  TwincheckService,
   KnowledgeBasesService,
   KnowledgeBasePublic,
   ReportGenieOutline,
@@ -103,7 +104,7 @@ const ReportGenie = () => {
     try {
       setLoadingDownload(true)
 
-      const response = await ReportgenieService.generateDocx({
+      const response = await TwincheckService.generateDocx({
         requestBody: { content: generatedDocument },
       })
 
@@ -174,7 +175,7 @@ const ReportGenie = () => {
         sections: sectionResults,
       }
 
-      const response = await ReportgenieService.generateCsv({
+      const response = await ReportgenieService.generateOutlineOptimizationCsv({
         requestBody: { content: JSON.stringify(csvData) },
       })
 

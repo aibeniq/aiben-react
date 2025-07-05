@@ -112,7 +112,7 @@ function Archive() {
           reportgenie.selectedReport.content ||
           ""
 
-        response = await ReportgenieService.generateDocx({
+        response = await TwincheckService.generateDocx({
           requestBody: { content: fullText },
         })
       } else if (activeTab === "compare" && twincheck.selectedReport) {
@@ -232,7 +232,7 @@ function Archive() {
         console.log("CSV data to send:", csvData)
         console.log("Number of sections:", csvData.sections.length)
 
-        response = await ReportgenieService.generateCsv({
+        response = await ReportgenieService.generateOutlineOptimizationCsv({
           requestBody: { content: JSON.stringify(csvData) },
         })
       } else if (activeTab === "review") {
