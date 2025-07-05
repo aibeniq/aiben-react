@@ -961,6 +961,8 @@ def generate_topics(
             ),
             "example_instruction": example_instruction,
             "example_analysis_instruction": example_analysis_instruction,
+            "knowledge_base_content": "",
+            "knowledge_base_instruction": "",
         }
 
         # Generate topics using the LLM
