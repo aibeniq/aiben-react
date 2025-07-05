@@ -1919,6 +1919,7 @@ export class VeradocService {
       url: "/api/v1/veradoc/generate/docx",
       body: data.requestBody,
       mediaType: "application/json",
+      responseType: "blob",
       errors: {
         422: "Validation Error",
       },
