@@ -4,8 +4,12 @@ from app.models import (
     FormConnectResponse,
     FormConnectForm,
     FormConnectDetailResponse,
+    GenerateFormFieldsRequest,
+    GenerateFormFieldsResponse,
     LlmInteraction,
     Message,
+    KnowledgeBase,
+    EmbeddingModel,
 )
 from app.services.llms import (
     get_default_llm,
@@ -19,11 +23,17 @@ from app.core.config import settings
 from sqlmodel import Session, select
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from typing import List, Dict, Any
+import re
+import traceback
 
 from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain.schema import AIMessage
 from dotenv import load_dotenv
+
+from app.services.embeddings import load_embeddings_model
+from app.services.knowledgebases import get_embedding_model
+from app.services.retrievers import create_ensemble_retriever
 
 import json
 import os
@@ -582,3 +592,206 @@ async def get_form_history(
             status_code=500,
             detail=f"Error retrieving form processing history: {str(e)}",
         )
+
+
+@router.post("/generate-fields", response_model=GenerateFormFieldsResponse)
+async def generate_form_fields(
+    session: SessionDep, current_user: CurrentUser, request: GenerateFormFieldsRequest
+):
+    """
+    Generate form fields based on a description with optional knowledge base reference.
+    """
+    try:
+        # Get the default LLM
+        llm = get_default_llm(session, current_user)
+
+        # Prepare variables for the prompt
+        prompt_variables = {
+            "description": request.description,
+            "example_instruction": "",
+            "analysis_instruction": "",
+            "analysis_note": "",
+            "knowledge_base_instruction": "",
+            "knowledge_base_content": "",
+        }
+
+        # If knowledge base is specified, retrieve relevant content
+        if request.knowledge_base_id:
+            try:
+                # Get the knowledge base
+                knowledge_base = session.exec(
+                    select(KnowledgeBase).where(
+                        KnowledgeBase.id == request.knowledge_base_id
+                    )
+                ).first()
+
+                if not knowledge_base:
+                    raise HTTPException(
+                        status_code=404, detail="Knowledge base not found"
+                    )
+
+                # Load embedding model - use the knowledge base's specific embedding model if available
+                if knowledge_base.embedding_model_id:
+                    embedding_model = session.get(
+                        EmbeddingModel, knowledge_base.embedding_model_id
+                    )
+                    if embedding_model:
+                        # Use the KB's original model
+                        model_id = embedding_model.model_id
+                        provider = embedding_model.provider
+                        print(
+                            f"Using knowledge base's original embedding model: {model_id}"
+                        )
+                    else:
+                        # Fallback if the model was deleted from the database
+                        embedding_info = get_embedding_model(session, current_user)
+                        model_id = embedding_info["model_id"]
+                        provider = embedding_info["provider"]
+                        print(
+                            f"Original embedding model not found, using current default: {model_id}"
+                        )
+                else:
+                    # For knowledge bases created before tracking embedding models
+                    embedding_info = get_embedding_model(session, current_user)
+                    model_id = embedding_info["model_id"]
+                    provider = embedding_info["provider"]
+                    print(
+                        f"Knowledge base has no embedding model record, using current default: {embedding_info}"
+                    )
+
+                embeddings = load_embeddings_model(provider=provider, model_id=model_id)
+
+                # Create retriever for the knowledge base
+                retriever = create_ensemble_retriever(
+                    knowledge_base.id, embeddings, k=8
+                )
+
+                # Retrieve relevant content from knowledge base
+                retrieved_docs = retriever.get_relevant_documents(request.description)
+
+                if retrieved_docs:
+                    knowledge_base_content = "\n\n".join(
+                        [
+                            f"Source: {doc.metadata.get('source', 'Unknown')}\nContent: {doc.page_content}"
+                            for doc in retrieved_docs[:5]  # Limit to top 5 results
+                        ]
+                    )
+
+                    prompt_variables["knowledge_base_content"] = (
+                        f"REFERENCE DOCUMENTS FROM KNOWLEDGE BASE:\n{knowledge_base_content}"
+                    )
+                    prompt_variables["knowledge_base_instruction"] = (
+                        "\n11. Use the reference documents from the knowledge base above as examples to understand the types of fields that are typically found in similar documents"
+                    )
+                    prompt_variables["analysis_instruction"] = (
+                        ". Briefly mention how the knowledge base content influenced the field selection"
+                    )
+
+            except Exception as e:
+                print(f"Error retrieving from knowledge base: {str(e)}")
+                # Continue without knowledge base content rather than failing
+                pass
+
+        # Generate fields using the LLM
+        fields_response = invoke_llm(
+            llm,
+            settings.FORMCONNECT_GENERATE_FIELDS_PROMPT_TEMPLATE,
+            prompt_variables,
+        )
+
+        # Parse the response to extract fields and analysis
+        fields = []
+        analysis = ""
+
+        lines = fields_response.strip().split("\n")
+        in_fields_section = False
+        in_analysis_section = False
+
+        for line in lines:
+            line = line.strip()
+            if line.startswith("FIELDS:"):
+                in_fields_section = True
+                in_analysis_section = False
+                continue
+            elif line.startswith("ANALYSIS:"):
+                in_fields_section = False
+                in_analysis_section = True
+                continue
+
+            if in_fields_section:
+                # Extract fields (numbered list)
+                if re.match(r"^\d+\.\s+", line):
+                    field = re.sub(r"^\d+\.\s+", "", line)
+                    if field.strip():
+                        fields.append(field.strip())
+            elif in_analysis_section:
+                if line:
+                    if analysis:
+                        analysis += " " + line
+                    else:
+                        analysis = line
+
+        # If parsing failed, try simpler approach
+        if not fields:
+            # Split by lines and look for numbered items
+            for line in lines:
+                line = line.strip()
+                if re.match(r"^\d+\.\s+", line):
+                    field = re.sub(r"^\d+\.\s+", "", line)
+                    if field.strip():
+                        fields.append(field.strip())
+
+        # Ensure we have some fields
+        if not fields:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate fields from the description. Please try with a more detailed description.",
+            )
+
+        # Apply user-specified limit if provided, otherwise use all generated fields
+        if request.num_fields:
+            fields = fields[: request.num_fields]
+
+        if not analysis:
+            analysis = f"Generated {len(fields)} form fields based on the provided description to enable structured data extraction from relevant documents."
+            if request.knowledge_base_id:
+                analysis += (
+                    " Used knowledge base reference for enhanced field selection."
+                )
+
+        # Record the interaction
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="generate_form_fields",
+            input_data={
+                "description": request.description,
+                "requested_fields": request.num_fields,
+                "knowledge_base_id": request.knowledge_base_id,
+            },
+            output_data={
+                "fields_count": len(fields),
+                "analysis": analysis,
+            },
+            metadata={},
+        )
+
+        return GenerateFormFieldsResponse(fields=fields, description_analysis=analysis)
+
+    except Exception as e:
+        print(f"Error generating form fields: {e}")
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error generating form fields: {str(e)}"
+        )
+
+
+@router.post("/generate-fields-json", response_model=GenerateFormFieldsResponse)
+async def generate_form_fields_json(
+    session: SessionDep, current_user: CurrentUser, request: GenerateFormFieldsRequest
+):
+    """
+    Generate form fields based on a description with optional knowledge base reference (JSON version).
+    """
+    # This is the same as generate_form_fields but ensures JSON request/response
+    return await generate_form_fields(session, current_user, request)

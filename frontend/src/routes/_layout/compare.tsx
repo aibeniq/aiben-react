@@ -6,7 +6,12 @@ import { createFileRoute } from "@tanstack/react-router"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
-import { TwincheckService, TwinCheckTopicList } from "@/client"
+import {
+  TwincheckService,
+  TwinCheckTopicList,
+  KnowledgeBasesService,
+  KnowledgeBasePublic,
+} from "@/client"
 import { useMutation } from "@tanstack/react-query"
 import useCustomToast from "@/hooks/useCustomToast"
 import DownloadButton from "@/components/ui/download-button"
@@ -31,6 +36,12 @@ const TwinCheck = () => {
   const [topics, setTopics] = useState("")
   const [comparisons, setComparisons] = useState<TwinCheckTopicList[]>([])
   const [selectedComparison, setSelectedComparison] = useState<TwinCheckTopicList | null>(null)
+
+  // Knowledge base state
+  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
+  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
+    null,
+  )
 
   // Results state
   const [summary, setSummary] = useState("")
@@ -150,8 +161,18 @@ const TwinCheck = () => {
     }
   }
 
+  const fetchKnowledgeBases = async () => {
+    try {
+      const response = await KnowledgeBasesService.readKnowledgeBases({})
+      setKnowledgeBases(response.data || [])
+    } catch (error) {
+      console.error("Error fetching knowledge bases:", error)
+    }
+  }
+
   useEffect(() => {
     fetchComparisons()
+    fetchKnowledgeBases()
   }, [])
 
   // Mutation for comparing documents
@@ -311,6 +332,8 @@ const TwinCheck = () => {
             onTopicsChange={setTopics}
             onTopicListsUpdate={fetchComparisons}
             topics={topics}
+            selectedKnowledgeBase={selectedKnowledgeBase}
+            knowledgeBases={knowledgeBases}
           />
         </SelectionModal>
 

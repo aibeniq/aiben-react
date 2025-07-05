@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Button, HStack, IconButton, Table, Checkbox } from "@chakra-ui/react"
 import { FiEye, FiCopy, FiTrash2, FiPlus } from "react-icons/fi"
-import { FormConnectForm, FormconnectService } from "../../client"
+import { FormConnectForm, FormconnectService, KnowledgeBasePublic } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import FormTemplateModal from "./FormTemplateModal"
 
@@ -16,6 +16,8 @@ interface FormTemplateTableProps {
   setFormName: (name: string) => void
   formDescription: string
   setFormDescription: (description: string) => void
+  selectedKnowledgeBase?: KnowledgeBasePublic | null
+  knowledgeBases?: KnowledgeBasePublic[]
   isDisabled?: boolean
 }
 
@@ -154,6 +156,8 @@ const FormTemplateTable = ({
   setFormName,
   formDescription,
   setFormDescription,
+  selectedKnowledgeBase,
+  knowledgeBases,
   isDisabled = false,
 }: FormTemplateTableProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -303,6 +307,8 @@ const FormTemplateTable = ({
         setFormDescription={setFormDescription}
         fields={fields}
         onFieldsChange={onFieldsChange}
+        selectedKnowledgeBase={selectedKnowledgeBase}
+        knowledgeBases={knowledgeBases}
       />
     </div>
   )

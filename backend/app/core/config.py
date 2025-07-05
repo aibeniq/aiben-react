@@ -211,7 +211,7 @@ class Settings(BaseSettings):
     INSTRUCTION: 
     You are an AI assistant that helps optimize review checklist questions to be more appropriate for document evaluation.
 
-    You have been given a checklist question and the answer that was generated when evaluating a document that SHOULD meet all requirements. If the answer indicates the requirement was NOT met (starts with NO rather than YES), you need to suggest a revised question that is less stringent but still meaningful.
+    You have been given a checklist question and the answer that was generated when evaluating a document that SHOULD meet all requirements. If the answer indicates the requirement was not met (starts with NO rather than YES), you need to suggest a revised question that is less stringent but still meaningful.
 
     ORIGINAL QUESTION:
     {original_question}
@@ -277,6 +277,41 @@ class Settings(BaseSettings):
     ONLY return the Markdown table -- do NOT return any other text. 
     Also, do NOT add tick marks like ``` and the label 'markdown': just give the actual markdown table content as raw text.
     However, if there are no discrepancies, please state that all fields match across documents.
+    """
+
+    FORMCONNECT_GENERATE_FIELDS_PROMPT_TEMPLATE: str = """
+    Generate a list of form fields for data extraction based on the following description:
+
+    DESCRIPTION: {description}
+
+    {knowledge_base_instruction}
+    {knowledge_base_content}
+    {example_instruction}
+
+    Please generate form field names that would be relevant for extracting structured data from documents that match this description.
+
+    Guidelines:
+    1. Focus on creating field names that would commonly appear in forms or documents of this type
+    2. Use clear, descriptive field names (e.g., "First Name", "Date of Birth", "Address Line 1")
+    3. Include both required and optional fields that might be found
+    4. Consider standard fields for this type of document/form
+    5. Generate between 5-20 fields unless a specific number is requested
+    6. Make field names practical for data entry and extraction
+    7. Avoid overly specific or technical jargon in field names
+    8. Use title case for field names (e.g., "Social Security Number" not "social_security_number")
+    9. Include common variations that might be needed (e.g., both "Phone Number" and "Email Address" for contact info)
+    10. Consider fields that would help with validation and verification
+    {analysis_instruction}
+
+    Output format:
+    FIELDS:
+    1. [Field Name 1]
+    2. [Field Name 2]
+    3. [Field Name 3]
+    ...
+
+    ANALYSIS:
+    [Brief explanation of why these fields were selected and how they relate to the description{analysis_note}]
     """
 
     CHATBOT_REPHRASING_PROMPT_TEMPLATE: str = """
@@ -501,6 +536,8 @@ COMPARISON TYPE: {comparison_type}
 
 {example_document}
 
+{knowledge_base_content}
+
 INSTRUCTIONS:
 1. Generate as many specific, clear, and actionable comparison topics as needed to comprehensively cover the description
 2. Each topic should represent a distinct area of comparison between two documents
@@ -513,7 +550,7 @@ INSTRUCTIONS:
 9. For complex regulatory or compliance comparisons, generate more detailed topics
 10. For simple comparisons, fewer but comprehensive topics are sufficient
 11. Consider both content-based comparisons (what is included/excluded) and structural comparisons (how information is organized)
-12. Include topics that would reveal differences in approach, methodology, compliance, or implementation{example_instruction}
+12. Include topics that would reveal differences in approach, methodology, compliance, or implementation{example_instruction}{knowledge_base_instruction}
 
 FORMAT YOUR RESPONSE AS:
 TOPICS:

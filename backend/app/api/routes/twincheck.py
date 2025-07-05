@@ -32,9 +32,14 @@ from app.models import (
     Message,
     GenerateTopicsRequest,
     GenerateTopicsResponse,
+    KnowledgeBase,
+    EmbeddingModel,
 )
 from app.core.config import settings
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from app.services.knowledgebases import get_embedding_model
+from app.services.embeddings import load_embeddings_model
+from app.services.retrievers import create_ensemble_retriever
 from langchain_community.document_loaders import PyPDFLoader
 import mimetypes
 import logging
@@ -1021,6 +1026,200 @@ def generate_topics(
                 "requested_topics": num_topics,
                 "comparison_type": comparison_type,
                 "has_example_document": len(files) > 0 and files[0].size > 0,
+            },
+            output_data={
+                "topics_count": len(topics),
+                "analysis": analysis,
+            },
+            metadata={},
+        )
+
+        return GenerateTopicsResponse(topics=topics, description_analysis=analysis)
+
+    except Exception as e:
+        print(f"Error generating topics: {e}")
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error generating topics: {str(e)}"
+        )
+
+
+@router.post("/generate-topics-json", response_model=GenerateTopicsResponse)
+async def generate_topics_json(
+    session: SessionDep, current_user: CurrentUser, request: GenerateTopicsRequest
+):
+    """
+    Generate comparison topics based on a description using LLM, with optional knowledge base reference (JSON version).
+    """
+    try:
+        # Get the default LLM
+        llm = get_default_llm(session, current_user)
+
+        # Prepare variables for the prompt
+        prompt_variables = {
+            "description": request.description,
+            "comparison_type": request.comparison_type or "general",
+            "example_document": "",
+            "example_instruction": "",
+            "example_analysis_instruction": "",
+            "knowledge_base_instruction": "",
+            "knowledge_base_content": "",
+        }
+
+        # If knowledge base is specified, retrieve relevant content
+        if request.knowledge_base_id:
+            try:
+                # Get the knowledge base
+                knowledge_base = session.exec(
+                    select(KnowledgeBase).where(
+                        KnowledgeBase.id == request.knowledge_base_id
+                    )
+                ).first()
+
+                if not knowledge_base:
+                    raise HTTPException(
+                        status_code=404, detail="Knowledge base not found"
+                    )
+
+                # Load embedding model - use the knowledge base's specific embedding model if available
+                if knowledge_base.embedding_model_id:
+                    embedding_model = session.get(
+                        EmbeddingModel, knowledge_base.embedding_model_id
+                    )
+                    if embedding_model:
+                        # Use the KB's original model
+                        model_id = embedding_model.model_id
+                        provider = embedding_model.provider
+                        print(
+                            f"Using knowledge base's original embedding model: {model_id}"
+                        )
+                    else:
+                        # Fallback if the model was deleted from the database
+                        embedding_info = get_embedding_model(session, current_user)
+                        model_id = embedding_info["model_id"]
+                        provider = embedding_info["provider"]
+                        print(
+                            f"Original embedding model not found, using current default: {model_id}"
+                        )
+                else:
+                    # For knowledge bases created before tracking embedding models
+                    embedding_info = get_embedding_model(session, current_user)
+                    model_id = embedding_info["model_id"]
+                    provider = embedding_info["provider"]
+                    print(
+                        f"Knowledge base has no embedding model record, using current default: {embedding_info}"
+                    )
+
+                embeddings = load_embeddings_model(provider=provider, model_id=model_id)
+
+                # Create retriever for the knowledge base
+                retriever = create_ensemble_retriever(
+                    knowledge_base.id, embeddings, k=8
+                )
+
+                # Retrieve relevant content from knowledge base
+                retrieved_docs = retriever.get_relevant_documents(request.description)
+
+                if retrieved_docs:
+                    knowledge_base_content = "\n\n".join(
+                        [
+                            f"Source: {doc.metadata.get('source', 'Unknown')}\nContent: {doc.page_content}"
+                            for doc in retrieved_docs[:5]  # Limit to top 5 results
+                        ]
+                    )
+
+                    prompt_variables["knowledge_base_content"] = (
+                        f"REFERENCE DOCUMENTS FROM KNOWLEDGE BASE:\n{knowledge_base_content}"
+                    )
+                    prompt_variables["knowledge_base_instruction"] = (
+                        "\n12. Use the reference documents from the knowledge base above as inspiration for the type of comparison topics and scope, adapting the topics to match the specific requirements in the description"
+                    )
+                    prompt_variables["example_analysis_instruction"] = (
+                        ". Briefly mention how the knowledge base content influenced the topic selection"
+                    )
+
+            except Exception as e:
+                print(f"Error retrieving from knowledge base: {str(e)}")
+                # Continue without knowledge base content rather than failing
+                pass
+
+        # Generate topics using the LLM
+        topics_response = invoke_llm(
+            llm,
+            settings.TWINCHECK_GENERATE_TOPICS_PROMPT_TEMPLATE,
+            prompt_variables,
+        )
+
+        # Parse the response to extract topics and analysis
+        topics = []
+        analysis = ""
+
+        lines = topics_response.strip().split("\n")
+        in_topics_section = False
+        in_analysis_section = False
+
+        for line in lines:
+            line = line.strip()
+            if line.startswith("TOPICS:"):
+                in_topics_section = True
+                in_analysis_section = False
+                continue
+            elif line.startswith("ANALYSIS:"):
+                in_topics_section = False
+                in_analysis_section = True
+                continue
+
+            if in_topics_section:
+                # Extract topics (numbered list)
+                if re.match(r"^\d+\.\s+", line):
+                    topic = re.sub(r"^\d+\.\s+", "", line)
+                    if topic.strip():
+                        topics.append(topic.strip())
+            elif in_analysis_section:
+                if line:
+                    if analysis:
+                        analysis += " " + line
+                    else:
+                        analysis = line
+
+        # If parsing failed, try simpler approach
+        if not topics:
+            # Split by lines and look for numbered items
+            for line in lines:
+                line = line.strip()
+                if re.match(r"^\d+\.\s+", line):
+                    topic = re.sub(r"^\d+\.\s+", "", line)
+                    if topic.strip():
+                        topics.append(topic.strip())
+
+        # Ensure we have some topics
+        if not topics:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate topics from the description. Please try with a more detailed description.",
+            )
+
+        # Apply user-specified limit if provided, otherwise use all generated topics
+        if request.num_topics:
+            topics = topics[: request.num_topics]
+
+        if not analysis:
+            analysis = f"Generated {len(topics)} comparison topics based on the provided description to ensure comprehensive document comparison coverage."
+            if request.knowledge_base_id:
+                analysis += (
+                    " Used knowledge base reference for enhanced topic selection."
+                )
+
+        # Record the interaction
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="generate_comparison_topics_json",
+            input_data={
+                "description": request.description,
+                "requested_topics": request.num_topics,
+                "comparison_type": request.comparison_type,
+                "knowledge_base_id": request.knowledge_base_id,
             },
             output_data={
                 "topics_count": len(topics),

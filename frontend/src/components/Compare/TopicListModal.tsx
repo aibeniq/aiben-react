@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   HStack,
   VStack,
@@ -11,7 +11,7 @@ import {
   Text,
 } from "@chakra-ui/react"
 import { Field } from "../ui/field"
-import { TwinCheckTopicList, TwincheckService } from "../../client"
+import { TwinCheckTopicList, TwincheckService, KnowledgeBasePublic } from "../../client"
 import TopicItem from "./TopicItem"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
@@ -29,10 +29,13 @@ interface TopicListModalProps {
   setTopicListDescription: (description: string) => void
   topicsList: string[]
   updateTopic: (index: number, value: string) => void
+  updateTopicsFromList: (newTopicsList: string[]) => void
   handleTopicBlur: (index: number, value: string) => void
   removeTopic: (index: number) => void
   moveTopicUp: (index: number) => void
   moveTopicDown: (index: number) => void
+  selectedKnowledgeBase?: KnowledgeBasePublic | null
+  knowledgeBases?: KnowledgeBasePublic[]
 }
 
 const TopicListModal = ({
@@ -46,14 +49,28 @@ const TopicListModal = ({
   setTopicListDescription,
   topicsList,
   updateTopic,
+  updateTopicsFromList,
   handleTopicBlur,
   removeTopic,
   moveTopicUp,
   moveTopicDown,
+  selectedKnowledgeBase,
+  knowledgeBases,
 }: TopicListModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [generating, setGenerating] = useState(false)
   const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
+  const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
+  const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
+    selectedKnowledgeBase || null,
+  )
+
+  // Set reference mode based on preselected knowledge base
+  useEffect(() => {
+    if (selectedKnowledgeBase) {
+      setReferenceMode("knowledge-base")
+    }
+  }, [selectedKnowledgeBase])
 
   const handleGenerateTopics = async () => {
     if (!topicListDescription.trim()) {
@@ -67,33 +84,54 @@ const TopicListModal = ({
       return
     }
 
+    // Validate reference requirements if any are selected
+    if (referenceMode === "files" && exampleFiles.length === 0) {
+      // Files mode but no files - this is okay, just use description
+    } else if (referenceMode === "knowledge-base" && !referenceKnowledgeBase) {
+      showErrorToast("Please select a Knowledge Base or switch to file upload mode")
+      return
+    }
+
     setGenerating(true)
 
     try {
-      // Extract files from FileItem objects for the API call
-      const files = exampleFiles.map((item) => item.file)
+      let response
 
-      const response = await TwincheckService.generateTopics({
-        formData: {
-          description: topicListDescription.trim(),
-          comparison_type: "general",
-          files: files.length > 0 ? files : undefined,
-        },
-      })
+      if (referenceMode === "files" && exampleFiles.length > 0) {
+        // Use the existing file upload endpoint
+        const files = exampleFiles.map((item) => item.file)
+        response = await TwincheckService.generateTopics({
+          formData: {
+            description: topicListDescription.trim(),
+            comparison_type: "general",
+            files: files.length > 0 ? files : undefined,
+          },
+        })
+      } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
+        // Use the new JSON endpoint with knowledge base reference
+        response = await TwincheckService.generateTopicsJson({
+          requestBody: {
+            description: topicListDescription.trim(),
+            comparison_type: "general",
+            knowledge_base_id: referenceKnowledgeBase.id,
+          },
+        })
+      } else {
+        // Use the basic file upload endpoint without files
+        response = await TwincheckService.generateTopics({
+          formData: {
+            description: topicListDescription.trim(),
+            comparison_type: "general",
+          },
+        })
+      }
 
       // Replace current topics with generated ones
       const generatedTopics = response.topics || []
       if (generatedTopics.length > 0) {
-        // Update topics through the parent component's state management
-        // We'll call updateTopic for each generated topic
-        generatedTopics.forEach((topic: string, index: number) => {
-          updateTopic(index, topic)
-        })
-
-        // Add empty topic at the end if needed
-        if (topicsList.length <= generatedTopics.length) {
-          updateTopic(generatedTopics.length, "")
-        }
+        // Replace the entire topics list with generated topics plus an empty topic for user input
+        const newTopicsList = [...generatedTopics, ""]
+        updateTopicsFromList(newTopicsList)
 
         showSuccessToast(`Generated ${generatedTopics.length} topics from description`)
       } else {
@@ -126,6 +164,17 @@ const TopicListModal = ({
       }
     } finally {
       setGenerating(false)
+    }
+  }
+
+  // Handler for reference mode changes
+  const handleReferenceModeChange = (mode: "files" | "knowledge-base") => {
+    setReferenceMode(mode)
+    // Clear the opposite mode's selection
+    if (mode === "files") {
+      setReferenceKnowledgeBase(null)
+    } else {
+      setExampleFiles([])
     }
   }
 
@@ -175,18 +224,73 @@ const TopicListModal = ({
                         )}
                     </Field>
 
-                    <Field label="Example Document (Optional)">
-                      <VStack align="stretch" gap={2}>
-                        <Text fontSize="sm" color="gray.600">
-                          Upload an example document to help the AI understand the desired
-                          comparison scope and style.
-                        </Text>
-                        <FileUpload
-                          files={exampleFiles}
-                          onFilesChange={setExampleFiles}
-                          maxFiles={1}
-                          showHandwrittenToggle={false}
-                        />
+                    <Field label="Reference for Topic Generation (Optional)">
+                      <VStack align="stretch" gap={3}>
+                        {/* Reference Mode Toggle */}
+                        <HStack gap={2}>
+                          <Button
+                            size="sm"
+                            variant={referenceMode === "files" ? "solid" : "outline"}
+                            onClick={() => handleReferenceModeChange("files")}
+                          >
+                            Upload Files
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={referenceMode === "knowledge-base" ? "solid" : "outline"}
+                            onClick={() => handleReferenceModeChange("knowledge-base")}
+                          >
+                            Knowledge Base
+                          </Button>
+                        </HStack>
+
+                        {/* Reference Mode Content */}
+                        {referenceMode === "files" ? (
+                          <VStack align="stretch" gap={2}>
+                            <Text fontSize="sm" color="gray.600">
+                              Upload an example document to help the AI understand the desired
+                              comparison scope and style.
+                            </Text>
+                            <FileUpload
+                              files={exampleFiles}
+                              onFilesChange={setExampleFiles}
+                              maxFiles={1}
+                              showHandwrittenToggle={false}
+                            />
+                          </VStack>
+                        ) : (
+                          <VStack align="stretch" gap={2}>
+                            <Text fontSize="sm" color="gray.600">
+                              Select a Knowledge Base to provide context and examples for topic
+                              generation.
+                            </Text>
+                            <select
+                              style={{
+                                width: "100%",
+                                padding: "8px",
+                                borderRadius: "6px",
+                                border: "1px solid #e2e8f0",
+                              }}
+                              value={referenceKnowledgeBase?.id || ""}
+                              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                                const kb = knowledgeBases?.find((kb) => kb.id === e.target.value)
+                                setReferenceKnowledgeBase(kb || null)
+                              }}
+                            >
+                              <option value="">Select a Knowledge Base...</option>
+                              {knowledgeBases?.map((kb) => (
+                                <option key={kb.id} value={kb.id}>
+                                  {kb.title}
+                                </option>
+                              ))}
+                            </select>
+                            {!knowledgeBases || knowledgeBases.length === 0 ? (
+                              <Text fontSize="sm" color="orange.600">
+                                No Knowledge Bases available. Create one first to use this feature.
+                              </Text>
+                            ) : null}
+                          </VStack>
+                        )}
                       </VStack>
                     </Field>
                   </VStack>
@@ -239,7 +343,7 @@ const TopicListModal = ({
                           onRemove={removeTopic}
                           onMoveUp={moveTopicUp}
                           onMoveDown={moveTopicDown}
-                          canRemove={topicsList.length > 1 && topic.trim() !== ""}
+                          canRemove={topicsList.length > 1 && Boolean(topic && topic.trim() !== "")}
                           totalTopics={topicsList.length}
                         />
                       ))}
@@ -250,14 +354,14 @@ const TopicListModal = ({
             </Dialog.Body>
 
             <Dialog.Footer>
-              <Dialog.ActionTrigger asChild>
+              <HStack gap={3}>
                 <CancelButton onClick={handleModalClose} size="md">
                   Cancel
                 </CancelButton>
-              </Dialog.ActionTrigger>
-              <ConfirmButton onClick={onSave} size="md">
-                {editingTopicList ? "Update Topic List" : "Create Topic List"}
-              </ConfirmButton>
+                <ConfirmButton onClick={onSave} size="md">
+                  {editingTopicList ? "Update Topic List" : "Create Topic List"}
+                </ConfirmButton>
+              </HStack>
             </Dialog.Footer>
 
             <Dialog.CloseTrigger asChild>
