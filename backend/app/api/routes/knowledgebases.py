@@ -8,6 +8,7 @@ from sqlalchemy.sql import func
 
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
 from app.services.knowledgebases import KnowledgeBaseService
+from app.services.embeddings import EmbeddingService
 from app.models import (
     KnowledgeBase,
     KnowledgeBaseCreate,
@@ -16,7 +17,6 @@ from app.models import (
     KnowledgeBaseUpdate,
     Message,
     Source,
-    EmbeddingModel,
 )
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
@@ -66,12 +66,14 @@ def read_knowledge_bases(
     # Format the response
     knowledge_bases = []
     for kb in results:
-        # Get embedding model name if it exists
-        embedding_model_name = None
+        # Get embedding model info
+        embedding_model = None
         if kb.KnowledgeBase.embedding_model_id:
-            model = session.get(EmbeddingModel, kb.KnowledgeBase.embedding_model_id)
-            if model:
-                embedding_model_name = model.name
+            from app.services.embeddings import EmbeddingService
+
+            embedding_model = EmbeddingService.get_model_spec(
+                kb.KnowledgeBase.embedding_model_id
+            )
 
         kb_public = KnowledgeBasePublic(
             id=kb.KnowledgeBase.id,
@@ -83,7 +85,7 @@ def read_knowledge_bases(
             date_created=kb.date_created,
             date_modified=kb.date_modified,
             embedding_model_id=kb.KnowledgeBase.embedding_model_id,
-            embedding_model_name=embedding_model_name,
+            embedding_model=embedding_model,
         )
         knowledge_bases.append(kb_public)
 
@@ -101,12 +103,14 @@ def read_knowledge_base(
     if not knowledge_base:
         raise HTTPException(status_code=404, detail="Knowledge base not found")
 
-    # Get embedding model name if it exists
-    embedding_model_name = None
+    # Get embedding model info
+    embedding_model = None
     if knowledge_base.embedding_model_id:
-        model = session.get(EmbeddingModel, knowledge_base.embedding_model_id)
-        if model:
-            embedding_model_name = model.name
+        from app.services.embeddings import EmbeddingService
+
+        embedding_model = EmbeddingService.get_model_spec(
+            knowledge_base.embedding_model_id
+        )
 
     # Get all sources for this knowledge base
     sources = session.exec(select(Source).where(Source.knowledge_base_id == id)).all()
@@ -123,11 +127,15 @@ def read_knowledge_base(
             }
         )
 
+    # Get number of sources
+    number_of_sources = len(sources)
+
     # Construct the response model
     knowledge_base_public = KnowledgeBasePublic(
         **knowledge_base.model_dump(),
         files=files,
-        embedding_model_name=embedding_model_name,
+        number_of_sources=number_of_sources,
+        embedding_model=embedding_model,
     )
     return knowledge_base_public
 
@@ -179,15 +187,53 @@ def create_knowledge_base(
         # add source to vector database
         vectordb_service.add_file(
             file=file,
-            knowledge_base_id=knowledge_base.id,
-            user_id=current_user.id,
-            source_id=source.id,
+            knowledge_base_id=str(knowledge_base.id),
+            embedding_model_id=knowledge_base.embedding_model_id,
+            user_id=str(current_user.id),
+            source_id=str(source.id),
         )
 
-    # return knowledge base
+    # commit and refresh knowledge base
     session.commit()
     session.refresh(knowledge_base)
-    return knowledge_base
+
+    # Get embedding model info
+    embedding_model = None
+    if knowledge_base.embedding_model_id:
+        from app.services.embeddings import EmbeddingService
+
+        embedding_model = EmbeddingService.get_model_spec(
+            knowledge_base.embedding_model_id
+        )
+
+    # Get all sources for this knowledge base
+    sources = session.exec(
+        select(Source).where(Source.knowledge_base_id == knowledge_base.id)
+    ).all()
+
+    files_response = []
+    for source in sources:
+        # Only include metadata, not the actual file content
+        files_response.append(
+            {
+                "id": str(source.source_data_id),
+                "name": source.name,
+                "date_created": source.date_created,
+                # Don't include data_base64 here
+            }
+        )
+
+    # Get number of sources
+    number_of_sources = len(sources)
+
+    # Construct and return the response model
+    knowledge_base_public = KnowledgeBasePublic(
+        **knowledge_base.model_dump(),
+        files=files_response,
+        number_of_sources=number_of_sources,
+        embedding_model=embedding_model,
+    )
+    return knowledge_base_public
 
 
 @router.put("/{id}", response_model=KnowledgeBasePublic)
@@ -229,9 +275,10 @@ def update_knowledge_base(
                 )
                 vectordb_service.add_file(
                     file=file,
-                    knowledge_base_id=knowledge_base.id,
-                    user_id=current_user.id,
-                    source_id=source.id,
+                    knowledge_base_id=str(knowledge_base.id),
+                    embedding_model_id=knowledge_base.embedding_model_id,
+                    user_id=str(current_user.id),
+                    source_id=str(source.id),
                 )
 
         # remove files
@@ -245,7 +292,10 @@ def update_knowledge_base(
                     source_id=source_id,
                     knowledge_base_id=knowledge_base.id,
                 )
-                vectordb_service.delete_source(source_id=source.id)
+                vectordb_service.delete_source(
+                    source_id=str(source.id),
+                    embedding_model_id=knowledge_base.embedding_model_id,
+                )
 
     except ValueError as e:
         logger.error(f"Validation error updating knowledge base {id}: {str(e)}")
@@ -258,13 +308,43 @@ def update_knowledge_base(
             status_code=500, detail=f"Error updating vector database: {str(e)}"
         )
 
-    # update date modified and return
+    # update date modified
     knowledge_base.date_modified = datetime.now(timezone.utc)
     session.add(knowledge_base)
     session.commit()
     session.refresh(knowledge_base)
 
-    return knowledge_base
+    # Get embedding model info
+    embedding_model = EmbeddingService.get_model_spec(knowledge_base.embedding_model_id)
+
+    # Get all sources for this knowledge base
+    sources = session.exec(
+        select(Source).where(Source.knowledge_base_id == knowledge_base.id)
+    ).all()
+
+    files_response = []
+    for source in sources:
+        # Only include metadata, not the actual file content
+        files_response.append(
+            {
+                "id": str(source.source_data_id),
+                "name": source.name,
+                "date_created": source.date_created,
+                # Don't include data_base64 here
+            }
+        )
+
+    # Get number of sources
+    number_of_sources = len(sources)
+
+    # Construct and return the response model
+    knowledge_base_public = KnowledgeBasePublic(
+        **knowledge_base.model_dump(),
+        files=files_response,
+        number_of_sources=number_of_sources,
+        embedding_model=embedding_model,
+    )
+    return knowledge_base_public
 
 
 @router.delete("/{id}", response_model=Message)
@@ -283,12 +363,25 @@ def delete_knowledge_base(
     if not current_user.is_superuser and knowledge_base.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
-    # delete knowledge base
-    KnowledgeBaseService.delete_knowledge_base(
-        session=session, knowledge_base_id=knowledge_base.id
-    )
+    try:
+        logger.info(f"Deleting knowledge base {id} from database")
+        KnowledgeBaseService.delete_knowledge_base(
+            session=session, knowledge_base_id=knowledge_base.id
+        )
 
-    # delete chunks from vector database
-    vectordb_service.delete_knowledge_base(knowledge_base_id=knowledge_base.id)
+        session.commit()
 
-    return Message(message="Knowledge base deleted successfully")
+        logger.info(f"Deleting knowledge base {id} from vector database")
+        vectordb_service.delete_knowledge_base(
+            knowledge_base_id=str(knowledge_base.id),
+            embedding_model_id=knowledge_base.embedding_model_id,
+        )
+
+        return Message(message="Knowledge base deleted successfully")
+
+    except Exception as e:
+        logger.error(f"Error deleting knowledge base {id}: {str(e)}")
+        session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"Error deleting knowledge base: {str(e)}"
+        )
