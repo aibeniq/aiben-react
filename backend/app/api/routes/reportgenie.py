@@ -6,15 +6,10 @@ from app.models import (
     ReportGenieDetailResponse,
     Source,
     KnowledgeBase,
-    EmbeddingModel,
     DocxRequest,
     LlmInteraction,
     Message,
 )
-from pathlib import Path
-import re
-import tempfile
-import zipfile
 import json
 import traceback
 from io import BytesIO
@@ -25,17 +20,14 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 import markdown
 from bs4 import BeautifulSoup
 
-from app.api.deps import CurrentUser, SessionDep
+from app.api.deps import CurrentUser, SessionDep, VectorDBDep
 from app.core.config import settings
-from app.services.knowledgebases import get_embedding_model
-from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from app.services.embeddings import EmbeddingService
 
 from sqlmodel import select
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List, Dict, Any
-
-from langchain_community.vectorstores import Chroma
 
 router = APIRouter(prefix="/reportgenie", tags=["reportgenie"])
 
@@ -44,6 +36,7 @@ router = APIRouter(prefix="/reportgenie", tags=["reportgenie"])
 async def generate_report(
     session: SessionDep,
     current_user: CurrentUser,
+    vectordb_service: VectorDBDep,
     request: ReportGenieRequest = Depends(),
 ):
     """
@@ -60,161 +53,154 @@ async def generate_report(
                 status_code=403, detail="You don't have access to this knowledge base"
             )
 
-        # 2. Create a temporary directory for ChromaDB
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Extract the zipped ChromaDB into the temp directory
-            if kb.data:
-                with zipfile.ZipFile(BytesIO(kb.data), "r") as zip_ref:
-                    zip_ref.extractall(temp_dir)
+        # get embedding model info for the knowledge base
+        if kb.embedding_model_id:
+            if EmbeddingService.is_valid_model_id(kb.embedding_model_id):
+                embedding_model = EmbeddingService.get_model_spec(kb.embedding_model_id)
             else:
                 raise HTTPException(
-                    status_code=400, detail="Knowledge base has no vector database data"
+                    status_code=400,
+                    detail=f"Knowledge base has an invalid embedding model {kb.embedding_model_id}",
                 )
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Knowledge base has no embedding model",
+            )
 
-            # 3. Load the vector database with the same model used to create the KB
-            if kb.embedding_model_id:
-                embedding_model = session.get(EmbeddingModel, kb.embedding_model_id)
-                if embedding_model:
-                    model_id = embedding_model.model_id
-                    provider = embedding_model.provider
-                    print(
-                        f"Using knowledge base's original embedding model: {model_id}"
-                    )
-                else:
-                    embedding_info = get_embedding_model(session, current_user)
-                    model_id = embedding_info["model_id"]
-                    provider = embedding_info["provider"]
+        # 4. Initialize the LLM
+        llm = get_default_llm(session, current_user)
+
+        # 5. Parse the sections outline
+        section_list = request.sections.strip().split("\n")
+
+        # 6. Process each section
+        sections = []
+
+        for section_description in section_list:
+            section_description = section_description.strip()
+            if not section_description:
+                continue
+
+            # search for relevant chunks
+            search_result = vectordb_service.search_semantic(
+                query=section_description,
+                embedding_model_id=embedding_model.id,
+                knowledge_base_id=str(kb.id),
+                limit=5,
+                output_fields=["content", "source_id", "title", "author", "url"],
+            )
+
+            if not search_result["success"]:
+                print(
+                    f"Search failed for section '{section_description}': {search_result.get('error', 'Unknown error')}"
+                )
+                continue
+
+            chunks = search_result["results"]
+            context = "\n\n".join([chunk["entity"]["content"] for chunk in chunks])
+
+            # process source documents for citation
+            source_citations = []
+            for chunk in chunks:
+                entity = chunk["entity"]
+
+                # create metadata similar to the old format
+                metadata = {
+                    "source_id": entity.get("source_id", ""),
+                    "title": entity.get("title", ""),
+                    "author": entity.get("author", ""),
+                    "url": entity.get("url", ""),
+                }
+
+                # try to get source data id from the source table
+                if entity.get("source_id"):
+                    source_entry = session.exec(
+                        select(Source).where(
+                            Source.source_data_id == entity["source_id"]
+                        )
+                    ).first()
+
+                    if source_entry:
+                        metadata["source_data_id"] = str(source_entry.source_data_id)
+                        # use the source name if available
+                        if source_entry.name:
+                            metadata["source"] = source_entry.name
+
+                source = {"content": entity["content"], "metadata": metadata}
+                source_citations.append(source)
+
+            # use the template from config
+            prompt_template = settings.REPORT_GENIE_PROMPT_TEMPLATE
+
+            section_content = invoke_llm(
+                llm,
+                prompt_template,
+                {"context": context, "question": section_description},
+            )
+
+            # store the section with its content and sources
+            sections.append(
+                {
+                    "title": section_description,
+                    "content": section_content,
+                    "source_citations": source_citations,
+                }
+            )
+
+        # 7. Compile the final report
+        full_report = "\n\n---\n\n".join(
+            [section["content"].strip() for section in sections]
+        )
+
+        result = {"full_report": full_report, "sections": sections}
+
+        # get outline name if outline_id is provided
+        outline_name = None
+        if hasattr(request, "outline_id") and request.outline_id:
+            try:
+                outline = session.get(ReportGenieOutline, request.outline_id)
+                if outline:
+                    outline_name = outline.name
+            except Exception as e:
+                print(f"Warning: Error retrieving outline name: {e}")
+
+        # if no outline_id but we have sections, use first line or "Custom Outline"
+        if not outline_name and request.sections:
+            first_line = request.sections.strip().split("\n")[0]
+            if first_line:
+                # extract a name from the first section (limited to 30 chars)
+                outline_name = first_line[:30] + ("..." if len(first_line) > 30 else "")
             else:
-                embedding_info = get_embedding_model(session, current_user)
-                model_id = embedding_info["model_id"]
-                provider = embedding_info["provider"]
+                outline_name = "Custom Outline"
 
-            print(f"Initializing embedding model: {model_id} ({provider})")
-            embeddings = load_embeddings_model(provider=provider, model_id=model_id)
-            chroma_db = Chroma(
-                persist_directory=temp_dir, embedding_function=embeddings
-            )
-            retriever = chroma_db.as_retriever(search_kwargs={"k": 5})
+        # store the full report and sections data in extra_data for retrieval later
+        detailed_extra_data = {
+            "kb_name": kb.title,
+            "full_report": full_report,
+            "sections": sections,  # this includes section content and sources
+            "outline_name": outline_name,  # add the outline name here
+        }
 
-            # 4. Initialize the LLM
-            llm = get_default_llm(session, current_user)
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="reportgenie",
+            input_data={
+                "sections": request.sections,
+                "kb_id": request.knowledge_base_id,
+                "outline_id": (
+                    request.outline_id if hasattr(request, "outline_id") else None
+                ),
+            },
+            output_data={
+                "section_count": len(sections),
+                "total_length": len(full_report),
+            },
+            metadata=detailed_extra_data,
+        )
 
-            # 5. Parse the sections outline
-            section_list = request.sections.strip().split("\n")
-
-            # 6. Process each section
-            sections = []
-
-            for section_description in section_list:
-                section_description = section_description.strip()
-                if not section_description:
-                    continue
-
-                # Retrieve relevant context from the knowledge base
-                docs = retriever.get_relevant_documents(section_description)
-                context = "\n\n".join([doc.page_content for doc in docs])
-
-                # Store source documents for citation
-                source_citations = []
-                for doc in docs:
-                    metadata = doc.metadata.copy()
-
-                    if "source" in metadata and isinstance(metadata["source"], str):
-                        source_path = metadata["source"]
-                        raw_filename = Path(source_path).name
-
-                        # Extract the real filename after the underscore using regex
-                        match = re.search(r"^[^_]*_(.+)$", raw_filename)
-                        if match:
-                            filename = match.group(1)
-                        else:
-                            filename = raw_filename
-
-                        source_entry = session.exec(
-                            select(Source).where(Source.name == filename)
-                        ).first()
-
-                        if source_entry:
-                            metadata["source_data_id"] = str(
-                                source_entry.source_data_id
-                            )
-
-                    source = {"content": doc.page_content, "metadata": metadata}
-                    source_citations.append(source)
-
-                # Use the template from config
-                prompt_template = settings.REPORT_GENIE_PROMPT_TEMPLATE
-
-                section_content = invoke_llm(
-                    llm,
-                    prompt_template,
-                    {"context": context, "question": section_description},
-                )
-
-                # Store the section with its content and sources
-                sections.append(
-                    {
-                        "title": section_description,
-                        "content": section_content,
-                        "source_citations": source_citations,
-                    }
-                )
-
-            # 7. Compile the final report
-            full_report = "\n\n---\n\n".join(
-                [section["content"].strip() for section in sections]
-            )
-
-            result = {"full_report": full_report, "sections": sections}
-
-            # Get outline name if outline_id is provided
-            outline_name = None
-            if hasattr(request, "outline_id") and request.outline_id:
-                try:
-                    outline = session.get(ReportGenieOutline, request.outline_id)
-                    if outline:
-                        outline_name = outline.name
-                except Exception as e:
-                    print(f"Warning: Error retrieving outline name: {e}")
-
-            # If no outline_id but we have sections, use first line or "Custom Outline"
-            if not outline_name and request.sections:
-                first_line = request.sections.strip().split("\n")[0]
-                if first_line:
-                    # Extract a name from the first section (limited to 30 chars)
-                    outline_name = first_line[:30] + (
-                        "..." if len(first_line) > 30 else ""
-                    )
-                else:
-                    outline_name = "Custom Outline"
-
-            # Store the full report and sections data in extra_data for retrieval later
-            detailed_extra_data = {
-                "kb_name": kb.title,
-                "full_report": full_report,
-                "sections": sections,  # This includes section content and sources
-                "outline_name": outline_name,  # Add the outline name here
-            }
-
-            record_llm_interaction(
-                session=session,
-                user_id=current_user.id,
-                functionality="reportgenie",
-                input_data={
-                    "sections": request.sections,
-                    "kb_id": request.knowledge_base_id,
-                    "outline_id": (
-                        request.outline_id if hasattr(request, "outline_id") else None
-                    ),
-                },
-                output_data={
-                    "section_count": len(sections),
-                    "total_length": len(full_report),
-                },
-                metadata=detailed_extra_data,
-            )
-
-            return ReportGenieResponse(results=result)
+        return ReportGenieResponse(results=result)
 
     except Exception as e:
         import traceback
