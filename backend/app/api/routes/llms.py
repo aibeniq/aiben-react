@@ -20,7 +20,7 @@ from app.models import (
     LlmModelPublic,
     LlmModelsPublic,
     LlmModelsValidate,
-    ModelProvider,
+    LlmProvider,
     Message,
     User,
 )
@@ -43,25 +43,25 @@ def initialize_default_llm_models(session: SessionDep):
         {
             "name": "GPT-4o Mini",
             "model_id": "gpt-4o-mini",
-            "provider": ModelProvider.OPENAI,
+            "provider": LlmProvider.OPENAI,
             "description": "OpenAI's GPT-4o Mini model, good balance of performance and speed.",
         },
         {
             "name": "Claude Sonnet 3.7",
             "model_id": "arn:aws:bedrock:eu-north-1:888577032067:inference-profile/eu.anthropic.claude-3-7-sonnet-20250219-v1:0",
-            "provider": ModelProvider.AWS,
+            "provider": LlmProvider.AWS,
             "description": "Anthropic's Claude 3.7 Sonnet model on AWS Bedrock. Highly capable, fast, and excellent at complex reasoning tasks. Great for enterprise use cases requiring advanced reasoning and understanding.",
         },
         {
             "name": "Llama 3 8B",
             "model_id": "llama3",
-            "provider": ModelProvider.OLLAMA,
+            "provider": LlmProvider.OLLAMA,
             "description": "Local Llama 3 8B model running via Ollama.",
         },
         {
             "name": "Mistral 7B",
             "model_id": "mistral",
-            "provider": ModelProvider.OLLAMA,
+            "provider": LlmProvider.OLLAMA,
             "description": "Local Mistral 7B model running via Ollama.",
         },
     ]
@@ -185,7 +185,7 @@ def validate_llm_model(
 
         print(f"Validating LLM: {model_id} (provider: {provider})")
 
-        if provider == ModelProvider.OPENAI:
+        if provider == LlmProvider.OPENAI:
             # For OpenAI, attempt to create the model with a simple test
 
             # Get API key from environment or request
@@ -202,7 +202,7 @@ def validate_llm_model(
             response = llm.invoke("Hello")
             print(f"OpenAI model validation successful: {model_id}")
 
-        elif model_data.provider == ModelProvider.AWS:
+        elif model_data.provider == LlmProvider.AWS:
             print("Now attempting to validate AWS Bedrock model...")
             try:
                 # Check if AWS credentials are configured
@@ -311,10 +311,10 @@ def validate_llm_model(
 
                 raise HTTPException(status_code=400, detail=detail)
 
-        elif provider == ModelProvider.HUGGINGFACE:
-            #only import HERE, to avoid errors in API-only builds
-            from langchain_huggingface import HuggingFacePipeline
-            from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+        elif provider == LlmProvider.HUGGINGFACE:
+            # only import HERE, to avoid errors in API-only builds
+            from transformers import AutoTokenizer
+
             # For HuggingFace, try to load the model
             print(f"Loading HuggingFace model: {model_id}")
 
@@ -328,7 +328,7 @@ def validate_llm_model(
             # if "text-generation" not in info.pipeline_tag and "text2text-generation" not in info.pipeline_tag:
             #     raise ValueError(f"Model {model_id} is not a language model")
 
-        elif provider == ModelProvider.OLLAMA:
+        elif provider == LlmProvider.OLLAMA:
             # For Ollama, check if the model is available
             base_url = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")
             # Try to connect to Ollama server and verify model
@@ -343,7 +343,7 @@ def validate_llm_model(
             response = llm.invoke("Hello")
             print(f"Ollama model validation successful: {model_id}")
 
-        elif provider == ModelProvider.REPLICATE:
+        elif provider == LlmProvider.REPLICATE:
             try:
                 # Check if API token is configured
                 if "REPLICATE_API_TOKEN" not in os.environ:
