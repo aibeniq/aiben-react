@@ -356,68 +356,6 @@ class RagChecklistRequest(VeraDocRequest):
     questions: str
 
 
-# Enum for LLM providers (embeddings handled by embedding service)
-class LlmProvider(str, enum.Enum):
-    HUGGINGFACE = "huggingface"
-    OPENAI = "openai"
-    OLLAMA = "ollama"
-    REPLICATE = "replicate"
-    AWS = "aws"
-    # Add other providers as needed
-
-
-# Define a SQLAlchemy type for the enum
-LlmProviderType = SQLAlchemyEnum(
-    LlmProvider,
-    name="llmprovider",
-    create_constraint=True,
-    validate_strings=True,
-    native_enum=True,
-    values_callable=lambda x: [e.value for e in x],  # Use enum values instead of names
-)
-
-
-class LlmModel(SQLModel, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    name: str = Field(index=True)  # Human-readable name
-    model_id: str  # Model identifier (e.g., "gpt-4o-mini" or "llama3")
-    provider: LlmProvider = Field(
-        default=LlmProvider.OPENAI,
-        sa_column=Column(LlmProviderType, nullable=False),
-    )
-    description: str = Field(default="")
-    owner_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
-    date_created: datetime = Field(default_factory=datetime.utcnow)
-    date_modified: datetime = Field(default_factory=datetime.utcnow)
-
-
-class LlmModelCreate(SQLModel):
-    name: str
-    model_id: str
-    provider: LlmProvider = LlmProvider.OPENAI
-    description: str = ""
-
-
-class LlmModelUpdate(SQLModel):
-    name: Optional[str] = None
-    model_id: Optional[str] = None
-    provider: Optional[LlmProvider] = None
-    description: Optional[str] = None
-
-
-class LlmModelPublic(LlmModel):
-    pass
-
-
-class LlmModelsPublic(SQLModel):
-    data: List[LlmModelPublic]
-
-
-class LlmModelsValidate(SQLModel):
-    model_id: str
-    provider: LlmProvider
-
-
 # Request model for ReportGenie
 class ReportGenieRequest(SQLModel):
     knowledge_base_id: str
