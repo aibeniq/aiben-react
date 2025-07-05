@@ -343,7 +343,13 @@ const ChecklistModal = ({
           headers["Authorization"] = `Bearer ${token}`
         }
 
-        const apiResponse = await fetch("/api/v1/generate-questions-with-files", {
+        // Use proper backend URL instead of relative path
+        const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
+        const apiUrl = `${baseUrl}/api/v1/veradoc/generate-questions-with-files`
+
+        console.log("Generating questions with files - API URL:", apiUrl)
+
+        const apiResponse = await fetch(apiUrl, {
           method: "POST",
           headers,
           body: formData,
