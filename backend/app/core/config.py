@@ -67,6 +67,9 @@ class Settings(BaseSettings):
     # Default embedding model configuration
     DEFAULT_EMBEDDING_MODEL: str = "text-embedding-3-small"
 
+    # Default LLM model configuration
+    DEFAULT_LLM_MODEL: str = "gpt-4o-mini"
+
     # Application configuration (can be overridden in .env)
     PROJECT_NAME: str = "aibenIQ"
     STACK_NAME: str = "aibeniq"

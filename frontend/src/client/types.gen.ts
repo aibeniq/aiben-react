@@ -15,7 +15,7 @@ export type Body_knowledge_bases_create_knowledge_base = {
 
 export type Body_knowledge_bases_update_knowledge_base = {
   files?: Array<Blob | File> | null
-  removed_file_ids?: Array<string>
+  removed_file_ids?: Array<string> | null
 }
 
 export type Body_login_login_access_token = {
@@ -327,6 +327,7 @@ export type UserCreate = {
   is_superuser?: boolean
   full_name?: string | null
   default_embedding_model?: string
+  default_llm?: string
   password: string
 }
 
@@ -336,6 +337,7 @@ export type UserPublic = {
   is_superuser?: boolean
   full_name?: string | null
   default_embedding_model?: string
+  default_llm?: string
   id: string
 }
 
@@ -356,6 +358,7 @@ export type UserUpdate = {
   is_superuser?: boolean
   full_name?: string | null
   default_embedding_model?: string
+  default_llm?: string
   password?: string | null
 }
 
@@ -574,7 +577,6 @@ export type KnowledgeBasesReadKnowledgeBaseResponse = KnowledgeBasePublic
 
 export type KnowledgeBasesUpdateKnowledgeBaseData = {
   description?: string | null
-  embeddingModelId?: string
   formData?: Body_knowledge_bases_update_knowledge_base
   id: string
   title?: string | null

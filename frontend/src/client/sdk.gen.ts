@@ -755,7 +755,6 @@ export class KnowledgeBasesService {
    * @param data.id
    * @param data.title
    * @param data.description
-   * @param data.embeddingModelId
    * @param data.formData
    * @returns KnowledgeBasePublic Successful Response
    * @throws ApiError
@@ -772,7 +771,6 @@ export class KnowledgeBasesService {
       query: {
         title: data.title,
         description: data.description,
-        embedding_model_id: data.embeddingModelId,
       },
       formData: data.formData,
       mediaType: "multipart/form-data",
@@ -1215,8 +1213,8 @@ export class ReportgenieService {
       method: "POST",
       url: "/api/v1/reportgenie/generate/docx",
       body: data.requestBody,
-      mediaType: "application/json",
       responseType: "blob",
+      mediaType: "application/json",
       errors: {
         422: "Validation Error",
       },
@@ -1470,8 +1468,8 @@ export class TwincheckService {
       method: "POST",
       url: "/api/v1/twincheck/generate/docx",
       body: data.requestBody,
-      mediaType: "application/json",
       responseType: "blob",
+      mediaType: "application/json",
       errors: {
         422: "Validation Error",
       },
@@ -1920,8 +1918,8 @@ export class VeradocService {
       method: "POST",
       url: "/api/v1/veradoc/generate/docx",
       body: data.requestBody,
-      mediaType: "application/json",
       responseType: "blob",
+      mediaType: "application/json",
       errors: {
         422: "Validation Error",
       },
