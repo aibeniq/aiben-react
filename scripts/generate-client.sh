@@ -5,13 +5,45 @@ set -x
 
 echo "Starting the generate-client script..."
 
+# Check if we're in the correct directory structure
+if [ ! -d "backend" ] || [ ! -d "frontend" ]; then
+    echo "Error: Please run this script from the project root directory"
+    echo "Expected directories: backend/ and frontend/"
+    exit 1
+fi
+
 # Detect the operating system
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
     echo "Detected macOS"
     cd backend
-    uv run python -c "import app.main; import json; print(json.dumps(app.main.app.openapi()))" > ../openapi.json
+    # Try to use virtual environment if it exists, otherwise use system python
+    if [ -d ".venv" ]; then
+        echo "Using virtual environment"
+        source .venv/bin/activate
+        python -c "import app.main; import json; print(json.dumps(app.main.app.openapi()))" > ../openapi.json
+    else
+        echo "Using system python"
+        # Try different python executables
+        if command -v python3 &> /dev/null; then
+            echo "Using python3"
+            python3 -c "import app.main; import json; print(json.dumps(app.main.app.openapi()))" > ../openapi.json
+        elif command -v python &> /dev/null; then
+            echo "Using python"
+            python -c "import app.main; import json; print(json.dumps(app.main.app.openapi()))" > ../openapi.json
+        else
+            echo "Error: No Python executable found"
+            exit 1
+        fi
+    fi
     cd ..
+    
+    # Check if OpenAPI generation was successful
+    if [ ! -f "openapi.json" ]; then
+        echo "Error: Failed to generate openapi.json"
+        exit 1
+    fi
+    
     mv openapi.json frontend/
     cd frontend
     npm run generate-client
@@ -34,8 +66,33 @@ else
     # Linux or other Unix-like systems
     echo "Detected Linux/Unix"
     cd backend
-    python -c "import app.main; import json; print(json.dumps(app.main.app.openapi()))" > ../openapi.json
+    # Try to use virtual environment if it exists, otherwise use system python
+    if [ -d ".venv" ]; then
+        echo "Using virtual environment"
+        source .venv/bin/activate
+        python -c "import app.main; import json; print(json.dumps(app.main.app.openapi()))" > ../openapi.json
+    else
+        echo "Using system python"
+        # Try different python executables
+        if command -v python3 &> /dev/null; then
+            echo "Using python3"
+            python3 -c "import app.main; import json; print(json.dumps(app.main.app.openapi()))" > ../openapi.json
+        elif command -v python &> /dev/null; then
+            echo "Using python"
+            python -c "import app.main; import json; print(json.dumps(app.main.app.openapi()))" > ../openapi.json
+        else
+            echo "Error: No Python executable found"
+            exit 1
+        fi
+    fi
     cd ..
+    
+    # Check if OpenAPI generation was successful
+    if [ ! -f "openapi.json" ]; then
+        echo "Error: Failed to generate openapi.json"
+        exit 1
+    fi
+    
     mv openapi.json frontend/
     cd frontend
     npm run generate-client
