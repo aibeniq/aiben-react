@@ -22,7 +22,7 @@ from app.core.config import settings
 
 from sqlmodel import Session, select
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Literal
 import re
 import traceback
 
@@ -195,7 +195,8 @@ async def compare_multiple_documents(
 async def process_form(
     session: SessionDep,
     current_user: CurrentUser,
-    form_connect_in: FormConnectRequest = Depends(),
+    fields: str,
+    search_mode: Literal["vector", "full_scan"] = "vector",
     digitized_files: List[UploadFile] = File(None),
     handwritten_files: List[UploadFile] = File(None),
 ):
@@ -206,6 +207,10 @@ async def process_form(
     - digitized_files: Standard text extraction
     - handwritten_files: OCR-based extraction (placeholder)
     """
+    print("process_form function invoked!")
+    print(f"Received search_mode: {search_mode}")
+    print(f"Request data: fields={fields[:50]}...")
+
     # Get the default LLM
     llm = get_default_llm(session, current_user)
 
@@ -231,7 +236,7 @@ async def process_form(
         )
 
     # Parse the fields into a list
-    field_list = form_connect_in.fields.splitlines()
+    field_list = fields.splitlines()
 
     if not field_list:
         raise HTTPException(status_code=400, detail="No fields provided.")
@@ -295,7 +300,7 @@ async def process_form(
         session=session,
         user_id=current_user.id,
         functionality="formconnect",
-        input_data={"fields": form_connect_in.fields, "files": file_names},
+        input_data={"fields": fields, "files": file_names, "search_mode": search_mode},
         output_data=result,
         metadata={"file_count": total_files},
     )

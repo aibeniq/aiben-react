@@ -19,6 +19,7 @@ interface FormTemplateTableProps {
   selectedKnowledgeBase?: KnowledgeBasePublic | null
   knowledgeBases?: KnowledgeBasePublic[]
   isDisabled?: boolean
+  searchMode?: "vector" | "full_scan"
 }
 
 interface FormTemplateTableHeaderProps {
@@ -159,6 +160,7 @@ const FormTemplateTable = ({
   selectedKnowledgeBase,
   knowledgeBases,
   isDisabled = false,
+  searchMode = "vector",
 }: FormTemplateTableProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [editingForm, setEditingForm] = useState<FormConnectForm | null>(null)
@@ -309,6 +311,7 @@ const FormTemplateTable = ({
         onFieldsChange={onFieldsChange}
         selectedKnowledgeBase={selectedKnowledgeBase}
         knowledgeBases={knowledgeBases}
+        searchMode={searchMode}
       />
     </div>
   )

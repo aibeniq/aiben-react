@@ -33,6 +33,7 @@ interface FormTemplateModalProps {
   onFieldsChange: (fields: string) => void
   selectedKnowledgeBase?: KnowledgeBasePublic | null
   knowledgeBases?: KnowledgeBasePublic[]
+  searchMode?: "vector" | "full_scan"
 }
 
 const FormTemplateModal = ({
@@ -48,6 +49,7 @@ const FormTemplateModal = ({
   onFieldsChange,
   selectedKnowledgeBase,
   knowledgeBases,
+  searchMode: passedSearchMode = "vector",
 }: FormTemplateModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [generating, setGenerating] = useState(false)
@@ -56,7 +58,7 @@ const FormTemplateModal = ({
   const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     selectedKnowledgeBase || null,
   )
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">(passedSearchMode)
 
   // Set reference mode based on preselected knowledge base
   useEffect(() => {

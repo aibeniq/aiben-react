@@ -37,6 +37,7 @@ interface TopicListModalProps {
   moveTopicDown: (index: number) => void
   selectedKnowledgeBase?: KnowledgeBasePublic | null
   knowledgeBases?: KnowledgeBasePublic[]
+  searchMode?: "vector" | "full_scan"
 }
 
 const TopicListModal = ({
@@ -57,6 +58,7 @@ const TopicListModal = ({
   moveTopicDown,
   selectedKnowledgeBase,
   knowledgeBases,
+  searchMode: passedSearchMode = "vector",
 }: TopicListModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [generating, setGenerating] = useState(false)
@@ -65,7 +67,7 @@ const TopicListModal = ({
   const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     selectedKnowledgeBase || null,
   )
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">(passedSearchMode)
 
   // Set reference mode based on preselected knowledge base
   useEffect(() => {
@@ -103,6 +105,7 @@ const TopicListModal = ({
         // Use the existing file upload endpoint
         const files = exampleFiles.map((item) => item.file)
         response = await TwincheckService.generateTopics({
+          searchMode: searchMode,
           formData: {
             description: topicListDescription.trim(),
             comparison_type: "general",
@@ -122,10 +125,10 @@ const TopicListModal = ({
       } else {
         // Use the basic file upload endpoint without files
         response = await TwincheckService.generateTopics({
+          searchMode: searchMode,
           formData: {
             description: topicListDescription.trim(),
             comparison_type: "general",
-            search_mode: searchMode,
           },
         })
       }

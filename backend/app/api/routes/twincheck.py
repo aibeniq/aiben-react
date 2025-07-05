@@ -916,11 +916,21 @@ def generate_topics(
     description: str = Form(...),
     comparison_type: str = Form("general"),
     num_topics: Optional[int] = Form(None),
+    search_mode: str = "vector",
     files: List[UploadFile] = File(default=[]),
 ):
     """
     Generate comparison topics based on a description using LLM, with optional example document.
     """
+    print("generate_topics function invoked!")
+    print(f"Received search_mode: {search_mode}")
+    print(f"Request data: description={description[:50]}...")
+
+    # Validate search mode
+    if search_mode not in ["vector", "full_scan"]:
+        print(f"Warning: Invalid search mode '{search_mode}', defaulting to 'vector'")
+        search_mode = "vector"
+
     try:
         # Get the default LLM
         llm = get_default_llm(session, current_user)
@@ -1026,6 +1036,7 @@ def generate_topics(
                 "requested_topics": num_topics,
                 "comparison_type": comparison_type,
                 "has_example_document": len(files) > 0 and files[0].size > 0,
+                "search_mode": search_mode,
             },
             output_data={
                 "topics_count": len(topics),

@@ -15,6 +15,7 @@ import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
 import FileUpload, { FileItem } from "../../components/Common/FileUpload"
 import FormTemplateTable from "../../components/Match/FormTemplateTable"
+import SearchModeToggle from "../../components/Common/SearchModeToggle"
 
 const FormConnect = () => {
   const [fileItems, setFileItems] = useState<FileItem[]>([])
@@ -27,6 +28,7 @@ const FormConnect = () => {
   const [loading, setLoading] = useState(false)
   const [showFormModal, setShowFormModal] = useState(false)
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
 
   const fetchKnowledgeBases = async () => {
     try {
@@ -53,11 +55,18 @@ const FormConnect = () => {
   }, [])
 
   const mutation = useMutation({
-    mutationFn: (data: { fields: string; digitized_files: File[]; handwritten_files: File[] }) => {
+    mutationFn: (data: {
+      fields: string
+      digitized_files: File[]
+      handwritten_files: File[]
+      search_mode: "vector" | "full_scan"
+    }) => {
       console.log("Now beginning mutation...")
+      console.log(`Using search mode: ${data.search_mode}`)
 
       return FormconnectService.processForm({
         fields: data.fields,
+        searchMode: data.search_mode,
         formData: {
           digitized_files: data.digitized_files,
           handwritten_files: data.handwritten_files,
@@ -106,6 +115,7 @@ const FormConnect = () => {
       fields: fields,
       digitized_files: digitizedFiles,
       handwritten_files: handwrittenFiles,
+      search_mode: searchMode,
     }
 
     setLoading(true) // Set loading to true
@@ -134,6 +144,8 @@ const FormConnect = () => {
               onFilesChange={setFileItems}
               showHandwrittenToggle={true}
             />
+
+            <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
           </VStack>
         </HStack>
 
@@ -154,6 +166,7 @@ const FormConnect = () => {
             formDescription={formDescription}
             setFormDescription={setFormDescription}
             knowledgeBases={knowledgeBases}
+            searchMode={searchMode}
           />
         </SelectionModal>
 
