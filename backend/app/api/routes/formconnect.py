@@ -7,18 +7,13 @@ from app.models import (
     LlmInteraction,
     Message,
 )
-from app.services.llms import (
-    get_default_llm,
-    invoke_llm,
-    invoke_llm_with_image,
-    record_llm_interaction,
-)
+from app.services.llms import LlmService
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 
 from sqlmodel import select
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 
 from dotenv import load_dotenv
 
@@ -29,6 +24,8 @@ import base64
 from pathlib import Path
 
 from datetime import datetime
+
+from langchain_core.language_models import BaseChatModel, BaseLLM
 
 # Load environment variables from .env file
 load_dotenv(dotenv_path="c:/miniconda/aibeniq-react/.env", override=False)
@@ -60,7 +57,7 @@ def generate_template(fields: List[str]) -> Dict[str, str]:
 
 
 async def extract_fields_from_digitized_document(
-    file: UploadFile, template: Dict[str, str], llm=None
+    file: UploadFile, template: Dict[str, str], llm: Union[BaseChatModel, BaseLLM]
 ) -> Dict[str, str]:
     """
     Extract fields from a document using the LLM.
@@ -81,7 +78,7 @@ async def extract_fields_from_digitized_document(
     # Create the prompt
     prompt_template = settings.FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE
     variables = {"template": json.dumps(template), "document_text": text}
-    response = invoke_llm(llm, prompt_template, variables)
+    response = llm.invoke(prompt_template, variables)
 
     # Try to parse JSON from the response
     try:
@@ -118,6 +115,10 @@ async def extract_fields_from_handwritten_document(
 
     # Check if the file is an image
     if file_ext in image_extensions:
+        # TODO: Implement handwritten document extraction
+        raise HTTPException(
+            status_code=400, detail="Handwritten documents are not supported yet."
+        )
         try:
             img_base64 = base64.b64encode(content).decode("utf-8")
 
@@ -153,7 +154,9 @@ async def extract_fields_from_handwritten_document(
 
 
 async def compare_multiple_documents(
-    documents: List[Dict[str, str]], file_names: List[str], llm
+    documents: List[Dict[str, str]],
+    file_names: List[str],
+    llm: Union[BaseChatModel, BaseLLM],
 ) -> str:
     """
     Compare fields across multiple documents using the LLM.
@@ -172,7 +175,7 @@ async def compare_multiple_documents(
     # Create the prompt for multi-document comparison
     prompt_template = settings.FORMCONNECT_COMPARISON_PROMPT_TEMPLATE
     variables = {"documents_str": documents_str}
-    response = invoke_llm(llm, prompt_template, variables)
+    response = llm.invoke(prompt_template, variables)
     return response
 
 
@@ -192,7 +195,7 @@ async def process_form(
     - handwritten_files: OCR-based extraction (placeholder)
     """
     # Get the default LLM
-    llm = get_default_llm(session, current_user)
+    llm = LlmService.get_model(current_user.default_llm)
 
     # Log the model type being used
     if hasattr(llm, "__class__") and "ReplicateWrapper" in llm.__class__.__name__:
@@ -245,6 +248,10 @@ async def process_form(
 
     # Process handwritten files using a specialized function (placeholder)
     if handwritten_files:
+        # TODO: Implement handwritten document extraction
+        raise HTTPException(
+            status_code=400, detail="Handwritten documents are not supported yet."
+        )
         for file in handwritten_files:
             extracted = await extract_fields_from_handwritten_document(
                 file, template, llm
@@ -276,7 +283,7 @@ async def process_form(
             "extracted_data": extracted_results,
         }
 
-    record_llm_interaction(
+    LlmService.record_llm_interaction(
         session=session,
         user_id=current_user.id,
         functionality="formconnect",
