@@ -6,7 +6,6 @@ from sqlmodel import select, Session, delete
 from app.models import (
     Source,
     SourceData,
-    EmbeddingModel,
     KnowledgeBase,
     KnowledgeBaseCreate,
 )
@@ -236,20 +235,3 @@ class KnowledgeBaseService:
         except Exception as e:
             logger.error(f"Error deleting source_data {source_data_id}: {str(e)}")
             raise
-
-
-# TODO: Move this to embeddings.py
-def get_embedding_model(session: Session, current_user: CurrentUser):
-    """Get the current default embedding model from the database."""
-    print("Now determining which embedding model to use...")
-
-    # Try to get the default model
-    if current_user.default_embedding_model:
-        default_model = session.get(
-            EmbeddingModel, current_user.default_embedding_model
-        )
-        return {"model_id": default_model.model_id, "provider": default_model.provider}
-    else:
-        from app.models import ModelProvider
-
-        return {"model_id": "all-MiniLM-L6-v2", "provider": ModelProvider.HUGGINGFACE}
