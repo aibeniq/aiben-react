@@ -12,7 +12,7 @@ from app.models import (
 
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
 from app.core.config import settings
-from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from app.services.llms.main import LlmService
 
 from sqlmodel import select
 from fastapi import (
@@ -145,7 +145,7 @@ async def process_rag_checklist(
             )
 
         # 3. Initialize the LLM
-        llm = get_default_llm(session, current_user)
+        llm = LlmService.get_user_default_model(session, current_user.id)
         print("LLM successfully loaded")
 
         # 4. Define the prompts for the different stages
@@ -236,8 +236,7 @@ async def process_rag_checklist(
 
             # Step 2: Get the relevant policy context for this question
             print("Generating context for question...")
-            question_context = invoke_llm(
-                llm,
+            question_context = llm.invoke(
                 context_prompt_template,
                 {"context": context, "question": question},
             )
@@ -254,8 +253,7 @@ async def process_rag_checklist(
 
             # Step 3: Answer the question based on the uploaded document and policy context
             print("Generating answer based on document and context...")
-            answer = invoke_llm(
-                llm,
+            answer = llm.invoke(
                 qa_prompt_template,
                 {
                     "document_text": document_text[
@@ -299,12 +297,12 @@ async def process_rag_checklist(
 
         # Final evaluation
         print("Generating final evaluation...")
-        final_evaluation = invoke_llm(
-            llm, final_prompt_template, {"qa_pairs": qa_pairs_text}
+        final_evaluation = llm.invoke(
+            final_prompt_template, {"qa_pairs": qa_pairs_text}
         )
         print(f"Got final evaluation: {final_evaluation[:100]}...")
 
-        interaction_id = record_llm_interaction(
+        interaction_id = LlmService.record_llm_interaction(
             session=session,
             user_id=current_user.id,
             functionality="veradoc",
