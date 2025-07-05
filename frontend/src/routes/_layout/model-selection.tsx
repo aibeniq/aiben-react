@@ -6,23 +6,21 @@ import {
   Flex,
   Heading,
   HStack,
-  Input,
-  Dialog,
   Spinner,
   Table,
   Badge,
-  Text,
-  Textarea,
   VStack,
   Separator,
+  Show,
+  Icon,
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useState, useEffect, useRef } from "react"
-import { CancelablePromise } from "@/client/core/CancelablePromise"
-import { FiPlus, FiSettings, FiCheckCircle, FiXCircle } from "react-icons/fi"
-import { Field } from "../../components/ui/field"
+import { useState, useEffect } from "react"
+import { FiPlus, FiSettings } from "react-icons/fi"
 import useCustomToast from "@/hooks/useCustomToast"
+import { AiOutlineAmazon, AiOutlineOpenAI } from "react-icons/ai"
+import { SiHuggingface, SiOllama } from "react-icons/si"
 
 // This will need to be added to your SDK client
 import { LlmModelsService, EmbeddingModelsService } from "@/client"
@@ -34,15 +32,35 @@ export const Route = createFileRoute("/_layout/model-selection")({
 const getProviderDisplayName = (provider: string) => {
   switch (provider) {
     case "huggingface":
-      return "HuggingFace"
+      return (
+        <HStack gap={1}>
+          <Icon as={SiHuggingface} />
+          HuggingFace
+        </HStack>
+      )
     case "openai":
-      return "OpenAI"
+      return (
+        <HStack gap={1}>
+          <Icon as={AiOutlineOpenAI} />
+          OpenAI
+        </HStack>
+      )
     case "ollama":
-      return "Ollama"
+      return (
+        <HStack gap={1}>
+          <Icon as={SiOllama} />
+          Ollama
+        </HStack>
+      )
     case "replicate":
       return "Replicate"
     case "aws":
-      return "AWS Bedrock"
+      return (
+        <HStack gap={1}>
+          <Icon as={AiOutlineAmazon} />
+          Bedrock
+        </HStack>
+      )
     default:
       return provider
   }
@@ -53,13 +71,13 @@ const getProviderColor = (provider: string) => {
     case "huggingface":
       return "teal"
     case "openai":
-      return "purple"
+      return "blue"
     case "ollama":
-      return "orange"
+      return "purple"
     case "replicate":
       return "red"
     case "aws":
-      return "blue"
+      return "orange"
     default:
       return "gray"
   }
