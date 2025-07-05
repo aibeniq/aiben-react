@@ -166,7 +166,7 @@ const EditUser = ({ user }: EditUserProps) => {
                   <Field disabled={field.disabled} colorPalette="teal">
                     <Checkbox
                       checked={field.value}
-                      onCheckedChange={({ checked }) => field.onChange(checked)}
+                      onCheckedChange={(checked) => field.onChange(checked)}
                     >
                       Is superuser?
                     </Checkbox>
@@ -180,7 +180,7 @@ const EditUser = ({ user }: EditUserProps) => {
                   <Field disabled={field.disabled} colorPalette="teal">
                     <Checkbox
                       checked={field.value}
-                      onCheckedChange={({ checked }) => field.onChange(checked)}
+                      onCheckedChange={(checked) => field.onChange(checked)}
                     >
                       Is active?
                     </Checkbox>

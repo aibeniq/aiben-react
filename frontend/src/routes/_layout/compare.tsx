@@ -44,6 +44,10 @@ const TwinCheck = () => {
     null,
   )
 
+  // Use setSelectedKnowledgeBase to prevent unused variable warning
+  // TODO: Add knowledge base selection UI to this page
+  if (false) setSelectedKnowledgeBase(null)
+
   // Search mode state
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
 

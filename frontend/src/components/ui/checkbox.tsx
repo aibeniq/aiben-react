@@ -1,7 +1,8 @@
 import { Checkbox as ChakraCheckbox } from "@chakra-ui/react"
 import * as React from "react"
 
-export interface CheckboxProps extends React.ComponentProps<typeof ChakraCheckbox.Root> {
+export interface CheckboxProps
+  extends Omit<React.ComponentProps<typeof ChakraCheckbox.Root>, "onCheckedChange"> {
   icon?: React.ReactNode
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>
   rootRef?: React.Ref<HTMLLabelElement>
@@ -18,7 +19,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         {...rest}
         checked={checked}
         onCheckedChange={
-          onCheckedChange ? (details) => onCheckedChange(details.checked) : undefined
+          onCheckedChange ? (details) => onCheckedChange(!!details.checked) : undefined
         }
       >
         <ChakraCheckbox.HiddenInput ref={ref} {...inputProps} />

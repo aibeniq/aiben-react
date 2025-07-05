@@ -328,7 +328,7 @@ const VeraDoc = () => {
       files: File[]
       handwrittenFiles: File[]
       customInstructions?: string
-      searchMode?: string
+      searchMode?: "vector" | "full_scan"
     }) => {
       if (ongoingRequest.current) {
         ongoingRequest.current.cancel()
