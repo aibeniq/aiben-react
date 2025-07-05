@@ -576,6 +576,173 @@ def delete_outline(
     return Message(message="Outline deleted successfully.")
 
 
+@router.post("/generate-outline-json", response_model=GenerateOutlineResponse)
+async def generate_outline_json(
+    session: SessionDep, current_user: CurrentUser, request: GenerateOutlineRequest
+):
+    """
+    Generate outline sections based on a description using LLM, with optional knowledge base reference (JSON version).
+    """
+    try:
+        # Get the default LLM
+        llm = get_default_llm(session, current_user)
+
+        # Prepare variables for the prompt
+        prompt_variables = {
+            "description": request.description,
+            "report_type": request.report_type or "general",
+            "example_document": "",
+            "example_instruction": "",
+            "example_analysis_instruction": "",
+            "knowledge_base_instruction": "",
+            "knowledge_base_content": "",
+        }
+
+        # If knowledge base is specified, retrieve relevant content
+        if request.knowledge_base_id:
+            try:
+                # Get the knowledge base
+                knowledge_base = session.exec(
+                    select(KnowledgeBase).where(
+                        KnowledgeBase.id == request.knowledge_base_id
+                    )
+                ).first()
+
+                if not knowledge_base:
+                    raise HTTPException(
+                        status_code=404, detail="Knowledge base not found"
+                    )
+
+                # Load embedding model
+                embedding_model = get_embedding_model(
+                    session, knowledge_base.embedding_model_id
+                )
+                embeddings = load_embeddings_model(embedding_model.model_name)
+
+                # Create retriever for the knowledge base
+                retriever = create_ensemble_retriever(
+                    knowledge_base.id, embeddings, k=8
+                )
+
+                # Retrieve relevant content from knowledge base
+                retrieved_docs = retriever.get_relevant_documents(request.description)
+
+                if retrieved_docs:
+                    knowledge_base_content = "\n\n".join(
+                        [
+                            f"Source: {doc.metadata.get('source', 'Unknown')}\nContent: {doc.page_content}"
+                            for doc in retrieved_docs[:5]  # Limit to top 5 results
+                        ]
+                    )
+
+                    prompt_variables["knowledge_base_content"] = (
+                        f"REFERENCE DOCUMENTS FROM KNOWLEDGE BASE:\n{knowledge_base_content}"
+                    )
+                    prompt_variables["knowledge_base_instruction"] = (
+                        "\n12. Use the reference documents from the knowledge base above as inspiration for the type of content organization and structure, adapting the sections to match the specific requirements in the outline description"
+                    )
+                    prompt_variables["example_analysis_instruction"] = (
+                        ". Briefly mention how the knowledge base content influenced the structure"
+                    )
+
+            except Exception as e:
+                print(f"Error retrieving from knowledge base: {str(e)}")
+                # Continue without knowledge base content rather than failing
+                pass
+
+        # Generate outline sections using the LLM
+        outline_response = invoke_llm(
+            llm,
+            settings.REPORTGENIE_GENERATE_OUTLINE_PROMPT_TEMPLATE,
+            prompt_variables,
+        )
+
+        # Parse the response to extract sections and analysis
+        sections = []
+        analysis = ""
+
+        lines = outline_response.strip().split("\n")
+        in_sections_section = False
+        in_analysis_section = False
+
+        for line in lines:
+            line = line.strip()
+            if line.startswith("SECTIONS:"):
+                in_sections_section = True
+                in_analysis_section = False
+                continue
+            elif line.startswith("ANALYSIS:"):
+                in_sections_section = False
+                in_analysis_section = True
+                continue
+
+            if in_sections_section:
+                # Extract sections (numbered list)
+                if re.match(r"^\d+\.\s+", line):
+                    section = re.sub(r"^\d+\.\s+", "", line)
+                    if section.strip():
+                        sections.append(section.strip())
+            elif in_analysis_section:
+                if line:
+                    if analysis:
+                        analysis += " " + line
+                    else:
+                        analysis = line
+
+        # If parsing failed, try simpler approach
+        if not sections:
+            # Split by lines and look for numbered items
+            for line in lines:
+                line = line.strip()
+                if re.match(r"^\d+\.\s+", line):
+                    section = re.sub(r"^\d+\.\s+", "", line)
+                    if section.strip():
+                        sections.append(section.strip())
+
+        # Ensure we have some sections
+        if not sections:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate sections from the description. Please try with a more detailed description.",
+            )
+
+        # Apply user-specified limit if provided, otherwise use all generated sections
+        if request.num_sections:
+            sections = sections[: request.num_sections]
+
+        if not analysis:
+            analysis = f"Generated {len(sections)} sections based on the provided description to ensure comprehensive report structure coverage."
+            if request.knowledge_base_id:
+                analysis += " Used knowledge base reference for enhanced structure."
+
+        # Record the interaction
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="generate_outline_sections_json",
+            input_data={
+                "description": request.description,
+                "requested_sections": request.num_sections,
+                "report_type": request.report_type,
+                "knowledge_base_id": request.knowledge_base_id,
+            },
+            output_data={
+                "sections_count": len(sections),
+                "analysis": analysis,
+            },
+            metadata={},
+        )
+
+        return GenerateOutlineResponse(sections=sections, description_analysis=analysis)
+
+    except Exception as e:
+        print(f"Error generating outline: {e}")
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error generating outline: {str(e)}"
+        )
+
+
 @router.post("/generate-outline", response_model=GenerateOutlineResponse)
 async def generate_outline(
     session: SessionDep,
@@ -778,425 +945,6 @@ async def generate_outline(
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error generating outline: {str(e)}"
-        )
-
-
-@router.post("/generate/docx", response_class=StreamingResponse)
-async def generate_docx(
-    session: SessionDep, current_user: CurrentUser, request: DocxRequest
-):
-    """
-    Generate a DOCX file from the report content.
-    """
-    print("Now generating DOCX of report...")
-    try:
-        # Get the markdown content from the request
-        if not request.content:
-            raise HTTPException(
-                status_code=400, detail="No content provided for DOCX generation."
-            )
-
-        # Convert markdown to HTML for parsing
-        html_content = markdown.markdown(
-            request.content, extensions=["tables", "fenced_code"]
-        )
-        soup = BeautifulSoup(html_content, "html.parser")
-
-        print("Markdown content converted to HTML successfully.")
-        # Create a new Document
-        doc = Document()
-
-        print("Adding title and date to the document...")
-        # Add a title
-        doc.add_heading("Generated Report", level=0).alignment = (
-            WD_ALIGN_PARAGRAPH.CENTER
-        )
-
-        # Add date
-        date_paragraph = doc.add_paragraph()
-        date_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        date_run = date_paragraph.add_run(
-            f"Generated on: {datetime.now().strftime('%B %d, %Y')}"
-        )
-        date_run.italic = True
-        doc.add_paragraph()  # Add a space after the date
-
-        # Process each element from the parsed HTML
-        for element in soup.find_all(True, recursive=False):
-            if element.name.startswith("h") and element.name[1:].isdigit():
-                level = int(element.name[1:])
-                doc.add_heading(element.get_text(strip=True), level=level)
-            elif element.name == "p":
-                if element.get_text(strip=True):  # Avoid empty paragraphs
-                    doc.add_paragraph(element.get_text())
-            elif element.name == "hr":
-                doc.add_paragraph("---")  # Visual separator
-            elif element.name == "table":
-                headers = [th.get_text(strip=True) for th in element.find_all("th")]
-                if not headers:
-                    continue
-
-                table = doc.add_table(rows=1, cols=len(headers))
-                table.style = "Table Grid"
-                hdr_cells = table.rows[0].cells
-                for i, h in enumerate(headers):
-                    hdr_cells[i].text = h
-
-                for row in element.find("tbody").find_all("tr"):
-                    row_cells = table.add_row().cells
-                    for i, td in enumerate(row.find_all("td")):
-                        row_cells[i].text = td.get_text(strip=True)
-            elif element.name in ["ul", "ol"]:
-                for li in element.find_all("li"):
-                    doc.add_paragraph(li.get_text(strip=True), style="List Bullet")
-
-        # Save the document to a memory stream
-        file_stream = BytesIO()
-        doc.save(file_stream)
-        file_stream.seek(0)
-
-        print("DOCX file generated and ready for streaming.")
-        # Return as a streaming response
-        return StreamingResponse(
-            file_stream,
-            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            headers={
-                "Content-Disposition": f"attachment; filename=generated_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
-            },
-        )
-
-    except Exception as e:
-        traceback.print_exc()
-        raise HTTPException(
-            status_code=500, detail=f"Error generating DOCX file: {str(e)}"
-        )
-
-
-@router.post("/generate/csv", response_class=StreamingResponse)
-async def generate_csv(
-    session: SessionDep, current_user: CurrentUser, request: DocxRequest
-):
-    """
-    Generate a CSV file from the report content with sections, content, and citations.
-    """
-    print("Now generating CSV of report...")
-    try:
-        # Get the content from the request - this should be the full report JSON or the report ID
-        if not request.content:
-            raise HTTPException(status_code=400, detail="Report content is required")
-
-        # For CSV generation, we need the structured sections data, not just the markdown text
-        # The request.content should contain either the report ID or the full sections data
-
-        # Create CSV content
-        csv_buffer = StringIO()
-        csv_writer = csv.writer(csv_buffer)
-
-        # Write header
-        csv_writer.writerow(["Prompt", "Content", "Citations"])
-
-        try:
-            # Try to parse the content as JSON (sections data)
-            data = json.loads(request.content)
-
-            if "sections" in data:
-                sections = data["sections"]
-            else:
-                # If it's just a list of sections
-                sections = data if isinstance(data, list) else []
-
-        except json.JSONDecodeError:
-            # If it's not JSON, try to extract from a report ID or return error
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid content format. Expected JSON with sections data.",
-            )
-
-        # Process each section
-        for section in sections:
-            prompt = section.get("title", "")
-            content = section.get("content", "").replace("\n", " ").replace("\r", " ")
-
-            # Extract citations
-            citations = []
-            if "source_citations" in section:
-                for citation in section["source_citations"]:
-                    source_name = "Unknown"
-                    if citation.get("metadata", {}).get("source"):
-                        source_path = citation["metadata"]["source"]
-                        # Extract filename from path
-                        source_name = source_path.split("/")[-1].split("\\")[-1]
-                        # Remove UUID prefix if present
-                        if "_" in source_name:
-                            source_name = source_name.split("_", 1)[1]
-
-                    citation_text = (
-                        citation.get("content", "")
-                        .replace("\n", " ")
-                        .replace("\r", " ")
-                    )
-                    citations.append(f"{source_name}: {citation_text}")
-
-            citations_text = " | ".join(citations) if citations else "No citations"
-
-            # Write row
-            csv_writer.writerow([prompt, content, citations_text])
-
-        # Get CSV content
-        csv_content = csv_buffer.getvalue()
-        csv_buffer.close()
-
-        # Create BytesIO object for the response
-        csv_bytes = BytesIO(csv_content.encode("utf-8"))
-        csv_bytes.seek(0)
-
-        print("CSV file generated successfully.")
-
-        # Create filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"report_{timestamp}.csv"
-
-        # Return the CSV as a downloadable file
-        return StreamingResponse(
-            csv_bytes,
-            media_type="text/csv",
-            headers={"Content-Disposition": f"attachment; filename={filename}"},
-        )
-
-    except Exception as e:
-        import traceback
-
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Error generating CSV: {str(e)}")
-
-
-@router.get("/history", response_model=List[Dict[str, Any]])
-async def get_report_history(
-    session: SessionDep,
-    current_user: CurrentUser,
-    skip: int = 0,
-    limit: int = 20,
-    show_all: bool = False,
-):
-    """Retrieve past report generation history for the current user or all users."""
-    print("Retrieving report history. Show all:", show_all)
-
-    try:
-        # Start with base query
-        query = select(LlmInteraction).where(
-            LlmInteraction.functionality == "reportgenie"
-        )
-
-        # Only filter by user if not showing all users
-        if not show_all:
-            query = query.where(LlmInteraction.user_id == current_user.id)
-
-        # Add ordering and pagination
-        reports = session.exec(
-            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
-        ).all()
-
-        print("Found {} reports for user {}:".format(len(reports), current_user.id))
-
-        result = []
-        for report in reports:
-            # Parse the input_data and output_data from string to dict if possible
-            try:
-                input_data = json.loads(report.input_data) if report.input_data else {}
-                output_data = (
-                    json.loads(report.output_data) if report.output_data else {}
-                )
-                extra_data = report.extra_data or {}
-
-                # Debug: Check the type of sections data in history
-                sections_data = input_data.get("sections", "")
-                print(
-                    f"Debug - History Report {report.id}: sections type = {type(sections_data)}"
-                )
-
-                # Create a user-friendly title
-                kb_name = extra_data.get("kb_name", "Unknown Knowledge Base")
-                title = f"Report on {kb_name}"
-                date = report.date_created.strftime("%Y-%m-%d %H:%M")
-
-                # Create the result item
-                result_item = {
-                    "id": str(report.id),
-                    "date_created": report.date_created,
-                    "title": title,
-                    "sections": (
-                        input_data.get("sections", "")
-                        if isinstance(input_data.get("sections", ""), str)
-                        else json.dumps(input_data.get("sections", []))
-                    ),
-                    "kb_id": input_data.get("kb_id", ""),
-                    "section_count": output_data.get("section_count", 0),
-                    "kb_name": kb_name,
-                    "outline_name": extra_data.get("outline_name", ""),
-                    "has_feedback": report.feedback is not None,
-                }
-
-                # Add feedback information if exists
-                if report.feedback:
-                    result_item["feedback"] = {
-                        "feedback": report.feedback,
-                        "feedbackText": report.feedback_text,
-                    }
-
-                # Add user info for all-users view
-                if show_all:
-                    from app.models import User  # Import here to avoid circular imports
-
-                    user = session.get(User, report.user_id)
-                    user_name = (
-                        f"{user.full_name or 'User'} ({user.email})"
-                        if user
-                        else "Unknown User"
-                    )
-                    result_item["user_name"] = user_name
-
-                result.append(result_item)
-            except json.JSONDecodeError:
-                # If JSON parsing fails, use raw data
-                result_item = {
-                    "id": str(report.id),
-                    "date_created": report.date_created,
-                    "title": f"Report from {report.date_created.strftime('%Y-%m-%d')}",
-                    "sections": "",
-                    "kb_id": "",
-                    "section_count": 0,
-                    "kb_name": "Unknown Knowledge Base",
-                    "outline_name": "",
-                    "has_feedback": report.feedback is not None,
-                }
-
-                # Add feedback information if exists
-                if report.feedback:
-                    result_item["feedback"] = {
-                        "feedback": report.feedback,
-                        "feedbackText": report.feedback_text,
-                    }
-
-                # Add user info for all-users view
-                if show_all:
-                    from app.models import User  # Import here to avoid circular imports
-
-                    user = session.get(User, report.user_id)
-                    user_name = (
-                        f"{user.full_name or 'User'} ({user.email})"
-                        if user
-                        else "Unknown User"
-                    )
-                    result_item["user_name"] = user_name
-
-                result.append(result_item)
-
-        return result
-    except Exception as e:
-        import traceback
-
-        traceback.print_exc()
-        raise HTTPException(
-            status_code=500, detail=f"Error retrieving report history: {str(e)}"
-        )
-
-
-@router.get("/history/{report_id}", response_model=ReportGenieDetailResponse)
-async def get_report_detail(
-    report_id: uuid.UUID,
-    session: SessionDep,
-    current_user: CurrentUser,
-):
-    """Retrieve a specific report's full content by ID."""
-    try:
-        report = session.get(LlmInteraction, report_id)
-        if not report:
-            raise HTTPException(status_code=404, detail="Report not found")
-
-        # Because we now allow viewing others' outputs, no longer need to ensure this
-        # if report.user_id != current_user.id:
-        #    raise HTTPException(
-        #        status_code=403, detail="You don't have access to this report"
-        #    )
-
-        if report.functionality != "reportgenie":
-            raise HTTPException(
-                status_code=400, detail="This is not a ReportGenie report"
-            )
-
-        # Try to reconstruct the original report structure
-        try:
-            input_data = json.loads(report.input_data) if report.input_data else {}
-            output_data = json.loads(report.output_data) if report.output_data else {}
-            extra_data = report.extra_data or {}
-
-            # Debug: Check the type of sections data
-            sections_data = input_data.get("sections", "")
-            print(
-                f"Debug - Report {report.id}: sections type = {type(sections_data)}, value = {repr(sections_data)[:200]}"
-            )
-
-            # If we don't have the full report content in extra_data, we need to generate a response
-            # that's compatible with the normal report format
-            kb_name = extra_data.get("kb_name", "Unknown Knowledge Base")
-
-            # Try to get any saved full report content
-            full_report = extra_data.get("full_report", "")
-
-            # Create a response that matches the structure expected by the frontend
-            result = {
-                "id": str(report.id),
-                "date_created": report.date_created,
-                "kb_name": kb_name,
-                "kb_id": input_data.get("kb_id", ""),
-                "sections": (
-                    input_data.get("sections", "")
-                    if isinstance(input_data.get("sections", ""), str)
-                    else json.dumps(input_data.get("sections", []))
-                ),
-                "results": {
-                    "full_report": full_report,
-                    "sections": extra_data.get("sections", []),
-                },
-                # Add feedback information
-                "feedback": {
-                    "feedback": report.feedback,
-                    "feedbackText": report.feedback_text,
-                    "feedbackDate": (
-                        report.feedback_date.isoformat()
-                        if report.feedback_date
-                        else None
-                    ),
-                },
-            }
-
-            return result
-
-        except json.JSONDecodeError:
-            # Fallback if JSON parsing fails
-            return {
-                "id": str(report.id),
-                "date_created": report.date_created,
-                "kb_name": "Unknown Knowledge Base",
-                "kb_id": "",
-                "sections": "",
-                "results": {
-                    "full_report": f"Unable to reconstruct report from {report.date_created}.\n\n"
-                    f"This might be due to an older format or incomplete data.",
-                    "sections": [],
-                },
-                # Add empty feedback object for consistency
-                "feedback": {
-                    "feedback": None,
-                    "feedbackText": None,
-                    "feedbackDate": None,
-                },
-            }
-
-    except Exception as e:
-        traceback.print_exc()
-        raise HTTPException(
-            status_code=500, detail=f"Error retrieving report details: {str(e)}"
         )
 
 

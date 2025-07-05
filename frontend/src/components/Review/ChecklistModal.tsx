@@ -334,8 +334,16 @@ const ChecklistModal = ({
         })
 
         // Use fetch directly since the SDK might not support FormData properly
+        const token = localStorage.getItem("access_token")
+        const headers: HeadersInit = {}
+
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`
+        }
+
         const apiResponse = await fetch("/api/v1/generate-questions-with-files", {
           method: "POST",
+          headers,
           body: formData,
         })
 

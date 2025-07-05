@@ -33,12 +33,13 @@ from fastapi import (
     APIRouter,
     UploadFile,
     File,
+    Form,
     HTTPException,
     Depends,
     Request as FastAPIRequest,
 )
 from fastapi.responses import StreamingResponse
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import asyncio
 from dotenv import load_dotenv
 import json
@@ -1561,23 +1562,108 @@ async def generate_optimization_csv(
         )
 
 
-@router.post("/generate-questions", response_model=GenerateQuestionsResponse)
-def generate_questions(
-    request_data: GenerateQuestionsRequest,
+@router.post("/generate-questions-with-files", response_model=GenerateQuestionsResponse)
+async def generate_questions_with_files(
     session: SessionDep,
     current_user: CurrentUser,
+    description: str = Form(...),
+    checklist_type: str = Form(default="general"),
+    num_questions: Optional[int] = Form(default=None),
+    files: List[UploadFile] = File(default=[]),
 ):
     """
-    Generate checklist questions based on a description using LLM.
+    Generate checklist questions based on a description using LLM, with optional reference documents.
     """
     try:
         # Get the default LLM
         llm = get_default_llm(session, current_user)
 
+        # Process uploaded files to extract reference document content
+        reference_document_content = ""
+        if files:
+            print(f"Processing {len(files)} uploaded files for question generation")
+
+            for file in files:
+                if file.size > 0:
+                    try:
+                        # Read and process the file content
+                        file_content = await file.read()
+                        filename = file.filename.lower() if file.filename else ""
+
+                        if file.content_type == "application/pdf" or filename.endswith(
+                            ".pdf"
+                        ):
+                            # Extract text from PDF
+                            import fitz  # PyMuPDF
+
+                            pdf_doc = fitz.open(stream=file_content, filetype="pdf")
+                            file_text = ""
+                            for page in pdf_doc:
+                                file_text += page.get_text()
+                            pdf_doc.close()
+                        elif (
+                            file.content_type
+                            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            or filename.endswith((".docx", ".doc"))
+                        ):
+                            # Extract text from DOCX/DOC files
+                            from docx import Document
+                            from io import BytesIO
+
+                            # Create a BytesIO object from the file content
+                            doc_stream = BytesIO(file_content)
+                            doc = Document(doc_stream)
+
+                            # Extract text from all paragraphs
+                            doc_text_parts = []
+                            for paragraph in doc.paragraphs:
+                                if paragraph.text.strip():
+                                    doc_text_parts.append(paragraph.text.strip())
+
+                            file_text = "\n".join(doc_text_parts)
+                            print(
+                                f"Successfully extracted text from DOCX: {len(file_text)} characters"
+                            )
+
+                        elif file.content_type == "text/plain" or filename.endswith(
+                            (".txt", ".md")
+                        ):
+                            # Handle text file
+                            file_text = file_content.decode("utf-8", errors="ignore")
+                        else:
+                            # For unknown file types, try to decode as text but warn about it
+                            print(
+                                f"Warning: Unknown file type for {file.filename} (content-type: {file.content_type}), attempting text decode"
+                            )
+                            file_text = file_content.decode("utf-8", errors="ignore")
+
+                        if file_text.strip():
+                            reference_document_content += f"\n\n--- Content from {file.filename} ---\n{file_text.strip()}"
+                            print(
+                                f"Extracted {len(file_text)} characters from {file.filename}"
+                            )
+
+                    except Exception as e:
+                        print(f"Error processing file {file.filename}: {str(e)}")
+                        # Add the error info to the document content so user knows what happened
+                        reference_document_content += f"\n\n--- Error processing {file.filename} ---\nError: {str(e)}\n"
+                        continue
+
         # Prepare variables for the prompt
+        if reference_document_content:
+            reference_documents_instruction = "You can find additional requirements in the reference documents provided below."
+            additional_instructions = "\n11. Use the reference documents provided below to identify additional requirements that should be included in the checklist questions"
+        else:
+            reference_documents_instruction = ""
+            reference_document_content = ""
+            additional_instructions = ""
+
         prompt_variables = {
-            "description": request_data.description,
-            "checklist_type": request_data.checklist_type,
+            "description": description,
+            "checklist_type": checklist_type,
+            "reference_documents_instruction": reference_documents_instruction,
+            "reference_documents_content": reference_document_content,
+            "additional_instructions": additional_instructions,
         }
 
         # Generate questions using the LLM
@@ -1637,8 +1723,8 @@ def generate_questions(
             )
 
         # Apply user-specified limit if provided, otherwise use all generated questions
-        if request_data.num_questions:
-            questions = questions[: request_data.num_questions]
+        if num_questions:
+            questions = questions[:num_questions]
 
         if not analysis:
             analysis = f"Generated {len(questions)} questions based on the provided description to ensure comprehensive evaluation coverage."
@@ -1649,9 +1735,9 @@ def generate_questions(
             user_id=current_user.id,
             functionality="generate_checklist_questions",
             input_data={
-                "description": request_data.description,
-                "requested_questions": request_data.num_questions,
-                "checklist_type": request_data.checklist_type,
+                "description": description,
+                "requested_questions": num_questions,
+                "checklist_type": checklist_type,
             },
             output_data={
                 "questions_count": len(questions),
@@ -1666,6 +1752,175 @@ def generate_questions(
 
     except Exception as e:
         print(f"Error generating questions: {e}")
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error generating questions: {str(e)}"
+        )
+
+
+@router.post("/generate-questions", response_model=GenerateQuestionsResponse)
+async def generate_questions(
+    session: SessionDep, current_user: CurrentUser, request: GenerateQuestionsRequest
+):
+    """
+    Generate checklist questions based on a description using LLM (JSON version).
+    Optionally uses a knowledge base as reference for generating questions.
+    """
+    try:
+        # Get the default LLM
+        llm = get_default_llm(session, current_user)
+
+        # Prepare variables for the prompt
+        prompt_variables = {
+            "description": request.description,
+            "checklist_type": request.checklist_type or "general",
+            "reference_documents_instruction": "",
+            "reference_documents_content": "",
+            "additional_instructions": "",
+        }
+
+        # If knowledge base is provided, retrieve relevant documents
+        if request.knowledge_base_id:
+            try:
+                # Get the knowledge base
+                knowledge_base = session.get(KnowledgeBase, request.knowledge_base_id)
+                if not knowledge_base:
+                    raise HTTPException(
+                        status_code=404, detail="Knowledge base not found"
+                    )
+
+                # Check if user has access to this knowledge base
+                if knowledge_base.owner_id != current_user.id:
+                    raise HTTPException(
+                        status_code=403, detail="Access denied to knowledge base"
+                    )
+
+                # Get the embedding model
+                embedding_model = get_embedding_model(
+                    session, knowledge_base.embedding_model_id
+                )
+                embeddings_model = load_embeddings_model(embedding_model)
+
+                # Create retriever
+                retriever = create_ensemble_retriever(
+                    str(knowledge_base.id),
+                    embeddings_model,
+                    k=10,  # Retrieve more documents for question generation
+                )
+
+                # Use the description as query to get relevant documents
+                docs = retriever.invoke(request.description)
+
+                if docs:
+                    # Format reference content
+                    reference_content = []
+                    for i, doc in enumerate(docs[:5], 1):  # Limit to top 5 documents
+                        content = doc.page_content.strip()
+                        if content:
+                            reference_content.append(
+                                f"Reference Document {i}:\n{content}"
+                            )
+
+                    if reference_content:
+                        prompt_variables["reference_documents_instruction"] = (
+                            "Use the following reference documents to inform the questions you generate. "
+                            "The questions should be relevant to the description while also considering "
+                            "the content and requirements found in these reference documents:"
+                        )
+                        prompt_variables["reference_documents_content"] = "\n\n".join(
+                            reference_content
+                        )
+
+            except Exception as e:
+                print(f"Error retrieving knowledge base documents: {e}")
+                # Continue without reference documents if there's an error
+                pass
+
+        # Generate questions using the LLM
+        questions_response = invoke_llm(
+            llm,
+            settings.VERADOC_GENERATE_QUESTIONS_PROMPT_TEMPLATE,
+            prompt_variables,
+        )
+
+        # Parse the response to extract questions and analysis
+        questions = []
+        analysis = ""
+
+        lines = questions_response.strip().split("\n")
+        in_questions_section = False
+        in_analysis_section = False
+
+        for line in lines:
+            line = line.strip()
+            if line.startswith("QUESTIONS:"):
+                in_questions_section = True
+                in_analysis_section = False
+                continue
+            elif line.startswith("ANALYSIS:"):
+                in_questions_section = False
+                in_analysis_section = True
+                continue
+
+            if in_questions_section:
+                # Extract question from numbered format
+                if line:
+                    # Remove leading numbers, dots, dashes, etc.
+                    question = re.sub(r"^\d+\.\s*", "", line)
+                    question = re.sub(r"^-\s*", "", question)
+                    question = re.sub(r"^\*\s*", "", question)
+                    if question.strip():
+                        questions.append(question.strip())
+
+            elif in_analysis_section:
+                analysis += line + " "
+
+        # Ensure we have some questions
+        if not questions:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate questions from the description. Please try with a more detailed description.",
+            )
+
+        # Apply user-specified limit if provided, otherwise use all generated questions
+        if request.num_questions:
+            questions = questions[: request.num_questions]
+
+        if not analysis:
+            analysis_text = f"Generated {len(questions)} questions based on the provided description"
+            if request.knowledge_base_id:
+                knowledge_base = session.get(KnowledgeBase, request.knowledge_base_id)
+                if knowledge_base:
+                    analysis_text += f" and reference documents from knowledge base '{knowledge_base.title}'"
+            analysis_text += " to ensure comprehensive evaluation coverage."
+            analysis = analysis_text
+
+        # Record the interaction
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="generate_checklist_questions",
+            input_data={
+                "description": request.description,
+                "requested_questions": request.num_questions,
+                "checklist_type": request.checklist_type,
+                "knowledge_base_id": request.knowledge_base_id,
+            },
+            output_data={
+                "questions_count": len(questions),
+                "analysis": analysis,
+            },
+            metadata={},
+        )
+
+        return GenerateQuestionsResponse(
+            questions=questions, description_analysis=analysis
+        )
+
+    except Exception as e:
+        print(f"Error generating questions: {e}")
+        import traceback
+
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error generating questions: {str(e)}"

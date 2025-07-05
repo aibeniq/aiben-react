@@ -538,6 +538,8 @@ REPORT TYPE: {report_type}
 
 {example_document}
 
+{knowledge_base_content}
+
 INSTRUCTIONS:
 1. Generate as many specific, clear, and meaningful sections as needed to comprehensively cover the outline description
 2. Each section should represent a distinct topic or area that would be covered in the report
@@ -551,7 +553,7 @@ INSTRUCTIONS:
    - The specific topics and subtopics that should be covered in that section
    - The general scope and depth of content expected
    - Approximate length or detail level (e.g., brief overview, detailed analysis, comprehensive review)
-10. Each section description should be substantive (3-5 sentences) explaining what content would be included{example_instruction}
+10. Each section description should be substantive (3-5 sentences) explaining what content would be included{example_instruction}{knowledge_base_instruction}
 
 FORMAT YOUR RESPONSE AS:
 SECTIONS:

@@ -687,6 +687,9 @@ class GenerateOutlineRequest(SQLModel):
     report_type: str = Field(
         default="general"
     )  # Type of report (general, compliance, technical, research, etc.)
+    knowledge_base_id: Optional[str] = Field(
+        default=None
+    )  # Optional - Knowledge base to use as reference
 
 
 class GenerateOutlineResponse(SQLModel):

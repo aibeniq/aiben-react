@@ -14,6 +14,7 @@ interface OutlineTableProps {
   sections: string
   isDisabled?: boolean
   selectedKnowledgeBase?: KnowledgeBasePublic | null
+  knowledgeBases?: KnowledgeBasePublic[]
 }
 
 interface OutlineTableHeaderProps {
@@ -156,6 +157,7 @@ const OutlineTable = ({
   sections,
   isDisabled = false,
   selectedKnowledgeBase,
+  knowledgeBases,
 }: OutlineTableProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -299,6 +301,7 @@ const OutlineTable = ({
         sections={sections}
         onSectionsChange={onSectionsChange}
         selectedKnowledgeBase={selectedKnowledgeBase}
+        knowledgeBases={knowledgeBases}
       />
     </div>
   )

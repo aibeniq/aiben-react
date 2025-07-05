@@ -33,6 +33,7 @@ interface OutlineModalProps {
   sections: string
   onSectionsChange: (sections: string) => void
   selectedKnowledgeBase?: KnowledgeBasePublic | null
+  knowledgeBases?: KnowledgeBasePublic[]
 }
 
 const OutlineModal = ({
@@ -47,6 +48,7 @@ const OutlineModal = ({
   sections,
   onSectionsChange,
   selectedKnowledgeBase,
+  knowledgeBases,
 }: OutlineModalProps) => {
   console.log("Parent: sections prop value", sections)
 
@@ -54,6 +56,10 @@ const OutlineModal = ({
   const [generating, setGenerating] = useState(false)
   const [showOptimizeModal, setShowOptimizeModal] = useState(false)
   const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
+  const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
+  const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
+    null,
+  )
 
   const handleGenerateOutline = async () => {
     if (!outlineDescription.trim()) {
@@ -67,19 +73,48 @@ const OutlineModal = ({
       return
     }
 
+    // Validate reference requirements if any are selected
+    if (referenceMode === "files" && exampleFiles.length === 0) {
+      // Files mode but no files - this is okay, just use description
+    } else if (referenceMode === "knowledge-base" && !referenceKnowledgeBase) {
+      showErrorToast("Please select a Knowledge Base or switch to file upload mode")
+      return
+    }
+
     setGenerating(true)
 
     try {
-      // Extract files from FileItem objects for the API call
-      const files = exampleFiles.map((item) => item.file)
+      let response
 
-      const response = await ReportgenieService.generateOutline({
-        formData: {
-          description: outlineDescription.trim(),
-          report_type: "general",
-          files: files.length > 0 ? files : undefined,
-        },
-      })
+      if (referenceMode === "files" && exampleFiles.length > 0) {
+        // Use the existing file upload endpoint
+        const files = exampleFiles.map((item) => item.file)
+
+        response = await ReportgenieService.generateOutline({
+          formData: {
+            description: outlineDescription.trim(),
+            report_type: "general",
+            files: files.length > 0 ? files : undefined,
+          },
+        })
+      } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
+        // Use the new JSON endpoint with knowledge base reference
+        response = await ReportgenieService.generateOutlineJson({
+          requestBody: {
+            description: outlineDescription.trim(),
+            report_type: "general",
+            knowledge_base_id: referenceKnowledgeBase.id,
+          },
+        })
+      } else {
+        // Use the basic file upload endpoint without files
+        response = await ReportgenieService.generateOutline({
+          formData: {
+            description: outlineDescription.trim(),
+            report_type: "general",
+          },
+        })
+      }
 
       // Replace current sections with generated ones
       const generatedSections = response.sections || []
@@ -95,7 +130,14 @@ const OutlineModal = ({
         const sectionsString = JSON.stringify(structuredSections)
         onSectionsChange(sectionsString)
 
-        showSuccessToast(`Generated ${generatedSections.length} sections from description`)
+        let successMessage = `Generated ${generatedSections.length} sections from description`
+        if (referenceMode === "files" && exampleFiles.length > 0) {
+          successMessage += ` and ${exampleFiles.length} example file(s)`
+        } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
+          successMessage += ` using Knowledge Base "${referenceKnowledgeBase.title}"`
+        }
+
+        showSuccessToast(successMessage)
       } else {
         showErrorToast("No sections were generated. Please try with a more detailed description.")
       }
@@ -108,14 +150,25 @@ const OutlineModal = ({
           "Invalid request. Please check that your description meets the requirements.",
         )
       } else if (error.status === 401) {
-        showErrorToast("You need to be logged in to generate outline.")
+        showErrorToast("You need to be logged in to generate sections.")
       } else if (error.status === 500) {
         showErrorToast("Server error. Please try again later or contact support.")
       } else {
-        showErrorToast(`Failed to generate outline: ${error.message || "Unknown error"}`)
+        showErrorToast(`Failed to generate sections: ${error.message || "Unknown error"}`)
       }
     } finally {
       setGenerating(false)
+    }
+  }
+
+  // Handler for reference mode changes
+  const handleReferenceModeChange = (mode: "files" | "knowledge-base") => {
+    setReferenceMode(mode)
+    // Clear the opposite mode's selection
+    if (mode === "files") {
+      setReferenceKnowledgeBase(null)
+    } else {
+      setExampleFiles([])
     }
   }
 
@@ -185,18 +238,94 @@ const OutlineModal = ({
                     )}
                 </Field>
 
-                <Field label="Example Document (Optional)">
-                  <VStack align="stretch" gap={2}>
+                <Field label="Reference Documents (Optional)">
+                  <VStack align="stretch" gap={3}>
                     <Text fontSize="sm" color="gray.600">
-                      Upload an example document to help the AI understand the desired structure and
-                      style.
+                      Upload reference documents or select a Knowledge Base to help the AI
+                      understand the desired structure and requirements for the outline sections.
                     </Text>
-                    <FileUpload
-                      files={exampleFiles}
-                      onFilesChange={setExampleFiles}
-                      maxFiles={1}
-                      showHandwrittenToggle={false}
-                    />
+
+                    {/* Toggle between files and knowledge base */}
+                    <HStack gap={4}>
+                      <Button
+                        size="sm"
+                        variant={referenceMode === "files" ? "solid" : "outline"}
+                        colorPalette={referenceMode === "files" ? "blue" : "gray"}
+                        onClick={() => handleReferenceModeChange("files")}
+                      >
+                        Upload Files
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={referenceMode === "knowledge-base" ? "solid" : "outline"}
+                        colorPalette={referenceMode === "knowledge-base" ? "blue" : "gray"}
+                        onClick={() => handleReferenceModeChange("knowledge-base")}
+                        disabled={!knowledgeBases || knowledgeBases.length === 0}
+                      >
+                        Select Knowledge Base
+                      </Button>
+                    </HStack>
+
+                    {referenceMode === "files" ? (
+                      <FileUpload
+                        files={exampleFiles}
+                        onFilesChange={setExampleFiles}
+                        maxFiles={3}
+                        showHandwrittenToggle={false}
+                      />
+                    ) : (
+                      <VStack align="stretch" gap={2}>
+                        {knowledgeBases && knowledgeBases.length > 0 ? (
+                          <VStack align="stretch" gap={2}>
+                            <Text fontSize="xs" color="gray.600">
+                              Select a Knowledge Base to use as reference for generating outline
+                              sections:
+                            </Text>
+                            <Box
+                              maxH="120px"
+                              overflowY="auto"
+                              border="1px solid"
+                              borderColor="gray.200"
+                              borderRadius="md"
+                            >
+                              {knowledgeBases.map((kb) => (
+                                <Box
+                                  key={kb.id}
+                                  p={2}
+                                  cursor="pointer"
+                                  _hover={{ bg: "gray.50" }}
+                                  bg={referenceKnowledgeBase?.id === kb.id ? "blue.50" : "white"}
+                                  borderBottom="1px solid"
+                                  borderColor="gray.100"
+                                  onClick={() => setReferenceKnowledgeBase(kb)}
+                                >
+                                  <Text fontSize="sm" fontWeight="medium">
+                                    {kb.title}
+                                  </Text>
+                                  {kb.description && (
+                                    <Text fontSize="xs" color="gray.600" lineClamp={2}>
+                                      {kb.description}
+                                    </Text>
+                                  )}
+                                  <Text fontSize="xs" color="gray.500">
+                                    {kb.number_of_sources || 0} sources
+                                  </Text>
+                                </Box>
+                              ))}
+                            </Box>
+                            {referenceKnowledgeBase && (
+                              <Text fontSize="xs" color="green.600">
+                                Selected: {referenceKnowledgeBase.title}
+                              </Text>
+                            )}
+                          </VStack>
+                        ) : (
+                          <Text fontSize="sm" color="gray.500">
+                            No Knowledge Bases available. Create one first or switch to file upload.
+                          </Text>
+                        )}
+                      </VStack>
+                    )}
                   </VStack>
                 </Field>
 
