@@ -377,10 +377,11 @@ class VectorDBService:
             )
 
             # prepare data for insertion
-            data_to_insert: List[EmbeddedChunkData] = []
+            data_to_insert: List[Dict[str, Any]] = []
             for chunk, embedding in zip(chunks, embeddings):
                 chunk_data = EmbeddedChunkData(**chunk.model_dump(), dense=embedding)
-                data_to_insert.append(chunk_data)
+                # convert pydantic model to dictionary for milvus insertion
+                data_to_insert.append(chunk_data.model_dump())
 
             # insert data
             result = self.client.insert(
