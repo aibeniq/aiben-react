@@ -15,14 +15,14 @@ import os
 from langchain_core.documents import Document
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.embeddings import Embeddings
 from fastapi import HTTPException
 import docx
 import time
 from app.core.config import settings
 
-from app.services.knowledgebases import KnowledgeBaseService
 from app.services.vectordb.types import ChunkData, EmbeddedChunkData
-from app.services.embeddings import EmbeddingService
+from app.services.embeddings.main import EmbeddingService
 from app.services.vectordb.config import (
     MILVUS_URL,
     MILVUS_SCHEMA_TEMPLATE,
@@ -142,7 +142,7 @@ class VectorDBService:
             logger.info(f"Connected to Milvus at {MILVUS_URL}")
 
             # cache for embedding models and initialized collections
-            self._embedding_models: Dict[str, Any] = {}
+            self._embedding_models: Dict[str, Embeddings] = {}
             self._initialized_collections: set = set()
 
             self.default_output_fields = [
@@ -159,13 +159,14 @@ class VectorDBService:
             raise
 
     def _get_collection_name(self, embedding_model_id: str) -> str:
-        """Generate collection name from embedding model ID."""
+        """Generate collection name from embedding model ID.
+
+        Returns:
+            tuple[bool, str]: True if the collection name is valid, False otherwise
+        """
         spec = EmbeddingService.get_model_spec(embedding_model_id)
         if not spec:
-            raise ValueError(
-                f"Unknown embedding model: {embedding_model_id}. "
-                f"Available models: {EmbeddingService.list_available_models()}"
-            )
+            raise ValueError(f"Unknown embedding model: {embedding_model_id}")
 
         # create safe collection name: provider_model_dimensions
         safe_name = f"{spec.provider}_{spec.model_name}_{spec.dimensions}"
@@ -173,9 +174,13 @@ class VectorDBService:
         safe_name = safe_name.replace("-", "").replace(".", "").replace("/", "")
         return safe_name
 
-    def _get_embedding_model(self, embedding_model_id: str):
+    def _get_embedding_model(self, embedding_model_id: str) -> Embeddings:
         """Get or load embedding model by ID."""
         if embedding_model_id not in self._embedding_models:
+            is_valid, error_msg = EmbeddingService.validate_model(embedding_model_id)
+            if not is_valid:
+                raise ValueError(error_msg)
+
             logger.info(f"Loading embedding model: {embedding_model_id}")
             self._embedding_models[embedding_model_id] = EmbeddingService.get_model(
                 embedding_model_id
@@ -185,9 +190,11 @@ class VectorDBService:
 
     def _create_schema(self, embedding_model_id: str) -> CollectionSchema:
         """Create Milvus schema for the specified embedding model."""
+        is_valid, error_msg = EmbeddingService.validate_model(embedding_model_id)
+        if not is_valid:
+            raise ValueError(error_msg)
+
         spec = EmbeddingService.get_model_spec(embedding_model_id)
-        if not spec:
-            raise ValueError(f"Unknown embedding model: {embedding_model_id}")
 
         # create schema fields with appropriate embedding dimension
         fields = MILVUS_SCHEMA_TEMPLATE + [
@@ -203,7 +210,7 @@ class VectorDBService:
         # create schema
         schema = CollectionSchema(
             fields=fields,
-            description=f"schema for {embedding_model_id} ({spec.provider}/{spec.model_name})",
+            description=f"schema for {embedding_model_id}",
         )
 
         # add BM25 function for keyword search
@@ -284,8 +291,13 @@ class VectorDBService:
         knowledge_base_id: str,
         user_id: str,
         source_id: str,
+        embedding_model_id: str,
     ) -> None:
         """Add files to the collection."""
+
+        is_valid, error_msg = EmbeddingService.validate_model(embedding_model_id)
+        if not is_valid:
+            raise ValueError(error_msg)
 
         documents = []
 
@@ -293,7 +305,7 @@ class VectorDBService:
         loaded_documents = load_uploaded_file(file)  # TODO: switch to docling
         documents.extend(loaded_documents)
 
-        # Split documents into chunks using RecursiveCharacterTextSplitter
+        # Split documents into chunks
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=settings.DOCUMENT_CHUNK_SIZE,
             chunk_overlap=settings.DOCUMENT_CHUNK_OVERLAP,
@@ -319,21 +331,31 @@ class VectorDBService:
 
         self._add_chunks(
             chunks_to_add,
-            embedding_model_id=EmbeddingService.get_default_model(),  # TODO: use user default (and make required)
+            embedding_model_id=embedding_model_id,
         )
 
-    def delete_source(self, source_id: str) -> None:
+    def delete_source(self, source_id: str, embedding_model_id: str) -> None:
         """Delete a file from the collection."""
+        is_valid, error_msg = EmbeddingService.validate_model(embedding_model_id)
+        if not is_valid:
+            raise ValueError(error_msg)
+
         self._delete_chunks(
             source_id=source_id,
-            embedding_model_id=EmbeddingService.get_default_model(),  # TODO: use user default (and make required))
+            embedding_model_id=embedding_model_id,
         )
 
-    def delete_knowledge_base(self, knowledge_base_id: str) -> None:
+    def delete_knowledge_base(
+        self, knowledge_base_id: str, embedding_model_id: str
+    ) -> None:
         """Delete a knowledge base from the collection."""
+        is_valid, error_msg = EmbeddingService.validate_model(embedding_model_id)
+        if not is_valid:
+            raise ValueError(error_msg)
+
         self._delete_chunks(
             knowledge_base_id=knowledge_base_id,
-            embedding_model_id=EmbeddingService.get_default_model(),  # TODO: use user default (and make required))
+            embedding_model_id=embedding_model_id,
         )
 
     def _add_chunks(
