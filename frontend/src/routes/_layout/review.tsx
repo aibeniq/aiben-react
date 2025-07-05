@@ -522,9 +522,9 @@ const VeraDoc = () => {
                 <Accordion.ItemContent pb={4} bg="surface">
                   {pair.source_citations.map((citation: any, cIndex: number) => (
                     <Box key={cIndex} p={3} mb={2} borderWidth="1px" borderRadius="md" bg="bg">
-                      {citation.metadata.source_data_id ? (
+                      {citation.metadata.source_id ? (
                         <SourceLink
-                          sourceId={citation.metadata.source_data_id}
+                          sourceId={citation.metadata.source_id}
                           fileName={getDisplayFileName(citation.metadata.source)}
                           ml={1}
                           fontWeight="normal"
