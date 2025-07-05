@@ -804,9 +804,6 @@ const VeraDoc = () => {
 
             {/* Search Mode Toggle */}
             <Box width="100%" mt={4}>
-              <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
-                Search Mode
-              </Text>
               <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
               <Text fontSize="xs" color="gray.500" mt={1}>
                 Vector search provides fast, targeted results. Full document scan reviews all
