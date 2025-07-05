@@ -443,6 +443,7 @@ const ReportGenie = () => {
             onOutlinesUpdate={fetchOutlines}
             sections={sections}
             selectedKnowledgeBase={selectedKnowledgeBase}
+            knowledgeBases={knowledgeBases}
           />
         </SelectionModal>
 
