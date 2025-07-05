@@ -1,15 +1,13 @@
 import replicate
 import os
-from io import BytesIO
-from app.models import ModelProvider, LlmModel, User, LlmInteraction
+from app.models import LlmProvider, LlmModel, User, LlmInteraction
 from langchain_openai import ChatOpenAI
 from langchain_aws import ChatBedrock
 from langchain_community.chat_models import ChatOllama
 from langchain_core.messages import HumanMessage, SystemMessage
 from typing import Optional, Any, Dict
-from app.api.deps import SessionDep, CurrentUser
+from app.api.deps import SessionDep
 from sqlmodel import select, Session
-from langchain_community.llms import Replicate
 from langchain.schema import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 import uuid
@@ -17,7 +15,6 @@ import traceback
 import json
 import boto3
 from langchain_community.llms import Bedrock
-from langchain.chains import LLMChain
 
 
 class ReplicateWrapper:
@@ -261,7 +258,7 @@ class BedrockWrapper:
 
 
 def create_llm(
-    provider: ModelProvider,
+    provider: LlmProvider,
     model_id: str,
     temperature: float = 0.0,
     api_key: Optional[str] = None,
@@ -272,7 +269,7 @@ def create_llm(
     """
     params = additional_params or {}
 
-    if provider == ModelProvider.AWS:
+    if provider == LlmProvider.AWS:
         print(f"Creating AWS Bedrock LLM wrapper for model: {model_id}")
 
         # Check if AWS credentials are configured
@@ -286,7 +283,7 @@ def create_llm(
         print("AWS Bedrock LLM wrapper created successfully.")
         return wrapper
 
-    elif provider == ModelProvider.OPENAI:
+    elif provider == LlmProvider.OPENAI:
         # If API key is provided, use it; otherwise, rely on environment variable
         if api_key:
             return ChatOpenAI(
@@ -298,14 +295,14 @@ def create_llm(
         else:
             return ChatOpenAI(model=model_id, temperature=temperature, **params)
 
-    elif provider == ModelProvider.OLLAMA:
+    elif provider == LlmProvider.OLLAMA:
         # Configure Ollama
         base_url = params.get("OLLAMA_BASE_URL", "http://ollama:11434")
         return ChatOllama(
             model=model_id, temperature=temperature, base_url=base_url, **params
         )
 
-    elif provider == ModelProvider.REPLICATE:
+    elif provider == LlmProvider.REPLICATE:
         # Configure Replicate
         if api_key:
             print("API key provided with length:", len(api_key))
@@ -357,7 +354,7 @@ def get_default_llm(session: SessionDep, current_user) -> Any:
     # Fallback to hardcoded value
     print("No default LLM found, using hardcoded OpenAI GPT-4o Mini.")
     return create_llm(
-        provider=ModelProvider.OPENAI, model_id="gpt-4o-mini", temperature=0.0
+        provider=LlmProvider.OPENAI, model_id="gpt-4o-mini", temperature=0.0
     )
 
 

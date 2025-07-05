@@ -1,34 +1,25 @@
 import os
 from pathlib import Path
 import replicate
-import requests
-from app.models import ModelProvider
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.embeddings import OllamaEmbeddings
 from langchain_aws import BedrockEmbeddings
 from langchain_core.embeddings import Embeddings
 from typing import Optional, List, Dict
 from dotenv import load_dotenv
 import json
-from dataclasses import dataclass
+from pydantic import BaseModel
 
 
-# TODO: remove (mock)
-def load_embeddings_model(provider: str, model_id: str) -> Embeddings:
-    """Load an embedding model by ID."""
-    return EmbeddingService.get_model(model_id)
+# Pydantic model for embedding model information (used for both internal and API purposes)
+class EmbeddingModelInfo(BaseModel):
+    """Model for embedding model information."""
 
-
-@dataclass
-class EmbeddingModelSpec:
-    """Specification for an embedding model."""
-
-    id: str  # unique identifier for the model
-    provider: str  # provider name (openai, huggingface, etc.)
-    model_name: str  # actual model name used by provider
-    dimensions: int  # embedding vector dimensions
-    max_input_length: Optional[int] = None  # max input tokens/chars
-    cost_per_1k_tokens: Optional[float] = None  # cost in USD
+    id: str
+    provider: str
+    model_name: str
+    dimensions: int
+    max_input_length: Optional[int] = None
+    cost_per_1k_tokens: Optional[float] = None
     description: Optional[str] = None
 
 
@@ -36,62 +27,113 @@ class EmbeddingService:
     """Service for managing and loading embedding models."""
 
     # registry of available embedding models
-    AVAILABLE_MODELS: Dict[str, EmbeddingModelSpec] = {
-        "openai-text-3-small": EmbeddingModelSpec(
-            id="openai-text-3-small",
+    AVAILABLE_MODELS: Dict[str, EmbeddingModelInfo] = {
+        # OpenAI Models
+        "text-embedding-3-small": EmbeddingModelInfo(
+            id="text-embedding-3-small",
             provider="openai",
             model_name="text-embedding-3-small",
             dimensions=1536,
             max_input_length=8191,
-            cost_per_1k_tokens=0.00002,
+            cost_per_1M_tokens=0.02,
             description="OpenAI's efficient small embedding model",
         ),
-        "openai-text-3-large": EmbeddingModelSpec(
-            id="openai-text-3-large",
+        "text-embedding-3-large": EmbeddingModelInfo(
+            id="text-embedding-3-large",
             provider="openai",
             model_name="text-embedding-3-large",
             dimensions=3072,
             max_input_length=8191,
-            cost_per_1k_tokens=0.00013,
+            cost_per_1M_tokens=0.13,
             description="OpenAI's high-performance large embedding model",
         ),
-        "openai-ada-002": EmbeddingModelSpec(
-            id="openai-ada-002",
+        "text-embedding-ada-002": EmbeddingModelInfo(
+            id="text-embedding-ada-002",
             provider="openai",
             model_name="text-embedding-ada-002",
             dimensions=1536,
             max_input_length=8191,
-            cost_per_1k_tokens=0.0001,
+            cost_per_1M_tokens=0.1,
             description="OpenAI's legacy embedding model",
+        ),
+        # AWS Bedrock Models
+        "amazon.titan-embed-text-v2:0": EmbeddingModelInfo(
+            id="amazon.titan-embed-text-v2:0",
+            provider="aws",
+            model_name="amazon.titan-embed-text-v2:0",
+            dimensions=1024,
+            max_input_length=8192,
+            cost_per_1M_tokens=0.021,
+            description="Amazon's Titan 2.0 embedding model for AWS Bedrock. High-quality text embeddings optimized for enterprise search and retrieval applications.",
+        ),
+        "cohere.embed-english-v3": EmbeddingModelInfo(
+            id="cohere.embed-english-v3",
+            provider="aws",
+            model_name="cohere.embed-english-v3",
+            dimensions=1024,
+            max_input_length=512,
+            cost_per_1M_tokens=0.1,
+            description="Cohere's English embedding model available on AWS Bedrock.",
+        ),
+        "cohere.embed-multilingual-v3": EmbeddingModelInfo(
+            id="cohere.embed-multilingual-v3",
+            provider="aws",
+            model_name="cohere.embed-multilingual-v3",
+            dimensions=1024,
+            max_input_length=512,
+            cost_per_1M_tokens=0.1,
+            description="Cohere's multilingual embedding model available on AWS Bedrock.",
         ),
     }
 
     @classmethod
-    def list_available_models(cls) -> List[str]:
+    def get_models(cls) -> List[EmbeddingModelInfo]:
+        """Get list of available models."""
+        return list(cls.AVAILABLE_MODELS.values())
+
+    @classmethod
+    def get_default_model(cls) -> EmbeddingModelInfo:
+        """Get the default model."""
+        # import here to avoid circular import
+        from app.core.config import settings
+
+        default_model_id = settings.DEFAULT_EMBEDDING_MODEL
+
+        if not cls.is_valid_model_id(default_model_id):
+            available_models = ", ".join(cls.AVAILABLE_MODELS.keys())
+            raise ValueError(
+                f"Configured default embedding model '{default_model_id}' not found in registry. "
+                f"Available models: {available_models}"
+            )
+
+        return cls.AVAILABLE_MODELS[default_model_id]
+
+    @classmethod
+    def get_providers(cls) -> List[str]:
+        """Get list of available providers."""
+        return list(set(spec.provider for spec in cls.AVAILABLE_MODELS.values()))
+
+    @classmethod
+    def get_model_ids(cls) -> List[str]:
         """Get list of available model IDs."""
         return list(cls.AVAILABLE_MODELS.keys())
 
     @classmethod
-    def get_default_model(cls) -> str:
-        """Get the default model ID."""
-        return "openai-text-3-small"  # TODO: make this configurable
+    def is_valid_model_id(cls, model_id: str) -> bool:
+        """Check if a model ID is valid."""
+        return model_id in cls.AVAILABLE_MODELS
 
     @classmethod
-    def get_model_spec(cls, model_id: str) -> Optional[EmbeddingModelSpec]:
+    def get_model_spec(cls, model_id: str) -> Optional[EmbeddingModelInfo]:
         """Get specification for a specific model."""
         return cls.AVAILABLE_MODELS.get(model_id)
 
     @classmethod
-    def get_models_by_provider(cls, provider: str) -> List[EmbeddingModelSpec]:
+    def get_models_by_provider(cls, provider: str) -> List[EmbeddingModelInfo]:
         """Get all models for a specific provider."""
         return [
             spec for spec in cls.AVAILABLE_MODELS.values() if spec.provider == provider
         ]
-
-    @classmethod
-    def get_model_specs(cls) -> Dict[str, EmbeddingModelSpec]:
-        """Get all model specifications."""
-        return cls.AVAILABLE_MODELS.copy()
 
     @classmethod
     def validate_model(
@@ -118,8 +160,23 @@ class EmbeddingService:
                     False,
                     f"OPENAI_API_KEY environment variable required for model '{model_id}'",
                 )
+        elif spec.provider == "aws":
+            # check for required AWS credentials
+            aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
+            aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+            if not aws_access_key or not aws_secret_key:
+                return (
+                    False,
+                    f"AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables required for model '{model_id}'",
+                )
 
-        # TODO: add other providers
+            # validate AWS region is set
+            aws_region = os.getenv("AWS_DEFAULT_REGION") or os.getenv("AWS_REGION")
+            if not aws_region:
+                return (
+                    False,
+                    f"AWS_DEFAULT_REGION or AWS_REGION environment variable required for model '{model_id}'",
+                )
 
         return True, None
 
@@ -149,9 +206,13 @@ class EmbeddingService:
         try:
             if spec.provider == "openai":
                 return OpenAIEmbeddings(model=spec.model_name, openai_api_key=api_key)
-
-            # TODO: add other providers
-
+            elif spec.provider == "aws":
+                # get AWS region from environment
+                aws_region = os.getenv("AWS_DEFAULT_REGION") or os.getenv("AWS_REGION")
+                return BedrockEmbeddings(
+                    model_id=spec.model_name,
+                    region_name=aws_region,
+                )
             else:
                 raise ValueError(f"Unsupported provider: {spec.provider}")
 
