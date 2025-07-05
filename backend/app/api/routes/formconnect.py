@@ -16,22 +16,17 @@ from app.services.llms import (
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 
-from sqlmodel import Session, select
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
+from sqlmodel import select
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from typing import List, Dict, Any
 
-from langchain.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
-from langchain.schema import AIMessage
 from dotenv import load_dotenv
 
 import json
 import os
 
 import base64
-from tempfile import NamedTemporaryFile
 from pathlib import Path
-import fitz  # PyMuPDF
 
 from datetime import datetime
 

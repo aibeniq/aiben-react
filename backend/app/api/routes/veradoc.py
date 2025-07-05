@@ -3,7 +3,6 @@ from app.models import (
     VeraDocResponse,
     VeraDocChecklist,
     RagChecklistRequest,
-    Source,
     KnowledgeBase,
     LlmInteraction,
     DocxRequest,
@@ -30,11 +29,8 @@ import asyncio
 from dotenv import load_dotenv
 import json
 import os
-import re
-from pathlib import Path
 
 from datetime import datetime
-from starlette.requests import Request
 import traceback
 from io import BytesIO
 from docx import Document

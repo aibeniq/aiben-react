@@ -1,6 +1,6 @@
 import uuid
 import difflib
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from datetime import datetime
 import json
 import traceback
@@ -10,12 +10,11 @@ import docx
 import io
 from io import BytesIO
 from docx import Document
-from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import markdown
 from bs4 import BeautifulSoup
 
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlmodel import select
 
