@@ -292,7 +292,7 @@ export class EmbeddingModelsService {
    * @param data The data for the request.
    * @param data.skip
    * @param data.limit
-   * @returns LlmModelInfo Successful Response
+   * @returns LlmModelSpec Successful Response
    * @throws ApiError
    */
   public static getLlmModels(
@@ -808,7 +808,7 @@ export class LlmModelsService {
   /**
    * Get Llm Models
    * Get all LLMs.
-   * @returns LlmModelInfo Successful Response
+   * @returns LlmModelSpec Successful Response
    * @throws ApiError
    */
   public static getLlmModels(): CancelablePromise<LlmModelsGetLlmModelsResponse> {
@@ -834,7 +834,7 @@ export class LlmModelsService {
   /**
    * Get Default Llm Model
    * Get the user's default LLM model (database record).
-   * @returns LlmModelInfo Successful Response
+   * @returns LlmModelSpec Successful Response
    * @throws ApiError
    */
   public static getDefaultLlmModel(): CancelablePromise<LlmModelsGetDefaultLlmModelResponse> {
@@ -895,7 +895,7 @@ export class LlmModelsService {
    * Set an LLM as the default.
    * @param data The data for the request.
    * @param data.modelId
-   * @returns LlmModelInfo Successful Response
+   * @returns LlmModelSpec Successful Response
    * @throws ApiError
    */
   public static setDefaultLlmModel(
