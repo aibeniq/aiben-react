@@ -19,6 +19,7 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import markdown
 from bs4 import BeautifulSoup
+from langchain_core.prompts import PromptTemplate
 
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
 from app.core.config import settings
@@ -133,18 +134,19 @@ async def generate_report(
                 source_citations.append(source)
 
             # use the template from config
-            prompt_template = settings.REPORT_GENIE_PROMPT_TEMPLATE
-
-            section_content = llm.invoke(
-                prompt_template,
-                {"context": context, "question": section_description},
+            prompt_template = PromptTemplate.from_template(
+                settings.REPORT_GENIE_PROMPT_TEMPLATE
             )
+            variables = {"context": context, "question": section_description}
+            prompt = prompt_template.invoke(variables)
+            section = llm.invoke(prompt)
+            print(f"Got response: {section.content[:100]}...")
 
             # store the section with its content and sources
             sections.append(
                 {
                     "title": section_description,
-                    "content": section_content,
+                    "content": section.content,
                     "source_citations": source_citations,
                 }
             )

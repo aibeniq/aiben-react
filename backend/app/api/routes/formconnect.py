@@ -25,7 +25,8 @@ from pathlib import Path
 
 from datetime import datetime
 
-from langchain_core.language_models import BaseChatModel, BaseLLM
+from langchain_core.language_models import BaseChatModel
+from langchain_core.prompts import PromptTemplate
 
 # Load environment variables from .env file
 load_dotenv(dotenv_path="c:/miniconda/aibeniq-react/.env", override=False)
@@ -57,7 +58,7 @@ def generate_template(fields: List[str]) -> Dict[str, str]:
 
 
 async def extract_fields_from_digitized_document(
-    file: UploadFile, template: Dict[str, str], llm: Union[BaseChatModel, BaseLLM]
+    file: UploadFile, template: Dict[str, str], llm: BaseChatModel
 ) -> Dict[str, str]:
     """
     Extract fields from a document using the LLM.
@@ -76,23 +77,26 @@ async def extract_fields_from_digitized_document(
         }
 
     # Create the prompt
-    prompt_template = settings.FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE
+    prompt_template = PromptTemplate.from_template(
+        settings.FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE
+    )
     variables = {"template": json.dumps(template), "document_text": text}
-    response = llm.invoke(prompt_template, variables)
+    prompt = prompt_template.invoke(variables)
+    response = llm.invoke(prompt)
 
     # Try to parse JSON from the response
     try:
         # The output might already be a dictionary
         if isinstance(response, dict):
             return response
-        content_dict = json.loads(response)
+        content_dict = json.loads(response.content)
         return content_dict
     except Exception:
-        return {"raw_content": str(response)}
+        return {"raw_content": str(response.content)}
 
 
 async def extract_fields_from_handwritten_document(
-    file: UploadFile, template: Dict[str, str], llm
+    file: UploadFile, template: Dict[str, str], llm: BaseChatModel
 ) -> Dict[str, str]:
     """
     Extract fields from a handwritten document.
@@ -156,7 +160,7 @@ async def extract_fields_from_handwritten_document(
 async def compare_multiple_documents(
     documents: List[Dict[str, str]],
     file_names: List[str],
-    llm: Union[BaseChatModel, BaseLLM],
+    llm: BaseChatModel,
 ) -> str:
     """
     Compare fields across multiple documents using the LLM.
@@ -173,10 +177,13 @@ async def compare_multiple_documents(
     )  # Print first 500 chars for debugging
 
     # Create the prompt for multi-document comparison
-    prompt_template = settings.FORMCONNECT_COMPARISON_PROMPT_TEMPLATE
+    prompt_template = PromptTemplate.from_template(
+        settings.FORMCONNECT_COMPARISON_PROMPT_TEMPLATE
+    )
     variables = {"documents_str": documents_str}
-    response = llm.invoke(prompt_template, variables)
-    return response
+    prompt = prompt_template.invoke(variables)
+    response = llm.invoke(prompt)
+    return response.content
 
 
 @router.post("/process", response_model=FormConnectResponse)

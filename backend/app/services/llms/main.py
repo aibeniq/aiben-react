@@ -2,12 +2,11 @@ import os
 from pathlib import Path
 import replicate
 import boto3
-from langchain_openai import ChatOpenAI
+from langchain.chat_models import init_chat_model
 from langchain_aws import ChatBedrock
-from langchain_community.chat_models import ChatOllama
 from langchain_community.llms import Bedrock
 from langchain_core.messages import HumanMessage, SystemMessage, BaseMessage
-from langchain_core.language_models import BaseChatModel, BaseLLM
+from langchain_core.language_models import BaseChatModel
 from typing import Optional, List, Dict, Any, Union
 from dotenv import load_dotenv
 import json
@@ -263,9 +262,7 @@ class LlmService:
         ]
 
     @classmethod
-    def validate_model(
-        cls, model_id: str, api_key: Optional[str] = None
-    ) -> tuple[bool, Optional[str]]:
+    def validate_model(cls, model_id: str) -> tuple[bool, Optional[str]]:
         """
         Validate if a model is available and properly configured.
 
@@ -281,7 +278,7 @@ class LlmService:
 
         # validate provider-specific requirements
         if spec.provider == "openai":
-            api_key = api_key or os.getenv("OPENAI_API_KEY")
+            api_key = os.getenv("OPENAI_API_KEY")
             if not api_key:
                 return (
                     False,
@@ -314,7 +311,7 @@ class LlmService:
                     f"OLLAMA_HOST environment variable required for model '{model_id}'",
                 )
         elif spec.provider == "replicate":
-            api_key = api_key or os.getenv("REPLICATE_API_TOKEN")
+            api_key = os.getenv("REPLICATE_API_TOKEN")
             if not api_key:
                 return (
                     False,
@@ -324,16 +321,13 @@ class LlmService:
         return True, None
 
     @classmethod
-    def get_model(
-        cls, model_id: str, api_key: Optional[str] = None, **kwargs
-    ) -> Union[BaseChatModel, BaseLLM]:
+    def get_model(cls, model_id: str, **kwargs) -> BaseChatModel:
         """
         Get an LLM model by ID.
 
         Args:
             model_id: The model identifier from the registry
-            api_key: Optional API key override
-            **kwargs: Additional model parameters
+            **kwargs: Additional model parameters (temperature, max_tokens, streaming, etc.)
 
         Returns:
             An initialized LLM model
@@ -342,72 +336,26 @@ class LlmService:
             ValueError: If model is invalid or cannot be loaded
         """
         # validate model
-        is_valid, error_msg = cls.validate_model(model_id, api_key)
+        is_valid, error_msg = cls.validate_model(model_id)
         if not is_valid:
             raise ValueError(error_msg)
 
         spec = cls.AVAILABLE_MODELS[model_id]
 
-        # load model based on provider
+        llm_params = {
+            "temperature": kwargs.get("temperature", 0.0),
+            "max_tokens": kwargs.get("max_tokens", spec.max_output_tokens),
+            "streaming": kwargs.get("streaming", False),
+        }
+        llm_params.update(kwargs)
+
         try:
-            if spec.provider == "openai":
-                return ChatOpenAI(
-                    model=spec.model_name,
-                    openai_api_key=api_key,
-                    temperature=kwargs.get("temperature", 0.0),
-                    max_tokens=kwargs.get("max_tokens", spec.max_output_tokens),
-                    streaming=kwargs.get("streaming", False),
-                    **{
-                        k: v
-                        for k, v in kwargs.items()
-                        if k not in ["temperature", "max_tokens", "streaming"]
-                    },
-                )
-            elif spec.provider == "aws":
-                # get AWS region from environment
-                aws_region = os.getenv("AWS_DEFAULT_REGION") or os.getenv("AWS_REGION")
-
-                if "anthropic.claude" in spec.model_name:
-                    return ChatBedrock(
-                        model_id=spec.model_name,
-                        region_name=aws_region,
-                        model_kwargs={
-                            "temperature": kwargs.get("temperature", 0.0),
-                            "max_tokens": kwargs.get(
-                                "max_tokens", spec.max_output_tokens
-                            ),
-                        },
-                        streaming=kwargs.get("streaming", False),
-                        **{
-                            k: v
-                            for k, v in kwargs.items()
-                            if k not in ["temperature", "max_tokens", "streaming"]
-                        },
-                    )
-                else:
-                    return BedrockLlm(
-                        model_id=spec.model_name,
-                        temperature=kwargs.get("temperature", 0.0),
-                        **kwargs,
-                    )
-            elif spec.provider == "ollama":
-                ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-                return ChatOllama(
-                    model=spec.model_name,
-                    base_url=ollama_host,
-                    temperature=kwargs.get("temperature", 0.0),
-                    **{k: v for k, v in kwargs.items() if k not in ["temperature"]},
-                )
-            elif spec.provider == "replicate":
-                return ReplicateLlm(
-                    model_id=spec.model_name,
-                    api_key=api_key,
-                    temperature=kwargs.get("temperature", 0.0),
-                    **kwargs,
-                )
-            else:
-                raise ValueError(f"Unsupported provider: {spec.provider}")
-
+            llm: BaseChatModel = init_chat_model(
+                model=spec.model_name,
+                model_provider=spec.provider,
+                **llm_params,
+            )
+            return llm
         except Exception as e:
             raise ValueError(f"Failed to load model '{model_id}': {str(e)}")
 

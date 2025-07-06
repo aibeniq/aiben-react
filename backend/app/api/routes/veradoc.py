@@ -38,6 +38,7 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import markdown
 from bs4 import BeautifulSoup
+from langchain_core.prompts import PromptTemplate
 
 # Load environment variables from .env file
 load_dotenv(dotenv_path="c:/miniconda/aibeniq-react/.env", override=False)
@@ -151,9 +152,15 @@ async def process_rag_checklist(
         print("LLM successfully loaded")
 
         # 4. Define the prompts for the different stages
-        context_prompt_template = settings.VERADOC_CONTEXT_PROMPT_TEMPLATE
-        qa_prompt_template = settings.VERADOC_QA_PROMPT_TEMPLATE
-        final_prompt_template = settings.VERADOC_FINAL_PROMPT_TEMPLATE
+        context_prompt_template = PromptTemplate.from_template(
+            settings.VERADOC_CONTEXT_PROMPT_TEMPLATE
+        )
+        qa_prompt_template = PromptTemplate.from_template(
+            settings.VERADOC_QA_PROMPT_TEMPLATE
+        )
+        final_prompt_template = PromptTemplate.from_template(
+            settings.VERADOC_FINAL_PROMPT_TEMPLATE
+        )
 
         # 5. Process each uploaded file
         qa_pairs = []
@@ -239,10 +246,10 @@ async def process_rag_checklist(
 
             # Step 2: Get the relevant policy context for this question
             print("Generating context for question...")
-            question_context = llm.invoke(
-                context_prompt_template,
-                {"context": context, "question": question},
-            )
+            variables = {"context": context, "question": question}
+            prompt = context_prompt_template.invoke(variables)
+            response = llm.invoke(prompt)
+            question_context = response.content
             print(f"Got context: {question_context[:100]}...")
 
             if cancellation_requested:
@@ -256,17 +263,14 @@ async def process_rag_checklist(
 
             # Step 3: Answer the question based on the uploaded document and policy context
             print("Generating answer based on document and context...")
-            answer = llm.invoke(
-                qa_prompt_template,
-                {
-                    "document_text": document_text[
-                        :10000
-                    ],  # Limit length to avoid token issues
-                    "question": question,
-                    "question_context": question_context,
-                },
-            )
-            print(f"Got answer: {answer[:100]}...")
+            variables = {
+                "document_text": document_text[:10000],
+                "question": question,
+                "question_context": question_context,
+            }
+            prompt = qa_prompt_template.invoke(variables)
+            answer = llm.invoke(prompt)
+            print(f"Got answer: {answer.content[:100]}...")
 
             print("Source citations for question:", question)
             # for source in source_citations:
@@ -276,7 +280,7 @@ async def process_rag_checklist(
             qa_pairs.append(
                 {
                     "question": question,
-                    "answer": answer,
+                    "answer": answer.content,
                     "context": question_context,
                     "source_citations": source_citations,
                 }
@@ -300,9 +304,10 @@ async def process_rag_checklist(
 
         # Final evaluation
         print("Generating final evaluation...")
-        final_evaluation = llm.invoke(
-            final_prompt_template, {"qa_pairs": qa_pairs_text}
-        )
+        variables = {"qa_pairs": qa_pairs_text}
+        prompt = final_prompt_template.invoke(variables)
+        response = llm.invoke(prompt)
+        final_evaluation = response.content
         print(f"Got final evaluation: {final_evaluation[:100]}...")
 
         interaction_id = LlmService.record_llm_interaction(
