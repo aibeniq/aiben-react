@@ -171,17 +171,36 @@ class Settings(BaseSettings):
     According to the policy context, the following should be kept in mind when answering the question:
     """
 
+    # VERADOC_QA_PROMPT_TEMPLATE: str = """
+    # Read the following document and answer the following question clearly and concisely in 100 words or less.
+    #
+    # SAMPLE DOCUMENT: {document_text}
+    #
+    # QUESTION: {question}
+    #
+    # Keep the following RELEVANT REQUIREMENTS in mind when answering the question:
+    # {question_context}
+    #
+    # ANSWER:
+    # """
+
     VERADOC_QA_PROMPT_TEMPLATE: str = """
-    Read the following document and answer the following question clearly and concisely in 100 words or less.
-    
-    SAMPLE DOCUMENT: {document_text}
-    
-    QUESTION: {question}
-    
-    Keep the following RELEVANT REQUIREMENTS in mind when answering the question:
-    {question_context}
-    
-    ANSWER:
+        Read the following document and answer the question below clearly and concisely in 100 words or less.
+
+        When answering, assess whether the document provides *explicit and verifiable evidence* that the relevant requirements are fully met. Do **not** assume compliance based on general statements or references (e.g., to Good Clinical Practice or regulatory standards) unless the document clearly explains how the requirements are operationalized.
+
+        If the document does not contain sufficient detail to confirm that a requirement is met, state that the information is insufficient, even if the requirement is mentioned.
+
+        SAMPLE DOCUMENT:
+        {document_text}
+
+        QUESTION:
+        {question}
+
+        RELEVANT REQUIREMENTS:
+        {question_context}
+
+        ANSWER:
     """
 
     VERADOC_FINAL_PROMPT_TEMPLATE: str = """
