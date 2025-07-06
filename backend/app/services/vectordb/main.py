@@ -689,8 +689,7 @@ class VectorDBService:
             dense_search_params = {
                 "data": [embedded_query],
                 "anns_field": "dense",
-                "metric_type": "COSINE",
-                "param": {"M": 16, "efConstruction": 500},
+                "param": {"efSearch": 500},
                 "limit": rerank_k,
                 "expr": filter_expr,
                 "expr_params": filter_params if filter_params else None,
