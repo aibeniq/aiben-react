@@ -64,18 +64,14 @@ class Settings(BaseSettings):
     DOCUMENT_CHUNK_SIZE: int = 1000
     DOCUMENT_CHUNK_OVERLAP: int = 200
 
-    # Default embedding model configuration
+    # Model configuration
     DEFAULT_EMBEDDING_MODEL: str = "text-embedding-3-small"
-
-    # Default LLM model configuration
     DEFAULT_LLM_MODEL: str = "gpt-4o-mini"
+    ENABLED_PROVIDERS: list[str] = ["openai"]
 
     # Application configuration (can be overridden in .env)
     PROJECT_NAME: str = "aibenIQ"
     STACK_NAME: str = "aibeniq"
-
-    # LLM Provider configuration
-    ENABLED_LLM_PROVIDERS: str = "openai,aws"
 
     # External service configuration
     OLLAMA_BASE_URL: str = "http://ollama:11434"
@@ -135,9 +131,9 @@ class Settings(BaseSettings):
 
     @computed_field
     @property
-    def llm_providers(self) -> list[str]:
-        """Return list of enabled LLM providers"""
-        return [provider.strip() for provider in self.ENABLED_LLM_PROVIDERS.split(",")]
+    def _enabled_providers(self) -> list[str]:
+        """Return list of enabled model providers"""
+        return [provider.strip() for provider in self.ENABLED_PROVIDERS.split(",")]
 
     # LLM Templates
     REPORT_GENIE_PROMPT_TEMPLATE: str = """

@@ -14,11 +14,20 @@ from app.models import User
 
 
 # pydantic model for llm model information
-class LlmModelInfo(BaseModel):
+class LlmProvider(BaseModel):
+    """Model for LLM provider information."""
+
+    id: str  # used by langchain to identify the provider
+    name: str  # used by the UI to display the provider name
+    required_env_vars: List[str]  # required environment variables (api keys, etc.)
+
+
+# pydantic model for llm model information
+class LlmModelSpec(BaseModel):
     """Model for LLM model information."""
 
     id: str
-    provider: str
+    provider: LlmProvider
     model_name: str
     context_length: Optional[int] = None
     max_output_tokens: Optional[int] = None
@@ -30,172 +39,180 @@ class LlmModelInfo(BaseModel):
     description: Optional[str] = None
 
 
+PROVIDERS: Dict[str, LlmProvider] = {
+    "openai": LlmProvider(
+        id="openai",
+        name="OpenAI",
+        required_env_vars=["OPENAI_API_KEY"],
+    ),
+    "bedrock": LlmProvider(
+        id="bedrock",
+        name="Bedrock",
+        required_env_vars=["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION"],
+    ),
+    "ollama": LlmProvider(
+        id="ollama",
+        name="Ollama",
+        required_env_vars=["OLLAMA_BASE_URL"],
+    ),
+    "replicate": LlmProvider(
+        id="replicate",
+        name="Replicate",
+        required_env_vars=["REPLICATE_API_TOKEN"],
+    ),
+    "together": LlmProvider(
+        id="together",
+        name="Together",
+        required_env_vars=["TOGETHER_API_KEY"],
+    ),
+}
+
+MODELS: Dict[str, LlmModelSpec] = {
+    "gpt-4o": LlmModelSpec(
+        id="gpt-4o",
+        provider=PROVIDERS["openai"],
+        model_name="gpt-4o",
+        context_length=128000,
+        max_output_tokens=16384,
+        cost_per_1M_input_tokens=2.5,
+        cost_per_1M_output_tokens=10.0,
+        supports_streaming=True,
+        supports_function_calling=True,
+        supports_vision=True,
+        description="Fast, intelligent, flexible GPT model",
+    ),
+    "gpt-4o-mini": LlmModelSpec(
+        id="gpt-4o-mini",
+        provider=PROVIDERS["openai"],
+        model_name="gpt-4o-mini",
+        context_length=128000,
+        max_output_tokens=16384,
+        cost_per_1M_input_tokens=0.15,
+        cost_per_1M_output_tokens=0.6,
+        supports_streaming=True,
+        supports_function_calling=True,
+        supports_vision=True,
+        description="Fast, affordable small model for focused tasks",
+    ),
+    "gpt-4.1": LlmModelSpec(
+        id="gpt-4.1",
+        provider=PROVIDERS["openai"],
+        model_name="gpt-4.1",
+        context_length=1047576,
+        max_output_tokens=32768,
+        cost_per_1M_input_tokens=2.0,
+        cost_per_1M_output_tokens=8.0,
+        supports_streaming=True,
+        supports_function_calling=True,
+        supports_vision=True,
+        description="Flagship GPT model for complex tasks",
+    ),
+}
+
+
 class LlmService:
     """Service for managing and loading LLM models."""
 
-    # registry of available llm models
-    AVAILABLE_MODELS: Dict[str, LlmModelInfo] = {
-        # OpenAI Models
-        "gpt-4o": LlmModelInfo(
-            id="gpt-4o",
-            provider="openai",
-            model_name="gpt-4o",
-            context_length=128000,
-            max_output_tokens=16384,
-            cost_per_1M_input_tokens=2.5,
-            cost_per_1M_output_tokens=10.0,
-            supports_streaming=True,
-            supports_function_calling=True,
-            supports_vision=True,
-            description="Fast, intelligent, flexible GPT model",
-        ),
-        "gpt-4o-mini": LlmModelInfo(
-            id="gpt-4o-mini",
-            provider="openai",
-            model_name="gpt-4o-mini",
-            context_length=128000,
-            max_output_tokens=16384,
-            cost_per_1M_input_tokens=0.15,
-            cost_per_1M_output_tokens=0.6,
-            supports_streaming=True,
-            supports_function_calling=True,
-            supports_vision=True,
-            description="Fast, affordable small model for focused tasks",
-        ),
-        "gpt-4.1": LlmModelInfo(
-            id="gpt-4.1",
-            provider="openai",
-            model_name="gpt-4.1",
-            context_length=1047576,
-            max_output_tokens=32768,
-            cost_per_1M_input_tokens=2.0,
-            cost_per_1M_output_tokens=8.0,
-            supports_streaming=True,
-            supports_function_calling=True,
-            supports_vision=True,
-            description="Flagship GPT model for complex tasks",
-        ),
-    }
-
     @classmethod
-    def get_models(cls) -> List[LlmModelInfo]:
+    def get_model_specs(cls) -> List[LlmModelSpec]:
         """Get list of available models."""
-        return list(cls.AVAILABLE_MODELS.values())
+        return list(MODELS.values())
 
     @classmethod
-    def get_default_model(cls) -> LlmModelInfo:
+    def get_default_model_spec(cls) -> LlmModelSpec:
         """Get the default model."""
         # import here to avoid circular import
         from app.core.config import settings
 
         default_model_id = getattr(settings, "DEFAULT_LLM_MODEL", "gpt-4o-mini")
 
-        if not cls.is_valid_model_id(default_model_id):
-            available_models = ", ".join(cls.AVAILABLE_MODELS.keys())
+        try:
+            spec = cls.get_model_spec(default_model_id)
+        except ValueError as e:
             raise ValueError(
                 f"Configured default LLM model '{default_model_id}' not found in registry. "
-                f"Available models: {available_models}"
+                f"Available models: {cls.get_model_ids()}. Error: {str(e)}"
             )
 
-        return cls.AVAILABLE_MODELS[default_model_id]
+        return spec
 
     @classmethod
-    def get_user_default_model(
+    def get_user_default_model_spec(
         cls, session: Session, user_id: uuid.UUID
-    ) -> LlmModelInfo:
+    ) -> LlmModelSpec:
         """Get the user's default model."""
         user = session.get(User, user_id)
         if not user:
             raise ValueError(f"User with id {user_id} not found")
         if not user.default_llm:
             raise ValueError(f"User with id {user_id} has no default LLM model")
-        return cls.get_model_spec(user.default_llm)
+        try:
+            return cls.get_model_spec(user.default_llm)
+        except ValueError as e:
+            raise ValueError(
+                f"User's default LLM model {user.default_llm} is invalid: {str(e)}"
+            )
+        except Exception as e:
+            raise ValueError(f"Error getting user's default LLM model: {str(e)}")
 
     @classmethod
     def get_providers(cls) -> List[str]:
         """Get list of available providers."""
-        return list(set(spec.provider for spec in cls.AVAILABLE_MODELS.values()))
+        # import here to avoid circular import
+        from app.core.config import settings
+
+        return [
+            provider.id
+            for provider in PROVIDERS.values()
+            if provider.id in settings.ENABLED_PROVIDERS
+        ]
 
     @classmethod
     def get_model_ids(cls) -> List[str]:
         """Get list of available model IDs."""
-        return list(cls.AVAILABLE_MODELS.keys())
+        return [model_spec.id for model_spec in cls.get_model_specs()]
 
     @classmethod
     def is_valid_model_id(cls, model_id: str) -> bool:
         """Check if a model ID is valid."""
-        return model_id in cls.AVAILABLE_MODELS
+        return model_id in MODELS
 
     @classmethod
-    def get_model_spec(cls, model_id: str) -> Optional[LlmModelInfo]:
-        """Get specification for a specific model."""
-        return cls.AVAILABLE_MODELS.get(model_id)
-
-    @classmethod
-    def get_models_by_provider(cls, provider: str) -> List[LlmModelInfo]:
+    def get_model_specs_by_provider(cls, provider: str) -> List[LlmModelSpec]:
         """Get all models for a specific provider."""
-        return [
-            spec for spec in cls.AVAILABLE_MODELS.values() if spec.provider == provider
-        ]
+        return [spec for spec in MODELS.values() if spec.provider.id == provider]
 
     @classmethod
-    def validate_model(cls, model_id: str) -> tuple[bool, Optional[str]]:
+    def get_model_spec(cls, model_id: str) -> LlmModelSpec:
         """
         Validate if a model is available and properly configured.
 
         Returns:
-            tuple: (is_valid, error_message)
+            LlmModelSpec: The validated model specification
         """
         # check if model exists in registry
-        if model_id not in cls.AVAILABLE_MODELS:
-            available = ", ".join(cls.AVAILABLE_MODELS.keys())
-            return False, f"Model '{model_id}' not found. Available models: {available}"
+        if model_id not in MODELS:
+            available = ", ".join(cls.get_model_ids())
+            raise ValueError(
+                f"Model '{model_id}' not found. Available models: {available}"
+            )
 
-        spec = cls.AVAILABLE_MODELS[model_id]
+        # check if provider is enabled
+        spec = MODELS[model_id]
+        if spec.provider.id not in cls.get_providers():
+            raise ValueError(
+                f"Provider '{spec.provider.id}' is not enabled. Available providers: {cls.get_providers()}"
+            )
 
-        # validate provider-specific requirements
-        if spec.provider == "openai":
-            api_key = os.getenv("OPENAI_API_KEY")
-            if not api_key:
-                return (
-                    False,
-                    f"OPENAI_API_KEY environment variable required for model '{model_id}'",
-                )
-        elif spec.provider == "aws":
-            # check for required AWS credentials
-            aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
-            aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
-            if not aws_access_key or not aws_secret_key:
-                return (
-                    False,
-                    f"AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables required for model '{model_id}'",
+        # validate required environment variables
+        required_env_vars = spec.provider.required_env_vars
+        for env_var in required_env_vars:
+            if not os.getenv(env_var):
+                raise ValueError(
+                    f"{env_var} environment variable required for '{model_id}'"
                 )
 
-            # validate AWS region is set
-            aws_region = os.getenv("AWS_DEFAULT_REGION") or os.getenv("AWS_REGION")
-            if not aws_region:
-                return (
-                    False,
-                    f"AWS_DEFAULT_REGION or AWS_REGION environment variable required for model '{model_id}'",
-                )
-        elif spec.provider == "ollama":
-            # check if ollama server is accessible
-            ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-            # basic validation - could be enhanced with actual connectivity check
-            if not ollama_host:
-                return (
-                    False,
-                    f"OLLAMA_HOST environment variable required for model '{model_id}'",
-                )
-        elif spec.provider == "replicate":
-            api_key = os.getenv("REPLICATE_API_TOKEN")
-            if not api_key:
-                return (
-                    False,
-                    f"REPLICATE_API_TOKEN environment variable required for model '{model_id}'",
-                )
-
-        return True, None
+        return spec
 
     @classmethod
     def get_model(cls, model_id: str, **kwargs) -> BaseChatModel:
@@ -213,31 +230,25 @@ class LlmService:
             ValueError: If model is invalid or cannot be loaded
             ImportError: If model provider integration package not installed
         """
-        # validate model
-        is_valid, error_msg = cls.validate_model(model_id)
-        if not is_valid:
-            raise ValueError(error_msg)
-
-        spec = cls.AVAILABLE_MODELS[model_id]
-
-        llm_params = {
-            "temperature": kwargs.get("temperature", 0.0),
-            "max_tokens": kwargs.get("max_tokens", spec.max_output_tokens),
-            "streaming": kwargs.get("streaming", False),
-        }
-        llm_params.update(kwargs)
-
         try:
+            spec = cls.get_model_spec(model_id)
+
+            llm_params = {
+                "temperature": kwargs.get("temperature", 0.0),
+                "max_tokens": kwargs.get("max_tokens", spec.max_output_tokens),
+                "streaming": kwargs.get("streaming", False),
+            }
+            llm_params.update(kwargs)
             llm: BaseChatModel = init_chat_model(
                 model=spec.model_name,
-                model_provider=spec.provider,
+                model_provider=spec.provider.id,
                 **llm_params,
             )
             return llm
+
         except ImportError as e:
-            raise ImportError(
-                f"Model provider integration package not installed: {spec.provider}"
-            )
+            raise ImportError(f"Provider LangChain package missing: {spec.provider}")
+
         except Exception as e:
             raise ValueError(f"Failed to load model '{model_id}': {str(e)}")
 
@@ -285,12 +296,18 @@ class LlmService:
         # Get user and their default LLM info
         user = session.get(User, user_id)
         if user and user.default_llm:
-            # Use the service to get model information
-            model_spec = LlmService.get_model_spec(user.default_llm)
-            if model_spec:
-                # Add LLM info to metadata
-                metadata["llm_model_id"] = model_spec.id
-                metadata["llm_provider"] = model_spec.provider
+            try:
+                spec = LlmService.get_model_spec(user.default_llm)
+            except ValueError as e:
+                raise ValueError(
+                    f"User's default LLM model {user.default_llm} is invalid: {str(e)}"
+                )
+            except Exception as e:
+                raise ValueError(f"Error getting user's default LLM model: {str(e)}")
+
+            # Add LLM info to metadata
+            metadata["llm_model_id"] = spec.id
+            metadata["llm_provider"] = spec.provider.id
 
         # Create and save interaction record
         interaction = LlmInteraction(
