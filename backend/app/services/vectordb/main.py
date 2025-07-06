@@ -33,7 +33,7 @@ from app.services.vectordb.config import (
 logger = logging.getLogger(__name__)
 
 
-def extract_text_from_docx(file_path: str, filename: str) -> List[Any]:
+def _extract_text_from_docx(file_path: str, filename: str) -> List[Any]:
     doc = docx.Document(file_path)
 
     full_text = []
@@ -76,7 +76,7 @@ def extract_text_from_docx(file_path: str, filename: str) -> List[Any]:
     return [Document(page_content=combined_text, metadata=metadata)]
 
 
-def load_uploaded_file(file: UploadFile) -> List[Any]:
+def _load_uploaded_file(file: UploadFile) -> List[Any]:
     """
     Load an uploaded file based on its type (e.g., PDF, text file).
 
@@ -109,7 +109,7 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
             or file.filename.lower().endswith(".docx")
         ):
             print("Loading DOCX with python-docx library...")
-            loaded_documents = extract_text_from_docx(temp_file_path, file.filename)
+            loaded_documents = _extract_text_from_docx(temp_file_path, file.filename)
         else:
             print("Loading text with TextLoader...")
             # Try with different encodings if utf-8 fails
@@ -304,7 +304,7 @@ class VectorDBService:
         documents = []
 
         # Load documents from file
-        loaded_documents = load_uploaded_file(file)  # TODO: switch to docling
+        loaded_documents = _load_uploaded_file(file)  # TODO: switch to docling
         documents.extend(loaded_documents)
 
         # Split documents into chunks
