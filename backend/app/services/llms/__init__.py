@@ -3,7 +3,6 @@ from .main import (
     LlmModelInfo,
     ReplicateLlm,
     BedrockLlm,
-    LlmInferenceService,
 )
 
 __all__ = [
@@ -11,5 +10,4 @@ __all__ = [
     "LlmModelInfo",
     "ReplicateLlm",
     "BedrockLlm",
-    "LlmInferenceService",
 ]
