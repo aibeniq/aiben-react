@@ -19,7 +19,7 @@ class EmbeddingModelInfo(BaseModel):
     model_name: str
     dimensions: int
     max_input_length: Optional[int] = None
-    cost_per_1k_tokens: Optional[float] = None
+    cost_per_1M_tokens: Optional[float] = None
     description: Optional[str] = None
 
 
