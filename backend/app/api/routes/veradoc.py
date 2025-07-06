@@ -147,7 +147,7 @@ async def process_rag_checklist(
             )
 
         # 3. Initialize the LLM
-        llm_info = LlmService.get_user_default_model(session, current_user.id)
+        llm_info = LlmService.get_user_default_model_spec(session, current_user.id)
         llm = LlmService.get_model(llm_info.id)
         print("LLM successfully loaded")
 

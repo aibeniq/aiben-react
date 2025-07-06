@@ -145,7 +145,7 @@ async def compare_documents(
         diff_text = "\n".join(diff_result)
 
         # Load the LLM model
-        llm_info = LlmService.get_user_default_model(session, current_user.id)
+        llm_info = LlmService.get_user_default_model_spec(session, current_user.id)
         llm = LlmService.get_model(llm_info.id)
 
         # Parse comparison topics

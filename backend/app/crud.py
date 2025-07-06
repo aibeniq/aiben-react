@@ -23,7 +23,7 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
     )
 
     # Set default LLM
-    default_llm = LlmService.get_default_model()
+    default_llm = LlmService.get_default_model_spec()
 
     if default_llm:
         db_obj.default_llm = default_llm.id

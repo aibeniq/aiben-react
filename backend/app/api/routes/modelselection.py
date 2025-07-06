@@ -3,7 +3,7 @@ from fastapi import APIRouter
 
 from app.api.deps import CurrentUser, SessionDep
 from app.services.embeddings import EmbeddingService, EmbeddingModelInfo
-from app.services.llms import LlmModelInfo, LlmService
+from app.services.llms import LlmModelSpec, LlmService
 
 router = APIRouter(prefix="/embedding-models", tags=["embedding-models"])
 
@@ -39,9 +39,9 @@ def get_default_embedding_model() -> EmbeddingModelInfo:
 # TODO: this doesn't belong here.. or we need to modify the prefix
 
 
-@router.get("/llm", response_model=List[LlmModelInfo])
+@router.get("/llm", response_model=List[LlmModelSpec])
 def get_llm_models(
     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
-) -> List[LlmModelInfo]:
+) -> List[LlmModelSpec]:
     """Get all LLM models."""
-    return LlmService.get_models()
+    return LlmService.get_model_specs()
