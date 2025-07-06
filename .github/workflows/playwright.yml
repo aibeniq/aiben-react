@@ -92,8 +92,6 @@ jobs:
       - run: docker compose down -v --remove-orphans
       - name: Run Playwright tests
         run: docker compose run --rm playwright npx playwright test --fail-on-flaky-tests --trace=retain-on-failure --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
-        env:
-          MAILCATCHER_HOST: http://mailcatcher:1080
       - run: docker compose down -v --remove-orphans
       - name: Upload blob report to GitHub Actions Artifacts
         if: ${{ !cancelled() }}
