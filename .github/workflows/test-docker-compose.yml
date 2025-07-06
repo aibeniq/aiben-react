@@ -12,28 +12,6 @@ on:
 jobs:
   test-docker-compose:
     runs-on: ubuntu-latest
-    env:
-      DOMAIN: localhost
-      FRONTEND_HOST: localhost
-      ENVIRONMENT: local
-      BACKEND_CORS_ORIGINS: "*"
-      SECRET_KEY: test-secret-key-for-ci
-      FIRST_SUPERUSER: admin@example.com
-      FIRST_SUPERUSER_PASSWORD: test-password
-      SMTP_HOST: ""
-      SMTP_USER: ""
-      SMTP_PASSWORD: ""
-      EMAILS_FROM_EMAIL: ""
-      POSTGRES_SERVER: db
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: app
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: test-password
-      SENTRY_DSN: ""
-      STACK_NAME: test-stack
-      DOCKER_IMAGE_BACKEND: test-backend
-      DOCKER_IMAGE_FRONTEND: test-frontend
-      TAG: latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
