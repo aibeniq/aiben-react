@@ -7,46 +7,46 @@ the llms service provides a unified interface for managing and using different l
 the llms service is used through static methods and doesn't require initialization. import it directly from the service:
 
 ```python
-from app.services.llms import LlmService, LlmInferenceService
+from app.services.llms import LlmService
 ```
 
 # available methods
 
 ## LlmService class
 
-#### `get_models()`
+#### `get_model_specs()`
 
 returns a list of all available llm models.
 
 **returns**
 
-- `List[LlmModelInfo]` - list of all available models
+- `List[LlmModelSpec]` - list of all available models
 
 **usage**
 
 ```python
-models = LlmService.get_models()
+models = LlmService.get_model_specs()
 ```
 
 ---
 
-#### `get_default_model()`
+#### `get_default_model_spec()`
 
 returns the default llm model configured in settings.
 
 **returns**
 
-- `LlmModelInfo` - default model information
+- `LlmModelSpec` - default model information
 
 **usage**
 
 ```python
-default_model = LlmService.get_default_model()
+default_model = LlmService.get_default_model_spec()
 ```
 
 ---
 
-#### `get_user_default_model(session, user_id)`
+#### `get_user_default_model_spec(session, user_id)`
 
 returns the user's default llm model from the database.
 
@@ -57,19 +57,19 @@ returns the user's default llm model from the database.
 
 **returns**
 
-- `LlmModelInfo` - user's default model information
+- `LlmModelSpec` - user's default model information
 
 **usage**
 
 ```python
-user_model = LlmService.get_user_default_model(session, user_id)
+user_model = LlmService.get_user_default_model_spec(session, user_id)
 ```
 
 ---
 
 #### `get_providers()`
 
-returns a list of all available llm providers.
+returns a list of all available llm providers based on enabled providers in settings.
 
 **returns**
 
@@ -119,17 +119,43 @@ is_valid = LlmService.is_valid_model_id("gpt-4o-mini")
 
 ---
 
-#### `get_model_spec(model_id)`
+#### `get_model_specs_by_provider(provider)`
 
-gets detailed specification for a specific model.
+gets all models for a specific provider.
 
 **parameters**
 
-- `model_id: str` - model identifier
+- `provider: str` - provider name (e.g., "openai", "bedrock", "ollama", "replicate", "together")
 
 **returns**
 
-- `Optional[LlmModelInfo]` - model specification or None if not found
+- `List[LlmModelSpec]` - list of models for the provider
+
+**usage**
+
+```python
+openai_models = LlmService.get_model_specs_by_provider("openai")
+```
+
+---
+
+#### `get_model_spec(model_id)`
+
+validates if a model is available and properly configured.
+
+**parameters**
+
+- `model_id: str` - model identifier to validate
+
+**returns**
+
+- `LlmModelSpec` - validated model specification
+
+**validation checks**
+
+- model exists in registry
+- provider is enabled
+- required environment variables are set
 
 **usage**
 
@@ -139,72 +165,32 @@ spec = LlmService.get_model_spec("gpt-4o-mini")
 
 ---
 
-#### `get_models_by_provider(provider)`
-
-gets all models for a specific provider.
-
-**parameters**
-
-- `provider: str` - provider name (e.g., "openai", "aws", "ollama", "replicate")
-
-**returns**
-
-- `List[LlmModelInfo]` - list of models for the provider
-
-**usage**
-
-```python
-openai_models = LlmService.get_models_by_provider("openai")
-```
-
----
-
-#### `validate_model(model_id, api_key=None)`
-
-validates if a model is available and properly configured.
-
-**parameters**
-
-- `model_id: str` - model identifier to validate
-- `api_key: Optional[str]` - optional API key override
-
-**returns**
-
-- `tuple[bool, Optional[str]]` - (is_valid, error_message)
-
-**validation checks**
-
-- model exists in registry
-- required environment variables are set
-- provider-specific credentials are available
-
-**usage**
-
-```python
-is_valid, error = LlmService.validate_model("gpt-4o-mini")
-```
-
----
-
-#### `get_model(model_id, api_key=None, **kwargs)`
+#### `get_model(model_id, **kwargs)`
 
 gets an initialized llm model instance.
 
 **parameters**
 
 - `model_id: str` - model identifier from the registry
-- `api_key: Optional[str]` - optional API key override
-- `**kwargs` - additional model parameters (temperature, max_tokens, etc.)
+- `**kwargs` - additional model parameters (temperature, max_tokens, streaming, etc.)
 
 **returns**
 
-- `Union[BaseChatModel, BaseLLM]` - initialized llm model
+- `BaseChatModel` - initialized llm model
 
 **usage**
 
 ```python
-llm = LlmService.get_model("gpt-4o-mini", temperature=0.7)
+llm = LlmService.get_model("gpt-4o-mini", temperature=0.7, max_tokens=1000)
 ```
+
+**langchain integration**
+
+the `get_model` method uses langchain's unified `init_chat_model` interface for all providers (excl. replicate).
+
+**supported providers**
+
+all providers listed in the [langchain documentation](https://python.langchain.com/api_reference/langchain/chat_models/langchain.chat_models.base.init_chat_model.html) are supported through langchain's `init_chat_model` function. each provider requires its corresponding integration package to be installed and the corresponding environment variables to be set.
 
 ---
 
@@ -252,40 +238,72 @@ custom llm implementation for Replicate API.
 
 ---
 
-#### `BedrockLlm(model_id, temperature=0.0, **kwargs)`
-
-custom llm implementation for AWS Bedrock API.
-
-**methods**
-
-- `invoke(prompt, **kwargs)` - generates text using the bedrock model
-- `__or__(other)` - supports pipe operator for chaining
-
-**features**
-
-- supports both claude and non-claude models
-- automatic client initialization
-- system prompt handling
-
 # schema
 
-#### `LlmModelInfo`
+#### `LlmProvider`
+
+pydantic model for llm provider information.
+
+```python
+class LlmProvider(BaseModel):
+    id: str                           # used by langchain to identify the provider
+    name: str                         # used by the UI to display the provider name
+    required_env_vars: List[str]      # required environment variables (api keys, etc.)
+```
+
+---
+
+#### `LlmModelSpec`
 
 pydantic model for llm model information.
 
 ```python
-class LlmModelInfo(BaseModel):
-    id: str                                      # unique model identifier
-    provider: str                                # provider name (openai, aws, ollama, replicate)
-    model_name: str                              # actual model name used by provider
-    context_length: Optional[int] = None         # maximum context length in tokens
-    max_output_tokens: Optional[int] = None      # maximum output tokens
-    cost_per_1k_input_tokens: Optional[float] = None   # cost per 1K input tokens
-    cost_per_1k_output_tokens: Optional[float] = None  # cost per 1K output tokens
-    supports_streaming: bool = True              # whether model supports streaming
-    supports_function_calling: bool = False     # whether model supports function calling
-    supports_vision: bool = False                # whether model supports vision/images
-    description: Optional[str] = None            # model description
+class LlmModelSpec(BaseModel):
+    id: str                                           # unique model identifier
+    provider: LlmProvider                             # provider information
+    model_name: str                                   # actual model name used by provider
+    context_length: Optional[int] = None              # maximum context length in tokens
+    max_output_tokens: Optional[int] = None           # maximum output tokens
+    cost_per_1M_input_tokens: Optional[float] = None  # cost per 1M input tokens
+    cost_per_1M_output_tokens: Optional[float] = None # cost per 1M output tokens
+    supports_streaming: bool = True                   # whether model supports streaming
+    supports_function_calling: bool = False           # whether model supports function calling
+    supports_vision: bool = False                     # whether model supports vision/images
+    description: Optional[str] = None                 # model description
+```
+
+---
+
+#### available providers registry
+
+```python
+PROVIDERS = {
+    "openai": LlmProvider(
+        id="openai",
+        name="OpenAI",
+        required_env_vars=["OPENAI_API_KEY"],
+    ),
+    "bedrock": LlmProvider(
+        id="bedrock",
+        name="Bedrock",
+        required_env_vars=["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION"],
+    ),
+    "ollama": LlmProvider(
+        id="ollama",
+        name="Ollama",
+        required_env_vars=["OLLAMA_BASE_URL"],
+    ),
+    "replicate": LlmProvider(
+        id="replicate",
+        name="Replicate",
+        required_env_vars=["REPLICATE_API_TOKEN"],
+    ),
+    "together": LlmProvider(
+        id="together",
+        name="Together",
+        required_env_vars=["TOGETHER_API_KEY"],
+    ),
+}
 ```
 
 ---
@@ -295,276 +313,117 @@ class LlmModelInfo(BaseModel):
 ##### openai models
 
 ```python
-"gpt-4o": LlmModelInfo(
+"gpt-4o": LlmModelSpec(
     id="gpt-4o",
-    provider="openai",
+    provider=PROVIDERS["openai"],
     model_name="gpt-4o",
     context_length=128000,
-    max_output_tokens=4096,
-    cost_per_1k_input_tokens=5.0,
-    cost_per_1k_output_tokens=15.0,
+    max_output_tokens=16384,
+    cost_per_1M_input_tokens=2.5,
+    cost_per_1M_output_tokens=10.0,
     supports_streaming=True,
     supports_function_calling=True,
     supports_vision=True,
-    description="OpenAI's most advanced multimodal model with vision capabilities"
+    description="Fast, intelligent, flexible GPT model"
 )
 
-"gpt-4o-mini": LlmModelInfo(
+"gpt-4o-mini": LlmModelSpec(
     id="gpt-4o-mini",
-    provider="openai",
+    provider=PROVIDERS["openai"],
     model_name="gpt-4o-mini",
     context_length=128000,
     max_output_tokens=16384,
-    cost_per_1k_input_tokens=0.15,
-    cost_per_1k_output_tokens=0.6,
+    cost_per_1M_input_tokens=0.15,
+    cost_per_1M_output_tokens=0.6,
     supports_streaming=True,
     supports_function_calling=True,
     supports_vision=True,
-    description="OpenAI's efficient small model with multimodal capabilities"
+    description="Fast, affordable small model for focused tasks"
 )
 
-"gpt-4-turbo": LlmModelInfo(
-    id="gpt-4-turbo",
-    provider="openai",
-    model_name="gpt-4-turbo",
-    context_length=128000,
-    max_output_tokens=4096,
-    cost_per_1k_input_tokens=10.0,
-    cost_per_1k_output_tokens=30.0,
+"gpt-4.1": LlmModelSpec(
+    id="gpt-4.1",
+    provider=PROVIDERS["openai"],
+    model_name="gpt-4.1",
+    context_length=1047576,
+    max_output_tokens=32768,
+    cost_per_1M_input_tokens=2.0,
+    cost_per_1M_output_tokens=8.0,
     supports_streaming=True,
     supports_function_calling=True,
     supports_vision=True,
-    description="OpenAI's powerful turbo model with extended context"
+    description="Flagship GPT model for complex tasks"
 )
-
-"gpt-3.5-turbo": LlmModelInfo(
-    id="gpt-3.5-turbo",
-    provider="openai",
-    model_name="gpt-3.5-turbo",
-    context_length=16385,
-    max_output_tokens=4096,
-    cost_per_1k_input_tokens=0.5,
-    cost_per_1k_output_tokens=1.5,
-    supports_streaming=True,
-    supports_function_calling=True,
-    supports_vision=False,
-    description="OpenAI's fast and efficient model for most tasks"
-)
-```
-
-##### aws bedrock models
-
-```python
-"anthropic.claude-3-5-sonnet-20241022-v2:0": LlmModelInfo(
-    id="anthropic.claude-3-5-sonnet-20241022-v2:0",
-    provider="aws",
-    model_name="anthropic.claude-3-5-sonnet-20241022-v2:0",
-    context_length=200000,
-    max_output_tokens=8192,
-    cost_per_1k_input_tokens=3.0,
-    cost_per_1k_output_tokens=15.0,
-    supports_streaming=True,
-    supports_function_calling=True,
-    supports_vision=True,
-    description="Anthropic's most capable model with strong reasoning and vision capabilities"
-)
-
-"anthropic.claude-3-haiku-20240307-v1:0": LlmModelInfo(
-    id="anthropic.claude-3-haiku-20240307-v1:0",
-    provider="aws",
-    model_name="anthropic.claude-3-haiku-20240307-v1:0",
-    context_length=200000,
-    max_output_tokens=4096,
-    cost_per_1k_input_tokens=0.25,
-    cost_per_1k_output_tokens=1.25,
-    supports_streaming=True,
-    supports_function_calling=False,
-    supports_vision=True,
-    description="Anthropic's fastest model for simple tasks and quick responses"
-)
-
-"amazon.titan-text-express-v1": LlmModelInfo(
-    id="amazon.titan-text-express-v1",
-    provider="aws",
-    model_name="amazon.titan-text-express-v1",
-    context_length=8192,
-    max_output_tokens=8192,
-    cost_per_1k_input_tokens=0.8,
-    cost_per_1k_output_tokens=1.6,
-    supports_streaming=True,
-    supports_function_calling=False,
-    supports_vision=False,
-    description="Amazon's Titan model optimized for text generation tasks"
-)
-```
-
-##### ollama models (local)
-
-```python
-"llama3.1:8b": LlmModelInfo(
-    id="llama3.1:8b",
-    provider="ollama",
-    model_name="llama3.1:8b",
-    context_length=128000,
-    max_output_tokens=8192,
-    cost_per_1k_input_tokens=0.0,  # local model
-    cost_per_1k_output_tokens=0.0,  # local model
-    supports_streaming=True,
-    supports_function_calling=False,
-    supports_vision=False,
-    description="Meta's Llama 3.1 8B model running locally via Ollama"
-)
-
-"llama3.1:70b": LlmModelInfo(
-    id="llama3.1:70b",
-    provider="ollama",
-    model_name="llama3.1:70b",
-    context_length=128000,
-    max_output_tokens=8192,
-    cost_per_1k_input_tokens=0.0,  # local model
-    cost_per_1k_output_tokens=0.0,  # local model
-    supports_streaming=True,
-    supports_function_calling=False,
-    supports_vision=False,
-    description="Meta's Llama 3.1 70B model running locally via Ollama"
-)
-
-"mistral:7b": LlmModelInfo(
-    id="mistral:7b",
-    provider="ollama",
-    model_name="mistral:7b",
-    context_length=32768,
-    max_output_tokens=8192,
-    cost_per_1k_input_tokens=0.0,  # local model
-    cost_per_1k_output_tokens=0.0,  # local model
-    supports_streaming=True,
-    supports_function_calling=False,
-    supports_vision=False,
-    description="Mistral 7B model running locally via Ollama"
-)
-```
-
-##### replicate models
-
-```python
-"meta/llama-2-70b-chat": LlmModelInfo(
-    id="meta/llama-2-70b-chat",
-    provider="replicate",
-    model_name="meta/llama-2-70b-chat",
-    context_length=4096,
-    max_output_tokens=4096,
-    cost_per_1k_input_tokens=0.65,
-    cost_per_1k_output_tokens=2.75,
-    supports_streaming=True,
-    supports_function_calling=False,
-    supports_vision=False,
-    description="Meta's Llama 2 70B Chat model via Replicate"
-)
-
-"mistralai/mixtral-8x7b-instruct-v0.1": LlmModelInfo(
-    id="mistralai/mixtral-8x7b-instruct-v0.1",
-    provider="replicate",
-    model_name="mistralai/mixtral-8x7b-instruct-v0.1",
-    context_length=32768,
-    max_output_tokens=8192,
-    cost_per_1k_input_tokens=0.3,
-    cost_per_1k_output_tokens=1.0,
-    supports_streaming=True,
-    supports_function_calling=False,
-    supports_vision=False,
-    description="Mistral's Mixtral 8x7B Instruct model via Replicate"
-)
-```
-
----
-
-#### environment variables
-
-##### openai provider
-
-```bash
-OPENAI_API_KEY=your_openai_api_key_here
-```
-
-##### aws bedrock provider
-
-```bash
-AWS_ACCESS_KEY_ID=your_aws_access_key
-AWS_SECRET_ACCESS_KEY=your_aws_secret_key
-AWS_DEFAULT_REGION=us-east-1  # or AWS_REGION
-```
-
-##### ollama provider
-
-```bash
-OLLAMA_HOST=http://localhost:11434  # default
-```
-
-##### replicate provider
-
-```bash
-REPLICATE_API_TOKEN=your_replicate_api_token
 ```
 
 ---
 
 #### error handling
 
+---
+
 ##### model validation errors
 
 ```python
 # invalid model ID
-is_valid, error = LlmService.validate_model("invalid-model")
-# returns: (False, "Model 'invalid-model' not found. Available models: ...")
+try:
+    spec = LlmService.get_model_spec("invalid-model")
+except ValueError as e:
+    # returns: "Model 'invalid-model' not found. Available models: ..."
+    print(f"validation error: {e}")
 
 # missing API key
-is_valid, error = LlmService.validate_model("gpt-4o-mini")
-# returns: (False, "OPENAI_API_KEY environment variable required...")
+try:
+    spec = LlmService.get_model_spec("gpt-4o-mini")
+except ValueError as e:
+    # returns: "OPENAI_API_KEY environment variable required for 'gpt-4o-mini'"
+    print(f"environment error: {e}")
 
-# missing AWS credentials
-is_valid, error = LlmService.validate_model("anthropic.claude-3-haiku-20240307-v1:0")
-# returns: (False, "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables required...")
+# provider not enabled
+try:
+    spec = LlmService.get_model_spec("gpt-4o")
+except ValueError as e:
+    # returns: "Provider 'openai' is not enabled. Available providers: ..."
+    print(f"provider error: {e}")
 ```
 
 ##### model loading errors
 
 ```python
 try:
-    service = LlmInferenceService("gpt-4o-mini")
-    response = service.generate_text("hello world")
+    llm = LlmService.get_model("gpt-4o-mini", temperature=0.7)
+    response = llm.invoke("hello world")
 except ValueError as e:
     # could be due to invalid credentials, network issues, etc.
     print(f"failed to load model: {e}")
+except ImportError as e:
+    # missing langchain provider package
+    print(f"missing provider package: {e}")
 ```
 
 ---
 
-#### provider-specific features
+---
 
-##### openai
+#### configuration
 
-- supports latest gpt models with vision capabilities
-- automatic API key management
-- function calling support
-- streaming responses
+##### settings integration
 
-##### aws bedrock
+the service integrates with app settings for:
 
-- supports anthropic claude and amazon titan models
-- automatic AWS credential management
-- region-aware configuration
-- specialized handling for claude vs non-claude models
+- `DEFAULT_LLM_MODEL`: default model id (defaults to "gpt-4o-mini")
+- `ENABLED_PROVIDERS`: list of enabled provider ids
 
-##### ollama
+##### model selection priority
 
-- local model execution
-- no cost for inference
-- customizable host configuration
-- supports open-source models
+1. user's default model (from database)
+2. system default model (from settings)
+3. fallback to "gpt-4o-mini"
 
-##### replicate
+##### environment variable validation
 
-- cloud-hosted open-source models
-- streaming support
-- flexible input parameter handling
-- automatic output format processing
+the service automatically validates required environment variables for each provider:
+
+- checks if all required env vars are set
+- raises descriptive errors if any are missing
+- validates when getting model specs or loading models
