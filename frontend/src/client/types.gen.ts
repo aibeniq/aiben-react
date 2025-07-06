@@ -503,6 +503,7 @@ export type FormconnectGetFormDetailResponse = FormConnectDetailResponse
 
 export type FormconnectGetFormHistoryData = {
   limit?: number
+  showAll?: boolean
   skip?: number
 }
 
@@ -678,6 +679,7 @@ export type ReportgenieGenerateDocxResponse = unknown
 
 export type ReportgenieGetReportHistoryData = {
   limit?: number
+  showAll?: boolean
   skip?: number
 }
 
@@ -700,6 +702,7 @@ export type TwincheckCompareDocumentsResponse = TwinCheckResponse
 
 export type TwincheckGetComparisonHistoryData = {
   limit?: number
+  showAll?: boolean
   skip?: number
 }
 
@@ -845,6 +848,7 @@ export type VeradocDeleteChecklistResponse = Message
 
 export type VeradocGetVeradocHistoryData = {
   limit?: number
+  showAll?: boolean
   skip?: number
 }
 

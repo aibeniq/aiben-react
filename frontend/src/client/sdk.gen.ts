@@ -530,10 +530,11 @@ export class FormconnectService {
 
   /**
    * Get Form History
-   * Retrieve past form processing history for the current user.
+   * Retrieve past form processing history for the current user or all users.
    * @param data The data for the request.
    * @param data.skip
    * @param data.limit
+   * @param data.showAll
    * @returns unknown Successful Response
    * @throws ApiError
    */
@@ -546,6 +547,7 @@ export class FormconnectService {
       query: {
         skip: data.skip,
         limit: data.limit,
+        show_all: data.showAll,
       },
       errors: {
         422: "Validation Error",
@@ -1201,10 +1203,11 @@ export class ReportgenieService {
 
   /**
    * Get Report History
-   * Retrieve past report generation history for the current user, so user can view.
+   * Retrieve past report generation history for the current user or all users.
    * @param data The data for the request.
    * @param data.skip
    * @param data.limit
+   * @param data.showAll
    * @returns unknown Successful Response
    * @throws ApiError
    */
@@ -1217,6 +1220,7 @@ export class ReportgenieService {
       query: {
         skip: data.skip,
         limit: data.limit,
+        show_all: data.showAll,
       },
       errors: {
         422: "Validation Error",
@@ -1278,10 +1282,11 @@ export class TwincheckService {
 
   /**
    * Get Comparison History
-   * Retrieve past document comparison history for the current user.
+   * Retrieve past document comparison history for the current user or all users.
    * @param data The data for the request.
    * @param data.skip
    * @param data.limit
+   * @param data.showAll
    * @returns unknown Successful Response
    * @throws ApiError
    */
@@ -1294,6 +1299,7 @@ export class TwincheckService {
       query: {
         skip: data.skip,
         limit: data.limit,
+        show_all: data.showAll,
       },
       errors: {
         422: "Validation Error",
@@ -1835,10 +1841,11 @@ export class VeradocService {
 
   /**
    * Get Veradoc History
-   * Retrieve past VeraDoc evaluation history for the current user.
+   * Retrieve past VeraDoc evaluation history for the current user or all users.
    * @param data The data for the request.
    * @param data.skip
    * @param data.limit
+   * @param data.showAll
    * @returns unknown Successful Response
    * @throws ApiError
    */
@@ -1851,6 +1858,7 @@ export class VeradocService {
       query: {
         skip: data.skip,
         limit: data.limit,
+        show_all: data.showAll,
       },
       errors: {
         422: "Validation Error",

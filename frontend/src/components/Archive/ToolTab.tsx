@@ -9,6 +9,8 @@ interface ToolTabProps {
   onLoadReport: (reportId: string) => void
   emptyMessage: string
   children: ReactNode
+  showAllUsers?: boolean
+  onToggleShowAllUsers?: () => void
 }
 
 const ToolTab: React.FC<ToolTabProps> = ({
@@ -18,7 +20,12 @@ const ToolTab: React.FC<ToolTabProps> = ({
   onLoadReport,
   emptyMessage,
   children,
+  showAllUsers,
+  onToggleShowAllUsers,
 }) => {
+  // Log when the component renders with showAllUsers prop
+  console.log(`ToolTab rendering with showAllUsers: ${showAllUsers}`)
+
   return (
     <HStack gap={4} align="stretch" height="fit-content">
       <Box minW="300px" maxW="400px" w="300px" flexShrink={0}>
@@ -28,6 +35,8 @@ const ToolTab: React.FC<ToolTabProps> = ({
           isHistoryLoading={isHistoryLoading}
           onLoadReport={onLoadReport}
           emptyMessage={emptyMessage}
+          showAllUsers={showAllUsers}
+          onToggleShowAllUsers={onToggleShowAllUsers}
         />
       </Box>
       <Box flex={1}>{children}</Box>
