@@ -185,7 +185,7 @@ def create_knowledge_base(
         )
 
         # add source to vector database
-        vectordb_service.add_file(
+        vectordb_service.add_source(
             file=file,
             knowledge_base_id=str(knowledge_base.id),
             embedding_model_id=knowledge_base.embedding_model_id,
@@ -273,7 +273,7 @@ def update_knowledge_base(
                     knowledge_base_id=knowledge_base.id,
                     file=file,
                 )
-                vectordb_service.add_file(
+                vectordb_service.add_source(
                     file=file,
                     knowledge_base_id=str(knowledge_base.id),
                     embedding_model_id=knowledge_base.embedding_model_id,

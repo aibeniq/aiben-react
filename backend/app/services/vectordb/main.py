@@ -287,7 +287,7 @@ class VectorDBService:
             logger.error(f"Error initializing collection '{collection_name}': {e}")
             return False
 
-    def add_file(
+    def add_source(
         self,
         file: UploadFile,
         knowledge_base_id: str,
