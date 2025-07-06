@@ -1,11 +1,8 @@
 import os
 from pathlib import Path
 import replicate
-import boto3
 from langchain.chat_models import init_chat_model
-from langchain_aws import ChatBedrock
-from langchain_community.llms import Bedrock
-from langchain_core.messages import HumanMessage, SystemMessage, BaseMessage
+from langchain_core.messages import BaseMessage
 from langchain_core.language_models import BaseChatModel
 from typing import Optional, List, Dict, Any, Union
 from dotenv import load_dotenv
@@ -25,8 +22,8 @@ class LlmModelInfo(BaseModel):
     model_name: str
     context_length: Optional[int] = None
     max_output_tokens: Optional[int] = None
-    cost_per_1k_input_tokens: Optional[float] = None
-    cost_per_1k_output_tokens: Optional[float] = None
+    cost_per_1M_input_tokens: Optional[float] = None
+    cost_per_1M_output_tokens: Optional[float] = None
     supports_streaming: bool = True
     supports_function_calling: bool = False
     supports_vision: bool = False
@@ -44,13 +41,13 @@ class LlmService:
             provider="openai",
             model_name="gpt-4o",
             context_length=128000,
-            max_output_tokens=4096,
-            cost_per_1k_input_tokens=5.0,
-            cost_per_1k_output_tokens=15.0,
+            max_output_tokens=16384,
+            cost_per_1M_input_tokens=2.5,
+            cost_per_1M_output_tokens=10.0,
             supports_streaming=True,
             supports_function_calling=True,
             supports_vision=True,
-            description="OpenAI's most advanced multimodal model with vision capabilities",
+            description="Fast, intelligent, flexible GPT model",
         ),
         "gpt-4o-mini": LlmModelInfo(
             id="gpt-4o-mini",
@@ -58,145 +55,25 @@ class LlmService:
             model_name="gpt-4o-mini",
             context_length=128000,
             max_output_tokens=16384,
-            cost_per_1k_input_tokens=0.15,
-            cost_per_1k_output_tokens=0.6,
+            cost_per_1M_input_tokens=0.15,
+            cost_per_1M_output_tokens=0.6,
             supports_streaming=True,
             supports_function_calling=True,
             supports_vision=True,
-            description="OpenAI's efficient small model with multimodal capabilities",
+            description="Fast, affordable small model for focused tasks",
         ),
-        "gpt-4-turbo": LlmModelInfo(
-            id="gpt-4-turbo",
+        "gpt-4.1": LlmModelInfo(
+            id="gpt-4.1",
             provider="openai",
-            model_name="gpt-4-turbo",
-            context_length=128000,
-            max_output_tokens=4096,
-            cost_per_1k_input_tokens=10.0,
-            cost_per_1k_output_tokens=30.0,
+            model_name="gpt-4.1",
+            context_length=1047576,
+            max_output_tokens=32768,
+            cost_per_1M_input_tokens=2.0,
+            cost_per_1M_output_tokens=8.0,
             supports_streaming=True,
             supports_function_calling=True,
             supports_vision=True,
-            description="OpenAI's powerful turbo model with extended context",
-        ),
-        "gpt-3.5-turbo": LlmModelInfo(
-            id="gpt-3.5-turbo",
-            provider="openai",
-            model_name="gpt-3.5-turbo",
-            context_length=16385,
-            max_output_tokens=4096,
-            cost_per_1k_input_tokens=0.5,
-            cost_per_1k_output_tokens=1.5,
-            supports_streaming=True,
-            supports_function_calling=True,
-            supports_vision=False,
-            description="OpenAI's fast and efficient model for most tasks",
-        ),
-        # AWS Bedrock Models
-        "anthropic.claude-3-5-sonnet-20241022-v2:0": LlmModelInfo(
-            id="anthropic.claude-3-5-sonnet-20241022-v2:0",
-            provider="aws",
-            model_name="anthropic.claude-3-5-sonnet-20241022-v2:0",
-            context_length=200000,
-            max_output_tokens=8192,
-            cost_per_1k_input_tokens=3.0,
-            cost_per_1k_output_tokens=15.0,
-            supports_streaming=True,
-            supports_function_calling=True,
-            supports_vision=True,
-            description="Anthropic's most capable model with strong reasoning and vision capabilities",
-        ),
-        "anthropic.claude-3-haiku-20240307-v1:0": LlmModelInfo(
-            id="anthropic.claude-3-haiku-20240307-v1:0",
-            provider="aws",
-            model_name="anthropic.claude-3-haiku-20240307-v1:0",
-            context_length=200000,
-            max_output_tokens=4096,
-            cost_per_1k_input_tokens=0.25,
-            cost_per_1k_output_tokens=1.25,
-            supports_streaming=True,
-            supports_function_calling=False,
-            supports_vision=True,
-            description="Anthropic's fastest model for simple tasks and quick responses",
-        ),
-        "amazon.titan-text-express-v1": LlmModelInfo(
-            id="amazon.titan-text-express-v1",
-            provider="aws",
-            model_name="amazon.titan-text-express-v1",
-            context_length=8192,
-            max_output_tokens=8192,
-            cost_per_1k_input_tokens=0.8,
-            cost_per_1k_output_tokens=1.6,
-            supports_streaming=True,
-            supports_function_calling=False,
-            supports_vision=False,
-            description="Amazon's Titan model optimized for text generation tasks",
-        ),
-        # Ollama Models (common local models)
-        "llama3.1:8b": LlmModelInfo(
-            id="llama3.1:8b",
-            provider="ollama",
-            model_name="llama3.1:8b",
-            context_length=128000,
-            max_output_tokens=8192,
-            cost_per_1k_input_tokens=0.0,  # local model
-            cost_per_1k_output_tokens=0.0,  # local model
-            supports_streaming=True,
-            supports_function_calling=False,
-            supports_vision=False,
-            description="Meta's Llama 3.1 8B model running locally via Ollama",
-        ),
-        "llama3.1:70b": LlmModelInfo(
-            id="llama3.1:70b",
-            provider="ollama",
-            model_name="llama3.1:70b",
-            context_length=128000,
-            max_output_tokens=8192,
-            cost_per_1k_input_tokens=0.0,  # local model
-            cost_per_1k_output_tokens=0.0,  # local model
-            supports_streaming=True,
-            supports_function_calling=False,
-            supports_vision=False,
-            description="Meta's Llama 3.1 70B model running locally via Ollama",
-        ),
-        "mistral:7b": LlmModelInfo(
-            id="mistral:7b",
-            provider="ollama",
-            model_name="mistral:7b",
-            context_length=32768,
-            max_output_tokens=8192,
-            cost_per_1k_input_tokens=0.0,  # local model
-            cost_per_1k_output_tokens=0.0,  # local model
-            supports_streaming=True,
-            supports_function_calling=False,
-            supports_vision=False,
-            description="Mistral 7B model running locally via Ollama",
-        ),
-        # Replicate Models
-        "meta/llama-2-70b-chat": LlmModelInfo(
-            id="meta/llama-2-70b-chat",
-            provider="replicate",
-            model_name="meta/llama-2-70b-chat",
-            context_length=4096,
-            max_output_tokens=4096,
-            cost_per_1k_input_tokens=0.65,
-            cost_per_1k_output_tokens=2.75,
-            supports_streaming=True,
-            supports_function_calling=False,
-            supports_vision=False,
-            description="Meta's Llama 2 70B Chat model via Replicate",
-        ),
-        "mistralai/mixtral-8x7b-instruct-v0.1": LlmModelInfo(
-            id="mistralai/mixtral-8x7b-instruct-v0.1",
-            provider="replicate",
-            model_name="mistralai/mixtral-8x7b-instruct-v0.1",
-            context_length=32768,
-            max_output_tokens=8192,
-            cost_per_1k_input_tokens=0.3,
-            cost_per_1k_output_tokens=1.0,
-            supports_streaming=True,
-            supports_function_calling=False,
-            supports_vision=False,
-            description="Mistral's Mixtral 8x7B Instruct model via Replicate",
+            description="Flagship GPT model for complex tasks",
         ),
     }
 
@@ -334,6 +211,7 @@ class LlmService:
 
         Raises:
             ValueError: If model is invalid or cannot be loaded
+            ImportError: If model provider integration package not installed
         """
         # validate model
         is_valid, error_msg = cls.validate_model(model_id)
@@ -356,6 +234,10 @@ class LlmService:
                 **llm_params,
             )
             return llm
+        except ImportError as e:
+            raise ImportError(
+                f"Model provider integration package not installed: {spec.provider}"
+            )
         except Exception as e:
             raise ValueError(f"Failed to load model '{model_id}': {str(e)}")
 
@@ -525,109 +407,6 @@ class ReplicateLlm:
 
         except Exception as e:
             raise ValueError(f"Error generating text with Replicate: {str(e)}")
-
-    def __or__(self, other):
-        """Support for pipe operator."""
-
-        def chain_func(inputs):
-            if isinstance(inputs, dict):
-                prompt_parts = []
-                for key, value in inputs.items():
-                    prompt_parts.append(f"{key}: {value}")
-                prompt = "\n".join(prompt_parts)
-            else:
-                prompt = str(inputs)
-
-            result = self.invoke(prompt)
-            return type("obj", (object,), {"content": result})()
-
-        return chain_func
-
-
-class BedrockLlm:
-    """LLM implementation using AWS Bedrock API."""
-
-    def __init__(self, model_id: str, temperature: float = 0.0, **kwargs):
-        """Initialize Bedrock LLM.
-
-        Args:
-            model_id: The model identifier on AWS Bedrock
-            temperature: Temperature for generation
-            **kwargs: Additional model parameters
-        """
-        self.model_id = model_id
-        self.temperature = temperature
-        self.kwargs = kwargs
-
-        # initialize AWS Bedrock client
-        self.client = boto3.client(
-            "bedrock-runtime",
-            region_name=os.environ.get("AWS_REGION", "us-east-1"),
-        )
-
-        # create the appropriate LangChain instance
-        if "anthropic.claude" in self.model_id:
-            self.bedrock = ChatBedrock(
-                model_id=self.model_id,
-                client=self.client,
-                model_kwargs={"temperature": self.temperature},
-                **{k: v for k, v in kwargs.items() if k not in ["system_prompt"]},
-            )
-        else:
-            self.bedrock = Bedrock(
-                model_id=self.model_id,
-                client=self.client,
-                model_kwargs={"temperature": self.temperature},
-                **{k: v for k, v in kwargs.items() if k not in ["system_prompt"]},
-            )
-
-    def invoke(self, prompt: Union[str, List[BaseMessage]], **kwargs) -> str:
-        """Generate text using the Bedrock model."""
-        system_prompt = self.kwargs.get("system_prompt", "")
-
-        if "anthropic.claude" in self.model_id:
-            # for Claude models using ChatBedrock
-            messages = []
-
-            if system_prompt:
-                messages.append(SystemMessage(content=system_prompt))
-
-            if isinstance(prompt, str):
-                messages.append(HumanMessage(content=prompt))
-            elif isinstance(prompt, list):
-                messages = prompt
-            else:
-                messages.append(HumanMessage(content=str(prompt)))
-
-            try:
-                response = self.bedrock.invoke(messages)
-                return (
-                    response.content if hasattr(response, "content") else str(response)
-                )
-            except Exception as e:
-                raise ValueError(f"Error calling AWS Bedrock Chat: {str(e)}")
-        else:
-            # for non-Claude models
-            if isinstance(prompt, str):
-                input_text = prompt
-            elif isinstance(prompt, list):
-                user_messages = [
-                    msg.content for msg in prompt if hasattr(msg, "content")
-                ]
-                input_text = "\n".join(user_messages)
-            else:
-                input_text = str(prompt)
-
-            if system_prompt:
-                full_prompt = f"{system_prompt}\n\n{input_text}"
-            else:
-                full_prompt = input_text
-
-            try:
-                response = self.bedrock.invoke(full_prompt)
-                return response if isinstance(response, str) else str(response)
-            except Exception as e:
-                raise ValueError(f"Error calling AWS Bedrock: {str(e)}")
 
     def __or__(self, other):
         """Support for pipe operator."""
