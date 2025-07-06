@@ -60,7 +60,7 @@ export type EmbeddingModelInfo = {
   model_name: string
   dimensions: number
   max_input_length?: number | null
-  cost_per_1k_tokens?: number | null
+  cost_per_1M_tokens?: number | null
   description?: string | null
 }
 
@@ -146,18 +146,27 @@ export type KnowledgeBasesPublic = {
 /**
  * Model for LLM model information.
  */
-export type LlmModelInfo = {
+export type LlmModelSpec = {
   id: string
-  provider: string
+  provider: LlmProvider
   model_name: string
   context_length?: number | null
   max_output_tokens?: number | null
-  cost_per_1k_input_tokens?: number | null
-  cost_per_1k_output_tokens?: number | null
+  cost_per_1M_input_tokens?: number | null
+  cost_per_1M_output_tokens?: number | null
   supports_streaming?: boolean
   supports_function_calling?: boolean
   supports_vision?: boolean
   description?: string | null
+}
+
+/**
+ * Model for LLM provider information.
+ */
+export type LlmProvider = {
+  id: string
+  name: string
+  required_env_vars: Array<string>
 }
 
 export type Message = {
@@ -445,7 +454,7 @@ export type EmbeddingModelsGetLlmModelsData = {
   skip?: number
 }
 
-export type EmbeddingModelsGetLlmModelsResponse = Array<LlmModelInfo>
+export type EmbeddingModelsGetLlmModelsResponse = Array<LlmModelSpec>
 
 export type FeedbackSubmitFeedbackData = {
   feedback: string
@@ -580,11 +589,11 @@ export type KnowledgeBasesDeleteKnowledgeBaseData = {
 
 export type KnowledgeBasesDeleteKnowledgeBaseResponse = Message
 
-export type LlmModelsGetLlmModelsResponse = Array<LlmModelInfo>
+export type LlmModelsGetLlmModelsResponse = Array<LlmModelSpec>
 
 export type LlmModelsGetAvailableProvidersResponse = Array<string>
 
-export type LlmModelsGetDefaultLlmModelResponse = LlmModelInfo
+export type LlmModelsGetDefaultLlmModelResponse = LlmModelSpec
 
 export type LlmModelsValidateLlmModelData = {
   modelId: string
@@ -602,7 +611,7 @@ export type LlmModelsSetDefaultLlmModelData = {
   modelId: string
 }
 
-export type LlmModelsSetDefaultLlmModelResponse = LlmModelInfo
+export type LlmModelsSetDefaultLlmModelResponse = LlmModelSpec
 
 export type LoginLoginAccessTokenData = {
   formData: Body_login_login_access_token
