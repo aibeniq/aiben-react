@@ -69,7 +69,8 @@ async def generate_report(
             )
 
         # 4. Initialize the LLM
-        llm = LlmService.get_user_default_model(session, current_user.id)
+        llm_info = LlmService.get_user_default_model(session, current_user.id)
+        llm = LlmService.get_model(llm_info.id)
 
         # 5. Parse the sections outline
         section_list = request.sections.strip().split("\n")
