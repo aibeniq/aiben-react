@@ -105,7 +105,7 @@ def get_llm_models(
         .limit(limit)
     ).all()
 
-    return LlmModelsPublic(data=models)
+    return LlmModelsPublic(data=models, count=len(models))
 
 
 @router.get("/default", response_model=LlmModelPublic)
