@@ -74,6 +74,13 @@ jobs:
       - run: uv run bash scripts/generate-client.sh
         env:
           VIRTUAL_ENV: backend/.venv
+          SECRET_KEY: just-for-generating-client
+          POSTGRES_PASSWORD: just-for-generating-client
+          FIRST_SUPERUSER_PASSWORD: just-for-generating-client
+          PROJECT_NAME: aiben-react
+          POSTGRES_SERVER: localhost
+          POSTGRES_USER: postgres
+          FIRST_SUPERUSER: admin@example.com
       - run: docker compose build
       - run: docker compose down -v --remove-orphans
       - name: Run Playwright tests

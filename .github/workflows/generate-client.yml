@@ -42,6 +42,10 @@ jobs:
           SECRET_KEY: just-for-generating-client
           POSTGRES_PASSWORD: just-for-generating-client
           FIRST_SUPERUSER_PASSWORD: just-for-generating-client
+          PROJECT_NAME: aiben-react
+          POSTGRES_SERVER: localhost
+          POSTGRES_USER: postgres
+          FIRST_SUPERUSER: admin@example.com
       - name: Add changes to git
         run: |
           git config --local user.email "github-actions@github.com"
