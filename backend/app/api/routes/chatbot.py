@@ -16,6 +16,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
+from langchain_core.prompts import PromptTemplate
 
 from app.core.config import settings
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
@@ -117,7 +118,7 @@ session_cache = SessionCache()
 
 
 def rephrase_question_with_context(
-    llm: Union[BaseChatModel, BaseLLM],
+    llm: BaseChatModel,
     chat_history: str,
     current_question: str,
 ) -> str:
@@ -128,15 +129,15 @@ def rephrase_question_with_context(
         print("No previous context to consider, returning original question")
         return current_question
 
-    print("Now rephrasing question with context")
-
     try:
-        rephrased_question = llm.invoke(
-            settings.CHATBOT_REPHRASING_PROMPT_TEMPLATE,
-            {"chat_history": chat_history, "question": current_question},
+        prompt_template = PromptTemplate.from_template(
+            settings.CHATBOT_REPHRASING_PROMPT_TEMPLATE
         )
+        variables = {"chat_history": chat_history, "question": current_question}
+        prompt = prompt_template.invoke(variables)
+        response = llm.invoke(prompt)
 
-        rephrased_question = str(rephrased_question).strip()
+        rephrased_question = response.content.strip()
         print(f"Original question: {current_question}")
         print(f"Rephrased question: {rephrased_question}")
         return rephrased_question
@@ -181,7 +182,7 @@ async def query_knowledge_base(
             llm = cached_data.get("llm")
 
         # If no cached LLM, we need to set everything up
-        if not llm:
+        if not llm or not isinstance(llm, BaseChatModel):
             print("Setting up new resources for knowledge base query")
             # 1. Retrieve knowledge base from database
             kb = session.get(KnowledgeBase, kb_id)
@@ -298,17 +299,17 @@ async def query_knowledge_base(
             }
             sources.append(source)
 
-        # Define prompt for question answering
-        qa_prompt_template = settings.CHATBOT_KB_QA_PROMPT_TEMPLATE
-
         # Generate the answer
         try:
             print("Generating answer for knowledge base query...")
-            answer_content = llm.invoke(
-                qa_prompt_template,
-                {"context": context, "question": rephrased_question},
+            # Define prompt for question answering
+            qa_prompt_template = PromptTemplate.from_template(
+                settings.CHATBOT_KB_QA_PROMPT_TEMPLATE
             )
-            print(f"Got response: {answer_content[:100]}...")
+            variables = {"context": context, "question": rephrased_question}
+            prompt = qa_prompt_template.invoke(variables)
+            answer = llm.invoke(prompt)
+            print(f"Got response: {answer.content[:100]}...")
         except Exception as e:
             print(f"Error generating answer: {e}")
             raise HTTPException(
@@ -325,7 +326,7 @@ async def query_knowledge_base(
                 "rephrased_question": rephrased_question,
                 "kb_id": kb_id,
             },
-            output_data=answer_content,
+            output_data=answer.content,
             metadata={
                 "session_id": session_id,
                 "is_follow_up": is_follow_up,
@@ -334,7 +335,7 @@ async def query_knowledge_base(
         )
 
         return {
-            "answer": answer_content,
+            "answer": answer.content,
             "sources": sources,
             "session_id": session_id,  # Return session ID for client to use in follow-ups
             "rephrased_question": rephrased_question,
@@ -497,24 +498,23 @@ async def query_document(
             }
             sources.append(source)
 
-        # Define prompt
-        qa_prompt_template = settings.CHATBOT_KB_QA_PROMPT_TEMPLATE
-
         # Generate the answer - with branching for different model types
         try:
             print("Generating answer for document query...")
-            answer_content = llm.invoke(
-                qa_prompt_template,
-                {"context": context, "question": rephrased_question},
+            qa_prompt_template = PromptTemplate.from_template(
+                settings.CHATBOT_KB_QA_PROMPT_TEMPLATE
             )
-            print(f"Got response: {answer_content[:100]}...")
+            variables = {"context": context, "question": rephrased_question}
+            prompt = qa_prompt_template.invoke(variables)
+            answer = llm.invoke(prompt)
+            print(f"Got response: {answer.content[:100]}...")
         except Exception as e:
             print(f"Error generating answer: {e}")
             raise HTTPException(
                 status_code=500, detail=f"Error generating answer: {str(e)}"
             )
 
-        print("Response:", answer_content[:100])
+        print("Response:", answer.content[:100])
         print("Sources:", len(sources))
 
         # After generating the answer and before returning:
@@ -527,7 +527,7 @@ async def query_document(
                 "rephrased_question": rephrased_question,
                 "document": file.filename,
             },
-            output_data=answer_content,
+            output_data=answer.content,
             metadata={
                 "session_id": session_id,
                 "is_follow_up": is_follow_up,
@@ -536,7 +536,7 @@ async def query_document(
         )
 
         return {
-            "answer": answer_content,
+            "answer": answer.content,
             "sources": sources,
             "session_id": session_id,
             "rephrased_question": rephrased_question,
@@ -599,7 +599,7 @@ async def query_text(
             llm = cached_data.get("llm")
 
         # If no cached LLM, get a new one
-        if not llm:
+        if not llm or not isinstance(llm, BaseChatModel):
             print("Setting up new LLM for text query")
             # Get the default LLM model
             llm = LlmService.get_model(current_user.default_llm)
@@ -619,18 +619,18 @@ async def query_text(
             print("No chat history, using original question")
             rephrased_question = question
 
-        # Define prompt template for general Q&A
-        qa_prompt_template = settings.CHATBOT_GENERAL_QA_PROMPT_TEMPLATE
-
         # Handle different model types
-        answer_content = ""
+        answer = None
 
         try:
             print("Generating answer for text query...")
-            answer_content = llm.invoke(
-                qa_prompt_template, {"question": rephrased_question}
+            qa_prompt_template = PromptTemplate.from_template(
+                settings.CHATBOT_GENERAL_QA_PROMPT_TEMPLATE
             )
-            print(f"Got response: {answer_content[:100]}...")
+            variables = {"question": rephrased_question}
+            prompt = qa_prompt_template.invoke(variables)
+            answer = llm.invoke(prompt)
+            print(f"Got response: {answer.content[:100]}...")
         except Exception as e:
             print(f"Error generating answer: {e}")
             raise HTTPException(
@@ -642,12 +642,12 @@ async def query_text(
             user_id=current_user.id,
             functionality="chatbot",
             input_data={"question": question, "rephrased_question": rephrased_question},
-            output_data=answer_content,
+            output_data=answer.content,
             metadata={"session_id": session_id, "is_follow_up": is_follow_up},
         )
 
         return {
-            "answer": answer_content,
+            "answer": answer.content,
             "session_id": session_id,
             "rephrased_question": rephrased_question,
         }
