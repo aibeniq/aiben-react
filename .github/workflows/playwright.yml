@@ -82,10 +82,18 @@ jobs:
           POSTGRES_USER: postgres
           FIRST_SUPERUSER: admin@example.com
       - run: cp .env.example .env
+      - name: Configure mailcatcher for tests
+        run: |
+          echo "SMTP_HOST=mailcatcher" >> .env
+          echo "SMTP_PORT=1025" >> .env
+          echo "SMTP_TLS=false" >> .env
+          echo "EMAILS_FROM_EMAIL=noreply@example.com" >> .env
       - run: docker compose build
       - run: docker compose down -v --remove-orphans
       - name: Run Playwright tests
         run: docker compose run --rm playwright npx playwright test --fail-on-flaky-tests --trace=retain-on-failure --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+        env:
+          MAILCATCHER_HOST: http://mailcatcher:1080
       - run: docker compose down -v --remove-orphans
       - name: Upload blob report to GitHub Actions Artifacts
         if: ${{ !cancelled() }}
