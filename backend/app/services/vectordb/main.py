@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import List, Dict, Any, Optional
 from pymilvus import (
     MilvusClient,
@@ -169,10 +170,10 @@ class VectorDBService:
         if not spec:
             raise ValueError(f"Unknown embedding model: {embedding_model_id}")
 
-        # create safe collection name: provider_model_dimensions
-        safe_name = f"{spec.provider}_{spec.model_name}_{spec.dimensions}"
-        # remove problematic characters
-        safe_name = safe_name.replace("-", "").replace(".", "").replace("/", "")
+        # create safe collection name (only alphanumerics and underscores): provider_model_dimensions
+        safe_name = re.sub(
+            r"[^a-zA-Z0-9_]", "", f"{spec.provider}_{spec.model_name}_{spec.dimensions}"
+        )
         return safe_name
 
     def _get_embedding_model(self, embedding_model_id: str) -> Embeddings:
