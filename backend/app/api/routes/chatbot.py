@@ -395,6 +395,7 @@ async def _handle_full_text_document_query(
                 temp_file.write(await file.read())
                 temp_path = temp_file.name
                 temp_paths.append(temp_path)
+            # File is now closed and ready to be read by loaders
 
             # Extract text from file
             if file.filename.endswith(".pdf"):
@@ -962,6 +963,7 @@ async def query_document(
                     temp_file.write(await file.read())
                     temp_path = temp_file.name
                     temp_paths.append(temp_path)
+                # File is now closed and ready to be read by loaders
 
                 # Detect file type and use appropriate loader
                 if file.filename.endswith(".pdf"):
