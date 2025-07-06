@@ -4,16 +4,15 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
+from app.services.llms import LlmService
+from app.services.embeddings import EmbeddingService
 from app.models import (
     Item,
     ItemCreate,
     User,
     UserCreate,
     UserUpdate,
-    LlmModel,
-    EmbeddingModel,
 )
-from app.core.config import settings
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -23,37 +22,21 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
         user_create, update={"hashed_password": get_password_hash(user_create.password)}
     )
 
-    # Get enabled providers from config
-    enabled_llm_providers = settings.llm_providers
-    enabled_embedding_providers = settings.embedding_providers
-
-    # Set default LLM - find first system LLM model with enabled provider
-    default_llm = None
-    system_llms = session.exec(
-        select(LlmModel).where(LlmModel.owner_id.is_(None))
-    ).all()
-
-    for model in system_llms:
-        if model.provider.value.lower() in enabled_llm_providers:
-            default_llm = model
-            break
+    # Set default LLM
+    default_llm = LlmService.get_default_model()
 
     if default_llm:
         db_obj.default_llm = default_llm.id
+    else:
+        raise ValueError("No default LLM model found")
 
-    # Set default embedding model - find first system embedding model with enabled provider
-    default_embedding = None
-    system_embeddings = session.exec(
-        select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
-    ).all()
-
-    for model in system_embeddings:
-        if model.provider.value.lower() in enabled_embedding_providers:
-            default_embedding = model
-            break
+    # Set default embedding model
+    default_embedding = EmbeddingService.get_default_model()
 
     if default_embedding:
         db_obj.default_embedding_model = default_embedding.id
+    else:
+        raise ValueError("No default embedding model found")
 
     # Save the user with default models
     session.add(db_obj)
