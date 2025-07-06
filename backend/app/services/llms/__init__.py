@@ -1,13 +1,11 @@
 from .main import (
     LlmService,
-    LlmModelInfo,
+    LlmModelSpec,
     ReplicateLlm,
-    BedrockLlm,
 )
 
 __all__ = [
     "LlmService",
-    "LlmModelInfo",
+    "LlmModelSpec",
     "ReplicateLlm",
-    "BedrockLlm",
 ]
