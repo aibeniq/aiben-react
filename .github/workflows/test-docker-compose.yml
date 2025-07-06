@@ -37,6 +37,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Copy .env.example to .env
+        run: cp .env.example .env
       - run: docker compose build
       - run: docker compose down -v --remove-orphans
       - run: docker compose up -d --wait backend frontend adminer
