@@ -90,6 +90,7 @@ def extract_text_from_file(file_content: bytes, filename: str) -> str:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
                 temp_file.write(file_content)
                 temp_file_path = temp_file.name
+            # File is now closed and ready to be read by PyPDFLoader
 
             try:
                 loader = PyPDFLoader(temp_file_path)
@@ -106,6 +107,7 @@ def extract_text_from_file(file_content: bytes, filename: str) -> str:
             ) as temp_file:
                 temp_file.write(file_content)
                 temp_file_path = temp_file.name
+            # File is now closed and ready to be read by docx
 
             try:
                 if file_ext == ".docx":
@@ -834,6 +836,8 @@ async def generate_outline(
             "example_document": example_document_section,
             "example_instruction": example_instruction,
             "example_analysis_instruction": example_analysis_instruction,
+            "knowledge_base_content": "",
+            "knowledge_base_instruction": "",
         }
 
         # Format the prompt with variables to show what exactly is being sent to the LLM

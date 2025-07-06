@@ -298,16 +298,6 @@ const FormTemplateModal = ({
                           </Box>
                         )}
 
-                        <Button
-                          onClick={handleGenerateFields}
-                          loading={generating}
-                          size="sm"
-                          colorScheme="blue"
-                          disabled={!formDescription.trim() || formDescription.trim().length < 10}
-                        >
-                          {generating ? "Generating Fields..." : "Generate Fields from Description"}
-                        </Button>
-
                         {formDescription.trim().length < 10 &&
                           formDescription.trim().length > 0 && (
                             <Text fontSize="sm" color="gray.500">
@@ -318,7 +308,35 @@ const FormTemplateModal = ({
                     </Field>
                   </VStack>
 
-                  <Field label="Form Fields" required py={0} flex="1">
+                  <Field
+                    label={
+                      <HStack justify="space-between" w="full">
+                        <span>Form Fields</span>
+                        <Button
+                          size="xs"
+                          onClick={handleGenerateFields}
+                          disabled={
+                            !formDescription.trim() ||
+                            formDescription.trim().length < 10 ||
+                            generating
+                          }
+                          loading={generating}
+                          variant="outline"
+                          colorPalette="green"
+                          title={
+                            formDescription.trim().length < 10
+                              ? "Description must be at least 10 characters to generate fields"
+                              : "Generate fields based on the description"
+                          }
+                        >
+                          {generating ? "Generating..." : "Generate Form Template"}
+                        </Button>
+                      </HStack>
+                    }
+                    required
+                    py={0}
+                    flex="1"
+                  >
                     <VStack
                       align="stretch"
                       gap={2}

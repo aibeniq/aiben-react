@@ -64,8 +64,18 @@ def extract_text_from_file(file: UploadFile) -> str:
     ) as temp_file:
         # Read the file content and write to temp file
         file_content = file.file.read()
+        if not file_content:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Uploaded file {file.filename} appears to be empty"
+            )
         temp_file.write(file_content)
         temp_file_path = temp_file.name
+    # File is now closed and ready to be read by other processes
+    
+    # Debug: Check file size
+    file_size = os.path.getsize(temp_file_path)
+    print(f"Temporary file created: {temp_file_path}, size: {file_size} bytes")
 
     try:
         # Process based on file type
@@ -943,12 +953,11 @@ def generate_topics(
         if files and len(files) > 0:
             file = files[0]
             if file.size > 0:
-                content = file.file.read()
+                # Reset file pointer to beginning before processing
+                file.file.seek(0)
                 example_document = extract_text_from_file(file)
                 example_instruction = f" and use the uploaded example document ({file.filename}) as a reference for the appropriate scope and depth of comparison topics"
                 example_analysis_instruction = f" and explain how they align with the scope shown in the example document ({file.filename})"
-                # Reset file pointer in case it's used elsewhere
-                file.file.seek(0)
 
         # Prepare variables for the prompt
         prompt_variables = {

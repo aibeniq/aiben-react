@@ -93,6 +93,7 @@ def extract_text_from_file(file_content: bytes, filename: str) -> str:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
                 temp_file.write(file_content)
                 temp_file_path = temp_file.name
+            # File is now closed and ready to be read by PyPDFLoader
 
             try:
                 loader = PyPDFLoader(temp_file_path)
@@ -109,6 +110,7 @@ def extract_text_from_file(file_content: bytes, filename: str) -> str:
             ) as temp_file:
                 temp_file.write(file_content)
                 temp_file_path = temp_file.name
+            # File is now closed and ready to be read by document processors
 
             try:
                 if file_ext == ".docx":

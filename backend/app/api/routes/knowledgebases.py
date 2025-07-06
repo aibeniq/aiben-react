@@ -180,6 +180,7 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
             file.file.read()
         )  # Write the file content to the temporary file
         temp_file_path = temp_file.name
+    # File is now closed and ready to be read by loaders
 
     try:
         if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
