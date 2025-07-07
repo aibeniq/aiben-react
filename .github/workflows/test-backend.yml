@@ -33,13 +33,13 @@ jobs:
           echo "AWS_ACCESS_KEY_ID=test-access-key" >> .env
           echo "AWS_SECRET_ACCESS_KEY=test-secret-key" >> .env
           echo "AWS_REGION=us-east-1" >> .env
-          echo "MILVUS_URL=http://milvus:19530" >> .env
+          echo "MILVUS_URL=http://localhost:19530" >> .env
         env:
           OPENAI_API_KEY: test-key
           AWS_ACCESS_KEY_ID: test-access-key
           AWS_SECRET_ACCESS_KEY: test-secret-key
           AWS_REGION: us-east-1
-          MILVUS_URL: http://milvus:19530
+          MILVUS_URL: http://localhost:19530
       - run: docker compose down -v --remove-orphans
       - run: docker compose up -d --wait db mailcatcher milvus-etcd milvus-minio milvus
       - name: Migrate DB
@@ -50,7 +50,7 @@ jobs:
           AWS_ACCESS_KEY_ID: test-access-key
           AWS_SECRET_ACCESS_KEY: test-secret-key
           AWS_REGION: us-east-1
-          MILVUS_URL: http://milvus:19530
+          MILVUS_URL: http://localhost:19530
       - name: Run tests
         run: uv run bash scripts/tests-start.sh "Coverage for ${{ github.sha }}"
         working-directory: backend
@@ -59,7 +59,7 @@ jobs:
           AWS_ACCESS_KEY_ID: test-access-key
           AWS_SECRET_ACCESS_KEY: test-secret-key
           AWS_REGION: us-east-1
-          MILVUS_URL: http://milvus:19530
+          MILVUS_URL: http://localhost:19530
       - run: docker compose down -v --remove-orphans
       - name: Store coverage files
         uses: actions/upload-artifact@v4
