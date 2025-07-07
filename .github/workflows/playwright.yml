@@ -81,6 +81,7 @@ jobs:
           POSTGRES_SERVER: localhost
           POSTGRES_USER: postgres
           FIRST_SUPERUSER: admin@example.com
+      - run: cp .env.example .env
       - run: docker compose build
       - run: docker compose down -v --remove-orphans
       - name: Run Playwright tests
