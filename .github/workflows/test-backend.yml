@@ -41,7 +41,7 @@ jobs:
           AWS_REGION: us-east-1
           MILVUS_URL: http://milvus:19530
       - run: docker compose down -v --remove-orphans
-      - run: docker compose up -d db mailcatcher milvus-etcd milvus-minio milvus
+      - run: docker compose up -d --wait db mailcatcher milvus-etcd milvus-minio milvus
       - name: Migrate DB
         run: uv run bash scripts/prestart.sh
         working-directory: backend
