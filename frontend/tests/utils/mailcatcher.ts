@@ -9,22 +9,38 @@ type Email = {
 async function findEmail({
   request,
   filter,
-}: { request: APIRequestContext; filter?: (email: Email) => boolean }) {
-  const response = await request.get(`${process.env.MAILCATCHER_HOST}/messages`)
-
-  let emails = await response.json()
-
-  if (filter) {
-    emails = emails.filter(filter)
+}: {
+  request: APIRequestContext
+  filter?: (email: Email) => boolean
+}) {
+  if (!process.env.MAILCATCHER_HOST) {
+    throw new Error("MAILCATCHER_HOST environment variable is not set!")
   }
 
-  const email = emails[emails.length - 1]
+  try {
+    const response = await request.get(`${process.env.MAILCATCHER_HOST}/messages`)
 
-  if (email) {
-    return email as Email
+    if (!response.ok()) {
+      throw new Error(`Failed to fetch emails: ${response.status()} - ${response.statusText()}`)
+    }
+
+    let emails: Email[] = await response.json()
+
+    if (filter) {
+      emails = emails.filter(filter)
+    }
+
+    const email = emails[emails.length - 1]
+
+    if (email) {
+      return email as Email
+    }
+
+    return null
+  } catch (error) {
+    console.error(`Network error when fetching emails:`, error)
+    return null
   }
-
-  return null
 }
 
 export function findLastEmail({
@@ -37,10 +53,9 @@ export function findLastEmail({
   timeout?: number
 }) {
   const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(
-      () => reject(new Error("Timeout while trying to get latest email")),
-      timeout,
-    ),
+    setTimeout(() => {
+      reject(new Error("Timeout while trying to get latest email"))
+    }, timeout),
   )
 
   const checkEmails = async () => {
@@ -50,6 +65,7 @@ export function findLastEmail({
       if (emailData) {
         return emailData
       }
+
       // Wait for 100ms before checking again
       await new Promise((resolve) => setTimeout(resolve, 100))
     }

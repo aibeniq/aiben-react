@@ -84,6 +84,7 @@ services:
       SMTP_PORT: "1025"
       SMTP_TLS: "false"
       SMTP_SSL: "false"
+      SMTP_USER: ""
       EMAILS_FROM_EMAIL: "noreply@example.com"
 
   mailcatcher:
