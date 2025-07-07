@@ -82,12 +82,6 @@ jobs:
           POSTGRES_USER: postgres
           FIRST_SUPERUSER: admin@example.com
       - run: cp .env.example .env
-      - name: Configure mailcatcher for tests
-        run: |
-          echo "SMTP_HOST=mailcatcher" >> .env
-          echo "SMTP_PORT=1025" >> .env
-          echo "SMTP_TLS=false" >> .env
-          echo "EMAILS_FROM_EMAIL=noreply@example.com" >> .env
       - run: docker compose build
       - run: docker compose down -v --remove-orphans
       - name: Run Playwright tests
