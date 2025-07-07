@@ -154,9 +154,9 @@ async def query_knowledge_base(
     vectordb_service: VectorDBDep,
     kb_id: str,
     question: str,
-    chat_history: str = None,
+    chat_history: Optional[str] = None,
     use_default_models: bool = False,
-    session_id: str = None,
+    session_id: Optional[str] = None,
     is_follow_up: bool = False,
 ):
     """Query a knowledge base with a question."""
@@ -354,10 +354,10 @@ async def query_knowledge_base(
 async def query_document(
     session: SessionDep,
     current_user: CurrentUser,
-    question: str = None,
-    chat_history: str = None,
+    question: Optional[str] = None,
+    chat_history: Optional[str] = None,
     use_default_models: bool = False,
-    session_id: str = None,
+    session_id: Optional[str] = None,
     is_follow_up: bool = False,
     file: UploadFile = File(None),
 ):
@@ -576,8 +576,8 @@ async def query_text(
     session: SessionDep,
     current_user: CurrentUser,
     question: str,
-    chat_history: str = None,
-    session_id: str = None,
+    chat_history: Optional[str] = None,
+    session_id: Optional[str] = None,
     is_follow_up: bool = False,
 ):
     """Answer a direct text question without a knowledge base or document."""
