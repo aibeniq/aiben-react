@@ -229,7 +229,9 @@ export class ChatService {
    * @returns TextQueryResponse Successful Response
    * @throws ApiError
    */
-  public static queryText(data: ChatQueryTextData): CancelablePromise<ChatQueryTextResponse> {
+  public static queryText(
+    data: ChatQueryTextData,
+  ): CancelablePromise<ChatQueryTextResponse> {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/chat/text",
@@ -590,7 +592,9 @@ export class ItemsService {
    * @returns ItemPublic Successful Response
    * @throws ApiError
    */
-  public static createItem(data: ItemsCreateItemData): CancelablePromise<ItemsCreateItemResponse> {
+  public static createItem(
+    data: ItemsCreateItemData,
+  ): CancelablePromise<ItemsCreateItemResponse> {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/items/",
@@ -610,7 +614,9 @@ export class ItemsService {
    * @returns ItemPublic Successful Response
    * @throws ApiError
    */
-  public static readItem(data: ItemsReadItemData): CancelablePromise<ItemsReadItemResponse> {
+  public static readItem(
+    data: ItemsReadItemData,
+  ): CancelablePromise<ItemsReadItemResponse> {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/items/{id}",
@@ -632,7 +638,9 @@ export class ItemsService {
    * @returns ItemPublic Successful Response
    * @throws ApiError
    */
-  public static updateItem(data: ItemsUpdateItemData): CancelablePromise<ItemsUpdateItemResponse> {
+  public static updateItem(
+    data: ItemsUpdateItemData,
+  ): CancelablePromise<ItemsUpdateItemResponse> {
     return __request(OpenAPI, {
       method: "PUT",
       url: "/api/v1/items/{id}",
@@ -655,7 +663,9 @@ export class ItemsService {
    * @returns Message Successful Response
    * @throws ApiError
    */
-  public static deleteItem(data: ItemsDeleteItemData): CancelablePromise<ItemsDeleteItemResponse> {
+  public static deleteItem(
+    data: ItemsDeleteItemData,
+  ): CancelablePromise<ItemsDeleteItemResponse> {
     return __request(OpenAPI, {
       method: "DELETE",
       url: "/api/v1/items/{id}",
@@ -1193,7 +1203,7 @@ export class ReportgenieService {
       method: "POST",
       url: "/api/v1/reportgenie/generate/docx",
       body: data.requestBody,
-      responseType: "blob",
+      responseType: 'blob',
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
@@ -1452,7 +1462,7 @@ export class TwincheckService {
       method: "POST",
       url: "/api/v1/twincheck/generate/docx",
       body: data.requestBody,
-      responseType: "blob",
+      responseType: 'blob',
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
@@ -1495,7 +1505,9 @@ export class UsersService {
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
-  public static createUser(data: UsersCreateUserData): CancelablePromise<UsersCreateUserResponse> {
+  public static createUser(
+    data: UsersCreateUserData,
+  ): CancelablePromise<UsersCreateUserResponse> {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/users/",
@@ -1631,7 +1643,9 @@ export class UsersService {
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
-  public static updateUser(data: UsersUpdateUserData): CancelablePromise<UsersUpdateUserResponse> {
+  public static updateUser(
+    data: UsersUpdateUserData,
+  ): CancelablePromise<UsersUpdateUserResponse> {
     return __request(OpenAPI, {
       method: "PATCH",
       url: "/api/v1/users/{user_id}",
@@ -1654,7 +1668,9 @@ export class UsersService {
    * @returns Message Successful Response
    * @throws ApiError
    */
-  public static deleteUser(data: UsersDeleteUserData): CancelablePromise<UsersDeleteUserResponse> {
+  public static deleteUser(
+    data: UsersDeleteUserData,
+  ): CancelablePromise<UsersDeleteUserResponse> {
     return __request(OpenAPI, {
       method: "DELETE",
       url: "/api/v1/users/{user_id}",
@@ -1677,7 +1693,9 @@ export class UtilsService {
    * @returns Message Successful Response
    * @throws ApiError
    */
-  public static testEmail(data: UtilsTestEmailData): CancelablePromise<UtilsTestEmailResponse> {
+  public static testEmail(
+    data: UtilsTestEmailData,
+  ): CancelablePromise<UtilsTestEmailResponse> {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/utils/test-email/",
@@ -1904,7 +1922,7 @@ export class VeradocService {
       method: "POST",
       url: "/api/v1/veradoc/generate/docx",
       body: data.requestBody,
-      responseType: "blob",
+      responseType: 'blob',
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
