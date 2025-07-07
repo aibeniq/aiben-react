@@ -1,7 +1,8 @@
 import enum
 import uuid
+from datetime import datetime
 from typing import List, Dict, Any, Optional
-from pydantic import EmailStr
+from pydantic import EmailStr, field_validator
 from sqlmodel import Field, Relationship, SQLModel, Column
 from sqlalchemy import (
     LargeBinary,
@@ -11,7 +12,9 @@ from sqlalchemy import (
     Enum as SQLAlchemyEnum,
     JSON,
 )
-from datetime import datetime
+
+from app.services.embeddings import EmbeddingModelInfo, EmbeddingService
+from app.core.config import settings
 
 
 # Shared properties
@@ -20,6 +23,22 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
+    default_embedding_model: str = Field(
+        default_factory=lambda: EmbeddingService.get_default_model().id, max_length=100
+    )
+    default_llm: str = Field(
+        default_factory=lambda: settings.DEFAULT_LLM_MODEL, max_length=100
+    )
+
+    @field_validator("default_embedding_model")
+    @classmethod
+    def validate_embedding_model(cls, v: str) -> str:
+        if not EmbeddingService.is_valid_model_id(v):
+            available_models = EmbeddingService.get_model_ids()
+            raise ValueError(
+                f"Invalid embedding model ID '{v}'. Available models: {', '.join(available_models)}"
+            )
+        return v
 
 
 # Properties to receive via API on creation
@@ -56,11 +75,6 @@ class User(UserBase, table=True):
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
     knowledge_bases: list["KnowledgeBase"] = Relationship(
         back_populates="owner", cascade_delete=True
-    )
-    # track the user's default models
-    default_llm: Optional[uuid.UUID] = Field(default=None, foreign_key="llmmodel.id")
-    default_embedding_model: Optional[uuid.UUID] = Field(
-        default=None, foreign_key="embeddingmodel.id"
     )
 
 
@@ -136,25 +150,33 @@ class NewPassword(SQLModel):
 class KnowledgeBaseBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=255)
-    embedding_model_id: Optional[uuid.UUID] = Field(
-        default=None, foreign_key="embeddingmodel.id"
+    embedding_model_id: str = Field(
+        default_factory=lambda: EmbeddingService.get_default_model().id, max_length=100
     )
-    # New property to store file paths or URLs
-    # file_paths: Optional[List[str]] = Field(default=None, sa_column_kwargs={"nullable": True})
+
+    @field_validator("embedding_model_id")
+    @classmethod
+    def validate_embedding_model(cls, v: str) -> str:
+        if not EmbeddingService.is_valid_model_id(v):
+            available_models = EmbeddingService.get_model_ids()
+            raise ValueError(
+                f"Invalid embedding model ID '{v}'. Available models: {', '.join(available_models)}"
+            )
+        return v
 
 
 # Properties to receive on KnowledgeBase creation
 class KnowledgeBaseCreate(KnowledgeBaseBase):
-    embedding_model_id: Optional[uuid.UUID] = None
+    pass
 
 
 # Properties to receive on KnowledgeBase update
-class KnowledgeBaseUpdate(KnowledgeBaseBase):
+class KnowledgeBaseUpdate(SQLModel):
     title: str | None = Field(default=None, min_length=1, max_length=255, unique=True)  # type: ignore
     description: str | None = Field(default=None, max_length=255)
-    removed_file_ids: List[str] = Field(
-        default_factory=list
-    )  # List of file IDs to be removed
+    removed_file_ids: List[str] | None = Field(
+        default=None
+    )  # List of file IDs to be removed (optional)
     # Allow updating file paths
     # file_paths: Optional[List[str]] = None
 
@@ -173,7 +195,6 @@ class KnowledgeBase(KnowledgeBaseBase, table=True):
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
     owner: User | None = Relationship(back_populates="knowledge_bases")
-    data: bytes | None = Field(default=None, sa_column=LargeBinary)
     date_created: datetime
     date_modified: datetime
 
@@ -186,8 +207,7 @@ class KnowledgeBasePublic(KnowledgeBaseBase):
     date_created: datetime
     date_modified: datetime
     number_of_sources: int = Field(default=0)
-    embedding_model_id: Optional[uuid.UUID] = None
-    embedding_model_name: Optional[str] = Field(default=None)
+    embedding_model: EmbeddingModelInfo
 
 
 class KnowledgeBasesPublic(SQLModel):
@@ -334,117 +354,6 @@ class VeraDocRagResponse(VeraDocRequest):
 class RagChecklistRequest(VeraDocRequest):
     knowledge_base_id: str
     questions: str
-
-
-# Enum for model providers
-class ModelProvider(str, enum.Enum):
-    HUGGINGFACE = "huggingface"
-    OPENAI = "openai"
-    OLLAMA = "ollama"
-    REPLICATE = "replicate"
-    AWS = "aws"
-    # Add other providers as needed
-
-
-# Define a SQLAlchemy type for the enum
-ModelProviderType = SQLAlchemyEnum(
-    ModelProvider,
-    name="modelprovider",
-    create_constraint=True,
-    validate_strings=True,
-    native_enum=True,
-    values_callable=lambda x: [e.value for e in x],  # Use enum values instead of names
-)
-
-
-# Update the EmbeddingModel table
-class EmbeddingModel(SQLModel, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    name: str = Field(index=True)  # Human-readable name
-    model_id: (
-        str  # Model identifier (e.g., "all-MiniLM-L6-v2" or "text-embedding-3-large")
-    )
-    provider: ModelProvider = Field(
-        default=ModelProvider.HUGGINGFACE,
-        sa_column=Column(ModelProviderType, nullable=False),
-    )
-    description: str = Field(default="")
-    owner_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
-    date_created: datetime = Field(default_factory=datetime.utcnow)
-    date_modified: datetime = Field(default_factory=datetime.utcnow)
-
-
-# Update create and update models
-class EmbeddingModelCreate(SQLModel):
-    name: str
-    model_id: str
-    provider: ModelProvider = ModelProvider.HUGGINGFACE
-    description: str = ""
-
-
-class EmbeddingModelUpdate(SQLModel):
-    name: Optional[str] = None
-    model_id: Optional[str] = None
-    provider: Optional[ModelProvider] = None
-    description: Optional[str] = None
-
-
-class EmbeddingModelValidate(SQLModel):
-    model_id: str
-    provider: ModelProvider
-
-
-class EmbeddingModelPublic(EmbeddingModel):
-    pass
-
-
-class EmbeddingModelsPublic(SQLModel):
-    data: List[EmbeddingModelPublic]
-    count: int
-
-
-# Add new models for LLM settings
-
-
-class LlmModel(SQLModel, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    name: str = Field(index=True)  # Human-readable name
-    model_id: str  # Model identifier (e.g., "gpt-4o-mini" or "llama3")
-    provider: ModelProvider = Field(
-        default=ModelProvider.OPENAI,
-        sa_column=Column(ModelProviderType, nullable=False),
-    )
-    description: str = Field(default="")
-    owner_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
-    date_created: datetime = Field(default_factory=datetime.utcnow)
-    date_modified: datetime = Field(default_factory=datetime.utcnow)
-
-
-class LlmModelCreate(SQLModel):
-    name: str
-    model_id: str
-    provider: ModelProvider = ModelProvider.OPENAI
-    description: str = ""
-
-
-class LlmModelUpdate(SQLModel):
-    name: Optional[str] = None
-    model_id: Optional[str] = None
-    provider: Optional[ModelProvider] = None
-    description: Optional[str] = None
-
-
-class LlmModelPublic(LlmModel):
-    pass
-
-
-class LlmModelsPublic(SQLModel):
-    data: List[LlmModelPublic]
-
-
-class LlmModelsValidate(SQLModel):
-    model_id: str
-    provider: ModelProvider
 
 
 # Request model for ReportGenie

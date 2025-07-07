@@ -3,8 +3,6 @@ from app.models import (
     VeraDocResponse,
     VeraDocChecklist,
     RagChecklistRequest,
-    EmbeddingModel,
-    Source,
     KnowledgeBase,
     LlmInteraction,
     DocxRequest,
@@ -13,14 +11,9 @@ from app.models import (
     User,
 )
 
-from app.api.deps import CurrentUser, SessionDep
+from app.api.deps import CurrentUser, SessionDep, VectorDBDep
 from app.core.config import settings
-from app.services.knowledgebases import get_embedding_model
-from app.services.embeddings import load_embeddings_model
-from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
-from app.services.retrievers import (
-    create_ensemble_retriever,
-)  # Import the ensemble retriever
+from app.services.llms.main import LlmService
 
 from sqlmodel import select
 from fastapi import (
@@ -37,20 +30,15 @@ import asyncio
 from dotenv import load_dotenv
 import json
 import os
-import re
-from pathlib import Path
 
 from datetime import datetime
-from starlette.requests import Request
-import tempfile
 import traceback
-from langchain_community.vectorstores import Chroma
-import zipfile
 from io import BytesIO
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import markdown
 from bs4 import BeautifulSoup
+from langchain_core.prompts import PromptTemplate
 
 # Load environment variables from .env file
 load_dotenv(dotenv_path="c:/miniconda/aibeniq-react/.env", override=False)
@@ -90,6 +78,7 @@ def generate_template(questions: List[str]) -> Dict[str, str]:
 async def process_rag_checklist(
     session: SessionDep,
     current_user: CurrentUser,
+    vectordb_service: VectorDBDep,
     request_data: RagChecklistRequest = Depends(),
     files: List[UploadFile] = File(...),
     handwritten_files: List[UploadFile] = File(None),
@@ -138,232 +127,60 @@ async def process_rag_checklist(
                 status_code=403, detail="You don't have access to this knowledge base"
             )
 
-        # 2. Create a temporary directory for ChromaDB
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Extract the zipped ChromaDB into the temp directory
-            if kb.data:
-                with zipfile.ZipFile(BytesIO(kb.data), "r") as zip_ref:
-                    zip_ref.extractall(temp_dir)
+        # 2. Get embedding model info for the knowledge base
+        if kb.embedding_model_id:
+            from app.services.embeddings import EmbeddingService
+
+            if EmbeddingService.is_valid_model_id(kb.embedding_model_id):
+                embedding_model = EmbeddingService.get_model_spec(kb.embedding_model_id)
+                print(f"Using embedding model: {kb.embedding_model_id}")
             else:
                 raise HTTPException(
-                    status_code=400, detail="Knowledge base has no vector database data"
+                    status_code=400,
+                    detail="Knowledge base has an invalid embedding model",
                 )
-
-            # 3. Load the vector database with the SAME model used to create the knowledge base
-            # Use the knowledge base's specific embedding model if available
-            if kb.embedding_model_id:
-                embedding_model = session.get(EmbeddingModel, kb.embedding_model_id)
-                if embedding_model:
-                    # Use the KB's original model
-                    model_id = embedding_model.model_id
-                    provider = embedding_model.provider
-                    print(
-                        f"Using knowledge base's original embedding model: {model_id}"
-                    )
-                else:
-                    # Fallback if the model was deleted from the database
-                    embedding_info = get_embedding_model(session, current_user)
-                    model_id = embedding_info["model_id"]
-                    provider = embedding_info["provider"]
-                    print(
-                        f"Original embedding model not found, using current default: {model_id}"
-                    )
-            else:
-                # For knowledge bases created before tracking embedding models
-                embedding_info = get_embedding_model(session, current_user)
-                model_id = embedding_info["model_id"]
-                provider = embedding_info["provider"]
-                print(
-                    f"Knowledge base has no embedding model record, using current default: {embedding_info}"
-                )
-
-            print(f"Initializing embedding model: {model_id} ({provider})")
-            embeddings = load_embeddings_model(provider=provider, model_id=model_id)
-            chroma_db = Chroma(
-                persist_directory=temp_dir, embedding_function=embeddings
+        else:
+            # For knowledge bases created before tracking embedding models
+            raise HTTPException(
+                status_code=400,
+                detail="Knowledge base has no embedding model",
             )
 
-            # Print all metadata in the vectorstore
-            print("======= CHROMA VECTORDB METADATA CONTENTS =======")
-            # Get all documents with their metadata
-            all_docs = chroma_db.get()
-            if all_docs and "metadatas" in all_docs and False:
-                for i, metadata in enumerate(all_docs["metadatas"]):
-                    print(f"Document {i+1} Metadata: {metadata}")
-                    # If you want to see document content as well
-                    if "documents" in all_docs and i < len(all_docs["documents"]):
-                        doc_preview = (
-                            all_docs["documents"][i][:200] + "..."
-                            if len(all_docs["documents"][i]) > 100
-                            else all_docs["documents"][i]
-                        )
-                        print(f"Content preview: {doc_preview}")
-                    print("-" * 50)
-            else:
-                print("No documents or metadata found in the vectorstore")
-            print("================================================")
+        # 3. Initialize the LLM
+        llm_info = LlmService.get_user_default_model_spec(session, current_user.id)
+        llm = LlmService.get_model(llm_info.id)
+        print("LLM successfully loaded")
 
-            # Create a hybrid retriever that combines vector-based and keyword-based retrieval
-            retriever = create_ensemble_retriever(
-                chroma_db=chroma_db,
-                vector_weight=0.7,  # Weight for vector-based retrieval
-                keyword_weight=0.3,  # Weight for keyword-based retrieval
-                search_kwargs={"k": 5},  # Search parameters
-            )
+        # 4. Define the prompts for the different stages
+        context_prompt_template = PromptTemplate.from_template(
+            settings.VERADOC_CONTEXT_PROMPT_TEMPLATE
+        )
+        qa_prompt_template = PromptTemplate.from_template(
+            settings.VERADOC_QA_PROMPT_TEMPLATE
+        )
+        final_prompt_template = PromptTemplate.from_template(
+            settings.VERADOC_FINAL_PROMPT_TEMPLATE
+        )
 
-            # 4. Initialize the LLM
-            # llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
-            print("Now loading default LLM for session with following info:")
-            print("Session:", session)
-            llm = get_default_llm(session, current_user)
-            print("LLM successfully loaded.")
+        # 5. Process each uploaded file
+        qa_pairs = []
+        question_list = request_data.questions.strip().split("\n")
 
-            # 5. Define the prompts for the different stages
-            context_prompt_template = settings.VERADOC_CONTEXT_PROMPT_TEMPLATE
-            qa_prompt_template = settings.VERADOC_QA_PROMPT_TEMPLATE
-            final_prompt_template = settings.VERADOC_FINAL_PROMPT_TEMPLATE
+        # Get file content
+        file = files[0]  # Process the first file for now
+        content = await file.read()
+        try:
+            document_text = content.decode("utf-8")
+        except UnicodeDecodeError:
+            # If it's not UTF-8 encoded, it's likely a binary file
+            # For PDFs, you could use PyPDF2 or other libraries to extract text
+            document_text = f"Failed to extract text from {file.filename}"
 
-            # 6. Process each uploaded file
-            qa_pairs = []
-            question_list = request_data.questions.strip().split("\n")
+        # Reset file position
+        await file.seek(0)
 
-            # Get file content
-            file = files[0]  # Process the first file for now
-            content = await file.read()
-            try:
-                document_text = content.decode("utf-8")
-            except UnicodeDecodeError:
-                # If it's not UTF-8 encoded, it's likely a binary file
-                # For PDFs, you could use PyPDF2 or other libraries to extract text
-                document_text = f"Failed to extract text from {file.filename}"
-
-            # Reset file position
-            await file.seek(0)
-
-            # 7. Process each question using the RAG approach
-            for question in question_list:
-                if cancellation_requested:
-                    print(
-                        "Operation cancelled by client disconnect, stopping processing"
-                    )
-                    return VeraDocResponse(
-                        results={
-                            "status": "cancelled",
-                            "message": "Operation cancelled by user",
-                        }
-                    )
-
-                question = question.strip()
-                if not question:
-                    continue
-
-                # Step 1: Retrieve relevant context from the knowledge base
-                docs = retriever.get_relevant_documents(question)
-                context = "\n\n".join([doc.page_content for doc in docs])
-
-                # Store source documents for citation
-                source_citations = []
-                for doc in docs:
-                    # Ensure source_data_id is included in metadata if available
-                    metadata = (
-                        doc.metadata.copy()
-                    )  # Copy to avoid modifying the original
-
-                    # If the metadata contains a source path that matches a pattern from a KB
-                    if "source" in metadata and isinstance(metadata["source"], str):
-                        # Try to find the corresponding source_data_id
-                        source_path = metadata["source"]
-                        # Extract just the filename
-                        raw_filename = Path(source_path).name
-
-                        # Extract the real filename after the underscore using regex
-                        # This looks for any characters followed by an underscore, then captures everything after
-                        match = re.search(r"^[^_]*_(.+)$", raw_filename)
-                        if match:
-                            # Use the captured group (everything after the underscore)
-                            filename = match.group(1)
-                        else:
-                            # Fallback to the original filename if no underscore found
-                            filename = raw_filename
-
-                        # Debug info
-                        print(f"Raw filename: {raw_filename}")
-                        print(f"Extracted filename: {filename}")
-
-                        # Try to find the source by the extracted name
-                        source_entry = session.exec(
-                            select(Source).where(Source.name == filename)
-                        ).first()
-
-                        if source_entry:
-                            metadata["source_data_id"] = str(
-                                source_entry.source_data_id
-                            )
-
-                    source = {"content": doc.page_content, "metadata": metadata}
-                    source_citations.append(source)
-
-                if cancellation_requested:
-                    print(
-                        "Operation cancelled by client disconnect, stopping processing"
-                    )
-                    return VeraDocResponse(
-                        results={
-                            "status": "cancelled",
-                            "message": "Operation cancelled by user",
-                        }
-                    )
-
-                # Step 2: Get the relevant policy context for this question
-                print("Generating context for question...")
-                question_context = invoke_llm(
-                    llm,
-                    context_prompt_template,
-                    {"context": context, "question": question},
-                )
-                print(f"Got context: {question_context[:100]}...")
-
-                if cancellation_requested:
-                    print(
-                        "Operation cancelled by client disconnect, stopping processing"
-                    )
-                    return VeraDocResponse(
-                        results={
-                            "status": "cancelled",
-                            "message": "Operation cancelled by user",
-                        }
-                    )
-
-                # Step 3: Answer the question based on the uploaded document and policy context
-                print("Generating answer based on document and context...")
-                answer = invoke_llm(
-                    llm,
-                    qa_prompt_template,
-                    {
-                        "document_text": document_text[
-                            :10000
-                        ],  # Limit length to avoid token issues
-                        "question": question,
-                        "question_context": question_context,
-                    },
-                )
-                print(f"Got answer: {answer[:100]}...")
-
-                print("Source citations for question:", question)
-                # for source in source_citations:
-                # print(f"Source: {source['metadata'].get('source', 'Unknown')}, Content: {source['content']}")
-
-                # Store the question-answer pair with context
-                qa_pairs.append(
-                    {
-                        "question": question,
-                        "answer": answer,
-                        "context": question_context,
-                        "source_citations": source_citations,
-                    }
-                )
-
-            # 8. Generate the final evaluation
+        # 6. Process each question using the RAG approach
+        for question in question_list:
             if cancellation_requested:
                 print("Operation cancelled by client disconnect, stopping processing")
                 return VeraDocResponse(
@@ -373,45 +190,152 @@ async def process_rag_checklist(
                     }
                 )
 
-            qa_pairs_text = ""
-            for i, qa in enumerate(qa_pairs):
-                qa_pairs_text += (
-                    f"Question {i+1}: {qa['question']}\nAnswer: {qa['answer']}\n\n"
+            question = question.strip()
+            if not question:
+                continue
+
+            # Step 1: Retrieve relevant context from the knowledge base using vectordb service
+            search_result = vectordb_service.search_hybrid(
+                query=question,
+                embedding_model_id=embedding_model.id,
+                knowledge_base_id=str(kb.id),
+                limit=5,
+                output_fields=["content", "source_id", "title", "author", "url"],
+                alpha=0.7,
+            )
+
+            if not search_result["success"]:
+                print(
+                    f"Search failed for question '{question}': {search_result.get('error', 'Unknown error')}"
+                )
+                continue
+
+            chunks = search_result["results"]
+            context = "\n\n".join([chunk["entity"]["content"] for chunk in chunks])
+
+            # store source documents for citation
+            source_citations = []
+            for chunk in chunks:
+                entity = chunk["entity"]
+
+                # Create metadata similar to the old format
+                metadata = {
+                    "source_id": entity.get("source_id", ""),
+                    "title": entity.get("title", ""),
+                    "author": entity.get("author", ""),
+                    "url": entity.get("url", ""),
+                }
+
+                # Try to get source data id from the source table
+                if entity.get("source_id"):
+                    metadata["source_id"] = str(entity["source_id"])
+                    if entity.get("url"):
+                        metadata["source"] = entity["url"]
+
+                source = {"content": entity["content"], "metadata": metadata}
+                source_citations.append(source)
+
+            if cancellation_requested:
+                print("Operation cancelled by client disconnect, stopping processing")
+                return VeraDocResponse(
+                    results={
+                        "status": "cancelled",
+                        "message": "Operation cancelled by user",
+                    }
                 )
 
-            # Final evaluation
-            print("Generating final evaluation...")
-            final_evaluation = invoke_llm(
-                llm, final_prompt_template, {"qa_pairs": qa_pairs_text}
-            )
-            print(f"Got final evaluation: {final_evaluation[:100]}...")
+            # Step 2: Get the relevant policy context for this question
+            print("Generating context for question...")
+            variables = {"context": context, "question": question}
+            prompt = context_prompt_template.invoke(variables)
+            response = llm.invoke(prompt)
+            question_context = response.content
+            print(f"Got context: {question_context[:100]}...")
 
-            interaction_id = record_llm_interaction(
-                session=session,
-                user_id=current_user.id,
-                functionality="veradoc",
-                input_data={
-                    "questions": request_data.questions,
-                    "document_name": file.filename,
-                    "kb_id": request_data.knowledge_base_id,
-                },
-                output_data={
-                    "final_evaluation": final_evaluation,
-                    "qa_count": len(qa_pairs),
-                },
-                metadata={
-                    "qa_pairs": qa_pairs  # Store the full QA pairs with sources for retrieval
-                },
-            )
+            if cancellation_requested:
+                print("Operation cancelled by client disconnect, stopping processing")
+                return VeraDocResponse(
+                    results={
+                        "status": "cancelled",
+                        "message": "Operation cancelled by user",
+                    }
+                )
 
-            # 9. Compile the results
-            result = {
-                "final_evaluation": final_evaluation,
-                "qa_pairs": qa_pairs,
-                "interaction_id": str(interaction_id),
+            # Step 3: Answer the question based on the uploaded document and policy context
+            print("Generating answer based on document and context...")
+            variables = {
+                "document_text": document_text[:10000],
+                "question": question,
+                "question_context": question_context,
             }
+            prompt = qa_prompt_template.invoke(variables)
+            answer = llm.invoke(prompt)
+            print(f"Got answer: {answer.content[:100]}...")
 
-            return VeraDocResponse(results=result)
+            print("Source citations for question:", question)
+            # for source in source_citations:
+            # print(f"Source: {source['metadata'].get('source', 'Unknown')}, Content: {source['content']}")
+
+            # Store the question-answer pair with context
+            qa_pairs.append(
+                {
+                    "question": question,
+                    "answer": answer.content,
+                    "context": question_context,
+                    "source_citations": source_citations,
+                }
+            )
+
+        # 7. Generate the final evaluation
+        if cancellation_requested:
+            print("Operation cancelled by client disconnect, stopping processing")
+            return VeraDocResponse(
+                results={
+                    "status": "cancelled",
+                    "message": "Operation cancelled by user",
+                }
+            )
+
+        qa_pairs_text = ""
+        for i, qa in enumerate(qa_pairs):
+            qa_pairs_text += (
+                f"Question {i+1}: {qa['question']}\nAnswer: {qa['answer']}\n\n"
+            )
+
+        # Final evaluation
+        print("Generating final evaluation...")
+        variables = {"qa_pairs": qa_pairs_text}
+        prompt = final_prompt_template.invoke(variables)
+        response = llm.invoke(prompt)
+        final_evaluation = response.content
+        print(f"Got final evaluation: {final_evaluation[:100]}...")
+
+        interaction_id = LlmService.record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="veradoc",
+            input_data={
+                "questions": request_data.questions,
+                "document_name": file.filename,
+                "kb_id": request_data.knowledge_base_id,
+            },
+            output_data={
+                "final_evaluation": final_evaluation,
+                "qa_count": len(qa_pairs),
+            },
+            metadata={
+                "qa_pairs": qa_pairs  # Store the full QA pairs with sources for retrieval
+            },
+        )
+
+        # 8. Compile the results
+        result = {
+            "final_evaluation": final_evaluation,
+            "qa_pairs": qa_pairs,
+            "interaction_id": str(interaction_id),
+        }
+
+        return VeraDocResponse(results=result)
 
     except Exception as e:
         print("Error processing RAG checklist:")

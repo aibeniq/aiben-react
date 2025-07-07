@@ -11,23 +11,10 @@ import type {
   ChatQueryTextData,
   ChatQueryTextResponse,
   EmbeddingModelsGetAvailableProvidersResponse,
-  EmbeddingModelsGetEmbeddingModelsData,
-  EmbeddingModelsGetEmbeddingModelsResponse,
-  EmbeddingModelsCreateEmbeddingModelData,
-  EmbeddingModelsCreateEmbeddingModelResponse,
+  EmbeddingModelsGetEmbeddingModelsRegistryResponse,
   EmbeddingModelsGetDefaultEmbeddingModelResponse,
-  EmbeddingModelsGetEmbeddingModelData,
-  EmbeddingModelsGetEmbeddingModelResponse,
-  EmbeddingModelsUpdateEmbeddingModelData,
-  EmbeddingModelsUpdateEmbeddingModelResponse,
-  EmbeddingModelsDeleteEmbeddingModelData,
-  EmbeddingModelsDeleteEmbeddingModelResponse,
-  EmbeddingModelsSetDefaultEmbeddingModelData,
-  EmbeddingModelsSetDefaultEmbeddingModelResponse,
-  EmbeddingModelsValidateEmbeddingModelData,
-  EmbeddingModelsValidateEmbeddingModelResponse,
-  EmbeddingModelsCheckApiKeyConfiguredData,
-  EmbeddingModelsCheckApiKeyConfiguredResponse,
+  EmbeddingModelsGetLlmModelsData,
+  EmbeddingModelsGetLlmModelsResponse,
   FeedbackSubmitFeedbackData,
   FeedbackSubmitFeedbackResponse,
   FilesGetSourceContentData,
@@ -67,15 +54,13 @@ import type {
   KnowledgeBasesUpdateKnowledgeBaseResponse,
   KnowledgeBasesDeleteKnowledgeBaseData,
   KnowledgeBasesDeleteKnowledgeBaseResponse,
-  LlmModelsGetLlmModelsData,
   LlmModelsGetLlmModelsResponse,
-  LlmModelsCreateLlmModelData,
-  LlmModelsCreateLlmModelResponse,
+  LlmModelsGetAvailableProvidersResponse,
   LlmModelsGetDefaultLlmModelResponse,
-  LlmModelsDeleteLlmModelData,
-  LlmModelsDeleteLlmModelResponse,
   LlmModelsValidateLlmModelData,
   LlmModelsValidateLlmModelResponse,
+  LlmModelsCheckApiKeyConfiguredData,
+  LlmModelsCheckApiKeyConfiguredResponse,
   LlmModelsSetDefaultLlmModelData,
   LlmModelsSetDefaultLlmModelResponse,
   LoginLoginAccessTokenData,
@@ -244,9 +229,7 @@ export class ChatService {
    * @returns TextQueryResponse Successful Response
    * @throws ApiError
    */
-  public static queryText(
-    data: ChatQueryTextData,
-  ): CancelablePromise<ChatQueryTextResponse> {
+  public static queryText(data: ChatQueryTextData): CancelablePromise<ChatQueryTextResponse> {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/chat/text",
@@ -266,7 +249,7 @@ export class ChatService {
 export class EmbeddingModelsService {
   /**
    * Get Available Providers
-   * Get the list of available model providers for LLMs and embedding models.
+   * Get list of available embedding providers.
    * @returns string Successful Response
    * @throws ApiError
    */
@@ -278,56 +261,22 @@ export class EmbeddingModelsService {
   }
 
   /**
-   * Get Embedding Models
-   * Get all embedding models.
-   * @param data The data for the request.
-   * @param data.skip
-   * @param data.limit
-   * @returns EmbeddingModelsPublic Successful Response
+   * Get Embedding Models Registry
+   * Get the registry of available embedding models.
+   * @returns EmbeddingModelInfo Successful Response
    * @throws ApiError
    */
-  public static getEmbeddingModels(
-    data: EmbeddingModelsGetEmbeddingModelsData = {},
-  ): CancelablePromise<EmbeddingModelsGetEmbeddingModelsResponse> {
+  public static getEmbeddingModelsRegistry(): CancelablePromise<EmbeddingModelsGetEmbeddingModelsRegistryResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/embedding-models/",
-      query: {
-        skip: data.skip,
-        limit: data.limit,
-      },
-      errors: {
-        422: "Validation Error",
-      },
-    })
-  }
-
-  /**
-   * Create Embedding Model
-   * Create a new embedding model.
-   * @param data The data for the request.
-   * @param data.requestBody
-   * @returns EmbeddingModelPublic Successful Response
-   * @throws ApiError
-   */
-  public static createEmbeddingModel(
-    data: EmbeddingModelsCreateEmbeddingModelData,
-  ): CancelablePromise<EmbeddingModelsCreateEmbeddingModelResponse> {
-    return __request(OpenAPI, {
-      method: "POST",
-      url: "/api/v1/embedding-models/",
-      body: data.requestBody,
-      mediaType: "application/json",
-      errors: {
-        422: "Validation Error",
-      },
+      url: "/api/v1/embedding-models/registry",
     })
   }
 
   /**
    * Get Default Embedding Model
-   * Get the user's default embedding model (or system default if not set).
-   * @returns EmbeddingModelPublic Successful Response
+   * Get the default embedding model.
+   * @returns EmbeddingModelInfo Successful Response
    * @throws ApiError
    */
   public static getDefaultEmbeddingModel(): CancelablePromise<EmbeddingModelsGetDefaultEmbeddingModelResponse> {
@@ -338,138 +287,23 @@ export class EmbeddingModelsService {
   }
 
   /**
-   * Get Embedding Model
-   * Get a specific embedding model by ID.
+   * Get Llm Models
+   * Get all LLM models.
    * @param data The data for the request.
-   * @param data.modelId
-   * @returns EmbeddingModelPublic Successful Response
+   * @param data.skip
+   * @param data.limit
+   * @returns LlmModelSpec Successful Response
    * @throws ApiError
    */
-  public static getEmbeddingModel(
-    data: EmbeddingModelsGetEmbeddingModelData,
-  ): CancelablePromise<EmbeddingModelsGetEmbeddingModelResponse> {
+  public static getLlmModels(
+    data: EmbeddingModelsGetLlmModelsData = {},
+  ): CancelablePromise<EmbeddingModelsGetLlmModelsResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/embedding-models/{model_id}",
-      path: {
-        model_id: data.modelId,
-      },
-      errors: {
-        422: "Validation Error",
-      },
-    })
-  }
-
-  /**
-   * Update Embedding Model
-   * Update an embedding model.
-   * @param data The data for the request.
-   * @param data.modelId
-   * @param data.requestBody
-   * @returns EmbeddingModelPublic Successful Response
-   * @throws ApiError
-   */
-  public static updateEmbeddingModel(
-    data: EmbeddingModelsUpdateEmbeddingModelData,
-  ): CancelablePromise<EmbeddingModelsUpdateEmbeddingModelResponse> {
-    return __request(OpenAPI, {
-      method: "PUT",
-      url: "/api/v1/embedding-models/{model_id}",
-      path: {
-        model_id: data.modelId,
-      },
-      body: data.requestBody,
-      mediaType: "application/json",
-      errors: {
-        422: "Validation Error",
-      },
-    })
-  }
-
-  /**
-   * Delete Embedding Model
-   * Delete an embedding model.
-   * @param data The data for the request.
-   * @param data.modelId
-   * @returns Message Successful Response
-   * @throws ApiError
-   */
-  public static deleteEmbeddingModel(
-    data: EmbeddingModelsDeleteEmbeddingModelData,
-  ): CancelablePromise<EmbeddingModelsDeleteEmbeddingModelResponse> {
-    return __request(OpenAPI, {
-      method: "DELETE",
-      url: "/api/v1/embedding-models/{model_id}",
-      path: {
-        model_id: data.modelId,
-      },
-      errors: {
-        422: "Validation Error",
-      },
-    })
-  }
-
-  /**
-   * Set Default Embedding Model
-   * Set an embedding model as the default for the current user.
-   * @param data The data for the request.
-   * @param data.modelId
-   * @returns EmbeddingModelPublic Successful Response
-   * @throws ApiError
-   */
-  public static setDefaultEmbeddingModel(
-    data: EmbeddingModelsSetDefaultEmbeddingModelData,
-  ): CancelablePromise<EmbeddingModelsSetDefaultEmbeddingModelResponse> {
-    return __request(OpenAPI, {
-      method: "POST",
-      url: "/api/v1/embedding-models/{model_id}/set-default",
-      path: {
-        model_id: data.modelId,
-      },
-      errors: {
-        422: "Validation Error",
-      },
-    })
-  }
-
-  /**
-   * Validate Embedding Model
-   * Validate if an embedding model ID is valid for the specified provider.
-   * @param data The data for the request.
-   * @param data.requestBody
-   * @returns Message Successful Response
-   * @throws ApiError
-   */
-  public static validateEmbeddingModel(
-    data: EmbeddingModelsValidateEmbeddingModelData,
-  ): CancelablePromise<EmbeddingModelsValidateEmbeddingModelResponse> {
-    return __request(OpenAPI, {
-      method: "POST",
-      url: "/api/v1/embedding-models/validate",
-      body: data.requestBody,
-      mediaType: "application/json",
-      errors: {
-        422: "Validation Error",
-      },
-    })
-  }
-
-  /**
-   * Check Api Key Configured
-   * Check if the API key for a specific provider is configured in the backend.
-   * @param data The data for the request.
-   * @param data.provider
-   * @returns Message Successful Response
-   * @throws ApiError
-   */
-  public static checkApiKeyConfigured(
-    data: EmbeddingModelsCheckApiKeyConfiguredData,
-  ): CancelablePromise<EmbeddingModelsCheckApiKeyConfiguredResponse> {
-    return __request(OpenAPI, {
-      method: "GET",
-      url: "/api/v1/embedding-models/check-api-key/{provider}",
-      path: {
-        provider: data.provider,
+      url: "/api/v1/embedding-models/llm",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
       },
       errors: {
         422: "Validation Error",
@@ -756,9 +590,7 @@ export class ItemsService {
    * @returns ItemPublic Successful Response
    * @throws ApiError
    */
-  public static createItem(
-    data: ItemsCreateItemData,
-  ): CancelablePromise<ItemsCreateItemResponse> {
+  public static createItem(data: ItemsCreateItemData): CancelablePromise<ItemsCreateItemResponse> {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/items/",
@@ -778,9 +610,7 @@ export class ItemsService {
    * @returns ItemPublic Successful Response
    * @throws ApiError
    */
-  public static readItem(
-    data: ItemsReadItemData,
-  ): CancelablePromise<ItemsReadItemResponse> {
+  public static readItem(data: ItemsReadItemData): CancelablePromise<ItemsReadItemResponse> {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/items/{id}",
@@ -802,9 +632,7 @@ export class ItemsService {
    * @returns ItemPublic Successful Response
    * @throws ApiError
    */
-  public static updateItem(
-    data: ItemsUpdateItemData,
-  ): CancelablePromise<ItemsUpdateItemResponse> {
+  public static updateItem(data: ItemsUpdateItemData): CancelablePromise<ItemsUpdateItemResponse> {
     return __request(OpenAPI, {
       method: "PUT",
       url: "/api/v1/items/{id}",
@@ -827,9 +655,7 @@ export class ItemsService {
    * @returns Message Successful Response
    * @throws ApiError
    */
-  public static deleteItem(
-    data: ItemsDeleteItemData,
-  ): CancelablePromise<ItemsDeleteItemResponse> {
+  public static deleteItem(data: ItemsDeleteItemData): CancelablePromise<ItemsDeleteItemResponse> {
     return __request(OpenAPI, {
       method: "DELETE",
       url: "/api/v1/items/{id}",
@@ -871,7 +697,7 @@ export class KnowledgeBasesService {
 
   /**
    * Create Knowledge Base
-   * Create new knowledge base with a compressed folder with the Chroma VectorDB.
+   * Create new knowledge base.
    * @param data The data for the request.
    * @param data.title
    * @param data.formData
@@ -929,7 +755,6 @@ export class KnowledgeBasesService {
    * @param data.id
    * @param data.title
    * @param data.description
-   * @param data.embeddingModelId
    * @param data.formData
    * @returns KnowledgeBasePublic Successful Response
    * @throws ApiError
@@ -946,7 +771,6 @@ export class KnowledgeBasesService {
       query: {
         title: data.title,
         description: data.description,
-        embedding_model_id: data.embeddingModelId,
       },
       formData: data.formData,
       mediaType: "multipart/form-data",
@@ -984,54 +808,33 @@ export class LlmModelsService {
   /**
    * Get Llm Models
    * Get all LLMs.
-   * @param data The data for the request.
-   * @param data.skip
-   * @param data.limit
-   * @returns LlmModelsPublic Successful Response
+   * @returns LlmModelSpec Successful Response
    * @throws ApiError
    */
-  public static getLlmModels(
-    data: LlmModelsGetLlmModelsData = {},
-  ): CancelablePromise<LlmModelsGetLlmModelsResponse> {
+  public static getLlmModels(): CancelablePromise<LlmModelsGetLlmModelsResponse> {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/llm-models/",
-      query: {
-        skip: data.skip,
-        limit: data.limit,
-      },
-      errors: {
-        422: "Validation Error",
-      },
     })
   }
 
   /**
-   * Create Llm Model
-   * Create a new LLM.
-   * @param data The data for the request.
-   * @param data.requestBody
-   * @returns LlmModelPublic Successful Response
+   * Get Available Providers
+   * Get all available LLM providers.
+   * @returns string Successful Response
    * @throws ApiError
    */
-  public static createLlmModel(
-    data: LlmModelsCreateLlmModelData,
-  ): CancelablePromise<LlmModelsCreateLlmModelResponse> {
+  public static getAvailableProviders(): CancelablePromise<LlmModelsGetAvailableProvidersResponse> {
     return __request(OpenAPI, {
-      method: "POST",
-      url: "/api/v1/llm-models/",
-      body: data.requestBody,
-      mediaType: "application/json",
-      errors: {
-        422: "Validation Error",
-      },
+      method: "GET",
+      url: "/api/v1/llm-models/providers",
     })
   }
 
   /**
    * Get Default Llm Model
    * Get the user's default LLM model (database record).
-   * @returns LlmModelPublic Successful Response
+   * @returns LlmModelSpec Successful Response
    * @throws ApiError
    */
   public static getDefaultLlmModel(): CancelablePromise<LlmModelsGetDefaultLlmModelResponse> {
@@ -1042,33 +845,10 @@ export class LlmModelsService {
   }
 
   /**
-   * Delete Llm Model
-   * Delete an LLM.
-   * @param data The data for the request.
-   * @param data.modelId
-   * @returns Message Successful Response
-   * @throws ApiError
-   */
-  public static deleteLlmModel(
-    data: LlmModelsDeleteLlmModelData,
-  ): CancelablePromise<LlmModelsDeleteLlmModelResponse> {
-    return __request(OpenAPI, {
-      method: "DELETE",
-      url: "/api/v1/llm-models/{model_id}",
-      path: {
-        model_id: data.modelId,
-      },
-      errors: {
-        422: "Validation Error",
-      },
-    })
-  }
-
-  /**
    * Validate Llm Model
    * Validate if an LLM ID is valid for the specified provider.
    * @param data The data for the request.
-   * @param data.requestBody
+   * @param data.modelId
    * @returns Message Successful Response
    * @throws ApiError
    */
@@ -1078,8 +858,32 @@ export class LlmModelsService {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/llm-models/validate",
-      body: data.requestBody,
-      mediaType: "application/json",
+      query: {
+        model_id: data.modelId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Check Api Key Configured
+   * Check if API key is configured for the specified provider.
+   * @param data The data for the request.
+   * @param data.provider
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static checkApiKeyConfigured(
+    data: LlmModelsCheckApiKeyConfiguredData,
+  ): CancelablePromise<LlmModelsCheckApiKeyConfiguredResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/llm-models/check-api-key",
+      query: {
+        provider: data.provider,
+      },
       errors: {
         422: "Validation Error",
       },
@@ -1091,7 +895,7 @@ export class LlmModelsService {
    * Set an LLM as the default.
    * @param data The data for the request.
    * @param data.modelId
-   * @returns LlmModelPublic Successful Response
+   * @returns LlmModelSpec Successful Response
    * @throws ApiError
    */
   public static setDefaultLlmModel(
@@ -1389,7 +1193,7 @@ export class ReportgenieService {
       method: "POST",
       url: "/api/v1/reportgenie/generate/docx",
       body: data.requestBody,
-      responseType: 'blob',
+      responseType: "blob",
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
@@ -1648,7 +1452,7 @@ export class TwincheckService {
       method: "POST",
       url: "/api/v1/twincheck/generate/docx",
       body: data.requestBody,
-      responseType: 'blob',
+      responseType: "blob",
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
@@ -1691,9 +1495,7 @@ export class UsersService {
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
-  public static createUser(
-    data: UsersCreateUserData,
-  ): CancelablePromise<UsersCreateUserResponse> {
+  public static createUser(data: UsersCreateUserData): CancelablePromise<UsersCreateUserResponse> {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/users/",
@@ -1829,9 +1631,7 @@ export class UsersService {
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
-  public static updateUser(
-    data: UsersUpdateUserData,
-  ): CancelablePromise<UsersUpdateUserResponse> {
+  public static updateUser(data: UsersUpdateUserData): CancelablePromise<UsersUpdateUserResponse> {
     return __request(OpenAPI, {
       method: "PATCH",
       url: "/api/v1/users/{user_id}",
@@ -1854,9 +1654,7 @@ export class UsersService {
    * @returns Message Successful Response
    * @throws ApiError
    */
-  public static deleteUser(
-    data: UsersDeleteUserData,
-  ): CancelablePromise<UsersDeleteUserResponse> {
+  public static deleteUser(data: UsersDeleteUserData): CancelablePromise<UsersDeleteUserResponse> {
     return __request(OpenAPI, {
       method: "DELETE",
       url: "/api/v1/users/{user_id}",
@@ -1879,9 +1677,7 @@ export class UtilsService {
    * @returns Message Successful Response
    * @throws ApiError
    */
-  public static testEmail(
-    data: UtilsTestEmailData,
-  ): CancelablePromise<UtilsTestEmailResponse> {
+  public static testEmail(data: UtilsTestEmailData): CancelablePromise<UtilsTestEmailResponse> {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/utils/test-email/",
@@ -2108,7 +1904,7 @@ export class VeradocService {
       method: "POST",
       url: "/api/v1/veradoc/generate/docx",
       body: data.requestBody,
-      responseType: 'blob',
+      responseType: "blob",
       mediaType: "application/json",
       errors: {
         422: "Validation Error",

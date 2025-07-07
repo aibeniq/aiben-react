@@ -23,7 +23,8 @@ async def get_source_content(
     """
     try:
         # Find the source data
-        source_data = session.get(SourceData, source_id)
+        source_data_id = session.get(Source, source_id).source_data_id
+        source_data = session.get(SourceData, source_data_id)
 
         if not source_data:
             raise HTTPException(status_code=404, detail="Source file not found")
@@ -32,7 +33,7 @@ async def get_source_content(
         # Either through a source they own or a knowledge base they have access to
         source = session.exec(
             select(Source)
-            .where(Source.source_data_id == source_id)
+            .where(Source.id == source_id)
             .where(Source.owner_id == current_user.id)
         ).first()
 
@@ -41,7 +42,7 @@ async def get_source_content(
             kb_access = session.exec(
                 select(KnowledgeBase)
                 .join(Source, KnowledgeBase.id == Source.knowledge_base_id)
-                .where(Source.source_data_id == source_id)
+                .where(Source.id == source_id)
                 .where(KnowledgeBase.owner_id == current_user.id)
             ).first()
 
@@ -52,9 +53,7 @@ async def get_source_content(
                 )
 
         # Get source name from the first associated Source (just for display)
-        file_source = session.exec(
-            select(Source).where(Source.source_data_id == source_id)
-        ).first()
+        file_source = session.exec(select(Source).where(Source.id == source_id)).first()
         file_name = file_source.name if file_source else f"file-{source_id}.txt"
 
         # Extract the file content from the ZIP

@@ -83,9 +83,9 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                         <Text fontWeight="bold" fontSize="xs" color="gray.700">
                           Source {sIdx + 1}:
                           {source.metadata?.source &&
-                            (source.metadata.source_data_id ? (
+                            (source.metadata.source_id ? (
                               <SourceLink
-                                sourceId={source.metadata.source_data_id}
+                                sourceId={source.metadata.source_id}
                                 fileName={getDisplayFileName(source.metadata.source)}
                                 ml={1}
                                 fontWeight="normal"

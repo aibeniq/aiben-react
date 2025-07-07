@@ -50,8 +50,6 @@ const SourceLink: React.FC<SourceLinkProps> = ({
     clearFile()
   }
 
-  console.log("Current file state:", { currentFile, isLoading, isModalOpen })
-
   return (
     <>
       <Link
