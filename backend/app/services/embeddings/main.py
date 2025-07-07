@@ -231,7 +231,7 @@ class ReplicateEmbeddings(Embeddings):
     # Load .env from project root
     load_dotenv(dotenv_path=os.path.join(root_dir, ".env"), override=True)
 
-    def __init__(self, model_id: str, api_key: str = None):
+    def __init__(self, model_id: str, api_key: Optional[str] = None):
         """Initialize Replicate embeddings.
 
         Args:

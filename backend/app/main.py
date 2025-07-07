@@ -4,6 +4,7 @@ from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import logging
+from typing import AsyncGenerator
 
 from app.api.main import api_router
 from app.core.config import settings
@@ -14,11 +15,11 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Initialize vector database service
     try:
         logger.info("Initializing vector database service")
-        app_state.vector_db_service = VectorDBService()
+        app_state.vector_db_service = VectorDBService()  # type: ignore
         logger.info("Vector database service initialized successfully")
     except Exception as e:
         logger.error(f"Error initializing vector database service: {e}")

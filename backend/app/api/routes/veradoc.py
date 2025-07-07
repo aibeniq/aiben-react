@@ -25,7 +25,7 @@ from fastapi import (
     Request as FastAPIRequest,
 )
 from fastapi.responses import StreamingResponse
-from typing import List, Dict, Any
+from typing import Optional, List, Dict, Any
 import asyncio
 from dotenv import load_dotenv
 import json
@@ -82,7 +82,7 @@ async def process_rag_checklist(
     request_data: RagChecklistRequest = Depends(),
     files: List[UploadFile] = File(...),
     handwritten_files: List[UploadFile] = File(None),
-    request: FastAPIRequest = None,
+    request: Optional[FastAPIRequest] = None,
 ):
     """
     Process the uploaded files using RAG with a knowledge base.
