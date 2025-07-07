@@ -26,7 +26,7 @@ dependencies = [
     "langchain-text-splitters==0.3.6",
     #"langchain-huggingface==0.2.0", MADE OPTIONAL
     "chromadb==1.0.9",
-    "openai==1.68.2",
+    "openai==1.93.1",
     "pymupdf==1.25.5",
     "pypdf==5.4.0",
     "langchain-openai==0.3.17",
