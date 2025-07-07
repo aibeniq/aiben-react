@@ -12,6 +12,11 @@ import uuid
 from sqlmodel import Session
 from app.models import User
 
+# Load environment variables from .env file
+current_dir = Path(__file__).resolve().parent
+root_dir = current_dir.parent.parent.parent
+load_dotenv(dotenv_path=os.path.join(root_dir, ".env"), override=True)
+
 
 # pydantic model for llm model information
 class LlmProvider(BaseModel):
