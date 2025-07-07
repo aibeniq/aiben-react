@@ -111,7 +111,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
           files: data.files,
           ...(data.removedFileIds && data.removedFileIds.length > 0
             ? { removed_file_ids: data.removedFileIds }
-            : { removed_file_ids: ["00000000-0000-0000-0000-000000000000"] }), // sending a dummy entry if no deletions
+            : { removed_file_ids: [] }),
         },
       }
 

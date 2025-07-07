@@ -127,17 +127,13 @@ const VeraDoc = () => {
         requestBody: { content: fullText },
       })
 
-      let blob
+      let blob: Blob
       if (response instanceof Blob) {
-        console.log("Response is a Blob")
+        console.log("✅ Response is a Blob, size:", response.size, "type:", response.type)
         blob = response
-      } else if (response instanceof ArrayBuffer) {
-        console.log("Response is an ArrayBuffer")
-        blob = new Blob([response], {
-          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        })
       } else {
-        console.log("Response is a string or unexpected type")
+        console.log("❌ Response is not a Blob, falling back to conversion")
+        // fallback for unexpected response types
         blob = new Blob([response as any], {
           type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         })
@@ -147,8 +143,10 @@ const VeraDoc = () => {
       const a = document.createElement("a")
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
       const filename = activeResult.filename.replace(/[^a-zA-Z0-9]/g, "_")
+      const downloadFilename = `Evaluation_${filename}_${timestamp}.docx`
+
       a.href = url
-      a.download = `Evaluation_${filename}_${timestamp}.docx`
+      a.download = downloadFilename
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
@@ -524,9 +522,9 @@ const VeraDoc = () => {
                 <Accordion.ItemContent pb={4} bg="surface">
                   {pair.source_citations.map((citation: any, cIndex: number) => (
                     <Box key={cIndex} p={3} mb={2} borderWidth="1px" borderRadius="md" bg="bg">
-                      {citation.metadata.source_data_id ? (
+                      {citation.metadata.source_id ? (
                         <SourceLink
-                          sourceId={citation.metadata.source_data_id}
+                          sourceId={citation.metadata.source_id}
                           fileName={getDisplayFileName(citation.metadata.source)}
                           ml={1}
                           fontWeight="normal"

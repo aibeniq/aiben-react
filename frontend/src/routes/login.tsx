@@ -44,7 +44,6 @@ function Login() {
     resetError()
 
     try {
-      console.log(data)
       await loginMutation.mutateAsync(data)
     } catch {
       // error is handled by useAuth hook

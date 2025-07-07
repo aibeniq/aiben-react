@@ -1,25 +1,27 @@
 import uuid
 import difflib
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from datetime import datetime
 import json
 import traceback
 import tempfile
 import os
 import docx
-import io
 from io import BytesIO
 from docx import Document
-from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import markdown
 from bs4 import BeautifulSoup
-
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlmodel import select
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_core.prompts import PromptTemplate
+import mimetypes
 
 from app.api.deps import CurrentUser, SessionDep
+from app.core.config import settings
+from app.services.llms import LlmService
 from app.models import (
     TwinCheckRequest,
     TwinCheckResponse,
@@ -29,10 +31,6 @@ from app.models import (
     DocxRequest,
     Message,
 )
-from app.core.config import settings
-from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
-from langchain_community.document_loaders import PyPDFLoader
-import mimetypes
 
 router = APIRouter(prefix="/twincheck", tags=["twincheck"])
 
@@ -147,7 +145,8 @@ async def compare_documents(
         diff_text = "\n".join(diff_result)
 
         # Load the LLM model
-        llm = get_default_llm(session, current_user)
+        llm_info = LlmService.get_user_default_model_spec(session, current_user.id)
+        llm = LlmService.get_model(llm_info.id)
 
         # Parse comparison topics
         topic_list = request.comparison_topics.strip().split("\n")
@@ -158,24 +157,22 @@ async def compare_documents(
             if not topic.strip():
                 continue
 
-            # Define prompt template for topic analysis
-            prompt_template = settings.TWINCHECK_ANALYSIS_PROMPT_TEMPLATE
-
             # Generate analysis for this topic
             try:
-                topic_result = invoke_llm(
-                    llm,
-                    prompt_template,
-                    {
-                        "diff_text": diff_text,
-                        "topic": topic,
-                        "doc1_name": document1.filename,
-                        "doc2_name": document2.filename,
-                    },
+                prompt_template = PromptTemplate.from_template(
+                    settings.TWINCHECK_ANALYSIS_PROMPT_TEMPLATE
                 )
+                variables = {
+                    "diff_text": diff_text,
+                    "topic": topic,
+                    "doc1_name": document1.filename,
+                    "doc2_name": document2.filename,
+                }
+                prompt = prompt_template.invoke(variables)
+                response = llm.invoke(prompt)
 
                 # Add to results
-                topic_analysis.append({"topic": topic, "analysis": topic_result})
+                topic_analysis.append({"topic": topic, "analysis": response.content})
 
             except Exception as e:
                 topic_analysis.append(
@@ -186,20 +183,21 @@ async def compare_documents(
                 )
 
         # Create a comprehensive summary
-        summary_prompt_template = settings.TWINCHECK_SUMMARY_PROMPT_TEMPLATE
-        summary = invoke_llm(
-            llm,
-            summary_prompt_template,
-            {
-                "diff_text": diff_text,
-                "doc1_name": document1.filename,
-                "doc2_name": document2.filename,
-                "topics": request.comparison_topics,
-            },
+        summary_prompt_template = PromptTemplate.from_template(
+            settings.TWINCHECK_SUMMARY_PROMPT_TEMPLATE
         )
+        variables = {
+            "diff_text": diff_text,
+            "doc1_name": document1.filename,
+            "doc2_name": document2.filename,
+            "topics": request.comparison_topics,
+        }
+        prompt = summary_prompt_template.invoke(variables)
+        summary = llm.invoke(prompt)
+        print(f"Got response: {summary.content[:100]}...")
 
         # Record this interaction for history
-        interaction_id = record_llm_interaction(
+        interaction_id = LlmService.record_llm_interaction(
             session=session,
             user_id=current_user.id,
             functionality="twincheck",
@@ -208,7 +206,10 @@ async def compare_documents(
                 "document1_name": document1.filename,
                 "document2_name": document2.filename,
             },
-            output_data={"summary": summary, "topic_count": len(topic_analysis)},
+            output_data={
+                "summary": summary.content,
+                "topic_count": len(topic_analysis),
+            },
             metadata={
                 "topic_analysis": topic_analysis,  # Store detailed analysis for retrieval
                 "diff_stats": {
@@ -221,7 +222,7 @@ async def compare_documents(
 
         # Return the results
         result = {
-            "summary": summary,
+            "summary": summary.content,
             "topic_analysis": topic_analysis,
             "interaction_id": str(interaction_id) if interaction_id else None,
         }

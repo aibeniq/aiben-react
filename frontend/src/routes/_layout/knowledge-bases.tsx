@@ -98,9 +98,9 @@ function KnowledgeBasesTable() {
                 {item.number_of_sources}
               </Table.Cell>
               <Table.Cell truncate maxW="sm">
-                {item.embedding_model_name ? (
+                {item.embedding_model.model_name ? (
                   <Badge colorPalette="blue" size="sm">
-                    {item.embedding_model_name}
+                    {item.embedding_model.model_name}
                   </Badge>
                 ) : (
                   <Badge colorPalette="gray" size="sm">

@@ -16,6 +16,23 @@ from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
 
+"""
+Should I put this in here or the .env file?
+
+🏗️ This file (config.py) should contain:
+- Default values with type annotations
+- Validation logic and business rules
+- Computed fields and derived values
+- Configuration schema and structure
+- Static business logic (prompt templates, etc.)
+
+📁 The .env file should contain:
+- Environment-specific values (URLs, domains, hosts)
+- Secrets and credentials (API keys, passwords, tokens)
+- Deployment-specific settings (database connection info)
+- Runtime overrides for the defaults defined here
+"""
+
 
 def parse_cors(v: Any) -> list[str] | str:
     if isinstance(v, str) and not v.startswith("["):
@@ -47,6 +64,19 @@ class Settings(BaseSettings):
     DOCUMENT_CHUNK_SIZE: int = 1000
     DOCUMENT_CHUNK_OVERLAP: int = 200
 
+    # Model configuration
+    DEFAULT_EMBEDDING_MODEL: str = "text-embedding-3-small"
+    DEFAULT_LLM_MODEL: str = "gpt-4o-mini"
+    ENABLED_PROVIDERS: list[str] = ["openai"]
+
+    # Application configuration (can be overridden in .env)
+    PROJECT_NAME: str = "aibenIQ"
+    STACK_NAME: str = "aibeniq"
+
+    # External service configuration
+    OLLAMA_BASE_URL: str = "http://ollama:11434"
+    AWS_REGION: str = "eu-north-1"
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def all_cors_origins(self) -> list[str]:
@@ -54,7 +84,6 @@ class Settings(BaseSettings):
             self.FRONTEND_HOST
         ]
 
-    PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
     POSTGRES_SERVER: str
     POSTGRES_PORT: int = 5432
@@ -100,24 +129,11 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
-    # ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
-    # ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
-    ENABLED_LLM_PROVIDERS: str = "openai,aws"
-    ENABLED_EMBEDDING_PROVIDERS: str = "openai,aws"
-
     @computed_field
     @property
-    def llm_providers(self) -> list[str]:
-        """Return list of enabled LLM providers"""
-        return [provider.strip() for provider in self.ENABLED_LLM_PROVIDERS.split(",")]
-
-    @computed_field
-    @property
-    def embedding_providers(self) -> list[str]:
-        """Return list of enabled embedding model providers"""
-        return [
-            provider.strip() for provider in self.ENABLED_EMBEDDING_PROVIDERS.split(",")
-        ]
+    def _enabled_providers(self) -> list[str]:
+        """Return list of enabled model providers"""
+        return [provider.strip() for provider in self.ENABLED_PROVIDERS.split(",")]
 
     # LLM Templates
     REPORT_GENIE_PROMPT_TEMPLATE: str = """
@@ -350,6 +366,21 @@ class Settings(BaseSettings):
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
+
+        return self
+
+    @model_validator(mode="after")
+    def _validate_default_embedding_model(self) -> Self:
+        """Validate that the configured default embedding model is available."""
+        # Import here to avoid circular import
+        from app.services.embeddings import EmbeddingService
+
+        if not EmbeddingService.is_valid_model_id(self.DEFAULT_EMBEDDING_MODEL):
+            available_models = ", ".join(EmbeddingService.get_model_ids())
+            raise ValueError(
+                f"Invalid DEFAULT_EMBEDDING_MODEL '{self.DEFAULT_EMBEDDING_MODEL}'. "
+                f"Available models: {available_models}"
+            )
 
         return self
 

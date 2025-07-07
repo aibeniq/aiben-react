@@ -1,128 +1,223 @@
 import os
 from pathlib import Path
 import replicate
-import requests
-from app.models import ModelProvider
-from app.core.config import settings
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.embeddings import OllamaEmbeddings
 from langchain_aws import BedrockEmbeddings
 from langchain_core.embeddings import Embeddings
-from typing import Optional, List
+from typing import Optional, List, Dict
 from dotenv import load_dotenv
 import json
+from pydantic import BaseModel
 
 
-def load_embeddings_model(
-    provider: ModelProvider, model_id: str, api_key: Optional[str] = None
-):
-    """
-    Factory function to create the appropriate embeddings model based on provider.
+# Pydantic model for embedding model information (used for both internal and API purposes)
+class EmbeddingModelInfo(BaseModel):
+    """Model for embedding model information."""
 
-    Args:
-        provider: The model provider (HuggingFace, OpenAI, etc.)
-        model_id: The model identifier
-        api_key: Optional API key for providers that require authentication
+    id: str
+    provider: str
+    model_name: str
+    dimensions: int
+    max_input_length: Optional[int] = None
+    cost_per_1M_tokens: Optional[float] = None
+    description: Optional[str] = None
 
-    Returns:
-        An initialized embeddings model ready for use
-    """
-    current_dir = Path(__file__).resolve().parent
 
-    # Navigate to project root (3 levels up from the current file)
-    root_dir = current_dir.parent.parent.parent
+class EmbeddingService:
+    """Service for managing and loading embedding models."""
 
-    # Load .env from project root
-    load_dotenv(dotenv_path=os.path.join(root_dir, ".env"), override=True)
+    # registry of available embedding models
+    AVAILABLE_MODELS: Dict[str, EmbeddingModelInfo] = {
+        # OpenAI Models
+        "text-embedding-3-small": EmbeddingModelInfo(
+            id="text-embedding-3-small",
+            provider="openai",
+            model_name="text-embedding-3-small",
+            dimensions=1536,
+            max_input_length=8191,
+            cost_per_1M_tokens=0.02,
+            description="OpenAI's efficient small embedding model",
+        ),
+        "text-embedding-3-large": EmbeddingModelInfo(
+            id="text-embedding-3-large",
+            provider="openai",
+            model_name="text-embedding-3-large",
+            dimensions=3072,
+            max_input_length=8191,
+            cost_per_1M_tokens=0.13,
+            description="OpenAI's high-performance large embedding model",
+        ),
+        "text-embedding-ada-002": EmbeddingModelInfo(
+            id="text-embedding-ada-002",
+            provider="openai",
+            model_name="text-embedding-ada-002",
+            dimensions=1536,
+            max_input_length=8191,
+            cost_per_1M_tokens=0.1,
+            description="OpenAI's legacy embedding model",
+        ),
+        # AWS Bedrock Models
+        "amazon.titan-embed-text-v2:0": EmbeddingModelInfo(
+            id="amazon.titan-embed-text-v2:0",
+            provider="aws",
+            model_name="amazon.titan-embed-text-v2:0",
+            dimensions=1024,
+            max_input_length=8192,
+            cost_per_1M_tokens=0.021,
+            description="Amazon's Titan 2.0 embedding model for AWS Bedrock. High-quality text embeddings optimized for enterprise search and retrieval applications.",
+        ),
+        "cohere.embed-english-v3": EmbeddingModelInfo(
+            id="cohere.embed-english-v3",
+            provider="aws",
+            model_name="cohere.embed-english-v3",
+            dimensions=1024,
+            max_input_length=512,
+            cost_per_1M_tokens=0.1,
+            description="Cohere's English embedding model available on AWS Bedrock.",
+        ),
+        "cohere.embed-multilingual-v3": EmbeddingModelInfo(
+            id="cohere.embed-multilingual-v3",
+            provider="aws",
+            model_name="cohere.embed-multilingual-v3",
+            dimensions=1024,
+            max_input_length=512,
+            cost_per_1M_tokens=0.1,
+            description="Cohere's multilingual embedding model available on AWS Bedrock.",
+        ),
+    }
 
-    if provider == ModelProvider.HUGGINGFACE:
-        # only load this here, to prevent errors in API-only builds
-        from langchain_huggingface import HuggingFaceEmbeddings
+    @classmethod
+    def get_models(cls) -> List[EmbeddingModelInfo]:
+        """Get list of available models."""
+        return list(cls.AVAILABLE_MODELS.values())
 
-        print("Loading HuggingFace embeddings model with model_id:", model_id)
-        return HuggingFaceEmbeddings(model_name=model_id)
-    elif provider == ModelProvider.AWS:
-        # Configure AWS Bedrock embeddings
-        region = os.environ.get("AWS_REGION", "eu-north-1")
-        print(
-            f"Loading AWS Bedrock embeddings model with model_id: {model_id}, region: {region}"
-        )
+    @classmethod
+    def get_default_model(cls) -> EmbeddingModelInfo:
+        """Get the default model."""
+        # import here to avoid circular import
+        from app.core.config import settings
 
-        # If API key is provided, use it; otherwise, rely on environment variable
-        if api_key:
-            print(f"Using provided API key of length: {len(api_key)}")
-            return BedrockEmbeddings(
-                model_id=model_id, region_name=region, api_key=api_key
+        default_model_id = settings.DEFAULT_EMBEDDING_MODEL
+
+        if not cls.is_valid_model_id(default_model_id):
+            available_models = ", ".join(cls.AVAILABLE_MODELS.keys())
+            raise ValueError(
+                f"Configured default embedding model '{default_model_id}' not found in registry. "
+                f"Available models: {available_models}"
             )
-        else:
-            print("Using API key from environment variables")
 
-            return BedrockEmbeddings(model_id=model_id, region_name=region)
-    elif provider == ModelProvider.OPENAI:
-        # If API key is provided, use it; otherwise, rely on environment variable
-        if api_key:
-            return OpenAIEmbeddings(model=model_id, openai_api_key=api_key)
-        else:
-            return OpenAIEmbeddings(model=model_id)
+        return cls.AVAILABLE_MODELS[default_model_id]
 
-    elif provider == ModelProvider.OLLAMA:
-        # Configure Ollama embeddings
-        base_url = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")
-        print(
-            f"Loading Ollama embeddings model with model_id: {model_id}, base_url: {base_url}"
-        )
+    @classmethod
+    def get_providers(cls) -> List[str]:
+        """Get list of available providers."""
+        return list(set(spec.provider for spec in cls.AVAILABLE_MODELS.values()))
 
-        # First check if Ollama server is reachable
+    @classmethod
+    def get_model_ids(cls) -> List[str]:
+        """Get list of available model IDs."""
+        return list(cls.AVAILABLE_MODELS.keys())
+
+    @classmethod
+    def is_valid_model_id(cls, model_id: str) -> bool:
+        """Check if a model ID is valid."""
+        return model_id in cls.AVAILABLE_MODELS
+
+    @classmethod
+    def get_model_spec(cls, model_id: str) -> Optional[EmbeddingModelInfo]:
+        """Get specification for a specific model."""
+        return cls.AVAILABLE_MODELS.get(model_id)
+
+    @classmethod
+    def get_models_by_provider(cls, provider: str) -> List[EmbeddingModelInfo]:
+        """Get all models for a specific provider."""
+        return [
+            spec for spec in cls.AVAILABLE_MODELS.values() if spec.provider == provider
+        ]
+
+    @classmethod
+    def validate_model(
+        cls, model_id: str, api_key: Optional[str] = None
+    ) -> tuple[bool, Optional[str]]:
+        """
+        Validate if a model is available and properly configured.
+
+        Returns:
+            tuple: (is_valid, error_message)
+        """
+        # check if model exists in registry
+        if model_id not in cls.AVAILABLE_MODELS:
+            available = ", ".join(cls.AVAILABLE_MODELS.keys())
+            return False, f"Model '{model_id}' not found. Available models: {available}"
+
+        spec = cls.AVAILABLE_MODELS[model_id]
+
+        # validate provider-specific requirements
+        if spec.provider == "openai":
+            api_key = api_key or os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                return (
+                    False,
+                    f"OPENAI_API_KEY environment variable required for model '{model_id}'",
+                )
+        elif spec.provider == "aws":
+            # check for required AWS credentials
+            aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
+            aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+            if not aws_access_key or not aws_secret_key:
+                return (
+                    False,
+                    f"AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables required for model '{model_id}'",
+                )
+
+            # validate AWS region is set
+            aws_region = os.getenv("AWS_DEFAULT_REGION") or os.getenv("AWS_REGION")
+            if not aws_region:
+                return (
+                    False,
+                    f"AWS_DEFAULT_REGION or AWS_REGION environment variable required for model '{model_id}'",
+                )
+
+        return True, None
+
+    @classmethod
+    def get_model(cls, model_id: str, api_key: Optional[str] = None) -> Embeddings:
+        """
+        Get an embedding model by ID.
+
+        Args:
+            model_id: The model identifier from the registry
+            api_key: Optional API key override
+
+        Returns:
+            An initialized embeddings model
+
+        Raises:
+            ValueError: If model is invalid or cannot be loaded
+        """
+        # validate model
+        is_valid, error_msg = cls.validate_model(model_id, api_key)
+        if not is_valid:
+            raise ValueError(error_msg)
+
+        spec = cls.AVAILABLE_MODELS[model_id]
+
+        # load model based on provider
         try:
-            response = requests.get(f"{base_url}/api/tags", timeout=5)
-            if response.status_code != 200:
-                raise ValueError(
-                    f"Ollama server not responding correctly at {base_url} (status: {response.status_code})"
+            if spec.provider == "openai":
+                return OpenAIEmbeddings(model=spec.model_name, openai_api_key=api_key)
+            elif spec.provider == "aws":
+                # get AWS region from environment
+                aws_region = os.getenv("AWS_DEFAULT_REGION") or os.getenv("AWS_REGION")
+                return BedrockEmbeddings(
+                    model_id=spec.model_name,
+                    region_name=aws_region,
                 )
+            else:
+                raise ValueError(f"Unsupported provider: {spec.provider}")
 
-            # Check if model exists (but don't fail, as Ollama can pull models on demand)
-            models_data = response.json()
-            # Different versions of Ollama API return different structures
-            available_models = []
-            if "models" in models_data:  # Newer versions
-                available_models = [
-                    model["name"] for model in models_data.get("models", [])
-                ]
-            else:  # Older versions
-                available_models = [
-                    model["name"] for model in models_data.get("models", [])
-                ]
-
-            if model_id not in available_models:
-                print(
-                    f"Warning: Model {model_id} may not be available in Ollama. Available models: {available_models}"
-                )
-                print(
-                    f"Ollama will attempt to pull the model if it's not found locally."
-                )
-
-        except requests.RequestException as e:
-            raise ValueError(f"Cannot connect to Ollama server at {base_url}: {str(e)}")
-
-        # Create and return the embeddings model
-        return OllamaEmbeddings(model=model_id, base_url=base_url)
-    elif provider == "replicate":
-        current_dir = Path(__file__).resolve().parent
-
-        # Navigate to project root (3 levels up from the current file)
-        root_dir = current_dir.parent.parent.parent
-
-        # Load .env from project root
-        load_dotenv(dotenv_path=os.path.join(root_dir, ".env"), override=True)
-        api_key = os.getenv("REPLICATE_API_TOKEN")
-        print("API key length:", len(api_key) if api_key else 0)
-
-        replicate_embeddings = ReplicateEmbeddings(model_id=model_id, api_key=api_key)
-        print("Replicate embeddings model loaded successfully.")
-
-        return replicate_embeddings
-    else:
-        raise ValueError(f"Unsupported provider: {provider}")
+        except Exception as e:
+            raise ValueError(f"Failed to load model '{model_id}': {str(e)}")
 
 
 class ReplicateEmbeddings(Embeddings):

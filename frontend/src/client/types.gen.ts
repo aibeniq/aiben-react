@@ -15,7 +15,7 @@ export type Body_knowledge_bases_create_knowledge_base = {
 
 export type Body_knowledge_bases_update_knowledge_base = {
   files?: Array<Blob | File> | null
-  removed_file_ids?: Array<string>
+  removed_file_ids?: Array<string> | null
 }
 
 export type Body_login_login_access_token = {
@@ -51,39 +51,17 @@ export type DocxRequest = {
   content: string
 }
 
-export type EmbeddingModelCreate = {
-  name: string
-  model_id: string
-  provider?: ModelProvider
-  description?: string
-}
-
-export type EmbeddingModelPublic = {
-  id?: string
-  name?: string
-  model_id?: string
-  provider?: ModelProvider
-  description?: string
-  owner_id?: string | null
-  date_created?: string
-  date_modified?: string
-}
-
-export type EmbeddingModelsPublic = {
-  data: Array<EmbeddingModelPublic>
-  count: number
-}
-
-export type EmbeddingModelUpdate = {
-  name?: string | null
-  model_id?: string | null
-  provider?: ModelProvider | null
+/**
+ * Model for embedding model information.
+ */
+export type EmbeddingModelInfo = {
+  id: string
+  provider: string
+  model_name: string
+  dimensions: number
+  max_input_length?: number | null
+  cost_per_1M_tokens?: number | null
   description?: string | null
-}
-
-export type EmbeddingModelValidate = {
-  model_id: string
-  provider: ModelProvider
 }
 
 export type FormConnectDetailFeedback = {
@@ -148,7 +126,7 @@ export type ItemUpdate = {
 export type KnowledgeBasePublic = {
   title: string
   description?: string | null
-  embedding_model_id?: string | null
+  embedding_model_id?: string
   id: string
   owner_id: string
   files?: Array<{
@@ -157,7 +135,7 @@ export type KnowledgeBasePublic = {
   date_created: string
   date_modified: string
   number_of_sources?: number
-  embedding_model_name?: string | null
+  embedding_model: EmbeddingModelInfo
 }
 
 export type KnowledgeBasesPublic = {
@@ -165,43 +143,35 @@ export type KnowledgeBasesPublic = {
   count: number
 }
 
-export type LlmModelCreate = {
+/**
+ * Model for LLM model information.
+ */
+export type LlmModelSpec = {
+  id: string
+  provider: LlmProvider
+  model_name: string
+  context_length?: number | null
+  max_output_tokens?: number | null
+  cost_per_1M_input_tokens?: number | null
+  cost_per_1M_output_tokens?: number | null
+  supports_streaming?: boolean
+  supports_function_calling?: boolean
+  supports_vision?: boolean
+  description?: string | null
+}
+
+/**
+ * Model for LLM provider information.
+ */
+export type LlmProvider = {
+  id: string
   name: string
-  model_id: string
-  provider?: ModelProvider
-  description?: string
-}
-
-export type LlmModelPublic = {
-  id?: string
-  name?: string
-  model_id?: string
-  provider?: ModelProvider
-  description?: string
-  owner_id?: string | null
-  date_created?: string
-  date_modified?: string
-}
-
-export type LlmModelsPublic = {
-  data: Array<LlmModelPublic>
-}
-
-export type LlmModelsValidate = {
-  model_id: string
-  provider: ModelProvider
+  required_env_vars: Array<string>
 }
 
 export type Message = {
   message: string
 }
-
-export type ModelProvider =
-  | "huggingface"
-  | "openai"
-  | "ollama"
-  | "replicate"
-  | "aws"
 
 export type NewPassword = {
   token: string
@@ -353,6 +323,8 @@ export type UserCreate = {
   is_active?: boolean
   is_superuser?: boolean
   full_name?: string | null
+  default_embedding_model?: string
+  default_llm?: string
   password: string
 }
 
@@ -361,6 +333,8 @@ export type UserPublic = {
   is_active?: boolean
   is_superuser?: boolean
   full_name?: string | null
+  default_embedding_model?: string
+  default_llm?: string
   id: string
 }
 
@@ -380,6 +354,8 @@ export type UserUpdate = {
   is_active?: boolean
   is_superuser?: boolean
   full_name?: string | null
+  default_embedding_model?: string
+  default_llm?: string
   password?: string | null
 }
 
@@ -466,63 +442,19 @@ export type ChatQueryTextData = {
 
 export type ChatQueryTextResponse = TextQueryResponse
 
-export type EmbeddingModelsGetAvailableProvidersResponse = {
-  [key: string]: Array<string>
-}
+export type EmbeddingModelsGetAvailableProvidersResponse = Array<string>
 
-export type EmbeddingModelsGetEmbeddingModelsData = {
+export type EmbeddingModelsGetEmbeddingModelsRegistryResponse =
+  Array<EmbeddingModelInfo>
+
+export type EmbeddingModelsGetDefaultEmbeddingModelResponse = EmbeddingModelInfo
+
+export type EmbeddingModelsGetLlmModelsData = {
   limit?: number
   skip?: number
 }
 
-export type EmbeddingModelsGetEmbeddingModelsResponse = EmbeddingModelsPublic
-
-export type EmbeddingModelsCreateEmbeddingModelData = {
-  requestBody: EmbeddingModelCreate
-}
-
-export type EmbeddingModelsCreateEmbeddingModelResponse = EmbeddingModelPublic
-
-export type EmbeddingModelsGetDefaultEmbeddingModelResponse =
-  EmbeddingModelPublic
-
-export type EmbeddingModelsGetEmbeddingModelData = {
-  modelId: string
-}
-
-export type EmbeddingModelsGetEmbeddingModelResponse = EmbeddingModelPublic
-
-export type EmbeddingModelsUpdateEmbeddingModelData = {
-  modelId: string
-  requestBody: EmbeddingModelUpdate
-}
-
-export type EmbeddingModelsUpdateEmbeddingModelResponse = EmbeddingModelPublic
-
-export type EmbeddingModelsDeleteEmbeddingModelData = {
-  modelId: string
-}
-
-export type EmbeddingModelsDeleteEmbeddingModelResponse = Message
-
-export type EmbeddingModelsSetDefaultEmbeddingModelData = {
-  modelId: string
-}
-
-export type EmbeddingModelsSetDefaultEmbeddingModelResponse =
-  EmbeddingModelPublic
-
-export type EmbeddingModelsValidateEmbeddingModelData = {
-  requestBody: EmbeddingModelValidate
-}
-
-export type EmbeddingModelsValidateEmbeddingModelResponse = Message
-
-export type EmbeddingModelsCheckApiKeyConfiguredData = {
-  provider: string
-}
-
-export type EmbeddingModelsCheckApiKeyConfiguredResponse = Message
+export type EmbeddingModelsGetLlmModelsResponse = Array<LlmModelSpec>
 
 export type FeedbackSubmitFeedbackData = {
   feedback: string
@@ -629,7 +561,7 @@ export type KnowledgeBasesReadKnowledgeBasesResponse = KnowledgeBasesPublic
 
 export type KnowledgeBasesCreateKnowledgeBaseData = {
   description?: string | null
-  embeddingModelId?: string | null
+  embeddingModelId?: string
   formData: Body_knowledge_bases_create_knowledge_base
   title: string
 }
@@ -644,7 +576,6 @@ export type KnowledgeBasesReadKnowledgeBaseResponse = KnowledgeBasePublic
 
 export type KnowledgeBasesUpdateKnowledgeBaseData = {
   description?: string | null
-  embeddingModelId?: string | null
   formData?: Body_knowledge_bases_update_knowledge_base
   id: string
   title?: string | null
@@ -658,38 +589,29 @@ export type KnowledgeBasesDeleteKnowledgeBaseData = {
 
 export type KnowledgeBasesDeleteKnowledgeBaseResponse = Message
 
-export type LlmModelsGetLlmModelsData = {
-  limit?: number
-  skip?: number
-}
+export type LlmModelsGetLlmModelsResponse = Array<LlmModelSpec>
 
-export type LlmModelsGetLlmModelsResponse = LlmModelsPublic
+export type LlmModelsGetAvailableProvidersResponse = Array<string>
 
-export type LlmModelsCreateLlmModelData = {
-  requestBody: LlmModelCreate
-}
+export type LlmModelsGetDefaultLlmModelResponse = LlmModelSpec
 
-export type LlmModelsCreateLlmModelResponse = LlmModelPublic
-
-export type LlmModelsGetDefaultLlmModelResponse = LlmModelPublic
-
-export type LlmModelsDeleteLlmModelData = {
+export type LlmModelsValidateLlmModelData = {
   modelId: string
 }
 
-export type LlmModelsDeleteLlmModelResponse = Message
+export type LlmModelsValidateLlmModelResponse = Message
 
-export type LlmModelsValidateLlmModelData = {
-  requestBody: LlmModelsValidate
+export type LlmModelsCheckApiKeyConfiguredData = {
+  provider: string
 }
 
-export type LlmModelsValidateLlmModelResponse = Message
+export type LlmModelsCheckApiKeyConfiguredResponse = Message
 
 export type LlmModelsSetDefaultLlmModelData = {
   modelId: string
 }
 
-export type LlmModelsSetDefaultLlmModelResponse = LlmModelPublic
+export type LlmModelsSetDefaultLlmModelResponse = LlmModelSpec
 
 export type LoginLoginAccessTokenData = {
   formData: Body_login_login_access_token

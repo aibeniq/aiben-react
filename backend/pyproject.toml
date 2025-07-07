@@ -35,6 +35,7 @@ dependencies = [
     "markdown == 3.5.2",
     "beautifulsoup4 == 4.12.2",
     "langchain-aws==0.2.24",
+    "pymilvus>=2.5.11",
     "rank_bm25==0.2.2",
 ]
 
