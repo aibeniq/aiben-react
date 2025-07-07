@@ -1,3 +1,7 @@
+"""
+This script pulls the required models from Ollama.
+"""
+
 import requests
 import time
 import sys
