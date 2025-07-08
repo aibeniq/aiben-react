@@ -1,33 +1,33 @@
-import tempfile
-import os
 import asyncio
-import uuid
-from datetime import datetime
+import os
+import tempfile
 import threading
+import uuid
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
+from typing import Any
 
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from typing import Optional, List, Union
+from fastapi import APIRouter, File, HTTPException, UploadFile
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_community.vectorstores import Chroma
+from langchain_core.language_models import BaseChatModel
+from langchain_core.prompts import PromptTemplate
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pydantic import BaseModel
 from sqlmodel import select
 
-from langchain_core.language_models import BaseChatModel, BaseLLM
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_community.document_loaders import TextLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
-from langchain_core.prompts import PromptTemplate
-
-from app.core.config import settings
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
-from app.services.embeddings import EmbeddingService
-from app.services.llms import LlmService
+from app.core.config import settings
 from app.models import (
     KnowledgeBase,
-    Source as SourceORM,
     User,
 )
-
+from app.models import (
+    Source as SourceORM,
+)
+from app.services.embeddings import EmbeddingService
+from app.services.llms import LlmService
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -36,9 +36,9 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 class SourceMetadata(BaseModel):
     """Metadata for document sources"""
 
-    source: Optional[str] = None
-    source_data_id: Optional[str] = None
-    page: Optional[int] = None
+    source: str | None = None
+    source_id: str | None = None
+    page: int | None = None
     # Allow additional fields since metadata can contain various keys
 
     class Config:
@@ -56,7 +56,7 @@ class QueryResponse(BaseModel):
     """Response model for knowledge base query endpoint"""
 
     answer: str
-    sources: List[Source]
+    sources: list[Source]
     session_id: str
     rephrased_question: str
 
@@ -65,7 +65,7 @@ class DocumentQueryResponse(BaseModel):
     """Response model for document query endpoint"""
 
     answer: str
-    sources: List[Source]
+    sources: list[Source]
     session_id: str
     rephrased_question: str
 
@@ -78,15 +78,23 @@ class TextQueryResponse(BaseModel):
     rephrased_question: str
 
 
+@dataclass
+class SessionCacheData:
+    llm: BaseChatModel
+    kb_id: str | None = None
+    retriever: Any | None = None
+
+
 # Create a simple cache for LLMs only (might use redis for production)
 class SessionCache:
-    def __init__(self):
-        self.cache = {}
+    def __init__(self) -> None:
+        self.cache: dict[str, SessionCacheData] = {}
         self.lock = threading.Lock()
-        self.expiry = {}  # For tracking session expiration
+        self.expiry: dict[str, datetime] = {}  # For tracking session expiration
         self._cleanup_interval = 3600  # 1 hour in seconds
+        self._max_cache_size = 1000  # Prevent unbounded growth
 
-    def get(self, session_id):
+    def get(self, session_id: str) -> SessionCacheData | None:
         with self.lock:
             if session_id in self.cache:
                 # Update last access time
@@ -94,23 +102,36 @@ class SessionCache:
                 return self.cache[session_id]
         return None
 
-    def set(self, session_id, data):
+    def set(self, session_id: str, data: SessionCacheData) -> None:
         with self.lock:
+            # Prevent unbounded growth
+            if len(self.cache) >= self._max_cache_size:
+                self._cleanup_expired()
+
             self.cache[session_id] = data
             self.expiry[session_id] = datetime.now()
 
-    def cleanup(self):
-        """Remove sessions older than 30 minutes"""
+    def _cleanup_expired(self) -> None:
+        """Internal cleanup method that assumes lock is already held"""
         now = datetime.now()
-        with self.lock:
-            expired = [
-                sid for sid, time in self.expiry.items() if (now - time).seconds > 1800
-            ]  # 30 minutes
-            for sid in expired:
-                if sid in self.cache:
-                    del self.cache[sid]
-                if sid in self.expiry:
-                    del self.expiry[sid]
+        expired = [
+            sid
+            for sid, time in self.expiry.items()
+            if (now - time).total_seconds() > 1800  # 30 minutes
+        ]
+
+        for sid in expired:
+            self.cache.pop(sid, None)  # Use pop to avoid KeyError
+            self.expiry.pop(sid, None)
+
+    def cleanup(self) -> None:
+        """Remove sessions older than 30 minutes"""
+        try:
+            with self.lock:
+                self._cleanup_expired()
+        except Exception as e:
+            print(f"Error during cache cleanup: {e}")
+            # Continue execution even if cleanup fails
 
 
 # Initialize the cache
@@ -137,6 +158,11 @@ def rephrase_question_with_context(
         prompt = prompt_template.invoke(variables)
         response = llm.invoke(prompt)
 
+        if not isinstance(response.content, str):
+            raise HTTPException(
+                status_code=500,
+                detail=f"Response content is not a string: {response.content}",
+            )
         rephrased_question = response.content.strip()
         print(f"Original question: {current_question}")
         print(f"Rephrased question: {rephrased_question}")
@@ -154,11 +180,10 @@ async def query_knowledge_base(
     vectordb_service: VectorDBDep,
     kb_id: str,
     question: str,
-    chat_history: str = None,
-    use_default_models: bool = False,
-    session_id: str = None,
+    chat_history: str | None = None,
+    session_id: str | None = None,
     is_follow_up: bool = False,
-):
+) -> QueryResponse:
     """Query a knowledge base with a question."""
     try:
         print(
@@ -177,9 +202,9 @@ async def query_knowledge_base(
 
         llm = None
 
-        if is_follow_up and cached_data and cached_data.get("kb_id") == kb_id:
+        if is_follow_up and cached_data and cached_data.kb_id == kb_id:
             print(f"Using cached LLM for session {session_id}")
-            llm = cached_data.get("llm")
+            llm = cached_data.llm
 
         # If no cached LLM, we need to set everything up
         if not llm or not isinstance(llm, BaseChatModel):
@@ -202,10 +227,7 @@ async def query_knowledge_base(
             # Cache the LLM
             session_cache.set(
                 session_id,
-                {
-                    "kb_id": kb_id,
-                    "llm": llm,
-                },
+                SessionCacheData(llm=llm, kb_id=kb_id),
             )
 
         # Get knowledge base info for vectordb service
@@ -214,18 +236,11 @@ async def query_knowledge_base(
             raise HTTPException(status_code=404, detail="Knowledge base not found")
 
         # Get embedding model info for the knowledge base
-        if kb.embedding_model_id:
-            if EmbeddingService.is_valid_model_id(kb.embedding_model_id):
-                embedding_model = EmbeddingService.get_model_spec(kb.embedding_model_id)
-            else:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Knowledge base has an invalid embedding model",
-                )
-        else:
+        embedding_model = EmbeddingService.get_model_spec(kb.embedding_model_id)
+        if not embedding_model:
             raise HTTPException(
                 status_code=400,
-                detail="Knowledge base has no embedding model",
+                detail="Knowledge base has an invalid embedding model",
             )
 
         # Rephrase the question using chat history if available
@@ -260,17 +275,16 @@ async def query_knowledge_base(
         )
 
         # Create a list of sources for citation
-        sources = []
+        sources: list[Source] = []
         for chunk in chunks:
             entity = chunk["entity"]
 
             # Create metadata similar to the old format
-            metadata = {
-                "source_id": entity.get("source_id", ""),
-                "title": entity.get("title", ""),
-                "author": entity.get("author", ""),
-                "url": entity.get("url", ""),
-            }
+            metadata = SourceMetadata(
+                source=entity.get("source", ""),
+                source_id=entity.get("source_id", ""),
+                page=entity.get("page", ""),
+            )
 
             # Try to get source id from the source table
             if entity.get("source_id"):
@@ -279,24 +293,24 @@ async def query_knowledge_base(
                 ).first()
 
                 if source_entry:
-                    metadata["source_id"] = str(source_entry.id)
+                    metadata.source_id = str(source_entry.id)
                     # Use the source name if available
                     if source_entry.name:
-                        metadata["source"] = source_entry.name
+                        metadata.source = source_entry.name
                     print(f"Found source entry with ID: {source_entry.id}")
                 else:
                     print(
                         f"No source entry found for source_id: {entity.get('source_id')}"
                     )
 
-            source = {
-                "content": (
+            source = Source(
+                content=(
                     entity["content"][:300] + "..."
                     if len(entity["content"]) > 300
                     else entity["content"]
                 ),
-                "metadata": metadata,
-            }
+                metadata=metadata,
+            )
             sources.append(source)
 
         # Generate the answer
@@ -309,6 +323,11 @@ async def query_knowledge_base(
             variables = {"context": context, "question": rephrased_question}
             prompt = qa_prompt_template.invoke(variables)
             answer = llm.invoke(prompt)
+            if not isinstance(answer.content, str):
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Response content is not a string: {answer.content}",
+                )
             print(f"Got response: {answer.content[:100]}...")
         except Exception as e:
             print(f"Error generating answer: {e}")
@@ -330,16 +349,16 @@ async def query_knowledge_base(
             metadata={
                 "session_id": session_id,
                 "is_follow_up": is_follow_up,
-                "sources": [s["metadata"] for s in sources],
+                "sources": [s.metadata for s in sources],
             },
         )
 
-        return {
-            "answer": answer.content,
-            "sources": sources,
-            "session_id": session_id,  # Return session ID for client to use in follow-ups
-            "rephrased_question": rephrased_question,
-        }
+        return QueryResponse(
+            answer=answer.content,
+            sources=sources,
+            session_id=session_id,  # Return session ID for client to use in follow-ups
+            rephrased_question=rephrased_question,
+        )
 
     except Exception as e:
         import traceback
@@ -354,13 +373,12 @@ async def query_knowledge_base(
 async def query_document(
     session: SessionDep,
     current_user: CurrentUser,
-    question: str = None,
-    chat_history: str = None,
-    use_default_models: bool = False,
-    session_id: str = None,
+    question: str | None = None,
+    chat_history: str | None = None,
+    session_id: str | None = None,
     is_follow_up: bool = False,
     file: UploadFile = File(None),
-):
+) -> DocumentQueryResponse:
     """Query an uploaded document with a question."""
     if not question:
         raise HTTPException(status_code=400, detail="Question is required")
@@ -377,7 +395,14 @@ async def query_document(
             status_code=400, detail="File is required for initial questions"
         )
 
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="File name is required")
+
     try:
+        # Generate a session ID if not provided
+        if not session_id:
+            session_id = str(uuid.uuid4())
+
         # Check if we have a cached retriever for this session
         retriever = None
         llm = None
@@ -386,28 +411,24 @@ async def query_document(
         if is_follow_up and session_id:
             print("Using cached resources for follow-up question")
             cached_data = session_cache.get(session_id)
-            if cached_data:
+            if cached_data and cached_data.retriever:
                 print(f"Using cached resources for document session {session_id}")
-                retriever = cached_data.get("retriever")
-                llm = cached_data.get("llm")
+                retriever = cached_data.retriever
+                llm = cached_data.llm
 
         # If no cached retriever or this is a new document, set up everything
-        if not retriever:
+        if not retriever or not isinstance(llm, BaseChatModel):
             print("Setting up new resources for document query")
             # Get the user's default models
             user = session.get(User, current_user.id)
             if not user:
                 raise HTTPException(status_code=400, detail="User not found")
-            if not user.default_embedding_model:
-                raise HTTPException(
-                    status_code=400, detail="User has no default embedding model"
-                )
-            if not user.default_llm:
-                raise HTTPException(
-                    status_code=400, detail="User has no default LLM model"
-                )
 
             model_info = EmbeddingService.get_model_spec(user.default_embedding_model)
+            if not model_info:
+                raise HTTPException(
+                    status_code=400, detail="Invalid user default embedding model"
+                )
             model_id = model_info.id
 
             llm = LlmService.get_model(user.default_llm)
@@ -419,13 +440,14 @@ async def query_document(
 
             # Detect file type and use appropriate loader
             if file.filename.endswith(".pdf"):
-                loader = PyPDFLoader(temp_path)
+                pdf_loader = PyPDFLoader(temp_path)
+                documents = pdf_loader.load()
             else:
                 # Default to text loader for other files
-                loader = TextLoader(temp_path)
+                text_loader = TextLoader(temp_path)
+                documents = text_loader.load()
 
             # Load and split the document
-            documents = loader.load()
             text_splitter = RecursiveCharacterTextSplitter(
                 chunk_size=1000, chunk_overlap=200
             )
@@ -443,19 +465,10 @@ async def query_document(
             # TODO: implement this using the vectordb service
             retriever = vector_store.as_retriever(search_kwargs={"k": 5})
 
-            # Generate a session ID if not provided
-            if not session_id:
-                session_id = str(uuid.uuid4())
-
             # Cache the resources
             session_cache.set(
                 session_id,
-                {
-                    "retriever": retriever,
-                    "llm": llm,
-                    "vector_dir": vector_dir,
-                    "temp_path": temp_path,
-                },
+                SessionCacheData(llm=llm, retriever=retriever),
             )
 
         # Rephrase the question using chat history if available
@@ -472,30 +485,34 @@ async def query_document(
         context = "\n\n".join([doc.page_content for doc in docs])
 
         # Create a list of sources for citation
-        sources = []
+        sources: list[Source] = []
         for doc in docs:
             # Ensure source_data_id is included in metadata if available
-            metadata = doc.metadata.copy()  # Copy to avoid modifying the original
+            metadata = SourceMetadata(
+                source=doc.metadata.get("source", ""),
+                source_id=doc.metadata.get("source_id", ""),
+                page=doc.metadata.get("page", ""),
+            )
 
             # If the metadata contains a source path that matches a pattern from a KB
-            if "source" in metadata and isinstance(metadata["source"], str):
+            if metadata.source and isinstance(metadata.source, str):
                 # Try to find the corresponding source_data_id
-                source_path = metadata["source"]
+                source_path = metadata.source
                 source_entry = session.exec(
                     select(SourceORM).where(SourceORM.name == Path(source_path).name)
                 ).first()
 
                 if source_entry:
-                    metadata["source_data_id"] = str(source_entry.source_data_id)
+                    metadata.source_id = str(source_entry.source_data_id)
 
-            source = {
-                "content": (
+            source = Source(
+                content=(
                     doc.page_content[:300] + "..."
                     if len(doc.page_content) > 300
                     else doc.page_content
                 ),
-                "metadata": metadata,
-            }
+                metadata=metadata,
+            )
             sources.append(source)
 
         # Generate the answer - with branching for different model types
@@ -507,6 +524,11 @@ async def query_document(
             variables = {"context": context, "question": rephrased_question}
             prompt = qa_prompt_template.invoke(variables)
             answer = llm.invoke(prompt)
+            if not isinstance(answer.content, str):
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Response content is not a string: {answer.content}",
+                )
             print(f"Got response: {answer.content[:100]}...")
         except Exception as e:
             print(f"Error generating answer: {e}")
@@ -531,16 +553,16 @@ async def query_document(
             metadata={
                 "session_id": session_id,
                 "is_follow_up": is_follow_up,
-                "sources": [s["metadata"] for s in sources],
+                "sources": [s.metadata for s in sources],
             },
         )
 
-        return {
-            "answer": answer.content,
-            "sources": sources,
-            "session_id": session_id,
-            "rephrased_question": rephrased_question,
-        }
+        return DocumentQueryResponse(
+            answer=answer.content,
+            sources=sources,
+            session_id=session_id,
+            rephrased_question=rephrased_question,
+        )
 
     except Exception as e:
         import traceback
@@ -552,7 +574,12 @@ async def query_document(
 
     finally:
         # Only clean up temp files if not cached
-        if temp_path and not is_follow_up and not session_cache.get(session_id):
+        if (
+            temp_path
+            and not is_follow_up
+            and session_id
+            and not session_cache.get(session_id)
+        ):
             try:
                 os.unlink(temp_path)
             except Exception as e:
@@ -561,12 +588,16 @@ async def query_document(
 
 # Add a cleanup task that runs periodically
 @router.on_event("startup")
-async def startup_event():
-    async def cleanup_sessions():
+async def startup_event() -> None:
+    async def cleanup_sessions() -> None:
         while True:
-            await asyncio.sleep(1800)  # 30 minutes
-            session_cache.cleanup()
-            print("Session cache cleanup performed")
+            try:
+                await asyncio.sleep(1800)  # 30 minutes
+                session_cache.cleanup()
+                print("Session cache cleanup performed")
+            except Exception as e:
+                print(f"Error in cleanup task: {e}")
+                # Continue running even if cleanup fails
 
     asyncio.create_task(cleanup_sessions())
 
@@ -576,10 +607,10 @@ async def query_text(
     session: SessionDep,
     current_user: CurrentUser,
     question: str,
-    chat_history: str = None,
-    session_id: str = None,
+    chat_history: str | None = None,
+    session_id: str | None = None,
     is_follow_up: bool = False,
-):
+) -> TextQueryResponse:
     """Answer a direct text question without a knowledge base or document."""
     try:
         print(
@@ -596,7 +627,7 @@ async def query_text(
 
         if is_follow_up and cached_data:
             print(f"Using cached LLM for session {session_id}")
-            llm = cached_data.get("llm")
+            llm = cached_data.llm
 
         # If no cached LLM, get a new one
         if not llm or not isinstance(llm, BaseChatModel):
@@ -605,7 +636,7 @@ async def query_text(
             llm = LlmService.get_model(current_user.default_llm)
             print("Default LLM model retrieved:", llm)
             # Cache the LLM
-            session_cache.set(session_id, {"llm": llm, "type": "text_query"})
+            session_cache.set(session_id, SessionCacheData(llm=llm))
             print("LLM cached for session", session_id)
 
         # Rephrase the question using chat history if available
@@ -630,6 +661,11 @@ async def query_text(
             variables = {"question": rephrased_question}
             prompt = qa_prompt_template.invoke(variables)
             answer = llm.invoke(prompt)
+            if not isinstance(answer.content, str):
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Response content is not a string: {answer.content}",
+                )
             print(f"Got response: {answer.content[:100]}...")
         except Exception as e:
             print(f"Error generating answer: {e}")
@@ -646,11 +682,11 @@ async def query_text(
             metadata={"session_id": session_id, "is_follow_up": is_follow_up},
         )
 
-        return {
-            "answer": answer.content,
-            "session_id": session_id,
-            "rephrased_question": rephrased_question,
-        }
+        return TextQueryResponse(
+            answer=answer.content,
+            session_id=session_id,
+            rephrased_question=rephrased_question,
+        )
 
     except Exception as e:
         import traceback

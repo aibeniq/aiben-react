@@ -1,21 +1,21 @@
 from fastapi import APIRouter
 
 from app.api.routes import (
+    chatbot,
+    feedback,
+    formconnect,
     items,
+    knowledgebases,
+    llms,
     login,
+    modelselection,
     private,
+    reportgenie,
+    sourceretrieval,
+    twincheck,
     users,
     utils,
-    knowledgebases,
-    formconnect,
-    reportgenie,
     veradoc,
-    modelselection,
-    llms,
-    chatbot,
-    sourceretrieval,
-    feedback,
-    twincheck,
 )
 from app.core.config import settings
 

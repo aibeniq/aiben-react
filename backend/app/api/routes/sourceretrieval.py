@@ -1,12 +1,14 @@
-import uuid
-from fastapi import APIRouter, HTTPException, Depends
-from sqlmodel import Session, select
-from app.api.deps import CurrentUser, SessionDep
-from app.models import Source, SourceData, KnowledgeBase, SourceContentResponse
-import zipfile
-from io import BytesIO
 import base64
 import mimetypes
+import uuid
+import zipfile
+from io import BytesIO
+
+from fastapi import APIRouter, HTTPException
+from sqlmodel import select
+
+from app.api.deps import CurrentUser, SessionDep
+from app.models import KnowledgeBase, Source, SourceContentResponse, SourceData
 
 router = APIRouter(prefix="/files", tags=["files"])
 
@@ -23,8 +25,10 @@ async def get_source_content(
     """
     try:
         # Find the source data
-        source_data_id = session.get(Source, source_id).source_data_id
-        source_data = session.get(SourceData, source_data_id)
+        source = session.get(Source, source_id)
+        if not source:
+            raise HTTPException(status_code=404, detail="Source not found")
+        source_data = session.get(SourceData, source.source_data_id)
 
         if not source_data:
             raise HTTPException(status_code=404, detail="Source file not found")
@@ -41,7 +45,7 @@ async def get_source_content(
             # If not direct owner, check if they have access to any knowledge base containing this source
             kb_access = session.exec(
                 select(KnowledgeBase)
-                .join(Source, KnowledgeBase.id == Source.knowledge_base_id)
+                .join(Source)
                 .where(Source.id == source_id)
                 .where(KnowledgeBase.owner_id == current_user.id)
             ).first()
@@ -71,12 +75,12 @@ async def get_source_content(
             # Base64 encode for transmission
             content_base64 = base64.b64encode(file_content).decode("utf-8")
 
-            return {
-                "id": str(source_id),
-                "name": file_name,
-                "data_base64": content_base64,
-                "content_type": content_type,
-            }
+            return SourceContentResponse(
+                id=str(source_id),
+                name=file_name,
+                data_base64=content_base64,
+                content_type=content_type,
+            )
 
     except Exception as e:
         import traceback

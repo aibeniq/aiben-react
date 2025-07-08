@@ -209,7 +209,8 @@ function LlmModels() {
               {modelsData
                 .filter(
                   (model): model is typeof model & { provider: string } =>
-                    model.provider !== undefined && availableProviders.includes(model.provider),
+                    model.provider !== undefined &&
+                    availableProviders.includes(model.provider.name),
                 )
                 .map((model) => (
                   <Table.Row key={model.id}>

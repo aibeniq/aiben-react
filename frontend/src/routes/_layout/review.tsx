@@ -232,7 +232,6 @@ const VeraDoc = () => {
         knowledgeBaseId: data.knowledgeBaseId,
         formData: {
           files: data.files,
-          handwritten_files: data.handwrittenFiles,
         },
       })
 
@@ -413,7 +412,6 @@ const VeraDoc = () => {
           knowledgeBaseId: requestData.knowledgeBaseId,
           formData: {
             files: requestData.files,
-            handwritten_files: requestData.handwrittenFiles,
           },
         })
 
