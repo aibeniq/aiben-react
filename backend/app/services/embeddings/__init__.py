@@ -1,11 +1,9 @@
 from .main import (
-    EmbeddingService,
     EmbeddingModelInfo,
-    ReplicateEmbeddings,
+    EmbeddingService,
 )
 
 __all__ = [
     "EmbeddingService",
     "EmbeddingModelInfo",
-    "ReplicateEmbeddings",
 ]

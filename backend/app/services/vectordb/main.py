@@ -1,39 +1,39 @@
 import logging
-import re
-from typing import List, Dict, Any, Optional
-from pymilvus import (
-    MilvusClient,
-    CollectionSchema,
-    AnnSearchRequest,
-    WeightedRanker,
-    FieldSchema,
-    DataType,
-)
-from fastapi import UploadFile
 import mimetypes
-import tempfile
 import os
-from langchain_core.documents import Document
-from langchain_community.document_loaders import PyPDFLoader, TextLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_core.embeddings import Embeddings
-from fastapi import HTTPException
-import docx
+import re
+import tempfile
 import time
-from app.core.config import settings
+from typing import Any
 
-from app.services.vectordb.types import ChunkData, EmbeddedChunkData
+import docx
+from fastapi import HTTPException, UploadFile
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_core.documents import Document
+from langchain_core.embeddings import Embeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from pymilvus import (
+    AnnSearchRequest,
+    CollectionSchema,
+    DataType,
+    FieldSchema,
+    MilvusClient,
+    WeightedRanker,
+)
+
+from app.core.config import settings
 from app.services.embeddings.main import EmbeddingService
 from app.services.vectordb.config import (
-    MILVUS_URL,
-    MILVUS_SCHEMA_TEMPLATE,
     BM25_FUNCTION,
+    MILVUS_SCHEMA_TEMPLATE,
+    MILVUS_URL,
 )
+from app.services.vectordb.types import ChunkData, EmbeddedChunkData
 
 logger = logging.getLogger(__name__)
 
 
-def _extract_text_from_docx(file_path: str, filename: str) -> List[Any]:
+def _extract_text_from_docx(file_path: str, filename: str) -> list[Any]:
     doc = docx.Document(file_path)
 
     full_text = []
@@ -76,7 +76,7 @@ def _extract_text_from_docx(file_path: str, filename: str) -> List[Any]:
     return [Document(page_content=combined_text, metadata=metadata)]
 
 
-def _load_uploaded_file(file: UploadFile) -> List[Any]:
+def _load_uploaded_file(file: UploadFile) -> list[Any]:
     """
     Load an uploaded file based on its type (e.g., PDF, text file).
 
@@ -87,7 +87,11 @@ def _load_uploaded_file(file: UploadFile) -> List[Any]:
         List[Any]: A list of loaded documents from the file.
     """
     print(f"Processing file: {file.filename}")
+    if not file.filename:
+        raise ValueError("File has no filename")
     content_type = file.content_type or mimetypes.guess_type(file.filename)[0]
+    if not content_type:
+        raise ValueError("File has no content type")
     print(f"Detected content type: {content_type}")
 
     with tempfile.NamedTemporaryFile(
@@ -101,8 +105,8 @@ def _load_uploaded_file(file: UploadFile) -> List[Any]:
     try:
         if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
             print("Loading PDF with PyPDFLoader...")
-            loader = PyPDFLoader(temp_file_path)
-            loaded_documents = loader.load()
+            pypdf_loader = PyPDFLoader(temp_file_path)
+            loaded_documents = pypdf_loader.load()
         elif (
             content_type
             == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -114,12 +118,12 @@ def _load_uploaded_file(file: UploadFile) -> List[Any]:
             print("Loading text with TextLoader...")
             # Try with different encodings if utf-8 fails
             try:
-                loader = TextLoader(temp_file_path, encoding="utf-8")
-                loaded_documents = loader.load()
+                text_loader = TextLoader(temp_file_path, encoding="utf-8")
+                loaded_documents = text_loader.load()
             except UnicodeDecodeError:
                 print("UTF-8 decoding failed. Retrying with Latin-1 encoding...")
-                loader = TextLoader(temp_file_path, encoding="latin-1")
-                loaded_documents = loader.load()
+                text_loader = TextLoader(temp_file_path, encoding="latin-1")
+                loaded_documents = text_loader.load()
 
         return loaded_documents
     except Exception as e:
@@ -135,7 +139,7 @@ def _load_uploaded_file(file: UploadFile) -> List[Any]:
 class VectorDBService:
     """Service for interacting with the vector database."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the vector database service."""
         try:
             # initialize Milvus client
@@ -143,8 +147,8 @@ class VectorDBService:
             logger.info(f"Connected to Milvus at {MILVUS_URL}")
 
             # cache for embedding models and initialized collections
-            self._embedding_models: Dict[str, Embeddings] = {}
-            self._initialized_collections: set = set()
+            self._embedding_models: dict[str, Embeddings] = {}
+            self._initialized_collections: set[str] = set()
 
             self.default_output_fields = [
                 "content",
@@ -197,6 +201,8 @@ class VectorDBService:
             raise ValueError(error_msg)
 
         spec = EmbeddingService.get_model_spec(embedding_model_id)
+        if not spec:
+            raise ValueError(f"Unknown embedding model: {embedding_model_id}")
 
         # create schema fields with appropriate embedding dimension
         fields = MILVUS_SCHEMA_TEMPLATE + [
@@ -314,7 +320,7 @@ class VectorDBService:
         )
         splits = text_splitter.split_documents(documents)
 
-        chunks_to_add: List[ChunkData] = []
+        chunks_to_add: list[ChunkData] = []
         for split in splits:
             chunk_data = ChunkData(
                 knowledge_base_id=str(knowledge_base_id),
@@ -362,9 +368,9 @@ class VectorDBService:
 
     def _add_chunks(
         self,
-        chunks: List[ChunkData],
+        chunks: list[ChunkData],
         embedding_model_id: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Add chunks to the collection.
 
@@ -401,8 +407,8 @@ class VectorDBService:
             )
 
             # prepare data for insertion
-            data_to_insert: List[Dict[str, Any]] = []
-            for chunk, embedding in zip(chunks, embeddings):
+            data_to_insert: list[dict[str, Any]] = []
+            for chunk, embedding in zip(chunks, embeddings, strict=False):
                 chunk_data = EmbeddedChunkData(**chunk.model_dump(), dense=embedding)
                 # convert pydantic model to dictionary for milvus insertion
                 data_to_insert.append(chunk_data.model_dump())
@@ -429,10 +435,10 @@ class VectorDBService:
     def _delete_chunks(
         self,
         embedding_model_id: str,
-        knowledge_base_id: Optional[str] = None,
-        user_id: Optional[str] = None,
-        source_id: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        knowledge_base_id: str | None = None,
+        user_id: str | None = None,
+        source_id: str | None = None,
+    ) -> dict[str, Any]:
         """Delete chunks from the collection."""
 
         collection_name = self._get_collection_name(embedding_model_id)
@@ -446,8 +452,8 @@ class VectorDBService:
             self.client.load_collection(collection_name=collection_name)
 
             # prepare filter
-            filter_expr = []
-            filter_params = {}
+            filter_expr: list[str] = []
+            filter_params: dict[str, str] = {}
             if knowledge_base_id:
                 filter_expr.append("knowledge_base_id == {kb_id}")
                 filter_params["kb_id"] = knowledge_base_id
@@ -457,12 +463,12 @@ class VectorDBService:
             if source_id:
                 filter_expr.append("source_id == {source_id}")
                 filter_params["source_id"] = source_id
-            filter_expr = " AND ".join(filter_expr) if filter_expr else None
+            filter = " AND ".join(filter_expr) if filter_expr else None
 
             # delete chunks
             self.client.delete(
                 collection_name=collection_name,
-                filter=filter_expr,
+                filter=filter,
                 filter_params=filter_params if filter_params else None,
             )
 
@@ -477,12 +483,12 @@ class VectorDBService:
         self,
         query: str,
         embedding_model_id: str,
-        knowledge_base_id: Optional[str] = None,
-        user_id: Optional[str] = None,
-        source_id: Optional[str] = None,
+        knowledge_base_id: str | None = None,
+        user_id: str | None = None,
+        source_id: str | None = None,
         limit: int = 10,
-        output_fields: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        output_fields: list[str] | None = None,
+    ) -> dict[str, Any]:
         """
         Semantic similarity search.
 
@@ -525,14 +531,14 @@ class VectorDBService:
             if source_id:
                 filter_expr.append("source_id == {source_id}")
                 filter_params["source_id"] = source_id
-            filter_expr = " AND ".join(filter_expr) if filter_expr else None
+            filter = " AND ".join(filter_expr) if filter_expr else None
 
             # perform search
             results = self.client.search(
                 collection_name=collection_name,
                 data=[query_embedding],
                 anns_field="dense",
-                filter=filter_expr,
+                filter=filter,
                 filter_params=filter_params if filter_params else None,
                 limit=limit,
                 output_fields=(
@@ -555,12 +561,12 @@ class VectorDBService:
         self,
         query: str,
         embedding_model_id: str,
-        knowledge_base_id: Optional[str] = None,
-        user_id: Optional[str] = None,
-        source_id: Optional[str] = None,
+        knowledge_base_id: str | None = None,
+        user_id: str | None = None,
+        source_id: str | None = None,
         limit: int = 10,
-        output_fields: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        output_fields: list[str] | None = None,
+    ) -> dict[str, Any]:
         """
         Keyword search.
 
@@ -588,8 +594,8 @@ class VectorDBService:
             self.client.load_collection(collection_name=collection_name)
 
             # prepare filter
-            filter_expr = []
-            filter_params = {}
+            filter_expr: list[str] = []
+            filter_params: dict[str, str] = {}
             if knowledge_base_id:
                 filter_expr.append("knowledge_base_id == {kb_id}")
                 filter_params["kb_id"] = knowledge_base_id
@@ -599,14 +605,14 @@ class VectorDBService:
             if source_id:
                 filter_expr.append("source_id == {source_id}")
                 filter_params["source_id"] = source_id
-            filter_expr = " AND ".join(filter_expr) if filter_expr else None
+            filter = " AND ".join(filter_expr) if filter_expr else None
 
             # perform search
             results = self.client.search(
                 collection_name=collection_name,
                 data=[query],
                 anns_field="sparse",
-                filter=filter_expr,
+                filter=filter,
                 filter_params=filter_params if filter_params else None,
                 limit=limit,
                 output_fields=(
@@ -629,14 +635,14 @@ class VectorDBService:
         self,
         query: str,
         embedding_model_id: str,
-        knowledge_base_id: Optional[str] = None,
-        user_id: Optional[str] = None,
-        source_id: Optional[str] = None,
+        knowledge_base_id: str | None = None,
+        user_id: str | None = None,
+        source_id: str | None = None,
         limit: int = 10,
-        output_fields: Optional[List[str]] = None,
+        output_fields: list[str] | None = None,
         alpha: float = 0.5,
         rerank_k: int = 20,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Hybrid search combining semantic and keyword search.
 
@@ -672,8 +678,8 @@ class VectorDBService:
             embedded_query = embedding_model.embed_query(query)
 
             # prepare filter
-            filter_expr = []
-            filter_params = {}
+            filter_expr: list[str] = []
+            filter_params: dict[str, str] = {}
             if knowledge_base_id:
                 filter_expr.append("knowledge_base_id == {kb_id}")
                 filter_params["kb_id"] = knowledge_base_id
@@ -683,7 +689,7 @@ class VectorDBService:
             if source_id:
                 filter_expr.append("source_id == {source_id}")
                 filter_params["source_id"] = source_id
-            filter_expr = " AND ".join(filter_expr) if filter_expr else None
+            filter = " AND ".join(filter_expr) if filter_expr else None
 
             # perform hybrid search using Milvus native hybrid search
             dense_search_params = {
@@ -691,7 +697,7 @@ class VectorDBService:
                 "anns_field": "dense",
                 "param": {"efSearch": 500},
                 "limit": rerank_k,
-                "expr": filter_expr,
+                "expr": filter,
                 "expr_params": filter_params if filter_params else None,
             }
             sparse_search_params = {
@@ -699,7 +705,7 @@ class VectorDBService:
                 "anns_field": "sparse",
                 "param": {"drop_ratio_search": 0.2},
                 "limit": rerank_k,
-                "expr": filter_expr,
+                "expr": filter,
                 "expr_params": filter_params if filter_params else None,
             }
 

@@ -1,6 +1,3 @@
-import os
-import stat
-
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -39,7 +36,7 @@ def send_email(
     subject: str = "",
     html_content: str = "",
 ) -> None:
-    assert settings.emails_enabled, "no provided configuration for email variables"
+    assert settings.emails_enabled(), "no provided configuration for email variables"
     message = emails.Message(
         subject=subject,
         html=html_content,

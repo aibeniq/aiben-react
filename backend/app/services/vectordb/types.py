@@ -1,8 +1,8 @@
 # NOTE: when adding new fields, update both the ChunkData and Milvus schema
 
-from typing import List
-from pydantic import BaseModel, Field
 import time
+
+from pydantic import BaseModel, Field
 
 
 class ChunkData(BaseModel):
@@ -12,7 +12,7 @@ class ChunkData(BaseModel):
     source_id: str = Field(..., description="Source ID")
     user_id: str = Field(..., description="User ID")
     content: str = Field(..., description="Content of the chunk")
-    tags: List[str] = Field(
+    tags: list[str] = Field(
         default_factory=list, description="Tags associated with the chunk"
     )
     title: str = Field(default="", description="Title of the document")
@@ -28,5 +28,5 @@ class ChunkData(BaseModel):
 
 
 class EmbeddedChunkData(ChunkData):
-    dense: List[float] = Field(..., description="Dense embedding vector")
+    dense: list[float] = Field(..., description="Dense embedding vector")
     # no sparse field as milvus adds it on insertion
