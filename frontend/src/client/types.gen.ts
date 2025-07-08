@@ -34,7 +34,6 @@ export type Body_twincheck_compare_documents = {
 
 export type Body_veradoc_process_rag_checklist = {
   files: Array<Blob | File>
-  handwritten_files?: Array<Blob | File>
 }
 
 /**
@@ -254,7 +253,7 @@ export type SourceContentResponse = {
  */
 export type SourceMetadata = {
   source?: string | null
-  source_data_id?: string | null
+  source_id?: string | null
   page?: number | null
   [key: string]: unknown
 }
@@ -412,32 +411,30 @@ export type VeraDocResponse = {
 }
 
 export type ChatQueryKnowledgeBaseData = {
-  chatHistory?: string
+  chatHistory?: string | null
   isFollowUp?: boolean
   kbId: string
   question: string
-  sessionId?: string
-  useDefaultModels?: boolean
+  sessionId?: string | null
 }
 
 export type ChatQueryKnowledgeBaseResponse = QueryResponse
 
 export type ChatQueryDocumentData = {
-  chatHistory?: string
+  chatHistory?: string | null
   formData?: Body_chat_query_document
   isFollowUp?: boolean
-  question?: string
-  sessionId?: string
-  useDefaultModels?: boolean
+  question?: string | null
+  sessionId?: string | null
 }
 
 export type ChatQueryDocumentResponse = DocumentQueryResponse
 
 export type ChatQueryTextData = {
-  chatHistory?: string
+  chatHistory?: string | null
   isFollowUp?: boolean
   question: string
-  sessionId?: string
+  sessionId?: string | null
 }
 
 export type ChatQueryTextResponse = TextQueryResponse
@@ -448,11 +445,6 @@ export type EmbeddingModelsGetEmbeddingModelsRegistryResponse =
   Array<EmbeddingModelInfo>
 
 export type EmbeddingModelsGetDefaultEmbeddingModelResponse = EmbeddingModelInfo
-
-export type EmbeddingModelsGetLlmModelsData = {
-  limit?: number
-  skip?: number
-}
 
 export type EmbeddingModelsGetLlmModelsResponse = Array<LlmModelSpec>
 

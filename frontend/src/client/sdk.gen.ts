@@ -13,7 +13,6 @@ import type {
   EmbeddingModelsGetAvailableProvidersResponse,
   EmbeddingModelsGetEmbeddingModelsRegistryResponse,
   EmbeddingModelsGetDefaultEmbeddingModelResponse,
-  EmbeddingModelsGetLlmModelsData,
   EmbeddingModelsGetLlmModelsResponse,
   FeedbackSubmitFeedbackData,
   FeedbackSubmitFeedbackResponse,
@@ -156,7 +155,6 @@ export class ChatService {
    * @param data.kbId
    * @param data.question
    * @param data.chatHistory
-   * @param data.useDefaultModels
    * @param data.sessionId
    * @param data.isFollowUp
    * @returns QueryResponse Successful Response
@@ -174,7 +172,6 @@ export class ChatService {
       query: {
         question: data.question,
         chat_history: data.chatHistory,
-        use_default_models: data.useDefaultModels,
         session_id: data.sessionId,
         is_follow_up: data.isFollowUp,
       },
@@ -190,7 +187,6 @@ export class ChatService {
    * @param data The data for the request.
    * @param data.question
    * @param data.chatHistory
-   * @param data.useDefaultModels
    * @param data.sessionId
    * @param data.isFollowUp
    * @param data.formData
@@ -206,7 +202,6 @@ export class ChatService {
       query: {
         question: data.question,
         chat_history: data.chatHistory,
-        use_default_models: data.useDefaultModels,
         session_id: data.sessionId,
         is_follow_up: data.isFollowUp,
       },
@@ -291,25 +286,13 @@ export class EmbeddingModelsService {
   /**
    * Get Llm Models
    * Get all LLM models.
-   * @param data The data for the request.
-   * @param data.skip
-   * @param data.limit
    * @returns LlmModelSpec Successful Response
    * @throws ApiError
    */
-  public static getLlmModels(
-    data: EmbeddingModelsGetLlmModelsData = {},
-  ): CancelablePromise<EmbeddingModelsGetLlmModelsResponse> {
+  public static getLlmModels(): CancelablePromise<EmbeddingModelsGetLlmModelsResponse> {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/embedding-models/llm",
-      query: {
-        skip: data.skip,
-        limit: data.limit,
-      },
-      errors: {
-        422: "Validation Error",
-      },
     })
   }
 }
