@@ -1,8 +1,6 @@
-from typing import List
 from fastapi import APIRouter
 
-from app.api.deps import CurrentUser, SessionDep
-from app.services.embeddings import EmbeddingService, EmbeddingModelInfo
+from app.services.embeddings import EmbeddingModelInfo, EmbeddingService
 from app.services.llms import LlmModelSpec, LlmService
 
 router = APIRouter(prefix="/embedding-models", tags=["embedding-models"])
@@ -11,16 +9,16 @@ router = APIRouter(prefix="/embedding-models", tags=["embedding-models"])
 # === Embedding Model Registry Endpoints ===
 
 
-@router.get("/providers", response_model=List[str])
-def get_available_providers() -> List[str]:
+@router.get("/providers", response_model=list[str])
+def get_available_providers() -> list[str]:
     """
     Get list of available embedding providers.
     """
     return EmbeddingService.get_providers()
 
 
-@router.get("/registry", response_model=List[EmbeddingModelInfo])
-def get_embedding_models_registry() -> List[EmbeddingModelInfo]:
+@router.get("/registry", response_model=list[EmbeddingModelInfo])
+def get_embedding_models_registry() -> list[EmbeddingModelInfo]:
     """
     Get the registry of available embedding models.
     """
@@ -39,9 +37,7 @@ def get_default_embedding_model() -> EmbeddingModelInfo:
 # TODO: this doesn't belong here.. or we need to modify the prefix
 
 
-@router.get("/llm", response_model=List[LlmModelSpec])
-def get_llm_models(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
-) -> List[LlmModelSpec]:
+@router.get("/llm", response_model=list[LlmModelSpec])
+def get_llm_models() -> list[LlmModelSpec]:
     """Get all LLM models."""
     return LlmService.get_model_specs()

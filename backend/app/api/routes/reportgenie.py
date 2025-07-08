@@ -1,34 +1,37 @@
-import uuid
-from app.models import (
-    ReportGenieRequest,
-    ReportGenieResponse,
-    ReportGenieOutline,
-    ReportGenieDetailResponse,
-    Source,
-    KnowledgeBase,
-    DocxRequest,
-    LlmInteraction,
-    Message,
-)
 import json
 import traceback
-from io import BytesIO
+import uuid
+from dataclasses import dataclass
 from datetime import datetime
-from fastapi.responses import StreamingResponse
-from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from io import BytesIO
+from typing import Any
+
 import markdown
 from bs4 import BeautifulSoup
+from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from langchain_core.prompts import PromptTemplate
+from sqlmodel import desc, select
 
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
 from app.core.config import settings
-from app.services.llms.main import LlmService
+from app.models import (
+    DocxRequest,
+    KnowledgeBase,
+    LlmInteraction,
+    Message,
+    ReportGenieDetailFeedback,
+    ReportGenieDetailResponse,
+    ReportGenieDetailResults,
+    ReportGenieOutline,
+    ReportGenieRequest,
+    ReportGenieResponse,
+    Source,
+)
 from app.services.embeddings import EmbeddingService
-
-from sqlmodel import select
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List, Dict, Any
+from app.services.llms.main import LlmService
 
 router = APIRouter(prefix="/reportgenie", tags=["reportgenie"])
 
@@ -39,7 +42,7 @@ async def generate_report(
     current_user: CurrentUser,
     vectordb_service: VectorDBDep,
     request: ReportGenieRequest = Depends(),
-):
+) -> ReportGenieResponse:
     """
     Generate a report based on sections outline and knowledge base search results.
     """
@@ -58,6 +61,11 @@ async def generate_report(
         if kb.embedding_model_id:
             if EmbeddingService.is_valid_model_id(kb.embedding_model_id):
                 embedding_model = EmbeddingService.get_model_spec(kb.embedding_model_id)
+                if not embedding_model:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Knowledge base has an invalid embedding model {kb.embedding_model_id}",
+                    )
             else:
                 raise HTTPException(
                     status_code=400,
@@ -77,7 +85,14 @@ async def generate_report(
         section_list = request.sections.strip().split("\n")
 
         # 6. Process each section
-        sections = []
+
+        @dataclass
+        class ReportSection:
+            title: str
+            content: str
+            source_citations: list[dict[str, Any]]
+
+        sections: list[ReportSection] = []
 
         for section_description in section_list:
             section_description = section_description.strip()
@@ -143,17 +158,21 @@ async def generate_report(
             print(f"Got response: {section.content[:100]}...")
 
             # store the section with its content and sources
-            sections.append(
-                {
-                    "title": section_description,
-                    "content": section.content,
-                    "source_citations": source_citations,
-                }
-            )
+            if isinstance(section.content, str):
+                sections.append(
+                    ReportSection(
+                        title=section_description,
+                        content=section.content,
+                        source_citations=source_citations,
+                    )
+                )
+            else:
+                print(f"Warning: Section content is not a string: {section.content}")
+                continue
 
         # 7. Compile the final report
         full_report = "\n\n---\n\n".join(
-            [section["content"].strip() for section in sections]
+            [section.content.strip() for section in sections]
         )
 
         result = {"full_report": full_report, "sections": sections}
@@ -218,7 +237,7 @@ async def generate_report(
 @router.post("/outlines", response_model=ReportGenieOutline)
 def create_outline(
     outline: ReportGenieOutline, session: SessionDep, current_user: CurrentUser
-):
+) -> ReportGenieOutline:
     """
     Save a new outline to the database.
     """
@@ -237,21 +256,23 @@ def create_outline(
     return outline
 
 
-@router.get("/outlines", response_model=List[ReportGenieOutline])
-def get_outlines(session: SessionDep, current_user: CurrentUser):
+@router.get("/outlines", response_model=list[ReportGenieOutline])
+def get_outlines(
+    session: SessionDep, current_user: CurrentUser
+) -> list[ReportGenieOutline]:
     """
     Retrieve all outlines from the database for this user.
     """
     print(f"Retrieving outlines for user {current_user.id}")
-    if not current_user:
-        raise HTTPException(status_code=401, detail="Not authenticated.")
 
     try:
-        outlines = session.exec(
-            select(ReportGenieOutline).where(
-                ReportGenieOutline.owner_id == current_user.id
+        outlines = list(
+            session.exec(
+                select(ReportGenieOutline).where(
+                    ReportGenieOutline.owner_id == current_user.id
+                )
             )
-        ).all()
+        )
 
         # Print the retrieved outlines for debugging
         print(f"Found {len(outlines)} outlines for user {current_user.id}:")
@@ -278,7 +299,7 @@ def get_outlines(session: SessionDep, current_user: CurrentUser):
 
 
 @router.get("/outlines/{outline_id}", response_model=ReportGenieOutline)
-def get_outline(outline_id: uuid.UUID, session: SessionDep):
+def get_outline(outline_id: uuid.UUID, session: SessionDep) -> ReportGenieOutline:
     """
     Retrieve a specific outline by ID.
     """
@@ -294,7 +315,7 @@ def update_outline(
     updated_outline: ReportGenieOutline,
     session: SessionDep,
     current_user: CurrentUser,
-):
+) -> ReportGenieOutline:
     """
     Update an existing outline.
     """
@@ -322,7 +343,7 @@ def update_outline(
 @router.delete("/outlines/{outline_id}", response_model=Message)
 def delete_outline(
     outline_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
-):
+) -> Message:
     """
     Delete an outline by ID.
     """
@@ -342,9 +363,7 @@ def delete_outline(
 
 
 @router.post("/generate/docx", response_class=StreamingResponse)
-async def generate_docx(
-    session: SessionDep, current_user: CurrentUser, request: DocxRequest
-):
+async def generate_docx(request: DocxRequest) -> StreamingResponse:
     """
     Generate a DOCX file from the report content.
     """
@@ -479,14 +498,14 @@ async def generate_docx(
         raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
 
 
-@router.get("/history", response_model=List[Dict[str, Any]])
+@router.get("/history", response_model=list[dict[str, Any]])
 async def get_report_history(
     session: SessionDep,
     current_user: CurrentUser,
     skip: int = 0,
     limit: int = 20,
     show_all: bool = False,
-):
+) -> list[dict[str, Any]]:
     """Retrieve past report generation history for the current user or all users."""
     print("Retrieving report history. Show all:", show_all)
 
@@ -502,10 +521,10 @@ async def get_report_history(
 
         # Add ordering and pagination
         reports = session.exec(
-            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
+            query.order_by(desc(LlmInteraction.date_created)).offset(skip).limit(limit)
         ).all()
 
-        print("Found {} reports for user {}:".format(len(reports), current_user.id))
+        print(f"Found {len(reports)} reports for user {current_user.id}:")
 
         result = []
         for report in reports:
@@ -520,7 +539,6 @@ async def get_report_history(
                 # Create a user-friendly title
                 kb_name = extra_data.get("kb_name", "Unknown Knowledge Base")
                 title = f"Report on {kb_name}"
-                date = report.date_created.strftime("%Y-%m-%d %H:%M")
 
                 # Create the result item
                 result_item = {
@@ -604,8 +622,7 @@ async def get_report_history(
 async def get_report_detail(
     report_id: uuid.UUID,
     session: SessionDep,
-    current_user: CurrentUser,
-):
+) -> ReportGenieDetailResponse:
     """Retrieve a specific report's full content by ID."""
     try:
         report = session.get(LlmInteraction, report_id)
@@ -626,7 +643,6 @@ async def get_report_detail(
         # Try to reconstruct the original report structure
         try:
             input_data = json.loads(report.input_data) if report.input_data else {}
-            output_data = json.loads(report.output_data) if report.output_data else {}
             extra_data = report.extra_data or {}
 
             # If we don't have the full report content in extra_data, we need to generate a response
@@ -637,47 +653,47 @@ async def get_report_detail(
             full_report = extra_data.get("full_report", "")
 
             # Create a response that matches the structure expected by the frontend
-            result = {
-                "id": str(report.id),
-                "date_created": report.date_created,
-                "kb_name": kb_name,
-                "kb_id": input_data.get("kb_id", ""),
-                "sections": input_data.get("sections", ""),
-                "results": {
-                    "full_report": full_report,
-                    "sections": extra_data.get("sections", []),
-                },
+            result = ReportGenieDetailResponse(
+                id=str(report.id),
+                date_created=report.date_created,
+                kb_name=kb_name,
+                kb_id=input_data.get("kb_id", ""),
+                sections=input_data.get("sections", ""),
+                results=ReportGenieDetailResults(
+                    full_report=full_report,
+                    sections=extra_data.get("sections", []),
+                ),
                 # Add feedback information
-                "feedback": {
-                    "feedback": report.feedback,
-                    "feedbackText": report.feedback_text,
-                    "feedbackDate": (
+                feedback=ReportGenieDetailFeedback(
+                    feedback=report.feedback,
+                    feedbackText=report.feedback_text,
+                    feedbackDate=(
                         report.feedback_date.isoformat()
                         if report.feedback_date
                         else None
                     ),
-                },
-            }
+                ),
+            )
 
             return result
 
         except json.JSONDecodeError:
             # Fallback if JSON parsing fails
-            return {
-                "id": str(report.id),
-                "date_created": report.date_created,
-                "results": {
-                    "full_report": f"Unable to reconstruct report from {report.date_created}.\n\n"
+            return ReportGenieDetailResponse(
+                id=str(report.id),
+                date_created=report.date_created,
+                results=ReportGenieDetailResults(
+                    full_report=f"Unable to reconstruct report from {report.date_created}.\n\n"
                     f"This might be due to an older format or incomplete data.",
-                    "sections": [],
-                },
+                    sections=[],
+                ),
                 # Add empty feedback object for consistency
-                "feedback": {
-                    "feedback": None,
-                    "feedbackText": None,
-                    "feedbackDate": None,
-                },
-            }
+                feedback=ReportGenieDetailFeedback(
+                    feedback=None,
+                    feedbackText=None,
+                    feedbackDate=None,
+                ),
+            )
 
     except Exception as e:
         traceback.print_exc()

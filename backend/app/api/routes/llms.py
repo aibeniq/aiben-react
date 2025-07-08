@@ -1,22 +1,20 @@
-from typing import List
-
 from fastapi import APIRouter, HTTPException
 
 from app.api.deps import CurrentUser, SessionDep
-from app.services.llms import LlmService, LlmModelSpec
 from app.models import Message, User
+from app.services.llms import LlmModelSpec, LlmService
 
 router = APIRouter(prefix="/llm-models", tags=["llm-models"])
 
 
-@router.get("/", response_model=List[LlmModelSpec])
-def get_llm_models() -> List[LlmModelSpec]:
+@router.get("/", response_model=list[LlmModelSpec])
+def get_llm_models() -> list[LlmModelSpec]:
     """Get all LLMs."""
     return LlmService.get_model_specs()
 
 
-@router.get("/providers", response_model=List[str])
-def get_available_providers() -> List[str]:
+@router.get("/providers", response_model=list[str])
+def get_available_providers() -> list[str]:
     """Get all available LLM providers."""
     return LlmService.get_providers()
 

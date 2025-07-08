@@ -1,6 +1,6 @@
-from pymilvus import FieldSchema, DataType, Function, FunctionType
 import os
 
+from pymilvus import DataType, FieldSchema, Function, FunctionType
 
 # bm25 function for keyword search
 BM25_FUNCTION = Function(

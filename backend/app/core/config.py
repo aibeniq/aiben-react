@@ -8,7 +8,6 @@ from pydantic import (
     BeforeValidator,
     EmailStr,
     HttpUrl,
-    PostgresDsn,
     computed_field,
     model_validator,
 )
@@ -93,7 +92,7 @@ class Settings(BaseSettings):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+    def SQLALCHEMY_DATABASE_URI(self) -> MultiHostUrl:
         return MultiHostUrl.build(
             scheme="postgresql+psycopg",
             username=self.POSTGRES_USER,
@@ -130,10 +129,9 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER_PASSWORD: str
 
     @computed_field
-    @property
     def _enabled_providers(self) -> list[str]:
         """Return list of enabled model providers"""
-        return [provider.strip() for provider in self.ENABLED_PROVIDERS.split(",")]
+        return [provider.strip() for provider in self.ENABLED_PROVIDERS]
 
     # LLM Templates
     REPORT_GENIE_PROMPT_TEMPLATE: str = """
@@ -159,8 +157,8 @@ class Settings(BaseSettings):
     CONTEXT:
     {context}
     
-    INSTRUCTION: 
-    What necessary information from the context above should be kept in mind when answering the following question? {question} 
+    INSTRUCTION:
+    What necessary information from the context above should be kept in mind when answering the following question? {question}
     ONLY INCLUDE POLICY INFORMATION THAT WOULD BE SPECIFICALLY PERTINENT TO THE QUESTION -- do NOT just repeat general requirements.
     
     ANSWER:
@@ -252,7 +250,7 @@ class Settings(BaseSettings):
     | Date  | 2023-01-01 | 2023-01-15 | ... |
     ```
 
-    ONLY return the Markdown table -- do NOT return any other text. 
+    ONLY return the Markdown table -- do NOT return any other text.
     Also, do NOT add tick marks like ``` and the label 'markdown': just give the actual markdown table content as raw text.
     However, if there are no discrepancies, please state that all fields match across documents.
     """
@@ -340,8 +338,8 @@ class Settings(BaseSettings):
     The user is particularly interested in these topics:
     {topics}
     
-    Please provide a comprehensive summary of all major differences between the two documents. 
-    Focus on structural, content, and semantic differences. 
+    Please provide a comprehensive summary of all major differences between the two documents.
+    Focus on structural, content, and semantic differences.
     Highlight the most important changes and explain their potential implications.
     Be clear, concise, and informative.
     """

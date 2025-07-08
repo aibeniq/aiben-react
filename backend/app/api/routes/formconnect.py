@@ -1,65 +1,41 @@
+import json
 import uuid
+from datetime import datetime, timezone
+from typing import Any
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from langchain_core.language_models import BaseChatModel
+from langchain_core.prompts import PromptTemplate
+from sqlmodel import desc, select
+
+from app.api.deps import CurrentUser, SessionDep
+from app.core.config import settings
 from app.models import (
+    FormConnectDetailFeedback,
+    FormConnectDetailResponse,
+    FormConnectForm,
     FormConnectRequest,
     FormConnectResponse,
-    FormConnectForm,
-    FormConnectDetailResponse,
     LlmInteraction,
     Message,
 )
 from app.services.llms import LlmService
-from app.api.deps import CurrentUser, SessionDep
-from app.core.config import settings
 
-from sqlmodel import select
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
-from typing import List, Dict, Any, Union
-
-from dotenv import load_dotenv
-
-import json
-import os
-
-import base64
-from pathlib import Path
-
-from datetime import datetime
-
-from langchain_core.language_models import BaseChatModel
-from langchain_core.prompts import PromptTemplate
-
-# Load environment variables from .env file
-load_dotenv(dotenv_path="c:/miniconda/aibeniq-react/.env", override=False)
-
-# Retrieve the OpenAI API key from the environment
-openai_api_key = os.getenv("OPENAI_API_KEY")
-# Initialize a flag to track API key status
-is_openai_configured = False
-
-if openai_api_key:
-    # Set up OpenAI API key if available
-    os.environ["OPENAI_API_KEY"] = openai_api_key
-    is_openai_configured = True
-    print("OpenAI API key configured successfully")
-else:
-    print(
-        "WARNING: OPENAI_API_KEY is not set in environment variables. Some FormConnect features will be limited."
-    )
 
 router = APIRouter(prefix="/formconnect", tags=["formconnect"])
 
 
-def generate_template(fields: List[str]) -> Dict[str, str]:
+def generate_template(fields: list[str]) -> dict[str, str]:
     """
     Generate a JSON template from a list of fields.
     Each field will have a blank value.
     """
-    return {field: "" for field in fields}
+    return dict.fromkeys(fields, "")
 
 
 async def extract_fields_from_digitized_document(
-    file: UploadFile, template: Dict[str, str], llm: BaseChatModel
-) -> Dict[str, str]:
+    file: UploadFile, template: dict[str, str], llm: BaseChatModel
+) -> dict[str, str]:
     """
     Extract fields from a document using the LLM.
     """
@@ -71,10 +47,9 @@ async def extract_fields_from_digitized_document(
     except UnicodeDecodeError:
         # If it's not a text file, we could handle binary files differently
         # For now, just return an error message in the template
-        return {
-            k: f"Could not extract: Binary file {file.filename}"
-            for k in template.keys()
-        }
+        return dict.fromkeys(
+            template.keys(), f"Could not extract: Binary file {file.filename}"
+        )
 
     # Create the prompt
     prompt_template = PromptTemplate.from_template(
@@ -89,77 +64,83 @@ async def extract_fields_from_digitized_document(
         # The output might already be a dictionary
         if isinstance(response, dict):
             return response
-        content_dict = json.loads(response.content)
-        return content_dict
+        if isinstance(response.content, str):
+            content_dict: dict[str, str] = dict(json.loads(response.content))
+            return content_dict
+        else:
+            print(f"Warning: Response content is not a string: {response.content}")
+            return {"raw_content": str(response.content)}
     except Exception:
         return {"raw_content": str(response.content)}
 
 
-async def extract_fields_from_handwritten_document(
-    file: UploadFile, template: Dict[str, str], llm: BaseChatModel
-) -> Dict[str, str]:
-    """
-    Extract fields from a handwritten document.
-    """
-    print("Now extracting fields from handwritten document:", file.filename)
-    content = await file.read()
+# async def extract_fields_from_handwritten_document(
+#     file: UploadFile, template: Dict[str, str], llm: BaseChatModel
+# ) -> Dict[str, str]:
+#     """
+#     Extract fields from a handwritten document.
+#     """
+#     print("Now extracting fields from handwritten document:", file.filename)
+#     content = await file.read()
 
-    # Define image file extensions
-    image_extensions = [
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".gif",
-        ".bmp",
-        ".tif",
-        ".tiff",
-        ".webp",
-    ]
-    file_ext = Path(file.filename).suffix.lower()
+#     # Define image file extensions
+#     image_extensions = [
+#         ".jpg",
+#         ".jpeg",
+#         ".png",
+#         ".gif",
+#         ".bmp",
+#         ".tif",
+#         ".tiff",
+#         ".webp",
+#     ]
+#     if not file.filename:
+#         raise HTTPException(status_code=400, detail="File name is required.")
+#     file_ext = Path(file.filename).suffix.lower()
 
-    # Check if the file is an image
-    if file_ext in image_extensions:
-        # TODO: Implement handwritten document extraction
-        raise HTTPException(
-            status_code=400, detail="Handwritten documents are not supported yet."
-        )
-        try:
-            img_base64 = base64.b64encode(content).decode("utf-8")
+#     # Check if the file is an image
+#     if file_ext in image_extensions:
+#         # TODO: Implement handwritten document extraction
+#         raise HTTPException(
+#             status_code=400, detail="Handwritten documents are not supported yet."
+#         )
+#         try:
+#             img_base64 = base64.b64encode(content).decode("utf-8")
 
-            # Use the template from config
-            prompt_template = settings.FORMCONNECT_HANDWRITTEN_PROMPT_TEMPLATE
-            variables = {"template": template}
+#             # Use the template from config
+#             prompt_template = settings.FORMCONNECT_HANDWRITTEN_PROMPT_TEMPLATE
+#             variables = {"template": template}
 
-            print("Now invoking LLM with base-encoded image...")
-            response = invoke_llm_with_image(
-                llm,
-                prompt_template,
-                variables=variables,
-                image_base64=img_base64,
-                image_type=file_ext[1:] if file_ext.startswith(".") else file_ext,
-            )
+#             print("Now invoking LLM with base-encoded image...")
+#             response = invoke_llm_with_image(
+#                 llm,
+#                 prompt_template,
+#                 variables=variables,
+#                 image_base64=img_base64,
+#                 image_type=file_ext[1:] if file_ext.startswith(".") else file_ext,
+#             )
 
-            # Try to parse JSON from the response
-            try:
-                import json
+#             # Try to parse JSON from the response
+#             try:
+#                 import json
 
-                if isinstance(response, dict):
-                    return response
-                content_dict = json.loads(response)
-                return content_dict
-            except Exception:
-                return {"raw_content": str(response)}
-        except Exception as e:
-            return {k: f"Error processing image: {str(e)}" for k in template.keys()}
+#                 if isinstance(response, dict):
+#                     return response
+#                 content_dict = json.loads(response)
+#                 return content_dict
+#             except Exception:
+#                 return {"raw_content": str(response)}
+#         except Exception as e:
+#             return {k: f"Error processing image: {str(e)}" for k in template.keys()}
 
-    # Fallback for non-image files
-    await file.seek(0)
-    return await extract_fields_from_digitized_document(file, template, llm)
+#     # Fallback for non-image files
+#     await file.seek(0)
+#     return await extract_fields_from_digitized_document(file, template, llm)
 
 
 async def compare_multiple_documents(
-    documents: List[Dict[str, str]],
-    file_names: List[str],
+    documents: list[dict[str, str]],
+    file_names: list[str],
     llm: BaseChatModel,
 ) -> str:
     """
@@ -167,7 +148,7 @@ async def compare_multiple_documents(
     """
     # Create a combined representation of all documents
     documents_str = ""
-    for i, (doc, name) in enumerate(zip(documents, file_names)):
+    for i, (doc, name) in enumerate(zip(documents, file_names, strict=False)):
         # Convert dict to string, escaping any curly braces for the formatter
         doc_str = str(doc).replace("{", "{{").replace("}", "}}")
         documents_str += f"Document {i+1} ({name}): {doc_str}\n\n"
@@ -183,6 +164,11 @@ async def compare_multiple_documents(
     variables = {"documents_str": documents_str}
     prompt = prompt_template.invoke(variables)
     response = llm.invoke(prompt)
+    if not isinstance(response.content, str):
+        raise HTTPException(
+            status_code=500,
+            detail=f"Response content is not a string: {response.content}",
+        )
     return response.content
 
 
@@ -191,9 +177,9 @@ async def process_form(
     session: SessionDep,
     current_user: CurrentUser,
     form_connect_in: FormConnectRequest = Depends(),
-    digitized_files: List[UploadFile] = File(None),
-    handwritten_files: List[UploadFile] = File(None),
-):
+    digitized_files: list[UploadFile] = File(None),
+    handwritten_files: list[UploadFile] = File(None),
+) -> FormConnectResponse:
     """
     Process the uploaded files and fields.
 
@@ -254,30 +240,30 @@ async def process_form(
             await file.seek(0)
 
     # Process handwritten files using a specialized function (placeholder)
-    if handwritten_files:
-        # TODO: Implement handwritten document extraction
-        raise HTTPException(
-            status_code=400, detail="Handwritten documents are not supported yet."
-        )
-        for file in handwritten_files:
-            extracted = await extract_fields_from_handwritten_document(
-                file, template, llm
-            )
-            extracted_results.append(extracted)
+    # if handwritten_files:
+    #     # TODO: Implement handwritten document extraction
+    #     raise HTTPException(
+    #         status_code=400, detail="Handwritten documents are not supported yet."
+    #     )
+    #     for file in handwritten_files:
+    #         extracted = await extract_fields_from_handwritten_document(
+    #             file, template, llm
+    #         )
+    #         extracted_results.append(extracted)
 
-            print("Results for file name:", file.filename)
-            print("Extracted fields:", extracted)
+    #         print("Results for file name:", file.filename)
+    #         print("Extracted fields:", extracted)
 
-            file_names.append(f"{file.filename} (handwritten)")
+    #         file_names.append(f"{file.filename} (handwritten)")
 
-            # Reset file position for potential future reads
-            await file.seek(0)
+    #         # Reset file position for potential future reads
+    #         await file.seek(0)
 
     # If there's only one file, we can't do comparison
     if total_files == 1:
         result = {
             "message": "Only one document provided. No comparison performed.",
-            "extracted_data": extracted_results[0],
+            "extracted_data": extracted_results,
         }
     else:
         # Compare the extracted fields
@@ -309,7 +295,7 @@ def create_form(
     form: FormConnectForm,
     session: SessionDep,
     current_user: CurrentUser,
-):
+) -> FormConnectForm:
     """
     Save a new form to the database.
     """
@@ -328,18 +314,20 @@ def create_form(
     return form
 
 
-@router.get("/forms", response_model=List[FormConnectForm])
-def get_forms(session: SessionDep, current_user: CurrentUser):
+@router.get("/forms", response_model=list[FormConnectForm])
+def get_forms(session: SessionDep, current_user: CurrentUser) -> list[FormConnectForm]:
     """
     Retrieve all forms from the database for this user.
     """
-    return session.exec(
-        select(FormConnectForm).where(FormConnectForm.owner_id == current_user.id)
-    ).all()
+    return list(
+        session.exec(
+            select(FormConnectForm).where(FormConnectForm.owner_id == current_user.id)
+        )
+    )
 
 
 @router.get("/forms/{form_id}", response_model=FormConnectForm)
-def get_form(form_id: uuid.UUID, session: SessionDep):
+def get_form(form_id: uuid.UUID, session: SessionDep) -> FormConnectForm:
     """
     Retrieve a specific form by ID.
     """
@@ -355,7 +343,7 @@ def update_form(
     updated_form: FormConnectForm,
     session: SessionDep,
     current_user: CurrentUser,
-):
+) -> FormConnectForm:
     """
     Update an existing form.
     """
@@ -372,7 +360,7 @@ def update_form(
     form.name = updated_form.name
     form.description = updated_form.description
     form.fields = updated_form.fields
-    form.date_modified = datetime.utcnow()
+    form.date_modified = datetime.now(timezone.utc)
 
     session.add(form)
     session.commit()
@@ -381,7 +369,9 @@ def update_form(
 
 
 @router.delete("/forms/{form_id}", response_model=Message)
-def delete_form(form_id: uuid.UUID, session: SessionDep, current_user: CurrentUser):
+def delete_form(
+    form_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
+) -> Message:
     """
     Delete a form by ID.
     """
@@ -405,8 +395,7 @@ def delete_form(form_id: uuid.UUID, session: SessionDep, current_user: CurrentUs
 async def get_form_detail(
     interaction_id: uuid.UUID,
     session: SessionDep,
-    current_user: CurrentUser,
-):
+) -> FormConnectDetailResponse:
     """Retrieve a specific form processing's full content by ID."""
     print("Received interaction ID:", interaction_id)
     try:
@@ -433,42 +422,42 @@ async def get_form_detail(
             output_data = json.loads(report.output_data) if report.output_data else {}
 
             # Create a response that matches the structure expected by the frontend
-            result = {
-                "id": str(report.id),
-                "date_created": report.date_created,
-                "fields": input_data.get("fields", ""),
-                "file_names": input_data.get("files", []),
-                "results": output_data,
+            result = FormConnectDetailResponse(
+                id=str(report.id),
+                date_created=report.date_created,
+                fields=input_data.get("fields", ""),
+                file_names=input_data.get("files", []),
+                results=output_data,
                 # Add feedback information
-                "feedback": {
-                    "feedback": report.feedback,
-                    "feedbackText": report.feedback_text,
-                    "feedbackDate": (
+                feedback=FormConnectDetailFeedback(
+                    feedback=report.feedback,
+                    feedbackText=report.feedback_text,
+                    feedbackDate=(
                         report.feedback_date.isoformat()
                         if report.feedback_date
                         else None
                     ),
-                },
-            }
+                ),
+            )
 
             return result
 
         except json.JSONDecodeError:
             # Fallback if JSON parsing fails
-            return {
-                "id": str(report.id),
-                "date_created": report.date_created,
-                "results": {
+            return FormConnectDetailResponse(
+                id=str(report.id),
+                date_created=report.date_created,
+                results={
                     "message": f"Unable to reconstruct form processing from {report.date_created}.\n\n"
                     f"This might be due to an older format or incomplete data."
                 },
                 # Add empty feedback object for consistency
-                "feedback": {
-                    "feedback": None,
-                    "feedbackText": None,
-                    "feedbackDate": None,
-                },
-            }
+                feedback=FormConnectDetailFeedback(
+                    feedback=None,
+                    feedbackText=None,
+                    feedbackDate=None,
+                ),
+            )
 
     except Exception as e:
         import traceback
@@ -481,14 +470,14 @@ async def get_form_detail(
 
 
 # Also add a history endpoint to get a list of past form processing operations
-@router.get("/history", response_model=List[Dict[str, Any]])
+@router.get("/history", response_model=list[dict[str, Any]])
 async def get_form_history(
     session: SessionDep,
     current_user: CurrentUser,
     skip: int = 0,
     limit: int = 20,
     show_all: bool = False,
-):
+) -> list[dict[str, Any]]:
     """Retrieve past form processing history for the current user or all users."""
     print("Retrieving FormConnect history. Show all:", show_all)
 
@@ -504,7 +493,7 @@ async def get_form_history(
 
         # Add ordering and pagination
         interactions = session.exec(
-            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
+            query.order_by(desc(LlmInteraction.date_created)).offset(skip).limit(limit)
         ).all()
 
         result = []
@@ -513,11 +502,6 @@ async def get_form_history(
             try:
                 input_data = (
                     json.loads(interaction.input_data) if interaction.input_data else {}
-                )
-                output_data = (
-                    json.loads(interaction.output_data)
-                    if interaction.output_data
-                    else {}
                 )
 
                 file_count = len(input_data.get("files", []))
