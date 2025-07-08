@@ -98,6 +98,7 @@ ignore = [
     "B904",  # Allow raising exceptions without from e, for HTTPException
     "W293",  # blank line contains whitespace
     "W291",  # trailing whitespace
+    "I001",  # organize imports
 ]
 
 [tool.ruff.lint.pyupgrade]
