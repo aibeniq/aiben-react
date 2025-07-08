@@ -62,9 +62,9 @@ async def process_rag_checklist(
     session: SessionDep,
     current_user: CurrentUser,
     vectordb_service: VectorDBDep,
+    request: FastAPIRequest,
     request_data: RagChecklistRequest = Depends(),
     files: list[UploadFile] = File(...),
-    request: FastAPIRequest | None = None,
 ) -> VeraDocResponse:
     """
     Process the uploaded files using RAG with a knowledge base.
