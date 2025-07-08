@@ -1,6 +1,5 @@
 import asyncio
 import json
-import os
 import traceback
 import uuid
 from datetime import datetime
@@ -11,7 +10,6 @@ import markdown
 from bs4 import BeautifulSoup
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from dotenv import load_dotenv
 from fastapi import (
     APIRouter,
     Depends,
@@ -43,24 +41,6 @@ from app.models import (
 )
 from app.services.llms.main import LlmService
 
-# Load environment variables from .env file
-load_dotenv(dotenv_path="c:/miniconda/aibeniq-react/.env", override=False)
-
-# Retrieve the OpenAI API key from the environment
-openai_api_key = os.getenv("OPENAI_API_KEY")
-
-# Initialize a flag to track API key status
-is_openai_configured = False
-
-if openai_api_key:
-    # Set up OpenAI API key if available
-    os.environ["OPENAI_API_KEY"] = openai_api_key
-    is_openai_configured = True
-    print("OpenAI API key configured successfully")
-else:
-    print(
-        "WARNING: OPENAI_API_KEY is not set in environment variables. Some FormConnect features will be limited."
-    )
 
 router = APIRouter(prefix="/veradoc", tags=["veradoc"])
 

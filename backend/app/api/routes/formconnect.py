@@ -1,10 +1,8 @@
 import json
-import os
 import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import PromptTemplate
@@ -23,23 +21,6 @@ from app.models import (
 )
 from app.services.llms import LlmService
 
-# Load environment variables from .env file
-load_dotenv(dotenv_path="c:/miniconda/aibeniq-react/.env", override=False)
-
-# Retrieve the OpenAI API key from the environment
-openai_api_key = os.getenv("OPENAI_API_KEY")
-# Initialize a flag to track API key status
-is_openai_configured = False
-
-if openai_api_key:
-    # Set up OpenAI API key if available
-    os.environ["OPENAI_API_KEY"] = openai_api_key
-    is_openai_configured = True
-    print("OpenAI API key configured successfully")
-else:
-    print(
-        "WARNING: OPENAI_API_KEY is not set in environment variables. Some FormConnect features will be limited."
-    )
 
 router = APIRouter(prefix="/formconnect", tags=["formconnect"])
 
