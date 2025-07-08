@@ -1,36 +1,39 @@
-import uuid
 import difflib
-from typing import List, Dict, Any
-from datetime import datetime
 import json
-import traceback
-import tempfile
+import mimetypes
 import os
-import docx
+import tempfile
+import traceback
+import uuid
+from datetime import datetime
 from io import BytesIO
-from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from typing import Any
+
+import docx
 import markdown
 from bs4 import BeautifulSoup
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
+from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
-from sqlmodel import select
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.prompts import PromptTemplate
-import mimetypes
+from sqlmodel import desc, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
-from app.services.llms import LlmService
 from app.models import (
+    DocxRequest,
+    LlmInteraction,
+    Message,
+    TwinCheckDetailFeedback,
+    TwinCheckDetailResponse,
+    TwinCheckDetailResults,
     TwinCheckRequest,
     TwinCheckResponse,
     TwinCheckTopicList,
-    TwinCheckDetailResponse,
-    LlmInteraction,
-    DocxRequest,
-    Message,
 )
+from app.services.llms import LlmService
 
 router = APIRouter(prefix="/twincheck", tags=["twincheck"])
 
@@ -40,7 +43,11 @@ def extract_text_from_file(file: UploadFile) -> str:
     Extract text content from uploaded files based on their type.
     Supports PDF, DOCX, and plain text files.
     """
+    if not file.filename:
+        raise ValueError("File has no filename")
     content_type = file.content_type or mimetypes.guess_type(file.filename)[0]
+    if not content_type:
+        raise ValueError("File has no content type")
     print(f"Processing file: {file.filename} with content type: {content_type}")
 
     # Create a temporary file to store the content
@@ -91,10 +98,10 @@ def extract_text_from_file(file: UploadFile) -> str:
             print("Loading as text file...")
             # Try with different encodings
             try:
-                with open(temp_file_path, "r", encoding="utf-8") as f:
+                with open(temp_file_path, encoding="utf-8") as f:
                     text = f.read()
             except UnicodeDecodeError:
-                with open(temp_file_path, "r", encoding="latin-1") as f:
+                with open(temp_file_path, encoding="latin-1") as f:
                     text = f.read()
 
         return text
@@ -118,7 +125,7 @@ async def compare_documents(
     request: TwinCheckRequest = Depends(),
     document1: UploadFile = File(...),
     document2: UploadFile = File(...),
-):
+) -> TwinCheckResponse:
     """
     Compare two documents based on the provided comparison topics.
     Supports PDF, DOCX, and plain text files.
@@ -237,14 +244,14 @@ async def compare_documents(
 
 
 # Get history of comparison operations
-@router.get("/history", response_model=List[Dict[str, Any]])
+@router.get("/history", response_model=list[dict[str, Any]])
 async def get_comparison_history(
     session: SessionDep,
     current_user: CurrentUser,
     skip: int = 0,
     limit: int = 20,
     show_all: bool = False,
-):
+) -> list[dict[str, Any]]:
     """Retrieve past document comparison history for the current user or all users."""
     print("Retrieving TwinCheck history. Show all:", show_all)
 
@@ -260,7 +267,7 @@ async def get_comparison_history(
 
         # Add ordering and pagination
         comparisons = session.exec(
-            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
+            query.order_by(desc(LlmInteraction.date_created)).offset(skip).limit(limit)
         ).all()
 
         result = []
@@ -354,8 +361,7 @@ async def get_comparison_history(
 async def get_comparison_detail(
     comparison_id: uuid.UUID,
     session: SessionDep,
-    current_user: CurrentUser,
-):
+) -> TwinCheckDetailResponse:
     """Retrieve a specific comparison's full content by ID."""
     try:
         comparison = session.get(LlmInteraction, comparison_id)
@@ -383,53 +389,49 @@ async def get_comparison_detail(
             extra_data = comparison.extra_data or {}
 
             # Create a response that matches the structure expected by the frontend
-            result = {
-                "id": str(comparison.id),
-                "date_created": comparison.date_created,
-                "document1_name": input_data.get(
-                    "document1_name", "Unknown Document 1"
+            result = TwinCheckDetailResponse(
+                id=str(comparison.id),
+                date_created=comparison.date_created,
+                document1_name=input_data.get("document1_name", "Unknown Document 1"),
+                document2_name=input_data.get("document2_name", "Unknown Document 2"),
+                comparison_topics=input_data.get("comparison_topics", ""),
+                results=TwinCheckDetailResults(
+                    summary=output_data.get("summary", ""),
+                    topic_analysis=extra_data.get("topic_analysis", []),
+                    interaction_id=str(comparison.id),
                 ),
-                "document2_name": input_data.get(
-                    "document2_name", "Unknown Document 2"
-                ),
-                "comparison_topics": input_data.get("comparison_topics", ""),
-                "results": {
-                    "summary": output_data.get("summary", ""),
-                    "topic_analysis": extra_data.get("topic_analysis", []),
-                    "interaction_id": str(comparison.id),
-                },
                 # Add feedback information
-                "feedback": {
-                    "feedback": comparison.feedback,
-                    "feedbackText": comparison.feedback_text,
-                    "feedbackDate": (
+                feedback=TwinCheckDetailFeedback(
+                    feedback=comparison.feedback,
+                    feedbackText=comparison.feedback_text,
+                    feedbackDate=(
                         comparison.feedback_date.isoformat()
                         if comparison.feedback_date
                         else None
                     ),
-                },
-            }
+                ),
+            )
 
             return result
 
         except json.JSONDecodeError:
             # Fallback if JSON parsing fails
-            return {
-                "id": str(comparison.id),
-                "date_created": comparison.date_created,
-                "document1_name": "Unknown Document 1",
-                "document2_name": "Unknown Document 2",
-                "results": {
-                    "summary": "Unable to reconstruct comparison from this record. This might be due to an older format or incomplete data.",
-                    "topic_analysis": [],
-                },
+            return TwinCheckDetailResponse(
+                id=str(comparison.id),
+                date_created=comparison.date_created,
+                document1_name="Unknown Document 1",
+                document2_name="Unknown Document 2",
+                results=TwinCheckDetailResults(
+                    summary="Unable to reconstruct comparison from this record. This might be due to an older format or incomplete data.",
+                    topic_analysis=[],
+                ),
                 # Add empty feedback object for consistency
-                "feedback": {
-                    "feedback": None,
-                    "feedbackText": None,
-                    "feedbackDate": None,
-                },
-            }
+                feedback=TwinCheckDetailFeedback(
+                    feedback=None,
+                    feedbackText=None,
+                    feedbackDate=None,
+                ),
+            )
 
     except Exception as e:
         traceback.print_exc()
@@ -442,7 +444,7 @@ async def get_comparison_detail(
 @router.post("/comparisons", response_model=TwinCheckTopicList)
 def create_comparison(
     comparison: TwinCheckTopicList, session: SessionDep, current_user: CurrentUser
-):
+) -> TwinCheckTopicList:
     """
     Save a new comparison topic set to the database.
     """
@@ -462,18 +464,24 @@ def create_comparison(
     return comparison
 
 
-@router.get("/comparisons", response_model=List[TwinCheckTopicList])
-def get_comparisons(session: SessionDep, current_user: CurrentUser):
+@router.get("/comparisons", response_model=list[TwinCheckTopicList])
+def get_comparisons(
+    session: SessionDep, current_user: CurrentUser
+) -> list[TwinCheckTopicList]:
     """
     Retrieve all saved comparison topic sets from the database for this user.
     """
-    return session.exec(
-        select(TwinCheckTopicList).where(TwinCheckTopicList.owner_id == current_user.id)
-    ).all()
+    return list(
+        session.exec(
+            select(TwinCheckTopicList).where(
+                TwinCheckTopicList.owner_id == current_user.id
+            )
+        )
+    )
 
 
 @router.get("/comparisons/{comparison_id}", response_model=TwinCheckTopicList)
-def get_comparison(comparison_id: uuid.UUID, session: SessionDep):
+def get_comparison(comparison_id: uuid.UUID, session: SessionDep) -> TwinCheckTopicList:
     """
     Retrieve a specific comparison topic set by ID.
     """
@@ -489,7 +497,7 @@ def update_comparison(
     updated_comparison: TwinCheckTopicList,
     session: SessionDep,
     current_user: CurrentUser,
-):
+) -> TwinCheckTopicList:
     """
     Update an existing comparison topic set.
     """
@@ -517,7 +525,7 @@ def update_comparison(
 @router.delete("/comparisons/{comparison_id}", response_model=Message)
 def delete_comparison(
     comparison_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
-):
+) -> Message:
     """
     Delete a comparison topic set by ID.
     """
@@ -537,9 +545,7 @@ def delete_comparison(
 
 
 @router.post("/generate/docx", response_class=StreamingResponse)
-async def generate_docx(
-    session: SessionDep, current_user: CurrentUser, request: DocxRequest
-):
+async def generate_docx(request: DocxRequest) -> StreamingResponse:
     """
     Generate a DOCX file from the comparison content.
     """

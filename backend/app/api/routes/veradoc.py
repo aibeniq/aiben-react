@@ -1,44 +1,47 @@
+import asyncio
+import json
+import os
+import traceback
 import uuid
-from app.models import (
-    VeraDocResponse,
-    VeraDocChecklist,
-    RagChecklistRequest,
-    KnowledgeBase,
-    LlmInteraction,
-    DocxRequest,
-    VeraDocDetailResponse,
-    Message,
-    User,
-)
+from datetime import datetime
+from io import BytesIO
+from typing import Any
 
-from app.api.deps import CurrentUser, SessionDep, VectorDBDep
-from app.core.config import settings
-from app.services.llms.main import LlmService
-
-from sqlmodel import select
+import markdown
+from bs4 import BeautifulSoup
+from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from dotenv import load_dotenv
 from fastapi import (
     APIRouter,
-    UploadFile,
+    Depends,
     File,
     HTTPException,
-    Depends,
+    UploadFile,
+)
+from fastapi import (
     Request as FastAPIRequest,
 )
 from fastapi.responses import StreamingResponse
-from typing import Optional, List, Dict, Any
-import asyncio
-from dotenv import load_dotenv
-import json
-import os
-
-from datetime import datetime
-import traceback
-from io import BytesIO
-from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-import markdown
-from bs4 import BeautifulSoup
 from langchain_core.prompts import PromptTemplate
+from sqlmodel import desc, select
+
+from app.api.deps import CurrentUser, SessionDep, VectorDBDep
+from app.core.config import settings
+from app.models import (
+    DocxRequest,
+    KnowledgeBase,
+    LlmInteraction,
+    Message,
+    RagChecklistRequest,
+    User,
+    VeraDocChecklist,
+    VeraDocDetailFeedback,
+    VeraDocDetailResponse,
+    VeraDocDetailResults,
+    VeraDocResponse,
+)
+from app.services.llms.main import LlmService
 
 # Load environment variables from .env file
 load_dotenv(dotenv_path="c:/miniconda/aibeniq-react/.env", override=False)
@@ -65,12 +68,12 @@ router = APIRouter(prefix="/veradoc", tags=["veradoc"])
 # llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
 
 
-def generate_template(questions: List[str]) -> Dict[str, str]:
+def generate_template(questions: list[str]) -> dict[str, str]:
     """
     Generate a JSON template from a list of questions.
     Each field will have a blank value.
     """
-    return {field: "" for field in questions}
+    return dict.fromkeys(questions, "")
 
 
 # Add the new endpoint
@@ -80,10 +83,9 @@ async def process_rag_checklist(
     current_user: CurrentUser,
     vectordb_service: VectorDBDep,
     request_data: RagChecklistRequest = Depends(),
-    files: List[UploadFile] = File(...),
-    handwritten_files: List[UploadFile] = File(None),
-    request: Optional[FastAPIRequest] = None,
-):
+    files: list[UploadFile] = File(...),
+    request: FastAPIRequest | None = None,
+) -> VeraDocResponse:
     """
     Process the uploaded files using RAG with a knowledge base.
     """
@@ -97,7 +99,7 @@ async def process_rag_checklist(
         disconnect_monitor = None
         if request:
 
-            async def monitor_client_disconnect():
+            async def monitor_client_disconnect() -> None:
                 nonlocal cancellation_requested
                 try:
                     # Don't create a separate task - just await directly
@@ -133,6 +135,11 @@ async def process_rag_checklist(
 
             if EmbeddingService.is_valid_model_id(kb.embedding_model_id):
                 embedding_model = EmbeddingService.get_model_spec(kb.embedding_model_id)
+                if not embedding_model:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Knowledge base has an invalid embedding model",
+                    )
                 print(f"Using embedding model: {kb.embedding_model_id}")
             else:
                 raise HTTPException(
@@ -250,6 +257,11 @@ async def process_rag_checklist(
             prompt = context_prompt_template.invoke(variables)
             response = llm.invoke(prompt)
             question_context = response.content
+            if not isinstance(question_context, str):
+                raise HTTPException(
+                    status_code=500,
+                    detail="Failed to generate context for question",
+                )
             print(f"Got context: {question_context[:100]}...")
 
             if cancellation_requested:
@@ -357,7 +369,7 @@ def create_checklist(
     checklist: VeraDocChecklist,
     session: SessionDep,
     current_user: CurrentUser,
-):
+) -> VeraDocChecklist:
     """
     Save a new checklist to the database.
     """
@@ -376,18 +388,22 @@ def create_checklist(
     return checklist
 
 
-@router.get("/checklists", response_model=List[VeraDocChecklist])
-def get_checklists(session: SessionDep, current_user: CurrentUser):
+@router.get("/checklists", response_model=list[VeraDocChecklist])
+def get_checklists(
+    session: SessionDep, current_user: CurrentUser
+) -> list[VeraDocChecklist]:
     """
     Retrieve all checklists from the database for this user.
     """
-    return session.exec(
-        select(VeraDocChecklist).where(VeraDocChecklist.owner_id == current_user.id)
-    ).all()
+    return list(
+        session.exec(
+            select(VeraDocChecklist).where(VeraDocChecklist.owner_id == current_user.id)
+        )
+    )
 
 
 @router.get("/checklists/{checklist_id}", response_model=VeraDocChecklist)
-def get_checklist(checklist_id: uuid.UUID, session: SessionDep):
+def get_checklist(checklist_id: uuid.UUID, session: SessionDep) -> VeraDocChecklist:
     """
     Retrieve a specific checklist by ID.
     """
@@ -403,7 +419,7 @@ def update_checklist(
     updated_checklist: VeraDocChecklist,
     session: SessionDep,
     current_user: CurrentUser,
-):
+) -> VeraDocChecklist:
     """
     Update an existing checklist.
     """
@@ -431,7 +447,7 @@ def update_checklist(
 @router.delete("/checklists/{checklist_id}", response_model=Message)
 def delete_checklist(
     checklist_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
-):
+) -> Message:
     """
     Delete a checklist by ID.
     """
@@ -450,14 +466,14 @@ def delete_checklist(
     return Message(message="Checklist deleted successfully.")
 
 
-@router.get("/history", response_model=List[Dict[str, Any]])
+@router.get("/history", response_model=list[dict[str, Any]])
 async def get_veradoc_history(
     session: SessionDep,
     current_user: CurrentUser,
     skip: int = 0,
     limit: int = 20,
     show_all: bool = False,
-):
+) -> list[dict[str, Any]]:
     """Retrieve past VeraDoc evaluation history for the current user or all users."""
     print("Retrieving VeraDoc history. Show all:", show_all)
 
@@ -471,7 +487,7 @@ async def get_veradoc_history(
 
         # Add ordering and pagination
         reports = session.exec(
-            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
+            query.order_by(desc(LlmInteraction.date_created)).offset(skip).limit(limit)
         ).all()
 
         print(f"Found {len(reports)} VeraDoc evaluations for user {current_user.id}")
@@ -479,9 +495,8 @@ async def get_veradoc_history(
         result = []
         for report in reports:
             # Initialize variables outside the try block
-            input_data = {}
-            output_data = {}
-            extra_data = {}
+            input_data: dict[str, Any] = {}
+            output_data: dict[str, Any] = {}
             kb_name = "Unknown Knowledge Base"
 
             try:
@@ -490,7 +505,6 @@ async def get_veradoc_history(
                 output_data = (
                     json.loads(report.output_data) if report.output_data else {}
                 )
-                extra_data = report.extra_data or {}
 
                 # Get KB name from input_data
                 if input_data.get("kb_id"):
@@ -558,8 +572,7 @@ async def get_veradoc_history(
 async def get_veradoc_detail(
     report_id: uuid.UUID,
     session: SessionDep,
-    current_user: CurrentUser,
-):
+) -> VeraDocDetailResponse:
     """Retrieve a specific VeraDoc evaluation's full content by ID."""
     try:
         report = session.get(LlmInteraction, report_id)
@@ -593,43 +606,43 @@ async def get_veradoc_detail(
                 kb_name = kb.title if kb else "Unknown Knowledge Base"
 
             # Create a response that matches the structure expected by the frontend
-            result = {
-                "id": str(report.id),
-                "date_created": report.date_created,
-                "document_name": document_name,
-                "kb_name": kb_name,
-                "kb_id": kb_id,
-                "questions": input_data.get("questions", ""),
-                "results": {
-                    "final_evaluation": output_data.get("final_evaluation", ""),
-                    "qa_pairs": extra_data.get("qa_pairs", []),
-                    "interaction_id": str(report.id),
-                },
+            result = VeraDocDetailResponse(
+                id=str(report.id),
+                date_created=report.date_created,
+                document_name=document_name,
+                kb_name=kb_name,
+                kb_id=kb_id,
+                questions=input_data.get("questions", ""),
+                results=VeraDocDetailResults(
+                    final_evaluation=output_data.get("final_evaluation", ""),
+                    qa_pairs=extra_data.get("qa_pairs", []),
+                    interaction_id=str(report.id),
+                ),
                 # Add feedback information
-                "feedback": {
-                    "feedback": report.feedback,
-                    "feedbackText": report.feedback_text,
-                    "feedbackDate": (
+                feedback=VeraDocDetailFeedback(
+                    feedback=report.feedback,
+                    feedbackText=report.feedback_text,
+                    feedbackDate=(
                         report.feedback_date.isoformat()
                         if report.feedback_date
                         else None
                     ),
-                },
-            }
+                ),
+            )
 
             return result
 
-        except Exception as e:
+        except Exception:
             # Fallback if parsing fails
-            return {
-                "id": str(report.id),
-                "date_created": report.date_created,
-                "results": {
-                    "final_evaluation": f"Unable to reconstruct evaluation from {report.date_created}.\n\n"
+            return VeraDocDetailResponse(
+                id=str(report.id),
+                date_created=report.date_created,
+                results=VeraDocDetailResults(
+                    final_evaluation=f"Unable to reconstruct evaluation from {report.date_created}.\n\n"
                     f"This might be due to an older format or incomplete data.",
-                    "qa_pairs": [],
-                },
-            }
+                    qa_pairs=[],
+                ),
+            )
 
     except Exception as e:
         import traceback
@@ -641,9 +654,7 @@ async def get_veradoc_detail(
 
 
 @router.post("/generate/docx", response_class=StreamingResponse)
-async def generate_docx(
-    session: SessionDep, current_user: CurrentUser, request: DocxRequest
-):
+async def generate_docx(request: DocxRequest) -> StreamingResponse:
     """
     Generate a DOCX file from the evaluation content.
     """

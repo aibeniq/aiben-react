@@ -1,11 +1,9 @@
 from .main import (
-    LlmService,
     LlmModelSpec,
-    ReplicateLlm,
+    LlmService,
 )
 
 __all__ = [
     "LlmService",
     "LlmModelSpec",
-    "ReplicateLlm",
 ]
