@@ -129,7 +129,6 @@ const ChatbotMain = () => {
           kbId: selectedKbId,
           question: userMessage,
           chatHistory: formattedChatHistory,
-          useDefaultModels: true,
           sessionId: sessionId, // Make sure this is being sent correctly
           isFollowUp: isFollowUp && sessionId ? true : false, // Only true if we have a session ID
         })
@@ -153,7 +152,6 @@ const ChatbotMain = () => {
         const response = await ChatService.queryDocument({
           question: userMessage,
           chatHistory: formattedChatHistory,
-          useDefaultModels: true,
           sessionId: sessionId,
           isFollowUp: isFollowUp === true,
           formData: isFollowUp ? undefined : { file: uploadedFile },
