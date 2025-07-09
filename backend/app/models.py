@@ -450,21 +450,21 @@ class Tool(str, Enum):
     TWINCHECK = "twincheck"
 
 
-class LlmFeedback(str, Enum):
+class ToolFeedback(str, Enum):
     """LLM interaction feedback options."""
 
     POSITIVE = "positive"
     NEGATIVE = "negative"
 
 
-# Extra data types for LlmInteraction
-class LlmInteractionExtraData(SQLModel):
+# Extra data types for ToolInteraction
+class ToolInteractionFeedback(SQLModel):
     """Base class for LLM interaction extra data."""
 
     pass
 
 
-class ReportGenieExtraData(LlmInteractionExtraData):
+class ReportGenieExtraData(ToolInteractionFeedback):
     """Extra data for ReportGenie interactions."""
 
     kb_name: str = ""
@@ -474,7 +474,7 @@ class ReportGenieExtraData(LlmInteractionExtraData):
     full_report: str = ""
 
 
-class ChatbotExtraData(LlmInteractionExtraData):
+class ChatbotExtraData(ToolInteractionFeedback):
     """Extra data for Chatbot interactions."""
 
     kb_name: str = ""
@@ -482,7 +482,7 @@ class ChatbotExtraData(LlmInteractionExtraData):
     conversation_id: str | None = None
 
 
-class VeradocExtraData(LlmInteractionExtraData):
+class VeradocExtraData(ToolInteractionFeedback):
     """Extra data for Veradoc interactions."""
 
     kb_name: str = ""
@@ -490,7 +490,7 @@ class VeradocExtraData(LlmInteractionExtraData):
     document_count: int = 0
 
 
-class FormconnectExtraData(LlmInteractionExtraData):
+class FormconnectExtraData(ToolInteractionFeedback):
     """Extra data for Formconnect interactions."""
 
     kb_name: str = ""
@@ -498,7 +498,7 @@ class FormconnectExtraData(LlmInteractionExtraData):
     form_template_id: str = ""
 
 
-class TwincheckExtraData(LlmInteractionExtraData):
+class TwincheckExtraData(ToolInteractionFeedback):
     """Extra data for Twincheck interactions."""
 
     kb_name: str = ""
@@ -506,10 +506,10 @@ class TwincheckExtraData(LlmInteractionExtraData):
     topic_list_id: str = ""
 
 
-class LlmInteraction(SQLModel, table=True):
+class ToolInteraction(SQLModel, table=True):
     """Records all interactions with LLM services for analytics and auditing."""
 
-    __tablename__ = "llm_interactions"
+    __tablename__ = "tool_interactions"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     date_created: datetime = Field(default_factory=datetime.utcnow)
@@ -520,11 +520,11 @@ class LlmInteraction(SQLModel, table=True):
     extra_data: dict[str, Any] | None = Field(
         default=None, sa_column=Column(JSON)
     )  # For additional info (JSON)
-    feedback: LlmFeedback | None = Field(default=None)
+    feedback: ToolFeedback | None = Field(default=None)
     feedback_text: str | None = Field(default=None)  # User's additional comments
     feedback_date: datetime | None = Field(default=None)  # When feedback was provided
 
-    def get_typed_extra_data(self) -> LlmInteractionExtraData | None:
+    def get_typed_extra_data(self) -> ToolInteractionFeedback | None:
         """
         Get extra_data as a properly typed model based on functionality.
 
@@ -547,15 +547,15 @@ class LlmInteraction(SQLModel, table=True):
                 return TwincheckExtraData(**self.extra_data)
             else:
                 # Fallback to base model for unknown functionalities
-                return LlmInteractionExtraData()
+                return ToolInteractionFeedback()
         except ValidationError as e:
             # Log the validation error for debugging
             print(f"Validation error for {self.functionality}: {e}")
-            return LlmInteractionExtraData()
+            return ToolInteractionFeedback()
         except Exception as e:
             # Log unexpected errors
             print(f"Unexpected error parsing extra_data for {self.functionality}: {e}")
-            return LlmInteractionExtraData()
+            return ToolInteractionFeedback()
 
     def validate_reportgenie_data(self) -> tuple[bool, ReportGenieExtraData | None]:
         """

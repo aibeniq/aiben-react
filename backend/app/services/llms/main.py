@@ -273,7 +273,7 @@ class LlmService:
             metadata: Any additional information to store
         """
         # Import here to avoid circular imports
-        from app.models import User, LlmInteraction
+        from app.models import User, ToolInteraction
 
         if metadata is None:
             metadata = {}
@@ -310,7 +310,7 @@ class LlmService:
             metadata["llm_provider"] = spec.provider.id
 
         # Create and save interaction record
-        interaction = LlmInteraction(
+        interaction = ToolInteraction(
             user_id=user_id,
             functionality=functionality,
             input_data=input_data,

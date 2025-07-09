@@ -27,9 +27,10 @@ from app.models import (
     TwinCheckResponse,
     TwinCheckTopicList,
     TwinCheckDetailResponse,
-    LlmInteraction,
+    ToolInteraction,
     DocxRequest,
     Message,
+    Tool,
 )
 
 router = APIRouter(prefix="/twincheck", tags=["twincheck"])
@@ -250,17 +251,19 @@ async def get_comparison_history(
 
     try:
         # Start with base query
-        query = select(LlmInteraction).where(
-            LlmInteraction.functionality == "twincheck"
+        query = select(ToolInteraction).where(
+            ToolInteraction.functionality == Tool.TWINCHECK
         )
 
         # Only filter by user if not showing all users
         if not show_all:
-            query = query.where(LlmInteraction.user_id == current_user.id)
+            query = query.where(ToolInteraction.user_id == current_user.id)
 
         # Add ordering and pagination
         comparisons = session.exec(
-            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
+            query.order_by(ToolInteraction.date_created.desc())
+            .offset(skip)
+            .limit(limit)
         ).all()
 
         result = []
@@ -358,7 +361,7 @@ async def get_comparison_detail(
 ):
     """Retrieve a specific comparison's full content by ID."""
     try:
-        comparison = session.get(LlmInteraction, comparison_id)
+        comparison = session.get(ToolInteraction, comparison_id)
         if not comparison:
             raise HTTPException(status_code=404, detail="Comparison not found")
 

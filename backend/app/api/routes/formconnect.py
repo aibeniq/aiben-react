@@ -4,7 +4,8 @@ from app.models import (
     FormConnectResponse,
     FormConnectForm,
     FormConnectDetailResponse,
-    LlmInteraction,
+    ToolInteraction,
+    Tool,
     Message,
 )
 from app.services.llms import LlmService
@@ -410,7 +411,7 @@ async def get_form_detail(
     """Retrieve a specific form processing's full content by ID."""
     print("Received interaction ID:", interaction_id)
     try:
-        report = session.get(LlmInteraction, interaction_id)
+        report = session.get(ToolInteraction, interaction_id)
         if not report:
             raise HTTPException(
                 status_code=404, detail="Form processing result not found"
@@ -494,17 +495,19 @@ async def get_form_history(
 
     try:
         # Start with base query
-        query = select(LlmInteraction).where(
-            LlmInteraction.functionality == "formconnect"
+        query = select(ToolInteraction).where(
+            ToolInteraction.functionality == Tool.FORMCONNECT
         )
 
         # Only filter by user if not showing all users
         if not show_all:
-            query = query.where(LlmInteraction.user_id == current_user.id)
+            query = query.where(ToolInteraction.user_id == current_user.id)
 
         # Add ordering and pagination
         interactions = session.exec(
-            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
+            query.order_by(ToolInteraction.date_created.desc())
+            .offset(skip)
+            .limit(limit)
         ).all()
 
         result = []

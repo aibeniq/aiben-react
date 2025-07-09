@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import LlmInteraction, Message
+from app.models import ToolInteraction, Message
 
 router = APIRouter(prefix="/feedback", tags=["feedback"])
 
@@ -23,7 +23,7 @@ def submit_feedback(
 ):
     """Submit feedback for an LLM interaction."""
     # Find the interaction
-    interaction = session.get(LlmInteraction, request.interaction_id)
+    interaction = session.get(ToolInteraction, request.interaction_id)
 
     # Verify that the interaction exists and belongs to the user
     if not interaction:

@@ -4,11 +4,12 @@ from app.models import (
     VeraDocChecklist,
     RagChecklistRequest,
     KnowledgeBase,
-    LlmInteraction,
+    ToolInteraction,
     DocxRequest,
     VeraDocDetailResponse,
     Message,
     User,
+    Tool,
 )
 
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
@@ -463,15 +464,19 @@ async def get_veradoc_history(
 
     try:
         # Start with base query
-        query = select(LlmInteraction).where(LlmInteraction.functionality == "veradoc")
+        query = select(ToolInteraction).where(
+            ToolInteraction.functionality == Tool.VERADOC
+        )
 
         # Only filter by user if not showing all users
         if not show_all:
-            query = query.where(LlmInteraction.user_id == current_user.id)
+            query = query.where(ToolInteraction.user_id == current_user.id)
 
         # Add ordering and pagination
         reports = session.exec(
-            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
+            query.order_by(ToolInteraction.date_created.desc())
+            .offset(skip)
+            .limit(limit)
         ).all()
 
         print(f"Found {len(reports)} VeraDoc evaluations for user {current_user.id}")
@@ -562,7 +567,7 @@ async def get_veradoc_detail(
 ):
     """Retrieve a specific VeraDoc evaluation's full content by ID."""
     try:
-        report = session.get(LlmInteraction, report_id)
+        report = session.get(ToolInteraction, report_id)
         if not report:
             raise HTTPException(status_code=404, detail="Report not found")
 
