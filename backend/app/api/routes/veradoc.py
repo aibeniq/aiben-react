@@ -311,7 +311,7 @@ async def process_rag_checklist(
         final_evaluation = response.content
         print(f"Got final evaluation: {final_evaluation[:100]}...")
 
-        interaction_id = LlmService.record_llm_interaction(
+        interaction_id = LlmService.record_tool_interaction(
             session=session,
             user_id=current_user.id,
             functionality="veradoc",

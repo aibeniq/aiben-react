@@ -214,7 +214,7 @@ async def generate_report(
             "outline_name": outline_name,  # add the outline name here
         }
 
-        LlmService.record_llm_interaction(
+        LlmService.record_tool_interaction(
             session=session,
             user_id=current_user.id,
             functionality=Tool.REPORTGENIE,

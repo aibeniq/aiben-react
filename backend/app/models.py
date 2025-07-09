@@ -459,13 +459,13 @@ class ToolFeedback(str, Enum):
 
 
 # Extra data types for ToolInteraction
-class ToolInteractionFeedback(SQLModel):
+class ToolInteractionExtraData(SQLModel):
     """Base class for LLM interaction extra data."""
 
     pass
 
 
-class ReportGenieExtraData(ToolInteractionFeedback):
+class ReportGenieExtraData(ToolInteractionExtraData):
     """Extra data for ReportGenie interactions."""
 
     kb_name: str = ""
@@ -475,7 +475,7 @@ class ReportGenieExtraData(ToolInteractionFeedback):
     full_report: str = ""
 
 
-class ChatbotExtraData(ToolInteractionFeedback):
+class ChatbotExtraData(ToolInteractionExtraData):
     """Extra data for Chatbot interactions."""
 
     kb_name: str = ""
@@ -483,7 +483,7 @@ class ChatbotExtraData(ToolInteractionFeedback):
     conversation_id: str | None = None
 
 
-class VeradocExtraData(ToolInteractionFeedback):
+class VeradocExtraData(ToolInteractionExtraData):
     """Extra data for Veradoc interactions."""
 
     kb_name: str = ""
@@ -491,7 +491,7 @@ class VeradocExtraData(ToolInteractionFeedback):
     document_count: int = 0
 
 
-class FormconnectExtraData(ToolInteractionFeedback):
+class FormconnectExtraData(ToolInteractionExtraData):
     """Extra data for Formconnect interactions."""
 
     kb_name: str = ""
@@ -499,7 +499,7 @@ class FormconnectExtraData(ToolInteractionFeedback):
     form_template_id: str = ""
 
 
-class TwincheckExtraData(ToolInteractionFeedback):
+class TwincheckExtraData(ToolInteractionExtraData):
     """Extra data for Twincheck interactions."""
 
     kb_name: str = ""
@@ -525,7 +525,7 @@ class ToolInteraction(SQLModel, table=True):
     feedback_text: str | None = Field(default=None)  # User's additional comments
     feedback_date: datetime | None = Field(default=None)  # When feedback was provided
 
-    def get_typed_extra_data(self) -> ToolInteractionFeedback | None:
+    def get_typed_extra_data(self) -> ToolInteractionExtraData | None:
         """
         Get extra_data as a properly typed model based on functionality.
 
@@ -548,15 +548,15 @@ class ToolInteraction(SQLModel, table=True):
                 return TwincheckExtraData(**self.extra_data)
             else:
                 # Fallback to base model for unknown functionalities
-                return ToolInteractionFeedback()
+                return ToolInteractionExtraData()
         except ValidationError as e:
             # Log the validation error for debugging
             print(f"Validation error for {self.functionality}: {e}")
-            return ToolInteractionFeedback()
+            return ToolInteractionExtraData()
         except Exception as e:
             # Log unexpected errors
             print(f"Unexpected error parsing extra_data for {self.functionality}: {e}")
-            return ToolInteractionFeedback()
+            return ToolInteractionExtraData()
 
     def validate_reportgenie_data(self) -> tuple[bool, ReportGenieExtraData | None]:
         """

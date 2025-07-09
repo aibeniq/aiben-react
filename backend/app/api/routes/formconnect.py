@@ -277,7 +277,7 @@ async def process_form(
             "extracted_data": extracted_results,
         }
 
-    LlmService.record_llm_interaction(
+    LlmService.record_tool_interaction(
         session=session,
         user_id=current_user.id,
         functionality="formconnect",

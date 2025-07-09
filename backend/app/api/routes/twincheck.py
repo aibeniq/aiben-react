@@ -209,7 +209,7 @@ async def compare_documents(
         print(f"Got response: {summary.content[:100]}...")
 
         # Record this interaction for history
-        interaction_id = LlmService.record_llm_interaction(
+        interaction_id = LlmService.record_tool_interaction(
             session=session,
             user_id=current_user.id,
             functionality="twincheck",
