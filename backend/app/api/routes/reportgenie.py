@@ -4,6 +4,7 @@ from app.models import (
     ReportGenieResponse,
     ReportGenieOutline,
     ReportGenieDetailResponse,
+    ReportGenieExtraData,
     KnowledgeBase,
     DocxRequest,
     ToolInteraction,
@@ -176,7 +177,7 @@ async def generate_report(
 
         # get outline name if outline_id is provided
         outline_name = None
-        if hasattr(request, "outline_id") and request.outline_id:
+        if request.outline_id:
             try:
                 outline = session.get(ReportGenieOutline, request.outline_id)
                 if outline:
@@ -194,25 +195,29 @@ async def generate_report(
                 outline_name = "Custom Outline"
 
         # store the full report and sections data in extra_data for retrieval later
-        detailed_extra_data = {
-            "kb_name": kb.title,
-            "full_report": full_report,
-            "sections": [
-                {
-                    "title": section.title,
-                    "content": section.content,
-                    "source_citations": [
-                        {
-                            "content": citation.content,
-                            "metadata": citation.metadata.model_dump(),
-                        }
-                        for citation in section.source_citations
-                    ],
-                }
-                for section in sections
-            ],
-            "outline_name": outline_name,  # add the outline name here
-        }
+        # prepare sections data as json string to match ReportGenieExtraData model
+        sections_data = [
+            {
+                "title": section.title,
+                "content": section.content,
+                "source_citations": [
+                    {
+                        "content": citation.content,
+                        "metadata": citation.metadata.model_dump(),
+                    }
+                    for citation in section.source_citations
+                ],
+            }
+            for section in sections
+        ]
+
+        detailed_extra_data = ReportGenieExtraData(
+            kb_name=kb.title,
+            kb_id=str(kb.id),
+            sections=json.dumps(sections_data),
+            outline_name=outline_name or "",
+            full_report=full_report,
+        )
 
         LlmService.record_tool_interaction(
             session=session,
@@ -229,7 +234,7 @@ async def generate_report(
                 "section_count": len(sections),
                 "total_length": len(full_report),
             },
-            metadata=detailed_extra_data,
+            metadata=detailed_extra_data.model_dump(),
         )
 
         return ReportGenieResponse(results=result)
