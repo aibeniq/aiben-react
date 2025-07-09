@@ -1,20 +1,22 @@
+import logging
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+
 import sentry_sdk
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-import logging
 
 from app.api.main import api_router
-from app.core.config import settings
 from app.core.app_state import app_state
+from app.core.config import settings
 from app.services.vectordb.main import VectorDBService
 
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     # Initialize vector database service
     try:
         logger.info("Initializing vector database service")

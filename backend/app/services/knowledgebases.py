@@ -1,20 +1,20 @@
-from typing import List
-import uuid
 import hashlib
+import logging
+import uuid
+import zipfile
+from datetime import datetime
+from io import BytesIO
+
 from fastapi import UploadFile
-from sqlmodel import select, Session, delete
+from sqlmodel import Session, select
+
+from app.api.deps import CurrentUser
 from app.models import (
-    Source,
-    SourceData,
     KnowledgeBase,
     KnowledgeBaseCreate,
+    Source,
+    SourceData,
 )
-from app.api.deps import CurrentUser
-from io import BytesIO
-import zipfile
-import logging
-from datetime import datetime
-
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +134,8 @@ class KnowledgeBaseService:
             )
             session.add(source)
         else:
-
+            if not file.filename:
+                raise ValueError("File has no filename")
             # Compress the file content into .zip format
             zip_buffer = BytesIO()
             with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
@@ -173,11 +174,19 @@ class KnowledgeBaseService:
             raise
 
     @staticmethod
-    def get_sources(session: Session, knowledge_base_id: uuid.UUID) -> List[Source]:
+    def get_sources(session: Session, knowledge_base_id: uuid.UUID) -> list[Source]:
         """Get all sources for a knowledge base."""
-        return session.exec(
-            select(Source).where(Source.knowledge_base_id == knowledge_base_id)
-        ).all()
+        try:
+            return list(
+                session.exec(
+                    select(Source).where(Source.knowledge_base_id == knowledge_base_id)
+                )
+            )
+        except Exception as e:
+            logger.error(
+                f"Error retrieving sources for knowledge base {knowledge_base_id}: {str(e)}"
+            )
+            raise
 
     @staticmethod
     def delete_source_by_id(

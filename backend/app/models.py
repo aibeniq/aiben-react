@@ -1,20 +1,21 @@
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 from enum import Enum
 
 from pydantic import EmailStr, field_validator, ValidationError
 from sqlmodel import Field, Relationship, SQLModel
 from sqlalchemy import (
+    JSON,
     LargeBinary,
-    Column,
     PrimaryKeyConstraint,
     UniqueConstraint,
     JSON,
 )
+from sqlmodel import Column, Field, Relationship, SQLModel
 
-from app.services.embeddings import EmbeddingModelInfo, EmbeddingService
 from app.core.config import settings
+from app.services.embeddings import EmbeddingModelInfo, EmbeddingService
 
 
 # Shared properties
@@ -174,9 +175,9 @@ class KnowledgeBaseCreate(KnowledgeBaseBase):
 
 # Properties to receive on KnowledgeBase update
 class KnowledgeBaseUpdate(SQLModel):
-    title: str | None = Field(default=None, min_length=1, max_length=255, unique=True)  # type: ignore
+    title: str | None = Field(default=None, min_length=1, max_length=255, unique=True)
     description: str | None = Field(default=None, max_length=255)
-    removed_file_ids: List[str] | None = Field(
+    removed_file_ids: list[str] | None = Field(
         default=None
     )  # List of file IDs to be removed (optional)
     # Allow updating file paths
@@ -205,7 +206,7 @@ class KnowledgeBase(KnowledgeBaseBase, table=True):
 class KnowledgeBasePublic(KnowledgeBaseBase):
     id: uuid.UUID
     owner_id: uuid.UUID
-    files: List[dict] = Field(default_factory=list)
+    files: list[dict[str, Any]] = Field(default_factory=list)
     date_created: datetime
     date_modified: datetime
     number_of_sources: int = Field(default=0)
@@ -238,7 +239,7 @@ class Source(SQLModel, table=True):
 class SourceData(SQLModel, table=True):
     __tablename__ = "source-data"
     id: uuid.UUID = Field(primary_key=True)
-    data: bytes = Field(sa_column=LargeBinary)
+    data: bytes = Field(sa_type=LargeBinary)
     file_hash: str = Field(max_length=64)  # SHA-256 hash is 64 characters
 
 
@@ -257,21 +258,21 @@ class FormConnectRequest(SQLModel):
 
 # Response model for FormConnect
 class FormConnectResponse(SQLModel):
-    results: Dict[str, Any]  # Accept any dictionary structure
+    results: dict[str, Any]  # Accept any dictionary structure
 
 
 class FormConnectDetailFeedback(SQLModel):
-    feedback: Optional[str] = None
-    feedbackText: Optional[str] = None
-    feedbackDate: Optional[str] = None
+    feedback: str | None = None
+    feedbackText: str | None = None
+    feedbackDate: str | None = None
 
 
 class FormConnectDetailResponse(SQLModel):
     id: str
     date_created: datetime
     fields: str
-    file_names: List[str]
-    results: Dict[str, Any]
+    file_names: list[str]
+    results: dict[str, Any]
     feedback: FormConnectDetailFeedback
 
 
@@ -296,29 +297,29 @@ class VeraDocRequest(SQLModel):
 
 # Response model for VeraDoc
 class VeraDocResponse(SQLModel):
-    results: Dict[str, Any]  # Accept any dictionary structure
+    results: dict[str, Any]  # Accept any dictionary structure
 
 
 # Response model for VeraDoc detail endpoint
 class VeraDocDetailFeedback(SQLModel):
-    feedback: Optional[str] = None
-    feedbackText: Optional[str] = None
-    feedbackDate: Optional[str] = None
+    feedback: str | None = None
+    feedbackText: str | None = None
+    feedbackDate: str | None = None
 
 
 class VeraDocDetailResults(SQLModel):
     final_evaluation: str
-    qa_pairs: List[Dict[str, Any]] = Field(default_factory=list)
+    qa_pairs: list[dict[str, Any]] = Field(default_factory=list)
     interaction_id: str
 
 
 class VeraDocDetailResponse(SQLModel):
     id: str
     date_created: datetime
-    document_name: Optional[str] = None
-    kb_name: Optional[str] = None
-    kb_id: Optional[str] = None
-    questions: Optional[str] = None
+    document_name: str | None = None
+    kb_name: str | None = None
+    kb_id: str | None = None
+    questions: str | None = None
     results: VeraDocDetailResults
     feedback: VeraDocDetailFeedback
 
@@ -340,13 +341,13 @@ class VeraDocChecklist(SQLModel, table=True):
 class VeraDocRagQA(VeraDocRequest):
     question: str
     answer: str
-    context: Optional[str] = None
+    context: str | None = None
 
 
 class VeraDocRagResult(VeraDocRequest):
     final_evaluation: str
-    qa_pairs: List[VeraDocRagQA]
-    interaction_id: Optional[str] = None
+    qa_pairs: list[VeraDocRagQA]
+    interaction_id: str | None = None
 
 
 class VeraDocRagResponse(VeraDocRequest):
@@ -416,9 +417,9 @@ class ReportGenieSection(SQLModel):
 
 
 class ReportGenieDetailFeedback(SQLModel):
-    feedback: Optional[str] = None
-    feedbackText: Optional[str] = None
-    feedbackDate: Optional[str] = None
+    feedback: str | None = None
+    feedbackText: str | None = None
+    feedbackDate: str | None = None
 
 
 class ReportGenieDetailResults(SQLModel):
@@ -597,7 +598,7 @@ class TwinCheckRequest(SQLModel):
 
 # Response model for TwinCheck
 class TwinCheckResponse(SQLModel):
-    results: Dict[str, Any]  # Accept any dictionary structure
+    results: dict[str, Any]  # Accept any dictionary structure
 
 
 # Table for saved comparison topic sets
@@ -613,14 +614,14 @@ class TwinCheckTopicList(SQLModel, table=True):
 
 
 class TwinCheckDetailFeedback(SQLModel):
-    feedback: Optional[str] = None
-    feedbackText: Optional[str] = None
-    feedbackDate: Optional[str] = None
+    feedback: str | None = None
+    feedbackText: str | None = None
+    feedbackDate: str | None = None
 
 
 class TwinCheckDetailResults(SQLModel):
     summary: str
-    topic_analysis: List[Dict[str, Any]] = Field(default_factory=list)
+    topic_analysis: list[dict[str, Any]] = Field(default_factory=list)
     interaction_id: str
 
 

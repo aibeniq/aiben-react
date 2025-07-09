@@ -1,16 +1,14 @@
-import os
-from pathlib import Path
-import replicate
-from langchain.chat_models import init_chat_model
-from langchain_core.messages import BaseMessage
-from langchain_core.language_models import BaseChatModel
-from typing import Optional, List, Dict, Any, Union
-from dotenv import load_dotenv
 import json
-from pydantic import BaseModel
+import os
 import uuid
+from typing import Any
+
+from langchain.chat_models import init_chat_model
+from langchain_core.language_models import BaseChatModel
+from pydantic import BaseModel
 from sqlmodel import Session
-from app.models import User
+
+from app.models import Tool, User, ToolInteraction, ToolInteractionExtraData
 
 
 # pydantic model for llm model information
@@ -19,7 +17,7 @@ class LlmProvider(BaseModel):
 
     id: str  # used by langchain to identify the provider
     name: str  # used by the UI to display the provider name
-    required_env_vars: List[str]  # required environment variables (api keys, etc.)
+    required_env_vars: list[str]  # required environment variables (api keys, etc.)
 
 
 # pydantic model for llm model information
@@ -29,17 +27,17 @@ class LlmModelSpec(BaseModel):
     id: str
     provider: LlmProvider
     model_name: str
-    context_length: Optional[int] = None
-    max_output_tokens: Optional[int] = None
-    cost_per_1M_input_tokens: Optional[float] = None
-    cost_per_1M_output_tokens: Optional[float] = None
+    context_length: int | None = None
+    max_output_tokens: int | None = None
+    cost_per_1M_input_tokens: float | None = None
+    cost_per_1M_output_tokens: float | None = None
     supports_streaming: bool = True
     supports_function_calling: bool = False
     supports_vision: bool = False
-    description: Optional[str] = None
+    description: str | None = None
 
 
-PROVIDERS: Dict[str, LlmProvider] = {
+PROVIDERS: dict[str, LlmProvider] = {
     "openai": LlmProvider(
         id="openai",
         name="OpenAI",
@@ -67,7 +65,7 @@ PROVIDERS: Dict[str, LlmProvider] = {
     ),
 }
 
-MODELS: Dict[str, LlmModelSpec] = {
+MODELS: dict[str, LlmModelSpec] = {
     "gpt-4o": LlmModelSpec(
         id="gpt-4o",
         provider=PROVIDERS["openai"],
@@ -114,7 +112,7 @@ class LlmService:
     """Service for managing and loading LLM models."""
 
     @classmethod
-    def get_model_specs(cls) -> List[LlmModelSpec]:
+    def get_model_specs(cls) -> list[LlmModelSpec]:
         """Get list of available models."""
         return list(MODELS.values())
 
@@ -156,7 +154,7 @@ class LlmService:
             raise ValueError(f"Error getting user's default LLM model: {str(e)}")
 
     @classmethod
-    def get_providers(cls) -> List[str]:
+    def get_providers(cls) -> list[str]:
         """Get list of available providers."""
         # import here to avoid circular import
         from app.core.config import settings
@@ -168,7 +166,7 @@ class LlmService:
         ]
 
     @classmethod
-    def get_model_ids(cls) -> List[str]:
+    def get_model_ids(cls) -> list[str]:
         """Get list of available model IDs."""
         return [model_spec.id for model_spec in cls.get_model_specs()]
 
@@ -178,7 +176,7 @@ class LlmService:
         return model_id in MODELS
 
     @classmethod
-    def get_model_specs_by_provider(cls, provider: str) -> List[LlmModelSpec]:
+    def get_model_specs_by_provider(cls, provider: str) -> list[LlmModelSpec]:
         """Get all models for a specific provider."""
         return [spec for spec in MODELS.values() if spec.provider.id == provider]
 
@@ -215,7 +213,7 @@ class LlmService:
         return spec
 
     @classmethod
-    def get_model(cls, model_id: str, **kwargs) -> BaseChatModel:
+    def get_model(cls, model_id: str, **kwargs: Any) -> BaseChatModel:
         """
         Get an LLM model by ID.
 
@@ -246,20 +244,20 @@ class LlmService:
             )
             return llm
 
-        except ImportError as e:
+        except ImportError:
             raise ImportError(f"Provider LangChain package missing: {spec.provider}")
 
         except Exception as e:
             raise ValueError(f"Failed to load model '{model_id}': {str(e)}")
 
     @staticmethod
-    def record_llm_interaction(
+    def record_tool_interaction(
         session: Session,
         user_id: uuid.UUID,
-        functionality: "LlmFunctionality",
+        functionality: Tool,
         input_data: Any,
         output_data: Any,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: ToolInteractionExtraData | None = None,
     ) -> uuid.UUID:
         """
         Records an interaction with an LLM to the database.
@@ -267,30 +265,27 @@ class LlmService:
         Args:
             session: SQLModel session
             user_id: ID of the user who initiated the request
-            functionality: Service used (LlmFunctionality enum)
+            functionality: Service used (Tool enum)
             input_data: The input prompt or data sent to the LLM
             output_data: The output generated by the LLM
             metadata: Any additional information to store
         """
-        # Import here to avoid circular imports
-        from app.models import User, ToolInteraction
-
         if metadata is None:
-            metadata = {}
+            metadata = ToolInteractionExtraData()
 
         # Convert input and output to strings if they're not already
         if not isinstance(input_data, str):
             # Try to preserve structure by using JSON
             try:
                 input_data = json.dumps(input_data)
-            except:
+            except Exception:
                 input_data = str(input_data)
 
         if not isinstance(output_data, str):
             # Try to preserve structure by using JSON
             try:
                 output_data = json.dumps(output_data)
-            except:
+            except Exception:
                 output_data = str(output_data)
 
         # Get user and their default LLM info
@@ -324,120 +319,120 @@ class LlmService:
         return interaction.id
 
 
-class ReplicateLlm:
-    """LLM implementation using Replicate API."""
+# class ReplicateLlm:
+#     """LLM implementation using Replicate API."""
 
-    current_dir = Path(__file__).resolve().parent
-    root_dir = current_dir.parent.parent.parent
-    load_dotenv(dotenv_path=os.path.join(root_dir, ".env"), override=True)
+#     current_dir = Path(__file__).resolve().parent
+#     root_dir = current_dir.parent.parent.parent
+#     load_dotenv(dotenv_path=os.path.join(root_dir, ".env"), override=True)
 
-    def __init__(
-        self,
-        model_id: str,
-        temperature: float = 0.0,
-        api_key: Optional[str] = None,
-        **kwargs,
-    ):
-        """Initialize Replicate LLM.
+#     def __init__(
+#         self,
+#         model_id: str,
+#         temperature: float = 0.0,
+#         api_key: Optional[str] = None,
+#         **kwargs: Any,
+#     ) -> None:
+#         """Initialize Replicate LLM.
 
-        Args:
-            model_id: The model identifier on Replicate
-            temperature: Temperature for generation
-            api_key: Optional API key for Replicate
-            **kwargs: Additional model parameters
-        """
-        self.model_id = model_id
-        self.temperature = temperature
-        self.kwargs = kwargs
+#         Args:
+#             model_id: The model identifier on Replicate
+#             temperature: Temperature for generation
+#             api_key: Optional API key for Replicate
+#             **kwargs: Additional model parameters
+#         """
+#         self.model_id = model_id
+#         self.temperature = temperature
+#         self.kwargs = kwargs
 
-        # set API key if provided
-        if api_key:
-            os.environ["REPLICATE_API_TOKEN"] = api_key
+#         # set API key if provided
+#         if api_key:
+#             os.environ["REPLICATE_API_TOKEN"] = api_key
 
-        # check if we have a modelversion format (owner/model:version)
-        if ":" in model_id:
-            self.owner_model, self.version = model_id.split(":")
-        else:
-            self.owner_model = model_id
-            self.version = None
+#         # check if we have a modelversion format (owner/model:version)
+#         if ":" in model_id:
+#             self.owner_model, self.version = model_id.split(":")
+#         else:
+#             self.owner_model = model_id
+#             self.version = None
 
-    def invoke(self, prompt: Union[str, List[BaseMessage]], **kwargs) -> str:
-        """Generate text using the Replicate model."""
-        # format prompt based on input type
-        if isinstance(prompt, str):
-            input_text = prompt
-            system_prompt = self.kwargs.get("system_prompt", "")
-        elif isinstance(prompt, list):
-            # handle list of messages
-            system_messages = [
-                msg.content
-                for msg in prompt
-                if hasattr(msg, "type") and msg.type == "system"
-            ]
-            user_messages = [
-                msg.content
-                for msg in prompt
-                if hasattr(msg, "content")
-                and not (hasattr(msg, "type") and msg.type == "system")
-            ]
+#     def invoke(self, prompt: Union[str, List[BaseMessage]], **kwargs: Any) -> str:
+#         """Generate text using the Replicate model."""
+#         # format prompt based on input type
+#         if isinstance(prompt, str):
+#             input_text = prompt
+#             system_prompt = self.kwargs.get("system_prompt", "")
+#         elif isinstance(prompt, list):
+#             # handle list of messages
+#             system_messages = [
+#                 msg.content
+#                 for msg in prompt
+#                 if hasattr(msg, "type") and msg.type == "system"
+#             ]
+#             user_messages = [
+#                 msg.content
+#                 for msg in prompt
+#                 if hasattr(msg, "content")
+#                 and not (hasattr(msg, "type") and msg.type == "system")
+#             ]
 
-            system_prompt = (
-                system_messages[0]
-                if system_messages
-                else self.kwargs.get("system_prompt", "")
-            )
-            input_text = "\n".join(user_messages)
-        else:
-            input_text = str(prompt)
-            system_prompt = self.kwargs.get("system_prompt", "")
+#             system_prompt = (
+#                 system_messages[0]
+#                 if system_messages
+#                 else self.kwargs.get("system_prompt", "")
+#             )
+#             input_text = "\n".join(user_messages)
+#         else:
+#             input_text = str(prompt)
+#             system_prompt = self.kwargs.get("system_prompt", "")
 
-        try:
-            # prepare input parameters
-            input_params = {
-                "prompt": input_text,
-                "temperature": kwargs.get("temperature", self.temperature),
-                "max_tokens": kwargs.get("max_tokens", 4096),
-            }
+#         try:
+#             # prepare input parameters
+#             input_params = {
+#                 "prompt": input_text,
+#                 "temperature": kwargs.get("temperature", self.temperature),
+#                 "max_tokens": kwargs.get("max_tokens", 4096),
+#             }
 
-            # add system prompt if available
-            if system_prompt:
-                input_params["system_prompt"] = system_prompt
+#             # add system prompt if available
+#             if system_prompt:
+#                 input_params["system_prompt"] = system_prompt
 
-            # add any additional parameters
-            for key, value in {**self.kwargs, **kwargs}.items():
-                if key not in ["system_prompt", "temperature", "max_tokens"]:
-                    input_params[key] = value
+#             # add any additional parameters
+#             for key, value in {**self.kwargs, **kwargs}.items():
+#                 if key not in ["system_prompt", "temperature", "max_tokens"]:
+#                     input_params[key] = value
 
-            # use streaming if requested
-            if kwargs.get("streaming", False):
-                chunks = []
-                for chunk in replicate.stream(self.model_id, input=input_params):
-                    chunks.append(chunk)
-                return "".join(chunks)
-            else:
-                output = replicate.run(self.model_id, input=input_params)
+#             # use streaming if requested
+#             if kwargs.get("streaming", False):
+#                 chunks = []
+#                 for chunk in replicate.stream(self.model_id, input=input_params):
+#                     chunks.append(chunk)
+#                 return "".join(chunks)
+#             else:
+#                 output = replicate.run(self.model_id, input=input_params)
 
-                # handle various output formats
-                if isinstance(output, list):
-                    return output[0] if len(output) == 1 else "".join(output)
-                return str(output)
+#                 # handle various output formats
+#                 if isinstance(output, list):
+#                     return output[0] if len(output) == 1 else "".join(output)
+#                 return str(output)
 
-        except Exception as e:
-            raise ValueError(f"Error generating text with Replicate: {str(e)}")
+#         except Exception as e:
+#             raise ValueError(f"Error generating text with Replicate: {str(e)}")
 
-    def __or__(self, other):
-        """Support for pipe operator."""
+#     def __or__(self, other: Any) -> Any:
+#         """Support for pipe operator."""
 
-        def chain_func(inputs):
-            if isinstance(inputs, dict):
-                prompt_parts = []
-                for key, value in inputs.items():
-                    prompt_parts.append(f"{key}: {value}")
-                prompt = "\n".join(prompt_parts)
-            else:
-                prompt = str(inputs)
+#         def chain_func(inputs: Any) -> Any:
+#             if isinstance(inputs, dict):
+#                 prompt_parts = []
+#                 for key, value in inputs.items():
+#                     prompt_parts.append(f"{key}: {value}")
+#                 prompt = "\n".join(prompt_parts)
+#             else:
+#                 prompt = str(inputs)
 
-            result = self.invoke(prompt)
-            return type("obj", (object,), {"content": result})()
+#             result = self.invoke(prompt)
+#             return type("obj", (object,), {"content": result})()
 
-        return chain_func
+#         return chain_func

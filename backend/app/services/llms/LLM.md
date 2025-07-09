@@ -1,6 +1,6 @@
 # llms service
 
-the llms service provides a unified interface for managing and using different large language models.
+the llms service provides a unified interface for managing and using different large language models
 
 # initialization
 

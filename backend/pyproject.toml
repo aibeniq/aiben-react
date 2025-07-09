@@ -52,6 +52,9 @@ dev-dependencies = [
     "pre-commit<4.0.0,>=3.6.2",
     "types-passlib<2.0.0.0,>=1.7.7.20240106",
     "coverage<8.0.0,>=7.4.3",
+    "types-requests>=2.32.4.20250611",
+    "types-markdown>=3.8.0.20250708",
+    "black>=25.1.0",
 ]
 
 [build-system]
@@ -62,9 +65,20 @@ build-backend = "hatchling.build"
 strict = true
 exclude = ["venv", ".venv", "alembic"]
 
+# Ignore missing stubs for libraries that don't have them
+[[tool.mypy.overrides]]
+module = [
+    "pymilvus.*",
+    "docx.*",
+    "bs4.*",
+]
+ignore_missing_imports = true
+
 [tool.ruff]
 target-version = "py310"
 exclude = ["alembic"]
+# Make ruff compatible with black
+line-length = 88
 
 [tool.ruff.lint]
 select = [
@@ -82,6 +96,9 @@ ignore = [
     "B008",  # do not perform function calls in argument defaults
     "W191",  # indentation contains tabs
     "B904",  # Allow raising exceptions without from e, for HTTPException
+    "W293",  # blank line contains whitespace
+    "W291",  # trailing whitespace
+    "I001",  # organize imports
 ]
 
 [tool.ruff.lint.pyupgrade]
@@ -89,3 +106,19 @@ ignore = [
 keep-runtime-typing = true
 
 [tool.black]
+line-length = 88
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | alembic
+)/
+'''

@@ -1,14 +1,12 @@
-import uuid
 import logging
+import uuid
 from datetime import datetime, timezone
-from typing import Any, List, Optional
-from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
-from sqlmodel import func, select
-from sqlalchemy.sql import func
+from typing import Any
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from sqlmodel import col, func, select
 
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
-from app.services.knowledgebases import KnowledgeBaseService
-from app.services.embeddings import EmbeddingService
 from app.models import (
     KnowledgeBase,
     KnowledgeBaseCreate,
@@ -18,6 +16,8 @@ from app.models import (
     Message,
     Source,
 )
+from app.services.embeddings import EmbeddingService
+from app.services.knowledgebases import KnowledgeBaseService
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
 logger = logging.getLogger(__name__)
@@ -30,72 +30,67 @@ def read_knowledge_bases(
     """
     Retrieve knowledge bases with additional metadata: Number of Sources, Date Created, and Date Modified.
     """
-    # Base query to count sources and retrieve metadata
-    query = (
-        session.query(
-            KnowledgeBase,
-            func.count(Source.id).label("number_of_sources"),
-            KnowledgeBase.date_created,
-            KnowledgeBase.date_modified,
-        )
-        .join(Source, Source.knowledge_base_id == KnowledgeBase.id, isouter=True)
-        .group_by(KnowledgeBase.id)
-    )
+
+    results: list[tuple[KnowledgeBase, int]] = []
 
     # Apply filters based on user permissions
     if current_user.is_superuser:
-        count_statement = select(func.count()).select_from(KnowledgeBase)
-        count = session.exec(count_statement).one()
-        query = query.offset(skip).limit(limit)
+        results = list(
+            session.exec(
+                select(
+                    KnowledgeBase,
+                    func.count(col(Source.id)).label("number_of_sources"),
+                )
+                .join(Source, isouter=True)
+                .group_by(col(KnowledgeBase.id))
+                .offset(skip)
+                .limit(limit)
+            )
+        )
     else:
-        count_statement = (
-            select(func.count())
-            .select_from(KnowledgeBase)
-            .where(KnowledgeBase.owner_id == current_user.id)
+        results = list(
+            session.exec(
+                select(
+                    KnowledgeBase, func.count(col(Source.id)).label("number_of_sources")
+                )
+                .where(KnowledgeBase.owner_id == current_user.id)
+                .join(Source, isouter=True)
+                .group_by(col(KnowledgeBase.id))
+                .offset(skip)
+                .limit(limit)
+            )
         )
-        count = session.exec(count_statement).one()
-        query = (
-            query.filter(KnowledgeBase.owner_id == current_user.id)
-            .offset(skip)
-            .limit(limit)
-        )
-
-    # Execute the query
-    results = query.all()
 
     # Format the response
-    knowledge_bases = []
-    for kb in results:
+    knowledge_bases: list[KnowledgeBasePublic] = []
+    for res in results:
+        kb, source_count = res
         # Get embedding model info
         embedding_model = None
-        if kb.KnowledgeBase.embedding_model_id:
+        if kb.embedding_model_id:
             from app.services.embeddings import EmbeddingService
 
-            embedding_model = EmbeddingService.get_model_spec(
-                kb.KnowledgeBase.embedding_model_id
-            )
+            embedding_model = EmbeddingService.get_model_spec(kb.embedding_model_id)
 
         kb_public = KnowledgeBasePublic(
-            id=kb.KnowledgeBase.id,
-            owner_id=kb.KnowledgeBase.owner_id,
-            title=kb.KnowledgeBase.title,
-            description=kb.KnowledgeBase.description,
+            id=kb.id,
+            owner_id=kb.owner_id,
+            title=kb.title,
+            description=kb.description,
             files=[],  # Files can be populated separately if needed
-            number_of_sources=kb.number_of_sources,
+            number_of_sources=source_count,
             date_created=kb.date_created,
             date_modified=kb.date_modified,
-            embedding_model_id=kb.KnowledgeBase.embedding_model_id,
+            embedding_model_id=kb.embedding_model_id,
             embedding_model=embedding_model,
         )
         knowledge_bases.append(kb_public)
 
-    return KnowledgeBasesPublic(data=knowledge_bases, count=count)
+    return KnowledgeBasesPublic(data=knowledge_bases, count=len(results))
 
 
 @router.get("/{id}", response_model=KnowledgeBasePublic)
-def read_knowledge_base(
-    session: SessionDep, current_user: CurrentUser, id: uuid.UUID
-) -> KnowledgeBasePublic:
+def read_knowledge_base(session: SessionDep, id: uuid.UUID) -> KnowledgeBasePublic:
     """Get knowledge base by ID."""
 
     # get knowledge base
@@ -147,7 +142,7 @@ def create_knowledge_base(
     current_user: CurrentUser,
     vectordb_service: VectorDBDep,
     knowledge_base_in: KnowledgeBaseCreate = Depends(),
-    files: List[UploadFile] = File(...),
+    files: list[UploadFile] = File(...),
 ) -> Any:
     """Create new knowledge base."""
 
@@ -244,7 +239,7 @@ def update_knowledge_base(
     vectordb_service: VectorDBDep,
     id: uuid.UUID,
     knowledge_base_in: KnowledgeBaseUpdate = Depends(),
-    files: Optional[List[UploadFile]] = None,
+    files: list[UploadFile] | None = None,
 ) -> KnowledgeBasePublic:
     """Update a knowledge base."""
 
@@ -287,9 +282,10 @@ def update_knowledge_base(
                 f"Removing {len(knowledge_base_in.removed_file_ids)} files from knowledge base {id}"
             )
             for source_id in knowledge_base_in.removed_file_ids:
+                source_uuid = uuid.UUID(source_id)
                 source = KnowledgeBaseService.delete_source_by_id(
                     session=session,
-                    source_id=source_id,
+                    source_id=source_uuid,
                     knowledge_base_id=knowledge_base.id,
                 )
                 vectordb_service.delete_source(

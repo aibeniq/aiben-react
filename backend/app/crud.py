@@ -4,8 +4,6 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.services.llms import LlmService
-from app.services.embeddings import EmbeddingService
 from app.models import (
     Item,
     ItemCreate,
@@ -13,6 +11,8 @@ from app.models import (
     UserCreate,
     UserUpdate,
 )
+from app.services.embeddings import EmbeddingService
+from app.services.llms import LlmService
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:

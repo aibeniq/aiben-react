@@ -15,12 +15,17 @@ import uuid
 from datetime import datetime
 from io import BytesIO
 from datetime import datetime
-from fastapi.responses import StreamingResponse
-from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from io import BytesIO
+from typing import Any
+
 import markdown
 from bs4 import BeautifulSoup
+from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from langchain_core.prompts import PromptTemplate
+from sqlmodel import desc, select
 
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
 from app.core.config import settings
@@ -58,7 +63,7 @@ async def generate_report(
     current_user: CurrentUser,
     vectordb_service: VectorDBDep,
     request: ReportGenieRequest = Depends(),
-):
+) -> ReportGenieResponse:
     """
     Generate a report based on sections outline and knowledge base search results.
     """
@@ -77,6 +82,11 @@ async def generate_report(
         if kb.embedding_model_id:
             if EmbeddingService.is_valid_model_id(kb.embedding_model_id):
                 embedding_model = EmbeddingService.get_model_spec(kb.embedding_model_id)
+                if not embedding_model:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Knowledge base has an invalid embedding model {kb.embedding_model_id}",
+                    )
             else:
                 raise HTTPException(
                     status_code=400,
@@ -235,7 +245,7 @@ async def generate_report(
 @router.post("/outlines", response_model=ReportGenieOutline)
 def create_outline(
     outline: ReportGenieOutline, session: SessionDep, current_user: CurrentUser
-):
+) -> ReportGenieOutline:
     """
     Save a new outline to the database.
     """
@@ -254,21 +264,23 @@ def create_outline(
     return outline
 
 
-@router.get("/outlines", response_model=List[ReportGenieOutline])
-def get_outlines(session: SessionDep, current_user: CurrentUser):
+@router.get("/outlines", response_model=list[ReportGenieOutline])
+def get_outlines(
+    session: SessionDep, current_user: CurrentUser
+) -> list[ReportGenieOutline]:
     """
     Retrieve all outlines from the database for this user.
     """
     print(f"Retrieving outlines for user {current_user.id}")
-    if not current_user:
-        raise HTTPException(status_code=401, detail="Not authenticated.")
 
     try:
-        outlines = session.exec(
-            select(ReportGenieOutline).where(
-                ReportGenieOutline.owner_id == current_user.id
+        outlines = list(
+            session.exec(
+                select(ReportGenieOutline).where(
+                    ReportGenieOutline.owner_id == current_user.id
+                )
             )
-        ).all()
+        )
 
         # Print the retrieved outlines for debugging
         print(f"Found {len(outlines)} outlines for user {current_user.id}:")
@@ -295,7 +307,7 @@ def get_outlines(session: SessionDep, current_user: CurrentUser):
 
 
 @router.get("/outlines/{outline_id}", response_model=ReportGenieOutline)
-def get_outline(outline_id: uuid.UUID, session: SessionDep):
+def get_outline(outline_id: uuid.UUID, session: SessionDep) -> ReportGenieOutline:
     """
     Retrieve a specific outline by ID.
     """
@@ -311,7 +323,7 @@ def update_outline(
     updated_outline: ReportGenieOutline,
     session: SessionDep,
     current_user: CurrentUser,
-):
+) -> ReportGenieOutline:
     """
     Update an existing outline.
     """
@@ -339,7 +351,7 @@ def update_outline(
 @router.delete("/outlines/{outline_id}", response_model=Message)
 def delete_outline(
     outline_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
-):
+) -> Message:
     """
     Delete an outline by ID.
     """
@@ -359,9 +371,7 @@ def delete_outline(
 
 
 @router.post("/generate/docx", response_class=StreamingResponse)
-async def generate_docx(
-    session: SessionDep, current_user: CurrentUser, request: DocxRequest
-):
+async def generate_docx(request: DocxRequest) -> StreamingResponse:
     """
     Generate a DOCX file from the report content.
     """
@@ -496,14 +506,14 @@ async def generate_docx(
         raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
 
 
-@router.get("/history", response_model=List[Dict[str, Any]])
+@router.get("/history", response_model=list[dict[str, Any]])
 async def get_report_history(
     session: SessionDep,
     current_user: CurrentUser,
     skip: int = 0,
     limit: int = 20,
     show_all: bool = False,
-):
+) -> list[dict[str, Any]]:
     """Retrieve past report generation history for the current user or all users."""
     print("Retrieving report history. Show all:", show_all)
 
@@ -524,7 +534,7 @@ async def get_report_history(
             .limit(limit)
         ).all()
 
-        print("Found {} reports for user {}:".format(len(reports), current_user.id))
+        print(f"Found {len(reports)} reports for user {current_user.id}:")
 
         result = []
         for report in reports:
@@ -553,7 +563,6 @@ async def get_report_history(
 
                 # Create a user-friendly title
                 title = f"Report on {kb_name}"
-                date = report.date_created.strftime("%Y-%m-%d %H:%M")
 
                 # Create the result item
                 result_item = {
@@ -637,8 +646,7 @@ async def get_report_history(
 async def get_report_detail(
     report_id: uuid.UUID,
     session: SessionDep,
-    current_user: CurrentUser,
-):
+) -> ReportGenieDetailResponse:
     """Retrieve a specific report's full content by ID."""
     try:
         tool_interaction = session.get(ToolInteraction, report_id)
