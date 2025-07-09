@@ -4,10 +4,9 @@ from app.models import (
     ReportGenieResponse,
     ReportGenieOutline,
     ReportGenieDetailResponse,
-    Source,
     KnowledgeBase,
     DocxRequest,
-    LlmInteraction,
+    ToolInteraction,
     Message,
 )
 import json
@@ -28,7 +27,7 @@ from app.core.config import settings
 from app.models import (
     DocxRequest,
     KnowledgeBase,
-    LlmInteraction,
+    ToolInteraction,
     Tool,
     Message,
     ReportGenieDetailFeedback,
@@ -510,17 +509,19 @@ async def get_report_history(
 
     try:
         # Start with base query
-        query = select(LlmInteraction).where(
-            LlmInteraction.functionality == "reportgenie"
+        query = select(ToolInteraction).where(
+            ToolInteraction.functionality == Tool.REPORTGENIE
         )
 
         # Only filter by user if not showing all users
         if not show_all:
-            query = query.where(LlmInteraction.user_id == current_user.id)
+            query = query.where(ToolInteraction.user_id == current_user.id)
 
         # Add ordering and pagination
         reports = session.exec(
-            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
+            query.order_by(ToolInteraction.date_created.desc())
+            .offset(skip)
+            .limit(limit)
         ).all()
 
         print("Found {} reports for user {}:".format(len(reports), current_user.id))
@@ -640,8 +641,8 @@ async def get_report_detail(
 ):
     """Retrieve a specific report's full content by ID."""
     try:
-        report = session.get(LlmInteraction, report_id)
-        if not report:
+        tool_interaction = session.get(ToolInteraction, report_id)
+        if not tool_interaction:
             raise HTTPException(status_code=404, detail="Report not found")
 
         # Because we now allow viewing others' outputs, no longer need to ensure this
@@ -650,33 +651,33 @@ async def get_report_detail(
         #        status_code=403, detail="You don't have access to this report"
         #    )
 
-        if report.functionality != Tool.REPORTGENIE:
+        if tool_interaction.functionality != Tool.REPORTGENIE:
             raise HTTPException(
                 status_code=400, detail="This is not a ReportGenie report"
             )
 
         # Validate ReportGenie extra data using new validation methods
-        is_valid, typed_extra_data = report.validate_reportgenie_data()
+        is_valid, typed_extra_data = tool_interaction.validate_reportgenie_data()
 
         if not is_valid or not typed_extra_data:
             # Fallback if validation fails
             return ReportGenieDetailResponse(
-                id=str(report.id),
-                date_created=report.date_created,
+                id=str(tool_interaction.id),
+                date_created=tool_interaction.date_created,
                 kb_name="Unknown Knowledge Base",
                 kb_id="",
                 sections="",
                 results=ReportGenieDetailResults(
-                    full_report=f"Unable to reconstruct report from {report.date_created}.\n\n"
+                    full_report=f"Unable to reconstruct report from {tool_interaction.date_created}.\n\n"
                     f"This might be due to corrupted or incomplete data.",
                     sections=[],
                 ),
                 feedback=ReportGenieDetailFeedback(
-                    feedback=report.feedback,
-                    feedbackText=report.feedback_text,
+                    feedback=tool_interaction.feedback,
+                    feedbackText=tool_interaction.feedback_text,
                     feedbackDate=(
-                        report.feedback_date.isoformat()
-                        if report.feedback_date
+                        tool_interaction.feedback_date.isoformat()
+                        if tool_interaction.feedback_date
                         else None
                     ),
                 ),
@@ -684,7 +685,11 @@ async def get_report_detail(
 
         # Try to reconstruct the original report structure
         try:
-            input_data = json.loads(report.input_data) if report.input_data else {}
+            input_data = (
+                json.loads(tool_interaction.input_data)
+                if tool_interaction.input_data
+                else {}
+            )
 
             # Use validated typed data instead of raw extra_data
             kb_name = typed_extra_data.kb_name or "Unknown Knowledge Base"
@@ -722,8 +727,8 @@ async def get_report_detail(
 
             # Create a response that matches the structure expected by the frontend
             result = ReportGenieDetailResponse(
-                id=str(report.id),
-                date_created=report.date_created,
+                id=str(tool_interaction.id),
+                date_created=tool_interaction.date_created,
                 kb_name=kb_name,
                 kb_id=typed_extra_data.kb_id or input_data.get("kb_id", ""),
                 sections=input_data.get("sections", ""),
@@ -733,38 +738,38 @@ async def get_report_detail(
                 ),
                 # Add feedback information
                 feedback=ReportGenieDetailFeedback(
-                    feedback=report.feedback,
-                    feedbackText=report.feedback_text,
+                    feedback=tool_interaction.feedback,
+                    feedbackText=tool_interaction.feedback_text,
                     feedbackDate=(
-                        report.feedback_date.isoformat()
-                        if report.feedback_date
+                        tool_interaction.feedback_date.isoformat()
+                        if tool_interaction.feedback_date
                         else None
                     ),
                 ),
-            }
+            )
 
             return result
 
         except json.JSONDecodeError:
             # Fallback if JSON parsing fails
             return ReportGenieDetailResponse(
-                id=str(report.id),
-                date_created=report.date_created,
+                id=str(tool_interaction.id),
+                date_created=tool_interaction.date_created,
                 kb_name=typed_extra_data.kb_name or "Unknown Knowledge Base",
                 kb_id=typed_extra_data.kb_id or "",
                 sections="",
                 results=ReportGenieDetailResults(
-                    full_report=f"Unable to reconstruct report from {report.date_created}.\n\n"
+                    full_report=f"Unable to reconstruct report from {tool_interaction.date_created}.\n\n"
                     f"This might be due to an older format or incomplete data.",
                     sections=[],
                 ),
                 # Add feedback object for consistency
                 feedback=ReportGenieDetailFeedback(
-                    feedback=report.feedback,
-                    feedbackText=report.feedback_text,
+                    feedback=tool_interaction.feedback,
+                    feedbackText=tool_interaction.feedback_text,
                     feedbackDate=(
-                        report.feedback_date.isoformat()
-                        if report.feedback_date
+                        tool_interaction.feedback_date.isoformat()
+                        if tool_interaction.feedback_date
                         else None
                     ),
                 ),
