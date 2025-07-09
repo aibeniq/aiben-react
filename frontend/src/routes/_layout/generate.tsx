@@ -209,6 +209,14 @@ const ReportGenie = () => {
 
   // Custom components for markdown rendering
   const components = {
+    // Header components
+    h1: (props: any) => <Heading as="h1" size="lg" mb={4} {...props} />,
+    h2: (props: any) => <Heading as="h2" size="md" mb={3} {...props} />,
+    h3: (props: any) => <Heading as="h3" size="sm" mb={3} {...props} />,
+    h4: (props: any) => <Heading as="h4" size="sm" mb={2} {...props} />,
+    h5: (props: any) => <Heading as="h5" size="xs" mb={2} {...props} />,
+    h6: (props: any) => <Heading as="h6" size="xs" mb={2} {...props} />,
+    // Table components
     table: (props: any) => (
       <Box
         as="table"
@@ -435,7 +443,12 @@ const ReportGenie = () => {
                             {expandedSection === index && (
                               <>
                                 <Box mb={4} p={3} borderLeft="4px solid" borderColor="blue.200">
-                                  <Text whiteSpace="pre-wrap">{section.content}</Text>
+                                  <ReactMarkdown
+                                    remarkPlugins={[remarkGfm]}
+                                    components={components}
+                                  >
+                                    {section.content}
+                                  </ReactMarkdown>
                                 </Box>
 
                                 {section.source_citations &&

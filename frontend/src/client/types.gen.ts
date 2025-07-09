@@ -213,9 +213,7 @@ export type ReportGenieDetailResponse = {
 
 export type ReportGenieDetailResults = {
   full_report: string
-  sections?: Array<{
-    [key: string]: unknown
-  }>
+  sections?: Array<ReportGenieSection>
 }
 
 export type ReportGenieOutline = {
@@ -229,9 +227,30 @@ export type ReportGenieOutline = {
 }
 
 export type ReportGenieResponse = {
-  results: {
-    [key: string]: unknown
-  }
+  results: ReportGenieResults
+}
+
+export type ReportGenieResults = {
+  full_report: string
+  sections?: Array<ReportGenieSection>
+}
+
+export type ReportGenieSection = {
+  title: string
+  content: string
+  source_citations?: Array<ReportGenieSourceCitation>
+}
+
+export type ReportGenieSourceCitation = {
+  metadata?: ReportGenieSourceMetadata
+  content: string
+}
+
+export type ReportGenieSourceMetadata = {
+  source_id?: string
+  url?: string
+  title?: string
+  author?: string
 }
 
 /**
