@@ -336,7 +336,7 @@ async def query_knowledge_base(
             )
 
         # Record the interaction
-        LlmService.record_llm_interaction(
+        LlmService.record_tool_interaction(
             session=session,
             user_id=current_user.id,
             functionality="chatbot",
@@ -540,7 +540,7 @@ async def query_document(
         print("Sources:", len(sources))
 
         # After generating the answer and before returning:
-        LlmService.record_llm_interaction(
+        LlmService.record_tool_interaction(
             session=session,
             user_id=current_user.id,
             functionality="chatbot",
@@ -673,7 +673,7 @@ async def query_text(
                 status_code=500, detail=f"Error generating answer: {str(e)}"
             )
 
-        LlmService.record_llm_interaction(
+        LlmService.record_tool_interaction(
             session=session,
             user_id=current_user.id,
             functionality="chatbot",
