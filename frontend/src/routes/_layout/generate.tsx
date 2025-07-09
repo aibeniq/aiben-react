@@ -18,8 +18,10 @@ import { useMutation } from "@tanstack/react-query"
 import {
   ReportgenieService,
   KnowledgeBasesService,
-  KnowledgeBasePublic,
-  ReportGenieOutline,
+  type KnowledgeBasePublic,
+  type ReportGenieOutline,
+  type ReportgenieGenerateReportResponse,
+  type ReportGenieSection,
 } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
@@ -51,7 +53,7 @@ const ReportGenie = () => {
 
   // Results state
   const [generatedDocument, setGeneratedDocument] = useState("")
-  const [sectionResults, setSectionResults] = useState<any[]>([])
+  const [sectionResults, setSectionResults] = useState<ReportGenieSection[]>([])
   const [loading, setLoading] = useState(false)
   const [expandedSection, setExpandedSection] = useState<number | null>(null)
 
@@ -154,8 +156,12 @@ const ReportGenie = () => {
   }, [])
 
   // Mutation hook for generating the document
-  const mutation = useMutation({
-    mutationFn: (data: { sections: string; knowledgeBaseId: string; outlineId?: string }) => {
+  const mutation = useMutation<
+    ReportgenieGenerateReportResponse,
+    Error,
+    { sections: string; knowledgeBaseId: string; outlineId?: string }
+  >({
+    mutationFn: (data) => {
       if (data.outlineId) {
         return ReportgenieService.generateReport({
           sections: data.sections,
@@ -172,11 +178,11 @@ const ReportGenie = () => {
         })
       }
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data) => {
       setGeneratedDocument(data.results.full_report)
       setSectionResults(data.results.sections || [])
     },
-    onError: (error: any) => {
+    onError: (error) => {
       showErrorToast(`Failed to generate document: ${error.message}`)
     },
   })
@@ -473,7 +479,7 @@ const ReportGenie = () => {
                                         </h2>
                                         <Accordion.ItemContent pb={4} bg="surface">
                                           {section.source_citations.map(
-                                            (citation: any, cIndex: number) => (
+                                            (citation, cIndex: number) => (
                                               <Box
                                                 key={cIndex}
                                                 p={3}
@@ -486,7 +492,7 @@ const ReportGenie = () => {
                                                   <SourceLink
                                                     sourceId={citation.metadata.source_id}
                                                     fileName={getDisplayFileName(
-                                                      citation.metadata.url,
+                                                      citation.metadata.url || "",
                                                     )}
                                                     ml={1}
                                                     fontWeight="normal"
