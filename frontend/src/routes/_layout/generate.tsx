@@ -181,6 +181,7 @@ const ReportGenie = () => {
     onSuccess: (data) => {
       setGeneratedDocument(data.results.full_report)
       setSectionResults(data.results.sections || [])
+      setLoading(false)
     },
     onError: (error) => {
       showErrorToast(`Failed to generate document: ${error.message}`)
