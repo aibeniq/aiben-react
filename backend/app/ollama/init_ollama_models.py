@@ -2,12 +2,13 @@
 This script pulls the required models from Ollama.
 """
 
-import requests
-import time
 import sys
+import time
+
+import requests
 
 
-def pull_model(model_name):
+def pull_model(model_name: str) -> None:
     print(f"Pulling model: {model_name}...")
 
     response = requests.post(
@@ -21,7 +22,7 @@ def pull_model(model_name):
     print(f"Model {model_name} pulled successfully.")
 
 
-def main():
+def main() -> None:
     # Wait for Ollama to be ready
     max_retries = 30
     for i in range(max_retries):
