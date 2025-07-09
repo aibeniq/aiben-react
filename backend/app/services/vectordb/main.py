@@ -29,6 +29,15 @@ from app.services.vectordb.config import (
     MILVUS_SCHEMA_TEMPLATE,
     BM25_FUNCTION,
 )
+from app.services.vectordb.types import (
+    ChunkData,
+    EmbeddedChunkData,
+    SearchEntity,
+    SearchHit,
+    SearchResults,
+    VectorDBError,
+    EmbeddingModelError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -164,11 +173,17 @@ class VectorDBService:
         """Generate collection name from embedding model ID.
 
         Returns:
-            tuple[bool, str]: True if the collection name is valid, False otherwise
+            str: The collection name
+
+        Raises:
+            EmbeddingModelError: If embedding model is invalid
         """
-        spec = EmbeddingService.get_model_spec(embedding_model_id)
-        if not spec:
-            raise ValueError(f"Unknown embedding model: {embedding_model_id}")
+        try:
+            spec = EmbeddingService.get_model_spec(embedding_model_id)
+        except ValueError as e:
+            raise EmbeddingModelError(
+                f"Failed to get collection name for {embedding_model_id}: {str(e)}"
+            ) from e
 
         # create safe collection name (only alphanumerics and underscores): provider_model_dimensions
         safe_name = re.sub(
@@ -177,67 +192,108 @@ class VectorDBService:
         return safe_name
 
     def _get_embedding_model(self, embedding_model_id: str) -> Embeddings:
-        """Get or load embedding model by ID."""
-        if embedding_model_id not in self._embedding_models:
-            is_valid, error_msg = EmbeddingService.validate_model(embedding_model_id)
-            if not is_valid:
-                raise ValueError(error_msg)
+        """
+        Get or load embedding model by ID.
 
-            logger.info(f"Loading embedding model: {embedding_model_id}")
-            self._embedding_models[embedding_model_id] = EmbeddingService.get_model(
-                embedding_model_id
-            )
+        Args:
+            embedding_model_id: The ID of the embedding model to get
+
+        Returns:
+            Embeddings: The embedding model
+
+        Raises:
+            EmbeddingModelError: If embedding model is invalid
+        """
+        if embedding_model_id not in self._embedding_models:
+            try:
+                self._embedding_models[embedding_model_id] = EmbeddingService.get_model(
+                    embedding_model_id
+                )
+            except Exception as e:
+                raise EmbeddingModelError(
+                    f"Failed to load embedding model {embedding_model_id}: {str(e)}"
+                ) from e
 
         return self._embedding_models[embedding_model_id]
 
     def _create_schema(self, embedding_model_id: str) -> CollectionSchema:
-        """Create Milvus schema for the specified embedding model."""
-        is_valid, error_msg = EmbeddingService.validate_model(embedding_model_id)
-        if not is_valid:
-            raise ValueError(error_msg)
+        """
+        Create Milvus schema for the specified embedding model.
 
-        spec = EmbeddingService.get_model_spec(embedding_model_id)
+        Args:
+            embedding_model_id: The ID of the embedding model to create a schema for
 
-        # create schema fields with appropriate embedding dimension
-        fields = MILVUS_SCHEMA_TEMPLATE + [
-            FieldSchema(
-                name="dense",
-                dtype=DataType.FLOAT_VECTOR,
-                description="dense embedding vector",
-                dim=spec.dimensions,
-                nullable=False,
-            )
-        ]
+        Returns:
+            CollectionSchema: The schema for the embedding model
 
-        # create schema
-        schema = CollectionSchema(
-            fields=fields,
-            description=f"schema for {embedding_model_id}",
-        )
-
-        # add BM25 function for keyword search
-        schema.add_function(BM25_FUNCTION)
-
-        return schema
-
-    def _init_collection(self, embedding_model_id: str) -> bool:
-        """Initialize a collection for the specified embedding model if it doesn't exist."""
-        collection_name = self._get_collection_name(embedding_model_id)
-
-        # check if already initialized
-        if collection_name in self._initialized_collections:
-            return True
+        Raises:
+            EmbeddingModelError: If embedding model is invalid
+            VectorDBError: If schema creation fails
+        """
 
         try:
+            spec = EmbeddingService.get_model_spec(embedding_model_id)
+        except ValueError as e:
+            raise EmbeddingModelError(
+                f"Unknown embedding model: {embedding_model_id}"
+            ) from e
+
+        try:
+            # create schema fields with appropriate embedding dimension
+            fields = MILVUS_SCHEMA_TEMPLATE + [
+                FieldSchema(
+                    name="dense",
+                    dtype=DataType.FLOAT_VECTOR,
+                    description="dense embedding vector",
+                    dim=spec.dimensions,
+                    nullable=False,
+                )
+            ]
+
+            # create schema
+            schema = CollectionSchema(
+                fields=fields,
+                description=f"schema for {embedding_model_id}",
+            )
+
+            # add BM25 function for keyword search
+            schema.add_function(BM25_FUNCTION)
+
+            return schema
+        except Exception as e:
+            raise VectorDBError(
+                f"Failed to create schema for {embedding_model_id}: {str(e)}"
+            ) from e
+
+    def _init_collection(self, embedding_model_id: str) -> str:
+        """
+        Initialize a collection for the specified embedding model if it doesn't exist.
+
+        Args:
+            embedding_model_id: The ID of the embedding model to initialize a collection for
+
+        Returns:
+            str: The name of the collection
+
+        Raises:
+            EmbeddingModelError: If embedding model is invalid
+            VectorDBError: If collection initialization fails
+        """
+
+        try:
+            collection_name = self._get_collection_name(embedding_model_id)
+
+            # check if already initialized
+            if collection_name in self._initialized_collections:
+                return collection_name
+
             # check if collection exists
             if self.client.has_collection(collection_name=collection_name):
                 logger.info(f"Collection '{collection_name}' already exists.")
                 self._initialized_collections.add(collection_name)
-                return True
+                return collection_name
 
-            logger.info(
-                f"Creating collection {collection_name} for {embedding_model_id}..."
-            )
+            logger.info(f"Creating collection {collection_name}...")
 
             # create schema
             schema = self._create_schema(embedding_model_id)
@@ -281,11 +337,16 @@ class VectorDBService:
 
             logger.info(f"Collection '{collection_name}' created successfully.")
             self._initialized_collections.add(collection_name)
-            return True
 
+            return collection_name
+
+        except EmbeddingModelError:
+            raise
         except Exception as e:
             logger.error(f"Error initializing collection '{collection_name}': {e}")
-            return False
+            raise VectorDBError(
+                f"Failed to initialize collection '{collection_name}': {str(e)}"
+            ) from e
 
     def add_source(
         self,
@@ -295,76 +356,112 @@ class VectorDBService:
         source_id: str,
         embedding_model_id: str,
     ) -> None:
-        """Add files to the collection."""
+        """Add files to the collection.
 
-        is_valid, error_msg = EmbeddingService.validate_model(embedding_model_id)
-        if not is_valid:
-            raise ValueError(error_msg)
+        Raises:
+            EmbeddingModelError: If embedding model is invalid
+            VectorDBError: If file processing or insertion fails
+        """
 
-        documents = []
+        try:
+            # validate embedding model
+            EmbeddingService.get_model_spec(embedding_model_id)
 
-        # Load documents from file
-        loaded_documents = _load_uploaded_file(file)  # TODO: switch to docling
-        documents.extend(loaded_documents)
+            documents = []
 
-        # Split documents into chunks
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=settings.DOCUMENT_CHUNK_SIZE,
-            chunk_overlap=settings.DOCUMENT_CHUNK_OVERLAP,
-        )
-        splits = text_splitter.split_documents(documents)
+            # Load documents from file
+            loaded_documents = _load_uploaded_file(file)  # TODO: switch to docling
+            documents.extend(loaded_documents)
 
-        chunks_to_add: List[ChunkData] = []
-        for split in splits:
-            chunk_data = ChunkData(
-                knowledge_base_id=str(knowledge_base_id),
-                source_id=str(source_id),
-                user_id=str(user_id),
-                content=split.page_content,
-                tags=[],
-                title=split.metadata.get("title", ""),
-                summary="",
-                author=split.metadata.get("author", ""),
-                url=split.metadata.get("source", ""),
-                created_at=int(time.time()),
-                updated_at=int(time.time()),
+            # Split documents into chunks
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=settings.DOCUMENT_CHUNK_SIZE,
+                chunk_overlap=settings.DOCUMENT_CHUNK_OVERLAP,
             )
-            chunks_to_add.append(chunk_data)
+            splits = text_splitter.split_documents(documents)
 
-        self._add_chunks(
-            chunks_to_add,
-            embedding_model_id=embedding_model_id,
-        )
+            chunks_to_add: list[ChunkData] = []
+            for split in splits:
+                chunk_data = ChunkData(
+                    knowledge_base_id=str(knowledge_base_id),
+                    source_id=str(source_id),
+                    user_id=str(user_id),
+                    content=split.page_content,
+                    tags=[],
+                    title=split.metadata.get("title", ""),
+                    summary="",
+                    author=split.metadata.get("author", ""),
+                    url=split.metadata.get("source", ""),
+                    created_at=int(time.time()),
+                    updated_at=int(time.time()),
+                )
+                chunks_to_add.append(chunk_data)
+
+            self._add_chunks(
+                chunks_to_add,
+                embedding_model_id=embedding_model_id,
+            )
+        except EmbeddingModelError:
+            raise
+        except Exception as e:
+            raise VectorDBError(f"Failed to add source {source_id}: {str(e)}") from e
 
     def delete_source(self, source_id: str, embedding_model_id: str) -> None:
-        """Delete a file from the collection."""
-        is_valid, error_msg = EmbeddingService.validate_model(embedding_model_id)
-        if not is_valid:
-            raise ValueError(error_msg)
+        """Delete a file from the collection.
 
-        self._delete_chunks(
-            source_id=source_id,
-            embedding_model_id=embedding_model_id,
-        )
+        Raises:
+            EmbeddingModelError: If embedding model is invalid
+            VectorDBError: If deletion fails
+        """
+        try:
+            # validate embedding model
+            EmbeddingService.get_model_spec(embedding_model_id)
+
+        except Exception as e:
+            raise EmbeddingModelError(
+                f"Failed to delete source {source_id}: {str(e)}"
+            ) from e
+
+        try:
+            self._delete_chunks(
+                source_id=source_id,
+                embedding_model_id=embedding_model_id,
+            )
+        except Exception as e:
+            raise VectorDBError(f"Failed to delete source {source_id}: {str(e)}") from e
 
     def delete_knowledge_base(
         self, knowledge_base_id: str, embedding_model_id: str
     ) -> None:
-        """Delete a knowledge base from the collection."""
-        is_valid, error_msg = EmbeddingService.validate_model(embedding_model_id)
-        if not is_valid:
-            raise ValueError(error_msg)
+        """Delete a knowledge base from the collection.
 
-        self._delete_chunks(
-            knowledge_base_id=knowledge_base_id,
-            embedding_model_id=embedding_model_id,
-        )
+        Raises:
+            EmbeddingModelError: If embedding model is invalid
+            VectorDBError: If deletion fails
+        """
+        try:
+            # validate embedding model
+            EmbeddingService.get_model_spec(embedding_model_id)
+        except Exception as e:
+            raise EmbeddingModelError(
+                f"Failed to delete knowledge base {knowledge_base_id}: {str(e)}"
+            ) from e
+
+        try:
+            self._delete_chunks(
+                knowledge_base_id=knowledge_base_id,
+                embedding_model_id=embedding_model_id,
+            )
+        except Exception as e:
+            raise VectorDBError(
+                f"Failed to delete knowledge base {knowledge_base_id}: {str(e)}"
+            ) from e
 
     def _add_chunks(
         self,
         chunks: List[ChunkData],
         embedding_model_id: str,
-    ) -> Dict[str, Any]:
+    ) -> None:
         """
         Add chunks to the collection.
 
@@ -372,24 +469,15 @@ class VectorDBService:
             chunks: List of ChunkData objects containing chunk data
             embedding_model_id: ID of the embedding model to use
 
-        Returns:
-            Dictionary with insertion results
+        Raises:
+            EmbeddingModelError: If embedding model is invalid
+            VectorDBError: If insertion fails
         """
 
-        collection_name = self._get_collection_name(embedding_model_id)
-
         try:
-            # validate embedding model
-            is_valid, error_msg = EmbeddingService.validate_model(embedding_model_id)
-            if not is_valid:
-                return {"success": False, "error": error_msg}
 
             # ensure collection exists and is loaded
-            if not self._init_collection(embedding_model_id):
-                return {
-                    "success": False,
-                    "error": f"Failed to initialize collection for {embedding_model_id}",
-                }
+            collection_name = self._init_collection(embedding_model_id)
 
             # load collection if not already loaded
             self.client.load_collection(collection_name=collection_name)
@@ -408,7 +496,7 @@ class VectorDBService:
                 data_to_insert.append(chunk_data.model_dump())
 
             # insert data
-            result = self.client.insert(
+            self.client.insert(
                 collection_name=collection_name,
                 data=data_to_insert,
             )
@@ -416,34 +504,35 @@ class VectorDBService:
             logger.info(
                 f"Successfully inserted {len(data_to_insert)} chunks into {collection_name}"
             )
-            return {
-                "success": True,
-                "inserted_count": len(data_to_insert),
-                "result": result,
-            }
 
+        except EmbeddingModelError:
+            raise
         except Exception as e:
-            logger.error(f"Error adding chunks to {collection_name}: {e}")
-            return {"success": False, "error": str(e)}
+            raise VectorDBError(
+                f"Failed to add chunks to {collection_name}: {str(e)}"
+            ) from e
 
     def _delete_chunks(
         self,
         embedding_model_id: str,
-        knowledge_base_id: Optional[str] = None,
-        user_id: Optional[str] = None,
-        source_id: Optional[str] = None,
-    ) -> Dict[str, Any]:
-        """Delete chunks from the collection."""
+        knowledge_base_id: str | None = None,
+        user_id: str | None = None,
+        source_id: str | None = None,
+    ) -> None:
+        """Delete chunks from the collection.
 
-        collection_name = self._get_collection_name(embedding_model_id)
+        Raises:
+            VectorDBError: If deletion fails
+        """
 
         try:
-            assert (
-                knowledge_base_id or user_id or source_id
-            ), "At least one of knowledge_base_id, user_id, or source_id must be provided"
+            if not (knowledge_base_id or user_id or source_id):
+                raise VectorDBError(
+                    "At least one of knowledge_base_id, user_id, or source_id must be provided"
+                )
 
-            # ensure collection is loaded
-            self.client.load_collection(collection_name=collection_name)
+            # ensure collection exists and is loaded
+            collection_name = self._init_collection(embedding_model_id)
 
             # prepare filter
             filter_expr = []
@@ -467,11 +556,13 @@ class VectorDBService:
             )
 
             logger.info(f"Successfully deleted chunks from {collection_name}")
-            return {"success": True}
 
+        except EmbeddingModelError:
+            raise
         except Exception as e:
-            logger.error(f"Error deleting chunks from {collection_name}: {e}")
-            return {"success": False, "error": str(e)}
+            raise VectorDBError(
+                f"Failed to delete chunks from {collection_name}: {str(e)}"
+            ) from e
 
     def search_semantic(
         self,
@@ -481,8 +572,13 @@ class VectorDBService:
         user_id: Optional[str] = None,
         source_id: Optional[str] = None,
         limit: int = 10,
+<<<<<<< Updated upstream
         output_fields: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
+=======
+        output_fields: list[str] | None = None,
+    ) -> SearchResults:
+>>>>>>> Stashed changes
         """
         Semantic similarity search.
 
@@ -496,18 +592,21 @@ class VectorDBService:
             output_fields: List of fields to return in results
 
         Returns:
-            Dictionary with search results
+            SearchResults
+
+        Raises:
+            VectorDBError: If search operation fails
+            EmbeddingModelError: If embedding model is invalid
         """
 
-        collection_name = self._get_collection_name(embedding_model_id)
-
         try:
-            assert (
-                knowledge_base_id or user_id or source_id
-            ), "At least one of knowledge_base_id, user_id, or source_id must be provided"
+            if not (knowledge_base_id or user_id or source_id):
+                raise VectorDBError(
+                    "At least one of knowledge_base_id, user_id, or source_id must be provided"
+                )
 
-            # ensure collection is loaded
-            self.client.load_collection(collection_name=collection_name)
+            # ensure collection exists and is loaded
+            collection_name = self._init_collection(embedding_model_id)
 
             # get embedding model and generate query embedding
             embedding_model = self._get_embedding_model(embedding_model_id)
@@ -542,14 +641,42 @@ class VectorDBService:
                 ),
             )
 
-            logger.info(
-                f"Semantic search completed with {len(results[0]) if results else 0} results from {collection_name}"
-            )
-            return {"success": True, "results": results[0] if results else []}
+            # convert raw results to typed hits
+            hits = []
+            if results and results[0]:
+                for hit in results[0]:
+                    # convert entity dict to SearchEntity
+                    entity_data = hit.get("entity", {})
+                    search_entity = SearchEntity(
+                        content=entity_data.get("content", ""),
+                        knowledge_base_id=entity_data.get("knowledge_base_id", ""),
+                        source_id=entity_data.get("source_id", ""),
+                        user_id=entity_data.get("user_id", ""),
+                        title=entity_data.get("title", ""),
+                        author=entity_data.get("author", ""),
+                        url=entity_data.get("url", ""),
+                        tags=entity_data.get("tags", []),
+                        summary=entity_data.get("summary", ""),
+                        created_at=entity_data.get("created_at", 0),
+                        updated_at=entity_data.get("updated_at", 0),
+                    )
+                    search_hit = SearchHit(
+                        id=str(hit.get("id", "")),
+                        distance=float(hit.get("distance", 0.0)),
+                        entity=search_entity,
+                    )
+                    hits.append(search_hit)
 
+            search_results = SearchResults(hits=hits)
+
+            logger.info(f"Semantic search completed with {len(hits)} results")
+            return search_results
+
+        except EmbeddingModelError:
+            raise
         except Exception as e:
             logger.error(f"Error searching chunks in {collection_name}: {e}")
-            return {"success": False, "error": str(e)}
+            raise VectorDBError(f"Semantic search failed: {str(e)}") from e
 
     def search_keyword(
         self,
@@ -559,8 +686,13 @@ class VectorDBService:
         user_id: Optional[str] = None,
         source_id: Optional[str] = None,
         limit: int = 10,
+<<<<<<< Updated upstream
         output_fields: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
+=======
+        output_fields: list[str] | None = None,
+    ) -> SearchResults:
+>>>>>>> Stashed changes
         """
         Keyword search.
 
@@ -574,18 +706,22 @@ class VectorDBService:
             output_fields: List of fields to return in results
 
         Returns:
-            Dictionary with search results
+            SearchResults
+
+        Raises:
+            VectorDBError: If search operation fails
+            EmbeddingModelError: If embedding model is invalid
         """
 
-        collection_name = self._get_collection_name(embedding_model_id)
-
         try:
-            assert (
-                knowledge_base_id or user_id or source_id
-            ), "At least one of knowledge_base_id, user_id, or source_id must be provided"
 
-            # ensure collection is loaded
-            self.client.load_collection(collection_name=collection_name)
+            if not (knowledge_base_id or user_id or source_id):
+                raise VectorDBError(
+                    "At least one of knowledge_base_id, user_id, or source_id must be provided"
+                )
+
+            # ensure collection exists and is loaded
+            collection_name = self._init_collection(embedding_model_id)
 
             # prepare filter
             filter_expr = []
@@ -616,14 +752,42 @@ class VectorDBService:
                 ),
             )
 
-            logger.info(
-                f"Keyword search completed with {len(results[0]) if results else 0} results from {collection_name}"
-            )
-            return {"success": True, "results": results[0] if results else []}
+            # convert raw results to typed hits
+            hits = []
+            if results and results[0]:
+                for hit in results[0]:
+                    # convert entity dict to SearchEntity
+                    entity_data = hit.get("entity", {})
+                    search_entity = SearchEntity(
+                        content=entity_data.get("content", ""),
+                        knowledge_base_id=entity_data.get("knowledge_base_id", ""),
+                        source_id=entity_data.get("source_id", ""),
+                        user_id=entity_data.get("user_id", ""),
+                        title=entity_data.get("title", ""),
+                        author=entity_data.get("author", ""),
+                        url=entity_data.get("url", ""),
+                        tags=entity_data.get("tags", []),
+                        summary=entity_data.get("summary", ""),
+                        created_at=entity_data.get("created_at", 0),
+                        updated_at=entity_data.get("updated_at", 0),
+                    )
+                    search_hit = SearchHit(
+                        id=str(hit.get("id", "")),
+                        distance=float(hit.get("distance", 0.0)),
+                        entity=search_entity,
+                    )
+                    hits.append(search_hit)
 
+            search_results = SearchResults(hits=hits)
+
+            logger.info(f"Keyword search completed with {len(hits)}")
+            return search_results
+
+        except EmbeddingModelError:
+            raise
         except Exception as e:
             logger.error(f"Error searching chunks in {collection_name}: {e}")
-            return {"success": False, "error": str(e)}
+            raise VectorDBError(f"Keyword search failed: {str(e)}") from e
 
     def search_hybrid(
         self,
@@ -636,7 +800,11 @@ class VectorDBService:
         output_fields: Optional[List[str]] = None,
         alpha: float = 0.5,
         rerank_k: int = 20,
+<<<<<<< Updated upstream
     ) -> Dict[str, Any]:
+=======
+    ) -> SearchResults:
+>>>>>>> Stashed changes
         """
         Hybrid search combining semantic and keyword search.
 
@@ -652,20 +820,24 @@ class VectorDBService:
             rerank_k: Number of candidates to retrieve before reranking
 
         Returns:
-            Dictionary with search results
+            SearchResults
+
+        Raises:
+            VectorDBError: If search operation fails
+            EmbeddingModelError: If embedding model is invalid
         """
 
-        collection_name = self._get_collection_name(embedding_model_id)
-
         try:
-            assert (
-                knowledge_base_id or user_id or source_id
-            ), "At least one of knowledge_base_id, user_id, or source_id must be provided"
+            if not (knowledge_base_id or user_id or source_id):
+                raise VectorDBError(
+                    "At least one of knowledge_base_id, user_id, or source_id must be provided"
+                )
 
-            assert 0.0 <= alpha <= 1.0, "alpha must be between 0.0 and 1.0"
+            # ensure collection exists and is loaded
+            collection_name = self._init_collection(embedding_model_id)
 
-            # ensure collection is loaded
-            self.client.load_collection(collection_name=collection_name)
+            if not 0.0 <= alpha <= 1.0:
+                raise VectorDBError("alpha must be between 0.0 and 1.0")
 
             # get embedding model and generate query embedding
             embedding_model = self._get_embedding_model(embedding_model_id)
@@ -721,12 +893,39 @@ class VectorDBService:
                 ),
             )
 
-            logger.info(
-                f"Hybrid search completed with {len(results[0]) if results else 0} results from {collection_name} "
-                f"(alpha={alpha})"
-            )
-            return {"success": True, "results": results[0] if results else []}
+            # convert raw results to typed hits
+            hits = []
+            if results and results[0]:
+                for hit in results[0]:
+                    # convert entity dict to SearchEntity
+                    entity_data = hit.get("entity", {})
+                    search_entity = SearchEntity(
+                        content=entity_data.get("content", ""),
+                        knowledge_base_id=entity_data.get("knowledge_base_id", ""),
+                        source_id=entity_data.get("source_id", ""),
+                        user_id=entity_data.get("user_id", ""),
+                        title=entity_data.get("title", ""),
+                        author=entity_data.get("author", ""),
+                        url=entity_data.get("url", ""),
+                        tags=entity_data.get("tags", []),
+                        summary=entity_data.get("summary", ""),
+                        created_at=entity_data.get("created_at", 0),
+                        updated_at=entity_data.get("updated_at", 0),
+                    )
+                    search_hit = SearchHit(
+                        id=str(hit.get("id", "")),
+                        distance=float(hit.get("distance", 0.0)),
+                        entity=search_entity,
+                    )
+                    hits.append(search_hit)
 
+            search_results = SearchResults(hits=hits)
+
+            logger.info(f"Hybrid search completed with {len(hits)} results")
+            return search_results
+
+        except EmbeddingModelError:
+            raise
         except Exception as e:
             logger.error(f"Error in hybrid search for {collection_name}: {e}")
-            return {"success": False, "error": str(e)}
+            raise VectorDBError(f"Hybrid search failed: {str(e)}") from e

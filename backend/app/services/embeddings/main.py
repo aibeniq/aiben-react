@@ -124,8 +124,23 @@ class EmbeddingService:
         return model_id in cls.AVAILABLE_MODELS
 
     @classmethod
-    def get_model_spec(cls, model_id: str) -> Optional[EmbeddingModelInfo]:
-        """Get specification for a specific model."""
+    def get_model_spec(cls, model_id: str) -> EmbeddingModelInfo:
+        """
+        Get specification for a specific model.
+
+        Args:
+            model_id: The model identifier from the registry
+
+        Returns:
+            The model specification
+
+        Raises:
+            ValueError: If model is invalid or cannot be loaded
+        """
+        is_valid, error_msg = cls._validate_model(model_id)
+        if not is_valid:
+            raise ValueError(error_msg)
+
         return cls.AVAILABLE_MODELS.get(model_id)
 
     @classmethod
@@ -136,9 +151,7 @@ class EmbeddingService:
         ]
 
     @classmethod
-    def validate_model(
-        cls, model_id: str, api_key: Optional[str] = None
-    ) -> tuple[bool, Optional[str]]:
+    def _validate_model(cls, model_id: str) -> tuple[bool, str | None]:
         """
         Validate if a model is available and properly configured.
 
@@ -154,7 +167,7 @@ class EmbeddingService:
 
         # validate provider-specific requirements
         if spec.provider == "openai":
-            api_key = api_key or os.getenv("OPENAI_API_KEY")
+            api_key = os.getenv("OPENAI_API_KEY")
             if not api_key:
                 return (
                     False,
@@ -196,7 +209,7 @@ class EmbeddingService:
             ValueError: If model is invalid or cannot be loaded
         """
         # validate model
-        is_valid, error_msg = cls.validate_model(model_id, api_key)
+        is_valid, error_msg = cls._validate_model(model_id)
         if not is_valid:
             raise ValueError(error_msg)
 

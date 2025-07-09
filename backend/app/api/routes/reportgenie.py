@@ -12,6 +12,8 @@ from app.models import (
 )
 import json
 import traceback
+import uuid
+from datetime import datetime
 from io import BytesIO
 from datetime import datetime
 from fastapi.responses import StreamingResponse
@@ -23,8 +25,26 @@ from langchain_core.prompts import PromptTemplate
 
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
 from app.core.config import settings
-from app.services.llms.main import LlmService
+from app.models import (
+    DocxRequest,
+    KnowledgeBase,
+    LlmInteraction,
+    Tool,
+    Message,
+    ReportGenieDetailFeedback,
+    ReportGenieDetailResponse,
+    ReportGenieDetailResults,
+    ReportGenieOutline,
+    ReportGenieRequest,
+    ReportGenieResponse,
+    ReportGenieResults,
+    ReportGenieSection,
+    ReportGenieSourceCitation,
+    ReportGenieSourceMetadata,
+)
 from app.services.embeddings import EmbeddingService
+from app.services.llms.main import LlmService
+from app.services.vectordb.types import VectorDBError
 
 from sqlmodel import select
 from fastapi import APIRouter, Depends, HTTPException
@@ -77,7 +97,7 @@ async def generate_report(
         section_list = request.sections.strip().split("\n")
 
         # 6. Process each section
-        sections = []
+        sections: list[ReportGenieSection] = []
 
         for section_description in section_list:
             section_description = section_description.strip()
@@ -85,53 +105,36 @@ async def generate_report(
                 continue
 
             # search for relevant chunks
-            search_result = vectordb_service.search_hybrid(
-                query=section_description,
-                embedding_model_id=embedding_model.id,
-                knowledge_base_id=str(kb.id),
-                limit=5,
-                output_fields=["content", "source_id", "title", "author", "url"],
-                alpha=0.7,
-            )
-
-            if not search_result["success"]:
-                print(
-                    f"Search failed for section '{section_description}': {search_result.get('error', 'Unknown error')}"
+            try:
+                search_result = vectordb_service.search_hybrid(
+                    query=section_description,
+                    embedding_model_id=embedding_model.id,
+                    knowledge_base_id=str(kb.id),
+                    limit=5,
+                    output_fields=["content", "source_id", "title", "author", "url"],
+                    alpha=0.7,
                 )
+            except VectorDBError as e:
+                print(f"Search failed for section '{section_description}': {str(e)}")
                 continue
 
-            chunks = search_result["results"]
-            context = "\n\n".join([chunk["entity"]["content"] for chunk in chunks])
+            chunks = search_result.hits
+            context = "\n\n".join([chunk.entity.content for chunk in chunks])
 
             # process source documents for citation
-            source_citations = []
+            source_citations: list[ReportGenieSourceCitation] = []
             for chunk in chunks:
-                entity = chunk["entity"]
+                metadata = ReportGenieSourceMetadata(
+                    source_id=chunk.entity.source_id,
+                    url=chunk.entity.url,
+                    title=chunk.entity.title,
+                    author=chunk.entity.author,
+                )
 
-                # create metadata similar to the old format
-                metadata = {
-                    "source_id": entity.get("source_id", ""),
-                    "title": entity.get("title", ""),
-                    "author": entity.get("author", ""),
-                    "url": entity.get("url", ""),
-                }
-
-                # try to get source data id from the source table
-                if entity.get("source_id"):
-                    source_entry = session.exec(
-                        select(Source).where(
-                            Source.source_data_id == entity["source_id"]
-                        )
-                    ).first()
-
-                    if source_entry:
-                        metadata["source_data_id"] = str(source_entry.source_data_id)
-                        # use the source name if available
-                        if source_entry.name:
-                            metadata["source"] = source_entry.name
-
-                source = {"content": entity["content"], "metadata": metadata}
-                source_citations.append(source)
+                source_citation = ReportGenieSourceCitation(
+                    content=chunk.entity.content, metadata=metadata
+                )
+                source_citations.append(source_citation)
 
             # use the template from config
             prompt_template = PromptTemplate.from_template(
@@ -140,23 +143,27 @@ async def generate_report(
             variables = {"context": context, "question": section_description}
             prompt = prompt_template.invoke(variables)
             section = llm.invoke(prompt)
-            print(f"Got response: {section.content[:100]}...")
+            print(f"Got response: {section.content[:50]}...")
 
             # store the section with its content and sources
-            sections.append(
-                {
-                    "title": section_description,
-                    "content": section.content,
-                    "source_citations": source_citations,
-                }
-            )
+            if isinstance(section.content, str):
+                sections.append(
+                    ReportGenieSection(
+                        title=section_description,
+                        content=section.content,
+                        source_citations=source_citations,
+                    )
+                )
+            else:
+                print(f"Warning: Section content is not a string: {section.content}")
+                continue
 
         # 7. Compile the final report
         full_report = "\n\n---\n\n".join(
-            [section["content"].strip() for section in sections]
+            [section.content.strip() for section in sections]
         )
 
-        result = {"full_report": full_report, "sections": sections}
+        result = ReportGenieResults(full_report=full_report, sections=sections)
 
         # get outline name if outline_id is provided
         outline_name = None
@@ -181,14 +188,27 @@ async def generate_report(
         detailed_extra_data = {
             "kb_name": kb.title,
             "full_report": full_report,
-            "sections": sections,  # this includes section content and sources
+            "sections": [
+                {
+                    "title": section.title,
+                    "content": section.content,
+                    "source_citations": [
+                        {
+                            "content": citation.content,
+                            "metadata": citation.metadata.model_dump(),
+                        }
+                        for citation in section.source_citations
+                    ],
+                }
+                for section in sections
+            ],
             "outline_name": outline_name,  # add the outline name here
         }
 
         LlmService.record_llm_interaction(
             session=session,
             user_id=current_user.id,
-            functionality="reportgenie",
+            functionality=Tool.REPORTGENIE,
             input_data={
                 "sections": request.sections,
                 "kb_id": request.knowledge_base_id,
@@ -206,8 +226,6 @@ async def generate_report(
         return ReportGenieResponse(results=result)
 
     except Exception as e:
-        import traceback
-
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error generating report: {str(e)}"
@@ -515,10 +533,24 @@ async def get_report_history(
                 output_data = (
                     json.loads(report.output_data) if report.output_data else {}
                 )
-                extra_data = report.extra_data or {}
+
+                # Use validation method for better type safety
+                if report.is_valid_reportgenie_data():
+                    # Get typed extra data
+                    _, typed_extra_data = report.validate_reportgenie_data()
+                    if typed_extra_data:
+                        kb_name = typed_extra_data.kb_name or "Unknown Knowledge Base"
+                        outline_name = typed_extra_data.outline_name or ""
+                    else:
+                        kb_name = "Unknown Knowledge Base"
+                        outline_name = ""
+                else:
+                    # Fallback to raw data if validation fails
+                    extra_data = report.extra_data or {}
+                    kb_name = extra_data.get("kb_name", "Unknown Knowledge Base")
+                    outline_name = extra_data.get("outline_name", "")
 
                 # Create a user-friendly title
-                kb_name = extra_data.get("kb_name", "Unknown Knowledge Base")
                 title = f"Report on {kb_name}"
                 date = report.date_created.strftime("%Y-%m-%d %H:%M")
 
@@ -531,7 +563,7 @@ async def get_report_history(
                     "kb_id": input_data.get("kb_id", ""),
                     "section_count": output_data.get("section_count", 0),
                     "kb_name": kb_name,
-                    "outline_name": extra_data.get("outline_name", ""),
+                    "outline_name": outline_name,
                     "has_feedback": report.feedback is not None,
                 }
 
@@ -618,66 +650,125 @@ async def get_report_detail(
         #        status_code=403, detail="You don't have access to this report"
         #    )
 
-        if report.functionality != "reportgenie":
+        if report.functionality != Tool.REPORTGENIE:
             raise HTTPException(
                 status_code=400, detail="This is not a ReportGenie report"
+            )
+
+        # Validate ReportGenie extra data using new validation methods
+        is_valid, typed_extra_data = report.validate_reportgenie_data()
+
+        if not is_valid or not typed_extra_data:
+            # Fallback if validation fails
+            return ReportGenieDetailResponse(
+                id=str(report.id),
+                date_created=report.date_created,
+                kb_name="Unknown Knowledge Base",
+                kb_id="",
+                sections="",
+                results=ReportGenieDetailResults(
+                    full_report=f"Unable to reconstruct report from {report.date_created}.\n\n"
+                    f"This might be due to corrupted or incomplete data.",
+                    sections=[],
+                ),
+                feedback=ReportGenieDetailFeedback(
+                    feedback=report.feedback,
+                    feedbackText=report.feedback_text,
+                    feedbackDate=(
+                        report.feedback_date.isoformat()
+                        if report.feedback_date
+                        else None
+                    ),
+                ),
             )
 
         # Try to reconstruct the original report structure
         try:
             input_data = json.loads(report.input_data) if report.input_data else {}
-            output_data = json.loads(report.output_data) if report.output_data else {}
-            extra_data = report.extra_data or {}
 
-            # If we don't have the full report content in extra_data, we need to generate a response
-            # that's compatible with the normal report format
-            kb_name = extra_data.get("kb_name", "Unknown Knowledge Base")
+            # Use validated typed data instead of raw extra_data
+            kb_name = typed_extra_data.kb_name or "Unknown Knowledge Base"
+            full_report = typed_extra_data.full_report or ""
 
-            # Try to get any saved full report content
-            full_report = extra_data.get("full_report", "")
+            # Reconstruct sections with proper typing
+            sections_data = (
+                json.loads(typed_extra_data.sections)
+                if typed_extra_data.sections
+                else []
+            )
+            reconstructed_sections = []
+            for section_data in sections_data:
+                source_citations = []
+                for citation_data in section_data.get("source_citations", []):
+                    metadata_data = citation_data.get("metadata", {})
+                    metadata = ReportGenieSourceMetadata(
+                        source_id=metadata_data.get("source_id", ""),
+                        title=metadata_data.get("title", ""),
+                        author=metadata_data.get("author", ""),
+                        url=metadata_data.get("url", ""),
+                    )
+                    citation = ReportGenieSourceCitation(
+                        content=citation_data.get("content", ""),
+                        metadata=metadata,
+                    )
+                    source_citations.append(citation)
+
+                section = ReportGenieSection(
+                    title=section_data.get("title", ""),
+                    content=section_data.get("content", ""),
+                    source_citations=source_citations,
+                )
+                reconstructed_sections.append(section)
 
             # Create a response that matches the structure expected by the frontend
-            result = {
-                "id": str(report.id),
-                "date_created": report.date_created,
-                "kb_name": kb_name,
-                "kb_id": input_data.get("kb_id", ""),
-                "sections": input_data.get("sections", ""),
-                "results": {
-                    "full_report": full_report,
-                    "sections": extra_data.get("sections", []),
-                },
+            result = ReportGenieDetailResponse(
+                id=str(report.id),
+                date_created=report.date_created,
+                kb_name=kb_name,
+                kb_id=typed_extra_data.kb_id or input_data.get("kb_id", ""),
+                sections=input_data.get("sections", ""),
+                results=ReportGenieDetailResults(
+                    full_report=full_report,
+                    sections=reconstructed_sections,
+                ),
                 # Add feedback information
-                "feedback": {
-                    "feedback": report.feedback,
-                    "feedbackText": report.feedback_text,
-                    "feedbackDate": (
+                feedback=ReportGenieDetailFeedback(
+                    feedback=report.feedback,
+                    feedbackText=report.feedback_text,
+                    feedbackDate=(
                         report.feedback_date.isoformat()
                         if report.feedback_date
                         else None
                     ),
-                },
+                ),
             }
 
             return result
 
         except json.JSONDecodeError:
             # Fallback if JSON parsing fails
-            return {
-                "id": str(report.id),
-                "date_created": report.date_created,
-                "results": {
-                    "full_report": f"Unable to reconstruct report from {report.date_created}.\n\n"
+            return ReportGenieDetailResponse(
+                id=str(report.id),
+                date_created=report.date_created,
+                kb_name=typed_extra_data.kb_name or "Unknown Knowledge Base",
+                kb_id=typed_extra_data.kb_id or "",
+                sections="",
+                results=ReportGenieDetailResults(
+                    full_report=f"Unable to reconstruct report from {report.date_created}.\n\n"
                     f"This might be due to an older format or incomplete data.",
-                    "sections": [],
-                },
-                # Add empty feedback object for consistency
-                "feedback": {
-                    "feedback": None,
-                    "feedbackText": None,
-                    "feedbackDate": None,
-                },
-            }
+                    sections=[],
+                ),
+                # Add feedback object for consistency
+                feedback=ReportGenieDetailFeedback(
+                    feedback=report.feedback,
+                    feedbackText=report.feedback_text,
+                    feedbackDate=(
+                        report.feedback_date.isoformat()
+                        if report.feedback_date
+                        else None
+                    ),
+                ),
+            )
 
     except Exception as e:
         traceback.print_exc()

@@ -4,19 +4,16 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { FiFileText } from "react-icons/fi"
 import SourceLink from "@/components/Common/SourceLink"
+import { ReportGenieDetailResponse } from "@/client"
 
 interface ReportgenieResultsProps {
-  selectedReport: any
+  selectedReport: ReportGenieDetailResponse
   components: any // Markdown components for table rendering
 }
 
 const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport, components }) => {
-  const results =
-    selectedReport.results?.full_report ||
-    selectedReport.full_report ||
-    selectedReport.content ||
-    ""
-  const sections = selectedReport.results?.sections || []
+  const results = selectedReport.results.full_report || ""
+  const sections = selectedReport.results.sections || []
 
   // For expanding/collapsing sections
   const [expandedSection, setExpandedSection] = useState<number | null>(null)
@@ -78,7 +75,9 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
               {expandedSection === index && (
                 <>
                   <Box mb={4} p={3} borderLeft="4px solid" borderColor="blue.200">
-                    <Text whiteSpace="pre-wrap">{section.content}</Text>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+                      {section.content}
+                    </ReactMarkdown>
                   </Box>
 
                   {section.source_citations && section.source_citations.length > 0 && (
