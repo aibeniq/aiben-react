@@ -572,13 +572,8 @@ class VectorDBService:
         user_id: Optional[str] = None,
         source_id: Optional[str] = None,
         limit: int = 10,
-<<<<<<< Updated upstream
-        output_fields: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
-=======
         output_fields: list[str] | None = None,
     ) -> SearchResults:
->>>>>>> Stashed changes
         """
         Semantic similarity search.
 
@@ -686,13 +681,8 @@ class VectorDBService:
         user_id: Optional[str] = None,
         source_id: Optional[str] = None,
         limit: int = 10,
-<<<<<<< Updated upstream
-        output_fields: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
-=======
         output_fields: list[str] | None = None,
     ) -> SearchResults:
->>>>>>> Stashed changes
         """
         Keyword search.
 
@@ -800,11 +790,7 @@ class VectorDBService:
         output_fields: Optional[List[str]] = None,
         alpha: float = 0.5,
         rerank_k: int = 20,
-<<<<<<< Updated upstream
-    ) -> Dict[str, Any]:
-=======
     ) -> SearchResults:
->>>>>>> Stashed changes
         """
         Hybrid search combining semantic and keyword search.
 
