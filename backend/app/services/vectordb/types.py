@@ -1,7 +1,6 @@
 # NOTE: when adding new fields, update both the ChunkData and Milvus schema
 
 import time
-from typing import Any
 
 from pydantic import BaseModel, Field
 
