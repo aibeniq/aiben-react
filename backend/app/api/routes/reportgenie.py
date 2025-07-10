@@ -27,7 +27,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from langchain_core.prompts import PromptTemplate
-from sqlmodel import desc, select
+from sqlmodel import select
 
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
 from app.core.config import settings
@@ -52,10 +52,6 @@ from app.services.embeddings import EmbeddingService
 from app.services.llms.main import LlmService
 from app.services.vectordb.types import VectorDBError
 
-from sqlmodel import select
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List, Dict, Any
-
 router = APIRouter(prefix="/reportgenie", tags=["reportgenie"])
 
 
@@ -64,7 +60,7 @@ async def generate_report(
     session: SessionDep,
     current_user: CurrentUser,
     vectordb_service: VectorDBDep,
-    request: ReportGenieRequest = Depends(),
+    request: ReportGenieRequest,
 ) -> ReportGenieResponse:
     """
     Generate a report based on sections outline and knowledge base search results.
@@ -249,7 +245,7 @@ async def generate_report(
 
 # Functions related to Outlines
 @router.post("/outlines", response_model=ReportGenieOutline)
-def create_outline(
+async def create_outline(
     outline: ReportGenieOutline, session: SessionDep, current_user: CurrentUser
 ) -> ReportGenieOutline:
     """
@@ -271,7 +267,7 @@ def create_outline(
 
 
 @router.get("/outlines", response_model=list[ReportGenieOutline])
-def get_outlines(
+async def get_outlines(
     session: SessionDep, current_user: CurrentUser
 ) -> list[ReportGenieOutline]:
     """
@@ -313,7 +309,7 @@ def get_outlines(
 
 
 @router.get("/outlines/{outline_id}", response_model=ReportGenieOutline)
-def get_outline(outline_id: uuid.UUID, session: SessionDep) -> ReportGenieOutline:
+async def get_outline(outline_id: uuid.UUID, session: SessionDep) -> ReportGenieOutline:
     """
     Retrieve a specific outline by ID.
     """
@@ -324,7 +320,7 @@ def get_outline(outline_id: uuid.UUID, session: SessionDep) -> ReportGenieOutlin
 
 
 @router.put("/outlines/{outline_id}", response_model=ReportGenieOutline)
-def update_outline(
+async def update_outline(
     outline_id: uuid.UUID,
     updated_outline: ReportGenieOutline,
     session: SessionDep,
@@ -355,7 +351,7 @@ def update_outline(
 
 
 @router.delete("/outlines/{outline_id}", response_model=Message)
-def delete_outline(
+async def delete_outline(
     outline_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
 ) -> Message:
     """
