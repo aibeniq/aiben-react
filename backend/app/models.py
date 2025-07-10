@@ -298,6 +298,19 @@ class VeraDocResponse(SQLModel):
     results: dict[str, Any]  # Accept any dictionary structure
 
 
+# Request models for VeraDoc checklists
+class VeraDocChecklistCreate(SQLModel):
+    name: str = Field(max_length=255)
+    description: str | None = Field(default=None, max_length=255)
+    questions: str
+
+
+class VeraDocChecklistUpdate(SQLModel):
+    name: str | None = Field(default=None, max_length=255)
+    description: str | None = Field(default=None, max_length=255)
+    questions: str | None = Field(default=None)
+
+
 # Response model for VeraDoc detail endpoint
 class VeraDocDetailFeedback(SQLModel):
     feedback: str | None = None
@@ -462,6 +475,7 @@ class ReportGenieDetailResponse(SQLModel):
 
 class DocxRequest(SQLModel):
     content: str
+    title: str | None = Field(default=None)
 
 
 class Tool(str, Enum):

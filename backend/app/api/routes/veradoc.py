@@ -5,6 +5,8 @@ import uuid
 from app.models import (
     VeraDocResponse,
     VeraDocChecklist,
+    VeraDocChecklistCreate,
+    VeraDocChecklistUpdate,
     RagChecklistRequest,
     KnowledgeBase,
     ToolInteraction,
@@ -350,7 +352,7 @@ async def process_rag_checklist(
 # Functions related to Checklists
 @router.post("/checklists", response_model=VeraDocChecklist)
 def create_checklist(
-    checklist: VeraDocChecklist,
+    checklist: VeraDocChecklistCreate,
     session: SessionDep,
     current_user: CurrentUser,
 ) -> VeraDocChecklist:
@@ -365,11 +367,17 @@ def create_checklist(
             status_code=400, detail="A checklist with this name already exists."
         )
 
-    checklist.owner_id = current_user.id
-    session.add(checklist)
+    # Create database model from request model
+    db_checklist = VeraDocChecklist(
+        name=checklist.name,
+        description=checklist.description,
+        questions=checklist.questions,
+        owner_id=current_user.id,
+    )
+    session.add(db_checklist)
     session.commit()
-    session.refresh(checklist)
-    return checklist
+    session.refresh(db_checklist)
+    return db_checklist
 
 
 @router.get("/checklists", response_model=list[VeraDocChecklist])
@@ -400,7 +408,7 @@ def get_checklist(checklist_id: uuid.UUID, session: SessionDep) -> VeraDocCheckl
 @router.put("/checklists/{checklist_id}", response_model=VeraDocChecklist)
 def update_checklist(
     checklist_id: uuid.UUID,
-    updated_checklist: VeraDocChecklist,
+    updated_checklist: VeraDocChecklistUpdate,
     session: SessionDep,
     current_user: CurrentUser,
 ) -> VeraDocChecklist:
@@ -417,9 +425,14 @@ def update_checklist(
             status_code=403, detail="Not authorized to update this checklist."
         )
 
-    checklist.name = updated_checklist.name
-    checklist.description = updated_checklist.description
-    checklist.questions = updated_checklist.questions
+    # Update only provided fields
+    if updated_checklist.name is not None:
+        checklist.name = updated_checklist.name
+    if updated_checklist.description is not None:
+        checklist.description = updated_checklist.description
+    if updated_checklist.questions is not None:
+        checklist.questions = updated_checklist.questions
+
     checklist.date_modified = datetime.now(timezone.utc)
 
     session.add(checklist)
@@ -735,11 +748,7 @@ async def generate_docx(request: DocxRequest) -> StreamingResponse:
 
         print("Adding title and date to the document...")
         # Add a title
-        title_text = (
-            request.title
-            if hasattr(request, "title") and request.title
-            else "Document Evaluation"
-        )
+        title_text = request.title if request.title else "Document Evaluation"
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
