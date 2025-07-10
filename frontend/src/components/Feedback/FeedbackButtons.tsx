@@ -27,7 +27,7 @@ const FeedbackButtons = ({
   )
   const [feedbackText, setFeedbackText] = useState(existingFeedback?.feedbackText || "")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { showErrorToast } = useCustomToast()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Effect to update state when existingFeedback changes
