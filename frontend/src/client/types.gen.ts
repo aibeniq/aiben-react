@@ -48,6 +48,7 @@ export type DocumentQueryResponse = {
 
 export type DocxRequest = {
   content: string
+  title?: string | null
 }
 
 /**
@@ -417,6 +418,18 @@ export type VeraDocChecklist = {
   owner_id: string
   date_created?: string
   date_modified?: string
+}
+
+export type VeraDocChecklistCreate = {
+  name: string
+  description?: string | null
+  questions: string
+}
+
+export type VeraDocChecklistUpdate = {
+  name?: string | null
+  description?: string | null
+  questions?: string | null
 }
 
 export type VeraDocDetailFeedback = {
@@ -885,7 +898,7 @@ export type VeradocProcessRagChecklistResponse = VeraDocResponse
 export type VeradocGetChecklistsResponse = Array<VeraDocChecklist>
 
 export type VeradocCreateChecklistData = {
-  requestBody: VeraDocChecklist
+  requestBody: VeraDocChecklistCreate
 }
 
 export type VeradocCreateChecklistResponse = VeraDocChecklist
@@ -898,7 +911,7 @@ export type VeradocGetChecklistResponse = VeraDocChecklist
 
 export type VeradocUpdateChecklistData = {
   checklistId: string
-  requestBody: VeraDocChecklist
+  requestBody: VeraDocChecklistUpdate
 }
 
 export type VeradocUpdateChecklistResponse = VeraDocChecklist
