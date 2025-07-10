@@ -17,7 +17,7 @@ import {
 import { useState, useEffect } from "react"
 import { FaPlus, FaTrash } from "react-icons/fa"
 
-import { KnowledgeBasesService, EmbeddingModelsService } from "@/client"
+import { KnowledgeBasesService, ModelsService } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
@@ -62,20 +62,20 @@ const AddKnowledgeBase = () => {
 
   const { data: embeddingModels = [] } = useQuery({
     queryKey: ["embedding-models"],
-    queryFn: () => EmbeddingModelsService.getEmbeddingModelsRegistry(),
+    queryFn: () => ModelsService.getEmbeddingModelsRegistry(),
     // Don't fetch if modal is closed
     enabled: isOpen,
   })
 
   const { data: defaultModel } = useQuery({
     queryKey: ["default-embedding-model"],
-    queryFn: () => EmbeddingModelsService.getDefaultEmbeddingModel(),
+    queryFn: () => ModelsService.getDefaultEmbeddingModel(),
     enabled: isOpen,
   })
 
   // determine which embedding models are allowed
   useEffect(() => {
-    EmbeddingModelsService.getAvailableProviders()
+    ModelsService.getEmbeddingProviders()
       .then((response) => {
         if (response && Array.isArray(response)) {
           setAvailableProviders(response)

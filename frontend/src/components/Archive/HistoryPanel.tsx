@@ -3,10 +3,26 @@ import { Switch } from "@chakra-ui/react"
 import { Tooltip } from "@/components/ui/tooltip"
 import { format } from "date-fns"
 import { FiFileText, FiDatabase, FiUsers, FiThumbsUp, FiThumbsDown } from "react-icons/fi"
+import { ReportGenieHistoryItem, VeraDocHistoryItem } from "@/client"
 
-interface HistoryPanelProps {
-  reportHistory: any[]
-  selectedHistoryReport: any | null
+// Base interface for history items - common fields across all tools
+interface BaseHistoryItem {
+  id: string
+  date_created: string
+  has_feedback?: boolean
+  feedback?: any
+  user_name?: string | null
+}
+
+// Union type for all possible history item types
+type HistoryItem =
+  | ReportGenieHistoryItem
+  | VeraDocHistoryItem
+  | (BaseHistoryItem & { [key: string]: unknown })
+
+interface HistoryPanelProps<T extends HistoryItem = HistoryItem> {
+  reportHistory: T[]
+  selectedHistoryReport: T | null
   isHistoryLoading: boolean
   onLoadReport: (reportId: string) => void
   emptyMessage?: string
@@ -14,7 +30,7 @@ interface HistoryPanelProps {
   onToggleShowAllUsers?: () => void
 }
 
-const HistoryPanel = ({
+const HistoryPanel = <T extends HistoryItem = HistoryItem>({
   reportHistory,
   selectedHistoryReport,
   isHistoryLoading,
@@ -22,43 +38,61 @@ const HistoryPanel = ({
   emptyMessage = "No previous items",
   showAllUsers = false,
   onToggleShowAllUsers,
-}: HistoryPanelProps) => {
-  const getDisplayTitle = (item: any) => {
-    // Try different possible title fields
+}: HistoryPanelProps<T>) => {
+  const getDisplayTitle = (item: T): string => {
+    // ReportGenie has a typed 'title' field
+    if ("title" in item && typeof item.title === "string" && item.title) {
+      return item.title
+    }
+
+    // Try different possible title fields for other tools
+    const anyItem = item as any
     return (
-      item?.document_name ||
-      item?.title ||
-      item?.name ||
-      item?.comparison_name ||
-      item?.form_name ||
+      anyItem?.document_name ||
+      anyItem?.name ||
+      anyItem?.comparison_name ||
+      anyItem?.form_name ||
       "Unnamed item"
     )
   }
 
-  const getSubtitle = (item: any) => {
-    // For different tools, show different subtitle information
-    if (item?.kb_name) {
+  const getSubtitle = (item: T): string | null => {
+    // ReportGenie has a typed 'kb_name' field
+    if ("kb_name" in item && typeof item.kb_name === "string" && item.kb_name) {
       return item.kb_name
     }
-    if (item?.document1_name && item?.document2_name) {
-      return `${item.document1_name} vs ${item.document2_name}`
+
+    // For other tools, check untyped fields
+    const anyItem = item as any
+    if (anyItem?.document1_name && anyItem?.document2_name) {
+      return `${anyItem.document1_name} vs ${anyItem.document2_name}`
     }
-    if (item?.form_type) {
-      return item.form_type
+    if (anyItem?.form_type) {
+      return anyItem.form_type
     }
     return null
   }
 
-  const getMetadata = (item: any) => {
-    // Show relevant metadata for each tool type
-    if (item?.qa_count > 0) {
-      return `${item.qa_count} question${item.qa_count !== 1 ? "s" : ""}`
+  const getMetadata = (item: T): string | null => {
+    // ReportGenie has a typed 'section_count' field
+    if (
+      "section_count" in item &&
+      typeof item.section_count === "number" &&
+      item.section_count > 0
+    ) {
+      return `${item.section_count} section${item.section_count !== 1 ? "s" : ""}`
     }
-    if (item?.topic_count > 0) {
-      return `${item.topic_count} topic${item.topic_count !== 1 ? "s" : ""}`
+
+    // For other tools, check untyped fields
+    const anyItem = item as any
+    if (anyItem?.qa_count > 0) {
+      return `${anyItem.qa_count} question${anyItem.qa_count !== 1 ? "s" : ""}`
     }
-    if (item?.field_count > 0) {
-      return `${item.field_count} field${item.field_count !== 1 ? "s" : ""}`
+    if (anyItem?.topic_count > 0) {
+      return `${anyItem.topic_count} topic${anyItem.topic_count !== 1 ? "s" : ""}`
+    }
+    if (anyItem?.field_count > 0) {
+      return `${anyItem.field_count} field${anyItem.field_count !== 1 ? "s" : ""}`
     }
     return null
   }
@@ -111,24 +145,22 @@ const HistoryPanel = ({
               {emptyMessage}
             </Text>
           ) : (
-            reportHistory.map((item: any) => (
+            reportHistory.map((item: T) => (
               <Box
-                key={item?.id}
+                key={item.id}
                 p={3}
                 borderWidth="1px"
                 borderRadius="md"
                 cursor="pointer"
-                bg={selectedHistoryReport?.id === item?.id ? "accent.subtle" : "surface"}
+                bg={selectedHistoryReport?.id === item.id ? "accent.subtle" : "surface"}
                 _hover={{ bg: "accent.subtle" }}
-                onClick={() => item?.id && onLoadReport(item.id)}
+                onClick={() => onLoadReport(item.id)}
                 flexShrink={0}
               >
                 <VStack align="start" gap={1} width="100%">
                   <HStack gap={1} width="100%" justify="space-between">
                     <Text fontSize="xs" color="gray.500">
-                      {item?.date_created
-                        ? format(new Date(item.date_created as string), "dd/MM/yyyy HH:mm")
-                        : "Unknown date"}
+                      {format(new Date(item.date_created), "dd/MM/yyyy HH:mm")}
                     </Text>
                     {getMetadata(item) && (
                       <Text fontSize="xs" color="gray.500">
@@ -138,7 +170,7 @@ const HistoryPanel = ({
                   </HStack>
 
                   {/* Show user info when viewing all users */}
-                  {showAllUsers && item?.user_name && (
+                  {showAllUsers && item.user_name && (
                     <HStack gap={1} width="100%">
                       <FiUsers size={12} />
                       <Text fontSize="xs" color="gray.500">
@@ -156,7 +188,7 @@ const HistoryPanel = ({
                     </HStack>
 
                     {/* Show feedback icon if feedback exists */}
-                    {item?.has_feedback && (
+                    {item.has_feedback && (
                       <Tooltip
                         content={
                           typeof item.feedback === "object" && item.feedback?.feedback === "correct"

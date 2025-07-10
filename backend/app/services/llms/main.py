@@ -154,6 +154,24 @@ class LlmService:
             raise ValueError(f"Error getting user's default LLM model: {str(e)}")
 
     @classmethod
+    def set_user_default_model_spec(
+        cls, session: Session, user_id: uuid.UUID, model_id: str
+    ) -> LlmModelSpec:
+        """Set the user's default model."""
+        user = session.get(User, user_id)
+        if not user:
+            raise ValueError(f"User with id {user_id} not found")
+        try:
+            spec = cls.get_model_spec(model_id)
+        except ValueError as e:
+            raise ValueError(f"Model '{model_id}' is invalid: {str(e)}")
+        except Exception as e:
+            raise ValueError(f"Error getting model '{model_id}': {str(e)}")
+        user.default_llm = spec.id
+        session.commit()
+        return spec
+
+    @classmethod
     def get_providers(cls) -> list[str]:
         """Get list of available providers."""
         # import here to avoid circular import
@@ -183,10 +201,13 @@ class LlmService:
     @classmethod
     def get_model_spec(cls, model_id: str) -> LlmModelSpec:
         """
-        Validate if a model is available and properly configured.
+        Get a model specification by ID.
 
         Returns:
             LlmModelSpec: The validated model specification
+
+        Raises:
+            ValueError: If model is invalid or cannot be loaded
         """
         # check if model exists in registry
         if model_id not in MODELS:
@@ -301,8 +322,8 @@ class LlmService:
                 raise ValueError(f"Error getting user's default LLM model: {str(e)}")
 
             # Add LLM info to metadata
-            metadata["llm_model_id"] = spec.id
-            metadata["llm_provider"] = spec.provider.id
+            metadata.llm_model_id = spec.id
+            metadata.llm_provider = spec.provider.id
 
         # Create and save interaction record
         interaction = ToolInteraction(
@@ -310,7 +331,7 @@ class LlmService:
             functionality=functionality,
             input_data=input_data,
             output_data=output_data,
-            extra_data=metadata,
+            extra_data=metadata.model_dump() if metadata else None,
         )
 
         session.add(interaction)

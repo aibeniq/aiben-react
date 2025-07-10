@@ -10,10 +10,6 @@ import type {
   ChatQueryDocumentResponse,
   ChatQueryTextData,
   ChatQueryTextResponse,
-  EmbeddingModelsGetAvailableProvidersResponse,
-  EmbeddingModelsGetEmbeddingModelsRegistryResponse,
-  EmbeddingModelsGetDefaultEmbeddingModelResponse,
-  EmbeddingModelsGetLlmModelsResponse,
   FeedbackSubmitFeedbackData,
   FeedbackSubmitFeedbackResponse,
   FilesGetSourceContentData,
@@ -71,6 +67,14 @@ import type {
   LoginResetPasswordResponse,
   LoginRecoverPasswordHtmlContentData,
   LoginRecoverPasswordHtmlContentResponse,
+  ModelsGetEmbeddingProvidersResponse,
+  ModelsGetEmbeddingModelsRegistryResponse,
+  ModelsGetDefaultEmbeddingModelResponse,
+  ModelsGetLlmProvidersResponse,
+  ModelsGetLlmModelsResponse,
+  ModelsGetDefaultLlmModelResponse,
+  ModelsSetDefaultLlmModelData,
+  ModelsSetDefaultLlmModelResponse,
   PrivateCreateUserData,
   PrivateCreateUserResponse,
   ReportgenieGenerateReportData,
@@ -237,60 +241,6 @@ export class ChatService {
       errors: {
         422: "Validation Error",
       },
-    })
-  }
-}
-
-export class EmbeddingModelsService {
-  /**
-   * Get Available Providers
-   * Get list of available embedding providers.
-   * @returns string Successful Response
-   * @throws ApiError
-   */
-  public static getAvailableProviders(): CancelablePromise<EmbeddingModelsGetAvailableProvidersResponse> {
-    return __request(OpenAPI, {
-      method: "GET",
-      url: "/api/v1/embedding-models/providers",
-    })
-  }
-
-  /**
-   * Get Embedding Models Registry
-   * Get the registry of available embedding models.
-   * @returns EmbeddingModelInfo Successful Response
-   * @throws ApiError
-   */
-  public static getEmbeddingModelsRegistry(): CancelablePromise<EmbeddingModelsGetEmbeddingModelsRegistryResponse> {
-    return __request(OpenAPI, {
-      method: "GET",
-      url: "/api/v1/embedding-models/registry",
-    })
-  }
-
-  /**
-   * Get Default Embedding Model
-   * Get the default embedding model.
-   * @returns EmbeddingModelInfo Successful Response
-   * @throws ApiError
-   */
-  public static getDefaultEmbeddingModel(): CancelablePromise<EmbeddingModelsGetDefaultEmbeddingModelResponse> {
-    return __request(OpenAPI, {
-      method: "GET",
-      url: "/api/v1/embedding-models/default",
-    })
-  }
-
-  /**
-   * Get Llm Models
-   * Get all LLM models.
-   * @returns LlmModelSpec Successful Response
-   * @throws ApiError
-   */
-  public static getLlmModels(): CancelablePromise<EmbeddingModelsGetLlmModelsResponse> {
-    return __request(OpenAPI, {
-      method: "GET",
-      url: "/api/v1/embedding-models/llm",
     })
   }
 }
@@ -994,6 +944,109 @@ export class LoginService {
       url: "/api/v1/password-recovery-html-content/{email}",
       path: {
         email: data.email,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
+export class ModelsService {
+  /**
+   * Get Embedding Providers
+   * Get list of available embedding providers.
+   * @returns string Successful Response
+   * @throws ApiError
+   */
+  public static getEmbeddingProviders(): CancelablePromise<ModelsGetEmbeddingProvidersResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/models/embedding-providers",
+    })
+  }
+
+  /**
+   * Get Embedding Models Registry
+   * Get the registry of available embedding models.
+   * @returns EmbeddingModelInfo Successful Response
+   * @throws ApiError
+   */
+  public static getEmbeddingModelsRegistry(): CancelablePromise<ModelsGetEmbeddingModelsRegistryResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/models/embedding-models",
+    })
+  }
+
+  /**
+   * Get Default Embedding Model
+   * Get the default embedding model.
+   * @returns EmbeddingModelInfo Successful Response
+   * @throws ApiError
+   */
+  public static getDefaultEmbeddingModel(): CancelablePromise<ModelsGetDefaultEmbeddingModelResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/models/embedding-default",
+    })
+  }
+
+  /**
+   * Get Llm Providers
+   * Get list of available LLM providers.
+   * @returns string Successful Response
+   * @throws ApiError
+   */
+  public static getLlmProviders(): CancelablePromise<ModelsGetLlmProvidersResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/models/llm-providers",
+    })
+  }
+
+  /**
+   * Get Llm Models
+   * Get all LLM models.
+   * @returns LlmModelSpec Successful Response
+   * @throws ApiError
+   */
+  public static getLlmModels(): CancelablePromise<ModelsGetLlmModelsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/models/llm-models",
+    })
+  }
+
+  /**
+   * Get Default Llm Model
+   * Get the default LLM model.
+   * @returns LlmModelSpec Successful Response
+   * @throws ApiError
+   */
+  public static getDefaultLlmModel(): CancelablePromise<ModelsGetDefaultLlmModelResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/models/llm-default",
+    })
+  }
+
+  /**
+   * Set Default Llm Model
+   * Set the default LLM model.
+   * @param data The data for the request.
+   * @param data.modelId
+   * @returns LlmModelSpec Successful Response
+   * @throws ApiError
+   */
+  public static setDefaultLlmModel(
+    data: ModelsSetDefaultLlmModelData,
+  ): CancelablePromise<ModelsSetDefaultLlmModelResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/models/llm-default",
+      query: {
+        model_id: data.modelId,
       },
       errors: {
         422: "Validation Error",

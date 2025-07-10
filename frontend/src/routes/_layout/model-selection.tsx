@@ -23,7 +23,7 @@ import { AiOutlineAmazon, AiOutlineOpenAI } from "react-icons/ai"
 import { SiHuggingface, SiOllama } from "react-icons/si"
 
 // This will need to be added to your SDK client
-import { LlmModelsService, EmbeddingModelsService } from "@/client"
+import { ModelsService } from "@/client"
 
 export const Route = createFileRoute("/_layout/model-selection")({
   component: ModelSelection,
@@ -106,7 +106,7 @@ function LlmModels() {
   // Similar to your EmbeddingModels component but for LLMs
   const [availableProviders, setAvailableProviders] = useState<string[]>([])
   useEffect(() => {
-    EmbeddingModelsService.getAvailableProviders()
+    ModelsService.getLlmProviders()
       .then((response) => {
         if (response && Array.isArray(response)) {
           setAvailableProviders(response)
@@ -119,7 +119,7 @@ function LlmModels() {
       .catch((error) => {
         console.error("Failed to fetch available providers:", error)
         // Fallback to defaults
-        setAvailableProviders(["huggingface", "openai", "ollama", "replicate", "aws"])
+        setAvailableProviders(["openai"])
       })
   }, [])
 
@@ -127,7 +127,7 @@ function LlmModels() {
 
   const { data: defaultModel } = useQuery({
     queryKey: ["defaultLlmModel"],
-    queryFn: () => LlmModelsService.getDefaultLlmModel(),
+    queryFn: () => ModelsService.getDefaultLlmModel(),
   })
 
   const queryClient = useQueryClient()
@@ -136,12 +136,12 @@ function LlmModels() {
   // Query to fetch all LLMs
   const { data: modelsData, isLoading } = useQuery({
     queryKey: ["llmModels"],
-    queryFn: () => LlmModelsService.getLlmModels(),
+    queryFn: () => ModelsService.getLlmModels(),
   })
 
   // Mutation to set a model as default
   const setDefaultMutation = useMutation({
-    mutationFn: (modelId: string) => LlmModelsService.setDefaultLlmModel({ modelId }),
+    mutationFn: (modelId: string) => ModelsService.setDefaultLlmModel({ modelId }),
     onSuccess: () => {
       showSuccessToast("Default model updated successfully")
       queryClient.invalidateQueries({ queryKey: ["llmModels"] })
@@ -208,16 +208,15 @@ function LlmModels() {
             <Table.Body>
               {modelsData
                 .filter(
-                  (model): model is typeof model & { provider: string } =>
-                    model.provider !== undefined &&
-                    availableProviders.includes(model.provider.name),
+                  (model): model is typeof model & { provider: { id: string } } =>
+                    model.provider !== undefined && availableProviders.includes(model.provider.id),
                 )
                 .map((model) => (
                   <Table.Row key={model.id}>
                     <Table.Cell>{model.model_name}</Table.Cell>
                     <Table.Cell>
-                      <Badge colorPalette={getProviderColor(model.provider)} size="sm">
-                        {getProviderDisplayName(model.provider)}
+                      <Badge colorPalette={getProviderColor(model.provider.id)} size="sm">
+                        {getProviderDisplayName(model.provider.id)}
                       </Badge>
                     </Table.Cell>
                     <Table.Cell>{model.description}</Table.Cell>
@@ -265,7 +264,7 @@ function EmbeddingModels() {
 
   // Fetch available providers when component mounts
   useEffect(() => {
-    EmbeddingModelsService.getAvailableProviders()
+    ModelsService.getEmbeddingProviders()
       .then((response) => {
         if (response && Array.isArray(response)) {
           setAvailableProviders(response)
@@ -279,7 +278,7 @@ function EmbeddingModels() {
   // Query to fetch all embedding models
   const { data: modelsData, isLoading } = useQuery({
     queryKey: ["embeddingModels"],
-    queryFn: () => EmbeddingModelsService.getEmbeddingModelsRegistry(),
+    queryFn: () => ModelsService.getEmbeddingModelsRegistry(),
   })
 
   return (

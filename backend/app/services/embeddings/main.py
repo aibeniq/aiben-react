@@ -137,7 +137,10 @@ class EmbeddingService:
         if not is_valid:
             raise ValueError(error_msg)
 
-        return cls.AVAILABLE_MODELS.get(model_id)
+        if model_id not in cls.AVAILABLE_MODELS:
+            raise ValueError(f"Model '{model_id}' not found.")
+
+        return cls.AVAILABLE_MODELS[model_id]
 
     @classmethod
     def get_models_by_provider(cls, provider: str) -> list[EmbeddingModelInfo]:

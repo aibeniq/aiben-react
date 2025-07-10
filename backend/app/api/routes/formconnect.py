@@ -19,6 +19,7 @@ from app.models import (
     ToolInteraction,
     Tool,
     Message,
+    FormconnectExtraData,
 )
 from app.services.llms import LlmService
 
@@ -280,10 +281,10 @@ async def process_form(
     LlmService.record_tool_interaction(
         session=session,
         user_id=current_user.id,
-        functionality="formconnect",
+        functionality=Tool.FORMCONNECT,
         input_data={"fields": form_connect_in.fields, "files": file_names},
         output_data=result,
-        metadata={"file_count": total_files},
+        metadata=FormconnectExtraData(file_count=total_files),
     )
 
     # Return the comparison results as a dictionary
@@ -494,9 +495,7 @@ async def get_form_history(
 
         # Add ordering and pagination
         interactions = session.exec(
-            query.order_by(ToolInteraction.date_created.desc())
-            .offset(skip)
-            .limit(limit)
+            query.order_by(desc(ToolInteraction.date_created)).offset(skip).limit(limit)
         ).all()
 
         result = []

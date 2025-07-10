@@ -164,17 +164,21 @@ const ReportGenie = () => {
     mutationFn: (data) => {
       if (data.outlineId) {
         return ReportgenieService.generateReport({
-          sections: data.sections,
-          knowledgeBaseId: data.knowledgeBaseId,
-          outlineId: data.outlineId,
+          requestBody: {
+            sections: data.sections,
+            knowledge_base_id: data.knowledgeBaseId,
+            outline_id: data.outlineId,
+          },
         })
       } else {
         // For now, we'll pass an empty string as outlineId when not provided
         // This might need to be adjusted based on backend requirements
         return ReportgenieService.generateReport({
-          sections: data.sections,
-          knowledgeBaseId: data.knowledgeBaseId,
-          outlineId: "",
+          requestBody: {
+            sections: data.sections,
+            knowledge_base_id: data.knowledgeBaseId,
+            outline_id: "",
+          },
         })
       }
     },
