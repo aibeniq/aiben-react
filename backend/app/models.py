@@ -398,6 +398,21 @@ class ReportGenieResponse(SQLModel):
     results: ReportGenieResults
 
 
+# History/summary model for ReportGenie list endpoint
+class ReportGenieHistoryItem(SQLModel):
+    id: str
+    date_created: datetime
+    title: str
+    sections: str
+    kb_id: str
+    section_count: int
+    kb_name: str
+    outline_name: str
+    has_feedback: bool
+    feedback: dict[str, Any] | None = None
+    user_name: str | None = None  # Only included when show_all=True
+
+
 # Form for saving outlines
 class ReportGenieOutline(SQLModel, table=True):
     __tablename__ = "reportgenie_outlines"

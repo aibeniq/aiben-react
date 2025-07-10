@@ -215,6 +215,22 @@ export type ReportGenieDetailResults = {
   sections?: Array<ReportGenieSection>
 }
 
+export type ReportGenieHistoryItem = {
+  id: string
+  date_created: string
+  title: string
+  sections: string
+  kb_id: string
+  section_count: number
+  kb_name: string
+  outline_name: string
+  has_feedback: boolean
+  feedback?: {
+    [key: string]: unknown
+  } | null
+  user_name?: string | null
+}
+
 export type ReportGenieOutline = {
   id?: string
   name: string
@@ -223,6 +239,12 @@ export type ReportGenieOutline = {
   owner_id: string
   date_created?: string
   date_modified?: string
+}
+
+export type ReportGenieRequest = {
+  knowledge_base_id: string
+  sections: string
+  outline_id: string
 }
 
 export type ReportGenieResponse = {
@@ -421,6 +443,23 @@ export type VeraDocDetailResults = {
     [key: string]: unknown
   }>
   interaction_id: string
+}
+
+export type VeraDocHistoryItem = {
+  id: string
+  date_created: string
+  title: string
+  document_name: string
+  kb_id: string
+  qa_count: number
+  kb_name: string
+  questions: string
+  final_evaluation: string
+  has_feedback: boolean
+  feedback?: {
+    [key: string]: unknown
+  } | null
+  user_name?: string | null
 }
 
 export type VeraDocResponse = {
@@ -657,9 +696,7 @@ export type PrivateCreateUserData = {
 export type PrivateCreateUserResponse = UserPublic
 
 export type ReportgenieGenerateReportData = {
-  knowledgeBaseId: string
-  outlineId: string
-  sections: string
+  requestBody: ReportGenieRequest
 }
 
 export type ReportgenieGenerateReportResponse = ReportGenieResponse
@@ -703,9 +740,7 @@ export type ReportgenieGetReportHistoryData = {
   skip?: number
 }
 
-export type ReportgenieGetReportHistoryResponse = Array<{
-  [key: string]: unknown
-}>
+export type ReportgenieGetReportHistoryResponse = Array<ReportGenieHistoryItem>
 
 export type ReportgenieGetReportDetailData = {
   reportId: string
@@ -872,9 +907,7 @@ export type VeradocGetVeradocHistoryData = {
   skip?: number
 }
 
-export type VeradocGetVeradocHistoryResponse = Array<{
-  [key: string]: unknown
-}>
+export type VeradocGetVeradocHistoryResponse = Array<VeraDocHistoryItem>
 
 export type VeradocGetVeradocDetailData = {
   reportId: string
