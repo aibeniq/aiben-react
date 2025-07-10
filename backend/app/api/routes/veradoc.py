@@ -2,11 +2,27 @@ import asyncio
 import json
 import traceback
 import uuid
-from datetime import datetime
-from io import BytesIO
-from typing import Any
+from app.models import (
+    VeraDocResponse,
+    VeraDocChecklist,
+    VeraDocChecklistCreate,
+    VeraDocChecklistUpdate,
+    RagChecklistRequest,
+    KnowledgeBase,
+    ToolInteraction,
+    DocxRequest,
+    VeraDocDetailResponse,
+    VeraDocHistoryItem,
+    Message,
+    User,
+    Tool,
+    VeradocExtraData,
+)
 
+from io import BytesIO
+from sqlmodel import desc, select
 import markdown
+from datetime import datetime, timezone
 from bs4 import BeautifulSoup
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -22,22 +38,12 @@ from fastapi import (
 )
 from fastapi.responses import StreamingResponse
 from langchain_core.prompts import PromptTemplate
-from sqlmodel import desc, select
 
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
 from app.core.config import settings
 from app.models import (
-    DocxRequest,
-    KnowledgeBase,
-    LlmInteraction,
-    Message,
-    RagChecklistRequest,
-    User,
-    VeraDocChecklist,
     VeraDocDetailFeedback,
-    VeraDocDetailResponse,
     VeraDocDetailResults,
-    VeraDocResponse,
 )
 from app.services.llms.main import LlmService
 
@@ -191,35 +197,29 @@ async def process_rag_checklist(
                 alpha=0.7,
             )
 
-            if not search_result["success"]:
-                print(
-                    f"Search failed for question '{question}': {search_result.get('error', 'Unknown error')}"
-                )
-                continue
-
-            chunks = search_result["results"]
-            context = "\n\n".join([chunk["entity"]["content"] for chunk in chunks])
+            chunks = search_result.hits
+            context = "\n\n".join([chunk.entity.content for chunk in chunks])
 
             # store source documents for citation
             source_citations = []
             for chunk in chunks:
-                entity = chunk["entity"]
+                entity = chunk.entity
 
                 # Create metadata similar to the old format
                 metadata = {
-                    "source_id": entity.get("source_id", ""),
-                    "title": entity.get("title", ""),
-                    "author": entity.get("author", ""),
-                    "url": entity.get("url", ""),
+                    "source_id": entity.source_id,
+                    "title": entity.title,
+                    "author": entity.author,
+                    "url": entity.url,
                 }
 
                 # Try to get source data id from the source table
-                if entity.get("source_id"):
-                    metadata["source_id"] = str(entity["source_id"])
-                    if entity.get("url"):
-                        metadata["source"] = entity["url"]
+                if entity.source_id:
+                    metadata["source_id"] = str(entity.source_id)
+                    if entity.url:
+                        metadata["source"] = entity.url
 
-                source = {"content": entity["content"], "metadata": metadata}
+                source = {"content": entity.content, "metadata": metadata}
                 source_citations.append(source)
 
             if cancellation_requested:
@@ -302,10 +302,18 @@ async def process_rag_checklist(
         final_evaluation = response.content
         print(f"Got final evaluation: {final_evaluation[:100]}...")
 
-        interaction_id = LlmService.record_llm_interaction(
+        # Create typed extra data for better type safety
+        detailed_extra_data = VeradocExtraData(
+            kb_name=kb.title,
+            kb_id=str(kb.id),
+            document_name=file.filename,
+            qa_pairs=qa_pairs,
+        )
+
+        interaction_id = LlmService.record_tool_interaction(
             session=session,
             user_id=current_user.id,
-            functionality="veradoc",
+            functionality=Tool.VERADOC,
             input_data={
                 "questions": request_data.questions,
                 "document_name": file.filename,
@@ -315,9 +323,7 @@ async def process_rag_checklist(
                 "final_evaluation": final_evaluation,
                 "qa_count": len(qa_pairs),
             },
-            metadata={
-                "qa_pairs": qa_pairs  # Store the full QA pairs with sources for retrieval
-            },
+            metadata=detailed_extra_data,
         )
 
         # 8. Compile the results
@@ -346,7 +352,7 @@ async def process_rag_checklist(
 # Functions related to Checklists
 @router.post("/checklists", response_model=VeraDocChecklist)
 def create_checklist(
-    checklist: VeraDocChecklist,
+    checklist: VeraDocChecklistCreate,
     session: SessionDep,
     current_user: CurrentUser,
 ) -> VeraDocChecklist:
@@ -361,11 +367,17 @@ def create_checklist(
             status_code=400, detail="A checklist with this name already exists."
         )
 
-    checklist.owner_id = current_user.id
-    session.add(checklist)
+    # Create database model from request model
+    db_checklist = VeraDocChecklist(
+        name=checklist.name,
+        description=checklist.description,
+        questions=checklist.questions,
+        owner_id=current_user.id,
+    )
+    session.add(db_checklist)
     session.commit()
-    session.refresh(checklist)
-    return checklist
+    session.refresh(db_checklist)
+    return db_checklist
 
 
 @router.get("/checklists", response_model=list[VeraDocChecklist])
@@ -396,7 +408,7 @@ def get_checklist(checklist_id: uuid.UUID, session: SessionDep) -> VeraDocCheckl
 @router.put("/checklists/{checklist_id}", response_model=VeraDocChecklist)
 def update_checklist(
     checklist_id: uuid.UUID,
-    updated_checklist: VeraDocChecklist,
+    updated_checklist: VeraDocChecklistUpdate,
     session: SessionDep,
     current_user: CurrentUser,
 ) -> VeraDocChecklist:
@@ -413,10 +425,15 @@ def update_checklist(
             status_code=403, detail="Not authorized to update this checklist."
         )
 
-    checklist.name = updated_checklist.name
-    checklist.description = updated_checklist.description
-    checklist.questions = updated_checklist.questions
-    checklist.date_modified = datetime.utcnow()
+    # Update only provided fields
+    if updated_checklist.name is not None:
+        checklist.name = updated_checklist.name
+    if updated_checklist.description is not None:
+        checklist.description = updated_checklist.description
+    if updated_checklist.questions is not None:
+        checklist.questions = updated_checklist.questions
+
+    checklist.date_modified = datetime.now(timezone.utc)
 
     session.add(checklist)
     session.commit()
@@ -446,77 +463,74 @@ def delete_checklist(
     return Message(message="Checklist deleted successfully.")
 
 
-@router.get("/history", response_model=list[dict[str, Any]])
+@router.get("/history", response_model=list[VeraDocHistoryItem])
 async def get_veradoc_history(
     session: SessionDep,
     current_user: CurrentUser,
     skip: int = 0,
     limit: int = 20,
     show_all: bool = False,
-) -> list[dict[str, Any]]:
+) -> list[VeraDocHistoryItem]:
     """Retrieve past VeraDoc evaluation history for the current user or all users."""
     print("Retrieving VeraDoc history. Show all:", show_all)
 
     try:
         # Start with base query
-        query = select(LlmInteraction).where(LlmInteraction.functionality == "veradoc")
+        query = select(ToolInteraction).where(
+            ToolInteraction.functionality == Tool.VERADOC
+        )
 
         # Only filter by user if not showing all users
         if not show_all:
-            query = query.where(LlmInteraction.user_id == current_user.id)
+            query = query.where(ToolInteraction.user_id == current_user.id)
 
         # Add ordering and pagination
         reports = session.exec(
-            query.order_by(desc(LlmInteraction.date_created)).offset(skip).limit(limit)
+            query.order_by(desc(ToolInteraction.date_created)).offset(skip).limit(limit)
         ).all()
 
         print(f"Found {len(reports)} VeraDoc evaluations for user {current_user.id}")
 
         result = []
         for report in reports:
-            # Initialize variables outside the try block
-            input_data: dict[str, Any] = {}
-            output_data: dict[str, Any] = {}
-            kb_name = "Unknown Knowledge Base"
-
+            # Parse the input_data and output_data from string to dict if possible
             try:
-                # Parse the input_data and output_data from string to dict
                 input_data = json.loads(report.input_data) if report.input_data else {}
                 output_data = (
                     json.loads(report.output_data) if report.output_data else {}
                 )
 
-                # Get KB name from input_data
-                if input_data.get("kb_id"):
-                    kb = session.get(KnowledgeBase, input_data.get("kb_id"))
-                    kb_name = kb.title if kb else "Unknown Knowledge Base"
+                # Use validation method for better type safety
+                if report.is_valid_veradoc_data():
+                    # Get typed extra data
+                    _, typed_extra_data = report.validate_veradoc_data()
+                    if typed_extra_data:
+                        kb_name = typed_extra_data.kb_name or "Unknown Knowledge Base"
+                        document_name = (
+                            typed_extra_data.document_name or "Unknown Document"
+                        )
+                    else:
+                        kb_name = "Unknown Knowledge Base"
+                        document_name = "Unknown Document"
+                else:
+                    # Fallback to raw data if validation fails
+                    extra_data = report.extra_data or {}
+                    kb_name = extra_data.get("kb_name", "Unknown Knowledge Base")
+                    document_name = extra_data.get("document_name", "Unknown Document")
 
                 # Create a user-friendly title
-                document_name = input_data.get("document_name", "Unnamed Document")
                 title = f"Evaluation of {document_name}"
 
-                # Create result item
-                result_item = {
-                    "id": str(report.id),
-                    "date_created": report.date_created,
-                    "title": title,
-                    "document_name": document_name,
-                    "kb_name": kb_name,
-                    "kb_id": input_data.get("kb_id", ""),
-                    "questions": input_data.get("questions", ""),
-                    "qa_count": output_data.get("qa_count", 0),
-                    "final_evaluation": output_data.get("final_evaluation", ""),
-                    "has_feedback": report.feedback is not None,
-                }
-
-                # Add feedback information if exists
+                # Create feedback object if exists
+                feedback = None
                 if report.feedback:
-                    result_item["feedback"] = {
+                    feedback = {
                         "feedback": report.feedback,
                         "feedbackText": report.feedback_text,
                     }
 
-                # Add user info for all-users view
+                # Get user info for all-users view
+                user_name = None
                 if show_all:
                     user = session.get(User, report.user_id)
                     user_name = (
@@ -524,19 +538,60 @@ async def get_veradoc_history(
                         if user
                         else "Unknown User"
                     )
-                    result_item["user_name"] = user_name
+
+                # Create the result item
+                result_item = VeraDocHistoryItem(
+                    id=str(report.id),
+                    date_created=report.date_created,
+                    title=title,
+                    document_name=document_name,
+                    kb_id=input_data.get("kb_id", ""),
+                    qa_count=output_data.get("qa_count", 0),
+                    kb_name=kb_name,
+                    questions=input_data.get("questions", ""),
+                    final_evaluation=output_data.get("final_evaluation", ""),
+                    has_feedback=report.feedback is not None,
+                    feedback=feedback,
+                    user_name=user_name,
+                )
 
                 result.append(result_item)
-            except Exception as e:
-                # If parsing fails, add a minimal entry
-                print(f"Error processing report {report.id}: {e}")
-                result.append(
-                    {
-                        "id": str(report.id),
-                        "date_created": report.date_created,
-                        "title": f"Evaluation from {report.date_created.strftime('%Y-%m-%d')}",
+            except json.JSONDecodeError:
+                # If JSON parsing fails, use raw data
+                # Create feedback object if exists
+                feedback = None
+                if report.feedback:
+                    feedback = {
+                        "feedback": report.feedback,
+                        "feedbackText": report.feedback_text,
                     }
+
+                # Get user info for all-users view
+                user_name = None
+                if show_all:
+                    user = session.get(User, report.user_id)
+                    user_name = (
+                        f"{user.full_name or 'User'} ({user.email})"
+                        if user
+                        else "Unknown User"
+                    )
+
+                result_item = VeraDocHistoryItem(
+                    id=str(report.id),
+                    date_created=report.date_created,
+                    title=f"Evaluation from {report.date_created.strftime('%Y-%m-%d')}",
+                    document_name="Unknown Document",
+                    kb_id="",
+                    qa_count=0,
+                    kb_name="Unknown Knowledge Base",
+                    questions="",
+                    final_evaluation="",
+                    has_feedback=report.feedback is not None,
+                    feedback=feedback,
+                    user_name=user_name,
                 )
+
+                result.append(result_item)
 
         return result
     except Exception as e:
@@ -555,7 +610,7 @@ async def get_veradoc_detail(
 ) -> VeraDocDetailResponse:
     """Retrieve a specific VeraDoc evaluation's full content by ID."""
     try:
-        report = session.get(LlmInteraction, report_id)
+        report = session.get(ToolInteraction, report_id)
         if not report:
             raise HTTPException(status_code=404, detail="Report not found")
 
@@ -570,20 +625,44 @@ async def get_veradoc_detail(
                 status_code=400, detail="This is not a VeraDoc evaluation"
             )
 
+        # Validate VeraDoc extra data using new validation methods
+        is_valid, typed_extra_data = report.validate_veradoc_data()
+
+        if not is_valid or not typed_extra_data:
+            # Fallback if validation fails
+            return VeraDocDetailResponse(
+                id=str(report.id),
+                date_created=report.date_created,
+                document_name="Unknown Document",
+                kb_name="Unknown Knowledge Base",
+                kb_id="",
+                questions="",
+                results=VeraDocDetailResults(
+                    final_evaluation=f"Unable to reconstruct evaluation from {report.date_created}.\n\n"
+                    f"This might be due to corrupted or incomplete data.",
+                    qa_pairs=[],
+                    interaction_id=str(report.id),
+                ),
+                feedback=VeraDocDetailFeedback(
+                    feedback=report.feedback,
+                    feedbackText=report.feedback_text,
+                    feedbackDate=(
+                        report.feedback_date.isoformat()
+                        if report.feedback_date
+                        else None
+                    ),
+                ),
+            )
+
+        # Try to reconstruct the original evaluation structure
         try:
             input_data = json.loads(report.input_data) if report.input_data else {}
             output_data = json.loads(report.output_data) if report.output_data else {}
-            extra_data = report.extra_data or {}
 
-            # For backward compatibility, try to reconstruct full results
-            document_name = input_data.get("document_name", "Unknown Document")
-            kb_name = "Unknown Knowledge Base"
-
-            # Try to get KB name
-            kb_id = input_data.get("kb_id")
-            if kb_id:
-                kb = session.get(KnowledgeBase, kb_id)
-                kb_name = kb.title if kb else "Unknown Knowledge Base"
+            # Use validated typed data instead of raw extra_data
+            kb_name = typed_extra_data.kb_name or "Unknown Knowledge Base"
+            document_name = typed_extra_data.document_name or "Unknown Document"
+            qa_pairs = typed_extra_data.qa_pairs or []
 
             # Create a response that matches the structure expected by the frontend
             result = VeraDocDetailResponse(
@@ -591,11 +670,11 @@ async def get_veradoc_detail(
                 date_created=report.date_created,
                 document_name=document_name,
                 kb_name=kb_name,
-                kb_id=kb_id,
+                kb_id=typed_extra_data.kb_id or input_data.get("kb_id", ""),
                 questions=input_data.get("questions", ""),
                 results=VeraDocDetailResults(
                     final_evaluation=output_data.get("final_evaluation", ""),
-                    qa_pairs=extra_data.get("qa_pairs", []),
+                    qa_pairs=qa_pairs,
                     interaction_id=str(report.id),
                 ),
                 # Add feedback information
@@ -612,15 +691,30 @@ async def get_veradoc_detail(
 
             return result
 
-        except Exception:
-            # Fallback if parsing fails
+        except json.JSONDecodeError:
+            # Fallback if JSON parsing fails
             return VeraDocDetailResponse(
                 id=str(report.id),
                 date_created=report.date_created,
+                document_name=typed_extra_data.document_name or "Unknown Document",
+                kb_name=typed_extra_data.kb_name or "Unknown Knowledge Base",
+                kb_id=typed_extra_data.kb_id or "",
+                questions="",
                 results=VeraDocDetailResults(
                     final_evaluation=f"Unable to reconstruct evaluation from {report.date_created}.\n\n"
                     f"This might be due to an older format or incomplete data.",
-                    qa_pairs=[],
+                    qa_pairs=typed_extra_data.qa_pairs or [],
+                    interaction_id=str(report.id),
+                ),
+                # Add feedback object for consistency
+                feedback=VeraDocDetailFeedback(
+                    feedback=report.feedback,
+                    feedbackText=report.feedback_text,
+                    feedbackDate=(
+                        report.feedback_date.isoformat()
+                        if report.feedback_date
+                        else None
+                    ),
                 ),
             )
 
@@ -654,11 +748,7 @@ async def generate_docx(request: DocxRequest) -> StreamingResponse:
 
         print("Adding title and date to the document...")
         # Add a title
-        title_text = (
-            request.title
-            if hasattr(request, "title") and request.title
-            else "Document Evaluation"
-        )
+        title_text = request.title if request.title else "Document Evaluation"
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
@@ -666,7 +756,7 @@ async def generate_docx(request: DocxRequest) -> StreamingResponse:
         date_paragraph = doc.add_paragraph()
         date_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         date_run = date_paragraph.add_run(
-            f"Generated on: {datetime.now().strftime('%B %d, %Y')}"
+            f"Generated on: {datetime.now(timezone.utc).strftime('%B %d, %Y')}"
         )
         date_run.italic = True
 
@@ -757,7 +847,7 @@ async def generate_docx(request: DocxRequest) -> StreamingResponse:
         )
 
         # Create a filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         filename = f"evaluation_{timestamp}.docx"
 
         # Return the document as a downloadable file

@@ -18,8 +18,10 @@ import { useMutation } from "@tanstack/react-query"
 import {
   ReportgenieService,
   KnowledgeBasesService,
-  KnowledgeBasePublic,
-  ReportGenieOutline,
+  type KnowledgeBasePublic,
+  type ReportGenieOutline,
+  type ReportgenieGenerateReportResponse,
+  type ReportGenieSection,
 } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
@@ -51,7 +53,7 @@ const ReportGenie = () => {
 
   // Results state
   const [generatedDocument, setGeneratedDocument] = useState("")
-  const [sectionResults, setSectionResults] = useState<any[]>([])
+  const [sectionResults, setSectionResults] = useState<ReportGenieSection[]>([])
   const [loading, setLoading] = useState(false)
   const [expandedSection, setExpandedSection] = useState<number | null>(null)
 
@@ -154,29 +156,38 @@ const ReportGenie = () => {
   }, [])
 
   // Mutation hook for generating the document
-  const mutation = useMutation({
-    mutationFn: (data: { sections: string; knowledgeBaseId: string; outlineId?: string }) => {
+  const mutation = useMutation<
+    ReportgenieGenerateReportResponse,
+    Error,
+    { sections: string; knowledgeBaseId: string; outlineId?: string }
+  >({
+    mutationFn: (data) => {
       if (data.outlineId) {
         return ReportgenieService.generateReport({
-          sections: data.sections,
-          knowledgeBaseId: data.knowledgeBaseId,
-          outlineId: data.outlineId,
+          requestBody: {
+            sections: data.sections,
+            knowledge_base_id: data.knowledgeBaseId,
+            outline_id: data.outlineId,
+          },
         })
       } else {
         // For now, we'll pass an empty string as outlineId when not provided
         // This might need to be adjusted based on backend requirements
         return ReportgenieService.generateReport({
-          sections: data.sections,
-          knowledgeBaseId: data.knowledgeBaseId,
-          outlineId: "",
+          requestBody: {
+            sections: data.sections,
+            knowledge_base_id: data.knowledgeBaseId,
+            outline_id: "",
+          },
         })
       }
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data) => {
       setGeneratedDocument(data.results.full_report)
       setSectionResults(data.results.sections || [])
+      setLoading(false)
     },
-    onError: (error: any) => {
+    onError: (error) => {
       showErrorToast(`Failed to generate document: ${error.message}`)
     },
   })
@@ -209,6 +220,14 @@ const ReportGenie = () => {
 
   // Custom components for markdown rendering
   const components = {
+    // Header components
+    h1: (props: any) => <Heading as="h1" size="lg" mb={4} {...props} />,
+    h2: (props: any) => <Heading as="h2" size="md" mb={3} {...props} />,
+    h3: (props: any) => <Heading as="h3" size="sm" mb={3} {...props} />,
+    h4: (props: any) => <Heading as="h4" size="sm" mb={2} {...props} />,
+    h5: (props: any) => <Heading as="h5" size="xs" mb={2} {...props} />,
+    h6: (props: any) => <Heading as="h6" size="xs" mb={2} {...props} />,
+    // Table components
     table: (props: any) => (
       <Box
         as="table"
@@ -435,7 +454,12 @@ const ReportGenie = () => {
                             {expandedSection === index && (
                               <>
                                 <Box mb={4} p={3} borderLeft="4px solid" borderColor="blue.200">
-                                  <Text whiteSpace="pre-wrap">{section.content}</Text>
+                                  <ReactMarkdown
+                                    remarkPlugins={[remarkGfm]}
+                                    components={components}
+                                  >
+                                    {section.content}
+                                  </ReactMarkdown>
                                 </Box>
 
                                 {section.source_citations &&
@@ -460,7 +484,7 @@ const ReportGenie = () => {
                                         </h2>
                                         <Accordion.ItemContent pb={4} bg="surface">
                                           {section.source_citations.map(
-                                            (citation: any, cIndex: number) => (
+                                            (citation, cIndex: number) => (
                                               <Box
                                                 key={cIndex}
                                                 p={3}
@@ -469,11 +493,11 @@ const ReportGenie = () => {
                                                 borderRadius="md"
                                                 bg="bg"
                                               >
-                                                {citation.metadata?.source_id ? (
+                                                {citation.source_metadata?.source_id ? (
                                                   <SourceLink
-                                                    sourceId={citation.metadata.source_id}
+                                                    sourceId={citation.source_metadata.source_id}
                                                     fileName={getDisplayFileName(
-                                                      citation.metadata.url,
+                                                      citation.source_metadata.url || "",
                                                     )}
                                                     ml={1}
                                                     fontWeight="normal"
@@ -488,7 +512,7 @@ const ReportGenie = () => {
                                                     color="blue.600"
                                                   >
                                                     {getDisplayFileName(
-                                                      citation.metadata?.url || "Unknown",
+                                                      citation.source_metadata?.url || "Unknown",
                                                     )}
                                                   </Text>
                                                 )}

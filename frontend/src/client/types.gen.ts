@@ -48,6 +48,7 @@ export type DocumentQueryResponse = {
 
 export type DocxRequest = {
   content: string
+  title?: string | null
 }
 
 /**
@@ -212,9 +213,23 @@ export type ReportGenieDetailResponse = {
 
 export type ReportGenieDetailResults = {
   full_report: string
-  sections?: Array<{
+  sections?: Array<ReportGenieSection>
+}
+
+export type ReportGenieHistoryItem = {
+  id: string
+  date_created: string
+  title: string
+  sections: string
+  kb_id: string
+  section_count: number
+  kb_name: string
+  outline_name: string
+  has_feedback: boolean
+  feedback?: {
     [key: string]: unknown
-  }>
+  } | null
+  user_name?: string | null
 }
 
 export type ReportGenieOutline = {
@@ -227,10 +242,37 @@ export type ReportGenieOutline = {
   date_modified?: string
 }
 
+export type ReportGenieRequest = {
+  knowledge_base_id: string
+  sections: string
+  outline_id: string
+}
+
 export type ReportGenieResponse = {
-  results: {
-    [key: string]: unknown
-  }
+  results: ReportGenieResults
+}
+
+export type ReportGenieResults = {
+  full_report: string
+  sections?: Array<ReportGenieSection>
+}
+
+export type ReportGenieSection = {
+  title: string
+  content: string
+  source_citations?: Array<ReportGenieSourceCitation>
+}
+
+export type ReportGenieSourceCitation = {
+  content: string
+  source_metadata: ReportGenieSourceMetadata
+}
+
+export type ReportGenieSourceMetadata = {
+  source_id?: string
+  url?: string
+  title?: string
+  author?: string
 }
 
 /**
@@ -252,9 +294,8 @@ export type SourceContentResponse = {
  * Metadata for document sources
  */
 export type SourceMetadata = {
-  source?: string | null
+  source_name?: string | null
   source_id?: string | null
-  page?: number | null
   [key: string]: unknown
 }
 
@@ -379,6 +420,18 @@ export type VeraDocChecklist = {
   date_modified?: string
 }
 
+export type VeraDocChecklistCreate = {
+  name: string
+  description?: string | null
+  questions: string
+}
+
+export type VeraDocChecklistUpdate = {
+  name?: string | null
+  description?: string | null
+  questions?: string | null
+}
+
 export type VeraDocDetailFeedback = {
   feedback?: string | null
   feedbackText?: string | null
@@ -402,6 +455,23 @@ export type VeraDocDetailResults = {
     [key: string]: unknown
   }>
   interaction_id: string
+}
+
+export type VeraDocHistoryItem = {
+  id: string
+  date_created: string
+  title: string
+  document_name: string
+  kb_id: string
+  qa_count: number
+  kb_name: string
+  questions: string
+  final_evaluation: string
+  has_feedback: boolean
+  feedback?: {
+    [key: string]: unknown
+  } | null
+  user_name?: string | null
 }
 
 export type VeraDocResponse = {
@@ -438,15 +508,6 @@ export type ChatQueryTextData = {
 }
 
 export type ChatQueryTextResponse = TextQueryResponse
-
-export type EmbeddingModelsGetAvailableProvidersResponse = Array<string>
-
-export type EmbeddingModelsGetEmbeddingModelsRegistryResponse =
-  Array<EmbeddingModelInfo>
-
-export type EmbeddingModelsGetDefaultEmbeddingModelResponse = EmbeddingModelInfo
-
-export type EmbeddingModelsGetLlmModelsResponse = Array<LlmModelSpec>
 
 export type FeedbackSubmitFeedbackData = {
   feedback: string
@@ -631,6 +692,24 @@ export type LoginRecoverPasswordHtmlContentData = {
 
 export type LoginRecoverPasswordHtmlContentResponse = string
 
+export type ModelsGetEmbeddingProvidersResponse = Array<string>
+
+export type ModelsGetEmbeddingModelsRegistryResponse = Array<EmbeddingModelInfo>
+
+export type ModelsGetDefaultEmbeddingModelResponse = EmbeddingModelInfo
+
+export type ModelsGetLlmProvidersResponse = Array<string>
+
+export type ModelsGetLlmModelsResponse = Array<LlmModelSpec>
+
+export type ModelsGetDefaultLlmModelResponse = LlmModelSpec
+
+export type ModelsSetDefaultLlmModelData = {
+  modelId: string
+}
+
+export type ModelsSetDefaultLlmModelResponse = LlmModelSpec
+
 export type PrivateCreateUserData = {
   requestBody: PrivateUserCreate
 }
@@ -638,9 +717,7 @@ export type PrivateCreateUserData = {
 export type PrivateCreateUserResponse = UserPublic
 
 export type ReportgenieGenerateReportData = {
-  knowledgeBaseId: string
-  outlineId: string
-  sections: string
+  requestBody: ReportGenieRequest
 }
 
 export type ReportgenieGenerateReportResponse = ReportGenieResponse
@@ -684,9 +761,7 @@ export type ReportgenieGetReportHistoryData = {
   skip?: number
 }
 
-export type ReportgenieGetReportHistoryResponse = Array<{
-  [key: string]: unknown
-}>
+export type ReportgenieGetReportHistoryResponse = Array<ReportGenieHistoryItem>
 
 export type ReportgenieGetReportDetailData = {
   reportId: string
@@ -823,7 +898,7 @@ export type VeradocProcessRagChecklistResponse = VeraDocResponse
 export type VeradocGetChecklistsResponse = Array<VeraDocChecklist>
 
 export type VeradocCreateChecklistData = {
-  requestBody: VeraDocChecklist
+  requestBody: VeraDocChecklistCreate
 }
 
 export type VeradocCreateChecklistResponse = VeraDocChecklist
@@ -836,7 +911,7 @@ export type VeradocGetChecklistResponse = VeraDocChecklist
 
 export type VeradocUpdateChecklistData = {
   checklistId: string
-  requestBody: VeraDocChecklist
+  requestBody: VeraDocChecklistUpdate
 }
 
 export type VeradocUpdateChecklistResponse = VeraDocChecklist
@@ -853,9 +928,7 @@ export type VeradocGetVeradocHistoryData = {
   skip?: number
 }
 
-export type VeradocGetVeradocHistoryResponse = Array<{
-  [key: string]: unknown
-}>
+export type VeradocGetVeradocHistoryResponse = Array<VeraDocHistoryItem>
 
 export type VeradocGetVeradocDetailData = {
   reportId: string

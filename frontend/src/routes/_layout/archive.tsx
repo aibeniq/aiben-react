@@ -7,7 +7,7 @@ import FormconnectResults from "../../components/Archive/Results/FormconnectResu
 import { useToolArchive } from "../../hooks/useToolArchive"
 import useCustomToast from "../../hooks/useCustomToast"
 import { createFileRoute } from "@tanstack/react-router"
-import { Box, Container, VStack, Tabs } from "@chakra-ui/react"
+import { Box, Container, VStack, Tabs, Heading } from "@chakra-ui/react"
 import { FiCheckCircle, FiFilePlus } from "react-icons/fi"
 import { FaBalanceScale } from "react-icons/fa"
 import { TbPlugConnected } from "react-icons/tb"
@@ -54,8 +54,7 @@ function Archive() {
       } else if (activeTab === "generate" && reportgenie.selectedReport) {
         fullText =
           reportgenie.selectedReport.results?.full_report ||
-          reportgenie.selectedReport.full_report ||
-          reportgenie.selectedReport.content ||
+          reportgenie.selectedReport.sections ||
           ""
       } else if (activeTab === "compare" && twincheck.selectedReport) {
         fullText = `# Summary\n\n${twincheck.selectedReport.results?.summary || ""}\n\n# Topic Analysis\n\n`
@@ -106,8 +105,7 @@ function Archive() {
       } else if (activeTab === "generate" && reportgenie.selectedReport) {
         fullText =
           reportgenie.selectedReport.results?.full_report ||
-          reportgenie.selectedReport.full_report ||
-          reportgenie.selectedReport.content ||
+          reportgenie.selectedReport.sections ||
           ""
 
         response = await ReportgenieService.generateDocx({
@@ -200,6 +198,14 @@ function Archive() {
   }
 
   const components = {
+    // Header components
+    h1: (props: any) => <Heading as="h1" size="lg" mb={4} {...props} />,
+    h2: (props: any) => <Heading as="h2" size="md" mb={3} {...props} />,
+    h3: (props: any) => <Heading as="h3" size="sm" mb={3} {...props} />,
+    h4: (props: any) => <Heading as="h4" size="sm" mb={2} {...props} />,
+    h5: (props: any) => <Heading as="h5" size="xs" mb={2} {...props} />,
+    h6: (props: any) => <Heading as="h6" size="xs" mb={2} {...props} />,
+    // Table components
     table: (props: any) => (
       <Box
         as="table"

@@ -1,15 +1,16 @@
 import uuid
 from datetime import datetime
 from typing import Any
+from enum import Enum
 
-from pydantic import EmailStr, field_validator
+from pydantic import EmailStr, field_validator, ValidationError
+from sqlmodel import Field, Relationship, SQLModel, Column
 from sqlalchemy import (
-    JSON,
     LargeBinary,
     PrimaryKeyConstraint,
     UniqueConstraint,
+    JSON,
 )
-from sqlmodel import Column, Field, Relationship, SQLModel
 
 from app.core.config import settings
 from app.services.embeddings import EmbeddingModelInfo, EmbeddingService
@@ -34,7 +35,8 @@ class UserBase(SQLModel):
         if not EmbeddingService.is_valid_model_id(v):
             available_models = EmbeddingService.get_model_ids()
             raise ValueError(
-                f"Invalid embedding model ID '{v}'. Available models: {', '.join(available_models)}"
+                f"Invalid embedding model ID '{v}'. Available models: "
+                f"{', '.join(available_models)}"
             )
         return v
 
@@ -158,7 +160,8 @@ class KnowledgeBaseBase(SQLModel):
         if not EmbeddingService.is_valid_model_id(v):
             available_models = EmbeddingService.get_model_ids()
             raise ValueError(
-                f"Invalid embedding model ID '{v}'. Available models: {', '.join(available_models)}"
+                f"Invalid embedding model ID '{v}'. Available models: "
+                f"{', '.join(available_models)}"
             )
         return v
 
@@ -295,6 +298,19 @@ class VeraDocResponse(SQLModel):
     results: dict[str, Any]  # Accept any dictionary structure
 
 
+# Request models for VeraDoc checklists
+class VeraDocChecklistCreate(SQLModel):
+    name: str = Field(max_length=255)
+    description: str | None = Field(default=None, max_length=255)
+    questions: str
+
+
+class VeraDocChecklistUpdate(SQLModel):
+    name: str | None = Field(default=None, max_length=255)
+    description: str | None = Field(default=None, max_length=255)
+    questions: str | None = Field(default=None)
+
+
 # Response model for VeraDoc detail endpoint
 class VeraDocDetailFeedback(SQLModel):
     feedback: str | None = None
@@ -361,9 +377,67 @@ class ReportGenieRequest(SQLModel):
     outline_id: str
 
 
-# Response model for ReportGenie
+# Metadata model for ReportGenie source citations
+class ReportGenieSourceMetadata(SQLModel):
+    source_id: str = ""  # Vector DB source ID
+    url: str = ""  # Document URL
+    title: str = ""  # Document title
+    author: str = ""  # Document author
+
+
+# Source citation model for ReportGenie
+class ReportGenieSourceCitation(SQLModel):
+    content: str
+    source_metadata: ReportGenieSourceMetadata
+
+
+# Section model for ReportGenie
+class ReportGenieSection(SQLModel):
+    title: str
+    content: str
+    source_citations: list[ReportGenieSourceCitation] = Field(default_factory=list)
+
+
+# Results model for ReportGenie generation
+class ReportGenieResults(SQLModel):
+    full_report: str
+    sections: list[ReportGenieSection] = Field(default_factory=list)
+
+
+# Response model for ReportGenie generation endpoint
 class ReportGenieResponse(SQLModel):
-    results: dict[str, Any]  # Accept any dictionary structure
+    results: ReportGenieResults
+
+
+# History/summary model for ReportGenie list endpoint
+class ReportGenieHistoryItem(SQLModel):
+    id: str
+    date_created: datetime
+    title: str
+    sections: str
+    kb_id: str
+    section_count: int
+    kb_name: str
+    outline_name: str
+    has_feedback: bool
+    feedback: dict[str, Any] | None = None
+    user_name: str | None = None  # Only included when show_all=True
+
+
+# History/summary model for VeraDoc list endpoint
+class VeraDocHistoryItem(SQLModel):
+    id: str
+    date_created: datetime
+    title: str
+    document_name: str
+    kb_id: str
+    qa_count: int
+    kb_name: str
+    questions: str
+    final_evaluation: str
+    has_feedback: bool
+    feedback: dict[str, Any] | None = None
+    user_name: str | None = None  # Only included when show_all=True
 
 
 # Form for saving outlines
@@ -378,12 +452,6 @@ class ReportGenieOutline(SQLModel, table=True):
     date_modified: datetime = Field(default_factory=datetime.utcnow)
 
 
-class ReportGenieSection(SQLModel):
-    title: str
-    content: str
-    source_citations: list[dict[str, Any]] = Field(default_factory=list)
-
-
 class ReportGenieDetailFeedback(SQLModel):
     feedback: str | None = None
     feedbackText: str | None = None
@@ -392,7 +460,7 @@ class ReportGenieDetailFeedback(SQLModel):
 
 class ReportGenieDetailResults(SQLModel):
     full_report: str
-    sections: list[dict[str, Any]] = Field(default_factory=list)
+    sections: list[ReportGenieSection] = Field(default_factory=list)
 
 
 class ReportGenieDetailResponse(SQLModel):
@@ -407,27 +475,221 @@ class ReportGenieDetailResponse(SQLModel):
 
 class DocxRequest(SQLModel):
     content: str
+    title: str | None = Field(default=None)
 
 
-class LlmInteraction(SQLModel, table=True):
+class Tool(str, Enum):
+    """Supported LLM functionalities."""
+
+    CHATBOT = "chatbot"
+    VERADOC = "veradoc"
+    FORMCONNECT = "formconnect"
+    REPORTGENIE = "reportgenie"
+    TWINCHECK = "twincheck"
+
+
+class ToolFeedback(str, Enum):
+    """LLM interaction feedback options."""
+
+    POSITIVE = "positive"
+    NEGATIVE = "negative"
+
+
+# Extra data types for ToolInteraction
+class ToolInteractionExtraData(SQLModel):
+    """Base class for LLM interaction extra data."""
+
+    llm_model_id: str | None = None
+    llm_provider: str | None = None
+
+
+class ReportGenieExtraData(ToolInteractionExtraData):
+    """Extra data for ReportGenie interactions."""
+
+    kb_name: str = ""
+    kb_id: str = ""
+    sections: str = ""
+    outline_name: str = ""
+    full_report: str = ""
+
+
+class ChatbotExtraData(ToolInteractionExtraData):
+    """Extra data for Chatbot interactions."""
+
+    session_id: str | None = None
+    is_follow_up: bool = False
+    sources: list[dict[str, Any]] | None = None
+    kb_name: str = ""
+    kb_id: str = ""
+
+
+class VeradocExtraData(ToolInteractionExtraData):
+    """Extra data for Veradoc interactions."""
+
+    kb_name: str = ""
+    kb_id: str = ""
+    document_name: str = ""
+    qa_pairs: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class FormconnectExtraData(ToolInteractionExtraData):
+    """Extra data for Formconnect interactions."""
+
+    file_count: int = 0
+
+
+class TwincheckTopicAnalysis(SQLModel):
+    """Individual topic analysis result for TwinCheck."""
+
+    topic: str
+    analysis: str
+
+
+class TwincheckDiffStats(SQLModel):
+    """Diff statistics for TwinCheck document comparison."""
+
+    additions: int
+    deletions: int
+    changes: int
+
+
+class TwincheckExtraData(ToolInteractionExtraData):
+    """Extra data for Twincheck interactions."""
+
+    topic_analysis: list[TwincheckTopicAnalysis] = Field(default_factory=list)
+    diff_stats: TwincheckDiffStats | None = None
+
+    def get_topic_analysis_dict(self) -> list[dict[str, str]]:
+        """Convert topic_analysis to dictionary format for API responses."""
+        return [
+            {"topic": ta.topic, "analysis": ta.analysis} for ta in self.topic_analysis
+        ]
+
+    def get_diff_stats_dict(self) -> dict[str, int] | None:
+        """Convert diff_stats to dictionary format for API responses."""
+        if self.diff_stats is None:
+            return None
+        return {
+            "additions": self.diff_stats.additions,
+            "deletions": self.diff_stats.deletions,
+            "changes": self.diff_stats.changes,
+        }
+
+
+class ToolInteraction(SQLModel, table=True):
     """Records all interactions with LLM services for analytics and auditing."""
 
-    __tablename__ = "llm_interactions"
+    __tablename__ = "tool_interactions"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     date_created: datetime = Field(default_factory=datetime.utcnow)
     user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
-    functionality: str = Field(
-        index=True
-    )  # 'chatbot', 'veradoc', 'formconnect', 'reportgenie'
-    input_data: str = Field(default=None)  # Stores the input prompt/question
-    output_data: str = Field(default=None)  # Stores the generated response
+    functionality: Tool = Field(index=True)
+    input_data: str | None = Field(default=None)  # Stores the input prompt/question
+    output_data: str | None = Field(default=None)  # Stores the generated response
     extra_data: dict[str, Any] | None = Field(
         default=None, sa_column=Column(JSON)
     )  # For additional info (JSON)
-    feedback: str | None = Field(default=None)  # 'correct' or 'incorrect'
+    feedback: ToolFeedback | None = Field(default=None)
     feedback_text: str | None = Field(default=None)  # User's additional comments
     feedback_date: datetime | None = Field(default=None)  # When feedback was provided
+
+    def get_typed_extra_data(self) -> ToolInteractionExtraData | None:
+        """
+        Get extra_data as a properly typed model based on functionality.
+
+        Returns:
+            Typed extra data model or None if no extra_data
+        """
+        if not self.extra_data:
+            return None
+
+        try:
+            if self.functionality == Tool.REPORTGENIE:
+                return ReportGenieExtraData(**self.extra_data)
+            elif self.functionality == Tool.CHATBOT:
+                return ChatbotExtraData(**self.extra_data)
+            elif self.functionality == Tool.VERADOC:
+                return VeradocExtraData(**self.extra_data)
+            elif self.functionality == Tool.FORMCONNECT:
+                return FormconnectExtraData(**self.extra_data)
+            elif self.functionality == Tool.TWINCHECK:
+                return TwincheckExtraData(**self.extra_data)
+            else:
+                # Fallback to base model for unknown functionalities
+                return ToolInteractionExtraData()
+        except ValidationError as e:
+            # Log the validation error for debugging
+            print(f"Validation error for {self.functionality}: {e}")
+            return ToolInteractionExtraData()
+        except Exception as e:
+            # Log unexpected errors
+            print(f"Unexpected error parsing extra_data for {self.functionality}: {e}")
+            return ToolInteractionExtraData()
+
+    def validate_reportgenie_data(self) -> tuple[bool, ReportGenieExtraData | None]:
+        """
+        Validate if extra_data can be parsed as ReportGenieExtraData.
+
+        Returns:
+            tuple: (is_valid, typed_data_or_none)
+        """
+        if not self.extra_data or self.functionality != Tool.REPORTGENIE:
+            return False, None
+
+        try:
+            validated_data = ReportGenieExtraData(**self.extra_data)
+            return True, validated_data
+        except ValidationError as e:
+            # Specific validation errors
+            print(f"ReportGenie validation failed: {e}")
+            return False, None
+        except Exception as e:
+            # Unexpected errors
+            print(f"Unexpected error validating ReportGenie data: {e}")
+            return False, None
+
+    def is_valid_reportgenie_data(self) -> bool:
+        """
+        Check if this interaction has valid ReportGenie extra data.
+
+        Returns:
+            bool: True if data is valid ReportGenieExtraData
+        """
+        is_valid, _ = self.validate_reportgenie_data()
+        return is_valid
+
+    def validate_veradoc_data(self) -> tuple[bool, VeradocExtraData | None]:
+        """
+        Validate if extra_data can be parsed as VeradocExtraData.
+
+        Returns:
+            tuple: (is_valid, typed_data_or_none)
+        """
+        if not self.extra_data or self.functionality != Tool.VERADOC:
+            return False, None
+
+        try:
+            validated_data = VeradocExtraData(**self.extra_data)
+            return True, validated_data
+        except ValidationError as e:
+            # Specific validation errors
+            print(f"VeraDoc validation failed: {e}")
+            return False, None
+        except Exception as e:
+            # Unexpected errors
+            print(f"Unexpected error validating VeraDoc data: {e}")
+            return False, None
+
+    def is_valid_veradoc_data(self) -> bool:
+        """
+        Check if this interaction has valid VeraDoc extra data.
+
+        Returns:
+            bool: True if data is valid VeradocExtraData
+        """
+        is_valid, _ = self.validate_veradoc_data()
+        return is_valid
 
 
 # Request model for TwinCheck

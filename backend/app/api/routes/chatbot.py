@@ -22,6 +22,8 @@ from app.core.config import settings
 from app.models import (
     KnowledgeBase,
     User,
+    Tool,
+    ChatbotExtraData,
 )
 from app.models import (
     Source as SourceORM,
@@ -36,9 +38,8 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 class SourceMetadata(BaseModel):
     """Metadata for document sources"""
 
-    source: str | None = None
+    source_name: str | None = None
     source_id: str | None = None
-    page: int | None = None
     # Allow additional fields since metadata can contain various keys
 
     class Config:
@@ -261,14 +262,8 @@ async def query_knowledge_base(
             output_fields=["content", "source_id", "title", "author", "url"],
         )
 
-        if not search_result["success"]:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Search failed: {search_result.get('error', 'Unknown error')}",
-            )
-
-        chunks = search_result["results"]
-        context = "\n\n".join([chunk["entity"]["content"] for chunk in chunks])
+        chunks = search_result.hits
+        context = "\n\n".join([chunk.entity.content for chunk in chunks])
         print(
             "Retrieved context:",
             context[:200] + "..." if len(context) > 200 else context,
@@ -277,37 +272,34 @@ async def query_knowledge_base(
         # Create a list of sources for citation
         sources: list[Source] = []
         for chunk in chunks:
-            entity = chunk["entity"]
+            entity = chunk.entity
 
             # Create metadata similar to the old format
             metadata = SourceMetadata(
-                source=entity.get("source", ""),
-                source_id=entity.get("source_id", ""),
-                page=entity.get("page", ""),
+                source_name=entity.source_id,
+                source_id=entity.source_id,
             )
 
             # Try to get source id from the source table
-            if entity.get("source_id"):
+            if entity.source_id:
                 source_entry = session.exec(
-                    select(SourceORM).where(SourceORM.id == entity["source_id"])
+                    select(SourceORM).where(SourceORM.id == uuid.UUID(entity.source_id))
                 ).first()
 
                 if source_entry:
                     metadata.source_id = str(source_entry.id)
                     # Use the source name if available
                     if source_entry.name:
-                        metadata.source = source_entry.name
+                        metadata.source_name = source_entry.name
                     print(f"Found source entry with ID: {source_entry.id}")
                 else:
-                    print(
-                        f"No source entry found for source_id: {entity.get('source_id')}"
-                    )
+                    print(f"No source entry found for source_id: {entity.source_id}")
 
             source = Source(
                 content=(
-                    entity["content"][:300] + "..."
-                    if len(entity["content"]) > 300
-                    else entity["content"]
+                    entity.content[:300] + "..."
+                    if len(entity.content) > 300
+                    else entity.content
                 ),
                 metadata=metadata,
             )
@@ -336,21 +328,23 @@ async def query_knowledge_base(
             )
 
         # Record the interaction
-        LlmService.record_llm_interaction(
+        LlmService.record_tool_interaction(
             session=session,
             user_id=current_user.id,
-            functionality="chatbot",
+            functionality=Tool.CHATBOT,
             input_data={
                 "question": question,
                 "rephrased_question": rephrased_question,
                 "kb_id": kb_id,
             },
             output_data=answer.content,
-            metadata={
-                "session_id": session_id,
-                "is_follow_up": is_follow_up,
-                "sources": [s.metadata for s in sources],
-            },
+            metadata=ChatbotExtraData(
+                session_id=session_id,
+                is_follow_up=is_follow_up,
+                sources=[s.metadata.model_dump() for s in sources],
+                kb_name=kb.title,
+                kb_id=kb_id,
+            ),
         )
 
         return QueryResponse(
@@ -489,15 +483,14 @@ async def query_document(
         for doc in docs:
             # Ensure source_data_id is included in metadata if available
             metadata = SourceMetadata(
-                source=doc.metadata.get("source", ""),
+                source_name=doc.metadata.get("source", ""),
                 source_id=doc.metadata.get("source_id", ""),
-                page=doc.metadata.get("page", ""),
             )
 
             # If the metadata contains a source path that matches a pattern from a KB
-            if metadata.source and isinstance(metadata.source, str):
+            if metadata.source_name and isinstance(metadata.source_name, str):
                 # Try to find the corresponding source_data_id
-                source_path = metadata.source
+                source_path = metadata.source_name
                 source_entry = session.exec(
                     select(SourceORM).where(SourceORM.name == Path(source_path).name)
                 ).first()
@@ -540,21 +533,21 @@ async def query_document(
         print("Sources:", len(sources))
 
         # After generating the answer and before returning:
-        LlmService.record_llm_interaction(
+        LlmService.record_tool_interaction(
             session=session,
             user_id=current_user.id,
-            functionality="chatbot",
+            functionality=Tool.CHATBOT,
             input_data={
                 "question": question,
                 "rephrased_question": rephrased_question,
                 "document": file.filename,
             },
             output_data=answer.content,
-            metadata={
-                "session_id": session_id,
-                "is_follow_up": is_follow_up,
-                "sources": [s.metadata for s in sources],
-            },
+            metadata=ChatbotExtraData(
+                session_id=session_id,
+                is_follow_up=is_follow_up,
+                sources=[s.metadata.model_dump() for s in sources],
+            ),
         )
 
         return DocumentQueryResponse(
@@ -673,13 +666,16 @@ async def query_text(
                 status_code=500, detail=f"Error generating answer: {str(e)}"
             )
 
-        LlmService.record_llm_interaction(
+        LlmService.record_tool_interaction(
             session=session,
             user_id=current_user.id,
-            functionality="chatbot",
+            functionality=Tool.CHATBOT,
             input_data={"question": question, "rephrased_question": rephrased_question},
             output_data=answer.content,
-            metadata={"session_id": session_id, "is_follow_up": is_follow_up},
+            metadata=ChatbotExtraData(
+                session_id=session_id,
+                is_follow_up=is_follow_up,
+            ),
         )
 
         return TextQueryResponse(

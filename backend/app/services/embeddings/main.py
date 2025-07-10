@@ -120,9 +120,27 @@ class EmbeddingService:
         return model_id in cls.AVAILABLE_MODELS
 
     @classmethod
-    def get_model_spec(cls, model_id: str) -> EmbeddingModelInfo | None:
-        """Get specification for a specific model."""
-        return cls.AVAILABLE_MODELS.get(model_id)
+    def get_model_spec(cls, model_id: str) -> EmbeddingModelInfo:
+        """
+        Get specification for a specific model.
+
+        Args:
+            model_id: The model identifier from the registry
+
+        Returns:
+            The model specification
+
+        Raises:
+            ValueError: If model is invalid or cannot be loaded
+        """
+        is_valid, error_msg = cls._validate_model(model_id)
+        if not is_valid:
+            raise ValueError(error_msg)
+
+        if model_id not in cls.AVAILABLE_MODELS:
+            raise ValueError(f"Model '{model_id}' not found.")
+
+        return cls.AVAILABLE_MODELS[model_id]
 
     @classmethod
     def get_models_by_provider(cls, provider: str) -> list[EmbeddingModelInfo]:
@@ -132,7 +150,7 @@ class EmbeddingService:
         ]
 
     @classmethod
-    def validate_model(cls, model_id: str) -> tuple[bool, str | None]:
+    def _validate_model(cls, model_id: str) -> tuple[bool, str | None]:
         """
         Validate if a model is available and properly configured.
 
@@ -148,7 +166,8 @@ class EmbeddingService:
 
         # validate provider-specific requirements
         if spec.provider == "openai":
-            if not os.getenv("OPENAI_API_KEY"):
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
                 return (
                     False,
                     f"OPENAI_API_KEY environment variable required for model '{model_id}'",
@@ -188,7 +207,7 @@ class EmbeddingService:
             ValueError: If model is invalid or cannot be loaded
         """
         # validate model
-        is_valid, error_msg = cls.validate_model(model_id)
+        is_valid, error_msg = cls._validate_model(model_id)
         if not is_valid:
             raise ValueError(error_msg)
 

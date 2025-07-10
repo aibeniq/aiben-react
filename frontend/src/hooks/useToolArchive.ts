@@ -2,10 +2,13 @@ import { useState, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
 import {
   VeradocGetVeradocDetailResponse,
+  ReportGenieDetailResponse,
+  ReportGenieHistoryItem,
   VeradocService,
   ReportgenieService,
   TwincheckService,
   FormconnectService,
+  VeraDocHistoryItem,
 } from "../client"
 import useCustomToast from "./useCustomToast"
 
@@ -21,8 +24,8 @@ interface ToolActions {
 }
 
 interface UseToolArchiveReturn {
-  veradoc: ToolState<{ [key: string]: unknown }, VeradocGetVeradocDetailResponse> & ToolActions
-  reportgenie: ToolState<{ [key: string]: unknown }, any> & ToolActions
+  veradoc: ToolState<VeraDocHistoryItem, VeradocGetVeradocDetailResponse> & ToolActions
+  reportgenie: ToolState<ReportGenieHistoryItem, ReportGenieDetailResponse> & ToolActions
   twincheck: ToolState<{ [key: string]: unknown }, any> & ToolActions
   formconnect: ToolState<{ [key: string]: unknown }, any> & ToolActions
   activeTab: string
@@ -39,14 +42,15 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // Veradoc (Review) state
-  const [veradocHistory, setVeradocHistory] = useState<{ [key: string]: unknown }[]>([])
+  const [veradocHistory, setVeradocHistory] = useState<VeraDocHistoryItem[]>([])
   const [selectedVeradocReport, setSelectedVeradocReport] =
     useState<VeradocGetVeradocDetailResponse | null>(null)
   const [isVeradocLoading, setIsVeradocLoading] = useState(false)
 
   // ReportGenie (Generate) state
-  const [reportgenieHistory, setReportgenieHistory] = useState<{ [key: string]: unknown }[]>([])
-  const [selectedReportgenieReport, setSelectedReportgenieReport] = useState<any>(null)
+  const [reportgenieHistory, setReportgenieHistory] = useState<ReportGenieHistoryItem[]>([])
+  const [selectedReportgenieReport, setSelectedReportgenieReport] =
+    useState<ReportGenieDetailResponse | null>(null)
   const [isReportgenieLoading, setIsReportgenieLoading] = useState(false)
 
   // TwinCheck (Compare) state
@@ -67,23 +71,23 @@ export const useToolArchive = (): UseToolArchiveReturn => {
 
   // Wrapper for setActiveTab to log state changes
   const setActiveTab = (newTab: string) => {
-    console.log(`Setting active tab to ${newTab}, showAllUsers is currently: ${showAllUsers}`);
-    setActiveTabInternal(newTab);
+    console.log(`Setting active tab to ${newTab}, showAllUsers is currently: ${showAllUsers}`)
+    setActiveTabInternal(newTab)
   }
 
   // Toggle handler for showing all users
   const toggleShowAllUsers = () => {
-    console.log("All Users toggle clicked. New value:", !showAllUsers);
-    setShowAllUsers(prev => !prev);
+    console.log("All Users toggle clicked. New value:", !showAllUsers)
+    setShowAllUsers((prev) => !prev)
   }
 
   // Veradoc history query
   const veradocHistoryQuery = useQuery({
     queryKey: ["veradocHistory", showAllUsers],
     queryFn: async () => {
-      const response = await VeradocService.getVeradocHistory({ 
+      const response = await VeradocService.getVeradocHistory({
         limit: 20,
-        showAll: showAllUsers 
+        showAll: showAllUsers,
       })
       return response
     },
@@ -94,9 +98,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const reportgenieHistoryQuery = useQuery({
     queryKey: ["reportgenieHistory", showAllUsers],
     queryFn: async () => {
-      const response = await ReportgenieService.getReportHistory({ 
+      const response = await ReportgenieService.getReportHistory({
         limit: 20,
-        showAll: showAllUsers 
+        showAll: showAllUsers,
       })
       return response
     },
@@ -107,9 +111,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const twincheckHistoryQuery = useQuery({
     queryKey: ["twincheckHistory", showAllUsers],
     queryFn: async () => {
-      const response = await TwincheckService.getComparisonHistory({ 
+      const response = await TwincheckService.getComparisonHistory({
         limit: 20,
-        showAll: showAllUsers 
+        showAll: showAllUsers,
       })
       return response
     },
@@ -120,9 +124,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const formconnectHistoryQuery = useQuery({
     queryKey: ["formconnectHistory", showAllUsers],
     queryFn: async () => {
-      const response = await FormconnectService.getFormHistory({ 
+      const response = await FormconnectService.getFormHistory({
         limit: 20,
-        showAll: showAllUsers 
+        showAll: showAllUsers,
       })
       return response
     },
@@ -253,6 +257,6 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     loadingDownload,
     setLoadingDownload,
     showAllUsers,
-    toggleShowAllUsers
+    toggleShowAllUsers,
   }
 }

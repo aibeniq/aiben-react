@@ -1,11 +1,12 @@
 import uuid
 from datetime import datetime, timezone
 
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from app.api.deps import SessionDep
-from app.models import LlmInteraction, Message
+from app.models import ToolInteraction, Message, ToolFeedback
 
 router = APIRouter(prefix="/feedback", tags=["feedback"])
 
@@ -22,7 +23,7 @@ async def submit_feedback(
 ) -> Message:
     """Submit feedback for an LLM interaction."""
     # Find the interaction
-    interaction = session.get(LlmInteraction, request.interaction_id)
+    interaction = session.get(ToolInteraction, request.interaction_id)
 
     # Verify that the interaction exists and belongs to the user
     if not interaction:
@@ -36,7 +37,7 @@ async def submit_feedback(
     #    )
 
     # Update the interaction with the feedback
-    interaction.feedback = request.feedback
+    interaction.feedback = ToolFeedback(request.feedback)
     interaction.feedback_text = request.feedback_text
     interaction.feedback_date = datetime.now(timezone.utc)
 

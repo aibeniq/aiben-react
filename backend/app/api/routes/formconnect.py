@@ -16,8 +16,10 @@ from app.models import (
     FormConnectForm,
     FormConnectRequest,
     FormConnectResponse,
-    LlmInteraction,
+    ToolInteraction,
+    Tool,
     Message,
+    FormconnectExtraData,
 )
 from app.services.llms import LlmService
 
@@ -276,13 +278,13 @@ async def process_form(
             "extracted_data": extracted_results,
         }
 
-    LlmService.record_llm_interaction(
+    LlmService.record_tool_interaction(
         session=session,
         user_id=current_user.id,
-        functionality="formconnect",
+        functionality=Tool.FORMCONNECT,
         input_data={"fields": form_connect_in.fields, "files": file_names},
         output_data=result,
-        metadata={"file_count": total_files},
+        metadata=FormconnectExtraData(file_count=total_files),
     )
 
     # Return the comparison results as a dictionary
@@ -399,7 +401,7 @@ async def get_form_detail(
     """Retrieve a specific form processing's full content by ID."""
     print("Received interaction ID:", interaction_id)
     try:
-        report = session.get(LlmInteraction, interaction_id)
+        report = session.get(ToolInteraction, interaction_id)
         if not report:
             raise HTTPException(
                 status_code=404, detail="Form processing result not found"
@@ -483,17 +485,17 @@ async def get_form_history(
 
     try:
         # Start with base query
-        query = select(LlmInteraction).where(
-            LlmInteraction.functionality == "formconnect"
+        query = select(ToolInteraction).where(
+            ToolInteraction.functionality == Tool.FORMCONNECT
         )
 
         # Only filter by user if not showing all users
         if not show_all:
-            query = query.where(LlmInteraction.user_id == current_user.id)
+            query = query.where(ToolInteraction.user_id == current_user.id)
 
         # Add ordering and pagination
         interactions = session.exec(
-            query.order_by(desc(LlmInteraction.date_created)).offset(skip).limit(limit)
+            query.order_by(desc(ToolInteraction.date_created)).offset(skip).limit(limit)
         ).all()
 
         result = []
