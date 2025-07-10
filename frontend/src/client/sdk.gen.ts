@@ -277,7 +277,7 @@ export class FeedbackService {
   ): CancelablePromise<FeedbackCreateFeedbackResponse> {
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/api/v1/feedback/",
+      url: "/api/v1/feedback/",
       formData: data.formData,
       mediaType: "multipart/form-data",
       errors: {
@@ -302,7 +302,7 @@ export class FeedbackService {
   ): CancelablePromise<FeedbackGetFeedbacksResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/api/v1/feedback/",
+      url: "/api/v1/feedback/",
       query: {
         skip: data.skip,
         limit: data.limit,
@@ -328,7 +328,7 @@ export class FeedbackService {
   ): CancelablePromise<FeedbackGetFeedbackResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/api/v1/feedback/{feedback_id}",
+      url: "/api/v1/feedback/{feedback_id}",
       path: {
         feedback_id: data.feedbackId,
       },
@@ -352,7 +352,7 @@ export class FeedbackService {
   ): CancelablePromise<FeedbackUpdateFeedbackResponse> {
     return __request(OpenAPI, {
       method: "PUT",
-      url: "/api/v1/api/v1/feedback/{feedback_id}",
+      url: "/api/v1/feedback/{feedback_id}",
       path: {
         feedback_id: data.feedbackId,
       },
@@ -377,7 +377,7 @@ export class FeedbackService {
   ): CancelablePromise<FeedbackDeleteFeedbackResponse> {
     return __request(OpenAPI, {
       method: "DELETE",
-      url: "/api/v1/api/v1/feedback/{feedback_id}",
+      url: "/api/v1/feedback/{feedback_id}",
       path: {
         feedback_id: data.feedbackId,
       },
@@ -400,7 +400,7 @@ export class FeedbackService {
   ): CancelablePromise<FeedbackGetFeedbackImagesResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/api/v1/feedback/{feedback_id}/images",
+      url: "/api/v1/feedback/{feedback_id}/images",
       path: {
         feedback_id: data.feedbackId,
       },
@@ -424,7 +424,7 @@ export class FeedbackService {
   ): CancelablePromise<FeedbackGetFeedbackImageResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/api/v1/feedback/{feedback_id}/images/{image_id}",
+      url: "/api/v1/feedback/{feedback_id}/images/{image_id}",
       path: {
         feedback_id: data.feedbackId,
         image_id: data.imageId,
@@ -452,7 +452,7 @@ export class FeedbackService {
   ): CancelablePromise<FeedbackGetAllFeedbacksAdminResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/api/v1/feedback/admin/all",
+      url: "/api/v1/feedback/admin/all",
       query: {
         skip: data.skip,
         limit: data.limit,
@@ -480,7 +480,7 @@ export class FeedbackService {
   ): CancelablePromise<FeedbackUpdateFeedbackAdminResponse> {
     return __request(OpenAPI, {
       method: "PUT",
-      url: "/api/v1/api/v1/feedback/admin/{feedback_id}",
+      url: "/api/v1/feedback/admin/{feedback_id}",
       path: {
         feedback_id: data.feedbackId,
       },
@@ -1518,7 +1518,7 @@ export class ToolfeedbackService {
   ): CancelablePromise<ToolfeedbackSubmitToolFeedbackResponse> {
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/api/v1/toolfeedback/",
+      url: "/api/v1/toolfeedback/",
       query: {
         interaction_id: data.interactionId,
         feedback: data.feedback,
