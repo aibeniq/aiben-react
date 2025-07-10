@@ -24,6 +24,7 @@ from app.models import (
 )
 from app.services.embeddings import load_embeddings_model
 from app.core.config import settings
+from app.services.pdf_utils import load_pdf_with_pypdf
 import hashlib
 
 from app.services.knowledgebases import KnowledgeBaseService
@@ -34,7 +35,9 @@ import tempfile
 
 from datetime import datetime
 
-from langchain_community.document_loaders import TextLoader, PyPDFLoader
+from langchain_community.document_loaders import TextLoader
+
+# from langchain_community.document_loaders import PyPDFLoader  # Removed - using pypdf instead
 import docx
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
@@ -184,9 +187,8 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
 
     try:
         if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
-            print("Loading PDF with PyPDFLoader...")
-            loader = PyPDFLoader(temp_file_path)
-            loaded_documents = loader.load()
+            print("Loading PDF with PyPDF...")
+            loaded_documents = load_pdf_with_pypdf(temp_file_path, file.filename)
         elif (
             content_type
             == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"

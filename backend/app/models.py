@@ -716,3 +716,14 @@ class GenerateOutlineRequest(SQLModel):
 class GenerateOutlineResponse(SQLModel):
     sections: List[str]
     description_analysis: str
+
+
+# Model for API compatibility with frontend expectations
+class EmbeddingModelInfo(SQLModel):
+    id: str
+    provider: str
+    model_name: str
+    dimensions: int
+    max_input_length: Optional[int] = None
+    cost_per_1M_tokens: Optional[float] = None
+    description: Optional[str] = None

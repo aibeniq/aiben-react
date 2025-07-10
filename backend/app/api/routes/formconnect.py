@@ -41,7 +41,9 @@ import os
 import base64
 from tempfile import NamedTemporaryFile
 from pathlib import Path
-import fitz  # PyMuPDF
+
+# import fitz  # PyMuPDF - Removed for commercial licensing
+from app.services.pdf_utils import load_pdf_with_pypdf
 
 from datetime import datetime
 

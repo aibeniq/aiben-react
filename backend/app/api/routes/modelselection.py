@@ -16,6 +16,7 @@ from app.models import (
     EmbeddingModelPublic,
     EmbeddingModelsPublic,
     EmbeddingModelValidate,
+    EmbeddingModelInfo,  # Add the new model
     ModelProvider,
     Message,
     User,
@@ -30,12 +31,35 @@ router = APIRouter(prefix="/embedding-models", tags=["embedding-models"])
 @router.get("/providers", response_model=Dict[str, List[str]])
 def get_available_providers() -> Dict[str, List[str]]:
     """
-    Get the list of available model providers for LLMs and embedding models.
+    Get list of available embedding providers.
     """
     return {
-        "llm_providers": settings.llm_providers,
         "embedding_providers": settings.embedding_providers,
+        "llm_providers": settings.llm_providers,
     }
+
+
+def get_model_dimensions(model_id: str, provider: ModelProvider) -> int:
+    """Get model dimensions based on known model specifications."""
+    # Default dimensions for known models
+    model_dimensions = {
+        # OpenAI models
+        "text-embedding-3-small": 1536,
+        "text-embedding-3-large": 3072,
+        "text-embedding-ada-002": 1536,
+        # AWS models
+        "amazon.titan-embed-text-v2:0": 1024,
+        "cohere.embed-english-v3": 1024,
+        "cohere.embed-multilingual-v3": 1024,
+        # HuggingFace models
+        "all-MiniLM-L6-v2": 384,
+        "all-mpnet-base-v2": 768,
+        "all-MiniLM-L12-v2": 384,
+        # Ollama models
+        "nomic-embed-text": 768,
+    }
+
+    return model_dimensions.get(model_id, 768)  # Default to 768 if unknown
 
 
 # Initialize with default models
@@ -111,18 +135,28 @@ def get_embedding_models(
     # Initialize default models if none exist
     initialize_default_models(session)
 
-    # First get system models (no owner_id)
+    # Get enabled providers from settings
+    enabled_providers = settings.embedding_providers
+
+    # First get system models (no owner_id) that have enabled providers
     system_models = session.exec(
         select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
     ).all()
 
-    # Then get user's custom models
+    # Filter system models by enabled providers
+    filtered_system_models = [
+        model
+        for model in system_models
+        if model.provider.value.lower() in enabled_providers
+    ]
+
+    # Then get user's custom models (always include regardless of provider)
     user_models = session.exec(
         select(EmbeddingModel).where(EmbeddingModel.owner_id == current_user.id)
     ).all()
 
     # Combine the results
-    models = system_models + user_models
+    models = filtered_system_models + user_models
     count = len(models)
 
     # Apply pagination
@@ -163,9 +197,7 @@ def get_default_embedding_model(
             print(
                 f"Using system default embedding model: {model.name} ({model.provider.value})"
             )
-            return load_embeddings_model(
-                provider=model.provider, model_id=model.model_id
-            )
+            return model
 
     # If no enabled system models found, raise a helpful error
     enabled_str = ", ".join(enabled_providers)

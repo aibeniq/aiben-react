@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     FULL_SCAN_DOCUMENT_CHUNK_OVERLAP: int = 200
     RAG_DOCUMENT_CHUNK_SIZE: int = 1000
     RAG_DOCUMENT_CHUNK_OVERLAP: int = 200
-    RAG_NUM_CHUNKS: int = 25  # Number of chunks to retrieve for RAG search
+    RAG_NUM_CHUNKS: int = 5  # Number of chunks to retrieve for RAG search
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -103,10 +103,10 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
-    # ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
-    # ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
-    ENABLED_LLM_PROVIDERS: str = "openai,aws"
-    ENABLED_EMBEDDING_PROVIDERS: str = "openai,aws"
+    ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
+    ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
+    # ENABLED_LLM_PROVIDERS: str = "openai,aws"
+    # ENABLED_EMBEDDING_PROVIDERS: str = "openai,aws"
 
     # OpenAI API Configuration
     OPENAI_TIMEOUT: int = 600  # 10 minutes timeout for OpenAI API calls
