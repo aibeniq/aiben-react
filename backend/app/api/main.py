@@ -12,6 +12,7 @@ from app.api.routes import (
     private,
     reportgenie,
     sourceretrieval,
+    toolfeedback,
     twincheck,
     users,
     utils,
@@ -34,6 +35,7 @@ api_router.include_router(llms.router)
 api_router.include_router(chatbot.router)
 api_router.include_router(sourceretrieval.router)
 api_router.include_router(feedback.router, prefix="/api/v1")
+api_router.include_router(toolfeedback.router, prefix="/api/v1")
 
 
 if settings.ENVIRONMENT == "local":

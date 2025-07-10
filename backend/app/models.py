@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 from enum import Enum
+import json
 
 from pydantic import EmailStr, field_validator, ValidationError
 from sqlmodel import Field, Relationship, SQLModel, Column
@@ -529,6 +530,14 @@ class ReportGenieExtraData(ToolInteractionExtraData):
     sections: str = ""
     outline_name: str = ""
     full_report: str = ""
+
+    @field_validator("sections", mode="before")
+    @classmethod
+    def validate_sections(cls, v: Any) -> str:
+        """convert sections to string if it's a list (for backward compatibility)"""
+        if isinstance(v, list):
+            return json.dumps(v)
+        return str(v)
 
 
 class ChatbotExtraData(ToolInteractionExtraData):

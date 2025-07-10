@@ -10,8 +10,24 @@ import type {
   ChatQueryDocumentResponse,
   ChatQueryTextData,
   ChatQueryTextResponse,
-  FeedbackSubmitFeedbackData,
-  FeedbackSubmitFeedbackResponse,
+  FeedbackCreateFeedbackData,
+  FeedbackCreateFeedbackResponse,
+  FeedbackGetFeedbacksData,
+  FeedbackGetFeedbacksResponse,
+  FeedbackGetFeedbackData,
+  FeedbackGetFeedbackResponse,
+  FeedbackUpdateFeedbackData,
+  FeedbackUpdateFeedbackResponse,
+  FeedbackDeleteFeedbackData,
+  FeedbackDeleteFeedbackResponse,
+  FeedbackGetFeedbackImagesData,
+  FeedbackGetFeedbackImagesResponse,
+  FeedbackGetFeedbackImageData,
+  FeedbackGetFeedbackImageResponse,
+  FeedbackGetAllFeedbacksAdminData,
+  FeedbackGetAllFeedbacksAdminResponse,
+  FeedbackUpdateFeedbackAdminData,
+  FeedbackUpdateFeedbackAdminResponse,
   FilesGetSourceContentData,
   FilesGetSourceContentResponse,
   FormconnectProcessFormData,
@@ -94,6 +110,8 @@ import type {
   ReportgenieGetReportHistoryResponse,
   ReportgenieGetReportDetailData,
   ReportgenieGetReportDetailResponse,
+  ToolfeedbackSubmitToolFeedbackData,
+  ToolfeedbackSubmitToolFeedbackResponse,
   TwincheckCompareDocumentsData,
   TwincheckCompareDocumentsResponse,
   TwincheckGetComparisonHistoryData,
@@ -228,9 +246,7 @@ export class ChatService {
    * @returns TextQueryResponse Successful Response
    * @throws ApiError
    */
-  public static queryText(
-    data: ChatQueryTextData,
-  ): CancelablePromise<ChatQueryTextResponse> {
+  public static queryText(data: ChatQueryTextData): CancelablePromise<ChatQueryTextResponse> {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/chat/text",
@@ -249,26 +265,227 @@ export class ChatService {
 
 export class FeedbackService {
   /**
-   * Submit Feedback
-   * Submit feedback for an LLM interaction.
+   * Create Feedback
+   * Create a new feedback submission with optional images.
    * @param data The data for the request.
-   * @param data.interactionId
-   * @param data.feedback
-   * @param data.feedbackText
-   * @returns Message Successful Response
+   * @param data.formData
+   * @returns FeedbackPublic Successful Response
    * @throws ApiError
    */
-  public static submitFeedback(
-    data: FeedbackSubmitFeedbackData,
-  ): CancelablePromise<FeedbackSubmitFeedbackResponse> {
+  public static createFeedback(
+    data: FeedbackCreateFeedbackData,
+  ): CancelablePromise<FeedbackCreateFeedbackResponse> {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/api/v1/feedback/",
-      query: {
-        interaction_id: data.interactionId,
-        feedback: data.feedback,
-        feedback_text: data.feedbackText,
+      formData: data.formData,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
       },
+    })
+  }
+
+  /**
+   * Get Feedbacks
+   * Get feedback submissions with optional filtering.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @param data.feedbackType
+   * @param data.status
+   * @returns FeedbacksPublic Successful Response
+   * @throws ApiError
+   */
+  public static getFeedbacks(
+    data: FeedbackGetFeedbacksData = {},
+  ): CancelablePromise<FeedbackGetFeedbacksResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/api/v1/feedback/",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+        feedback_type: data.feedbackType,
+        status: data.status,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Feedback
+   * Get a specific feedback submission.
+   * @param data The data for the request.
+   * @param data.feedbackId
+   * @returns FeedbackPublic Successful Response
+   * @throws ApiError
+   */
+  public static getFeedback(
+    data: FeedbackGetFeedbackData,
+  ): CancelablePromise<FeedbackGetFeedbackResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/api/v1/feedback/{feedback_id}",
+      path: {
+        feedback_id: data.feedbackId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Feedback
+   * Update a feedback submission.
+   * @param data The data for the request.
+   * @param data.feedbackId
+   * @param data.requestBody
+   * @returns FeedbackPublic Successful Response
+   * @throws ApiError
+   */
+  public static updateFeedback(
+    data: FeedbackUpdateFeedbackData,
+  ): CancelablePromise<FeedbackUpdateFeedbackResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/api/v1/feedback/{feedback_id}",
+      path: {
+        feedback_id: data.feedbackId,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Feedback
+   * Delete a feedback submission.
+   * @param data The data for the request.
+   * @param data.feedbackId
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static deleteFeedback(
+    data: FeedbackDeleteFeedbackData,
+  ): CancelablePromise<FeedbackDeleteFeedbackResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/api/v1/feedback/{feedback_id}",
+      path: {
+        feedback_id: data.feedbackId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Feedback Images
+   * Get all images for a specific feedback submission.
+   * @param data The data for the request.
+   * @param data.feedbackId
+   * @returns FeedbackImageResponse Successful Response
+   * @throws ApiError
+   */
+  public static getFeedbackImages(
+    data: FeedbackGetFeedbackImagesData,
+  ): CancelablePromise<FeedbackGetFeedbackImagesResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/api/v1/feedback/{feedback_id}/images",
+      path: {
+        feedback_id: data.feedbackId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Feedback Image
+   * Get a specific image for a feedback submission.
+   * @param data The data for the request.
+   * @param data.feedbackId
+   * @param data.imageId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getFeedbackImage(
+    data: FeedbackGetFeedbackImageData,
+  ): CancelablePromise<FeedbackGetFeedbackImageResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/api/v1/feedback/{feedback_id}/images/{image_id}",
+      path: {
+        feedback_id: data.feedbackId,
+        image_id: data.imageId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get All Feedbacks Admin
+   * Get all feedback submissions (admin only).
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @param data.feedbackType
+   * @param data.status
+   * @param data.userId
+   * @returns FeedbacksPublic Successful Response
+   * @throws ApiError
+   */
+  public static getAllFeedbacksAdmin(
+    data: FeedbackGetAllFeedbacksAdminData = {},
+  ): CancelablePromise<FeedbackGetAllFeedbacksAdminResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/api/v1/feedback/admin/all",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+        feedback_type: data.feedbackType,
+        status: data.status,
+        user_id: data.userId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Feedback Admin
+   * Update feedback status and admin notes (admin only).
+   * @param data The data for the request.
+   * @param data.feedbackId
+   * @param data.requestBody
+   * @returns FeedbackPublic Successful Response
+   * @throws ApiError
+   */
+  public static updateFeedbackAdmin(
+    data: FeedbackUpdateFeedbackAdminData,
+  ): CancelablePromise<FeedbackUpdateFeedbackAdminResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/api/v1/feedback/admin/{feedback_id}",
+      path: {
+        feedback_id: data.feedbackId,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
       errors: {
         422: "Validation Error",
       },
@@ -525,9 +742,7 @@ export class ItemsService {
    * @returns ItemPublic Successful Response
    * @throws ApiError
    */
-  public static createItem(
-    data: ItemsCreateItemData,
-  ): CancelablePromise<ItemsCreateItemResponse> {
+  public static createItem(data: ItemsCreateItemData): CancelablePromise<ItemsCreateItemResponse> {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/items/",
@@ -547,9 +762,7 @@ export class ItemsService {
    * @returns ItemPublic Successful Response
    * @throws ApiError
    */
-  public static readItem(
-    data: ItemsReadItemData,
-  ): CancelablePromise<ItemsReadItemResponse> {
+  public static readItem(data: ItemsReadItemData): CancelablePromise<ItemsReadItemResponse> {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/items/{id}",
@@ -571,9 +784,7 @@ export class ItemsService {
    * @returns ItemPublic Successful Response
    * @throws ApiError
    */
-  public static updateItem(
-    data: ItemsUpdateItemData,
-  ): CancelablePromise<ItemsUpdateItemResponse> {
+  public static updateItem(data: ItemsUpdateItemData): CancelablePromise<ItemsUpdateItemResponse> {
     return __request(OpenAPI, {
       method: "PUT",
       url: "/api/v1/items/{id}",
@@ -596,9 +807,7 @@ export class ItemsService {
    * @returns Message Successful Response
    * @throws ApiError
    */
-  public static deleteItem(
-    data: ItemsDeleteItemData,
-  ): CancelablePromise<ItemsDeleteItemResponse> {
+  public static deleteItem(data: ItemsDeleteItemData): CancelablePromise<ItemsDeleteItemResponse> {
     return __request(OpenAPI, {
       method: "DELETE",
       url: "/api/v1/items/{id}",
@@ -1234,7 +1443,7 @@ export class ReportgenieService {
       method: "POST",
       url: "/api/v1/reportgenie/generate/docx",
       body: data.requestBody,
-      responseType: 'blob',
+      responseType: "blob",
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
@@ -1285,6 +1494,35 @@ export class ReportgenieService {
       url: "/api/v1/reportgenie/history/{report_id}",
       path: {
         report_id: data.reportId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
+export class ToolfeedbackService {
+  /**
+   * Submit Tool Feedback
+   * Submit feedback for a tool interaction.
+   * @param data The data for the request.
+   * @param data.interactionId
+   * @param data.feedback
+   * @param data.feedbackText
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static submitToolFeedback(
+    data: ToolfeedbackSubmitToolFeedbackData,
+  ): CancelablePromise<ToolfeedbackSubmitToolFeedbackResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/api/v1/toolfeedback/",
+      query: {
+        interaction_id: data.interactionId,
+        feedback: data.feedback,
+        feedback_text: data.feedbackText,
       },
       errors: {
         422: "Validation Error",
@@ -1493,7 +1731,7 @@ export class TwincheckService {
       method: "POST",
       url: "/api/v1/twincheck/generate/docx",
       body: data.requestBody,
-      responseType: 'blob',
+      responseType: "blob",
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
@@ -1536,9 +1774,7 @@ export class UsersService {
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
-  public static createUser(
-    data: UsersCreateUserData,
-  ): CancelablePromise<UsersCreateUserResponse> {
+  public static createUser(data: UsersCreateUserData): CancelablePromise<UsersCreateUserResponse> {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/users/",
@@ -1674,9 +1910,7 @@ export class UsersService {
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
-  public static updateUser(
-    data: UsersUpdateUserData,
-  ): CancelablePromise<UsersUpdateUserResponse> {
+  public static updateUser(data: UsersUpdateUserData): CancelablePromise<UsersUpdateUserResponse> {
     return __request(OpenAPI, {
       method: "PATCH",
       url: "/api/v1/users/{user_id}",
@@ -1699,9 +1933,7 @@ export class UsersService {
    * @returns Message Successful Response
    * @throws ApiError
    */
-  public static deleteUser(
-    data: UsersDeleteUserData,
-  ): CancelablePromise<UsersDeleteUserResponse> {
+  public static deleteUser(data: UsersDeleteUserData): CancelablePromise<UsersDeleteUserResponse> {
     return __request(OpenAPI, {
       method: "DELETE",
       url: "/api/v1/users/{user_id}",
@@ -1724,9 +1956,7 @@ export class UtilsService {
    * @returns Message Successful Response
    * @throws ApiError
    */
-  public static testEmail(
-    data: UtilsTestEmailData,
-  ): CancelablePromise<UtilsTestEmailResponse> {
+  public static testEmail(data: UtilsTestEmailData): CancelablePromise<UtilsTestEmailResponse> {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/utils/test-email/",
@@ -1953,7 +2183,7 @@ export class VeradocService {
       method: "POST",
       url: "/api/v1/veradoc/generate/docx",
       body: data.requestBody,
-      responseType: 'blob',
+      responseType: "blob",
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
