@@ -244,6 +244,21 @@ class SourceData(SQLModel, table=True):
     file_hash: str = Field(max_length=64)  # SHA-256 hash is 64 characters
 
 
+# Model for storing feedback images
+class FeedbackImage(SQLModel, table=True):
+    __tablename__ = "feedback_images"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    feedback_id: uuid.UUID = Field(
+        foreign_key="feedback.id", nullable=False, ondelete="CASCADE"
+    )
+    feedback: "Feedback" = Relationship(back_populates="images")
+    filename: str = Field(max_length=255)  # Original filename
+    content_type: str = Field(max_length=100)  # MIME type (e.g., image/jpeg, image/png)
+    data: bytes = Field(sa_type=LargeBinary)  # Image binary data
+    file_size: int = Field()  # File size in bytes
+    date_uploaded: datetime = Field(default_factory=datetime.utcnow)
+
+
 # Response model for source content retrieval
 class SourceContentResponse(SQLModel):
     id: str
@@ -766,11 +781,31 @@ class FeedbackBase(SQLModel):
     description: str = Field(min_length=1, max_length=2000)
     feedback_type: FeedbackType
     status: FeedbackStatus = Field(default=FeedbackStatus.OPEN)
+    has_images: bool = Field(
+        default=False
+    )  # Flag to indicate if feedback has attached images
 
 
 # Properties to receive on feedback creation
 class FeedbackCreate(FeedbackBase):
     pass
+
+
+# Properties for feedback image upload
+class FeedbackImageUpload(SQLModel):
+    filename: str = Field(max_length=255)
+    content_type: str = Field(max_length=100)
+    data: bytes = Field()  # Base64 encoded image data
+    file_size: int = Field(gt=0, le=10 * 1024 * 1024)  # Max 10MB file size
+
+
+# Response model for feedback image
+class FeedbackImageResponse(SQLModel):
+    id: uuid.UUID
+    filename: str
+    content_type: str
+    file_size: int
+    date_uploaded: datetime
 
 
 # Properties to receive on feedback update
@@ -790,6 +825,9 @@ class Feedback(FeedbackBase, table=True):
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
     user: User | None = Relationship(back_populates="feedback")
+    images: list["FeedbackImage"] = Relationship(
+        back_populates="feedback", cascade_delete=True
+    )
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
     admin_notes: str | None = Field(
@@ -804,6 +842,7 @@ class FeedbackPublic(FeedbackBase):
     date_created: datetime
     date_modified: datetime
     admin_notes: str | None = None
+    image_count: int = Field(default=0)  # Number of attached images
 
 
 class FeedbacksPublic(SQLModel):
