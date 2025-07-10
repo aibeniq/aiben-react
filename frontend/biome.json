@@ -34,15 +34,5 @@
       "bracketSpacing": true,
       "bracketSameLine": false
     }
-  },
-  "typescript": {
-    "formatter": {
-      "quoteStyle": "double",
-      "semicolons": "asNeeded",
-      "trailingCommas": "all",
-      "arrowParentheses": "always",
-      "bracketSpacing": true,
-      "bracketSameLine": false
-    }
   }
 }
