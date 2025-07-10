@@ -493,11 +493,11 @@ const ReportGenie = () => {
                                                 borderRadius="md"
                                                 bg="bg"
                                               >
-                                                {citation.metadata?.source_id ? (
+                                                {citation.source_metadata?.source_id ? (
                                                   <SourceLink
-                                                    sourceId={citation.metadata.source_id}
+                                                    sourceId={citation.source_metadata.source_id}
                                                     fileName={getDisplayFileName(
-                                                      citation.metadata.url || "",
+                                                      citation.source_metadata.url || "",
                                                     )}
                                                     ml={1}
                                                     fontWeight="normal"
@@ -512,7 +512,7 @@ const ReportGenie = () => {
                                                     color="blue.600"
                                                   >
                                                     {getDisplayFileName(
-                                                      citation.metadata?.url || "Unknown",
+                                                      citation.source_metadata?.url || "Unknown",
                                                     )}
                                                   </Text>
                                                 )}
