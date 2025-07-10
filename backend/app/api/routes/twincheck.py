@@ -24,7 +24,7 @@ from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 from app.models import (
     DocxRequest,
-    LlmInteraction,
+    ToolInteraction,
     Message,
     TwinCheckDetailFeedback,
     TwinCheckDetailResponse,
