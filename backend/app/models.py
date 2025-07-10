@@ -76,6 +76,9 @@ class User(UserBase, table=True):
     knowledge_bases: list["KnowledgeBase"] = Relationship(
         back_populates="owner", cascade_delete=True
     )
+    feedback: list["Feedback"] = Relationship(
+        back_populates="user", cascade_delete=True
+    )
 
 
 # Properties to return via API, id is always required
@@ -734,3 +737,81 @@ class TwinCheckDetailResponse(SQLModel):
     comparison_topics: str
     results: TwinCheckDetailResults
     feedback: TwinCheckDetailFeedback
+
+
+# Feedback types for general user feedback
+class FeedbackType(str, Enum):
+    """Types of general feedback users can submit."""
+
+    FEATURE_REQUEST = "feature_request"
+    BUG_REPORT = "bug_report"
+    GENERAL_FEEDBACK = "general_feedback"
+    IMPROVEMENT_SUGGESTION = "improvement_suggestion"
+    OTHER = "other"
+
+
+# Feedback status
+class FeedbackStatus(str, Enum):
+    """Status of feedback items."""
+
+    OPEN = "open"
+    IN_PROGRESS = "in_progress"
+    RESOLVED = "resolved"
+    CLOSED = "closed"
+
+
+# Shared properties for feedback
+class FeedbackBase(SQLModel):
+    title: str = Field(min_length=1, max_length=255)
+    description: str = Field(min_length=1, max_length=2000)
+    feedback_type: FeedbackType
+    status: FeedbackStatus = Field(default=FeedbackStatus.OPEN)
+
+
+# Properties to receive on feedback creation
+class FeedbackCreate(FeedbackBase):
+    pass
+
+
+# Properties to receive on feedback update
+class FeedbackUpdate(SQLModel):
+    title: str | None = Field(default=None, min_length=1, max_length=255)
+    description: str | None = Field(default=None, min_length=1, max_length=2000)
+    feedback_type: FeedbackType | None = Field(default=None)
+    status: FeedbackStatus | None = Field(default=None)
+
+
+# Database model for feedback
+class Feedback(FeedbackBase, table=True):
+    __tablename__ = "feedback"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    user: User | None = Relationship(back_populates="feedback")
+    date_created: datetime = Field(default_factory=datetime.utcnow)
+    date_modified: datetime = Field(default_factory=datetime.utcnow)
+    admin_notes: str | None = Field(
+        default=None, max_length=2000
+    )  # For admin responses/notes
+
+
+# Properties to return via API
+class FeedbackPublic(FeedbackBase):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    date_created: datetime
+    date_modified: datetime
+    admin_notes: str | None = None
+
+
+class FeedbacksPublic(SQLModel):
+    data: list[FeedbackPublic]
+    count: int
+
+
+# Admin-only properties for feedback management
+class FeedbackAdminUpdate(SQLModel):
+    status: FeedbackStatus | None = Field(default=None)
+    admin_notes: str | None = Field(default=None, max_length=2000)
