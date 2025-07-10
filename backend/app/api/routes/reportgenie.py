@@ -57,7 +57,10 @@ from fastapi import (
 from typing import List, Dict, Any, Optional
 
 from langchain_community.vectorstores import Chroma
-from langchain_community.document_loaders import PyPDFLoader, TextLoader
+
+# from langchain_community.document_loaders import PyPDFLoader, TextLoader  # Removed - using pypdf instead
+from langchain_community.document_loaders import TextLoader
+from app.services.pdf_utils import load_pdf_with_pypdf
 
 router = APIRouter(prefix="/reportgenie", tags=["reportgenie"])
 
@@ -90,11 +93,10 @@ def extract_text_from_file(file_content: bytes, filename: str) -> str:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
                 temp_file.write(file_content)
                 temp_file_path = temp_file.name
-            # File is now closed and ready to be read by PyPDFLoader
+            # File is now closed and ready to be read by pypdf
 
             try:
-                loader = PyPDFLoader(temp_file_path)
-                documents = loader.load()
+                documents = load_pdf_with_pypdf(temp_file_path, filename)
                 text = "\n\n".join([doc.page_content for doc in documents])
                 return text
             finally:
@@ -763,14 +765,22 @@ async def generate_outline(
                         if file.content_type == "application/pdf" or filename.endswith(
                             ".pdf"
                         ):
-                            # Extract text from PDF
-                            import fitz  # PyMuPDF
+                            # Extract text from PDF using pypdf (BSD license)
+                            with tempfile.NamedTemporaryFile(
+                                delete=False, suffix=".pdf"
+                            ) as temp_file:
+                                temp_file.write(file_content)
+                                temp_file_path = temp_file.name
 
-                            pdf_doc = fitz.open(stream=file_content, filetype="pdf")
-                            file_text = ""
-                            for page in pdf_doc:
-                                file_text += page.get_text()
-                            pdf_doc.close()
+                            try:
+                                documents = load_pdf_with_pypdf(
+                                    temp_file_path, file.filename
+                                )
+                                file_text = "\n\n".join(
+                                    [doc.page_content for doc in documents]
+                                )
+                            finally:
+                                os.unlink(temp_file_path)
                         elif (
                             file.content_type
                             == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"

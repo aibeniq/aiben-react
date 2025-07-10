@@ -64,10 +64,18 @@ def load_embeddings_model(
         return RetryOpenAIEmbeddings(model=model_id, openai_api_key=api_key)
 
     elif provider == ModelProvider.OLLAMA:
-        # Configure Ollama embeddings
+        # Configure Ollama embeddings - use dedicated embedding model
         base_url = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")
+
+        # Use dedicated embedding model instead of chat models
+        embedding_model = (
+            "nomic-embed-text"
+            if model_id in ["llama3", "mistral", "qwen2.5:14b"]
+            else model_id
+        )
+
         print(
-            f"Loading Ollama embeddings model with model_id: {model_id}, base_url: {base_url}"
+            f"Loading Ollama embeddings model with model_id: {embedding_model}, base_url: {base_url}"
         )
 
         # First check if Ollama server is reachable
@@ -91,9 +99,9 @@ def load_embeddings_model(
                     model["name"] for model in models_data.get("models", [])
                 ]
 
-            if model_id not in available_models:
+            if embedding_model not in available_models:
                 print(
-                    f"Warning: Model {model_id} may not be available in Ollama. Available models: {available_models}"
+                    f"Warning: Model {embedding_model} may not be available in Ollama. Available models: {available_models}"
                 )
                 print(
                     f"Ollama will attempt to pull the model if it's not found locally."
@@ -103,7 +111,7 @@ def load_embeddings_model(
             raise ValueError(f"Cannot connect to Ollama server at {base_url}: {str(e)}")
 
         # Create and return the embeddings model
-        return OllamaEmbeddings(model=model_id, base_url=base_url)
+        return OllamaEmbeddings(model=embedding_model, base_url=base_url)
     elif provider == "replicate":
         current_dir = Path(__file__).resolve().parent
 

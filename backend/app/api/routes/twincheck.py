@@ -40,7 +40,9 @@ from app.services.llms import get_default_llm, invoke_llm, record_llm_interactio
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.retrievers import create_ensemble_retriever
-from langchain_community.document_loaders import PyPDFLoader
+from app.services.pdf_utils import load_pdf_with_pypdf
+
+# from langchain_community.document_loaders import PyPDFLoader  # Removed - using pypdf instead
 import mimetypes
 import logging
 
@@ -66,13 +68,13 @@ def extract_text_from_file(file: UploadFile) -> str:
         file_content = file.file.read()
         if not file_content:
             raise HTTPException(
-                status_code=400, 
-                detail=f"Uploaded file {file.filename} appears to be empty"
+                status_code=400,
+                detail=f"Uploaded file {file.filename} appears to be empty",
             )
         temp_file.write(file_content)
         temp_file_path = temp_file.name
     # File is now closed and ready to be read by other processes
-    
+
     # Debug: Check file size
     file_size = os.path.getsize(temp_file_path)
     print(f"Temporary file created: {temp_file_path}, size: {file_size} bytes")
@@ -80,9 +82,8 @@ def extract_text_from_file(file: UploadFile) -> str:
     try:
         # Process based on file type
         if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
-            print("Loading PDF with PyPDFLoader...")
-            loader = PyPDFLoader(temp_file_path)
-            pages = loader.load()
+            print("Loading PDF with PyPDF...")
+            pages = load_pdf_with_pypdf(temp_file_path, file.filename)
             # Combine all page contents
             text = "\n\n".join([page.page_content for page in pages])
 

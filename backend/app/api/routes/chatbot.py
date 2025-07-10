@@ -27,9 +27,10 @@ from app.models import (
     User,
 )
 from app.core.config import settings
+from app.services.pdf_utils import load_pdf_with_pypdf
 from sqlmodel import select
 
-from langchain_community.document_loaders import PyPDFLoader
+# from langchain_community.document_loaders import PyPDFLoader  # Removed - using pypdf instead
 
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -399,11 +400,10 @@ async def _handle_full_text_document_query(
 
             # Extract text from file
             if file.filename.endswith(".pdf"):
-                loader = PyPDFLoader(temp_path)
+                documents = load_pdf_with_pypdf(temp_path, file.filename)
             else:
                 loader = TextLoader(temp_path)
-
-            documents = loader.load()
+                documents = loader.load()
             full_text = "\n\n".join([doc.page_content for doc in documents])
 
             # Chunk the text
@@ -967,13 +967,11 @@ async def query_document(
 
                 # Detect file type and use appropriate loader
                 if file.filename.endswith(".pdf"):
-                    loader = PyPDFLoader(temp_path)
+                    documents = load_pdf_with_pypdf(temp_path, file.filename)
                 else:
                     # Default to text loader for other files
                     loader = TextLoader(temp_path)
-
-                # Load and split the document
-                documents = loader.load()
+                    documents = loader.load()
 
                 # Add file source information to metadata
                 for doc in documents:
