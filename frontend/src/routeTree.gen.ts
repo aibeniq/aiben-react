@@ -24,6 +24,7 @@ import { Route as LayoutMatchImport } from './routes/_layout/match'
 import { Route as LayoutKnowledgeBasesImport } from './routes/_layout/knowledge-bases'
 import { Route as LayoutItemsImport } from './routes/_layout/items'
 import { Route as LayoutGenerateImport } from './routes/_layout/generate'
+import { Route as LayoutFeedbackImport } from './routes/_layout/feedback'
 import { Route as LayoutCompareImport } from './routes/_layout/compare'
 import { Route as LayoutArchiveImport } from './routes/_layout/archive'
 import { Route as LayoutAdminImport } from './routes/_layout/admin'
@@ -95,6 +96,11 @@ const LayoutGenerateRoute = LayoutGenerateImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
+const LayoutFeedbackRoute = LayoutFeedbackImport.update({
+  path: '/feedback',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
 const LayoutCompareRoute = LayoutCompareImport.update({
   path: '/compare',
   getParentRoute: () => LayoutRoute,
@@ -146,6 +152,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCompareImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/feedback': {
+      preLoaderRoute: typeof LayoutFeedbackImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/generate': {
       preLoaderRoute: typeof LayoutGenerateImport
       parentRoute: typeof LayoutImport
@@ -188,6 +198,7 @@ export const routeTree = rootRoute.addChildren([
     LayoutAdminRoute,
     LayoutArchiveRoute,
     LayoutCompareRoute,
+    LayoutFeedbackRoute,
     LayoutGenerateRoute,
     LayoutItemsRoute,
     LayoutKnowledgeBasesRoute,

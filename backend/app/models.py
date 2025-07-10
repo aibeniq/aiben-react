@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 from enum import Enum
+import json
 
 from pydantic import EmailStr, field_validator, ValidationError
 from sqlmodel import Field, Relationship, SQLModel, Column
@@ -75,6 +76,9 @@ class User(UserBase, table=True):
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
     knowledge_bases: list["KnowledgeBase"] = Relationship(
         back_populates="owner", cascade_delete=True
+    )
+    feedback: list["Feedback"] = Relationship(
+        back_populates="user", cascade_delete=True
     )
 
 
@@ -239,6 +243,21 @@ class SourceData(SQLModel, table=True):
     id: uuid.UUID = Field(primary_key=True)
     data: bytes = Field(sa_type=LargeBinary)
     file_hash: str = Field(max_length=64)  # SHA-256 hash is 64 characters
+
+
+# Model for storing feedback images
+class FeedbackImage(SQLModel, table=True):
+    __tablename__ = "feedback_images"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    feedback_id: uuid.UUID = Field(
+        foreign_key="feedback.id", nullable=False, ondelete="CASCADE"
+    )
+    feedback: "Feedback" = Relationship(back_populates="images")
+    filename: str = Field(max_length=255)  # Original filename
+    content_type: str = Field(max_length=100)  # MIME type (e.g., image/jpeg, image/png)
+    data: bytes = Field(sa_type=LargeBinary)  # Image binary data
+    file_size: int = Field()  # File size in bytes
+    date_uploaded: datetime = Field(default_factory=datetime.utcnow)
 
 
 # Response model for source content retrieval
@@ -512,6 +531,14 @@ class ReportGenieExtraData(ToolInteractionExtraData):
     outline_name: str = ""
     full_report: str = ""
 
+    @field_validator("sections", mode="before")
+    @classmethod
+    def validate_sections(cls, v: Any) -> str:
+        """convert sections to string if it's a list (for backward compatibility)"""
+        if isinstance(v, list):
+            return json.dumps(v)
+        return str(v)
+
 
 class ChatbotExtraData(ToolInteractionExtraData):
     """Extra data for Chatbot interactions."""
@@ -734,3 +761,105 @@ class TwinCheckDetailResponse(SQLModel):
     comparison_topics: str
     results: TwinCheckDetailResults
     feedback: TwinCheckDetailFeedback
+
+
+# Feedback types for general user feedback
+class FeedbackType(str, Enum):
+    """Types of general feedback users can submit."""
+
+    FEATURE_REQUEST = "feature_request"
+    BUG_REPORT = "bug_report"
+    GENERAL_FEEDBACK = "general_feedback"
+    IMPROVEMENT_SUGGESTION = "improvement_suggestion"
+    OTHER = "other"
+
+
+# Feedback status
+class FeedbackStatus(str, Enum):
+    """Status of feedback items."""
+
+    OPEN = "open"
+    IN_PROGRESS = "in_progress"
+    RESOLVED = "resolved"
+    CLOSED = "closed"
+
+
+# Shared properties for feedback
+class FeedbackBase(SQLModel):
+    title: str = Field(min_length=1, max_length=255)
+    description: str = Field(min_length=1, max_length=2000)
+    feedback_type: FeedbackType
+    status: FeedbackStatus = Field(default=FeedbackStatus.OPEN)
+    has_images: bool = Field(
+        default=False
+    )  # Flag to indicate if feedback has attached images
+
+
+# Properties to receive on feedback creation
+class FeedbackCreate(FeedbackBase):
+    pass
+
+
+# Properties for feedback image upload
+class FeedbackImageUpload(SQLModel):
+    filename: str = Field(max_length=255)
+    content_type: str = Field(max_length=100)
+    data: bytes = Field()  # Base64 encoded image data
+    file_size: int = Field(gt=0, le=10 * 1024 * 1024)  # Max 10MB file size
+
+
+# Response model for feedback image
+class FeedbackImageResponse(SQLModel):
+    id: uuid.UUID
+    filename: str
+    content_type: str
+    file_size: int
+    date_uploaded: datetime
+
+
+# Properties to receive on feedback update
+class FeedbackUpdate(SQLModel):
+    title: str | None = Field(default=None, min_length=1, max_length=255)
+    description: str | None = Field(default=None, min_length=1, max_length=2000)
+    feedback_type: FeedbackType | None = Field(default=None)
+    status: FeedbackStatus | None = Field(default=None)
+
+
+# Database model for feedback
+class Feedback(FeedbackBase, table=True):
+    __tablename__ = "feedback"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    user: User | None = Relationship(back_populates="feedback")
+    images: list["FeedbackImage"] = Relationship(
+        back_populates="feedback", cascade_delete=True
+    )
+    date_created: datetime = Field(default_factory=datetime.utcnow)
+    date_modified: datetime = Field(default_factory=datetime.utcnow)
+    admin_notes: str | None = Field(
+        default=None, max_length=2000
+    )  # For admin responses/notes
+
+
+# Properties to return via API
+class FeedbackPublic(FeedbackBase):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    date_created: datetime
+    date_modified: datetime
+    admin_notes: str | None = None
+    image_count: int = Field(default=0)  # Number of attached images
+
+
+class FeedbacksPublic(SQLModel):
+    data: list[FeedbackPublic]
+    count: int
+
+
+# Admin-only properties for feedback management
+class FeedbackAdminUpdate(SQLModel):
+    status: FeedbackStatus | None = Field(default=None)
+    admin_notes: str | None = Field(default=None, max_length=2000)

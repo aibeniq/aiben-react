@@ -2,14 +2,14 @@ import { useState, useRef, useEffect } from "react"
 import { Box, HStack, Button, Textarea, Text, Portal, IconButton } from "@chakra-ui/react"
 import { Tooltip } from "@/components/ui/tooltip"
 import { FiThumbsUp, FiThumbsDown } from "react-icons/fi"
-import { FeedbackService } from "@/client"
+import { ToolfeedbackService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
 
 interface FeedbackButtonsProps {
   interactionId: string
   onFeedbackSubmitted?: (type: string) => void
   existingFeedback?: {
-    feedback: "correct" | "incorrect" | null
+    feedback: "positive" | "negative" | null
     feedbackText?: string
     feedbackDate?: string
   }
@@ -22,12 +22,12 @@ const FeedbackButtons = ({
 }: FeedbackButtonsProps) => {
   // Replace useDisclosure with a simple useState
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [feedbackType, setFeedbackType] = useState<"correct" | "incorrect" | null>(
+  const [feedbackType, setFeedbackType] = useState<"positive" | "negative" | null>(
     existingFeedback?.feedback || null,
   )
   const [feedbackText, setFeedbackText] = useState(existingFeedback?.feedbackText || "")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { showErrorToast } = useCustomToast()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Effect to update state when existingFeedback changes
@@ -39,7 +39,7 @@ const FeedbackButtons = ({
   }, [existingFeedback])
 
   // Open the modal and set the feedback type
-  const handleFeedbackClick = (type: "correct" | "incorrect") => {
+  const handleFeedbackClick = (type: "positive" | "negative") => {
     console.log("Feedback button clicked:", type)
 
     // If this type is already selected and there's existing feedback,
@@ -79,13 +79,12 @@ const FeedbackButtons = ({
 
     setIsSubmitting(true)
     try {
-      await FeedbackService.submitFeedback({
+      await ToolfeedbackService.submitToolFeedback({
         interactionId: interactionId,
         feedback: feedbackType,
         feedbackText: feedbackText.trim() || undefined,
       })
 
-      showSuccessToast("Thank you for your feedback!")
       setIsModalOpen(false)
       if (onFeedbackSubmitted) {
         onFeedbackSubmitted(feedbackType)
@@ -112,7 +111,7 @@ const FeedbackButtons = ({
       >
         <Tooltip
           content={
-            existingFeedback?.feedback === "correct"
+            existingFeedback?.feedback === "positive"
               ? "Edit your helpful feedback"
               : "Mark as helpful"
           }
@@ -121,17 +120,17 @@ const FeedbackButtons = ({
           <IconButton
             aria-label="Mark as helpful"
             size="sm"
-            variant={feedbackType === "correct" ? "solid" : "ghost"}
+            variant={feedbackType === "positive" ? "solid" : "ghost"}
             colorPalette="green"
-            onClick={() => handleFeedbackClick("correct")}
+            onClick={() => handleFeedbackClick("positive")}
           >
-            <FiThumbsUp size={18} color={feedbackType === "correct" ? "white" : "green"} />
+            <FiThumbsUp size={18} color={feedbackType === "positive" ? "white" : "green"} />
           </IconButton>
         </Tooltip>
 
         <Tooltip
           content={
-            existingFeedback?.feedback === "incorrect"
+            existingFeedback?.feedback === "negative"
               ? "Edit your feedback for improvements"
               : "Mark as not helpful"
           }
@@ -140,11 +139,11 @@ const FeedbackButtons = ({
           <IconButton
             aria-label="Mark as unhelpful"
             size="sm"
-            variant={feedbackType === "incorrect" ? "solid" : "ghost"}
+            variant={feedbackType === "negative" ? "solid" : "ghost"}
             colorPalette="red"
-            onClick={() => handleFeedbackClick("incorrect")}
+            onClick={() => handleFeedbackClick("negative")}
           >
-            <FiThumbsDown size={18} color={feedbackType === "incorrect" ? "white" : "red"} />
+            <FiThumbsDown size={18} color={feedbackType === "negative" ? "white" : "red"} />
           </IconButton>
         </Tooltip>
 
@@ -186,11 +185,11 @@ const FeedbackButtons = ({
               p={4}
             >
               <Text fontWeight="semibold" fontSize="lg" mb={3}>
-                {feedbackType === "correct" ? "What was helpful?" : "What could be improved?"}
+                {feedbackType === "positive" ? "What was helpful?" : "What could be improved?"}
               </Text>
 
               <Text fontSize="sm" mb={2}>
-                {feedbackType === "correct"
+                {feedbackType === "positive"
                   ? "Tell us what you liked about this response."
                   : "Tell us how we can improve this response."}
               </Text>
@@ -212,7 +211,7 @@ const FeedbackButtons = ({
                 </Button>
                 <Button
                   size="sm"
-                  colorPalette={feedbackType === "correct" ? "green" : "red"}
+                  colorPalette={feedbackType === "positive" ? "green" : "red"}
                   onClick={handleSubmitFeedback}
                   loading={isSubmitting}
                 >

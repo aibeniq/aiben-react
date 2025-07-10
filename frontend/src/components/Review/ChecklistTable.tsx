@@ -265,7 +265,6 @@ const ChecklistTable = ({
           name: `${checklist.name} (Copy)`,
           description: checklist.description || "",
           questions: checklist.questions || "",
-          owner_id: checklist.owner_id || "",
         },
       })
 
@@ -309,7 +308,6 @@ const ChecklistTable = ({
             name: checklistName,
             description: checklistDescription,
             questions: trimmedQuestions,
-            owner_id: editingChecklist.owner_id || "",
           },
         })
 
@@ -321,7 +319,6 @@ const ChecklistTable = ({
             name: checklistName,
             description: checklistDescription,
             questions: questionsString,
-            owner_id: "",
           },
         })
 

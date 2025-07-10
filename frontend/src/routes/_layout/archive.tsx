@@ -268,8 +268,8 @@ function Archive() {
         loadingDownload={loadingDownload}
         onCopyReport={handleCopyReport}
         onDownloadReport={handleDownloadReport}
-        onFeedbackSubmitted={(type) => {
-          showSuccessToast(`Thank you for marking this response as ${type}!`)
+        onFeedbackSubmitted={() => {
+          showSuccessToast(`Thank you for your feedback!`)
         }}
       >
         {renderToolResults()}

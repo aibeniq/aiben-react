@@ -63,7 +63,7 @@ const BaseResultsContainer: React.FC<BaseResultsContainerProps> = ({
             existingFeedback={
               selectedReport.feedback
                 ? {
-                    feedback: selectedReport.feedback.feedback as "correct" | "incorrect" | null,
+                    feedback: selectedReport.feedback.feedback as "positive" | "negative" | null,
                     feedbackText: selectedReport.feedback.feedbackText || undefined,
                     feedbackDate: selectedReport.feedback.feedbackDate || undefined,
                   }

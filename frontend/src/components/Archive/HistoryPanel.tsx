@@ -191,27 +191,28 @@ const HistoryPanel = <T extends HistoryItem = HistoryItem>({
                     {item.has_feedback && (
                       <Tooltip
                         content={
-                          typeof item.feedback === "object" && item.feedback?.feedback === "correct"
+                          typeof item.feedback === "object" &&
+                          item.feedback?.feedback === "positive"
                             ? "Positive feedback"
                             : typeof item.feedback === "object" &&
-                                item.feedback?.feedback === "incorrect"
+                                item.feedback?.feedback === "negative"
                               ? "Negative feedback"
-                              : item.feedback === "correct" || item.feedback === "positive"
+                              : item.feedback === "positive"
                                 ? "Positive feedback"
-                                : item.feedback === "incorrect" || item.feedback === "negative"
+                                : item.feedback === "negative"
                                   ? "Negative feedback"
                                   : "Has feedback"
                         }
                       >
                         {typeof item.feedback === "object" &&
-                        item.feedback?.feedback === "correct" ? (
+                        item.feedback?.feedback === "positive" ? (
                           <FiThumbsUp size={14} color="green" />
                         ) : typeof item.feedback === "object" &&
-                          item.feedback?.feedback === "incorrect" ? (
+                          item.feedback?.feedback === "negative" ? (
                           <FiThumbsDown size={14} color="red" />
-                        ) : item.feedback === "correct" || item.feedback === "positive" ? (
+                        ) : item.feedback === "positive" ? (
                           <FiThumbsUp size={14} color="green" />
-                        ) : item.feedback === "incorrect" || item.feedback === "negative" ? (
+                        ) : item.feedback === "negative" ? (
                           <FiThumbsDown size={14} color="red" />
                         ) : (
                           <FiThumbsUp size={14} color="green" opacity={0.7} />

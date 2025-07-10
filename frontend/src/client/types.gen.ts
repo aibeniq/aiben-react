@@ -4,6 +4,13 @@ export type Body_chat_query_document = {
   file?: Blob | File
 }
 
+export type Body_feedback_create_feedback = {
+  title: string
+  description: string
+  feedback_type: FeedbackType
+  images?: Array<Blob | File> | null
+}
+
 export type Body_formconnect_process_form = {
   digitized_files?: Array<Blob | File>
   handwritten_files?: Array<Blob | File>
@@ -62,6 +69,60 @@ export type EmbeddingModelInfo = {
   max_input_length?: number | null
   cost_per_1M_tokens?: number | null
   description?: string | null
+}
+
+export type FeedbackAdminUpdate = {
+  status?: FeedbackStatus | null
+  admin_notes?: string | null
+}
+
+export type FeedbackImageResponse = {
+  id: string
+  filename: string
+  content_type: string
+  file_size: number
+  date_uploaded: string
+}
+
+export type FeedbackPublic = {
+  title: string
+  description: string
+  feedback_type: FeedbackType
+  status?: FeedbackStatus
+  has_images?: boolean
+  id: string
+  user_id: string
+  date_created: string
+  date_modified: string
+  admin_notes?: string | null
+  image_count?: number
+}
+
+export type FeedbacksPublic = {
+  data: Array<FeedbackPublic>
+  count: number
+}
+
+/**
+ * Status of feedback items.
+ */
+export type FeedbackStatus = "open" | "in_progress" | "resolved" | "closed"
+
+/**
+ * Types of general feedback users can submit.
+ */
+export type FeedbackType =
+  | "feature_request"
+  | "bug_report"
+  | "general_feedback"
+  | "improvement_suggestion"
+  | "other"
+
+export type FeedbackUpdate = {
+  title?: string | null
+  description?: string | null
+  feedback_type?: FeedbackType | null
+  status?: FeedbackStatus | null
 }
 
 export type FormConnectDetailFeedback = {
@@ -313,6 +374,11 @@ export type Token = {
   token_type?: string
 }
 
+/**
+ * LLM interaction feedback options.
+ */
+export type ToolFeedback = "positive" | "negative"
+
 export type TwinCheckDetailFeedback = {
   feedback?: string | null
   feedbackText?: string | null
@@ -509,13 +575,69 @@ export type ChatQueryTextData = {
 
 export type ChatQueryTextResponse = TextQueryResponse
 
-export type FeedbackSubmitFeedbackData = {
-  feedback: string
-  feedbackText?: string | null
-  interactionId: string
+export type FeedbackCreateFeedbackData = {
+  formData: Body_feedback_create_feedback
 }
 
-export type FeedbackSubmitFeedbackResponse = Message
+export type FeedbackCreateFeedbackResponse = FeedbackPublic
+
+export type FeedbackGetFeedbacksData = {
+  feedbackType?: string | null
+  limit?: number
+  skip?: number
+  status?: string | null
+}
+
+export type FeedbackGetFeedbacksResponse = FeedbacksPublic
+
+export type FeedbackGetFeedbackData = {
+  feedbackId: string
+}
+
+export type FeedbackGetFeedbackResponse = FeedbackPublic
+
+export type FeedbackUpdateFeedbackData = {
+  feedbackId: string
+  requestBody: FeedbackUpdate
+}
+
+export type FeedbackUpdateFeedbackResponse = FeedbackPublic
+
+export type FeedbackDeleteFeedbackData = {
+  feedbackId: string
+}
+
+export type FeedbackDeleteFeedbackResponse = Message
+
+export type FeedbackGetFeedbackImagesData = {
+  feedbackId: string
+}
+
+export type FeedbackGetFeedbackImagesResponse = Array<FeedbackImageResponse>
+
+export type FeedbackGetFeedbackImageData = {
+  feedbackId: string
+  imageId: string
+}
+
+export type FeedbackGetFeedbackImageResponse = unknown
+
+export type FeedbackGetAllFeedbacksAdminData = {
+  feedbackType?: string | null
+  limit?: number
+  skip?: number
+  status?: string | null
+  userId?: string | null
+}
+
+export type FeedbackGetAllFeedbacksAdminResponse = FeedbacksPublic
+
+export type FeedbackUpdateFeedbackAdminData = {
+  feedbackId: string
+  requestBody: FeedbackAdminUpdate
+}
+
+export type FeedbackUpdateFeedbackAdminResponse = FeedbackPublic
 
 export type FilesGetSourceContentData = {
   sourceId: string
@@ -768,6 +890,14 @@ export type ReportgenieGetReportDetailData = {
 }
 
 export type ReportgenieGetReportDetailResponse = ReportGenieDetailResponse
+
+export type ToolfeedbackSubmitToolFeedbackData = {
+  feedback: ToolFeedback
+  feedbackText?: string | null
+  interactionId: string
+}
+
+export type ToolfeedbackSubmitToolFeedbackResponse = Message
 
 export type TwincheckCompareDocumentsData = {
   comparisonTopics: string
