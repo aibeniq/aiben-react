@@ -10,181 +10,171 @@
 
 // Import Routes
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as SignupImport } from './routes/signup'
-import { Route as ResetPasswordImport } from './routes/reset-password'
-import { Route as RecoverPasswordImport } from './routes/recover-password'
-import { Route as LoginImport } from './routes/login'
-import { Route as LayoutImport } from './routes/_layout'
-import { Route as LayoutIndexImport } from './routes/_layout/index'
-import { Route as LayoutSettingsImport } from './routes/_layout/settings'
-import { Route as LayoutReviewImport } from './routes/_layout/review'
-import { Route as LayoutModelSelectionImport } from './routes/_layout/model-selection'
-import { Route as LayoutMatchImport } from './routes/_layout/match'
-import { Route as LayoutKnowledgeBasesImport } from './routes/_layout/knowledge-bases'
-import { Route as LayoutItemsImport } from './routes/_layout/items'
-import { Route as LayoutGenerateImport } from './routes/_layout/generate'
-import { Route as LayoutFeedbackImport } from './routes/_layout/feedback'
-import { Route as LayoutCompareImport } from './routes/_layout/compare'
-import { Route as LayoutArchiveImport } from './routes/_layout/archive'
-import { Route as LayoutAdminImport } from './routes/_layout/admin'
+import { Route as rootRoute } from "./routes/__root"
+import { Route as SignupImport } from "./routes/signup"
+import { Route as ResetPasswordImport } from "./routes/reset-password"
+import { Route as RecoverPasswordImport } from "./routes/recover-password"
+import { Route as LoginImport } from "./routes/login"
+import { Route as LayoutImport } from "./routes/_layout"
+import { Route as LayoutIndexImport } from "./routes/_layout/index"
+import { Route as LayoutSettingsImport } from "./routes/_layout/settings"
+import { Route as LayoutReviewImport } from "./routes/_layout/review"
+import { Route as LayoutModelSelectionImport } from "./routes/_layout/model-selection"
+import { Route as LayoutMatchImport } from "./routes/_layout/match"
+import { Route as LayoutKnowledgeBasesImport } from "./routes/_layout/knowledge-bases"
+import { Route as LayoutGenerateImport } from "./routes/_layout/generate"
+import { Route as LayoutFeedbackImport } from "./routes/_layout/feedback"
+import { Route as LayoutCompareImport } from "./routes/_layout/compare"
+import { Route as LayoutArchiveImport } from "./routes/_layout/archive"
+import { Route as LayoutAdminImport } from "./routes/_layout/admin"
 
 // Create/Update Routes
 
 const SignupRoute = SignupImport.update({
-  path: '/signup',
+  path: "/signup",
   getParentRoute: () => rootRoute,
 } as any)
 
 const ResetPasswordRoute = ResetPasswordImport.update({
-  path: '/reset-password',
+  path: "/reset-password",
   getParentRoute: () => rootRoute,
 } as any)
 
 const RecoverPasswordRoute = RecoverPasswordImport.update({
-  path: '/recover-password',
+  path: "/recover-password",
   getParentRoute: () => rootRoute,
 } as any)
 
 const LoginRoute = LoginImport.update({
-  path: '/login',
+  path: "/login",
   getParentRoute: () => rootRoute,
 } as any)
 
 const LayoutRoute = LayoutImport.update({
-  id: '/_layout',
+  id: "/_layout",
   getParentRoute: () => rootRoute,
 } as any)
 
 const LayoutIndexRoute = LayoutIndexImport.update({
-  path: '/',
+  path: "/",
   getParentRoute: () => LayoutRoute,
 } as any)
 
 const LayoutSettingsRoute = LayoutSettingsImport.update({
-  path: '/settings',
+  path: "/settings",
   getParentRoute: () => LayoutRoute,
 } as any)
 
 const LayoutReviewRoute = LayoutReviewImport.update({
-  path: '/review',
+  path: "/review",
   getParentRoute: () => LayoutRoute,
 } as any)
 
 const LayoutModelSelectionRoute = LayoutModelSelectionImport.update({
-  path: '/model-selection',
+  path: "/model-selection",
   getParentRoute: () => LayoutRoute,
 } as any)
 
 const LayoutMatchRoute = LayoutMatchImport.update({
-  path: '/match',
+  path: "/match",
   getParentRoute: () => LayoutRoute,
 } as any)
 
 const LayoutKnowledgeBasesRoute = LayoutKnowledgeBasesImport.update({
-  path: '/knowledge-bases',
-  getParentRoute: () => LayoutRoute,
-} as any)
-
-const LayoutItemsRoute = LayoutItemsImport.update({
-  path: '/items',
+  path: "/knowledge-bases",
   getParentRoute: () => LayoutRoute,
 } as any)
 
 const LayoutGenerateRoute = LayoutGenerateImport.update({
-  path: '/generate',
+  path: "/generate",
   getParentRoute: () => LayoutRoute,
 } as any)
 
 const LayoutFeedbackRoute = LayoutFeedbackImport.update({
-  path: '/feedback',
+  path: "/feedback",
   getParentRoute: () => LayoutRoute,
 } as any)
 
 const LayoutCompareRoute = LayoutCompareImport.update({
-  path: '/compare',
+  path: "/compare",
   getParentRoute: () => LayoutRoute,
 } as any)
 
 const LayoutArchiveRoute = LayoutArchiveImport.update({
-  path: '/archive',
+  path: "/archive",
   getParentRoute: () => LayoutRoute,
 } as any)
 
 const LayoutAdminRoute = LayoutAdminImport.update({
-  path: '/admin',
+  path: "/admin",
   getParentRoute: () => LayoutRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/_layout': {
+    "/_layout": {
       preLoaderRoute: typeof LayoutImport
       parentRoute: typeof rootRoute
     }
-    '/login': {
+    "/login": {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
-    '/recover-password': {
+    "/recover-password": {
       preLoaderRoute: typeof RecoverPasswordImport
       parentRoute: typeof rootRoute
     }
-    '/reset-password': {
+    "/reset-password": {
       preLoaderRoute: typeof ResetPasswordImport
       parentRoute: typeof rootRoute
     }
-    '/signup': {
+    "/signup": {
       preLoaderRoute: typeof SignupImport
       parentRoute: typeof rootRoute
     }
-    '/_layout/admin': {
+    "/_layout/admin": {
       preLoaderRoute: typeof LayoutAdminImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/archive': {
+    "/_layout/archive": {
       preLoaderRoute: typeof LayoutArchiveImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/compare': {
+    "/_layout/compare": {
       preLoaderRoute: typeof LayoutCompareImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/feedback': {
+    "/_layout/feedback": {
       preLoaderRoute: typeof LayoutFeedbackImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/generate': {
+    "/_layout/generate": {
       preLoaderRoute: typeof LayoutGenerateImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/items': {
-      preLoaderRoute: typeof LayoutItemsImport
-      parentRoute: typeof LayoutImport
-    }
-    '/_layout/knowledge-bases': {
+    "/_layout/knowledge-bases": {
       preLoaderRoute: typeof LayoutKnowledgeBasesImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/match': {
+    "/_layout/match": {
       preLoaderRoute: typeof LayoutMatchImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/model-selection': {
+    "/_layout/model-selection": {
       preLoaderRoute: typeof LayoutModelSelectionImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/review': {
+    "/_layout/review": {
       preLoaderRoute: typeof LayoutReviewImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/settings': {
+    "/_layout/settings": {
       preLoaderRoute: typeof LayoutSettingsImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/': {
+    "/_layout/": {
       preLoaderRoute: typeof LayoutIndexImport
       parentRoute: typeof LayoutImport
     }
@@ -200,7 +190,6 @@ export const routeTree = rootRoute.addChildren([
     LayoutCompareRoute,
     LayoutFeedbackRoute,
     LayoutGenerateRoute,
-    LayoutItemsRoute,
     LayoutKnowledgeBasesRoute,
     LayoutMatchRoute,
     LayoutModelSelectionRoute,
