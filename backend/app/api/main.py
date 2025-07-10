@@ -4,7 +4,6 @@ from app.api.routes import (
     chatbot,
     feedback,
     formconnect,
-    items,
     knowledgebases,
     llms,
     login,
@@ -24,7 +23,6 @@ api_router = APIRouter()
 api_router.include_router(login.router)
 api_router.include_router(users.router)
 api_router.include_router(utils.router)
-api_router.include_router(items.router)
 api_router.include_router(knowledgebases.router)
 api_router.include_router(formconnect.router)
 api_router.include_router(reportgenie.router)
