@@ -263,8 +263,8 @@ export type ReportGenieSection = {
 }
 
 export type ReportGenieSourceCitation = {
-  metadata?: ReportGenieSourceMetadata
   content: string
+  source_metadata: ReportGenieSourceMetadata
 }
 
 export type ReportGenieSourceMetadata = {
@@ -293,9 +293,8 @@ export type SourceContentResponse = {
  * Metadata for document sources
  */
 export type SourceMetadata = {
-  source?: string | null
+  source_name?: string | null
   source_id?: string | null
-  page?: number | null
   [key: string]: unknown
 }
 
@@ -497,15 +496,6 @@ export type ChatQueryTextData = {
 
 export type ChatQueryTextResponse = TextQueryResponse
 
-export type EmbeddingModelsGetAvailableProvidersResponse = Array<string>
-
-export type EmbeddingModelsGetEmbeddingModelsRegistryResponse =
-  Array<EmbeddingModelInfo>
-
-export type EmbeddingModelsGetDefaultEmbeddingModelResponse = EmbeddingModelInfo
-
-export type EmbeddingModelsGetLlmModelsResponse = Array<LlmModelSpec>
-
 export type FeedbackSubmitFeedbackData = {
   feedback: string
   feedbackText?: string | null
@@ -688,6 +678,24 @@ export type LoginRecoverPasswordHtmlContentData = {
 }
 
 export type LoginRecoverPasswordHtmlContentResponse = string
+
+export type ModelsGetEmbeddingProvidersResponse = Array<string>
+
+export type ModelsGetEmbeddingModelsRegistryResponse = Array<EmbeddingModelInfo>
+
+export type ModelsGetDefaultEmbeddingModelResponse = EmbeddingModelInfo
+
+export type ModelsGetLlmProvidersResponse = Array<string>
+
+export type ModelsGetLlmModelsResponse = Array<LlmModelSpec>
+
+export type ModelsGetDefaultLlmModelResponse = LlmModelSpec
+
+export type ModelsSetDefaultLlmModelData = {
+  modelId: string
+}
+
+export type ModelsSetDefaultLlmModelResponse = LlmModelSpec
 
 export type PrivateCreateUserData = {
   requestBody: PrivateUserCreate

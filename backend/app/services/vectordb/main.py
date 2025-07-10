@@ -221,23 +221,17 @@ class VectorDBService:
 
     def _create_schema(self, embedding_model_id: str) -> CollectionSchema:
         """
-                Create Milvus schema for the specified embedding model.
+        Create Milvus schema for the specified embedding model.
 
-        <<<<<<< HEAD
-                Args:
-                    embedding_model_id: The ID of the embedding model to create a schema for
-        =======
-                spec = EmbeddingService.get_model_spec(embedding_model_id)
-                if not spec:
-                    raise ValueError(f"Unknown embedding model: {embedding_model_id}")
-        >>>>>>> 87ac160b7f878628267ddb0696d3186aafdd7ab0
+        Args:
+            embedding_model_id: The ID of the embedding model to create a schema for
 
-                Returns:
-                    CollectionSchema: The schema for the embedding model
+        Returns:
+            CollectionSchema: The schema for the embedding model
 
-                Raises:
-                    EmbeddingModelError: If embedding model is invalid
-                    VectorDBError: If schema creation fails
+        Raises:
+            EmbeddingModelError: If embedding model is invalid
+            VectorDBError: If schema creation fails
         """
 
         try:

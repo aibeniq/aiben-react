@@ -4,15 +4,13 @@ from typing import Any
 from enum import Enum
 
 from pydantic import EmailStr, field_validator, ValidationError
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, Column
 from sqlalchemy import (
-    JSON,
     LargeBinary,
     PrimaryKeyConstraint,
     UniqueConstraint,
     JSON,
 )
-from sqlmodel import Column, Field, Relationship, SQLModel
 
 from app.core.config import settings
 from app.services.embeddings import EmbeddingModelInfo, EmbeddingService
@@ -377,7 +375,7 @@ class ReportGenieSourceMetadata(SQLModel):
 # Source citation model for ReportGenie
 class ReportGenieSourceCitation(SQLModel):
     content: str
-    metadata: ReportGenieSourceMetadata
+    source_metadata: ReportGenieSourceMetadata
 
 
 # Section model for ReportGenie
@@ -441,12 +439,6 @@ class ReportGenieOutline(SQLModel, table=True):
     date_modified: datetime = Field(default_factory=datetime.utcnow)
 
 
-class ReportGenieSection(SQLModel):
-    title: str
-    content: str
-    source_citations: list[ReportGenieSourceCitation] = Field(default_factory=list)
-
-
 class ReportGenieDetailFeedback(SQLModel):
     feedback: str | None = None
     feedbackText: str | None = None
@@ -493,7 +485,8 @@ class ToolFeedback(str, Enum):
 class ToolInteractionExtraData(SQLModel):
     """Base class for LLM interaction extra data."""
 
-    pass
+    llm_model_id: str | None = None
+    llm_provider: str | None = None
 
 
 class ReportGenieExtraData(ToolInteractionExtraData):
@@ -509,9 +502,11 @@ class ReportGenieExtraData(ToolInteractionExtraData):
 class ChatbotExtraData(ToolInteractionExtraData):
     """Extra data for Chatbot interactions."""
 
+    session_id: str | None = None
+    is_follow_up: bool = False
+    sources: list[dict[str, Any]] | None = None
     kb_name: str = ""
     kb_id: str = ""
-    conversation_id: str | None = None
 
 
 class VeradocExtraData(ToolInteractionExtraData):
@@ -526,17 +521,45 @@ class VeradocExtraData(ToolInteractionExtraData):
 class FormconnectExtraData(ToolInteractionExtraData):
     """Extra data for Formconnect interactions."""
 
-    kb_name: str = ""
-    kb_id: str = ""
-    form_template_id: str = ""
+    file_count: int = 0
+
+
+class TwincheckTopicAnalysis(SQLModel):
+    """Individual topic analysis result for TwinCheck."""
+
+    topic: str
+    analysis: str
+
+
+class TwincheckDiffStats(SQLModel):
+    """Diff statistics for TwinCheck document comparison."""
+
+    additions: int
+    deletions: int
+    changes: int
 
 
 class TwincheckExtraData(ToolInteractionExtraData):
     """Extra data for Twincheck interactions."""
 
-    kb_name: str = ""
-    kb_id: str = ""
-    topic_list_id: str = ""
+    topic_analysis: list[TwincheckTopicAnalysis] = Field(default_factory=list)
+    diff_stats: TwincheckDiffStats | None = None
+
+    def get_topic_analysis_dict(self) -> list[dict[str, str]]:
+        """Convert topic_analysis to dictionary format for API responses."""
+        return [
+            {"topic": ta.topic, "analysis": ta.analysis} for ta in self.topic_analysis
+        ]
+
+    def get_diff_stats_dict(self) -> dict[str, int] | None:
+        """Convert diff_stats to dictionary format for API responses."""
+        if self.diff_stats is None:
+            return None
+        return {
+            "additions": self.diff_stats.additions,
+            "deletions": self.diff_stats.deletions,
+            "changes": self.diff_stats.changes,
+        }
 
 
 class ToolInteraction(SQLModel, table=True):

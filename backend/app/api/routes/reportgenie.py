@@ -13,36 +13,24 @@ from app.models import (
 )
 import json
 import traceback
-import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
-from datetime import datetime
-from io import BytesIO
-from typing import Any
 
 import markdown
 from bs4 import BeautifulSoup
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from langchain_core.prompts import PromptTemplate
-from sqlmodel import select
+from sqlmodel import desc, select
 
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
 from app.core.config import settings
 from app.models import (
-    DocxRequest,
-    KnowledgeBase,
-    ToolInteraction,
     Tool,
-    Message,
     ReportGenieDetailFeedback,
-    ReportGenieDetailResponse,
     ReportGenieDetailResults,
-    ReportGenieOutline,
-    ReportGenieRequest,
-    ReportGenieResponse,
     ReportGenieResults,
     ReportGenieSection,
     ReportGenieSourceCitation,
@@ -139,7 +127,7 @@ async def generate_report(
                 )
 
                 source_citation = ReportGenieSourceCitation(
-                    content=chunk.entity.content, metadata=metadata
+                    content=chunk.entity.content, source_metadata=metadata
                 )
                 source_citations.append(source_citation)
 
@@ -200,7 +188,7 @@ async def generate_report(
                 "source_citations": [
                     {
                         "content": citation.content,
-                        "metadata": citation.metadata.model_dump(),
+                        "metadata": citation.source_metadata.model_dump(),
                     }
                     for citation in section.source_citations
                 ],
@@ -231,7 +219,7 @@ async def generate_report(
                 "section_count": len(sections),
                 "total_length": len(full_report),
             },
-            metadata=detailed_extra_data.model_dump(),
+            metadata=detailed_extra_data,
         )
 
         return ReportGenieResponse(results=result)
@@ -342,7 +330,7 @@ async def update_outline(
     outline.name = updated_outline.name
     outline.description = updated_outline.description
     outline.sections = updated_outline.sections
-    outline.date_modified = datetime.utcnow()
+    outline.date_modified = datetime.now(timezone.utc)
 
     session.add(outline)
     session.commit()
@@ -400,7 +388,7 @@ async def generate_docx(request: DocxRequest) -> StreamingResponse:
         date_paragraph = doc.add_paragraph()
         date_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         date_run = date_paragraph.add_run(
-            f"Generated on: {datetime.now().strftime('%B %d, %Y')}"
+            f"Generated on: {datetime.now(timezone.utc).strftime('%B %d, %Y')}"
         )
         date_run.italic = True
 
@@ -491,7 +479,7 @@ async def generate_docx(request: DocxRequest) -> StreamingResponse:
         )
 
         # Create a filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         filename = f"report_{timestamp}.docx"
 
         # Return the document as a downloadable file
@@ -531,9 +519,7 @@ async def get_report_history(
 
         # Add ordering and pagination
         reports = session.exec(
-            query.order_by(ToolInteraction.date_created.desc())
-            .offset(skip)
-            .limit(limit)
+            query.order_by(desc(ToolInteraction.date_created)).offset(skip).limit(limit)
         ).all()
 
         print(f"Found {len(reports)} reports for user {current_user.id}:")
@@ -730,7 +716,7 @@ async def get_report_detail(
                     )
                     citation = ReportGenieSourceCitation(
                         content=citation_data.get("content", ""),
-                        metadata=metadata,
+                        source_metadata=metadata,
                     )
                     source_citations.append(citation)
 

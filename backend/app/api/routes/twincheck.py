@@ -5,7 +5,7 @@ import os
 import tempfile
 import traceback
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from typing import Any
 
@@ -23,11 +23,7 @@ from sqlmodel import desc, select
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 from app.models import (
-    DocxRequest,
-    ToolInteraction,
-    Message,
     TwinCheckDetailFeedback,
-    TwinCheckDetailResponse,
     TwinCheckDetailResults,
     TwinCheckRequest,
     TwinCheckResponse,
@@ -37,6 +33,9 @@ from app.models import (
     DocxRequest,
     Message,
     Tool,
+    TwincheckExtraData,
+    TwincheckTopicAnalysis,
+    TwincheckDiffStats,
 )
 from app.services.llms import LlmService
 
@@ -162,7 +161,7 @@ async def compare_documents(
 
         # Parse comparison topics
         topic_list = request.comparison_topics.strip().split("\n")
-        topic_analysis = []
+        topic_analysis: list[TwincheckTopicAnalysis] = []
 
         # Process each topic with the LLM
         for topic in topic_list:
@@ -184,14 +183,15 @@ async def compare_documents(
                 response = llm.invoke(prompt)
 
                 # Add to results
-                topic_analysis.append({"topic": topic, "analysis": response.content})
+                topic_analysis.append(
+                    TwincheckTopicAnalysis(topic=topic, analysis=response.content)
+                )
 
             except Exception as e:
                 topic_analysis.append(
-                    {
-                        "topic": topic,
-                        "analysis": f"Error analyzing this topic: {str(e)}",
-                    }
+                    TwincheckTopicAnalysis(
+                        topic=topic, analysis=f"Error analyzing this topic: {str(e)}"
+                    )
                 )
 
         # Create a comprehensive summary
@@ -212,7 +212,7 @@ async def compare_documents(
         interaction_id = LlmService.record_tool_interaction(
             session=session,
             user_id=current_user.id,
-            functionality="twincheck",
+            functionality=Tool.TWINCHECK,
             input_data={
                 "comparison_topics": request.comparison_topics,
                 "document1_name": document1.filename,
@@ -222,20 +222,22 @@ async def compare_documents(
                 "summary": summary.content,
                 "topic_count": len(topic_analysis),
             },
-            metadata={
-                "topic_analysis": topic_analysis,  # Store detailed analysis for retrieval
-                "diff_stats": {
-                    "additions": diff_text.count("\n+ "),
-                    "deletions": diff_text.count("\n- "),
-                    "changes": diff_text.count("\n? "),
-                },
-            },
+            metadata=TwincheckExtraData(
+                topic_analysis=topic_analysis,
+                diff_stats=TwincheckDiffStats(
+                    additions=diff_text.count("\n+ "),
+                    deletions=diff_text.count("\n- "),
+                    changes=diff_text.count("\n? "),
+                ),
+            ),
         )
 
         # Return the results
         result = {
             "summary": summary.content,
-            "topic_analysis": topic_analysis,
+            "topic_analysis": [
+                {"topic": ta.topic, "analysis": ta.analysis} for ta in topic_analysis
+            ],
             "interaction_id": str(interaction_id) if interaction_id else None,
         }
 
@@ -272,9 +274,7 @@ async def get_comparison_history(
 
         # Add ordering and pagination
         comparisons = session.exec(
-            query.order_by(ToolInteraction.date_created.desc())
-            .offset(skip)
-            .limit(limit)
+            query.order_by(desc(ToolInteraction.date_created)).offset(skip).limit(limit)
         ).all()
 
         result = []
@@ -521,7 +521,7 @@ def update_comparison(
     comparison.name = updated_comparison.name
     comparison.description = updated_comparison.description
     comparison.topics = updated_comparison.topics
-    comparison.date_modified = datetime.utcnow()
+    comparison.date_modified = datetime.now(timezone.utc)
 
     session.add(comparison)
     session.commit()
@@ -584,7 +584,7 @@ async def generate_docx(request: DocxRequest) -> StreamingResponse:
         date_paragraph = doc.add_paragraph()
         date_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         date_run = date_paragraph.add_run(
-            f"Generated on: {datetime.now().strftime('%B %d, %Y')}"
+            f"Generated on: {datetime.now(timezone.utc).strftime('%B %d, %Y')}"
         )
         date_run.italic = True
 
@@ -675,7 +675,7 @@ async def generate_docx(request: DocxRequest) -> StreamingResponse:
         )
 
         # Create a filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         filename = f"comparison_{timestamp}.docx"
 
         # Return the document as a downloadable file

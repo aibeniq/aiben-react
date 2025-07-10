@@ -3,10 +3,12 @@ import { useQuery } from "@tanstack/react-query"
 import {
   VeradocGetVeradocDetailResponse,
   ReportGenieDetailResponse,
+  ReportGenieHistoryItem,
   VeradocService,
   ReportgenieService,
   TwincheckService,
   FormconnectService,
+  VeraDocHistoryItem,
 } from "../client"
 import useCustomToast from "./useCustomToast"
 
@@ -22,8 +24,8 @@ interface ToolActions {
 }
 
 interface UseToolArchiveReturn {
-  veradoc: ToolState<{ [key: string]: unknown }, VeradocGetVeradocDetailResponse> & ToolActions
-  reportgenie: ToolState<{ [key: string]: unknown }, ReportGenieDetailResponse> & ToolActions
+  veradoc: ToolState<VeraDocHistoryItem, VeradocGetVeradocDetailResponse> & ToolActions
+  reportgenie: ToolState<ReportGenieHistoryItem, ReportGenieDetailResponse> & ToolActions
   twincheck: ToolState<{ [key: string]: unknown }, any> & ToolActions
   formconnect: ToolState<{ [key: string]: unknown }, any> & ToolActions
   activeTab: string
@@ -40,13 +42,13 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // Veradoc (Review) state
-  const [veradocHistory, setVeradocHistory] = useState<{ [key: string]: unknown }[]>([])
+  const [veradocHistory, setVeradocHistory] = useState<VeraDocHistoryItem[]>([])
   const [selectedVeradocReport, setSelectedVeradocReport] =
     useState<VeradocGetVeradocDetailResponse | null>(null)
   const [isVeradocLoading, setIsVeradocLoading] = useState(false)
 
   // ReportGenie (Generate) state
-  const [reportgenieHistory, setReportgenieHistory] = useState<{ [key: string]: unknown }[]>([])
+  const [reportgenieHistory, setReportgenieHistory] = useState<ReportGenieHistoryItem[]>([])
   const [selectedReportgenieReport, setSelectedReportgenieReport] =
     useState<ReportGenieDetailResponse | null>(null)
   const [isReportgenieLoading, setIsReportgenieLoading] = useState(false)

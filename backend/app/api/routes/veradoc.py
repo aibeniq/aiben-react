@@ -18,8 +18,9 @@ from app.models import (
 )
 
 from io import BytesIO
+from sqlmodel import desc, select
 import markdown
-import datetime
+from datetime import datetime, timezone
 from bs4 import BeautifulSoup
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -35,28 +36,14 @@ from fastapi import (
 )
 from fastapi.responses import StreamingResponse
 from langchain_core.prompts import PromptTemplate
-from sqlmodel import desc, select
 
 from app.api.deps import CurrentUser, SessionDep, VectorDBDep
 from app.core.config import settings
 from app.models import (
-    DocxRequest,
-    KnowledgeBase,
-    ToolInteraction,
-    Message,
-    RagChecklistRequest,
-    User,
-    VeraDocChecklist,
     VeraDocDetailFeedback,
-    VeraDocDetailResponse,
     VeraDocDetailResults,
-    VeraDocResponse,
-    VeraDocHistoryItem,
-    Tool,
-    VeradocExtraData,
 )
 from app.services.llms.main import LlmService
-from typing import Any
 
 
 router = APIRouter(prefix="/veradoc", tags=["veradoc"])
@@ -208,35 +195,29 @@ async def process_rag_checklist(
                 alpha=0.7,
             )
 
-            if not search_result["success"]:
-                print(
-                    f"Search failed for question '{question}': {search_result.get('error', 'Unknown error')}"
-                )
-                continue
-
-            chunks = search_result["results"]
-            context = "\n\n".join([chunk["entity"]["content"] for chunk in chunks])
+            chunks = search_result.hits
+            context = "\n\n".join([chunk.entity.content for chunk in chunks])
 
             # store source documents for citation
             source_citations = []
             for chunk in chunks:
-                entity = chunk["entity"]
+                entity = chunk.entity
 
                 # Create metadata similar to the old format
                 metadata = {
-                    "source_id": entity.get("source_id", ""),
-                    "title": entity.get("title", ""),
-                    "author": entity.get("author", ""),
-                    "url": entity.get("url", ""),
+                    "source_id": entity.source_id,
+                    "title": entity.title,
+                    "author": entity.author,
+                    "url": entity.url,
                 }
 
                 # Try to get source data id from the source table
-                if entity.get("source_id"):
-                    metadata["source_id"] = str(entity["source_id"])
-                    if entity.get("url"):
-                        metadata["source"] = entity["url"]
+                if entity.source_id:
+                    metadata["source_id"] = str(entity.source_id)
+                    if entity.url:
+                        metadata["source"] = entity.url
 
-                source = {"content": entity["content"], "metadata": metadata}
+                source = {"content": entity.content, "metadata": metadata}
                 source_citations.append(source)
 
             if cancellation_requested:
@@ -340,7 +321,7 @@ async def process_rag_checklist(
                 "final_evaluation": final_evaluation,
                 "qa_count": len(qa_pairs),
             },
-            metadata=detailed_extra_data.model_dump(),
+            metadata=detailed_extra_data,
         )
 
         # 8. Compile the results
@@ -439,7 +420,7 @@ def update_checklist(
     checklist.name = updated_checklist.name
     checklist.description = updated_checklist.description
     checklist.questions = updated_checklist.questions
-    checklist.date_modified = datetime.utcnow()
+    checklist.date_modified = datetime.now(timezone.utc)
 
     session.add(checklist)
     session.commit()
@@ -492,9 +473,7 @@ async def get_veradoc_history(
 
         # Add ordering and pagination
         reports = session.exec(
-            query.order_by(ToolInteraction.date_created.desc())
-            .offset(skip)
-            .limit(limit)
+            query.order_by(desc(ToolInteraction.date_created)).offset(skip).limit(limit)
         ).all()
 
         print(f"Found {len(reports)} VeraDoc evaluations for user {current_user.id}")
@@ -768,7 +747,7 @@ async def generate_docx(request: DocxRequest) -> StreamingResponse:
         date_paragraph = doc.add_paragraph()
         date_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         date_run = date_paragraph.add_run(
-            f"Generated on: {datetime.now().strftime('%B %d, %Y')}"
+            f"Generated on: {datetime.now(timezone.utc).strftime('%B %d, %Y')}"
         )
         date_run.italic = True
 
@@ -859,7 +838,7 @@ async def generate_docx(request: DocxRequest) -> StreamingResponse:
         )
 
         # Create a filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         filename = f"evaluation_{timestamp}.docx"
 
         # Return the document as a downloadable file
