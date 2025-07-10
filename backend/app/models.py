@@ -413,6 +413,22 @@ class ReportGenieHistoryItem(SQLModel):
     user_name: str | None = None  # Only included when show_all=True
 
 
+# History/summary model for VeraDoc list endpoint
+class VeraDocHistoryItem(SQLModel):
+    id: str
+    date_created: datetime
+    title: str
+    document_name: str
+    kb_id: str
+    qa_count: int
+    kb_name: str
+    questions: str
+    final_evaluation: str
+    has_feedback: bool
+    feedback: dict[str, Any] | None = None
+    user_name: str | None = None  # Only included when show_all=True
+
+
 # Form for saving outlines
 class ReportGenieOutline(SQLModel, table=True):
     __tablename__ = "reportgenie_outlines"
@@ -503,7 +519,8 @@ class VeradocExtraData(ToolInteractionExtraData):
 
     kb_name: str = ""
     kb_id: str = ""
-    document_count: int = 0
+    document_name: str = ""
+    qa_pairs: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class FormconnectExtraData(ToolInteractionExtraData):
@@ -603,6 +620,38 @@ class ToolInteraction(SQLModel, table=True):
             bool: True if data is valid ReportGenieExtraData
         """
         is_valid, _ = self.validate_reportgenie_data()
+        return is_valid
+
+    def validate_veradoc_data(self) -> tuple[bool, VeradocExtraData | None]:
+        """
+        Validate if extra_data can be parsed as VeradocExtraData.
+
+        Returns:
+            tuple: (is_valid, typed_data_or_none)
+        """
+        if not self.extra_data or self.functionality != Tool.VERADOC:
+            return False, None
+
+        try:
+            validated_data = VeradocExtraData(**self.extra_data)
+            return True, validated_data
+        except ValidationError as e:
+            # Specific validation errors
+            print(f"VeraDoc validation failed: {e}")
+            return False, None
+        except Exception as e:
+            # Unexpected errors
+            print(f"Unexpected error validating VeraDoc data: {e}")
+            return False, None
+
+    def is_valid_veradoc_data(self) -> bool:
+        """
+        Check if this interaction has valid VeraDoc extra data.
+
+        Returns:
+            bool: True if data is valid VeradocExtraData
+        """
+        is_valid, _ = self.validate_veradoc_data()
         return is_valid
 
 
