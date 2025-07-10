@@ -5,6 +5,7 @@ from app.models import (
     ReportGenieOutline,
     ReportGenieDetailResponse,
     ReportGenieExtraData,
+    ReportGenieHistoryItem,
     KnowledgeBase,
     DocxRequest,
     ToolInteraction,
@@ -511,14 +512,14 @@ async def generate_docx(request: DocxRequest) -> StreamingResponse:
         raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
 
 
-@router.get("/history", response_model=list[dict[str, Any]])
+@router.get("/history", response_model=list[ReportGenieHistoryItem])
 async def get_report_history(
     session: SessionDep,
     current_user: CurrentUser,
     skip: int = 0,
     limit: int = 20,
     show_all: bool = False,
-) -> list[dict[str, Any]]:
+) -> list[ReportGenieHistoryItem]:
     """Retrieve past report generation history for the current user or all users."""
     print("Retrieving report history. Show all:", show_all)
 
@@ -569,27 +570,16 @@ async def get_report_history(
                 # Create a user-friendly title
                 title = f"Report on {kb_name}"
 
-                # Create the result item
-                result_item = {
-                    "id": str(report.id),
-                    "date_created": report.date_created,
-                    "title": title,
-                    "sections": input_data.get("sections", ""),
-                    "kb_id": input_data.get("kb_id", ""),
-                    "section_count": output_data.get("section_count", 0),
-                    "kb_name": kb_name,
-                    "outline_name": outline_name,
-                    "has_feedback": report.feedback is not None,
-                }
-
-                # Add feedback information if exists
+                # Create feedback object if exists
+                feedback = None
                 if report.feedback:
-                    result_item["feedback"] = {
+                    feedback = {
                         "feedback": report.feedback,
                         "feedbackText": report.feedback_text,
                     }
 
-                # Add user info for all-users view
+                # Get user info for all-users view
+                user_name = None
                 if show_all:
                     from app.models import User  # Import here to avoid circular imports
 
@@ -599,31 +589,35 @@ async def get_report_history(
                         if user
                         else "Unknown User"
                     )
-                    result_item["user_name"] = user_name
+
+                # Create the result item
+                result_item = ReportGenieHistoryItem(
+                    id=str(report.id),
+                    date_created=report.date_created,
+                    title=title,
+                    sections=input_data.get("sections", ""),
+                    kb_id=input_data.get("kb_id", ""),
+                    section_count=output_data.get("section_count", 0),
+                    kb_name=kb_name,
+                    outline_name=outline_name,
+                    has_feedback=report.feedback is not None,
+                    feedback=feedback,
+                    user_name=user_name,
+                )
 
                 result.append(result_item)
             except json.JSONDecodeError:
                 # If JSON parsing fails, use raw data
-                result_item = {
-                    "id": str(report.id),
-                    "date_created": report.date_created,
-                    "title": f"Report from {report.date_created.strftime('%Y-%m-%d')}",
-                    "sections": "",
-                    "kb_id": "",
-                    "section_count": 0,
-                    "kb_name": "Unknown Knowledge Base",
-                    "outline_name": "",
-                    "has_feedback": report.feedback is not None,
-                }
-
-                # Add feedback information if exists
+                # Create feedback object if exists
+                feedback = None
                 if report.feedback:
-                    result_item["feedback"] = {
+                    feedback = {
                         "feedback": report.feedback,
                         "feedbackText": report.feedback_text,
                     }
 
-                # Add user info for all-users view
+                # Get user info for all-users view
+                user_name = None
                 if show_all:
                     from app.models import User  # Import here to avoid circular imports
 
@@ -633,7 +627,20 @@ async def get_report_history(
                         if user
                         else "Unknown User"
                     )
-                    result_item["user_name"] = user_name
+
+                result_item = ReportGenieHistoryItem(
+                    id=str(report.id),
+                    date_created=report.date_created,
+                    title=f"Report from {report.date_created.strftime('%Y-%m-%d')}",
+                    sections="",
+                    kb_id="",
+                    section_count=0,
+                    kb_name="Unknown Knowledge Base",
+                    outline_name="",
+                    has_feedback=report.feedback is not None,
+                    feedback=feedback,
+                    user_name=user_name,
+                )
 
                 result.append(result_item)
 
