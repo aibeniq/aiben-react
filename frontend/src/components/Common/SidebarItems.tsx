@@ -12,6 +12,7 @@ import {
   FiCpu,
   FiArchive,
   FiDatabase,
+  FiMessageSquare,
 } from "react-icons/fi"
 import { FaBalanceScale } from "react-icons/fa"
 import { TbPlugConnected } from "react-icons/tb"
@@ -23,7 +24,10 @@ import type { UserPublic } from "@/client"
 export const categories: Category[] = [
   {
     name: null, // No category header for these items
-    items: [{ icon: FiHome, title: "Dashboard", path: "/" }],
+    items: [
+      { icon: FiHome, title: "Dashboard", path: "/" },
+      { icon: FiMessageSquare, title: "Feedback", path: "/feedback" },
+    ],
   },
   {
     name: "Tools",
