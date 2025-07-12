@@ -1546,6 +1546,7 @@ export class ReportgenieService {
       method: "POST",
       url: "/api/v1/reportgenie/optimize-outline/csv",
       body: data.requestBody,
+      responseType: 'blob',
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
@@ -2344,6 +2345,7 @@ export class VeradocService {
       method: "POST",
       url: "/api/v1/veradoc/generate/csv",
       body: data.requestBody,
+      responseType: 'blob',
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
@@ -2367,6 +2369,7 @@ export class VeradocService {
       method: "POST",
       url: "/api/v1/veradoc/optimization/csv",
       body: data.requestBody,
+      responseType: 'blob',
       mediaType: "application/json",
       errors: {
         422: "Validation Error",

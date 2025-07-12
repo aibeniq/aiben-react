@@ -39,7 +39,7 @@ if (!sdkContent.includes('url: "/api/v1/veradoc/generate/docx",') || !sdkContent
 // Patch for VeraDoc CSV
 if (!sdkContent.includes('url: "/api/v1/veradoc/generate/csv",') || !sdkContent.includes('responseType: \'blob\',')) {
   sdkContent = sdkContent.replace(
-    /(url: "\/api\/v1\/veradoc\/generate\/csv",[\s\S]*?body: data\.requestBody,)/,
+    /(url: "\/api\/v1\/veradoc\/generate\/csv",\s*body: data\.requestBody,)/,
     "$1\n      responseType: 'blob',",
   )
 }
@@ -47,7 +47,7 @@ if (!sdkContent.includes('url: "/api/v1/veradoc/generate/csv",') || !sdkContent.
 // Patch for VeraDoc Optimization CSV
 if (!sdkContent.includes('url: "/api/v1/veradoc/optimization/csv",') || !sdkContent.includes('responseType: \'blob\',')) {
   sdkContent = sdkContent.replace(
-    /(url: "\/api\/v1\/veradoc\/optimization\/csv",[\s\S]*?body: data\.requestBody,)/,
+    /(url: "\/api\/v1\/veradoc\/optimization\/csv",\s*body: data\.requestBody,)/,
     "$1\n      responseType: 'blob',",
   )
 }
@@ -55,7 +55,7 @@ if (!sdkContent.includes('url: "/api/v1/veradoc/optimization/csv",') || !sdkCont
 // Patch for ReportGenie Outline Optimization CSV
 if (!sdkContent.includes('url: "/api/v1/reportgenie/optimize-outline/csv",') || !sdkContent.includes('responseType: \'blob\',')) {
   sdkContent = sdkContent.replace(
-    /(url: "\/api\/v1\/reportgenie\/optimize-outline\/csv",[\s\S]*?body: data\.requestBody,)/,
+    /(url: "\/api\/v1\/reportgenie\/optimize-outline\/csv",\s*body: data\.requestBody,)/,
     "$1\n      responseType: 'blob',",
   )
 }

@@ -16,6 +16,7 @@ import {
   Separator,
 } from "@chakra-ui/react"
 import { Field } from "../ui/field"
+import { Tooltip } from "../ui/tooltip"
 import { FiCopy, FiCheck, FiEdit3, FiSave, FiX } from "react-icons/fi"
 import { VeraDocChecklist, VeradocService } from "../../client"
 import QuestionItem from "./QuestionItem"
@@ -612,17 +613,24 @@ const ChecklistModal = ({
                       <HStack justify="space-between" w="full">
                         <span>Questions *</span>
                         <HStack gap={2}>
-                          {/* Show optimization button if knowledge base is available */}
-                          {knowledgeBases && selectedKnowledgeBase && (
+                          {/* Always show optimization button with tooltip when disabled */}
+                          <Tooltip
+                            content={
+                              !knowledgeBases || !selectedKnowledgeBase
+                                ? "Knowledge Base must be selected for Optimize function to be enabled"
+                                : "Optimize questions based on the selected Knowledge Base"
+                            }
+                          >
                             <Button
                               size="xs"
                               onClick={() => setShowOptimizeSection(!showOptimizeSection)}
                               variant="outline"
                               colorPalette="blue"
+                              disabled={!knowledgeBases || !selectedKnowledgeBase}
                             >
                               {showOptimizeSection ? "Hide Optimize" : "Optimize"}
                             </Button>
-                          )}
+                          </Tooltip>
                           <IconButton
                             size="xs"
                             onClick={handleCopyQuestions}
