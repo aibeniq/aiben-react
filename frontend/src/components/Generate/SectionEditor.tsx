@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react"
-import { VStack, HStack, Input, Button, Text, Switch, IconButton, Box } from "@chakra-ui/react"
-import { FiPlus, FiTrash2, FiChevronUp, FiChevronDown } from "react-icons/fi"
+import { VStack, HStack, Input, Text, Switch, IconButton, Box } from "@chakra-ui/react"
+import { FiTrash2, FiChevronUp, FiChevronDown } from "react-icons/fi"
 
 interface SectionItem {
   id: string
@@ -49,6 +49,10 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
               text: item.text,
               consultDocuments: item.consultDocuments,
             }))
+            // Ensure there's always an empty section at the end
+            if (items.length === 0 || items[items.length - 1].text.trim() !== "") {
+              items.push({ id: crypto.randomUUID(), text: "", consultDocuments: true })
+            }
             setSectionItems(items)
           } else {
             throw new Error("Not structured format")
@@ -62,51 +66,79 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
               text: text.trim(),
               consultDocuments: true,
             }))
+          // Ensure there's always an empty section at the end
+          items.push({ id: crypto.randomUUID(), text: "", consultDocuments: true })
           setSectionItems(items)
         }
       } else {
-        setSectionItems([])
+        // Start with one empty section
+        setSectionItems([{ id: crypto.randomUUID(), text: "", consultDocuments: true }])
       }
       lastSectionsValueRef.current = sections
     }
   }, [sections])
 
-  const handleSectionChange = (id: string, field: keyof SectionItem, value: any) => {
-    setSectionItems((currentItems) =>
-      currentItems.map((item) => (item.id === id ? { ...item, [field]: value } : item)),
-    )
-  }
+  // Initialize with empty section if starting fresh
+  useEffect(() => {
+    if (sectionItems.length === 0) {
+      setSectionItems([{ id: crypto.randomUUID(), text: "", consultDocuments: true }])
+    }
+  }, [])
 
-  const addSection = () => {
-    const newItems = [
-      ...sectionItems,
-      { id: crypto.randomUUID(), text: "", consultDocuments: true },
-    ]
-    setSectionItems(newItems)
+  const handleSectionChange = (id: string, field: keyof SectionItem, value: any) => {
+    setSectionItems((currentItems) => {
+      const updatedItems = currentItems.map((item) =>
+        item.id === id ? { ...item, [field]: value } : item,
+      )
+
+      // If we're updating text and this is the last item and it's not empty anymore,
+      // add a new empty section at the end
+      if (field === "text" && value.trim() !== "") {
+        const itemIndex = currentItems.findIndex((item) => item.id === id)
+        if (itemIndex === currentItems.length - 1) {
+          updatedItems.push({ id: crypto.randomUUID(), text: "", consultDocuments: true })
+        }
+      }
+
+      return updatedItems
+    })
   }
 
   const removeSection = (id: string) => {
-    const updated = sectionItems.filter((item) => item.id !== id)
-    setSectionItems(updated)
+    setSectionItems((currentItems) => {
+      const updated = currentItems.filter((item) => item.id !== id)
+      // Ensure we always have at least one empty section
+      if (updated.length === 0 || updated[updated.length - 1].text.trim() !== "") {
+        updated.push({ id: crypto.randomUUID(), text: "", consultDocuments: true })
+      }
+      return updated
+    })
   }
 
   const moveSectionUp = (index: number) => {
     if (index === 0) return
-    const newItems = [...sectionItems]
-    ;[newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]]
-    setSectionItems(newItems)
+    setSectionItems((currentItems) => {
+      const newItems = [...currentItems]
+      ;[newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]]
+      return newItems
+    })
   }
 
   const moveSectionDown = (index: number) => {
-    if (index === sectionItems.length - 1) return
-    const newItems = [...sectionItems]
-    ;[newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]]
-    setSectionItems(newItems)
+    setSectionItems((currentItems) => {
+      if (index === currentItems.length - 1) return currentItems
+      const newItems = [...currentItems]
+      ;[newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]]
+      return newItems
+    })
   }
 
   useEffect(() => {
     console.log("SectionEditor: sectionItems changed, notifying parent", sectionItems)
-    const structuredData = sectionItems.map((item) => ({
+    // Filter out empty sections for the parent (except keep one empty for editing)
+    const nonEmptySections = sectionItems.filter((item) => item.text.trim() !== "")
+
+    const structuredData = nonEmptySections.map((item) => ({
       id: item.id,
       text: item.text,
       consultDocuments: item.consultDocuments,
@@ -115,100 +147,146 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
     lastSectionsValueRef.current = sectionsString // Prevent re-parsing our own changes
     callbacks.current.onSectionsChange(sectionsString)
     if (callbacks.current.onStructuredSectionsChange) {
-      callbacks.current.onStructuredSectionsChange(sectionItems)
+      callbacks.current.onStructuredSectionsChange(nonEmptySections)
     }
   }, [sectionItems])
 
   return (
-    <VStack gap={3} align="stretch" pr={2}>
-      <Text fontSize="sm" fontWeight="medium" color="gray.700">
-        Configure sections and document consultation:
-      </Text>
+    <VStack gap={0} align="stretch" w="full">
+      <VStack
+        align="stretch"
+        gap={0}
+        overflowY="auto"
+        maxH="300px"
+        css={{
+          "&:after": {
+            content: '""',
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "25px",
+            background: "linear-gradient(to top, white, transparent)",
+            pointerEvents: "none",
+          },
+        }}
+      >
+        {sectionItems.map((item, index) => {
+          const isLastEmptySection = index === sectionItems.length - 1 && item.text.trim() === ""
+          const canRemove = sectionItems.length > 1 && item.text.trim() !== ""
 
-      <VStack as="div" align="stretch" gap={3} overflowY="auto" maxH="300px">
-        {sectionItems.map((item, index) => (
-          <HStack
-            key={item.id}
-            gap={3}
-            align="center"
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(null)}
-          >
-            <Switch.Root
-              ids={{
-                root: `switch-root-${item.id}`,
-                hiddenInput: `switch-input-${item.id}`,
+          return (
+            <div
+              key={item.id}
+              style={{
+                position: "relative",
+                display: "flex",
+                paddingTop: "0.25rem",
+                paddingBottom: "0.25rem",
+                borderRadius: "0.375rem",
+                backgroundColor: "transparent",
+                transition: "all 0.2s ease",
               }}
-              checked={item.consultDocuments}
-              onCheckedChange={(details) => {
-                handleSectionChange(item.id, "consultDocuments", details.checked)
-              }}
-              size="md"
-              colorScheme="teal"
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
             >
-              <Switch.HiddenInput />
-              <Switch.Control />
-              <Switch.Label>
-                <Text fontSize="sm">Consult documents</Text>
-              </Switch.Label>
-            </Switch.Root>
+              <HStack gap={3} align="center" w="full">
+                {!isLastEmptySection && (
+                  <Switch.Root
+                    ids={{
+                      root: `switch-root-${item.id}`,
+                      hiddenInput: `switch-input-${item.id}`,
+                    }}
+                    checked={item.consultDocuments}
+                    onCheckedChange={(details) => {
+                      handleSectionChange(item.id, "consultDocuments", details.checked)
+                    }}
+                    size="sm"
+                    colorPalette="teal"
+                  >
+                    <Switch.HiddenInput />
+                    <Switch.Control />
+                    <Switch.Label>
+                      <Text fontSize="xs">Consult docs</Text>
+                    </Switch.Label>
+                  </Switch.Root>
+                )}
 
-            <Input
-              value={item.text}
-              onChange={(e) => handleSectionChange(item.id, "text", e.target.value)}
-              placeholder="Section description"
-              flex={1}
-              size="sm"
-            />
+                <div style={{ flex: "1", width: "100%" }}>
+                  <Input
+                    value={item.text}
+                    onChange={(e) => handleSectionChange(item.id, "text", e.target.value)}
+                    placeholder={isLastEmptySection ? "Add section" : "Section description"}
+                    size="sm"
+                    borderTop="none"
+                    borderLeft="none"
+                    borderRight="none"
+                    borderBottom="1px solid"
+                    borderColor="gray.200"
+                    borderRadius="none"
+                    bg="transparent"
+                    px={2}
+                    py={0}
+                    w="full"
+                    _focus={{
+                      borderTop: "none",
+                      borderLeft: "none",
+                      borderRight: "none",
+                      borderBottom: "1px solid",
+                      borderColor: "blue.300",
+                      boxShadow: "none",
+                      outline: "none",
+                      bg: "transparent",
+                    }}
+                    _placeholder={{
+                      color: isLastEmptySection ? "gray.400" : "gray.500",
+                      fontStyle: isLastEmptySection ? "italic" : "normal",
+                    }}
+                  />
+                </div>
 
-            <VStack gap={0} w="24px">
-              <IconButton
-                aria-label="Move section up"
-                size="xs"
-                variant="ghost"
-                onClick={() => moveSectionUp(index)}
-                disabled={index === 0}
-                opacity={hoveredIndex === index && index > 0 ? 1 : 0}
-              >
-                <FiChevronUp size={12} />
-              </IconButton>
-              <IconButton
-                aria-label="Move section down"
-                size="xs"
-                variant="ghost"
-                onClick={() => moveSectionDown(index)}
-                disabled={index === sectionItems.length - 1}
-                opacity={hoveredIndex === index && index < sectionItems.length - 1 ? 1 : 0}
-              >
-                <FiChevronDown size={12} />
-              </IconButton>
-            </VStack>
+                <VStack gap={0} w="24px">
+                  <IconButton
+                    aria-label="Move section up"
+                    size="xs"
+                    variant="ghost"
+                    onClick={() => moveSectionUp(index)}
+                    disabled={index === 0}
+                    opacity={hoveredIndex === index && index > 0 ? 1 : 0}
+                  >
+                    <FiChevronUp size={12} />
+                  </IconButton>
+                  <IconButton
+                    aria-label="Move section down"
+                    size="xs"
+                    variant="ghost"
+                    onClick={() => moveSectionDown(index)}
+                    disabled={index === sectionItems.length - 1}
+                    opacity={hoveredIndex === index && index < sectionItems.length - 1 ? 1 : 0}
+                  >
+                    <FiChevronDown size={12} />
+                  </IconButton>
+                </VStack>
 
-            <Box w="32px" textAlign="center">
-              <IconButton
-                size="sm"
-                variant="ghost"
-                colorScheme="red"
-                aria-label="Remove section"
-                onClick={() => removeSection(item.id)}
-                opacity={hoveredIndex === index ? 1 : 0}
-              >
-                <FiTrash2 />
-              </IconButton>
-            </Box>
-          </HStack>
-        ))}
+                <Box w="32px" textAlign="center">
+                  {canRemove && (
+                    <IconButton
+                      size="sm"
+                      variant="ghost"
+                      colorScheme="red"
+                      aria-label="Remove section"
+                      onClick={() => removeSection(item.id)}
+                      opacity={hoveredIndex === index ? 1 : 0}
+                    >
+                      <FiTrash2 />
+                    </IconButton>
+                  )}
+                </Box>
+              </HStack>
+            </div>
+          )
+        })}
       </VStack>
-
-      <Button size="sm" onClick={addSection} variant="outline">
-        <FiPlus />
-        Add Section
-      </Button>
-
-      <Text fontSize="xs" color="gray.500">
-        • Checked: Generate content using documents from knowledge base
-        <br />• Unchecked: Use section text as-is in the report
-      </Text>
     </VStack>
   )
 }

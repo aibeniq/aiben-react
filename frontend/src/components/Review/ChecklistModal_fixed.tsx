@@ -398,11 +398,10 @@ const ChecklistModal = ({
   }
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={onClose}>
+    <Dialog.Root open={isOpen} onOpenChange={onClose} size="full">
       <Portal>
-        <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content maxW="6xl" maxH="90vh">
+          <Dialog.Content maxW="95vw" maxH="95vh">
             <Dialog.Header>
               <Dialog.Title>
                 {editingChecklist ? "Edit Checklist" : "Create New Checklist"}
@@ -410,11 +409,11 @@ const ChecklistModal = ({
             </Dialog.Header>
 
             <Dialog.Body>
-              <VStack align="stretch" gap={4}>
+              <VStack align="stretch" gap={4} w="full" h="full">
                 {/* Two-column layout */}
                 <HStack align="stretch" gap={4}>
                   {/* Left Column - Basic Fields and Settings */}
-                  <VStack align="stretch" gap={4} flex="1">
+                  <VStack align="stretch" gap={4} flex="1" minW="400px">
                     <Field label="Checklist Name *" required>
                       <Input
                         value={checklistName}
@@ -535,6 +534,27 @@ const ChecklistModal = ({
                           </VStack>
                         )}
 
+                        {/* Generate button with description validation */}
+                        <Button
+                          onClick={handleGenerateQuestions}
+                          disabled={
+                            !checklistDescription.trim() ||
+                            checklistDescription.trim().length < 10 ||
+                            generating
+                          }
+                          loading={generating}
+                          variant="solid"
+                          colorPalette="green"
+                          size="sm"
+                          title={
+                            checklistDescription.trim().length < 10
+                              ? "Description must be at least 10 characters to generate questions"
+                              : "Generate questions based on the description"
+                          }
+                        >
+                          {generating ? "Generating..." : "Generate Questions"}
+                        </Button>
+
                         {checklistDescription.trim().length < 10 &&
                           checklistDescription.trim().length > 0 && (
                             <Text fontSize="sm" color="gray.500">
@@ -546,31 +566,12 @@ const ChecklistModal = ({
                   </VStack>
 
                   {/* Right Column - Questions List */}
-                  <VStack align="stretch" gap={4} flex="1">
+                  <VStack align="stretch" gap={4} flex="1" minW="400px">
                     <Field
                       label={
                         <HStack justify="space-between" w="full">
                           <span>Questions *</span>
                           <HStack gap={2}>
-                            <Button
-                              size="xs"
-                              onClick={handleGenerateQuestions}
-                              disabled={
-                                !checklistDescription.trim() ||
-                                checklistDescription.trim().length < 10 ||
-                                generating
-                              }
-                              loading={generating}
-                              variant="outline"
-                              colorPalette="green"
-                              title={
-                                checklistDescription.trim().length < 10
-                                  ? "Description must be at least 10 characters to generate questions"
-                                  : "Generate questions based on the description"
-                              }
-                            >
-                              {generating ? "Generating..." : "Generate"}
-                            </Button>
                             {/* Always show optimization button with tooltip when disabled */}
                             <Tooltip
                               content={

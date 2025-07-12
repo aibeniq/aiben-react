@@ -9,6 +9,7 @@ import {
   CloseButton,
   Button,
   Text,
+  IconButton,
 } from "@chakra-ui/react"
 import { Field } from "../ui/field"
 import { TwinCheckTopicList, TwincheckService, KnowledgeBasePublic } from "../../client"
@@ -18,6 +19,7 @@ import ConfirmButton from "../ui/confirm-button"
 import FileUpload, { FileItem } from "../Common/FileUpload"
 import useCustomToast from "../../hooks/useCustomToast"
 import SearchModeToggle from "../Common/SearchModeToggle"
+import { FiCopy } from "react-icons/fi"
 
 interface TopicListModalProps {
   isOpen: boolean
@@ -196,6 +198,27 @@ const TopicListModal = ({
     onClose()
   }
 
+  const handleCopyTopics = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    // Filter out empty topics
+    const nonEmptyTopics = topicsList.filter((topic) => topic.trim() !== "")
+
+    if (nonEmptyTopics.length === 0) {
+      showErrorToast("No topics to copy")
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(nonEmptyTopics.join("\n"))
+      showSuccessToast("Topics copied to clipboard!")
+    } catch (error) {
+      console.error("Error copying topics:", error)
+      showErrorToast("Failed to copy topics to clipboard")
+    }
+  }
+
   return (
     <Dialog.Root open={isOpen} onOpenChange={(e) => (e.open ? null : handleModalClose())}>
       <Portal>
@@ -314,25 +337,40 @@ const TopicListModal = ({
                     label={
                       <HStack justify="space-between" w="full">
                         <span>Comparison Topics</span>
-                        <Button
-                          size="xs"
-                          onClick={handleGenerateTopics}
-                          disabled={
-                            !topicListDescription.trim() ||
-                            topicListDescription.trim().length < 10 ||
-                            generating
-                          }
-                          loading={generating}
-                          variant="outline"
-                          colorPalette="green"
-                          title={
-                            topicListDescription.trim().length < 10
-                              ? "Description must be at least 10 characters to generate topics"
-                              : "Generate topics based on the description"
-                          }
-                        >
-                          {generating ? "Generating..." : "Generate Topics"}
-                        </Button>
+                        <HStack gap={2}>
+                          <Button
+                            size="xs"
+                            onClick={handleGenerateTopics}
+                            disabled={
+                              !topicListDescription.trim() ||
+                              topicListDescription.trim().length < 10 ||
+                              generating
+                            }
+                            loading={generating}
+                            variant="outline"
+                            colorPalette="green"
+                            title={
+                              topicListDescription.trim().length < 10
+                                ? "Description must be at least 10 characters to generate topics"
+                                : "Generate topics based on the description"
+                            }
+                          >
+                            {generating ? "Generating..." : "Generate Topics"}
+                          </Button>
+
+                          <IconButton
+                            size="xs"
+                            onClick={handleCopyTopics}
+                            variant="ghost"
+                            aria-label="Copy topics as text"
+                            title="Copy all topics as text"
+                            disabled={
+                              topicsList.filter((topic) => topic.trim() !== "").length === 0
+                            }
+                          >
+                            <FiCopy size={12} />
+                          </IconButton>
+                        </HStack>
                       </HStack>
                     }
                     required
