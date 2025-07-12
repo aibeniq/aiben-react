@@ -1,4 +1,8 @@
 import uuid
+import json
+import tempfile
+import os
+from pathlib import Path
 from app.models import (
     FormConnectRequest,
     FormConnectResponse,
@@ -35,12 +39,8 @@ from app.services.embeddings import load_embeddings_model
 from app.services.knowledgebases import get_embedding_model
 from app.services.retrievers import create_ensemble_retriever
 
-import json
-import os
-
 import base64
 from tempfile import NamedTemporaryFile
-from pathlib import Path
 
 # import fitz  # PyMuPDF - Removed for commercial licensing
 from app.services.pdf_utils import load_pdf_with_pypdf
@@ -77,25 +77,323 @@ def generate_template(fields: List[str]) -> Dict[str, str]:
 
 
 async def extract_fields_from_digitized_document(
-    file: UploadFile, template: Dict[str, str], llm=None
+    file: UploadFile, template: Dict[str, str], llm=None, search_mode: str = "full_scan"
 ) -> Dict[str, str]:
     """
     Extract fields from a document using the LLM.
+    Supports both full text processing and vector search modes.
     """
     # Read the file content
     content = await file.read()
 
+    if search_mode == "vector":
+        # TRUE VECTOR SEARCH IMPLEMENTATION
+        return await extract_fields_using_vector_search(file, content, template, llm)
+    else:
+        # FULL TEXT MODE (existing implementation)
+        return await extract_fields_using_full_text(
+            content, file.filename, template, llm
+        )
+
+
+async def extract_fields_using_vector_search(
+    file: UploadFile, content: bytes, template: Dict[str, str], llm=None
+) -> Dict[str, str]:
+    """
+    Extract fields using vector search to find relevant document sections.
+    Uses a temporary ChromaDB instance to perform semantic search.
+    """
     try:
-        text = content.decode("utf-8")  # Try to decode as UTF-8
-    except UnicodeDecodeError:
-        # If it's not a text file, we could handle binary files differently
-        # For now, just return an error message in the template
+        import tempfile
+        import shutil
+        from langchain_community.vectorstores import Chroma
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
+        from app.services.embeddings import load_embeddings_model
+        from app.services.knowledgebases import get_embedding_model
+        from app.services.retrievers import create_ensemble_retriever
+
+        print(f"🔍 Using vector search mode for field extraction from {file.filename}")
+
+        # Get embedding model
+        from app.api.deps import get_session
+
+        session = next(get_session())
+        embedding_info = get_embedding_model(session)
+
+        if not embedding_info:
+            print("❌ No embedding model available, falling back to full text mode")
+            return await extract_fields_using_full_text(
+                content, file.filename, template, llm
+            )
+
+        print(
+            f"Using embedding model: {embedding_info['model_id']} ({embedding_info['provider']})"
+        )
+
+        # Extract text from the document first
+        text = ""
+        file_ext = Path(file.filename).suffix.lower() if file.filename else ""
+
+        if file_ext == ".pdf":
+            from app.services.pdf_utils import extract_text_from_pdf_bytes
+
+            text = extract_text_from_pdf_bytes(content, file.filename)
+        elif file_ext in [".docx", ".doc"]:
+            import tempfile
+            import os
+            from docx import Document as DocxDocument
+
+            with tempfile.NamedTemporaryFile(
+                delete=False, suffix=file_ext
+            ) as temp_file:
+                temp_file.write(content)
+                temp_file_path = temp_file.name
+
+            try:
+                doc = DocxDocument(temp_file_path)
+                text_parts = []
+                for paragraph in doc.paragraphs:
+                    if paragraph.text.strip():
+                        text_parts.append(paragraph.text)
+                for table in doc.tables:
+                    for row in table.rows:
+                        for cell in row.cells:
+                            if cell.text.strip():
+                                text_parts.append(cell.text)
+                text = "\n\n".join(text_parts)
+            finally:
+                if os.path.exists(temp_file_path):
+                    os.unlink(temp_file_path)
+        else:
+            # Handle text files
+            try:
+                text = content.decode("utf-8")
+            except UnicodeDecodeError:
+                try:
+                    text = content.decode("latin-1")
+                except UnicodeDecodeError:
+                    return {
+                        k: "Could not extract: Unsupported file format"
+                        for k in template.keys()
+                    }
+
+        if not text.strip():
+            return {k: "Could not extract: Empty document" for k in template.keys()}
+
+        # Create temporary directory for ChromaDB
+        temp_dir = tempfile.mkdtemp()
+
+        try:
+            # Load embedding model
+            embeddings = load_embeddings_model(
+                provider=embedding_info["provider"], model_id=embedding_info["model_id"]
+            )
+
+            # Split text into chunks for vector storage
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=settings.RAG_DOCUMENT_CHUNK_SIZE,
+                chunk_overlap=settings.RAG_DOCUMENT_CHUNK_OVERLAP,
+                length_function=len,
+            )
+            chunks = text_splitter.split_text(text)
+
+            print(f"📄 Split document into {len(chunks)} chunks for vector search")
+
+            # Create ChromaDB vector store
+            chroma_db = Chroma.from_texts(
+                texts=chunks,
+                embedding=embeddings,
+                persist_directory=temp_dir,
+                metadatas=[
+                    {"source": file.filename, "chunk_id": i} for i in range(len(chunks))
+                ],
+            )
+
+            # Create retriever for semantic search
+            retriever = create_ensemble_retriever(
+                chroma_db=chroma_db,
+                vector_weight=0.8,  # Higher weight for vector search in FormConnect
+                keyword_weight=0.2,
+                search_kwargs={"k": settings.FORMCONNECT_VECTOR_SEARCH_CHUNKS},
+            )
+
+            # Extract fields using vector search
+            extracted_data = {}
+            field_count = len(template)
+
+            print(f"🔎 Extracting {field_count} fields using vector search...")
+
+            for i, (field_name, field_description) in enumerate(template.items(), 1):
+                print(f"[{i}/{field_count}] Searching for: {field_name}")
+
+                # Create search query combining field name and description
+                search_query = f"{field_name} {field_description}".strip()
+
+                try:
+                    # Retrieve relevant chunks
+                    relevant_docs = retriever.invoke(search_query)
+
+                    if relevant_docs:
+                        # Combine relevant text from retrieved chunks
+                        relevant_chunks = []
+                        total_tokens = 0
+
+                        for doc in relevant_docs:
+                            chunk_text = doc.page_content
+                            chunk_tokens = count_tokens(chunk_text)
+
+                            # Limit total context to avoid token limits
+                            if (
+                                total_tokens + chunk_tokens > 10000
+                            ):  # Conservative limit
+                                break
+
+                            relevant_chunks.append(chunk_text)
+                            total_tokens += chunk_tokens
+
+                        relevant_text = "\n\n".join(relevant_chunks)
+
+                        if relevant_text.strip():
+                            # Create field-specific extraction prompt
+                            field_prompt = f"""Extract the value for "{field_name}" from the following text.
+
+Field description: {field_description}
+
+Relevant text:
+{relevant_text}
+
+Instructions:
+1. Look for the specific information related to "{field_name}"
+2. If found, return only the extracted value
+3. If not found, return "Not found"
+4. Be precise and concise
+
+Extracted value:"""
+
+                            # Extract field value using LLM
+                            field_response = invoke_llm(llm, field_prompt, {})
+                            extracted_value = (
+                                field_response.content
+                                if hasattr(field_response, "content")
+                                else str(field_response)
+                            )
+                            extracted_data[field_name] = extracted_value.strip()
+
+                            print(f"   ✅ Found: {extracted_value.strip()[:50]}...")
+                        else:
+                            extracted_data[field_name] = "Not found"
+                            print(f"   ❌ No relevant content found")
+                    else:
+                        extracted_data[field_name] = "Not found"
+                        print(f"   ❌ No search results")
+
+                except Exception as e:
+                    print(f"   ❌ Error searching for {field_name}: {str(e)}")
+                    extracted_data[field_name] = f"Error: {str(e)}"
+
+            print("✅ Vector search extraction completed")
+            return extracted_data
+
+        finally:
+            # Cleanup temporary directory
+            try:
+                shutil.rmtree(temp_dir)
+                print(f"🧹 Cleaned up temporary directory: {temp_dir}")
+            except Exception as e:
+                print(f"Warning: Could not cleanup temporary directory: {str(e)}")
+
+    except Exception as e:
+        print(f"❌ Vector search failed: {str(e)}. Falling back to full text mode.")
+        return await extract_fields_using_full_text(
+            content, file.filename, template, llm
+        )
+
+
+async def extract_fields_using_full_text(
+    content: bytes, filename: str, template: Dict[str, str], llm=None
+) -> Dict[str, str]:
+    """
+    Extract fields using full text processing (original method).
+    """
+    print(f"📄 Using full text mode for field extraction from {filename}")
+
+    # Check file extension to determine processing method
+    file_ext = Path(filename).suffix.lower() if filename else ""
+
+    try:
+        if file_ext == ".pdf":
+            # Handle PDF files using our PDF utility
+            from app.services.pdf_utils import extract_text_from_pdf_bytes
+
+            text = extract_text_from_pdf_bytes(content, filename)
+        elif file_ext in [".docx", ".doc"]:
+            # Handle Word documents
+            import tempfile
+            import os
+            from docx import Document as DocxDocument
+
+            with tempfile.NamedTemporaryFile(
+                delete=False, suffix=file_ext
+            ) as temp_file:
+                temp_file.write(content)
+                temp_file_path = temp_file.name
+
+            try:
+                doc = DocxDocument(temp_file_path)
+                text_parts = []
+
+                # Extract text from paragraphs
+                for paragraph in doc.paragraphs:
+                    if paragraph.text.strip():
+                        text_parts.append(paragraph.text)
+
+                # Extract text from tables
+                for table in doc.tables:
+                    for row in table.rows:
+                        for cell in row.cells:
+                            if cell.text.strip():
+                                text_parts.append(cell.text)
+
+                text = "\n\n".join(text_parts)
+            finally:
+                if os.path.exists(temp_file_path):
+                    os.unlink(temp_file_path)
+        else:
+            # Handle text files
+            try:
+                text = content.decode("utf-8")
+            except UnicodeDecodeError:
+                try:
+                    text = content.decode("latin-1")
+                except UnicodeDecodeError:
+                    return {
+                        k: f"Could not extract: Unsupported file format {filename}"
+                        for k in template.keys()
+                    }
+
+        if not text.strip():
+            return {
+                k: f"Could not extract: Empty document {filename}"
+                for k in template.keys()
+            }
+
+        # Check token count and implement chunking if needed
+        token_count = count_tokens(text + json.dumps(template))
+
+        if token_count > 150000:  # Token limit safety
+            print(
+                f"⚠️ Large document detected ({token_count} tokens), implementing chunking..."
+            )
+            return await extract_fields_with_chunking(text, template, llm)
+
+    except Exception as e:
+        print(f"Error processing file {filename}: {str(e)}")
         return {
-            k: f"Could not extract: Binary file {file.filename}"
+            k: f"Could not extract: Error processing {filename} - {str(e)}"
             for k in template.keys()
         }
 
-    # Create the prompt
+    # Create the prompt for full text extraction
     prompt_template = settings.FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE
     variables = {"template": json.dumps(template), "document_text": text}
     response = invoke_llm(llm, prompt_template, variables)
@@ -109,6 +407,97 @@ async def extract_fields_from_digitized_document(
         return content_dict
     except Exception:
         return {"raw_content": str(response)}
+
+
+def count_tokens(text: str, model: str = "gpt-4o-mini") -> int:
+    """Count tokens in text for the given model."""
+    try:
+        import tiktoken
+
+        encoding = tiktoken.encoding_for_model(model)
+        return len(encoding.encode(text))
+    except KeyError:
+        # Fallback to cl100k_base for unknown models
+        import tiktoken
+
+        encoding = tiktoken.get_encoding("cl100k_base")
+        return len(encoding.encode(text))
+
+
+async def extract_fields_with_chunking(
+    document_text: str, template: Dict[str, str], llm=None
+) -> Dict[str, str]:
+    """
+    Extract fields from large documents using chunking.
+    """
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+    print("🔄 Processing large document with chunking...")
+
+    # Create chunks
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=50000,  # Conservative chunk size
+        chunk_overlap=200,
+        length_function=len,
+    )
+
+    chunks = splitter.split_text(document_text)
+    print(f"📄 Split document into {len(chunks)} chunks")
+
+    all_extractions = []
+
+    # Process each chunk
+    for i, chunk in enumerate(chunks):
+        print(f"[{i+1}/{len(chunks)}] Processing chunk ({count_tokens(chunk)} tokens)")
+
+        try:
+            prompt_template = settings.FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE
+            variables = {"template": json.dumps(template), "document_text": chunk}
+            response = invoke_llm(llm, prompt_template, variables)
+
+            try:
+                if isinstance(response, dict):
+                    chunk_extraction = response
+                else:
+                    chunk_extraction = json.loads(response)
+                all_extractions.append(chunk_extraction)
+            except json.JSONDecodeError as e:
+                print(f"Error parsing JSON from chunk {i+1}: {e}")
+                continue
+
+        except Exception as e:
+            print(f"Error processing chunk {i+1}: {str(e)}")
+            continue
+
+    # Merge extractions from all chunks
+    return merge_field_extractions(all_extractions, template)
+
+
+def merge_field_extractions(
+    extractions: list, template: Dict[str, str]
+) -> Dict[str, str]:
+    """
+    Merge field extractions from multiple document chunks.
+    """
+    if not extractions:
+        return {k: "Not found" for k in template.keys()}
+
+    if len(extractions) == 1:
+        return extractions[0]
+
+    # Start with the template structure
+    merged = {k: "Not found" for k in template.keys()}
+
+    # For each field, take the first non-empty value found
+    for extraction in extractions:
+        for field, value in extraction.items():
+            if field in merged and value and str(value).strip():
+                # Only update if current value is empty/placeholder
+                current_value = str(merged[field]).strip()
+                if current_value.lower() in ["not found", "", "n/a", "null", "none"]:
+                    merged[field] = value
+
+    return merged
 
 
 async def extract_fields_from_handwritten_document(
@@ -166,7 +555,9 @@ async def extract_fields_from_handwritten_document(
 
     # Fallback for non-image files
     await file.seek(0)
-    return await extract_fields_from_digitized_document(file, template, llm)
+    return await extract_fields_from_digitized_document(
+        file, template, llm, "full_scan"
+    )
 
 
 async def compare_multiple_documents(
@@ -254,7 +645,7 @@ async def process_form(
     if digitized_files:
         for file in digitized_files:
             extracted = await extract_fields_from_digitized_document(
-                file, template, llm
+                file, template, llm, search_mode
             )
 
             print("Results for file name:", file.filename)
