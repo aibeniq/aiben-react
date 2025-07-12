@@ -10,6 +10,7 @@ import {
   Button,
   Text,
   Box,
+  IconButton,
 } from "@chakra-ui/react"
 import { Field } from "../ui/field"
 import { FormConnectForm, KnowledgeBasePublic } from "../../client"
@@ -19,6 +20,7 @@ import ConfirmButton from "../ui/confirm-button"
 import FileUpload, { FileItem } from "../Common/FileUpload"
 import SearchModeToggle from "../Common/SearchModeToggle"
 import useCustomToast from "../../hooks/useCustomToast"
+import { FiCopy } from "react-icons/fi"
 
 interface FormTemplateModalProps {
   isOpen: boolean
@@ -195,6 +197,31 @@ const FormTemplateModal = ({
     setExampleFiles([])
     onClose()
   }
+
+  const handleCopyFields = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    // Parse fields from the string format used by InteractiveList
+    const fieldLines = fields
+      .split("\n")
+      .filter((line) => line.trim() !== "")
+      .map((line) => line.trim())
+
+    if (fieldLines.length === 0) {
+      showErrorToast("No fields to copy")
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(fieldLines.join("\n"))
+      showSuccessToast("Fields copied to clipboard!")
+    } catch (error) {
+      console.error("Error copying fields:", error)
+      showErrorToast("Failed to copy fields to clipboard")
+    }
+  }
+
   return (
     <Dialog.Root open={isOpen} onOpenChange={(e) => (e.open ? null : handleModalClose())}>
       <Portal>
@@ -312,25 +339,41 @@ const FormTemplateModal = ({
                     label={
                       <HStack justify="space-between" w="full">
                         <span>Form Fields</span>
-                        <Button
-                          size="xs"
-                          onClick={handleGenerateFields}
-                          disabled={
-                            !formDescription.trim() ||
-                            formDescription.trim().length < 10 ||
-                            generating
-                          }
-                          loading={generating}
-                          variant="outline"
-                          colorPalette="green"
-                          title={
-                            formDescription.trim().length < 10
-                              ? "Description must be at least 10 characters to generate fields"
-                              : "Generate fields based on the description"
-                          }
-                        >
-                          {generating ? "Generating..." : "Generate Form Template"}
-                        </Button>
+                        <HStack gap={2}>
+                          <Button
+                            size="xs"
+                            onClick={handleGenerateFields}
+                            disabled={
+                              !formDescription.trim() ||
+                              formDescription.trim().length < 10 ||
+                              generating
+                            }
+                            loading={generating}
+                            variant="outline"
+                            colorPalette="green"
+                            title={
+                              formDescription.trim().length < 10
+                                ? "Description must be at least 10 characters to generate fields"
+                                : "Generate fields based on the description"
+                            }
+                          >
+                            {generating ? "Generating..." : "Generate Form Template"}
+                          </Button>
+
+                          <IconButton
+                            size="xs"
+                            onClick={handleCopyFields}
+                            variant="ghost"
+                            aria-label="Copy fields as text"
+                            title="Copy all fields as text"
+                            disabled={
+                              !fields.trim() ||
+                              fields.split("\n").filter((line) => line.trim() !== "").length === 0
+                            }
+                          >
+                            <FiCopy size={12} />
+                          </IconButton>
+                        </HStack>
                       </HStack>
                     }
                     required

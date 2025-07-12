@@ -9,6 +9,7 @@ import {
   Button,
   Text,
   Box,
+  IconButton,
 } from "@chakra-ui/react"
 import { Field } from "../ui/field"
 import { ReportGenieOutline, KnowledgeBasePublic } from "../../client"
@@ -21,6 +22,7 @@ import { useState } from "react"
 import { ReportgenieService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import SearchModeToggle from "../Common/SearchModeToggle"
+import { FiCopy } from "react-icons/fi"
 
 interface OutlineModalProps {
   isOpen: boolean
@@ -200,6 +202,44 @@ const OutlineModal = ({
     onClose()
   }
 
+  const handleCopySections = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    try {
+      // Parse sections from JSON format
+      let sectionTexts: string[] = []
+
+      if (sections.trim()) {
+        try {
+          const parsedSections = JSON.parse(sections)
+          if (Array.isArray(parsedSections)) {
+            sectionTexts = parsedSections
+              .filter((section) => section.text && section.text.trim() !== "")
+              .map((section) => section.text.trim())
+          }
+        } catch {
+          // If JSON parsing fails, treat as simple text
+          sectionTexts = sections
+            .split("\n")
+            .filter((line) => line.trim() !== "")
+            .map((line) => line.trim())
+        }
+      }
+
+      if (sectionTexts.length === 0) {
+        showErrorToast("No sections to copy")
+        return
+      }
+
+      await navigator.clipboard.writeText(sectionTexts.join("\n"))
+      showSuccessToast("Sections copied to clipboard!")
+    } catch (error) {
+      console.error("Error copying sections:", error)
+      showErrorToast("Failed to copy sections to clipboard")
+    }
+  }
+
   if (!isOpen) return null
 
   return (
@@ -207,7 +247,7 @@ const OutlineModal = ({
       <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && handleClose()}>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content maxW="4xl" maxH="80vh">
+          <Dialog.Content maxW="6xl" maxH="90vh">
             <Dialog.Header>
               <Dialog.Title>{editingOutline ? "Edit Outline" : "Create New Outline"}</Dialog.Title>
               <Dialog.CloseTrigger asChild>
@@ -217,187 +257,211 @@ const OutlineModal = ({
 
             <Dialog.Body overflowY="auto">
               <VStack gap={4} align="stretch">
-                <Field label="Outline Name" required>
-                  <Input
-                    value={outlineName}
-                    onChange={(e) => setOutlineName(e.target.value)}
-                    placeholder="Enter outline name"
-                  />
-                </Field>
-
-                <Field label="Description">
-                  <Textarea
-                    value={outlineDescription}
-                    onChange={(e) => setOutlineDescription(e.target.value)}
-                    placeholder="Enter outline description to auto-generate sections (minimum 10 characters)..."
-                    resize="vertical"
-                    rows={3}
-                  />
-                  {outlineDescription.trim().length > 0 &&
-                    outlineDescription.trim().length < 10 && (
-                      <Text fontSize="xs" color="orange.600">
-                        Description needs at least {10 - outlineDescription.trim().length} more
-                        characters to generate sections
-                      </Text>
-                    )}
-                </Field>
-
-                <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
-
-                <Field label="Reference Documents (Optional)">
-                  <VStack align="stretch" gap={3}>
-                    <Text fontSize="sm" color="gray.600">
-                      Upload reference documents or select a Knowledge Base to help the AI
-                      understand the desired structure and requirements for the outline sections.
-                    </Text>
-
-                    {/* Toggle between files and knowledge base */}
-                    <HStack gap={4}>
-                      <Button
-                        size="sm"
-                        variant={referenceMode === "files" ? "solid" : "outline"}
-                        colorPalette={referenceMode === "files" ? "blue" : "gray"}
-                        onClick={() => handleReferenceModeChange("files")}
-                      >
-                        Upload Files
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant={referenceMode === "knowledge-base" ? "solid" : "outline"}
-                        colorPalette={referenceMode === "knowledge-base" ? "blue" : "gray"}
-                        onClick={() => handleReferenceModeChange("knowledge-base")}
-                        disabled={!knowledgeBases || knowledgeBases.length === 0}
-                      >
-                        Select Knowledge Base
-                      </Button>
-                    </HStack>
-
-                    {referenceMode === "files" ? (
-                      <FileUpload
-                        files={exampleFiles}
-                        onFilesChange={setExampleFiles}
-                        maxFiles={3}
-                        showHandwrittenToggle={false}
+                {/* Two-column layout */}
+                <HStack align="stretch" gap={4}>
+                  {/* Left Column - Basic Fields and Settings */}
+                  <VStack align="stretch" gap={4} flex="1">
+                    <Field label="Outline Name" required>
+                      <Input
+                        value={outlineName}
+                        onChange={(e) => setOutlineName(e.target.value)}
+                        placeholder="Enter outline name"
                       />
-                    ) : (
-                      <VStack align="stretch" gap={2}>
-                        {knowledgeBases && knowledgeBases.length > 0 ? (
+                    </Field>
+
+                    <Field label="Description">
+                      <Textarea
+                        value={outlineDescription}
+                        onChange={(e) => setOutlineDescription(e.target.value)}
+                        placeholder="Enter outline description to auto-generate sections (minimum 10 characters)..."
+                        resize="vertical"
+                        rows={3}
+                      />
+                      {outlineDescription.trim().length > 0 &&
+                        outlineDescription.trim().length < 10 && (
+                          <Text fontSize="xs" color="orange.600">
+                            Description needs at least {10 - outlineDescription.trim().length} more
+                            characters to generate sections
+                          </Text>
+                        )}
+                    </Field>
+
+                    <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
+
+                    <Field label="Reference Documents (Optional)">
+                      <VStack align="stretch" gap={3}>
+                        <Text fontSize="sm" color="gray.600">
+                          Upload reference documents or select a Knowledge Base to help the AI
+                          understand the desired structure and requirements for the outline
+                          sections.
+                        </Text>
+
+                        {/* Toggle between files and knowledge base */}
+                        <HStack gap={4}>
+                          <Button
+                            size="sm"
+                            variant={referenceMode === "files" ? "solid" : "outline"}
+                            colorPalette={referenceMode === "files" ? "blue" : "gray"}
+                            onClick={() => handleReferenceModeChange("files")}
+                          >
+                            Upload Files
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={referenceMode === "knowledge-base" ? "solid" : "outline"}
+                            colorPalette={referenceMode === "knowledge-base" ? "blue" : "gray"}
+                            onClick={() => handleReferenceModeChange("knowledge-base")}
+                            disabled={!knowledgeBases || knowledgeBases.length === 0}
+                          >
+                            Select Knowledge Base
+                          </Button>
+                        </HStack>
+
+                        {referenceMode === "files" ? (
+                          <FileUpload
+                            files={exampleFiles}
+                            onFilesChange={setExampleFiles}
+                            maxFiles={3}
+                            showHandwrittenToggle={false}
+                          />
+                        ) : (
                           <VStack align="stretch" gap={2}>
-                            <Text fontSize="xs" color="gray.600">
-                              Select a Knowledge Base to use as reference for generating outline
-                              sections:
-                            </Text>
-                            <Box
-                              maxH="120px"
-                              overflowY="auto"
-                              border="1px solid"
-                              borderColor="gray.200"
-                              borderRadius="md"
-                            >
-                              {knowledgeBases.map((kb) => (
+                            {knowledgeBases && knowledgeBases.length > 0 ? (
+                              <VStack align="stretch" gap={2}>
+                                <Text fontSize="xs" color="gray.600">
+                                  Select a Knowledge Base to use as reference for generating outline
+                                  sections:
+                                </Text>
                                 <Box
-                                  key={kb.id}
-                                  p={2}
-                                  cursor="pointer"
-                                  _hover={{ bg: "gray.50" }}
-                                  bg={referenceKnowledgeBase?.id === kb.id ? "blue.50" : "white"}
-                                  borderBottom="1px solid"
-                                  borderColor="gray.100"
-                                  onClick={() => setReferenceKnowledgeBase(kb)}
+                                  maxH="120px"
+                                  overflowY="auto"
+                                  border="1px solid"
+                                  borderColor="gray.200"
+                                  borderRadius="md"
                                 >
-                                  <Text fontSize="sm" fontWeight="medium">
-                                    {kb.title}
-                                  </Text>
-                                  {kb.description && (
-                                    <Text fontSize="xs" color="gray.600" lineClamp={2}>
-                                      {kb.description}
-                                    </Text>
-                                  )}
-                                  <Text fontSize="xs" color="gray.500">
-                                    {kb.number_of_sources || 0} sources
-                                  </Text>
+                                  {knowledgeBases.map((kb) => (
+                                    <Box
+                                      key={kb.id}
+                                      p={2}
+                                      cursor="pointer"
+                                      _hover={{ bg: "gray.50" }}
+                                      bg={
+                                        referenceKnowledgeBase?.id === kb.id ? "blue.50" : "white"
+                                      }
+                                      borderBottom="1px solid"
+                                      borderColor="gray.100"
+                                      onClick={() => setReferenceKnowledgeBase(kb)}
+                                    >
+                                      <Text fontSize="sm" fontWeight="medium">
+                                        {kb.title}
+                                      </Text>
+                                      {kb.description && (
+                                        <Text fontSize="xs" color="gray.600" lineClamp={2}>
+                                          {kb.description}
+                                        </Text>
+                                      )}
+                                      <Text fontSize="xs" color="gray.500">
+                                        {kb.number_of_sources || 0} sources
+                                      </Text>
+                                    </Box>
+                                  ))}
                                 </Box>
-                              ))}
-                            </Box>
-                            {referenceKnowledgeBase && (
-                              <Text fontSize="xs" color="green.600">
-                                Selected: {referenceKnowledgeBase.title}
+                                {referenceKnowledgeBase && (
+                                  <Text fontSize="xs" color="green.600">
+                                    Selected: {referenceKnowledgeBase.title}
+                                  </Text>
+                                )}
+                              </VStack>
+                            ) : (
+                              <Text fontSize="sm" color="gray.500">
+                                No Knowledge Bases available. Create one first or switch to file
+                                upload.
                               </Text>
                             )}
                           </VStack>
-                        ) : (
-                          <Text fontSize="sm" color="gray.500">
-                            No Knowledge Bases available. Create one first or switch to file upload.
-                          </Text>
                         )}
                       </VStack>
-                    )}
+                    </Field>
                   </VStack>
-                </Field>
 
-                <Field
-                  label={
-                    <HStack justify="space-between" w="full">
-                      <span>Sections</span>
-                      <HStack gap={2}>
-                        <Button
-                          size="xs"
-                          onClick={handleGenerateOutline}
-                          disabled={
-                            !outlineDescription.trim() ||
-                            outlineDescription.trim().length < 10 ||
-                            generating
-                          }
-                          loading={generating}
-                          variant="outline"
-                          colorPalette="green"
-                          title={
-                            outlineDescription.trim().length < 10
-                              ? "Description must be at least 10 characters to generate sections"
-                              : "Generate sections based on the description"
-                          }
-                        >
-                          {generating ? "Generating..." : "Generate Outline"}
-                        </Button>
+                  {/* Right Column - Sections List */}
+                  <VStack align="stretch" gap={4} flex="1">
+                    <Field
+                      label={
+                        <HStack justify="space-between" w="full">
+                          <span>Sections *</span>
+                          <HStack gap={2}>
+                            <Button
+                              size="xs"
+                              onClick={handleGenerateOutline}
+                              disabled={
+                                !outlineDescription.trim() ||
+                                outlineDescription.trim().length < 10 ||
+                                generating
+                              }
+                              loading={generating}
+                              variant="outline"
+                              colorPalette="green"
+                              title={
+                                outlineDescription.trim().length < 10
+                                  ? "Description must be at least 10 characters to generate sections"
+                                  : "Generate sections based on the description"
+                              }
+                            >
+                              {generating ? "Generating..." : "Generate"}
+                            </Button>
 
-                        <Button
-                          size="xs"
-                          onClick={handleOptimizeClick}
-                          disabled={
-                            !selectedKnowledgeBase ||
-                            !editingOutline?.id ||
-                            !sections.trim() ||
-                            generating
-                          }
-                          variant="outline"
-                          colorPalette="blue"
-                          title={
-                            !selectedKnowledgeBase
-                              ? "Select a knowledge base first"
-                              : !editingOutline?.id
-                                ? "Save the outline first"
-                                : !sections.trim()
-                                  ? "Add sections to optimize"
-                                  : "Optimize sections using ground-truth document"
-                          }
-                        >
-                          Optimize
-                        </Button>
-                      </HStack>
-                    </HStack>
-                  }
-                  required
-                >
-                  <Box
-                    border="1px solid"
-                    borderColor="gray.200"
-                    borderRadius="md"
-                    p={3}
-                    width="full"
-                  >
-                    <SectionEditor sections={sections} onSectionsChange={onSectionsChange} />
-                  </Box>
-                </Field>
+                            <Button
+                              size="xs"
+                              onClick={handleOptimizeClick}
+                              disabled={
+                                !selectedKnowledgeBase ||
+                                !editingOutline?.id ||
+                                !sections.trim() ||
+                                generating
+                              }
+                              variant="outline"
+                              colorPalette="blue"
+                              title={
+                                !selectedKnowledgeBase
+                                  ? "Select a knowledge base first"
+                                  : !editingOutline?.id
+                                    ? "Save the outline first"
+                                    : !sections.trim()
+                                      ? "Add sections to optimize"
+                                      : "Optimize sections using ground-truth document"
+                              }
+                            >
+                              Optimize
+                            </Button>
+
+                            <IconButton
+                              size="xs"
+                              onClick={handleCopySections}
+                              variant="ghost"
+                              aria-label="Copy sections as text"
+                              title="Copy all sections as text"
+                              disabled={!sections.trim()}
+                            >
+                              <FiCopy size={12} />
+                            </IconButton>
+                          </HStack>
+                        </HStack>
+                      }
+                      required
+                    >
+                      <Box
+                        border="1px solid"
+                        borderColor="gray.200"
+                        borderRadius="md"
+                        p={3}
+                        width="full"
+                      >
+                        <SectionEditor sections={sections} onSectionsChange={onSectionsChange} />
+                      </Box>
+                    </Field>
+                  </VStack>
+                </HStack>
               </VStack>
             </Dialog.Body>
 
