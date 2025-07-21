@@ -94,9 +94,6 @@ def get_llm_models(
     """
     Get all LLMs.
     """
-    # Initialize default models if none exist
-    initialize_default_llm_models(session)
-
     # Get models (both system and user-specific)
     models = session.exec(
         select(LlmModel)

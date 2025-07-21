@@ -153,4 +153,4 @@ def get_embedding_model(session: Session, current_user: CurrentUser):
     else:
         from app.models import ModelProvider
 
-        return {"model_id": "all-MiniLM-L6-v2", "provider": ModelProvider.HUGGINGFACE}
+        return {"model_id": "text-embedding-3-small", "provider": ModelProvider.OPENAI}

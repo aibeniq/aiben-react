@@ -25,6 +25,7 @@ import ConfirmButton from "../ui/confirm-button"
 import useCustomToast from "../../hooks/useCustomToast"
 import FileUpload from "../Common/FileUpload"
 import SearchModeToggle from "../Common/SearchModeToggle"
+import { generateUUID } from "../../utils/uuid"
 
 interface ChecklistModalProps {
   isOpen: boolean
@@ -629,7 +630,7 @@ const ChecklistModal = ({
                         {questionsList.map((question, index) => (
                           <QuestionItem
                             key={`${questionsKey}-${index}`}
-                            id={questionsData[index]?.id || crypto.randomUUID()}
+                            id={questionsData[index]?.id || generateUUID()}
                             index={index}
                             question={question}
                             consultDocuments={questionsData[index]?.consultDocuments ?? true}

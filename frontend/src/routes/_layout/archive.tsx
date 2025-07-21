@@ -11,7 +11,7 @@ import { Box, Container, VStack, Tabs } from "@chakra-ui/react"
 import { FiCheckCircle, FiFilePlus } from "react-icons/fi"
 import { FaBalanceScale } from "react-icons/fa"
 import { TbPlugConnected } from "react-icons/tb"
-import { VeradocService, ReportgenieService, TwincheckService } from "../../client"
+import { VeradocService, ReportgenieService, TwincheckService, FormconnectService } from "../../client"
 import { useState } from "react"
 
 export const Route = createFileRoute("/_layout/archive")({
@@ -55,6 +55,7 @@ function Archive() {
         })
       } else if (activeTab === "generate" && reportgenie.selectedReport) {
         fullText =
+          reportgenie.selectedReport.results?.final_report ||
           reportgenie.selectedReport.results?.full_report ||
           reportgenie.selectedReport.full_report ||
           reportgenie.selectedReport.content ||
@@ -107,6 +108,7 @@ function Archive() {
         })
       } else if (activeTab === "generate" && reportgenie.selectedReport) {
         fullText =
+          reportgenie.selectedReport.results?.final_report ||
           reportgenie.selectedReport.results?.full_report ||
           reportgenie.selectedReport.full_report ||
           reportgenie.selectedReport.content ||
@@ -127,9 +129,37 @@ function Archive() {
           requestBody: { content: fullText },
         })
       } else if (activeTab === "match" && formconnect.selectedReport) {
-        // FormConnect doesn't have generateDocx, show error message
-        showErrorToast("Download functionality is not available for Form Processing results")
-        return
+        // FormConnect DOCX download
+        if (formconnect.selectedReport.results?.comparison) {
+          // Multi-document comparison results
+          fullText = `# Form Processing Results\n\n${formconnect.selectedReport.results.comparison}`
+        } else if (formconnect.selectedReport.results?.message) {
+          // Single document results
+          fullText = `# Form Processing Results\n\n${formconnect.selectedReport.results.message}\n\n`
+          
+          if (formconnect.selectedReport.results.extracted_data) {
+            fullText += `## Extracted Fields\n\n`
+            const extractedData = formconnect.selectedReport.results.extracted_data
+            if (Array.isArray(extractedData) && extractedData.length > 0) {
+              extractedData.forEach((data: any, index: number) => {
+                fullText += `### Document ${index + 1}\n\n`
+                Object.entries(data).forEach(([key, value]) => {
+                  fullText += `**${key}**: ${value}\n\n`
+                })
+              })
+            } else if (typeof extractedData === 'object') {
+              Object.entries(extractedData).forEach(([key, value]) => {
+                fullText += `**${key}**: ${value}\n\n`
+              })
+            }
+          }
+        } else {
+          fullText = formconnect.selectedReport.content || formconnect.selectedReport.full_report || "No content available"
+        }
+
+        response = await FormconnectService.generateDocx({
+          requestBody: { content: fullText },
+        })
       }
 
       if (!response) return

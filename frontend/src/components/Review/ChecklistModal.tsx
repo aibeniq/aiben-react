@@ -25,6 +25,7 @@ import ConfirmButton from "../ui/confirm-button"
 import useCustomToast from "../../hooks/useCustomToast"
 import FileUpload from "../Common/FileUpload"
 import SearchModeToggle from "../Common/SearchModeToggle"
+import { generateUUID } from "../../utils/uuid"
 
 interface ChecklistModalProps {
   isOpen: boolean
@@ -307,10 +308,15 @@ const ChecklistModal = ({
           formData.append("files", item.file)
         })
 
-        // Use direct fetch for file upload
+        // Add authentication headers
+        const token = localStorage.getItem("access_token")
         const headers: any = {}
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`
+        }
+
         const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
-        const apiUrl = `${baseUrl}/veradoc/generate-questions`
+        const apiUrl = `${baseUrl}/api/v1/veradoc/generate-questions-with-files`
 
         console.log("Generating questions with files - API URL:", apiUrl)
 
@@ -628,7 +634,7 @@ const ChecklistModal = ({
                         {questionsList.map((question, index) => (
                           <QuestionItem
                             key={`${questionsKey}-${index}`}
-                            id={questionsData[index]?.id || crypto.randomUUID()}
+                            id={questionsData[index]?.id || generateUUID()}
                             index={index}
                             question={question}
                             consultDocuments={questionsData[index]?.consultDocuments ?? true}

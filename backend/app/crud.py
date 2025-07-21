@@ -12,12 +12,21 @@ from app.models import (
     UserUpdate,
     LlmModel,
     EmbeddingModel,
+    ModelProvider,
 )
 from app.core.config import settings
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
     """Create a new user with default LLM and embedding model settings."""
+    
+    # Initialize default models first (ensure they exist in database)
+    from app.api.routes.modelselection import initialize_default_models
+    from app.api.routes.llms import initialize_default_llm_models
+    
+    initialize_default_models(session)
+    initialize_default_llm_models(session)
+    
     # Create the user object with password hash
     db_obj = User.model_validate(
         user_create, update={"hashed_password": get_password_hash(user_create.password)}
@@ -27,33 +36,43 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
     enabled_llm_providers = settings.llm_providers
     enabled_embedding_providers = settings.embedding_providers
 
-    # Set default LLM - find first system LLM model with enabled provider
-    default_llm = None
-    system_llms = session.exec(
-        select(LlmModel).where(LlmModel.owner_id.is_(None))
-    ).all()
+    # Set default LLM - specifically assign gpt-4o-mini from OpenAI
+    default_llm = session.exec(
+        select(LlmModel).where(
+            LlmModel.model_id == "gpt-4o-mini",
+            LlmModel.provider == ModelProvider.OPENAI,
+            LlmModel.owner_id.is_(None)
+        )
+    ).first()
 
-    for model in system_llms:
-        if model.provider.value.lower() in enabled_llm_providers:
-            default_llm = model
-            break
-
-    if default_llm:
+    if default_llm and "openai" in enabled_llm_providers:
         db_obj.default_llm = default_llm.id
 
-    # Set default embedding model - find first system embedding model with enabled provider
-    default_embedding = None
-    system_embeddings = session.exec(
-        select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
-    ).all()
+    # Set default embedding model - specifically assign text-embedding-3-small from OpenAI
+    default_embedding = session.exec(
+        select(EmbeddingModel).where(
+            EmbeddingModel.model_id == "text-embedding-3-small",
+            EmbeddingModel.provider == ModelProvider.OPENAI,
+            EmbeddingModel.owner_id.is_(None)
+        )
+    ).first()
 
-    for model in system_embeddings:
-        if model.provider.value.lower() in enabled_embedding_providers:
-            default_embedding = model
-            break
-
-    if default_embedding:
+    if default_embedding and "openai" in enabled_embedding_providers:
         db_obj.default_embedding_model = default_embedding.id
+    else:
+        # Fallback: try to find any OpenAI embedding model if the specific one isn't found
+        if "openai" in enabled_embedding_providers:
+            any_openai_embedding = session.exec(
+                select(EmbeddingModel).where(
+                    EmbeddingModel.provider == ModelProvider.OPENAI,
+                    EmbeddingModel.owner_id.is_(None)
+                )
+            ).first()
+            if any_openai_embedding:
+                db_obj.default_embedding_model = any_openai_embedding.id
+                print(f"Using fallback OpenAI embedding model: {any_openai_embedding.model_id}")
+            else:
+                print("Warning: No OpenAI embedding models found in database despite being enabled")
 
     # Save the user with default models
     session.add(db_obj)

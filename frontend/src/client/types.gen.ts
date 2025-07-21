@@ -351,13 +351,6 @@ export type OutlineSuggestion = {
   needs_revision: boolean
 }
 
-export type PrivateUserCreate = {
-  email: string
-  password: string
-  full_name: string
-  is_verified?: boolean
-}
-
 /**
  * Response model for knowledge base query endpoint
  */
@@ -366,6 +359,31 @@ export type QueryResponse = {
   sources: Array<Source>
   session_id: string
   rephrased_question: string
+}
+
+export type ReportGenieDetailFeedback = {
+  feedback?: string | null
+  feedbackText?: string | null
+  feedbackDate?: string | null
+}
+
+export type ReportGenieDetailResponse = {
+  id: string
+  date_created: string
+  outline_name: string
+  kb_name: string
+  kb_id: string
+  sections: string
+  results: ReportGenieDetailResults
+  feedback: ReportGenieDetailFeedback
+}
+
+export type ReportGenieDetailResults = {
+  final_report: string
+  section_reports?: Array<{
+    [key: string]: unknown
+  }>
+  interaction_id: string
 }
 
 export type ReportGenieOutline = {
@@ -745,6 +763,12 @@ export type FormconnectGenerateFormFieldsJsonData = {
 export type FormconnectGenerateFormFieldsJsonResponse =
   GenerateFormFieldsResponse
 
+export type FormconnectGenerateDocxData = {
+  requestBody: DocxRequest
+}
+
+export type FormconnectGenerateDocxResponse = unknown
+
 export type ItemsReadItemsData = {
   limit?: number
   skip?: number
@@ -874,12 +898,6 @@ export type LoginRecoverPasswordHtmlContentData = {
 
 export type LoginRecoverPasswordHtmlContentResponse = string
 
-export type PrivateCreateUserData = {
-  requestBody: PrivateUserCreate
-}
-
-export type PrivateCreateUserResponse = UserPublic
-
 export type ReportgenieGenerateReportData = {
   formData: Body_reportgenie_generate_report
 }
@@ -936,6 +954,22 @@ export type ReportgenieGenerateOutlineOptimizationCsvData = {
 }
 
 export type ReportgenieGenerateOutlineOptimizationCsvResponse = unknown
+
+export type ReportgenieGetReportgenieHistoryData = {
+  limit?: number
+  showAll?: boolean
+  skip?: number
+}
+
+export type ReportgenieGetReportgenieHistoryResponse = Array<{
+  [key: string]: unknown
+}>
+
+export type ReportgenieGetReportgenieDetailData = {
+  reportId: string
+}
+
+export type ReportgenieGetReportgenieDetailResponse = ReportGenieDetailResponse
 
 export type TwincheckCompareDocumentsData = {
   comparisonTopics: string

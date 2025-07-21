@@ -93,21 +93,49 @@ def load_correct_embeddings_model(
 
         # Fallback to system default if user has no default
         if not model_id or not provider:
-            default_model = session.exec(
+            from app.core.config import settings
+            enabled_providers = settings.embedding_providers
+            
+            # Get all system default embedding models
+            system_defaults = session.exec(
                 select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
-            ).first()
+            ).all()
+            
+            default_model = None
+            
+            # First, try to find OpenAI models (preferred default)
+            for model in system_defaults:
+                if (model.provider.value.lower() in enabled_providers and 
+                    model.provider.value.lower() == "openai"):
+                    default_model = model
+                    break
+            
+            # If no OpenAI model found, fall back to any enabled provider
+            if not default_model:
+                for model in system_defaults:
+                    if model.provider.value.lower() in enabled_providers:
+                        default_model = model
+                        break
+            
             print("System default embedding model:", default_model)
             if default_model:
                 model_id = default_model.model_id
                 provider = default_model.provider
             else:
-                print("No default embedding model found, using hardcoded value.")
-                model_id = "all-MiniLM-L6-v2"
-                provider = "huggingface"
+                print("No enabled system default found, using OpenAI default.")
+                model_id = "text-embedding-3-small"
+                provider = "openai"
 
     # Initialize embeddings with the selected model
     try:
-        embeddings = load_embeddings_model(provider=provider, model_id=model_id)
+        # Convert provider to the correct format if needed
+        if isinstance(provider, str):
+            from app.models import ModelProvider
+            provider_enum = ModelProvider(provider.lower())
+        else:
+            provider_enum = provider
+            
+        embeddings = load_embeddings_model(provider=provider_enum, model_id=model_id)
         print("Embeddings model loaded successfully.")
     except Exception as e:
         raise HTTPException(

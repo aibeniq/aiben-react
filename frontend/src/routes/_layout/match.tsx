@@ -10,12 +10,14 @@ import {
 } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText } from "react-icons/fi"
+import { FiFileText, FiCopy, FiCheck } from "react-icons/fi"
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
 import FileUpload, { FileItem } from "../../components/Common/FileUpload"
 import FormTemplateTable from "../../components/Match/FormTemplateTable"
 import SearchModeToggle from "../../components/Common/SearchModeToggle"
+import DownloadButton from "../../components/ui/download-button"
+import useCustomToast from "../../hooks/useCustomToast"
 
 const FormConnect = () => {
   const [fileItems, setFileItems] = useState<FileItem[]>([])
@@ -29,6 +31,10 @@ const FormConnect = () => {
   const [showFormModal, setShowFormModal] = useState(false)
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
+  const [copySuccess, setCopySuccess] = useState(false)
+  const [loadingDownload, setLoadingDownload] = useState(false)
+  
+  const { showSuccessToast, showErrorToast } = useCustomToast()
 
   const fetchKnowledgeBases = async () => {
     try {
@@ -126,6 +132,94 @@ const FormConnect = () => {
     })
   }
 
+  const handleCopyResults = async () => {
+    try {
+      await navigator.clipboard.writeText(results)
+      setCopySuccess(true)
+
+      // Reset the success icon after 2 seconds
+      setTimeout(() => {
+        setCopySuccess(false)
+      }, 2000)
+
+      showSuccessToast("Results copied to clipboard")
+    } catch (err) {
+      console.error("Failed to copy results:", err)
+      showErrorToast("Failed to copy results to clipboard")
+    }
+  }
+
+  const handleDownloadResults = async () => {
+    try {
+      setLoadingDownload(true)
+
+      if (!results) {
+        showErrorToast("No results to download")
+        return
+      }
+
+      const response = await FormconnectService.generateDocx({
+        requestBody: { content: results },
+      })
+
+      console.log("Received DOCX response:", response)
+      console.log("Response type:", typeof response)
+      console.log("Response instanceof Blob:", response instanceof Blob)
+      console.log("Response instanceof ArrayBuffer:", response instanceof ArrayBuffer)
+
+      let blob
+      if (response instanceof Blob) {
+        console.log("Response is already a Blob")
+        blob = response
+      } else if (response instanceof ArrayBuffer) {
+        console.log("Converting ArrayBuffer to Blob")
+        blob = new Blob([response], {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        })
+      } else {
+        console.log("Converting unknown response type to Blob")
+        blob = new Blob([response as any], {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        })
+      }
+
+      console.log("Final DOCX blob:", blob)
+      console.log("Blob size:", blob.size)
+      console.log("Blob type:", blob.type)
+
+      const url = window.URL.createObjectURL(blob)
+      console.log("Created DOCX object URL:", url)
+
+      const a = document.createElement("a")
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+      a.href = url
+      a.download = `form_processing_${timestamp}.docx`
+
+      console.log("DOCX download filename:", `form_processing_${timestamp}.docx`)
+      console.log("About to trigger DOCX download...")
+
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      console.log("DOCX download triggered successfully")
+      showSuccessToast("Document downloaded successfully")
+    } catch (err: any) {
+      console.error("Failed to download document:", err)
+      console.error("Error details:", {
+        message: err instanceof Error ? err.message : "Unknown error",
+        stack: err instanceof Error ? err.stack : undefined,
+        name: err instanceof Error ? err.name : undefined,
+      })
+
+      showErrorToast(`Failed to download document: ${err.message || "Unknown error"}`)
+    } finally {
+      console.log("DOCX download process completed")
+      setLoadingDownload(false)
+    }
+  }
+
   return (
     <Container maxW="container.xl" py={8}>
       <VStack gap={6} align="stretch">
@@ -208,9 +302,31 @@ const FormConnect = () => {
             gap={4}
           >
             <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
-              <Heading size="md" mb={4}>
-                Results
-              </Heading>
+              <HStack justify="space-between" align="center" mb={4}>
+                <Heading size="md">Results</Heading>
+
+                {results && (
+                  <HStack gap={2}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCopyResults}
+                      colorPalette={copySuccess ? "green" : "blue"}
+                    >
+                      {copySuccess ? <FiCheck color="green" /> : <FiCopy />}
+                      {copySuccess ? "Copied!" : "Copy Text"}
+                    </Button>
+
+                    <DownloadButton
+                      size="sm"
+                      onClick={handleDownloadResults}
+                      loading={loadingDownload}
+                    >
+                      Download DOCX
+                    </DownloadButton>
+                  </HStack>
+                )}
+              </HStack>
 
               <Box
                 border="1px solid"

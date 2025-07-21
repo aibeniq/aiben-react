@@ -21,6 +21,8 @@ from app.models import (
     ReportGenieResponse,
     ReportGenieOutline,
     ReportGenieDetailResponse,
+    ReportGenieDetailResults,
+    ReportGenieDetailFeedback,
     Source,
     SourceData,
     KnowledgeBase,
@@ -33,6 +35,7 @@ from app.models import (
     OptimizeOutlineRequest,
     OutlineSuggestion,
     OptimizedOutlineResponse,
+    User,
 )
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
@@ -222,6 +225,18 @@ async def generate_report(
                     sources = session.exec(
                         select(Source).where(Source.knowledge_base_id == kb.id)
                     ).all()
+                    
+                    # COLLECT SOURCE CITATIONS FROM SOURCES
+                    source_citations = []
+                    for source in sources:
+                        source_info = {
+                            "source": source.name,
+                            "content": "Full document scan - content processed in chunks",
+                            "scan_type": "full_text",
+                            "document_id": str(source.id)
+                        }
+                        source_citations.append(source_info)
+                    
                     for source in sources:
                         # Get source data
                         source_data = session.get(SourceData, source.source_data_id)
@@ -273,7 +288,7 @@ async def generate_report(
                     if not chunk_analyses:
                         print("No chunk analyses found - using fallback message")
                         section_content = "No relevant information found in the knowledge base to answer this question."
-                        source_citations = []
+                        # source_citations already set above
                     else:
                         chunk_analyses_text = "\n\n".join(chunk_analyses)
                         print(
@@ -290,7 +305,7 @@ async def generate_report(
                                 },
                             )
                             section_content = synthesized_answer
-                            source_citations = []  # Add proper citations if needed
+                            # source_citations already populated above
                         except Exception as e:
                             print(f"Error in synthesis: {e}")
                             print(
@@ -357,6 +372,18 @@ async def generate_report(
                             [doc.page_content for doc in search_results]
                         )
 
+                        # COLLECT SOURCE CITATIONS FROM SEARCH RESULTS
+                        source_citations = []
+                        for doc in search_results:
+                            if hasattr(doc, 'metadata') and doc.metadata:
+                                source_info = {
+                                    "source": doc.metadata.get('source', 'Unknown Source'),
+                                    "content": doc.page_content[:200] + "..." if len(doc.page_content) > 200 else doc.page_content,
+                                    "page": doc.metadata.get('page', None),
+                                    "relevance_score": doc.metadata.get('relevance_score', None)
+                                }
+                                source_citations.append(source_info)
+
                         synthesized_answer = invoke_llm(
                             llm,
                             settings.REPORT_GENIE_PROMPT_TEMPLATE,
@@ -373,11 +400,11 @@ async def generate_report(
                         )
 
                         section_content = synthesized_answer
-                        source_citations = []  # Add proper citations if needed
+                        # source_citations is now properly populated above
             else:
                 # Use raw text directly without consulting knowledge base
                 section_content = section_description
-                source_citations = []
+                source_citations = []  # No citations needed for literal text sections
 
             section_title = section_description
 
@@ -409,21 +436,23 @@ async def generate_report(
             except Exception as e:
                 print(f"Warning: Error retrieving outline name: {e}")
 
-        # If no outline_id but we have sections, use first line or "Custom Outline"
+        # If no outline_id but we have sections, use first section title or "Custom Outline"
         if not outline_name and sections:
-            first_line = sections.strip().split("\n")[0]
-            if first_line:
-                # Extract a name from the first section (limited to 30 chars)
-                outline_name = first_line[:30] + ("..." if len(first_line) > 30 else "")
+            if sections and sections[0].get("title"):
+                # Extract a name from the first section title (limited to 30 chars)
+                first_section_title = sections[0]["title"]
+                outline_name = first_section_title[:30] + ("..." if len(first_section_title) > 30 else "")
             else:
                 outline_name = "Custom Outline"
 
-        # Store the full report and sections data in extra_data for retrieval later
+        # Convert sections to string format for input_data (following VeraDoc pattern)
+        sections_str = json.dumps(section_items) if section_items else sections
+
+        # Store the full report and sections data following VeraDoc pattern
         detailed_extra_data = {
             "kb_name": kb.title,
-            "full_report": full_report,
-            "sections": sections,  # This includes section content and sources
-            "outline_name": outline_name,  # Add the outline name here
+            "sections": sections,  # Store sections with citations in metadata like VeraDoc stores qa_pairs
+            "outline_name": outline_name,
         }
 
         record_llm_interaction(
@@ -431,15 +460,17 @@ async def generate_report(
             user_id=current_user.id,
             functionality="reportgenie",
             input_data={
-                "sections": sections,
+                "sections": sections_str,  # Store as string for consistency with VeraDoc
                 "kb_id": knowledge_base_id,
                 "outline_id": outline_id,
+                "outline_name": outline_name,
             },
             output_data={
+                "final_report": full_report,  # Store main content in output_data like VeraDoc
                 "section_count": len(sections),
                 "total_length": len(full_report),
             },
-            metadata=detailed_extra_data,
+            metadata=detailed_extra_data,  # Store sections in metadata like VeraDoc stores qa_pairs
         )
 
         return ReportGenieResponse(results=result)
@@ -1730,6 +1761,11 @@ Prompt size: {prompt_size} characters (~{estimated_tokens} tokens)
                         )
                         reasoning = f"Fallback: Content analysis found {match_type} match (score: {best_content_match[1]}) with section {best_content_match[0] + 1}"
                     else:
+                        # Check if we have any sections to map to
+                        if not section_descriptions:
+                            print("Warning: No sections available for mapping. Skipping chunk.")
+                            continue  # Skip this chunk if no sections available
+                        
                         # Use positional fallback with improved logic
                         if chunk_idx == 0:
                             # First chunk: likely maps to first section(s)
@@ -2238,18 +2274,179 @@ async def generate_outline_optimization_csv(
         )
 
 
-def sanitize_text_for_json(text: str) -> str:
-    """Sanitize text to prevent JSON parsing issues with control characters."""
-    # Replace smart quotes and apostrophes with regular ones
-    text = text.replace(""", "'").replace(""", "'")
-    text = text.replace('"', '"').replace('"', '"')
-    text = text.replace("–", "-").replace("—", "-")
-    text = text.replace("ʼ", "'")  # This specific character from the logs
 
-    # Remove control characters (characters 0-31 except tab, newline, carriage return)
-    text = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]", "", text)
+@router.get("/history", response_model=List[Dict[str, Any]])
+async def get_reportgenie_history(
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 20,
+    show_all: bool = False,
+):
+    """Retrieve past ReportGenie generation history for the current user or all users."""
+    print("Retrieving ReportGenie history. Show all:", show_all)
 
-    # Replace any remaining problematic Unicode characters
-    text = text.encode("ascii", errors="ignore").decode("ascii")
+    try:
+        # Start with base query
+        query = select(LlmInteraction).where(
+            LlmInteraction.functionality == "reportgenie"
+        )
 
-    return text
+        # Only filter by user if not showing all users
+        if not show_all:
+            query = query.where(LlmInteraction.user_id == current_user.id)
+
+        # Add ordering and pagination
+        interactions = session.exec(
+            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
+        ).all()
+
+        result = []
+        for interaction in interactions:
+            # Parse the input_data and output_data following VeraDoc pattern
+            try:
+                input_data = (
+                    json.loads(interaction.input_data) if interaction.input_data else {}
+                )
+                output_data = (
+                    json.loads(interaction.output_data)
+                    if interaction.output_data
+                    else {}
+                )
+
+                # Get KB name from input_data
+                kb_name = "Unknown Knowledge Base"
+                kb_id = input_data.get("kb_id")
+                if kb_id:
+                    kb = session.get(KnowledgeBase, kb_id)
+                    kb_name = kb.title if kb else "Unknown Knowledge Base"
+
+                # Create a user-friendly title from outline or sections
+                outline_name = input_data.get("outline_name", "Unknown Report")
+                title = f"Report: {outline_name}"
+
+                # Create result item following VeraDoc pattern
+                result_item = {
+                    "id": str(interaction.id),
+                    "date_created": interaction.date_created,
+                    "title": title,
+                    "outline_name": outline_name,
+                    "kb_name": kb_name,
+                    "kb_id": kb_id or "",
+                    "sections": input_data.get("sections", "") if isinstance(input_data.get("sections"), str) else json.dumps(input_data.get("sections", [])),
+                    "search_mode": input_data.get("search_mode", "vector"),
+                    "has_feedback": interaction.feedback is not None,
+                }
+
+                # Add feedback information if exists
+                if interaction.feedback:
+                    result_item["feedback"] = {
+                        "feedback": interaction.feedback,
+                        "feedbackText": interaction.feedback_text,
+                    }
+
+                # Add user info for all-users view
+                if show_all:
+                    user = session.get(User, interaction.user_id)
+                    user_name = (
+                        f"{user.full_name or 'User'} ({user.email})"
+                        if user
+                        else "Unknown User"
+                    )
+                    result_item["user_name"] = user_name
+
+                result.append(result_item)
+
+            except Exception as e:
+                # If parsing fails, add a minimal entry
+                print(f"Error processing interaction {interaction.id}: {e}")
+                result.append(
+                    {
+                        "id": str(interaction.id),
+                        "date_created": interaction.date_created,
+                        "title": f"Report from {interaction.date_created.strftime('%Y-%m-%d')}",
+                        "has_feedback": interaction.feedback is not None,
+                    }
+                )
+
+        return result
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving ReportGenie history: {str(e)}"
+        )
+
+
+@router.get("/history/{report_id}", response_model=ReportGenieDetailResponse)
+async def get_reportgenie_detail(
+    report_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+):
+    """Retrieve a specific ReportGenie report's full content by ID."""
+    try:
+        report = session.get(LlmInteraction, report_id)
+        if not report:
+            raise HTTPException(status_code=404, detail="Report not found")
+
+        if report.functionality != "reportgenie":
+            raise HTTPException(
+                status_code=400, detail="This is not a ReportGenie report"
+            )
+
+        # Parse the input and output data following VeraDoc pattern
+        input_data = json.loads(report.input_data) if report.input_data else {}
+        output_data = json.loads(report.output_data) if report.output_data else {}
+        extra_data = report.extra_data or {}
+
+        # Get KB name from input_data
+        kb_name = "Unknown Knowledge Base"
+        kb_id = input_data.get("kb_id")
+        if kb_id:
+            kb = session.get(KnowledgeBase, kb_id)
+            kb_name = kb.title if kb else "Unknown Knowledge Base"
+
+        # Get sections from metadata (following VeraDoc pattern where qa_pairs are in extra_data)
+        sections = extra_data.get("sections", [])
+
+        # Always serialize sections as JSON string for frontend compatibility
+        sections_data = input_data.get("sections", [])
+        if isinstance(sections_data, str):
+            sections_str = sections_data
+        else:
+            sections_str = json.dumps(sections_data)
+
+        # Get final report from output_data (following VeraDoc pattern)
+        final_report = output_data.get("final_report", "")
+
+        response = ReportGenieDetailResponse(
+            id=str(report.id),
+            date_created=report.date_created,
+            outline_name=input_data.get("outline_name", "Unknown Report"),
+            kb_name=kb_name,
+            kb_id=kb_id or "",
+            sections=sections_str,
+            results=ReportGenieDetailResults(
+                final_report=final_report,
+                sections=sections,  # Changed from section_reports to sections to match VeraDoc (qa_pairs)
+                interaction_id=str(report.id),
+            ),
+            feedback=ReportGenieDetailFeedback(
+                feedback=report.feedback,
+                feedbackText=report.feedback_text,
+                feedbackDate=report.date_created.isoformat() if report.feedback else None,
+            ),
+        )
+
+        return response
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving ReportGenie detail: {str(e)}"
+        )

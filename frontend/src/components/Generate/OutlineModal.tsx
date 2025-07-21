@@ -23,6 +23,7 @@ import { ReportgenieService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import SearchModeToggle from "../Common/SearchModeToggle"
 import { FiCopy } from "react-icons/fi"
+import { generateUUID } from "../../utils/uuid"
 
 interface OutlineModalProps {
   isOpen: boolean
@@ -126,7 +127,7 @@ const OutlineModal = ({
       if (generatedSections.length > 0) {
         // Create structured section data with all sections having consultDocuments: true by default
         const structuredSections = generatedSections.map((section) => ({
-          id: crypto.randomUUID(),
+          id: generateUUID(),
           text: section,
           consultDocuments: true,
         }))

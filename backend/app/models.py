@@ -524,13 +524,15 @@ class ReportGenieDetailFeedback(SQLModel):
 
 
 class ReportGenieDetailResults(SQLModel):
-    full_report: str
-    sections: List[Dict[str, Any]] = Field(default_factory=list)
+    final_report: str
+    sections: List[Dict[str, Any]] = Field(default_factory=list)  # Changed from section_reports to sections to match VeraDoc pattern (qa_pairs)
+    interaction_id: str
 
 
 class ReportGenieDetailResponse(SQLModel):
     id: str
     date_created: datetime
+    outline_name: str
     kb_name: str
     kb_id: str
     sections: str

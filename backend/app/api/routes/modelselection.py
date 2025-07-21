@@ -132,9 +132,6 @@ def get_embedding_models(
     """
     Get all embedding models.
     """
-    # Initialize default models if none exist
-    initialize_default_models(session)
-
     # Get enabled providers from settings
     enabled_providers = settings.embedding_providers
 
@@ -172,9 +169,6 @@ def get_default_embedding_model(
     """
     Get the user's default embedding model (or system default if not set).
     """
-    # Initialize default models if none exist
-    initialize_default_models(session)
-
     # Try to get the user's default embedding model
     user = session.get(User, current_user.id)
     if user and user.default_embedding_model:

@@ -5,6 +5,7 @@ import {
   VeradocService,
   TwincheckService,
   FormconnectService,
+  ReportgenieService,
 } from "../client"
 import useCustomToast from "./useCustomToast"
 
@@ -83,9 +84,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const veradocHistoryQuery = useQuery({
     queryKey: ["veradocHistory", showAllUsers],
     queryFn: async () => {
-      const response = await VeradocService.getVeradocHistory({ 
+      const response = await VeradocService.getVeradocHistory({
         limit: 20,
-        showAll: showAllUsers 
+        showAll: showAllUsers
       })
       return response
     },
@@ -96,25 +97,22 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const reportgenieHistoryQuery = useQuery({
     queryKey: ["reportgenieHistory", showAllUsers],
     queryFn: async () => {
-      // TODO: Implement getReportHistory method in ReportgenieService
-      // const response = await ReportgenieService.getReportHistory({ 
-      //   limit: 20,
-      //   showAll: showAllUsers 
-      // })
-      // return response
-      console.warn("ReportGenie history not available - method not implemented")
-      return { data: [], total: 0 }
+      const response = await ReportgenieService.getReportgenieHistory({
+        limit: 20,
+        showAll: showAllUsers
+      })
+      return response
     },
-    enabled: false, // Disabled until backend method is available
+    enabled: true, // Re-enable once SDK is updated
   })
 
   // TwinCheck history query
   const twincheckHistoryQuery = useQuery({
     queryKey: ["twincheckHistory", showAllUsers],
     queryFn: async () => {
-      const response = await TwincheckService.getComparisonHistory({ 
+      const response = await TwincheckService.getComparisonHistory({
         limit: 20,
-        showAll: showAllUsers 
+        showAll: showAllUsers
       })
       return response
     },
@@ -125,9 +123,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const formconnectHistoryQuery = useQuery({
     queryKey: ["formconnectHistory", showAllUsers],
     queryFn: async () => {
-      const response = await FormconnectService.getFormHistory({ 
+      const response = await FormconnectService.getFormHistory({
         limit: 20,
-        showAll: showAllUsers 
+        showAll: showAllUsers
       })
       return response
     },
@@ -187,11 +185,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const loadReportgenieReport = async (reportId: string) => {
     try {
       setIsReportgenieLoading(true)
-      // TODO: Implement getReportDetail method in ReportgenieService
-      // const report = await ReportgenieService.getReportDetail({ reportId })
-      // setSelectedReportgenieReport(report)
-      console.warn("ReportGenie report detail not available - method not implemented, reportId:", reportId)
-      showErrorToast("ReportGenie report loading not available")
+      const report = await ReportgenieService.getReportgenieDetail({ reportId })
+      setSelectedReportgenieReport(report)
+      showSuccessToast("Report loaded successfully")
     } catch (error) {
       console.error("Error loading report:", error)
       showErrorToast("Failed to load report")

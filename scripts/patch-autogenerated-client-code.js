@@ -29,9 +29,10 @@ if (!sdkContent.includes('url: "/api/v1/twincheck/generate/docx",') || !sdkConte
 }
 
 // Patch for VeraDoc DOCX
-if (!sdkContent.includes('url: "/api/v1/veradoc/generate/docx",') || !sdkContent.includes('responseType: \'blob\',')) {
+const veradocDocxPattern = /url: "\/api\/v1\/veradoc\/generate\/docx",[\s\S]*?body: data\.requestBody,(?!\s*responseType:)/
+if (veradocDocxPattern.test(sdkContent)) {
   sdkContent = sdkContent.replace(
-    /(url: "\/api\/v1\/veradoc\/generate\/docx",[\s\S]*?body: data\.requestBody,)/,
+    /(url: "\/api\/v1\/veradoc\/generate\/docx",[\s\S]*?body: data\.requestBody,)(?!\s*responseType:)/,
     "$1\n      responseType: 'blob',",
   )
 }

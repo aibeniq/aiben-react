@@ -883,7 +883,16 @@ async def query_document(
 
     # Handle full text scan mode
     if search_mode == "full_text":
-        if not files or len(files) == 0:
+        # For follow-up questions, files will be None, so use cached data
+        if is_follow_up and session_id:
+            cached_data = session_cache.get(session_id)
+            if not cached_data:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Session expired or not found. Please upload documents again."
+                )
+            # Use the cached files/session for full text processing
+        elif not files or len(files) == 0:
             raise HTTPException(
                 status_code=400,
                 detail="For full-text scan, please upload at least one document.",
@@ -906,17 +915,37 @@ async def query_document(
         llm = None
         temp_paths = []
 
+        # For follow-up questions, we MUST use cached resources
         if is_follow_up and session_id:
             print("Using cached resources for follow-up question")
             cached_data = session_cache.get(session_id)
-            if cached_data:
-                print(f"Using cached resources for document session {session_id}")
-                retriever = cached_data.get("retriever")
-                llm = cached_data.get("llm")
+            if not cached_data:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Session expired or not found. Please upload documents again."
+                )
+            
+            print(f"Using cached resources for document session {session_id}")
+            retriever = cached_data.get("retriever")
+            llm = cached_data.get("llm")
+            
+            # Validate that we actually got the cached resources
+            if not retriever or not llm:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Cached session is incomplete. Please upload documents again."
+                )
 
-        # If no cached retriever or this is a new document, set up everything
-        if not retriever:
+        # If this is NOT a follow-up, set up new resources
+        elif not is_follow_up:
             print("Setting up new resources for document query")
+            
+            # Ensure we have files for new sessions
+            if not files or len(files) == 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Files are required for new document queries"
+                )
             # Get the user's default models
             user = session.get(User, current_user.id)
             if user and user.default_embedding_model:
@@ -1025,6 +1054,13 @@ async def query_document(
                     "vector_dir": vector_dir,
                     "temp_paths": temp_paths,
                 },
+            )
+        
+        # If we reach here without retriever/llm, something went wrong
+        if not retriever or not llm:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to set up or retrieve cached resources"
             )
 
         # Rephrase the question using chat history if available

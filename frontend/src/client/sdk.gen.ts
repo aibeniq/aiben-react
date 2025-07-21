@@ -53,6 +53,8 @@ import type {
   FormconnectGenerateFormFieldsResponse,
   FormconnectGenerateFormFieldsJsonData,
   FormconnectGenerateFormFieldsJsonResponse,
+  FormconnectGenerateDocxData,
+  FormconnectGenerateDocxResponse,
   ItemsReadItemsData,
   ItemsReadItemsResponse,
   ItemsCreateItemData,
@@ -93,8 +95,6 @@ import type {
   LoginResetPasswordResponse,
   LoginRecoverPasswordHtmlContentData,
   LoginRecoverPasswordHtmlContentResponse,
-  PrivateCreateUserData,
-  PrivateCreateUserResponse,
   ReportgenieGenerateReportData,
   ReportgenieGenerateReportResponse,
   ReportgenieGetOutlinesResponse,
@@ -114,6 +114,10 @@ import type {
   ReportgenieOptimizeOutlineResponse,
   ReportgenieGenerateOutlineOptimizationCsvData,
   ReportgenieGenerateOutlineOptimizationCsvResponse,
+  ReportgenieGetReportgenieHistoryData,
+  ReportgenieGetReportgenieHistoryResponse,
+  ReportgenieGetReportgenieDetailData,
+  ReportgenieGetReportgenieDetailResponse,
   TwincheckCompareDocumentsData,
   TwincheckCompareDocumentsResponse,
   TwincheckGetComparisonHistoryData,
@@ -814,6 +818,28 @@ export class FormconnectService {
       },
     })
   }
+
+  /**
+   * Generate Docx
+   * Generate a DOCX file from the form processing content.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static generateDocx(
+    data: FormconnectGenerateDocxData,
+  ): CancelablePromise<FormconnectGenerateDocxResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/formconnect/generate/docx",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
 }
 
 export class ItemsService {
@@ -1309,30 +1335,6 @@ export class LoginService {
   }
 }
 
-export class PrivateService {
-  /**
-   * Create User
-   * Create a new user.
-   * @param data The data for the request.
-   * @param data.requestBody
-   * @returns UserPublic Successful Response
-   * @throws ApiError
-   */
-  public static createUser(
-    data: PrivateCreateUserData,
-  ): CancelablePromise<PrivateCreateUserResponse> {
-    return __request(OpenAPI, {
-      method: "POST",
-      url: "/api/v1/private/users/",
-      body: data.requestBody,
-      mediaType: "application/json",
-      errors: {
-        422: "Validation Error",
-      },
-    })
-  }
-}
-
 export class ReportgenieService {
   /**
    * Generate Report
@@ -1546,8 +1548,57 @@ export class ReportgenieService {
       method: "POST",
       url: "/api/v1/reportgenie/optimize-outline/csv",
       body: data.requestBody,
-      responseType: 'blob',
       mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Reportgenie History
+   * Retrieve past ReportGenie generation history for the current user or all users.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @param data.showAll
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getReportgenieHistory(
+    data: ReportgenieGetReportgenieHistoryData = {},
+  ): CancelablePromise<ReportgenieGetReportgenieHistoryResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/reportgenie/history",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+        show_all: data.showAll,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Reportgenie Detail
+   * Retrieve a specific ReportGenie report's full content by ID.
+   * @param data The data for the request.
+   * @param data.reportId
+   * @returns ReportGenieDetailResponse Successful Response
+   * @throws ApiError
+   */
+  public static getReportgenieDetail(
+    data: ReportgenieGetReportgenieDetailData,
+  ): CancelablePromise<ReportgenieGetReportgenieDetailResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/reportgenie/history/{report_id}",
+      path: {
+        report_id: data.reportId,
+      },
       errors: {
         422: "Validation Error",
       },
@@ -2322,6 +2373,7 @@ export class VeradocService {
       method: "POST",
       url: "/api/v1/veradoc/generate/docx",
       body: data.requestBody,
+      responseType: 'blob',
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
@@ -2345,7 +2397,6 @@ export class VeradocService {
       method: "POST",
       url: "/api/v1/veradoc/generate/csv",
       body: data.requestBody,
-      responseType: 'blob',
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
@@ -2369,7 +2420,6 @@ export class VeradocService {
       method: "POST",
       url: "/api/v1/veradoc/optimization/csv",
       body: data.requestBody,
-      responseType: 'blob',
       mediaType: "application/json",
       errors: {
         422: "Validation Error",
