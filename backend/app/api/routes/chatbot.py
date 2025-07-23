@@ -116,32 +116,61 @@ class SessionCache:
         self.lock = threading.Lock()
         self.expiry = {}  # For tracking session expiration
         self._cleanup_interval = 3600  # 1 hour in seconds
+        self._session_timeout = 3600  # 1 hour timeout (increased from 30 minutes)
 
     def get(self, session_id):
         with self.lock:
             if session_id in self.cache:
                 # Update last access time
                 self.expiry[session_id] = datetime.now()
+                print(f"✅ Cache HIT for session {session_id}")
                 return self.cache[session_id]
-        return None
+            else:
+                print(f"❌ Cache MISS for session {session_id}")
+                print(f"Available sessions: {list(self.cache.keys())}")
+                return None
 
     def set(self, session_id, data):
         with self.lock:
             self.cache[session_id] = data
             self.expiry[session_id] = datetime.now()
+            print(f"💾 Cache SET for session {session_id}")
+            print(f"Cache now contains {len(self.cache)} sessions")
 
     def cleanup(self):
-        """Remove sessions older than 30 minutes"""
+        """Remove sessions older than 1 hour (increased timeout)"""
         now = datetime.now()
         with self.lock:
             expired = [
-                sid for sid, time in self.expiry.items() if (now - time).seconds > 1800
-            ]  # 30 minutes
+                sid for sid, time in self.expiry.items() 
+                if (now - time).total_seconds() > self._session_timeout
+            ]
             for sid in expired:
                 if sid in self.cache:
                     del self.cache[sid]
+                    print(f"🗑️ Cleaned up expired session {sid}")
                 if sid in self.expiry:
                     del self.expiry[sid]
+            if expired:
+                print(f"Session cleanup removed {len(expired)} expired sessions")
+            else:
+                print(f"Session cleanup: no expired sessions found (active: {len(self.cache)})")
+
+    def debug_info(self):
+        """Debug method to see cache state"""
+        with self.lock:
+            now = datetime.now()
+            info = {
+                "total_sessions": len(self.cache),
+                "sessions": {}
+            }
+            for sid, last_access in self.expiry.items():
+                age_seconds = (now - last_access).total_seconds()
+                info["sessions"][sid] = {
+                    "age_seconds": age_seconds,
+                    "expires_in": self._session_timeout - age_seconds
+                }
+            return info
 
 
 # Initialize the cache
@@ -917,24 +946,49 @@ async def query_document(
 
         # For follow-up questions, we MUST use cached resources
         if is_follow_up and session_id:
-            print("Using cached resources for follow-up question")
+            print(f"🔍 Looking for cached resources for session: {session_id}")
+            print(f"Cache contains {len(session_cache.cache)} sessions")
+            print(f"Available session IDs: {list(session_cache.cache.keys())}")
+            
+            # Debug cache state
+            cache_debug = session_cache.debug_info()
+            print(f"Cache debug info: {cache_debug}")
+            
             cached_data = session_cache.get(session_id)
             if not cached_data:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Session expired or not found. Please upload documents again."
-                )
-            
-            print(f"Using cached resources for document session {session_id}")
-            retriever = cached_data.get("retriever")
-            llm = cached_data.get("llm")
-            
-            # Validate that we actually got the cached resources
-            if not retriever or not llm:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Cached session is incomplete. Please upload documents again."
-                )
+                print(f"❌ CACHE MISS: Session {session_id} not found in cache")
+                print(f"Available sessions: {list(session_cache.cache.keys())}")
+                
+                # Instead of failing, gracefully degrade to treating this as a new request
+                print("⚠️ Treating follow-up as new request due to cache miss")
+                is_follow_up = False  # Treat as new request
+                
+                # Make sure we have files for the new request
+                if not files or len(files) == 0:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Session expired and no files provided. Please upload documents again."
+                    )
+            else:
+                print(f"✅ CACHE HIT: Using cached resources for document session {session_id}")
+                retriever = cached_data.get("retriever")
+                llm = cached_data.get("llm")
+                
+                # Validate that we actually got the cached resources
+                if not retriever or not llm:
+                    print(f"❌ INVALID CACHE: Session {session_id} exists but missing retriever/llm")
+                    print(f"Cached data keys: {list(cached_data.keys()) if cached_data else 'None'}")
+                    
+                    # Gracefully degrade instead of failing
+                    print("⚠️ Treating follow-up as new request due to incomplete cache")
+                    is_follow_up = False
+                    if not files or len(files) == 0:
+                        raise HTTPException(
+                            status_code=400,
+                            detail="Session incomplete and no files provided. Please upload documents again."
+                        )
+                else:
+                    print(f"✅ Successfully retrieved cached retriever and LLM for session {session_id}")
 
         # If this is NOT a follow-up, set up new resources
         elif not is_follow_up:
@@ -1128,7 +1182,7 @@ async def query_document(
             input_data={
                 "question": question,
                 "rephrased_question": rephrased_question,
-                "documents": [file.filename for file in files],
+                "documents": [file.filename for file in files] if files else [],
             },
             output_data=answer_content,
             metadata={

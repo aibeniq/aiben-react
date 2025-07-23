@@ -1,7 +1,10 @@
 # Stage 0, "build-stage", based on Node.js, to build and compile the frontend
-FROM node:20 AS build-stage
+FROM node:18.20.8 AS build-stage
 
 WORKDIR /app
+
+# Add this debug line temporarily
+RUN node -v && npm -v
 
 COPY package*.json /app/
 
@@ -18,6 +21,9 @@ RUN npm run build
 FROM nginx:1
 
 COPY --from=build-stage /app/dist/ /usr/share/nginx/html
+
+# Copy .htpasswd for Nginx basic auth
+COPY .htpasswd /usr/share/nginx/html/.htpasswd
 
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 COPY ./nginx-backend-not-found.conf /etc/nginx/extra-conf.d/backend-not-found.conf

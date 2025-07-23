@@ -59,20 +59,6 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
 
     if default_embedding and "openai" in enabled_embedding_providers:
         db_obj.default_embedding_model = default_embedding.id
-    else:
-        # Fallback: try to find any OpenAI embedding model if the specific one isn't found
-        if "openai" in enabled_embedding_providers:
-            any_openai_embedding = session.exec(
-                select(EmbeddingModel).where(
-                    EmbeddingModel.provider == ModelProvider.OPENAI,
-                    EmbeddingModel.owner_id.is_(None)
-                )
-            ).first()
-            if any_openai_embedding:
-                db_obj.default_embedding_model = any_openai_embedding.id
-                print(f"Using fallback OpenAI embedding model: {any_openai_embedding.model_id}")
-            else:
-                print("Warning: No OpenAI embedding models found in database despite being enabled")
 
     # Save the user with default models
     session.add(db_obj)

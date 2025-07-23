@@ -54,7 +54,9 @@ const OutlineModal = ({
   selectedKnowledgeBase,
   knowledgeBases,
 }: OutlineModalProps) => {
-  console.log("Parent: sections prop value", sections)
+  console.log("🔍 OutlineModal: Received sections prop:", sections)
+  console.log("🔍 OutlineModal: Type of sections prop:", typeof sections)
+  console.log("🔍 OutlineModal: Editing outline:", editingOutline?.name)
 
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [generating, setGenerating] = useState(false)
