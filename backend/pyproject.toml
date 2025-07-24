@@ -23,7 +23,7 @@ dependencies = [
     "pyjwt<3.0.0,>=2.8.0",
     # David adding in genAI-related packages
     "langchain-community==0.3.19",
-    "langchain-text-splitters==0.3.6",
+    "langchain-text-splitters==0.3.9",
     #"langchain-huggingface==0.2.0", MADE OPTIONAL
     "chromadb==1.0.9",
     "openai==1.68.2",
