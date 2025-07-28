@@ -1040,6 +1040,25 @@ export type TwincheckGenerateTopicsJsonData = {
 
 export type TwincheckGenerateTopicsJsonResponse = GenerateTopicsResponse
 
+export type UsageGetTokenUsageData = {
+  /**
+   * End time (Unix seconds) of the query time range, exclusive
+   */
+  endTime?: number | null
+  /**
+   * Number of buckets to return
+   */
+  limit?: number | null
+  /**
+   * Start time (Unix seconds) of the query time range, inclusive
+   */
+  startTime?: number | null
+}
+
+export type UsageGetTokenUsageResponse = {
+  [key: string]: unknown
+}
+
 export type UsersUpdateLanguageData = {
   requestBody: LanguageUpdate
 }
