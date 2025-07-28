@@ -39,7 +39,12 @@ def calculate_quota_period() -> QuotaPeriod:
 
     if current_day >= start_day:
         start_date = datetime(current_year, current_month, start_day)
-        end_date = datetime(current_year, current_month + 1, start_day - 1, 23, 59, 59)
+        if current_month == 12:
+            end_date = datetime(current_year + 1, 1, start_day - 1, 23, 59, 59)
+        else:
+            end_date = datetime(
+                current_year, current_month + 1, start_day - 1, 23, 59, 59
+            )
     else:
         start_date = datetime(current_year, current_month - 1, start_day)
         end_date = datetime(current_year, current_month, start_day - 1, 23, 59, 59)
