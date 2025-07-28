@@ -139,7 +139,6 @@ import type {
   TwincheckGenerateTopicsResponse,
   TwincheckGenerateTopicsJsonData,
   TwincheckGenerateTopicsJsonResponse,
-  UsageGetTokenUsageData,
   UsageGetTokenUsageResponse,
   UsersUpdateLanguageData,
   UsersUpdateLanguageResponse,
@@ -1868,30 +1867,17 @@ export class TwincheckService {
 export class UsageService {
   /**
    * Get Token Usage
-   * Get total OpenAI API token usage.
+   * Get total OpenAI API token usage and current quota period information.
    *
-   * Returns the total number of tokens consumed by the configured API key.
-   * @param data The data for the request.
-   * @param data.startTime Start time (Unix seconds) of the query time range, inclusive
-   * @param data.endTime End time (Unix seconds) of the query time range, exclusive
-   * @param data.limit Number of buckets to return
-   * @returns unknown Successful Response
+   * Returns the total number of tokens consumed by the configured API key
+   * along with the current quota period details.
+   * @returns TokenUsageResponse Successful Response
    * @throws ApiError
    */
-  public static getTokenUsage(
-    data: UsageGetTokenUsageData = {},
-  ): CancelablePromise<UsageGetTokenUsageResponse> {
+  public static getTokenUsage(): CancelablePromise<UsageGetTokenUsageResponse> {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/usage/token-usage",
-      query: {
-        start_time: data.startTime,
-        end_time: data.endTime,
-        limit: data.limit,
-      },
-      errors: {
-        422: "Validation Error",
-      },
     })
   }
 }

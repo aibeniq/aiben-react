@@ -55,6 +55,10 @@ class Settings(BaseSettings):
     FORMCONNECT_VECTOR_SEARCH_CHUNKS: int = 5  # Number of chunks to retrieve per field
     FORMCONNECT_CHUNK_OVERLAP: int = 200  # Overlap for document chunking
 
+    # Usage quota configuration
+    QUOTA_PERIOD_START_DAY: int = 28  # day of month when quota period starts (1-31)
+    QUOTA_PERIOD_MAX_TOKENS: int = 50_000_000  # maximum tokens per quota period
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def all_cors_origins(self) -> list[str]:
@@ -108,8 +112,8 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
-    #ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
-    #ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
+    # ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
+    # ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
     ENABLED_LLM_PROVIDERS: str = "openai,aws"
     ENABLED_EMBEDDING_PROVIDERS: str = "openai,aws"
 

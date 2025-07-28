@@ -361,6 +361,14 @@ export type QueryResponse = {
   rephrased_question: string
 }
 
+export type QuotaPeriod = {
+  start_time: number
+  end_time: number
+  start_date: string
+  end_date: string
+  max_tokens: number
+}
+
 export type ReportGenieDetailFeedback = {
   feedback?: string | null
   feedbackText?: string | null
@@ -439,6 +447,11 @@ export type TextQueryResponse = {
 export type Token = {
   access_token: string
   token_type?: string
+}
+
+export type TokenUsageResponse = {
+  total_tokens: number
+  quota_period: QuotaPeriod
 }
 
 export type TwinCheckDetailFeedback = {
@@ -1040,24 +1053,7 @@ export type TwincheckGenerateTopicsJsonData = {
 
 export type TwincheckGenerateTopicsJsonResponse = GenerateTopicsResponse
 
-export type UsageGetTokenUsageData = {
-  /**
-   * End time (Unix seconds) of the query time range, exclusive
-   */
-  endTime?: number | null
-  /**
-   * Number of buckets to return
-   */
-  limit?: number | null
-  /**
-   * Start time (Unix seconds) of the query time range, inclusive
-   */
-  startTime?: number | null
-}
-
-export type UsageGetTokenUsageResponse = {
-  [key: string]: unknown
-}
+export type UsageGetTokenUsageResponse = TokenUsageResponse
 
 export type UsersUpdateLanguageData = {
   requestBody: LanguageUpdate

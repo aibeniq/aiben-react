@@ -22,35 +22,6 @@ export const Route = createFileRoute("/_layout/")({
 })
 
 function UsageStats() {
-  const calculateQuotaPeriod = () => {
-    const today = new Date()
-    const currentDay = today.getDate()
-    const currentMonth = today.getMonth()
-    const currentYear = today.getFullYear()
-
-    let startDate: Date
-    let endDate: Date
-
-    if (currentDay >= 28) {
-      // current quota period: this month's 28th to next month's 27th
-      startDate = new Date(currentYear, currentMonth, 28)
-      endDate = new Date(currentYear, currentMonth + 1, 27, 23, 59, 59) // end of 27th
-    } else {
-      // current quota period: last month's 28th to this month's 27th
-      startDate = new Date(currentYear, currentMonth - 1, 28)
-      endDate = new Date(currentYear, currentMonth, 27, 23, 59, 59) // end of 27th
-    }
-
-    return {
-      startTime: Math.floor(startDate.getTime() / 1000),
-      endTime: Math.floor(endDate.getTime() / 1000),
-      startDate,
-      endDate,
-    }
-  }
-
-  const { startTime, endTime, startDate, endDate } = calculateQuotaPeriod()
-
   const {
     data: usageData,
     isLoading,
@@ -58,12 +29,8 @@ function UsageStats() {
     refetch,
     isFetching,
   } = useQuery({
-    queryKey: ["usage", "token-usage", startTime, endTime],
-    queryFn: () =>
-      UsageService.getTokenUsage({
-        startTime,
-        endTime,
-      }),
+    queryKey: ["usage", "token-usage"],
+    queryFn: () => UsageService.getTokenUsage(),
     refetchInterval: 5 * 60 * 1000, // refetch every 5 minutes
   })
 
@@ -88,9 +55,13 @@ function UsageStats() {
     )
   }
 
-  const totalTokens = (usageData as any)?.total_tokens || 0
-  const maxTokens = 50_000_000
+  const totalTokens = usageData?.total_tokens || 0
+  const quotaPeriod = usageData?.quota_period
+  const maxTokens = quotaPeriod?.max_tokens || 50_000_000
   const percentage = Math.min((totalTokens / maxTokens) * 100, 100)
+
+  const startDate = quotaPeriod?.start_date ? new Date(quotaPeriod.start_date) : null
+  const endDate = quotaPeriod?.end_date ? new Date(quotaPeriod.end_date) : null
 
   return (
     <VStack align="stretch" gap={6}>
@@ -101,7 +72,10 @@ function UsageStats() {
           </Text>
           <VStack align="start" gap={1}>
             <Text fontSize="sm" color="gray.500">
-              Current period: {formatDate(startDate)} - {formatDate(endDate)}
+              Current period:{" "}
+              {startDate && endDate
+                ? `${formatDate(startDate)} - ${formatDate(endDate)}`
+                : "Loading..."}
             </Text>
           </VStack>
         </Box>

@@ -1,31 +1,69 @@
 import os
-from datetime import datetime, timedelta
-from typing import Any, Optional
+from datetime import datetime
+from typing_extensions import TypedDict
 import httpx
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException
 from app.api.deps import CurrentUser
+from app.core.config import settings
+
+
+class QuotaPeriod(TypedDict):
+    start_time: int
+    end_time: int
+    start_date: str
+    end_date: str
+    max_tokens: int
+
+
+class TokenUsageResponse(TypedDict):
+    total_tokens: int
+    quota_period: QuotaPeriod
+
 
 router = APIRouter(prefix="/usage", tags=["usage"])
+
+
+def calculate_quota_period() -> QuotaPeriod:
+    """
+    Calculate the current quota period based on configuration.
+
+    Returns:
+        QuotaPeriod: Contains start_time, end_time, start_date, end_date, and max_tokens
+    """
+    today = datetime.now()
+    current_day = today.day
+    current_month = today.month
+    current_year = today.year
+
+    start_day = settings.QUOTA_PERIOD_START_DAY
+
+    if current_day >= start_day:
+        start_date = datetime(current_year, current_month, start_day)
+        end_date = datetime(current_year, current_month + 1, start_day - 1, 23, 59, 59)
+    else:
+        start_date = datetime(current_year, current_month - 1, start_day)
+        end_date = datetime(current_year, current_month, start_day - 1, 23, 59, 59)
+
+    return {
+        "start_time": int(start_date.timestamp()),
+        "end_time": int(end_date.timestamp()),
+        "start_date": start_date.isoformat(),
+        "end_date": end_date.isoformat(),
+        "max_tokens": settings.QUOTA_PERIOD_MAX_TOKENS,
+    }
 
 
 @router.get("/token-usage")
 async def get_token_usage(
     current_user: CurrentUser,
-    start_time: Optional[int] = Query(
-        None, description="Start time (Unix seconds) of the query time range, inclusive"
-    ),
-    end_time: Optional[int] = Query(
-        None, description="End time (Unix seconds) of the query time range, exclusive"
-    ),
-    limit: Optional[int] = Query(None, description="Number of buckets to return"),
-) -> dict:
+) -> TokenUsageResponse:
     """
-    Get total OpenAI API token usage.
+    Get total OpenAI API token usage and current quota period information.
 
-    Returns the total number of tokens consumed by the configured API key.
+    Returns the total number of tokens consumed by the configured API key
+    along with the current quota period details.
     """
 
-    # get environment variables
     openai_admin_key = os.getenv("OPENAI_ADMIN_KEY")
     openai_api_key = os.getenv("OPENAI_API_KEY")
 
@@ -37,12 +75,10 @@ async def get_token_usage(
     if not openai_api_key:
         raise HTTPException(status_code=500, detail="OpenAI API key is not configured")
 
-    # if no start_time provided, default to 30 days ago
-    if start_time is None:
-        start_time = int((datetime.now() - timedelta(days=30)).timestamp())
+    quota_period = calculate_quota_period()
 
     params = [
-        ("start_time", start_time),
+        ("start_time", quota_period["start_time"]),
         ("bucket_width", "1d"),
         ("api_key_ids[]", openai_api_key),
         ("group_by[]", "api_key_id"),
@@ -50,13 +86,6 @@ async def get_token_usage(
         ("group_by[]", "bucket"),
     ]
 
-    # add optional parameters if provided
-    if end_time is not None:
-        params.append(("end_time", end_time))
-    if limit is not None:
-        params.append(("limit", limit))
-
-    # make request to OpenAI Admin API
     url = "https://api.openai.com/v1/organization/usage/completions"
     headers = {
         "Authorization": f"Bearer {openai_admin_key}",
@@ -70,8 +99,7 @@ async def get_token_usage(
             if response.status_code == 200:
                 data = response.json()
 
-                # calculate total tokens from the response
-                total_tokens = 0
+                total_tokens: int = 0
 
                 if data and "data" in data and isinstance(data["data"], list):
                     for bucket in data["data"]:
@@ -80,7 +108,9 @@ async def get_token_usage(
                                 total_tokens += result.get("input_tokens", 0)
                                 total_tokens += result.get("output_tokens", 0)
 
-                return {"total_tokens": total_tokens}
+                return TokenUsageResponse(
+                    total_tokens=total_tokens, quota_period=quota_period
+                )
 
             elif response.status_code == 401:
                 raise HTTPException(
