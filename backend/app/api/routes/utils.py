@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from pydantic.networks import EmailStr
+from sqlmodel import Session, select
 
-from app.api.deps import get_current_active_superuser
+from app.api.deps import get_current_active_superuser, SessionDep
 from app.models import Message
 from app.utils.email_utils import generate_test_email, send_email
 
@@ -30,3 +31,17 @@ def test_email(email_to: EmailStr) -> Message:
 @router.get("/health-check/", response_model=bool)
 async def health_check() -> bool:
     return True
+
+
+@router.get("/readiness-check/", response_model=bool)
+async def readiness_check(session: SessionDep) -> bool:
+    """
+    Check if the application is ready to serve requests.
+    This includes database connectivity.
+    """
+    try:
+        # Test database connection
+        result = session.exec(select(1)).first()
+        return result == 1
+    except Exception:
+        return False

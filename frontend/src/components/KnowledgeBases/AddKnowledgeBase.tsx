@@ -293,26 +293,6 @@ const AddKnowledgeBase = () => {
                   />
                 </Field>
 
-                <Field label="Embedding Model">
-                  <select
-                    value={selectedEmbeddingModelId || ""}
-                    onChange={(e) => setSelectedEmbeddingModelId(e.target.value || null)}
-                    style={{
-                      width: "100%",
-                      padding: "0.5rem",
-                      borderRadius: "0.375rem",
-                      borderColor: "#E2E8F0",
-                    }}
-                  >
-                    {filteredEmbeddingModels.map((model) => (
-                      <option key={model.id} value={model.id}>
-                        {model.name} ({model.provider}){" "}
-                        {defaultModel?.id === model.id ? "(Default)" : ""}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-
                 {/* Drag-and-Drop File Upload */}
                 <Box
                   {...getRootProps()}

@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: aibeniq-production
+
+resources:
+  - ../../base
+
+namespace: aibeniq-prod
+
+patchesStrategicMerge:
+  - configmap-patch.yaml
+  - backend-patch.yaml
+  - frontend-patch.yaml
+  - postgres-patch.yaml
+
+commonLabels:
+  environment: production
+
+images:
+  - name: quay.io/aibeniq/backend
+    newTag: v1.0.0
+  - name: quay.io/aibeniq/frontend
+    newTag: v1.0.0

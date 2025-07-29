@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: aibeniq-development
+
+resources:
+  - ../../base
+
+namespace: aibeniq-dev
+
+patchesStrategicMerge:
+  - configmap-patch.yaml
+  - backend-patch.yaml
+  - frontend-patch.yaml
+
+commonLabels:
+  environment: development
+
+images:
+  - name: quay.io/aibeniq/backend
+    newTag: dev
+  - name: quay.io/aibeniq/frontend
+    newTag: dev
