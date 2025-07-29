@@ -2,6 +2,9 @@ FROM python:3.10
 
 ENV PYTHONUNBUFFERED=1
 
+# Create non-root user for OpenShift compatibility
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
 WORKDIR /app/
 
 #argument for whether to install huggingface
@@ -46,5 +49,11 @@ COPY ./app /app/app
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
+
+# Change ownership to appuser for OpenShift compatibility
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
 
 CMD ["fastapi", "run", "--workers", "4", "app/main.py"]

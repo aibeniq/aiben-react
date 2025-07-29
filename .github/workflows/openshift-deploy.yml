@@ -1,0 +1,163 @@
+name: Build and Deploy to OpenShift
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: quay.io
+  REGISTRY_NAMESPACE: aibeniq
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      backend-image: ${{ steps.meta-backend.outputs.tags }}
+      frontend-image: ${{ steps.meta-frontend.outputs.tags }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Extract metadata for backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}/backend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Extract metadata for frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}/frontend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          build-args: |
+            VITE_API_URL=https://api.yourdomain.com
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-dev:
+    needs: build
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install OpenShift CLI
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: latest
+
+      - name: Log in to OpenShift
+        run: |
+          oc login --token=${{ secrets.OPENSHIFT_TOKEN }} --server=${{ secrets.OPENSHIFT_SERVER }}
+
+      - name: Set OpenShift project
+        run: |
+          oc project aibeniq-dev || oc new-project aibeniq-dev
+
+      - name: Install Kustomize
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Update image tags in kustomization
+        run: |
+          cd openshift/overlays/development
+          kustomize edit set image quay.io/aibeniq/backend=${{ needs.build.outputs.backend-image }}
+          kustomize edit set image quay.io/aibeniq/frontend=${{ needs.build.outputs.frontend-image }}
+
+      - name: Deploy to development
+        run: |
+          cd openshift/overlays/development
+          kustomize build . | oc apply -f -
+
+      - name: Wait for deployment
+        run: |
+          oc rollout status deployment/backend -n aibeniq-dev --timeout=300s
+          oc rollout status deployment/frontend -n aibeniq-dev --timeout=300s
+
+  deploy-prod:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install OpenShift CLI
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: latest
+
+      - name: Log in to OpenShift
+        run: |
+          oc login --token=${{ secrets.OPENSHIFT_TOKEN }} --server=${{ secrets.OPENSHIFT_SERVER }}
+
+      - name: Set OpenShift project
+        run: |
+          oc project aibeniq-prod || oc new-project aibeniq-prod
+
+      - name: Install Kustomize
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Update image tags in kustomization
+        run: |
+          cd openshift/overlays/production
+          kustomize edit set image quay.io/aibeniq/backend=${{ needs.build.outputs.backend-image }}
+          kustomize edit set image quay.io/aibeniq/frontend=${{ needs.build.outputs.frontend-image }}
+
+      - name: Deploy to production
+        run: |
+          cd openshift/overlays/production
+          kustomize build . | oc apply -f -
+
+      - name: Wait for deployment
+        run: |
+          oc rollout status deployment/backend -n aibeniq-prod --timeout=300s
+          oc rollout status deployment/frontend -n aibeniq-prod --timeout=300s

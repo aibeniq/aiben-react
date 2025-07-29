@@ -39,7 +39,7 @@ export const categories: Category[] = [
     name: "Configurations",
     icon: FiPackage,
     items: [
-      { icon: FiCpu, title: "Model Selection", path: "/model-selection" },
+      ...(false ? [{ icon: FiCpu, title: "Model Selection", path: "/model-selection" }] : []),
       { icon: FiDatabase, title: "Knowledge Bases", path: "/knowledge-bases" },
       { icon: FiArchive, title: "Archive", path: "/archive" },
       { icon: FiSettings, title: "Settings", path: "/settings" },

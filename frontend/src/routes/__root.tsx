@@ -17,8 +17,13 @@ const loadDevtools = () =>
     },
   )
 
-const TanStackDevtools =
-  process.env.NODE_ENV === "production" ? () => null : React.lazy(loadDevtools)
+//const TanStackDevtools =
+//  process.env.NODE_ENV === "production" || import.meta.env.VITE_DISABLE_DEVTOOLS === "true"
+//    ? () => null
+//    : React.lazy(loadDevtools)
+
+//tried hiding the TanStack icon with a flag but it didn't take somehow due to .env issue... just disabling for now
+const TanStackDevtools = () => null
 
 export const Route = createRootRoute({
   component: () => (
