@@ -15,8 +15,8 @@ spec:
       restartPolicy: OnFailure
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        fsGroup: 1000
+        #runAsUser: 1000
+        #fsGroup: 1000
       containers:
         - name: prestart
           image: quay.io/aibeniq/backend:latest

@@ -242,7 +242,7 @@ function Deploy-ToOpenShift {
         
         # Run database migrations if this is a new deployment
         Write-Status "Waiting for database prestart job..."
-        oc wait --for=condition=complete job/prestart --timeout=300s -n $PROJECT_NAME
+        oc wait --for=condition=complete job/backend-prestart --timeout=300s -n $PROJECT_NAME
         
         Write-Success "Deployment completed successfully!"
         
@@ -250,9 +250,9 @@ function Deploy-ToOpenShift {
         Write-Status "Application URLs:"
         $routes = oc get routes -n $PROJECT_NAME -o json | ConvertFrom-Json
         foreach ($route in $routes.items) {
-            $name = $route.metadata.name
-            $host = $route.spec.host
-            Write-Output "  $name`: https://$host"
+            $routeName = $route.metadata.name
+            $routeHost = $route.spec.host
+            Write-Output "  $routeName`: https://$routeHost"
         }
         
     } finally {
