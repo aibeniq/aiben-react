@@ -50,6 +50,11 @@ class Settings(BaseSettings):
     RAG_DOCUMENT_CHUNK_OVERLAP: int = 200
     RAG_NUM_CHUNKS: int = 5  # Number of chunks to retrieve for RAG search
 
+    # Embedding processing parameters
+    EMBEDDING_MAX_TOKENS_PER_REQUEST: int = (
+        250000  # Safe limit below OpenAI's 300k token limit
+    )
+
     # FormConnect processing parameters
     FORMCONNECT_MAX_TOKENS_PER_REQUEST: int = 150000  # Token limit for full text mode
     FORMCONNECT_VECTOR_SEARCH_CHUNKS: int = 5  # Number of chunks to retrieve per field
