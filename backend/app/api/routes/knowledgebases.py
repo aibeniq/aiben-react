@@ -43,8 +43,104 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain.schema.document import Document
 import mimetypes
+import tiktoken
+import asyncio
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
+
+
+def estimate_tokens_for_embedding(text: str) -> int:
+    """
+    Estimate tokens in text for embedding models using cl100k_base encoding.
+    This is the same encoding used by OpenAI's text-embedding models.
+    """
+    try:
+        encoding = tiktoken.get_encoding("cl100k_base")
+        return len(encoding.encode(text))
+    except Exception:
+        # Fallback to rough estimation if tiktoken fails
+        return len(text) // 4
+
+
+def chunk_documents_for_embedding(
+    documents: List[Document], max_tokens_per_chunk: int = None
+) -> List[List[Document]]:
+    """
+    Split documents into chunks that fit within embedding model token limits.
+
+    Args:
+        documents: List of Document objects to chunk
+        max_tokens_per_chunk: Maximum tokens per chunk (defaults to config setting)
+
+    Returns:
+        List of document chunks, where each chunk is a list of documents
+    """
+    if max_tokens_per_chunk is None:
+        max_tokens_per_chunk = settings.EMBEDDING_MAX_TOKENS_PER_REQUEST
+
+    chunks = []
+    current_chunk = []
+    current_tokens = 0
+
+    print(
+        f"Chunking {len(documents)} documents with max {max_tokens_per_chunk:,} tokens per chunk"
+    )
+
+    for doc in documents:
+        # Estimate tokens for this document's content
+        doc_tokens = estimate_tokens_for_embedding(doc.page_content)
+
+        # If this single document exceeds the limit, split it further
+        if doc_tokens > max_tokens_per_chunk:
+            print(
+                f"⚠️  Document exceeds token limit ({doc_tokens:,} tokens), splitting further..."
+            )
+
+            # If we have accumulated docs, add them as a chunk first
+            if current_chunk:
+                chunks.append(current_chunk)
+                current_chunk = []
+                current_tokens = 0
+
+            # Split this large document into smaller pieces
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=max_tokens_per_chunk
+                * 3,  # Rough character estimate (4 chars per token)
+                chunk_overlap=200,
+            )
+            split_docs = text_splitter.split_documents([doc])
+
+            # Group the split documents into token-limited chunks
+            for split_doc in split_docs:
+                split_tokens = estimate_tokens_for_embedding(split_doc.page_content)
+
+                if current_tokens + split_tokens > max_tokens_per_chunk:
+                    if current_chunk:
+                        chunks.append(current_chunk)
+                    current_chunk = [split_doc]
+                    current_tokens = split_tokens
+                else:
+                    current_chunk.append(split_doc)
+                    current_tokens += split_tokens
+        else:
+            # Check if adding this document would exceed the limit
+            if current_tokens + doc_tokens > max_tokens_per_chunk:
+                # Start a new chunk
+                if current_chunk:
+                    chunks.append(current_chunk)
+                current_chunk = [doc]
+                current_tokens = doc_tokens
+            else:
+                # Add to current chunk
+                current_chunk.append(doc)
+                current_tokens += doc_tokens
+
+    # Add the last chunk if it has documents
+    if current_chunk:
+        chunks.append(current_chunk)
+
+    print(f"✅ Created {len(chunks)} chunks from {len(documents)} documents")
+    return chunks
 
 
 def load_correct_embeddings_model(
@@ -330,7 +426,7 @@ def read_knowledge_base(
 
 
 @router.post("/", response_model=KnowledgeBasePublic)
-def create_knowledge_base(
+async def create_knowledge_base(
     *,
     session: SessionDep,
     current_user: CurrentUser,
@@ -399,20 +495,56 @@ def create_knowledge_base(
 
     print(f"Using embedding model: {model_id}")
 
+    # Chunk documents to avoid token limits
+    print("Chunking documents for embedding...")
+    document_chunks = chunk_documents_for_embedding(splits)
+    print(f"Split into {len(document_chunks)} chunks for embedding")
+
     # Clear out any existing chroma_db directory
     chroma_dir = tempfile.mkdtemp()
+    chroma_db = None
+
     try:
-        # Create Chroma VectorDB from the document splits
-        Chroma.from_documents(
-            documents=splits, embedding=embeddings, persist_directory=chroma_dir
-        )
+        # Process each chunk separately to avoid token limits
+        for i, chunk in enumerate(document_chunks):
+            print(
+                f"Processing chunk {i+1}/{len(document_chunks)} with {len(chunk)} documents"
+            )
+
+            # Estimate total tokens in this chunk for logging
+            total_chunk_tokens = sum(
+                estimate_tokens_for_embedding(doc.page_content) for doc in chunk
+            )
+            print(f"Chunk {i+1} contains approximately {total_chunk_tokens:,} tokens")
+
+            if chroma_db is None:
+                # Initialize Chroma database with first chunk
+                chroma_db = Chroma.from_documents(
+                    documents=chunk,
+                    embedding=embeddings,
+                    persist_directory=chroma_dir,
+                )
+            else:
+                # Add subsequent chunks to existing database
+                chroma_db.add_documents(documents=chunk)
+
+            # Optional: Add a small delay between chunks to be nice to the API
+            if i < len(document_chunks) - 1:  # Don't delay after the last chunk
+                await asyncio.sleep(0.5)  # 500ms delay between chunks
+
+        # Persist the database
+        if chroma_db:
+            chroma_db.persist()
+
+        print("Successfully created vector database with chunked processing")
+
     except Exception as e:
         print(f"Error creating Chroma VectorDB: {str(e)}")
         # Clean up the directory on error
         if os.path.exists(chroma_dir):
             shutil.rmtree(chroma_dir)
         raise HTTPException(
-            status_code=500, detail=f"Error creating vector database: {str(e)}"
+            status_code=400, detail=f"Error creating vector database: {str(e)}"
         )
 
     print("Zipping Chroma database...")
@@ -428,6 +560,13 @@ def create_knowledge_base(
                 )  # Preserve directory structure
                 zip_file.write(file_path, arcname)
     zip_buffer.seek(0)
+
+    # Clean up the temporary chroma directory
+    try:
+        if os.path.exists(chroma_dir):
+            shutil.rmtree(chroma_dir)
+    except Exception as e:
+        print(f"Warning: Could not clean up temporary directory {chroma_dir}: {e}")
 
     print("Validating knowledge base...")
 

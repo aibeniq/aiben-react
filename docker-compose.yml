@@ -172,7 +172,7 @@ services:
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
 
   ollama-init:
-    #profiles: ["ollama"]
+    profiles: ["ollama"]
     image: "${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}"
     depends_on:
       ollama:
@@ -184,7 +184,7 @@ services:
       - default
 
   ollama:
-    #profiles: ["ollama"]
+    profiles: ["ollama"]
     image: ollama/ollama:latest
     container_name: ollama
     restart: always
