@@ -13,6 +13,7 @@ import { FaBalanceScale } from "react-icons/fa"
 import { TbPlugConnected } from "react-icons/tb"
 import { VeradocService, ReportgenieService, TwincheckService } from "../../client"
 import { useState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 
 export const Route = createFileRoute("/_layout/archive")({
   component: Archive,
@@ -36,6 +37,7 @@ function Archive() {
 
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
+  const queryClient = useQueryClient()
 
   // Copy and download functions
   const handleCopyReport = async () => {
@@ -394,6 +396,23 @@ function Archive() {
         onDownloadCsv={handleDownloadCsv}
         showCsvDownload={activeTab === "generate" || activeTab === "review"}
         onFeedbackSubmitted={(type) => {
+          console.log("Feedback submitted for archive item, invalidating query cache")
+
+          // Invalidate the history queries to refresh the archive list
+          if (activeTab === "review") {
+            queryClient.invalidateQueries({ queryKey: ["veradocHistory"] })
+          } else if (activeTab === "generate") {
+            queryClient.invalidateQueries({ queryKey: ["reportgenieHistory"] })
+          } else if (activeTab === "compare") {
+            queryClient.invalidateQueries({ queryKey: ["twincheckHistory"] })
+          } else if (activeTab === "match") {
+            queryClient.invalidateQueries({ queryKey: ["formconnectHistory"] })
+          }
+
+          // Also invalidate the broader archive queries
+          queryClient.invalidateQueries({ queryKey: ["archive"] })
+          queryClient.invalidateQueries({ queryKey: ["items"] })
+
           showSuccessToast(`Thank you for marking this response as ${type}!`)
         }}
       >

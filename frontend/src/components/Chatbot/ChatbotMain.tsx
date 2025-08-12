@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Drawer } from "@chakra-ui/react"
 import FloatingChatButton from "@/components/Chatbot/FloatingChatButton"
 import ChatbotPanel from "@/components/Chatbot/ChatbotPanel"
@@ -35,6 +35,29 @@ const ChatbotMain = () => {
     setSelectedKbId(null)
     setUploadedFiles([])
   }
+
+  const handleOpenChat = () => {
+    console.log("🎯 FloatingChatButton clicked, opening chat")
+    setIsOpen(true)
+  }
+
+  const handleDrawerOpenChange = (details: { open: boolean }) => {
+    console.log("🎯 Drawer state changed:", details.open)
+    setIsOpen(details.open)
+  }
+
+  // Add escape key handler as emergency fallback
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isOpen) {
+        console.log("🚨 Emergency escape - closing chat drawer")
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener("keydown", handleEscapeKey)
+    return () => document.removeEventListener("keydown", handleEscapeKey)
+  }, [isOpen])
 
   const handleChatbotResponse = (response: any, userMessage: string) => {
     if (!response?.answer) return
@@ -191,16 +214,10 @@ const ChatbotMain = () => {
 
   return (
     <>
-      <FloatingChatButton onClick={() => setIsOpen(true)} />
-      <Drawer.Root
-        open={isOpen}
-        onOpenChange={(details) => setIsOpen(details.open)}
-        placement="end"
-        size="md"
-      >
-        <Drawer.Trigger asChild>
-          <FloatingChatButton onClick={() => setIsOpen(true)} />
-        </Drawer.Trigger>
+      {/* Only show floating button when drawer is closed */}
+      {!isOpen && <FloatingChatButton onClick={handleOpenChat} />}
+
+      <Drawer.Root open={isOpen} onOpenChange={handleDrawerOpenChange} placement="end" size="md">
         <Drawer.Backdrop />
         <Drawer.Positioner>
           <Drawer.Content>
