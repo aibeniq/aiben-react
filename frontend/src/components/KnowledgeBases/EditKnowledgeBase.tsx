@@ -56,7 +56,11 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
     queryKey: ["knowledge-base", item.id],
     queryFn: async () => {
       console.log("Fetching knowledge base with ID:", item.id)
-      return KnowledgeBasesService.readKnowledgeBase({ id: item.id })
+      const result = await KnowledgeBasesService.readKnowledgeBase({ id: item.id })
+      console.log("📊 Knowledge base API response:", result)
+      console.log("📊 Embedding model in response:", result.embedding_model)
+      console.log("📊 Embedding model ID:", result.embedding_model_id)
+      return result
     },
     enabled: isOpen, // Only fetch when dialog is open
   })
@@ -107,6 +111,8 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
         title: data.title,
         description: data.description,
         id: item.id,
+        // Preserve the existing embedding model ID
+        embeddingModelId: knowledgeBase?.embedding_model_id || item.embedding_model_id,
         formData: {
           files: data.files,
           ...(data.removedFileIds && data.removedFileIds.length > 0
@@ -116,21 +122,25 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
       }
 
       console.log("Payload being sent to KnowledgeBasesService.updateKnowledgeBase:", payload)
+      console.log("Preserving embedding_model_id:", payload.embeddingModelId)
 
       return KnowledgeBasesService.updateKnowledgeBase(payload)
     },
     onSuccess: () => {
       showSuccessToast("Knowledge Base updated successfully.")
-      reset()
-      setSelectedFiles([])
-      setRemovedFileIds([])
       setIsOpen(false)
+      // Force immediate cache invalidation and refetch
+      queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
+      queryClient.invalidateQueries({ queryKey: ["items"] })
+      queryClient.refetchQueries({ queryKey: ["items"] })
     },
     onError: (err: ApiError) => {
       handleError(err)
     },
     onSettled: () => {
+      // Additional invalidation on settlement
       queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
+      queryClient.invalidateQueries({ queryKey: ["items"] })
     },
   })
 
@@ -259,6 +269,20 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                     {...register("description")}
                     placeholder="Description"
                     type="text"
+                  />
+                </Field>
+
+                <Field label="Embedding Model">
+                  <Input
+                    value={
+                      knowledgeBase?.embedding_model?.model_id ||
+                      knowledgeBase?.embedding_model?.provider ||
+                      "Default"
+                    }
+                    disabled
+                    placeholder="Embedding Model (cannot be changed)"
+                    bg="gray.50"
+                    _dark={{ bg: "gray.700" }}
                   />
                 </Field>
 

@@ -106,7 +106,9 @@ const AddKnowledgeBase = () => {
 
   // Reset selected files when the popup is closed
   useEffect(() => {
+    console.log("📱 Modal state changed - isOpen:", isOpen)
     if (!isOpen) {
+      console.log("🔒 Modal is closing - resetting form and files")
       setSelectedFiles([])
       setSelectedEmbeddingModelId(null)
 
@@ -122,8 +124,14 @@ const AddKnowledgeBase = () => {
           keepTouched: false, // This resets touched state
         },
       )
+
+      // Force a final cache refresh when modal closes
+      console.log("🔄 Final cache invalidation on modal close...")
+      queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
+      queryClient.invalidateQueries({ queryKey: ["items"] })
+      console.log("✅ Modal close cleanup completed")
     }
-  }, [isOpen])
+  }, [isOpen, reset, queryClient])
 
   const mutation = useMutation({
     mutationFn: (data: {
@@ -132,7 +140,7 @@ const AddKnowledgeBase = () => {
       embedding_model_id: string | null
       files: File[]
     }) => {
-      console.log("Now beginning mutation...")
+      console.log("🚀 Starting knowledge base creation mutation with data:", data)
 
       // Send the FormData object to the backend
       return KnowledgeBasesService.createKnowledgeBase({
@@ -144,16 +152,25 @@ const AddKnowledgeBase = () => {
         }, // Include all fields in the FormData payload
       })
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("✅ Knowledge base creation SUCCESS:", data)
       showSuccessToast("Knowledge Base created successfully.")
-      reset()
-      setSelectedFiles([]) // Reset selected files after successful creation
-      setSelectedEmbeddingModelId(null)
       setIsOpen(false)
+
+      // Invalidate BOTH query keys
+      console.log("🔄 Invalidating knowledge-bases cache...")
+      queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
+
+      console.log("🔄 Invalidating items cache (the one actually used by the list)...")
+      queryClient.invalidateQueries({ queryKey: ["items"] })
+
+      console.log("🔄 Forcing refetch of items...")
+      queryClient.refetchQueries({ queryKey: ["items"] })
+
+      console.log("✨ Knowledge base creation success flow completed")
     },
     onError: (err: ApiError) => {
-      reset(undefined, { keepValues: true })
-
+      console.error("❌ Knowledge base creation ERROR:", err)
       if (err.status === 409) {
         // Handle duplicate title error specifically
         showErrorToast(
@@ -166,15 +183,25 @@ const AddKnowledgeBase = () => {
       }
     },
     onSettled: () => {
+      console.log("🏁 Knowledge base mutation SETTLED - doing final cache invalidation")
       queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
+      queryClient.invalidateQueries({ queryKey: ["items"] })
     },
   })
 
-  const onSubmit: SubmitHandler<KnowledgeBaseCreate> = (data) => {
+  const onSubmit: SubmitHandler<KnowledgeBaseCreate> = async (data) => {
+    console.log("📝 Form submitted with data:", data)
+
     if (selectedFiles.length === 0) {
+      console.log("⚠️ No files selected - showing error")
       showErrorToast("At least one file is required.")
       return
     }
+
+    console.log(
+      "📁 Selected files:",
+      selectedFiles.map((f) => f.name),
+    )
 
     // Prepare the data for the SDK function
     const requestData = {
@@ -184,9 +211,17 @@ const AddKnowledgeBase = () => {
       files: selectedFiles, // Pass the selected files
     }
 
-    console.log([requestData])
+    console.log("📤 Prepared request data:", requestData)
 
-    return mutation.mutateAsync(requestData)
+    try {
+      console.log("🚀 Calling mutation.mutateAsync...")
+      await mutation.mutateAsync(requestData)
+      console.log("✅ Mutation completed successfully")
+      // The success handling is now in the mutation's onSuccess callback
+    } catch (error) {
+      // Error handling is in the mutation's onError callback
+      console.error("❌ Mutation failed:", error)
+    }
   }
 
   const onDrop = (acceptedFiles: File[]) => {

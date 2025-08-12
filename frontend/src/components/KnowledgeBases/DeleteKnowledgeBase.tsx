@@ -35,12 +35,18 @@ const DeleteKnowledgeBase = ({ id }: { id: string }) => {
     onSuccess: () => {
       showSuccessToast("The KnowledgeBase was deleted successfully")
       setIsOpen(false)
+      // Force immediate cache invalidation and refetch
+      queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
+      queryClient.invalidateQueries({ queryKey: ["items"] })
+      queryClient.refetchQueries({ queryKey: ["knowledge-bases"] })
     },
     onError: () => {
       showErrorToast("An error occurred while deleting the KnowledgeBase")
     },
     onSettled: () => {
-      queryClient.invalidateQueries()
+      // Additional invalidation on settlement
+      queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
+      queryClient.invalidateQueries({ queryKey: ["items"] })
     },
   })
 
