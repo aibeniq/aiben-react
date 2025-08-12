@@ -85,10 +85,12 @@ const FeedbackButtons = ({
         feedbackText: feedbackText.trim() || undefined,
       })
 
+      console.log("Feedback submitted successfully, calling onFeedbackSubmitted callback")
       showSuccessToast("Thank you for your feedback!")
       setIsModalOpen(false)
       if (onFeedbackSubmitted) {
         onFeedbackSubmitted(feedbackType)
+        console.log("onFeedbackSubmitted callback completed")
       }
     } catch (error) {
       console.error("Failed to submit feedback:", error)
