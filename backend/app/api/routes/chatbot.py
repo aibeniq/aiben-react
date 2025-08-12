@@ -505,14 +505,14 @@ Please synthesize the information from all documents into a coherent, comprehens
             input_data={
                 "question": question,
                 "rephrased_question": rephrased_question,
-                "documents": [file.filename for file in files],
+                "documents": [file.filename for file in files] if files else [],
                 "search_mode": "full_text",
             },
             output_data=final_answer,
             metadata={
                 "session_id": session_id,
                 "is_follow_up": is_follow_up,
-                "document_count": len(files),
+                "document_count": len(files) if files else 0,
                 "relevant_documents": len(all_document_analyses),
             },
         )
@@ -913,6 +913,12 @@ async def query_document(
                 print(f"Using cached resources for document session {session_id}")
                 retriever = cached_data.get("retriever")
                 llm = cached_data.get("llm")
+            else:
+                # For follow-up questions, verify we have cached data
+                raise HTTPException(
+                    status_code=400,
+                    detail="Session not found. Please upload your documents again.",
+                )
 
         # If no cached retriever or this is a new document, set up everything
         if not retriever:
@@ -1024,6 +1030,7 @@ async def query_document(
                     "llm": llm,
                     "vector_dir": vector_dir,
                     "temp_paths": temp_paths,
+                    "file_names": [file.filename for file in files],  # Cache file names
                 },
             )
 
@@ -1084,6 +1091,14 @@ async def query_document(
         print("Response:", answer_content[:100])
         print("Sources:", len(sources))
 
+        # Get file names for logging
+        if files:
+            document_names = [file.filename for file in files]
+        else:
+            # For follow-up questions, get from cache
+            cached_data = session_cache.get(session_id)
+            document_names = cached_data.get("file_names", []) if cached_data else []
+
         # After generating the answer and before returning:
         record_llm_interaction(
             session=session,
@@ -1092,7 +1107,7 @@ async def query_document(
             input_data={
                 "question": question,
                 "rephrased_question": rephrased_question,
-                "documents": [file.filename for file in files],
+                "documents": document_names,  # Use the variable instead of direct access
             },
             output_data=answer_content,
             metadata={
