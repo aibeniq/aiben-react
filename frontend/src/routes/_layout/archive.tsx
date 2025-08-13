@@ -118,7 +118,7 @@ function Archive() {
           reportgenie.selectedReport.content ||
           ""
 
-        response = await TwincheckService.generateDocx({
+        response = await ReportgenieService.generateDocx({
           requestBody: { content: fullText },
         })
       } else if (activeTab === "compare" && twincheck.selectedReport) {

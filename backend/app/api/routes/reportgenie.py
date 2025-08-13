@@ -2594,18 +2594,144 @@ async def generate_outline_optimization_csv(
         )
 
 
-def sanitize_text_for_json(text: str) -> str:
-    """Sanitize text to prevent JSON parsing issues with control characters."""
-    # Replace smart quotes and apostrophes with regular ones
-    text = text.replace(""", "'").replace(""", "'")
-    text = text.replace('"', '"').replace('"', '"')
-    text = text.replace("–", "-").replace("—", "-")
-    text = text.replace("ʼ", "'")  # This specific character from the logs
+@router.post("/generate/docx", response_class=StreamingResponse)
+async def generate_docx(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a DOCX file from the report content.
+    """
+    print("Now generating DOCX of report...")
+    try:
+        # Get the markdown content from the request
+        if not request.content:
+            raise HTTPException(status_code=400, detail="Report content is required")
 
-    # Remove control characters (characters 0-31 except tab, newline, carriage return)
-    text = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]", "", text)
+        # Convert markdown to HTML for parsing
+        html_content = markdown.markdown(request.content, extensions=["tables"])
+        soup = BeautifulSoup(html_content, "html.parser")
 
-    # Replace any remaining problematic Unicode characters
-    text = text.encode("ascii", errors="ignore").decode("ascii")
+        print("Markdown content converted to HTML successfully.")
+        # Create a new Document
+        doc = Document()
 
-    return text
+        print("Adding title and date to the document...")
+        # Add a title
+        title_text = (
+            request.title
+            if hasattr(request, "title") and request.title
+            else "Generated Report"
+        )
+        title = doc.add_heading(title_text, level=0)
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        # Add date
+        date_paragraph = doc.add_paragraph()
+        date_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        date_run = date_paragraph.add_run(
+            f"Generated on: {datetime.now().strftime('%B %d, %Y')}"
+        )
+        date_run.italic = True
+
+        # Add a separator
+        doc.add_paragraph("─" * 50)
+
+        print("Adding headers, paragraphs, lists, and tables...")
+        # Process each element in the soup
+        for element in soup.find_all():
+            if element.name == "h1":
+                doc.add_heading(element.get_text().strip(), level=1)
+            elif element.name == "h2":
+                doc.add_heading(element.get_text().strip(), level=2)
+            elif element.name == "h3":
+                doc.add_heading(element.get_text().strip(), level=3)
+            elif element.name == "h4":
+                doc.add_heading(element.get_text().strip(), level=4)
+            elif element.name == "p":
+                text = element.get_text().strip()
+                if text:  # Only add non-empty paragraphs
+                    paragraph = doc.add_paragraph(text)
+
+                    # Handle formatting within paragraphs
+                    for strong in element.find_all("strong"):
+                        # Bold text formatting would need more complex handling
+                        pass
+                    for em in element.find_all("em"):
+                        # Italic text formatting would need more complex handling
+                        pass
+
+            elif element.name == "table":
+                # Handle tables
+                rows = element.find_all("tr")
+                if rows:
+                    print(f"Adding table with {len(rows)} rows...")
+                    table = doc.add_table(
+                        rows=len(rows), cols=len(rows[0].find_all(["th", "td"]))
+                    )
+                    table.style = "Table Grid"
+
+                    for i, row in enumerate(rows):
+                        cells = row.find_all(["th", "td"])
+                        for j, cell in enumerate(cells):
+                            if j < len(table.rows[i].cells):
+                                table.rows[i].cells[j].text = cell.get_text().strip()
+                                # Make header row bold
+                                if i == 0:
+                                    for paragraph in table.rows[i].cells[j].paragraphs:
+                                        for run in paragraph.runs:
+                                            run.bold = True
+
+            elif element.name == "ul":
+                # Handle unordered lists
+                for li in element.find_all("li", recursive=False):
+                    text = li.get_text().strip()
+                    if text:
+                        paragraph = doc.add_paragraph(text, style="List Bullet")
+
+            elif element.name == "ol":
+                # Handle ordered lists
+                for li in element.find_all("li", recursive=False):
+                    text = li.get_text().strip()
+                    if text:
+                        paragraph = doc.add_paragraph(text, style="List Number")
+
+        print("Saving the document to a BytesIO object...")
+        # Save the document to a BytesIO object
+        doc_io = BytesIO()
+        doc.save(doc_io)
+        doc_io.seek(0)
+
+        # Create filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"report_{timestamp}.docx"
+
+        print(f"DOCX file size: {len(doc_io.getvalue())} bytes")
+
+        # Verify the document can be opened (basic integrity check)
+        doc_io.seek(0)
+        try:
+            test_doc = Document(doc_io)
+            print("DOCX file passed integrity check (can be opened by python-docx).")
+        except Exception as e:
+            print(f"DOCX integrity check failed: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Generated DOCX file is corrupted: {str(e)}"
+            )
+
+        doc_io.seek(0)
+        print(
+            "Document saved successfully. Preparing to return as a downloadable file."
+        )
+
+        # Return the document as a downloadable file
+        return StreamingResponse(
+            doc_io,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
