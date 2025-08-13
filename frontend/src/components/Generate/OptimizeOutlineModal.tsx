@@ -14,8 +14,13 @@ import { Field } from "../ui/field"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
 import SearchModeToggle from "../Common/SearchModeToggle"
-import { useState } from "react"
-import { ReportgenieService, OptimizedOutlineResponse, OutlineSuggestion } from "../../client"
+import { useState, useRef } from "react"
+import {
+  ReportgenieService,
+  OptimizedOutlineResponse,
+  OutlineSuggestion,
+  CancelablePromise,
+} from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import { FiCheck, FiEdit3, FiSave, FiX, FiDownload } from "react-icons/fi"
 
@@ -52,6 +57,9 @@ const OptimizeOutlineModal = ({
   const [editingModes, setEditingModes] = useState<Set<number>>(new Set())
   const [expandedContent, setExpandedContent] = useState<Set<number>>(new Set())
   const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
+
+  // Add cancelable promise ref for request cancellation
+  const ongoingRequestRef = useRef<CancelablePromise<any> | null>(null)
 
   const toggleSuggestion = (index: number) => {
     const newAccepted = new Set(acceptedSuggestions)
@@ -130,10 +138,17 @@ const OptimizeOutlineModal = ({
       return
     }
 
+    // Cancel any existing request
+    if (ongoingRequestRef.current) {
+      ongoingRequestRef.current.cancel()
+      ongoingRequestRef.current = null
+    }
+
     try {
       setOptimizing(true)
-      // Format the request to match the expected form data structure
-      const result = await ReportgenieService.optimizeOutline({
+
+      // Store the cancelable promise
+      ongoingRequestRef.current = ReportgenieService.optimizeOutline({
         formData: {
           knowledge_base_id: knowledgeBaseId,
           outline_id: outlineId,
@@ -143,6 +158,11 @@ const OptimizeOutlineModal = ({
           files: [selectedFile],
         },
       })
+
+      const result = await ongoingRequestRef.current
+
+      // Clear the reference on successful completion
+      ongoingRequestRef.current = null
 
       setOptimizationResults(result)
       setShowResults(true)
@@ -160,6 +180,12 @@ const OptimizeOutlineModal = ({
         `Optimization complete! Found suggestions for ${result.suggestions.filter((s: OutlineSuggestion) => s.needs_revision).length} sections.`,
       )
     } catch (error: any) {
+      // Don't show error if request was cancelled
+      if (error.isCancelled || error.name === "CancelError") {
+        console.log("Optimization request was cancelled")
+        return
+      }
+
       console.error("Error optimizing outline:", error)
 
       if (error.status === 422) {
@@ -177,6 +203,7 @@ const OptimizeOutlineModal = ({
       }
     } finally {
       setOptimizing(false)
+      ongoingRequestRef.current = null
     }
   }
 
@@ -243,6 +270,12 @@ const OptimizeOutlineModal = ({
   }
 
   const handleClose = () => {
+    // Cancel any ongoing request when closing
+    if (ongoingRequestRef.current) {
+      ongoingRequestRef.current.cancel()
+      ongoingRequestRef.current = null
+    }
+
     setSelectedFile(null)
     setCustomInstructions("")
     setSearchMode("vector") // Reset search mode
@@ -337,6 +370,22 @@ const OptimizeOutlineModal = ({
                       <Text fontSize="sm" mt={2} textAlign="center" color="gray.600">
                         Analyzing outline and generating optimizations...
                       </Text>
+                      <Box textAlign="center" mt={3}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (ongoingRequestRef.current) {
+                              ongoingRequestRef.current.cancel()
+                              ongoingRequestRef.current = null
+                            }
+                            setOptimizing(false)
+                            showSuccessToast("Optimization cancelled")
+                          }}
+                        >
+                          Cancel Analysis
+                        </Button>
+                      </Box>
                     </Box>
                   )}
                 </VStack>

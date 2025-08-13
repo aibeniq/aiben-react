@@ -619,6 +619,7 @@ class OptimizeChecklistRequest(SQLModel):
     questions: str  # Current checklist questions (newline-separated)
     target_answers: str = "yes"  # Expected answers for the good document
     custom_instructions: Optional[str] = Field(default=None, max_length=2000)
+    search_mode: str = "vector"  # "vector" or "full_scan"
 
 
 class ChecklistSuggestion(SQLModel):
