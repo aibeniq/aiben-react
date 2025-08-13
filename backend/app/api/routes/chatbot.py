@@ -13,6 +13,7 @@ from app.services.llms import (
     invoke_llm,
     record_llm_interaction,
 )
+from app.services.translation import translate_text_if_needed
 from app.services.knowledgebases import get_embedding_model
 from app.services.retrievers import (
     create_ensemble_retriever,
@@ -383,6 +384,11 @@ async def _handle_full_text_document_query(
     else:
         rephrased_question = question
 
+    # Translate the rephrased question for display purposes
+    translated_rephrased_question = await translate_text_if_needed(
+        rephrased_question, session, current_user, llm
+    )
+
     # Process each file independently
     all_document_analyses = []
     all_source_citations = []
@@ -497,6 +503,11 @@ Please synthesize the information from all documents into a coherent, comprehens
             )
             sources = all_source_citations
 
+        # Translate the final answer if needed
+        final_answer = await translate_text_if_needed(
+            final_answer, session, current_user, llm
+        )
+
         # Record the interaction
         record_llm_interaction(
             session=session,
@@ -521,7 +532,7 @@ Please synthesize the information from all documents into a coherent, comprehens
             "answer": final_answer,
             "sources": sources,
             "session_id": session_id,
-            "rephrased_question": rephrased_question,
+            "rephrased_question": translated_rephrased_question,
         }
 
     finally:
@@ -1043,6 +1054,11 @@ async def query_document(
         else:
             rephrased_question = question
 
+        # Translate the rephrased question if needed for display purposes
+        translated_rephrased_question = await translate_text_if_needed(
+            rephrased_question, session, current_user, llm
+        )
+
         # Retrieve relevant context
         docs = retriever.get_relevant_documents(rephrased_question)
         context = "\n\n".join([doc.page_content for doc in docs])
@@ -1082,6 +1098,12 @@ async def query_document(
                 {"context": context, "question": rephrased_question},
             )
             print(f"Got response: {answer_content[:100]}...")
+
+            # Translate the answer if needed
+            answer_content = await translate_text_if_needed(
+                answer_content, session, current_user, llm
+            )
+
         except Exception as e:
             print(f"Error generating answer: {e}")
             raise HTTPException(
@@ -1121,7 +1143,7 @@ async def query_document(
             "answer": answer_content,
             "sources": sources,
             "session_id": session_id,
-            "rephrased_question": rephrased_question,
+            "rephrased_question": translated_rephrased_question,
         }
 
     except Exception as e:

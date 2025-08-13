@@ -30,6 +30,7 @@ from app.services.llms import (
     invoke_llm_with_image,
     record_llm_interaction,
 )
+from app.services.translation import translate_text_if_needed
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 
@@ -570,7 +571,7 @@ async def extract_fields_from_handwritten_document(
 
 
 async def compare_multiple_documents(
-    documents: List[Dict[str, str]], file_names: List[str], llm
+    documents: List[Dict[str, str]], file_names: List[str], llm, current_user
 ) -> str:
     """
     Compare fields across multiple documents using the LLM.
@@ -617,7 +618,11 @@ Format your response in markdown with clear tables and analysis."""
         "filename_list": "\n".join([f"- {name}" for name in clean_filenames]),
     }
     response = invoke_llm(llm, enhanced_prompt_template, variables)
-    return response
+    # Translate the response if needed
+    translated_response = translate_text_if_needed(
+        response, current_user.preferred_language
+    )
+    return translated_response
 
 
 @router.post("/process", response_model=FormConnectResponse)
@@ -717,7 +722,7 @@ async def process_form(
     else:
         # Compare the extracted fields
         comparison_result = await compare_multiple_documents(
-            extracted_results, file_names, llm
+            extracted_results, file_names, llm, current_user
         )
         result = {
             "message": "Documents compared successfully",
@@ -1184,6 +1189,11 @@ async def generate_form_fields(
             if request.knowledge_base_id:
                 analysis += " with knowledge base reference."
 
+        # Translate the analysis if needed
+        translated_analysis = translate_text_if_needed(
+            analysis, current_user.preferred_language
+        )
+
         # Record the interaction
         record_llm_interaction(
             session=session,
@@ -1201,12 +1211,14 @@ async def generate_form_fields(
             },
             output_data={
                 "fields_count": len(fields),
-                "analysis": analysis,
+                "analysis": translated_analysis,
             },
             metadata={},
         )
 
-        return GenerateFormFieldsResponse(fields=fields, description_analysis=analysis)
+        return GenerateFormFieldsResponse(
+            fields=fields, description_analysis=translated_analysis
+        )
 
     except Exception as e:
         print(f"Error generating form fields: {e}")

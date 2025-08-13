@@ -24,6 +24,7 @@ from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from app.services.translation import translate_text_if_needed
 from app.services.retrievers import (
     create_ensemble_retriever,
 )  # Import the ensemble retriever
@@ -848,6 +849,12 @@ async def process_rag_checklist(
                             },
                         )
                         print(f"Got answer: {answer[:100]}...")
+
+                        # Translate the answer if needed
+                        answer = await translate_text_if_needed(
+                            answer, session, current_user, llm
+                        )
+
                     except Exception as answer_error:
                         print(f"Error generating answer for question: {answer_error}")
                         answer = f"Error generating answer: {str(answer_error)}"
@@ -907,6 +914,12 @@ async def process_rag_checklist(
                     llm, final_prompt_template, {"qa_pairs": qa_pairs_text}
                 )
                 print(f"Got final evaluation: {final_evaluation[:100]}...")
+
+                # Translate the final evaluation if needed
+                final_evaluation = await translate_text_if_needed(
+                    final_evaluation, session, current_user, llm
+                )
+
             except Exception as final_eval_error:
                 print(f"Error generating final evaluation: {final_eval_error}")
                 final_evaluation = (

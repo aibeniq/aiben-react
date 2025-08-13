@@ -37,6 +37,7 @@ from app.models import (
 )
 from app.core.config import settings
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from app.services.translation import translate_text_if_needed
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.retrievers import create_ensemble_retriever
@@ -332,6 +333,11 @@ async def compare_documents(
 
                     synthesized_result = invoke_llm(llm, synthesis_prompt, {})
 
+                    # Translate the synthesized result if needed
+                    synthesized_result = await translate_text_if_needed(
+                        synthesized_result, session, current_user, llm
+                    )
+
                     topic_analysis.append(
                         {
                             "topic": topic,
@@ -370,6 +376,11 @@ async def compare_documents(
                             "doc1_name": document1.filename,
                             "doc2_name": document2.filename,
                         },
+                    )
+
+                    # Translate the topic result if needed
+                    topic_result = await translate_text_if_needed(
+                        topic_result, session, current_user, llm
                     )
 
                     topic_analysis.append({"topic": topic, "analysis": topic_result})
@@ -416,6 +427,12 @@ async def compare_documents(
 
             try:
                 summary = invoke_llm(llm, summary_prompt, {})
+
+                # Translate the summary if needed
+                summary = await translate_text_if_needed(
+                    summary, session, current_user, llm
+                )
+
             except Exception as e:
                 summary = f"Summary generation error: {str(e)}\n\nPlease refer to the individual topic analyses below for detailed insights."
         else:
@@ -430,6 +447,11 @@ async def compare_documents(
                     "doc2_name": document2.filename,
                     "topics": request.comparison_topics,
                 },
+            )
+
+            # Translate the summary if needed
+            summary = await translate_text_if_needed(
+                summary, session, current_user, llm
             )
 
         # Record this interaction for history

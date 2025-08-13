@@ -40,6 +40,7 @@ from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from app.services.translation import translate_text_if_needed
 from app.services.retrievers import (
     create_ensemble_retriever,
 )  # Import the ensemble retriever
@@ -290,7 +291,10 @@ async def generate_report(
                                     "question": section_description,
                                 },
                             )
-                            section_content = synthesized_answer
+                            # Translate the synthesized answer if needed
+                            section_content = translate_text_if_needed(
+                                synthesized_answer, current_user.preferred_language
+                            )
 
                             # Create source citations from all sources used in full text scan
                             source_citations = []
@@ -388,7 +392,10 @@ async def generate_report(
                             },
                         )
 
-                        section_content = synthesized_answer
+                        # Translate the synthesized answer if needed
+                        section_content = translate_text_if_needed(
+                            synthesized_answer, current_user.preferred_language
+                        )
 
                         # Extract source citations from search results
                         source_citations = []
@@ -1553,7 +1560,10 @@ async def optimize_outline(
                                     "question": section_description,
                                 },
                             )
-                            generated_content = synthesized_answer
+                            # Translate the synthesized answer if needed
+                            generated_content = translate_text_if_needed(
+                                synthesized_answer, current_user.preferred_language
+                            )
 
                         print(
                             f"Generated {len(generated_content)} characters for section using full text scan"
@@ -1598,6 +1608,10 @@ async def optimize_outline(
                             llm,
                             settings.REPORT_GENIE_PROMPT_TEMPLATE,
                             template_vars,
+                        )
+                        # Translate the generated content if needed
+                        generated_content = translate_text_if_needed(
+                            generated_content, current_user.preferred_language
                         )
                         print(
                             f"Generated {len(generated_content)} characters for section using vector search"
