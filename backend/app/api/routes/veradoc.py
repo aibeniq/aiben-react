@@ -249,7 +249,7 @@ async def process_rag_checklist(
     session: SessionDep,
     current_user: CurrentUser,
     request_data: RagChecklistRequest = Depends(),
-    files: List[UploadFile] = File(...),
+    files: List[UploadFile] = File(None),
     handwritten_files: List[UploadFile] = File(None),
     request: FastAPIRequest = None,
 ):
@@ -269,7 +269,11 @@ async def process_rag_checklist(
     if not request_data.questions or not request_data.questions.strip():
         raise HTTPException(status_code=400, detail="Questions are required")
 
-    if not files or len(files) == 0:
+    # Check for at least one file in either files or handwritten_files
+    total_files = (len(files) if files else 0) + (
+        len(handwritten_files) if handwritten_files else 0
+    )
+    if total_files == 0:
         raise HTTPException(status_code=400, detail="At least one file is required")
 
     # Validate search mode
@@ -583,13 +587,27 @@ async def process_rag_checklist(
                     if q.strip()
                 ]
 
-            # Get file content
-            if not files or len(files) == 0:
+            # Get file content - process both regular and handwritten files
+            all_files_to_process = []
+
+            # Add regular files
+            if files:
+                for file in files:
+                    all_files_to_process.append((file, "digitized"))
+
+            # Add handwritten files
+            if handwritten_files:
+                for file in handwritten_files:
+                    all_files_to_process.append((file, "handwritten"))
+
+            if not all_files_to_process:
                 raise HTTPException(
                     status_code=400, detail="No files provided for processing"
                 )
 
-            file = files[0]  # Process the first file for now
+            # For now, process the first file (can be extended to handle multiple files)
+            file, file_type = all_files_to_process[0]
+            print(f"Processing {file_type} file: {file.filename}")
 
             try:
                 content = await file.read()
@@ -599,7 +617,13 @@ async def process_rag_checklist(
                     )
 
                 # Extract text using the extraction function
-                document_text = extract_text_from_file(content, file.filename)
+                if file_type == "handwritten":
+                    print(f"Processing handwritten file with OCR: {file.filename}")
+                    # For handwritten files, we can use the same extraction but potentially with enhanced OCR
+                    document_text = extract_text_from_file(content, file.filename)
+                else:
+                    print(f"Processing digitized file: {file.filename}")
+                    document_text = extract_text_from_file(content, file.filename)
                 if not document_text or document_text.strip() == "":
                     raise HTTPException(
                         status_code=400,
