@@ -8,6 +8,7 @@ import traceback
 import asyncio
 import os
 import markdown
+import uuid
 from pathlib import Path
 from io import BytesIO, StringIO
 from datetime import datetime
@@ -290,7 +291,22 @@ async def generate_report(
                                 },
                             )
                             section_content = synthesized_answer
-                            source_citations = []  # Add proper citations if needed
+
+                            # Create source citations from all sources used in full text scan
+                            source_citations = []
+                            for source in sources:
+                                source_citations.append(
+                                    {
+                                        "content": f"Full document scan from {source.name}",
+                                        "metadata": {
+                                            "source": source.name,
+                                            "source_data_id": str(
+                                                source.source_data_id
+                                            ),
+                                            "scan_type": "full_text",
+                                        },
+                                    }
+                                )
                         except Exception as e:
                             print(f"Error in synthesis: {e}")
                             print(
@@ -373,7 +389,31 @@ async def generate_report(
                         )
 
                         section_content = synthesized_answer
-                        source_citations = []  # Add proper citations if needed
+
+                        # Extract source citations from search results
+                        source_citations = []
+                        for doc in search_results:
+                            # Extract metadata from the document
+                            metadata = doc.metadata if hasattr(doc, "metadata") else {}
+
+                            # Create citation entry
+                            citation = {
+                                "content": (
+                                    doc.page_content[:500] + "..."
+                                    if len(doc.page_content) > 500
+                                    else doc.page_content
+                                ),
+                                "metadata": {
+                                    "source": metadata.get("source", "Unknown"),
+                                    "source_data_id": metadata.get(
+                                        "source_data_id", ""
+                                    ),
+                                    "page": metadata.get("page", ""),
+                                    "chunk_index": metadata.get("chunk_index", ""),
+                                    "scan_type": "vector_search",
+                                },
+                            }
+                            source_citations.append(citation)
             else:
                 # Use raw text directly without consulting knowledge base
                 section_content = section_description
@@ -398,6 +438,16 @@ async def generate_report(
         )
 
         result = {"full_report": full_report, "sections": sections}
+
+        # Debug logging to verify citations are being saved
+        print(f"🔍 REPORTGENIE SAVE DEBUG: Saving {len(sections)} sections")
+        for i, section in enumerate(sections):
+            citations_count = len(section.get("source_citations", []))
+            print(
+                f"🔍 Section {i+1}: '{section.get('title', 'No title')}' has {citations_count} citations"
+            )
+            if citations_count > 0:
+                print(f"🔍 Sample citation: {section['source_citations'][0]}")
 
         # Get outline name if outline_id is provided
         outline_name = None
@@ -431,15 +481,25 @@ async def generate_report(
             user_id=current_user.id,
             functionality="reportgenie",
             input_data={
-                "sections": sections,
-                "kb_id": knowledge_base_id,
+                "knowledge_base_id": knowledge_base_id,
+                "sections": sections_data,
                 "outline_id": outline_id,
+                "search_mode": search_mode,
+                "kb_name": kb.title,
             },
-            output_data={
-                "section_count": len(sections),
+            output_data=result,  # ← Use result directly, not nested under "results"
+            metadata={
+                "kb_name": kb.title,
+                "kb_id": knowledge_base_id,
+                "sections": sections_data,
+                "search_mode": search_mode,
+                "outline_id": outline_id,
+                "full_report": full_report,
+                "section_count": len(
+                    result.get("sections", [])
+                ),  # Move metrics to metadata
                 "total_length": len(full_report),
             },
-            metadata=detailed_extra_data,
         )
 
         return ReportGenieResponse(results=result)
@@ -450,6 +510,302 @@ async def generate_report(
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error generating report: {str(e)}"
+        )
+
+
+@router.get("/history", response_model=List[Dict[str, Any]])
+async def get_report_history(
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 20,
+    show_all: bool = False,
+):
+    """Retrieve past ReportGenie generation history for the current user or all users."""
+    print("Retrieving ReportGenie history. Show all:", show_all)
+
+    try:
+        # Start with base query
+        query = select(LlmInteraction).where(
+            LlmInteraction.functionality == "reportgenie"
+        )
+
+        # Only filter by user if not showing all users
+        if not show_all:
+            query = query.where(LlmInteraction.user_id == current_user.id)
+
+        # Add ordering and pagination
+        interactions = session.exec(
+            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
+        ).all()
+
+        result = []
+        for interaction in interactions:
+            try:
+                # Safe parsing of JSON fields with better error handling
+                input_data = {}
+                output_data = {}
+                metadata = {}
+
+                # Parse input_data safely
+                if interaction.input_data:
+                    if isinstance(interaction.input_data, str):
+                        input_data = json.loads(interaction.input_data)
+                    elif isinstance(interaction.input_data, dict):
+                        input_data = interaction.input_data
+                    else:
+                        print(
+                            f"Unexpected input_data type: {type(interaction.input_data)}"
+                        )
+                        input_data = {}
+
+                # Parse output_data safely
+                if interaction.output_data:
+                    if isinstance(interaction.output_data, str):
+                        output_data = json.loads(interaction.output_data)
+                    elif isinstance(interaction.output_data, dict):
+                        output_data = interaction.output_data
+                    else:
+                        print(
+                            f"Unexpected output_data type: {type(interaction.output_data)}"
+                        )
+                        output_data = {}
+
+                # Parse metadata safely with enhanced error handling
+                if interaction.metadata:
+                    if isinstance(interaction.metadata, str):
+                        metadata = json.loads(interaction.metadata)
+                    elif isinstance(interaction.metadata, dict):
+                        metadata = interaction.metadata
+                    else:
+                        # Handle the MetaData object case
+                        print(f"Metadata is of type: {type(interaction.metadata)}")
+                        if hasattr(interaction.metadata, "__dict__"):
+                            # Convert object to dict if possible
+                            metadata = interaction.metadata.__dict__
+                        else:
+                            # Try to serialize it as string and then parse
+                            try:
+                                metadata_str = str(interaction.metadata)
+                                if metadata_str.startswith(
+                                    "{"
+                                ) and metadata_str.endswith("}"):
+                                    metadata = json.loads(metadata_str)
+                                else:
+                                    metadata = {}
+                            except:
+                                print(
+                                    f"Failed to parse metadata: {interaction.metadata}"
+                                )
+                                metadata = {}
+
+                # Handle sections data - ensure it's always a string for API response
+                sections_data = input_data.get("sections", "")
+                if not isinstance(sections_data, str):
+                    sections_data = json.dumps(sections_data) if sections_data else ""
+
+                # Create result item with proper field names for archive display
+                result_item = {
+                    "id": str(interaction.id),
+                    "date_created": interaction.date_created,
+                    "knowledge_base_id": input_data.get("knowledge_base_id", ""),
+                    "sections": sections_data,
+                    "kb_name": metadata.get(
+                        "kb_name", input_data.get("kb_name", "Unknown")
+                    ),
+                    "outline_id": input_data.get("outline_id", ""),
+                    "search_mode": input_data.get("search_mode", "vector"),
+                    "full_report": metadata.get(
+                        "full_report", output_data.get("full_report", "")
+                    ),
+                    "section_count": output_data.get("section_count", 0),
+                    "total_length": output_data.get("total_length", 0),
+                    "has_feedback": interaction.feedback is not None,
+                }
+
+                # Add feedback information if exists
+                if interaction.feedback:
+                    result_item["feedback"] = {
+                        "feedback": interaction.feedback,
+                        "feedbackText": interaction.feedback_text,
+                        "feedbackDate": interaction.feedback_date,
+                    }
+
+                # Add user info for all-users view
+                if show_all:
+                    from app.models import User  # Import here to avoid circular imports
+
+                    user = session.get(User, interaction.user_id)
+                    user_name = (
+                        f"{user.full_name or 'User'} ({user.email})"
+                        if user
+                        else "Unknown User"
+                    )
+                    result_item["user_name"] = user_name
+
+                result.append(result_item)
+
+            except json.JSONDecodeError:
+                # Handle legacy entries or malformed JSON
+                result_item = {
+                    "id": str(interaction.id),
+                    "date_created": interaction.date_created,
+                    "knowledge_base_id": "",
+                    "sections": "",
+                    "kb_name": "Unknown",
+                    "outline_id": "",
+                    "search_mode": "vector",
+                    "full_report": "",
+                    "section_count": 0,
+                    "total_length": 0,
+                    "has_feedback": interaction.feedback is not None,
+                }
+
+                # Add user info for all-users view
+                if show_all:
+                    from app.models import User
+
+                    user = session.get(User, interaction.user_id)
+                    user_name = (
+                        f"{user.full_name or 'User'} ({user.email})"
+                        if user
+                        else "Unknown User"
+                    )
+                    result_item["user_name"] = user_name
+
+                result.append(result_item)
+
+        return result
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error retrieving ReportGenie history: {str(e)}",
+        )
+
+
+@router.get("/detail/{report_id}", response_model=Dict[str, Any])
+async def get_report_detail(
+    report_id: str,
+    session: SessionDep,
+    current_user: CurrentUser,
+):
+    """Retrieve a specific ReportGenie report's full content by ID."""
+    try:
+        # Convert string ID to UUID for database query
+        interaction_id = uuid.UUID(report_id)
+
+        # Get the specific interaction
+        interaction = session.exec(
+            select(LlmInteraction)
+            .where(LlmInteraction.id == interaction_id)
+            .where(LlmInteraction.functionality == "reportgenie")
+            .where(LlmInteraction.user_id == current_user.id)
+        ).first()
+
+        if not interaction:
+            raise HTTPException(status_code=404, detail="Report not found")
+
+        # Safe parsing of JSON fields with better error handling
+        input_data = {}
+        output_data = {}
+        metadata = {}
+
+        # Parse input_data safely
+        if interaction.input_data:
+            if isinstance(interaction.input_data, str):
+                input_data = json.loads(interaction.input_data)
+            elif isinstance(interaction.input_data, dict):
+                input_data = interaction.input_data
+            else:
+                print(f"Unexpected input_data type: {type(interaction.input_data)}")
+                input_data = {}
+
+        # Parse output_data safely
+        if interaction.output_data:
+            if isinstance(interaction.output_data, str):
+                output_data = json.loads(interaction.output_data)
+            elif isinstance(interaction.output_data, dict):
+                output_data = interaction.output_data
+            else:
+                print(f"Unexpected output_data type: {type(interaction.output_data)}")
+                output_data = {}
+
+        # Parse metadata safely with enhanced error handling
+        if interaction.metadata:
+            if isinstance(interaction.metadata, str):
+                metadata = json.loads(interaction.metadata)
+            elif isinstance(interaction.metadata, dict):
+                metadata = interaction.metadata
+            else:
+                # Handle the MetaData object case
+                print(f"Metadata is of type: {type(interaction.metadata)}")
+                if hasattr(interaction.metadata, "__dict__"):
+                    # Convert object to dict if possible
+                    metadata = interaction.metadata.__dict__
+                else:
+                    # Try to serialize it as string and then parse
+                    try:
+                        metadata_str = str(interaction.metadata)
+                        if metadata_str.startswith("{") and metadata_str.endswith("}"):
+                            metadata = json.loads(metadata_str)
+                        else:
+                            metadata = {}
+                    except:
+                        print(f"Failed to parse metadata: {interaction.metadata}")
+                        metadata = {}
+
+        # Handle sections data - ensure it's always a string for API response
+        sections_data = input_data.get("sections", "")
+        if not isinstance(sections_data, str):
+            sections_data = json.dumps(sections_data) if sections_data else ""
+
+        result_data = {
+            "id": str(interaction.id),
+            "date_created": interaction.date_created,
+            "knowledge_base_id": input_data.get("knowledge_base_id", ""),
+            "sections": sections_data,
+            "kb_name": metadata.get("kb_name", input_data.get("kb_name", "Unknown")),
+            "outline_id": input_data.get("outline_id", ""),
+            "search_mode": input_data.get("search_mode", "vector"),
+            "full_report": metadata.get(
+                "full_report", output_data.get("full_report", "")
+            ),
+            "results": output_data,
+            "section_count": output_data.get("section_count", 0),
+            "total_length": output_data.get("total_length", 0),
+            "has_feedback": interaction.feedback is not None,
+        }
+
+        # Debug logging for citation retrieval
+        sections_with_citations = output_data.get("sections", [])
+        if sections_with_citations:
+            print(
+                f"🔍 REPORTGENIE RETRIEVE DEBUG: Retrieved {len(sections_with_citations)} sections"
+            )
+            for i, section in enumerate(sections_with_citations):
+                if isinstance(section, dict):
+                    citations_count = len(section.get("source_citations", []))
+                    print(
+                        f"🔍 Retrieved Section {i+1}: '{section.get('title', 'No title')}' has {citations_count} citations"
+                    )
+        else:
+            print("🔍 REPORTGENIE RETRIEVE DEBUG: No sections found in output_data")
+
+        return result_data
+
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid report ID format")
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error retrieving report detail: {str(e)}",
         )
 
 

@@ -5,6 +5,7 @@ import {
   VeradocService,
   TwincheckService,
   FormconnectService,
+  ReportgenieService,
 } from "../client"
 import useCustomToast from "./useCustomToast"
 
@@ -92,20 +93,23 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     enabled: true,
   })
 
-  // ReportGenie history query - currently not available in the API
+  // ReportGenie history query
   const reportgenieHistoryQuery = useQuery({
     queryKey: ["reportgenieHistory", showAllUsers],
     queryFn: async () => {
-      // TODO: Implement getReportHistory method in ReportgenieService
-      // const response = await ReportgenieService.getReportHistory({ 
-      //   limit: 20,
-      //   showAll: showAllUsers 
-      // })
-      // return response
-      console.warn("ReportGenie history not available - method not implemented")
-      return { data: [], total: 0 }
+      console.log("🔄 REPORTGENIE: Starting to fetch history, showAllUsers:", showAllUsers);
+      const response = await ReportgenieService.getReportHistory({ 
+        limit: 20,
+        showAll: showAllUsers 
+      })
+      console.log("✅ REPORTGENIE: History fetch completed, response:", response);
+      console.log("📊 REPORTGENIE: Number of reports returned:", Array.isArray(response) ? response.length : "Response is not an array");
+      if (Array.isArray(response) && response.length > 0) {
+        console.log("📋 REPORTGENIE: First report sample:", response[0]);
+      }
+      return response
     },
-    enabled: false, // Disabled until backend method is available
+    enabled: true, // Enabled now that backend method is available
   })
 
   // TwinCheck history query
@@ -143,10 +147,16 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   }, [veradocHistoryQuery.data, veradocHistoryQuery.isLoading])
 
   useEffect(() => {
+    console.log("🔄 REPORTGENIE: useEffect triggered for reportgenieHistoryQuery");
+    console.log("📊 REPORTGENIE: Query status - isLoading:", reportgenieHistoryQuery.isLoading, "isError:", reportgenieHistoryQuery.isError, "error:", reportgenieHistoryQuery.error);
+    
     if (reportgenieHistoryQuery.data) {
+      console.log("✅ REPORTGENIE: Setting history data:", reportgenieHistoryQuery.data);
       setReportgenieHistory(
         Array.isArray(reportgenieHistoryQuery.data) ? reportgenieHistoryQuery.data : [],
       )
+    } else {
+      console.log("❌ REPORTGENIE: No data received or data is null/undefined");
     }
     setIsReportgenieLoading(reportgenieHistoryQuery.isLoading)
   }, [reportgenieHistoryQuery.data, reportgenieHistoryQuery.isLoading])
@@ -187,11 +197,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const loadReportgenieReport = async (reportId: string) => {
     try {
       setIsReportgenieLoading(true)
-      // TODO: Implement getReportDetail method in ReportgenieService
-      // const report = await ReportgenieService.getReportDetail({ reportId })
-      // setSelectedReportgenieReport(report)
-      console.warn("ReportGenie report detail not available - method not implemented, reportId:", reportId)
-      showErrorToast("ReportGenie report loading not available")
+      const report = await ReportgenieService.getReportDetail({ reportId })
+      setSelectedReportgenieReport(report)
+      showSuccessToast("Report loaded successfully")
     } catch (error) {
       console.error("Error loading report:", error)
       showErrorToast("Failed to load report")
