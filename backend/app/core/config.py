@@ -383,12 +383,14 @@ class Settings(BaseSettings):
     
     Diff output:
     {diff_text}
+    {knowledge_base_context}
     
     Please analyze how these documents differ specifically regarding: "{topic}"
     
     Provide a clear, detailed analysis of the differences between the two documents regarding this topic.
     Refer to specific sections of the documents where relevant differences exist.
     If there are no differences related to this topic, state that clearly.
+    If reference context was provided, use it to inform your analysis and provide additional insights.
     """
 
     TWINCHECK_SUMMARY_PROMPT_TEMPLATE: str = """
