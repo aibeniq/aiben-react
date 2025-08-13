@@ -41,9 +41,9 @@ const ChatbotMain = () => {
     setIsOpen(true)
   }
 
-  const handleDrawerOpenChange = (details: { open: boolean }) => {
-    console.log("🎯 Drawer state changed:", details.open)
-    setIsOpen(details.open)
+  const handleCloseChat = () => {
+    console.log("🔒 Closing chat drawer")
+    setIsOpen(false)
   }
 
   // Add escape key handler as emergency fallback
@@ -212,38 +212,59 @@ const ChatbotMain = () => {
     }
   }
 
+  // Defensive: always neutralize any drawer backdrops so chat panel is never dimmed
+  useEffect(() => {
+    if (isOpen) {
+      // Find the drawer content and ensure it's fully opaque
+      const drawerContent = document.querySelector('[data-scope="drawer"][data-part="content"]')
+      if (drawerContent) {
+        const contentEl = drawerContent as HTMLElement
+        contentEl.style.opacity = "1"
+        contentEl.style.backgroundColor = "white"
+        contentEl.style.position = "relative"
+        contentEl.style.zIndex = "9001"
+      }
+    }
+  }, [isOpen])
+
   return (
     <>
-      {/* Only show floating button when drawer is closed */}
       {!isOpen && <FloatingChatButton onClick={handleOpenChat} />}
-
-      <Drawer.Root open={isOpen} onOpenChange={handleDrawerOpenChange} placement="end" size="md">
-        <Drawer.Backdrop />
-        <Drawer.Positioner>
-          <Drawer.Content>
-            <ChatbotPanel
-              isOpen={isOpen}
-              messages={messages}
-              question={question}
-              setQuestion={setQuestion}
-              isLoading={isLoading}
-              messagesEndRef={messagesEndRef}
-              selectedKbId={selectedKbId}
-              setSelectedKbId={setSelectedKbId}
-              uploadedFiles={uploadedFiles}
-              setUploadedFiles={setUploadedFiles}
-              setCurrentKbId={setCurrentKbId}
-              setCurrentFileNames={setCurrentFileNames}
-              showKnowledgeBaseModal={showKnowledgeBaseModal}
-              setShowKnowledgeBaseModal={setShowKnowledgeBaseModal}
-              clearChat={clearChat}
-              handleSendMessage={handleSendMessage}
-              searchMode={searchMode}
-              setSearchMode={setSearchMode}
-            />
-          </Drawer.Content>
-        </Drawer.Positioner>
-      </Drawer.Root>
+      {isOpen && (
+        <Drawer.Root
+          open={isOpen}
+          onOpenChange={({ open }) => !open && handleCloseChat()}
+          placement="end"
+          size="md"
+        >
+          {/* Use the built-in Drawer.Backdrop but with custom styling */}
+          <Drawer.Backdrop />
+          <Drawer.Positioner>
+            <Drawer.Content>
+              <ChatbotPanel
+                isOpen={isOpen}
+                messages={messages}
+                question={question}
+                setQuestion={setQuestion}
+                isLoading={isLoading}
+                messagesEndRef={messagesEndRef}
+                selectedKbId={selectedKbId}
+                setSelectedKbId={setSelectedKbId}
+                uploadedFiles={uploadedFiles}
+                setUploadedFiles={setUploadedFiles}
+                setCurrentKbId={setCurrentKbId}
+                setCurrentFileNames={setCurrentFileNames}
+                showKnowledgeBaseModal={showKnowledgeBaseModal}
+                setShowKnowledgeBaseModal={setShowKnowledgeBaseModal}
+                clearChat={clearChat}
+                handleSendMessage={handleSendMessage}
+                searchMode={searchMode}
+                setSearchMode={setSearchMode}
+              />
+            </Drawer.Content>
+          </Drawer.Positioner>
+        </Drawer.Root>
+      )}
     </>
   )
 }

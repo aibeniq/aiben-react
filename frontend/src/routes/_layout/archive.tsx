@@ -1,3 +1,5 @@
+console.log("🚨 TIMESTAMP CHECK:", new Date().toISOString())
+
 import BaseResultsContainer from "../../components/Archive/BaseResultsContainer"
 import ToolTab from "../../components/Archive/ToolTab"
 import VeradocResults from "../../components/Archive/Results/VeradocResults"
@@ -20,6 +22,8 @@ export const Route = createFileRoute("/_layout/archive")({
 })
 
 function Archive() {
+  console.log("🏠 Archive component is rendering!")
+
   const {
     veradoc,
     reportgenie,
@@ -467,6 +471,20 @@ function Archive() {
           </Tabs.Content>
 
           <Tabs.Content value="generate">
+            {(() => {
+              console.log("🎯 GENERATE TAB: Rendering tab content")
+              console.log("📊 GENERATE TAB: reportgenie.history:", reportgenie.history)
+              console.log(
+                "📊 GENERATE TAB: reportgenie.history length:",
+                reportgenie.history?.length,
+              )
+              console.log("📊 GENERATE TAB: reportgenie.isLoading:", reportgenie.isLoading)
+              console.log(
+                "📊 GENERATE TAB: reportgenie.selectedReport:",
+                reportgenie.selectedReport,
+              )
+              return null
+            })()}
             <ToolTab
               reportHistory={reportgenie.history}
               selectedHistoryReport={reportgenie.selectedReport}
