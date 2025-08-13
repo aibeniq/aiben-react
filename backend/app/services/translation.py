@@ -14,7 +14,7 @@ def get_translation_prompt(text: str, target_language: str) -> str:
     language_map = {
         # Major European Languages
         "en": "English",
-        "es": "Spanish",
+        "es": "Spanish (Europe)",
         "fr": "French",
         "de": "German",
         "it": "Italian",
@@ -58,7 +58,7 @@ def get_translation_prompt(text: str, target_language: str) -> str:
         "sw": "Swahili",
         # Regional Variants
         "pt-BR": "Portuguese (Brazil)",
-        "es-MX": "Spanish (Mexico)",
+        "es-LATAM": "Spanish (Latin America)",
     }
 
     target_language_name = language_map.get(target_language, target_language)
@@ -134,7 +134,7 @@ def get_supported_languages() -> dict:
     return {
         # Major European Languages
         "en": "English",
-        "es": "Spanish",
+        "es": "Spanish (Europe)",
         "fr": "French",
         "de": "German",
         "it": "Italian",
@@ -178,7 +178,7 @@ def get_supported_languages() -> dict:
         "sw": "Swahili",
         # Regional Variants
         "pt-BR": "Portuguese (Brazil)",
-        "es-MX": "Spanish (Mexico)",
+        "es-LATAM": "Spanish (Latin America)",
     }
 
 

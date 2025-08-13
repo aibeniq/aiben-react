@@ -568,6 +568,8 @@ class LlmInteraction(SQLModel, table=True):
 # Request model for TwinCheck
 class TwinCheckRequest(SQLModel):
     comparison_topics: str
+    knowledge_base_id: Optional[int] = None
+    search_mode: Optional[str] = "vector"
 
 
 # Response model for TwinCheck

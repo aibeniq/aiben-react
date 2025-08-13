@@ -288,6 +288,70 @@ async def compare_documents(
 
             print(f"Processing topic: {topic}")
 
+            # Get knowledge base context and citations for this topic if knowledge_base_id is provided
+            topic_context = ""
+            source_citations = []
+
+            if hasattr(request, "knowledge_base_id") and request.knowledge_base_id:
+                try:
+                    print(f"Retrieving knowledge base context for topic: {topic}")
+
+                    # Get the knowledge base and embedding model
+                    kb_statement = select(KnowledgeBase).where(
+                        KnowledgeBase.id == request.knowledge_base_id,
+                        KnowledgeBase.owner_id == current_user.id,
+                    )
+                    knowledge_base = session.exec(kb_statement).first()
+
+                    if knowledge_base:
+                        embedding_model = get_embedding_model(
+                            session, knowledge_base.embedding_model_id
+                        )
+                        embeddings = load_embeddings_model(embedding_model)
+
+                        # Create retriever
+                        retriever = create_ensemble_retriever(
+                            session, knowledge_base.id, embeddings, current_user.id
+                        )
+
+                        # Retrieve relevant documents for this topic
+                        search_mode = getattr(request, "search_mode", "vector")
+                        query = f"{topic} - document comparison analysis"
+
+                        relevant_docs = retriever.get_relevant_documents(query)
+
+                        if relevant_docs:
+                            # Prepare context from retrieved documents
+                            topic_context = "\n\n".join(
+                                [doc.page_content for doc in relevant_docs[:3]]
+                            )  # Limit to top 3
+
+                            # Create source citations
+                            for doc in relevant_docs[:3]:
+                                source_citations.append(
+                                    {
+                                        "content": (
+                                            doc.page_content[:200] + "..."
+                                            if len(doc.page_content) > 200
+                                            else doc.page_content
+                                        ),
+                                        "metadata": doc.metadata,
+                                    }
+                                )
+
+                            print(
+                                f"Retrieved {len(relevant_docs)} documents for topic: {topic}"
+                            )
+                        else:
+                            print(f"No relevant documents found for topic: {topic}")
+
+                except Exception as e:
+                    print(
+                        f"Error retrieving knowledge base context for topic '{topic}': {str(e)}"
+                    )
+                    topic_context = ""
+                    source_citations = []
+
             if is_chunked:
                 # Process each chunk for this topic
                 chunk_results = []
@@ -298,15 +362,26 @@ async def compare_documents(
                     )
 
                     try:
+                        # Prepare enhanced prompt with knowledge base context
+                        prompt_variables = {
+                            "diff_text": chunk,
+                            "topic": topic,
+                            "doc1_name": document1.filename,
+                            "doc2_name": document2.filename,
+                        }
+
+                        # Add knowledge base context if available
+                        if topic_context:
+                            prompt_variables["knowledge_base_context"] = (
+                                f"\n\nRELEVANT REFERENCE CONTEXT:\n{topic_context}\n\nUse this reference context to inform your analysis, but focus on comparing the two uploaded documents."
+                            )
+                        else:
+                            prompt_variables["knowledge_base_context"] = ""
+
                         chunk_result = invoke_llm(
                             llm,
                             settings.TWINCHECK_ANALYSIS_PROMPT_TEMPLATE,
-                            {
-                                "diff_text": chunk,
-                                "topic": topic,
-                                "doc1_name": document1.filename,
-                                "doc2_name": document2.filename,
-                            },
+                            prompt_variables,
                         )
 
                         chunk_results.append(
@@ -343,6 +418,7 @@ async def compare_documents(
                             "topic": topic,
                             "analysis": synthesized_result,
                             "chunk_count": len(diff_chunks),
+                            "source_citations": source_citations,
                         }
                     )
 
@@ -362,20 +438,32 @@ async def compare_documents(
                             "analysis": combined_analysis,
                             "chunk_count": len(diff_chunks),
                             "synthesis_error": str(e),
+                            "source_citations": source_citations,
                         }
                     )
             else:
                 # Single chunk processing (original behavior)
                 try:
+                    # Prepare enhanced prompt with knowledge base context
+                    prompt_variables = {
+                        "diff_text": diff_text,
+                        "topic": topic,
+                        "doc1_name": document1.filename,
+                        "doc2_name": document2.filename,
+                    }
+
+                    # Add knowledge base context if available
+                    if topic_context:
+                        prompt_variables["knowledge_base_context"] = (
+                            f"\n\nRELEVANT REFERENCE CONTEXT:\n{topic_context}\n\nUse this reference context to inform your analysis, but focus on comparing the two uploaded documents."
+                        )
+                    else:
+                        prompt_variables["knowledge_base_context"] = ""
+
                     topic_result = invoke_llm(
                         llm,
                         settings.TWINCHECK_ANALYSIS_PROMPT_TEMPLATE,
-                        {
-                            "diff_text": diff_text,
-                            "topic": topic,
-                            "doc1_name": document1.filename,
-                            "doc2_name": document2.filename,
-                        },
+                        prompt_variables,
                     )
 
                     # Translate the topic result if needed
@@ -383,13 +471,20 @@ async def compare_documents(
                         topic_result, session, current_user, llm
                     )
 
-                    topic_analysis.append({"topic": topic, "analysis": topic_result})
+                    topic_analysis.append(
+                        {
+                            "topic": topic,
+                            "analysis": topic_result,
+                            "source_citations": source_citations,
+                        }
+                    )
 
                 except Exception as e:
                     topic_analysis.append(
                         {
                             "topic": topic,
                             "analysis": f"Error analyzing this topic: {str(e)}",
+                            "source_citations": source_citations,
                         }
                     )
 
@@ -463,6 +558,8 @@ async def compare_documents(
                 "comparison_topics": request.comparison_topics,
                 "document1_name": document1.filename,
                 "document2_name": document2.filename,
+                "knowledge_base_id": getattr(request, "knowledge_base_id", None),
+                "search_mode": getattr(request, "search_mode", "vector"),
             },
             output_data={"summary": summary, "topic_count": len(topic_analysis)},
             metadata={

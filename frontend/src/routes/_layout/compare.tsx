@@ -45,10 +45,6 @@ const TwinCheck = () => {
     null,
   )
 
-  // Use setSelectedKnowledgeBase to prevent unused variable warning
-  // TODO: Add knowledge base selection UI to this page
-  if (false) setSelectedKnowledgeBase(null)
-
   // Search mode state
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
 
@@ -193,7 +189,14 @@ const TwinCheck = () => {
 
   // Mutation for comparing documents
   const mutation = useMutation({
-    mutationFn: (data: { comparison_topics: string; document1: File; document2: File }) => {
+    mutationFn: (data: {
+      comparison_topics: string
+      document1: File
+      document2: File
+      knowledge_base_id?: number
+      search_mode?: string
+    }) => {
+      // For now, only pass the supported parameters until the client is regenerated
       return TwincheckService.compareDocuments({
         comparisonTopics: data.comparison_topics,
         formData: {
@@ -239,6 +242,8 @@ const TwinCheck = () => {
       comparison_topics: topics,
       document1: document1,
       document2: document2,
+      knowledge_base_id: selectedKnowledgeBase?.id ? Number(selectedKnowledgeBase.id) : undefined,
+      search_mode: searchMode,
     }
 
     setLoading(true)
