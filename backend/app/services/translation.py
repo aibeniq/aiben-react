@@ -12,12 +12,53 @@ def get_translation_prompt(text: str, target_language: str) -> str:
     Create a translation prompt for the LLM.
     """
     language_map = {
+        # Major European Languages
         "en": "English",
-        "fi": "Finnish",
+        "es": "Spanish",
+        "fr": "French",
         "de": "German",
-        "pl": "Polish",
+        "it": "Italian",
+        "pt": "Portuguese",
         "ru": "Russian",
+        "uk": "Ukrainian",
+        "pl": "Polish",
+        "nl": "Dutch",
+        "sv": "Swedish",
+        "no": "Norwegian",
+        "da": "Danish",
+        "fi": "Finnish",
+        "cs": "Czech",
+        "sk": "Slovak",
+        "hu": "Hungarian",
+        "ro": "Romanian",
+        "bg": "Bulgarian",
+        "hr": "Croatian",
+        "sr": "Serbian",
+        "sl": "Slovenian",
+        "et": "Estonian",
+        "lv": "Latvian",
+        "lt": "Lithuanian",
+        "el": "Greek",
+        # Asian Languages
+        "zh": "Chinese (Simplified)",
+        "zh-TW": "Chinese (Traditional)",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "hi": "Hindi",
+        "th": "Thai",
+        "vi": "Vietnamese",
+        "id": "Indonesian",
+        "ms": "Malay",
+        "tl": "Filipino",
+        # Middle Eastern & African Languages
         "ar": "Arabic",
+        "he": "Hebrew",
+        "fa": "Persian (Farsi)",
+        "tr": "Turkish",
+        "sw": "Swahili",
+        # Regional Variants
+        "pt-BR": "Portuguese (Brazil)",
+        "es-MX": "Spanish (Mexico)",
     }
 
     target_language_name = language_map.get(target_language, target_language)
@@ -91,12 +132,53 @@ def get_supported_languages() -> dict:
         Dictionary mapping language codes to language names
     """
     return {
+        # Major European Languages
         "en": "English",
-        "fi": "Finnish",
+        "es": "Spanish",
+        "fr": "French",
         "de": "German",
-        "pl": "Polish",
+        "it": "Italian",
+        "pt": "Portuguese",
         "ru": "Russian",
+        "uk": "Ukrainian",
+        "pl": "Polish",
+        "nl": "Dutch",
+        "sv": "Swedish",
+        "no": "Norwegian",
+        "da": "Danish",
+        "fi": "Finnish",
+        "cs": "Czech",
+        "sk": "Slovak",
+        "hu": "Hungarian",
+        "ro": "Romanian",
+        "bg": "Bulgarian",
+        "hr": "Croatian",
+        "sr": "Serbian",
+        "sl": "Slovenian",
+        "et": "Estonian",
+        "lv": "Latvian",
+        "lt": "Lithuanian",
+        "el": "Greek",
+        # Asian Languages
+        "zh": "Chinese (Simplified)",
+        "zh-TW": "Chinese (Traditional)",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "hi": "Hindi",
+        "th": "Thai",
+        "vi": "Vietnamese",
+        "id": "Indonesian",
+        "ms": "Malay",
+        "tl": "Filipino",
+        # Middle Eastern & African Languages
         "ar": "Arabic",
+        "he": "Hebrew",
+        "fa": "Persian (Farsi)",
+        "tr": "Turkish",
+        "sw": "Swahili",
+        # Regional Variants
+        "pt-BR": "Portuguese (Brazil)",
+        "es-MX": "Spanish (Mexico)",
     }
 
 

@@ -782,6 +782,12 @@ async def process_rag_checklist(
                                 {"context": context, "question": question_text},
                             )
                             print(f"Got context: {question_context[:100]}...")
+
+                            # Translate the question context if needed
+                            question_context = await translate_text_if_needed(
+                                question_context, session, current_user, llm
+                            )
+
                         except Exception as context_error:
                             print(
                                 f"Error generating context for question: {context_error}"
@@ -789,9 +795,17 @@ async def process_rag_checklist(
                             question_context = (
                                 f"Error generating context: {str(context_error)}"
                             )
+                            # Translate the error message if needed
+                            question_context = await translate_text_if_needed(
+                                question_context, session, current_user, llm
+                            )
                     else:
                         # Skip knowledge base consultation - use empty context and citations
                         question_context = "No policy context consultation requested for this question."
+                        # Translate the fallback message if needed
+                        question_context = await translate_text_if_needed(
+                            question_context, session, current_user, llm
+                        )
                         source_citations = []
                         print(
                             f"Skipping document consultation for question: {question_text[:50]}..."
@@ -1441,6 +1455,11 @@ async def optimize_checklist(
                     llm,
                     context_prompt_template,
                     {"context": context, "question": question},
+                )
+
+                # Translate the question context if needed
+                question_context = await translate_text_if_needed(
+                    question_context, session, current_user, llm
                 )
 
                 # Prepare custom instructions section if provided
