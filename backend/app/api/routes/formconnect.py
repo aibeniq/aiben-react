@@ -698,13 +698,20 @@ async def process_form(
             "extracted_data": extracted_results,
         }
 
-    record_llm_interaction(
+    interaction_id = record_llm_interaction(
         session=session,
         user_id=current_user.id,
         functionality="formconnect",
         input_data={"fields": fields, "files": file_names, "search_mode": search_mode},
         output_data=result,
         metadata={"file_count": total_files},
+    )
+
+    print(f"[DEBUG] FormConnect interaction_id returned: {interaction_id}")
+    # Add interaction_id to the result
+    result["interaction_id"] = str(interaction_id) if interaction_id else None
+    print(
+        f"[DEBUG] FormConnect result with interaction_id: {result.get('interaction_id')}"
     )
 
     # Return the comparison results as a dictionary

@@ -14,6 +14,7 @@ import useCustomToast from "@/hooks/useCustomToast"
 import SourceLink from "@/components/Common/SourceLink"
 import DownloadButton from "@/components/ui/download-button"
 import SearchModeToggle from "@/components/Common/SearchModeToggle"
+import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import { useState, useEffect } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
@@ -58,6 +59,7 @@ const ReportGenie = () => {
   const [sectionResults, setSectionResults] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [expandedSection, setExpandedSection] = useState<number | null>(null)
+  const [interactionId, setInteractionId] = useState<string | null>(null)
 
   // Search mode state
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector") // Default to vector search
@@ -81,6 +83,12 @@ const ReportGenie = () => {
   const isCitationExpanded = (sectionIndex: number, citationIndex: number) => {
     const citationKey = `${sectionIndex}-${citationIndex}`
     return expandedCitations[citationKey] || false
+  }
+
+  // Handle feedback submission
+  const handleFeedbackSubmitted = (type: string) => {
+    console.log("Feedback submitted for generate result:", type)
+    showSuccessToast(`Thank you for marking this response as ${type}!`)
   }
 
   const handleCopyDocument = async () => {
@@ -274,8 +282,11 @@ const ReportGenie = () => {
       })
     },
     onSuccess: (data: any) => {
+      console.log("Generate Response data:", data)
+      console.log("Generate interaction_id:", data.results.interaction_id)
       setGeneratedDocument(data.results.full_report)
       setSectionResults(data.results.sections || [])
+      setInteractionId(data.results.interaction_id as string | null)
     },
     onError: (error: any) => {
       showErrorToast(`Failed to generate document: ${error.message}`)
@@ -718,6 +729,44 @@ const ReportGenie = () => {
                         ))}
                       </Box>
                     )}
+
+                    {/* Add feedback buttons for the generated document */}
+                    {interactionId ? (
+                      <Box
+                        position="sticky"
+                        bottom={4}
+                        right={4}
+                        display="flex"
+                        justifyContent="flex-end"
+                        pointerEvents="auto"
+                        zIndex={10}
+                        mt={4}
+                      >
+                        <FeedbackButtons
+                          interactionId={interactionId}
+                          onFeedbackSubmitted={handleFeedbackSubmitted}
+                        />
+                      </Box>
+                    ) : (
+                      <Box
+                        position="sticky"
+                        bottom={4}
+                        right={4}
+                        display="flex"
+                        justifyContent="flex-end"
+                        pointerEvents="auto"
+                        zIndex={10}
+                        mt={4}
+                        bg="yellow.100"
+                        p={2}
+                        borderRadius="md"
+                      >
+                        <Text fontSize="sm" color="red.600">
+                          Debug: No interaction ID found
+                        </Text>
+                      </Box>
+                    )}
+                    {console.log("Generate interactionId for feedback:", interactionId)}
                   </>
                 ) : (
                   <Text color="gray.500">

@@ -17,6 +17,7 @@ import SourceLink from "@/components/Common/SourceLink"
 import FileUpload, { FileItem } from "@/components/Common/FileUpload"
 import SearchModeToggle from "@/components/Common/SearchModeToggle"
 import DownloadButton from "@/components/ui/download-button"
+import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import { useState, useEffect, useRef } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
@@ -62,7 +63,7 @@ const VeraDoc = () => {
   const [fileItems, setFileItems] = useState<FileItem[]>([])
 
   const [results, setResults] = useState<
-    Array<{ filename: string; displayResults: string; qaPairs: any[] }>
+    Array<{ filename: string; displayResults: string; qaPairs: any[]; interactionId?: string }>
   >([])
   const [loading, setLoading] = useState<boolean>(false)
   const [activeTab, setActiveTab] = useState<number>(0)
@@ -93,6 +94,12 @@ const VeraDoc = () => {
   const isCitationExpanded = (resultIndex: number, pairIndex: number, citationIndex: number) => {
     const citationKey = `${resultIndex}-${pairIndex}-${citationIndex}`
     return expandedCitations[citationKey] || false
+  }
+
+  // Handle feedback submission
+  const handleFeedbackSubmitted = (type: string) => {
+    console.log("Feedback submitted for review result:", type)
+    showSuccessToast(`Thank you for marking this response as ${type}!`)
   }
 
   // Reset active tab when results change
@@ -366,6 +373,7 @@ const VeraDoc = () => {
         filename: data.results.filename,
         displayResults: data.results.final_evaluation || "",
         qaPairs: (data.results.qa_pairs as any[]) || [],
+        interactionId: data.results.interaction_id as string | undefined,
       }
 
       setResults([singleResult])
@@ -511,6 +519,7 @@ const VeraDoc = () => {
         filename: string
         displayResults: string
         qaPairs: any[]
+        interactionId?: string
       }> = []
 
       // Process each file individually
@@ -560,6 +569,7 @@ const VeraDoc = () => {
           filename: fileItem.file.name,
           displayResults,
           qaPairs: (response.results.qa_pairs as any[]) || [],
+          interactionId: response.results.interaction_id as string | undefined,
         })
 
         // Update your state for batch results
@@ -614,7 +624,7 @@ const VeraDoc = () => {
 
   // Function to render results content
   const renderResultsContent = (
-    result: { displayResults: string; qaPairs: any[] },
+    result: { displayResults: string; qaPairs: any[]; interactionId?: string },
     resultIndex: number,
   ) => (
     <Box key={resultIndex}>
@@ -963,6 +973,25 @@ const VeraDoc = () => {
                         </Tabs.Content>
                       ))}
                     </Tabs.Root>
+
+                    {/* Add feedback buttons for the active result */}
+                    {results[activeTab]?.interactionId && (
+                      <Box
+                        position="sticky"
+                        bottom={4}
+                        right={4}
+                        display="flex"
+                        justifyContent="flex-end"
+                        pointerEvents="auto"
+                        zIndex={10}
+                        mt={4}
+                      >
+                        <FeedbackButtons
+                          interactionId={results[activeTab].interactionId}
+                          onFeedbackSubmitted={handleFeedbackSubmitted}
+                        />
+                      </Box>
+                    )}
                   </>
                 ) : (
                   <Text color="gray.500">Results will appear here after running.</Text>

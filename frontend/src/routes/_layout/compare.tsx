@@ -19,6 +19,7 @@ import SelectionCard from "@/components/Common/SelectionCard"
 import SelectionModal from "@/components/Common/SelectionModal"
 import TopicListTable from "@/components/Compare/TopicListTable"
 import SearchModeToggle from "@/components/Common/SearchModeToggle"
+import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 
 const TwinCheck = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -56,6 +57,13 @@ const TwinCheck = () => {
   const [topicResults, setTopicResults] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [expandedTopic, setExpandedTopic] = useState<number | null>(null)
+  const [interactionId, setInteractionId] = useState<string | null>(null)
+
+  // Handle feedback submission
+  const handleFeedbackSubmitted = (type: string) => {
+    console.log("Feedback submitted for compare result:", type)
+    showSuccessToast(`Thank you for marking this response as ${type}!`)
+  }
 
   // Function to copy report to clipboard
   const handleCopyReport = async () => {
@@ -199,6 +207,7 @@ const TwinCheck = () => {
 
       setSummary(data.results.summary || "")
       setTopicResults(data.results.topic_analysis || [])
+      setInteractionId(data.results.interaction_id as string | null)
     },
     onError: (error: any) => {
       console.log("Comparison failed!")
@@ -493,6 +502,25 @@ const TwinCheck = () => {
                             )}
                           </Box>
                         ))}
+                      </Box>
+                    )}
+
+                    {/* Add feedback buttons for the comparison result */}
+                    {interactionId && (
+                      <Box
+                        position="sticky"
+                        bottom={4}
+                        right={4}
+                        display="flex"
+                        justifyContent="flex-end"
+                        pointerEvents="auto"
+                        zIndex={10}
+                        mt={4}
+                      >
+                        <FeedbackButtons
+                          interactionId={interactionId}
+                          onFeedbackSubmitted={handleFeedbackSubmitted}
+                        />
                       </Box>
                     )}
                   </>
