@@ -129,10 +129,16 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const formconnectHistoryQuery = useQuery({
     queryKey: ["formconnectHistory", showAllUsers],
     queryFn: async () => {
+      console.log("🔄 FORMCONNECT: Starting to fetch history, showAllUsers:", showAllUsers);
       const response = await FormconnectService.getFormHistory({ 
         limit: 20,
         showAll: showAllUsers 
       })
+      console.log("✅ FORMCONNECT: History fetch completed, response:", response);
+      console.log("📊 FORMCONNECT: Number of records returned:", Array.isArray(response) ? response.length : "Response is not an array");
+      if (Array.isArray(response) && response.length > 0) {
+        console.log("📋 FORMCONNECT: First record sample:", response[0]);
+      }
       return response
     },
     enabled: true,
@@ -171,10 +177,19 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   }, [twincheckHistoryQuery.data, twincheckHistoryQuery.isLoading])
 
   useEffect(() => {
+    console.log("🔄 FORMCONNECT: useEffect triggered for formconnectHistoryQuery");
+    console.log("📊 FORMCONNECT: Query status - isLoading:", formconnectHistoryQuery.isLoading, "isError:", formconnectHistoryQuery.isError);
+    if (formconnectHistoryQuery.error) {
+      console.log("❌ FORMCONNECT: Error:", formconnectHistoryQuery.error);
+    }
+    
     if (formconnectHistoryQuery.data) {
+      console.log("✅ FORMCONNECT: Setting history data:", formconnectHistoryQuery.data);
       setFormconnectHistory(
         Array.isArray(formconnectHistoryQuery.data) ? formconnectHistoryQuery.data : [],
       )
+    } else {
+      console.log("❌ FORMCONNECT: No data received or data is null/undefined");
     }
     setIsFormconnectLoading(formconnectHistoryQuery.isLoading)
   }, [formconnectHistoryQuery.data, formconnectHistoryQuery.isLoading])
