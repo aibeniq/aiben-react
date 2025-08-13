@@ -737,6 +737,12 @@ export type FormconnectGenerateFormFieldsJsonData = {
 
 export type FormconnectGenerateFormFieldsJsonResponse = (GenerateFormFieldsResponse);
 
+export type FormconnectGenerateDocxData = {
+    requestBody: DocxRequest;
+};
+
+export type FormconnectGenerateDocxResponse = (unknown);
+
 export type ItemsReadItemsData = {
     limit?: number;
     skip?: number;

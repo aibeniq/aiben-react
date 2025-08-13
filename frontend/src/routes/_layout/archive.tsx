@@ -13,7 +13,12 @@ import { Box, Container, VStack, Tabs } from "@chakra-ui/react"
 import { FiCheckCircle, FiFilePlus } from "react-icons/fi"
 import { FaBalanceScale } from "react-icons/fa"
 import { TbPlugConnected } from "react-icons/tb"
-import { VeradocService, ReportgenieService, TwincheckService } from "../../client"
+import {
+  VeradocService,
+  ReportgenieService,
+  TwincheckService,
+  FormconnectService,
+} from "../../client"
 import { useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 
@@ -133,9 +138,15 @@ function Archive() {
           requestBody: { content: fullText },
         })
       } else if (activeTab === "match" && formconnect.selectedReport) {
-        // FormConnect doesn't have generateDocx, show error message
-        showErrorToast("Download functionality is not available for Form Processing results")
-        return
+        // Prepare combined text from FormConnect results
+        fullText =
+          formconnect.selectedReport.results?.comparison ||
+          formconnect.selectedReport.results?.message ||
+          ""
+
+        response = await FormconnectService.generateDocx({
+          requestBody: { content: fullText },
+        })
       }
 
       if (!response) return

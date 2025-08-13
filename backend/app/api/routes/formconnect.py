@@ -2,7 +2,15 @@ import uuid
 import json
 import tempfile
 import os
+import markdown
 from pathlib import Path
+from io import BytesIO, StringIO
+from datetime import datetime
+from fastapi.responses import StreamingResponse
+from docx import Document
+from docx.shared import Inches
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from bs4 import BeautifulSoup
 from app.models import (
     FormConnectRequest,
     FormConnectResponse,
@@ -10,6 +18,7 @@ from app.models import (
     FormConnectDetailResponse,
     GenerateFormFieldsRequest,
     GenerateFormFieldsResponse,
+    DocxRequest,
     LlmInteraction,
     Message,
     KnowledgeBase,
@@ -1156,3 +1165,175 @@ async def generate_form_fields_json(
     """
     # This is the same as generate_form_fields but ensures JSON request/response
     return await generate_form_fields(session, current_user, request)
+
+
+@router.post("/generate/docx", response_class=StreamingResponse)
+async def generate_docx(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a DOCX file from the FormConnect results content.
+    Handles markdown tables with extra care for proper rendering.
+    """
+    print("Now generating DOCX of FormConnect results...")
+    try:
+        # Get the markdown content from the request
+        if not request.content:
+            raise HTTPException(
+                status_code=400, detail="FormConnect content is required"
+            )
+
+        # Convert markdown to HTML for parsing with tables extension
+        html_content = markdown.markdown(
+            request.content, extensions=["tables", "extra"]
+        )
+        soup = BeautifulSoup(html_content, "html.parser")
+
+        print("Markdown content converted to HTML successfully.")
+        # Create a new Document
+        doc = Document()
+
+        print("Adding title and date to the document...")
+        # Add a title
+        title_text = (
+            request.title
+            if hasattr(request, "title") and request.title
+            else "FormConnect Results"
+        )
+        title = doc.add_heading(title_text, level=0)
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        # Add date
+        date_paragraph = doc.add_paragraph()
+        date_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        date_run = date_paragraph.add_run(
+            f"Generated on: {datetime.now().strftime('%B %d, %Y')}"
+        )
+        date_run.italic = True
+
+        # Add a separator
+        doc.add_paragraph("─" * 50)
+
+        print("Processing content elements with special attention to tables...")
+        # Process each element in the soup
+        for element in soup.find_all():
+            if element.name == "h1":
+                doc.add_heading(element.get_text().strip(), level=1)
+            elif element.name == "h2":
+                doc.add_heading(element.get_text().strip(), level=2)
+            elif element.name == "h3":
+                doc.add_heading(element.get_text().strip(), level=3)
+            elif element.name == "h4":
+                doc.add_heading(element.get_text().strip(), level=4)
+            elif element.name == "p":
+                text = element.get_text().strip()
+                if text:  # Only add non-empty paragraphs
+                    paragraph = doc.add_paragraph(text)
+
+            elif element.name == "table":
+                # Handle tables with extra care for FormConnect markdown tables
+                rows = element.find_all("tr")
+                if rows:
+                    print(f"Adding table with {len(rows)} rows...")
+
+                    # Count maximum columns across all rows
+                    max_cols = 0
+                    for row in rows:
+                        cells = row.find_all(["th", "td"])
+                        max_cols = max(max_cols, len(cells))
+
+                    if max_cols > 0:
+                        table = doc.add_table(rows=len(rows), cols=max_cols)
+                        table.style = "Table Grid"
+
+                        # Set consistent column widths
+                        for col in table.columns:
+                            col.width = Inches(6.0 / max_cols)
+
+                        for i, row in enumerate(rows):
+                            cells = row.find_all(["th", "td"])
+                            for j, cell in enumerate(cells):
+                                if j < len(table.rows[i].cells):
+                                    cell_text = cell.get_text().strip()
+                                    table.rows[i].cells[j].text = cell_text
+
+                                    # Make header row bold and centered
+                                    if i == 0 or cell.name == "th":
+                                        for paragraph in (
+                                            table.rows[i].cells[j].paragraphs
+                                        ):
+                                            paragraph.alignment = (
+                                                WD_ALIGN_PARAGRAPH.CENTER
+                                            )
+                                            for run in paragraph.runs:
+                                                run.bold = True
+
+                                    # Handle cell alignment for data rows
+                                    elif (
+                                        cell_text.isdigit()
+                                        or cell_text.replace(".", "")
+                                        .replace("-", "")
+                                        .isdigit()
+                                    ):
+                                        # Right-align numeric content
+                                        for paragraph in (
+                                            table.rows[i].cells[j].paragraphs
+                                        ):
+                                            paragraph.alignment = (
+                                                WD_ALIGN_PARAGRAPH.RIGHT
+                                            )
+
+            elif element.name == "ul":
+                # Handle unordered lists
+                for li in element.find_all("li", recursive=False):
+                    text = li.get_text().strip()
+                    if text:
+                        paragraph = doc.add_paragraph(text, style="List Bullet")
+
+            elif element.name == "ol":
+                # Handle ordered lists
+                for li in element.find_all("li", recursive=False):
+                    text = li.get_text().strip()
+                    if text:
+                        paragraph = doc.add_paragraph(text, style="List Number")
+
+        print("Saving the document to a BytesIO object...")
+        # Save the document to a BytesIO object
+        doc_io = BytesIO()
+        doc.save(doc_io)
+        doc_io.seek(0)
+
+        # Create filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"formconnect_results_{timestamp}.docx"
+
+        print(f"DOCX file size: {len(doc_io.getvalue())} bytes")
+
+        # Verify the document can be opened (basic integrity check)
+        doc_io.seek(0)
+        try:
+            test_doc = Document(doc_io)
+            print("DOCX file passed integrity check (can be opened by python-docx).")
+        except Exception as e:
+            print(f"DOCX integrity check failed: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Generated DOCX file is corrupted: {str(e)}"
+            )
+
+        doc_io.seek(0)
+        print(
+            "Document saved successfully. Preparing to return as a downloadable file."
+        )
+
+        # Return the document as a downloadable file
+        return StreamingResponse(
+            doc_io,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
