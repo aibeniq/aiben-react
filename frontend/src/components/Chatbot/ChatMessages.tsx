@@ -138,6 +138,15 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                                     color="blue.600"
                                     useModal={true}
                                   />
+                                ) : source.metadata.source.toLowerCase().endsWith(".docx") ? (
+                                  <SourceLink
+                                    sourceId="" // Empty sourceId, will be handled by filename fallback
+                                    fileName={getDisplayFileName(source.metadata.source)}
+                                    ml={1}
+                                    fontWeight="normal"
+                                    color="blue.600"
+                                    useModal={true}
+                                  />
                                 ) : (
                                   <Text as="span" ml={1} fontWeight="normal" color="blue.600">
                                     {getDisplayFileName(source.metadata.source)}

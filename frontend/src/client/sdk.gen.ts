@@ -375,6 +375,56 @@ export class FilesService {
         });
     }
     
+    /**
+     * Convert DOCX to PDF
+     * Convert a DOCX source file to PDF on-demand.
+     * Only works with DOCX files that the user has access to.
+     * @param data The data for the request.
+     * @param data.sourceId
+     * @returns Blob PDF file content
+     * @throws ApiError
+     */
+    public static convertDocxToPdf(data: FilesGetSourceContentData): CancelablePromise<Blob> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/files/source/{source_id}/pdf',
+            path: {
+                source_id: data.sourceId
+            },
+            responseType: 'blob',
+            errors: {
+                400: 'Bad Request - File is not a DOCX document',
+                404: 'Not Found - Source file not found',
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Convert DOCX to PDF by filename
+     * Convert a DOCX source file to PDF on-demand using filename.
+     * Only works with DOCX files that the user has access to.
+     * @param data The data for the request.
+     * @param data.filename
+     * @returns Blob PDF file content
+     * @throws ApiError
+     */
+    public static convertDocxToPdfByFilename(data: { filename: string }): CancelablePromise<Blob> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/files/source/by-filename/{filename}/pdf',
+            path: {
+                filename: data.filename
+            },
+            responseType: 'blob',
+            errors: {
+                400: 'Bad Request - File is not a DOCX document',
+                404: 'Not Found - Source file not found or access denied',
+                422: 'Validation Error'
+            }
+        });
+    }
+    
 }
 
 export class FormconnectService {
