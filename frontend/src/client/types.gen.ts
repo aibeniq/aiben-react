@@ -947,6 +947,12 @@ export type ReportgenieGenerateOutlineOptimizationCsvData = {
 
 export type ReportgenieGenerateOutlineOptimizationCsvResponse = (unknown);
 
+export type ReportgenieGenerateDocxData = {
+    requestBody: DocxRequest;
+};
+
+export type ReportgenieGenerateDocxResponse = (unknown);
+
 export type TwincheckCompareDocumentsData = {
     comparisonTopics: string;
     formData: Body_twincheck_compare_documents;
