@@ -292,8 +292,8 @@ async def generate_report(
                                 },
                             )
                             # Translate the synthesized answer if needed
-                            section_content = translate_text_if_needed(
-                                synthesized_answer, current_user.preferred_language
+                            section_content = await translate_text_if_needed(
+                                synthesized_answer, session, current_user, llm
                             )
 
                             # Create source citations from all sources used in full text scan
@@ -393,8 +393,8 @@ async def generate_report(
                         )
 
                         # Translate the synthesized answer if needed
-                        section_content = translate_text_if_needed(
-                            synthesized_answer, current_user.preferred_language
+                        section_content = await translate_text_if_needed(
+                            synthesized_answer, session, current_user, llm
                         )
 
                         # Extract source citations from search results
@@ -1561,8 +1561,8 @@ async def optimize_outline(
                                 },
                             )
                             # Translate the synthesized answer if needed
-                            generated_content = translate_text_if_needed(
-                                synthesized_answer, current_user.preferred_language
+                            generated_content = await translate_text_if_needed(
+                                synthesized_answer, session, current_user, llm
                             )
 
                         print(
@@ -1610,8 +1610,8 @@ async def optimize_outline(
                             template_vars,
                         )
                         # Translate the generated content if needed
-                        generated_content = translate_text_if_needed(
-                            generated_content, current_user.preferred_language
+                        generated_content = await translate_text_if_needed(
+                            generated_content, session, current_user, llm
                         )
                         print(
                             f"Generated {len(generated_content)} characters for section using vector search"

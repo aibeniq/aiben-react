@@ -571,7 +571,7 @@ async def extract_fields_from_handwritten_document(
 
 
 async def compare_multiple_documents(
-    documents: List[Dict[str, str]], file_names: List[str], llm, current_user
+    documents: List[Dict[str, str]], file_names: List[str], llm, current_user, session
 ) -> str:
     """
     Compare fields across multiple documents using the LLM.
@@ -619,8 +619,8 @@ Format your response in markdown with clear tables and analysis."""
     }
     response = invoke_llm(llm, enhanced_prompt_template, variables)
     # Translate the response if needed
-    translated_response = translate_text_if_needed(
-        response, current_user.preferred_language
+    translated_response = await translate_text_if_needed(
+        response, session, current_user, llm
     )
     return translated_response
 
@@ -722,7 +722,7 @@ async def process_form(
     else:
         # Compare the extracted fields
         comparison_result = await compare_multiple_documents(
-            extracted_results, file_names, llm, current_user
+            extracted_results, file_names, llm, current_user, session
         )
         result = {
             "message": "Documents compared successfully",
@@ -1190,8 +1190,8 @@ async def generate_form_fields(
                 analysis += " with knowledge base reference."
 
         # Translate the analysis if needed
-        translated_analysis = translate_text_if_needed(
-            analysis, current_user.preferred_language
+        translated_analysis = await translate_text_if_needed(
+            analysis, session, current_user, llm
         )
 
         # Record the interaction
