@@ -420,9 +420,25 @@ const ChecklistTable = ({
 
   const handleCopyChecklist = async (checklist: VeraDocChecklist) => {
     try {
+      // Generate a unique name with numbered copies
+      const generateUniqueName = (baseName: string): string => {
+        let copyName = `${baseName} (Copy)`
+        let copyNumber = 2
+
+        // Keep checking and incrementing until we find a unique name
+        while (checklists.some((existing) => existing.name === copyName)) {
+          copyName = `${baseName} (Copy ${copyNumber})`
+          copyNumber++
+        }
+
+        return copyName
+      }
+
+      const uniqueName = generateUniqueName(checklist.name || "Untitled")
+
       await VeradocService.createChecklist({
         requestBody: {
-          name: `${checklist.name} (Copy)`,
+          name: uniqueName,
           description: checklist.description || "",
           questions: checklist.questions || "",
           owner_id: checklist.owner_id || "",

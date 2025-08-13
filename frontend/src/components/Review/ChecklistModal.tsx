@@ -403,7 +403,7 @@ const ChecklistModal = ({
                     </VStack>
 
                     {/* Right Column - Questions List */}
-                    <VStack align="stretch" gap={4} flex={1}>
+                    <VStack align="stretch" gap={4} flex={1} height="100%">
                       {/* Generate and Optimize buttons above questions */}
                       <HStack justify="space-between" align="center">
                         <Text fontSize="md" fontWeight="medium">
@@ -450,7 +450,7 @@ const ChecklistModal = ({
                       </HStack>
 
                       {/* Questions List */}
-                      <Box>
+                      <Box flex={1} minH={0}>
                         <VStack gap={3} align="stretch" maxH="400px" overflow="auto">
                           {questionsList.map((question, index) => (
                             <QuestionItem
