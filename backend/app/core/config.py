@@ -137,13 +137,13 @@ class Settings(BaseSettings):
 
     # LLM Templates
     REPORT_GENIE_PROMPT_TEMPLATE: str = """
-    You are drafting an Informed Consent Form for a clinical study.
+    You are drafting a document.
     
     DRAFT OF REPORT SO FAR:
     {report_draft}
 
     TASK:
-    You will be shown some reference information and then asked to write a clear and comprehensive section for a research participation consent form. 
+    You will be shown some reference information and then asked to write a clear and comprehensive section of this document based on the description below. 
     
     The section to create is: {question}
 
@@ -287,6 +287,7 @@ class Settings(BaseSettings):
     ONLY return the Markdown table -- do NOT return any other text. 
     Also, do NOT add tick marks like ``` and the label 'markdown': just give the actual markdown table content as raw text.
     However, if there are no discrepancies, please state that all fields match across documents.
+    IF A FIELD ENTRY WASN'T FOUND FOR A GIVEN DOCUMENT, SAY SO EXPLICITLY.
     """
 
     FORMCONNECT_GENERATE_FIELDS_PROMPT_TEMPLATE: str = """
