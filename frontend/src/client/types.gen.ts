@@ -959,6 +959,12 @@ export type ReportgenieGenerateDocxData = {
 
 export type ReportgenieGenerateDocxResponse = (unknown);
 
+export type ReportgenieGenerateCsvData = {
+    requestBody: DocxRequest;
+};
+
+export type ReportgenieGenerateCsvResponse = (unknown);
+
 export type TwincheckCompareDocumentsData = {
     comparisonTopics: string;
     formData: Body_twincheck_compare_documents;
