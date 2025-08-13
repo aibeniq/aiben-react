@@ -28,13 +28,24 @@ const LanguageSettings: React.FC = () => {
 
   const updateLanguage = useMutation({
     mutationFn: async (language: string) => {
+      // Get the auth token from localStorage
+      const token = localStorage.getItem("access_token")
+      const headers: any = {
+        "Content-Type": "application/json",
+      }
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`
+      }
+
       // We need to make a direct API call using the PUT method since the generated client
       // doesn't have the correct endpoint
-      return fetch("/api/v1/users/me/language", {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
+      const apiUrl = `${baseUrl}/api/v1/users/me/language`
+
+      return fetch(apiUrl, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({ preferred_language: language }),
       }).then((response) => {
         if (!response.ok) {
