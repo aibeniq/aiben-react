@@ -680,6 +680,20 @@ const ReportGenie = () => {
                                                       color="blue.600"
                                                       useModal={true}
                                                     />
+                                                  ) : citation.metadata?.source &&
+                                                    citation.metadata.source
+                                                      .toLowerCase()
+                                                      .endsWith(".docx") ? (
+                                                    <SourceLink
+                                                      sourceId="" // Empty sourceId, will be handled by filename fallback
+                                                      fileName={getDisplayFileName(
+                                                        citation.metadata.source,
+                                                      )}
+                                                      ml={1}
+                                                      fontWeight="normal"
+                                                      color="blue.600"
+                                                      useModal={true}
+                                                    />
                                                   ) : (
                                                     <Text
                                                       as="span"
