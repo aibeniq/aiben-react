@@ -249,7 +249,7 @@ function Archive() {
         console.log("CSV data to send:", csvData)
         console.log("Number of sections:", csvData.sections.length)
 
-        response = await ReportgenieService.generateOutlineOptimizationCsv({
+        response = await ReportgenieService.generateCsv({
           requestBody: { content: JSON.stringify(csvData) },
         })
       } else if (activeTab === "review") {

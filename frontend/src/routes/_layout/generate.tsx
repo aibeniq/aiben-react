@@ -175,7 +175,7 @@ const ReportGenie = () => {
         sections: sectionResults,
       }
 
-      const response = await ReportgenieService.generateOutlineOptimizationCsv({
+      const response = await ReportgenieService.generateCsv({
         requestBody: { content: JSON.stringify(csvData) },
       })
 

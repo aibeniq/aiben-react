@@ -2735,3 +2735,135 @@ async def generate_docx(
 
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
+
+
+@router.post("/generate/csv", response_class=StreamingResponse)
+async def generate_csv(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a CSV file from report content with columns for:
+    Section Title, Content, Citations
+    """
+    print("Now generating CSV of report content...")
+    try:
+        # Get the content from the request
+        if not request.content:
+            raise HTTPException(status_code=400, detail="Report content is required")
+
+        # Create CSV content
+        csv_buffer = StringIO()
+        csv_writer = csv.writer(csv_buffer)
+
+        # Write header for report CSV
+        csv_writer.writerow(["Section Title", "Content", "Citations"])
+
+        try:
+            # Parse the content as JSON (report sections data)
+            data = json.loads(request.content)
+            sections = data.get("sections", [])
+
+            print(f"Processing {len(sections)} sections for CSV export...")
+
+            # Process each section
+            for section in sections:
+                title = section.get("title", "")
+                content = section.get("content", "")
+                citations = section.get("source_citations", [])
+
+                # Format citations as "filename: content | filename: content"
+                citation_texts = []
+                for citation in citations:
+                    if isinstance(citation, dict):
+                        source = citation.get("source", "unknown")
+                        citation_content = citation.get("content", "")
+                        citation_texts.append(f"{source}: {citation_content}")
+                    elif isinstance(citation, str):
+                        citation_texts.append(citation)
+
+                citations_formatted = " | ".join(citation_texts)
+
+                # Clean up text fields (remove newlines and carriage returns for CSV)
+                title_clean = (
+                    title.replace("\n", " ").replace("\r", " ").replace('"', '""')
+                )
+                content_clean = (
+                    content.replace("\n", " ").replace("\r", " ").replace('"', '""')
+                )
+                citations_clean = (
+                    citations_formatted.replace("\n", " ")
+                    .replace("\r", " ")
+                    .replace('"', '""')
+                )
+
+                # Write row
+                csv_writer.writerow([title_clean, content_clean, citations_clean])
+
+        except json.JSONDecodeError:
+            # If not JSON, treat as plain markdown content
+            print("Content is not JSON, treating as plain markdown content...")
+
+            # Split content into sections based on headers
+            lines = request.content.split("\n")
+            current_section = ""
+            current_content = []
+
+            for line in lines:
+                line = line.strip()
+                if line.startswith("#"):
+                    # Save previous section
+                    if current_section:
+                        content_text = " ".join(current_content).replace('"', '""')
+                        csv_writer.writerow(
+                            [
+                                current_section.replace('"', '""'),
+                                content_text,
+                                "",  # No citations for markdown content
+                            ]
+                        )
+
+                    # Start new section
+                    current_section = line.lstrip("#").strip()
+                    current_content = []
+                elif line:
+                    current_content.append(line)
+
+            # Save final section
+            if current_section:
+                content_text = " ".join(current_content).replace('"', '""')
+                csv_writer.writerow(
+                    [current_section.replace('"', '""'), content_text, ""]
+                )
+
+        # Prepare CSV for download
+        csv_content = csv_buffer.getvalue()
+        csv_buffer.close()
+
+        if not csv_content.strip() or csv_content.count("\n") <= 1:
+            raise HTTPException(
+                status_code=400, detail="No valid report data found to export"
+            )
+
+        print(f"CSV generated successfully with {csv_content.count(chr(10))} rows")
+
+        # Create response
+        csv_bytes = BytesIO(csv_content.encode("utf-8"))
+
+        # Create filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"report_{timestamp}.csv"
+
+        return StreamingResponse(
+            csv_bytes,
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        print(f"Error generating CSV: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating CSV: {str(e)}")
