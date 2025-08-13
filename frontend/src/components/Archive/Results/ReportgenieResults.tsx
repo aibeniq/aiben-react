@@ -174,6 +174,15 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
                                     color="blue.600"
                                     useModal={true}
                                   />
+                                ) : citation.metadata?.source &&
+                                  citation.metadata.source.toLowerCase().endsWith(".docx") ? (
+                                  <SourceLink
+                                    sourceId="" // Empty sourceId, will be handled by filename fallback
+                                    fileName={getDisplayFileName(citation.metadata.source)}
+                                    fontWeight="medium"
+                                    color="blue.600"
+                                    useModal={true}
+                                  />
                                 ) : (
                                   <Text fontWeight="medium" color="blue.600">
                                     {getDisplayFileName(
