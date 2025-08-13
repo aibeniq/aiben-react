@@ -16,8 +16,12 @@ import SelectionModal from "../../components/Common/SelectionModal"
 import FileUpload, { FileItem } from "../../components/Common/FileUpload"
 import FormTemplateTable from "../../components/Match/FormTemplateTable"
 import SearchModeToggle from "../../components/Common/SearchModeToggle"
+import FeedbackButtons from "../../components/Feedback/FeedbackButtons"
+import useCustomToast from "@/hooks/useCustomToast"
 
 const FormConnect = () => {
+  const { showSuccessToast } = useCustomToast()
+
   const [fileItems, setFileItems] = useState<FileItem[]>([])
   const [forms, setForms] = useState<FormConnectForm[]>([])
   const [selectedForm, setSelectedForm] = useState<FormConnectForm | null>(null)
@@ -29,6 +33,13 @@ const FormConnect = () => {
   const [showFormModal, setShowFormModal] = useState(false)
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
+  const [interactionId, setInteractionId] = useState<string | null>(null)
+
+  // Handle feedback submission
+  const handleFeedbackSubmitted = (type: string) => {
+    console.log("Feedback submitted for match result:", type)
+    showSuccessToast(`Thank you for marking this response as ${type}!`)
+  }
 
   const fetchKnowledgeBases = async () => {
     try {
@@ -74,7 +85,8 @@ const FormConnect = () => {
       })
     },
     onSuccess: (data) => {
-      console.log("Response data:", data)
+      console.log("Match Response data:", data)
+      console.log("Match interaction_id:", data.results.interaction_id)
       // Handle both comparison and single file responses
       if (data.results.comparison) {
         console.log("Comparison data:", data.results.comparison)
@@ -86,6 +98,7 @@ const FormConnect = () => {
       } else {
         setResults(JSON.stringify(data.results, null, 2))
       }
+      setInteractionId(data.results.interaction_id as string | null)
     },
     onError: (error: any) => {
       console.log("Mutation unsuccessful!")
@@ -236,7 +249,47 @@ const FormConnect = () => {
                   </Box>
                 )}
                 {results ? (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{results}</ReactMarkdown>
+                  <>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{results}</ReactMarkdown>
+
+                    {/* Add feedback buttons for the match result */}
+                    {interactionId ? (
+                      <Box
+                        position="sticky"
+                        bottom={4}
+                        right={4}
+                        display="flex"
+                        justifyContent="flex-end"
+                        pointerEvents="auto"
+                        zIndex={10}
+                        mt={4}
+                      >
+                        <FeedbackButtons
+                          interactionId={interactionId}
+                          onFeedbackSubmitted={handleFeedbackSubmitted}
+                        />
+                      </Box>
+                    ) : (
+                      <Box
+                        position="sticky"
+                        bottom={4}
+                        right={4}
+                        display="flex"
+                        justifyContent="flex-end"
+                        pointerEvents="auto"
+                        zIndex={10}
+                        mt={4}
+                        bg="yellow.100"
+                        p={2}
+                        borderRadius="md"
+                      >
+                        <Text fontSize="sm" color="red.600">
+                          Debug: No interaction ID found
+                        </Text>
+                      </Box>
+                    )}
+                    {console.log("Match interactionId for feedback:", interactionId)}
+                  </>
                 ) : (
                   <Text color="gray.500">Results will appear here after running.</Text>
                 )}

@@ -476,7 +476,7 @@ async def generate_report(
             "outline_name": outline_name,  # Add the outline name here
         }
 
-        record_llm_interaction(
+        interaction_id = record_llm_interaction(
             session=session,
             user_id=current_user.id,
             functionality="reportgenie",
@@ -500,6 +500,13 @@ async def generate_report(
                 ),  # Move metrics to metadata
                 "total_length": len(full_report),
             },
+        )
+
+        print(f"[DEBUG] ReportGenie interaction_id returned: {interaction_id}")
+        # Add interaction_id to the result
+        result["interaction_id"] = str(interaction_id) if interaction_id else None
+        print(
+            f"[DEBUG] ReportGenie result with interaction_id: {result.get('interaction_id')}"
         )
 
         return ReportGenieResponse(results=result)
