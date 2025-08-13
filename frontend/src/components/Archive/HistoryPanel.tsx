@@ -46,6 +46,37 @@ const HistoryPanel = ({
     if (item?.form_type) {
       return item.form_type
     }
+
+    // Enhanced FormConnect display with actual filenames
+    if (item?.digitized_files?.length > 0 || item?.handwritten_files?.length > 0) {
+      const digitized = item.digitized_files || []
+      const handwritten = item.handwritten_files || []
+      const allFiles = [...digitized, ...handwritten]
+
+      if (allFiles.length === 1) {
+        return allFiles[0]
+      } else if (allFiles.length === 2) {
+        return `${allFiles[0]} vs ${allFiles[1]}`
+      } else if (allFiles.length <= 4) {
+        return allFiles.join(", ")
+      } else {
+        return `${allFiles[0]}, ${allFiles[1]}, +${allFiles.length - 2} more`
+      }
+    }
+
+    // Fallback to the existing logic for FormConnect (for backward compatibility)
+    if (
+      item?.metadata?.digitized_files?.length > 0 ||
+      item?.metadata?.handwritten_files?.length > 0
+    ) {
+      const digitizedCount = item.metadata.digitized_files?.length || 0
+      const handwrittenCount = item.metadata.handwritten_files?.length || 0
+      const parts = []
+      if (digitizedCount > 0) parts.push(`${digitizedCount} digitized`)
+      if (handwrittenCount > 0) parts.push(`${handwrittenCount} handwritten`)
+      return parts.join(", ")
+    }
+
     return null
   }
 
@@ -58,7 +89,12 @@ const HistoryPanel = ({
       return `${item.topic_count} topic${item.topic_count !== 1 ? "s" : ""}`
     }
     if (item?.field_count > 0) {
-      return `${item.field_count} field${item.field_count !== 1 ? "s" : ""}`
+      const fieldText = `${item.field_count} field${item.field_count !== 1 ? "s" : ""}`
+      // For FormConnect, also show document count if available
+      if (item?.document_count > 0) {
+        return `${fieldText}, ${item.document_count} document${item.document_count !== 1 ? "s" : ""}`
+      }
+      return fieldText
     }
     return null
   }
@@ -191,9 +227,28 @@ const HistoryPanel = ({
                   {getSubtitle(item) && (
                     <HStack gap={1} width="100%">
                       <FiDatabase size={12} color="gray" />
-                      <Text fontSize="xs" color="gray.600" lineClamp={1}>
-                        {getSubtitle(item)}
-                      </Text>
+                      {/* Add tooltip for FormConnect files when there are many */}
+                      {item?.digitized_files?.length > 0 || item?.handwritten_files?.length > 0 ? (
+                        <Tooltip
+                          content={
+                            [...(item.digitized_files || []), ...(item.handwritten_files || [])]
+                              .length > 4
+                              ? [
+                                  ...(item.digitized_files || []),
+                                  ...(item.handwritten_files || []),
+                                ].join(", ")
+                              : undefined
+                          }
+                        >
+                          <Text fontSize="xs" color="gray.600" lineClamp={1}>
+                            {getSubtitle(item)}
+                          </Text>
+                        </Tooltip>
+                      ) : (
+                        <Text fontSize="xs" color="gray.600" lineClamp={1}>
+                          {getSubtitle(item)}
+                        </Text>
+                      )}
                     </HStack>
                   )}
                 </VStack>

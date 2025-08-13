@@ -575,21 +575,48 @@ async def compare_multiple_documents(
     """
     Compare fields across multiple documents using the LLM.
     """
-    # Create a combined representation of all documents
+    # Create a combined representation of all documents WITH ACTUAL FILENAMES
     documents_str = ""
+    clean_filenames = []
+
     for i, (doc, name) in enumerate(zip(documents, file_names)):
+        # Clean the filename (remove " (digitized)" or " (handwritten)" suffix)
+        clean_filename = name.replace(" (digitized)", "").replace(" (handwritten)", "")
+        clean_filenames.append(clean_filename)
+
         # Convert dict to string, escaping any curly braces for the formatter
         doc_str = str(doc).replace("{", "{{").replace("}", "}}")
-        documents_str += f"Document {i+1} ({name}): {doc_str}\n\n"
+        documents_str += f"Document: {clean_filename}\nExtracted Data: {doc_str}\n\n"
 
     print(
         "documents_str for comparison:", documents_str[:500]
     )  # Print first 500 chars for debugging
 
-    # Create the prompt for multi-document comparison
-    prompt_template = settings.FORMCONNECT_COMPARISON_PROMPT_TEMPLATE
-    variables = {"documents_str": documents_str}
-    response = invoke_llm(llm, prompt_template, variables)
+    # Create an enhanced prompt that explicitly instructs the LLM to use actual filenames
+    enhanced_prompt_template = """Compare the extracted fields across the following documents and provide a detailed analysis.
+
+IMPORTANT: When referring to documents in your analysis and tables, use the actual document filenames provided below, NOT generic labels like "Document 1", "Document 2", etc.
+
+Document Filenames:
+{filename_list}
+
+Documents to compare:
+{documents_str}
+
+Instructions:
+1. Create a comparison table showing field values across all documents
+2. Use the actual document filenames as column headers in any tables
+3. Identify discrepancies and highlight the most likely correct values
+4. Provide a summary of findings
+5. If creating markdown tables, use the document filenames as column headers
+
+Format your response in markdown with clear tables and analysis."""
+
+    variables = {
+        "documents_str": documents_str,
+        "filename_list": "\n".join([f"- {name}" for name in clean_filenames]),
+    }
+    response = invoke_llm(llm, enhanced_prompt_template, variables)
     return response
 
 
@@ -704,7 +731,19 @@ async def process_form(
         functionality="formconnect",
         input_data={"fields": fields, "files": file_names, "search_mode": search_mode},
         output_data=result,
-        metadata={"file_count": total_files},
+        metadata={
+            "file_count": total_files,
+            "field_count": len(field_list),
+            "document_count": total_files,
+            "digitized_files": (
+                [f.filename for f in digitized_files] if digitized_files else []
+            ),
+            "handwritten_files": (
+                [f.filename for f in handwritten_files] if handwritten_files else []
+            ),
+            "fields": field_list,
+            "search_mode": search_mode,
+        },
     )
 
     print(f"[DEBUG] FormConnect interaction_id returned: {interaction_id}")
@@ -934,6 +973,8 @@ async def get_form_history(
                     if interaction.output_data
                     else {}
                 )
+                # Fix: Use extra_data instead of metadata
+                metadata = interaction.extra_data if interaction.extra_data else {}
 
                 file_count = len(input_data.get("files", []))
                 fields = input_data.get("fields", "").split("\n")
@@ -948,6 +989,12 @@ async def get_form_history(
                     "field_count": field_count,
                     "fields": fields,
                     "has_feedback": interaction.feedback is not None,
+                    # Add metadata information for enhanced display
+                    "metadata": metadata,
+                    "digitized_files": metadata.get("digitized_files", []),
+                    "handwritten_files": metadata.get("handwritten_files", []),
+                    "document_count": metadata.get("document_count", file_count),
+                    "search_mode": metadata.get("search_mode", "unknown"),
                 }
 
                 # Add feedback information if exists
@@ -981,6 +1028,12 @@ async def get_form_history(
                     "field_count": 0,
                     "fields": [],
                     "has_feedback": interaction.feedback is not None,
+                    # Add empty metadata for consistency
+                    "metadata": {},
+                    "digitized_files": [],
+                    "handwritten_files": [],
+                    "document_count": 0,
+                    "search_mode": "unknown",
                 }
 
                 # Add user info for all-users view
