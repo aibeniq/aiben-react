@@ -1316,13 +1316,52 @@ async def optimize_checklist(
                 persist_directory=temp_dir, embedding_function=embeddings
             )
 
-            # Create retriever
-            retriever = create_ensemble_retriever(
-                chroma_db=chroma_db,
-                vector_weight=0.7,
-                keyword_weight=0.3,
-                search_kwargs={"k": settings.RAG_NUM_CHUNKS},
-            )
+            # Create retriever based on search mode
+            if request_data.search_mode == "full_scan":
+                print("Using full document scan mode for optimization")
+
+                # Create a simple retriever that returns all documents
+                class FullScanRetriever:
+                    def __init__(self, chroma_db):
+                        self.chroma_db = chroma_db
+
+                    def get_relevant_documents(self, query):
+                        try:
+                            all_data = self.chroma_db.get()
+                            documents = []
+
+                            if (
+                                all_data
+                                and "documents" in all_data
+                                and all_data["documents"]
+                            ):
+                                for i, doc_content in enumerate(all_data["documents"]):
+                                    metadata = (
+                                        all_data["metadatas"][i]
+                                        if "metadatas" in all_data
+                                        and i < len(all_data["metadatas"])
+                                        else {}
+                                    )
+                                    documents.append(
+                                        LangchainDocument(
+                                            page_content=doc_content, metadata=metadata
+                                        )
+                                    )
+
+                            return documents
+                        except Exception as e:
+                            print(f"Error in FullScanRetriever: {e}")
+                            return []
+
+                retriever = FullScanRetriever(chroma_db)
+            else:
+                print("Using vector search mode for optimization")
+                retriever = create_ensemble_retriever(
+                    chroma_db=chroma_db,
+                    vector_weight=0.7,
+                    keyword_weight=0.3,
+                    search_kwargs={"k": settings.RAG_NUM_CHUNKS},
+                )
 
             # Initialize LLM
             llm = get_default_llm(session, current_user)
