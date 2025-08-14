@@ -1190,10 +1190,12 @@ async def query_document(
                 # File is now closed and ready to be read by loaders
 
                 # Use unified document processing for all file types
-                with open(temp_path, 'rb') as f:
+                with open(temp_path, "rb") as f:
                     file_content = f.read()
-                
-                documents = extract_documents_from_file_unified(file_content, file.filename)
+
+                documents = extract_documents_from_file_unified(
+                    file_content, file.filename
+                )
 
                 # Add file source information to metadata
                 for doc in documents:
