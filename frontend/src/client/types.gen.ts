@@ -418,6 +418,25 @@ export type TextQueryResponse = {
   rephrased_question: string
 }
 
+/**
+ * Quota period information
+ */
+export type QuotaPeriod = {
+  start_time: number
+  end_time: number
+  start_date: string
+  end_date: string
+  max_tokens: number
+}
+
+/**
+ * Token usage response
+ */
+export type TokenUsageResponse = {
+  total_tokens: number
+  quota_period: QuotaPeriod
+}
+
 export type Token = {
   access_token: string
   token_type?: string
@@ -1236,3 +1255,5 @@ export type VeradocGenerateQuestionsData = {
 }
 
 export type VeradocGenerateQuestionsResponse = GenerateQuestionsResponse
+
+export type UsageGetTokenUsageResponse = TokenUsageResponse

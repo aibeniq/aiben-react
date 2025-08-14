@@ -179,6 +179,7 @@ import type {
   UtilsTestEmailData,
   UtilsTestEmailResponse,
   UtilsHealthCheckResponse,
+  UsageGetTokenUsageResponse,
   VeradocProcessRagChecklistData,
   VeradocProcessRagChecklistResponse,
   VeradocGetChecklistsResponse,
@@ -2355,6 +2356,27 @@ export class UtilsService {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/utils/health-check/",
+    })
+  }
+}
+
+export class UsageService {
+  /**
+   * Get Token Usage
+   * Get total OpenAI API token usage and current quota period information.
+   *
+   * Returns the total number of tokens consumed by the configured API key
+   * along with the current quota period details.
+   * @returns TokenUsageResponse Successful Response
+   * @throws ApiError
+   */
+  public static getTokenUsage(): CancelablePromise<UsageGetTokenUsageResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/usage/token-usage",
+      errors: {
+        422: "Validation Error",
+      },
     })
   }
 }
