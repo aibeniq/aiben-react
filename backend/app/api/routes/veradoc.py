@@ -87,78 +87,10 @@ else:
 
 
 def extract_text_from_file(file_content: bytes, filename: str) -> str:
-    """Extract text from various file formats."""
-    try:
-        # Determine file type from extension
-        file_ext = Path(filename).suffix.lower()
+    """Extract text from various file formats using unified document processing."""
+    from app.services.document_utils import extract_text_from_file_unified
 
-        if file_ext == ".pdf":
-            # Handle PDF files
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-                temp_file.write(file_content)
-                temp_file_path = temp_file.name
-            # File is now closed and ready to be read by pypdf
-
-            try:
-                documents = load_pdf_with_pypdf(temp_file_path, filename)
-                text = "\n\n".join([doc.page_content for doc in documents])
-                return text
-            finally:
-                os.unlink(temp_file_path)
-
-        elif file_ext in [".docx", ".doc"]:
-            # Handle Word documents
-            with tempfile.NamedTemporaryFile(
-                delete=False, suffix=file_ext
-            ) as temp_file:
-                temp_file.write(file_content)
-                temp_file_path = temp_file.name
-            # File is now closed and ready to be read by document processors
-
-            try:
-                if file_ext == ".docx":
-                    doc = Document(temp_file_path)
-                    text_parts = []
-                    for paragraph in doc.paragraphs:
-                        if paragraph.text.strip():
-                            text_parts.append(paragraph.text)
-
-                    # Also extract text from tables
-                    for table in doc.tables:
-                        for row in table.rows:
-                            for cell in row.cells:
-                                if cell.text.strip():
-                                    text_parts.append(cell.text)
-
-                    return "\n\n".join(text_parts)
-                else:
-                    # For .doc files, fall back to textloader
-                    loader = TextLoader(temp_file_path)
-                    documents = loader.load()
-                    return "\n\n".join([doc.page_content for doc in documents])
-            finally:
-                os.unlink(temp_file_path)
-
-        elif file_ext in [".txt", ".md"]:
-            # Handle text files
-            try:
-                return file_content.decode("utf-8")
-            except UnicodeDecodeError:
-                return file_content.decode("latin-1")
-
-        else:
-            # Try to decode as text for unknown file types
-            try:
-                return file_content.decode("utf-8")
-            except UnicodeDecodeError:
-                try:
-                    return file_content.decode("latin-1")
-                except UnicodeDecodeError:
-                    return f"Unable to extract text from {filename} - unsupported file format"
-
-    except Exception as e:
-        print(f"Error extracting text from {filename}: {e}")
-        return f"Failed to extract text from {filename}: {str(e)}"
+    return extract_text_from_file_unified(file_content, filename)
 
 
 router = APIRouter(prefix="/veradoc", tags=["veradoc"])

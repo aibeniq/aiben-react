@@ -50,86 +50,27 @@ router = APIRouter(prefix="/twincheck", tags=["twincheck"])
 
 def extract_text_from_file(file: UploadFile) -> str:
     """
-    Extract text content from uploaded files based on their type.
-    Supports PDF, DOCX, and plain text files.
+    Extract text content from uploaded files using unified document processing.
     """
-    content_type = file.content_type or mimetypes.guess_type(file.filename)[0]
-    print(f"Processing file: {file.filename} with content type: {content_type}")
+    from app.services.document_utils import extract_text_from_file_unified
 
-    # Create a temporary file to store the content
-    with tempfile.NamedTemporaryFile(
-        delete=False, suffix=f"_{file.filename}"
-    ) as temp_file:
-        # Read the file content and write to temp file
-        file_content = file.file.read()
-        if not file_content:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Uploaded file {file.filename} appears to be empty",
-            )
-        temp_file.write(file_content)
-        temp_file_path = temp_file.name
-    # File is now closed and ready to be read by other processes
+    print(f"Processing file: {file.filename}")
 
-    # Debug: Check file size
-    file_size = os.path.getsize(temp_file_path)
-    print(f"Temporary file created: {temp_file_path}, size: {file_size} bytes")
+    # Read the file content
+    file_content = file.file.read()
+    if not file_content:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Uploaded file {file.filename} appears to be empty",
+        )
 
     try:
-        # Process based on file type
-        if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
-            print("Loading PDF with PyPDF...")
-            pages = load_pdf_with_pypdf(temp_file_path, file.filename)
-            # Combine all page contents
-            text = "\n\n".join([page.page_content for page in pages])
-
-        elif (
-            content_type
-            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            or file.filename.lower().endswith(".docx")
-        ):
-            print("Loading DOCX with python-docx library...")
-            doc = docx.Document(temp_file_path)
-
-            # Extract text from paragraphs
-            paragraphs = [para.text for para in doc.paragraphs if para.text.strip()]
-
-            # Extract text from tables
-            tables_text = []
-            for table in doc.tables:
-                for row in table.rows:
-                    row_text = []
-                    for cell in row.cells:
-                        if cell.text.strip():
-                            row_text.append(cell.text.strip())
-                    if row_text:
-                        tables_text.append(" | ".join(row_text))
-
-            # Combine all text
-            text = "\n\n".join(paragraphs + tables_text)
-
-        else:
-            # Assume it's a text file
-            print("Loading as text file...")
-            # Try with different encodings
-            try:
-                with open(temp_file_path, "r", encoding="utf-8") as f:
-                    text = f.read()
-            except UnicodeDecodeError:
-                with open(temp_file_path, "r", encoding="latin-1") as f:
-                    text = f.read()
-
-        return text
-
+        return extract_text_from_file_unified(file_content, file.filename or "unknown")
     except Exception as e:
         print(f"Error processing file {file.filename}: {str(e)}")
         raise HTTPException(
             status_code=400, detail=f"Error processing file {file.filename}: {str(e)}"
         )
-    finally:
-        # Clean up the temporary file
-        if os.path.exists(temp_file_path):
-            os.unlink(temp_file_path)
 
 
 # Estimate the number of tokens in a text string.

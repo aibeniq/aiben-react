@@ -85,66 +85,11 @@ def sanitize_text_for_json(text: str) -> str:
 
 
 def extract_text_from_file(file_content: bytes, filename: str) -> str:
-    """Extract text from various file formats."""
+    """Extract text from various file formats using unified document processing."""
+    from app.services.document_utils import extract_text_from_file_unified
+
     try:
-        # Determine file type from extension
-        file_ext = Path(filename).suffix.lower()
-
-        if file_ext == ".pdf":
-            # Handle PDF files
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-                temp_file.write(file_content)
-                temp_file_path = temp_file.name
-            # File is now closed and ready to be read by pypdf
-
-            try:
-                documents = load_pdf_with_pypdf(temp_file_path, filename)
-                text = "\n\n".join([doc.page_content for doc in documents])
-                return text
-            finally:
-                os.unlink(temp_file_path)
-
-        elif file_ext in [".docx", ".doc"]:
-            # Handle Word documents
-            with tempfile.NamedTemporaryFile(
-                delete=False, suffix=file_ext
-            ) as temp_file:
-                temp_file.write(file_content)
-                temp_file_path = temp_file.name
-            # File is now closed and ready to be read by docx
-
-            try:
-                if file_ext == ".docx":
-                    doc = Document(temp_file_path)
-                    text_parts = []
-                    for paragraph in doc.paragraphs:
-                        if paragraph.text.strip():
-                            text_parts.append(paragraph.text)
-
-                    # Also extract text from tables
-                    for table in doc.tables:
-                        for row in table.rows:
-                            for cell in row.cells:
-                                if cell.text.strip():
-                                    text_parts.append(cell.text)
-
-                    return "\n\n".join(text_parts)
-                else:
-                    # For .doc files, fall back to textloader
-                    loader = TextLoader(temp_file_path)
-                    documents = loader.load()
-                    return "\n\n".join([doc.page_content for doc in documents])
-            finally:
-                os.unlink(temp_file_path)
-
-        elif file_ext == ".txt":
-            # Handle text files
-            return file_content.decode("utf-8", errors="ignore")
-
-        else:
-            # For other formats, try to decode as text
-            return file_content.decode("utf-8", errors="ignore")
-
+        return extract_text_from_file_unified(file_content, filename)
     except Exception as e:
         raise HTTPException(
             status_code=400, detail=f"Error extracting text from {filename}: {str(e)}"
