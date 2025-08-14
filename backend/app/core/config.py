@@ -422,17 +422,17 @@ class Settings(BaseSettings):
 
     # TwinCheck prompt templates
     TWINCHECK_ANALYSIS_PROMPT_TEMPLATE: str = """
-    You are comparing two documents using their diff output:
+    You are an expert document analyst comparing two documents:
     - Document 1: {doc1_name}
     - Document 2: {doc2_name}
     
-    In the diff output below:
-    - Lines starting with '- ' are in Document 1 but not in Document 2 (deletions)
-    - Lines starting with '+ ' are in Document 2 but not in Document 1 (additions)
-    - Lines starting with '? ' indicate changes in whitespace or small changes
-    - Lines with no prefix are common to both documents
+    Based on your analysis of the content below:
+    - Lines starting with '- ' represent content unique to Document 1
+    - Lines starting with '+ ' represent content unique to Document 2
+    - Lines starting with '? ' indicate formatting or minor textual variations
+    - Lines with no prefix represent shared content between both documents
     
-    Diff output:
+    Document comparison data:
     {diff_text}
     {knowledge_base_context}
     
@@ -445,25 +445,25 @@ class Settings(BaseSettings):
     """
 
     TWINCHECK_SUMMARY_PROMPT_TEMPLATE: str = """
-    You are comparing two documents using their diff output:
+    You are an expert document analyst comparing two documents:
     - Document 1: {doc1_name}
     - Document 2: {doc2_name}
     
-    In the diff output below:
-    - Lines starting with '- ' are in Document 1 but not in Document 2 (deletions)
-    - Lines starting with '+ ' are in Document 2 but not in Document 1 (additions)
-    - Lines starting with '? ' indicate changes in whitespace or small changes
-    - Lines with no prefix are common to both documents
+    Based on your analysis of the content below:
+    - Lines starting with '- ' represent content unique to Document 1
+    - Lines starting with '+ ' represent content unique to Document 2
+    - Lines starting with '? ' indicate formatting or minor textual variations
+    - Lines with no prefix represent shared content between both documents
     
-    Diff output:
+    Document comparison data:
     {diff_text}
     
     The user is particularly interested in these topics:
     {topics}
     
-    Please provide a comprehensive summary of all major differences between the two documents. 
-    Focus on structural, content, and semantic differences. 
-    Highlight the most important changes and explain their potential implications.
+    Please provide a comprehensive analysis of all significant differences between the two documents. 
+    Focus on structural, content, and semantic variations. 
+    Highlight the most important distinctions and explain their potential implications.
     Be clear, concise, and informative.
     """
 

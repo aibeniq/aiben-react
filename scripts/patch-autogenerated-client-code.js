@@ -1,7 +1,8 @@
 const fs = require("fs")
+const path = require("path")
 
 // --- Patch sdk.gen.ts ---
-const sdkPath = "./frontend/src/client/sdk.gen.ts"
+const sdkPath = path.join(__dirname, "../frontend/src/client/sdk.gen.ts")
 let sdkContent = fs.readFileSync(sdkPath, "utf8")
 
 // Define endpoints that need blob response
@@ -9,13 +10,12 @@ const blobEndpoints = [
   "/api/v1/reportgenie/generate/docx",
   "/api/v1/reportgenie/generate/csv", 
   "/api/v1/twincheck/generate/docx",
+  "/api/v1/twincheck/generate/csv",
   "/api/v1/veradoc/generate/docx",
   "/api/v1/veradoc/generate/csv",
   "/api/v1/veradoc/optimization/csv",
   "/api/v1/reportgenie/optimize-outline/csv"
-]
-
-// For each endpoint, find and patch it
+]// For each endpoint, find and patch it
 blobEndpoints.forEach(endpoint => {
   const escapedEndpoint = endpoint.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   
@@ -49,7 +49,7 @@ blobEndpoints.forEach(endpoint => {
 fs.writeFileSync(sdkPath, sdkContent)
 
 // --- Patch ApiRequestOptions.ts ---
-const apiRequestOptionsPath = "./frontend/src/client/core/ApiRequestOptions.ts"
+const apiRequestOptionsPath = path.join(__dirname, "../frontend/src/client/core/ApiRequestOptions.ts")
 let apiRequestOptionsContent = fs.readFileSync(apiRequestOptionsPath, "utf8")
 
 if (!apiRequestOptionsContent.includes('readonly responseType?:')) {
@@ -62,7 +62,7 @@ if (!apiRequestOptionsContent.includes('readonly responseType?:')) {
 fs.writeFileSync(apiRequestOptionsPath, apiRequestOptionsContent)
 
 // --- Patch request.ts ---
-const requestPath = "./frontend/src/client/core/request.ts"
+const requestPath = path.join(__dirname, "../frontend/src/client/core/request.ts")
 let requestContent = fs.readFileSync(requestPath, "utf8")
 
 if (!requestContent.includes('responseType: options.responseType')) {
