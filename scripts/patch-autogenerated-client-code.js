@@ -14,12 +14,15 @@ const blobEndpoints = [
   "/api/v1/veradoc/generate/docx",
   "/api/v1/veradoc/generate/csv",
   "/api/v1/veradoc/optimization/csv",
-  "/api/v1/reportgenie/optimize-outline/csv"
+  "/api/v1/reportgenie/optimize-outline/csv",
+  "/api/v1/formconnect/generate/docx",
+  "/api/v1/formconnect/generate/csv"
 ]// For each endpoint, find and patch it
 blobEndpoints.forEach(endpoint => {
   const escapedEndpoint = endpoint.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   
   // Find the function containing this URL and add responseType if not present
+  // Pattern 1: Standard pattern with body parameter
   const pattern = new RegExp(
     `(url: '${escapedEndpoint}',\\s*\\n\\s*body:[\\s\\S]*?mediaType: 'application/json',\\s*\\n)(\\s*)(errors: \\{)`,
     'g'
@@ -32,7 +35,20 @@ blobEndpoints.forEach(endpoint => {
     return beforeErrors + whitespace + "responseType: 'blob',\n" + whitespace + errorsStart
   })
   
-  // Also try pattern with double quotes
+  // Pattern 2: Alternative pattern with simple body reference
+  const pattern2 = new RegExp(
+    `(url: "${escapedEndpoint}",\\s*\\n\\s*body: data\\.requestBody,\\s*\\n\\s*mediaType: "application/json",\\s*\\n)(\\s*)(errors: \\{)`,
+    'g'
+  )
+  
+  sdkContent = sdkContent.replace(pattern2, (match, beforeErrors, whitespace, errorsStart) => {
+    if (match.includes("responseType:")) {
+      return match // Already patched
+    }
+    return beforeErrors + whitespace + "responseType: 'blob',\n" + whitespace + errorsStart
+  })
+  
+  // Also try pattern with double quotes for URL
   const patternDoubleQuotes = new RegExp(
     `(url: "${escapedEndpoint}",\\s*\\n\\s*body:[\\s\\S]*?mediaType: 'application/json',\\s*\\n)(\\s*)(errors: \\{)`,
     'g'

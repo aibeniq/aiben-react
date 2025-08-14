@@ -1,5 +1,6 @@
 import uuid
 import json
+import csv
 import tempfile
 import os
 import markdown
@@ -1183,7 +1184,7 @@ async def generate_docx(
         title_text = (
             request.title
             if hasattr(request, "title") and request.title
-            else "FormConnect Results"
+            else "Matching Results"
         )
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -1322,3 +1323,142 @@ async def generate_docx(
 
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
+
+
+@router.post("/generate/csv", response_class=StreamingResponse)
+async def generate_csv(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a CSV file from the FormConnect results content using LLM formatting.
+    """
+    print("Now generating CSV of FormConnect results...")
+    try:
+        # Get the content from the request
+        if not request.content:
+            raise HTTPException(status_code=400, detail="Results content is required")
+
+        # Get the default LLM for formatting
+        llm = get_default_llm(session, current_user)
+
+        # Try to parse the content as JSON first (for structured data)
+        try:
+            content_data = json.loads(request.content)
+            extracted_data = content_data.get("extracted_data", [])
+            comparison_data = content_data.get("comparison", "")
+            message_data = content_data.get("message", "")
+        except json.JSONDecodeError:
+            # If it's not JSON, treat it as raw content and use LLM to format
+            extracted_data = []
+            comparison_data = request.content
+            message_data = ""
+
+        # Create LLM prompt to format the data as CSV
+        csv_prompt_template = """You are tasked with converting FormConnect comparison results into a well-structured CSV format.
+
+Input Data:
+{input_data}
+
+Instructions:
+1. Analyze the extracted data and comparison results
+2. Create a CSV table with the following structure:
+   - First column: "Filename" (document names)
+   - Subsequent columns: Field names from the form template
+3. Each row should represent one document with its extracted field values
+4. If a field value is missing for a document, leave the cell empty
+5. Clean up any formatting issues and ensure values are CSV-safe
+6. Return ONLY the CSV content, no additional text or formatting
+
+Expected format:
+Filename,Field1,Field2,Field3,...
+Document1.pdf,Value1,Value2,Value3,...
+Document2.pdf,Value1,Value2,Value3,...
+
+Return the CSV content:"""
+
+        # Prepare the input data for the LLM
+        input_data = {
+            "extracted_data": extracted_data,
+            "comparison": comparison_data,
+            "message": message_data,
+        }
+
+        input_data_str = json.dumps(input_data, indent=2)
+
+        variables = {"input_data": input_data_str}
+
+        # Use LLM to generate the CSV content
+        print("Calling LLM to format FormConnect results as CSV...")
+        csv_content = invoke_llm(llm, csv_prompt_template, variables)
+
+        # Clean up the response - remove any markdown formatting or extra text
+        csv_content = csv_content.strip()
+        if csv_content.startswith("```csv"):
+            csv_content = csv_content[6:]
+        if csv_content.startswith("```"):
+            csv_content = csv_content[3:]
+        if csv_content.endswith("```"):
+            csv_content = csv_content[:-3]
+        csv_content = csv_content.strip()
+
+        # Ensure we have valid CSV content
+        if not csv_content or "Filename" not in csv_content:
+            # Fallback to basic formatting if LLM didn't produce good results
+            output = StringIO()
+            writer = csv.writer(output)
+
+            # Create basic headers
+            headers = ["Filename", "Field", "Value"]
+            writer.writerow(headers)
+
+            # Add extracted data if available
+            if extracted_data:
+                for i, doc_data in enumerate(extracted_data):
+                    filename = f"Document_{i+1}"
+                    if isinstance(doc_data, dict):
+                        for field_name, field_value in doc_data.items():
+                            cleaned_value = (
+                                str(field_value)
+                                .replace("\n", " ")
+                                .replace("\r", "")
+                                .replace('"', '""')
+                            )
+                            writer.writerow([filename, field_name, cleaned_value])
+
+            # Add comparison data if available
+            if comparison_data:
+                writer.writerow(
+                    [
+                        "Comparison Results",
+                        "Analysis",
+                        comparison_data.replace("\n", " ")
+                        .replace("\r", "")
+                        .replace('"', '""'),
+                    ]
+                )
+
+            csv_content = output.getvalue()
+            output.close()
+
+        # Convert to bytes
+        csv_bytes = csv_content.encode("utf-8")
+
+        # Generate timestamp for filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"formconnect_results_{timestamp}.csv"
+
+        print(
+            "CSV file generated successfully using LLM formatting. Preparing to return as a downloadable file."
+        )
+
+        return StreamingResponse(
+            BytesIO(csv_bytes),
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generating CSV: {str(e)}")
