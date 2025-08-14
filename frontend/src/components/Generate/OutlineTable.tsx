@@ -247,6 +247,8 @@ const OutlineTable = ({
     setEditingOutline(null)
     setOutlineName("")
     setOutlineDescription("")
+    // Initialize with an empty section for immediate editing
+    onSectionsChange(JSON.stringify([{ id: crypto.randomUUID(), text: "", consultDocuments: true }]))
     setIsModalOpen(true)
   }
 
@@ -299,6 +301,8 @@ const OutlineTable = ({
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setEditingOutline(null)
+    // Clear sections when closing modal to prevent stale state
+    onSectionsChange("")
   }
 
   return (
