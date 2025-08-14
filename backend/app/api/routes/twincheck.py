@@ -32,15 +32,10 @@ from app.models import (
     Message,
     GenerateTopicsRequest,
     GenerateTopicsResponse,
-    KnowledgeBase,
-    EmbeddingModel,
 )
 from app.core.config import settings
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
 from app.services.translation import translate_text_if_needed
-from app.services.knowledgebases import get_embedding_model
-from app.services.embeddings import load_embeddings_model
-from app.services.retrievers import create_ensemble_retriever
 from app.services.pdf_utils import load_pdf_with_pypdf
 
 # from langchain_community.document_loaders import PyPDFLoader  # Removed - using pypdf instead
@@ -288,69 +283,8 @@ async def compare_documents(
 
             print(f"Processing topic: {topic}")
 
-            # Get knowledge base context and citations for this topic if knowledge_base_id is provided
-            topic_context = ""
-            source_citations = []
-
-            if hasattr(request, "knowledge_base_id") and request.knowledge_base_id:
-                try:
-                    print(f"Retrieving knowledge base context for topic: {topic}")
-
-                    # Get the knowledge base and embedding model
-                    kb_statement = select(KnowledgeBase).where(
-                        KnowledgeBase.id == request.knowledge_base_id,
-                        KnowledgeBase.owner_id == current_user.id,
-                    )
-                    knowledge_base = session.exec(kb_statement).first()
-
-                    if knowledge_base:
-                        embedding_model = get_embedding_model(
-                            session, knowledge_base.embedding_model_id
-                        )
-                        embeddings = load_embeddings_model(embedding_model)
-
-                        # Create retriever
-                        retriever = create_ensemble_retriever(
-                            session, knowledge_base.id, embeddings, current_user.id
-                        )
-
-                        # Retrieve relevant documents for this topic
-                        search_mode = getattr(request, "search_mode", "vector")
-                        query = f"{topic} - document comparison analysis"
-
-                        relevant_docs = retriever.get_relevant_documents(query)
-
-                        if relevant_docs:
-                            # Prepare context from retrieved documents
-                            topic_context = "\n\n".join(
-                                [doc.page_content for doc in relevant_docs[:3]]
-                            )  # Limit to top 3
-
-                            # Create source citations
-                            for doc in relevant_docs[:3]:
-                                source_citations.append(
-                                    {
-                                        "content": (
-                                            doc.page_content[:200] + "..."
-                                            if len(doc.page_content) > 200
-                                            else doc.page_content
-                                        ),
-                                        "metadata": doc.metadata,
-                                    }
-                                )
-
-                            print(
-                                f"Retrieved {len(relevant_docs)} documents for topic: {topic}"
-                            )
-                        else:
-                            print(f"No relevant documents found for topic: {topic}")
-
-                except Exception as e:
-                    print(
-                        f"Error retrieving knowledge base context for topic '{topic}': {str(e)}"
-                    )
-                    topic_context = ""
-                    source_citations = []
+            # Simplified topic processing without Knowledge Base
+            source_citations = []  # Keep this empty array for consistency
 
             if is_chunked:
                 # Process each chunk for this topic
@@ -362,21 +296,14 @@ async def compare_documents(
                     )
 
                     try:
-                        # Prepare enhanced prompt with knowledge base context
+                        # Simplified prompt without knowledge base context
                         prompt_variables = {
                             "diff_text": chunk,
                             "topic": topic,
                             "doc1_name": document1.filename,
                             "doc2_name": document2.filename,
+                            "knowledge_base_context": "",  # Always empty
                         }
-
-                        # Add knowledge base context if available
-                        if topic_context:
-                            prompt_variables["knowledge_base_context"] = (
-                                f"\n\nRELEVANT REFERENCE CONTEXT:\n{topic_context}\n\nUse this reference context to inform your analysis, but focus on comparing the two uploaded documents."
-                            )
-                        else:
-                            prompt_variables["knowledge_base_context"] = ""
 
                         chunk_result = invoke_llm(
                             llm,
@@ -444,21 +371,14 @@ async def compare_documents(
             else:
                 # Single chunk processing (original behavior)
                 try:
-                    # Prepare enhanced prompt with knowledge base context
+                    # Simplified prompt without knowledge base context
                     prompt_variables = {
                         "diff_text": diff_text,
                         "topic": topic,
                         "doc1_name": document1.filename,
                         "doc2_name": document2.filename,
+                        "knowledge_base_context": "",  # Always empty
                     }
-
-                    # Add knowledge base context if available
-                    if topic_context:
-                        prompt_variables["knowledge_base_context"] = (
-                            f"\n\nRELEVANT REFERENCE CONTEXT:\n{topic_context}\n\nUse this reference context to inform your analysis, but focus on comparing the two uploaded documents."
-                        )
-                    else:
-                        prompt_variables["knowledge_base_context"] = ""
 
                     topic_result = invoke_llm(
                         llm,
@@ -558,8 +478,6 @@ async def compare_documents(
                 "comparison_topics": request.comparison_topics,
                 "document1_name": document1.filename,
                 "document2_name": document2.filename,
-                "knowledge_base_id": getattr(request, "knowledge_base_id", None),
-                "search_mode": getattr(request, "search_mode", "vector"),
             },
             output_data={"summary": summary, "topic_count": len(topic_analysis)},
             metadata={

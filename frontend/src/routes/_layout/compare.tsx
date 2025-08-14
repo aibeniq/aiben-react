@@ -18,7 +18,6 @@ import DownloadButton from "@/components/ui/download-button"
 import SelectionCard from "@/components/Common/SelectionCard"
 import SelectionModal from "@/components/Common/SelectionModal"
 import TopicListTable from "@/components/Compare/TopicListTable"
-import SearchModeToggle from "@/components/Common/SearchModeToggle"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 
 const TwinCheck = () => {
@@ -39,14 +38,8 @@ const TwinCheck = () => {
   const [comparisons, setComparisons] = useState<TwinCheckTopicList[]>([])
   const [selectedComparison, setSelectedComparison] = useState<TwinCheckTopicList | null>(null)
 
-  // Knowledge base state
+  // Knowledge base state (only for topic generation)
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
-  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
-    null,
-  )
-
-  // Search mode state
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
 
   // Results state
   const [summary, setSummary] = useState("")
@@ -189,14 +182,8 @@ const TwinCheck = () => {
 
   // Mutation for comparing documents
   const mutation = useMutation({
-    mutationFn: (data: {
-      comparison_topics: string
-      document1: File
-      document2: File
-      knowledge_base_id?: number
-      search_mode?: string
-    }) => {
-      // For now, only pass the supported parameters until the client is regenerated
+    mutationFn: (data: { comparison_topics: string; document1: File; document2: File }) => {
+      // Simplified API call without knowledge base parameters
       return TwincheckService.compareDocuments({
         comparisonTopics: data.comparison_topics,
         formData: {
@@ -238,12 +225,11 @@ const TwinCheck = () => {
       return
     }
 
+    // Simplified request data without knowledge base
     const requestData = {
       comparison_topics: topics,
       document1: document1,
       document2: document2,
-      knowledge_base_id: selectedKnowledgeBase?.id ? Number(selectedKnowledgeBase.id) : undefined,
-      search_mode: searchMode,
     }
 
     setLoading(true)
@@ -306,8 +292,6 @@ const TwinCheck = () => {
               onClick={() => setShowTopicListModal(true)}
             />
 
-            <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
-
             <VStack gap={4} align="stretch">
               <HStack gap={6} align="stretch">
                 <Box flex="1">
@@ -356,9 +340,7 @@ const TwinCheck = () => {
             onTopicsChange={setTopics}
             onTopicListsUpdate={fetchComparisons}
             topics={topics}
-            selectedKnowledgeBase={selectedKnowledgeBase}
             knowledgeBases={knowledgeBases}
-            searchMode={searchMode}
           />
         </SelectionModal>
 

@@ -568,8 +568,6 @@ class LlmInteraction(SQLModel, table=True):
 # Request model for TwinCheck
 class TwinCheckRequest(SQLModel):
     comparison_topics: str
-    knowledge_base_id: Optional[int] = None
-    search_mode: Optional[str] = "vector"
 
 
 # Response model for TwinCheck
@@ -587,10 +585,6 @@ class TwinCheckTopicList(SQLModel, table=True):
     owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
     date_created: datetime = Field(default_factory=datetime.utcnow)
     date_modified: datetime = Field(default_factory=datetime.utcnow)
-
-
-class TwinCheckRequest(SQLModel):
-    comparison_topics: str
 
 
 class TwinCheckDetailFeedback(SQLModel):
