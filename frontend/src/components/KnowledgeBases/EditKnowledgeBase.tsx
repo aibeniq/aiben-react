@@ -58,7 +58,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
       console.log("Fetching knowledge base with ID:", item.id)
       const result = await KnowledgeBasesService.readKnowledgeBase({ id: item.id })
       console.log("📊 Knowledge base API response:", result)
-      console.log("📊 Embedding model in response:", result.embedding_model)
+      console.log("📊 Embedding model ID:", result.embedding_model_id)
       console.log("📊 Embedding model ID:", result.embedding_model_id)
       return result
     },
@@ -274,11 +274,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
 
                 <Field label="Embedding Model">
                   <Input
-                    value={
-                      knowledgeBase?.embedding_model?.model_id ||
-                      knowledgeBase?.embedding_model?.provider ||
-                      "Default"
-                    }
+                    value={knowledgeBase?.embedding_model_id || "Default"}
                     disabled
                     placeholder="Embedding Model (cannot be changed)"
                     bg="gray.50"

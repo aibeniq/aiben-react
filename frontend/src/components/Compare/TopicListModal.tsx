@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   HStack,
   VStack,
@@ -17,8 +17,8 @@ import TopicItem from "./TopicItem"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
 import FileUpload, { FileItem } from "../Common/FileUpload"
-import useCustomToast from "../../hooks/useCustomToast"
 import SearchModeToggle from "../Common/SearchModeToggle"
+import useCustomToast from "../../hooks/useCustomToast"
 import { FiCopy } from "react-icons/fi"
 
 interface TopicListModalProps {
@@ -37,9 +37,7 @@ interface TopicListModalProps {
   removeTopic: (index: number) => void
   moveTopicUp: (index: number) => void
   moveTopicDown: (index: number) => void
-  selectedKnowledgeBase?: KnowledgeBasePublic | null
   knowledgeBases?: KnowledgeBasePublic[]
-  searchMode?: "vector" | "full_scan"
 }
 
 const TopicListModal = ({
@@ -58,25 +56,23 @@ const TopicListModal = ({
   removeTopic,
   moveTopicUp,
   moveTopicDown,
-  selectedKnowledgeBase,
-  knowledgeBases,
-  searchMode: passedSearchMode = "vector",
+  knowledgeBases = [],
 }: TopicListModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [generating, setGenerating] = useState(false)
   const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
   const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
   const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
-    selectedKnowledgeBase || null,
+    null,
   )
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">(passedSearchMode)
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
 
-  // Set reference mode based on preselected knowledge base
-  useEffect(() => {
-    if (selectedKnowledgeBase) {
-      setReferenceMode("knowledge-base")
-    }
-  }, [selectedKnowledgeBase])
+  // Remove the knowledge base effect
+  // useEffect(() => {
+  //   if (selectedKnowledgeBase) {
+  //     setReferenceMode("knowledge-base")
+  //   }
+  // }, [selectedKnowledgeBase])
 
   const handleGenerateTopics = async () => {
     if (!topicListDescription.trim()) {
@@ -90,20 +86,12 @@ const TopicListModal = ({
       return
     }
 
-    // Validate reference requirements if any are selected
-    if (referenceMode === "files" && exampleFiles.length === 0) {
-      // Files mode but no files - this is okay, just use description
-    } else if (referenceMode === "knowledge-base" && !referenceKnowledgeBase) {
-      showErrorToast("Please select a Knowledge Base or switch to file upload mode")
-      return
-    }
-
     setGenerating(true)
 
     try {
       let response
 
-      if (referenceMode === "files" && exampleFiles.length > 0) {
+      if (exampleFiles.length > 0) {
         // Use the existing file upload endpoint
         const files = exampleFiles.map((item) => item.file)
         response = await TwincheckService.generateTopics({
@@ -111,16 +99,6 @@ const TopicListModal = ({
             description: topicListDescription.trim(),
             comparison_type: "general",
             files: files.length > 0 ? files : undefined,
-          },
-        })
-      } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
-        // Use the new JSON endpoint with knowledge base reference
-        response = await TwincheckService.generateTopicsJson({
-          requestBody: {
-            description: topicListDescription.trim(),
-            comparison_type: "general",
-            knowledge_base_id: referenceKnowledgeBase.id,
-            search_mode: searchMode,
           },
         })
       } else {
@@ -141,12 +119,9 @@ const TopicListModal = ({
         updateTopicsFromList(newTopicsList)
 
         let successMessage = `Generated ${generatedTopics.length} topics from description`
-        if (referenceMode === "files" && exampleFiles.length > 0) {
+        if (exampleFiles.length > 0) {
           successMessage += ` and ${exampleFiles.length} example file(s)`
-        } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
-          successMessage += ` using Knowledge Base "${referenceKnowledgeBase.title}"`
         }
-        successMessage += ` (${searchMode === "vector" ? "vector search" : "full document scan"})`
 
         showSuccessToast(successMessage)
       } else {
