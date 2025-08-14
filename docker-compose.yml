@@ -51,23 +51,28 @@ services:
     env_file:
       - .env
     environment:
-      - DOMAIN=${DOMAIN}
-      - FRONTEND_HOST=${FRONTEND_HOST?Variable not set}
-      - ENVIRONMENT=${ENVIRONMENT}
-      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
-      - SECRET_KEY=${SECRET_KEY?Variable not set}
-      - FIRST_SUPERUSER=${FIRST_SUPERUSER?Variable not set}
-      - FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD?Variable not set}
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_USER=${SMTP_USER}
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
-      - EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}
+      #- DOMAIN=${DOMAIN}
+      #- FRONTEND_HOST=${FRONTEND_HOST?Variable not set}
+      #- ENVIRONMENT=${ENVIRONMENT}
+      #- BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
+      #- SECRET_KEY=${SECRET_KEY?Variable not set}
+      #- FIRST_SUPERUSER=${FIRST_SUPERUSER?Variable not set}
+      #- FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD?Variable not set}
+      #- SMTP_HOST=${SMTP_HOST}
+      #- SMTP_USER=${SMTP_USER}
+      #- SMTP_PASSWORD=${SMTP_PASSWORD}
+      #- EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}
       - POSTGRES_SERVER=db
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
-      - SENTRY_DSN=${SENTRY_DSN}
+      #- POSTGRES_PORT=${POSTGRES_PORT}
+      #- POSTGRES_DB=${POSTGRES_DB}
+      #- POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      #- POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      #- SENTRY_DSN=${SENTRY_DSN}
+      #- AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      #- AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      #- OPENAI_API_KEY=${OPENAI_API_KEY}
+      #- OPENAI_ADMIN_KEY=${OPENAI_ADMIN_KEY}
+      #- REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN}
 
   backend:
     image: "${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}"
@@ -88,27 +93,27 @@ services:
     env_file:
       - .env
     environment:
-      - DOMAIN=${DOMAIN}
-      - FRONTEND_HOST=${FRONTEND_HOST?Variable not set}
-      - ENVIRONMENT=${ENVIRONMENT}
-      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
-      - SECRET_KEY=${SECRET_KEY?Variable not set}
-      - FIRST_SUPERUSER=${FIRST_SUPERUSER?Variable not set}
-      - FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD?Variable not set}
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_USER=${SMTP_USER}
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
-      - EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}
+      #- DOMAIN=${DOMAIN}
+      #- FRONTEND_HOST=${FRONTEND_HOST?Variable not set}
+      #- ENVIRONMENT=${ENVIRONMENT}
+      #- BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
+      #- SECRET_KEY=${SECRET_KEY?Variable not set}
+      #- FIRST_SUPERUSER=${FIRST_SUPERUSER?Variable not set}
+      #- FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD?Variable not set}
+      #- SMTP_HOST=${SMTP_HOST}
+      #- SMTP_USER=${SMTP_USER}
+      #- SMTP_PASSWORD=${SMTP_PASSWORD}
+      #- EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}
       - POSTGRES_SERVER=db
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
-      - SENTRY_DSN=${SENTRY_DSN}
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - OPENAI_API_KEY
-      - REPLICATE_API_TOKEN
+      #- POSTGRES_PORT=${POSTGRES_PORT}
+      #- POSTGRES_DB=${POSTGRES_DB}
+      #- POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      #- POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      #- SENTRY_DSN=${SENTRY_DSN}
+      #- AWS_ACCESS_KEY_ID
+      #- AWS_SECRET_ACCESS_KEY
+      #- OPENAI_API_KEY=${OPENAI_API_KEY}
+      #- REPLICATE_API_TOKEN
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
@@ -124,9 +129,6 @@ services:
       - traefik.constraint-label=traefik-public
 
       - traefik.http.services.${STACK_NAME?Variable not set}-backend.loadbalancer.server.port=8000
-
-      # HTTP Basic Auth middleware
-      - traefik.http.middlewares.${STACK_NAME?Variable not set}-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
 
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.rule=Host(`recq-api.${DOMAIN?Variable not set}`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.entrypoints=http
@@ -150,6 +152,8 @@ services:
       - traefik.constraint-label=traefik-public
 
       - traefik.http.services.${STACK_NAME?Variable not set}-frontend.loadbalancer.server.port=80
+
+      - traefik.http.middlewares.${STACK_NAME?Variable not set}-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
 
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.rule=Host(`recq.${DOMAIN?Variable not set}`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.entrypoints=http
