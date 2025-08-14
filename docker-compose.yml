@@ -18,6 +18,19 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_DB=${POSTGRES_DB?Variable not set}
 
+  redis:
+    image: redis:7-alpine
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - redis-data:/data
+    networks:
+      - default
+
   adminer:
     image: adminer
     restart: always
@@ -86,6 +99,9 @@ services:
       db:
         condition: service_healthy
         restart: true
+      redis:
+        condition: service_healthy
+        restart: true
       prestart:
         condition: service_completed_successfully
       #ollama:
@@ -114,6 +130,7 @@ services:
       - AWS_SECRET_ACCESS_KEY
       - OPENAI_API_KEY
       - REPLICATE_API_TOKEN
+      - REDIS_URL=redis://redis:6379
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
@@ -142,7 +159,7 @@ services:
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.middlewares=https-redirect
 
   frontend:
-    profiles: ["frontend"]
+    #profiles: ["frontend"]
     image: "${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}"
     restart: always
     networks:
@@ -205,6 +222,7 @@ services:
 
 volumes:
   app-db-data:
+  redis-data:
   ollama-data:
 
 networks:
