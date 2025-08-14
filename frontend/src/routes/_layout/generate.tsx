@@ -681,9 +681,12 @@ const ReportGenie = () => {
                                                       useModal={true}
                                                     />
                                                   ) : citation.metadata?.source &&
-                                                    citation.metadata.source
+                                                    (citation.metadata.source
                                                       .toLowerCase()
-                                                      .endsWith(".docx") ? (
+                                                      .endsWith(".docx") ||
+                                                      citation.metadata.source
+                                                        .toLowerCase()
+                                                        .endsWith(".pdf")) ? (
                                                     <SourceLink
                                                       sourceId="" // Empty sourceId, will be handled by filename fallback
                                                       fileName={getDisplayFileName(

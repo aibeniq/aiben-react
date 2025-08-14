@@ -425,6 +425,29 @@ export class FilesService {
         });
     }
     
+    /**
+     * Get Source Content by filename
+     * Retrieve a source file by filename.
+     * Only returns files that the user has access to (either owns or has permissions for).
+     * @param data The data for the request.
+     * @param data.filename
+     * @returns SourceContentResponse Successful Response
+     * @throws ApiError
+     */
+    public static getSourceContentByFilename(data: { filename: string }): CancelablePromise<FilesGetSourceContentResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/files/source/by-filename/{filename}',
+            path: {
+                filename: data.filename
+            },
+            errors: {
+                404: 'Not Found - Source file not found or access denied',
+                422: 'Validation Error'
+            }
+        });
+    }
+    
 }
 
 export class FormconnectService {
