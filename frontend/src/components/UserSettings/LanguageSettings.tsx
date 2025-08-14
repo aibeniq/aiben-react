@@ -5,9 +5,11 @@ import useAuth from "@/hooks/useAuth"
 import { Field } from "@/components/ui/field"
 import { Button } from "@/components/ui/button"
 import useCustomToast from "@/hooks/useCustomToast"
+import { UsersService, type ApiError } from "@/client"
+import { handleError } from "@/utils"
 
-// Language options (alphabetized by language name)
-const LANGUAGES = [
+// Default fallback languages (should match backend config)
+const DEFAULT_LANGUAGES = [
   { code: "ar", name: "Arabic" },
   { code: "bg", name: "Bulgarian" },
   { code: "zh", name: "Chinese (Simplified)" },
@@ -65,39 +67,17 @@ const LanguageSettings: React.FC = () => {
 
   const updateLanguage = useMutation({
     mutationFn: async (language: string) => {
-      // Get the auth token from localStorage
-      const token = localStorage.getItem("access_token")
-      const headers: any = {
-        "Content-Type": "application/json",
-      }
-
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`
-      }
-
-      // We need to make a direct API call using the PUT method since the generated client
-      // doesn't have the correct endpoint
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
-      const apiUrl = `${baseUrl}/api/v1/users/me/language`
-
-      return fetch(apiUrl, {
-        method: "PUT",
-        headers,
-        body: JSON.stringify({ preferred_language: language }),
-      }).then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to update language preference")
-        }
-        return response.json()
+      return UsersService.updateLanguage({
+        requestBody: { preferred_language: language },
       })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] })
       showSuccessToast("Your preferred language has been updated.")
     },
-    onError: (error) => {
-      showErrorToast("Failed to update your language preference.")
-      console.error(error)
+    onError: (error: ApiError) => {
+      console.error("Language update error:", error)
+      handleError(error, showErrorToast)
     },
   })
 
@@ -126,7 +106,7 @@ const LanguageSettings: React.FC = () => {
                 borderColor: "inherit",
               }}
             >
-              {LANGUAGES.map((lang) => (
+              {DEFAULT_LANGUAGES.map((lang) => (
                 <option key={lang.code} value={lang.code}>
                   {lang.name}
                 </option>
@@ -135,7 +115,12 @@ const LanguageSettings: React.FC = () => {
           </Field>
 
           <Box>
-            <Button colorPalette="blue" loading={updateLanguage.isPending} onClick={handleSave}>
+            <Button
+              colorPalette="blue"
+              loading={updateLanguage.isPending}
+              onClick={handleSave}
+              disabled={selectedLanguage === currentLanguage}
+            >
               Save Language Preference
             </Button>
           </Box>
