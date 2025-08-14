@@ -278,6 +278,18 @@ function Archive() {
         response = await TwincheckService.generateCsv({
           requestBody: { content: JSON.stringify(csvData) },
         })
+      } else if (activeTab === "match") {
+        // FormConnect CSV download
+        const csvData = {
+          comparison: selectedReport.results?.comparison || "",
+          message: selectedReport.results?.message || "",
+          results: selectedReport.results || {},
+        }
+        console.log("FormConnect CSV data to send:", csvData)
+
+        response = await FormconnectService.generateCsv({
+          requestBody: { content: JSON.stringify(csvData) },
+        })
       } else {
         showErrorToast("CSV download not available for this type of report")
         return
@@ -424,7 +436,10 @@ function Archive() {
         onDownloadReport={handleDownloadReport}
         onDownloadCsv={handleDownloadCsv}
         showCsvDownload={
-          activeTab === "generate" || activeTab === "review" || activeTab === "compare"
+          activeTab === "generate" ||
+          activeTab === "review" ||
+          activeTab === "compare" ||
+          activeTab === "match"
         }
         onFeedbackSubmitted={(type) => {
           console.log("Feedback submitted for archive item, invalidating query cache")

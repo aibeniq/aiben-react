@@ -769,6 +769,12 @@ export type FormconnectGenerateDocxData = {
 
 export type FormconnectGenerateDocxResponse = unknown
 
+export type FormconnectGenerateCsvData = {
+  requestBody: DocxRequest
+}
+
+export type FormconnectGenerateCsvResponse = unknown
+
 export type ItemsReadItemsData = {
   limit?: number
   skip?: number
