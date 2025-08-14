@@ -25,6 +25,7 @@ const TwinCheck = () => {
 
   const [copySuccess, setCopySuccess] = useState(false)
   const [loadingDownload, setLoadingDownload] = useState(false)
+  const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
 
   // Modal states
   const [showTopicListModal, setShowTopicListModal] = useState(false)
@@ -152,6 +153,74 @@ const TwinCheck = () => {
     } finally {
       console.log("DOCX download process completed")
       setLoadingDownload(false)
+    }
+  }
+
+  // Function to download comparison as CSV
+  const handleDownloadCsv = async () => {
+    try {
+      setLoadingCsvDownload(true)
+
+      // Prepare the data for CSV generation
+      const csvData = {
+        summary: summary,
+        topic_results: topicResults,
+        doc1_name: document1?.name || "Document 1",
+        doc2_name: document2?.name || "Document 2",
+      }
+
+      const response = await TwincheckService.generateCsv({
+        requestBody: { content: JSON.stringify(csvData) },
+      })
+
+      console.log("Received CSV response:", response)
+      console.log("Response type:", typeof response)
+      console.log("Response instanceof Blob:", response instanceof Blob)
+
+      // Handle blob response
+      let blob
+      if (response instanceof Blob) {
+        blob = response
+      } else if (response instanceof ArrayBuffer) {
+        blob = new Blob([response], { type: "text/csv" })
+      } else {
+        blob = new Blob([response as any], { type: "text/csv" })
+      }
+
+      console.log("Blob size:", blob.size)
+
+      if (blob.size === 0) {
+        throw new Error("Received empty CSV file")
+      }
+
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+      a.href = url
+      a.download = `TwinCheck_Comparison_${timestamp}.csv`
+
+      console.log("CSV download filename:", `TwinCheck_Comparison_${timestamp}.csv`)
+      console.log("About to trigger CSV download...")
+
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      console.log("CSV download triggered successfully")
+      showSuccessToast("CSV downloaded successfully")
+    } catch (err: any) {
+      console.error("Failed to download CSV:", err)
+      console.error("Error details:", {
+        message: err instanceof Error ? err.message : "Unknown error",
+        stack: err instanceof Error ? err.stack : undefined,
+        name: err instanceof Error ? err.name : undefined,
+      })
+
+      showErrorToast(`Failed to download CSV: ${err.message || "Unknown error"}`)
+    } finally {
+      console.log("CSV download process completed")
+      setLoadingCsvDownload(false)
     }
   }
 
@@ -399,6 +468,14 @@ const TwinCheck = () => {
                       loading={loadingDownload}
                     >
                       Download DOCX
+                    </DownloadButton>
+
+                    <DownloadButton
+                      size="sm"
+                      onClick={handleDownloadCsv}
+                      loading={loadingCsvDownload}
+                    >
+                      Download CSV
                     </DownloadButton>
                   </HStack>
                 )}

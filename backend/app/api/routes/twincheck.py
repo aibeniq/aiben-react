@@ -1,6 +1,7 @@
 import uuid
 import difflib
 import re
+import csv
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import json
@@ -9,7 +10,7 @@ import tempfile
 import os
 import docx
 import io
-from io import BytesIO
+from io import BytesIO, StringIO
 from docx import Document
 from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -896,6 +897,134 @@ async def generate_docx(
 
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
+
+
+@router.post("/generate/csv", response_class=StreamingResponse)
+async def generate_csv(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a CSV file from the comparison content.
+    """
+    print("Now generating CSV of comparison...")
+    try:
+        # Get the content from the request
+        if not request.content:
+            raise HTTPException(status_code=400, detail="Report content is required")
+
+        # Try to parse the content as JSON first (for structured data)
+        try:
+            content_data = json.loads(request.content)
+            summary = content_data.get("summary", "")
+            topic_results = content_data.get("topic_results", [])
+            doc1_name = content_data.get("doc1_name", "Document 1")
+            doc2_name = content_data.get("doc2_name", "Document 2")
+        except json.JSONDecodeError:
+            # If it's not JSON, treat it as markdown content
+            content_lines = request.content.split("\n")
+            summary = ""
+            topic_results = []
+            doc1_name = "Document 1"
+            doc2_name = "Document 2"
+
+            # Extract summary and topics from markdown
+            current_section = ""
+            current_content = []
+
+            for line in content_lines:
+                if line.startswith("# Summary"):
+                    current_section = "summary"
+                    current_content = []
+                elif line.startswith("# Topic Analysis") or line.startswith(
+                    "## Topic:"
+                ):
+                    if current_section == "summary":
+                        summary = "\n".join(current_content).strip()
+                    current_section = "topic"
+                    if line.startswith("## Topic:"):
+                        topic_name = line.replace("## Topic:", "").strip()
+                        current_content = [topic_name]
+                elif line.strip() and current_section:
+                    current_content.append(line.strip())
+
+            # Handle last section
+            if current_section == "summary":
+                summary = "\n".join(current_content).strip()
+
+        # Create CSV content
+        output = StringIO()
+        writer = csv.writer(output)
+
+        # Write headers
+        headers = ["Comparison Topic", "Analysis", "Document 1", "Document 2"]
+        writer.writerow(headers)
+
+        # Write summary row
+        if summary:
+            writer.writerow(
+                [
+                    "Overall Summary",
+                    summary.replace("\n", " ").replace("\r", "").replace('"', '""'),
+                    doc1_name,
+                    doc2_name,
+                ]
+            )
+
+        # Write topic analysis rows
+        for topic_result in topic_results:
+            if isinstance(topic_result, dict):
+                topic = topic_result.get("topic", "Unknown Topic")
+                analysis = topic_result.get("analysis", "No analysis available")
+            else:
+                topic = str(topic_result)
+                analysis = "No analysis available"
+
+            # Clean analysis text for CSV
+            cleaned_analysis = (
+                analysis.replace("\n", " ").replace("\r", "").replace('"', '""')
+            )
+
+            writer.writerow([topic, cleaned_analysis, doc1_name, doc2_name])
+
+        # If no structured data was found, create a simple row with the content
+        if not summary and not topic_results:
+            writer.writerow(
+                [
+                    "Comparison Analysis",
+                    request.content.replace("\n", " ")
+                    .replace("\r", "")
+                    .replace('"', '""'),
+                    doc1_name,
+                    doc2_name,
+                ]
+            )
+
+        # Prepare the CSV for download
+        csv_content = output.getvalue()
+        output.close()
+
+        # Convert to bytes
+        csv_bytes = csv_content.encode("utf-8")
+
+        # Generate timestamp for filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"twincheck_comparison_{timestamp}.csv"
+
+        print(
+            "CSV file generated successfully. Preparing to return as a downloadable file."
+        )
+
+        return StreamingResponse(
+            BytesIO(csv_bytes),
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generating CSV: {str(e)}")
 
 
 @router.post("/generate-topics", response_model=GenerateTopicsResponse)

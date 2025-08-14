@@ -2586,7 +2586,7 @@ async def generate_docx(
         title_text = (
             request.title
             if hasattr(request, "title") and request.title
-            else "Generated Report"
+            else "Generated Document"
         )
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER

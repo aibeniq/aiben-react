@@ -264,6 +264,20 @@ function Archive() {
         response = await VeradocService.generateCsv({
           requestBody: { content: JSON.stringify(csvData) },
         })
+      } else if (activeTab === "compare") {
+        // TwinCheck CSV download
+        const csvData = {
+          summary: selectedReport.results?.summary || "",
+          topic_results: selectedReport.results?.topic_analysis || [],
+          doc1_name: selectedReport.results?.doc1_name || "Document 1",
+          doc2_name: selectedReport.results?.doc2_name || "Document 2",
+        }
+        console.log("TwinCheck CSV data to send:", csvData)
+        console.log("Number of topic results:", csvData.topic_results.length)
+
+        response = await TwincheckService.generateCsv({
+          requestBody: { content: JSON.stringify(csvData) },
+        })
       } else {
         showErrorToast("CSV download not available for this type of report")
         return
@@ -409,7 +423,9 @@ function Archive() {
         onCopyReport={handleCopyReport}
         onDownloadReport={handleDownloadReport}
         onDownloadCsv={handleDownloadCsv}
-        showCsvDownload={activeTab === "generate" || activeTab === "review"}
+        showCsvDownload={
+          activeTab === "generate" || activeTab === "review" || activeTab === "compare"
+        }
         onFeedbackSubmitted={(type) => {
           console.log("Feedback submitted for archive item, invalidating query cache")
 
