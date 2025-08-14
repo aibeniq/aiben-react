@@ -172,6 +172,10 @@ class Settings(BaseSettings):
     # OpenAI API Configuration
     OPENAI_TIMEOUT: int = 600  # 10 minutes timeout for OpenAI API calls
 
+    # Usage Quota Configuration
+    QUOTA_PERIOD_START_DAY: int = 1  # Day of month when quota period starts (1-28)
+    QUOTA_PERIOD_MAX_TOKENS: int = 50_000_000  # Maximum tokens per quota period
+
     @computed_field
     @property
     def llm_providers(self) -> list[str]:
