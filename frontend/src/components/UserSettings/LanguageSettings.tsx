@@ -57,7 +57,7 @@ const DEFAULT_LANGUAGES = [
 
 const LanguageSettings: React.FC = () => {
   const { user } = useAuth()
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { showSuccessToast } = useCustomToast()
   const queryClient = useQueryClient()
 
   // Default to English if the preferred_language isn't in the user object yet
@@ -77,7 +77,7 @@ const LanguageSettings: React.FC = () => {
     },
     onError: (error: ApiError) => {
       console.error("Language update error:", error)
-      handleError(error, showErrorToast)
+      handleError(error)
     },
   })
 

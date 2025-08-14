@@ -47,12 +47,12 @@ const SourceLink: React.FC<SourceLinkProps> = ({
         // If sourceId is empty/null, use filename-based conversion
         if (!sourceId || sourceId.trim() === "") {
           console.log("No sourceId provided, using filename-based conversion:", fileName)
-          pdfBlob = await FilesService.convertDocxToPdfByFilename({ filename: fileName })
+          pdfBlob = (await FilesService.convertDocxToPdfByFilename({ filename: fileName })) as Blob
           console.log("PDF conversion by filename successful, blob size:", pdfBlob.size)
         } else {
           console.log("Using sourceId-based conversion:", sourceId)
           // Use the DOCX to PDF conversion endpoint with sourceId
-          pdfBlob = await FilesService.convertDocxToPdf({ sourceId })
+          pdfBlob = (await FilesService.convertDocxToPdf({ sourceId })) as Blob
           console.log("PDF conversion successful, blob size:", pdfBlob.size)
         }
 
