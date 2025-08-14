@@ -5,63 +5,16 @@ Translation service for converting LLM outputs to user's preferred language.
 from typing import Optional
 from app.services.llms import invoke_llm, get_default_llm
 from app.api.deps import SessionDep, CurrentUser
+from app.core.config import settings
 
 
 def get_translation_prompt(text: str, target_language: str) -> str:
     """
     Create a translation prompt for the LLM.
     """
-    language_map = {
-        # Major European Languages
-        "en": "English",
-        "es": "Spanish (Europe)",
-        "fr": "French",
-        "de": "German",
-        "it": "Italian",
-        "pt": "Portuguese",
-        "ru": "Russian",
-        "uk": "Ukrainian",
-        "pl": "Polish",
-        "nl": "Dutch",
-        "sv": "Swedish",
-        "no": "Norwegian",
-        "da": "Danish",
-        "fi": "Finnish",
-        "cs": "Czech",
-        "sk": "Slovak",
-        "hu": "Hungarian",
-        "ro": "Romanian",
-        "bg": "Bulgarian",
-        "hr": "Croatian",
-        "sr": "Serbian",
-        "sl": "Slovenian",
-        "et": "Estonian",
-        "lv": "Latvian",
-        "lt": "Lithuanian",
-        "el": "Greek",
-        # Asian Languages
-        "zh": "Chinese (Simplified)",
-        "zh-TW": "Chinese (Traditional)",
-        "ja": "Japanese",
-        "ko": "Korean",
-        "hi": "Hindi",
-        "th": "Thai",
-        "vi": "Vietnamese",
-        "id": "Indonesian",
-        "ms": "Malay",
-        "tl": "Filipino",
-        # Middle Eastern & African Languages
-        "ar": "Arabic",
-        "he": "Hebrew",
-        "fa": "Persian (Farsi)",
-        "tr": "Turkish",
-        "sw": "Swahili",
-        # Regional Variants
-        "pt-BR": "Portuguese (Brazil)",
-        "es-LATAM": "Spanish (Latin America)",
-    }
-
-    target_language_name = language_map.get(target_language, target_language)
+    target_language_name = settings.SUPPORTED_LANGUAGES.get(
+        target_language, target_language
+    )
 
     return f"""You are a professional translator. Translate the following text to {target_language_name}.
 
@@ -131,55 +84,7 @@ def get_supported_languages() -> dict:
     Returns:
         Dictionary mapping language codes to language names
     """
-    return {
-        # Major European Languages
-        "en": "English",
-        "es": "Spanish (Europe)",
-        "fr": "French",
-        "de": "German",
-        "it": "Italian",
-        "pt": "Portuguese",
-        "ru": "Russian",
-        "uk": "Ukrainian",
-        "pl": "Polish",
-        "nl": "Dutch",
-        "sv": "Swedish",
-        "no": "Norwegian",
-        "da": "Danish",
-        "fi": "Finnish",
-        "cs": "Czech",
-        "sk": "Slovak",
-        "hu": "Hungarian",
-        "ro": "Romanian",
-        "bg": "Bulgarian",
-        "hr": "Croatian",
-        "sr": "Serbian",
-        "sl": "Slovenian",
-        "et": "Estonian",
-        "lv": "Latvian",
-        "lt": "Lithuanian",
-        "el": "Greek",
-        # Asian Languages
-        "zh": "Chinese (Simplified)",
-        "zh-TW": "Chinese (Traditional)",
-        "ja": "Japanese",
-        "ko": "Korean",
-        "hi": "Hindi",
-        "th": "Thai",
-        "vi": "Vietnamese",
-        "id": "Indonesian",
-        "ms": "Malay",
-        "tl": "Filipino",
-        # Middle Eastern & African Languages
-        "ar": "Arabic",
-        "he": "Hebrew",
-        "fa": "Persian (Farsi)",
-        "tr": "Turkish",
-        "sw": "Swahili",
-        # Regional Variants
-        "pt-BR": "Portuguese (Brazil)",
-        "es-LATAM": "Spanish (Latin America)",
-    }
+    return settings.SUPPORTED_LANGUAGES
 
 
 def is_translation_needed(current_user: CurrentUser) -> bool:

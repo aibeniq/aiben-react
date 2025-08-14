@@ -113,10 +113,61 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
-    #ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
-    #ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
+    # ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
+    # ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
     ENABLED_LLM_PROVIDERS: str = "openai,aws"
     ENABLED_EMBEDDING_PROVIDERS: str = "openai,aws"
+
+    # Supported Languages for Translation
+    SUPPORTED_LANGUAGES: dict[str, str] = {
+        # Major European Languages
+        "en": "English",
+        "es": "Spanish (Europe)",
+        "fr": "French",
+        "de": "German",
+        "it": "Italian",
+        "pt": "Portuguese",
+        "ru": "Russian",
+        "uk": "Ukrainian",
+        "pl": "Polish",
+        "nl": "Dutch",
+        "sv": "Swedish",
+        "no": "Norwegian",
+        "da": "Danish",
+        "fi": "Finnish",
+        "cs": "Czech",
+        "sk": "Slovak",
+        "hu": "Hungarian",
+        "ro": "Romanian",
+        "bg": "Bulgarian",
+        "hr": "Croatian",
+        "sr": "Serbian",
+        "sl": "Slovenian",
+        "et": "Estonian",
+        "lv": "Latvian",
+        "lt": "Lithuanian",
+        "el": "Greek",
+        # Asian Languages
+        "zh": "Chinese (Simplified)",
+        "zh-TW": "Chinese (Traditional)",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "hi": "Hindi",
+        "th": "Thai",
+        "vi": "Vietnamese",
+        "id": "Indonesian",
+        "ms": "Malay",
+        "tl": "Filipino",
+        # Middle Eastern & African Languages
+        "ar": "Arabic",
+        "he": "Hebrew",
+        "fa": "Persian (Farsi)",
+        "tr": "Turkish",
+        "sw": "Swahili",
+        # Regional Variants
+        "pt-BR": "Portuguese (Brazil)",
+        "es-LATAM": "Spanish (Latin America)",
+    }
 
     # OpenAI API Configuration
     OPENAI_TIMEOUT: int = 600  # 10 minutes timeout for OpenAI API calls

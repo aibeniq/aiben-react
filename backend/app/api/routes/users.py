@@ -30,6 +30,12 @@ from app.utils.email_utils import generate_new_account_email, send_email
 router = APIRouter(prefix="/users", tags=["users"])
 
 
+@router.get("/supported-languages")
+def get_supported_languages() -> Any:
+    """Get the list of supported languages for translation."""
+    return {"languages": settings.SUPPORTED_LANGUAGES}
+
+
 @router.put("/me/language", response_model=User)
 def update_language(
     language_update: LanguageUpdate,
@@ -39,11 +45,11 @@ def update_language(
     """Update current user language preference."""
 
     # Validate the language code
-    supported_languages = ["en", "fi", "de", "pl", "ru", "ar"]
-    if language_update.preferred_language not in supported_languages:
+    if language_update.preferred_language not in settings.SUPPORTED_LANGUAGES:
+        supported_codes = list(settings.SUPPORTED_LANGUAGES.keys())
         raise HTTPException(
             status_code=400,
-            detail=f"Language not supported. Choose from: {', '.join(supported_languages)}",
+            detail=f"Language not supported. Choose from: {', '.join(supported_codes)}",
         )
 
     # Update user's language preference
