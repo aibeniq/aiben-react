@@ -619,6 +619,7 @@ export class FilesService {
       path: {
         source_id: data.sourceId,
       },
+      responseType: 'blob',
       errors: {
         422: "Validation Error",
       },
@@ -643,6 +644,7 @@ export class FilesService {
       path: {
         filename: data.filename,
       },
+      responseType: 'blob',
       errors: {
         422: "Validation Error",
       },
