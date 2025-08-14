@@ -140,52 +140,10 @@ async def extract_fields_using_vector_search(
             f"Using embedding model: {embedding_info['model_id']} ({embedding_info['provider']})"
         )
 
-        # Extract text from the document first
-        text = ""
-        file_ext = Path(file.filename).suffix.lower() if file.filename else ""
+        # Extract text from the document first using unified processing
+        from app.services.document_utils import extract_text_from_file_unified
 
-        if file_ext == ".pdf":
-            from app.services.pdf_utils import extract_text_from_pdf_bytes
-
-            text = extract_text_from_pdf_bytes(content, file.filename)
-        elif file_ext in [".docx", ".doc"]:
-            import tempfile
-            import os
-            from docx import Document as DocxDocument
-
-            with tempfile.NamedTemporaryFile(
-                delete=False, suffix=file_ext
-            ) as temp_file:
-                temp_file.write(content)
-                temp_file_path = temp_file.name
-
-            try:
-                doc = DocxDocument(temp_file_path)
-                text_parts = []
-                for paragraph in doc.paragraphs:
-                    if paragraph.text.strip():
-                        text_parts.append(paragraph.text)
-                for table in doc.tables:
-                    for row in table.rows:
-                        for cell in row.cells:
-                            if cell.text.strip():
-                                text_parts.append(cell.text)
-                text = "\n\n".join(text_parts)
-            finally:
-                if os.path.exists(temp_file_path):
-                    os.unlink(temp_file_path)
-        else:
-            # Handle text files
-            try:
-                text = content.decode("utf-8")
-            except UnicodeDecodeError:
-                try:
-                    text = content.decode("latin-1")
-                except UnicodeDecodeError:
-                    return {
-                        k: "Could not extract: Unsupported file format"
-                        for k in template.keys()
-                    }
+        text = extract_text_from_file_unified(content, file.filename or "unknown")
 
         if not text.strip():
             return {k: "Could not extract: Empty document" for k in template.keys()}
@@ -331,55 +289,10 @@ async def extract_fields_using_full_text(
     file_ext = Path(filename).suffix.lower() if filename else ""
 
     try:
-        if file_ext == ".pdf":
-            # Handle PDF files using our PDF utility
-            from app.services.pdf_utils import extract_text_from_pdf_bytes
+        # Use unified document processing for all file types
+        from app.services.document_utils import extract_text_from_file_unified
 
-            text = extract_text_from_pdf_bytes(content, filename)
-        elif file_ext in [".docx", ".doc"]:
-            # Handle Word documents
-            import tempfile
-            import os
-            from docx import Document as DocxDocument
-
-            with tempfile.NamedTemporaryFile(
-                delete=False, suffix=file_ext
-            ) as temp_file:
-                temp_file.write(content)
-                temp_file_path = temp_file.name
-
-            try:
-                doc = DocxDocument(temp_file_path)
-                text_parts = []
-
-                # Extract text from paragraphs
-                for paragraph in doc.paragraphs:
-                    if paragraph.text.strip():
-                        text_parts.append(paragraph.text)
-
-                # Extract text from tables
-                for table in doc.tables:
-                    for row in table.rows:
-                        for cell in row.cells:
-                            if cell.text.strip():
-                                text_parts.append(cell.text)
-
-                text = "\n\n".join(text_parts)
-            finally:
-                if os.path.exists(temp_file_path):
-                    os.unlink(temp_file_path)
-        else:
-            # Handle text files
-            try:
-                text = content.decode("utf-8")
-            except UnicodeDecodeError:
-                try:
-                    text = content.decode("latin-1")
-                except UnicodeDecodeError:
-                    return {
-                        k: f"Could not extract: Unsupported file format {filename}"
-                        for k in template.keys()
-                    }
+        text = extract_text_from_file_unified(content, filename)
 
         if not text.strip():
             return {

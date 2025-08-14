@@ -32,6 +32,7 @@ from app.models import (
 from app.services.session_manager import session_manager
 from app.core.config import settings
 from app.services.pdf_utils import load_pdf_with_pypdf
+from app.services.document_utils import extract_documents_from_file_unified
 from sqlmodel import select
 
 # from langchain_community.document_loaders import PyPDFLoader  # Removed - using pypdf instead
@@ -372,12 +373,12 @@ async def _handle_full_text_document_query(
                 temp_paths.append(temp_path)
             # File is now closed and ready to be read by loaders
 
-            # Extract text from file
-            if file.filename.endswith(".pdf"):
-                documents = load_pdf_with_pypdf(temp_path, file.filename)
-            else:
-                loader = TextLoader(temp_path)
-                documents = loader.load()
+            # Extract text from file using unified document processing
+            with open(temp_path, "rb") as f:
+                file_content = f.read()
+
+            # Use the unified document extraction function
+            documents = extract_documents_from_file_unified(file_content, file.filename)
             full_text = "\n\n".join([doc.page_content for doc in documents])
 
             # Chunk the text
@@ -603,63 +604,73 @@ async def query_knowledge_base(
 
         if is_follow_up and cached_data and cached_data.get("kb_id") == kb_id:
             print(f"Using cached resources for session {session_id}")
-            
+
             # Try to get objects from cache
             retriever = cached_data.get("retriever")
             llm = cached_data.get("llm")
-            
+
             # Check if objects need rebuilding and rebuild them gracefully
-            if (session_manager.session_needs_rebuild(cached_data, "retriever") or 
-                session_manager.session_needs_rebuild(cached_data, "llm")):
+            if session_manager.session_needs_rebuild(
+                cached_data, "retriever"
+            ) or session_manager.session_needs_rebuild(cached_data, "llm"):
                 print("Session objects need rebuilding - rebuilding from metadata")
-                
+
                 # Get cached metadata
                 temp_dir = cached_data.get("temp_dir")
-                
+
                 if not temp_dir:
                     print("No temp_dir in cache - session expired")
                     raise HTTPException(
                         status_code=400,
                         detail="Session expired. Please upload your documents again.",
                     )
-                
+
                 try:
                     # Rebuild retriever if needed
                     if session_manager.session_needs_rebuild(cached_data, "retriever"):
                         print("Rebuilding retriever from vector database")
-                        
+
                         # Get KB and embedding model
                         kb = session.get(KnowledgeBase, kb_id)
                         if not kb:
-                            raise HTTPException(status_code=404, detail="Knowledge base not found")
-                        
+                            raise HTTPException(
+                                status_code=404, detail="Knowledge base not found"
+                            )
+
                         # Get embedding model
                         if kb.embedding_model_id:
-                            embedding_model = session.get(EmbeddingModel, kb.embedding_model_id)
+                            embedding_model = session.get(
+                                EmbeddingModel, kb.embedding_model_id
+                            )
                         else:
                             user = session.get(User, current_user.id)
                             if user and user.default_embedding_model:
-                                embedding_model = session.get(EmbeddingModel, user.default_embedding_model)
+                                embedding_model = session.get(
+                                    EmbeddingModel, user.default_embedding_model
+                                )
                             else:
                                 embedding_model = session.exec(
-                                    select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
+                                    select(EmbeddingModel).where(
+                                        EmbeddingModel.owner_id.is_(None)
+                                    )
                                 ).first()
-                        
+
                         if not embedding_model:
-                            raise HTTPException(status_code=404, detail="No embedding model found")
-                        
+                            raise HTTPException(
+                                status_code=404, detail="No embedding model found"
+                            )
+
                         # Rebuild embeddings and vector store
                         embeddings = load_embeddings_model(
-                            provider=embedding_model.provider, 
-                            model_id=embedding_model.model_id
+                            provider=embedding_model.provider,
+                            model_id=embedding_model.model_id,
                         )
-                        
+
                         # Reconnect to existing vector database
                         chroma_db = Chroma(
-                            persist_directory=temp_dir, 
-                            embedding_function=embeddings
+                            persist_directory=temp_dir, embedding_function=embeddings
                         )
-                        
+
                         # Rebuild retriever
                         retriever = create_ensemble_retriever(
                             chroma_db=chroma_db,
@@ -668,11 +679,11 @@ async def query_knowledge_base(
                             search_kwargs={"k": settings.RAG_NUM_CHUNKS},
                         )
                         print("Successfully rebuilt retriever")
-                    
+
                     # Rebuild LLM if needed
                     if session_manager.session_needs_rebuild(cached_data, "llm"):
                         print("Rebuilding LLM")
-                        
+
                         # Get KB and LLM model
                         kb = session.get(KnowledgeBase, kb_id)
                         if use_default_models:
@@ -681,19 +692,21 @@ async def query_knowledge_base(
                             llm_model = session.get(LlmModel, kb.llm_model_id)
                             if llm_model:
                                 llm = create_llm(
-                                    llm_model.provider, llm_model.model_id, temperature=0.0
+                                    llm_model.provider,
+                                    llm_model.model_id,
+                                    temperature=0.0,
                                 )
                             else:
                                 llm = get_default_llm(session, current_user)
                         print("Successfully rebuilt LLM")
-                    
+
                     # Update session cache with rebuilt objects
                     updated_session_data = cached_data.copy()
                     updated_session_data["retriever"] = retriever
                     updated_session_data["llm"] = llm
                     session_manager.set_session(session_id, updated_session_data)
                     print("Updated session cache with rebuilt objects")
-                    
+
                 except Exception as e:
                     print(f"Failed to rebuild session objects: {e}")
                     raise HTTPException(
@@ -986,31 +999,39 @@ async def query_document(
             cached_data = session_manager.get_session(session_id)
             if cached_data:
                 print(f"Found session data for {session_id}")
-                
+
                 # Try to use existing objects first
                 retriever = cached_data.get("retriever")
                 llm = cached_data.get("llm")
-                
+
                 # Check if objects need rebuilding (after Redis deserialization)
-                retriever_needs_rebuild = session_manager.session_needs_rebuild(cached_data, "retriever")
-                llm_needs_rebuild = session_manager.session_needs_rebuild(cached_data, "llm")
-                
+                retriever_needs_rebuild = session_manager.session_needs_rebuild(
+                    cached_data, "retriever"
+                )
+                llm_needs_rebuild = session_manager.session_needs_rebuild(
+                    cached_data, "llm"
+                )
+
                 if retriever_needs_rebuild or llm_needs_rebuild:
-                    print("Session objects need rebuilding - rebuilding from cached metadata")
-                    
+                    print(
+                        "Session objects need rebuilding - rebuilding from cached metadata"
+                    )
+
                     # We have session metadata, so we can rebuild the objects
                     vector_dir = cached_data.get("vector_dir")
                     file_names = cached_data.get("file_names", [])
-                    
+
                     if not vector_dir or not file_names:
                         print("Session metadata incomplete - cannot rebuild")
                         raise HTTPException(
                             status_code=400,
                             detail="Session expired. Please upload your documents again.",
                         )
-                    
-                    print(f"Rebuilding session from vector_dir: {vector_dir}, files: {file_names}")
-                    
+
+                    print(
+                        f"Rebuilding session from vector_dir: {vector_dir}, files: {file_names}"
+                    )
+
                     # Rebuild the retriever if needed
                     if retriever_needs_rebuild:
                         print("Rebuilding retriever from vector database")
@@ -1018,27 +1039,33 @@ async def query_document(
                             # Get user's default embedding model for rebuilding
                             user = session.get(User, current_user.id)
                             if user and user.default_embedding_model:
-                                embedding_model = session.get(EmbeddingModel, user.default_embedding_model)
+                                embedding_model = session.get(
+                                    EmbeddingModel, user.default_embedding_model
+                                )
                             else:
                                 embedding_model = session.exec(
-                                    select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
+                                    select(EmbeddingModel).where(
+                                        EmbeddingModel.owner_id.is_(None)
+                                    )
                                 ).first()
-                            
+
                             if not embedding_model:
-                                raise HTTPException(status_code=404, detail="No embedding model found")
-                            
+                                raise HTTPException(
+                                    status_code=404, detail="No embedding model found"
+                                )
+
                             # Rebuild embeddings and vector store
                             embeddings = load_embeddings_model(
-                                provider=embedding_model.provider, 
-                                model_id=embedding_model.model_id
+                                provider=embedding_model.provider,
+                                model_id=embedding_model.model_id,
                             )
-                            
+
                             # Reconnect to existing vector database
                             vector_store = Chroma(
-                                persist_directory=vector_dir, 
-                                embedding_function=embeddings
+                                persist_directory=vector_dir,
+                                embedding_function=embeddings,
                             )
-                            
+
                             # Rebuild retriever
                             retriever = create_ensemble_retriever(
                                 chroma_db=vector_store,
@@ -1047,14 +1074,14 @@ async def query_document(
                                 search_kwargs={"k": 5},
                             )
                             print("Successfully rebuilt retriever")
-                            
+
                         except Exception as e:
                             print(f"Failed to rebuild retriever: {e}")
                             raise HTTPException(
                                 status_code=400,
                                 detail="Session expired. Please upload your documents again.",
                             )
-                    
+
                     # Rebuild the LLM if needed
                     if llm_needs_rebuild:
                         print("Rebuilding LLM")
@@ -1067,10 +1094,12 @@ async def query_document(
                                 llm_model = session.exec(
                                     select(LlmModel).where(LlmModel.owner_id.is_(None))
                                 ).first()
-                            
+
                             if not llm_model:
-                                raise HTTPException(status_code=404, detail="No LLM model found")
-                            
+                                raise HTTPException(
+                                    status_code=404, detail="No LLM model found"
+                                )
+
                             # Rebuild LLM
                             llm = create_llm(
                                 provider=llm_model.provider,
@@ -1078,21 +1107,21 @@ async def query_document(
                                 temperature=0.0,
                             )
                             print("Successfully rebuilt LLM")
-                            
+
                         except Exception as e:
                             print(f"Failed to rebuild LLM: {e}")
                             raise HTTPException(
                                 status_code=400,
                                 detail="Session expired. Please upload your documents again.",
                             )
-                    
+
                     # Update the session cache with rebuilt objects
                     updated_session_data = cached_data.copy()
                     updated_session_data["retriever"] = retriever
                     updated_session_data["llm"] = llm
                     session_manager.set_session(session_id, updated_session_data)
                     print("Updated session cache with rebuilt objects")
-                
+
                 # Verify we have working objects
                 if not retriever or not llm:
                     print("Session missing required objects after rebuild attempt")
@@ -1100,7 +1129,7 @@ async def query_document(
                         status_code=400,
                         detail="Session incomplete. Please upload your documents again.",
                     )
-                    
+
                 print("Successfully restored session objects")
             else:
                 # Session not found in Redis
@@ -1160,13 +1189,11 @@ async def query_document(
                     temp_paths.append(temp_path)
                 # File is now closed and ready to be read by loaders
 
-                # Detect file type and use appropriate loader
-                if file.filename.endswith(".pdf"):
-                    documents = load_pdf_with_pypdf(temp_path, file.filename)
-                else:
-                    # Default to text loader for other files
-                    loader = TextLoader(temp_path)
-                    documents = loader.load()
+                # Use unified document processing for all file types
+                with open(temp_path, 'rb') as f:
+                    file_content = f.read()
+                
+                documents = extract_documents_from_file_unified(file_content, file.filename)
 
                 # Add file source information to metadata
                 for doc in documents:
@@ -1332,7 +1359,11 @@ async def query_document(
 
     finally:
         # Only clean up temp files if not cached
-        if temp_paths and not is_follow_up and not session_manager.get_session(session_id):
+        if (
+            temp_paths
+            and not is_follow_up
+            and not session_manager.get_session(session_id)
+        ):
             for temp_path in temp_paths:
                 try:
                     os.unlink(temp_path)

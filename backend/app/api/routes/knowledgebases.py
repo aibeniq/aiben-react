@@ -216,46 +216,12 @@ def load_correct_embeddings_model(
 
 
 def extract_text_from_docx(file_path: str, filename: str) -> List[Any]:
-    doc = docx.Document(file_path)
+    """
+    Extract text from DOCX files using unified document processing.
+    """
+    from app.services.document_utils import extract_text_from_docx_langchain
 
-    full_text = []
-
-    for para in doc.paragraphs:
-        if para.text.strip():  # Skip empty paragraphs
-            full_text.append(para.text)
-
-    for table in doc.tables:
-        for row in table.rows:
-            row_text = []
-            for cell in row.cells:
-                if cell.text.strip():
-                    row_text.append(cell.text.strip())
-            if row_text:
-                full_text.append(" | ".join(row_text))
-
-    combined_text = "\n\n".join(full_text)
-
-    metadata = {
-        "source": filename,
-        "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    }
-
-    # Try to get document properties
-    try:
-        core_properties = doc.core_properties
-        if core_properties.title:
-            metadata["title"] = core_properties.title
-        if core_properties.author:
-            metadata["author"] = core_properties.author
-        if core_properties.created:
-            metadata["created"] = str(core_properties.created)
-        if core_properties.modified:
-            metadata["modified"] = str(core_properties.modified)
-    except Exception as e:
-        print(f"Could not extract document properties: {str(e)}")
-
-    # Create a Document object compatible with langchain
-    return [Document(page_content=combined_text, metadata=metadata)]
+    return extract_text_from_docx_langchain(file_path, filename)
 
 
 def load_uploaded_file(file: UploadFile) -> List[Any]:
