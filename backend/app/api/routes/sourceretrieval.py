@@ -391,3 +391,69 @@ async def convert_docx_to_pdf_by_filename(
 
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"PDF conversion failed: {str(e)}")
+
+
+@router.get("/source/by-filename/{filename}", response_model=SourceContentResponse)
+async def get_source_content_by_filename(
+    filename: str,
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> SourceContentResponse:
+    """
+    Retrieve a source file by filename.
+    Only returns files that the user has access to (either owns or has permissions for).
+    """
+    try:
+        # Find the source by filename that the user has access to
+        source = session.exec(
+            select(Source)
+            .where(Source.name == filename)
+            .where(Source.owner_id == current_user.id)
+        ).first()
+
+        if not source and not current_user.is_superuser:
+            # Check if they have access through knowledge base
+            source = session.exec(
+                select(Source)
+                .join(KnowledgeBase, KnowledgeBase.id == Source.knowledge_base_id)
+                .where(Source.name == filename)
+                .where(KnowledgeBase.owner_id == current_user.id)
+            ).first()
+
+        if not source:
+            raise HTTPException(
+                status_code=404, detail="Source file not found or access denied"
+            )
+
+        # Get the source data
+        source_data = session.get(SourceData, source.source_data_id)
+        if not source_data:
+            raise HTTPException(status_code=404, detail="Source data not found")
+
+        # Extract the file content from the ZIP
+        zip_data = BytesIO(source_data.data)
+        with zipfile.ZipFile(zip_data, "r") as zip_file:
+            # Get the first file in the archive
+            file_info = zip_file.infolist()[0]
+            file_content = zip_file.read(file_info.filename)
+
+            # Determine content type
+            content_type = (
+                mimetypes.guess_type(filename)[0] or "application/octet-stream"
+            )
+
+            # Base64 encode for transmission
+            content_base64 = base64.b64encode(file_content).decode("utf-8")
+
+            return {
+                "id": str(source.source_data_id),
+                "name": filename,
+                "data_base64": content_base64,
+                "content_type": content_type,
+            }
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error retrieving file: {str(e)}")

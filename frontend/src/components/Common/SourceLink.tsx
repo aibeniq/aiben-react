@@ -89,11 +89,47 @@ const SourceLink: React.FC<SourceLinkProps> = ({
       } else {
         console.log("Non-DOCX file, using normal viewing method")
         // Handle non-DOCX files normally
-        if (useModal) {
-          await viewFileInModal(sourceId)
-          setIsModalOpen(true)
+
+        // If no sourceId is available, try filename-based viewing for PDFs
+        if ((!sourceId || sourceId.trim() === "") && fileName.toLowerCase().endsWith(".pdf")) {
+          console.log("No sourceId provided for PDF, using filename-based viewing:", fileName)
+
+          try {
+            const response = await FilesService.getSourceContentByFilename({ filename: fileName })
+            console.log("PDF file data received:", response)
+
+            if (useModal) {
+              setConvertedPdfFile(response)
+              setIsModalOpen(true)
+              console.log("Opened PDF in modal using filename")
+            } else {
+              // Create a blob URL for the PDF and open in new tab
+              const byteCharacters = atob(response.data_base64)
+              const byteNumbers = new Array(byteCharacters.length)
+
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i)
+              }
+
+              const byteArray = new Uint8Array(byteNumbers)
+              const blob = new Blob([byteArray], { type: response.content_type })
+              const url = URL.createObjectURL(blob)
+
+              window.open(url, "_blank")
+              console.log("Opened PDF in new tab using filename")
+            }
+          } catch (filenameError) {
+            console.error("Filename-based PDF viewing failed:", filenameError)
+            throw filenameError // Re-throw to trigger fallback
+          }
         } else {
-          await viewFile(sourceId)
+          // Use normal sourceId-based viewing
+          if (useModal) {
+            await viewFileInModal(sourceId)
+            setIsModalOpen(true)
+          } else {
+            await viewFile(sourceId)
+          }
         }
       }
     } catch (error) {
