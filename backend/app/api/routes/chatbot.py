@@ -6,6 +6,8 @@ import os
 import uuid
 import traceback
 import re
+import json
+import redis
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import (
     create_llm,
@@ -27,6 +29,7 @@ from app.models import (
     SourceData,
     User,
 )
+from app.services.session_manager import session_manager
 from app.core.config import settings
 from app.services.pdf_utils import load_pdf_with_pypdf
 from sqlmodel import select
@@ -111,42 +114,7 @@ class TextQueryResponse(BaseModel):
 
 # Create a simple cache for vector databases and retrievers
 # might want to use a more robust solution like Redis for production
-class SessionCache:
-    def __init__(self):
-        self.cache = {}
-        self.lock = threading.Lock()
-        self.expiry = {}  # For tracking session expiration
-        self._cleanup_interval = 3600  # 1 hour in seconds
-
-    def get(self, session_id):
-        with self.lock:
-            if session_id in self.cache:
-                # Update last access time
-                self.expiry[session_id] = datetime.now()
-                return self.cache[session_id]
-        return None
-
-    def set(self, session_id, data):
-        with self.lock:
-            self.cache[session_id] = data
-            self.expiry[session_id] = datetime.now()
-
-    def cleanup(self):
-        """Remove sessions older than 30 minutes"""
-        now = datetime.now()
-        with self.lock:
-            expired = [
-                sid for sid, time in self.expiry.items() if (now - time).seconds > 1800
-            ]  # 30 minutes
-            for sid in expired:
-                if sid in self.cache:
-                    del self.cache[sid]
-                if sid in self.expiry:
-                    del self.expiry[sid]
-
-
-# Initialize the cache
-session_cache = SessionCache()
+# Session manager is imported from services
 
 
 async def _handle_full_text_kb_query(
@@ -616,26 +584,122 @@ async def query_knowledge_base(
 
         # Continue with existing vector search implementation
         # Check if we have a cached retriever for this session
-        cached_data = session_cache.get(session_id)
+        cached_data = session_manager.get_session(session_id)
         print(
             f"Session cache lookup - ID: {session_id}, Found: {cached_data is not None}"
         )
 
         if cached_data:
             print(f"Cache contents for {session_id}: {list(cached_data.keys())}")
+
         retriever = None
         llm = None
 
         print("Session ID:", session_id)
         print("Is follow-up:", is_follow_up)
-        print("Cached data:", cached_data)
+        print("Cached data:", cached_data is not None)
         print("Cached KB ID:", cached_data.get("kb_id") if cached_data else None)
         print("KB ID:", kb_id)
 
         if is_follow_up and cached_data and cached_data.get("kb_id") == kb_id:
             print(f"Using cached resources for session {session_id}")
+            
+            # Try to get objects from cache
             retriever = cached_data.get("retriever")
             llm = cached_data.get("llm")
+            
+            # Check if objects need rebuilding and rebuild them gracefully
+            if (session_manager.session_needs_rebuild(cached_data, "retriever") or 
+                session_manager.session_needs_rebuild(cached_data, "llm")):
+                print("Session objects need rebuilding - rebuilding from metadata")
+                
+                # Get cached metadata
+                temp_dir = cached_data.get("temp_dir")
+                
+                if not temp_dir:
+                    print("No temp_dir in cache - session expired")
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Session expired. Please upload your documents again.",
+                    )
+                
+                try:
+                    # Rebuild retriever if needed
+                    if session_manager.session_needs_rebuild(cached_data, "retriever"):
+                        print("Rebuilding retriever from vector database")
+                        
+                        # Get KB and embedding model
+                        kb = session.get(KnowledgeBase, kb_id)
+                        if not kb:
+                            raise HTTPException(status_code=404, detail="Knowledge base not found")
+                        
+                        # Get embedding model
+                        if kb.embedding_model_id:
+                            embedding_model = session.get(EmbeddingModel, kb.embedding_model_id)
+                        else:
+                            user = session.get(User, current_user.id)
+                            if user and user.default_embedding_model:
+                                embedding_model = session.get(EmbeddingModel, user.default_embedding_model)
+                            else:
+                                embedding_model = session.exec(
+                                    select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
+                                ).first()
+                        
+                        if not embedding_model:
+                            raise HTTPException(status_code=404, detail="No embedding model found")
+                        
+                        # Rebuild embeddings and vector store
+                        embeddings = load_embeddings_model(
+                            provider=embedding_model.provider, 
+                            model_id=embedding_model.model_id
+                        )
+                        
+                        # Reconnect to existing vector database
+                        chroma_db = Chroma(
+                            persist_directory=temp_dir, 
+                            embedding_function=embeddings
+                        )
+                        
+                        # Rebuild retriever
+                        retriever = create_ensemble_retriever(
+                            chroma_db=chroma_db,
+                            vector_weight=0.7,
+                            keyword_weight=0.3,
+                            search_kwargs={"k": settings.RAG_NUM_CHUNKS},
+                        )
+                        print("Successfully rebuilt retriever")
+                    
+                    # Rebuild LLM if needed
+                    if session_manager.session_needs_rebuild(cached_data, "llm"):
+                        print("Rebuilding LLM")
+                        
+                        # Get KB and LLM model
+                        kb = session.get(KnowledgeBase, kb_id)
+                        if use_default_models:
+                            llm = get_default_llm(session, current_user)
+                        else:
+                            llm_model = session.get(LlmModel, kb.llm_model_id)
+                            if llm_model:
+                                llm = create_llm(
+                                    llm_model.provider, llm_model.model_id, temperature=0.0
+                                )
+                            else:
+                                llm = get_default_llm(session, current_user)
+                        print("Successfully rebuilt LLM")
+                    
+                    # Update session cache with rebuilt objects
+                    updated_session_data = cached_data.copy()
+                    updated_session_data["retriever"] = retriever
+                    updated_session_data["llm"] = llm
+                    session_manager.set_session(session_id, updated_session_data)
+                    print("Updated session cache with rebuilt objects")
+                    
+                except Exception as e:
+                    print(f"Failed to rebuild session objects: {e}")
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Session expired. Please upload your documents again.",
+                    )
 
         # If no cached retriever, we need to set everything up
         if not retriever:
@@ -738,7 +802,7 @@ async def query_knowledge_base(
                     llm = get_default_llm(session, current_user)
 
             # Cache the resources
-            session_cache.set(
+            session_manager.set_session(
                 session_id,
                 {
                     "kb_id": kb_id,
@@ -919,13 +983,127 @@ async def query_document(
 
         if is_follow_up and session_id:
             print("Using cached resources for follow-up question")
-            cached_data = session_cache.get(session_id)
+            cached_data = session_manager.get_session(session_id)
             if cached_data:
-                print(f"Using cached resources for document session {session_id}")
+                print(f"Found session data for {session_id}")
+                
+                # Try to use existing objects first
                 retriever = cached_data.get("retriever")
                 llm = cached_data.get("llm")
+                
+                # Check if objects need rebuilding (after Redis deserialization)
+                retriever_needs_rebuild = session_manager.session_needs_rebuild(cached_data, "retriever")
+                llm_needs_rebuild = session_manager.session_needs_rebuild(cached_data, "llm")
+                
+                if retriever_needs_rebuild or llm_needs_rebuild:
+                    print("Session objects need rebuilding - rebuilding from cached metadata")
+                    
+                    # We have session metadata, so we can rebuild the objects
+                    vector_dir = cached_data.get("vector_dir")
+                    file_names = cached_data.get("file_names", [])
+                    
+                    if not vector_dir or not file_names:
+                        print("Session metadata incomplete - cannot rebuild")
+                        raise HTTPException(
+                            status_code=400,
+                            detail="Session expired. Please upload your documents again.",
+                        )
+                    
+                    print(f"Rebuilding session from vector_dir: {vector_dir}, files: {file_names}")
+                    
+                    # Rebuild the retriever if needed
+                    if retriever_needs_rebuild:
+                        print("Rebuilding retriever from vector database")
+                        try:
+                            # Get user's default embedding model for rebuilding
+                            user = session.get(User, current_user.id)
+                            if user and user.default_embedding_model:
+                                embedding_model = session.get(EmbeddingModel, user.default_embedding_model)
+                            else:
+                                embedding_model = session.exec(
+                                    select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
+                                ).first()
+                            
+                            if not embedding_model:
+                                raise HTTPException(status_code=404, detail="No embedding model found")
+                            
+                            # Rebuild embeddings and vector store
+                            embeddings = load_embeddings_model(
+                                provider=embedding_model.provider, 
+                                model_id=embedding_model.model_id
+                            )
+                            
+                            # Reconnect to existing vector database
+                            vector_store = Chroma(
+                                persist_directory=vector_dir, 
+                                embedding_function=embeddings
+                            )
+                            
+                            # Rebuild retriever
+                            retriever = create_ensemble_retriever(
+                                chroma_db=vector_store,
+                                vector_weight=0.7,
+                                keyword_weight=0.3,
+                                search_kwargs={"k": 5},
+                            )
+                            print("Successfully rebuilt retriever")
+                            
+                        except Exception as e:
+                            print(f"Failed to rebuild retriever: {e}")
+                            raise HTTPException(
+                                status_code=400,
+                                detail="Session expired. Please upload your documents again.",
+                            )
+                    
+                    # Rebuild the LLM if needed
+                    if llm_needs_rebuild:
+                        print("Rebuilding LLM")
+                        try:
+                            # Get user's default LLM model
+                            user = session.get(User, current_user.id)
+                            if user and user.default_llm:
+                                llm_model = session.get(LlmModel, user.default_llm)
+                            else:
+                                llm_model = session.exec(
+                                    select(LlmModel).where(LlmModel.owner_id.is_(None))
+                                ).first()
+                            
+                            if not llm_model:
+                                raise HTTPException(status_code=404, detail="No LLM model found")
+                            
+                            # Rebuild LLM
+                            llm = create_llm(
+                                provider=llm_model.provider,
+                                model_id=llm_model.model_id,
+                                temperature=0.0,
+                            )
+                            print("Successfully rebuilt LLM")
+                            
+                        except Exception as e:
+                            print(f"Failed to rebuild LLM: {e}")
+                            raise HTTPException(
+                                status_code=400,
+                                detail="Session expired. Please upload your documents again.",
+                            )
+                    
+                    # Update the session cache with rebuilt objects
+                    updated_session_data = cached_data.copy()
+                    updated_session_data["retriever"] = retriever
+                    updated_session_data["llm"] = llm
+                    session_manager.set_session(session_id, updated_session_data)
+                    print("Updated session cache with rebuilt objects")
+                
+                # Verify we have working objects
+                if not retriever or not llm:
+                    print("Session missing required objects after rebuild attempt")
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Session incomplete. Please upload your documents again.",
+                    )
+                    
+                print("Successfully restored session objects")
             else:
-                # For follow-up questions, verify we have cached data
+                # Session not found in Redis
                 raise HTTPException(
                     status_code=400,
                     detail="Session not found. Please upload your documents again.",
@@ -1034,7 +1212,7 @@ async def query_document(
                 session_id = str(uuid.uuid4())
 
             # Cache the resources
-            session_cache.set(
+            session_manager.set_session(
                 session_id,
                 {
                     "retriever": retriever,
@@ -1118,7 +1296,7 @@ async def query_document(
             document_names = [file.filename for file in files]
         else:
             # For follow-up questions, get from cache
-            cached_data = session_cache.get(session_id)
+            cached_data = session_manager.get_session(session_id)
             document_names = cached_data.get("file_names", []) if cached_data else []
 
         # After generating the answer and before returning:
@@ -1154,7 +1332,7 @@ async def query_document(
 
     finally:
         # Only clean up temp files if not cached
-        if temp_paths and not is_follow_up and not session_cache.get(session_id):
+        if temp_paths and not is_follow_up and not session_manager.get_session(session_id):
             for temp_path in temp_paths:
                 try:
                     os.unlink(temp_path)
@@ -1182,12 +1360,16 @@ async def query_text(
             session_id = str(uuid.uuid4())
 
         # Check if we have a cached LLM for this session
-        cached_data = session_cache.get(session_id)
+        cached_data = session_manager.get_session(session_id)
         llm = None
 
         if is_follow_up and cached_data:
             print(f"Using cached LLM for session {session_id}")
-            llm = cached_data.get("llm")
+            # Check if LLM needs rebuilding
+            if not session_manager.session_needs_rebuild(cached_data, "llm"):
+                llm = cached_data.get("llm")
+            else:
+                print("LLM needs rebuilding due to deserialization")
 
         # If no cached LLM, get a new one
         if not llm:
@@ -1196,7 +1378,7 @@ async def query_text(
             llm = get_default_llm(session, current_user)
             print("Default LLM model retrieved")
             # Cache the LLM
-            session_cache.set(session_id, {"llm": llm, "type": "text_query"})
+            session_manager.set_session(session_id, {"llm": llm, "type": "text_query"})
             print("LLM cached for session", session_id)
 
         # Rephrase the question using chat history if available
