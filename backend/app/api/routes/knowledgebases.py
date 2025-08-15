@@ -161,7 +161,29 @@ def load_correct_embeddings_model(
         model_id: The ID of the embedding model.
         provider: The provider of the embedding model.
     """
-    if embedding_model_id:
+    from app.core.config import settings
+    
+    # Check if model selection is disabled (OpenAI-only mode)
+    if not settings.ENABLE_MODEL_SELECTION:
+        print(f"Model selection disabled, forcing default embedding: {settings.FORCE_DEFAULT_EMBEDDING}")
+        # Force the configured default regardless of user preference or explicit model ID
+        forced_model = session.exec(
+            select(EmbeddingModel).where(
+                EmbeddingModel.owner_id.is_(None),
+                EmbeddingModel.model_id == settings.FORCE_DEFAULT_EMBEDDING
+            )
+        ).first()
+        
+        if forced_model:
+            model_id = forced_model.model_id
+            provider = forced_model.provider
+            print(f"✅ Using forced embedding model: {model_id} from provider: {provider}")
+        else:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Forced embedding model {settings.FORCE_DEFAULT_EMBEDDING} not found. Please check your system configuration."
+            )
+    elif embedding_model_id:
         print("Using provided embedding model ID:", embedding_model_id)
         # Verify the embedding model exists
         model = session.get(EmbeddingModel, embedding_model_id)
@@ -189,9 +211,18 @@ def load_correct_embeddings_model(
 
         # Fallback to system default if user has no default
         if not model_id or not provider:
-            default_model = session.exec(
-                select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
-            ).first()
+            if not settings.ENABLE_MODEL_SELECTION:
+                default_model = session.exec(
+                    select(EmbeddingModel).where(
+                        EmbeddingModel.owner_id.is_(None),
+                        EmbeddingModel.model_id == settings.FORCE_DEFAULT_EMBEDDING
+                    )
+                ).first()
+            else:
+                default_model = session.exec(
+                    select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
+                ).first()
+                
             print("System default embedding model:", default_model)
             if default_model:
                 model_id = default_model.model_id

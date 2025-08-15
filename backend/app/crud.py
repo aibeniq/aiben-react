@@ -121,22 +121,32 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
 
     # If model selection is disabled, force the configured default
     if not settings.ENABLE_MODEL_SELECTION:
+        print(f"Model selection disabled, forcing embedding: {settings.FORCE_DEFAULT_EMBEDDING}")
         for model in system_embeddings:
             if (
                 model.model_id == settings.FORCE_DEFAULT_EMBEDDING
                 and model.provider.value.lower() in enabled_embedding_providers
             ):
                 default_embedding = model
+                print(f"✅ Found forced embedding model: {model.model_id} (provider: {model.provider})")
                 break
+        
+        if not default_embedding:
+            print(f"⚠️ Warning: Forced embedding model {settings.FORCE_DEFAULT_EMBEDDING} not found or provider not enabled")
+            print(f"Available embedding models: {[m.model_id for m in system_embeddings]}")
+            print(f"Enabled embedding providers: {enabled_embedding_providers}")
     else:
         # Normal logic - find first system embedding model with enabled provider
         for model in system_embeddings:
             if model.provider.value.lower() in enabled_embedding_providers:
                 default_embedding = model
+                print(f"Using default embedding model: {model.model_id} (provider: {model.provider})")
                 break
 
     if default_embedding:
         db_obj.default_embedding_model = default_embedding.id
+    else:
+        print("⚠️ Warning: No suitable embedding model found for new user")
 
     # Save the user with default models
     session.add(db_obj)
