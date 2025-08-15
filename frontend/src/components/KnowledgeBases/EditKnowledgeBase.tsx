@@ -59,7 +59,6 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
       const result = await KnowledgeBasesService.readKnowledgeBase({ id: item.id })
       console.log("📊 Knowledge base API response:", result)
       console.log("📊 Embedding model ID:", result.embedding_model_id)
-      console.log("📊 Embedding model ID:", result.embedding_model_id)
       return result
     },
     enabled: isOpen, // Only fetch when dialog is open
@@ -269,16 +268,6 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                     {...register("description")}
                     placeholder="Description"
                     type="text"
-                  />
-                </Field>
-
-                <Field label="Embedding Model">
-                  <Input
-                    value={knowledgeBase?.embedding_model_id || "Default"}
-                    disabled
-                    placeholder="Embedding Model (cannot be changed)"
-                    bg="gray.50"
-                    _dark={{ bg: "gray.700" }}
                   />
                 </Field>
 
