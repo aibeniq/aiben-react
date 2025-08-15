@@ -176,6 +176,15 @@ class Settings(BaseSettings):
     QUOTA_PERIOD_START_DAY: int = 1  # Day of month when quota period starts (1-28)
     QUOTA_PERIOD_MAX_TOKENS: int = 50_000_000  # Maximum tokens per quota period
 
+    # Model Selection Configuration
+    ENABLE_MODEL_SELECTION: bool = True  # Set to False to disable model selection UI
+    FORCE_DEFAULT_LLM: str = (
+        "gpt-4o-mini"  # Default LLM when model selection is disabled
+    )
+    FORCE_DEFAULT_EMBEDDING: str = (
+        "text-embedding-3-small"  # Default embedding when disabled
+    )
+
     @computed_field
     @property
     def llm_providers(self) -> list[str]:

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Model Selection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        .debug-output {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Model Selection Debug Tool</h1>
+        
+        <div class="status info">
+            <strong>Purpose:</strong> This tool tests the Model Selection hiding functionality by calling the backend API directly.
+        </div>
+
+        <h2>Test Results</h2>
+        <div id="results"></div>
+
+        <h2>Actions</h2>
+        <button onclick="testBackendDirect()">Test Backend Direct (Port 8000)</button>
+        <button onclick="testBackendProxy()">Test Backend via Proxy</button>
+        <button onclick="testFrontendLogic()">Test Frontend Logic</button>
+        <button onclick="clearResults()">Clear Results</button>
+
+        <h2>Expected Behavior</h2>
+        <div class="status info">
+            <strong>When ENABLE_MODEL_SELECTION=false:</strong><br>
+            • Backend API should return: {"enable_model_selection": false}<br>
+            • Frontend should hide the "Model Selection" tab from navigation<br>
+            • Only these tabs should be visible: Dashboard, Review, Generate, Compare, Match, Knowledge Bases, Archive, Settings, Admin
+        </div>
+    </div>
+
+    <script>
+        function addResult(title, status, content) {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.innerHTML = `
+                <h3>${title}</h3>
+                <div class="status ${status}">
+                    <div class="debug-output">${content}</div>
+                </div>
+            `;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testBackendDirect() {
+            try {
+                addResult('🔍 Testing Backend Direct (Port 8000)', 'info', 'Making request to http://localhost:8000/api/v1/utils/system-config...');
+                
+                const response = await fetch('http://localhost:8000/api/v1/utils/system-config');
+                const data = await response.json();
+                
+                const analysis = analyzeSystemConfig(data);
+                addResult('✅ Backend Direct Test', 'success', 
+                    `Status: ${response.status}\n` +
+                    `Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                    `Analysis:\n${analysis}`
+                );
+            } catch (error) {
+                addResult('❌ Backend Direct Test', 'error', 
+                    `Error: ${error.message}\n\n` +
+                    `This usually means:\n` +
+                    `• Backend container is not running\n` +
+                    `• Backend is not accessible on port 8000\n` +
+                    `• CORS is blocking the request`
+                );
+            }
+        }
+
+        async function testBackendProxy() {
+            try {
+                addResult('🔍 Testing Backend via Proxy', 'info', 'Making request to /api/v1/utils/system-config...');
+                
+                const response = await fetch('/api/v1/utils/system-config');
+                const data = await response.json();
+                
+                const analysis = analyzeSystemConfig(data);
+                addResult('✅ Backend Proxy Test', 'success', 
+                    `Status: ${response.status}\n` +
+                    `Response: ${JSON.stringify(data, null, 2)}\n\n` +
+                    `Analysis:\n${analysis}`
+                );
+            } catch (error) {
+                addResult('❌ Backend Proxy Test', 'error', 
+                    `Error: ${error.message}\n\n` +
+                    `This usually means:\n` +
+                    `• Traefik proxy is not configured correctly\n` +
+                    `• Frontend is not served from the same domain\n` +
+                    `• API routing is not working`
+                );
+            }
+        }
+
+        function testFrontendLogic() {
+            addResult('🔍 Testing Frontend Logic', 'info', 'Simulating frontend navigation filtering...');
+            
+            // Simulate the categories from SidebarItems.tsx
+            const categories = [
+                {
+                    name: null,
+                    items: [{ icon: "FiHome", title: "Dashboard", path: "/" }],
+                },
+                {
+                    name: "Tools",
+                    icon: "FiTool",
+                    items: [
+                        { icon: "FiCheckCircle", title: "Review", path: "/review" },
+                        { icon: "FiFilePlus", title: "Generate", path: "/generate" },
+                        { icon: "FaBalanceScale", title: "Compare", path: "/compare" },
+                        { icon: "TbPlugConnected", title: "Match", path: "/match" },
+                    ],
+                },
+                {
+                    name: "Configurations",
+                    icon: "FiPackage",
+                    items: [
+                        { icon: "FiCpu", title: "Model Selection", path: "/model-selection" },
+                        { icon: "FiDatabase", title: "Knowledge Bases", path: "/knowledge-bases" },
+                        { icon: "FiArchive", title: "Archive", path: "/archive" },
+                        { icon: "FiSettings", title: "Settings", path: "/settings" },
+                    ],
+                },
+            ];
+
+            // Test with enable_model_selection = false
+            const testConfig = { enable_model_selection: false };
+            const filteredCategories = getFilteredCategories(categories, testConfig, false);
+            
+            const allItems = filteredCategories.flatMap(cat => cat.items.map(item => item.title));
+            const hasModelSelection = allItems.includes("Model Selection");
+            
+            const result = 
+                `Test Configuration: ${JSON.stringify(testConfig, null, 2)}\n\n` +
+                `Filtered Navigation Items:\n${allItems.join(', ')}\n\n` +
+                `Model Selection Visible: ${hasModelSelection}\n\n` +
+                `Expected: Model Selection should NOT be visible\n` +
+                `Result: ${hasModelSelection ? '❌ FAIL - Model Selection is still visible!' : '✅ PASS - Model Selection is hidden'}`
+            
+            addResult('🔍 Frontend Logic Test', hasModelSelection ? 'error' : 'success', result);
+        }
+
+        function getFilteredCategories(categories, systemConfig, isLoading) {
+            const filtered = [...categories];
+            const shouldShowModelSelection = isLoading || systemConfig?.enable_model_selection !== false;
+
+            if (!shouldShowModelSelection) {
+                const configIndex = filtered.findIndex((category) => category.name === "Configurations");
+                if (configIndex !== -1) {
+                    filtered[configIndex] = {
+                        ...filtered[configIndex],
+                        items: filtered[configIndex].items.filter((item) => item.path !== "/model-selection"),
+                    };
+                }
+            }
+
+            return filtered;
+        }
+
+        function analyzeSystemConfig(config) {
+            const issues = [];
+            const checks = [];
+
+            if (config.enable_model_selection === false) {
+                checks.push('✅ enable_model_selection is correctly set to false');
+            } else if (config.enable_model_selection === true) {
+                issues.push('❌ enable_model_selection is true (should be false)');
+            } else {
+                issues.push('❌ enable_model_selection is missing or invalid');
+            }
+
+            if (config.force_default_llm === 'gpt-4o-mini') {
+                checks.push('✅ force_default_llm is correctly set to gpt-4o-mini');
+            } else {
+                issues.push(`❌ force_default_llm is "${config.force_default_llm}" (should be "gpt-4o-mini")`);
+            }
+
+            if (config.force_default_embedding === 'text-embedding-3-small') {
+                checks.push('✅ force_default_embedding is correctly set to text-embedding-3-small');
+            } else {
+                issues.push(`❌ force_default_embedding is "${config.force_default_embedding}" (should be "text-embedding-3-small")`);
+            }
+
+            return checks.concat(issues).join('\n');
+        }
+
+        // Auto-run tests when page loads
+        window.addEventListener('load', () => {
+            addResult('🚀 Auto-Testing', 'info', 'Running automatic tests...');
+            setTimeout(() => {
+                testFrontendLogic();
+                testBackendDirect();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
