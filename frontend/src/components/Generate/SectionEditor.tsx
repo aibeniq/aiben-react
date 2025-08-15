@@ -19,7 +19,10 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
   onSectionsChange,
   onStructuredSectionsChange,
 }) => {
-  const [sectionItems, setSectionItems] = useState<SectionItem[]>([])
+  // Initialize with an empty section by default to ensure there's always a text box
+  const [sectionItems, setSectionItems] = useState<SectionItem[]>([
+    { id: crypto.randomUUID(), text: "", consultDocuments: true }
+  ])
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [isInitializing, setIsInitializing] = useState(false)
   const lastSectionsValueRef = useRef<string>("")
