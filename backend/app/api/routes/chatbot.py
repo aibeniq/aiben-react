@@ -857,24 +857,38 @@ async def query_knowledge_base(
                 match = re.search(r"^[^_]*_(.+)$", raw_filename)
                 if match:
                     # Use the captured group (everything after the underscore)
-                    filename = match.group(1)
+                    truncated_filename = match.group(1)
                 else:
                     # Fallback to the original filename if no underscore found
-                    filename = raw_filename
+                    truncated_filename = raw_filename
 
                 # Debug info
-                print(f"Looking up source with filename: {filename}")
+                print(f"Looking up source with filename: {truncated_filename}")
 
-                # Try to find the source by name
+                # Try to find the source by truncated name first
                 source_entry = session.exec(
-                    select(SourceORM).where(SourceORM.name == filename)
+                    select(SourceORM).where(SourceORM.name == truncated_filename)
                 ).first()
+
+                # 🚨 NEW FALLBACK: If not found with truncated name, try the whole filename
+                if not source_entry:
+                    print(f"No source entry found for truncated filename: {truncated_filename}")
+                    print(f"Trying with full filename: {raw_filename}")
+                    
+                    source_entry = session.exec(
+                        select(SourceORM).where(SourceORM.name == raw_filename)
+                    ).first()
+                    
+                    if source_entry:
+                        print(f"✅ Found source entry with full filename: {raw_filename}")
+                    else:
+                        print(f"❌ No source entry found for either truncated or full filename")
 
                 if source_entry:
                     print(f"Found source entry with ID: {source_entry.source_data_id}")
                     metadata["source_data_id"] = str(source_entry.source_data_id)
                 else:
-                    print(f"No source entry found for filename: {filename}")
+                    print(f"No source entry found for filename: {truncated_filename} or {raw_filename}")
 
             source = {
                 "content": doc.page_content,  # Remove 300 character truncation
