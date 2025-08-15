@@ -67,18 +67,6 @@ def initialize_default_models(session: SessionDep):
     # List of default models to ensure exist
     default_models = [
         {
-            "name": "GPT-4o Mini (System Default)",
-            "model_id": "gpt-4o-mini",
-            "provider": ModelProvider.OPENAI,
-            "description": "OpenAI's GPT-4o Mini model - system default for all users.",
-        },
-        {
-            "name": "OpenAI Embeddings 3 Small (System Default)",
-            "model_id": "text-embedding-3-small",
-            "provider": ModelProvider.OPENAI,
-            "description": "OpenAI's compact embedding model - system default for all users.",
-        },
-        {
             "name": "MiniLM-L6-v2",
             "model_id": "all-MiniLM-L6-v2",
             "provider": ModelProvider.HUGGINGFACE,
