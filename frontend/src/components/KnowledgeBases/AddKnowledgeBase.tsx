@@ -328,6 +328,8 @@ const AddKnowledgeBase = () => {
                   />
                 </Field>
 
+                {/* Comment out or remove this entire Field block to hide the embedding model dropdown */}
+                {/*
                 <Field label="Embedding Model">
                   <select
                     value={selectedEmbeddingModelId || ""}
@@ -347,6 +349,7 @@ const AddKnowledgeBase = () => {
                     ))}
                   </select>
                 </Field>
+                */}
 
                 {/* Drag-and-Drop File Upload */}
                 <Box
