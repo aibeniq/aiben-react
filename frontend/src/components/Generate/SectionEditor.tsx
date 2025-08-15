@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { VStack, HStack, Textarea, Text, Switch, IconButton, Box } from "@chakra-ui/react"
 import { FiTrash2, FiChevronUp, FiChevronDown } from "react-icons/fi"
+import { generateUUID } from "../../utils/uuid"
 
 interface SectionItem {
   id: string
@@ -21,7 +22,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
 }) => {
   // Initialize with an empty section by default to ensure there's always a text box
   const [sectionItems, setSectionItems] = useState<SectionItem[]>([
-    { id: crypto.randomUUID(), text: "", consultDocuments: true }
+    { id: generateUUID(), text: "", consultDocuments: true }
   ])
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [isInitializing, setIsInitializing] = useState(false)
@@ -51,7 +52,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
             const items = parsedSections
               .filter((item) => item && typeof item === "object" && typeof item.text === "string")
               .map((item) => ({
-                id: item.id || crypto.randomUUID(),
+                id: item.id || generateUUID(),
                 text: item.text,
                 consultDocuments: item.consultDocuments !== undefined ? item.consultDocuments : true,
               }))
@@ -60,7 +61,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
             
             // Ensure there's always an empty section at the end
             if (items.length === 0 || items[items.length - 1].text.trim() !== "") {
-              items.push({ id: crypto.randomUUID(), text: "", consultDocuments: true })
+              items.push({ id: generateUUID(), text: "", consultDocuments: true })
             }
             setSectionItems(items)
             lastSectionsValueRef.current = sections
@@ -74,12 +75,12 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
             .split("\n")
             .filter((line) => line.trim())
             .map((text) => ({
-              id: crypto.randomUUID(),
+              id: generateUUID(),
               text: text.trim(),
               consultDocuments: true,
             }))
           // Ensure there's always an empty section at the end
-          items.push({ id: crypto.randomUUID(), text: "", consultDocuments: true })
+          items.push({ id: generateUUID(), text: "", consultDocuments: true })
           setSectionItems(items)
           lastSectionsValueRef.current = sections
           return // Exit early - don't run the else block!
@@ -88,7 +89,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
       
       // Only run this if we didn't successfully parse above
       console.log("SectionEditor: No valid sections, creating empty section")
-      setSectionItems([{ id: crypto.randomUUID(), text: "", consultDocuments: true }])
+      setSectionItems([{ id: generateUUID(), text: "", consultDocuments: true }])
       lastSectionsValueRef.current = sections
       
       // DON'T set initialization to false here - do it in a separate useEffect that watches sectionItems
@@ -115,7 +116,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
       if (field === "text" && value.trim() !== "") {
         const itemIndex = currentItems.findIndex((item) => item.id === id)
         if (itemIndex === currentItems.length - 1) {
-          updatedItems.push({ id: crypto.randomUUID(), text: "", consultDocuments: true })
+          updatedItems.push({ id: generateUUID(), text: "", consultDocuments: true })
         }
       }
 
@@ -128,7 +129,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
       const updated = currentItems.filter((item) => item.id !== id)
       // Ensure we always have at least one empty section
       if (updated.length === 0 || updated[updated.length - 1].text.trim() !== "") {
-        updated.push({ id: crypto.randomUUID(), text: "", consultDocuments: true })
+        updated.push({ id: generateUUID(), text: "", consultDocuments: true })
       }
       return updated
     })

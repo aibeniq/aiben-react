@@ -4,6 +4,7 @@ import { FiEye, FiCopy, FiTrash2, FiPlus } from "react-icons/fi"
 import { ReportGenieOutline, ReportgenieService, KnowledgeBasePublic } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import OutlineModal from "./OutlineModal"
+import { generateUUID } from "../../utils/uuid"
 
 interface OutlineTableProps {
   outlines: ReportGenieOutline[]
@@ -187,7 +188,7 @@ const OutlineTable = ({
         console.log("🔍 OutlineTable: Failed to parse sections as JSON, treating as plain text:", error)
         // If parsing fails, treat as plain text and convert to structured format
         sectionsString = JSON.stringify([{
-          id: crypto.randomUUID(),
+          id: generateUUID(),
           text: outline.sections,
           consultDocuments: true
         }])
@@ -248,7 +249,7 @@ const OutlineTable = ({
     setOutlineName("")
     setOutlineDescription("")
     // Initialize with an empty section for immediate editing
-    onSectionsChange(JSON.stringify([{ id: crypto.randomUUID(), text: "", consultDocuments: true }]))
+    onSectionsChange(JSON.stringify([{ id: generateUUID(), text: "", consultDocuments: true }]))
     setIsModalOpen(true)
   }
 
