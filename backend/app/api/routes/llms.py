@@ -12,6 +12,7 @@ from langchain_aws import ChatBedrock
 from langchain_core.messages import HumanMessage
 
 from app.api.deps import CurrentUser, SessionDep
+from app.core.config import settings
 from app.services.llms import create_llm
 from app.models import (
     LlmModel,
@@ -40,6 +41,12 @@ router = APIRouter(prefix="/llm-models", tags=["llm-models"])
 # Initialize with default models
 def initialize_default_llm_models(session: SessionDep):
     default_models = [
+        {
+            "name": "GPT-4o Mini (System Default)",
+            "model_id": "gpt-4o-mini",
+            "provider": ModelProvider.OPENAI,
+            "description": "OpenAI's GPT-4o Mini model - system default for all users.",
+        },
         {
             "name": "GPT-4o Mini",
             "model_id": "gpt-4o-mini",
@@ -115,16 +122,54 @@ def get_default_llm_model(
     """
     Get the user's default LLM model (database record).
     """
+    # Initialize default models if none exist
+    initialize_default_llm_models(session)
+
+    # If model selection is disabled, force the configured default
+    if not settings.ENABLE_MODEL_SELECTION:
+        model = session.exec(
+            select(LlmModel).where(
+                LlmModel.model_id == settings.FORCE_DEFAULT_LLM,
+                LlmModel.owner_id.is_(None),
+            )
+        ).first()
+        if model:
+            return model
+
+    # Try to get the user's default LLM model
     user = session.get(User, current_user.id)
     if user and user.default_llm:
         model = session.get(LlmModel, user.default_llm)
         if model:
             return model
-    # Fallback to system default (first system model)
-    model = session.exec(select(LlmModel).where(LlmModel.owner_id.is_(None))).first()
-    if not model:
+
+    # Fallback to system default
+    enabled_providers = settings.llm_providers
+
+    # Get all system default models
+    system_defaults = session.exec(
+        select(LlmModel).where(LlmModel.owner_id.is_(None))
+    ).all()
+
+    # If model selection disabled, prioritize the forced default
+    if not settings.ENABLE_MODEL_SELECTION:
+        for model in system_defaults:
+            if (
+                model.model_id == settings.FORCE_DEFAULT_LLM
+                and model.provider.value.lower() in enabled_providers
+            ):
+                return model
+
+    # Find the first system model with an enabled provider
+    for model in system_defaults:
+        if model.provider.value.lower() in enabled_providers:
+            return model
+
+    if not system_defaults:
         raise HTTPException(status_code=404, detail="No default LLM found")
-    return model
+
+    # Return first available model if no enabled provider match
+    return system_defaults[0]
 
 
 @router.post("/", response_model=LlmModelPublic)

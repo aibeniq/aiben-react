@@ -1,7 +1,9 @@
+from typing import Any, Dict
 from fastapi import APIRouter, Depends
 from pydantic.networks import EmailStr
 
 from app.api.deps import get_current_active_superuser
+from app.core.config import settings
 from app.models import Message
 from app.utils.email_utils import generate_test_email, send_email
 
@@ -30,3 +32,21 @@ def test_email(email_to: EmailStr) -> Message:
 @router.get("/health-check/", response_model=bool)
 async def health_check() -> bool:
     return True
+
+
+@router.get("/system-config")
+def get_system_config() -> Dict[str, Any]:
+    """
+    Get system configuration for frontend.
+    """
+    return {
+        "enable_model_selection": settings.ENABLE_MODEL_SELECTION,
+        "force_default_llm": (
+            settings.FORCE_DEFAULT_LLM if not settings.ENABLE_MODEL_SELECTION else None
+        ),
+        "force_default_embedding": (
+            settings.FORCE_DEFAULT_EMBEDDING
+            if not settings.ENABLE_MODEL_SELECTION
+            else None
+        ),
+    }
