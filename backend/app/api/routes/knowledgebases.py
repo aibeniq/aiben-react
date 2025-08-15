@@ -300,6 +300,12 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
                 loader = TextLoader(temp_file_path, encoding="latin-1")
                 loaded_documents = loader.load()
 
+        # 🚨 CRITICAL FIX: Ensure ALL documents have correct source metadata
+        for doc in loaded_documents:
+            # Force the source to be the original filename, not temp path
+            doc.metadata['source'] = file.filename
+            print(f"✅ Set document source to: {file.filename}")
+
         return loaded_documents
     except Exception as e:
         print(f"Error processing file {file.filename}: {str(e)}")
