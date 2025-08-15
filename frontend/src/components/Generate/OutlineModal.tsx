@@ -18,6 +18,7 @@ import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
 import OptimizeOutlineModal from "./OptimizeOutlineModal"
 import FileUpload, { FileItem } from "../Common/FileUpload"
+import { generateUUID } from "../../utils/uuid"
 import { useState } from "react"
 import { ReportgenieService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
@@ -128,7 +129,7 @@ const OutlineModal = ({
       if (generatedSections.length > 0) {
         // Create structured section data with all sections having consultDocuments: true by default
         const structuredSections = generatedSections.map((section) => ({
-          id: crypto.randomUUID(),
+          id: generateUUID(),
           text: section,
           consultDocuments: true,
         }))
