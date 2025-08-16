@@ -668,6 +668,20 @@ async def process_rag_checklist(
                                                     )
                                                 ).first()
 
+                                                # 🚨 NEW FALLBACK: If not found with truncated name, try the whole filename
+                                                if not source_entry:
+                                                    print(f"No source entry found for truncated filename: {filename}")
+                                                    print(f"Trying with full filename: {raw_filename}")
+                                                    
+                                                    source_entry = session.exec(
+                                                        select(Source).where(Source.name == raw_filename)
+                                                    ).first()
+                                                    
+                                                    if source_entry:
+                                                        print(f"✅ Found source entry with full filename: {raw_filename}")
+                                                    else:
+                                                        print(f"❌ No source entry found for either truncated or full filename")
+
                                                 if source_entry:
                                                     metadata["source_data_id"] = str(
                                                         source_entry.source_data_id

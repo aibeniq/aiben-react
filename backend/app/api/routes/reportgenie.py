@@ -2582,11 +2582,12 @@ async def generate_docx(
         doc = Document()
 
         print("Adding title and date to the document...")
-        # Add a title
+        # Add a title - hard-coding it for ReportGenie because it's using the service for Compare functionality with 'Document Comparison' as title
         title_text = (
-            request.title
-            if hasattr(request, "title") and request.title
-            else "Generated Document"
+            #request.title
+            #if hasattr(request, "title") and request.title
+            #else "Generated Document"
+            "Generated Document"
         )
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER

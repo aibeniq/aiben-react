@@ -20,7 +20,6 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
 import {
   ReportgenieService,
-  TwincheckService,
   KnowledgeBasesService,
   KnowledgeBasePublic,
   ReportGenieOutline,
@@ -113,7 +112,7 @@ const ReportGenie = () => {
     try {
       setLoadingDownload(true)
 
-      const response = await TwincheckService.generateDocx({
+      const response = await ReportgenieService.generateDocx({
         requestBody: { content: generatedDocument },
       })
 

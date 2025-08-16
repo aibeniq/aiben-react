@@ -36,7 +36,7 @@ const InputArea: React.FC<InputAreaProps> = ({
     if (files.length === 0) return
 
     // Check file size limit (10MB per file)
-    const maxSize = 10 * 1024 * 1024 // 10MB
+    const maxSize = 100 * 1024 * 1024 // 100MB... upped from 10
     const oversizedFiles = files.filter((file) => file.size > maxSize)
 
     if (oversizedFiles.length > 0) {
