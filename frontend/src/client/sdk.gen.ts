@@ -111,6 +111,8 @@ import type {
   ReportgenieGetReportHistoryResponse,
   ReportgenieGetReportDetailData,
   ReportgenieGetReportDetailResponse,
+  ReportgenieDeleteReportData,
+  ReportgenieDeleteReportResponse,
   ReportgenieGetOutlinesResponse,
   ReportgenieCreateOutlineData,
   ReportgenieCreateOutlineResponse,
@@ -195,6 +197,8 @@ import type {
   VeradocGetVeradocHistoryResponse,
   VeradocGetVeradocDetailData,
   VeradocGetVeradocDetailResponse,
+  VeradocDeleteEvaluationData,
+  VeradocDeleteEvaluationResponse,
   VeradocOptimizeChecklistData,
   VeradocOptimizeChecklistResponse,
   VeradocGenerateDocxData,
@@ -1550,6 +1554,29 @@ export class ReportgenieService {
   }
 
   /**
+   * Delete Report
+   * Delete a report by ID.
+   * @param data The data for the request.
+   * @param data.reportId
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static deleteReport(
+    data: ReportgenieDeleteReportData,
+  ): CancelablePromise<ReportgenieDeleteReportResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/reportgenie/reports/{report_id}",
+      path: {
+        report_id: data.reportId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
    * Get Outlines
    * Retrieve all outlines from the database for this user.
    * @returns ReportGenieOutline Successful Response
@@ -2564,6 +2591,29 @@ export class VeradocService {
       url: "/api/v1/veradoc/history/{report_id}",
       path: {
         report_id: data.reportId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Evaluation
+   * Delete an evaluation/report by ID.
+   * @param data The data for the request.
+   * @param data.evaluationId
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static deleteEvaluation(
+    data: VeradocDeleteEvaluationData,
+  ): CancelablePromise<VeradocDeleteEvaluationResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/veradoc/evaluations/{evaluation_id}",
+      path: {
+        evaluation_id: data.evaluationId,
       },
       errors: {
         422: "Validation Error",

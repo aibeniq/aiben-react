@@ -953,6 +953,12 @@ export type ReportgenieGetReportDetailResponse = {
   [key: string]: unknown
 }
 
+export type ReportgenieDeleteReportData = {
+  reportId: string
+}
+
+export type ReportgenieDeleteReportResponse = Message
+
 export type ReportgenieGetOutlinesResponse = Array<ReportGenieOutline>
 
 export type ReportgenieCreateOutlineData = {
@@ -1213,6 +1219,12 @@ export type VeradocGetVeradocDetailData = {
 }
 
 export type VeradocGetVeradocDetailResponse = VeraDocDetailResponse
+
+export type VeradocDeleteEvaluationData = {
+  evaluationId: string
+}
+
+export type VeradocDeleteEvaluationResponse = Message
 
 export type VeradocOptimizeChecklistData = {
   customInstructions?: string | null

@@ -472,6 +472,34 @@ async def generate_report(
         )
 
 
+@router.delete("/reports/{report_id}", response_model=Message)
+def delete_report(
+    report_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
+):
+    """
+    Delete a report by ID.
+    """
+    report = session.get(LlmInteraction, report_id)
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found.")
+
+    # Ensure the current user is the owner of the report
+    if report.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="Not authorized to delete this report."
+        )
+
+    # Only allow deletion of reportgenie reports
+    if report.functionality != "reportgenie":
+        raise HTTPException(
+            status_code=400, detail="Invalid report type."
+        )
+
+    session.delete(report)
+    session.commit()
+    return Message(message="Report deleted successfully.")
+
+
 @router.get("/history", response_model=List[Dict[str, Any]])
 async def get_report_history(
     session: SessionDep,

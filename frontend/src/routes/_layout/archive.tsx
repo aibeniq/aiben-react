@@ -505,6 +505,7 @@ function Archive() {
               selectedHistoryReport={veradoc.selectedReport}
               isHistoryLoading={veradoc.isLoading}
               onLoadReport={veradoc.loadReport}
+              onDeleteReport={veradoc.deleteReport}
               emptyMessage="No previous evaluations"
               showAllUsers={showAllUsers}
               onToggleShowAllUsers={toggleShowAllUsers}
@@ -533,6 +534,7 @@ function Archive() {
               selectedHistoryReport={reportgenie.selectedReport}
               isHistoryLoading={reportgenie.isLoading}
               onLoadReport={reportgenie.loadReport}
+              onDeleteReport={reportgenie.deleteReport}
               emptyMessage="No previous reports"
               showAllUsers={showAllUsers}
               onToggleShowAllUsers={toggleShowAllUsers}
@@ -547,6 +549,7 @@ function Archive() {
               selectedHistoryReport={twincheck.selectedReport}
               isHistoryLoading={twincheck.isLoading}
               onLoadReport={twincheck.loadReport}
+              onDeleteReport={twincheck.deleteReport}
               emptyMessage="No previous comparisons"
               showAllUsers={showAllUsers}
               onToggleShowAllUsers={toggleShowAllUsers}
@@ -561,6 +564,7 @@ function Archive() {
               selectedHistoryReport={formconnect.selectedReport}
               isHistoryLoading={formconnect.isLoading}
               onLoadReport={formconnect.loadReport}
+              onDeleteReport={formconnect.deleteReport}
               emptyMessage="No previous form processing"
               showAllUsers={showAllUsers}
               onToggleShowAllUsers={toggleShowAllUsers}

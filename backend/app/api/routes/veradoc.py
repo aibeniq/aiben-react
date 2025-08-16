@@ -1047,6 +1047,34 @@ def delete_checklist(
     return Message(message="Checklist deleted successfully.")
 
 
+@router.delete("/evaluations/{evaluation_id}", response_model=Message)
+def delete_evaluation(
+    evaluation_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
+):
+    """
+    Delete an evaluation/report by ID.
+    """
+    evaluation = session.get(LlmInteraction, evaluation_id)
+    if not evaluation:
+        raise HTTPException(status_code=404, detail="Evaluation not found.")
+
+    # Ensure the current user is the owner of the evaluation
+    if evaluation.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="Not authorized to delete this evaluation."
+        )
+
+    # Only allow deletion of veradoc evaluations
+    if evaluation.functionality != "veradoc":
+        raise HTTPException(
+            status_code=400, detail="Invalid evaluation type."
+        )
+
+    session.delete(evaluation)
+    session.commit()
+    return Message(message="Evaluation deleted successfully.")
+
+
 @router.get("/history", response_model=List[Dict[str, Any]])
 async def get_veradoc_history(
     session: SessionDep,
