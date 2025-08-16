@@ -152,8 +152,8 @@ const ChecklistModal = ({
   // Optimize modal state
   const [showOptimizeModal, setShowOptimizeModal] = useState(false)
 
-  // Generate questions state
-  const [generating, setGenerating] = useState(false)
+  // Suggest questions state
+  const [suggesting, setSuggesting] = useState(false)
   const [questionsKey, setQuestionsKey] = useState(0)
   const [referenceFiles, setReferenceFiles] = useState<FileItem[]>([])
   const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<any>(null)
@@ -207,7 +207,7 @@ const ChecklistModal = ({
     showSuccessToast(`Applied ${optimizedQuestions.length} optimized questions`)
   }
 
-  const handleGenerateQuestions = async () => {
+  const handleSuggestQuestions = async () => {
     if (!checklistDescription.trim()) {
       showErrorToast("Please enter a description")
       return
@@ -218,7 +218,7 @@ const ChecklistModal = ({
       return
     }
 
-    setGenerating(true)
+    setSuggesting(true)
 
     try {
       let response
@@ -246,7 +246,7 @@ const ChecklistModal = ({
         const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
         const apiUrl = `${baseUrl}/api/v1/veradoc/generate-questions-with-files`
 
-        console.log("Generating questions with files - API URL:", apiUrl)
+        console.log("Suggesting questions with files - API URL:", apiUrl)
 
         const apiResponse = await fetch(apiUrl, {
           method: "POST",
@@ -280,11 +280,11 @@ const ChecklistModal = ({
         })
       }
 
-      // Replace current questions with generated ones
-      const generatedQuestions = response.questions || []
-      if (generatedQuestions.length > 0) {
-        // Create new questions array with generated questions plus one empty question at the end
-        const newQuestions = [...generatedQuestions, ""]
+      // Replace current questions with suggested ones
+      const suggestedQuestions = response.questions || []
+      if (suggestedQuestions.length > 0) {
+        // Create new questions array with suggested questions plus one empty question at the end
+        const newQuestions = [...suggestedQuestions, ""]
 
         // Replace the entire questions list
         updateQuestionsList(newQuestions)
@@ -297,7 +297,7 @@ const ChecklistModal = ({
         // Force re-render of question items
         setQuestionsKey((prev) => prev + 1)
 
-        let successMessage = `Generated ${generatedQuestions.length} questions from description`
+        let successMessage = `Suggested ${suggestedQuestions.length} questions from description`
         if (referenceMode === "files" && referenceFiles.length > 0) {
           successMessage += ` and ${referenceFiles.length} reference file(s)`
         } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
@@ -306,13 +306,13 @@ const ChecklistModal = ({
 
         showSuccessToast(successMessage)
       } else {
-        showErrorToast("No questions were generated. Please try a different description.")
+        showErrorToast("No questions were suggested. Please try a different description.")
       }
     } catch (error: any) {
-      console.error("Error generating questions:", error)
-      showErrorToast(`Failed to generate questions: ${error.message || "Unknown error"}`)
+      console.error("Error suggesting questions:", error)
+      showErrorToast(`Failed to suggest questions: ${error.message || "Unknown error"}`)
     } finally {
-      setGenerating(false)
+      setSuggesting(false)
     }
   }
 
@@ -364,14 +364,14 @@ const ChecklistModal = ({
                         <Textarea
                           value={checklistDescription}
                           onChange={(e) => handleDescriptionChange(e.target.value)}
-                          placeholder="Enter checklist description to auto-generate questions (minimum 10 characters)..."
+                          placeholder="Enter checklist description to auto-suggest questions (minimum 10 characters)..."
                           rows={4}
                         />
                         {checklistDescription.trim().length > 0 &&
                           checklistDescription.trim().length < 10 && (
                             <Text fontSize="xs" color="orange.600">
                               Description needs at least {10 - checklistDescription.trim().length}{" "}
-                              more characters to generate questions
+                              more characters to suggest questions
                             </Text>
                           )}
                       </Field>
@@ -385,16 +385,14 @@ const ChecklistModal = ({
                         <VStack align="stretch" gap={3}>
                           <Text fontSize="sm" color="gray.600">
                             Upload reference documents or select a Knowledge Base to help the AI
-                            understand the desired structure and requirements for the checklist
-                            questions.
+                            suggest checklist questions.
                           </Text>
 
-                          {/* Toggle between files and knowledge base */}
-                          <HStack gap={4}>
+                          {/* Reference Mode Toggle */}
+                          <HStack gap={2}>
                             <Button
                               size="sm"
                               variant={referenceMode === "files" ? "solid" : "outline"}
-                              colorPalette={referenceMode === "files" ? "blue" : "gray"}
                               onClick={() => handleReferenceModeChange("files")}
                             >
                               Upload Files
@@ -402,84 +400,79 @@ const ChecklistModal = ({
                             <Button
                               size="sm"
                               variant={referenceMode === "knowledge-base" ? "solid" : "outline"}
-                              colorPalette={referenceMode === "knowledge-base" ? "blue" : "gray"}
                               onClick={() => handleReferenceModeChange("knowledge-base")}
                               disabled={!knowledgeBases || knowledgeBases.length === 0}
                             >
-                              Select Knowledge Base
+                              Knowledge Base
                             </Button>
                           </HStack>
 
-                          {referenceMode === "files" ? (
-                            <FileUpload
-                              files={referenceFiles}
-                              onFilesChange={setReferenceFiles}
-                              maxFiles={3}
-                              showHandwrittenToggle={false}
-                            />
-                          ) : (
+                          {/* Reference Mode Content */}
+                          {referenceMode === "files" && (
                             <VStack align="stretch" gap={2}>
-                              {knowledgeBases && knowledgeBases.length > 0 ? (
-                                <VStack align="stretch" gap={2}>
-                                  <Text fontSize="xs" color="gray.600">
-                                    Select a Knowledge Base to use as reference for generating
-                                    checklist questions:
-                                  </Text>
-                                  <Box
-                                    maxH="120px"
-                                    overflowY="auto"
-                                    border="1px solid"
-                                    borderColor="gray.200"
-                                    borderRadius="md"
-                                  >
-                                    {knowledgeBases.map((kb) => (
-                                      <Box
-                                        key={kb.id}
-                                        p={2}
-                                        cursor="pointer"
-                                        _hover={{ bg: "gray.50" }}
-                                        bg={
-                                          referenceKnowledgeBase?.id === kb.id ? "blue.50" : "white"
-                                        }
-                                        borderBottom="1px solid"
-                                        borderColor="gray.100"
-                                        onClick={() => setReferenceKnowledgeBase(kb)}
-                                      >
-                                        <Text fontSize="sm" fontWeight="medium">
-                                          {kb.title}
-                                        </Text>
-                                        {kb.description && (
-                                          <Text fontSize="xs" color="gray.600" lineClamp={2}>
-                                            {kb.description}
-                                          </Text>
-                                        )}
-                                        <Text fontSize="xs" color="gray.500">
-                                          {kb.number_of_sources || 0} sources
-                                        </Text>
-                                      </Box>
-                                    ))}
-                                  </Box>
-                                  {referenceKnowledgeBase && (
-                                    <Text fontSize="xs" color="green.600">
-                                      Selected: {referenceKnowledgeBase.title}
-                                    </Text>
-                                  )}
-                                </VStack>
-                              ) : (
-                                <Text fontSize="sm" color="gray.500">
-                                  No Knowledge Bases available. Create one first or switch to file
-                                  upload.
-                                </Text>
-                              )}
+                              <Text fontSize="sm" color="gray.700" fontWeight="medium">
+                                Provide reference documents for suggesting a checklist
+                              </Text>
+                              <FileUpload
+                                files={referenceFiles}
+                                onFilesChange={setReferenceFiles}
+                                acceptedFileTypes={{
+                                  "application/pdf": [".pdf"],
+                                  "application/msword": [".doc"],
+                                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                                    [".docx"],
+                                  "text/plain": [".txt"],
+                                  "text/csv": [".csv"],
+                                  "application/json": [".json"],
+                                }}
+                                maxFiles={5}
+                              />
                             </VStack>
                           )}
+
+                          {referenceMode === "knowledge-base" && (
+                            <Box>
+                              <select
+                                style={{
+                                  width: "100%",
+                                  padding: "8px",
+                                  borderRadius: "6px",
+                                  border: "1px solid #e2e8f0",
+                                }}
+                                value={referenceKnowledgeBase?.id || ""}
+                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                                  const kb = knowledgeBases?.find((kb) => kb.id === e.target.value)
+                                  setReferenceKnowledgeBase(kb || null)
+                                }}
+                              >
+                                <option value="">Select a Knowledge Base...</option>
+                                {knowledgeBases?.map((kb) => (
+                                  <option key={kb.id} value={kb.id}>
+                                    {kb.title}
+                                  </option>
+                                ))}
+                              </select>
+                              {!knowledgeBases || knowledgeBases.length === 0 ? (
+                                <Text fontSize="sm" color="orange.600">
+                                  No Knowledge Bases available. Create one first to use this feature.
+                                </Text>
+                              ) : null}
+                            </Box>
+                          )}
+
+                          {checklistDescription.trim().length < 10 &&
+                            checklistDescription.trim().length > 0 && (
+                              <Text fontSize="sm" color="gray.500">
+                                Description must be at least 10 characters to suggest questions
+                              </Text>
+                            )}
                         </VStack>
                       </Field>
                     </VStack>
 
                     {/* Right Column - Questions List */}
                     <VStack align="stretch" gap={4} flex={1} height="100%">
-                      {/* Generate and Optimize buttons above questions */}
+                      {/* Suggest and Optimize buttons above questions */}
                       <HStack justify="space-between" align="center">
                         <Text fontSize="md" fontWeight="medium">
                           Questions
@@ -487,13 +480,13 @@ const ChecklistModal = ({
                         <HStack gap={2}>
                           <Button
                             size="xs"
-                            onClick={handleGenerateQuestions}
-                            loading={generating}
-                            disabled={!checklistDescription.trim() || generating}
+                            onClick={handleSuggestQuestions}
+                            loading={suggesting}
+                            disabled={!checklistDescription.trim() || suggesting}
                             variant="outline"
                             colorPalette="green"
                           >
-                            {generating ? "Generating..." : "Generate"}
+                            {suggesting ? "Suggesting..." : "Suggest"}
                           </Button>
                           {/* Always show optimization button with tooltip when disabled */}
                           <Tooltip

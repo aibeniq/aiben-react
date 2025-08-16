@@ -10,7 +10,7 @@ import {
 } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText, FiCopy, FiCheck } from "react-icons/fi"
+import { FiFileText, FiCopy, FiCheck, FiTrash2 } from "react-icons/fi"
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
 import FileUpload, { FileItem } from "../../components/Common/FileUpload"
@@ -20,9 +20,15 @@ import FeedbackButtons from "../../components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { copyToClipboard } from "../../utils/copyToClipboard"
+import { useResults } from "../../contexts/ResultsContext"
 
 const FormConnect = () => {
-  const { showSuccessToast } = useCustomToast()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const {
+    matchResult,
+    setMatchResult,
+    clearMatchResult
+  } = useResults()
 
   const [fileItems, setFileItems] = useState<FileItem[]>([])
   const [forms, setForms] = useState<FormConnectForm[]>([])
@@ -30,12 +36,10 @@ const FormConnect = () => {
   const [formName, setFormName] = useState("")
   const [formDescription, setFormDescription] = useState("")
   const [fields, setFields] = useState("")
-  const [results, setResults] = useState("")
   const [loading, setLoading] = useState(false)
   const [showFormModal, setShowFormModal] = useState(false)
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
-  const [interactionId, setInteractionId] = useState<string | null>(null)
 
   // Copy and download states
   const [copySuccess, setCopySuccess] = useState(false)
@@ -48,10 +52,18 @@ const FormConnect = () => {
     showSuccessToast(`Thank you for marking this response as ${type}!`)
   }
 
+  // Debug effect to log context state
+  useEffect(() => {
+    console.log("Match tab - context state:", { 
+      hasResult: !!matchResult, 
+      resultsLength: matchResult?.results?.length 
+    })
+  }, [matchResult])
+
   // Function to copy results to clipboard
   const handleCopyResults = async () => {
     try {
-      await copyToClipboard(results)
+      await copyToClipboard(matchResult?.results || "")
       setCopySuccess(true)
       setTimeout(() => {
         setCopySuccess(false)
@@ -69,7 +81,7 @@ const FormConnect = () => {
       setLoadingDownload(true)
 
       const response = await FormconnectService.generateDocx({
-        requestBody: { content: results },
+        requestBody: { content: matchResult?.results || "" },
       })
 
       console.log("Received DOCX response:", response)
@@ -133,7 +145,7 @@ const FormConnect = () => {
       setLoadingCsvDownload(true)
 
       const response = await FormconnectService.generateCsv({
-        requestBody: { content: results },
+        requestBody: { content: matchResult?.results || "" },
       })
 
       console.log("Received CSV response:", response)
@@ -233,33 +245,44 @@ const FormConnect = () => {
     onSuccess: (data) => {
       console.log("Match Response data:", data)
       console.log("Match interaction_id:", data.results.interaction_id)
+      
+      const interactionId = data.results.interaction_id
+      console.log("Match interactionId for feedback:", interactionId)
+      
       // Handle both comparison and single file responses
+      let results = ""
       if (data.results.comparison) {
         console.log("Comparison data:", data.results.comparison)
-        setResults(data.results.comparison as string)
+        results = data.results.comparison as string
       } else if (data.results.message) {
-        setResults(
-          `${data.results.message}\n\n${JSON.stringify(data.results.extracted_data, null, 2)}`,
-        )
+        results = `${data.results.message}\n\n${JSON.stringify(data.results.extracted_data, null, 2)}`
       } else {
-        setResults(JSON.stringify(data.results, null, 2))
+        results = JSON.stringify(data.results, null, 2)
       }
-      setInteractionId(data.results.interaction_id as string | null)
+      
+      // Store result in global state
+      setMatchResult({
+        results: results,
+        interactionId: interactionId as string
+      })
+      
+      const searchMethod = searchMode === "vector" ? "vector search" : "full document scan"
+      showSuccessToast(`Form processing completed using ${searchMethod}!`)
     },
     onError: (error: any) => {
       console.log("Mutation unsuccessful!")
-      setResults(`Error: ${error.message}`)
+      showErrorToast(`Form processing failed: ${error.message}`)
     },
   })
 
   const handleRun = async () => {
     if (fileItems.length < 1) {
-      setResults("Please upload at least one file.")
+      showErrorToast("Please upload at least one file.")
       return
     }
 
     if (!fields.trim()) {
-      setResults("Please enter at least one field.")
+      showErrorToast("Please enter at least one field.")
       return
     }
 
@@ -287,6 +310,17 @@ const FormConnect = () => {
 
   return (
     <Container maxW="container.xl" py={8}>
+      {/* Tab description */}
+      <Text 
+        fontSize="sm" 
+        color="gray.500" 
+        textAlign="center" 
+        mb={4}
+        fontStyle="italic"
+      >
+        Ensure that documents match based on a user-defined list of fields.
+      </Text>
+      
       <VStack gap={6} align="stretch">
         <HStack width="100%" justify="space-between">
           <VStack gap={4} align="stretch" flex={1}>
@@ -332,8 +366,8 @@ const FormConnect = () => {
         <VStack
           align="stretch"
           mb={4}
-          opacity={!selectedForm ? 0.3 : 1}
-          pointerEvents={!selectedForm ? "none" : "auto"}
+          opacity={!selectedForm && !matchResult ? 0.3 : 1}
+          pointerEvents={!selectedForm && !matchResult ? "none" : "auto"}
         >
           <HStack gap={4} justify="center">
             <Button
@@ -394,7 +428,7 @@ const FormConnect = () => {
                     <Spinner size="lg" color="blue.500" />
                   </Box>
                 )}
-                {results ? (
+                {matchResult ? (
                   <>
                     {/* Copy and Download buttons */}
                     <HStack gap={2} mb={4} justifyContent="flex-end">
@@ -423,12 +457,25 @@ const FormConnect = () => {
                       >
                         Download CSV
                       </DownloadButton>
+
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        colorPalette="red"
+                        onClick={() => {
+                          clearMatchResult()
+                          showSuccessToast("Match results cleared")
+                        }}
+                      >
+                        <FiTrash2 />
+                        Clear Results
+                      </Button>
                     </HStack>
 
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{results}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{matchResult.results}</ReactMarkdown>
 
                     {/* Add feedback buttons for the match result */}
-                    {interactionId ? (
+                    {matchResult.interactionId && (
                       <Box
                         position="sticky"
                         bottom={4}
@@ -440,30 +487,11 @@ const FormConnect = () => {
                         mt={4}
                       >
                         <FeedbackButtons
-                          interactionId={interactionId}
+                          interactionId={matchResult.interactionId}
                           onFeedbackSubmitted={handleFeedbackSubmitted}
                         />
                       </Box>
-                    ) : (
-                      <Box
-                        position="sticky"
-                        bottom={4}
-                        right={4}
-                        display="flex"
-                        justifyContent="flex-end"
-                        pointerEvents="auto"
-                        zIndex={10}
-                        mt={4}
-                        bg="yellow.100"
-                        p={2}
-                        borderRadius="md"
-                      >
-                        <Text fontSize="sm" color="red.600">
-                          Debug: No interaction ID found
-                        </Text>
-                      </Box>
                     )}
-                    {console.log("Match interactionId for feedback:", interactionId)}
                   </>
                 ) : (
                   <Text color="gray.500">Results will appear here after running.</Text>

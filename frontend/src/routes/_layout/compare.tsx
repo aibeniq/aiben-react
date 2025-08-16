@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Box, Button, Container, Heading, HStack, Text, VStack, Spinner } from "@chakra-ui/react"
-import { FiUpload, FiFile, FiFileText, FiCheck, FiCopy } from "react-icons/fi"
+import { FiUpload, FiFile, FiFileText, FiCheck, FiCopy, FiTrash2 } from "react-icons/fi"
 import { useDropzone } from "react-dropzone"
 import { createFileRoute } from "@tanstack/react-router"
 import ReactMarkdown from "react-markdown"
@@ -20,9 +20,15 @@ import SelectionModal from "@/components/Common/SelectionModal"
 import TopicListTable from "@/components/Compare/TopicListTable"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import { copyToClipboard } from "@/utils/copyToClipboard"
+import { useResults } from "@/contexts/ResultsContext"
 
 const TwinCheck = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const {
+    compareResult,
+    setCompareResult,
+    clearCompareResult
+  } = useResults()
 
   const [copySuccess, setCopySuccess] = useState(false)
   const [loadingDownload, setLoadingDownload] = useState(false)
@@ -43,12 +49,9 @@ const TwinCheck = () => {
   // Knowledge base state (only for topic generation)
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
 
-  // Results state
-  const [summary, setSummary] = useState("")
-  const [topicResults, setTopicResults] = useState<any[]>([])
+  // Loading state
   const [loading, setLoading] = useState(false)
   const [expandedTopic, setExpandedTopic] = useState<number | null>(null)
-  const [interactionId, setInteractionId] = useState<string | null>(null)
 
   // Handle feedback submission
   const handleFeedbackSubmitted = (type: string) => {
@@ -56,14 +59,23 @@ const TwinCheck = () => {
     showSuccessToast(`Thank you for marking this response as ${type}!`)
   }
 
+  // Debug effect to log context state
+  useEffect(() => {
+    console.log("Compare tab - context state:", { 
+      hasResult: !!compareResult, 
+      summaryLength: compareResult?.summary?.length,
+      topicResultsCount: compareResult?.topicResults?.length 
+    })
+  }, [compareResult])
+
   // Function to copy report to clipboard
   const handleCopyReport = async () => {
     try {
       // Prepare combined text with summary and all topic analyses
-      let fullText = `# Summary\n\n${summary}\n\n# Topic Analysis\n\n`
+      let fullText = `# Summary\n\n${compareResult?.summary || ""}\n\n# Topic Analysis\n\n`
 
       // Add each topic and its analysis
-      topicResults.forEach((topic) => {
+      compareResult?.topicResults.forEach((topic: any) => {
         fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
       })
 
@@ -88,10 +100,10 @@ const TwinCheck = () => {
       setLoadingDownload(true)
 
       // Prepare combined text with summary and all topic analyses
-      let fullText = `# Summary\n\n${summary}\n\n# Topic Analysis\n\n`
+      let fullText = `# Summary\n\n${compareResult?.summary || ""}\n\n# Topic Analysis\n\n`
 
       // Add each topic and its analysis
-      topicResults.forEach((topic) => {
+      compareResult?.topicResults.forEach((topic: any) => {
         fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
       })
 
@@ -164,8 +176,8 @@ const TwinCheck = () => {
 
       // Prepare the data for CSV generation
       const csvData = {
-        summary: summary,
-        topic_results: topicResults,
+        summary: compareResult?.summary || "",
+        topic_results: compareResult?.topicResults || [],
         doc1_name: document1?.name || "Document 1",
         doc2_name: document2?.name || "Document 2",
       }
@@ -265,14 +277,21 @@ const TwinCheck = () => {
     onSuccess: (data: any) => {
       console.log("Response data:", data)
 
-      setSummary(data.results.summary || "")
-      setTopicResults(data.results.topic_analysis || [])
-      setInteractionId(data.results.interaction_id as string | null)
+      const interactionId = data.results.interaction_id
+      console.log("Compare interactionId for feedback:", interactionId)
+
+            // Store result in global state
+      setCompareResult({
+        summary: data.results.summary || "",
+        topicResults: data.results.topic_analysis || [],
+        interactionId: interactionId
+      })
+      
+      showSuccessToast("Documents compared successfully!")
     },
     onError: (error: any) => {
       console.log("Comparison failed!")
-      setSummary(`Error: ${error.message}`)
-      setTopicResults([])
+      showErrorToast(`Comparison failed: ${error.message}`)
     },
     onSettled: () => {
       setLoading(false)
@@ -329,6 +348,17 @@ const TwinCheck = () => {
 
   return (
     <Container maxW="container.xl" py={8}>
+      {/* Tab description */}
+      <Text 
+        fontSize="sm" 
+        color="gray.500" 
+        textAlign="center" 
+        mb={4}
+        fontStyle="italic"
+      >
+        Compare documents based on a user-defined list of topics.
+      </Text>
+      
       {/* Loading overlay */}
       {loading && (
         <Box
@@ -417,8 +447,8 @@ const TwinCheck = () => {
         <VStack
           align="stretch"
           mb={4}
-          opacity={!selectedComparison ? 0.3 : 1}
-          pointerEvents={!selectedComparison ? "none" : "auto"}
+          opacity={!selectedComparison && !compareResult ? 0.3 : 1}
+          pointerEvents={!selectedComparison && !compareResult ? "none" : "auto"}
         >
           <HStack gap={4} justify="center">
             <Button
@@ -451,7 +481,7 @@ const TwinCheck = () => {
               <HStack justify="space-between" align="center" mb={4}>
                 <Heading size="md">Results</Heading>
 
-                {summary && (
+                {compareResult && (
                   <HStack gap={2}>
                     <Button
                       size="sm"
@@ -478,6 +508,19 @@ const TwinCheck = () => {
                     >
                       Download CSV
                     </DownloadButton>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      colorPalette="red"
+                      onClick={() => {
+                        clearCompareResult()
+                        showSuccessToast("Comparison results cleared")
+                      }}
+                    >
+                      <FiTrash2 />
+                      Clear Results
+                    </Button>
                   </HStack>
                 )}
               </HStack>
@@ -505,7 +548,7 @@ const TwinCheck = () => {
                     <Spinner size="lg" color="blue.500" />
                   </Box>
                 )}
-                {summary || topicResults.length > 0 ? (
+                {compareResult ? (
                   <>
                     {/* Summary Section */}
                     <Heading as="h3" size="md" mb={2}>
@@ -513,18 +556,18 @@ const TwinCheck = () => {
                     </Heading>
                     <Box p={3} mb={4} borderWidth="1px" borderRadius="md" bg="bg">
                       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                        {summary}
+                        {compareResult.summary}
                       </ReactMarkdown>
                     </Box>
 
                     {/* Topic Analysis Section */}
-                    {topicResults.length > 0 && (
+                    {compareResult.topicResults.length > 0 && (
                       <Box mt={8}>
                         <Heading as="h3" size="md" mb={4}>
                           Topic Analysis
                         </Heading>
 
-                        {topicResults.map((topicResult, index) => (
+                        {compareResult.topicResults.map((topicResult, index) => (
                           <Box
                             key={index}
                             mb={6}
@@ -571,7 +614,7 @@ const TwinCheck = () => {
                     )}
 
                     {/* Add feedback buttons for the comparison result */}
-                    {interactionId && (
+                    {compareResult?.interactionId && (
                       <Box
                         position="sticky"
                         bottom={4}
@@ -583,7 +626,7 @@ const TwinCheck = () => {
                         mt={4}
                       >
                         <FeedbackButtons
-                          interactionId={interactionId}
+                          interactionId={compareResult.interactionId}
                           onFeedbackSubmitted={handleFeedbackSubmitted}
                         />
                       </Box>

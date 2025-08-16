@@ -10,6 +10,7 @@ import {
   Button,
   Text,
   IconButton,
+  Box,
 } from "@chakra-ui/react"
 import { Field } from "../ui/field"
 import { TwinCheckTopicList, TwincheckService, KnowledgeBasePublic } from "../../client"
@@ -119,7 +120,7 @@ const TopicListModal = ({
     onSave()
   }
 
-  const [generating, setGenerating] = useState(false)
+  const [suggesting, setSuggesting] = useState(false)
   const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
   const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
   const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
@@ -134,7 +135,7 @@ const TopicListModal = ({
   //   }
   // }, [selectedKnowledgeBase])
 
-  const handleGenerateTopics = async () => {
+  const handleSuggestTopics = async () => {
     if (!topicListDescription.trim()) {
       showErrorToast("Please enter a topic list description first")
       return
@@ -146,7 +147,7 @@ const TopicListModal = ({
       return
     }
 
-    setGenerating(true)
+    setSuggesting(true)
 
     try {
       let response
@@ -171,11 +172,11 @@ const TopicListModal = ({
         })
       }
 
-      // Replace current topics with generated ones
-      const generatedTopics = response.topics || []
-      if (generatedTopics.length > 0) {
-        // Replace the entire topics list with generated topics plus an empty topic for user input
-        const newTopicsList = [...generatedTopics, ""]
+      // Replace current topics with suggested ones
+      const suggestedTopics = response.topics || []
+      if (suggestedTopics.length > 0) {
+        // Replace the entire topics list with suggested topics plus an empty topic for user input
+        const newTopicsList = [...suggestedTopics, ""]
         updateTopicsFromList(newTopicsList)
 
         // Clear topics validation error if it exists
@@ -183,17 +184,17 @@ const TopicListModal = ({
           setValidationErrors(prev => ({ ...prev, topics: '' }))
         }
 
-        let successMessage = `Generated ${generatedTopics.length} topics from description`
+        let successMessage = `Suggested ${suggestedTopics.length} topics from description`
         if (exampleFiles.length > 0) {
           successMessage += ` and ${exampleFiles.length} example file(s)`
         }
 
         showSuccessToast(successMessage)
       } else {
-        showErrorToast("No topics were generated. Please try with a more detailed description.")
+        showErrorToast("No topics were suggested. Please try with a more detailed description.")
       }
     } catch (error: any) {
-      console.error("Error generating topics:", error)
+      console.error("Error suggesting topics:", error)
       console.log("Error details:", {
         message: error.message,
         status: error.status,
@@ -209,16 +210,16 @@ const TopicListModal = ({
           "Invalid request. Please check that your description meets the requirements.",
         )
       } else if (error.status === 401) {
-        showErrorToast("You need to be logged in to generate topics.")
+        showErrorToast("You need to be logged in to suggest topics.")
       } else if (error.status === 404) {
-        showErrorToast("Generate topics feature is not available. Please contact support.")
+        showErrorToast("Suggest topics feature is not available. Please contact support.")
       } else if (error.status === 500) {
         showErrorToast("Server error. Please try again later or contact support.")
       } else {
-        showErrorToast(`Failed to generate topics: ${error.message || "Unknown error"}`)
+        showErrorToast(`Failed to suggest topics: ${error.message || "Unknown error"}`)
       }
     } finally {
-      setGenerating(false)
+      setSuggesting(false)
     }
   }
 
@@ -287,7 +288,7 @@ const TopicListModal = ({
                       <Textarea
                         value={topicListDescription}
                         onChange={(e) => handleDescriptionChange(e.target.value)}
-                        placeholder="Enter topic list description to auto-generate topics (minimum 10 characters)..."
+                        placeholder="Enter topic list description to auto-suggest topics (minimum 10 characters)..."
                         resize="vertical"
                         rows={3}
                       />
@@ -295,15 +296,20 @@ const TopicListModal = ({
                         topicListDescription.trim().length < 10 && (
                           <Text fontSize="xs" color="orange.600">
                             Description needs at least {10 - topicListDescription.trim().length}{" "}
-                            more characters to generate topics
+                            more characters to suggest topics
                           </Text>
                         )}
                     </Field>
 
                     <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
 
-                    <Field label="Reference for Topic Generation (Optional)">
+                    <Field label="Reference Documents (Optional)">
                       <VStack align="stretch" gap={3}>
+                        <Text fontSize="sm" color="gray.600">
+                          Upload reference documents or select a Knowledge Base to help the AI
+                          suggest topics.
+                        </Text>
+
                         {/* Reference Mode Toggle */}
                         <HStack gap={2}>
                           <Button
@@ -323,25 +329,30 @@ const TopicListModal = ({
                         </HStack>
 
                         {/* Reference Mode Content */}
-                        {referenceMode === "files" ? (
+                        {referenceMode === "files" && (
                           <VStack align="stretch" gap={2}>
-                            <Text fontSize="sm" color="gray.600">
-                              Upload an example document to help the AI understand the desired
-                              comparison scope and style.
+                            <Text fontSize="sm" color="gray.700" fontWeight="medium">
+                              Provide reference documents for suggesting topics
                             </Text>
                             <FileUpload
                               files={exampleFiles}
                               onFilesChange={setExampleFiles}
-                              maxFiles={1}
-                              showHandwrittenToggle={false}
+                              acceptedFileTypes={{
+                                "application/pdf": [".pdf"],
+                                "application/msword": [".doc"],
+                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                                  [".docx"],
+                                "text/plain": [".txt"],
+                                "text/csv": [".csv"],
+                                "application/json": [".json"],
+                              }}
+                              maxFiles={5}
                             />
                           </VStack>
-                        ) : (
-                          <VStack align="stretch" gap={2}>
-                            <Text fontSize="sm" color="gray.600">
-                              Select a Knowledge Base to provide context and examples for topic
-                              generation.
-                            </Text>
+                        )}
+
+                        {referenceMode === "knowledge-base" && (
+                          <Box>
                             <select
                               style={{
                                 width: "100%",
@@ -367,8 +378,15 @@ const TopicListModal = ({
                                 No Knowledge Bases available. Create one first to use this feature.
                               </Text>
                             ) : null}
-                          </VStack>
+                          </Box>
                         )}
+
+                        {topicListDescription.trim().length < 10 &&
+                          topicListDescription.trim().length > 0 && (
+                            <Text fontSize="sm" color="gray.500">
+                              Description must be at least 10 characters to suggest topics
+                            </Text>
+                          )}
                       </VStack>
                     </Field>
                   </VStack>
@@ -380,22 +398,22 @@ const TopicListModal = ({
                         <HStack gap={2}>
                           <Button
                             size="xs"
-                            onClick={handleGenerateTopics}
+                            onClick={handleSuggestTopics}
                             disabled={
                               !topicListDescription.trim() ||
                               topicListDescription.trim().length < 10 ||
-                              generating
+                              suggesting
                             }
-                            loading={generating}
+                            loading={suggesting}
                             variant="outline"
                             colorPalette="green"
                             title={
                               topicListDescription.trim().length < 10
-                                ? "Description must be at least 10 characters to generate topics"
-                                : "Generate topics based on the description"
+                                ? "Description must be at least 10 characters to suggest topics"
+                                : "Suggest topics based on the description"
                             }
                           >
-                            {generating ? "Generating..." : "Generate Topics"}
+                            {suggesting ? "Suggesting..." : "Suggest"}
                           </Button>
 
                           <IconButton

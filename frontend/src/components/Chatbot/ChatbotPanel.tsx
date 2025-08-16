@@ -143,6 +143,10 @@ const ChatbotPanel = ({
               </Radio>
             </HStack>
           </RadioGroup>
+          <Text fontSize="xs" color="gray.500" mt={1}>
+            Vector search provides fast, targeted results. Full text scan reviews all
+            content in the knowledge base.
+          </Text>
         </Box>
 
         <Box p={4} overflowY="auto" flex="1" height="100%">
