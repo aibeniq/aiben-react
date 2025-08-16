@@ -18,6 +18,22 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_DB=${POSTGRES_DB?Variable not set}
 
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 1gb --maxmemory-policy allkeys-lru
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   adminer:
     image: adminer
     restart: always
@@ -57,6 +73,8 @@ services:
       db:
         condition: service_healthy
         restart: true
+      redis:
+        condition: service_healthy
     command: bash scripts/prestart.sh
     env_file:
       - .env
@@ -75,6 +93,8 @@ services:
       db:
         condition: service_healthy
         restart: true
+      redis:
+        condition: service_healthy
       prestart:
         condition: service_completed_successfully
       #ollama:
@@ -83,6 +103,7 @@ services:
       - .env
     environment:
       - DOMAIN=${DOMAIN}
+      - REDIS_URL=redis://redis:6379
       - FRONTEND_HOST=${FRONTEND_HOST?Variable not set}
       - ENVIRONMENT=${ENVIRONMENT}
       - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
@@ -198,6 +219,7 @@ services:
 
 volumes:
   app-db-data:
+  redis-data:
   #ollama-data:
 
 networks:
