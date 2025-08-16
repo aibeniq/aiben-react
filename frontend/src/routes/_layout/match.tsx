@@ -19,6 +19,7 @@ import SearchModeToggle from "../../components/Common/SearchModeToggle"
 import FeedbackButtons from "../../components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import useCustomToast from "@/hooks/useCustomToast"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 const FormConnect = () => {
   const { showSuccessToast } = useCustomToast()
@@ -50,7 +51,7 @@ const FormConnect = () => {
   // Function to copy results to clipboard
   const handleCopyResults = async () => {
     try {
-      await navigator.clipboard.writeText(results)
+      await copyToClipboard(results)
       setCopySuccess(true)
       setTimeout(() => {
         setCopySuccess(false)

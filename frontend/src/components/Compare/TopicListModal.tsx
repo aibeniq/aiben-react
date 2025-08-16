@@ -20,6 +20,7 @@ import FileUpload, { FileItem } from "../Common/FileUpload"
 import SearchModeToggle from "../Common/SearchModeToggle"
 import useCustomToast from "../../hooks/useCustomToast"
 import { FiCopy } from "react-icons/fi"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 interface TopicListModalProps {
   isOpen: boolean
@@ -59,6 +60,65 @@ const TopicListModal = ({
   knowledgeBases = [],
 }: TopicListModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
+
+  // Validation state
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+
+  // Validation function
+  const validateForm = () => {
+    const errors: {[key: string]: string} = {}
+    
+    if (!topicListName.trim()) {
+      errors.name = "Topic list name is required"
+    } else if (topicListName.trim().length < 3) {
+      errors.name = "Topic list name must be at least 3 characters long"
+    }
+    
+    if (!topicListDescription.trim()) {
+      errors.description = "Description is required"
+    }
+    
+    if (topicsList.length === 0 || topicsList.every(topic => !topic.trim())) {
+      errors.topics = "At least one topic is required"
+    }
+    
+    setValidationErrors(errors)
+    
+    // Show the first error as a toast
+    const firstError = Object.values(errors)[0]
+    if (firstError) {
+      showErrorToast(firstError)
+      return false
+    }
+    
+    return true
+  }
+
+  // Clear validation errors when user starts typing
+  const handleNameChange = (value: string) => {
+    setTopicListName(value)
+    if (validationErrors.name) {
+      setValidationErrors(prev => ({ ...prev, name: '' }))
+    }
+  }
+
+  const handleDescriptionChange = (value: string) => {
+    setTopicListDescription(value)
+    if (validationErrors.description) {
+      setValidationErrors(prev => ({ ...prev, description: '' }))
+    }
+  }
+
+  // Enhanced save handler with validation
+  const handleSave = () => {
+    if (!validateForm()) {
+      return // Stop execution if validation fails
+    }
+    
+    // Call the parent's onSave function if validation passes
+    onSave()
+  }
+
   const [generating, setGenerating] = useState(false)
   const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
   const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
@@ -117,6 +177,11 @@ const TopicListModal = ({
         // Replace the entire topics list with generated topics plus an empty topic for user input
         const newTopicsList = [...generatedTopics, ""]
         updateTopicsFromList(newTopicsList)
+
+        // Clear topics validation error if it exists
+        if (validationErrors.topics) {
+          setValidationErrors(prev => ({ ...prev, topics: '' }))
+        }
 
         let successMessage = `Generated ${generatedTopics.length} topics from description`
         if (exampleFiles.length > 0) {
@@ -186,7 +251,7 @@ const TopicListModal = ({
     }
 
     try {
-      await navigator.clipboard.writeText(nonEmptyTopics.join("\n"))
+      await copyToClipboard(nonEmptyTopics.join("\n"))
       showSuccessToast("Topics copied to clipboard!")
     } catch (error) {
       console.error("Error copying topics:", error)
@@ -210,18 +275,18 @@ const TopicListModal = ({
               <VStack align="stretch" gap={4}>
                 <HStack align="stretch" gap={4}>
                   <VStack align="stretch" gap={4} flex="1">
-                    <Field label="Topic List Name" required>
+                    <Field label="Topic List Name" required invalid={!!validationErrors.name} errorText={validationErrors.name}>
                       <Input
                         value={topicListName}
-                        onChange={(e) => setTopicListName(e.target.value)}
+                        onChange={(e) => handleNameChange(e.target.value)}
                         placeholder="Enter topic list name"
                       />
                     </Field>
 
-                    <Field label="Topic List Description">
+                    <Field label="Topic List Description" invalid={!!validationErrors.description} errorText={validationErrors.description}>
                       <Textarea
                         value={topicListDescription}
-                        onChange={(e) => setTopicListDescription(e.target.value)}
+                        onChange={(e) => handleDescriptionChange(e.target.value)}
                         placeholder="Enter topic list description to auto-generate topics (minimum 10 characters)..."
                         resize="vertical"
                         rows={3}
@@ -349,6 +414,8 @@ const TopicListModal = ({
                       </HStack>
                     }
                     required
+                    invalid={!!validationErrors.topics}
+                    errorText={validationErrors.topics}
                     py={0}
                     flex="1"
                   >
@@ -366,7 +433,13 @@ const TopicListModal = ({
                           key={index}
                           index={index}
                           topic={topic}
-                          onUpdate={updateTopic}
+                          onUpdate={(idx, value) => {
+                            updateTopic(idx, value)
+                            // Clear validation error when topics are modified
+                            if (validationErrors.topics) {
+                              setValidationErrors(prev => ({ ...prev, topics: '' }))
+                            }
+                          }}
                           onBlur={handleTopicBlur}
                           onRemove={removeTopic}
                           onMoveUp={moveTopicUp}
@@ -386,7 +459,7 @@ const TopicListModal = ({
                 <CancelButton onClick={handleModalClose} size="md">
                   Cancel
                 </CancelButton>
-                <ConfirmButton onClick={onSave} size="md">
+                <ConfirmButton onClick={handleSave} size="md">
                   {editingTopicList ? "Update Topic List" : "Create Topic List"}
                 </ConfirmButton>
               </HStack>

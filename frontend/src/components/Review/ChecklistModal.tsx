@@ -23,6 +23,7 @@ import useCustomToast from "../../hooks/useCustomToast"
 import OptimizeChecklistModal from "./OptimizeChecklistModal"
 import FileUpload from "../Common/FileUpload"
 import SearchModeToggle from "../Common/SearchModeToggle"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 interface ChecklistModalProps {
   isOpen: boolean
@@ -80,6 +81,64 @@ const ChecklistModal = ({
 }: ChecklistModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
+  // Validation state
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+
+  // Validation function
+  const validateForm = () => {
+    const errors: {[key: string]: string} = {}
+    
+    if (!checklistName.trim()) {
+      errors.name = "Checklist name is required"
+    } else if (checklistName.trim().length < 3) {
+      errors.name = "Checklist name must be at least 3 characters long"
+    }
+    
+    if (!checklistDescription.trim()) {
+      errors.description = "Description is required"
+    }
+    
+    if (questionsList.length === 0 || questionsList.every(q => !q.trim())) {
+      errors.questions = "At least one question is required"
+    }
+    
+    setValidationErrors(errors)
+    
+    // Show the first error as a toast
+    const firstError = Object.values(errors)[0]
+    if (firstError) {
+      showErrorToast(firstError)
+      return false
+    }
+    
+    return true
+  }
+
+  // Clear validation errors when user starts typing
+  const handleNameChange = (value: string) => {
+    setChecklistName(value)
+    if (validationErrors.name) {
+      setValidationErrors(prev => ({ ...prev, name: '' }))
+    }
+  }
+
+  const handleDescriptionChange = (value: string) => {
+    setChecklistDescription(value)
+    if (validationErrors.description) {
+      setValidationErrors(prev => ({ ...prev, description: '' }))
+    }
+  }
+
+  // Enhanced save handler with validation
+  const handleSave = () => {
+    if (!validateForm()) {
+      return // Stop execution if validation fails
+    }
+    
+    // Call the parent's onSave function if validation passes
+    onSave()
+  }
+
   // Handler for consult documents toggle
   const handleConsultDocumentsChange = (id: string, value: boolean) => {
     console.log("Toggle changed for question ID:", id, "new value:", value)
@@ -109,8 +168,13 @@ const ChecklistModal = ({
     const nonEmptyQuestions = questionsList.filter((q) => q.trim() !== "")
     const questionsText = nonEmptyQuestions.join("\n")
 
+    if (nonEmptyQuestions.length === 0) {
+      showErrorToast("No questions to copy")
+      return
+    }
+
     try {
-      await navigator.clipboard.writeText(questionsText)
+      await copyToClipboard(questionsText)
       showSuccessToast("Questions copied to clipboard")
     } catch (error) {
       console.error("Error copying questions:", error)
@@ -134,6 +198,12 @@ const ChecklistModal = ({
 
   const handleOptimized = (optimizedQuestions: string[]) => {
     updateQuestionsList(optimizedQuestions)
+    
+    // Clear questions validation error if it exists
+    if (validationErrors.questions) {
+      setValidationErrors(prev => ({ ...prev, questions: '' }))
+    }
+    
     showSuccessToast(`Applied ${optimizedQuestions.length} optimized questions`)
   }
 
@@ -219,6 +289,11 @@ const ChecklistModal = ({
         // Replace the entire questions list
         updateQuestionsList(newQuestions)
 
+        // Clear questions validation error if it exists
+        if (validationErrors.questions) {
+          setValidationErrors(prev => ({ ...prev, questions: '' }))
+        }
+
         // Force re-render of question items
         setQuestionsKey((prev) => prev + 1)
 
@@ -277,18 +352,18 @@ const ChecklistModal = ({
                     {/* Left Column - Basic Fields and Settings */}
                     <VStack align="stretch" gap={4} flex={1}>
                       {/* Basic Info */}
-                      <Field label="Checklist Name" required>
+                      <Field label="Checklist Name" required invalid={!!validationErrors.name} errorText={validationErrors.name}>
                         <Input
                           value={checklistName}
-                          onChange={(e) => setChecklistName(e.target.value)}
+                          onChange={(e) => handleNameChange(e.target.value)}
                           placeholder="Enter checklist name..."
                         />
                       </Field>
 
-                      <Field label="Description" required>
+                      <Field label="Description" required invalid={!!validationErrors.description} errorText={validationErrors.description}>
                         <Textarea
                           value={checklistDescription}
-                          onChange={(e) => setChecklistDescription(e.target.value)}
+                          onChange={(e) => handleDescriptionChange(e.target.value)}
                           placeholder="Enter checklist description to auto-generate questions (minimum 10 characters)..."
                           rows={4}
                         />
@@ -411,11 +486,12 @@ const ChecklistModal = ({
                         </Text>
                         <HStack gap={2}>
                           <Button
-                            size="sm"
+                            size="xs"
                             onClick={handleGenerateQuestions}
                             loading={generating}
                             disabled={!checklistDescription.trim() || generating}
-                            colorPalette="blue"
+                            variant="outline"
+                            colorPalette="green"
                           >
                             {generating ? "Generating..." : "Generate"}
                           </Button>
@@ -428,7 +504,7 @@ const ChecklistModal = ({
                             }
                           >
                             <Button
-                              size="sm"
+                              size="xs"
                               onClick={handleOptimizeClick}
                               variant="outline"
                               colorPalette="blue"
@@ -438,19 +514,24 @@ const ChecklistModal = ({
                             </Button>
                           </Tooltip>
                           <IconButton
-                            size="sm"
+                            size="xs"
                             onClick={handleCopyQuestions}
                             variant="ghost"
                             aria-label="Copy questions as text"
                             title="Copy all questions as text"
                           >
-                            <FiCopy size={14} />
+                            <FiCopy size={12} />
                           </IconButton>
                         </HStack>
                       </HStack>
 
                       {/* Questions List */}
                       <Box flex={1} minH={0}>
+                        {validationErrors.questions && (
+                          <Text fontSize="sm" color="red.500" mb={2}>
+                            {validationErrors.questions}
+                          </Text>
+                        )}
                         <VStack gap={3} align="stretch" maxH="400px" overflow="auto">
                           {questionsList.map((question, index) => (
                             <QuestionItem
@@ -482,7 +563,7 @@ const ChecklistModal = ({
                     Cancel
                   </CancelButton>
                 </Dialog.ActionTrigger>
-                <ConfirmButton onClick={onSave} size="md">
+                <ConfirmButton onClick={handleSave} size="md">
                   {editingChecklist ? "Update Checklist" : "Create Checklist"}
                 </ConfirmButton>
               </Dialog.Footer>

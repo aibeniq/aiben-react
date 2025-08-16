@@ -32,6 +32,7 @@ import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
 import KnowledgeBaseTable from "../../components/Common/KnowledgeBaseTable"
 import OutlineTable from "../../components/Generate/OutlineTable"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 const ReportGenie = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -93,7 +94,7 @@ const ReportGenie = () => {
 
   const handleCopyDocument = async () => {
     try {
-      await navigator.clipboard.writeText(generatedDocument)
+      await copyToClipboard(generatedDocument)
       setCopySuccess(true)
 
       // Reset the success icon after 2 seconds

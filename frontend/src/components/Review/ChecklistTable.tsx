@@ -5,6 +5,7 @@ import { VeraDocChecklist, VeradocService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import ChecklistModal from "./ChecklistModal"
 import { generateUUID } from "../../utils/uuid"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 interface QuestionData {
   id: string
@@ -539,7 +540,7 @@ const ChecklistTable = ({
     }
 
     try {
-      await navigator.clipboard.writeText(selectedChecklist.questions)
+      await copyToClipboard(selectedChecklist.questions)
       showSuccessToast("Questions copied to clipboard!")
     } catch (error) {
       console.error("Error copying questions:", error)

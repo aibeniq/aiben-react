@@ -34,6 +34,7 @@ import KnowledgeBaseTable from "../../components/Common/KnowledgeBaseTable"
 import ChecklistTable from "../../components/Review/ChecklistTable"
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 interface QuestionData {
   id: string
@@ -130,7 +131,7 @@ const VeraDoc = () => {
         fullText += `### Relevant Policy Context\n${pair.context}\n\n`
       })
 
-      await navigator.clipboard.writeText(fullText)
+      await copyToClipboard(fullText)
       setCopySuccess(true)
 
       // Reset the success icon after 2 seconds
