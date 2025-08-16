@@ -666,11 +666,24 @@ def create_comparison(
     """
     Save a new comparison topic set to the database.
     """
+    print(f"🐛 DEBUG: Received comparison data: {comparison}")
+    print(f"🐛 DEBUG: Name: '{comparison.name}', Topics: '{comparison.topics}', Description: '{comparison.description}'")
+    
+    # Validate required fields
+    if not comparison.name or not comparison.name.strip():
+        print(f"🐛 DEBUG: Name validation failed - name is empty or None")
+        raise HTTPException(status_code=400, detail="Comparison name is required and cannot be empty")
+    
+    if not comparison.topics or not comparison.topics.strip():
+        print(f"🐛 DEBUG: Topics validation failed - topics is empty or None")
+        raise HTTPException(status_code=400, detail="Comparison topics are required and cannot be empty")
+    
     existing_comparison = session.exec(
         select(TwinCheckTopicList).where(TwinCheckTopicList.name == comparison.name)
     ).first()
 
     if existing_comparison:
+        print(f"🐛 DEBUG: Duplicate name found - existing comparison: {existing_comparison.name}")
         raise HTTPException(
             status_code=400, detail="A comparison with this name already exists."
         )
@@ -679,6 +692,7 @@ def create_comparison(
     session.add(comparison)
     session.commit()
     session.refresh(comparison)
+    print(f"🐛 DEBUG: Successfully created comparison with ID: {comparison.id}")
     return comparison
 
 

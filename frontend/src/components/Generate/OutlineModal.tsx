@@ -133,7 +133,7 @@ const OutlineModal = ({
     onSave()
   }
 
-  const [generating, setGenerating] = useState(false)
+  const [suggesting, setSuggesting] = useState(false)
   const [showOptimizeModal, setShowOptimizeModal] = useState(false)
   const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
   const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
@@ -142,7 +142,7 @@ const OutlineModal = ({
   )
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
 
-  const handleGenerateOutline = async () => {
+  const handleSuggestOutline = async () => {
     if (!outlineDescription.trim()) {
       showErrorToast("Please enter an outline description first")
       return
@@ -162,7 +162,7 @@ const OutlineModal = ({
       return
     }
 
-    setGenerating(true)
+    setSuggesting(true)
 
     try {
       let response
@@ -198,11 +198,11 @@ const OutlineModal = ({
         })
       }
 
-      // Replace current sections with generated ones
-      const generatedSections = response.sections || []
-      if (generatedSections.length > 0) {
+      // Replace current sections with suggested ones
+      const suggestedSections = response.sections || []
+      if (suggestedSections.length > 0) {
         // Create structured section data with all sections having consultDocuments: true by default
-        const structuredSections = generatedSections.map((section) => ({
+        const structuredSections = suggestedSections.map((section) => ({
           id: generateUUID(),
           text: section,
           consultDocuments: true,
@@ -217,7 +217,7 @@ const OutlineModal = ({
           setValidationErrors(prev => ({ ...prev, sections: '' }))
         }
 
-        let successMessage = `Generated ${generatedSections.length} sections from description`
+        let successMessage = `Suggested ${suggestedSections.length} sections from description`
         if (referenceMode === "files" && exampleFiles.length > 0) {
           successMessage += ` and ${exampleFiles.length} example file(s)`
         } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
@@ -227,7 +227,7 @@ const OutlineModal = ({
 
         showSuccessToast(successMessage)
       } else {
-        showErrorToast("No sections were generated. Please try with a more detailed description.")
+        showErrorToast("No sections were suggested. Please try with a more detailed description.")
       }
     } catch (error: any) {
       console.error("Error generating outline:", error)
@@ -238,14 +238,14 @@ const OutlineModal = ({
           "Invalid request. Please check that your description meets the requirements.",
         )
       } else if (error.status === 401) {
-        showErrorToast("You need to be logged in to generate sections.")
+        showErrorToast("You need to be logged in to suggest sections.")
       } else if (error.status === 500) {
         showErrorToast("Server error. Please try again later or contact support.")
       } else {
-        showErrorToast(`Failed to generate sections: ${error.message || "Unknown error"}`)
+        showErrorToast(`Failed to suggest sections: ${error.message || "Unknown error"}`)
       }
     } finally {
-      setGenerating(false)
+      setSuggesting(false)
     }
   }
 
@@ -355,7 +355,7 @@ const OutlineModal = ({
                       <Textarea
                         value={outlineDescription}
                         onChange={(e) => handleDescriptionChange(e.target.value)}
-                        placeholder="Enter outline description to auto-generate sections (minimum 10 characters)..."
+                        placeholder="Enter outline description to auto-suggest sections (minimum 10 characters)..."
                         resize="vertical"
                         rows={3}
                       />
@@ -363,7 +363,7 @@ const OutlineModal = ({
                         outlineDescription.trim().length < 10 && (
                           <Text fontSize="xs" color="orange.600">
                             Description needs at least {10 - outlineDescription.trim().length} more
-                            characters to generate sections
+                            characters to suggest sections
                           </Text>
                         )}
                     </Field>
@@ -374,16 +374,14 @@ const OutlineModal = ({
                       <VStack align="stretch" gap={3}>
                         <Text fontSize="sm" color="gray.600">
                           Upload reference documents or select a Knowledge Base to help the AI
-                          understand the desired structure and requirements for the outline
-                          sections.
+                          suggest outline sections.
                         </Text>
 
-                        {/* Toggle between files and knowledge base */}
-                        <HStack gap={4}>
+                        {/* Reference Mode Toggle */}
+                        <HStack gap={2}>
                           <Button
                             size="sm"
                             variant={referenceMode === "files" ? "solid" : "outline"}
-                            colorPalette={referenceMode === "files" ? "blue" : "gray"}
                             onClick={() => handleReferenceModeChange("files")}
                           >
                             Upload Files
@@ -391,77 +389,72 @@ const OutlineModal = ({
                           <Button
                             size="sm"
                             variant={referenceMode === "knowledge-base" ? "solid" : "outline"}
-                            colorPalette={referenceMode === "knowledge-base" ? "blue" : "gray"}
                             onClick={() => handleReferenceModeChange("knowledge-base")}
                             disabled={!knowledgeBases || knowledgeBases.length === 0}
                           >
-                            Select Knowledge Base
+                            Knowledge Base
                           </Button>
                         </HStack>
 
-                        {referenceMode === "files" ? (
-                          <FileUpload
-                            files={exampleFiles}
-                            onFilesChange={setExampleFiles}
-                            maxFiles={3}
-                            showHandwrittenToggle={false}
-                          />
-                        ) : (
+                        {/* Reference Mode Content */}
+                        {referenceMode === "files" && (
                           <VStack align="stretch" gap={2}>
-                            {knowledgeBases && knowledgeBases.length > 0 ? (
-                              <VStack align="stretch" gap={2}>
-                                <Text fontSize="xs" color="gray.600">
-                                  Select a Knowledge Base to use as reference for generating outline
-                                  sections:
-                                </Text>
-                                <Box
-                                  maxH="120px"
-                                  overflowY="auto"
-                                  border="1px solid"
-                                  borderColor="gray.200"
-                                  borderRadius="md"
-                                >
-                                  {knowledgeBases.map((kb) => (
-                                    <Box
-                                      key={kb.id}
-                                      p={2}
-                                      cursor="pointer"
-                                      _hover={{ bg: "gray.50" }}
-                                      bg={
-                                        referenceKnowledgeBase?.id === kb.id ? "blue.50" : "white"
-                                      }
-                                      borderBottom="1px solid"
-                                      borderColor="gray.100"
-                                      onClick={() => setReferenceKnowledgeBase(kb)}
-                                    >
-                                      <Text fontSize="sm" fontWeight="medium">
-                                        {kb.title}
-                                      </Text>
-                                      {kb.description && (
-                                        <Text fontSize="xs" color="gray.600" lineClamp={2}>
-                                          {kb.description}
-                                        </Text>
-                                      )}
-                                      <Text fontSize="xs" color="gray.500">
-                                        {kb.number_of_sources || 0} sources
-                                      </Text>
-                                    </Box>
-                                  ))}
-                                </Box>
-                                {referenceKnowledgeBase && (
-                                  <Text fontSize="xs" color="green.600">
-                                    Selected: {referenceKnowledgeBase.title}
-                                  </Text>
-                                )}
-                              </VStack>
-                            ) : (
-                              <Text fontSize="sm" color="gray.500">
-                                No Knowledge Bases available. Create one first or switch to file
-                                upload.
-                              </Text>
-                            )}
+                            <Text fontSize="sm" color="gray.700" fontWeight="medium">
+                              Provide reference documents for suggesting an outline
+                            </Text>
+                            <FileUpload
+                              files={exampleFiles}
+                              onFilesChange={setExampleFiles}
+                              acceptedFileTypes={{
+                                "application/pdf": [".pdf"],
+                                "application/msword": [".doc"],
+                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                                  [".docx"],
+                                "text/plain": [".txt"],
+                                "text/csv": [".csv"],
+                                "application/json": [".json"],
+                              }}
+                              maxFiles={5}
+                            />
                           </VStack>
                         )}
+
+                        {referenceMode === "knowledge-base" && (
+                          <Box>
+                            <select
+                              style={{
+                                width: "100%",
+                                padding: "8px",
+                                borderRadius: "6px",
+                                border: "1px solid #e2e8f0",
+                              }}
+                              value={referenceKnowledgeBase?.id || ""}
+                              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                                const kb = knowledgeBases?.find((kb) => kb.id === e.target.value)
+                                setReferenceKnowledgeBase(kb || null)
+                              }}
+                            >
+                              <option value="">Select a Knowledge Base...</option>
+                              {knowledgeBases?.map((kb) => (
+                                <option key={kb.id} value={kb.id}>
+                                  {kb.title}
+                                </option>
+                              ))}
+                            </select>
+                            {!knowledgeBases || knowledgeBases.length === 0 ? (
+                              <Text fontSize="sm" color="orange.600">
+                                No Knowledge Bases available. Create one first to use this feature.
+                              </Text>
+                            ) : null}
+                          </Box>
+                        )}
+
+                        {outlineDescription.trim().length < 10 &&
+                          outlineDescription.trim().length > 0 && (
+                            <Text fontSize="sm" color="gray.500">
+                              Description must be at least 10 characters to suggest sections
+                            </Text>
+                          )}
                       </VStack>
                     </Field>
                   </VStack>
@@ -475,22 +468,22 @@ const OutlineModal = ({
                           <HStack gap={2}>
                             <Button
                               size="xs"
-                              onClick={handleGenerateOutline}
+                              onClick={handleSuggestOutline}
                               disabled={
                                 !outlineDescription.trim() ||
                                 outlineDescription.trim().length < 10 ||
-                                generating
+                                suggesting
                               }
-                              loading={generating}
+                              loading={suggesting}
                               variant="outline"
                               colorPalette="green"
                               title={
                                 outlineDescription.trim().length < 10
-                                  ? "Description must be at least 10 characters to generate sections"
-                                  : "Generate sections based on the description"
+                                  ? "Description must be at least 10 characters to suggest sections"
+                                  : "Suggest sections based on the description"
                               }
                             >
-                              {generating ? "Generating..." : "Generate"}
+                              {suggesting ? "Suggesting..." : "Suggest"}
                             </Button>
 
                             <Button
@@ -500,7 +493,7 @@ const OutlineModal = ({
                                 !selectedKnowledgeBase ||
                                 !editingOutline?.id ||
                                 !sections.trim() ||
-                                generating
+                                suggesting
                               }
                               variant="outline"
                               colorPalette="blue"

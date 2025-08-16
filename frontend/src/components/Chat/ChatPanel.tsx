@@ -182,6 +182,10 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                         <Radio value="full_text">Full Text Scan</Radio>
                       </HStack>
                     </RadioGroup>
+                    <Text fontSize="xs" color="gray.500" mt={1}>
+                      Vector search provides fast, targeted results. Full text scan reviews all
+                      content in the knowledge base.
+                    </Text>
                   </VStack>
                 </Box>
               </VStack>

@@ -29,12 +29,13 @@ import {
 } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText, FiDatabase, FiCopy, FiCheck } from "react-icons/fi"
+import { FiFileText, FiDatabase, FiCopy, FiCheck, FiTrash2 } from "react-icons/fi"
 import KnowledgeBaseTable from "../../components/Common/KnowledgeBaseTable"
 import ChecklistTable from "../../components/Review/ChecklistTable"
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
 import { copyToClipboard } from "../../utils/copyToClipboard"
+import { useResults } from "../../contexts/ResultsContext"
 
 interface QuestionData {
   id: string
@@ -44,6 +45,14 @@ interface QuestionData {
 
 const VeraDoc = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const {
+    reviewResults: results,
+    setReviewResults: setResults,
+    reviewActiveTab: activeTab,
+    setReviewActiveTab: setActiveTab,
+    clearReviewResults
+  } = useResults()
+  
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     null,
   )
@@ -63,11 +72,7 @@ const VeraDoc = () => {
 
   const [fileItems, setFileItems] = useState<FileItem[]>([])
 
-  const [results, setResults] = useState<
-    Array<{ filename: string; displayResults: string; qaPairs: any[]; interactionId?: string }>
-  >([])
   const [loading, setLoading] = useState<boolean>(false)
-  const [activeTab, setActiveTab] = useState<number>(0)
 
   const [checklists, setChecklists] = useState<VeraDocChecklist[]>([])
   const [selectedChecklist, setSelectedChecklist] = useState<VeraDocChecklist | null>(null)
@@ -105,10 +110,20 @@ const VeraDoc = () => {
 
   // Reset active tab when results change
   useEffect(() => {
+    console.log("Review tab - results changed:", results.length, results)
     if (results.length > 0) {
       setActiveTab(0)
     }
   }, [results.length])
+
+  // Debug effect to log context state
+  useEffect(() => {
+    console.log("Review tab - context state:", { 
+      resultsLength: results.length, 
+      activeTab, 
+      firstResult: results[0]?.filename 
+    })
+  }, [results, activeTab])
 
   const handleCopyReport = async () => {
     try {
@@ -747,6 +762,17 @@ const VeraDoc = () => {
 
   return (
     <Container maxW="container.xl" py={8}>
+      {/* Tab description */}
+      <Text 
+        fontSize="sm" 
+        color="gray.500" 
+        textAlign="center" 
+        mb={4}
+        fontStyle="italic"
+      >
+        Review a document based on a user-defined checklist and policy database.
+      </Text>
+      
       {/* Add this overlay spinner that shows when loading is true */}
       {loading && (
         <Box
@@ -867,8 +893,8 @@ const VeraDoc = () => {
         <VStack
           align="stretch"
           mb={4}
-          opacity={!selectedKnowledgeBase || !selectedChecklist ? 0.3 : 1}
-          pointerEvents={!selectedKnowledgeBase || !selectedChecklist ? "none" : "auto"}
+          opacity={(!selectedKnowledgeBase || !selectedChecklist) && !results ? 0.3 : 1}
+          pointerEvents={(!selectedKnowledgeBase || !selectedChecklist) && !results ? "none" : "auto"}
         >
           <HStack gap={4} justify="center">
             <Button
@@ -932,6 +958,19 @@ const VeraDoc = () => {
                     >
                       Download CSV
                     </DownloadButton>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      colorPalette="red"
+                      onClick={() => {
+                        clearReviewResults()
+                        showSuccessToast("Review results cleared")
+                      }}
+                    >
+                      <FiTrash2 />
+                      Clear Results
+                    </Button>
                   </HStack>
                 )}
               </HStack>

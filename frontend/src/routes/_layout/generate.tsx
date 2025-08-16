@@ -26,15 +26,22 @@ import {
 } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText, FiCopy, FiCheck, FiDatabase } from "react-icons/fi"
+import { FiFileText, FiCopy, FiCheck, FiDatabase, FiTrash2 } from "react-icons/fi"
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
 import KnowledgeBaseTable from "../../components/Common/KnowledgeBaseTable"
 import OutlineTable from "../../components/Generate/OutlineTable"
 import { copyToClipboard } from "../../utils/copyToClipboard"
+import { useResults } from "../../contexts/ResultsContext"
 
 const ReportGenie = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const {
+    generateResult,
+    setGenerateResult,
+    clearGenerateResult
+  } = useResults()
+  
   const [copySuccess, setCopySuccess] = useState(false)
   const [loadingDownload, setLoadingDownload] = useState(false)
   const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
@@ -54,12 +61,9 @@ const ReportGenie = () => {
   const [outlines, setOutlines] = useState<ReportGenieOutline[]>([])
   const [selectedOutline, setSelectedOutline] = useState<ReportGenieOutline | null>(null)
 
-  // Results state
-  const [generatedDocument, setGeneratedDocument] = useState("")
-  const [sectionResults, setSectionResults] = useState<any[]>([])
+  // Loading state
   const [loading, setLoading] = useState(false)
   const [expandedSection, setExpandedSection] = useState<number | null>(null)
-  const [interactionId, setInteractionId] = useState<string | null>(null)
 
   // Search mode state
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector") // Default to vector search
@@ -91,9 +95,18 @@ const ReportGenie = () => {
     showSuccessToast(`Thank you for marking this response as ${type}!`)
   }
 
+  // Debug effect to log context state
+  useEffect(() => {
+    console.log("Generate tab - context state:", { 
+      hasResult: !!generateResult, 
+      reportLength: generateResult?.full_report?.length,
+      sectionsCount: generateResult?.sections?.length 
+    })
+  }, [generateResult])
+
   const handleCopyDocument = async () => {
     try {
-      await copyToClipboard(generatedDocument)
+      await copyToClipboard(generateResult?.full_report || "")
       setCopySuccess(true)
 
       // Reset the success icon after 2 seconds
@@ -113,7 +126,7 @@ const ReportGenie = () => {
       setLoadingDownload(true)
 
       const response = await ReportgenieService.generateDocx({
-        requestBody: { content: generatedDocument },
+        requestBody: { content: generateResult?.full_report || "" },
       })
 
       console.log("Received DOCX response:", response)
@@ -180,7 +193,7 @@ const ReportGenie = () => {
 
       // Prepare the sections data for CSV generation
       const csvData = {
-        sections: sectionResults,
+        sections: generateResult?.sections || [],
       }
 
       const response = await ReportgenieService.generateCsv({
@@ -284,9 +297,19 @@ const ReportGenie = () => {
     onSuccess: (data: any) => {
       console.log("Generate Response data:", data)
       console.log("Generate interaction_id:", data.results.interaction_id)
-      setGeneratedDocument(data.results.full_report)
-      setSectionResults(data.results.sections || [])
-      setInteractionId(data.results.interaction_id as string | null)
+      
+      const interactionId = data.results.interaction_id
+      console.log("Generate interactionId for feedback:", interactionId)
+      
+      // Store result with interaction ID in global state
+      setGenerateResult({
+        full_report: data.results?.full_report || "",
+        sections: data.results?.sections || [],
+        interactionId: interactionId
+      })
+      
+      const searchMethod = searchMode === "vector" ? "vector search" : "full document scan"
+      showSuccessToast(`Report generated successfully using ${searchMethod}!`)
     },
     onError: (error: any) => {
       showErrorToast(`Failed to generate document: ${error.message}`)
@@ -344,6 +367,17 @@ const ReportGenie = () => {
 
   return (
     <Container maxW="container.xl" py={8}>
+      {/* Tab description */}
+      <Text 
+        fontSize="sm" 
+        color="gray.500" 
+        textAlign="center" 
+        mb={4}
+        fontStyle="italic"
+      >
+        Generate a document based on a user-defined checklist and document database.
+      </Text>
+      
       {/* Loading overlay while document generates */}
       {loading && (
         <Box
@@ -447,8 +481,8 @@ const ReportGenie = () => {
         <VStack
           align="stretch"
           mb={4}
-          opacity={!selectedKnowledgeBase || !selectedOutline ? 0.3 : 1}
-          pointerEvents={!selectedKnowledgeBase || !selectedOutline ? "none" : "auto"}
+          opacity={(!selectedKnowledgeBase || !selectedOutline) && !generateResult ? 0.3 : 1}
+          pointerEvents={(!selectedKnowledgeBase || !selectedOutline) && !generateResult ? "none" : "auto"}
         >
           <HStack gap={4} justify="center">
             <Button
@@ -481,7 +515,7 @@ const ReportGenie = () => {
               <HStack justify="space-between" align="center" mb={4}>
                 <Heading size="md">Results</Heading>
 
-                {generatedDocument && (
+                {generateResult && (
                   <HStack gap={2}>
                     <Button
                       size="sm"
@@ -508,6 +542,19 @@ const ReportGenie = () => {
                     >
                       Download CSV
                     </DownloadButton>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      colorPalette="red"
+                      onClick={() => {
+                        clearGenerateResult()
+                        showSuccessToast("Generated report cleared")
+                      }}
+                    >
+                      <FiTrash2 />
+                      Clear Report
+                    </Button>
                   </HStack>
                 )}
               </HStack>
@@ -535,20 +582,20 @@ const ReportGenie = () => {
                     <Spinner size="lg" color="blue.500" />
                   </Box>
                 )}
-                {generatedDocument || sectionResults.length > 0 ? (
+                {generateResult ? (
                   <>
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                      {generatedDocument}
+                      {generateResult.full_report}
                     </ReactMarkdown>
 
                     {/* Detailed section results with sources */}
-                    {sectionResults.length > 0 && (
+                    {generateResult.sections.length > 0 && (
                       <Box mt={8}>
                         <Heading as="h3" size="md" mb={4}>
                           Sections with Sources
                         </Heading>
 
-                        {sectionResults.map((section, index) => (
+                        {generateResult.sections.map((section, index) => (
                           <Box
                             key={index}
                             mb={6}
@@ -748,7 +795,7 @@ const ReportGenie = () => {
                     )}
 
                     {/* Add feedback buttons for the generated document */}
-                    {interactionId ? (
+                    {generateResult?.interactionId && (
                       <Box
                         position="sticky"
                         bottom={4}
@@ -760,30 +807,11 @@ const ReportGenie = () => {
                         mt={4}
                       >
                         <FeedbackButtons
-                          interactionId={interactionId}
+                          interactionId={generateResult.interactionId}
                           onFeedbackSubmitted={handleFeedbackSubmitted}
                         />
                       </Box>
-                    ) : (
-                      <Box
-                        position="sticky"
-                        bottom={4}
-                        right={4}
-                        display="flex"
-                        justifyContent="flex-end"
-                        pointerEvents="auto"
-                        zIndex={10}
-                        mt={4}
-                        bg="yellow.100"
-                        p={2}
-                        borderRadius="md"
-                      >
-                        <Text fontSize="sm" color="red.600">
-                          Debug: No interaction ID found
-                        </Text>
-                      </Box>
                     )}
-                    {console.log("Generate interactionId for feedback:", interactionId)}
                   </>
                 ) : (
                   <Text color="gray.500">

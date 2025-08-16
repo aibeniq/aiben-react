@@ -6,6 +6,7 @@ import { routeTree } from "./routeTree.gen"
 
 import { ApiError, OpenAPI } from "./client"
 import { CustomProvider } from "./components/ui/provider"
+import { ResultsProvider } from "./contexts/ResultsContext"
 
 console.log("API URL:", import.meta.env.VITE_API_URL);
 
@@ -39,7 +40,9 @@ declare module "@tanstack/react-router" {
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <CustomProvider>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <ResultsProvider>
+        <RouterProvider router={router} />
+      </ResultsProvider>
     </QueryClientProvider>
   </CustomProvider>,
 )
