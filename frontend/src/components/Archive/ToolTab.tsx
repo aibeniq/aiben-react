@@ -7,6 +7,7 @@ interface ToolTabProps {
   selectedHistoryReport: any | null
   isHistoryLoading: boolean
   onLoadReport: (reportId: string) => void
+  onDeleteReport?: (reportId: string) => void
   emptyMessage: string
   children: ReactNode
   showAllUsers?: boolean
@@ -18,6 +19,7 @@ const ToolTab: React.FC<ToolTabProps> = ({
   selectedHistoryReport,
   isHistoryLoading,
   onLoadReport,
+  onDeleteReport,
   emptyMessage,
   children,
   showAllUsers,
@@ -34,6 +36,7 @@ const ToolTab: React.FC<ToolTabProps> = ({
           selectedHistoryReport={selectedHistoryReport}
           isHistoryLoading={isHistoryLoading}
           onLoadReport={onLoadReport}
+          onDeleteReport={onDeleteReport}
           emptyMessage={emptyMessage}
           showAllUsers={showAllUsers}
           onToggleShowAllUsers={onToggleShowAllUsers}

@@ -18,6 +18,7 @@ interface ToolState<THistory = any, TDetail = any> {
 
 interface ToolActions {
   loadReport: (reportId: string) => Promise<void>
+  deleteReport?: (reportId: string) => Promise<void>
 }
 
 interface UseToolArchiveReturn {
@@ -84,9 +85,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const veradocHistoryQuery = useQuery({
     queryKey: ["veradocHistory", showAllUsers],
     queryFn: async () => {
-      const response = await VeradocService.getVeradocHistory({ 
+      const response = await VeradocService.getVeradocHistory({
         limit: 20,
-        showAll: showAllUsers 
+        showAll: showAllUsers
       })
       return response
     },
@@ -98,9 +99,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     queryKey: ["reportgenieHistory", showAllUsers],
     queryFn: async () => {
       console.log("🔄 REPORTGENIE: Starting to fetch history, showAllUsers:", showAllUsers);
-      const response = await ReportgenieService.getReportHistory({ 
+      const response = await ReportgenieService.getReportHistory({
         limit: 20,
-        showAll: showAllUsers 
+        showAll: showAllUsers
       })
       console.log("✅ REPORTGENIE: History fetch completed, response:", response);
       console.log("📊 REPORTGENIE: Number of reports returned:", Array.isArray(response) ? response.length : "Response is not an array");
@@ -116,9 +117,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const twincheckHistoryQuery = useQuery({
     queryKey: ["twincheckHistory", showAllUsers],
     queryFn: async () => {
-      const response = await TwincheckService.getComparisonHistory({ 
+      const response = await TwincheckService.getComparisonHistory({
         limit: 20,
-        showAll: showAllUsers 
+        showAll: showAllUsers
       })
       return response
     },
@@ -130,9 +131,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     queryKey: ["formconnectHistory", showAllUsers],
     queryFn: async () => {
       console.log("🔄 FORMCONNECT: Starting to fetch history, showAllUsers:", showAllUsers);
-      const response = await FormconnectService.getFormHistory({ 
+      const response = await FormconnectService.getFormHistory({
         limit: 20,
-        showAll: showAllUsers 
+        showAll: showAllUsers
       })
       console.log("✅ FORMCONNECT: History fetch completed, response:", response);
       console.log("📊 FORMCONNECT: Number of records returned:", Array.isArray(response) ? response.length : "Response is not an array");
@@ -155,7 +156,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   useEffect(() => {
     console.log("🔄 REPORTGENIE: useEffect triggered for reportgenieHistoryQuery");
     console.log("📊 REPORTGENIE: Query status - isLoading:", reportgenieHistoryQuery.isLoading, "isError:", reportgenieHistoryQuery.isError, "error:", reportgenieHistoryQuery.error);
-    
+
     if (reportgenieHistoryQuery.data) {
       console.log("✅ REPORTGENIE: Setting history data:", reportgenieHistoryQuery.data);
       setReportgenieHistory(
@@ -182,7 +183,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     if (formconnectHistoryQuery.error) {
       console.log("❌ FORMCONNECT: Error:", formconnectHistoryQuery.error);
     }
-    
+
     if (formconnectHistoryQuery.data) {
       console.log("✅ FORMCONNECT: Setting history data:", formconnectHistoryQuery.data);
       setFormconnectHistory(
@@ -251,30 +252,107 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     }
   }
 
+  // Delete functions for each tool
+  const deleteVeradocReport = async (reportId: string) => {
+    try {
+      await VeradocService.deleteEvaluation({ evaluationId: reportId })
+      showSuccessToast("Evaluation deleted successfully")
+
+      // Clear selected report if it was the one being deleted
+      if (selectedVeradocReport?.id === reportId) {
+        setSelectedVeradocReport(null)
+      }
+
+      // Refresh the history
+      veradocHistoryQuery.refetch()
+    } catch (error) {
+      console.error("Error deleting evaluation:", error)
+      showErrorToast("Failed to delete evaluation")
+    }
+  }
+
+  const deleteReportgenieReport = async (reportId: string) => {
+    try {
+      await ReportgenieService.deleteReport({ reportId })
+      showSuccessToast("Report deleted successfully")
+
+      // Clear selected report if it was the one being deleted
+      if (selectedReportgenieReport?.id === reportId) {
+        setSelectedReportgenieReport(null)
+      }
+
+      // Refresh the history
+      reportgenieHistoryQuery.refetch()
+    } catch (error) {
+      console.error("Error deleting report:", error)
+      showErrorToast("Failed to delete report")
+    }
+  }
+
+  const deleteTwincheckReport = async (comparisonId: string) => {
+    try {
+      await TwincheckService.deleteComparison({ comparisonId })
+      showSuccessToast("Comparison deleted successfully")
+
+      // Clear selected report if it was the one being deleted
+      if (selectedTwincheckReport?.id === comparisonId) {
+        setSelectedTwincheckReport(null)
+      }
+
+      // Refresh the history
+      twincheckHistoryQuery.refetch()
+    } catch (error) {
+      console.error("Error deleting comparison:", error)
+      showErrorToast("Failed to delete comparison")
+    }
+  }
+
+  const deleteFormconnectReport = async (interactionId: string) => {
+    try {
+      await FormconnectService.deleteForm({ formId: interactionId })
+      showSuccessToast("Form processing deleted successfully")
+
+      // Clear selected report if it was the one being deleted
+      if (selectedFormconnectReport?.id === interactionId) {
+        setSelectedFormconnectReport(null)
+      }
+
+      // Refresh the history
+      formconnectHistoryQuery.refetch()
+    } catch (error) {
+      console.error("Error deleting form processing:", error)
+      showErrorToast("Failed to delete form processing")
+    }
+  }
+
   return {
     veradoc: {
       history: veradocHistory,
       selectedReport: selectedVeradocReport,
       isLoading: isVeradocLoading,
       loadReport: loadVeradocReport,
+      deleteReport: deleteVeradocReport,
     },
     reportgenie: {
       history: reportgenieHistory,
       selectedReport: selectedReportgenieReport,
       isLoading: isReportgenieLoading,
       loadReport: loadReportgenieReport,
+      deleteReport: deleteReportgenieReport,
     },
     twincheck: {
       history: twincheckHistory,
       selectedReport: selectedTwincheckReport,
       isLoading: isTwincheckLoading,
       loadReport: loadTwincheckReport,
+      deleteReport: deleteTwincheckReport,
     },
     formconnect: {
       history: formconnectHistory,
       selectedReport: selectedFormconnectReport,
       isLoading: isFormconnectLoading,
       loadReport: loadFormconnectReport,
+      deleteReport: deleteFormconnectReport,
     },
     activeTab,
     setActiveTab,
