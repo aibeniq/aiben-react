@@ -24,6 +24,7 @@ import { ReportgenieService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import SearchModeToggle from "../Common/SearchModeToggle"
 import { FiCopy } from "react-icons/fi"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 interface OutlineModalProps {
   isOpen: boolean
@@ -59,6 +60,79 @@ const OutlineModal = ({
   console.log("🔍 OutlineModal: Editing outline:", editingOutline?.name)
 
   const { showSuccessToast, showErrorToast } = useCustomToast()
+
+  // Validation state
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+
+  // Validation function
+  const validateForm = () => {
+    const errors: {[key: string]: string} = {}
+    
+    if (!outlineName.trim()) {
+      errors.name = "Outline name is required"
+    } else if (outlineName.trim().length < 3) {
+      errors.name = "Outline name must be at least 3 characters long"
+    }
+    
+    if (!outlineDescription.trim()) {
+      errors.description = "Description is required"
+    }
+    
+    // Check if sections exist (either as JSON array or simple text)
+    let hasSections = false
+    if (sections.trim()) {
+      try {
+        const parsedSections = JSON.parse(sections)
+        if (Array.isArray(parsedSections)) {
+          hasSections = parsedSections.some(section => section.text && section.text.trim())
+        }
+      } catch {
+        // If JSON parsing fails, treat as simple text
+        hasSections = sections.split('\n').some(line => line.trim())
+      }
+    }
+    
+    if (!hasSections) {
+      errors.sections = "At least one section is required"
+    }
+    
+    setValidationErrors(errors)
+    
+    // Show the first error as a toast
+    const firstError = Object.values(errors)[0]
+    if (firstError) {
+      showErrorToast(firstError)
+      return false
+    }
+    
+    return true
+  }
+
+  // Clear validation errors when user starts typing
+  const handleNameChange = (value: string) => {
+    setOutlineName(value)
+    if (validationErrors.name) {
+      setValidationErrors(prev => ({ ...prev, name: '' }))
+    }
+  }
+
+  const handleDescriptionChange = (value: string) => {
+    setOutlineDescription(value)
+    if (validationErrors.description) {
+      setValidationErrors(prev => ({ ...prev, description: '' }))
+    }
+  }
+
+  // Enhanced save handler with validation
+  const handleSave = () => {
+    if (!validateForm()) {
+      return // Stop execution if validation fails
+    }
+    
+    // Call the parent's onSave function if validation passes
+    onSave()
+  }
+
   const [generating, setGenerating] = useState(false)
   const [showOptimizeModal, setShowOptimizeModal] = useState(false)
   const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
@@ -137,6 +211,11 @@ const OutlineModal = ({
         // Convert to JSON string format expected by the section editor
         const sectionsString = JSON.stringify(structuredSections)
         onSectionsChange(sectionsString)
+
+        // Clear sections validation error if it exists
+        if (validationErrors.sections) {
+          setValidationErrors(prev => ({ ...prev, sections: '' }))
+        }
 
         let successMessage = `Generated ${generatedSections.length} sections from description`
         if (referenceMode === "files" && exampleFiles.length > 0) {
@@ -235,7 +314,7 @@ const OutlineModal = ({
         return
       }
 
-      await navigator.clipboard.writeText(sectionTexts.join("\n"))
+      await copyToClipboard(sectionTexts.join("\n"))
       showSuccessToast("Sections copied to clipboard!")
     } catch (error) {
       console.error("Error copying sections:", error)
@@ -264,18 +343,18 @@ const OutlineModal = ({
                 <HStack align="stretch" gap={4}>
                   {/* Left Column - Basic Fields and Settings */}
                   <VStack align="stretch" gap={4} flex="1">
-                    <Field label="Outline Name" required>
+                    <Field label="Outline Name" required invalid={!!validationErrors.name} errorText={validationErrors.name}>
                       <Input
                         value={outlineName}
-                        onChange={(e) => setOutlineName(e.target.value)}
+                        onChange={(e) => handleNameChange(e.target.value)}
                         placeholder="Enter outline name"
                       />
                     </Field>
 
-                    <Field label="Description">
+                    <Field label="Description" invalid={!!validationErrors.description} errorText={validationErrors.description}>
                       <Textarea
                         value={outlineDescription}
-                        onChange={(e) => setOutlineDescription(e.target.value)}
+                        onChange={(e) => handleDescriptionChange(e.target.value)}
                         placeholder="Enter outline description to auto-generate sections (minimum 10 characters)..."
                         resize="vertical"
                         rows={3}
@@ -452,6 +531,8 @@ const OutlineModal = ({
                         </HStack>
                       }
                       required
+                      invalid={!!validationErrors.sections}
+                      errorText={validationErrors.sections}
                     >
                       <Box
                         border="1px solid"
@@ -460,7 +541,16 @@ const OutlineModal = ({
                         p={3}
                         width="full"
                       >
-                        <SectionEditor sections={sections} onSectionsChange={onSectionsChange} />
+                        <SectionEditor 
+                          sections={sections} 
+                          onSectionsChange={(newSections) => {
+                            onSectionsChange(newSections)
+                            // Clear validation error when sections are modified
+                            if (validationErrors.sections) {
+                              setValidationErrors(prev => ({ ...prev, sections: '' }))
+                            }
+                          }} 
+                        />
                       </Box>
                     </Field>
                   </VStack>
@@ -473,7 +563,7 @@ const OutlineModal = ({
                 <CancelButton onClick={handleClose} size="md">
                   Cancel
                 </CancelButton>
-                <ConfirmButton onClick={onSave} size="md">
+                <ConfirmButton onClick={handleSave} size="md">
                   {editingOutline ? "Update Outline" : "Create Outline"}
                 </ConfirmButton>
               </HStack>

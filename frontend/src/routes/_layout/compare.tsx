@@ -19,6 +19,7 @@ import SelectionCard from "@/components/Common/SelectionCard"
 import SelectionModal from "@/components/Common/SelectionModal"
 import TopicListTable from "@/components/Compare/TopicListTable"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
+import { copyToClipboard } from "@/utils/copyToClipboard"
 
 const TwinCheck = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -66,7 +67,7 @@ const TwinCheck = () => {
         fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
       })
 
-      await navigator.clipboard.writeText(fullText)
+      await copyToClipboard(fullText)
       setCopySuccess(true)
 
       // Reset the success icon after 2 seconds

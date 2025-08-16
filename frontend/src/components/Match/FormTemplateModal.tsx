@@ -21,6 +21,7 @@ import FileUpload, { FileItem } from "../Common/FileUpload"
 import SearchModeToggle from "../Common/SearchModeToggle"
 import useCustomToast from "../../hooks/useCustomToast"
 import { FiCopy } from "react-icons/fi"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 interface FormTemplateModalProps {
   isOpen: boolean
@@ -54,6 +55,66 @@ const FormTemplateModal = ({
   searchMode: passedSearchMode = "vector",
 }: FormTemplateModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
+
+  // Validation state
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+
+  // Validation function
+  const validateForm = () => {
+    const errors: {[key: string]: string} = {}
+    
+    if (!formName.trim()) {
+      errors.name = "Form template name is required"
+    } else if (formName.trim().length < 3) {
+      errors.name = "Form template name must be at least 3 characters long"
+    }
+    
+    if (!formDescription.trim()) {
+      errors.description = "Description is required"
+    }
+    
+    // Check if fields exist (should be a newline-separated string)
+    if (!fields.trim() || fields.split('\n').every(field => !field.trim())) {
+      errors.fields = "At least one form field is required"
+    }
+    
+    setValidationErrors(errors)
+    
+    // Show the first error as a toast
+    const firstError = Object.values(errors)[0]
+    if (firstError) {
+      showErrorToast(firstError)
+      return false
+    }
+    
+    return true
+  }
+
+  // Clear validation errors when user starts typing
+  const handleNameChange = (value: string) => {
+    setFormName(value)
+    if (validationErrors.name) {
+      setValidationErrors(prev => ({ ...prev, name: '' }))
+    }
+  }
+
+  const handleDescriptionChange = (value: string) => {
+    setFormDescription(value)
+    if (validationErrors.description) {
+      setValidationErrors(prev => ({ ...prev, description: '' }))
+    }
+  }
+
+  // Enhanced save handler with validation
+  const handleSave = () => {
+    if (!validateForm()) {
+      return // Stop execution if validation fails
+    }
+    
+    // Call the parent's onSave function if validation passes
+    onSave()
+  }
+
   const [generating, setGenerating] = useState(false)
   const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
   const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
@@ -149,6 +210,11 @@ const FormTemplateModal = ({
         const fieldsString = generatedFields.join("\n")
         onFieldsChange(fieldsString)
 
+        // Clear fields validation error if it exists
+        if (validationErrors.fields) {
+          setValidationErrors(prev => ({ ...prev, fields: '' }))
+        }
+
         const searchMethodText = searchMode === "vector" ? "vector search" : "full document scan"
         const referenceText =
           referenceMode === "knowledge-base" && referenceKnowledgeBase
@@ -214,7 +280,7 @@ const FormTemplateModal = ({
     }
 
     try {
-      await navigator.clipboard.writeText(fieldLines.join("\n"))
+      await copyToClipboard(fieldLines.join("\n"))
       showSuccessToast("Fields copied to clipboard!")
     } catch (error) {
       console.error("Error copying fields:", error)
@@ -238,18 +304,18 @@ const FormTemplateModal = ({
               <VStack align="stretch" gap={4}>
                 <HStack align="stretch" gap={4}>
                   <VStack align="stretch" gap={4} flex="1">
-                    <Field label="Form Template Name" required>
+                    <Field label="Form Template Name" required invalid={!!validationErrors.name} errorText={validationErrors.name}>
                       <Input
                         value={formName}
-                        onChange={(e) => setFormName(e.target.value)}
+                        onChange={(e) => handleNameChange(e.target.value)}
                         placeholder="Enter form template name"
                       />
                     </Field>
 
-                    <Field label="Form Template Description">
+                    <Field label="Form Template Description" invalid={!!validationErrors.description} errorText={validationErrors.description}>
                       <Textarea
                         value={formDescription}
-                        onChange={(e) => setFormDescription(e.target.value)}
+                        onChange={(e) => handleDescriptionChange(e.target.value)}
                         placeholder="Enter form template description (e.g., 'Patient intake form for medical clinic', 'Employee onboarding documentation')"
                         resize="vertical"
                         rows={3}
@@ -377,6 +443,8 @@ const FormTemplateModal = ({
                       </HStack>
                     }
                     required
+                    invalid={!!validationErrors.fields}
+                    errorText={validationErrors.fields}
                     py={0}
                     flex="1"
                   >
@@ -391,7 +459,13 @@ const FormTemplateModal = ({
                     >
                       <InteractiveList
                         value={fields}
-                        onChange={onFieldsChange}
+                        onChange={(newFields) => {
+                          onFieldsChange(newFields)
+                          // Clear validation error when fields are modified
+                          if (validationErrors.fields) {
+                            setValidationErrors(prev => ({ ...prev, fields: '' }))
+                          }
+                        }}
                         placeholder="Add a field name (e.g. First Name, Address, SSN) or generate from description"
                       />
                     </VStack>
@@ -404,7 +478,7 @@ const FormTemplateModal = ({
               <CancelButton onClick={handleModalClose} size="md">
                 Cancel
               </CancelButton>
-              <ConfirmButton onClick={onSave} size="md">
+              <ConfirmButton onClick={handleSave} size="md">
                 {editingForm ? "Update Form Template" : "Create Form Template"}
               </ConfirmButton>
             </Dialog.Footer>

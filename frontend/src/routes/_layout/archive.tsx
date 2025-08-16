@@ -21,6 +21,7 @@ import {
 } from "../../client"
 import { useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 export const Route = createFileRoute("/_layout/archive")({
   component: Archive,
@@ -83,7 +84,7 @@ function Archive() {
           ""
       }
 
-      await navigator.clipboard.writeText(fullText)
+      await copyToClipboard(fullText)
       setCopySuccess(true)
       setTimeout(() => setCopySuccess(false), 2000)
       showSuccessToast("Report copied to clipboard")
