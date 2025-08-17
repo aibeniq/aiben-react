@@ -97,6 +97,8 @@ export type ChecklistSuggestion = {
   reason: string
   current_answer: string
   needs_revision: boolean
+  policy_context?: string | null
+  source_citations?: Array<string> | null
 }
 
 /**

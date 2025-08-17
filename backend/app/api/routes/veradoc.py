@@ -133,6 +133,7 @@ def parse_optimization_response(
             reason=reason,
             current_answer=original_qa["answer"],
             needs_revision=needs_revision,
+            policy_context=original_qa.get("context", ""),
         )
     except Exception as e:
         print(f"Error parsing optimization response: {e}")
@@ -142,6 +143,7 @@ def parse_optimization_response(
             reason=f"Error parsing suggestion: {str(e)}",
             current_answer=original_qa["answer"],
             needs_revision=False,
+            policy_context=original_qa.get("context", ""),
         )
 
 
@@ -1497,18 +1499,20 @@ async def optimize_checklist(
                     )
 
                     suggestion = parse_optimization_response(suggestion_response, qa)
+                    # Add policy context to the suggestion
+                    suggestion.policy_context = qa["context"]
                     suggestions.append(suggestion)
                 else:
                     # Question is already working well
-                    suggestions.append(
-                        ChecklistSuggestion(
-                            original_question=qa["question"],
-                            suggested_question=qa["question"],
-                            reason="Question already generates positive responses",
-                            current_answer=qa["answer"],
-                            needs_revision=False,
-                        )
+                    suggestion = ChecklistSuggestion(
+                        original_question=qa["question"],
+                        suggested_question=qa["question"],
+                        reason="Question already generates positive responses",
+                        current_answer=qa["answer"],
+                        needs_revision=False,
+                        policy_context=qa["context"],
                     )
+                    suggestions.append(suggestion)
 
             # 6. Compile results
             original_questions = [qa["question"] for qa in qa_results]
@@ -1840,8 +1844,9 @@ async def generate_optimization_csv(
                 "Original Question",
                 "Suggested Question",
                 "Needs Revision",
-                "Reason",
+                "Policy Context",
                 "Current Answer",
+                "Reason",
                 "Analysis Summary",
             ]
         )
@@ -1863,6 +1868,7 @@ async def generate_optimization_csv(
                 needs_revision = suggestion.get("needs_revision", False)
                 reason = suggestion.get("reason", "")
                 current_answer = suggestion.get("current_answer", "")
+                policy_context = suggestion.get("policy_context", "")
 
                 # Clean up text fields (remove newlines and carriage returns for CSV)
                 original_question_clean = original_question.replace("\n", " ").replace(
@@ -1873,6 +1879,9 @@ async def generate_optimization_csv(
                 ).replace("\r", " ")
                 reason_clean = reason.replace("\n", " ").replace("\r", " ")
                 current_answer_clean = current_answer.replace("\n", " ").replace(
+                    "\r", " "
+                )
+                policy_context_clean = policy_context.replace("\n", " ").replace(
                     "\r", " "
                 )
                 analysis_summary_clean = analysis_summary.replace("\n", " ").replace(
@@ -1886,8 +1895,9 @@ async def generate_optimization_csv(
                         original_question_clean,
                         suggested_question_clean,
                         "Yes" if needs_revision else "No",
-                        reason_clean,
+                        policy_context_clean,
                         current_answer_clean,
+                        reason_clean,
                         analysis_summary_clean,
                     ]
                 )

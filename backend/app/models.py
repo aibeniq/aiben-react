@@ -624,6 +624,8 @@ class ChecklistSuggestion(SQLModel):
     reason: str
     current_answer: str
     needs_revision: bool
+    policy_context: Optional[str] = None
+    source_citations: Optional[List[str]] = None
 
 
 class OptimizedChecklistResponse(SQLModel):
