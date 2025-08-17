@@ -94,9 +94,7 @@ const ChecklistModal = ({
       errors.name = "Checklist name must be at least 3 characters long"
     }
     
-    if (!checklistDescription.trim()) {
-      errors.description = "Description is required"
-    }
+    // Description is optional - no validation required
     
     if (questionsList.length === 0 || questionsList.every(q => !q.trim())) {
       errors.questions = "At least one question is required"
@@ -360,7 +358,7 @@ const ChecklistModal = ({
                         />
                       </Field>
 
-                      <Field label="Description" required invalid={!!validationErrors.description} errorText={validationErrors.description}>
+                      <Field label="Description" invalid={!!validationErrors.description} errorText={validationErrors.description}>
                         <Textarea
                           value={checklistDescription}
                           onChange={(e) => handleDescriptionChange(e.target.value)}

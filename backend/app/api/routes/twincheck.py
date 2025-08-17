@@ -1081,7 +1081,153 @@ def generate_topics(
                 example_instruction = f" and use the uploaded example document ({file.filename}) as a reference for the appropriate scope and depth of comparison topics"
                 example_analysis_instruction = f" and explain how they align with the scope shown in the example document ({file.filename})"
 
-        # Prepare variables for the prompt
+        # Check if example document exceeds token limits and chunk if necessary
+        if example_document:
+            print(f"Total example document content: {len(example_document)} characters")
+            
+            # Using conservative chunking similar to TWINCHECK settings
+            max_chunk_size = 80000  # Conservative chunk size for 128K context limit
+            
+            if len(example_document) > max_chunk_size:
+                print(f"Example document too large ({len(example_document)} chars), chunking for processing")
+                
+                from app.services.text_processing import chunk_text
+                
+                # Chunk the document content
+                chunks = chunk_text(example_document, max_tokens=max_chunk_size)
+                
+                # Process each chunk to generate topics
+                all_chunk_topics = []
+                
+                for i, chunk in enumerate(chunks):
+                    print(f"Processing chunk {i+1}/{len(chunks)}")
+                    
+                    # Generate topics for this chunk
+                    chunk_prompt_variables = {
+                        "description": description,
+                        "comparison_type": comparison_type,
+                        "example_document": f"EXAMPLE DOCUMENT: {file.filename}\n{chunk}\n",
+                        "example_instruction": example_instruction,
+                        "example_analysis_instruction": example_analysis_instruction,
+                        "knowledge_base_content": "",
+                        "knowledge_base_instruction": "",
+                    }
+
+                    try:
+                        chunk_response = invoke_llm(
+                            llm,
+                            settings.TWINCHECK_GENERATE_TOPICS_PROMPT_TEMPLATE,
+                            chunk_prompt_variables,
+                        )
+                        
+                        # Parse topics from chunk response
+                        chunk_topics = []
+                        lines = chunk_response.strip().split("\n")
+                        in_topics_section = False
+                        
+                        for line in lines:
+                            line = line.strip()
+                            if line.startswith("TOPICS:"):
+                                in_topics_section = True
+                                continue
+                            elif line.startswith("ANALYSIS:"):
+                                in_topics_section = False
+                                continue
+
+                            if in_topics_section:
+                                if re.match(r"^\d+\.\s+", line):
+                                    topic = re.sub(r"^\d+\.\s+", "", line)
+                                    if topic.strip():
+                                        chunk_topics.append(topic.strip())
+                        
+                        # If parsing failed, try simpler approach
+                        if not chunk_topics:
+                            for line in lines:
+                                line = line.strip()
+                                if re.match(r"^\d+\.\s+", line):
+                                    topic = re.sub(r"^\d+\.\s+", "", line)
+                                    if topic.strip():
+                                        chunk_topics.append(topic.strip())
+                        
+                        all_chunk_topics.extend(chunk_topics)
+                        
+                    except Exception as e:
+                        print(f"Error processing chunk {i+1}: {e}")
+                        continue
+                
+                # Deduplicate and refine topics across all chunks
+                if all_chunk_topics:
+                    # Remove duplicates while preserving order
+                    seen = set()
+                    unique_topics = []
+                    for t in all_chunk_topics:
+                        if t.lower() not in seen:
+                            seen.add(t.lower())
+                            unique_topics.append(t)
+                    
+                    # If we have too many topics, synthesize and prioritize
+                    if len(unique_topics) > (num_topics or 20):
+                        synthesis_prompt = f"""From the following list of comparison topics, select and refine the {num_topics or 10} most important and relevant topics for {comparison_type} comparison based on: {description}
+
+Topics to review:
+{chr(10).join([f"{i+1}. {t}" for i, t in enumerate(unique_topics)])}
+
+Requirements:
+1. Select the most critical and comprehensive topics
+2. Ensure good coverage of comparison aspects
+3. Maintain clarity and specificity
+4. Focus on topics most relevant to the description
+
+Return only the final selected topics, one per line, numbered."""
+                        
+                        try:
+                            refined_response = invoke_llm(llm, synthesis_prompt, {})
+                            topics = []
+                            for line in refined_response.strip().split('\n'):
+                                line = line.strip()
+                                if line and (line[0].isdigit() or line.startswith('-') or line.startswith('*')):
+                                    topic = re.sub(r"^\d+\.\s+", "", line)
+                                    topic = re.sub(r"^[-*]\s+", "", topic)
+                                    if topic.strip():
+                                        topics.append(topic.strip())
+                        except Exception as e:
+                            print(f"Error in topic synthesis: {e}")
+                            topics = unique_topics[:num_topics or 10]
+                    else:
+                        topics = unique_topics[:num_topics or 20]
+                    
+                    # For analysis, show chunked processing was used
+                    analysis = f"Generated {len(topics)} topics from chunked example document analysis ({len(chunks)} chunks processed) based on the provided description to ensure comprehensive document comparison coverage."
+                    
+                    # Record the interaction
+                    record_llm_interaction(
+                        session=session,
+                        user_id=current_user.id,
+                        functionality="generate_comparison_topics",
+                        input_data={
+                            "description": description,
+                            "requested_topics": num_topics,
+                            "comparison_type": comparison_type,
+                            "has_example_document": True,
+                            "chunked_processing": True,
+                            "chunk_count": len(chunks),
+                            "search_mode": search_mode,
+                        },
+                        output_data={
+                            "topics_count": len(topics),
+                            "analysis": analysis,
+                        },
+                        metadata={},
+                    )
+
+                    return GenerateTopicsResponse(topics=topics, description_analysis=analysis)
+                else:
+                    # Fallback to description-only generation if chunk processing failed
+                    example_document = ""
+                    example_instruction = ""
+                    example_analysis_instruction = ""
+
+        # Continue with existing logic for small documents or when no files provided
         prompt_variables = {
             "description": description,
             "comparison_type": comparison_type,
@@ -1199,9 +1345,12 @@ async def generate_topics_json(
         # Get the default LLM
         llm = get_default_llm(session, current_user)
 
+        # Handle optional description
+        description = request.description or ""
+
         # Prepare variables for the prompt
         prompt_variables = {
-            "description": request.description,
+            "description": description,
             "comparison_type": request.comparison_type or "general",
             "example_document": "",
             "example_instruction": "",
@@ -1222,7 +1371,7 @@ async def generate_topics_json(
                     current_user=current_user,
                     knowledge_base_id=request.knowledge_base_id,
                     search_mode=request.search_mode,
-                    query=request.description,
+                    query=description,
                 )
 
                 if content:

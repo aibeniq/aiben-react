@@ -69,9 +69,7 @@ const FormTemplateModal = ({
       errors.name = "Form template name must be at least 3 characters long"
     }
     
-    if (!formDescription.trim()) {
-      errors.description = "Description is required"
-    }
+    // Description is optional - no validation required
     
     // Check if fields exist (should be a newline-separated string)
     if (!fields.trim() || fields.split('\n').every(field => !field.trim())) {

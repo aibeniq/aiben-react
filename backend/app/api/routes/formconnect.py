@@ -991,9 +991,12 @@ async def generate_form_fields(
         # Get the default LLM
         llm = get_default_llm(session, current_user)
 
+        # Handle optional description
+        description = request.description or ""
+
         # Prepare variables for the prompt
         prompt_variables = {
-            "description": request.description,
+            "description": description,
             "example_instruction": "",
             "analysis_instruction": "",
             "analysis_note": "",
@@ -1013,7 +1016,7 @@ async def generate_form_fields(
                     current_user=current_user,
                     knowledge_base_id=str(request.knowledge_base_id),
                     search_mode=request.search_mode,
-                    query=request.description,
+                    query=description,
                 )
 
                 if content:
