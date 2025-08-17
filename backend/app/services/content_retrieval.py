@@ -80,8 +80,29 @@ async def retrieve_knowledge_base_content(
                             continue
 
                 if kb_content_parts:
-                    content = "\n\n" + "=" * 80 + "\n\n".join(kb_content_parts)
-                    instruction = "Use ALL the following reference documents to inform your generation:"
+                    full_content = "\n\n" + "=" * 80 + "\n\n".join(kb_content_parts)
+                    
+                    # Check if content exceeds reasonable limits and potentially needs chunking
+                    # This function returns content for use in prompts, so we need to be careful about size
+                    max_content_size = 100000  # Conservative limit for knowledge base content
+                    
+                    if len(full_content) > max_content_size:
+                        logger.warning(f"Knowledge base content is very large ({len(full_content)} chars), truncating to avoid context issues")
+                        
+                        # Truncate but try to end at a reasonable boundary
+                        truncated_content = full_content[:max_content_size]
+                        
+                        # Find the last complete document boundary
+                        last_boundary = truncated_content.rfind("=" * 80)
+                        if last_boundary > max_content_size // 2:  # Only use if we keep at least half the content
+                            truncated_content = truncated_content[:last_boundary]
+                        
+                        content = truncated_content + f"\n\n[Content truncated - showing first {len(truncated_content)} characters of {len(full_content)} total]"
+                        instruction = "Use the following reference documents (content may be truncated due to size) to inform your generation:"
+                    else:
+                        content = full_content
+                        instruction = "Use ALL the following reference documents to inform your generation:"
+                        
                     return content, instruction
 
         elif search_mode == "vector":

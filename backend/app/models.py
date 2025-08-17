@@ -280,7 +280,7 @@ class FormConnectForm(SQLModel, table=True):
 
 # Request models for generating form fields
 class GenerateFormFieldsRequest(SQLModel):
-    description: str = Field(min_length=10, max_length=2000)
+    description: str | None = Field(default=None, max_length=2000)
     num_fields: Optional[int] = Field(default=None, ge=1, le=50)
     knowledge_base_id: Optional[uuid.UUID] = None
     search_mode: Literal["vector", "full_scan"] = Field(default="vector")
@@ -659,7 +659,7 @@ class OptimizedOutlineResponse(SQLModel):
 
 
 class GenerateTopicsRequest(SQLModel):
-    description: str = Field(min_length=10, max_length=20000)
+    description: str | None = Field(default=None, max_length=20000)
     num_topics: Optional[int] = Field(
         default=None, ge=1, le=20
     )  # Optional - LLM will decide if not specified
@@ -697,7 +697,7 @@ class GenerateQuestionsResponse(SQLModel):
 
 
 class GenerateOutlineRequest(SQLModel):
-    description: str = Field(min_length=10, max_length=20000)
+    description: str | None = Field(default=None, max_length=20000)
     num_sections: Optional[int] = Field(
         default=None, ge=1, le=20
     )  # Optional - LLM will decide if not specified

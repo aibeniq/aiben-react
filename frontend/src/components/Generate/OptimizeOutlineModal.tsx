@@ -24,6 +24,7 @@ import {
 import useCustomToast from "../../hooks/useCustomToast"
 import { FiCheck, FiEdit3, FiSave, FiX, FiDownload } from "react-icons/fi"
 
+
 interface OptimizeOutlineModalProps {
   isOpen: boolean
   onClose: () => void
@@ -210,20 +211,63 @@ const OptimizeOutlineModal = ({
   const handleApplyOptimizations = () => {
     if (!optimizationResults) return
 
-    // Create optimized sections using only accepted suggestions
-    const optimizedSections = optimizationResults.suggestions.map(
-      (suggestion: OutlineSuggestion, index: number) => {
-        if (acceptedSuggestions.has(index) && suggestion.needs_revision) {
-          // Use edited suggestion if available, otherwise use original suggestion
-          return getSuggestionText(index)
+    try {
+      // Parse the current sections to get the original structure
+      const originalSections = JSON.parse(currentSections)
+      console.log("OptimizeOutline: Original sections structure:", originalSections)
+      console.log("OptimizeOutline: Optimization suggestions count:", optimizationResults.suggestions.length)
+      
+      // The backend only returns suggestions for sections with consultDocuments: true
+      // We need to reconstruct the full sections array by:
+      // 1. Keeping non-consulting sections unchanged from original
+      // 2. Updating consulting sections from optimization results
+      
+      let suggestionIndex = 0
+      const optimizedSections = originalSections.map((originalSection: any, originalIndex: number) => {
+        // If this section doesn't consult documents, keep it unchanged
+        if (!originalSection.consultDocuments) {
+          console.log(`OptimizeOutline: Keeping non-consulting section ${originalIndex} unchanged:`, originalSection.text?.substring(0, 50))
+          return originalSection
         }
-        return suggestion.original_section
-      },
-    )
+        
+        // This section consults documents, so it should have a corresponding suggestion
+        if (suggestionIndex >= optimizationResults.suggestions.length) {
+          console.warn(`OptimizeOutline: No suggestion found for consulting section at original index ${originalIndex}`)
+          return originalSection
+        }
+        
+        const suggestion = optimizationResults.suggestions[suggestionIndex]
+        console.log(`OptimizeOutline: Processing consulting section ${originalIndex} with suggestion ${suggestionIndex}`)
+        
+        let updatedSection
+        if (acceptedSuggestions.has(suggestionIndex) && suggestion.needs_revision) {
+          // Use edited suggestion if available, otherwise use original suggestion
+          updatedSection = {
+            ...originalSection,
+            text: getSuggestionText(suggestionIndex)
+          }
+          console.log(`OptimizeOutline: Applied optimization for section ${originalIndex}`)
+        } else {
+          // Keep the original section unchanged
+          updatedSection = {
+            ...originalSection,
+            text: suggestion.original_section
+          }
+          console.log(`OptimizeOutline: Kept original content for section ${originalIndex}`)
+        }
+        
+        suggestionIndex++
+        return updatedSection
+      })
 
-    onOptimizedSections(JSON.stringify(optimizedSections))
-    showSuccessToast(`Applied ${acceptedSuggestions.size} optimization suggestions`)
-    handleClose()
+      console.log("OptimizeOutline: Final optimized sections:", optimizedSections)
+      onOptimizedSections(JSON.stringify(optimizedSections))
+      showSuccessToast(`Applied ${acceptedSuggestions.size} optimization suggestions`)
+      handleClose()
+    } catch (error) {
+      console.error("Error applying optimizations:", error)
+      showErrorToast("Failed to apply optimizations. Please try again.")
+    }
   }
 
   const handleDownloadCsv = async () => {

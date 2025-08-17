@@ -1940,6 +1940,9 @@ async def generate_questions_with_files(
     """
     Generate checklist questions based on a description using LLM, with optional reference documents.
     """
+    from app.services.text_processing import chunk_text
+    from app.core.config import settings
+    
     try:
         # Get the default LLM
         llm = get_default_llm(session, current_user)
@@ -2023,7 +2026,154 @@ async def generate_questions_with_files(
                         reference_document_content += f"\n\n--- Error processing {file.filename} ---\nError: {str(e)}\n"
                         continue
 
-        # Prepare variables for the prompt
+        # Check if content exceeds token limits and chunk if necessary
+        if reference_document_content:
+            print(f"Total document content: {len(reference_document_content)} characters")
+            
+            # Using conservative chunking similar to TWINCHECK settings
+            max_chunk_size = 80000  # Conservative chunk size for 128K context limit
+            
+            if len(reference_document_content) > max_chunk_size:
+                print(f"Document too large ({len(reference_document_content)} chars), chunking for processing")
+                
+                # Chunk the document content
+                chunks = chunk_text(reference_document_content, max_tokens=max_chunk_size)
+                
+                # Process each chunk to generate questions
+                all_chunk_questions = []
+                
+                for i, chunk in enumerate(chunks):
+                    print(f"Processing chunk {i+1}/{len(chunks)}")
+                    
+                    # Generate questions for this chunk
+                    chunk_prompt_variables = {
+                        "description": description,
+                        "checklist_type": checklist_type,
+                        "reference_documents_instruction": "You can find additional requirements in the reference documents provided below.",
+                        "reference_documents_content": chunk,
+                        "additional_instructions": "\n11. Use the reference documents provided below to identify additional requirements that should be included in the checklist questions",
+                    }
+
+                    try:
+                        chunk_response = invoke_llm(
+                            llm,
+                            settings.VERADOC_GENERATE_QUESTIONS_PROMPT_TEMPLATE,
+                            chunk_prompt_variables,
+                        )
+                        
+                        # Parse questions from chunk response
+                        chunk_questions = []
+                        lines = chunk_response.strip().split("\n")
+                        in_questions_section = False
+                        
+                        for line in lines:
+                            line = line.strip()
+                            if line.startswith("QUESTIONS:"):
+                                in_questions_section = True
+                                continue
+                            elif line.startswith("ANALYSIS:"):
+                                in_questions_section = False
+                                continue
+
+                            if in_questions_section:
+                                if re.match(r"^\d+\.\s+", line):
+                                    question = re.sub(r"^\d+\.\s+", "", line)
+                                    if question.strip():
+                                        chunk_questions.append(question.strip())
+                        
+                        # If parsing failed, try simpler approach
+                        if not chunk_questions:
+                            for line in lines:
+                                line = line.strip()
+                                if re.match(r"^\d+\.\s+", line):
+                                    question = re.sub(r"^\d+\.\s+", "", line)
+                                    if question.strip():
+                                        chunk_questions.append(question.strip())
+                        
+                        all_chunk_questions.extend(chunk_questions)
+                        
+                    except Exception as e:
+                        print(f"Error processing chunk {i+1}: {e}")
+                        continue
+                
+                # Deduplicate and refine questions across all chunks
+                if all_chunk_questions:
+                    # Remove duplicates while preserving order
+                    seen = set()
+                    unique_questions = []
+                    for q in all_chunk_questions:
+                        if q.lower() not in seen:
+                            seen.add(q.lower())
+                            unique_questions.append(q)
+                    
+                    # If we have too many questions, synthesize and prioritize
+                    if len(unique_questions) > (num_questions or 50):
+                        synthesis_prompt_variables = {
+                            "description": description,
+                            "checklist_type": checklist_type,
+                            "questions_list": "\n".join([f"{i+1}. {q}" for i, q in enumerate(unique_questions)]),
+                            "num_questions": num_questions or 20,
+                        }
+                        
+                        synthesis_prompt = f"""From the following list of checklist questions, select and refine the {num_questions or 20} most important and relevant questions for {checklist_type} verification based on: {description}
+
+Questions to review:
+{chr(10).join([f"{i+1}. {q}" for i, q in enumerate(unique_questions)])}
+
+Requirements:
+1. Select the most critical and actionable questions
+2. Ensure no redundancy
+3. Maintain clarity and specificity
+4. Focus on questions most relevant to the description
+
+Return only the final selected questions, one per line, numbered."""
+                        
+                        try:
+                            refined_response = invoke_llm(llm, synthesis_prompt, {})
+                            questions = []
+                            for line in refined_response.strip().split('\n'):
+                                line = line.strip()
+                                if line and (line[0].isdigit() or line.startswith('-') or line.startswith('*')):
+                                    question = re.sub(r"^\d+\.\s+", "", line)
+                                    question = re.sub(r"^[-*]\s+", "", question)
+                                    if question.strip():
+                                        questions.append(question.strip())
+                        except Exception as e:
+                            print(f"Error in question synthesis: {e}")
+                            questions = unique_questions[:num_questions or 20]
+                    else:
+                        questions = unique_questions[:num_questions or 20]
+                    
+                    # For analysis, show chunked processing was used
+                    analysis = f"Generated {len(questions)} questions from chunked document analysis ({len(chunks)} chunks processed) based on the provided description to ensure comprehensive evaluation coverage."
+                    
+                    # Record the interaction
+                    record_llm_interaction(
+                        session=session,
+                        user_id=current_user.id,
+                        functionality="generate_checklist_questions",
+                        input_data={
+                            "description": description,
+                            "requested_questions": num_questions,
+                            "checklist_type": checklist_type,
+                            "chunked_processing": True,
+                            "chunk_count": len(chunks),
+                        },
+                        output_data={
+                            "questions_count": len(questions),
+                            "analysis": analysis,
+                        },
+                        metadata={},
+                    )
+
+                    return GenerateQuestionsResponse(
+                        questions=questions, description_analysis=analysis
+                    )
+                else:
+                    # Fallback to description-only generation if chunk processing failed
+                    reference_document_content = ""
+
+        # Continue with existing logic for small documents or when no files provided
         if reference_document_content:
             reference_documents_instruction = "You can find additional requirements in the reference documents provided below."
             additional_instructions = "\n11. Use the reference documents provided below to identify additional requirements that should be included in the checklist questions"
@@ -2144,9 +2294,12 @@ async def generate_questions(
         # Get the default LLM
         llm = get_default_llm(session, current_user)
 
+        # Handle optional description
+        description = request.description or ""
+
         # Prepare variables for the prompt
         prompt_variables = {
-            "description": request.description,
+            "description": description,
             "checklist_type": request.checklist_type or "general",
             "reference_documents_instruction": "",
             "reference_documents_content": "",
@@ -2165,7 +2318,7 @@ async def generate_questions(
                     current_user=current_user,
                     knowledge_base_id=request.knowledge_base_id,
                     search_mode=request.search_mode,
-                    query=request.description,
+                    query=description,
                 )
 
                 if content:

@@ -5,7 +5,6 @@ import { VeraDocChecklist, VeradocService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import ChecklistModal from "./ChecklistModal"
 import { generateUUID } from "../../utils/uuid"
-import { copyToClipboard } from "../../utils/copyToClipboard"
 
 interface QuestionData {
   id: string
@@ -29,8 +28,6 @@ interface ChecklistTableProps {
 
 interface ChecklistTableHeaderProps {
   onCreateNew: () => void
-  onCopyQuestions: () => void
-  hasSelectedChecklist: boolean
 }
 
 interface ChecklistTableBodyProps {
@@ -46,8 +43,6 @@ interface ChecklistTableBodyProps {
 
 const ChecklistTableHeader = ({
   onCreateNew,
-  onCopyQuestions,
-  hasSelectedChecklist,
 }: ChecklistTableHeaderProps) => {
   return (
     <Table.Header position="sticky" top="0" bg="transparent" zIndex="1">
@@ -61,16 +56,6 @@ const ChecklistTableHeader = ({
         </Table.ColumnHeader>
         <Table.ColumnHeader w="40" style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
           <HStack gap={1} ml="auto">
-            <IconButton
-              size="xs"
-              onClick={onCopyQuestions}
-              variant="ghost"
-              disabled={!hasSelectedChecklist}
-              aria-label="Copy questions as text"
-              title="Copy all questions as text"
-            >
-              <FiCopy size={12} />
-            </IconButton>
             <Button size="sm" onClick={onCreateNew} variant="ghost">
               <FiPlus size={14} />
             </Button>
@@ -533,21 +518,6 @@ const ChecklistTable = ({
     setEditingChecklist(null)
   }
 
-  const handleCopyQuestions = async () => {
-    if (!selectedChecklist || !selectedChecklist.questions) {
-      showErrorToast("No questions to copy")
-      return
-    }
-
-    try {
-      await copyToClipboard(selectedChecklist.questions)
-      showSuccessToast("Questions copied to clipboard!")
-    } catch (error) {
-      console.error("Error copying questions:", error)
-      showErrorToast("Failed to copy questions to clipboard")
-    }
-  }
-
   return (
     <div style={{ opacity: isDisabled ? 0.3 : 1, pointerEvents: isDisabled ? "none" : "auto" }}>
       {/* Checklist Table */}
@@ -563,8 +533,6 @@ const ChecklistTable = ({
         <Table.Root variant="line">
           <ChecklistTableHeader
             onCreateNew={handleCreateNew}
-            onCopyQuestions={handleCopyQuestions}
-            hasSelectedChecklist={!!selectedChecklist}
           />
           <ChecklistTableBody
             checklists={checklists}

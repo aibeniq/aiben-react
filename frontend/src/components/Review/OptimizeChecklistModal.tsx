@@ -11,6 +11,7 @@ import {
   Portal,
   Dialog,
 } from "@chakra-ui/react"
+import { Field } from "../ui/field"
 import { FiCheck, FiEdit3, FiSave, FiX } from "react-icons/fi"
 import {
   VeraDocChecklist,
@@ -44,6 +45,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
   const [acceptedSuggestions, setAcceptedSuggestions] = useState<Set<number>>(new Set())
   const [isApplying, setIsApplying] = useState(false)
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
+  const [customInstructions, setCustomInstructions] = useState("")
   const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
   const [editingSuggestions, setEditingSuggestions] = useState<Map<number, string>>(new Map())
   const [editingModes, setEditingModes] = useState<Set<number>>(new Set())
@@ -84,6 +86,8 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
       ongoingRequestRef.current = VeradocService.optimizeChecklist({
         knowledgeBaseId: selectedKnowledgeBase.id,
         questions: checklist.questions || "",
+        customInstructions: customInstructions || undefined,
+        searchMode: searchMode === "full_scan" ? "full_text" : searchMode,
         formData: {
           files: regularFiles,
         },
@@ -263,6 +267,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
     setAcceptedSuggestions(new Set())
     setIsApplying(false)
     setSearchMode("vector")
+    setCustomInstructions("")
     setLoadingCsvDownload(false)
     setEditingSuggestions(new Map())
     setEditingModes(new Set())
@@ -298,6 +303,22 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                     showHandwrittenToggle={false}
                   />
                 </Box>
+
+                <Field
+                  label="Custom Instructions (Optional)"
+                  helperText="Enter any additional instructions that should be considered when answering the checklist questions"
+                >
+                  <Textarea
+                    value={customInstructions}
+                    onChange={(e) => setCustomInstructions(e.target.value)}
+                    placeholder="e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
+                    rows={3}
+                    maxLength={2000}
+                  />
+                  <Text fontSize="xs" color="gray.500" mt={1}>
+                    {customInstructions.length}/2000 characters
+                  </Text>
+                </Field>
 
                 <HStack justifyContent="space-between">
                   <Button

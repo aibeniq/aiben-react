@@ -74,9 +74,7 @@ const OutlineModal = ({
       errors.name = "Outline name must be at least 3 characters long"
     }
     
-    if (!outlineDescription.trim()) {
-      errors.description = "Description is required"
-    }
+    // Description is optional - no validation required
     
     // Check if sections exist (either as JSON array or simple text)
     let hasSections = false

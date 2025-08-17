@@ -332,10 +332,7 @@ const TopicListTable = ({
         return
       }
 
-      if (!topicListDescription.trim()) {
-        showErrorToast("Description is required")
-        return
-      }
+      // Description is optional - no validation required
 
       if (validTopics.length === 0) {
         showErrorToast("At least one non-empty topic is required")

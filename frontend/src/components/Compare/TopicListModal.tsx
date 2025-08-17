@@ -75,9 +75,7 @@ const TopicListModal = ({
       errors.name = "Topic list name must be at least 3 characters long"
     }
     
-    if (!topicListDescription.trim()) {
-      errors.description = "Description is required"
-    }
+    // Description is optional - no validation required
     
     if (topicsList.length === 0 || topicsList.every(topic => !topic.trim())) {
       errors.topics = "At least one topic is required"
