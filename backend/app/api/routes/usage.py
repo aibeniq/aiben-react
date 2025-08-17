@@ -108,10 +108,10 @@ async def get_token_usage(
         ("start_time", quota_period["start_time"]),
         ("end_time", quota_period["end_time"]),
         ("bucket_width", "1d"),
-        ("api_key_ids[]", openai_api_key),
-        ("group_by[]", "api_key_id"),
-        ("group_by[]", "model"),
-        ("group_by[]", "bucket"),
+        ("api_key_ids", "key_141jK27ifYPzney0"), #DAVID TODO - hardcoded in the key ID...
+        #("group_by[]", "api_key_id"),
+        #("group_by[]", "model"),
+        #("group_by[]", "bucket"),
     ]
     
     # Print calculated usage period
@@ -151,8 +151,7 @@ async def get_token_usage(
                     # Print raw API response for debugging
                     print(f"Page {page_count} - OpenAI API response status: {response.status_code}")
                     print(f"Page {page_count} - Raw response data keys: {list(data.keys()) if data else 'None'}")
-                    if page_count == 1:  # Only print full response for first page to avoid spam
-                        print(f"Page {page_count} - Raw response: {data}")
+                    print(f"Page {page_count} - Raw response: {data}")
 
                     page_tokens = 0
                     if data and "data" in data and isinstance(data["data"], list):
