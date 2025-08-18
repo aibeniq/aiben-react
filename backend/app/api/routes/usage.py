@@ -52,9 +52,14 @@ def calculate_quota_period() -> QuotaPeriod:
         else:
             next_month = current_month + 1
             next_year = current_year
-        # End date is next month's (start_day - 1)
-        end_day = start_day - 1 if start_day > 1 else monthrange(next_year, next_month)[1]
-        end_date = datetime(next_year, next_month, end_day, 23, 59, 59)
+        # End date is next month's (start_day - 1), or current month's last day if start_day is 1
+        if start_day > 1:
+            end_day = start_day - 1
+            end_date = datetime(next_year, next_month, end_day, 23, 59, 59)
+        else:
+            # If start_day is 1, period ends on last day of current month
+            end_day = monthrange(current_year, current_month)[1]
+            end_date = datetime(current_year, current_month, end_day, 23, 59, 59)
     else:
         # Current period: last month's start_day to this month's (start_day - 1)
         if current_month == 1:
