@@ -24,6 +24,7 @@ from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from app.services.translation import translate_text_if_needed
 from app.services.retrievers import (
     create_ensemble_retriever,
 )  # Import the ensemble retriever
@@ -86,78 +87,10 @@ else:
 
 
 def extract_text_from_file(file_content: bytes, filename: str) -> str:
-    """Extract text from various file formats."""
-    try:
-        # Determine file type from extension
-        file_ext = Path(filename).suffix.lower()
+    """Extract text from various file formats using unified document processing."""
+    from app.services.document_utils import extract_text_from_file_unified
 
-        if file_ext == ".pdf":
-            # Handle PDF files
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-                temp_file.write(file_content)
-                temp_file_path = temp_file.name
-            # File is now closed and ready to be read by pypdf
-
-            try:
-                documents = load_pdf_with_pypdf(temp_file_path, filename)
-                text = "\n\n".join([doc.page_content for doc in documents])
-                return text
-            finally:
-                os.unlink(temp_file_path)
-
-        elif file_ext in [".docx", ".doc"]:
-            # Handle Word documents
-            with tempfile.NamedTemporaryFile(
-                delete=False, suffix=file_ext
-            ) as temp_file:
-                temp_file.write(file_content)
-                temp_file_path = temp_file.name
-            # File is now closed and ready to be read by document processors
-
-            try:
-                if file_ext == ".docx":
-                    doc = Document(temp_file_path)
-                    text_parts = []
-                    for paragraph in doc.paragraphs:
-                        if paragraph.text.strip():
-                            text_parts.append(paragraph.text)
-
-                    # Also extract text from tables
-                    for table in doc.tables:
-                        for row in table.rows:
-                            for cell in row.cells:
-                                if cell.text.strip():
-                                    text_parts.append(cell.text)
-
-                    return "\n\n".join(text_parts)
-                else:
-                    # For .doc files, fall back to textloader
-                    loader = TextLoader(temp_file_path)
-                    documents = loader.load()
-                    return "\n\n".join([doc.page_content for doc in documents])
-            finally:
-                os.unlink(temp_file_path)
-
-        elif file_ext in [".txt", ".md"]:
-            # Handle text files
-            try:
-                return file_content.decode("utf-8")
-            except UnicodeDecodeError:
-                return file_content.decode("latin-1")
-
-        else:
-            # Try to decode as text for unknown file types
-            try:
-                return file_content.decode("utf-8")
-            except UnicodeDecodeError:
-                try:
-                    return file_content.decode("latin-1")
-                except UnicodeDecodeError:
-                    return f"Unable to extract text from {filename} - unsupported file format"
-
-    except Exception as e:
-        print(f"Error extracting text from {filename}: {e}")
-        return f"Failed to extract text from {filename}: {str(e)}"
+    return extract_text_from_file_unified(file_content, filename)
 
 
 router = APIRouter(prefix="/veradoc", tags=["veradoc"])
@@ -200,6 +133,7 @@ def parse_optimization_response(
             reason=reason,
             current_answer=original_qa["answer"],
             needs_revision=needs_revision,
+            policy_context=original_qa.get("context", ""),
         )
     except Exception as e:
         print(f"Error parsing optimization response: {e}")
@@ -209,6 +143,7 @@ def parse_optimization_response(
             reason=f"Error parsing suggestion: {str(e)}",
             current_answer=original_qa["answer"],
             needs_revision=False,
+            policy_context=original_qa.get("context", ""),
         )
 
 
@@ -249,7 +184,7 @@ async def process_rag_checklist(
     session: SessionDep,
     current_user: CurrentUser,
     request_data: RagChecklistRequest = Depends(),
-    files: List[UploadFile] = File(...),
+    files: List[UploadFile] = File(None),
     handwritten_files: List[UploadFile] = File(None),
     request: FastAPIRequest = None,
 ):
@@ -269,7 +204,11 @@ async def process_rag_checklist(
     if not request_data.questions or not request_data.questions.strip():
         raise HTTPException(status_code=400, detail="Questions are required")
 
-    if not files or len(files) == 0:
+    # Check for at least one file in either files or handwritten_files
+    total_files = (len(files) if files else 0) + (
+        len(handwritten_files) if handwritten_files else 0
+    )
+    if total_files == 0:
         raise HTTPException(status_code=400, detail="At least one file is required")
 
     # Validate search mode
@@ -583,13 +522,27 @@ async def process_rag_checklist(
                     if q.strip()
                 ]
 
-            # Get file content
-            if not files or len(files) == 0:
+            # Get file content - process both regular and handwritten files
+            all_files_to_process = []
+
+            # Add regular files
+            if files:
+                for file in files:
+                    all_files_to_process.append((file, "digitized"))
+
+            # Add handwritten files
+            if handwritten_files:
+                for file in handwritten_files:
+                    all_files_to_process.append((file, "handwritten"))
+
+            if not all_files_to_process:
                 raise HTTPException(
                     status_code=400, detail="No files provided for processing"
                 )
 
-            file = files[0]  # Process the first file for now
+            # For now, process the first file (can be extended to handle multiple files)
+            file, file_type = all_files_to_process[0]
+            print(f"Processing {file_type} file: {file.filename}")
 
             try:
                 content = await file.read()
@@ -599,7 +552,13 @@ async def process_rag_checklist(
                     )
 
                 # Extract text using the extraction function
-                document_text = extract_text_from_file(content, file.filename)
+                if file_type == "handwritten":
+                    print(f"Processing handwritten file with OCR: {file.filename}")
+                    # For handwritten files, we can use the same extraction but potentially with enhanced OCR
+                    document_text = extract_text_from_file(content, file.filename)
+                else:
+                    print(f"Processing digitized file: {file.filename}")
+                    document_text = extract_text_from_file(content, file.filename)
                 if not document_text or document_text.strip() == "":
                     raise HTTPException(
                         status_code=400,
@@ -711,6 +670,20 @@ async def process_rag_checklist(
                                                     )
                                                 ).first()
 
+                                                # 🚨 NEW FALLBACK: If not found with truncated name, try the whole filename
+                                                if not source_entry:
+                                                    print(f"No source entry found for truncated filename: {filename}")
+                                                    print(f"Trying with full filename: {raw_filename}")
+                                                    
+                                                    source_entry = session.exec(
+                                                        select(Source).where(Source.name == raw_filename)
+                                                    ).first()
+                                                    
+                                                    if source_entry:
+                                                        print(f"✅ Found source entry with full filename: {raw_filename}")
+                                                    else:
+                                                        print(f"❌ No source entry found for either truncated or full filename")
+
                                                 if source_entry:
                                                     metadata["source_data_id"] = str(
                                                         source_entry.source_data_id
@@ -757,6 +730,12 @@ async def process_rag_checklist(
                                 {"context": context, "question": question_text},
                             )
                             print(f"Got context: {question_context[:100]}...")
+
+                            # Translate the question context if needed
+                            question_context = await translate_text_if_needed(
+                                question_context, session, current_user, llm
+                            )
+
                         except Exception as context_error:
                             print(
                                 f"Error generating context for question: {context_error}"
@@ -764,9 +743,17 @@ async def process_rag_checklist(
                             question_context = (
                                 f"Error generating context: {str(context_error)}"
                             )
+                            # Translate the error message if needed
+                            question_context = await translate_text_if_needed(
+                                question_context, session, current_user, llm
+                            )
                     else:
                         # Skip knowledge base consultation - use empty context and citations
                         question_context = "No policy context consultation requested for this question."
+                        # Translate the fallback message if needed
+                        question_context = await translate_text_if_needed(
+                            question_context, session, current_user, llm
+                        )
                         source_citations = []
                         print(
                             f"Skipping document consultation for question: {question_text[:50]}..."
@@ -824,6 +811,12 @@ async def process_rag_checklist(
                             },
                         )
                         print(f"Got answer: {answer[:100]}...")
+
+                        # Translate the answer if needed
+                        answer = await translate_text_if_needed(
+                            answer, session, current_user, llm
+                        )
+
                     except Exception as answer_error:
                         print(f"Error generating answer for question: {answer_error}")
                         answer = f"Error generating answer: {str(answer_error)}"
@@ -883,6 +876,12 @@ async def process_rag_checklist(
                     llm, final_prompt_template, {"qa_pairs": qa_pairs_text}
                 )
                 print(f"Got final evaluation: {final_evaluation[:100]}...")
+
+                # Translate the final evaluation if needed
+                final_evaluation = await translate_text_if_needed(
+                    final_evaluation, session, current_user, llm
+                )
+
             except Exception as final_eval_error:
                 print(f"Error generating final evaluation: {final_eval_error}")
                 final_evaluation = (
@@ -1048,6 +1047,34 @@ def delete_checklist(
     session.delete(checklist)
     session.commit()
     return Message(message="Checklist deleted successfully.")
+
+
+@router.delete("/evaluations/{evaluation_id}", response_model=Message)
+def delete_evaluation(
+    evaluation_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
+):
+    """
+    Delete an evaluation/report by ID.
+    """
+    evaluation = session.get(LlmInteraction, evaluation_id)
+    if not evaluation:
+        raise HTTPException(status_code=404, detail="Evaluation not found.")
+
+    # Ensure the current user is the owner of the evaluation
+    if evaluation.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="Not authorized to delete this evaluation."
+        )
+
+    # Only allow deletion of veradoc evaluations
+    if evaluation.functionality != "veradoc":
+        raise HTTPException(
+            status_code=400, detail="Invalid evaluation type."
+        )
+
+    session.delete(evaluation)
+    session.commit()
+    return Message(message="Evaluation deleted successfully.")
 
 
 @router.get("/history", response_model=List[Dict[str, Any]])
@@ -1316,13 +1343,52 @@ async def optimize_checklist(
                 persist_directory=temp_dir, embedding_function=embeddings
             )
 
-            # Create retriever
-            retriever = create_ensemble_retriever(
-                chroma_db=chroma_db,
-                vector_weight=0.7,
-                keyword_weight=0.3,
-                search_kwargs={"k": settings.RAG_NUM_CHUNKS},
-            )
+            # Create retriever based on search mode
+            if request_data.search_mode == "full_scan":
+                print("Using full document scan mode for optimization")
+
+                # Create a simple retriever that returns all documents
+                class FullScanRetriever:
+                    def __init__(self, chroma_db):
+                        self.chroma_db = chroma_db
+
+                    def get_relevant_documents(self, query):
+                        try:
+                            all_data = self.chroma_db.get()
+                            documents = []
+
+                            if (
+                                all_data
+                                and "documents" in all_data
+                                and all_data["documents"]
+                            ):
+                                for i, doc_content in enumerate(all_data["documents"]):
+                                    metadata = (
+                                        all_data["metadatas"][i]
+                                        if "metadatas" in all_data
+                                        and i < len(all_data["metadatas"])
+                                        else {}
+                                    )
+                                    documents.append(
+                                        LangchainDocument(
+                                            page_content=doc_content, metadata=metadata
+                                        )
+                                    )
+
+                            return documents
+                        except Exception as e:
+                            print(f"Error in FullScanRetriever: {e}")
+                            return []
+
+                retriever = FullScanRetriever(chroma_db)
+            else:
+                print("Using vector search mode for optimization")
+                retriever = create_ensemble_retriever(
+                    chroma_db=chroma_db,
+                    vector_weight=0.7,
+                    keyword_weight=0.3,
+                    search_kwargs={"k": settings.RAG_NUM_CHUNKS},
+                )
 
             # Initialize LLM
             llm = get_default_llm(session, current_user)
@@ -1365,6 +1431,11 @@ async def optimize_checklist(
                     llm,
                     context_prompt_template,
                     {"context": context, "question": question},
+                )
+
+                # Translate the question context if needed
+                question_context = await translate_text_if_needed(
+                    question_context, session, current_user, llm
                 )
 
                 # Prepare custom instructions section if provided
@@ -1428,18 +1499,20 @@ async def optimize_checklist(
                     )
 
                     suggestion = parse_optimization_response(suggestion_response, qa)
+                    # Add policy context to the suggestion
+                    suggestion.policy_context = qa["context"]
                     suggestions.append(suggestion)
                 else:
                     # Question is already working well
-                    suggestions.append(
-                        ChecklistSuggestion(
-                            original_question=qa["question"],
-                            suggested_question=qa["question"],
-                            reason="Question already generates positive responses",
-                            current_answer=qa["answer"],
-                            needs_revision=False,
-                        )
+                    suggestion = ChecklistSuggestion(
+                        original_question=qa["question"],
+                        suggested_question=qa["question"],
+                        reason="Question already generates positive responses",
+                        current_answer=qa["answer"],
+                        needs_revision=False,
+                        policy_context=qa["context"],
                     )
+                    suggestions.append(suggestion)
 
             # 6. Compile results
             original_questions = [qa["question"] for qa in qa_results]
@@ -1771,8 +1844,9 @@ async def generate_optimization_csv(
                 "Original Question",
                 "Suggested Question",
                 "Needs Revision",
-                "Reason",
+                "Policy Context",
                 "Current Answer",
+                "Reason",
                 "Analysis Summary",
             ]
         )
@@ -1794,6 +1868,7 @@ async def generate_optimization_csv(
                 needs_revision = suggestion.get("needs_revision", False)
                 reason = suggestion.get("reason", "")
                 current_answer = suggestion.get("current_answer", "")
+                policy_context = suggestion.get("policy_context", "")
 
                 # Clean up text fields (remove newlines and carriage returns for CSV)
                 original_question_clean = original_question.replace("\n", " ").replace(
@@ -1804,6 +1879,9 @@ async def generate_optimization_csv(
                 ).replace("\r", " ")
                 reason_clean = reason.replace("\n", " ").replace("\r", " ")
                 current_answer_clean = current_answer.replace("\n", " ").replace(
+                    "\r", " "
+                )
+                policy_context_clean = policy_context.replace("\n", " ").replace(
                     "\r", " "
                 )
                 analysis_summary_clean = analysis_summary.replace("\n", " ").replace(
@@ -1817,8 +1895,9 @@ async def generate_optimization_csv(
                         original_question_clean,
                         suggested_question_clean,
                         "Yes" if needs_revision else "No",
-                        reason_clean,
+                        policy_context_clean,
                         current_answer_clean,
+                        reason_clean,
                         analysis_summary_clean,
                     ]
                 )
@@ -1871,6 +1950,9 @@ async def generate_questions_with_files(
     """
     Generate checklist questions based on a description using LLM, with optional reference documents.
     """
+    from app.services.text_processing import chunk_text
+    from app.core.config import settings
+    
     try:
         # Get the default LLM
         llm = get_default_llm(session, current_user)
@@ -1954,7 +2036,154 @@ async def generate_questions_with_files(
                         reference_document_content += f"\n\n--- Error processing {file.filename} ---\nError: {str(e)}\n"
                         continue
 
-        # Prepare variables for the prompt
+        # Check if content exceeds token limits and chunk if necessary
+        if reference_document_content:
+            print(f"Total document content: {len(reference_document_content)} characters")
+            
+            # Using conservative chunking similar to TWINCHECK settings
+            max_chunk_size = 80000  # Conservative chunk size for 128K context limit
+            
+            if len(reference_document_content) > max_chunk_size:
+                print(f"Document too large ({len(reference_document_content)} chars), chunking for processing")
+                
+                # Chunk the document content
+                chunks = chunk_text(reference_document_content, max_tokens=max_chunk_size)
+                
+                # Process each chunk to generate questions
+                all_chunk_questions = []
+                
+                for i, chunk in enumerate(chunks):
+                    print(f"Processing chunk {i+1}/{len(chunks)}")
+                    
+                    # Generate questions for this chunk
+                    chunk_prompt_variables = {
+                        "description": description,
+                        "checklist_type": checklist_type,
+                        "reference_documents_instruction": "You can find additional requirements in the reference documents provided below.",
+                        "reference_documents_content": chunk,
+                        "additional_instructions": "\n11. Use the reference documents provided below to identify additional requirements that should be included in the checklist questions",
+                    }
+
+                    try:
+                        chunk_response = invoke_llm(
+                            llm,
+                            settings.VERADOC_GENERATE_QUESTIONS_PROMPT_TEMPLATE,
+                            chunk_prompt_variables,
+                        )
+                        
+                        # Parse questions from chunk response
+                        chunk_questions = []
+                        lines = chunk_response.strip().split("\n")
+                        in_questions_section = False
+                        
+                        for line in lines:
+                            line = line.strip()
+                            if line.startswith("QUESTIONS:"):
+                                in_questions_section = True
+                                continue
+                            elif line.startswith("ANALYSIS:"):
+                                in_questions_section = False
+                                continue
+
+                            if in_questions_section:
+                                if re.match(r"^\d+\.\s+", line):
+                                    question = re.sub(r"^\d+\.\s+", "", line)
+                                    if question.strip():
+                                        chunk_questions.append(question.strip())
+                        
+                        # If parsing failed, try simpler approach
+                        if not chunk_questions:
+                            for line in lines:
+                                line = line.strip()
+                                if re.match(r"^\d+\.\s+", line):
+                                    question = re.sub(r"^\d+\.\s+", "", line)
+                                    if question.strip():
+                                        chunk_questions.append(question.strip())
+                        
+                        all_chunk_questions.extend(chunk_questions)
+                        
+                    except Exception as e:
+                        print(f"Error processing chunk {i+1}: {e}")
+                        continue
+                
+                # Deduplicate and refine questions across all chunks
+                if all_chunk_questions:
+                    # Remove duplicates while preserving order
+                    seen = set()
+                    unique_questions = []
+                    for q in all_chunk_questions:
+                        if q.lower() not in seen:
+                            seen.add(q.lower())
+                            unique_questions.append(q)
+                    
+                    # If we have too many questions, synthesize and prioritize
+                    if len(unique_questions) > (num_questions or 50):
+                        synthesis_prompt_variables = {
+                            "description": description,
+                            "checklist_type": checklist_type,
+                            "questions_list": "\n".join([f"{i+1}. {q}" for i, q in enumerate(unique_questions)]),
+                            "num_questions": num_questions or 20,
+                        }
+                        
+                        synthesis_prompt = f"""From the following list of checklist questions, select and refine the {num_questions or 20} most important and relevant questions for {checklist_type} verification based on: {description}
+
+Questions to review:
+{chr(10).join([f"{i+1}. {q}" for i, q in enumerate(unique_questions)])}
+
+Requirements:
+1. Select the most critical and actionable questions
+2. Ensure no redundancy
+3. Maintain clarity and specificity
+4. Focus on questions most relevant to the description
+
+Return only the final selected questions, one per line, numbered."""
+                        
+                        try:
+                            refined_response = invoke_llm(llm, synthesis_prompt, {})
+                            questions = []
+                            for line in refined_response.strip().split('\n'):
+                                line = line.strip()
+                                if line and (line[0].isdigit() or line.startswith('-') or line.startswith('*')):
+                                    question = re.sub(r"^\d+\.\s+", "", line)
+                                    question = re.sub(r"^[-*]\s+", "", question)
+                                    if question.strip():
+                                        questions.append(question.strip())
+                        except Exception as e:
+                            print(f"Error in question synthesis: {e}")
+                            questions = unique_questions[:num_questions or 20]
+                    else:
+                        questions = unique_questions[:num_questions or 20]
+                    
+                    # For analysis, show chunked processing was used
+                    analysis = f"Generated {len(questions)} questions from chunked document analysis ({len(chunks)} chunks processed) based on the provided description to ensure comprehensive evaluation coverage."
+                    
+                    # Record the interaction
+                    record_llm_interaction(
+                        session=session,
+                        user_id=current_user.id,
+                        functionality="generate_checklist_questions",
+                        input_data={
+                            "description": description,
+                            "requested_questions": num_questions,
+                            "checklist_type": checklist_type,
+                            "chunked_processing": True,
+                            "chunk_count": len(chunks),
+                        },
+                        output_data={
+                            "questions_count": len(questions),
+                            "analysis": analysis,
+                        },
+                        metadata={},
+                    )
+
+                    return GenerateQuestionsResponse(
+                        questions=questions, description_analysis=analysis
+                    )
+                else:
+                    # Fallback to description-only generation if chunk processing failed
+                    reference_document_content = ""
+
+        # Continue with existing logic for small documents or when no files provided
         if reference_document_content:
             reference_documents_instruction = "You can find additional requirements in the reference documents provided below."
             additional_instructions = "\n11. Use the reference documents provided below to identify additional requirements that should be included in the checklist questions"
@@ -2075,9 +2304,12 @@ async def generate_questions(
         # Get the default LLM
         llm = get_default_llm(session, current_user)
 
+        # Handle optional description
+        description = request.description or ""
+
         # Prepare variables for the prompt
         prompt_variables = {
-            "description": request.description,
+            "description": description,
             "checklist_type": request.checklist_type or "general",
             "reference_documents_instruction": "",
             "reference_documents_content": "",
@@ -2096,7 +2328,7 @@ async def generate_questions(
                     current_user=current_user,
                     knowledge_base_id=request.knowledge_base_id,
                     search_mode=request.search_mode,
-                    query=request.description,
+                    query=description,
                 )
 
                 if content:

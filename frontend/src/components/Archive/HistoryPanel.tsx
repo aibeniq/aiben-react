@@ -1,14 +1,15 @@
-import { Box, Card, Heading, Text, VStack, HStack, Spinner } from "@chakra-ui/react"
+import { Box, Card, Heading, Text, VStack, HStack, Spinner, IconButton } from "@chakra-ui/react"
 import { Switch } from "@chakra-ui/react"
 import { Tooltip } from "@/components/ui/tooltip"
 import { format } from "date-fns"
-import { FiFileText, FiDatabase, FiUsers, FiThumbsUp, FiThumbsDown } from "react-icons/fi"
+import { FiFileText, FiDatabase, FiUsers, FiThumbsUp, FiThumbsDown, FiTrash2 } from "react-icons/fi"
 
 interface HistoryPanelProps {
   reportHistory: any[]
   selectedHistoryReport: any | null
   isHistoryLoading: boolean
   onLoadReport: (reportId: string) => void
+  onDeleteReport?: (reportId: string) => void
   emptyMessage?: string
   showAllUsers?: boolean
   onToggleShowAllUsers?: () => void
@@ -19,6 +20,7 @@ const HistoryPanel = ({
   selectedHistoryReport,
   isHistoryLoading,
   onLoadReport,
+  onDeleteReport,
   emptyMessage = "No previous items",
   showAllUsers = false,
   onToggleShowAllUsers,
@@ -46,6 +48,37 @@ const HistoryPanel = ({
     if (item?.form_type) {
       return item.form_type
     }
+
+    // Enhanced FormConnect display with actual filenames
+    if (item?.digitized_files?.length > 0 || item?.handwritten_files?.length > 0) {
+      const digitized = item.digitized_files || []
+      const handwritten = item.handwritten_files || []
+      const allFiles = [...digitized, ...handwritten]
+
+      if (allFiles.length === 1) {
+        return allFiles[0]
+      } else if (allFiles.length === 2) {
+        return `${allFiles[0]} vs ${allFiles[1]}`
+      } else if (allFiles.length <= 4) {
+        return allFiles.join(", ")
+      } else {
+        return `${allFiles[0]}, ${allFiles[1]}, +${allFiles.length - 2} more`
+      }
+    }
+
+    // Fallback to the existing logic for FormConnect (for backward compatibility)
+    if (
+      item?.metadata?.digitized_files?.length > 0 ||
+      item?.metadata?.handwritten_files?.length > 0
+    ) {
+      const digitizedCount = item.metadata.digitized_files?.length || 0
+      const handwrittenCount = item.metadata.handwritten_files?.length || 0
+      const parts = []
+      if (digitizedCount > 0) parts.push(`${digitizedCount} digitized`)
+      if (handwrittenCount > 0) parts.push(`${handwrittenCount} handwritten`)
+      return parts.join(", ")
+    }
+
     return null
   }
 
@@ -58,7 +91,12 @@ const HistoryPanel = ({
       return `${item.topic_count} topic${item.topic_count !== 1 ? "s" : ""}`
     }
     if (item?.field_count > 0) {
-      return `${item.field_count} field${item.field_count !== 1 ? "s" : ""}`
+      const fieldText = `${item.field_count} field${item.field_count !== 1 ? "s" : ""}`
+      // For FormConnect, also show document count if available
+      if (item?.document_count > 0) {
+        return `${fieldText}, ${item.document_count} document${item.document_count !== 1 ? "s" : ""}`
+      }
+      return fieldText
     }
     return null
   }
@@ -115,14 +153,47 @@ const HistoryPanel = ({
               <Box
                 key={item?.id}
                 p={3}
-                borderWidth="1px"
+                borderWidth="2px"
                 borderRadius="md"
                 cursor="pointer"
-                bg={selectedHistoryReport?.id === item?.id ? "accent.subtle" : "surface"}
-                _hover={{ bg: "accent.subtle" }}
+                bg={selectedHistoryReport?.id === item?.id ? "blue.50" : "surface"}
+                borderColor={selectedHistoryReport?.id === item?.id ? "blue.300" : "border"}
+                _hover={{ 
+                  bg: selectedHistoryReport?.id === item?.id ? "blue.100" : "accent.subtle",
+                  borderColor: selectedHistoryReport?.id === item?.id ? "blue.400" : "border"
+                }}
                 onClick={() => item?.id && onLoadReport(item.id)}
                 flexShrink={0}
+                position="relative"
+                transition="all 0.2s"
+                shadow={selectedHistoryReport?.id === item?.id ? "md" : "sm"}
               >
+                {/* Delete button */}
+                {onDeleteReport && (
+                  <Box
+                    position="absolute"
+                    top={2}
+                    right={2}
+                    zIndex={10}
+                  >
+                    <IconButton
+                      size="xs"
+                      variant="ghost"
+                      colorScheme="red"
+                      aria-label="Delete"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        // Add confirmation dialog
+                        if (window.confirm("Are you sure you want to delete this item? This action cannot be undone.")) {
+                          onDeleteReport(item.id)
+                        }
+                      }}
+                    >
+                      <FiTrash2 size={12} />
+                    </IconButton>
+                  </Box>
+                )}
+                
                 <VStack align="start" gap={1} width="100%">
                   <HStack gap={1} width="100%" justify="space-between">
                     <Text fontSize="xs" color="gray.500">
@@ -191,9 +262,28 @@ const HistoryPanel = ({
                   {getSubtitle(item) && (
                     <HStack gap={1} width="100%">
                       <FiDatabase size={12} color="gray" />
-                      <Text fontSize="xs" color="gray.600" lineClamp={1}>
-                        {getSubtitle(item)}
-                      </Text>
+                      {/* Add tooltip for FormConnect files when there are many */}
+                      {item?.digitized_files?.length > 0 || item?.handwritten_files?.length > 0 ? (
+                        <Tooltip
+                          content={
+                            [...(item.digitized_files || []), ...(item.handwritten_files || [])]
+                              .length > 4
+                              ? [
+                                  ...(item.digitized_files || []),
+                                  ...(item.handwritten_files || []),
+                                ].join(", ")
+                              : undefined
+                          }
+                        >
+                          <Text fontSize="xs" color="gray.600" lineClamp={1}>
+                            {getSubtitle(item)}
+                          </Text>
+                        </Tooltip>
+                      ) : (
+                        <Text fontSize="xs" color="gray.600" lineClamp={1}>
+                          {getSubtitle(item)}
+                        </Text>
+                      )}
                     </HStack>
                   )}
                 </VStack>

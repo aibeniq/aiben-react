@@ -14,26 +14,34 @@ import useCustomToast from "@/hooks/useCustomToast"
 import SourceLink from "@/components/Common/SourceLink"
 import DownloadButton from "@/components/ui/download-button"
 import SearchModeToggle from "@/components/Common/SearchModeToggle"
+import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import { useState, useEffect } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
 import {
   ReportgenieService,
-  TwincheckService,
   KnowledgeBasesService,
   KnowledgeBasePublic,
   ReportGenieOutline,
 } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText, FiCopy, FiCheck, FiDatabase } from "react-icons/fi"
+import { FiFileText, FiCopy, FiCheck, FiDatabase, FiTrash2 } from "react-icons/fi"
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
 import KnowledgeBaseTable from "../../components/Common/KnowledgeBaseTable"
 import OutlineTable from "../../components/Generate/OutlineTable"
+import { copyToClipboard } from "../../utils/copyToClipboard"
+import { useResults } from "../../contexts/ResultsContext"
 
 const ReportGenie = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const {
+    generateResult,
+    setGenerateResult,
+    clearGenerateResult
+  } = useResults()
+  
   const [copySuccess, setCopySuccess] = useState(false)
   const [loadingDownload, setLoadingDownload] = useState(false)
   const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
@@ -53,9 +61,7 @@ const ReportGenie = () => {
   const [outlines, setOutlines] = useState<ReportGenieOutline[]>([])
   const [selectedOutline, setSelectedOutline] = useState<ReportGenieOutline | null>(null)
 
-  // Results state
-  const [generatedDocument, setGeneratedDocument] = useState("")
-  const [sectionResults, setSectionResults] = useState<any[]>([])
+  // Loading state
   const [loading, setLoading] = useState(false)
   const [expandedSection, setExpandedSection] = useState<number | null>(null)
 
@@ -83,9 +89,24 @@ const ReportGenie = () => {
     return expandedCitations[citationKey] || false
   }
 
+  // Handle feedback submission
+  const handleFeedbackSubmitted = (type: string) => {
+    console.log("Feedback submitted for generate result:", type)
+    showSuccessToast(`Thank you for marking this response as ${type}!`)
+  }
+
+  // Debug effect to log context state
+  useEffect(() => {
+    console.log("Generate tab - context state:", { 
+      hasResult: !!generateResult, 
+      reportLength: generateResult?.full_report?.length,
+      sectionsCount: generateResult?.sections?.length 
+    })
+  }, [generateResult])
+
   const handleCopyDocument = async () => {
     try {
-      await navigator.clipboard.writeText(generatedDocument)
+      await copyToClipboard(generateResult?.full_report || "")
       setCopySuccess(true)
 
       // Reset the success icon after 2 seconds
@@ -104,8 +125,8 @@ const ReportGenie = () => {
     try {
       setLoadingDownload(true)
 
-      const response = await TwincheckService.generateDocx({
-        requestBody: { content: generatedDocument },
+      const response = await ReportgenieService.generateDocx({
+        requestBody: { content: generateResult?.full_report || "" },
       })
 
       console.log("Received DOCX response:", response)
@@ -172,10 +193,10 @@ const ReportGenie = () => {
 
       // Prepare the sections data for CSV generation
       const csvData = {
-        sections: sectionResults,
+        sections: generateResult?.sections || [],
       }
 
-      const response = await ReportgenieService.generateOutlineOptimizationCsv({
+      const response = await ReportgenieService.generateCsv({
         requestBody: { content: JSON.stringify(csvData) },
       })
 
@@ -274,8 +295,21 @@ const ReportGenie = () => {
       })
     },
     onSuccess: (data: any) => {
-      setGeneratedDocument(data.results.full_report)
-      setSectionResults(data.results.sections || [])
+      console.log("Generate Response data:", data)
+      console.log("Generate interaction_id:", data.results.interaction_id)
+      
+      const interactionId = data.results.interaction_id
+      console.log("Generate interactionId for feedback:", interactionId)
+      
+      // Store result with interaction ID in global state
+      setGenerateResult({
+        full_report: data.results?.full_report || "",
+        sections: data.results?.sections || [],
+        interactionId: interactionId
+      })
+      
+      const searchMethod = searchMode === "vector" ? "vector search" : "full document scan"
+      showSuccessToast(`Report generated successfully using ${searchMethod}!`)
     },
     onError: (error: any) => {
       showErrorToast(`Failed to generate document: ${error.message}`)
@@ -333,6 +367,17 @@ const ReportGenie = () => {
 
   return (
     <Container maxW="container.xl" py={8}>
+      {/* Tab description */}
+      <Text 
+        fontSize="sm" 
+        color="gray.500" 
+        textAlign="center" 
+        mb={4}
+        fontStyle="italic"
+      >
+        Generate a document based on a user-defined checklist and document database.
+      </Text>
+      
       {/* Loading overlay while document generates */}
       {loading && (
         <Box
@@ -436,8 +481,8 @@ const ReportGenie = () => {
         <VStack
           align="stretch"
           mb={4}
-          opacity={!selectedKnowledgeBase || !selectedOutline ? 0.3 : 1}
-          pointerEvents={!selectedKnowledgeBase || !selectedOutline ? "none" : "auto"}
+          opacity={(!selectedKnowledgeBase || !selectedOutline) && !generateResult ? 0.3 : 1}
+          pointerEvents={(!selectedKnowledgeBase || !selectedOutline) && !generateResult ? "none" : "auto"}
         >
           <HStack gap={4} justify="center">
             <Button
@@ -470,7 +515,7 @@ const ReportGenie = () => {
               <HStack justify="space-between" align="center" mb={4}>
                 <Heading size="md">Results</Heading>
 
-                {generatedDocument && (
+                {generateResult && (
                   <HStack gap={2}>
                     <Button
                       size="sm"
@@ -497,6 +542,19 @@ const ReportGenie = () => {
                     >
                       Download CSV
                     </DownloadButton>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      colorPalette="red"
+                      onClick={() => {
+                        clearGenerateResult()
+                        showSuccessToast("Generated report cleared")
+                      }}
+                    >
+                      <FiTrash2 />
+                      Clear Report
+                    </Button>
                   </HStack>
                 )}
               </HStack>
@@ -524,20 +582,20 @@ const ReportGenie = () => {
                     <Spinner size="lg" color="blue.500" />
                   </Box>
                 )}
-                {generatedDocument || sectionResults.length > 0 ? (
+                {generateResult ? (
                   <>
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                      {generatedDocument}
+                      {generateResult.full_report}
                     </ReactMarkdown>
 
                     {/* Detailed section results with sources */}
-                    {sectionResults.length > 0 && (
+                    {generateResult.sections.length > 0 && (
                       <Box mt={8}>
                         <Heading as="h3" size="md" mb={4}>
                           Sections with Sources
                         </Heading>
 
-                        {sectionResults.map((section, index) => (
+                        {generateResult.sections.map((section, index) => (
                           <Box
                             key={index}
                             mb={6}
@@ -669,6 +727,23 @@ const ReportGenie = () => {
                                                       color="blue.600"
                                                       useModal={true}
                                                     />
+                                                  ) : citation.metadata?.source &&
+                                                    (citation.metadata.source
+                                                      .toLowerCase()
+                                                      .endsWith(".docx") ||
+                                                      citation.metadata.source
+                                                        .toLowerCase()
+                                                        .endsWith(".pdf")) ? (
+                                                    <SourceLink
+                                                      sourceId="" // Empty sourceId, will be handled by filename fallback
+                                                      fileName={getDisplayFileName(
+                                                        citation.metadata.source,
+                                                      )}
+                                                      ml={1}
+                                                      fontWeight="normal"
+                                                      color="blue.600"
+                                                      useModal={true}
+                                                    />
                                                   ) : (
                                                     <Text
                                                       as="span"
@@ -716,6 +791,25 @@ const ReportGenie = () => {
                             )}
                           </Box>
                         ))}
+                      </Box>
+                    )}
+
+                    {/* Add feedback buttons for the generated document */}
+                    {generateResult?.interactionId && (
+                      <Box
+                        position="sticky"
+                        bottom={4}
+                        right={4}
+                        display="flex"
+                        justifyContent="flex-end"
+                        pointerEvents="auto"
+                        zIndex={10}
+                        mt={4}
+                      >
+                        <FeedbackButtons
+                          interactionId={generateResult.interactionId}
+                          onFeedbackSubmitted={handleFeedbackSubmitted}
+                        />
                       </Box>
                     )}
                   </>

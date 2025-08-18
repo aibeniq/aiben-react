@@ -34,6 +34,12 @@ import type {
   FeedbackSubmitFeedbackResponse,
   FilesGetSourceContentData,
   FilesGetSourceContentResponse,
+  FilesConvertDocxToPdfData,
+  FilesConvertDocxToPdfResponse,
+  FilesConvertDocxToPdfByFilenameData,
+  FilesConvertDocxToPdfByFilenameResponse,
+  FilesGetSourceContentByFilenameData,
+  FilesGetSourceContentByFilenameResponse,
   FormconnectProcessFormData,
   FormconnectProcessFormResponse,
   FormconnectGetFormsResponse,
@@ -53,6 +59,10 @@ import type {
   FormconnectGenerateFormFieldsResponse,
   FormconnectGenerateFormFieldsJsonData,
   FormconnectGenerateFormFieldsJsonResponse,
+  FormconnectGenerateDocxData,
+  FormconnectGenerateDocxResponse,
+  FormconnectGenerateCsvData,
+  FormconnectGenerateCsvResponse,
   ItemsReadItemsData,
   ItemsReadItemsResponse,
   ItemsCreateItemData,
@@ -97,6 +107,12 @@ import type {
   PrivateCreateUserResponse,
   ReportgenieGenerateReportData,
   ReportgenieGenerateReportResponse,
+  ReportgenieGetReportHistoryData,
+  ReportgenieGetReportHistoryResponse,
+  ReportgenieGetReportDetailData,
+  ReportgenieGetReportDetailResponse,
+  ReportgenieDeleteReportData,
+  ReportgenieDeleteReportResponse,
   ReportgenieGetOutlinesResponse,
   ReportgenieCreateOutlineData,
   ReportgenieCreateOutlineResponse,
@@ -114,6 +130,10 @@ import type {
   ReportgenieOptimizeOutlineResponse,
   ReportgenieGenerateOutlineOptimizationCsvData,
   ReportgenieGenerateOutlineOptimizationCsvResponse,
+  ReportgenieGenerateDocxData,
+  ReportgenieGenerateDocxResponse,
+  ReportgenieGenerateCsvData,
+  ReportgenieGenerateCsvResponse,
   TwincheckCompareDocumentsData,
   TwincheckCompareDocumentsResponse,
   TwincheckGetComparisonHistoryData,
@@ -131,10 +151,13 @@ import type {
   TwincheckDeleteComparisonResponse,
   TwincheckGenerateDocxData,
   TwincheckGenerateDocxResponse,
+  TwincheckGenerateCsvData,
+  TwincheckGenerateCsvResponse,
   TwincheckGenerateTopicsData,
   TwincheckGenerateTopicsResponse,
   TwincheckGenerateTopicsJsonData,
   TwincheckGenerateTopicsJsonResponse,
+  UsersGetSupportedLanguagesResponse,
   UsersUpdateLanguageData,
   UsersUpdateLanguageResponse,
   UsersReadUsersData,
@@ -158,6 +181,7 @@ import type {
   UtilsTestEmailData,
   UtilsTestEmailResponse,
   UtilsHealthCheckResponse,
+  UsageGetTokenUsageResponse,
   VeradocProcessRagChecklistData,
   VeradocProcessRagChecklistResponse,
   VeradocGetChecklistsResponse,
@@ -173,6 +197,8 @@ import type {
   VeradocGetVeradocHistoryResponse,
   VeradocGetVeradocDetailData,
   VeradocGetVeradocDetailResponse,
+  VeradocDeleteEvaluationData,
+  VeradocDeleteEvaluationResponse,
   VeradocOptimizeChecklistData,
   VeradocOptimizeChecklistResponse,
   VeradocGenerateDocxData,
@@ -579,6 +605,80 @@ export class FilesService {
       },
     })
   }
+
+  /**
+   * Convert Docx To Pdf
+   * Convert a DOCX source file to PDF on-demand.
+   * Only works with DOCX files that the user has access to.
+   * @param data The data for the request.
+   * @param data.sourceId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static convertDocxToPdf(
+    data: FilesConvertDocxToPdfData,
+  ): CancelablePromise<FilesConvertDocxToPdfResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/files/source/{source_id}/pdf",
+      path: {
+        source_id: data.sourceId,
+      },
+      responseType: 'blob',
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Convert Docx To Pdf By Filename
+   * Convert a DOCX source file to PDF on-demand using filename.
+   * Only works with DOCX files that the user has access to.
+   * @param data The data for the request.
+   * @param data.filename
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static convertDocxToPdfByFilename(
+    data: FilesConvertDocxToPdfByFilenameData,
+  ): CancelablePromise<FilesConvertDocxToPdfByFilenameResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/files/source/by-filename/{filename}/pdf",
+      path: {
+        filename: data.filename,
+      },
+      responseType: 'blob',
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Source Content By Filename
+   * Retrieve a source file by filename.
+   * Only returns files that the user has access to (either owns or has permissions for).
+   * @param data The data for the request.
+   * @param data.filename
+   * @returns SourceContentResponse Successful Response
+   * @throws ApiError
+   */
+  public static getSourceContentByFilename(
+    data: FilesGetSourceContentByFilenameData,
+  ): CancelablePromise<FilesGetSourceContentByFilenameResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/files/source/by-filename/{filename}",
+      path: {
+        filename: data.filename,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
 }
 
 export class FormconnectService {
@@ -809,6 +909,53 @@ export class FormconnectService {
       url: "/api/v1/formconnect/generate-fields-json",
       body: data.requestBody,
       mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Generate Docx
+   * Generate a DOCX file from the FormConnect results content.
+   * Handles markdown tables with extra care for proper rendering.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static generateDocx(
+    data: FormconnectGenerateDocxData,
+  ): CancelablePromise<FormconnectGenerateDocxResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/formconnect/generate/docx",
+      body: data.requestBody,
+      mediaType: "application/json",
+      responseType: 'blob',
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Generate Csv
+   * Generate a CSV file from the FormConnect results content.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static generateCsv(
+    data: FormconnectGenerateCsvData,
+  ): CancelablePromise<FormconnectGenerateCsvResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/formconnect/generate/csv",
+      body: data.requestBody,
+      mediaType: "application/json",
+      responseType: 'blob',
       errors: {
         422: "Validation Error",
       },
@@ -1357,6 +1504,79 @@ export class ReportgenieService {
   }
 
   /**
+   * Get Report History
+   * Retrieve past ReportGenie generation history for the current user or all users.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @param data.showAll
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getReportHistory(
+    data: ReportgenieGetReportHistoryData = {},
+  ): CancelablePromise<ReportgenieGetReportHistoryResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/reportgenie/history",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+        show_all: data.showAll,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Report Detail
+   * Retrieve a specific ReportGenie report's full content by ID.
+   * @param data The data for the request.
+   * @param data.reportId
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getReportDetail(
+    data: ReportgenieGetReportDetailData,
+  ): CancelablePromise<ReportgenieGetReportDetailResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/reportgenie/detail/{report_id}",
+      path: {
+        report_id: data.reportId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Report
+   * Delete a report by ID.
+   * @param data The data for the request.
+   * @param data.reportId
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static deleteReport(
+    data: ReportgenieDeleteReportData,
+  ): CancelablePromise<ReportgenieDeleteReportResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/reportgenie/reports/{report_id}",
+      path: {
+        report_id: data.reportId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
    * Get Outlines
    * Retrieve all outlines from the database for this user.
    * @returns ReportGenieOutline Successful Response
@@ -1546,8 +1766,55 @@ export class ReportgenieService {
       method: "POST",
       url: "/api/v1/reportgenie/optimize-outline/csv",
       body: data.requestBody,
-      responseType: 'blob',
       mediaType: "application/json",
+      responseType: 'blob',
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Generate Docx
+   * Generate a DOCX file from the report content.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static generateDocx(
+    data: ReportgenieGenerateDocxData,
+  ): CancelablePromise<ReportgenieGenerateDocxResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/reportgenie/generate/docx",
+      body: data.requestBody,
+      mediaType: "application/json",
+      responseType: 'blob',
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Generate Csv
+   * Generate a CSV file from report content with columns for:
+   * Section Title, Content, Citations
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static generateCsv(
+    data: ReportgenieGenerateCsvData,
+  ): CancelablePromise<ReportgenieGenerateCsvResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/reportgenie/generate/csv",
+      body: data.requestBody,
+      mediaType: "application/json",
+      responseType: 'blob',
       errors: {
         422: "Validation Error",
       },
@@ -1755,8 +2022,31 @@ export class TwincheckService {
       method: "POST",
       url: "/api/v1/twincheck/generate/docx",
       body: data.requestBody,
-      responseType: 'blob',
       mediaType: "application/json",
+      responseType: 'blob',
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Generate Csv
+   * Generate a CSV file from the comparison content.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static generateCsv(
+    data: TwincheckGenerateCsvData,
+  ): CancelablePromise<TwincheckGenerateCsvResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/twincheck/generate/csv",
+      body: data.requestBody,
+      mediaType: "application/json",
+      responseType: 'blob',
       errors: {
         422: "Validation Error",
       },
@@ -1813,6 +2103,19 @@ export class TwincheckService {
 }
 
 export class UsersService {
+  /**
+   * Get Supported Languages
+   * Get the list of supported languages for translation.
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static getSupportedLanguages(): CancelablePromise<UsersGetSupportedLanguagesResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/users/supported-languages",
+    })
+  }
+
   /**
    * Update Language
    * Update current user language preference.
@@ -2084,6 +2387,27 @@ export class UtilsService {
   }
 }
 
+export class UsageService {
+  /**
+   * Get Token Usage
+   * Get total OpenAI API token usage and current quota period information.
+   *
+   * Returns the total number of tokens consumed by the configured API key
+   * along with the current quota period details.
+   * @returns TokenUsageResponse Successful Response
+   * @throws ApiError
+   */
+  public static getTokenUsage(): CancelablePromise<UsageGetTokenUsageResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/usage/token-usage",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
 export class VeradocService {
   /**
    * Process Rag Checklist
@@ -2091,9 +2415,9 @@ export class VeradocService {
    * @param data The data for the request.
    * @param data.questions
    * @param data.knowledgeBaseId
-   * @param data.formData
    * @param data.customInstructions
    * @param data.searchMode
+   * @param data.formData
    * @returns VeraDocResponse Successful Response
    * @throws ApiError
    */
@@ -2275,6 +2599,29 @@ export class VeradocService {
   }
 
   /**
+   * Delete Evaluation
+   * Delete an evaluation/report by ID.
+   * @param data The data for the request.
+   * @param data.evaluationId
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static deleteEvaluation(
+    data: VeradocDeleteEvaluationData,
+  ): CancelablePromise<VeradocDeleteEvaluationResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/veradoc/evaluations/{evaluation_id}",
+      path: {
+        evaluation_id: data.evaluationId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
    * Optimize Checklist
    * Optimize checklist questions by testing them against a document that should meet all requirements.
    * Suggests revisions for questions that resulted in negative answers.
@@ -2284,6 +2631,7 @@ export class VeradocService {
    * @param data.formData
    * @param data.targetAnswers
    * @param data.customInstructions
+   * @param data.searchMode
    * @returns OptimizedChecklistResponse Successful Response
    * @throws ApiError
    */
@@ -2298,6 +2646,7 @@ export class VeradocService {
         questions: data.questions,
         target_answers: data.targetAnswers,
         custom_instructions: data.customInstructions,
+        search_mode: data.searchMode,
       },
       formData: data.formData,
       mediaType: "multipart/form-data",
@@ -2323,6 +2672,7 @@ export class VeradocService {
       url: "/api/v1/veradoc/generate/docx",
       body: data.requestBody,
       mediaType: "application/json",
+      responseType: 'blob',
       errors: {
         422: "Validation Error",
       },
@@ -2345,8 +2695,8 @@ export class VeradocService {
       method: "POST",
       url: "/api/v1/veradoc/generate/csv",
       body: data.requestBody,
-      responseType: 'blob',
       mediaType: "application/json",
+      responseType: 'blob',
       errors: {
         422: "Validation Error",
       },
@@ -2369,8 +2719,8 @@ export class VeradocService {
       method: "POST",
       url: "/api/v1/veradoc/optimization/csv",
       body: data.requestBody,
-      responseType: 'blob',
       mediaType: "application/json",
+      responseType: 'blob',
       errors: {
         422: "Validation Error",
       },

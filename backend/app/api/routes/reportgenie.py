@@ -8,6 +8,7 @@ import traceback
 import asyncio
 import os
 import markdown
+import uuid
 from pathlib import Path
 from io import BytesIO, StringIO
 from datetime import datetime
@@ -39,6 +40,7 @@ from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from app.services.translation import translate_text_if_needed
 from app.services.retrievers import (
     create_ensemble_retriever,
 )  # Import the ensemble retriever
@@ -83,66 +85,11 @@ def sanitize_text_for_json(text: str) -> str:
 
 
 def extract_text_from_file(file_content: bytes, filename: str) -> str:
-    """Extract text from various file formats."""
+    """Extract text from various file formats using unified document processing."""
+    from app.services.document_utils import extract_text_from_file_unified
+
     try:
-        # Determine file type from extension
-        file_ext = Path(filename).suffix.lower()
-
-        if file_ext == ".pdf":
-            # Handle PDF files
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-                temp_file.write(file_content)
-                temp_file_path = temp_file.name
-            # File is now closed and ready to be read by pypdf
-
-            try:
-                documents = load_pdf_with_pypdf(temp_file_path, filename)
-                text = "\n\n".join([doc.page_content for doc in documents])
-                return text
-            finally:
-                os.unlink(temp_file_path)
-
-        elif file_ext in [".docx", ".doc"]:
-            # Handle Word documents
-            with tempfile.NamedTemporaryFile(
-                delete=False, suffix=file_ext
-            ) as temp_file:
-                temp_file.write(file_content)
-                temp_file_path = temp_file.name
-            # File is now closed and ready to be read by docx
-
-            try:
-                if file_ext == ".docx":
-                    doc = Document(temp_file_path)
-                    text_parts = []
-                    for paragraph in doc.paragraphs:
-                        if paragraph.text.strip():
-                            text_parts.append(paragraph.text)
-
-                    # Also extract text from tables
-                    for table in doc.tables:
-                        for row in table.rows:
-                            for cell in row.cells:
-                                if cell.text.strip():
-                                    text_parts.append(cell.text)
-
-                    return "\n\n".join(text_parts)
-                else:
-                    # For .doc files, fall back to textloader
-                    loader = TextLoader(temp_file_path)
-                    documents = loader.load()
-                    return "\n\n".join([doc.page_content for doc in documents])
-            finally:
-                os.unlink(temp_file_path)
-
-        elif file_ext == ".txt":
-            # Handle text files
-            return file_content.decode("utf-8", errors="ignore")
-
-        else:
-            # For other formats, try to decode as text
-            return file_content.decode("utf-8", errors="ignore")
-
+        return extract_text_from_file_unified(file_content, filename)
     except Exception as e:
         raise HTTPException(
             status_code=400, detail=f"Error extracting text from {filename}: {str(e)}"
@@ -289,8 +236,26 @@ async def generate_report(
                                     "question": section_description,
                                 },
                             )
-                            section_content = synthesized_answer
-                            source_citations = []  # Add proper citations if needed
+                            # Translate the synthesized answer if needed
+                            section_content = await translate_text_if_needed(
+                                synthesized_answer, session, current_user, llm
+                            )
+
+                            # Create source citations from all sources used in full text scan
+                            source_citations = []
+                            for source in sources:
+                                source_citations.append(
+                                    {
+                                        "content": f"Full document scan from {source.name}",
+                                        "metadata": {
+                                            "source": source.name,
+                                            "source_data_id": str(
+                                                source.source_data_id
+                                            ),
+                                            "scan_type": "full_text",
+                                        },
+                                    }
+                                )
                         except Exception as e:
                             print(f"Error in synthesis: {e}")
                             print(
@@ -372,8 +337,35 @@ async def generate_report(
                             },
                         )
 
-                        section_content = synthesized_answer
-                        source_citations = []  # Add proper citations if needed
+                        # Translate the synthesized answer if needed
+                        section_content = await translate_text_if_needed(
+                            synthesized_answer, session, current_user, llm
+                        )
+
+                        # Extract source citations from search results
+                        source_citations = []
+                        for doc in search_results:
+                            # Extract metadata from the document
+                            metadata = doc.metadata if hasattr(doc, "metadata") else {}
+
+                            # Create citation entry
+                            citation = {
+                                "content": (
+                                    doc.page_content[:500] + "..."
+                                    if len(doc.page_content) > 500
+                                    else doc.page_content
+                                ),
+                                "metadata": {
+                                    "source": metadata.get("source", "Unknown"),
+                                    "source_data_id": metadata.get(
+                                        "source_data_id", ""
+                                    ),
+                                    "page": metadata.get("page", ""),
+                                    "chunk_index": metadata.get("chunk_index", ""),
+                                    "scan_type": "vector_search",
+                                },
+                            }
+                            source_citations.append(citation)
             else:
                 # Use raw text directly without consulting knowledge base
                 section_content = section_description
@@ -398,6 +390,16 @@ async def generate_report(
         )
 
         result = {"full_report": full_report, "sections": sections}
+
+        # Debug logging to verify citations are being saved
+        print(f"🔍 REPORTGENIE SAVE DEBUG: Saving {len(sections)} sections")
+        for i, section in enumerate(sections):
+            citations_count = len(section.get("source_citations", []))
+            print(
+                f"🔍 Section {i+1}: '{section.get('title', 'No title')}' has {citations_count} citations"
+            )
+            if citations_count > 0:
+                print(f"🔍 Sample citation: {section['source_citations'][0]}")
 
         # Get outline name if outline_id is provided
         outline_name = None
@@ -426,20 +428,37 @@ async def generate_report(
             "outline_name": outline_name,  # Add the outline name here
         }
 
-        record_llm_interaction(
+        interaction_id = record_llm_interaction(
             session=session,
             user_id=current_user.id,
             functionality="reportgenie",
             input_data={
-                "sections": sections,
-                "kb_id": knowledge_base_id,
+                "knowledge_base_id": knowledge_base_id,
+                "sections": sections_data,
                 "outline_id": outline_id,
+                "search_mode": search_mode,
+                "kb_name": kb.title,
             },
-            output_data={
-                "section_count": len(sections),
+            output_data=result,  # ← Use result directly, not nested under "results"
+            metadata={
+                "kb_name": kb.title,
+                "kb_id": knowledge_base_id,
+                "sections": sections_data,
+                "search_mode": search_mode,
+                "outline_id": outline_id,
+                "full_report": full_report,
+                "section_count": len(
+                    result.get("sections", [])
+                ),  # Move metrics to metadata
                 "total_length": len(full_report),
             },
-            metadata=detailed_extra_data,
+        )
+
+        print(f"[DEBUG] ReportGenie interaction_id returned: {interaction_id}")
+        # Add interaction_id to the result
+        result["interaction_id"] = str(interaction_id) if interaction_id else None
+        print(
+            f"[DEBUG] ReportGenie result with interaction_id: {result.get('interaction_id')}"
         )
 
         return ReportGenieResponse(results=result)
@@ -450,6 +469,330 @@ async def generate_report(
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error generating report: {str(e)}"
+        )
+
+
+@router.delete("/reports/{report_id}", response_model=Message)
+def delete_report(
+    report_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
+):
+    """
+    Delete a report by ID.
+    """
+    report = session.get(LlmInteraction, report_id)
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found.")
+
+    # Ensure the current user is the owner of the report
+    if report.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="Not authorized to delete this report."
+        )
+
+    # Only allow deletion of reportgenie reports
+    if report.functionality != "reportgenie":
+        raise HTTPException(
+            status_code=400, detail="Invalid report type."
+        )
+
+    session.delete(report)
+    session.commit()
+    return Message(message="Report deleted successfully.")
+
+
+@router.get("/history", response_model=List[Dict[str, Any]])
+async def get_report_history(
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 20,
+    show_all: bool = False,
+):
+    """Retrieve past ReportGenie generation history for the current user or all users."""
+    print("Retrieving ReportGenie history. Show all:", show_all)
+
+    try:
+        # Start with base query
+        query = select(LlmInteraction).where(
+            LlmInteraction.functionality == "reportgenie"
+        )
+
+        # Only filter by user if not showing all users
+        if not show_all:
+            query = query.where(LlmInteraction.user_id == current_user.id)
+
+        # Add ordering and pagination
+        interactions = session.exec(
+            query.order_by(LlmInteraction.date_created.desc()).offset(skip).limit(limit)
+        ).all()
+
+        result = []
+        for interaction in interactions:
+            try:
+                # Safe parsing of JSON fields with better error handling
+                input_data = {}
+                output_data = {}
+                metadata = {}
+
+                # Parse input_data safely
+                if interaction.input_data:
+                    if isinstance(interaction.input_data, str):
+                        input_data = json.loads(interaction.input_data)
+                    elif isinstance(interaction.input_data, dict):
+                        input_data = interaction.input_data
+                    else:
+                        print(
+                            f"Unexpected input_data type: {type(interaction.input_data)}"
+                        )
+                        input_data = {}
+
+                # Parse output_data safely
+                if interaction.output_data:
+                    if isinstance(interaction.output_data, str):
+                        output_data = json.loads(interaction.output_data)
+                    elif isinstance(interaction.output_data, dict):
+                        output_data = interaction.output_data
+                    else:
+                        print(
+                            f"Unexpected output_data type: {type(interaction.output_data)}"
+                        )
+                        output_data = {}
+
+                # Parse metadata safely with enhanced error handling
+                if interaction.metadata:
+                    if isinstance(interaction.metadata, str):
+                        metadata = json.loads(interaction.metadata)
+                    elif isinstance(interaction.metadata, dict):
+                        metadata = interaction.metadata
+                    else:
+                        # Handle the MetaData object case
+                        print(f"Metadata is of type: {type(interaction.metadata)}")
+                        if hasattr(interaction.metadata, "__dict__"):
+                            # Convert object to dict if possible
+                            metadata = interaction.metadata.__dict__
+                        else:
+                            # Try to serialize it as string and then parse
+                            try:
+                                metadata_str = str(interaction.metadata)
+                                if metadata_str.startswith(
+                                    "{"
+                                ) and metadata_str.endswith("}"):
+                                    metadata = json.loads(metadata_str)
+                                else:
+                                    metadata = {}
+                            except:
+                                print(
+                                    f"Failed to parse metadata: {interaction.metadata}"
+                                )
+                                metadata = {}
+
+                # Handle sections data - ensure it's always a string for API response
+                sections_data = input_data.get("sections", "")
+                if not isinstance(sections_data, str):
+                    sections_data = json.dumps(sections_data) if sections_data else ""
+
+                # Create result item with proper field names for archive display
+                result_item = {
+                    "id": str(interaction.id),
+                    "date_created": interaction.date_created,
+                    "knowledge_base_id": input_data.get("knowledge_base_id", ""),
+                    "sections": sections_data,
+                    "kb_name": metadata.get(
+                        "kb_name", input_data.get("kb_name", "Unknown")
+                    ),
+                    "outline_id": input_data.get("outline_id", ""),
+                    "search_mode": input_data.get("search_mode", "vector"),
+                    "full_report": metadata.get(
+                        "full_report", output_data.get("full_report", "")
+                    ),
+                    "section_count": output_data.get("section_count", 0),
+                    "total_length": output_data.get("total_length", 0),
+                    "has_feedback": interaction.feedback is not None,
+                }
+
+                # Add feedback information if exists
+                if interaction.feedback:
+                    result_item["feedback"] = {
+                        "feedback": interaction.feedback,
+                        "feedbackText": interaction.feedback_text,
+                        "feedbackDate": interaction.feedback_date,
+                    }
+
+                # Add user info for all-users view
+                if show_all:
+                    from app.models import User  # Import here to avoid circular imports
+
+                    user = session.get(User, interaction.user_id)
+                    user_name = (
+                        f"{user.full_name or 'User'} ({user.email})"
+                        if user
+                        else "Unknown User"
+                    )
+                    result_item["user_name"] = user_name
+
+                result.append(result_item)
+
+            except json.JSONDecodeError:
+                # Handle legacy entries or malformed JSON
+                result_item = {
+                    "id": str(interaction.id),
+                    "date_created": interaction.date_created,
+                    "knowledge_base_id": "",
+                    "sections": "",
+                    "kb_name": "Unknown",
+                    "outline_id": "",
+                    "search_mode": "vector",
+                    "full_report": "",
+                    "section_count": 0,
+                    "total_length": 0,
+                    "has_feedback": interaction.feedback is not None,
+                }
+
+                # Add user info for all-users view
+                if show_all:
+                    from app.models import User
+
+                    user = session.get(User, interaction.user_id)
+                    user_name = (
+                        f"{user.full_name or 'User'} ({user.email})"
+                        if user
+                        else "Unknown User"
+                    )
+                    result_item["user_name"] = user_name
+
+                result.append(result_item)
+
+        return result
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error retrieving ReportGenie history: {str(e)}",
+        )
+
+
+@router.get("/detail/{report_id}", response_model=Dict[str, Any])
+async def get_report_detail(
+    report_id: str,
+    session: SessionDep,
+    current_user: CurrentUser,
+):
+    """Retrieve a specific ReportGenie report's full content by ID."""
+    try:
+        # Convert string ID to UUID for database query
+        interaction_id = uuid.UUID(report_id)
+
+        # Get the specific interaction
+        interaction = session.exec(
+            select(LlmInteraction)
+            .where(LlmInteraction.id == interaction_id)
+            .where(LlmInteraction.functionality == "reportgenie")
+            .where(LlmInteraction.user_id == current_user.id)
+        ).first()
+
+        if not interaction:
+            raise HTTPException(status_code=404, detail="Report not found")
+
+        # Safe parsing of JSON fields with better error handling
+        input_data = {}
+        output_data = {}
+        metadata = {}
+
+        # Parse input_data safely
+        if interaction.input_data:
+            if isinstance(interaction.input_data, str):
+                input_data = json.loads(interaction.input_data)
+            elif isinstance(interaction.input_data, dict):
+                input_data = interaction.input_data
+            else:
+                print(f"Unexpected input_data type: {type(interaction.input_data)}")
+                input_data = {}
+
+        # Parse output_data safely
+        if interaction.output_data:
+            if isinstance(interaction.output_data, str):
+                output_data = json.loads(interaction.output_data)
+            elif isinstance(interaction.output_data, dict):
+                output_data = interaction.output_data
+            else:
+                print(f"Unexpected output_data type: {type(interaction.output_data)}")
+                output_data = {}
+
+        # Parse metadata safely with enhanced error handling
+        if interaction.metadata:
+            if isinstance(interaction.metadata, str):
+                metadata = json.loads(interaction.metadata)
+            elif isinstance(interaction.metadata, dict):
+                metadata = interaction.metadata
+            else:
+                # Handle the MetaData object case
+                print(f"Metadata is of type: {type(interaction.metadata)}")
+                if hasattr(interaction.metadata, "__dict__"):
+                    # Convert object to dict if possible
+                    metadata = interaction.metadata.__dict__
+                else:
+                    # Try to serialize it as string and then parse
+                    try:
+                        metadata_str = str(interaction.metadata)
+                        if metadata_str.startswith("{") and metadata_str.endswith("}"):
+                            metadata = json.loads(metadata_str)
+                        else:
+                            metadata = {}
+                    except:
+                        print(f"Failed to parse metadata: {interaction.metadata}")
+                        metadata = {}
+
+        # Handle sections data - ensure it's always a string for API response
+        sections_data = input_data.get("sections", "")
+        if not isinstance(sections_data, str):
+            sections_data = json.dumps(sections_data) if sections_data else ""
+
+        result_data = {
+            "id": str(interaction.id),
+            "date_created": interaction.date_created,
+            "knowledge_base_id": input_data.get("knowledge_base_id", ""),
+            "sections": sections_data,
+            "kb_name": metadata.get("kb_name", input_data.get("kb_name", "Unknown")),
+            "outline_id": input_data.get("outline_id", ""),
+            "search_mode": input_data.get("search_mode", "vector"),
+            "full_report": metadata.get(
+                "full_report", output_data.get("full_report", "")
+            ),
+            "results": output_data,
+            "section_count": output_data.get("section_count", 0),
+            "total_length": output_data.get("total_length", 0),
+            "has_feedback": interaction.feedback is not None,
+        }
+
+        # Debug logging for citation retrieval
+        sections_with_citations = output_data.get("sections", [])
+        if sections_with_citations:
+            print(
+                f"🔍 REPORTGENIE RETRIEVE DEBUG: Retrieved {len(sections_with_citations)} sections"
+            )
+            for i, section in enumerate(sections_with_citations):
+                if isinstance(section, dict):
+                    citations_count = len(section.get("source_citations", []))
+                    print(
+                        f"🔍 Retrieved Section {i+1}: '{section.get('title', 'No title')}' has {citations_count} citations"
+                    )
+        else:
+            print("🔍 REPORTGENIE RETRIEVE DEBUG: No sections found in output_data")
+
+        return result_data
+
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid report ID format")
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error retrieving report detail: {str(e)}",
         )
 
 
@@ -591,9 +934,12 @@ async def generate_outline_json(
         # Get the default LLM
         llm = get_default_llm(session, current_user)
 
+        # Handle optional description
+        description = request.description or ""
+
         # Prepare variables for the prompt
         prompt_variables = {
-            "description": request.description,
+            "description": description,
             "report_type": request.report_type or "general",
             "example_document": "",
             "example_instruction": "",
@@ -614,7 +960,7 @@ async def generate_outline_json(
                     current_user=current_user,
                     knowledge_base_id=request.knowledge_base_id,
                     search_mode=request.search_mode,
-                    query=request.description,
+                    query=description,
                 )
 
                 if content:
@@ -826,7 +1172,150 @@ async def generate_outline(
                         example_document_content += f"\n\n--- Error processing {file.filename} ---\nError: {str(e)}\n"
                         continue
 
-        # Prepare variables for the prompt
+        # Check if content exceeds token limits and chunk if necessary
+        if example_document_content:
+            print(f"Total example document content: {len(example_document_content)} characters")
+            
+            # Using conservative chunking similar to TWINCHECK settings
+            max_chunk_size = 80000  # Conservative chunk size for 128K context limit
+            
+            if len(example_document_content) > max_chunk_size:
+                print(f"Example document too large ({len(example_document_content)} chars), chunking for processing")
+                
+                from app.services.text_processing import chunk_text
+                
+                # Chunk the document content
+                chunks = chunk_text(example_document_content, max_tokens=max_chunk_size)
+                
+                # Process each chunk to generate sections
+                all_chunk_sections = []
+                
+                for i, chunk in enumerate(chunks):
+                    print(f"Processing chunk {i+1}/{len(chunks)}")
+                    
+                    # Generate sections for this chunk
+                    chunk_prompt_variables = {
+                        "description": description,
+                        "report_type": report_type,
+                        "example_document": f"EXAMPLE DOCUMENT FOR REFERENCE:\n{chunk}",
+                        "example_instruction": "\n12. Use the example document provided above as inspiration for the type of content organization and structure, but adapt the sections to match the specific requirements in the outline description",
+                        "example_analysis_instruction": ". Briefly mention how the example document influenced the structure",
+                        "knowledge_base_content": "",
+                        "knowledge_base_instruction": "",
+                    }
+
+                    try:
+                        chunk_response = invoke_llm(
+                            llm,
+                            settings.REPORTGENIE_GENERATE_OUTLINE_PROMPT_TEMPLATE,
+                            chunk_prompt_variables,
+                        )
+                        
+                        # Parse sections from chunk response
+                        chunk_sections = []
+                        lines = chunk_response.strip().split("\n")
+                        in_sections_section = False
+                        
+                        for line in lines:
+                            line = line.strip()
+                            if line.startswith("SECTIONS:"):
+                                in_sections_section = True
+                                continue
+                            elif line.startswith("ANALYSIS:"):
+                                in_sections_section = False
+                                continue
+
+                            if in_sections_section:
+                                if re.match(r"^\d+\.\s+", line):
+                                    section = re.sub(r"^\d+\.\s+", "", line)
+                                    if section.strip():
+                                        chunk_sections.append(section.strip())
+                        
+                        # If parsing failed, try simpler approach
+                        if not chunk_sections:
+                            for line in lines:
+                                line = line.strip()
+                                if re.match(r"^\d+\.\s+", line):
+                                    section = re.sub(r"^\d+\.\s+", "", line)
+                                    if section.strip():
+                                        chunk_sections.append(section.strip())
+                        
+                        all_chunk_sections.extend(chunk_sections)
+                        
+                    except Exception as e:
+                        print(f"Error processing chunk {i+1}: {e}")
+                        continue
+                
+                # Deduplicate and refine sections across all chunks
+                if all_chunk_sections:
+                    # Remove duplicates while preserving order
+                    seen = set()
+                    unique_sections = []
+                    for s in all_chunk_sections:
+                        if s.lower() not in seen:
+                            seen.add(s.lower())
+                            unique_sections.append(s)
+                    
+                    # If we have too many sections, synthesize and prioritize
+                    if len(unique_sections) > (num_sections or 15):
+                        synthesis_prompt = f"""From the following list of outline sections, select and refine the {num_sections or 8} most important and relevant sections for a {report_type} report based on: {description}
+
+Sections to review:
+{chr(10).join([f"{i+1}. {s}" for i, s in enumerate(unique_sections)])}
+
+Requirements:
+1. Select the most critical and comprehensive sections
+2. Ensure logical flow and organization
+3. Maintain clarity and specificity
+4. Focus on sections most relevant to the description
+
+Return only the final selected sections, one per line, numbered."""
+                        
+                        try:
+                            refined_response = invoke_llm(llm, synthesis_prompt, {})
+                            sections = []
+                            for line in refined_response.strip().split('\n'):
+                                line = line.strip()
+                                if line and (line[0].isdigit() or line.startswith('-') or line.startswith('*')):
+                                    section = re.sub(r"^\d+\.\s+", "", line)
+                                    section = re.sub(r"^[-*]\s+", "", section)
+                                    if section.strip():
+                                        sections.append(section.strip())
+                        except Exception as e:
+                            print(f"Error in section synthesis: {e}")
+                            sections = unique_sections[:num_sections or 8]
+                    else:
+                        sections = unique_sections[:num_sections or 15]
+                    
+                    # For analysis, show chunked processing was used
+                    analysis = f"Generated {len(sections)} sections from chunked example document analysis ({len(chunks)} chunks processed) based on the provided description to ensure comprehensive report structure coverage."
+                    
+                    # Record the interaction
+                    record_llm_interaction(
+                        session=session,
+                        user_id=current_user.id,
+                        functionality="generate_outline_sections",
+                        input_data={
+                            "description": description,
+                            "requested_sections": num_sections,
+                            "report_type": report_type,
+                            "has_example_document": True,
+                            "chunked_processing": True,
+                            "chunk_count": len(chunks),
+                        },
+                        output_data={
+                            "sections_count": len(sections),
+                            "analysis": analysis,
+                        },
+                        metadata={},
+                    )
+
+                    return GenerateOutlineResponse(sections=sections, description_analysis=analysis)
+                else:
+                    # Fallback to description-only generation if chunk processing failed
+                    example_document_content = ""
+
+        # Continue with existing logic for small documents or when no files provided
         if example_document_content:
             example_document_section = (
                 f"EXAMPLE DOCUMENT FOR REFERENCE:\n{example_document_content}"
@@ -1190,7 +1679,10 @@ async def optimize_outline(
                                     "question": section_description,
                                 },
                             )
-                            generated_content = synthesized_answer
+                            # Translate the synthesized answer if needed
+                            generated_content = await translate_text_if_needed(
+                                synthesized_answer, session, current_user, llm
+                            )
 
                         print(
                             f"Generated {len(generated_content)} characters for section using full text scan"
@@ -1235,6 +1727,10 @@ async def optimize_outline(
                             llm,
                             settings.REPORT_GENIE_PROMPT_TEMPLATE,
                             template_vars,
+                        )
+                        # Translate the generated content if needed
+                        generated_content = await translate_text_if_needed(
+                            generated_content, session, current_user, llm
                         )
                         print(
                             f"Generated {len(generated_content)} characters for section using vector search"
@@ -2238,18 +2734,277 @@ async def generate_outline_optimization_csv(
         )
 
 
-def sanitize_text_for_json(text: str) -> str:
-    """Sanitize text to prevent JSON parsing issues with control characters."""
-    # Replace smart quotes and apostrophes with regular ones
-    text = text.replace(""", "'").replace(""", "'")
-    text = text.replace('"', '"').replace('"', '"')
-    text = text.replace("–", "-").replace("—", "-")
-    text = text.replace("ʼ", "'")  # This specific character from the logs
+@router.post("/generate/docx", response_class=StreamingResponse)
+async def generate_docx(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a DOCX file from the report content.
+    """
+    print("Now generating DOCX of report...")
+    try:
+        # Get the markdown content from the request
+        if not request.content:
+            raise HTTPException(status_code=400, detail="Report content is required")
 
-    # Remove control characters (characters 0-31 except tab, newline, carriage return)
-    text = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]", "", text)
+        # Convert markdown to HTML for parsing
+        html_content = markdown.markdown(request.content, extensions=["tables"])
+        soup = BeautifulSoup(html_content, "html.parser")
 
-    # Replace any remaining problematic Unicode characters
-    text = text.encode("ascii", errors="ignore").decode("ascii")
+        print("Markdown content converted to HTML successfully.")
+        # Create a new Document
+        doc = Document()
 
-    return text
+        print("Adding title and date to the document...")
+        # Add a title - hard-coding it for ReportGenie because it's using the service for Compare functionality with 'Document Comparison' as title
+        title_text = (
+            #request.title
+            #if hasattr(request, "title") and request.title
+            #else "Generated Document"
+            "Generated Document"
+        )
+        title = doc.add_heading(title_text, level=0)
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        # Add date
+        date_paragraph = doc.add_paragraph()
+        date_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        date_run = date_paragraph.add_run(
+            f"Generated on: {datetime.now().strftime('%B %d, %Y')}"
+        )
+        date_run.italic = True
+
+        # Add a separator
+        doc.add_paragraph("─" * 50)
+
+        print("Adding headers, paragraphs, lists, and tables...")
+        # Process each element in the soup
+        for element in soup.find_all():
+            if element.name == "h1":
+                doc.add_heading(element.get_text().strip(), level=1)
+            elif element.name == "h2":
+                doc.add_heading(element.get_text().strip(), level=2)
+            elif element.name == "h3":
+                doc.add_heading(element.get_text().strip(), level=3)
+            elif element.name == "h4":
+                doc.add_heading(element.get_text().strip(), level=4)
+            elif element.name == "p":
+                text = element.get_text().strip()
+                if text:  # Only add non-empty paragraphs
+                    paragraph = doc.add_paragraph(text)
+
+                    # Handle formatting within paragraphs
+                    for strong in element.find_all("strong"):
+                        # Bold text formatting would need more complex handling
+                        pass
+                    for em in element.find_all("em"):
+                        # Italic text formatting would need more complex handling
+                        pass
+
+            elif element.name == "table":
+                # Handle tables
+                rows = element.find_all("tr")
+                if rows:
+                    print(f"Adding table with {len(rows)} rows...")
+                    table = doc.add_table(
+                        rows=len(rows), cols=len(rows[0].find_all(["th", "td"]))
+                    )
+                    table.style = "Table Grid"
+
+                    for i, row in enumerate(rows):
+                        cells = row.find_all(["th", "td"])
+                        for j, cell in enumerate(cells):
+                            if j < len(table.rows[i].cells):
+                                table.rows[i].cells[j].text = cell.get_text().strip()
+                                # Make header row bold
+                                if i == 0:
+                                    for paragraph in table.rows[i].cells[j].paragraphs:
+                                        for run in paragraph.runs:
+                                            run.bold = True
+
+            elif element.name == "ul":
+                # Handle unordered lists
+                for li in element.find_all("li", recursive=False):
+                    text = li.get_text().strip()
+                    if text:
+                        paragraph = doc.add_paragraph(text, style="List Bullet")
+
+            elif element.name == "ol":
+                # Handle ordered lists
+                for li in element.find_all("li", recursive=False):
+                    text = li.get_text().strip()
+                    if text:
+                        paragraph = doc.add_paragraph(text, style="List Number")
+
+        print("Saving the document to a BytesIO object...")
+        # Save the document to a BytesIO object
+        doc_io = BytesIO()
+        doc.save(doc_io)
+        doc_io.seek(0)
+
+        # Create filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"report_{timestamp}.docx"
+
+        print(f"DOCX file size: {len(doc_io.getvalue())} bytes")
+
+        # Verify the document can be opened (basic integrity check)
+        doc_io.seek(0)
+        try:
+            test_doc = Document(doc_io)
+            print("DOCX file passed integrity check (can be opened by python-docx).")
+        except Exception as e:
+            print(f"DOCX integrity check failed: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Generated DOCX file is corrupted: {str(e)}"
+            )
+
+        doc_io.seek(0)
+        print(
+            "Document saved successfully. Preparing to return as a downloadable file."
+        )
+
+        # Return the document as a downloadable file
+        return StreamingResponse(
+            doc_io,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
+
+
+@router.post("/generate/csv", response_class=StreamingResponse)
+async def generate_csv(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a CSV file from report content with columns for:
+    Section Title, Content, Citations
+    """
+    print("Now generating CSV of report content...")
+    try:
+        # Get the content from the request
+        if not request.content:
+            raise HTTPException(status_code=400, detail="Report content is required")
+
+        # Create CSV content
+        csv_buffer = StringIO()
+        csv_writer = csv.writer(csv_buffer)
+
+        # Write header for report CSV
+        csv_writer.writerow(["Section Title", "Content", "Citations"])
+
+        try:
+            # Parse the content as JSON (report sections data)
+            data = json.loads(request.content)
+            sections = data.get("sections", [])
+
+            print(f"Processing {len(sections)} sections for CSV export...")
+
+            # Process each section
+            for section in sections:
+                title = section.get("title", "")
+                content = section.get("content", "")
+                citations = section.get("source_citations", [])
+
+                # Format citations as "filename: content | filename: content"
+                citation_texts = []
+                for citation in citations:
+                    if isinstance(citation, dict):
+                        source = citation.get("source", "unknown")
+                        citation_content = citation.get("content", "")
+                        citation_texts.append(f"{source}: {citation_content}")
+                    elif isinstance(citation, str):
+                        citation_texts.append(citation)
+
+                citations_formatted = " | ".join(citation_texts)
+
+                # Clean up text fields (remove newlines and carriage returns for CSV)
+                title_clean = (
+                    title.replace("\n", " ").replace("\r", " ").replace('"', '""')
+                )
+                content_clean = (
+                    content.replace("\n", " ").replace("\r", " ").replace('"', '""')
+                )
+                citations_clean = (
+                    citations_formatted.replace("\n", " ")
+                    .replace("\r", " ")
+                    .replace('"', '""')
+                )
+
+                # Write row
+                csv_writer.writerow([title_clean, content_clean, citations_clean])
+
+        except json.JSONDecodeError:
+            # If not JSON, treat as plain markdown content
+            print("Content is not JSON, treating as plain markdown content...")
+
+            # Split content into sections based on headers
+            lines = request.content.split("\n")
+            current_section = ""
+            current_content = []
+
+            for line in lines:
+                line = line.strip()
+                if line.startswith("#"):
+                    # Save previous section
+                    if current_section:
+                        content_text = " ".join(current_content).replace('"', '""')
+                        csv_writer.writerow(
+                            [
+                                current_section.replace('"', '""'),
+                                content_text,
+                                "",  # No citations for markdown content
+                            ]
+                        )
+
+                    # Start new section
+                    current_section = line.lstrip("#").strip()
+                    current_content = []
+                elif line:
+                    current_content.append(line)
+
+            # Save final section
+            if current_section:
+                content_text = " ".join(current_content).replace('"', '""')
+                csv_writer.writerow(
+                    [current_section.replace('"', '""'), content_text, ""]
+                )
+
+        # Prepare CSV for download
+        csv_content = csv_buffer.getvalue()
+        csv_buffer.close()
+
+        if not csv_content.strip() or csv_content.count("\n") <= 1:
+            raise HTTPException(
+                status_code=400, detail="No valid report data found to export"
+            )
+
+        print(f"CSV generated successfully with {csv_content.count(chr(10))} rows")
+
+        # Create response
+        csv_bytes = BytesIO(csv_content.encode("utf-8"))
+
+        # Create filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"report_{timestamp}.csv"
+
+        return StreamingResponse(
+            csv_bytes,
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        print(f"Error generating CSV: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating CSV: {str(e)}")

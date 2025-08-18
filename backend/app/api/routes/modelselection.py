@@ -175,6 +175,17 @@ def get_default_embedding_model(
     # Initialize default models if none exist
     initialize_default_models(session)
 
+    # If model selection is disabled, force the configured default
+    if not settings.ENABLE_MODEL_SELECTION:
+        model = session.exec(
+            select(EmbeddingModel).where(
+                EmbeddingModel.model_id == settings.FORCE_DEFAULT_EMBEDDING,
+                EmbeddingModel.owner_id.is_(None),
+            )
+        ).first()
+        if model:
+            return model
+
     # Try to get the user's default embedding model
     user = session.get(User, current_user.id)
     if user and user.default_embedding_model:
@@ -190,6 +201,15 @@ def get_default_embedding_model(
     system_defaults = session.exec(
         select(EmbeddingModel).where(EmbeddingModel.owner_id.is_(None))
     ).all()
+
+    # If model selection disabled, prioritize the forced default
+    if not settings.ENABLE_MODEL_SELECTION:
+        for model in system_defaults:
+            if (
+                model.model_id == settings.FORCE_DEFAULT_EMBEDDING
+                and model.provider.value.lower() in enabled_providers
+            ):
+                return model
 
     # Find the first system model with an enabled provider
     for model in system_defaults:

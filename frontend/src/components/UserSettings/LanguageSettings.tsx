@@ -5,20 +5,59 @@ import useAuth from "@/hooks/useAuth"
 import { Field } from "@/components/ui/field"
 import { Button } from "@/components/ui/button"
 import useCustomToast from "@/hooks/useCustomToast"
+import { UsersService, type ApiError } from "@/client"
+import { handleError } from "@/utils"
 
-// Language options
-const LANGUAGES = [
-  { code: "en", name: "English" },
-  { code: "fi", name: "Finnish" },
-  { code: "de", name: "German" },
-  { code: "pl", name: "Polish" },
-  { code: "ru", name: "Russian" },
+// Default fallback languages (should match backend config)
+const DEFAULT_LANGUAGES = [
   { code: "ar", name: "Arabic" },
+  { code: "bg", name: "Bulgarian" },
+  { code: "zh", name: "Chinese (Simplified)" },
+  { code: "zh-TW", name: "Chinese (Traditional)" },
+  { code: "hr", name: "Croatian" },
+  { code: "cs", name: "Czech" },
+  { code: "da", name: "Danish" },
+  { code: "nl", name: "Dutch" },
+  { code: "en", name: "English" },
+  { code: "et", name: "Estonian" },
+  { code: "tl", name: "Filipino" },
+  { code: "fi", name: "Finnish" },
+  { code: "fr", name: "French" },
+  { code: "de", name: "German" },
+  { code: "el", name: "Greek" },
+  { code: "he", name: "Hebrew" },
+  { code: "hi", name: "Hindi" },
+  { code: "hu", name: "Hungarian" },
+  { code: "id", name: "Indonesian" },
+  { code: "it", name: "Italian" },
+  { code: "ja", name: "Japanese" },
+  { code: "ko", name: "Korean" },
+  { code: "lv", name: "Latvian" },
+  { code: "lt", name: "Lithuanian" },
+  { code: "ms", name: "Malay" },
+  { code: "no", name: "Norwegian" },
+  { code: "fa", name: "Persian (Farsi)" },
+  { code: "pl", name: "Polish" },
+  { code: "pt", name: "Portuguese" },
+  { code: "pt-BR", name: "Portuguese (Brazil)" },
+  { code: "ro", name: "Romanian" },
+  { code: "ru", name: "Russian" },
+  { code: "sr", name: "Serbian" },
+  { code: "sk", name: "Slovak" },
+  { code: "sl", name: "Slovenian" },
+  { code: "es", name: "Spanish (Europe)" },
+  { code: "es-LATAM", name: "Spanish (Latin America)" },
+  { code: "sw", name: "Swahili" },
+  { code: "sv", name: "Swedish" },
+  { code: "th", name: "Thai" },
+  { code: "tr", name: "Turkish" },
+  { code: "uk", name: "Ukrainian" },
+  { code: "vi", name: "Vietnamese" },
 ]
 
 const LanguageSettings: React.FC = () => {
   const { user } = useAuth()
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { showSuccessToast } = useCustomToast()
   const queryClient = useQueryClient()
 
   // Default to English if the preferred_language isn't in the user object yet
@@ -28,28 +67,17 @@ const LanguageSettings: React.FC = () => {
 
   const updateLanguage = useMutation({
     mutationFn: async (language: string) => {
-      // We need to make a direct API call using the PUT method since the generated client
-      // doesn't have the correct endpoint
-      return fetch("/api/v1/users/me/language", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ preferred_language: language }),
-      }).then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to update language preference")
-        }
-        return response.json()
+      return UsersService.updateLanguage({
+        requestBody: { preferred_language: language },
       })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] })
       showSuccessToast("Your preferred language has been updated.")
     },
-    onError: (error) => {
-      showErrorToast("Failed to update your language preference.")
-      console.error(error)
+    onError: (error: ApiError) => {
+      console.error("Language update error:", error)
+      handleError(error)
     },
   })
 
@@ -78,7 +106,7 @@ const LanguageSettings: React.FC = () => {
                 borderColor: "inherit",
               }}
             >
-              {LANGUAGES.map((lang) => (
+              {DEFAULT_LANGUAGES.map((lang) => (
                 <option key={lang.code} value={lang.code}>
                   {lang.name}
                 </option>
@@ -87,7 +115,12 @@ const LanguageSettings: React.FC = () => {
           </Field>
 
           <Box>
-            <Button colorPalette="blue" loading={updateLanguage.isPending} onClick={handleSave}>
+            <Button
+              colorPalette="blue"
+              loading={updateLanguage.isPending}
+              onClick={handleSave}
+              disabled={selectedLanguage === currentLanguage}
+            >
               Save Language Preference
             </Button>
           </Box>

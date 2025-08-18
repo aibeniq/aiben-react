@@ -1,5 +1,5 @@
 import { Box, Flex, Icon, Text, Accordion } from "@chakra-ui/react"
-import { useQueryClient } from "@tanstack/react-query"
+import { useQueryClient, useQuery } from "@tanstack/react-query"
 import { Link as RouterLink, useRouterState } from "@tanstack/react-router"
 import {
   FiHome,
@@ -71,8 +71,43 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
   const routerState = useRouterState()
 
+  // Fetch system configuration to check if model selection is enabled
+  const { data: systemConfig } = useQuery({
+    queryKey: ["systemConfig"],
+    queryFn: async () => {
+      // Temporary implementation - this will be replaced when SDK is regenerated
+      const response = await fetch("/api/v1/utils/system-config")
+      if (!response.ok) {
+        throw new Error("Failed to fetch system config")
+      }
+      return response.json()
+    },
+    // Default to enabling model selection if the query fails
+    retry: 3,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+
+  // Filter categories based on system configuration
+  const getFilteredCategories = () => {
+    const filtered = [...categories]
+
+    // If model selection is disabled, remove it from configurations
+    // Default to showing model selection if config is not available (fail-safe)
+    if (systemConfig?.enable_model_selection === false) {
+      const configIndex = filtered.findIndex((category) => category.name === "Configurations")
+      if (configIndex !== -1) {
+        filtered[configIndex] = {
+          ...filtered[configIndex],
+          items: filtered[configIndex].items.filter((item) => item.path !== "/model-selection"),
+        }
+      }
+    }
+
+    return filtered
+  }
+
   // Add admin item for superusers
-  const finalCategories = [...categories]
+  const finalCategories = getFilteredCategories()
   if (currentUser?.is_superuser) {
     finalCategories.push({
       name: null,

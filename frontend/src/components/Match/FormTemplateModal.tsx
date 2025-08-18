@@ -21,6 +21,7 @@ import FileUpload, { FileItem } from "../Common/FileUpload"
 import SearchModeToggle from "../Common/SearchModeToggle"
 import useCustomToast from "../../hooks/useCustomToast"
 import { FiCopy } from "react-icons/fi"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 interface FormTemplateModalProps {
   isOpen: boolean
@@ -54,7 +55,65 @@ const FormTemplateModal = ({
   searchMode: passedSearchMode = "vector",
 }: FormTemplateModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const [generating, setGenerating] = useState(false)
+
+  // Validation state
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+
+  // Validation function
+  const validateForm = () => {
+    const errors: {[key: string]: string} = {}
+    
+    if (!formName.trim()) {
+      errors.name = "Form template name is required"
+    } else if (formName.trim().length < 3) {
+      errors.name = "Form template name must be at least 3 characters long"
+    }
+    
+    // Description is optional - no validation required
+    
+    // Check if fields exist (should be a newline-separated string)
+    if (!fields.trim() || fields.split('\n').every(field => !field.trim())) {
+      errors.fields = "At least one form field is required"
+    }
+    
+    setValidationErrors(errors)
+    
+    // Show the first error as a toast
+    const firstError = Object.values(errors)[0]
+    if (firstError) {
+      showErrorToast(firstError)
+      return false
+    }
+    
+    return true
+  }
+
+  // Clear validation errors when user starts typing
+  const handleNameChange = (value: string) => {
+    setFormName(value)
+    if (validationErrors.name) {
+      setValidationErrors(prev => ({ ...prev, name: '' }))
+    }
+  }
+
+  const handleDescriptionChange = (value: string) => {
+    setFormDescription(value)
+    if (validationErrors.description) {
+      setValidationErrors(prev => ({ ...prev, description: '' }))
+    }
+  }
+
+  // Enhanced save handler with validation
+  const handleSave = () => {
+    if (!validateForm()) {
+      return // Stop execution if validation fails
+    }
+    
+    // Call the parent's onSave function if validation passes
+    onSave()
+  }
+
+  const [suggesting, setSuggesting] = useState(false)
   const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
   const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
   const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
@@ -69,7 +128,7 @@ const FormTemplateModal = ({
     }
   }, [selectedKnowledgeBase])
 
-  const handleGenerateFields = async () => {
+  const handleSuggestFields = async () => {
     if (!formDescription.trim()) {
       showErrorToast("Please enter a form description first")
       return
@@ -89,7 +148,7 @@ const FormTemplateModal = ({
       return
     }
 
-    setGenerating(true)
+    setSuggesting(true)
 
     try {
       let response
@@ -143,11 +202,16 @@ const FormTemplateModal = ({
 
       const result = await response.json()
 
-      // Convert generated fields to the format expected by InteractiveList
-      const generatedFields = result.fields || []
-      if (generatedFields.length > 0) {
-        const fieldsString = generatedFields.join("\n")
+      // Convert suggested fields to the format expected by InteractiveList
+      const suggestedFields = result.fields || []
+      if (suggestedFields.length > 0) {
+        const fieldsString = suggestedFields.join("\n")
         onFieldsChange(fieldsString)
+
+        // Clear fields validation error if it exists
+        if (validationErrors.fields) {
+          setValidationErrors(prev => ({ ...prev, fields: '' }))
+        }
 
         const searchMethodText = searchMode === "vector" ? "vector search" : "full document scan"
         const referenceText =
@@ -156,29 +220,29 @@ const FormTemplateModal = ({
             : ""
 
         showSuccessToast(
-          `Generated ${generatedFields.length} form fields from description${referenceText}`,
+          `Suggested ${suggestedFields.length} form fields from description${referenceText}`,
         )
       } else {
-        showErrorToast("No fields were generated. Please try with a more detailed description.")
+        showErrorToast("No fields were suggested. Please try with a more detailed description.")
       }
     } catch (error: any) {
-      console.error("Error generating fields:", error)
+      console.error("Error suggesting fields:", error)
 
       if (error.status === 422) {
         showErrorToast(
           "Invalid request. Please check that your description meets the requirements.",
         )
       } else if (error.status === 401) {
-        showErrorToast("You need to be logged in to generate fields.")
+        showErrorToast("You need to be logged in to suggest fields.")
       } else if (error.status === 404) {
-        showErrorToast("Generate fields feature is not available. Please contact support.")
+        showErrorToast("Suggest fields feature is not available. Please contact support.")
       } else if (error.status === 500) {
         showErrorToast("Server error. Please try again later or contact support.")
       } else {
-        showErrorToast(`Failed to generate fields: ${error.message || "Unknown error"}`)
+        showErrorToast(`Failed to suggest fields: ${error.message || "Unknown error"}`)
       }
     } finally {
-      setGenerating(false)
+      setSuggesting(false)
     }
   }
 
@@ -214,7 +278,7 @@ const FormTemplateModal = ({
     }
 
     try {
-      await navigator.clipboard.writeText(fieldLines.join("\n"))
+      await copyToClipboard(fieldLines.join("\n"))
       showSuccessToast("Fields copied to clipboard!")
     } catch (error) {
       console.error("Error copying fields:", error)
@@ -238,19 +302,19 @@ const FormTemplateModal = ({
               <VStack align="stretch" gap={4}>
                 <HStack align="stretch" gap={4}>
                   <VStack align="stretch" gap={4} flex="1">
-                    <Field label="Form Template Name" required>
+                    <Field label="Form Template Name" required invalid={!!validationErrors.name} errorText={validationErrors.name}>
                       <Input
                         value={formName}
-                        onChange={(e) => setFormName(e.target.value)}
+                        onChange={(e) => handleNameChange(e.target.value)}
                         placeholder="Enter form template name"
                       />
                     </Field>
 
-                    <Field label="Form Template Description">
+                    <Field label="Form Template Description" invalid={!!validationErrors.description} errorText={validationErrors.description}>
                       <Textarea
                         value={formDescription}
-                        onChange={(e) => setFormDescription(e.target.value)}
-                        placeholder="Enter form template description (e.g., 'Patient intake form for medical clinic', 'Employee onboarding documentation')"
+                        onChange={(e) => handleDescriptionChange(e.target.value)}
+                        placeholder="Enter form template description to auto-suggest fields (minimum 10 characters)..."
                         resize="vertical"
                         rows={3}
                       />
@@ -258,20 +322,25 @@ const FormTemplateModal = ({
 
                     <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
 
-                    {/* Generate Fields Section */}
-                    <Field label="Generate Fields from Reference">
+                    <Field label="Reference Documents (Optional)">
                       <VStack align="stretch" gap={3}>
+                        <Text fontSize="sm" color="gray.600">
+                          Upload reference documents or select a Knowledge Base to help the AI
+                          suggest form fields.
+                        </Text>
+
+                        {/* Reference Mode Toggle */}
                         <HStack gap={2}>
                           <Button
                             size="sm"
-                            variant={referenceMode === "files" ? "solid" : "ghost"}
+                            variant={referenceMode === "files" ? "solid" : "outline"}
                             onClick={() => handleReferenceModeChange("files")}
                           >
                             Upload Files
                           </Button>
                           <Button
                             size="sm"
-                            variant={referenceMode === "knowledge-base" ? "solid" : "ghost"}
+                            variant={referenceMode === "knowledge-base" ? "solid" : "outline"}
                             onClick={() => handleReferenceModeChange("knowledge-base")}
                           >
                             Knowledge Base
@@ -279,20 +348,25 @@ const FormTemplateModal = ({
                         </HStack>
 
                         {referenceMode === "files" && (
-                          <FileUpload
-                            files={exampleFiles}
-                            onFilesChange={setExampleFiles}
-                            acceptedFileTypes={{
-                              "application/pdf": [".pdf"],
-                              "application/msword": [".doc"],
-                              "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                                [".docx"],
-                              "text/plain": [".txt"],
-                              "text/csv": [".csv"],
-                              "application/json": [".json"],
-                            }}
-                            maxFiles={5}
-                          />
+                          <VStack align="stretch" gap={2}>
+                            <Text fontSize="sm" color="gray.700" fontWeight="medium">
+                              Provide reference documents for suggesting form fields
+                            </Text>
+                            <FileUpload
+                              files={exampleFiles}
+                              onFilesChange={setExampleFiles}
+                              acceptedFileTypes={{
+                                "application/pdf": [".pdf"],
+                                "application/msword": [".doc"],
+                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                                  [".docx"],
+                                "text/plain": [".txt"],
+                                "text/csv": [".csv"],
+                                "application/json": [".json"],
+                              }}
+                              maxFiles={5}
+                            />
+                          </VStack>
                         )}
 
                         {referenceMode === "knowledge-base" && (
@@ -328,7 +402,7 @@ const FormTemplateModal = ({
                         {formDescription.trim().length < 10 &&
                           formDescription.trim().length > 0 && (
                             <Text fontSize="sm" color="gray.500">
-                              Description must be at least 10 characters to generate fields
+                              Description must be at least 10 characters to suggest fields
                             </Text>
                           )}
                       </VStack>
@@ -342,22 +416,22 @@ const FormTemplateModal = ({
                         <HStack gap={2}>
                           <Button
                             size="xs"
-                            onClick={handleGenerateFields}
+                            onClick={handleSuggestFields}
                             disabled={
                               !formDescription.trim() ||
                               formDescription.trim().length < 10 ||
-                              generating
+                              suggesting
                             }
-                            loading={generating}
+                            loading={suggesting}
                             variant="outline"
                             colorPalette="green"
                             title={
                               formDescription.trim().length < 10
-                                ? "Description must be at least 10 characters to generate fields"
-                                : "Generate fields based on the description"
+                                ? "Description must be at least 10 characters to suggest fields"
+                                : "Suggest fields based on the description"
                             }
                           >
-                            {generating ? "Generating..." : "Generate Form Template"}
+                            {suggesting ? "Suggesting..." : "Suggest"}
                           </Button>
 
                           <IconButton
@@ -377,6 +451,8 @@ const FormTemplateModal = ({
                       </HStack>
                     }
                     required
+                    invalid={!!validationErrors.fields}
+                    errorText={validationErrors.fields}
                     py={0}
                     flex="1"
                   >
@@ -391,8 +467,14 @@ const FormTemplateModal = ({
                     >
                       <InteractiveList
                         value={fields}
-                        onChange={onFieldsChange}
-                        placeholder="Add a field name (e.g. First Name, Address, SSN) or generate from description"
+                        onChange={(newFields) => {
+                          onFieldsChange(newFields)
+                          // Clear validation error when fields are modified
+                          if (validationErrors.fields) {
+                            setValidationErrors(prev => ({ ...prev, fields: '' }))
+                          }
+                        }}
+                        placeholder="Add a field name (e.g. First Name, Address, SSN) or suggest from description"
                       />
                     </VStack>
                   </Field>
@@ -404,7 +486,7 @@ const FormTemplateModal = ({
               <CancelButton onClick={handleModalClose} size="md">
                 Cancel
               </CancelButton>
-              <ConfirmButton onClick={onSave} size="md">
+              <ConfirmButton onClick={handleSave} size="md">
                 {editingForm ? "Update Form Template" : "Create Form Template"}
               </ConfirmButton>
             </Dialog.Footer>

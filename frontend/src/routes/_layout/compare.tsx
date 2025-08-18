@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Box, Button, Container, Heading, HStack, Text, VStack, Spinner } from "@chakra-ui/react"
-import { FiUpload, FiFile, FiFileText, FiCheck, FiCopy } from "react-icons/fi"
+import { FiUpload, FiFile, FiFileText, FiCheck, FiCopy, FiTrash2 } from "react-icons/fi"
 import { useDropzone } from "react-dropzone"
 import { createFileRoute } from "@tanstack/react-router"
 import ReactMarkdown from "react-markdown"
@@ -18,13 +18,21 @@ import DownloadButton from "@/components/ui/download-button"
 import SelectionCard from "@/components/Common/SelectionCard"
 import SelectionModal from "@/components/Common/SelectionModal"
 import TopicListTable from "@/components/Compare/TopicListTable"
-import SearchModeToggle from "@/components/Common/SearchModeToggle"
+import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
+import { copyToClipboard } from "@/utils/copyToClipboard"
+import { useResults } from "@/contexts/ResultsContext"
 
 const TwinCheck = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const {
+    compareResult,
+    setCompareResult,
+    clearCompareResult
+  } = useResults()
 
   const [copySuccess, setCopySuccess] = useState(false)
   const [loadingDownload, setLoadingDownload] = useState(false)
+  const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
 
   // Modal states
   const [showTopicListModal, setShowTopicListModal] = useState(false)
@@ -38,37 +46,40 @@ const TwinCheck = () => {
   const [comparisons, setComparisons] = useState<TwinCheckTopicList[]>([])
   const [selectedComparison, setSelectedComparison] = useState<TwinCheckTopicList | null>(null)
 
-  // Knowledge base state
+  // Knowledge base state (only for topic generation)
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
-  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
-    null,
-  )
 
-  // Use setSelectedKnowledgeBase to prevent unused variable warning
-  // TODO: Add knowledge base selection UI to this page
-  if (false) setSelectedKnowledgeBase(null)
-
-  // Search mode state
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
-
-  // Results state
-  const [summary, setSummary] = useState("")
-  const [topicResults, setTopicResults] = useState<any[]>([])
+  // Loading state
   const [loading, setLoading] = useState(false)
   const [expandedTopic, setExpandedTopic] = useState<number | null>(null)
+
+  // Handle feedback submission
+  const handleFeedbackSubmitted = (type: string) => {
+    console.log("Feedback submitted for compare result:", type)
+    showSuccessToast(`Thank you for marking this response as ${type}!`)
+  }
+
+  // Debug effect to log context state
+  useEffect(() => {
+    console.log("Compare tab - context state:", { 
+      hasResult: !!compareResult, 
+      summaryLength: compareResult?.summary?.length,
+      topicResultsCount: compareResult?.topicResults?.length 
+    })
+  }, [compareResult])
 
   // Function to copy report to clipboard
   const handleCopyReport = async () => {
     try {
       // Prepare combined text with summary and all topic analyses
-      let fullText = `# Summary\n\n${summary}\n\n# Topic Analysis\n\n`
+      let fullText = `# Summary\n\n${compareResult?.summary || ""}\n\n# Topic Analysis\n\n`
 
       // Add each topic and its analysis
-      topicResults.forEach((topic) => {
+      compareResult?.topicResults.forEach((topic: any) => {
         fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
       })
 
-      await navigator.clipboard.writeText(fullText)
+      await copyToClipboard(fullText)
       setCopySuccess(true)
 
       // Reset the success icon after 2 seconds
@@ -89,10 +100,10 @@ const TwinCheck = () => {
       setLoadingDownload(true)
 
       // Prepare combined text with summary and all topic analyses
-      let fullText = `# Summary\n\n${summary}\n\n# Topic Analysis\n\n`
+      let fullText = `# Summary\n\n${compareResult?.summary || ""}\n\n# Topic Analysis\n\n`
 
       // Add each topic and its analysis
-      topicResults.forEach((topic) => {
+      compareResult?.topicResults.forEach((topic: any) => {
         fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
       })
 
@@ -158,6 +169,74 @@ const TwinCheck = () => {
     }
   }
 
+  // Function to download comparison as CSV
+  const handleDownloadCsv = async () => {
+    try {
+      setLoadingCsvDownload(true)
+
+      // Prepare the data for CSV generation
+      const csvData = {
+        summary: compareResult?.summary || "",
+        topic_results: compareResult?.topicResults || [],
+        doc1_name: document1?.name || "Document 1",
+        doc2_name: document2?.name || "Document 2",
+      }
+
+      const response = await TwincheckService.generateCsv({
+        requestBody: { content: JSON.stringify(csvData) },
+      })
+
+      console.log("Received CSV response:", response)
+      console.log("Response type:", typeof response)
+      console.log("Response instanceof Blob:", response instanceof Blob)
+
+      // Handle blob response
+      let blob
+      if (response instanceof Blob) {
+        blob = response
+      } else if (response instanceof ArrayBuffer) {
+        blob = new Blob([response], { type: "text/csv" })
+      } else {
+        blob = new Blob([response as any], { type: "text/csv" })
+      }
+
+      console.log("Blob size:", blob.size)
+
+      if (blob.size === 0) {
+        throw new Error("Received empty CSV file")
+      }
+
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+      a.href = url
+      a.download = `TwinCheck_Comparison_${timestamp}.csv`
+
+      console.log("CSV download filename:", `TwinCheck_Comparison_${timestamp}.csv`)
+      console.log("About to trigger CSV download...")
+
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      console.log("CSV download triggered successfully")
+      showSuccessToast("CSV downloaded successfully")
+    } catch (err: any) {
+      console.error("Failed to download CSV:", err)
+      console.error("Error details:", {
+        message: err instanceof Error ? err.message : "Unknown error",
+        stack: err instanceof Error ? err.stack : undefined,
+        name: err instanceof Error ? err.name : undefined,
+      })
+
+      showErrorToast(`Failed to download CSV: ${err.message || "Unknown error"}`)
+    } finally {
+      console.log("CSV download process completed")
+      setLoadingCsvDownload(false)
+    }
+  }
+
   // Fetch saved comparison topic sets when component mounts
   const fetchComparisons = async () => {
     try {
@@ -186,6 +265,7 @@ const TwinCheck = () => {
   // Mutation for comparing documents
   const mutation = useMutation({
     mutationFn: (data: { comparison_topics: string; document1: File; document2: File }) => {
+      // Simplified API call without knowledge base parameters
       return TwincheckService.compareDocuments({
         comparisonTopics: data.comparison_topics,
         formData: {
@@ -197,13 +277,21 @@ const TwinCheck = () => {
     onSuccess: (data: any) => {
       console.log("Response data:", data)
 
-      setSummary(data.results.summary || "")
-      setTopicResults(data.results.topic_analysis || [])
+      const interactionId = data.results.interaction_id
+      console.log("Compare interactionId for feedback:", interactionId)
+
+            // Store result in global state
+      setCompareResult({
+        summary: data.results.summary || "",
+        topicResults: data.results.topic_analysis || [],
+        interactionId: interactionId
+      })
+      
+      showSuccessToast("Documents compared successfully!")
     },
     onError: (error: any) => {
       console.log("Comparison failed!")
-      setSummary(`Error: ${error.message}`)
-      setTopicResults([])
+      showErrorToast(`Comparison failed: ${error.message}`)
     },
     onSettled: () => {
       setLoading(false)
@@ -226,6 +314,7 @@ const TwinCheck = () => {
       return
     }
 
+    // Simplified request data without knowledge base
     const requestData = {
       comparison_topics: topics,
       document1: document1,
@@ -259,6 +348,17 @@ const TwinCheck = () => {
 
   return (
     <Container maxW="container.xl" py={8}>
+      {/* Tab description */}
+      <Text 
+        fontSize="sm" 
+        color="gray.500" 
+        textAlign="center" 
+        mb={4}
+        fontStyle="italic"
+      >
+        Compare documents based on a user-defined list of topics.
+      </Text>
+      
       {/* Loading overlay */}
       {loading && (
         <Box
@@ -291,8 +391,6 @@ const TwinCheck = () => {
               isSelected={!!selectedComparison}
               onClick={() => setShowTopicListModal(true)}
             />
-
-            <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
 
             <VStack gap={4} align="stretch">
               <HStack gap={6} align="stretch">
@@ -342,17 +440,15 @@ const TwinCheck = () => {
             onTopicsChange={setTopics}
             onTopicListsUpdate={fetchComparisons}
             topics={topics}
-            selectedKnowledgeBase={selectedKnowledgeBase}
             knowledgeBases={knowledgeBases}
-            searchMode={searchMode}
           />
         </SelectionModal>
 
         <VStack
           align="stretch"
           mb={4}
-          opacity={!selectedComparison ? 0.3 : 1}
-          pointerEvents={!selectedComparison ? "none" : "auto"}
+          opacity={!selectedComparison && !compareResult ? 0.3 : 1}
+          pointerEvents={!selectedComparison && !compareResult ? "none" : "auto"}
         >
           <HStack gap={4} justify="center">
             <Button
@@ -385,7 +481,7 @@ const TwinCheck = () => {
               <HStack justify="space-between" align="center" mb={4}>
                 <Heading size="md">Results</Heading>
 
-                {summary && (
+                {compareResult && (
                   <HStack gap={2}>
                     <Button
                       size="sm"
@@ -404,6 +500,27 @@ const TwinCheck = () => {
                     >
                       Download DOCX
                     </DownloadButton>
+
+                    <DownloadButton
+                      size="sm"
+                      onClick={handleDownloadCsv}
+                      loading={loadingCsvDownload}
+                    >
+                      Download CSV
+                    </DownloadButton>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      colorPalette="red"
+                      onClick={() => {
+                        clearCompareResult()
+                        showSuccessToast("Comparison results cleared")
+                      }}
+                    >
+                      <FiTrash2 />
+                      Clear Results
+                    </Button>
                   </HStack>
                 )}
               </HStack>
@@ -431,7 +548,7 @@ const TwinCheck = () => {
                     <Spinner size="lg" color="blue.500" />
                   </Box>
                 )}
-                {summary || topicResults.length > 0 ? (
+                {compareResult ? (
                   <>
                     {/* Summary Section */}
                     <Heading as="h3" size="md" mb={2}>
@@ -439,18 +556,18 @@ const TwinCheck = () => {
                     </Heading>
                     <Box p={3} mb={4} borderWidth="1px" borderRadius="md" bg="bg">
                       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                        {summary}
+                        {compareResult.summary}
                       </ReactMarkdown>
                     </Box>
 
                     {/* Topic Analysis Section */}
-                    {topicResults.length > 0 && (
+                    {compareResult.topicResults.length > 0 && (
                       <Box mt={8}>
                         <Heading as="h3" size="md" mb={4}>
                           Topic Analysis
                         </Heading>
 
-                        {topicResults.map((topicResult, index) => (
+                        {compareResult.topicResults.map((topicResult, index) => (
                           <Box
                             key={index}
                             mb={6}
@@ -493,6 +610,25 @@ const TwinCheck = () => {
                             )}
                           </Box>
                         ))}
+                      </Box>
+                    )}
+
+                    {/* Add feedback buttons for the comparison result */}
+                    {compareResult?.interactionId && (
+                      <Box
+                        position="sticky"
+                        bottom={4}
+                        right={4}
+                        display="flex"
+                        justifyContent="flex-end"
+                        pointerEvents="auto"
+                        zIndex={10}
+                        mt={4}
+                      >
+                        <FeedbackButtons
+                          interactionId={compareResult.interactionId}
+                          onFeedbackSubmitted={handleFeedbackSubmitted}
+                        />
                       </Box>
                     )}
                   </>

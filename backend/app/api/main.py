@@ -16,6 +16,7 @@ from app.api.routes import (
     sourceretrieval,
     feedback,
     twincheck,
+    usage,
 )
 from app.core.config import settings
 
@@ -34,6 +35,7 @@ api_router.include_router(llms.router)
 api_router.include_router(chatbot.router)
 api_router.include_router(sourceretrieval.router)
 api_router.include_router(feedback.router, prefix="/api/v1")
+api_router.include_router(usage.router)
 
 
 if settings.ENVIRONMENT == "local":

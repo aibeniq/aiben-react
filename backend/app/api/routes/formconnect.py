@@ -1,8 +1,17 @@
 import uuid
 import json
+import csv
 import tempfile
 import os
+import markdown
 from pathlib import Path
+from io import BytesIO, StringIO
+from datetime import datetime
+from fastapi.responses import StreamingResponse
+from docx import Document
+from docx.shared import Inches
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from bs4 import BeautifulSoup
 from app.models import (
     FormConnectRequest,
     FormConnectResponse,
@@ -10,6 +19,7 @@ from app.models import (
     FormConnectDetailResponse,
     GenerateFormFieldsRequest,
     GenerateFormFieldsResponse,
+    DocxRequest,
     LlmInteraction,
     Message,
     KnowledgeBase,
@@ -21,6 +31,7 @@ from app.services.llms import (
     invoke_llm_with_image,
     record_llm_interaction,
 )
+from app.services.translation import translate_text_if_needed
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 
@@ -130,52 +141,10 @@ async def extract_fields_using_vector_search(
             f"Using embedding model: {embedding_info['model_id']} ({embedding_info['provider']})"
         )
 
-        # Extract text from the document first
-        text = ""
-        file_ext = Path(file.filename).suffix.lower() if file.filename else ""
+        # Extract text from the document first using unified processing
+        from app.services.document_utils import extract_text_from_file_unified
 
-        if file_ext == ".pdf":
-            from app.services.pdf_utils import extract_text_from_pdf_bytes
-
-            text = extract_text_from_pdf_bytes(content, file.filename)
-        elif file_ext in [".docx", ".doc"]:
-            import tempfile
-            import os
-            from docx import Document as DocxDocument
-
-            with tempfile.NamedTemporaryFile(
-                delete=False, suffix=file_ext
-            ) as temp_file:
-                temp_file.write(content)
-                temp_file_path = temp_file.name
-
-            try:
-                doc = DocxDocument(temp_file_path)
-                text_parts = []
-                for paragraph in doc.paragraphs:
-                    if paragraph.text.strip():
-                        text_parts.append(paragraph.text)
-                for table in doc.tables:
-                    for row in table.rows:
-                        for cell in row.cells:
-                            if cell.text.strip():
-                                text_parts.append(cell.text)
-                text = "\n\n".join(text_parts)
-            finally:
-                if os.path.exists(temp_file_path):
-                    os.unlink(temp_file_path)
-        else:
-            # Handle text files
-            try:
-                text = content.decode("utf-8")
-            except UnicodeDecodeError:
-                try:
-                    text = content.decode("latin-1")
-                except UnicodeDecodeError:
-                    return {
-                        k: "Could not extract: Unsupported file format"
-                        for k in template.keys()
-                    }
+        text = extract_text_from_file_unified(content, file.filename or "unknown")
 
         if not text.strip():
             return {k: "Could not extract: Empty document" for k in template.keys()}
@@ -321,55 +290,10 @@ async def extract_fields_using_full_text(
     file_ext = Path(filename).suffix.lower() if filename else ""
 
     try:
-        if file_ext == ".pdf":
-            # Handle PDF files using our PDF utility
-            from app.services.pdf_utils import extract_text_from_pdf_bytes
+        # Use unified document processing for all file types
+        from app.services.document_utils import extract_text_from_file_unified
 
-            text = extract_text_from_pdf_bytes(content, filename)
-        elif file_ext in [".docx", ".doc"]:
-            # Handle Word documents
-            import tempfile
-            import os
-            from docx import Document as DocxDocument
-
-            with tempfile.NamedTemporaryFile(
-                delete=False, suffix=file_ext
-            ) as temp_file:
-                temp_file.write(content)
-                temp_file_path = temp_file.name
-
-            try:
-                doc = DocxDocument(temp_file_path)
-                text_parts = []
-
-                # Extract text from paragraphs
-                for paragraph in doc.paragraphs:
-                    if paragraph.text.strip():
-                        text_parts.append(paragraph.text)
-
-                # Extract text from tables
-                for table in doc.tables:
-                    for row in table.rows:
-                        for cell in row.cells:
-                            if cell.text.strip():
-                                text_parts.append(cell.text)
-
-                text = "\n\n".join(text_parts)
-            finally:
-                if os.path.exists(temp_file_path):
-                    os.unlink(temp_file_path)
-        else:
-            # Handle text files
-            try:
-                text = content.decode("utf-8")
-            except UnicodeDecodeError:
-                try:
-                    text = content.decode("latin-1")
-                except UnicodeDecodeError:
-                    return {
-                        k: f"Could not extract: Unsupported file format {filename}"
-                        for k in template.keys()
-                    }
+        text = extract_text_from_file_unified(content, filename)
 
         if not text.strip():
             return {
@@ -561,27 +485,58 @@ async def extract_fields_from_handwritten_document(
 
 
 async def compare_multiple_documents(
-    documents: List[Dict[str, str]], file_names: List[str], llm
+    documents: List[Dict[str, str]], file_names: List[str], llm, current_user, session
 ) -> str:
     """
     Compare fields across multiple documents using the LLM.
     """
-    # Create a combined representation of all documents
+    # Create a combined representation of all documents WITH ACTUAL FILENAMES
     documents_str = ""
+    clean_filenames = []
+
     for i, (doc, name) in enumerate(zip(documents, file_names)):
+        # Clean the filename (remove " (digitized)" or " (handwritten)" suffix)
+        clean_filename = name.replace(" (digitized)", "").replace(" (handwritten)", "")
+        clean_filenames.append(clean_filename)
+
         # Convert dict to string, escaping any curly braces for the formatter
         doc_str = str(doc).replace("{", "{{").replace("}", "}}")
-        documents_str += f"Document {i+1} ({name}): {doc_str}\n\n"
+        documents_str += f"Document: {clean_filename}\nExtracted Data: {doc_str}\n\n"
 
     print(
         "documents_str for comparison:", documents_str[:500]
     )  # Print first 500 chars for debugging
 
-    # Create the prompt for multi-document comparison
-    prompt_template = settings.FORMCONNECT_COMPARISON_PROMPT_TEMPLATE
-    variables = {"documents_str": documents_str}
-    response = invoke_llm(llm, prompt_template, variables)
-    return response
+    # Create an enhanced prompt that explicitly instructs the LLM to use actual filenames
+    enhanced_prompt_template = """Compare the extracted fields across the following documents and provide a detailed analysis.
+
+IMPORTANT: When referring to documents in your analysis and tables, use the actual document filenames provided below, NOT generic labels like "Document 1", "Document 2", etc.
+
+Document Filenames:
+{filename_list}
+
+Documents to compare:
+{documents_str}
+
+Instructions:
+1. Create a comparison table showing field values across all documents
+2. Use the actual document filenames as column headers in any tables
+3. Identify discrepancies and highlight the most likely correct values
+4. Provide a summary of findings
+5. If creating markdown tables, use the document filenames as column headers
+
+Format your response in markdown with clear tables and analysis."""
+
+    variables = {
+        "documents_str": documents_str,
+        "filename_list": "\n".join([f"- {name}" for name in clean_filenames]),
+    }
+    response = invoke_llm(llm, enhanced_prompt_template, variables)
+    # Translate the response if needed
+    translated_response = await translate_text_if_needed(
+        response, session, current_user, llm
+    )
+    return translated_response
 
 
 @router.post("/process", response_model=FormConnectResponse)
@@ -681,7 +636,7 @@ async def process_form(
     else:
         # Compare the extracted fields
         comparison_result = await compare_multiple_documents(
-            extracted_results, file_names, llm
+            extracted_results, file_names, llm, current_user, session
         )
         result = {
             "message": "Documents compared successfully",
@@ -689,13 +644,32 @@ async def process_form(
             "extracted_data": extracted_results,
         }
 
-    record_llm_interaction(
+    interaction_id = record_llm_interaction(
         session=session,
         user_id=current_user.id,
         functionality="formconnect",
         input_data={"fields": fields, "files": file_names, "search_mode": search_mode},
         output_data=result,
-        metadata={"file_count": total_files},
+        metadata={
+            "file_count": total_files,
+            "field_count": len(field_list),
+            "document_count": total_files,
+            "digitized_files": (
+                [f.filename for f in digitized_files] if digitized_files else []
+            ),
+            "handwritten_files": (
+                [f.filename for f in handwritten_files] if handwritten_files else []
+            ),
+            "fields": field_list,
+            "search_mode": search_mode,
+        },
+    )
+
+    print(f"[DEBUG] FormConnect interaction_id returned: {interaction_id}")
+    # Add interaction_id to the result
+    result["interaction_id"] = str(interaction_id) if interaction_id else None
+    print(
+        f"[DEBUG] FormConnect result with interaction_id: {result.get('interaction_id')}"
     )
 
     # Return the comparison results as a dictionary
@@ -918,6 +892,8 @@ async def get_form_history(
                     if interaction.output_data
                     else {}
                 )
+                # Fix: Use extra_data instead of metadata
+                metadata = interaction.extra_data if interaction.extra_data else {}
 
                 file_count = len(input_data.get("files", []))
                 fields = input_data.get("fields", "").split("\n")
@@ -932,6 +908,12 @@ async def get_form_history(
                     "field_count": field_count,
                     "fields": fields,
                     "has_feedback": interaction.feedback is not None,
+                    # Add metadata information for enhanced display
+                    "metadata": metadata,
+                    "digitized_files": metadata.get("digitized_files", []),
+                    "handwritten_files": metadata.get("handwritten_files", []),
+                    "document_count": metadata.get("document_count", file_count),
+                    "search_mode": metadata.get("search_mode", "unknown"),
                 }
 
                 # Add feedback information if exists
@@ -965,6 +947,12 @@ async def get_form_history(
                     "field_count": 0,
                     "fields": [],
                     "has_feedback": interaction.feedback is not None,
+                    # Add empty metadata for consistency
+                    "metadata": {},
+                    "digitized_files": [],
+                    "handwritten_files": [],
+                    "document_count": 0,
+                    "search_mode": "unknown",
                 }
 
                 # Add user info for all-users view
@@ -1003,9 +991,12 @@ async def generate_form_fields(
         # Get the default LLM
         llm = get_default_llm(session, current_user)
 
+        # Handle optional description
+        description = request.description or ""
+
         # Prepare variables for the prompt
         prompt_variables = {
-            "description": request.description,
+            "description": description,
             "example_instruction": "",
             "analysis_instruction": "",
             "analysis_note": "",
@@ -1025,7 +1016,7 @@ async def generate_form_fields(
                     current_user=current_user,
                     knowledge_base_id=str(request.knowledge_base_id),
                     search_mode=request.search_mode,
-                    query=request.description,
+                    query=description,
                 )
 
                 if content:
@@ -1115,6 +1106,11 @@ async def generate_form_fields(
             if request.knowledge_base_id:
                 analysis += " with knowledge base reference."
 
+        # Translate the analysis if needed
+        translated_analysis = await translate_text_if_needed(
+            analysis, session, current_user, llm
+        )
+
         # Record the interaction
         record_llm_interaction(
             session=session,
@@ -1132,12 +1128,14 @@ async def generate_form_fields(
             },
             output_data={
                 "fields_count": len(fields),
-                "analysis": analysis,
+                "analysis": translated_analysis,
             },
             metadata={},
         )
 
-        return GenerateFormFieldsResponse(fields=fields, description_analysis=analysis)
+        return GenerateFormFieldsResponse(
+            fields=fields, description_analysis=translated_analysis
+        )
 
     except Exception as e:
         print(f"Error generating form fields: {e}")
@@ -1156,3 +1154,314 @@ async def generate_form_fields_json(
     """
     # This is the same as generate_form_fields but ensures JSON request/response
     return await generate_form_fields(session, current_user, request)
+
+
+@router.post("/generate/docx", response_class=StreamingResponse)
+async def generate_docx(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a DOCX file from the FormConnect results content.
+    Handles markdown tables with extra care for proper rendering.
+    """
+    print("Now generating DOCX of FormConnect results...")
+    try:
+        # Get the markdown content from the request
+        if not request.content:
+            raise HTTPException(
+                status_code=400, detail="FormConnect content is required"
+            )
+
+        # Convert markdown to HTML for parsing with tables extension
+        html_content = markdown.markdown(
+            request.content, extensions=["tables", "extra"]
+        )
+        soup = BeautifulSoup(html_content, "html.parser")
+
+        print("Markdown content converted to HTML successfully.")
+        # Create a new Document
+        doc = Document()
+
+        print("Adding title and date to the document...")
+        # Add a title
+        title_text = (
+            request.title
+            if hasattr(request, "title") and request.title
+            else "Matching Results"
+        )
+        title = doc.add_heading(title_text, level=0)
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        # Add date
+        date_paragraph = doc.add_paragraph()
+        date_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        date_run = date_paragraph.add_run(
+            f"Generated on: {datetime.now().strftime('%B %d, %Y')}"
+        )
+        date_run.italic = True
+
+        # Add a separator
+        doc.add_paragraph("─" * 50)
+
+        print("Processing content elements with special attention to tables...")
+        # Process each element in the soup
+        for element in soup.find_all():
+            if element.name == "h1":
+                doc.add_heading(element.get_text().strip(), level=1)
+            elif element.name == "h2":
+                doc.add_heading(element.get_text().strip(), level=2)
+            elif element.name == "h3":
+                doc.add_heading(element.get_text().strip(), level=3)
+            elif element.name == "h4":
+                doc.add_heading(element.get_text().strip(), level=4)
+            elif element.name == "p":
+                text = element.get_text().strip()
+                if text:  # Only add non-empty paragraphs
+                    paragraph = doc.add_paragraph(text)
+
+            elif element.name == "table":
+                # Handle tables with extra care for FormConnect markdown tables
+                rows = element.find_all("tr")
+                if rows:
+                    print(f"Adding table with {len(rows)} rows...")
+
+                    # Count maximum columns across all rows
+                    max_cols = 0
+                    for row in rows:
+                        cells = row.find_all(["th", "td"])
+                        max_cols = max(max_cols, len(cells))
+
+                    if max_cols > 0:
+                        table = doc.add_table(rows=len(rows), cols=max_cols)
+                        table.style = "Table Grid"
+
+                        # Set consistent column widths
+                        for col in table.columns:
+                            col.width = Inches(6.0 / max_cols)
+
+                        for i, row in enumerate(rows):
+                            cells = row.find_all(["th", "td"])
+                            for j, cell in enumerate(cells):
+                                if j < len(table.rows[i].cells):
+                                    cell_text = cell.get_text().strip()
+                                    table.rows[i].cells[j].text = cell_text
+
+                                    # Make header row bold and centered
+                                    if i == 0 or cell.name == "th":
+                                        for paragraph in (
+                                            table.rows[i].cells[j].paragraphs
+                                        ):
+                                            paragraph.alignment = (
+                                                WD_ALIGN_PARAGRAPH.CENTER
+                                            )
+                                            for run in paragraph.runs:
+                                                run.bold = True
+
+                                    # Handle cell alignment for data rows
+                                    elif (
+                                        cell_text.isdigit()
+                                        or cell_text.replace(".", "")
+                                        .replace("-", "")
+                                        .isdigit()
+                                    ):
+                                        # Right-align numeric content
+                                        for paragraph in (
+                                            table.rows[i].cells[j].paragraphs
+                                        ):
+                                            paragraph.alignment = (
+                                                WD_ALIGN_PARAGRAPH.RIGHT
+                                            )
+
+            elif element.name == "ul":
+                # Handle unordered lists
+                for li in element.find_all("li", recursive=False):
+                    text = li.get_text().strip()
+                    if text:
+                        paragraph = doc.add_paragraph(text, style="List Bullet")
+
+            elif element.name == "ol":
+                # Handle ordered lists
+                for li in element.find_all("li", recursive=False):
+                    text = li.get_text().strip()
+                    if text:
+                        paragraph = doc.add_paragraph(text, style="List Number")
+
+        print("Saving the document to a BytesIO object...")
+        # Save the document to a BytesIO object
+        doc_io = BytesIO()
+        doc.save(doc_io)
+        doc_io.seek(0)
+
+        # Create filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"formconnect_results_{timestamp}.docx"
+
+        print(f"DOCX file size: {len(doc_io.getvalue())} bytes")
+
+        # Verify the document can be opened (basic integrity check)
+        doc_io.seek(0)
+        try:
+            test_doc = Document(doc_io)
+            print("DOCX file passed integrity check (can be opened by python-docx).")
+        except Exception as e:
+            print(f"DOCX integrity check failed: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Generated DOCX file is corrupted: {str(e)}"
+            )
+
+        doc_io.seek(0)
+        print(
+            "Document saved successfully. Preparing to return as a downloadable file."
+        )
+
+        # Return the document as a downloadable file
+        return StreamingResponse(
+            doc_io,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
+
+
+@router.post("/generate/csv", response_class=StreamingResponse)
+async def generate_csv(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a CSV file from the FormConnect results content using LLM formatting.
+    """
+    print("Now generating CSV of FormConnect results...")
+    try:
+        # Get the content from the request
+        if not request.content:
+            raise HTTPException(status_code=400, detail="Results content is required")
+
+        # Get the default LLM for formatting
+        llm = get_default_llm(session, current_user)
+
+        # Try to parse the content as JSON first (for structured data)
+        try:
+            content_data = json.loads(request.content)
+            extracted_data = content_data.get("extracted_data", [])
+            comparison_data = content_data.get("comparison", "")
+            message_data = content_data.get("message", "")
+        except json.JSONDecodeError:
+            # If it's not JSON, treat it as raw content and use LLM to format
+            extracted_data = []
+            comparison_data = request.content
+            message_data = ""
+
+        # Create LLM prompt to format the data as CSV
+        csv_prompt_template = """You are tasked with converting FormConnect comparison results into a well-structured CSV format.
+
+Input Data:
+{input_data}
+
+Instructions:
+1. Analyze the extracted data and comparison results
+2. Create a CSV table with the following structure:
+   - First column: "Filename" (document names)
+   - Subsequent columns: Field names from the form template
+3. Each row should represent one document with its extracted field values
+4. If a field value is missing for a document, leave the cell empty
+5. Clean up any formatting issues and ensure values are CSV-safe
+6. Return ONLY the CSV content, no additional text or formatting
+
+Expected format:
+Filename,Field1,Field2,Field3,...
+Document1.pdf,Value1,Value2,Value3,...
+Document2.pdf,Value1,Value2,Value3,...
+
+Return the CSV content:"""
+
+        # Prepare the input data for the LLM
+        input_data = {
+            "extracted_data": extracted_data,
+            "comparison": comparison_data,
+            "message": message_data,
+        }
+
+        input_data_str = json.dumps(input_data, indent=2)
+
+        variables = {"input_data": input_data_str}
+
+        # Use LLM to generate the CSV content
+        print("Calling LLM to format FormConnect results as CSV...")
+        csv_content = invoke_llm(llm, csv_prompt_template, variables)
+
+        # Clean up the response - remove any markdown formatting or extra text
+        csv_content = csv_content.strip()
+        if csv_content.startswith("```csv"):
+            csv_content = csv_content[6:]
+        if csv_content.startswith("```"):
+            csv_content = csv_content[3:]
+        if csv_content.endswith("```"):
+            csv_content = csv_content[:-3]
+        csv_content = csv_content.strip()
+
+        # Ensure we have valid CSV content
+        if not csv_content or "Filename" not in csv_content:
+            # Fallback to basic formatting if LLM didn't produce good results
+            output = StringIO()
+            writer = csv.writer(output)
+
+            # Create basic headers
+            headers = ["Filename", "Field", "Value"]
+            writer.writerow(headers)
+
+            # Add extracted data if available
+            if extracted_data:
+                for i, doc_data in enumerate(extracted_data):
+                    filename = f"Document_{i+1}"
+                    if isinstance(doc_data, dict):
+                        for field_name, field_value in doc_data.items():
+                            cleaned_value = (
+                                str(field_value)
+                                .replace("\n", " ")
+                                .replace("\r", "")
+                                .replace('"', '""')
+                            )
+                            writer.writerow([filename, field_name, cleaned_value])
+
+            # Add comparison data if available
+            if comparison_data:
+                writer.writerow(
+                    [
+                        "Comparison Results",
+                        "Analysis",
+                        comparison_data.replace("\n", " ")
+                        .replace("\r", "")
+                        .replace('"', '""'),
+                    ]
+                )
+
+            csv_content = output.getvalue()
+            output.close()
+
+        # Convert to bytes
+        csv_bytes = csv_content.encode("utf-8")
+
+        # Generate timestamp for filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"formconnect_results_{timestamp}.csv"
+
+        print(
+            "CSV file generated successfully using LLM formatting. Preparing to return as a downloadable file."
+        )
+
+        return StreamingResponse(
+            BytesIO(csv_bytes),
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generating CSV: {str(e)}")
