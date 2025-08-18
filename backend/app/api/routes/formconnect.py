@@ -39,6 +39,10 @@ from sqlmodel import Session, select
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from typing import List, Dict, Any, Literal
 import re
+import json
+import os
+import tempfile
+import re
 import traceback
 
 from langchain.prompts import ChatPromptTemplate
@@ -1154,6 +1158,186 @@ async def generate_form_fields_json(
     """
     # This is the same as generate_form_fields but ensures JSON request/response
     return await generate_form_fields(session, current_user, request)
+
+
+@router.post("/generate-fields-with-files", response_model=GenerateFormFieldsResponse)
+async def generate_form_fields_with_files(
+    session: SessionDep,
+    current_user: CurrentUser,
+    description: str = Form(...),
+    num_fields: int = Form(15),
+    search_mode: Literal["vector", "full_scan"] = Form("vector"),
+    files: List[UploadFile] = File(...),
+):
+    """
+    Generate form fields based on a description and uploaded reference documents.
+    """
+    try:
+        if not files or len(files) == 0:
+            raise HTTPException(
+                status_code=400, detail="At least one reference file must be uploaded."
+            )
+
+        # Get the default LLM
+        llm = get_default_llm(session, current_user)
+
+        # Extract text from all uploaded files
+        extracted_documents = []
+        file_names = []
+        
+        print(f"🔍 Processing {len(files)} reference files for field suggestion...")
+        
+        for file in files:
+            try:
+                # Read file content
+                content = await file.read()
+                
+                # Extract text using unified document processing
+                from app.services.document_utils import extract_text_from_file_unified
+                
+                text = extract_text_from_file_unified(content, file.filename or "unknown")
+                
+                if text.strip():
+                    extracted_documents.append({
+                        "filename": file.filename,
+                        "content": text
+                    })
+                    file_names.append(file.filename)
+                    print(f"✅ Successfully extracted text from {file.filename}")
+                else:
+                    print(f"⚠️ No text extracted from {file.filename}")
+                    
+            except Exception as e:
+                print(f"❌ Error processing {file.filename}: {str(e)}")
+                # Continue with other files instead of failing completely
+                continue
+
+        if not extracted_documents:
+            raise HTTPException(
+                status_code=400, 
+                detail="No text could be extracted from any of the uploaded files. Please check your files and try again."
+            )
+
+        # Combine all document content for analysis
+        combined_content = ""
+        for doc in extracted_documents:
+            combined_content += f"\n\n--- DOCUMENT: {doc['filename']} ---\n"
+            combined_content += doc['content']
+
+        # Prepare variables for the prompt
+        prompt_variables = {
+            "description": description.strip() if description else "Form template based on reference documents",
+            "example_instruction": f"\n12. Use the following {len(extracted_documents)} reference document(s) as examples to understand the types of fields that are typically found in similar documents:",
+            "analysis_instruction": f". Briefly mention how the {len(extracted_documents)} reference document(s) influenced the field selection using {search_mode} analysis",
+            "analysis_note": f" (analyzed {len(extracted_documents)} reference documents)",
+            "knowledge_base_instruction": "",
+            "knowledge_base_content": f"REFERENCE DOCUMENTS:\n{combined_content}",
+        }
+
+        # Generate fields using the LLM
+        fields_response = invoke_llm(
+            llm,
+            settings.FORMCONNECT_GENERATE_FIELDS_PROMPT_TEMPLATE,
+            prompt_variables,
+        )
+
+        # Parse the response to extract fields and analysis
+        fields = []
+        analysis = ""
+
+        lines = fields_response.strip().split("\n")
+        in_fields_section = False
+        in_analysis_section = False
+
+        for line in lines:
+            line = line.strip()
+            if line.startswith("FIELDS:"):
+                in_fields_section = True
+                in_analysis_section = False
+                continue
+            elif line.startswith("ANALYSIS:"):
+                in_fields_section = False
+                in_analysis_section = True
+                continue
+
+            if in_fields_section:
+                # Extract fields (numbered list)
+                if re.match(r"^\d+\.\s+", line):
+                    field = re.sub(r"^\d+\.\s+", "", line)
+                    if field.strip():
+                        fields.append(field.strip())
+            elif in_analysis_section:
+                if line:
+                    if analysis:
+                        analysis += " " + line
+                    else:
+                        analysis = line
+
+        # If parsing failed, try simpler approach
+        if not fields:
+            # Split by lines and look for numbered items
+            for line in lines:
+                line = line.strip()
+                if re.match(r"^\d+\.\s+", line):
+                    field = re.sub(r"^\d+\.\s+", "", line)
+                    if field.strip():
+                        fields.append(field.strip())
+
+        # Ensure we have some fields
+        if not fields:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate fields from the reference documents. Please try with different documents or add a more detailed description.",
+            )
+
+        # Apply user-specified limit if provided
+        if num_fields and num_fields > 0:
+            fields = fields[:num_fields]
+
+        if not analysis:
+            analysis = f"Generated {len(fields)} form fields based on analysis of {len(extracted_documents)} reference document(s) using {search_mode} method"
+
+        # Translate the analysis if needed
+        translated_analysis = await translate_text_if_needed(
+            analysis, session, current_user, llm
+        )
+
+        # Record the interaction
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="generate_form_fields_with_files",
+            input_data={
+                "description": description,
+                "requested_fields": num_fields,
+                "file_count": len(extracted_documents),
+                "file_names": file_names,
+                "search_mode": search_mode,
+            },
+            output_data={
+                "fields_count": len(fields),
+                "analysis": translated_analysis,
+            },
+            metadata={
+                "processed_files": len(extracted_documents),
+                "total_files": len(files),
+            },
+        )
+
+        return GenerateFormFieldsResponse(
+            fields=fields, description_analysis=translated_analysis
+        )
+
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        print(f"Error generating form fields with files: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error generating form fields: {str(e)}"
+        )
 
 
 @router.post("/generate/docx", response_class=StreamingResponse)
