@@ -475,11 +475,7 @@ const FormTemplateModal = ({
                                 : "Suggest fields based on the description"
                             }
                           >
-                            {suggesting 
-                              ? "Suggesting..." 
-                              : referenceMode === "files" && exampleFiles.length > 0
-                              ? `Suggest (${exampleFiles.length} files)`
-                              : "Suggest"}
+                            {suggesting ? "Suggesting..." : "Suggest"}
                           </Button>
 
                           <IconButton
