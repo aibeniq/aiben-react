@@ -241,7 +241,7 @@ const ChecklistModal = ({
           headers["Authorization"] = `Bearer ${token}`
         }
 
-        const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
+        const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
         const apiUrl = `${baseUrl}/api/v1/veradoc/generate-questions-with-files`
 
         console.log("Suggesting questions with files - API URL:", apiUrl)
