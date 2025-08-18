@@ -153,27 +153,50 @@ const FormTemplateModal = ({
     try {
       let response
 
-      // For now, we'll call the JSON endpoint directly since the client might not be updated yet
-      // TODO: Replace with generated client call once available
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
-      const apiUrl = `${baseUrl}/api/v1/formconnect/generate-fields-json`
-
       // Get auth token for API calls
       const token = localStorage.getItem("access_token")
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      }
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`
-      }
+      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
-      if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
+      if (referenceMode === "files" && exampleFiles.length > 0) {
+        // Use the new file upload endpoint
+        const apiUrl = `${baseUrl}/api/v1/formconnect/generate-fields-with-files`
+        
+        const formData = new FormData()
+        formData.append("description", formDescription.trim())
+        formData.append("num_fields", "15")
+        formData.append("search_mode", searchMode)
+
+        // Add files to formData
+        exampleFiles.forEach((item) => {
+          formData.append("files", item.file)
+        })
+
+        const headers: Record<string, string> = {}
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`
+        }
+
+        response = await fetch(apiUrl, {
+          method: "POST",
+          headers,
+          body: formData,
+        })
+      } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
         // Use knowledge base reference
+        const apiUrl = `${baseUrl}/api/v1/formconnect/generate-fields-json`
+        
         const requestData = {
           description: formDescription.trim(),
           num_fields: 15, // Default number of fields
           knowledge_base_id: referenceKnowledgeBase.id,
           search_mode: searchMode,
+        }
+
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+        }
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`
         }
 
         response = await fetch(apiUrl, {
@@ -182,11 +205,20 @@ const FormTemplateModal = ({
           body: JSON.stringify(requestData),
         })
       } else {
-        // Use description only (files mode not implemented for form fields yet)
+        // Use description only (no files or knowledge base)
+        const apiUrl = `${baseUrl}/api/v1/formconnect/generate-fields-json`
+        
         const requestData = {
           description: formDescription.trim(),
           num_fields: 15, // Default number of fields
           search_mode: searchMode,
+        }
+
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+        }
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`
         }
 
         response = await fetch(apiUrl, {
@@ -214,10 +246,13 @@ const FormTemplateModal = ({
         }
 
         const searchMethodText = searchMode === "vector" ? "vector search" : "full document scan"
-        const referenceText =
-          referenceMode === "knowledge-base" && referenceKnowledgeBase
-            ? ` using ${searchMethodText} on knowledge base`
-            : ""
+        let referenceText = ""
+        
+        if (referenceMode === "files" && exampleFiles.length > 0) {
+          referenceText = ` using ${searchMethodText} on ${exampleFiles.length} uploaded file(s)`
+        } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
+          referenceText = ` using ${searchMethodText} on knowledge base`
+        }
 
         showSuccessToast(
           `Suggested ${suggestedFields.length} form fields from description${referenceText}`,
@@ -350,7 +385,7 @@ const FormTemplateModal = ({
                         {referenceMode === "files" && (
                           <VStack align="stretch" gap={2}>
                             <Text fontSize="sm" color="gray.700" fontWeight="medium">
-                              Provide reference documents for suggesting form fields
+                              Upload reference documents to suggest form fields based on their content
                             </Text>
                             <FileUpload
                               files={exampleFiles}
@@ -366,6 +401,11 @@ const FormTemplateModal = ({
                               }}
                               maxFiles={5}
                             />
+                            {exampleFiles.length > 0 && (
+                              <Text fontSize="xs" color="green.600" fontWeight="medium">
+                                ✅ {exampleFiles.length} file(s) will be analyzed to suggest relevant form fields
+                              </Text>
+                            )}
                           </VStack>
                         )}
 
@@ -428,10 +468,18 @@ const FormTemplateModal = ({
                             title={
                               formDescription.trim().length < 10
                                 ? "Description must be at least 10 characters to suggest fields"
+                                : referenceMode === "files" && exampleFiles.length > 0
+                                ? `Suggest fields based on description and ${exampleFiles.length} uploaded file(s)`
+                                : referenceMode === "knowledge-base" && referenceKnowledgeBase
+                                ? "Suggest fields based on description and knowledge base"
                                 : "Suggest fields based on the description"
                             }
                           >
-                            {suggesting ? "Suggesting..." : "Suggest"}
+                            {suggesting 
+                              ? "Suggesting..." 
+                              : referenceMode === "files" && exampleFiles.length > 0
+                              ? `Suggest (${exampleFiles.length} files)`
+                              : "Suggest"}
                           </Button>
 
                           <IconButton
