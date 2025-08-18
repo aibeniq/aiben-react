@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: aibeniq
+    component: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: aibeniq
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: aibeniq
+        component: frontend
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        #runAsUser: 1000
+        #fsGroup: 1000
+      containers:
+        - name: frontend
+          image: quay.io/aibeniq/frontend:latest
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: frontend-config
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    app: aibeniq
+    component: frontend
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  selector:
+    app: aibeniq
+    component: frontend
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: frontend-dashboard
+  labels:
+    app: aibeniq
+    component: frontend
+spec:
+  host: dashboard.yourdomain.com
+  to:
+    kind: Service
+    name: frontend
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

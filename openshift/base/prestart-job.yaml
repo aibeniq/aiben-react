@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: backend-prestart
+  labels:
+    app: aibeniq
+    component: backend-prestart
+spec:
+  template:
+    metadata:
+      labels:
+        app: aibeniq
+        component: backend-prestart
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        #runAsUser: 1000
+        #fsGroup: 1000
+      containers:
+        - name: prestart
+          image: quay.io/aibeniq/backend:latest
+          command: ["bash", "scripts/prestart.sh"]
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:17
+          command:
+            [
+              "sh",
+              "-c",
+              "until pg_isready -h postgres -p 5432 -U app; do echo waiting for postgres; sleep 2; done;",
+            ]
