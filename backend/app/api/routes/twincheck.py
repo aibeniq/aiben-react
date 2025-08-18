@@ -1,6 +1,7 @@
 import uuid
 import difflib
 import re
+import csv
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import json
@@ -9,7 +10,7 @@ import tempfile
 import os
 import docx
 import io
-from io import BytesIO
+from io import BytesIO, StringIO
 from docx import Document
 from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -32,14 +33,10 @@ from app.models import (
     Message,
     GenerateTopicsRequest,
     GenerateTopicsResponse,
-    KnowledgeBase,
-    EmbeddingModel,
 )
 from app.core.config import settings
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
-from app.services.knowledgebases import get_embedding_model
-from app.services.embeddings import load_embeddings_model
-from app.services.retrievers import create_ensemble_retriever
+from app.services.translation import translate_text_if_needed
 from app.services.pdf_utils import load_pdf_with_pypdf
 
 # from langchain_community.document_loaders import PyPDFLoader  # Removed - using pypdf instead
@@ -54,86 +51,27 @@ router = APIRouter(prefix="/twincheck", tags=["twincheck"])
 
 def extract_text_from_file(file: UploadFile) -> str:
     """
-    Extract text content from uploaded files based on their type.
-    Supports PDF, DOCX, and plain text files.
+    Extract text content from uploaded files using unified document processing.
     """
-    content_type = file.content_type or mimetypes.guess_type(file.filename)[0]
-    print(f"Processing file: {file.filename} with content type: {content_type}")
+    from app.services.document_utils import extract_text_from_file_unified
 
-    # Create a temporary file to store the content
-    with tempfile.NamedTemporaryFile(
-        delete=False, suffix=f"_{file.filename}"
-    ) as temp_file:
-        # Read the file content and write to temp file
-        file_content = file.file.read()
-        if not file_content:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Uploaded file {file.filename} appears to be empty",
-            )
-        temp_file.write(file_content)
-        temp_file_path = temp_file.name
-    # File is now closed and ready to be read by other processes
+    print(f"Processing file: {file.filename}")
 
-    # Debug: Check file size
-    file_size = os.path.getsize(temp_file_path)
-    print(f"Temporary file created: {temp_file_path}, size: {file_size} bytes")
+    # Read the file content
+    file_content = file.file.read()
+    if not file_content:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Uploaded file {file.filename} appears to be empty",
+        )
 
     try:
-        # Process based on file type
-        if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
-            print("Loading PDF with PyPDF...")
-            pages = load_pdf_with_pypdf(temp_file_path, file.filename)
-            # Combine all page contents
-            text = "\n\n".join([page.page_content for page in pages])
-
-        elif (
-            content_type
-            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            or file.filename.lower().endswith(".docx")
-        ):
-            print("Loading DOCX with python-docx library...")
-            doc = docx.Document(temp_file_path)
-
-            # Extract text from paragraphs
-            paragraphs = [para.text for para in doc.paragraphs if para.text.strip()]
-
-            # Extract text from tables
-            tables_text = []
-            for table in doc.tables:
-                for row in table.rows:
-                    row_text = []
-                    for cell in row.cells:
-                        if cell.text.strip():
-                            row_text.append(cell.text.strip())
-                    if row_text:
-                        tables_text.append(" | ".join(row_text))
-
-            # Combine all text
-            text = "\n\n".join(paragraphs + tables_text)
-
-        else:
-            # Assume it's a text file
-            print("Loading as text file...")
-            # Try with different encodings
-            try:
-                with open(temp_file_path, "r", encoding="utf-8") as f:
-                    text = f.read()
-            except UnicodeDecodeError:
-                with open(temp_file_path, "r", encoding="latin-1") as f:
-                    text = f.read()
-
-        return text
-
+        return extract_text_from_file_unified(file_content, file.filename or "unknown")
     except Exception as e:
         print(f"Error processing file {file.filename}: {str(e)}")
         raise HTTPException(
             status_code=400, detail=f"Error processing file {file.filename}: {str(e)}"
         )
-    finally:
-        # Clean up the temporary file
-        if os.path.exists(temp_file_path):
-            os.unlink(temp_file_path)
 
 
 # Estimate the number of tokens in a text string.
@@ -287,6 +225,9 @@ async def compare_documents(
 
             print(f"Processing topic: {topic}")
 
+            # Simplified topic processing without Knowledge Base
+            source_citations = []  # Keep this empty array for consistency
+
             if is_chunked:
                 # Process each chunk for this topic
                 chunk_results = []
@@ -297,15 +238,19 @@ async def compare_documents(
                     )
 
                     try:
+                        # Simplified prompt without knowledge base context
+                        prompt_variables = {
+                            "diff_text": chunk,
+                            "topic": topic,
+                            "doc1_name": document1.filename,
+                            "doc2_name": document2.filename,
+                            "knowledge_base_context": "",  # Always empty
+                        }
+
                         chunk_result = invoke_llm(
                             llm,
                             settings.TWINCHECK_ANALYSIS_PROMPT_TEMPLATE,
-                            {
-                                "diff_text": chunk,
-                                "topic": topic,
-                                "doc1_name": document1.filename,
-                                "doc2_name": document2.filename,
-                            },
+                            prompt_variables,
                         )
 
                         chunk_results.append(
@@ -332,11 +277,17 @@ async def compare_documents(
 
                     synthesized_result = invoke_llm(llm, synthesis_prompt, {})
 
+                    # Translate the synthesized result if needed
+                    synthesized_result = await translate_text_if_needed(
+                        synthesized_result, session, current_user, llm
+                    )
+
                     topic_analysis.append(
                         {
                             "topic": topic,
                             "analysis": synthesized_result,
                             "chunk_count": len(diff_chunks),
+                            "source_citations": source_citations,
                         }
                     )
 
@@ -356,29 +307,46 @@ async def compare_documents(
                             "analysis": combined_analysis,
                             "chunk_count": len(diff_chunks),
                             "synthesis_error": str(e),
+                            "source_citations": source_citations,
                         }
                     )
             else:
                 # Single chunk processing (original behavior)
                 try:
+                    # Simplified prompt without knowledge base context
+                    prompt_variables = {
+                        "diff_text": diff_text,
+                        "topic": topic,
+                        "doc1_name": document1.filename,
+                        "doc2_name": document2.filename,
+                        "knowledge_base_context": "",  # Always empty
+                    }
+
                     topic_result = invoke_llm(
                         llm,
                         settings.TWINCHECK_ANALYSIS_PROMPT_TEMPLATE,
-                        {
-                            "diff_text": diff_text,
-                            "topic": topic,
-                            "doc1_name": document1.filename,
-                            "doc2_name": document2.filename,
-                        },
+                        prompt_variables,
                     )
 
-                    topic_analysis.append({"topic": topic, "analysis": topic_result})
+                    # Translate the topic result if needed
+                    topic_result = await translate_text_if_needed(
+                        topic_result, session, current_user, llm
+                    )
+
+                    topic_analysis.append(
+                        {
+                            "topic": topic,
+                            "analysis": topic_result,
+                            "source_citations": source_citations,
+                        }
+                    )
 
                 except Exception as e:
                     topic_analysis.append(
                         {
                             "topic": topic,
                             "analysis": f"Error analyzing this topic: {str(e)}",
+                            "source_citations": source_citations,
                         }
                     )
 
@@ -416,6 +384,12 @@ async def compare_documents(
 
             try:
                 summary = invoke_llm(llm, summary_prompt, {})
+
+                # Translate the summary if needed
+                summary = await translate_text_if_needed(
+                    summary, session, current_user, llm
+                )
+
             except Exception as e:
                 summary = f"Summary generation error: {str(e)}\n\nPlease refer to the individual topic analyses below for detailed insights."
         else:
@@ -430,6 +404,11 @@ async def compare_documents(
                     "doc2_name": document2.filename,
                     "topics": request.comparison_topics,
                 },
+            )
+
+            # Translate the summary if needed
+            summary = await translate_text_if_needed(
+                summary, session, current_user, llm
             )
 
         # Record this interaction for history
@@ -687,11 +666,24 @@ def create_comparison(
     """
     Save a new comparison topic set to the database.
     """
+    print(f"🐛 DEBUG: Received comparison data: {comparison}")
+    print(f"🐛 DEBUG: Name: '{comparison.name}', Topics: '{comparison.topics}', Description: '{comparison.description}'")
+    
+    # Validate required fields
+    if not comparison.name or not comparison.name.strip():
+        print(f"🐛 DEBUG: Name validation failed - name is empty or None")
+        raise HTTPException(status_code=400, detail="Comparison name is required and cannot be empty")
+    
+    if not comparison.topics or not comparison.topics.strip():
+        print(f"🐛 DEBUG: Topics validation failed - topics is empty or None")
+        raise HTTPException(status_code=400, detail="Comparison topics are required and cannot be empty")
+    
     existing_comparison = session.exec(
         select(TwinCheckTopicList).where(TwinCheckTopicList.name == comparison.name)
     ).first()
 
     if existing_comparison:
+        print(f"🐛 DEBUG: Duplicate name found - existing comparison: {existing_comparison.name}")
         raise HTTPException(
             status_code=400, detail="A comparison with this name already exists."
         )
@@ -700,6 +692,7 @@ def create_comparison(
     session.add(comparison)
     session.commit()
     session.refresh(comparison)
+    print(f"🐛 DEBUG: Successfully created comparison with ID: {comparison.id}")
     return comparison
 
 
@@ -920,6 +913,134 @@ async def generate_docx(
         raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
 
 
+@router.post("/generate/csv", response_class=StreamingResponse)
+async def generate_csv(
+    session: SessionDep, current_user: CurrentUser, request: DocxRequest
+):
+    """
+    Generate a CSV file from the comparison content.
+    """
+    print("Now generating CSV of comparison...")
+    try:
+        # Get the content from the request
+        if not request.content:
+            raise HTTPException(status_code=400, detail="Report content is required")
+
+        # Try to parse the content as JSON first (for structured data)
+        try:
+            content_data = json.loads(request.content)
+            summary = content_data.get("summary", "")
+            topic_results = content_data.get("topic_results", [])
+            doc1_name = content_data.get("doc1_name", "Document 1")
+            doc2_name = content_data.get("doc2_name", "Document 2")
+        except json.JSONDecodeError:
+            # If it's not JSON, treat it as markdown content
+            content_lines = request.content.split("\n")
+            summary = ""
+            topic_results = []
+            doc1_name = "Document 1"
+            doc2_name = "Document 2"
+
+            # Extract summary and topics from markdown
+            current_section = ""
+            current_content = []
+
+            for line in content_lines:
+                if line.startswith("# Summary"):
+                    current_section = "summary"
+                    current_content = []
+                elif line.startswith("# Topic Analysis") or line.startswith(
+                    "## Topic:"
+                ):
+                    if current_section == "summary":
+                        summary = "\n".join(current_content).strip()
+                    current_section = "topic"
+                    if line.startswith("## Topic:"):
+                        topic_name = line.replace("## Topic:", "").strip()
+                        current_content = [topic_name]
+                elif line.strip() and current_section:
+                    current_content.append(line.strip())
+
+            # Handle last section
+            if current_section == "summary":
+                summary = "\n".join(current_content).strip()
+
+        # Create CSV content
+        output = StringIO()
+        writer = csv.writer(output)
+
+        # Write headers
+        headers = ["Comparison Topic", "Analysis", "Document 1", "Document 2"]
+        writer.writerow(headers)
+
+        # Write summary row
+        if summary:
+            writer.writerow(
+                [
+                    "Overall Summary",
+                    summary.replace("\n", " ").replace("\r", "").replace('"', '""'),
+                    doc1_name,
+                    doc2_name,
+                ]
+            )
+
+        # Write topic analysis rows
+        for topic_result in topic_results:
+            if isinstance(topic_result, dict):
+                topic = topic_result.get("topic", "Unknown Topic")
+                analysis = topic_result.get("analysis", "No analysis available")
+            else:
+                topic = str(topic_result)
+                analysis = "No analysis available"
+
+            # Clean analysis text for CSV
+            cleaned_analysis = (
+                analysis.replace("\n", " ").replace("\r", "").replace('"', '""')
+            )
+
+            writer.writerow([topic, cleaned_analysis, doc1_name, doc2_name])
+
+        # If no structured data was found, create a simple row with the content
+        if not summary and not topic_results:
+            writer.writerow(
+                [
+                    "Comparison Analysis",
+                    request.content.replace("\n", " ")
+                    .replace("\r", "")
+                    .replace('"', '""'),
+                    doc1_name,
+                    doc2_name,
+                ]
+            )
+
+        # Prepare the CSV for download
+        csv_content = output.getvalue()
+        output.close()
+
+        # Convert to bytes
+        csv_bytes = csv_content.encode("utf-8")
+
+        # Generate timestamp for filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"twincheck_comparison_{timestamp}.csv"
+
+        print(
+            "CSV file generated successfully. Preparing to return as a downloadable file."
+        )
+
+        return StreamingResponse(
+            BytesIO(csv_bytes),
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generating CSV: {str(e)}")
+
+
 @router.post("/generate-topics", response_model=GenerateTopicsResponse)
 def generate_topics(
     session: SessionDep,
@@ -960,7 +1081,153 @@ def generate_topics(
                 example_instruction = f" and use the uploaded example document ({file.filename}) as a reference for the appropriate scope and depth of comparison topics"
                 example_analysis_instruction = f" and explain how they align with the scope shown in the example document ({file.filename})"
 
-        # Prepare variables for the prompt
+        # Check if example document exceeds token limits and chunk if necessary
+        if example_document:
+            print(f"Total example document content: {len(example_document)} characters")
+            
+            # Using conservative chunking similar to TWINCHECK settings
+            max_chunk_size = 80000  # Conservative chunk size for 128K context limit
+            
+            if len(example_document) > max_chunk_size:
+                print(f"Example document too large ({len(example_document)} chars), chunking for processing")
+                
+                from app.services.text_processing import chunk_text
+                
+                # Chunk the document content
+                chunks = chunk_text(example_document, max_tokens=max_chunk_size)
+                
+                # Process each chunk to generate topics
+                all_chunk_topics = []
+                
+                for i, chunk in enumerate(chunks):
+                    print(f"Processing chunk {i+1}/{len(chunks)}")
+                    
+                    # Generate topics for this chunk
+                    chunk_prompt_variables = {
+                        "description": description,
+                        "comparison_type": comparison_type,
+                        "example_document": f"EXAMPLE DOCUMENT: {file.filename}\n{chunk}\n",
+                        "example_instruction": example_instruction,
+                        "example_analysis_instruction": example_analysis_instruction,
+                        "knowledge_base_content": "",
+                        "knowledge_base_instruction": "",
+                    }
+
+                    try:
+                        chunk_response = invoke_llm(
+                            llm,
+                            settings.TWINCHECK_GENERATE_TOPICS_PROMPT_TEMPLATE,
+                            chunk_prompt_variables,
+                        )
+                        
+                        # Parse topics from chunk response
+                        chunk_topics = []
+                        lines = chunk_response.strip().split("\n")
+                        in_topics_section = False
+                        
+                        for line in lines:
+                            line = line.strip()
+                            if line.startswith("TOPICS:"):
+                                in_topics_section = True
+                                continue
+                            elif line.startswith("ANALYSIS:"):
+                                in_topics_section = False
+                                continue
+
+                            if in_topics_section:
+                                if re.match(r"^\d+\.\s+", line):
+                                    topic = re.sub(r"^\d+\.\s+", "", line)
+                                    if topic.strip():
+                                        chunk_topics.append(topic.strip())
+                        
+                        # If parsing failed, try simpler approach
+                        if not chunk_topics:
+                            for line in lines:
+                                line = line.strip()
+                                if re.match(r"^\d+\.\s+", line):
+                                    topic = re.sub(r"^\d+\.\s+", "", line)
+                                    if topic.strip():
+                                        chunk_topics.append(topic.strip())
+                        
+                        all_chunk_topics.extend(chunk_topics)
+                        
+                    except Exception as e:
+                        print(f"Error processing chunk {i+1}: {e}")
+                        continue
+                
+                # Deduplicate and refine topics across all chunks
+                if all_chunk_topics:
+                    # Remove duplicates while preserving order
+                    seen = set()
+                    unique_topics = []
+                    for t in all_chunk_topics:
+                        if t.lower() not in seen:
+                            seen.add(t.lower())
+                            unique_topics.append(t)
+                    
+                    # If we have too many topics, synthesize and prioritize
+                    if len(unique_topics) > (num_topics or 20):
+                        synthesis_prompt = f"""From the following list of comparison topics, select and refine the {num_topics or 10} most important and relevant topics for {comparison_type} comparison based on: {description}
+
+Topics to review:
+{chr(10).join([f"{i+1}. {t}" for i, t in enumerate(unique_topics)])}
+
+Requirements:
+1. Select the most critical and comprehensive topics
+2. Ensure good coverage of comparison aspects
+3. Maintain clarity and specificity
+4. Focus on topics most relevant to the description
+
+Return only the final selected topics, one per line, numbered."""
+                        
+                        try:
+                            refined_response = invoke_llm(llm, synthesis_prompt, {})
+                            topics = []
+                            for line in refined_response.strip().split('\n'):
+                                line = line.strip()
+                                if line and (line[0].isdigit() or line.startswith('-') or line.startswith('*')):
+                                    topic = re.sub(r"^\d+\.\s+", "", line)
+                                    topic = re.sub(r"^[-*]\s+", "", topic)
+                                    if topic.strip():
+                                        topics.append(topic.strip())
+                        except Exception as e:
+                            print(f"Error in topic synthesis: {e}")
+                            topics = unique_topics[:num_topics or 10]
+                    else:
+                        topics = unique_topics[:num_topics or 20]
+                    
+                    # For analysis, show chunked processing was used
+                    analysis = f"Generated {len(topics)} topics from chunked example document analysis ({len(chunks)} chunks processed) based on the provided description to ensure comprehensive document comparison coverage."
+                    
+                    # Record the interaction
+                    record_llm_interaction(
+                        session=session,
+                        user_id=current_user.id,
+                        functionality="generate_comparison_topics",
+                        input_data={
+                            "description": description,
+                            "requested_topics": num_topics,
+                            "comparison_type": comparison_type,
+                            "has_example_document": True,
+                            "chunked_processing": True,
+                            "chunk_count": len(chunks),
+                            "search_mode": search_mode,
+                        },
+                        output_data={
+                            "topics_count": len(topics),
+                            "analysis": analysis,
+                        },
+                        metadata={},
+                    )
+
+                    return GenerateTopicsResponse(topics=topics, description_analysis=analysis)
+                else:
+                    # Fallback to description-only generation if chunk processing failed
+                    example_document = ""
+                    example_instruction = ""
+                    example_analysis_instruction = ""
+
+        # Continue with existing logic for small documents or when no files provided
         prompt_variables = {
             "description": description,
             "comparison_type": comparison_type,
@@ -1078,9 +1345,12 @@ async def generate_topics_json(
         # Get the default LLM
         llm = get_default_llm(session, current_user)
 
+        # Handle optional description
+        description = request.description or ""
+
         # Prepare variables for the prompt
         prompt_variables = {
-            "description": request.description,
+            "description": description,
             "comparison_type": request.comparison_type or "general",
             "example_document": "",
             "example_instruction": "",
@@ -1101,7 +1371,7 @@ async def generate_topics_json(
                     current_user=current_user,
                     knowledge_base_id=request.knowledge_base_id,
                     search_mode=request.search_mode,
-                    query=request.description,
+                    query=description,
                 )
 
                 if content:

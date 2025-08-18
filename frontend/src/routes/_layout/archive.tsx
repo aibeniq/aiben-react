@@ -1,3 +1,5 @@
+console.log("🚨 TIMESTAMP CHECK:", new Date().toISOString())
+
 import BaseResultsContainer from "../../components/Archive/BaseResultsContainer"
 import ToolTab from "../../components/Archive/ToolTab"
 import VeradocResults from "../../components/Archive/Results/VeradocResults"
@@ -11,14 +13,23 @@ import { Box, Container, VStack, Tabs } from "@chakra-ui/react"
 import { FiCheckCircle, FiFilePlus } from "react-icons/fi"
 import { FaBalanceScale } from "react-icons/fa"
 import { TbPlugConnected } from "react-icons/tb"
-import { VeradocService, ReportgenieService, TwincheckService } from "../../client"
+import {
+  VeradocService,
+  ReportgenieService,
+  TwincheckService,
+  FormconnectService,
+} from "../../client"
 import { useState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 export const Route = createFileRoute("/_layout/archive")({
   component: Archive,
 })
 
 function Archive() {
+  console.log("🏠 Archive component is rendering!")
+
   const {
     veradoc,
     reportgenie,
@@ -36,6 +47,7 @@ function Archive() {
 
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
+  const queryClient = useQueryClient()
 
   // Copy and download functions
   const handleCopyReport = async () => {
@@ -72,7 +84,7 @@ function Archive() {
           ""
       }
 
-      await navigator.clipboard.writeText(fullText)
+      await copyToClipboard(fullText)
       setCopySuccess(true)
       setTimeout(() => setCopySuccess(false), 2000)
       showSuccessToast("Report copied to clipboard")
@@ -112,7 +124,7 @@ function Archive() {
           reportgenie.selectedReport.content ||
           ""
 
-        response = await TwincheckService.generateDocx({
+        response = await ReportgenieService.generateDocx({
           requestBody: { content: fullText },
         })
       } else if (activeTab === "compare" && twincheck.selectedReport) {
@@ -127,9 +139,15 @@ function Archive() {
           requestBody: { content: fullText },
         })
       } else if (activeTab === "match" && formconnect.selectedReport) {
-        // FormConnect doesn't have generateDocx, show error message
-        showErrorToast("Download functionality is not available for Form Processing results")
-        return
+        // Prepare combined text from FormConnect results
+        fullText =
+          formconnect.selectedReport.results?.comparison ||
+          formconnect.selectedReport.results?.message ||
+          ""
+
+        response = await FormconnectService.generateDocx({
+          requestBody: { content: fullText },
+        })
       }
 
       if (!response) return
@@ -232,7 +250,7 @@ function Archive() {
         console.log("CSV data to send:", csvData)
         console.log("Number of sections:", csvData.sections.length)
 
-        response = await ReportgenieService.generateOutlineOptimizationCsv({
+        response = await ReportgenieService.generateCsv({
           requestBody: { content: JSON.stringify(csvData) },
         })
       } else if (activeTab === "review") {
@@ -245,6 +263,32 @@ function Archive() {
         console.log("Number of QA pairs:", csvData.qa_pairs.length)
 
         response = await VeradocService.generateCsv({
+          requestBody: { content: JSON.stringify(csvData) },
+        })
+      } else if (activeTab === "compare") {
+        // TwinCheck CSV download
+        const csvData = {
+          summary: selectedReport.results?.summary || "",
+          topic_results: selectedReport.results?.topic_analysis || [],
+          doc1_name: selectedReport.results?.doc1_name || "Document 1",
+          doc2_name: selectedReport.results?.doc2_name || "Document 2",
+        }
+        console.log("TwinCheck CSV data to send:", csvData)
+        console.log("Number of topic results:", csvData.topic_results.length)
+
+        response = await TwincheckService.generateCsv({
+          requestBody: { content: JSON.stringify(csvData) },
+        })
+      } else if (activeTab === "match") {
+        // FormConnect CSV download
+        const csvData = {
+          comparison: selectedReport.results?.comparison || "",
+          message: selectedReport.results?.message || "",
+          results: selectedReport.results || {},
+        }
+        console.log("FormConnect CSV data to send:", csvData)
+
+        response = await FormconnectService.generateCsv({
           requestBody: { content: JSON.stringify(csvData) },
         })
       } else {
@@ -392,8 +436,30 @@ function Archive() {
         onCopyReport={handleCopyReport}
         onDownloadReport={handleDownloadReport}
         onDownloadCsv={handleDownloadCsv}
-        showCsvDownload={activeTab === "generate" || activeTab === "review"}
+        showCsvDownload={
+          activeTab === "generate" ||
+          activeTab === "review" ||
+          activeTab === "compare" ||
+          activeTab === "match"
+        }
         onFeedbackSubmitted={(type) => {
+          console.log("Feedback submitted for archive item, invalidating query cache")
+
+          // Invalidate the history queries to refresh the archive list
+          if (activeTab === "review") {
+            queryClient.invalidateQueries({ queryKey: ["veradocHistory"] })
+          } else if (activeTab === "generate") {
+            queryClient.invalidateQueries({ queryKey: ["reportgenieHistory"] })
+          } else if (activeTab === "compare") {
+            queryClient.invalidateQueries({ queryKey: ["twincheckHistory"] })
+          } else if (activeTab === "match") {
+            queryClient.invalidateQueries({ queryKey: ["formconnectHistory"] })
+          }
+
+          // Also invalidate the broader archive queries
+          queryClient.invalidateQueries({ queryKey: ["archive"] })
+          queryClient.invalidateQueries({ queryKey: ["items"] })
+
           showSuccessToast(`Thank you for marking this response as ${type}!`)
         }}
       >
@@ -439,6 +505,7 @@ function Archive() {
               selectedHistoryReport={veradoc.selectedReport}
               isHistoryLoading={veradoc.isLoading}
               onLoadReport={veradoc.loadReport}
+              onDeleteReport={veradoc.deleteReport}
               emptyMessage="No previous evaluations"
               showAllUsers={showAllUsers}
               onToggleShowAllUsers={toggleShowAllUsers}
@@ -448,11 +515,26 @@ function Archive() {
           </Tabs.Content>
 
           <Tabs.Content value="generate">
+            {(() => {
+              console.log("🎯 GENERATE TAB: Rendering tab content")
+              console.log("📊 GENERATE TAB: reportgenie.history:", reportgenie.history)
+              console.log(
+                "📊 GENERATE TAB: reportgenie.history length:",
+                reportgenie.history?.length,
+              )
+              console.log("📊 GENERATE TAB: reportgenie.isLoading:", reportgenie.isLoading)
+              console.log(
+                "📊 GENERATE TAB: reportgenie.selectedReport:",
+                reportgenie.selectedReport,
+              )
+              return null
+            })()}
             <ToolTab
               reportHistory={reportgenie.history}
               selectedHistoryReport={reportgenie.selectedReport}
               isHistoryLoading={reportgenie.isLoading}
               onLoadReport={reportgenie.loadReport}
+              onDeleteReport={reportgenie.deleteReport}
               emptyMessage="No previous reports"
               showAllUsers={showAllUsers}
               onToggleShowAllUsers={toggleShowAllUsers}
@@ -467,6 +549,7 @@ function Archive() {
               selectedHistoryReport={twincheck.selectedReport}
               isHistoryLoading={twincheck.isLoading}
               onLoadReport={twincheck.loadReport}
+              onDeleteReport={twincheck.deleteReport}
               emptyMessage="No previous comparisons"
               showAllUsers={showAllUsers}
               onToggleShowAllUsers={toggleShowAllUsers}
@@ -481,6 +564,7 @@ function Archive() {
               selectedHistoryReport={formconnect.selectedReport}
               isHistoryLoading={formconnect.isLoading}
               onLoadReport={formconnect.loadReport}
+              onDeleteReport={formconnect.deleteReport}
               emptyMessage="No previous form processing"
               showAllUsers={showAllUsers}
               onToggleShowAllUsers={toggleShowAllUsers}

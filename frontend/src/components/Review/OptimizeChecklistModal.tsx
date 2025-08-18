@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import {
   Box,
   Button,
@@ -6,16 +6,22 @@ import {
   HStack,
   Text,
   Spinner,
-  Card,
-  Separator,
   Textarea,
   IconButton,
+  Portal,
+  Dialog,
 } from "@chakra-ui/react"
-import { DialogBody, DialogContent, DialogHeader, DialogRoot, DialogTitle } from "@chakra-ui/react"
-import { FiCheck, FiEdit3, FiSave, FiX, FiDownload } from "react-icons/fi"
-import { VeraDocChecklist, VeradocService } from "../../client"
+import { Field } from "../ui/field"
+import { FiCheck, FiEdit3, FiSave, FiX } from "react-icons/fi"
+import {
+  VeraDocChecklist,
+  VeradocService,
+  ChecklistSuggestion,
+  CancelablePromise,
+} from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
-import FileUpload from "../Common/FileUpload"
+import FileUpload, { FileItem } from "../Common/FileUpload"
+import SearchModeToggle from "../Common/SearchModeToggle"
 
 interface OptimizeChecklistModalProps {
   isOpen: boolean
@@ -25,90 +31,109 @@ interface OptimizeChecklistModalProps {
   onOptimized: (optimizedQuestions: string[]) => void
 }
 
-interface ChecklistSuggestion {
-  original_question: string
-  suggested_question: string
-  reason: string
-  current_answer: string
-  needs_revision: boolean
-}
-
-interface FileItem {
-  file: File
-  isHandwritten: boolean
-}
-
-const OptimizeChecklistModal = ({
+const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
   isOpen,
   onClose,
   checklist,
   selectedKnowledgeBase,
   onOptimized,
-}: OptimizeChecklistModalProps) => {
+}) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [fileItems, setFileItems] = useState<FileItem[]>([])
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [suggestions, setSuggestions] = useState<ChecklistSuggestion[]>([])
   const [acceptedSuggestions, setAcceptedSuggestions] = useState<Set<number>>(new Set())
+  const [isApplying, setIsApplying] = useState(false)
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
+  const [customInstructions, setCustomInstructions] = useState("")
   const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
-
-  // State for editing suggestions
   const [editingSuggestions, setEditingSuggestions] = useState<Map<number, string>>(new Map())
   const [editingModes, setEditingModes] = useState<Set<number>>(new Set())
-
-  // State for expanding current answers
+  const [hasOptimized, setHasOptimized] = useState(false)
   const [expandedAnswers, setExpandedAnswers] = useState<Set<number>>(new Set())
+
+  // Add cancelable promise ref for request cancellation
+  const ongoingRequestRef = useRef<CancelablePromise<any> | null>(null)
 
   const handleOptimize = async () => {
     if (!checklist) {
-      showErrorToast("No checklist selected")
+      showErrorToast("No checklist provided for optimization")
       return
     }
 
     if (!selectedKnowledgeBase) {
-      showErrorToast("Please select a knowledge base")
+      showErrorToast("Please select a knowledge base first")
       return
     }
 
-    if (fileItems.length === 0) {
-      showErrorToast("Please upload a test document")
+    if (!checklist.questions || checklist.questions.trim() === "") {
+      showErrorToast("Please provide checklist questions to optimize")
       return
     }
 
-    setLoading(true)
-    setSuggestions([])
+    if (fileItems.length === 0 || !fileItems.some(item => item.file.size > 0)) {
+      showErrorToast("Please upload at least one document that should be accepted by the checklist")
+      return
+    }
 
+    // Cancel any existing request
+    if (ongoingRequestRef.current) {
+      ongoingRequestRef.current.cancel()
+      ongoingRequestRef.current = null
+    }
+
+    setIsLoading(true)
     try {
       const validItems = fileItems.filter((item) => item.file.size > 0)
       const regularFiles = validItems.filter((item) => !item.isHandwritten).map((item) => item.file)
 
-      const response = await VeradocService.optimizeChecklist({
-        questions: checklist.questions || "",
+      // Store the cancelable promise
+      ongoingRequestRef.current = VeradocService.optimizeChecklist({
         knowledgeBaseId: selectedKnowledgeBase.id,
+        questions: checklist.questions || "",
+        customInstructions: customInstructions || undefined,
+        searchMode: searchMode === "full_scan" ? "full_text" : searchMode,
         formData: {
           files: regularFiles,
         },
       })
 
-      setSuggestions(response.suggestions || [])
+      const response = await ongoingRequestRef.current
+
+      // Clear the reference on successful completion
+      ongoingRequestRef.current = null
+
+      console.log("Optimization response:", response)
 
       if (response.suggestions && response.suggestions.length > 0) {
-        const optimizationCount = response.suggestions.filter((s) => s.needs_revision).length
-        if (optimizationCount > 0) {
-          showSuccessToast(`Found ${optimizationCount} questions that could be optimized`)
-        } else {
-          showSuccessToast("All questions are already well-optimized!")
-        }
+        const optimizationCount = response.suggestions.filter(
+          (s: ChecklistSuggestion) => s.needs_revision,
+        ).length
+        setSuggestions(response.suggestions)
+        setHasOptimized(true)
+        showSuccessToast(
+          `Analysis complete! Found ${optimizationCount} suggestions for improvement out of ${response.suggestions.length} questions.`,
+        )
+      } else {
+        showSuccessToast("No optimization suggestions found - your checklist looks good!")
+        setSuggestions([])
       }
     } catch (error: any) {
-      console.error("Error optimizing checklist:", error)
-      showErrorToast(`Failed to optimize checklist: ${error.message || "Unknown error"}`)
+      // Don't show error if request was cancelled
+      if (error.isCancelled || error.name === "CancelError") {
+        console.log("Optimization request was cancelled")
+        return
+      }
+
+      console.error("Optimization error:", error)
+      showErrorToast("Failed to optimize checklist. Please try again.")
     } finally {
-      setLoading(false)
+      setIsLoading(false)
+      ongoingRequestRef.current = null
     }
   }
 
-  const toggleSuggestion = (index: number) => {
+  const handleSuggestionToggle = (index: number) => {
     const newAccepted = new Set(acceptedSuggestions)
     if (newAccepted.has(index)) {
       newAccepted.delete(index)
@@ -118,45 +143,112 @@ const OptimizeChecklistModal = ({
     setAcceptedSuggestions(newAccepted)
   }
 
-  const startEditingSuggestion = (index: number) => {
-    const newEditingModes = new Set(editingModes)
-    newEditingModes.add(index)
-    setEditingModes(newEditingModes)
-
-    // Initialize with the current suggested question if not already editing
-    if (!editingSuggestions.has(index)) {
-      const newEditingSuggestions = new Map(editingSuggestions)
-      newEditingSuggestions.set(index, suggestions[index].suggested_question)
-      setEditingSuggestions(newEditingSuggestions)
+  const handleEditSuggestion = (index: number) => {
+    const suggestion = suggestions[index]
+    if (suggestion) {
+      setEditingSuggestions(
+        new Map(editingSuggestions.set(index, suggestion.suggested_question || "")),
+      )
+      setEditingModes(new Set(editingModes.add(index)))
     }
   }
 
-  const cancelEditingSuggestion = (index: number) => {
-    const newEditingModes = new Set(editingModes)
-    newEditingModes.delete(index)
-    setEditingModes(newEditingModes)
-
-    // Reset to original suggestion
-    const newEditingSuggestions = new Map(editingSuggestions)
-    newEditingSuggestions.set(index, suggestions[index].suggested_question)
-    setEditingSuggestions(newEditingSuggestions)
+  const handleSaveSuggestion = (index: number) => {
+    const editedText = editingSuggestions.get(index)
+    if (editedText !== undefined) {
+      const updatedSuggestions = [...suggestions]
+      updatedSuggestions[index] = {
+        ...updatedSuggestions[index],
+        suggested_question: editedText,
+      }
+      setSuggestions(updatedSuggestions)
+      setEditingModes(new Set([...editingModes].filter((i) => i !== index)))
+    }
   }
 
-  const saveEditedSuggestion = (index: number) => {
-    const newEditingModes = new Set(editingModes)
-    newEditingModes.delete(index)
-    setEditingModes(newEditingModes)
-    // The edited text is already saved in editingSuggestions map
+  const handleCancelEdit = (index: number) => {
+    setEditingModes(new Set([...editingModes].filter((i) => i !== index)))
+    setEditingSuggestions(new Map([...editingSuggestions].filter(([i]) => i !== index)))
   }
 
-  const updateEditingSuggestion = (index: number, value: string) => {
-    const newEditingSuggestions = new Map(editingSuggestions)
-    newEditingSuggestions.set(index, value)
-    setEditingSuggestions(newEditingSuggestions)
+  const handleApplyOptimizations = () => {
+    if (acceptedSuggestions.size === 0) {
+      showErrorToast("Please select at least one suggestion to apply")
+      return
+    }
+
+    setIsApplying(true)
+
+    try {
+      const optimizedQuestions: string[] = []
+
+      suggestions.forEach((suggestion, index) => {
+        if (acceptedSuggestions.has(index) && suggestion.suggested_question) {
+          optimizedQuestions.push(suggestion.suggested_question)
+        } else {
+          optimizedQuestions.push(suggestion.original_question)
+        }
+      })
+
+      onOptimized(optimizedQuestions)
+      showSuccessToast(
+        `Applied ${acceptedSuggestions.size} optimization${acceptedSuggestions.size > 1 ? "s" : ""} successfully!`,
+      )
+      handleClose()
+    } catch (error) {
+      console.error("Apply optimizations error:", error)
+      showErrorToast("Failed to apply optimizations. Please try again.")
+    } finally {
+      setIsApplying(false)
+    }
   }
 
-  const getSuggestionText = (index: number) => {
-    return editingSuggestions.get(index) || suggestions[index]?.suggested_question || ""
+  const handleDownloadCsv = async () => {
+    if (!checklist || !hasOptimized) return
+
+    setLoadingCsvDownload(true)
+    try {
+      const csvData = suggestions.map((suggestion, index) => ({
+        "Question Number": index + 1,
+        "Original Question": suggestion.original_question,
+        "Needs Revision": suggestion.needs_revision ? "Yes" : "No",
+        "Suggested Revision": suggestion.suggested_question || "N/A",
+        "Policy Context": suggestion.policy_context || "N/A",
+        "Current Answer": suggestion.current_answer || "N/A",
+        Analysis: suggestion.reason,
+        Status: acceptedSuggestions.has(index) ? "Accepted" : "Not Applied",
+      }))
+
+      const headers = Object.keys(csvData[0])
+      const csvContent = [
+        headers.join(","),
+        ...csvData.map((row) =>
+          headers
+            .map((header) => `"${String(row[header as keyof typeof row]).replace(/"/g, '""')}"`)
+            .join(","),
+        ),
+      ].join("\n")
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+      const link = document.createElement("a")
+      const url = URL.createObjectURL(blob)
+      link.setAttribute("href", url)
+      link.setAttribute(
+        "download",
+        `checklist_optimization_${new Date().toISOString().split("T")[0]}.csv`,
+      )
+      link.style.visibility = "hidden"
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      showSuccessToast("CSV file downloaded successfully!")
+    } catch (error) {
+      console.error("CSV download error:", error)
+      showErrorToast("Failed to download CSV. Please try again.")
+    } finally {
+      setLoadingCsvDownload(false)
+    }
   }
 
   const toggleAnswerExpansion = (index: number) => {
@@ -169,337 +261,486 @@ const OptimizeChecklistModal = ({
     setExpandedAnswers(newExpanded)
   }
 
-  const handleApplySuggestions = () => {
-    if (suggestions.length === 0) return
-
-    // Create a map of original questions to their suggestions for accepted items
-    const suggestionMap = new Map<string, string>()
-
-    suggestions.forEach((suggestion, index) => {
-      if (acceptedSuggestions.has(index) && suggestion.needs_revision) {
-        // Use edited suggestion if available, otherwise use original suggestion
-        suggestionMap.set(suggestion.original_question, getSuggestionText(index))
-      }
-    })
-
-    // Build the optimized questions array by replacing accepted suggestions
-    const optimizedQuestions = suggestions.map((suggestion) => {
-      const originalQuestion = suggestion.original_question
-      if (suggestionMap.has(originalQuestion)) {
-        return suggestionMap.get(originalQuestion) || originalQuestion
-      }
-      return originalQuestion
-    })
-
-    onOptimized(optimizedQuestions)
-    showSuccessToast(`Applied ${acceptedSuggestions.size} optimization suggestions`)
-    handleClose()
-  }
-
-  const handleDownloadCsv = async () => {
-    if (suggestions.length === 0) {
-      showErrorToast("No optimization results to download")
-      return
-    }
-
-    setLoadingCsvDownload(true)
-
-    try {
-      // Create the data structure expected by the backend
-      const csvData = {
-        suggestions: suggestions,
-        analysis_summary: "Checklist optimization results export", // You could store this from the optimization response
-      }
-
-      const response = await VeradocService.generateOptimizationCsv({
-        requestBody: { content: JSON.stringify(csvData) },
-      })
-
-      // Handle the blob response
-      const blob = new Blob([response as any], { type: "text/csv" })
-      const url = window.URL.createObjectURL(blob)
-
-      // Create download link
-      const a = document.createElement("a")
-      a.href = url
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").split("T")[0]
-      a.download = `checklist_optimization_${timestamp}.csv`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-
-      showSuccessToast("CSV downloaded successfully")
-    } catch (error: any) {
-      console.error("Error downloading CSV:", error)
-      showErrorToast(`Failed to download CSV: ${error.message || "Unknown error"}`)
-    } finally {
-      setLoadingCsvDownload(false)
-    }
-  }
-
   const handleClose = () => {
+    // Cancel any ongoing request when closing
+    if (ongoingRequestRef.current) {
+      ongoingRequestRef.current.cancel()
+      ongoingRequestRef.current = null
+    }
+
     setFileItems([])
+    setIsLoading(false)
     setSuggestions([])
     setAcceptedSuggestions(new Set())
+    setIsApplying(false)
+    setSearchMode("vector")
+    setCustomInstructions("")
+    setLoadingCsvDownload(false)
     setEditingSuggestions(new Map())
     setEditingModes(new Set())
+    setHasOptimized(false)
     setExpandedAnswers(new Set())
-    setLoadingCsvDownload(false)
     onClose()
   }
 
+  if (!isOpen) return null
+
   return (
-    <DialogRoot open={isOpen} onOpenChange={({ open }) => !open && handleClose()}>
-      <DialogContent maxW="6xl" maxH="90vh" display="flex" flexDirection="column">
-        <DialogHeader flexShrink={0}>
-          <DialogTitle>Optimize Checklist</DialogTitle>
-        </DialogHeader>
-        <DialogBody flex={1} overflow="hidden" display="flex" flexDirection="column">
-          <VStack gap={6} align="stretch" height="100%" overflow="hidden">
-            <Box>
-              <Text mb={2} fontWeight="medium">
-                Upload a document that SHOULD meet all checklist requirements:
-              </Text>
-              <FileUpload
-                files={fileItems}
-                onFilesChange={setFileItems}
-                showHandwrittenToggle={false}
-              />
-            </Box>
-
-            <HStack justify="space-between">
-              <Text fontSize="sm" color="gray.600">
-                Knowledge Base: {selectedKnowledgeBase?.title || "None selected"}
-              </Text>
-              <Button
-                onClick={handleOptimize}
-                disabled={fileItems.length === 0 || !selectedKnowledgeBase || loading}
-                loading={loading}
-                colorPalette="blue"
-              >
-                {loading ? "Analyzing..." : "Optimize Checklist"}
-              </Button>
-            </HStack>
-
-            {loading && (
-              <Box textAlign="center" py={8}>
-                <Spinner size="lg" mb={4} />
-                <Text>Running optimization analysis...</Text>
-              </Box>
-            )}
-
-            {suggestions.length > 0 && !loading && (
-              <VStack gap={4} align="stretch" flex={1} overflow="hidden">
-                <Separator />
-                <HStack justify="space-between" flexShrink={0}>
-                  <VStack align="start" gap={1}>
-                    <Text fontSize="lg" fontWeight="bold">
-                      Optimization Suggestions
-                    </Text>
-                    <Text fontSize="sm" color="gray.600">
-                      {suggestions.filter((s) => s.needs_revision).length} questions need
-                      optimization
-                    </Text>
+    <Portal>
+      <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && handleClose()}>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content maxW="6xl" maxH="90vh" display="flex" flexDirection="column">
+            <Dialog.Header flexShrink={0}>
+              <Dialog.Title>Optimize Checklist</Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body flex={1} overflow="hidden" display="flex" flexDirection="column">
+              {/* Configuration and Analysis Section */}
+              <VStack gap={4} align="stretch" flexShrink={0} pb={4} borderBottom="1px solid" borderColor="gray.200">
+                <HStack gap={6} align="flex-start">
+                  <VStack flex={1} align="stretch" gap={4}>
+                    <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
+                    
+                    <Field
+                      label="Custom Instructions (Optional)"
+                      helperText="Enter any additional instructions that should be considered when answering the checklist questions"
+                    >
+                      <Textarea
+                        value={customInstructions}
+                        onChange={(e) => setCustomInstructions(e.target.value)}
+                        placeholder="e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
+                        rows={2}
+                        maxLength={2000}
+                      />
+                      <Text fontSize="xs" color="gray.500" mt={1}>
+                        {customInstructions.length}/2000 characters
+                      </Text>
+                    </Field>
                   </VStack>
+                  
+                  <Box flex={1}>
+                    <Text mb={2} fontWeight="medium">
+                      Upload document(s) that should be accepted by checklist *
+                    </Text>
+                    <Text fontSize="sm" color="gray.600" mb={2}>
+                      Upload documents that should meet all checklist requirements to help identify questions that may be too strict
+                    </Text>
+                    <FileUpload
+                      files={fileItems}
+                      onFilesChange={setFileItems}
+                      showHandwrittenToggle={false}
+                    />
+                  </Box>
+                </HStack>
+
+                <HStack justifyContent="space-between">
                   <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleDownloadCsv}
-                    loading={loadingCsvDownload}
-                    colorPalette="green"
+                    onClick={handleOptimize}
+                    loading={isLoading}
+                    colorScheme="blue"
+                    disabled={!checklist?.questions || fileItems.length === 0 || !fileItems.some(item => item.file.size > 0)}
                   >
-                    <FiDownload />
-                    Download CSV
+                    {isLoading ? "Analyzing..." : "Analyze Checklist"}
                   </Button>
-                </HStack>{" "}
-                <Box flex={1} overflow="auto" pr={2}>
-                  <VStack gap={4} align="stretch">
-                    {suggestions.map((suggestion, index) => (
-                      <Card.Root
-                        key={index}
-                        variant={suggestion.needs_revision ? "elevated" : "subtle"}
+
+                  {hasOptimized && suggestions.length > 0 && (
+                    <HStack gap={2}>
+                      <Text fontSize="sm" color="gray.600">
+                        Found {suggestions.filter((s) => s.needs_revision).length} optimization opportunities
+                        out of {suggestions.length} questions
+                      </Text>
+                      <Button
+                        onClick={handleDownloadCsv}
+                        loading={loadingCsvDownload}
+                        variant="outline"
+                        size="sm"
                       >
-                        <Card.Body>
-                          <VStack gap={3} align="stretch">
-                            <HStack justify="space-between">
-                              <Text fontWeight="bold" fontSize="sm" color="gray.600">
-                                Question {index + 1}
-                              </Text>
-                              {suggestion.needs_revision && (
-                                <Button
-                                  size="sm"
-                                  variant={acceptedSuggestions.has(index) ? "solid" : "outline"}
-                                  colorPalette={acceptedSuggestions.has(index) ? "green" : "blue"}
-                                  onClick={() => toggleSuggestion(index)}
-                                >
-                                  {acceptedSuggestions.has(index) ? (
-                                    <>
-                                      <FiCheck size={14} /> Accepted
-                                    </>
-                                  ) : (
-                                    "Accept"
-                                  )}
-                                </Button>
-                              )}
-                            </HStack>
+                        {loadingCsvDownload ? "Downloading..." : "Download CSV"}
+                      </Button>
+                    </HStack>
+                  )}
+                </HStack>
+              </VStack>
 
-                            <Box>
-                              <Text fontSize="sm" fontWeight="medium" mb={1}>
-                                Original Question:
-                              </Text>
-                              <Text fontSize="sm" p={2} bg="gray.50" borderRadius="md">
-                                {suggestion.original_question}
-                              </Text>
-                            </Box>
+              {/* Loading State */}
+              {isLoading && (
+                <Box textAlign="center" py={12} flex={1} display="flex" flexDirection="column" justifyContent="center">
+                  <Spinner size="lg" />
+                  <Text mt={4} color="gray.600">
+                    Analyzing your checklist for optimization opportunities...
+                  </Text>
+                  <Button
+                    mt={4}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (ongoingRequestRef.current) {
+                        ongoingRequestRef.current.cancel()
+                        ongoingRequestRef.current = null
+                      }
+                      setIsLoading(false)
+                      showSuccessToast("Optimization cancelled")
+                    }}
+                  >
+                    Cancel Analysis
+                  </Button>
+                </Box>
+              )}
 
-                            {suggestion.needs_revision ? (
-                              <>
-                                <Box>
-                                  <HStack justify="space-between" mb={1}>
-                                    <Text fontSize="sm" fontWeight="medium">
-                                      Suggested Question:
+              {/* Two-Column Results Layout */}
+              {suggestions.length > 0 && !isLoading && (
+                <Box flex={1} overflow="hidden" display="flex" flexDirection="column" pt={4}>
+                  <HStack gap={6} flex={1} overflow="hidden" align="stretch">
+                    {/* Left Column: Suggestions that need revision */}
+                    <VStack flex={1} align="stretch" overflow="hidden">
+                      <Text fontWeight="semibold" color="blue.700" mb={3}>
+                        Questions Needing Optimization ({suggestions.filter((s) => s.needs_revision).length})
+                      </Text>
+                      <Box flex={1} overflow="auto" pr={2}>
+                        <VStack gap={4} align="stretch">
+                          {suggestions
+                            .map((suggestion, index) => ({ suggestion, index }))
+                            .filter(({ suggestion }) => suggestion.needs_revision)
+                            .map(({ suggestion, index }) => (
+                              <Box
+                                key={index}
+                                p={4}
+                                border="1px solid"
+                                borderColor="blue.200"
+                                borderRadius="md"
+                                bg="blue.50"
+                              >
+                                <VStack align="stretch" gap={3}>
+                                  <HStack justifyContent="space-between" align="flex-start">
+                                    <Text fontWeight="medium" color="gray.700">
+                                      Question {index + 1}
                                     </Text>
-                                    {!editingModes.has(index) ? (
+                                    <HStack gap={2}>
                                       <IconButton
-                                        size="xs"
-                                        variant="ghost"
                                         aria-label="Edit suggestion"
-                                        onClick={() => startEditingSuggestion(index)}
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => handleEditSuggestion(index)}
+                                        disabled={editingModes.has(index)}
                                       >
-                                        <FiEdit3 size={12} />
+                                        <FiEdit3 />
                                       </IconButton>
-                                    ) : (
-                                      <HStack gap={1}>
-                                        <IconButton
-                                          size="xs"
-                                          variant="ghost"
-                                          colorPalette="green"
-                                          aria-label="Save changes"
-                                          onClick={() => saveEditedSuggestion(index)}
-                                        >
-                                          <FiSave size={12} />
-                                        </IconButton>
-                                        <IconButton
-                                          size="xs"
-                                          variant="ghost"
-                                          colorPalette="red"
-                                          aria-label="Cancel editing"
-                                          onClick={() => cancelEditingSuggestion(index)}
-                                        >
-                                          <FiX size={12} />
-                                        </IconButton>
-                                      </HStack>
-                                    )}
+                                      <Button
+                                        size="sm"
+                                        variant={acceptedSuggestions.has(index) ? "solid" : "outline"}
+                                        colorScheme={acceptedSuggestions.has(index) ? "green" : "gray"}
+                                        onClick={() => handleSuggestionToggle(index)}
+                                      >
+                                        {acceptedSuggestions.has(index) ? (
+                                          <>
+                                            <FiCheck /> Selected
+                                          </>
+                                        ) : (
+                                          "Select"
+                                        )}
+                                      </Button>
+                                    </HStack>
                                   </HStack>
 
-                                  {editingModes.has(index) ? (
-                                    <Textarea
-                                      value={getSuggestionText(index)}
-                                      onChange={(e) =>
-                                        updateEditingSuggestion(index, e.target.value)
-                                      }
-                                      fontSize="sm"
-                                      p={2}
-                                      bg="blue.50"
-                                      borderRadius="md"
-                                      border="1px solid"
-                                      borderColor="blue.200"
-                                      resize="vertical"
-                                      rows={3}
-                                    />
-                                  ) : (
+                                  <Box>
+                                    <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
+                                      Original:
+                                    </Text>
+                                    <Text fontSize="sm" bg="white" p={2} borderRadius="md" border="1px solid" borderColor="gray.200">
+                                      {suggestion.original_question}
+                                    </Text>
+                                  </Box>
+
+                                  <Box>
+                                    <Text fontSize="sm" fontWeight="medium" color="blue.600" mb={1}>
+                                      Suggested Improvement:
+                                    </Text>
+                                    {editingModes.has(index) ? (
+                                      <VStack align="stretch" gap={2}>
+                                        <Textarea
+                                          value={editingSuggestions.get(index) || ""}
+                                          onChange={(e) =>
+                                            setEditingSuggestions(
+                                              new Map(editingSuggestions.set(index, e.target.value)),
+                                            )
+                                          }
+                                          size="sm"
+                                          resize="vertical"
+                                          minH="80px"
+                                        />
+                                        <HStack gap={2}>
+                                          <Button
+                                            size="sm"
+                                            colorScheme="green"
+                                            onClick={() => handleSaveSuggestion(index)}
+                                          >
+                                            <FiSave /> Save
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleCancelEdit(index)}
+                                          >
+                                            <FiX /> Cancel
+                                          </Button>
+                                        </HStack>
+                                      </VStack>
+                                    ) : (
+                                      <Text
+                                        fontSize="sm"
+                                        bg="white"
+                                        p={2}
+                                        borderRadius="md"
+                                        color="blue.800"
+                                        border="1px solid"
+                                        borderColor="blue.200"
+                                      >
+                                        {suggestion.suggested_question}
+                                      </Text>
+                                    )}
+                                  </Box>
+
+                                  {/* Policy Context Section */}
+                                  {suggestion.policy_context && (
+                                    <Box>
+                                      <Text fontSize="sm" fontWeight="medium" color="purple.600" mb={1}>
+                                        Policy Context:
+                                      </Text>
+                                      <Text
+                                        fontSize="sm"
+                                        bg="white"
+                                        p={2}
+                                        borderRadius="md"
+                                        border="1px solid"
+                                        borderColor="purple.200"
+                                        color="gray.700"
+                                        style={{
+                                          overflow: expandedAnswers.has(index) ? "visible" : "hidden",
+                                          display: expandedAnswers.has(index) ? "block" : "-webkit-box",
+                                          WebkitLineClamp: expandedAnswers.has(index) ? "none" : 2,
+                                          WebkitBoxOrient: "vertical" as const,
+                                        }}
+                                      >
+                                        {suggestion.policy_context}
+                                      </Text>
+                                    </Box>
+                                  )}
+
+                                  {/* Current Answer Section */}
+                                  <Box>
+                                    <Text fontSize="sm" fontWeight="medium" color="orange.600" mb={1}>
+                                      Current Answer:
+                                    </Text>
                                     <Text
                                       fontSize="sm"
+                                      bg="white"
                                       p={2}
-                                      bg="blue.50"
                                       borderRadius="md"
                                       border="1px solid"
-                                      borderColor="blue.200"
-                                      cursor="pointer"
-                                      onClick={() => startEditingSuggestion(index)}
-                                      _hover={{ bg: "blue.100" }}
+                                      borderColor="orange.200"
+                                      color="gray.700"
+                                      style={{
+                                        overflow: expandedAnswers.has(index) ? "visible" : "hidden",
+                                        display: expandedAnswers.has(index) ? "block" : "-webkit-box",
+                                        WebkitLineClamp: expandedAnswers.has(index) ? "none" : 2,
+                                        WebkitBoxOrient: "vertical" as const,
+                                      }}
                                     >
-                                      {getSuggestionText(index)}
+                                      {suggestion.current_answer}
                                     </Text>
-                                  )}
-                                </Box>
+                                  </Box>
 
-                                <Box>
-                                  <Text fontSize="sm" fontWeight="medium" mb={1}>
-                                    Reason for Change:
-                                  </Text>
-                                  <Text fontSize="sm" color="gray.600">
-                                    {suggestion.reason}
-                                  </Text>
-                                </Box>
-
-                                <Box>
-                                  <Text fontSize="sm" fontWeight="medium" mb={1}>
-                                    Current Answer (why this needs optimization):
-                                  </Text>
-                                  <Box
-                                    p={2}
-                                    bg="orange.50"
-                                    borderRadius="md"
-                                    border="1px solid"
-                                    borderColor="orange.200"
-                                  >
-                                    <Text fontSize="sm" color="gray.600">
-                                      {expandedAnswers.has(index)
-                                        ? suggestion.current_answer
-                                        : suggestion.current_answer.substring(0, 300)}
-                                      {!expandedAnswers.has(index) &&
-                                      suggestion.current_answer.length > 300
-                                        ? "..."
-                                        : ""}
-                                    </Text>
-                                    {suggestion.current_answer.length > 300 && (
+                                  <Box>
+                                    <HStack justifyContent="space-between" align="center">
+                                      <Text fontSize="sm" fontWeight="medium" color="gray.600">
+                                        Analysis:
+                                      </Text>
                                       <Button
                                         size="xs"
                                         variant="ghost"
-                                        mt={1}
                                         onClick={() => toggleAnswerExpansion(index)}
-                                        colorPalette="orange"
                                       >
                                         {expandedAnswers.has(index) ? "Show Less" : "Show More"}
                                       </Button>
-                                    )}
+                                    </HStack>
+                                    <Text
+                                      fontSize="sm"
+                                      color="gray.700"
+                                      bg="white"
+                                      p={2}
+                                      borderRadius="md"
+                                      border="1px solid"
+                                      borderColor="gray.200"
+                                      style={{
+                                        overflow: expandedAnswers.has(index) ? "visible" : "hidden",
+                                        display: expandedAnswers.has(index) ? "block" : "-webkit-box",
+                                        WebkitLineClamp: expandedAnswers.has(index) ? "none" : 3,
+                                        WebkitBoxOrient: "vertical" as const,
+                                      }}
+                                    >
+                                      {suggestion.reason}
+                                    </Text>
                                   </Box>
-                                </Box>
-                              </>
-                            ) : (
-                              <Box>
-                                <Text fontSize="sm" color="green.600" fontWeight="medium">
-                                  ✓ This question is already well-optimized
-                                </Text>
+                                </VStack>
                               </Box>
-                            )}
-                          </VStack>
-                        </Card.Body>
-                      </Card.Root>
-                    ))}
-                  </VStack>
+                            ))}
+                        </VStack>
+                      </Box>
+                    </VStack>
+
+                    {/* Right Column: Questions that are already good */}
+                    <VStack flex={1} align="stretch" overflow="hidden">
+                      <Text fontWeight="semibold" color="green.700" mb={3}>
+                        Questions Already Optimized ({suggestions.filter((s) => !s.needs_revision).length})
+                      </Text>
+                      <Box flex={1} overflow="auto" pr={2}>
+                        <VStack gap={4} align="stretch">
+                          {suggestions
+                            .map((suggestion, index) => ({ suggestion, index }))
+                            .filter(({ suggestion }) => !suggestion.needs_revision)
+                            .map(({ suggestion, index }) => (
+                              <Box
+                                key={index}
+                                p={4}
+                                border="1px solid"
+                                borderColor="green.200"
+                                borderRadius="md"
+                                bg="green.50"
+                              >
+                                <VStack align="stretch" gap={3}>
+                                  <HStack justifyContent="space-between" align="flex-start">
+                                    <Text fontWeight="medium" color="gray.700">
+                                      Question {index + 1}
+                                    </Text>
+                                    <Text fontSize="sm" color="green.600" fontWeight="medium">
+                                      ✓ Optimized
+                                    </Text>
+                                  </HStack>
+
+                                  <Box>
+                                    <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
+                                      Question:
+                                    </Text>
+                                    <Text fontSize="sm" bg="white" p={2} borderRadius="md" border="1px solid" borderColor="gray.200">
+                                      {suggestion.original_question}
+                                    </Text>
+                                  </Box>
+
+                                  {/* Policy Context Section */}
+                                  {suggestion.policy_context && (
+                                    <Box>
+                                      <Text fontSize="sm" fontWeight="medium" color="purple.600" mb={1}>
+                                        Policy Context:
+                                      </Text>
+                                      <Text
+                                        fontSize="sm"
+                                        bg="white"
+                                        p={2}
+                                        borderRadius="md"
+                                        border="1px solid"
+                                        borderColor="purple.200"
+                                        color="gray.700"
+                                        style={{
+                                          overflow: expandedAnswers.has(index) ? "visible" : "hidden",
+                                          display: expandedAnswers.has(index) ? "block" : "-webkit-box",
+                                          WebkitLineClamp: expandedAnswers.has(index) ? "none" : 2,
+                                          WebkitBoxOrient: "vertical" as const,
+                                        }}
+                                      >
+                                        {suggestion.policy_context}
+                                      </Text>
+                                    </Box>
+                                  )}
+
+                                  {/* Current Answer Section */}
+                                  <Box>
+                                    <Text fontSize="sm" fontWeight="medium" color="orange.600" mb={1}>
+                                      Current Answer:
+                                    </Text>
+                                    <Text
+                                      fontSize="sm"
+                                      bg="white"
+                                      p={2}
+                                      borderRadius="md"
+                                      border="1px solid"
+                                      borderColor="orange.200"
+                                      color="gray.700"
+                                      style={{
+                                        overflow: expandedAnswers.has(index) ? "visible" : "hidden",
+                                        display: expandedAnswers.has(index) ? "block" : "-webkit-box",
+                                        WebkitLineClamp: expandedAnswers.has(index) ? "none" : 2,
+                                        WebkitBoxOrient: "vertical" as const,
+                                      }}
+                                    >
+                                      {suggestion.current_answer}
+                                    </Text>
+                                  </Box>
+
+                                  <Box>
+                                    <HStack justifyContent="space-between" align="center">
+                                      <Text fontSize="sm" fontWeight="medium" color="gray.600">
+                                        Analysis:
+                                      </Text>
+                                      <Button
+                                        size="xs"
+                                        variant="ghost"
+                                        onClick={() => toggleAnswerExpansion(index)}
+                                      >
+                                        {expandedAnswers.has(index) ? "Show Less" : "Show More"}
+                                      </Button>
+                                    </HStack>
+                                    <Text
+                                      fontSize="sm"
+                                      color="gray.700"
+                                      bg="white"
+                                      p={2}
+                                      borderRadius="md"
+                                      border="1px solid"
+                                      borderColor="gray.200"
+                                      style={{
+                                        overflow: expandedAnswers.has(index) ? "visible" : "hidden",
+                                        display: expandedAnswers.has(index) ? "block" : "-webkit-box",
+                                        WebkitLineClamp: expandedAnswers.has(index) ? "none" : 3,
+                                        WebkitBoxOrient: "vertical" as const,
+                                      }}
+                                    >
+                                      {suggestion.reason}
+                                    </Text>
+                                  </Box>
+                                </VStack>
+                              </Box>
+                            ))}
+                        </VStack>
+                      </Box>
+                    </VStack>
+                  </HStack>
+
+                  {/* Apply Optimizations Section */}
+                  {acceptedSuggestions.size > 0 && (
+                    <Box mt={4} pt={4} borderTop="1px" borderColor="gray.200" flexShrink={0}>
+                      <HStack justifyContent="space-between" align="center">
+                        <Text fontSize="sm" color="gray.600">
+                          {acceptedSuggestions.size} optimization
+                          {acceptedSuggestions.size > 1 ? "s" : ""} selected for application
+                        </Text>
+                        <Button
+                          onClick={handleApplyOptimizations}
+                          loading={isApplying}
+                          colorScheme="green"
+                          size="lg"
+                        >
+                          {isApplying ? "Applying..." : "Apply Selected Optimizations"}
+                        </Button>
+                      </HStack>
+                    </Box>
+                  )}
                 </Box>
-                <HStack justify="space-between" pt={4} flexShrink={0}>
-                  <Button variant="outline" onClick={handleClose}>
-                    Cancel
-                  </Button>
-                  <Button
-                    colorPalette="blue"
-                    onClick={handleApplySuggestions}
-                    disabled={acceptedSuggestions.size === 0}
-                  >
-                    Apply {acceptedSuggestions.size} Suggestion
-                    {acceptedSuggestions.size !== 1 ? "s" : ""}
-                  </Button>
-                </HStack>
-              </VStack>
-            )}
-          </VStack>
-        </DialogBody>
-      </DialogContent>
-    </DialogRoot>
+              )}
+            </Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
+    </Portal>
   )
 }
 

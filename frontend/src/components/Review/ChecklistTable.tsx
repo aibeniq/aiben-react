@@ -4,6 +4,7 @@ import { FiEye, FiCopy, FiTrash2, FiPlus } from "react-icons/fi"
 import { VeraDocChecklist, VeradocService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import ChecklistModal from "./ChecklistModal"
+import { generateUUID } from "../../utils/uuid"
 
 interface QuestionData {
   id: string
@@ -27,8 +28,6 @@ interface ChecklistTableProps {
 
 interface ChecklistTableHeaderProps {
   onCreateNew: () => void
-  onCopyQuestions: () => void
-  hasSelectedChecklist: boolean
 }
 
 interface ChecklistTableBodyProps {
@@ -44,8 +43,6 @@ interface ChecklistTableBodyProps {
 
 const ChecklistTableHeader = ({
   onCreateNew,
-  onCopyQuestions,
-  hasSelectedChecklist,
 }: ChecklistTableHeaderProps) => {
   return (
     <Table.Header position="sticky" top="0" bg="transparent" zIndex="1">
@@ -59,16 +56,6 @@ const ChecklistTableHeader = ({
         </Table.ColumnHeader>
         <Table.ColumnHeader w="40" style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
           <HStack gap={1} ml="auto">
-            <IconButton
-              size="xs"
-              onClick={onCopyQuestions}
-              variant="ghost"
-              disabled={!hasSelectedChecklist}
-              aria-label="Copy questions as text"
-              title="Copy all questions as text"
-            >
-              <FiCopy size={12} />
-            </IconButton>
             <Button size="sm" onClick={onCreateNew} variant="ghost">
               <FiPlus size={14} />
             </Button>
@@ -140,7 +127,7 @@ const ChecklistTableBody = ({
                         .split("\n")
                         .filter((q) => q.trim())
                       const structuredData = questionsArray.map((text) => ({
-                        id: crypto.randomUUID(),
+                        id: generateUUID(),
                         text,
                         consultDocuments: true, // Default for legacy
                       }))
@@ -247,7 +234,7 @@ const ChecklistTable = ({
             // It's structured data
             const questionsArray = parsedQuestions.map((q) => q.text)
             const structuredData = parsedQuestions.map((q) => ({
-              id: q.id || crypto.randomUUID(),
+              id: q.id || generateUUID(),
               text: q.text,
               consultDocuments: q.consultDocuments,
             }))
@@ -256,7 +243,7 @@ const ChecklistTable = ({
             setQuestionsData(
               structuredData.length > 0
                 ? structuredData
-                : [{ id: crypto.randomUUID(), text: "", consultDocuments: true }],
+                : [{ id: generateUUID(), text: "", consultDocuments: true }],
             )
           } else {
             throw new Error("Not structured format")
@@ -267,7 +254,7 @@ const ChecklistTable = ({
           setQuestionsList(questionsArray.length > 0 ? questionsArray : [""])
           setQuestionsData(
             questionsArray.map((text) => ({
-              id: crypto.randomUUID(),
+              id: generateUUID(),
               text,
               consultDocuments: true,
             })),
@@ -275,13 +262,13 @@ const ChecklistTable = ({
         }
       } else {
         setQuestionsList([""])
-        setQuestionsData([{ id: crypto.randomUUID(), text: "", consultDocuments: true }])
+        setQuestionsData([{ id: generateUUID(), text: "", consultDocuments: true }])
       }
     } else {
       setChecklistName("")
       setChecklistDescription("")
       setQuestionsList([""])
-      setQuestionsData([{ id: crypto.randomUUID(), text: "", consultDocuments: true }])
+      setQuestionsData([{ id: generateUUID(), text: "", consultDocuments: true }])
     }
   }, [editingChecklist])
 
@@ -289,14 +276,14 @@ const ChecklistTable = ({
   useEffect(() => {
     if (questionsList.length === 0) {
       setQuestionsList([""])
-      setQuestionsData([{ id: crypto.randomUUID(), text: "", consultDocuments: true }])
+      setQuestionsData([{ id: generateUUID(), text: "", consultDocuments: true }])
     }
   }, [])
 
   // Function to sync questionsData with questionsList
   const syncQuestionsData = (newQuestionsList: string[]) => {
     const newQuestionsData = newQuestionsList.map((text, index) => ({
-      id: questionsData[index]?.id || crypto.randomUUID(),
+      id: questionsData[index]?.id || generateUUID(),
       text,
       consultDocuments: questionsData[index]?.consultDocuments ?? true,
     }))
@@ -332,7 +319,7 @@ const ChecklistTable = ({
       const hasEmptyQuestion = newQuestions.some((q) => q.trim() === "")
       if (!hasEmptyQuestion) {
         newQuestions.push("")
-        newData.push({ id: crypto.randomUUID(), text: "", consultDocuments: true })
+        newData.push({ id: generateUUID(), text: "", consultDocuments: true })
       }
 
       setQuestionsList(newQuestions)
@@ -349,7 +336,7 @@ const ChecklistTable = ({
         const newQuestions = [...questionsList, ""]
         const newData = [
           ...questionsData,
-          { id: crypto.randomUUID(), text: "", consultDocuments: true },
+          { id: generateUUID(), text: "", consultDocuments: true },
         ]
         setQuestionsList(newQuestions)
         setQuestionsData(newData)
@@ -368,7 +355,7 @@ const ChecklistTable = ({
     const hasEmptyQuestion = newQuestions.some((q) => q.trim() === "")
     if (!hasEmptyQuestion && questionsList[questionsList.length - 1].trim() !== "") {
       newQuestions.push("")
-      newData.push({ id: crypto.randomUUID(), text: "", consultDocuments: true })
+      newData.push({ id: generateUUID(), text: "", consultDocuments: true })
     }
 
     setQuestionsList(newQuestions)
@@ -420,9 +407,25 @@ const ChecklistTable = ({
 
   const handleCopyChecklist = async (checklist: VeraDocChecklist) => {
     try {
+      // Generate a unique name by checking existing checklists
+      const generateUniqueName = (baseName: string): string => {
+        let copyName = `${baseName} (Copy)`
+        let copyNumber = 1
+
+        // Keep checking and incrementing until we find a unique name
+        while (checklists.some((existing) => existing.name === copyName)) {
+          copyNumber++
+          copyName = `${baseName}${" (Copy)".repeat(copyNumber)}`
+        }
+
+        return copyName
+      }
+
+      const uniqueName = generateUniqueName(checklist.name || "Untitled")
+
       await VeradocService.createChecklist({
         requestBody: {
-          name: `${checklist.name} (Copy)`,
+          name: uniqueName,
           description: checklist.description || "",
           questions: checklist.questions || "",
           owner_id: checklist.owner_id || "",
@@ -515,21 +518,6 @@ const ChecklistTable = ({
     setEditingChecklist(null)
   }
 
-  const handleCopyQuestions = async () => {
-    if (!selectedChecklist || !selectedChecklist.questions) {
-      showErrorToast("No questions to copy")
-      return
-    }
-
-    try {
-      await navigator.clipboard.writeText(selectedChecklist.questions)
-      showSuccessToast("Questions copied to clipboard!")
-    } catch (error) {
-      console.error("Error copying questions:", error)
-      showErrorToast("Failed to copy questions to clipboard")
-    }
-  }
-
   return (
     <div style={{ opacity: isDisabled ? 0.3 : 1, pointerEvents: isDisabled ? "none" : "auto" }}>
       {/* Checklist Table */}
@@ -545,8 +533,6 @@ const ChecklistTable = ({
         <Table.Root variant="line">
           <ChecklistTableHeader
             onCreateNew={handleCreateNew}
-            onCopyQuestions={handleCopyQuestions}
-            hasSelectedChecklist={!!selectedChecklist}
           />
           <ChecklistTableBody
             checklists={checklists}

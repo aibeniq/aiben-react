@@ -280,7 +280,7 @@ class FormConnectForm(SQLModel, table=True):
 
 # Request models for generating form fields
 class GenerateFormFieldsRequest(SQLModel):
-    description: str = Field(min_length=10, max_length=2000)
+    description: str | None = Field(default=None, max_length=2000)
     num_fields: Optional[int] = Field(default=None, ge=1, le=50)
     knowledge_base_id: Optional[uuid.UUID] = None
     search_mode: Literal["vector", "full_scan"] = Field(default="vector")
@@ -587,10 +587,6 @@ class TwinCheckTopicList(SQLModel, table=True):
     date_modified: datetime = Field(default_factory=datetime.utcnow)
 
 
-class TwinCheckRequest(SQLModel):
-    comparison_topics: str
-
-
 class TwinCheckDetailFeedback(SQLModel):
     feedback: Optional[str] = None
     feedbackText: Optional[str] = None
@@ -619,6 +615,7 @@ class OptimizeChecklistRequest(SQLModel):
     questions: str  # Current checklist questions (newline-separated)
     target_answers: str = "yes"  # Expected answers for the good document
     custom_instructions: Optional[str] = Field(default=None, max_length=2000)
+    search_mode: str = "vector"  # "vector" or "full_scan"
 
 
 class ChecklistSuggestion(SQLModel):
@@ -627,6 +624,8 @@ class ChecklistSuggestion(SQLModel):
     reason: str
     current_answer: str
     needs_revision: bool
+    policy_context: Optional[str] = None
+    source_citations: Optional[List[str]] = None
 
 
 class OptimizedChecklistResponse(SQLModel):
@@ -662,7 +661,7 @@ class OptimizedOutlineResponse(SQLModel):
 
 
 class GenerateTopicsRequest(SQLModel):
-    description: str = Field(min_length=10, max_length=20000)
+    description: str | None = Field(default=None, max_length=20000)
     num_topics: Optional[int] = Field(
         default=None, ge=1, le=20
     )  # Optional - LLM will decide if not specified
@@ -700,7 +699,7 @@ class GenerateQuestionsResponse(SQLModel):
 
 
 class GenerateOutlineRequest(SQLModel):
-    description: str = Field(min_length=10, max_length=20000)
+    description: str | None = Field(default=None, max_length=20000)
     num_sections: Optional[int] = Field(
         default=None, ge=1, le=20
     )  # Optional - LLM will decide if not specified

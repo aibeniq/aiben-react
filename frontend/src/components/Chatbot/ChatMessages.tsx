@@ -139,7 +139,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                                     useModal={true}
                                   />
                                 ) : (
-                                  <Text as="span" ml={1} fontWeight="normal" color="blue.600">
+                                  // For temporary uploaded files without source_data_id, show as plain text
+                                  <Text as="span" ml={1} fontWeight="normal" color="gray.600">
                                     {getDisplayFileName(source.metadata.source)}
                                   </Text>
                                 ))}

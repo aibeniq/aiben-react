@@ -5,6 +5,7 @@ import {
   VeradocService,
   TwincheckService,
   FormconnectService,
+  ReportgenieService,
 } from "../client"
 import useCustomToast from "./useCustomToast"
 
@@ -17,6 +18,7 @@ interface ToolState<THistory = any, TDetail = any> {
 
 interface ToolActions {
   loadReport: (reportId: string) => Promise<void>
+  deleteReport?: (reportId: string) => Promise<void>
 }
 
 interface UseToolArchiveReturn {
@@ -83,38 +85,41 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const veradocHistoryQuery = useQuery({
     queryKey: ["veradocHistory", showAllUsers],
     queryFn: async () => {
-      const response = await VeradocService.getVeradocHistory({ 
+      const response = await VeradocService.getVeradocHistory({
         limit: 20,
-        showAll: showAllUsers 
+        showAll: showAllUsers
       })
       return response
     },
     enabled: true,
   })
 
-  // ReportGenie history query - currently not available in the API
+  // ReportGenie history query
   const reportgenieHistoryQuery = useQuery({
     queryKey: ["reportgenieHistory", showAllUsers],
     queryFn: async () => {
-      // TODO: Implement getReportHistory method in ReportgenieService
-      // const response = await ReportgenieService.getReportHistory({ 
-      //   limit: 20,
-      //   showAll: showAllUsers 
-      // })
-      // return response
-      console.warn("ReportGenie history not available - method not implemented")
-      return { data: [], total: 0 }
+      console.log("🔄 REPORTGENIE: Starting to fetch history, showAllUsers:", showAllUsers);
+      const response = await ReportgenieService.getReportHistory({
+        limit: 20,
+        showAll: showAllUsers
+      })
+      console.log("✅ REPORTGENIE: History fetch completed, response:", response);
+      console.log("📊 REPORTGENIE: Number of reports returned:", Array.isArray(response) ? response.length : "Response is not an array");
+      if (Array.isArray(response) && response.length > 0) {
+        console.log("📋 REPORTGENIE: First report sample:", response[0]);
+      }
+      return response
     },
-    enabled: false, // Disabled until backend method is available
+    enabled: true, // Enabled now that backend method is available
   })
 
   // TwinCheck history query
   const twincheckHistoryQuery = useQuery({
     queryKey: ["twincheckHistory", showAllUsers],
     queryFn: async () => {
-      const response = await TwincheckService.getComparisonHistory({ 
+      const response = await TwincheckService.getComparisonHistory({
         limit: 20,
-        showAll: showAllUsers 
+        showAll: showAllUsers
       })
       return response
     },
@@ -125,10 +130,16 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const formconnectHistoryQuery = useQuery({
     queryKey: ["formconnectHistory", showAllUsers],
     queryFn: async () => {
-      const response = await FormconnectService.getFormHistory({ 
+      console.log("🔄 FORMCONNECT: Starting to fetch history, showAllUsers:", showAllUsers);
+      const response = await FormconnectService.getFormHistory({
         limit: 20,
-        showAll: showAllUsers 
+        showAll: showAllUsers
       })
+      console.log("✅ FORMCONNECT: History fetch completed, response:", response);
+      console.log("📊 FORMCONNECT: Number of records returned:", Array.isArray(response) ? response.length : "Response is not an array");
+      if (Array.isArray(response) && response.length > 0) {
+        console.log("📋 FORMCONNECT: First record sample:", response[0]);
+      }
       return response
     },
     enabled: true,
@@ -143,10 +154,16 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   }, [veradocHistoryQuery.data, veradocHistoryQuery.isLoading])
 
   useEffect(() => {
+    console.log("🔄 REPORTGENIE: useEffect triggered for reportgenieHistoryQuery");
+    console.log("📊 REPORTGENIE: Query status - isLoading:", reportgenieHistoryQuery.isLoading, "isError:", reportgenieHistoryQuery.isError, "error:", reportgenieHistoryQuery.error);
+
     if (reportgenieHistoryQuery.data) {
+      console.log("✅ REPORTGENIE: Setting history data:", reportgenieHistoryQuery.data);
       setReportgenieHistory(
         Array.isArray(reportgenieHistoryQuery.data) ? reportgenieHistoryQuery.data : [],
       )
+    } else {
+      console.log("❌ REPORTGENIE: No data received or data is null/undefined");
     }
     setIsReportgenieLoading(reportgenieHistoryQuery.isLoading)
   }, [reportgenieHistoryQuery.data, reportgenieHistoryQuery.isLoading])
@@ -161,10 +178,19 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   }, [twincheckHistoryQuery.data, twincheckHistoryQuery.isLoading])
 
   useEffect(() => {
+    console.log("🔄 FORMCONNECT: useEffect triggered for formconnectHistoryQuery");
+    console.log("📊 FORMCONNECT: Query status - isLoading:", formconnectHistoryQuery.isLoading, "isError:", formconnectHistoryQuery.isError);
+    if (formconnectHistoryQuery.error) {
+      console.log("❌ FORMCONNECT: Error:", formconnectHistoryQuery.error);
+    }
+
     if (formconnectHistoryQuery.data) {
+      console.log("✅ FORMCONNECT: Setting history data:", formconnectHistoryQuery.data);
       setFormconnectHistory(
         Array.isArray(formconnectHistoryQuery.data) ? formconnectHistoryQuery.data : [],
       )
+    } else {
+      console.log("❌ FORMCONNECT: No data received or data is null/undefined");
     }
     setIsFormconnectLoading(formconnectHistoryQuery.isLoading)
   }, [formconnectHistoryQuery.data, formconnectHistoryQuery.isLoading])
@@ -187,11 +213,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const loadReportgenieReport = async (reportId: string) => {
     try {
       setIsReportgenieLoading(true)
-      // TODO: Implement getReportDetail method in ReportgenieService
-      // const report = await ReportgenieService.getReportDetail({ reportId })
-      // setSelectedReportgenieReport(report)
-      console.warn("ReportGenie report detail not available - method not implemented, reportId:", reportId)
-      showErrorToast("ReportGenie report loading not available")
+      const report = await ReportgenieService.getReportDetail({ reportId })
+      setSelectedReportgenieReport(report)
+      showSuccessToast("Report loaded successfully")
     } catch (error) {
       console.error("Error loading report:", error)
       showErrorToast("Failed to load report")
@@ -228,30 +252,107 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     }
   }
 
+  // Delete functions for each tool
+  const deleteVeradocReport = async (reportId: string) => {
+    try {
+      await VeradocService.deleteEvaluation({ evaluationId: reportId })
+      showSuccessToast("Evaluation deleted successfully")
+
+      // Clear selected report if it was the one being deleted
+      if (selectedVeradocReport?.id === reportId) {
+        setSelectedVeradocReport(null)
+      }
+
+      // Refresh the history
+      veradocHistoryQuery.refetch()
+    } catch (error) {
+      console.error("Error deleting evaluation:", error)
+      showErrorToast("Failed to delete evaluation")
+    }
+  }
+
+  const deleteReportgenieReport = async (reportId: string) => {
+    try {
+      await ReportgenieService.deleteReport({ reportId })
+      showSuccessToast("Report deleted successfully")
+
+      // Clear selected report if it was the one being deleted
+      if (selectedReportgenieReport?.id === reportId) {
+        setSelectedReportgenieReport(null)
+      }
+
+      // Refresh the history
+      reportgenieHistoryQuery.refetch()
+    } catch (error) {
+      console.error("Error deleting report:", error)
+      showErrorToast("Failed to delete report")
+    }
+  }
+
+  const deleteTwincheckReport = async (comparisonId: string) => {
+    try {
+      await TwincheckService.deleteComparison({ comparisonId })
+      showSuccessToast("Comparison deleted successfully")
+
+      // Clear selected report if it was the one being deleted
+      if (selectedTwincheckReport?.id === comparisonId) {
+        setSelectedTwincheckReport(null)
+      }
+
+      // Refresh the history
+      twincheckHistoryQuery.refetch()
+    } catch (error) {
+      console.error("Error deleting comparison:", error)
+      showErrorToast("Failed to delete comparison")
+    }
+  }
+
+  const deleteFormconnectReport = async (interactionId: string) => {
+    try {
+      await FormconnectService.deleteForm({ formId: interactionId })
+      showSuccessToast("Form processing deleted successfully")
+
+      // Clear selected report if it was the one being deleted
+      if (selectedFormconnectReport?.id === interactionId) {
+        setSelectedFormconnectReport(null)
+      }
+
+      // Refresh the history
+      formconnectHistoryQuery.refetch()
+    } catch (error) {
+      console.error("Error deleting form processing:", error)
+      showErrorToast("Failed to delete form processing")
+    }
+  }
+
   return {
     veradoc: {
       history: veradocHistory,
       selectedReport: selectedVeradocReport,
       isLoading: isVeradocLoading,
       loadReport: loadVeradocReport,
+      deleteReport: deleteVeradocReport,
     },
     reportgenie: {
       history: reportgenieHistory,
       selectedReport: selectedReportgenieReport,
       isLoading: isReportgenieLoading,
       loadReport: loadReportgenieReport,
+      deleteReport: deleteReportgenieReport,
     },
     twincheck: {
       history: twincheckHistory,
       selectedReport: selectedTwincheckReport,
       isLoading: isTwincheckLoading,
       loadReport: loadTwincheckReport,
+      deleteReport: deleteTwincheckReport,
     },
     formconnect: {
       history: formconnectHistory,
       selectedReport: selectedFormconnectReport,
       isLoading: isFormconnectLoading,
       loadReport: loadFormconnectReport,
+      deleteReport: deleteFormconnectReport,
     },
     activeTab,
     setActiveTab,

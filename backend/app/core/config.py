@@ -50,6 +50,11 @@ class Settings(BaseSettings):
     RAG_DOCUMENT_CHUNK_OVERLAP: int = 200
     RAG_NUM_CHUNKS: int = 5  # Number of chunks to retrieve for RAG search
 
+    # Embedding processing parameters
+    EMBEDDING_MAX_TOKENS_PER_REQUEST: int = (
+        250000  # Safe limit below OpenAI's 300k token limit
+    )
+
     # FormConnect processing parameters
     FORMCONNECT_MAX_TOKENS_PER_REQUEST: int = 150000  # Token limit for full text mode
     FORMCONNECT_VECTOR_SEARCH_CHUNKS: int = 5  # Number of chunks to retrieve per field
@@ -108,13 +113,77 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
-    ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
-    ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
-    # ENABLED_LLM_PROVIDERS: str = "openai,aws"
-    # ENABLED_EMBEDDING_PROVIDERS: str = "openai,aws"
+    # ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
+    # ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
+    ENABLED_LLM_PROVIDERS: str = "openai,aws"
+    ENABLED_EMBEDDING_PROVIDERS: str = "openai,aws"
+
+    # Supported Languages for Translation
+    SUPPORTED_LANGUAGES: dict[str, str] = {
+        # Major European Languages
+        "en": "English",
+        "es": "Spanish (Europe)",
+        "fr": "French",
+        "de": "German",
+        "it": "Italian",
+        "pt": "Portuguese",
+        "ru": "Russian",
+        "uk": "Ukrainian",
+        "pl": "Polish",
+        "nl": "Dutch",
+        "sv": "Swedish",
+        "no": "Norwegian",
+        "da": "Danish",
+        "fi": "Finnish",
+        "cs": "Czech",
+        "sk": "Slovak",
+        "hu": "Hungarian",
+        "ro": "Romanian",
+        "bg": "Bulgarian",
+        "hr": "Croatian",
+        "sr": "Serbian",
+        "sl": "Slovenian",
+        "et": "Estonian",
+        "lv": "Latvian",
+        "lt": "Lithuanian",
+        "el": "Greek",
+        # Asian Languages
+        "zh": "Chinese (Simplified)",
+        "zh-TW": "Chinese (Traditional)",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "hi": "Hindi",
+        "th": "Thai",
+        "vi": "Vietnamese",
+        "id": "Indonesian",
+        "ms": "Malay",
+        "tl": "Filipino",
+        # Middle Eastern & African Languages
+        "ar": "Arabic",
+        "he": "Hebrew",
+        "fa": "Persian (Farsi)",
+        "tr": "Turkish",
+        "sw": "Swahili",
+        # Regional Variants
+        "pt-BR": "Portuguese (Brazil)",
+        "es-LATAM": "Spanish (Latin America)",
+    }
 
     # OpenAI API Configuration
     OPENAI_TIMEOUT: int = 600  # 10 minutes timeout for OpenAI API calls
+
+    # Usage Quota Configuration
+    QUOTA_PERIOD_START_DAY: int = 1  # Day of month when quota period starts (1-28)
+    QUOTA_PERIOD_MAX_TOKENS: int = 50_000_000  # Maximum tokens per quota period
+
+    # Model Selection Configuration
+    ENABLE_MODEL_SELECTION: bool = True  # Set to False to disable model selection UI
+    FORCE_DEFAULT_LLM: str = (
+        "gpt-4o-mini"  # Default LLM when model selection is disabled
+    )
+    FORCE_DEFAULT_EMBEDDING: str = (
+        "text-embedding-3-small"  # Default embedding when disabled
+    )
 
     @computed_field
     @property
@@ -132,13 +201,13 @@ class Settings(BaseSettings):
 
     # LLM Templates
     REPORT_GENIE_PROMPT_TEMPLATE: str = """
-    You are drafting an Informed Consent Form for a clinical study.
+    You are drafting a document.
     
     DRAFT OF REPORT SO FAR:
     {report_draft}
 
     TASK:
-    You will be shown some reference information and then asked to write a clear and comprehensive section for a research participation consent form. 
+    You will be shown some reference information and then asked to write a clear and comprehensive section of this document based on the description below. 
     
     The section to create is: {question}
 
@@ -282,6 +351,7 @@ class Settings(BaseSettings):
     ONLY return the Markdown table -- do NOT return any other text. 
     Also, do NOT add tick marks like ``` and the label 'markdown': just give the actual markdown table content as raw text.
     However, if there are no discrepancies, please state that all fields match across documents.
+    IF A FIELD ENTRY WASN'T FOUND FOR A GIVEN DOCUMENT, SAY SO EXPLICITLY.
     """
 
     FORMCONNECT_GENERATE_FIELDS_PROMPT_TEMPLATE: str = """
@@ -365,46 +435,48 @@ class Settings(BaseSettings):
 
     # TwinCheck prompt templates
     TWINCHECK_ANALYSIS_PROMPT_TEMPLATE: str = """
-    You are comparing two documents using their diff output:
+    You are an expert document analyst comparing two documents:
     - Document 1: {doc1_name}
     - Document 2: {doc2_name}
     
-    In the diff output below:
-    - Lines starting with '- ' are in Document 1 but not in Document 2 (deletions)
-    - Lines starting with '+ ' are in Document 2 but not in Document 1 (additions)
-    - Lines starting with '? ' indicate changes in whitespace or small changes
-    - Lines with no prefix are common to both documents
+    Based on your analysis of the content below:
+    - Lines starting with '- ' represent content unique to Document 1
+    - Lines starting with '+ ' represent content unique to Document 2
+    - Lines starting with '? ' indicate formatting or minor textual variations
+    - Lines with no prefix represent shared content between both documents
     
-    Diff output:
+    Document comparison data:
     {diff_text}
+    {knowledge_base_context}
     
     Please analyze how these documents differ specifically regarding: "{topic}"
     
     Provide a clear, detailed analysis of the differences between the two documents regarding this topic.
     Refer to specific sections of the documents where relevant differences exist.
     If there are no differences related to this topic, state that clearly.
+    If reference context was provided, use it to inform your analysis and provide additional insights.
     """
 
     TWINCHECK_SUMMARY_PROMPT_TEMPLATE: str = """
-    You are comparing two documents using their diff output:
+    You are an expert document analyst comparing two documents:
     - Document 1: {doc1_name}
     - Document 2: {doc2_name}
     
-    In the diff output below:
-    - Lines starting with '- ' are in Document 1 but not in Document 2 (deletions)
-    - Lines starting with '+ ' are in Document 2 but not in Document 1 (additions)
-    - Lines starting with '? ' indicate changes in whitespace or small changes
-    - Lines with no prefix are common to both documents
+    Based on your analysis of the content below:
+    - Lines starting with '- ' represent content unique to Document 1
+    - Lines starting with '+ ' represent content unique to Document 2
+    - Lines starting with '? ' indicate formatting or minor textual variations
+    - Lines with no prefix represent shared content between both documents
     
-    Diff output:
+    Document comparison data:
     {diff_text}
     
     The user is particularly interested in these topics:
     {topics}
     
-    Please provide a comprehensive summary of all major differences between the two documents. 
-    Focus on structural, content, and semantic differences. 
-    Highlight the most important changes and explain their potential implications.
+    Please provide a comprehensive analysis of all significant differences between the two documents. 
+    Focus on structural, content, and semantic variations. 
+    Highlight the most important distinctions and explain their potential implications.
     Be clear, concise, and informative.
     """
 

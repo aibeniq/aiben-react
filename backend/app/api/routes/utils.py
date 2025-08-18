@@ -1,8 +1,10 @@
+from typing import Any, Dict
 from fastapi import APIRouter, Depends
 from pydantic.networks import EmailStr
 from sqlmodel import Session, select
 
 from app.api.deps import get_current_active_superuser, SessionDep
+from app.core.config import settings
 from app.models import Message
 from app.utils.email_utils import generate_test_email, send_email
 
@@ -45,3 +47,21 @@ async def readiness_check(session: SessionDep) -> bool:
         return result == 1
     except Exception:
         return False
+
+@router.get("/system-config")
+def get_system_config() -> Dict[str, Any]:
+    """
+    Get system configuration for frontend.
+    """
+    return {
+        "enable_model_selection": settings.ENABLE_MODEL_SELECTION,
+        "force_default_llm": (
+            settings.FORCE_DEFAULT_LLM if not settings.ENABLE_MODEL_SELECTION else None
+        ),
+        "force_default_embedding": (
+            settings.FORCE_DEFAULT_EMBEDDING
+            if not settings.ENABLE_MODEL_SELECTION
+            else None
+        ),
+    }
+

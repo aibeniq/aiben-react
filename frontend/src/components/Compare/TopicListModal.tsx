@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   HStack,
   VStack,
@@ -10,6 +10,7 @@ import {
   Button,
   Text,
   IconButton,
+  Box,
 } from "@chakra-ui/react"
 import { Field } from "../ui/field"
 import { TwinCheckTopicList, TwincheckService, KnowledgeBasePublic } from "../../client"
@@ -17,9 +18,10 @@ import TopicItem from "./TopicItem"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
 import FileUpload, { FileItem } from "../Common/FileUpload"
-import useCustomToast from "../../hooks/useCustomToast"
 import SearchModeToggle from "../Common/SearchModeToggle"
+import useCustomToast from "../../hooks/useCustomToast"
 import { FiCopy } from "react-icons/fi"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 interface TopicListModalProps {
   isOpen: boolean
@@ -37,9 +39,7 @@ interface TopicListModalProps {
   removeTopic: (index: number) => void
   moveTopicUp: (index: number) => void
   moveTopicDown: (index: number) => void
-  selectedKnowledgeBase?: KnowledgeBasePublic | null
   knowledgeBases?: KnowledgeBasePublic[]
-  searchMode?: "vector" | "full_scan"
 }
 
 const TopicListModal = ({
@@ -58,27 +58,82 @@ const TopicListModal = ({
   removeTopic,
   moveTopicUp,
   moveTopicDown,
-  selectedKnowledgeBase,
-  knowledgeBases,
-  searchMode: passedSearchMode = "vector",
+  knowledgeBases = [],
 }: TopicListModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const [generating, setGenerating] = useState(false)
+
+  // Validation state
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+
+  // Validation function
+  const validateForm = () => {
+    const errors: {[key: string]: string} = {}
+    
+    if (!topicListName.trim()) {
+      errors.name = "Topic list name is required"
+    } else if (topicListName.trim().length < 3) {
+      errors.name = "Topic list name must be at least 3 characters long"
+    }
+    
+    // Description is optional - no validation required
+    
+    if (topicsList.length === 0 || topicsList.every(topic => !topic.trim())) {
+      errors.topics = "At least one topic is required"
+    }
+    
+    setValidationErrors(errors)
+    
+    // Show the first error as a toast
+    const firstError = Object.values(errors)[0]
+    if (firstError) {
+      showErrorToast(firstError)
+      return false
+    }
+    
+    return true
+  }
+
+  // Clear validation errors when user starts typing
+  const handleNameChange = (value: string) => {
+    setTopicListName(value)
+    if (validationErrors.name) {
+      setValidationErrors(prev => ({ ...prev, name: '' }))
+    }
+  }
+
+  const handleDescriptionChange = (value: string) => {
+    setTopicListDescription(value)
+    if (validationErrors.description) {
+      setValidationErrors(prev => ({ ...prev, description: '' }))
+    }
+  }
+
+  // Enhanced save handler with validation
+  const handleSave = () => {
+    if (!validateForm()) {
+      return // Stop execution if validation fails
+    }
+    
+    // Call the parent's onSave function if validation passes
+    onSave()
+  }
+
+  const [suggesting, setSuggesting] = useState(false)
   const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
   const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
   const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
-    selectedKnowledgeBase || null,
+    null,
   )
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">(passedSearchMode)
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
 
-  // Set reference mode based on preselected knowledge base
-  useEffect(() => {
-    if (selectedKnowledgeBase) {
-      setReferenceMode("knowledge-base")
-    }
-  }, [selectedKnowledgeBase])
+  // Remove the knowledge base effect
+  // useEffect(() => {
+  //   if (selectedKnowledgeBase) {
+  //     setReferenceMode("knowledge-base")
+  //   }
+  // }, [selectedKnowledgeBase])
 
-  const handleGenerateTopics = async () => {
+  const handleSuggestTopics = async () => {
     if (!topicListDescription.trim()) {
       showErrorToast("Please enter a topic list description first")
       return
@@ -90,20 +145,12 @@ const TopicListModal = ({
       return
     }
 
-    // Validate reference requirements if any are selected
-    if (referenceMode === "files" && exampleFiles.length === 0) {
-      // Files mode but no files - this is okay, just use description
-    } else if (referenceMode === "knowledge-base" && !referenceKnowledgeBase) {
-      showErrorToast("Please select a Knowledge Base or switch to file upload mode")
-      return
-    }
-
-    setGenerating(true)
+    setSuggesting(true)
 
     try {
       let response
 
-      if (referenceMode === "files" && exampleFiles.length > 0) {
+      if (exampleFiles.length > 0) {
         // Use the existing file upload endpoint
         const files = exampleFiles.map((item) => item.file)
         response = await TwincheckService.generateTopics({
@@ -111,16 +158,6 @@ const TopicListModal = ({
             description: topicListDescription.trim(),
             comparison_type: "general",
             files: files.length > 0 ? files : undefined,
-          },
-        })
-      } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
-        // Use the new JSON endpoint with knowledge base reference
-        response = await TwincheckService.generateTopicsJson({
-          requestBody: {
-            description: topicListDescription.trim(),
-            comparison_type: "general",
-            knowledge_base_id: referenceKnowledgeBase.id,
-            search_mode: searchMode,
           },
         })
       } else {
@@ -133,27 +170,29 @@ const TopicListModal = ({
         })
       }
 
-      // Replace current topics with generated ones
-      const generatedTopics = response.topics || []
-      if (generatedTopics.length > 0) {
-        // Replace the entire topics list with generated topics plus an empty topic for user input
-        const newTopicsList = [...generatedTopics, ""]
+      // Replace current topics with suggested ones
+      const suggestedTopics = response.topics || []
+      if (suggestedTopics.length > 0) {
+        // Replace the entire topics list with suggested topics plus an empty topic for user input
+        const newTopicsList = [...suggestedTopics, ""]
         updateTopicsFromList(newTopicsList)
 
-        let successMessage = `Generated ${generatedTopics.length} topics from description`
-        if (referenceMode === "files" && exampleFiles.length > 0) {
-          successMessage += ` and ${exampleFiles.length} example file(s)`
-        } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
-          successMessage += ` using Knowledge Base "${referenceKnowledgeBase.title}"`
+        // Clear topics validation error if it exists
+        if (validationErrors.topics) {
+          setValidationErrors(prev => ({ ...prev, topics: '' }))
         }
-        successMessage += ` (${searchMode === "vector" ? "vector search" : "full document scan"})`
+
+        let successMessage = `Suggested ${suggestedTopics.length} topics from description`
+        if (exampleFiles.length > 0) {
+          successMessage += ` and ${exampleFiles.length} example file(s)`
+        }
 
         showSuccessToast(successMessage)
       } else {
-        showErrorToast("No topics were generated. Please try with a more detailed description.")
+        showErrorToast("No topics were suggested. Please try with a more detailed description.")
       }
     } catch (error: any) {
-      console.error("Error generating topics:", error)
+      console.error("Error suggesting topics:", error)
       console.log("Error details:", {
         message: error.message,
         status: error.status,
@@ -169,16 +208,16 @@ const TopicListModal = ({
           "Invalid request. Please check that your description meets the requirements.",
         )
       } else if (error.status === 401) {
-        showErrorToast("You need to be logged in to generate topics.")
+        showErrorToast("You need to be logged in to suggest topics.")
       } else if (error.status === 404) {
-        showErrorToast("Generate topics feature is not available. Please contact support.")
+        showErrorToast("Suggest topics feature is not available. Please contact support.")
       } else if (error.status === 500) {
         showErrorToast("Server error. Please try again later or contact support.")
       } else {
-        showErrorToast(`Failed to generate topics: ${error.message || "Unknown error"}`)
+        showErrorToast(`Failed to suggest topics: ${error.message || "Unknown error"}`)
       }
     } finally {
-      setGenerating(false)
+      setSuggesting(false)
     }
   }
 
@@ -211,7 +250,7 @@ const TopicListModal = ({
     }
 
     try {
-      await navigator.clipboard.writeText(nonEmptyTopics.join("\n"))
+      await copyToClipboard(nonEmptyTopics.join("\n"))
       showSuccessToast("Topics copied to clipboard!")
     } catch (error) {
       console.error("Error copying topics:", error)
@@ -235,19 +274,19 @@ const TopicListModal = ({
               <VStack align="stretch" gap={4}>
                 <HStack align="stretch" gap={4}>
                   <VStack align="stretch" gap={4} flex="1">
-                    <Field label="Topic List Name" required>
+                    <Field label="Topic List Name" required invalid={!!validationErrors.name} errorText={validationErrors.name}>
                       <Input
                         value={topicListName}
-                        onChange={(e) => setTopicListName(e.target.value)}
+                        onChange={(e) => handleNameChange(e.target.value)}
                         placeholder="Enter topic list name"
                       />
                     </Field>
 
-                    <Field label="Topic List Description">
+                    <Field label="Topic List Description" invalid={!!validationErrors.description} errorText={validationErrors.description}>
                       <Textarea
                         value={topicListDescription}
-                        onChange={(e) => setTopicListDescription(e.target.value)}
-                        placeholder="Enter topic list description to auto-generate topics (minimum 10 characters)..."
+                        onChange={(e) => handleDescriptionChange(e.target.value)}
+                        placeholder="Enter topic list description to auto-suggest topics (minimum 10 characters)..."
                         resize="vertical"
                         rows={3}
                       />
@@ -255,15 +294,20 @@ const TopicListModal = ({
                         topicListDescription.trim().length < 10 && (
                           <Text fontSize="xs" color="orange.600">
                             Description needs at least {10 - topicListDescription.trim().length}{" "}
-                            more characters to generate topics
+                            more characters to suggest topics
                           </Text>
                         )}
                     </Field>
 
                     <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
 
-                    <Field label="Reference for Topic Generation (Optional)">
+                    <Field label="Reference Documents (Optional)">
                       <VStack align="stretch" gap={3}>
+                        <Text fontSize="sm" color="gray.600">
+                          Upload reference documents or select a Knowledge Base to help the AI
+                          suggest topics.
+                        </Text>
+
                         {/* Reference Mode Toggle */}
                         <HStack gap={2}>
                           <Button
@@ -283,25 +327,30 @@ const TopicListModal = ({
                         </HStack>
 
                         {/* Reference Mode Content */}
-                        {referenceMode === "files" ? (
+                        {referenceMode === "files" && (
                           <VStack align="stretch" gap={2}>
-                            <Text fontSize="sm" color="gray.600">
-                              Upload an example document to help the AI understand the desired
-                              comparison scope and style.
+                            <Text fontSize="sm" color="gray.700" fontWeight="medium">
+                              Provide reference documents for suggesting topics
                             </Text>
                             <FileUpload
                               files={exampleFiles}
                               onFilesChange={setExampleFiles}
-                              maxFiles={1}
-                              showHandwrittenToggle={false}
+                              acceptedFileTypes={{
+                                "application/pdf": [".pdf"],
+                                "application/msword": [".doc"],
+                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                                  [".docx"],
+                                "text/plain": [".txt"],
+                                "text/csv": [".csv"],
+                                "application/json": [".json"],
+                              }}
+                              maxFiles={5}
                             />
                           </VStack>
-                        ) : (
-                          <VStack align="stretch" gap={2}>
-                            <Text fontSize="sm" color="gray.600">
-                              Select a Knowledge Base to provide context and examples for topic
-                              generation.
-                            </Text>
+                        )}
+
+                        {referenceMode === "knowledge-base" && (
+                          <Box>
                             <select
                               style={{
                                 width: "100%",
@@ -327,8 +376,15 @@ const TopicListModal = ({
                                 No Knowledge Bases available. Create one first to use this feature.
                               </Text>
                             ) : null}
-                          </VStack>
+                          </Box>
                         )}
+
+                        {topicListDescription.trim().length < 10 &&
+                          topicListDescription.trim().length > 0 && (
+                            <Text fontSize="sm" color="gray.500">
+                              Description must be at least 10 characters to suggest topics
+                            </Text>
+                          )}
                       </VStack>
                     </Field>
                   </VStack>
@@ -340,22 +396,22 @@ const TopicListModal = ({
                         <HStack gap={2}>
                           <Button
                             size="xs"
-                            onClick={handleGenerateTopics}
+                            onClick={handleSuggestTopics}
                             disabled={
                               !topicListDescription.trim() ||
                               topicListDescription.trim().length < 10 ||
-                              generating
+                              suggesting
                             }
-                            loading={generating}
+                            loading={suggesting}
                             variant="outline"
                             colorPalette="green"
                             title={
                               topicListDescription.trim().length < 10
-                                ? "Description must be at least 10 characters to generate topics"
-                                : "Generate topics based on the description"
+                                ? "Description must be at least 10 characters to suggest topics"
+                                : "Suggest topics based on the description"
                             }
                           >
-                            {generating ? "Generating..." : "Generate Topics"}
+                            {suggesting ? "Suggesting..." : "Suggest"}
                           </Button>
 
                           <IconButton
@@ -374,6 +430,8 @@ const TopicListModal = ({
                       </HStack>
                     }
                     required
+                    invalid={!!validationErrors.topics}
+                    errorText={validationErrors.topics}
                     py={0}
                     flex="1"
                   >
@@ -391,7 +449,13 @@ const TopicListModal = ({
                           key={index}
                           index={index}
                           topic={topic}
-                          onUpdate={updateTopic}
+                          onUpdate={(idx, value) => {
+                            updateTopic(idx, value)
+                            // Clear validation error when topics are modified
+                            if (validationErrors.topics) {
+                              setValidationErrors(prev => ({ ...prev, topics: '' }))
+                            }
+                          }}
                           onBlur={handleTopicBlur}
                           onRemove={removeTopic}
                           onMoveUp={moveTopicUp}
@@ -411,7 +475,7 @@ const TopicListModal = ({
                 <CancelButton onClick={handleModalClose} size="md">
                   Cancel
                 </CancelButton>
-                <ConfirmButton onClick={onSave} size="md">
+                <ConfirmButton onClick={handleSave} size="md">
                   {editingTopicList ? "Update Topic List" : "Create Topic List"}
                 </ConfirmButton>
               </HStack>

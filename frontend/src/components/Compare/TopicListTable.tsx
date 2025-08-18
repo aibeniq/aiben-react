@@ -13,9 +13,7 @@ interface TopicListTableProps {
   onTopicListsUpdate: () => void
   topics: string
   isDisabled?: boolean
-  selectedKnowledgeBase?: KnowledgeBasePublic | null
   knowledgeBases?: KnowledgeBasePublic[]
-  searchMode?: "vector" | "full_scan"
 }
 
 interface TopicListTableHeaderProps {
@@ -152,9 +150,7 @@ const TopicListTable = ({
   onTopicsChange,
   onTopicListsUpdate,
   isDisabled = false,
-  selectedKnowledgeBase,
-  knowledgeBases,
-  searchMode = "vector",
+  knowledgeBases = [],
 }: TopicListTableProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [topicListName, setTopicListName] = useState("")
@@ -266,20 +262,35 @@ const TopicListTable = ({
 
   const handleCopyTopicList = async (topicList: TwinCheckTopicList) => {
     try {
+      console.log("🐛 DEBUG: Copying topic list:", topicList)
+      
+      // Validate the topic list data before copying
+      if (!topicList.topics || !topicList.topics.trim()) {
+        showErrorToast("Cannot copy topic list: no topics found")
+        return
+      }
+
       await TwincheckService.createComparison({
         requestBody: {
-          name: `${topicList.name} (Copy)`,
-          description: topicList.description || "",
-          topics: topicList.topics || "",
+          name: `${topicList.name} (Copy)`.trim(),
+          description: (topicList.description || "").trim(),
+          topics: topicList.topics.trim(),
           owner_id: topicList.owner_id || "",
         },
       })
 
       showSuccessToast("Topic list copied successfully.")
       onTopicListsUpdate()
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error copying topic list:", error)
-      showErrorToast("Failed to copy topic list. Please try again.")
+      console.error("Error details:", {
+        message: error.message,
+        status: error.status,
+        body: error.body
+      })
+      
+      const errorMessage = error.body?.detail || error.message || "Unknown error occurred"
+      showErrorToast(`Error copying topic list: ${errorMessage}`)
     }
   }
 
@@ -304,7 +315,29 @@ const TopicListTable = ({
 
   const handleSaveTopicList = async () => {
     try {
-      const topicsString = topicsList.join("\n")
+      // Filter out empty topics and create topics string
+      const validTopics = topicsList.filter(topic => topic.trim() !== "")
+      const topicsString = validTopics.join("\n")
+
+      console.log("🐛 DEBUG: Saving topic list with data:", {
+        name: topicListName,
+        description: topicListDescription,
+        topics: topicsString,
+        validTopicsCount: validTopics.length
+      })
+
+      // Enhanced validation
+      if (!topicListName.trim()) {
+        showErrorToast("Topic list name is required")
+        return
+      }
+
+      // Description is optional - no validation required
+
+      if (validTopics.length === 0) {
+        showErrorToast("At least one non-empty topic is required")
+        return
+      }
 
       if (editingTopicList) {
         const trimmedTopics = topicsString.trim()
@@ -312,8 +345,8 @@ const TopicListTable = ({
         await TwincheckService.updateComparison({
           comparisonId: editingTopicList.id || "",
           requestBody: {
-            name: topicListName,
-            description: topicListDescription,
+            name: topicListName.trim(),
+            description: topicListDescription.trim(),
             topics: trimmedTopics,
             owner_id: editingTopicList.owner_id || "",
           },
@@ -324,9 +357,9 @@ const TopicListTable = ({
         // Create a new topic list
         await TwincheckService.createComparison({
           requestBody: {
-            name: topicListName,
-            description: topicListDescription,
-            topics: topicsString,
+            name: topicListName.trim(),
+            description: topicListDescription.trim(),
+            topics: topicsString.trim(),
             owner_id: "", // This will be set by the backend
           },
         })
@@ -338,9 +371,17 @@ const TopicListTable = ({
       setIsModalOpen(false)
       setEditingTopicList(null)
       onTopicListsUpdate()
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving topic list:", error)
-      showErrorToast("Failed to save topic list. Please try again.")
+      console.error("Error details:", {
+        message: error.message,
+        status: error.status,
+        body: error.body
+      })
+      
+      // Show specific error message from backend if available
+      const errorMessage = error.body?.detail || error.message || "Unknown error occurred"
+      showErrorToast(`Error saving topic list: ${errorMessage}`)
     }
   }
 
@@ -397,9 +438,7 @@ const TopicListTable = ({
         removeTopic={removeTopic}
         moveTopicUp={moveTopicUp}
         moveTopicDown={moveTopicDown}
-        selectedKnowledgeBase={selectedKnowledgeBase}
         knowledgeBases={knowledgeBases}
-        searchMode={searchMode}
       />
     </div>
   )

@@ -75,7 +75,7 @@ export type Body_veradoc_optimize_checklist = {
 }
 
 export type Body_veradoc_process_rag_checklist = {
-  files: Array<Blob | File>
+  files?: Array<Blob | File>
   handwritten_files?: Array<Blob | File>
 }
 
@@ -97,6 +97,8 @@ export type ChecklistSuggestion = {
   reason: string
   current_answer: string
   needs_revision: boolean
+  policy_context?: string | null
+  source_citations?: Array<string> | null
 }
 
 /**
@@ -418,6 +420,25 @@ export type TextQueryResponse = {
   rephrased_question: string
 }
 
+/**
+ * Quota period information
+ */
+export type QuotaPeriod = {
+  start_time: number
+  end_time: number
+  start_date: string
+  end_date: string
+  max_tokens: number
+}
+
+/**
+ * Token usage response
+ */
+export type TokenUsageResponse = {
+  total_tokens: number
+  quota_period: QuotaPeriod
+}
+
 export type Token = {
   access_token: string
   token_type?: string
@@ -681,6 +702,24 @@ export type FilesGetSourceContentData = {
 
 export type FilesGetSourceContentResponse = SourceContentResponse
 
+export type FilesConvertDocxToPdfData = {
+  sourceId: string
+}
+
+export type FilesConvertDocxToPdfResponse = unknown
+
+export type FilesConvertDocxToPdfByFilenameData = {
+  filename: string
+}
+
+export type FilesConvertDocxToPdfByFilenameResponse = unknown
+
+export type FilesGetSourceContentByFilenameData = {
+  filename: string
+}
+
+export type FilesGetSourceContentByFilenameResponse = SourceContentResponse
+
 export type FormconnectProcessFormData = {
   fields: string
   formData?: Body_formconnect_process_form
@@ -744,6 +783,18 @@ export type FormconnectGenerateFormFieldsJsonData = {
 
 export type FormconnectGenerateFormFieldsJsonResponse =
   GenerateFormFieldsResponse
+
+export type FormconnectGenerateDocxData = {
+  requestBody: DocxRequest
+}
+
+export type FormconnectGenerateDocxResponse = unknown
+
+export type FormconnectGenerateCsvData = {
+  requestBody: DocxRequest
+}
+
+export type FormconnectGenerateCsvResponse = unknown
 
 export type ItemsReadItemsData = {
   limit?: number
@@ -886,6 +937,30 @@ export type ReportgenieGenerateReportData = {
 
 export type ReportgenieGenerateReportResponse = ReportGenieResponse
 
+export type ReportgenieGetReportHistoryData = {
+  limit?: number
+  showAll?: boolean
+  skip?: number
+}
+
+export type ReportgenieGetReportHistoryResponse = Array<{
+  [key: string]: unknown
+}>
+
+export type ReportgenieGetReportDetailData = {
+  reportId: string
+}
+
+export type ReportgenieGetReportDetailResponse = {
+  [key: string]: unknown
+}
+
+export type ReportgenieDeleteReportData = {
+  reportId: string
+}
+
+export type ReportgenieDeleteReportResponse = Message
+
 export type ReportgenieGetOutlinesResponse = Array<ReportGenieOutline>
 
 export type ReportgenieCreateOutlineData = {
@@ -936,6 +1011,18 @@ export type ReportgenieGenerateOutlineOptimizationCsvData = {
 }
 
 export type ReportgenieGenerateOutlineOptimizationCsvResponse = unknown
+
+export type ReportgenieGenerateDocxData = {
+  requestBody: DocxRequest
+}
+
+export type ReportgenieGenerateDocxResponse = unknown
+
+export type ReportgenieGenerateCsvData = {
+  requestBody: DocxRequest
+}
+
+export type ReportgenieGenerateCsvResponse = unknown
 
 export type TwincheckCompareDocumentsData = {
   comparisonTopics: string
@@ -993,6 +1080,12 @@ export type TwincheckGenerateDocxData = {
 
 export type TwincheckGenerateDocxResponse = unknown
 
+export type TwincheckGenerateCsvData = {
+  requestBody: DocxRequest
+}
+
+export type TwincheckGenerateCsvResponse = unknown
+
 export type TwincheckGenerateTopicsData = {
   formData: Body_twincheck_generate_topics
   searchMode?: string
@@ -1005,6 +1098,8 @@ export type TwincheckGenerateTopicsJsonData = {
 }
 
 export type TwincheckGenerateTopicsJsonResponse = GenerateTopicsResponse
+
+export type UsersGetSupportedLanguagesResponse = unknown
 
 export type UsersUpdateLanguageData = {
   requestBody: LanguageUpdate
@@ -1076,7 +1171,7 @@ export type UtilsHealthCheckResponse = boolean
 
 export type VeradocProcessRagChecklistData = {
   customInstructions?: string | null
-  formData: Body_veradoc_process_rag_checklist
+  formData?: Body_veradoc_process_rag_checklist
   knowledgeBaseId: string
   questions: string
   searchMode?: "vector" | "full_scan"
@@ -1127,11 +1222,18 @@ export type VeradocGetVeradocDetailData = {
 
 export type VeradocGetVeradocDetailResponse = VeraDocDetailResponse
 
+export type VeradocDeleteEvaluationData = {
+  evaluationId: string
+}
+
+export type VeradocDeleteEvaluationResponse = Message
+
 export type VeradocOptimizeChecklistData = {
   customInstructions?: string | null
   formData: Body_veradoc_optimize_checklist
   knowledgeBaseId: string
   questions: string
+  searchMode?: string
   targetAnswers?: string
 }
 
@@ -1167,3 +1269,5 @@ export type VeradocGenerateQuestionsData = {
 }
 
 export type VeradocGenerateQuestionsResponse = GenerateQuestionsResponse
+
+export type UsageGetTokenUsageResponse = TokenUsageResponse

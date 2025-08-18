@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>Frontend API Test</h1>
+    <p>Testing the system configuration API call that should hide the Model Selection tab.</p>
+    
+    <div id="results"></div>
+    
+    <script>
+        async function testSystemConfig() {
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                console.log('Making API call to system config...');
+                const response = await fetch('/api/v1/utils/system-config');
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                resultsDiv.innerHTML = `
+                    <div class="result success">
+                        <h3>✅ API Call Successful</h3>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Response:</strong></p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p><strong>enable_model_selection:</strong> ${data.enable_model_selection}</p>
+                        <p><strong>Should Model Selection be hidden?</strong> ${data.enable_model_selection === false ? 'YES' : 'NO'}</p>
+                    </div>
+                `;
+                
+                // Test the actual logic that should hide the tab
+                const shouldShowModelSelection = data.enable_model_selection !== false;
+                console.log('shouldShowModelSelection:', shouldShowModelSelection);
+                
+                if (!shouldShowModelSelection) {
+                    resultsDiv.innerHTML += `
+                        <div class="result success">
+                            <h3>✅ Logic Test Passed</h3>
+                            <p>The Model Selection tab should be HIDDEN based on the API response.</p>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML += `
+                        <div class="result error">
+                            <h3>❌ Logic Test Failed</h3>
+                            <p>The Model Selection tab will be SHOWN, which is wrong!</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('API call failed:', error);
+                resultsDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ API Call Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>This means the frontend cannot communicate with the backend.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Run the test when the page loads
+        window.addEventListener('load', testSystemConfig);
+    </script>
+</body>
+</html>

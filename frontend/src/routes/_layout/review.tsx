@@ -17,6 +17,7 @@ import SourceLink from "@/components/Common/SourceLink"
 import FileUpload, { FileItem } from "@/components/Common/FileUpload"
 import SearchModeToggle from "@/components/Common/SearchModeToggle"
 import DownloadButton from "@/components/ui/download-button"
+import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import { useState, useEffect, useRef } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
@@ -28,11 +29,13 @@ import {
 } from "@/client"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText, FiDatabase, FiCopy, FiCheck } from "react-icons/fi"
+import { FiFileText, FiDatabase, FiCopy, FiCheck, FiTrash2 } from "react-icons/fi"
 import KnowledgeBaseTable from "../../components/Common/KnowledgeBaseTable"
 import ChecklistTable from "../../components/Review/ChecklistTable"
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
+import { copyToClipboard } from "../../utils/copyToClipboard"
+import { useResults } from "../../contexts/ResultsContext"
 
 interface QuestionData {
   id: string
@@ -42,6 +45,14 @@ interface QuestionData {
 
 const VeraDoc = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const {
+    reviewResults: results,
+    setReviewResults: setResults,
+    reviewActiveTab: activeTab,
+    setReviewActiveTab: setActiveTab,
+    clearReviewResults
+  } = useResults()
+  
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     null,
   )
@@ -61,11 +72,7 @@ const VeraDoc = () => {
 
   const [fileItems, setFileItems] = useState<FileItem[]>([])
 
-  const [results, setResults] = useState<
-    Array<{ filename: string; displayResults: string; qaPairs: any[] }>
-  >([])
   const [loading, setLoading] = useState<boolean>(false)
-  const [activeTab, setActiveTab] = useState<number>(0)
 
   const [checklists, setChecklists] = useState<VeraDocChecklist[]>([])
   const [selectedChecklist, setSelectedChecklist] = useState<VeraDocChecklist | null>(null)
@@ -95,12 +102,28 @@ const VeraDoc = () => {
     return expandedCitations[citationKey] || false
   }
 
+  // Handle feedback submission
+  const handleFeedbackSubmitted = (type: string) => {
+    console.log("Feedback submitted for review result:", type)
+    showSuccessToast(`Thank you for marking this response as ${type}!`)
+  }
+
   // Reset active tab when results change
   useEffect(() => {
+    console.log("Review tab - results changed:", results.length, results)
     if (results.length > 0) {
       setActiveTab(0)
     }
   }, [results.length])
+
+  // Debug effect to log context state
+  useEffect(() => {
+    console.log("Review tab - context state:", { 
+      resultsLength: results.length, 
+      activeTab, 
+      firstResult: results[0]?.filename 
+    })
+  }, [results, activeTab])
 
   const handleCopyReport = async () => {
     try {
@@ -123,7 +146,7 @@ const VeraDoc = () => {
         fullText += `### Relevant Policy Context\n${pair.context}\n\n`
       })
 
-      await navigator.clipboard.writeText(fullText)
+      await copyToClipboard(fullText)
       setCopySuccess(true)
 
       // Reset the success icon after 2 seconds
@@ -366,6 +389,7 @@ const VeraDoc = () => {
         filename: data.results.filename,
         displayResults: data.results.final_evaluation || "",
         qaPairs: (data.results.qa_pairs as any[]) || [],
+        interactionId: data.results.interaction_id as string | undefined,
       }
 
       setResults([singleResult])
@@ -511,6 +535,7 @@ const VeraDoc = () => {
         filename: string
         displayResults: string
         qaPairs: any[]
+        interactionId?: string
       }> = []
 
       // Process each file individually
@@ -560,6 +585,7 @@ const VeraDoc = () => {
           filename: fileItem.file.name,
           displayResults,
           qaPairs: (response.results.qa_pairs as any[]) || [],
+          interactionId: response.results.interaction_id as string | undefined,
         })
 
         // Update your state for batch results
@@ -614,7 +640,7 @@ const VeraDoc = () => {
 
   // Function to render results content
   const renderResultsContent = (
-    result: { displayResults: string; qaPairs: any[] },
+    result: { displayResults: string; qaPairs: any[]; interactionId?: string },
     resultIndex: number,
   ) => (
     <Box key={resultIndex}>
@@ -686,6 +712,16 @@ const VeraDoc = () => {
                             color="blue.600"
                             useModal={true}
                           />
+                        ) : citation.metadata.source &&
+                          citation.metadata.source.toLowerCase().endsWith(".docx") ? (
+                          <SourceLink
+                            sourceId="" // Empty sourceId, will be handled by filename fallback
+                            fileName={getDisplayFileName(citation.metadata.source)}
+                            ml={1}
+                            fontWeight="normal"
+                            color="blue.600"
+                            useModal={true}
+                          />
                         ) : (
                           <Text as="span" ml={1} fontWeight="normal" color="blue.600">
                             {getDisplayFileName(citation.metadata.source)}
@@ -726,6 +762,17 @@ const VeraDoc = () => {
 
   return (
     <Container maxW="container.xl" py={8}>
+      {/* Tab description */}
+      <Text 
+        fontSize="sm" 
+        color="gray.500" 
+        textAlign="center" 
+        mb={4}
+        fontStyle="italic"
+      >
+        Review a document based on a user-defined checklist and policy database.
+      </Text>
+      
       {/* Add this overlay spinner that shows when loading is true */}
       {loading && (
         <Box
@@ -846,8 +893,8 @@ const VeraDoc = () => {
         <VStack
           align="stretch"
           mb={4}
-          opacity={!selectedKnowledgeBase || !selectedChecklist ? 0.3 : 1}
-          pointerEvents={!selectedKnowledgeBase || !selectedChecklist ? "none" : "auto"}
+          opacity={(!selectedKnowledgeBase || !selectedChecklist) && !results ? 0.3 : 1}
+          pointerEvents={(!selectedKnowledgeBase || !selectedChecklist) && !results ? "none" : "auto"}
         >
           <HStack gap={4} justify="center">
             <Button
@@ -911,6 +958,19 @@ const VeraDoc = () => {
                     >
                       Download CSV
                     </DownloadButton>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      colorPalette="red"
+                      onClick={() => {
+                        clearReviewResults()
+                        showSuccessToast("Review results cleared")
+                      }}
+                    >
+                      <FiTrash2 />
+                      Clear Results
+                    </Button>
                   </HStack>
                 )}
               </HStack>
@@ -963,6 +1023,25 @@ const VeraDoc = () => {
                         </Tabs.Content>
                       ))}
                     </Tabs.Root>
+
+                    {/* Add feedback buttons for the active result */}
+                    {results[activeTab]?.interactionId && (
+                      <Box
+                        position="sticky"
+                        bottom={4}
+                        right={4}
+                        display="flex"
+                        justifyContent="flex-end"
+                        pointerEvents="auto"
+                        zIndex={10}
+                        mt={4}
+                      >
+                        <FeedbackButtons
+                          interactionId={results[activeTab].interactionId}
+                          onFeedbackSubmitted={handleFeedbackSubmitted}
+                        />
+                      </Box>
+                    )}
                   </>
                 ) : (
                   <Text color="gray.500">Results will appear here after running.</Text>

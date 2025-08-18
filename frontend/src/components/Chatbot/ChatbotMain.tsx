@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Drawer } from "@chakra-ui/react"
 import FloatingChatButton from "@/components/Chatbot/FloatingChatButton"
 import ChatbotPanel from "@/components/Chatbot/ChatbotPanel"
@@ -31,10 +31,33 @@ const ChatbotMain = () => {
 
   const clearChat = () => {
     setMessages([])
-    setSessionId(Math.random().toString(36).substring(2, 15))
+    setSessionId("")
     setSelectedKbId(null)
     setUploadedFiles([])
   }
+
+  const handleOpenChat = () => {
+    console.log("🎯 FloatingChatButton clicked, opening chat")
+    setIsOpen(true)
+  }
+
+  const handleCloseChat = () => {
+    console.log("🔒 Closing chat drawer")
+    setIsOpen(false)
+  }
+
+  // Add escape key handler as emergency fallback
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isOpen) {
+        console.log("🚨 Emergency escape - closing chat drawer")
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener("keydown", handleEscapeKey)
+    return () => document.removeEventListener("keydown", handleEscapeKey)
+  }, [isOpen])
 
   const handleChatbotResponse = (response: any, userMessage: string) => {
     if (!response?.answer) return
@@ -155,6 +178,20 @@ const ChatbotMain = () => {
           console.log("Files changed, clearing session ID")
         }
 
+        // Check for large files and adjust timeout
+        const hasVeryLargeFile = uploadedFiles.some(file => file.size > 50 * 1024 * 1024) // > 50MB
+        
+        if (hasVeryLargeFile && searchMode === "vector") {
+          console.log("Large file detected, recommending full text mode")
+          setMessages((prev) => [
+            ...prev,
+            { 
+              role: "assistant", 
+              content: "⚠️ Large document detected. For better performance with files over 50MB, consider switching to 'Full Text Scan' mode using the toggle above."
+            },
+          ])
+        }
+
         const formData = new FormData()
         // For full-text mode, always send the files since they're needed for each query
         // For vector mode, only send the files if this is NOT a follow-up question
@@ -180,53 +217,88 @@ const ChatbotMain = () => {
       }
     } catch (error) {
       console.error("Error querying:", error)
+      
+      // Better error handling for timeouts and large files
+      let errorMessage = "Sorry, I couldn't process your request. Please try again."
+      
+      if (error && typeof error === 'object') {
+        const errorObj = error as any
+        if (errorObj.code === "ERR_NETWORK" || errorObj.message?.includes("timeout")) {
+          const hasLargeFiles = uploadedFiles.some(file => file.size > 10 * 1024 * 1024)
+          if (hasLargeFiles) {
+            errorMessage = "The document is very large and processing timed out. Please try with a smaller document or switch to 'Full Text Scan' mode which is more efficient for large files."
+          } else {
+            errorMessage = "Request timed out. Please check your connection and try again."
+          }
+        } else if (errorObj.response?.status === 413) {
+          errorMessage = "The uploaded file is too large. Please try with a smaller document."
+        } else if (errorObj.response?.status >= 500) {
+          errorMessage = "Server error occurred. The document might be too large or complex to process. Please try with a smaller file or contact support."
+        }
+      }
+      
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Sorry, I couldn't process your request. Please try again." },
+        { role: "assistant", content: errorMessage },
       ])
     } finally {
       setIsLoading(false)
     }
   }
 
+  // Defensive: always neutralize any drawer backdrops so chat panel is never dimmed
+  useEffect(() => {
+    if (isOpen) {
+      // Find the drawer content and ensure it's fully opaque
+      const drawerContent = document.querySelector('[data-scope="drawer"][data-part="content"]')
+      if (drawerContent) {
+        const contentEl = drawerContent as HTMLElement
+        contentEl.style.opacity = "1"
+        contentEl.style.backgroundColor = "white"
+        contentEl.style.position = "relative"
+        contentEl.style.zIndex = "9001"
+      }
+    }
+  }, [isOpen])
+
   return (
     <>
-      <FloatingChatButton onClick={() => setIsOpen(true)} />
-      <Drawer.Root
-        open={isOpen}
-        onOpenChange={(details) => setIsOpen(details.open)}
-        placement="end"
-        size="md"
-      >
-        <Drawer.Trigger asChild>
-          <FloatingChatButton onClick={() => setIsOpen(true)} />
-        </Drawer.Trigger>
-        <Drawer.Backdrop />
-        <Drawer.Positioner>
-          <Drawer.Content>
-            <ChatbotPanel
-              isOpen={isOpen}
-              messages={messages}
-              question={question}
-              setQuestion={setQuestion}
-              isLoading={isLoading}
-              messagesEndRef={messagesEndRef}
-              selectedKbId={selectedKbId}
-              setSelectedKbId={setSelectedKbId}
-              uploadedFiles={uploadedFiles}
-              setUploadedFiles={setUploadedFiles}
-              setCurrentKbId={setCurrentKbId}
-              setCurrentFileNames={setCurrentFileNames}
-              showKnowledgeBaseModal={showKnowledgeBaseModal}
-              setShowKnowledgeBaseModal={setShowKnowledgeBaseModal}
-              clearChat={clearChat}
-              handleSendMessage={handleSendMessage}
-              searchMode={searchMode}
-              setSearchMode={setSearchMode}
-            />
-          </Drawer.Content>
-        </Drawer.Positioner>
-      </Drawer.Root>
+      {!isOpen && <FloatingChatButton onClick={handleOpenChat} />}
+      {isOpen && (
+        <Drawer.Root
+          open={isOpen}
+          onOpenChange={({ open }) => !open && handleCloseChat()}
+          placement="end"
+          size="md"
+        >
+          {/* Use the built-in Drawer.Backdrop but with custom styling */}
+          <Drawer.Backdrop />
+          <Drawer.Positioner>
+            <Drawer.Content>
+              <ChatbotPanel
+                isOpen={isOpen}
+                messages={messages}
+                question={question}
+                setQuestion={setQuestion}
+                isLoading={isLoading}
+                messagesEndRef={messagesEndRef}
+                selectedKbId={selectedKbId}
+                setSelectedKbId={setSelectedKbId}
+                uploadedFiles={uploadedFiles}
+                setUploadedFiles={setUploadedFiles}
+                setCurrentKbId={setCurrentKbId}
+                setCurrentFileNames={setCurrentFileNames}
+                showKnowledgeBaseModal={showKnowledgeBaseModal}
+                setShowKnowledgeBaseModal={setShowKnowledgeBaseModal}
+                clearChat={clearChat}
+                handleSendMessage={handleSendMessage}
+                searchMode={searchMode}
+                setSearchMode={setSearchMode}
+              />
+            </Drawer.Content>
+          </Drawer.Positioner>
+        </Drawer.Root>
+      )}
     </>
   )
 }

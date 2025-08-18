@@ -4,6 +4,7 @@ import { FiEye, FiCopy, FiTrash2, FiPlus } from "react-icons/fi"
 import { ReportGenieOutline, ReportgenieService, KnowledgeBasePublic } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import OutlineModal from "./OutlineModal"
+import { generateUUID } from "../../utils/uuid"
 
 interface OutlineTableProps {
   outlines: ReportGenieOutline[]
@@ -166,12 +167,49 @@ const OutlineTable = ({
   const [outlineDescription, setOutlineDescription] = useState("")
 
   const handleViewOutline = (outline: ReportGenieOutline) => {
-    setEditingOutline(outline)
-    setOutlineName(outline.name)
-    setOutlineDescription(outline.description || "")
-    onSectionsChange(outline.sections || "")
-    setIsModalOpen(true)
+  console.log("🔍 OutlineTable: Opening edit modal for outline:", outline.name)
+  console.log("🔍 OutlineTable: Raw outline.sections:", outline.sections)
+  console.log("🔍 OutlineTable: Type of outline.sections:", typeof outline.sections)
+  
+  setEditingOutline(outline)
+  setOutlineName(outline.name)
+  setOutlineDescription(outline.description || "")
+  
+  // Ensure sections is always passed as a properly stringified JSON
+  let sectionsString = ""
+  if (outline.sections) {
+    if (typeof outline.sections === "string") {
+      // If it's already a string, verify it's valid JSON, otherwise use as-is
+      try {
+        const parsed = JSON.parse(outline.sections)
+        console.log("🔍 OutlineTable: Successfully parsed sections JSON:", parsed)
+        sectionsString = outline.sections
+      } catch (error) {
+        console.log("🔍 OutlineTable: Failed to parse sections as JSON, treating as plain text:", error)
+        // If parsing fails, treat as plain text and convert to structured format
+        sectionsString = JSON.stringify([{
+          id: generateUUID(),
+          text: outline.sections,
+          consultDocuments: true
+        }])
+      }
+    } else if (Array.isArray(outline.sections)) {
+      console.log("🔍 OutlineTable: Sections is array, stringifying:", outline.sections)
+      // If it's already parsed as an array, stringify it
+      sectionsString = JSON.stringify(outline.sections)
+    } else {
+      console.log("🔍 OutlineTable: Sections is unknown format, using empty string:", outline.sections)
+      // Fallback for any other format
+      sectionsString = ""
+    }
+  } else {
+    console.log("🔍 OutlineTable: No sections found in outline")
   }
+  
+  console.log("🔍 OutlineTable: Final sectionsString being passed:", sectionsString)
+  onSectionsChange(sectionsString)
+  setIsModalOpen(true)
+}
 
   const handleCopyOutline = async (outline: ReportGenieOutline) => {
     try {
@@ -210,6 +248,8 @@ const OutlineTable = ({
     setEditingOutline(null)
     setOutlineName("")
     setOutlineDescription("")
+    // Initialize with an empty section for immediate editing
+    onSectionsChange(JSON.stringify([{ id: generateUUID(), text: "", consultDocuments: true }]))
     setIsModalOpen(true)
   }
 
@@ -262,6 +302,8 @@ const OutlineTable = ({
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setEditingOutline(null)
+    // Clear sections when closing modal to prevent stale state
+    onSectionsChange("")
   }
 
   return (
