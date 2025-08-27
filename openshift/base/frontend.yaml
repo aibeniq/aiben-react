@@ -74,7 +74,7 @@ metadata:
     app: aibeniq
     component: frontend
 spec:
-  host: dashboard.yourdomain.com
+  host: redhat.aiben.io
   to:
     kind: Service
     name: frontend

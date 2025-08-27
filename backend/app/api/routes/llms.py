@@ -42,12 +42,6 @@ router = APIRouter(prefix="/llm-models", tags=["llm-models"])
 def initialize_default_llm_models(session: SessionDep):
     default_models = [
         {
-            "name": "GPT-4o Mini (System Default)",
-            "model_id": "gpt-4o-mini",
-            "provider": ModelProvider.OPENAI,
-            "description": "OpenAI's GPT-4o Mini model - system default for all users.",
-        },
-        {
             "name": "GPT-4o Mini",
             "model_id": "gpt-4o-mini",
             "provider": ModelProvider.OPENAI,
@@ -75,6 +69,7 @@ def initialize_default_llm_models(session: SessionDep):
 
     for model_data in default_models:
         # Check if this default LLM model already exists (system model: owner_id is None)
+        # Use BOTH model_id AND provider to ensure uniqueness
         exists = session.exec(
             select(LlmModel).where(
                 LlmModel.model_id == model_data["model_id"],
@@ -83,13 +78,17 @@ def initialize_default_llm_models(session: SessionDep):
             )
         ).first()
         if not exists:
+            print(f"Creating default LLM model: {model_data['name']}")
             model = LlmModel(
                 name=model_data["name"],
                 model_id=model_data["model_id"],
                 provider=model_data["provider"],
                 description=model_data["description"],
+                owner_id=None,  # System model
             )
             session.add(model)
+        else:
+            print(f"Default LLM model already exists: {model_data['name']}")
 
     session.commit()
 

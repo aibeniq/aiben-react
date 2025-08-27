@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: domain-config
+data:
+  # Development environment domain configuration
+  BASE_DOMAIN: "aiben.io"
+  ENVIRONMENT: "dev"
+
+  # Service URLs for development environment
+  FRONTEND_URL: "redhat-dev.aiben.io"
+  API_URL: "redhat-api-dev.aiben.io"
+  TRAEFIK_URL: "redhat-traefik-dev.aiben.io"
+  ADMINER_URL: "redhat-adminer-dev.aiben.io"

@@ -17,67 +17,15 @@ from app.models import (
 from app.core.config import settings
 
 
-def initialize_default_embedding_models(session: Session):
-    """Initialize default embedding models if they don't exist."""
-    # List of default models to ensure exist (copied from modelselection.py)
-    default_models = [
-        {
-            "name": "OpenAI Embeddings 3 Small (System Default)",
-            "model_id": "text-embedding-3-small",
-            "provider": ModelProvider.OPENAI,
-            "description": "OpenAI's compact embedding model - system default for all users.",
-        },
-        {
-            "name": "Amazon Titan 2.0",
-            "model_id": "amazon.titan-embed-text-v2:0",
-            "provider": ModelProvider.AWS,
-            "description": "Amazon's Titan 2.0 embedding model for AWS Bedrock.",
-        },
-        {
-            "name": "MiniLM-L6-v2",
-            "model_id": "all-MiniLM-L6-v2",
-            "provider": ModelProvider.HUGGINGFACE,
-            "description": "A compact and efficient embedding model.",
-        },
-    ]
-
-    def get_model_dimensions(model_id: str) -> int:
-        """Get model dimensions based on known model specifications."""
-        model_dimensions = {
-            "text-embedding-3-small": 1536,
-            "text-embedding-3-large": 3072,
-            "text-embedding-ada-002": 1536,
-            "amazon.titan-embed-text-v2:0": 1024,
-            "all-MiniLM-L6-v2": 384,
-        }
-        return model_dimensions.get(model_id, 768)
-
-    for model_data in default_models:
-        # Check if this default model already exists
-        exists = session.exec(
-            select(EmbeddingModel).where(
-                EmbeddingModel.model_id == model_data["model_id"],
-                EmbeddingModel.provider == model_data["provider"],
-                EmbeddingModel.owner_id.is_(None),
-            )
-        ).first()
-        if not exists:
-            model = EmbeddingModel(
-                name=model_data["name"],
-                model_id=model_data["model_id"],
-                provider=model_data["provider"],
-                description=model_data["description"],
-                dimensions=get_model_dimensions(model_data["model_id"]),
-            )
-            session.add(model)
-
-    session.commit()
-
-
 def create_user(*, session: Session, user_create: UserCreate) -> User:
     """Create a new user with default LLM and embedding model settings."""
+    # Import the centralized initialization functions
+    from app.api.routes.modelselection import initialize_default_models
+    from app.api.routes.llms import initialize_default_llm_models
+
     # Initialize default models to ensure they exist
-    initialize_default_embedding_models(session)
+    initialize_default_models(session)
+    initialize_default_llm_models(session)
 
     # Create the user object with password hash
     db_obj = User.model_validate(
@@ -121,26 +69,36 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
 
     # If model selection is disabled, force the configured default
     if not settings.ENABLE_MODEL_SELECTION:
-        print(f"Model selection disabled, forcing embedding: {settings.FORCE_DEFAULT_EMBEDDING}")
+        print(
+            f"Model selection disabled, forcing embedding: {settings.FORCE_DEFAULT_EMBEDDING}"
+        )
         for model in system_embeddings:
             if (
                 model.model_id == settings.FORCE_DEFAULT_EMBEDDING
                 and model.provider.value.lower() in enabled_embedding_providers
             ):
                 default_embedding = model
-                print(f"✅ Found forced embedding model: {model.model_id} (provider: {model.provider})")
+                print(
+                    f"✅ Found forced embedding model: {model.model_id} (provider: {model.provider})"
+                )
                 break
-        
+
         if not default_embedding:
-            print(f"⚠️ Warning: Forced embedding model {settings.FORCE_DEFAULT_EMBEDDING} not found or provider not enabled")
-            print(f"Available embedding models: {[m.model_id for m in system_embeddings]}")
+            print(
+                f"⚠️ Warning: Forced embedding model {settings.FORCE_DEFAULT_EMBEDDING} not found or provider not enabled"
+            )
+            print(
+                f"Available embedding models: {[m.model_id for m in system_embeddings]}"
+            )
             print(f"Enabled embedding providers: {enabled_embedding_providers}")
     else:
         # Normal logic - find first system embedding model with enabled provider
         for model in system_embeddings:
             if model.provider.value.lower() in enabled_embedding_providers:
                 default_embedding = model
-                print(f"Using default embedding model: {model.model_id} (provider: {model.provider})")
+                print(
+                    f"Using default embedding model: {model.model_id} (provider: {model.provider})"
+                )
                 break
 
     if default_embedding:

@@ -1,0 +1,46 @@
+﻿---
+# Patch b# Patch frontend deployment to use internal registry  
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  template:
+    spec:
+      containers:
+        - name: frontend
+          image: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/frontend:20250826-214903oyment to use internal registry
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  template:
+    spec:
+      containers:
+        - name: backend
+          image: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/backend:latest
+---
+# Patch frontend deployment to use internal registry
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  template:
+    spec:
+      containers:
+        - name: frontend
+          image: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/frontend:20250826-185810
+---
+# Patch backend prestart job to use internal registry
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: backend-prestart
+spec:
+  template:
+    spec:
+      containers:
+        - name: backend-prestart
+          image: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/backend:latest

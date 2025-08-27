@@ -4,4 +4,27 @@ metadata:
   name: backend-config
 data:
   ENVIRONMENT: "production"
-  BACKEND_CORS_ORIGINS: "https://dashboard.yourdomain.com"
+  PROJECT_NAME: "AibenIQ"
+  STACK_NAME: "aibeniq"
+  BACKEND_CORS_ORIGINS: "https://redhat.aiben.io,http://redhat.aiben.io"
+  POSTGRES_SERVER: "postgres"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "app"
+  POSTGRES_USER: "app"
+  API_V1_STR: "/api/v1"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "11520"
+  FULL_SCAN_DOCUMENT_CHUNK_SIZE: "100000"
+  FULL_SCAN_DOCUMENT_CHUNK_OVERLAP: "200"
+  RAG_DOCUMENT_CHUNK_SIZE: "1000"
+  RAG_DOCUMENT_CHUNK_OVERLAP: "200"
+  DEFAULT_LLM_MODEL: "gpt-4o-mini"
+  ENABLED_PROVIDERS: "openai"
+  OLLAMA_BASE_URL: "http://ollama:11434"
+  AWS_REGION: "eu-north-1"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  VITE_API_URL: "https://backend-api-aibeniq-prod.apps.aibeniq-prod.gimc.p1.openshiftapps.com"

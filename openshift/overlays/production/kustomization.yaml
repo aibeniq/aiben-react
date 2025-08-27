@@ -10,10 +10,16 @@ resources:
 namespace: aibeniq-prod
 
 patchesStrategicMerge:
+  - domain-config-patch.yaml
   - configmap-patch.yaml
   - backend-patch.yaml
   - frontend-patch.yaml
   - postgres-patch.yaml
+  - route-patches.yaml
+  - internal-registry-patches.yaml
+  - frontend-permissions-patch.yaml
+  - traefik-permissions-patch.yaml
+  - adminer-permissions-patch.yaml
 
 commonLabels:
   environment: production

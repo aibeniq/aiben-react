@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: domain-config
+data:
+  # Production environment domain configuration
+  BASE_DOMAIN: "aiben.io"
+  ENVIRONMENT: "prod"
+
+  # Service URLs for production environment (RedHat)
+  FRONTEND_URL: "redhat.aiben.io"
+  API_URL: "redhat-api.aiben.io"
+  TRAEFIK_URL: "redhat-traefik.aiben.io"
+  ADMINER_URL: "redhat-adminer.aiben.io"

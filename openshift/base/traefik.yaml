@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+  labels:
+    app: aibeniq
+    component: traefik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aibeniq
+      component: traefik
+  template:
+    metadata:
+      labels:
+        app: aibeniq
+        component: traefik
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: traefik
+          image: traefik:v3.0
+          ports:
+            - containerPort: 8080
+              name: dashboard
+            - containerPort: 80
+              name: web
+          args:
+            - --api.dashboard=true
+            - --api.insecure=true
+            - --entrypoints.web.address=:80
+            - --entrypoints.dashboard.address=:8080
+            - --providers.kubernetesingress
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+  labels:
+    app: aibeniq
+    component: traefik
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: dashboard
+    - port: 80
+      targetPort: 80
+      name: web
+  selector:
+    app: aibeniq
+    component: traefik
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: traefik-dashboard
+  labels:
+    app: aibeniq
+    component: traefik
+spec:
+  host: redhat-traefik.aiben.io
+  to:
+    kind: Service
+    name: traefik
+  port:
+    targetPort: dashboard
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

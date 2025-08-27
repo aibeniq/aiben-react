@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: domain-config
+  labels:
+    app: aibeniq
+    component: config
+data:
+  # Base domain for all environments
+  BASE_DOMAIN: "aiben.io"
+  # Environment placeholder (will be replaced by overlays)
+  ENVIRONMENT: "staging"
+
+  # Service URLs for RedHat environment (production)
+  FRONTEND_URL: "redhat.aiben.io"
+  API_URL: "redhat-api.aiben.io"
+  TRAEFIK_URL: "redhat-traefik.aiben.io"
+  ADMINER_URL: "redhat-adminer.aiben.io"

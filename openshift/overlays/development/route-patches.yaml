@@ -1,0 +1,27 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: backend-api
+spec:
+  host: redhat-api-dev.aiben.io
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: frontend-dashboard
+spec:
+  host: redhat-dev.aiben.io
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: traefik-dashboard
+spec:
+  host: redhat-traefik-dev.aiben.io
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: adminer
+spec:
+  host: redhat-adminer-dev.aiben.io

@@ -19,6 +19,7 @@ PROJECT_NAME=""
 ENVIRONMENT=""
 BUILD_IMAGES=false
 PUSH_IMAGES=false
+INTERNAL_REGISTRY=false
 DRY_RUN=false
 
 # Function to print colored output
@@ -78,6 +79,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -p|--push)
             PUSH_IMAGES=true
+            shift
+            ;;
+        -i|--internal)
+            INTERNAL_REGISTRY=true
             shift
             ;;
         -d|--dry-run)
@@ -176,7 +181,16 @@ build_images() {
     
     # Push images if requested
     if [[ "$PUSH_IMAGES" == true ]]; then
-        print_status "Pushing images to registry..."
+        # If requested, use internal registry
+        if [[ "$INTERNAL_REGISTRY" == true ]]; then
+            print_status "Using OpenShift internal registry for push"
+            oc registry login
+            REGISTRY=$(oc registry info)
+            NAMESPACE="$PROJECT_NAME"
+            print_status "Internal registry: $REGISTRY, namespace: $NAMESPACE"
+        fi
+
+        print_status "Pushing images to registry ${REGISTRY}/${NAMESPACE}..."
         docker push "${REGISTRY}/${NAMESPACE}/backend:${IMAGE_TAG}"
         docker push "${REGISTRY}/${NAMESPACE}/backend:latest"
         docker push "${REGISTRY}/${NAMESPACE}/frontend:${IMAGE_TAG}"

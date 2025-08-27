@@ -4,10 +4,3 @@ metadata:
   name: frontend
 spec:
   replicas: 1
----
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  name: frontend-dashboard
-spec:
-  host: dashboard-dev.yourdomain.com

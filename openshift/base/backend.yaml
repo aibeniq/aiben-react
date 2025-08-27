@@ -87,7 +87,7 @@ metadata:
     app: aibeniq
     component: backend
 spec:
-  host: api.yourdomain.com
+  host: redhat-api.aiben.io
   to:
     kind: Service
     name: backend

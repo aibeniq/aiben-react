@@ -8,7 +8,7 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 WORKDIR /app/
 
 #argument for whether to install huggingface
-ARG INSTALL_HUGGINGFACE=false
+ARG INSTALL_HUGGINGFACE=true
 
 # Install uv
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#installing-uv

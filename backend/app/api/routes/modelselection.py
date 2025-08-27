@@ -106,6 +106,7 @@ def initialize_default_models(session: SessionDep):
 
     for model_data in default_models:
         # Check if this default model already exists (system model: owner_id is None)
+        # Use BOTH model_id AND provider to ensure uniqueness
         exists = session.exec(
             select(EmbeddingModel).where(
                 EmbeddingModel.model_id == model_data["model_id"],
@@ -114,13 +115,20 @@ def initialize_default_models(session: SessionDep):
             )
         ).first()
         if not exists:
+            print(f"Creating default embedding model: {model_data['name']}")
             model = EmbeddingModel(
                 name=model_data["name"],
                 model_id=model_data["model_id"],
                 provider=model_data["provider"],
                 description=model_data["description"],
+                dimensions=get_model_dimensions(
+                    model_data["model_id"], model_data["provider"]
+                ),
+                owner_id=None,  # System model
             )
             session.add(model)
+        else:
+            print(f"Default embedding model already exists: {model_data['name']}")
 
     session.commit()
 

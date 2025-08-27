@@ -1,0 +1,21 @@
+# Patch traefik deployment to fix OpenShift security constraints
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+spec:
+  template:
+    spec:
+      containers:
+        - name: traefik
+          ports:
+            - containerPort: 8080
+              name: dashboard
+            - containerPort: 8000
+              name: web-alt
+          args:
+            - --api.dashboard=true
+            - --api.insecure=true
+            - --entrypoints.web.address=:8000
+            - --entrypoints.traefik.address=:8080
+            - --providers.kubernetesingress

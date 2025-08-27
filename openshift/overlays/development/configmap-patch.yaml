@@ -4,4 +4,11 @@ metadata:
   name: backend-config
 data:
   ENVIRONMENT: "development"
-  BACKEND_CORS_ORIGINS: "http://localhost,http://localhost:5173,https://dashboard-dev.yourdomain.com"
+  BACKEND_CORS_ORIGINS: "http://localhost,http://localhost:5173,https://redhat-dev.aiben.io"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  VITE_API_URL: "https://redhat-api-dev.aiben.io"

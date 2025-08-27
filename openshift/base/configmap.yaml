@@ -9,7 +9,7 @@ data:
   ENVIRONMENT: "staging"
   PROJECT_NAME: "AibenIQ"
   STACK_NAME: "aibeniq"
-  BACKEND_CORS_ORIGINS: "http://localhost,http://localhost:5173,https://dashboard.yourdomain.com"
+  BACKEND_CORS_ORIGINS: "http://localhost,http://localhost:5173,https://redhat.aiben.io"
   POSTGRES_SERVER: "postgres"
   POSTGRES_PORT: "5432"
   POSTGRES_DB: "app"
@@ -33,4 +33,4 @@ metadata:
     app: aibeniq
     component: frontend
 data:
-  VITE_API_URL: "https://api.yourdomain.com"
+  VITE_API_URL: "https://redhat-api.aiben.io"

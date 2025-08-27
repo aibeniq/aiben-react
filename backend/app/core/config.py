@@ -113,10 +113,10 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
-    # ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
-    # ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
-    ENABLED_LLM_PROVIDERS: str = "openai,aws"
-    ENABLED_EMBEDDING_PROVIDERS: str = "openai,aws"
+    ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
+    ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
+    # ENABLED_LLM_PROVIDERS: str = "openai,aws"
+    # ENABLED_EMBEDDING_PROVIDERS: str = "openai,aws"
 
     # Supported Languages for Translation
     SUPPORTED_LANGUAGES: dict[str, str] = {

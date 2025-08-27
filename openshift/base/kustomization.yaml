@@ -5,11 +5,14 @@ metadata:
   name: aibeniq-base
 
 resources:
+  - domain-config.yaml
   - configmap.yaml
   - secrets.yaml
   - postgres.yaml
   - backend.yaml
   - frontend.yaml
+  - traefik.yaml
+  - adminer.yaml
   - prestart-job.yaml
 
 commonLabels:

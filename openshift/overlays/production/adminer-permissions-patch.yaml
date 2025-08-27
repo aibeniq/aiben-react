@@ -1,0 +1,24 @@
+# Patch adminer deployment to fix OpenShift security constraints
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adminer
+spec:
+  template:
+    spec:
+      containers:
+        - name: adminer
+          volumeMounts:
+            - name: adminer-tmp
+              mountPath: /tmp
+            - name: adminer-var-tmp
+              mountPath: /var/tmp
+            - name: adminer-home
+              mountPath: /var/www/html
+      volumes:
+        - name: adminer-tmp
+          emptyDir: {}
+        - name: adminer-var-tmp
+          emptyDir: {}
+        - name: adminer-home
+          emptyDir: {}

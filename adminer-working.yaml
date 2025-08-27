@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adminer-working
+  namespace: aibeniq-prod
+  labels:
+    app: aibeniq
+    component: adminer-working
+    environment: production
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aibeniq
+      component: adminer-working
+      environment: production
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: aibeniq
+        component: adminer-working
+        environment: production
+        version: v1
+    spec:
+      initContainers:
+        - name: setup-adminer
+          image: adminer:4.8.1
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # Copy adminer files to the web root
+              cp -r /usr/share/adminer/. /tmp/adminer-files/ 2>/dev/null || true
+              cp /usr/local/share/adminer/. /tmp/adminer-files/ 2>/dev/null || true
+              # Find and copy the actual adminer.php file
+              find /usr -name "adminer.php" -exec cp {} /tmp/adminer-files/ \; 2>/dev/null || true
+              find / -name "adminer.php" -exec cp {} /tmp/adminer-files/ \; 2>/dev/null || true
+              # Create a simple index.php that redirects to adminer.php
+              echo '<?php header("Location: adminer.php"); ?>' > /tmp/adminer-files/index.php
+              ls -la /tmp/adminer-files/
+          volumeMounts:
+            - name: adminer-home
+              mountPath: /tmp/adminer-files
+      containers:
+        - name: adminer
+          image: adminer:4.8.1
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: ADMINER_DEFAULT_SERVER
+              value: postgres
+            - name: ADMINER_DESIGN
+              value: pepa-linha
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+          volumeMounts:
+            - name: adminer-home
+              mountPath: /var/www/html
+      volumes:
+        - name: adminer-home
+          emptyDir: {}

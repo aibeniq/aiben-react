@@ -10,9 +10,13 @@ resources:
 namespace: aibeniq-dev
 
 patchesStrategicMerge:
+  - domain-config-patch.yaml
   - configmap-patch.yaml
   - backend-patch.yaml
   - frontend-patch.yaml
+  - route-patches.yaml
+  - internal-registry-patches.yaml
+  - frontend-permissions-patch.yaml
 
 commonLabels:
   environment: development
