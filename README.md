@@ -1,65 +1,72 @@
-# Full Stack FastAPI Template
+# AIBeniq
 
-<a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3ATest" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test/badge.svg" alt="Test"></a>
-<a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/fastapi/full-stack-fastapi-template" target="_blank"><img src="https://coverage-badge.samuelcolvin.workers.dev/fastapi/full-stack-fastapi-template.svg" alt="Coverage"></a>
+FastAPI + React AI/LLM application platform (chat, document ingestion, embeddings, model orchestration) with OpenShift (ROSA) & Docker deployment paths.
 
-## Technology Stack and Features
+## Key Components
 
-- ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
-    - 🧰 [SQLModel](https://sqlmodel.tiangolo.com) for the Python SQL database interactions (ORM).
-    - 🔍 [Pydantic](https://docs.pydantic.dev), used by FastAPI, for the data validation and settings management.
-    - 💾 [PostgreSQL](https://www.postgresql.org) as the SQL database.
-- 🚀 [React](https://react.dev) for the frontend.
-    - 💃 Using TypeScript, hooks, Vite, and other parts of a modern frontend stack.
-    - 🎨 [Chakra UI](https://chakra-ui.com) for the frontend components.
-    - 🤖 An automatically generated frontend client.
-    - 🧪 [Playwright](https://playwright.dev) for End-to-End testing.
-    - 🦇 Dark mode support.
-- 🐋 [Docker Compose](https://www.docker.com) for development and production.
-- 🔒 Secure password hashing by default.
-- 🔑 JWT (JSON Web Token) authentication.
-- 📫 Email based password recovery.
-- ✅ Tests with [Pytest](https://pytest.org).
-- 📞 [Traefik](https://traefik.io) as a reverse proxy / load balancer.
-- 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
-- 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
+- Backend: FastAPI, SQLModel, PostgreSQL, LangChain / Ollama / OpenAI / Bedrock
+- Frontend: React + TypeScript + Vite + Chakra UI
+- Infrastructure: Traefik, OpenShift (ROSA), Docker Compose
+- Extras: Background model pre-download, embedding management, multi‑provider LLM abstraction
 
-### Dashboard Login
+## Quick Start
 
-[![API docs](img/login.png)](https://github.com/fastapi/full-stack-fastapi-template)
+Clone and follow development guide:
 
-### Dashboard - Admin
+```bash
+git clone <this-repo>
+cd aibeniq-react
+docker compose --profile frontend watch
+```
 
-[![API docs](img/dashboard.png)](https://github.com/fastapi/full-stack-fastapi-template)
+Then open:
 
-### Dashboard - Create User
+- Frontend: http://localhost:5173
+- API Docs: http://localhost:8000/docs
 
-[![API docs](img/dashboard-create.png)](https://github.com/fastapi/full-stack-fastapi-template)
+## Documentation
 
-### Dashboard - Items
+All consolidated docs moved to `docs/`:
 
-[![API docs](img/dashboard-items.png)](https://github.com/fastapi/full-stack-fastapi-template)
+| Topic                  | Path                         |
+| ---------------------- | ---------------------------- |
+| Development workflow   | docs/development.md          |
+| Backend details        | docs/backend.md              |
+| Frontend details       | docs/frontend.md             |
+| Deployment (Compose)   | docs/deployment.md           |
+| OpenShift / ROSA       | docs/openshift.md            |
+| Security policy        | docs/security.md             |
+| Changelog & history    | docs/changelog.md (incoming) |
+| Archived one-off notes | docs/archive/                |
 
-### Dashboard - User Settings
+## Configuration
 
-[![API docs](img/dashboard-user-settings.png)](https://github.com/fastapi/full-stack-fastapi-template)
+Copy `.env.example` (or existing template) to `.env` and set:
 
-### Dashboard - Dark Mode
+- SECRET_KEY
+- FIRST_SUPERUSER / FIRST_SUPERUSER_PASSWORD
+- POSTGRES_PASSWORD
+- OPENAI / AWS / other provider keys as needed
 
-[![API docs](img/dashboard-dark.png)](https://github.com/fastapi/full-stack-fastapi-template)
+## Testing
 
-### Interactive API Documentation
+Backend: `bash backend/scripts/test.sh`
+Frontend E2E: `npx playwright test`
 
-[![API docs](img/docs.png)](https://github.com/fastapi/full-stack-fastapi-template)
+## Deployment Paths
 
-## How To Use It
+1. Docker Compose (simple / PoC)
+2. OpenShift (ROSA) production cluster
 
-You can **just fork or clone** this repository and use it as is.
+See `docs/deployment.md` and `docs/openshift.md`.
 
-✨ It just works. ✨
+## License
 
-### How to Use a Private Repository
+MIT
 
+---
+
+Historic template boilerplate & point-in-time fix notes have been archived under `docs/archive/` to reduce clutter.
 If you want to have a private repository, GitHub won't allow you to simply fork it as it doesn't allow changing the visibility of forks.
 
 But you can do the following:

@@ -319,7 +319,11 @@ def create_llm(
         # Configure Ollama
         base_url = params.get("OLLAMA_BASE_URL", "http://ollama:11434")
         return ChatOllama(
-            model=model_id, temperature=temperature, base_url=base_url, **params
+            model=model_id,
+            temperature=temperature,
+            base_url=base_url,
+            request_timeout=300,  # 5 minutes for model loading
+            **params,
         )
 
     elif provider == ModelProvider.REPLICATE:

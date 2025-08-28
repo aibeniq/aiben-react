@@ -13,11 +13,12 @@ resources:
   - frontend.yaml
   - traefik.yaml
   - adminer.yaml
-  - prestart-job.yaml
+  - ollama.yaml
 
 commonLabels:
   app: aibeniq
   version: v1
+  environment: production # Using commonLabels for compatibility with current kustomize version bundled in oc
 
 images:
   - name: quay.io/aibeniq/backend

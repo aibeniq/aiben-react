@@ -171,6 +171,7 @@ dependencies = [
     { name = "jinja2" },
     { name = "langchain-aws" },
     { name = "langchain-community" },
+    { name = "langchain-huggingface" },
     { name = "langchain-openai" },
     { name = "langchain-text-splitters" },
     { name = "mammoth" },
@@ -192,11 +193,6 @@ dependencies = [
     { name = "sqlmodel" },
     { name = "tenacity" },
     { name = "tiktoken" },
-]
-
-[package.optional-dependencies]
-huggingface = [
-    { name = "langchain-huggingface" },
 ]
 
 [package.dev-dependencies]
@@ -222,7 +218,7 @@ requires-dist = [
     { name = "jinja2", specifier = ">=3.1.4,<4.0.0" },
     { name = "langchain-aws", specifier = "==0.2.24" },
     { name = "langchain-community", specifier = "==0.3.19" },
-    { name = "langchain-huggingface", marker = "extra == 'huggingface'", specifier = "==0.2.0" },
+    { name = "langchain-huggingface", specifier = "==0.2.0" },
     { name = "langchain-openai", specifier = "==0.3.17" },
     { name = "langchain-text-splitters", specifier = "==0.3.6" },
     { name = "mammoth", specifier = ">=1.6.0,<2.0.0" },

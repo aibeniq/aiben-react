@@ -37,6 +37,20 @@ spec:
             limits:
               memory: "128Mi"
               cpu: "100m"
+          volumeMounts:
+            - name: adminer-tmp
+              mountPath: /tmp
+            - name: adminer-var-tmp
+              mountPath: /var/tmp
+            - name: adminer-home
+              mountPath: /var/www/html
+      volumes:
+        - name: adminer-tmp
+          emptyDir: {}
+        - name: adminer-var-tmp
+          emptyDir: {}
+        - name: adminer-home
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service

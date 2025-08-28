@@ -148,6 +148,21 @@ function Pause-Workloads {
     Write-Host "Pausing complete. Pods will be terminated and stop consuming vCPU/EC2. Persistent volumes will still be billed." -ForegroundColor Yellow
 }
 
+function Check-ServiceEndpoints {
+    param($ns)
+    Write-Host "Checking service endpoints consistency..." -ForegroundColor Yellow
+    
+    $services = (oc get service -n $ns -o json | ConvertFrom-Json).items
+    foreach ($svc in $services) {
+        $endpoints = oc get endpoints $svc.metadata.name -n $ns -o jsonpath='{.subsets[*].addresses[*].ip}' 2>$null
+        if (-not $endpoints -and $svc.spec.selector) {
+            Write-Warning "Service '$($svc.metadata.name)' has no endpoints. Check if pod labels match service selector."
+            Write-Host "Service selector:" -ForegroundColor Gray
+            $svc.spec.selector | ConvertTo-Json -Compress | Write-Host -ForegroundColor Gray
+        }
+    }
+}
+
 function Resume-Workloads {
     param($ns)
     Write-Host "Resuming workloads in namespace: $ns" -ForegroundColor Cyan
@@ -187,6 +202,10 @@ function Resume-Workloads {
     }
 
     Write-Host "Resume requested. Some pods may take time to become Ready." -ForegroundColor Green
+    
+    # Check for service endpoint issues that might prevent pods from starting
+    Start-Sleep -Seconds 5
+    Check-ServiceEndpoints $ns
 }
 
 function Show-Status {

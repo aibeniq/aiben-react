@@ -27,10 +27,13 @@ spec:
               name: dashboard
             - containerPort: 80
               name: web
+            - containerPort: 8000
+              name: web-alt
           args:
             - --api.dashboard=true
             - --api.insecure=true
             - --entrypoints.web.address=:80
+            - --entrypoints.web-alt.address=:8000
             - --entrypoints.dashboard.address=:8080
             - --providers.kubernetesingress
           resources:
@@ -56,6 +59,9 @@ spec:
     - port: 80
       targetPort: 80
       name: web
+    - port: 8000
+      targetPort: 8000
+      name: web-alt
   selector:
     app: aibeniq
     component: traefik

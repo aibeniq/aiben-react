@@ -31,11 +31,7 @@ ENV UV_LINK_MODE=copy
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    if [ "$INSTALL_HUGGINGFACE" = "true" ]; then \
-      uv sync --extra huggingface --frozen --no-install-project; \
-    else \
-      uv sync --frozen --no-install-project; \
-    fi
+    uv sync --frozen --no-install-project
 
 ENV PYTHONPATH=/app
 
@@ -50,8 +46,15 @@ COPY ./app /app/app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
-# Change ownership to appuser for OpenShift compatibility
-RUN chown -R appuser:appuser /app
+# Create HuggingFace cache directories with proper permissions BEFORE switching user
+RUN mkdir -p /app/.cache/huggingface && \
+    mkdir -p /app/.cache/transformers && \
+    chown -R appuser:appuser /app
+
+# Set HuggingFace cache environment variables
+ENV HF_HOME=/app/.cache/huggingface
+ENV TRANSFORMERS_CACHE=/app/.cache/transformers
+ENV SENTENCE_TRANSFORMERS_HOME=/app/.cache/huggingface
 
 # Switch to non-root user
 USER appuser

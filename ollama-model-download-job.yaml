@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ollama-model-download
+  namespace: aibeniq-prod
+  labels:
+    app: aibeniq
+    component: ollama-init
+spec:
+  template:
+    metadata:
+      labels:
+        app: aibeniq
+        component: ollama-init
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: ollama-init
+          image: ollama/ollama:latest
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              echo "Waiting for Ollama service to be ready..."
+              while ! curl -s http://ollama:11434/ > /dev/null; do
+                echo "Waiting for Ollama service..."
+                sleep 5
+              done
+
+              echo "Ollama service is ready, downloading models..."
+
+              # Download required models
+              echo "Downloading nomic-embed-text model..."
+              ollama -s http://ollama:11434 pull nomic-embed-text
+
+              echo "Downloading llama3 model..."
+              ollama -s http://ollama:11434 pull llama3
+
+              echo "Downloading mistral model..."
+              ollama -s http://ollama:11434 pull mistral
+
+              echo "All models downloaded successfully!"
+              ollama -s http://ollama:11434 list
+          env:
+            - name: OLLAMA_HOST
+              value: "http://ollama:11434"
+      backoffLimit: 3

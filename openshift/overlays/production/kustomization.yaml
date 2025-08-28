@@ -10,22 +10,15 @@ resources:
 namespace: aibeniq-prod
 
 patchesStrategicMerge:
-  - domain-config-patch.yaml
-  - configmap-patch.yaml
-  - backend-patch.yaml
-  - frontend-patch.yaml
-  - postgres-patch.yaml
-  - route-patches.yaml
-  - internal-registry-patches.yaml
-  - frontend-permissions-patch.yaml
-  - traefik-permissions-patch.yaml
-  - adminer-permissions-patch.yaml
+  # Only remaining patch is backend dev sizing in development overlay; production has no resource patches now
 
 commonLabels:
-  environment: production
+  environment: production # Reverting to commonLabels due to oc/kustomize version schema
 
 images:
   - name: quay.io/aibeniq/backend
-    newTag: v1.0.0
+    newName: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/backend
+    newTag: latest
   - name: quay.io/aibeniq/frontend
-    newTag: v1.0.0
+    newName: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/frontend
+    newTag: latest

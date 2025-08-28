@@ -1,4 +1,4 @@
-﻿---
+---
 # Patch backend deployment to use internal registry
 apiVersion: apps/v1
 kind: Deployment
@@ -9,9 +9,9 @@ spec:
     spec:
       containers:
         - name: backend
-          image: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/backend:latest
+          image: image-registry.openshift-image-registry.svc:5000/aibeniq-prod/backend:dashboard-redhat-cf4002b
 ---
-# Patch frontend deployment to use internal registry  
+# Patch frontend deployment to use internal registry
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/frontend:latest
+          image: image-registry.openshift-image-registry.svc:5000/aibeniq-prod/frontend:latest
 ---
 # Patch backend prestart job to use internal registry
 apiVersion: batch/v1
@@ -33,4 +33,4 @@ spec:
     spec:
       containers:
         - name: backend-prestart
-          image: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/backend:latest
+          image: image-registry.openshift-image-registry.svc:5000/aibeniq-prod/backend:dashboard-redhat-cf4002b

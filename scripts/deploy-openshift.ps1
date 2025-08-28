@@ -8,6 +8,7 @@ param(
 
     [switch]$Build,
     [switch]$Push,
+    [switch]$NoCache,
     [switch]$DryRun,
     [switch]$Help,
     [switch]$Internal
@@ -36,12 +37,14 @@ PARAMETERS:
     -Environment ENV         Target environment (dev|prod) [required]
     -Build                  Build Docker images locally
     -Push                   Push images to registry (requires -Build)
+    -NoCache                Rebuild images without using Docker layer cache
     -DryRun                 Show what would be deployed without applying
     -Help                   Show this help message
 
 EXAMPLES:
     .\deploy-openshift.ps1 -Environment dev
     .\deploy-openshift.ps1 -Environment prod -Build -Push
+    .\deploy-openshift.ps1 -Environment prod -Build -Push -NoCache
     .\deploy-openshift.ps1 -Environment dev -DryRun
 
 PREREQUISITES:
@@ -265,8 +268,14 @@ function Build-Images {
         $script:IMAGE_TAG = "latest"
     }
 
+    $cacheFlag = ""
+    if ($NoCache) {
+        $cacheFlag = "--no-cache"
+        Write-Status "NoCache enabled: will bypass Docker build cache"
+    }
+
     Write-Status "Building backend image..."
-    docker build -t "$script:REGISTRY/$script:NAMESPACE/backend:$script:IMAGE_TAG" ./backend
+    docker build $cacheFlag -t "$script:REGISTRY/$script:NAMESPACE/backend:$script:IMAGE_TAG" ./backend
     if ($LASTEXITCODE -ne 0) { Write-Error-Custom "Failed to build backend image" ; exit 1 }
     docker tag "$script:REGISTRY/$script:NAMESPACE/backend:$script:IMAGE_TAG" "$script:REGISTRY/$script:NAMESPACE/backend:latest"
 
@@ -280,7 +289,7 @@ function Build-Images {
         $API_URL = "https://api-$script:PROJECT_NAME.apps.your-cluster.com"
     }
     Write-Status "Using API URL for frontend build: $API_URL"
-    docker build -t "$script:REGISTRY/$script:NAMESPACE/frontend:$script:IMAGE_TAG" ./frontend --build-arg VITE_API_URL=$API_URL
+    docker build $cacheFlag -t "$script:REGISTRY/$script:NAMESPACE/frontend:$script:IMAGE_TAG" ./frontend --build-arg VITE_API_URL=$API_URL
     if ($LASTEXITCODE -ne 0) { Write-Error-Custom "Failed to build frontend image" ; exit 1 }
     docker tag "$script:REGISTRY/$script:NAMESPACE/frontend:$script:IMAGE_TAG" "$script:REGISTRY/$script:NAMESPACE/frontend:latest"
 

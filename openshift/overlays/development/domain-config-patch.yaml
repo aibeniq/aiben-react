@@ -5,7 +5,7 @@ metadata:
 data:
   # Development environment domain configuration
   BASE_DOMAIN: "aiben.io"
-  ENVIRONMENT: "dev"
+  ENVIRONMENT: "development"
 
   # Service URLs for development environment
   FRONTEND_URL: "redhat-dev.aiben.io"

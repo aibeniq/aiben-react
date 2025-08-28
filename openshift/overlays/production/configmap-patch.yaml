@@ -6,7 +6,8 @@ data:
   ENVIRONMENT: "production"
   PROJECT_NAME: "AibenIQ"
   STACK_NAME: "aibeniq"
-  BACKEND_CORS_ORIGINS: "https://redhat.aiben.io,http://redhat.aiben.io"
+  FRONTEND_HOST: "https://redhat.aiben.io"
+  BACKEND_CORS_ORIGINS: "https://redhat.aiben.io,https://redhat-api.aiben.io,http://redhat.aiben.io,http://redhat-api.aiben.io,http://localhost:5173"
   POSTGRES_SERVER: "postgres"
   POSTGRES_PORT: "5432"
   POSTGRES_DB: "app"
@@ -27,4 +28,4 @@ kind: ConfigMap
 metadata:
   name: frontend-config
 data:
-  VITE_API_URL: "https://backend-api-aibeniq-prod.apps.aibeniq-prod.gimc.p1.openshiftapps.com"
+  VITE_API_URL: "https://redhat-api.aiben.io"

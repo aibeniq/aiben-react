@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  labels:
+    app: aibeniq
+    component: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aibeniq
+      component: ollama
+  template:
+    metadata:
+      labels:
+        app: aibeniq
+        component: ollama
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+            - containerPort: 11434
+              name: http
+          env:
+            - name: OLLAMA_HOST
+              value: "0.0.0.0"
+            - name: HOME
+              value: "/tmp"
+            - name: OLLAMA_DATA_DIR
+              value: "/tmp/.ollama"
+          volumeMounts:
+            - name: ollama-data
+              mountPath: /tmp/.ollama
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 11434
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+      volumes:
+        - name: ollama-data
+          persistentVolumeClaim:
+            claimName: ollama-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama
+  labels:
+    app: aibeniq
+    component: ollama
+spec:
+  type: ClusterIP
+  ports:
+    - port: 11434
+      targetPort: 11434
+      protocol: TCP
+      name: http
+  selector:
+    app: aibeniq
+    component: ollama
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-data
+  labels:
+    app: aibeniq
+    component: ollama
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi

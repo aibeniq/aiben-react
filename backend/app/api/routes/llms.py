@@ -1,6 +1,8 @@
 import os
 import replicate
 import uuid
+import threading
+import requests
 from typing import Any, List, Optional
 import boto3
 import traceback
@@ -176,10 +178,9 @@ def create_llm_model(
     model_in: LlmModelCreate, session: SessionDep, current_user: CurrentUser
 ) -> LlmModelPublic:
     """
-    Create a new LLM.
+    Create a new LLM and trigger model download for supported providers.
     """
-    # Optionally, validate model_id/provider here (e.g., try to instantiate the model)
-    # For now, just create the model
+    # Create the model record first
     model = LlmModel(
         **model_in.model_dump(),
         owner_id=current_user.id,
@@ -189,7 +190,77 @@ def create_llm_model(
     session.add(model)
     session.commit()
     session.refresh(model)
+
+    # Trigger model download for supported providers
+    _trigger_model_download(model_in.provider, model_in.model_id)
+
     return model
+
+
+def _trigger_model_download(provider: ModelProvider, model_id: str):
+    """
+    Trigger model download for providers that support it.
+    This runs in the background to avoid blocking the API response.
+    """
+    import threading
+
+    def download_task():
+        try:
+            if provider == ModelProvider.OLLAMA:
+                _download_ollama_model(model_id)
+            elif provider == ModelProvider.HUGGINGFACE:
+                _download_huggingface_model(model_id)
+            # Add other providers as needed
+        except Exception as e:
+            print(
+                f"Error downloading model {model_id} for provider {provider}: {str(e)}"
+            )
+
+    # Start download in background thread
+    thread = threading.Thread(target=download_task)
+    thread.daemon = True
+    thread.start()
+
+
+def _download_ollama_model(model_id: str):
+    """Download an Ollama model."""
+    import requests
+
+    base_url = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")
+    print(f"Triggering download for Ollama model: {model_id}")
+
+    try:
+        response = requests.post(
+            f"{base_url}/api/pull",
+            json={"name": model_id},
+            timeout=300,  # 5 minute timeout for initial pull request
+        )
+
+        if response.status_code == 200:
+            print(f"Successfully triggered download for Ollama model: {model_id}")
+        else:
+            print(
+                f"Failed to trigger download for Ollama model {model_id}: {response.text}"
+            )
+    except Exception as e:
+        print(f"Error triggering Ollama model download: {str(e)}")
+
+
+def _download_huggingface_model(model_id: str):
+    """Pre-download a HuggingFace model."""
+    try:
+        from transformers import AutoTokenizer, AutoModel
+
+        print(f"Pre-downloading HuggingFace model: {model_id}")
+
+        # Download tokenizer and model to cache
+        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        model = AutoModel.from_pretrained(model_id)
+
+        print(f"Successfully pre-downloaded HuggingFace model: {model_id}")
+    except Exception as e:
+        print(f"Error pre-downloading HuggingFace model: {str(e)}")
+        # Don't raise - this is a background operation
 
 
 @router.delete("/{model_id}", response_model=Message)

@@ -13,16 +13,15 @@ patchesStrategicMerge:
   - domain-config-patch.yaml
   - configmap-patch.yaml
   - backend-patch.yaml
-  - frontend-patch.yaml
-  - route-patches.yaml
-  - internal-registry-patches.yaml
-  - frontend-permissions-patch.yaml
+  # internal registry now handled via images block
 
 commonLabels:
   environment: development
 
 images:
   - name: quay.io/aibeniq/backend
-    newTag: dev
+    newName: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-dev/backend
+    newTag: latest
   - name: quay.io/aibeniq/frontend
-    newTag: dev
+    newName: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-dev/frontend
+    newTag: latest

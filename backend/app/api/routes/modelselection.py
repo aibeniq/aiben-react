@@ -1,5 +1,7 @@
 import uuid
 import os
+import threading
+import requests
 from typing import List, Dict
 import replicate
 import boto3
@@ -375,7 +377,77 @@ def create_embedding_model(
     session.commit()
     session.refresh(model)
 
+    # Trigger model download for supported providers
+    _trigger_embedding_model_download(model_in.provider, model_in.model_id)
+
     return model
+
+
+def _trigger_embedding_model_download(provider: ModelProvider, model_id: str):
+    """
+    Trigger embedding model download for providers that support it.
+    This runs in the background to avoid blocking the API response.
+    """
+    import threading
+
+    def download_task():
+        try:
+            if provider == ModelProvider.OLLAMA:
+                _download_ollama_embedding_model(model_id)
+            elif provider == ModelProvider.HUGGINGFACE:
+                _download_huggingface_embedding_model(model_id)
+            # Add other providers as needed
+        except Exception as e:
+            print(
+                f"Error downloading embedding model {model_id} for provider {provider}: {str(e)}"
+            )
+
+    # Start download in background thread
+    thread = threading.Thread(target=download_task)
+    thread.daemon = True
+    thread.start()
+
+
+def _download_ollama_embedding_model(model_id: str):
+    """Download an Ollama embedding model."""
+    import requests
+
+    base_url = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")
+    print(f"Triggering download for Ollama embedding model: {model_id}")
+
+    try:
+        response = requests.post(
+            f"{base_url}/api/pull",
+            json={"name": model_id},
+            timeout=300,  # 5 minute timeout for initial pull request
+        )
+
+        if response.status_code == 200:
+            print(
+                f"Successfully triggered download for Ollama embedding model: {model_id}"
+            )
+        else:
+            print(
+                f"Failed to trigger download for Ollama embedding model {model_id}: {response.text}"
+            )
+    except Exception as e:
+        print(f"Error triggering Ollama embedding model download: {str(e)}")
+
+
+def _download_huggingface_embedding_model(model_id: str):
+    """Pre-download a HuggingFace embedding model."""
+    try:
+        from sentence_transformers import SentenceTransformer
+
+        print(f"Pre-downloading HuggingFace embedding model: {model_id}")
+
+        # Download the model to cache
+        model = SentenceTransformer(model_id)
+
+        print(f"Successfully pre-downloaded HuggingFace embedding model: {model_id}")
+    except Exception as e:
+        print(f"Error pre-downloading HuggingFace embedding model: {str(e)}")
+        # Don't raise - this is a background operation
 
 
 @router.put("/{model_id}", response_model=EmbeddingModelPublic)

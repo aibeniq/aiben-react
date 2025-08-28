@@ -8,10 +8,10 @@ metadata:
 data:
   # Base domain for all environments
   BASE_DOMAIN: "aiben.io"
-  # Environment placeholder (will be replaced by overlays)
-  ENVIRONMENT: "staging"
+  # Default environment (production); development overlay will override
+  ENVIRONMENT: "production"
 
-  # Service URLs for RedHat environment (production)
+  # Service URLs for production environment
   FRONTEND_URL: "redhat.aiben.io"
   API_URL: "redhat-api.aiben.io"
   TRAEFIK_URL: "redhat-traefik.aiben.io"

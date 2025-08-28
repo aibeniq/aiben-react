@@ -180,8 +180,17 @@ function LlmModels() {
   const addModelMutation = useMutation({
     mutationFn: (data: { name: string; model_id: string; provider: string; description: string }) =>
       LlmModelsService.createLlmModel({ requestBody: { ...data, provider: data.provider as any } }),
-    onSuccess: () => {
-      showSuccessToast("LLM added successfully")
+    onSuccess: (data, variables) => {
+      const provider = variables.provider.toLowerCase()
+
+      if (provider === "ollama" || provider === "huggingface") {
+        showSuccessToast(
+          `LLM model "${variables.name}" has been added successfully. Model download initiated - this may take several minutes to complete. The model will be available for use once the download finishes.`,
+        )
+      } else {
+        showSuccessToast("LLM added successfully")
+      }
+
       resetForm()
       setIsOpen(false)
       queryClient.invalidateQueries({ queryKey: ["llmModels"] })
@@ -694,9 +703,18 @@ function EmbeddingModels() {
           throw error
         })
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       console.log("Mutation completed successfully with data:", data)
-      showSuccessToast("Model added successfully")
+      const provider = variables.provider.toLowerCase()
+
+      if (provider === "ollama" || provider === "huggingface") {
+        showSuccessToast(
+          `Embedding model "${variables.name}" has been added successfully. Model download initiated - this may take several minutes to complete. The model will be available for use once the download finishes.`,
+        )
+      } else {
+        showSuccessToast("Model added successfully")
+      }
+
       resetForm()
       onClose()
       queryClient.invalidateQueries({ queryKey: ["embeddingModels"] })

@@ -6,7 +6,7 @@ metadata:
     app: aibeniq
     component: frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: aibeniq
@@ -27,6 +27,9 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+          env:
+            - name: NGINX_USER
+              value: "nginx"
           envFrom:
             - configMapRef:
                 name: frontend-config
@@ -44,11 +47,21 @@ spec:
             periodSeconds: 5
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
               memory: "256Mi"
               cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "400m"
+          volumeMounts:
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            - name: nginx-run
+              mountPath: /var/run
+      volumes:
+        - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
