@@ -48,12 +48,12 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
+                  name: backend-secrets
                   key: POSTGRES_PASSWORD
             - name: POSTGRES_USER
               value: "app"
             - name: POSTGRES_DB
-              value: "app"
+              value: "aibeniq"
             - name: PGDATA
               value: "/var/lib/postgresql/data/pgdata"
           volumeMounts:
@@ -66,7 +66,7 @@ spec:
                 - -U
                 - app
                 - -d
-                - app
+                - aibeniq
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
@@ -76,7 +76,7 @@ spec:
                 - -U
                 - app
                 - -d
-                - app
+                - aibeniq
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:

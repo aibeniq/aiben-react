@@ -1,0 +1,48 @@
+﻿{
+    "namespace":  "aibeniq-dev",
+    "timestamp":  "2025-08-29T16:55:08.4279488-05:00",
+    "deployments":  [
+                        {
+                            "kind":  "Deployment",
+                            "name":  "adminer",
+                            "replicas":  1
+                        },
+                        {
+                            "kind":  "Deployment",
+                            "name":  "backend",
+                            "replicas":  1
+                        },
+                        {
+                            "kind":  "Deployment",
+                            "name":  "frontend",
+                            "replicas":  1
+                        },
+                        {
+                            "kind":  "Deployment",
+                            "name":  "ollama",
+                            "replicas":  1
+                        },
+                        {
+                            "kind":  "Deployment",
+                            "name":  "postgres",
+                            "replicas":  1
+                        },
+                        {
+                            "kind":  "Deployment",
+                            "name":  "redis",
+                            "replicas":  1
+                        }
+                    ],
+    "statefulsets":  [
+
+                     ],
+    "cronjobs":  [
+
+                 ],
+    "hpas":  [
+
+             ],
+    "machinesets":  [
+
+                    ]
+}

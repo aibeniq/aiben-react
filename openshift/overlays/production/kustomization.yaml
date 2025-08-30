@@ -1,4 +1,4 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
+﻿apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 metadata:
@@ -10,15 +10,17 @@ resources:
 namespace: aibeniq-prod
 
 patchesStrategicMerge:
-  # Only remaining patch is backend dev sizing in development overlay; production has no resource patches now
+  - configmap-patch.yaml
+  - secret-patch.yaml
+  - internal-registry-patches.yaml
 
 commonLabels:
   environment: production # Reverting to commonLabels due to oc/kustomize version schema
 
 images:
-  - name: quay.io/aibeniq/backend
+  - name: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/backend
     newName: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/backend
     newTag: latest
-  - name: quay.io/aibeniq/frontend
+  - name: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/frontend
     newName: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/frontend
     newTag: latest

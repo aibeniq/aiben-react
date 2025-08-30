@@ -5,12 +5,13 @@ import ReactDOM from "react-dom/client"
 import { routeTree } from "./routeTree.gen"
 
 import { ApiError, OpenAPI } from "./client"
+import { API_BASE_URL } from "./config/api"
 import { CustomProvider } from "./components/ui/provider"
 import { ResultsProvider } from "./contexts/ResultsContext"
 
-console.log("API URL:", import.meta.env.VITE_API_URL);
+console.log("API URL:", API_BASE_URL)
 
-OpenAPI.BASE = import.meta.env.VITE_API_URL
+OpenAPI.BASE = API_BASE_URL
 OpenAPI.TOKEN = async () => {
   return localStorage.getItem("access_token") || ""
 }

@@ -178,9 +178,17 @@ function LlmModels() {
 
   // Add mutations for adding, updating, deleting models
   const addModelMutation = useMutation({
-    mutationFn: (_data: { name: string; model_id: string; provider: string; description: string }) =>
-      LlmModelsService.createLlmModel({ requestBody: { ..._data, provider: _data.provider as any } }),
-    onSuccess: (data, variables) => {
+    mutationFn: (_data: {
+      name: string
+      model_id: string
+      provider: string
+      description: string
+    }) =>
+      LlmModelsService.createLlmModel({
+        requestBody: { ..._data, provider: _data.provider as any },
+      }),
+    // '_data' intentionally unused; response body not needed here
+    onSuccess: (_data, variables) => {
       const provider = variables.provider.toLowerCase()
 
       if (provider === "ollama" || provider === "huggingface") {

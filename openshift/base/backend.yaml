@@ -23,7 +23,8 @@ spec:
         #fsGroup: 1000
       containers:
         - name: backend
-          image: quay.io/aibeniq/backend:latest
+          # Use internal image registry service reference for reliability inside cluster
+          image: image-registry.openshift-image-registry.svc:5000/aibeniq-prod/backend:latest
           ports:
             - containerPort: 8000
               name: http
@@ -32,6 +33,7 @@ spec:
                 name: backend-config
             - secretRef:
                 name: backend-secrets
+          # CORS origins now sourced solely from ConfigMap (backend-config) to avoid drift.
           livenessProbe:
             httpGet:
               path: /api/v1/utils/health-check/
@@ -62,6 +64,27 @@ spec:
               "-c",
               "until pg_isready -h postgres -p 5432; do echo waiting for postgres; sleep 2; done;",
             ]
+        - name: wait-for-redis
+          image: redis:7-alpine
+          command:
+            [
+              "sh",
+              "-c",
+              "until redis-cli -h redis -p 6379 ping; do echo waiting for redis; sleep 2; done;",
+            ]
+        - name: run-prestart
+          image: image-registry.openshift-image-registry.svc:5000/aibeniq-prod/backend:latest
+          command:
+            [
+              "bash",
+              "-c",
+              "echo '[init] Running prestart script (migrations & seed)...'; if [ -f scripts/prestart.sh ]; then bash scripts/prestart.sh; elif [ -f /app/scripts/prestart.sh ]; then bash /app/scripts/prestart.sh; else echo 'prestart.sh not found'; fi; echo '[init] Prestart complete.'",
+            ]
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-secrets
 ---
 apiVersion: v1
 kind: Service

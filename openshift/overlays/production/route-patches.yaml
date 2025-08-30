@@ -15,13 +15,6 @@ spec:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: traefik-dashboard
-spec:
-  host: redhat-traefik.aiben.io
----
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
   name: adminer
 spec:
   host: redhat-adminer.aiben.io

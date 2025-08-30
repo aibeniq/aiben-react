@@ -1,4 +1,4 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
+﻿apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 metadata:
@@ -10,18 +10,23 @@ resources:
 namespace: aibeniq-dev
 
 patchesStrategicMerge:
-  - domain-config-patch.yaml
+  - internal-registry-patches.yaml
   - configmap-patch.yaml
   - backend-patch.yaml
-  # internal registry now handled via images block
+  - route-patches.yaml
 
 commonLabels:
   environment: development
 
 images:
-  - name: quay.io/aibeniq/backend
+  # Map external route images
+  - name: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/backend
     newName: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-dev/backend
     newTag: latest
-  - name: quay.io/aibeniq/frontend
+  - name: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/frontend
     newName: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-dev/frontend
+    newTag: latest
+  # Map internal service images
+  - name: image-registry.openshift-image-registry.svc:5000/aibeniq-prod/backend
+    newName: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-dev/backend
     newTag: latest

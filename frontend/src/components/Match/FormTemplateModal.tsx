@@ -57,34 +57,34 @@ const FormTemplateModal = ({
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // Validation state
-  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({})
 
   // Validation function
   const validateForm = () => {
-    const errors: {[key: string]: string} = {}
-    
+    const errors: { [key: string]: string } = {}
+
     if (!formName.trim()) {
       errors.name = "Form template name is required"
     } else if (formName.trim().length < 3) {
       errors.name = "Form template name must be at least 3 characters long"
     }
-    
+
     // Description is optional - no validation required
-    
+
     // Check if fields exist (should be a newline-separated string)
-    if (!fields.trim() || fields.split('\n').every(field => !field.trim())) {
+    if (!fields.trim() || fields.split("\n").every((field) => !field.trim())) {
       errors.fields = "At least one form field is required"
     }
-    
+
     setValidationErrors(errors)
-    
+
     // Show the first error as a toast
     const firstError = Object.values(errors)[0]
     if (firstError) {
       showErrorToast(firstError)
       return false
     }
-    
+
     return true
   }
 
@@ -92,14 +92,14 @@ const FormTemplateModal = ({
   const handleNameChange = (value: string) => {
     setFormName(value)
     if (validationErrors.name) {
-      setValidationErrors(prev => ({ ...prev, name: '' }))
+      setValidationErrors((prev) => ({ ...prev, name: "" }))
     }
   }
 
   const handleDescriptionChange = (value: string) => {
     setFormDescription(value)
     if (validationErrors.description) {
-      setValidationErrors(prev => ({ ...prev, description: '' }))
+      setValidationErrors((prev) => ({ ...prev, description: "" }))
     }
   }
 
@@ -108,7 +108,7 @@ const FormTemplateModal = ({
     if (!validateForm()) {
       return // Stop execution if validation fails
     }
-    
+
     // Call the parent's onSave function if validation passes
     onSave()
   }
@@ -155,7 +155,10 @@ const FormTemplateModal = ({
 
       // For now, we'll call the JSON endpoint directly since the client might not be updated yet
       // TODO: Replace with generated client call once available
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
+      // Use centralized API base (ensures production host)
+      // Lazy import to avoid circular deps if any
+      const { API_BASE_URL } = await import("@/config/api")
+      const baseUrl = API_BASE_URL
       const apiUrl = `${baseUrl}/api/v1/formconnect/generate-fields-json`
 
       // Get auth token for API calls
@@ -210,7 +213,7 @@ const FormTemplateModal = ({
 
         // Clear fields validation error if it exists
         if (validationErrors.fields) {
-          setValidationErrors(prev => ({ ...prev, fields: '' }))
+          setValidationErrors((prev) => ({ ...prev, fields: "" }))
         }
 
         const searchMethodText = searchMode === "vector" ? "vector search" : "full document scan"
@@ -302,7 +305,12 @@ const FormTemplateModal = ({
               <VStack align="stretch" gap={4}>
                 <HStack align="stretch" gap={4}>
                   <VStack align="stretch" gap={4} flex="1">
-                    <Field label="Form Template Name" required invalid={!!validationErrors.name} errorText={validationErrors.name}>
+                    <Field
+                      label="Form Template Name"
+                      required
+                      invalid={!!validationErrors.name}
+                      errorText={validationErrors.name}
+                    >
                       <Input
                         value={formName}
                         onChange={(e) => handleNameChange(e.target.value)}
@@ -310,7 +318,11 @@ const FormTemplateModal = ({
                       />
                     </Field>
 
-                    <Field label="Form Template Description" invalid={!!validationErrors.description} errorText={validationErrors.description}>
+                    <Field
+                      label="Form Template Description"
+                      invalid={!!validationErrors.description}
+                      errorText={validationErrors.description}
+                    >
                       <Textarea
                         value={formDescription}
                         onChange={(e) => handleDescriptionChange(e.target.value)}
@@ -471,7 +483,7 @@ const FormTemplateModal = ({
                           onFieldsChange(newFields)
                           // Clear validation error when fields are modified
                           if (validationErrors.fields) {
-                            setValidationErrors(prev => ({ ...prev, fields: '' }))
+                            setValidationErrors((prev) => ({ ...prev, fields: "" }))
                           }
                         }}
                         placeholder="Add a field name (e.g. First Name, Address, SSN) or suggest from description"

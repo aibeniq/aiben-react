@@ -6,17 +6,20 @@ Target cluster/namespace: defaults to 'aibeniq-prod2' (you can override)
 
 Usage examples:
   # show current status
-  .\pause-cluster.ps1 -Action status -Namespace aibeniq-prod2
+  .\pause-cluster.ps1 -Action status -Namespace aibeniq-dev
 
-  # pause (save state + scale to zero)
-  .\pause-cluster.ps1 -Action pause -Namespace aibeniq-prod2
+  # cleanup failed resources without pausing
+  .\pause-cluster.ps1 -Action cleanup -Namespace aibeniq-dev
+
+  # pause (save state + scale to zero + cleanup)
+  .\pause-cluster.ps1 -Action pause -Namespace aibeniq-dev
 
   # resume (restore saved state)
-  .\pause-cluster.ps1 -Action resume -Namespace aibeniq-prod2
+  .\pause-cluster.ps1 -Action resume -Namespace aibeniq-dev
 
 Options:
-  -Action pause|resume|status
-  -Namespace   target namespace (default: aibeniq-prod2)
+  -Action pause|resume|status|cleanup
+  -Namespace   target namespace (default: aibeniq-dev)
   -StateFile   path to save state (default: ./pause-state-<namespace>.json)
   -ScaleWorkers switch; if provided and you have cluster-admin rights the script will scale "worker" machinesets to 0 (risky)
   -DryRun      show commands without executing
@@ -24,10 +27,10 @@ Options:
 #>
 
 param(
-    [ValidateSet('pause','resume','status')]
+    [ValidateSet('pause','resume','status','cleanup')]
     [string]$Action = 'status',
 
-    [string]$Namespace = 'aibeniq-prod2',
+    [string]$Namespace = 'aibeniq-dev',
 
     [string]$StateFile = "./pause-state-$([System.IO.Path]::GetFileNameWithoutExtension($Namespace)).json",
 
@@ -38,7 +41,7 @@ param(
 )
 
 function Show-Usage {
-    Write-Host "Usage: .\pause-cluster.ps1 -Action pause|resume|status [-Namespace name] [-StateFile path] [-ScaleWorkers] [-DryRun] [-Force]" -ForegroundColor Cyan
+    Write-Host "Usage: .\pause-cluster.ps1 -Action pause|resume|status|cleanup [-Namespace name] [-StateFile path] [-ScaleWorkers] [-DryRun] [-Force]" -ForegroundColor Cyan
 }
 
 if ($Help) { Show-Usage ; exit 0 }
@@ -62,9 +65,93 @@ function Load-StateFromFile() {
     return $raw | ConvertFrom-Json
 }
 
+function Cleanup-FailedResources {
+    param($ns)
+    Write-Host "Cleaning up failed/completed resources in namespace: $ns" -ForegroundColor Cyan
+    
+    # Clean up failed pods
+    Write-Host "Cleaning up failed pods..." -ForegroundColor Yellow
+    if ($DryRun) {
+        Write-Host "DRYRUN: would delete failed pods" -ForegroundColor Yellow
+        oc get pods -n $ns --field-selector=status.phase=Failed
+    } else {
+        oc delete pods -n $ns --field-selector=status.phase=Failed 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Deleted failed pods" -ForegroundColor Green
+        } else {
+            Write-Host "No failed pods to delete" -ForegroundColor Gray
+        }
+    }
+
+    # Clean up succeeded pods (from completed jobs)
+    Write-Host "Cleaning up succeeded pods..." -ForegroundColor Yellow
+    if ($DryRun) {
+        Write-Host "DRYRUN: would delete succeeded pods" -ForegroundColor Yellow
+        oc get pods -n $ns --field-selector=status.phase=Succeeded
+    } else {
+        oc delete pods -n $ns --field-selector=status.phase=Succeeded 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Deleted succeeded pods" -ForegroundColor Green
+        } else {
+            Write-Host "No succeeded pods to delete" -ForegroundColor Gray
+        }
+    }
+
+    # Clean up completed builds
+    Write-Host "Cleaning up completed builds..." -ForegroundColor Yellow
+    if ($DryRun) {
+        Write-Host "DRYRUN: would delete completed builds" -ForegroundColor Yellow
+        oc get builds -n $ns --field-selector=status.phase=Complete
+    } else {
+        oc delete builds -n $ns --field-selector=status.phase=Complete 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Deleted completed builds" -ForegroundColor Green
+        } else {
+            Write-Host "No completed builds to delete" -ForegroundColor Gray
+        }
+    }
+
+    # Clean up failed builds
+    Write-Host "Cleaning up failed builds..." -ForegroundColor Yellow
+    if ($DryRun) {
+        Write-Host "DRYRUN: would delete failed builds" -ForegroundColor Yellow
+        oc get builds -n $ns --field-selector=status.phase=Failed
+    } else {
+        oc delete builds -n $ns --field-selector=status.phase=Failed 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Deleted failed builds" -ForegroundColor Green
+        } else {
+            Write-Host "No failed builds to delete" -ForegroundColor Gray
+        }
+    }
+
+    # Clean up old ReplicaSets with 0 replicas
+    Write-Host "Cleaning up old ReplicaSets..." -ForegroundColor Yellow
+    if ($DryRun) {
+        Write-Host "DRYRUN: would check for old ReplicaSets" -ForegroundColor Yellow
+        oc get rs -n $ns -o jsonpath='{range .items[?(@.spec.replicas==0)]}{.metadata.name}{"\n"}{end}'
+    } else {
+        $oldRS = oc get rs -n $ns -o jsonpath='{range .items[?(@.spec.replicas==0)]}{.metadata.name}{" "}{end}' 2>$null
+        if ($oldRS -and $oldRS.Trim()) {
+            $rsList = $oldRS.Trim().Split(" ")
+            foreach ($rs in $rsList) {
+                if ($rs) {
+                    oc delete rs $rs -n $ns
+                    Write-Host "Deleted ReplicaSet: $rs" -ForegroundColor Green
+                }
+            }
+        } else {
+            Write-Host "No old ReplicaSets to delete" -ForegroundColor Gray
+        }
+    }
+}
+
 function Pause-Workloads {
     param($ns)
     Write-Host "Pausing workloads in namespace: $ns" -ForegroundColor Cyan
+
+    # First cleanup failed/completed resources
+    Cleanup-FailedResources -ns $ns
 
     # gather deployments
     $deployJson = oc get deployment -n $ns -o json 2>$null
@@ -201,6 +288,9 @@ function Resume-Workloads {
         }
     }
 
+    # 🚀 NEW: Apply environment-specific configuration after resume
+    Apply-EnvironmentConfig -ns $ns
+
     Write-Host "Resume requested. Some pods may take time to become Ready." -ForegroundColor Green
     
     # Check for service endpoint issues that might prevent pods from starting
@@ -255,6 +345,17 @@ function Scale-Workers-ToZero {
 # Main
 if ($Action -eq 'status') { Check-OCLoggedIn ; Show-Status -ns $Namespace ; exit 0 }
 
+if ($Action -eq 'cleanup') {
+    Check-OCLoggedIn
+    if (-not $Force) {
+        Write-Host "About to cleanup failed/completed resources in namespace: $Namespace" -ForegroundColor Yellow
+        $confirm = Read-Host "Proceed? (y/N)"
+        if ($confirm -ne 'y' -and $confirm -ne 'Y') { Write-Host "Aborted by user." ; exit 0 }
+    }
+    Cleanup-FailedResources -ns $Namespace
+    exit 0
+}
+
 if ($Action -eq 'pause') {
     Check-OCLoggedIn
     if (-not $Force) {
@@ -280,6 +381,39 @@ if ($Action -eq 'resume') {
         }
     }
     exit 0
+}
+
+# Enhanced environment-aware functions
+function Apply-EnvironmentConfig {
+    param($ns)
+    
+    # Determine environment from namespace
+    $environment = if ($ns -like "*dev*") { "dev" } elseif ($ns -like "*prod*") { "prod" } else { "dev" }
+    
+    Write-Host "Applying $environment environment configuration to namespace: $ns" -ForegroundColor Cyan
+    
+    if (-not $DryRun) {
+        # Use the deployment script to apply proper environment config
+        if (Test-Path ".\scripts\deploy-openshift.ps1") {
+            Write-Host "Running deployment script to restore environment configuration..."
+            & ".\scripts\deploy-openshift.ps1" -Environment $environment -SkipSecrets
+        } else {
+            Write-Warning "deploy-openshift.ps1 not found. Applying basic configuration manually..."
+            
+            if ($environment -eq "dev") {
+                # Development: HTTP URLs
+                oc patch configmap frontend-config -n $ns -p '{"data":{"VITE_API_URL":"http://redhat-api.aiben.io"}}' 2>$null
+                oc patch configmap backend-config -n $ns -p '{"data":{"FRONTEND_HOST":"http://redhat.aiben.io","BACKEND_CORS_ORIGINS":"http://localhost,http://localhost:5173,http://redhat.aiben.io"}}' 2>$null
+            } else {
+                # Production: HTTPS URLs
+                oc patch configmap frontend-config -n $ns -p '{"data":{"VITE_API_URL":"https://redhat-api.aiben.io"}}' 2>$null
+                oc patch configmap backend-config -n $ns -p '{"data":{"FRONTEND_HOST":"https://redhat.aiben.io","BACKEND_CORS_ORIGINS":"https://redhat.aiben.io,https://redhat-api.aiben.io,http://redhat.aiben.io,http://redhat-api.aiben.io,http://localhost:5173"}}' 2>$null
+            }
+            
+            # Restart deployments to pick up config changes
+            oc rollout restart deployment/frontend deployment/backend -n $ns 2>$null
+        }
+    }
 }
 
 Write-Host "Unknown action: $Action" ; Show-Usage ; exit 1

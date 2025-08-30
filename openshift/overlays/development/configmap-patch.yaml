@@ -3,12 +3,13 @@ kind: ConfigMap
 metadata:
   name: backend-config
 data:
-  ENVIRONMENT: "development"
-  BACKEND_CORS_ORIGINS: "http://localhost,http://localhost:5173,https://redhat-dev.aiben.io"
+  ENVIRONMENT: "production"
+  BACKEND_CORS_ORIGINS: "http://localhost,http://localhost:5173,http://redhat.aiben.io"
+  FRONTEND_HOST: "http://redhat.aiben.io"
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: frontend-config
 data:
-  VITE_API_URL: "https://redhat-api-dev.aiben.io"
+  VITE_API_URL: "http://redhat-api.aiben.io"

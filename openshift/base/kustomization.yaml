@@ -9,9 +9,9 @@ resources:
   - configmap.yaml
   - secrets.yaml
   - postgres.yaml
+  - redis.yaml
   - backend.yaml
   - frontend.yaml
-  - traefik.yaml
   - adminer.yaml
   - ollama.yaml
 
@@ -21,7 +21,7 @@ commonLabels:
   environment: production # Using commonLabels for compatibility with current kustomize version bundled in oc
 
 images:
-  - name: quay.io/aibeniq/backend
+  - name: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/backend
     newTag: latest
-  - name: quay.io/aibeniq/frontend
+  - name: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/frontend
     newTag: latest

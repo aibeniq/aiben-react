@@ -1,8 +1,44 @@
 # Python
-__pycache__
+
+**pycache**
 app.egg-info
-*.pyc
+\*.pyc
 .mypy_cache
 .coverage
 htmlcov
 .venv
+
+# Ignore HuggingFace model files to speed up Docker builds
+
+**/\*.bin
+**/_.safetensors
+\*\*/_.onnx
+**/\*.h5
+**/_.pkl
+\*\*/_.pt \*_/_.pth
+
+# Ignore cache directories (will be created at runtime)
+
+.cache/
+_.pyo
+_.pyd
+.Python
+\*.so
+
+# Ignore git and development files
+
+.git/
+.gitignore
+.vscode/
+.pytest_cache/
+\*.log
+
+# Ignore unnecessary files
+
+README.md
+_.md
+Dockerfile_
+docker-compose*
+.env*
+tests/
+docs/

@@ -19,7 +19,7 @@ spec:
         #fsGroup: 1000
       containers:
         - name: prestart
-          image: quay.io/aibeniq/backend:latest
+          image: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/backend:latest
           command: ["bash", "scripts/prestart.sh"]
           envFrom:
             - configMapRef:

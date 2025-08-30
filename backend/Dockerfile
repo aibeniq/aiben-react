@@ -49,14 +49,25 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Create HuggingFace cache directories with proper permissions BEFORE switching user
 RUN mkdir -p /app/.cache/huggingface && \
     mkdir -p /app/.cache/transformers && \
-    chown -R appuser:appuser /app
+    chown -R appuser:appuser /app/.cache
 
 # Set HuggingFace cache environment variables
 ENV HF_HOME=/app/.cache/huggingface
 ENV TRANSFORMERS_CACHE=/app/.cache/transformers
 ENV SENTENCE_TRANSFORMERS_HOME=/app/.cache/huggingface
 
+# Add graceful shutdown and health check configuration
+STOPSIGNAL SIGTERM
+
+# Set graceful shutdown timeout
+ENV GRACEFUL_TIMEOUT=30
+
+# Add health check that matches OpenShift readiness probe
+# Fix: HEALTHCHECK command must be on a single line
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 CMD curl -f http://localhost:8000/ready || exit 1
+
 # Switch to non-root user
 USER appuser
 
-CMD ["fastapi", "run", "--workers", "4", "app/main.py"]
+# Use FastAPI with single worker for OpenShift compatibility
+CMD ["fastapi", "run", "--workers", "1", "app/main.py"]

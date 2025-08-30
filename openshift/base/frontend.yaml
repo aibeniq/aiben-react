@@ -23,13 +23,16 @@ spec:
         #fsGroup: 1000
       containers:
         - name: frontend
-          image: quay.io/aibeniq/frontend:latest
+          image: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/frontend:latest
           ports:
             - containerPort: 8080
               name: http
+          # ENTRYPOINT handles runtime injection of VITE_API_URL; no command override needed
           env:
             - name: NGINX_USER
               value: "nginx"
+            - name: VITE_API_URL
+              value: "https://redhat-api.aiben.io"
           envFrom:
             - configMapRef:
                 name: frontend-config
