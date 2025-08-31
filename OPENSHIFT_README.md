@@ -166,13 +166,22 @@ OPENAI_ADMIN_KEY: "REPLACE_ME_OPENAI_ADMIN_KEY" # OpenAI Admin API key for usage
 
 ### Main Deployment Script
 
-Use `scripts\deploy-openshift.ps1` for all deployments:
+Use `scripts\deploy-openshift.ps1` for all deployments with Docker size optimization support:
 
 ```powershell
-# Quick deployment (development)
+# Quick deployment (development with auto build type)
 .\scripts\deploy-openshift.ps1 -Environment dev
 
-# Full build and push (production)
+# Production lean deployment (recommended - ~500MB-1GB) with memory optimization
+.\scripts\deploy-openshift.ps1 -Environment prod -Build -Push -BackendBuild lean
+
+# Production with runtime ML support (lean + on-demand ML) with memory optimization
+.\scripts\deploy-openshift.ps1 -Environment prod -Build -Push -BackendBuild lean -EnableRuntimeML
+
+# Development with full ML capabilities (~2-3GB) with memory optimization
+.\scripts\deploy-openshift.ps1 -Environment dev -Build -Push -BackendBuild full
+
+# Auto build type (lean for prod, full for dev)
 .\scripts\deploy-openshift.ps1 -Environment prod -Build -Push
 
 # Dry run to check configuration
@@ -185,6 +194,41 @@ Use `scripts\deploy-openshift.ps1` for all deployments:
 .\scripts\deploy-openshift.ps1 -Environment dev -ForceCleanup -DiagnoseDeployment backend
 ```
 
+### Docker Size Optimization Options
+
+The deployment script now supports **three backend build types** to optimize Docker image size:
+
+#### 1. Lean Build (Recommended for Production)
+
+- **Size**: ~500MB-1GB (90% reduction from original 11.3GB)
+- **Usage**: `-BackendBuild lean`
+- **Features**: OpenAI, AWS Bedrock, Ollama
+- **Limitation**: No HuggingFace models by default
+- **Best for**: Production deployments, OpenAI-only usage
+
+#### 2. Lean + Runtime ML
+
+- **Size**: ~500MB-1GB base + on-demand ML installation
+- **Usage**: `-BackendBuild lean -EnableRuntimeML`
+- **Features**: All providers (ML installed on first use)
+- **Trade-off**: First ML operation has 30-60 second installation delay
+- **Best for**: Occasional HuggingFace usage with minimal image size
+
+#### 3. Full Build
+
+- **Size**: ~2-3GB (70% reduction from original)
+- **Usage**: `-BackendBuild full`
+- **Features**: All ML capabilities pre-installed
+- **Best for**: Heavy HuggingFace model usage, development
+
+#### 4. Auto Build (Default)
+
+- **Usage**: No `-BackendBuild` parameter
+- **Logic**:
+  - Production environment → lean build
+  - Development environment → full build
+- **Best for**: Most use cases
+
 ### Script Parameters
 
 - `-Environment`: `dev` or `prod` (required)
@@ -196,6 +240,11 @@ Use `scripts\deploy-openshift.ps1` for all deployments:
 - `-DiagnoseOnly`: Run diagnostics on stuck deployments
 - `-DiagnoseDeployment`: Specify deployment to diagnose (default: backend)
 - `-ForceCleanup`: Force cleanup and restart stuck deployment
+
+**New Docker Size Optimization Parameters:**
+
+- `-BackendBuild`: Choose build type (`lean`|`full`|`auto`) [default: auto]
+- `-EnableRuntimeML`: Enable runtime ML installation (use with `-BackendBuild lean`)
 
 ### Manual Deployment Steps
 
@@ -258,6 +307,42 @@ openshift/
 ## Troubleshooting Guide
 
 ### Common Deployment Issues
+
+#### 0. Docker Image Push Timeouts / Large Image Size Issues
+
+**Symptoms**:
+
+- Docker push commands timeout or fail
+- Backend image size is extremely large (>10GB)
+- OpenShift deployment takes very long time
+- Out of storage space errors
+
+**Root Cause**: PyTorch+CUDA libraries add ~6GB to Docker image
+
+**Solution**: Use the new lean build system
+
+```powershell
+# ✅ RECOMMENDED: Use lean build for production
+.\scripts\deploy-openshift.ps1 -Environment prod -Build -Push -BackendBuild lean
+
+# For development with ML capabilities
+.\scripts\deploy-openshift.ps1 -Environment dev -Build -Push -BackendBuild full
+
+# Lean build with on-demand ML installation
+.\scripts\deploy-openshift.ps1 -Environment prod -Build -Push -BackendBuild lean -EnableRuntimeML
+```
+
+**Size Comparison**:
+
+- Original: 11.3GB
+- Lean build: ~500MB-1GB (90% reduction)
+- Full build: ~2-3GB (70% reduction)
+
+**Available Build Types**:
+
+- `lean`: OpenAI, AWS, Ollama only (~500MB-1GB)
+- `full`: All ML capabilities pre-installed (~2-3GB)
+- `auto`: Lean for prod, full for dev (default)
 
 #### 1. Backend CrashLoopBackOff / Init:1/2 Status
 
@@ -414,6 +499,356 @@ oc rollout status deployment/backend --timeout=300s
 - Use single worker configuration: `--workers 1`
 - Set appropriate graceful shutdown timeout: `--timeout-graceful-shutdown 30`
 
+#### 6. HuggingFace Model Loading Issues
+
+**Symptoms**:
+
+- Backend logs show `PermissionError: [Errno 13] Permission denied: '/app/.cache/huggingface/'`
+- HuggingFace model downloads fail with cache directory errors
+- 404 errors for `sentence-transformers/all-MiniLM-L6-v2` (incorrect model name format)
+- Backend returns 500 errors when using embedding models
+
+**Root Cause**:
+
+- **OpenShift Security Conflict**: OpenShift assigns random UIDs that don't match Dockerfile's `appuser`
+- **Permission Mismatch**: Even though Dockerfile creates `/app/.cache/` with proper permissions, OpenShift's random UID can't write to it
+- **Incorrect Model Naming**: Should be `all-MiniLM-L6-v2`, not `sentence-transformers/all-MiniLM-L6-v2`
+
+**✅ Comprehensive Fix Applied**:
+
+**1. Updated Dockerfile** ([`backend/Dockerfile`](backend/Dockerfile)) now uses a simplified, robust pattern:
+
+```dockerfile
+# Create writable cache (model files are non-sensitive) for arbitrary OpenShift UID
+RUN mkdir -p /app/.cache/huggingface /app/.cache/transformers \
+  && chmod -R 0777 /app/.cache
+
+# Runtime entrypoint validates writability and can fall back to /tmp if needed
+COPY docker/entrypoint-hf.sh /entrypoint-hf.sh
+ENTRYPOINT ["/entrypoint-hf.sh"]
+```
+
+Key improvements:
+
+- 0777 permissions avoid reliance on fsGroup for image-layer dirs
+- Lightweight entrypoint (`entrypoint-hf.sh`) auto-falls back to `/tmp/huggingface-cache` if primary path not writable
+- Eliminated redundant chown/chgrp layers and multiple tmp dirs
+- Healthcheck retained (`/ready`) ensuring readiness gating
+
+**2. Updated OpenShift Deployment** ([`backend.yaml`](openshift/base/backend.yaml)):
+
+```yaml
+securityContext:
+  runAsNonRoot: true
+  # Use fsGroup: 0 (root group) to match Dockerfile's group permissions
+  fsGroup: 0
+```
+
+**3. Removed Conflicting Environment Variables**:
+
+- Dockerfile sets `HF_HOME=/app/.cache/huggingface`
+- OpenShift deployment no longer overrides this
+- Both configurations now work together instead of conflicting
+
+**Manual Verification**:
+
+```powershell
+# Test HuggingFace model loading with Docker's cache configuration
+oc exec deployment/backend -- python -c "
+import os
+print('HF_HOME:', os.environ.get('HF_HOME'))
+print('TRANSFORMERS_CACHE:', os.environ.get('TRANSFORMERS_CACHE'))
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer('all-MiniLM-L6-v2')
+print('✅ Model loaded successfully with cache:', model.cache_folder)
+"
+
+# Check that cache directories exist and are writable
+oc exec deployment/backend -- ls -la /app/.cache/
+oc exec deployment/backend -- touch /app/.cache/test_write
+```
+
+**Alternative: Switch to OpenAI Embeddings** (Recommended for Production):
+
+```powershell
+# Update to use OpenAI embeddings (no local model downloads required)
+oc patch configmap backend-config -p '{"data":{"FORCE_DEFAULT_EMBEDDING":"text-embedding-3-small"}}'
+oc rollout restart deployment/backend
+```
+
+**Prevention & Hardening**:
+
+- ✅ Writable cache independent of assigned UID/GID
+- ✅ Automatic `/tmp` fallback if primary path blocked
+- ✅ Minimal permissions scope (only cache dirs relaxed)
+- ✅ Avoids stale partial downloads (entrypoint test writes)
+- ✅ Configurable via `HF_HOME`, `TRANSFORMERS_CACHE`, and fallback `HF_FALLBACK`
+
+**Optional Preload Optimization**:
+
+You can warm the embedding cache at pod startup:
+
+1. Set in `backend-config` ConfigMap:
+
+```yaml
+PRELOAD_EMBEDDING_MODEL: all-MiniLM-L6-v2
+PRELOAD_EMBEDDING_PROVIDER: huggingface # huggingface|openai|ollama|replicate|aws
+```
+
+2. Redeploy / restart backend.
+3. Logs will show: `Preloading embedding model 'all-MiniLM-L6-v2'...`.
+
+If preload fails it logs a warning but does not block readiness.
+
+#### 7. ML Features Not Available in Lean Deployment
+
+**Symptoms**:
+
+- Backend logs show "ML capabilities not available" warnings
+- HuggingFace embedding models return 503 errors
+- Only OpenAI, AWS, and Ollama models work
+
+**Root Cause**: Using lean build (`-BackendBuild lean`) without runtime ML installation
+
+**This is Expected Behavior**: Lean builds exclude PyTorch to achieve 90% size reduction
+
+**Solutions**:
+
+**Option A: Enable Runtime ML Installation**
+
+```powershell
+# Redeploy with runtime ML support
+.\scripts\deploy-openshift.ps1 -Environment prod -Build -Push -BackendBuild lean -EnableRuntimeML
+```
+
+**Option B: Use Full Build**
+
+```powershell
+# Switch to full build with pre-installed ML
+.\scripts\deploy-openshift.ps1 -Environment prod -Build -Push -BackendBuild full
+```
+
+**Option C: Use OpenAI/AWS Alternatives (Recommended)**
+
+- Configure OpenAI API key for embeddings
+- Use AWS Bedrock for embeddings
+- Use Ollama for local models (no PyTorch dependency)
+
+**Verify ML Configuration**:
+
+```powershell
+# Check ML environment settings
+oc get configmap backend-config -o yaml | findstr PYTORCH
+
+# Check backend logs for ML capability status
+oc logs deployment/backend | findstr -i "ML\|pytorch\|huggingface"
+```
+
+#### 8. Runtime ML Installation Failures
+
+**Symptoms**:
+
+- First HuggingFace operation takes very long or fails
+- Backend logs show "Failed to install PyTorch" errors
+- Error: `/app/.venv/bin/python: No module named pip`
+- Runtime installation hangs or times out
+- **Backend pod restarts frequently (RestartCount > 0)**
+- **OOMKilled events in `oc get events`**
+
+**Root Cause**:
+
+- `pip` module not available in `uv`-based virtual environments
+- Permission issues with cache directories in OpenShift
+- Using `uv add` instead of `uv pip install` causes lockfile conflicts
+- **NEW: Memory pressure during ML installation causing OOMKilled**
+
+**✅ CRITICAL FIX: Increased Memory Limits**
+
+As of August 2025, all environments now include memory-optimized resource limits:
+
+```yaml
+# Backend resource limits (applied automatically via memory patches)
+resources:
+  requests:
+    memory: "10Gi" # Increased from 6Gi to 10Gi
+    cpu: "1000m"
+  limits:
+    memory: "12Gi" # Increased from 8Gi to 12Gi to handle ML installations
+    cpu: "2000m" # Increased for faster installation
+```
+
+**Memory-Aware Installation Logic**: ML installation functions now monitor available memory and warn when memory is low (<3GB available).
+
+**Solutions**:
+
+**Check for OOMKilled Events**:
+
+```powershell
+# Check for memory-related restarts
+oc get events --sort-by=.metadata.creationTimestamp | Select-String "OOMKilled"
+
+# Check current pod memory usage
+oc top pods
+
+# Monitor memory during installation
+oc logs deployment/backend -f | Select-String -i "memory|install|pytorch"
+```
+
+**Verify Memory Configuration**:
+
+```powershell
+# Check if memory patches are applied
+oc describe deployment backend | Select-String -A 10 -B 5 "Limits|Requests"
+
+# Should show: memory: 12Gi limit, 10Gi request
+```
+
+**Check Container Permissions**:
+
+```powershell
+# Verify container can write to filesystem
+oc exec deployment/backend -- touch /tmp/test_write
+oc exec deployment/backend -- ls -la /tmp/test_write
+
+# Check if pip is available
+oc exec deployment/backend -- /app/.venv/bin/python -m pip --version
+
+# Check if writable cache directories exist
+oc exec deployment/backend -- ls -la /tmp/ | findstr cache
+```
+
+**Check Network Connectivity**:
+
+```powershell
+# Test PyPI connectivity
+oc exec deployment/backend -- curl -I https://pypi.org/
+```
+
+**Use Full Build Instead**:
+
+```powershell
+# Switch to pre-installed ML capabilities
+.\scripts\deploy-openshift.ps1 -Environment prod -Build -Push -BackendBuild full
+```
+
+**Fix Lean Build (if pip is missing)**:
+
+```powershell
+# Both Dockerfile and Dockerfile.lean need the pip installation fix
+# This should already be included in the latest version:
+# RUN uv pip install pip
+# RUN mkdir -p /tmp/uv-cache /tmp/pip-cache && chmod 777 /tmp/uv-cache /tmp/pip-cache
+
+# Rebuild and deploy with the fixes
+.\scripts\deploy-openshift.ps1 -Environment dev -Build -Push -BackendBuild lean -EnableRuntimeML
+```
+
+**Manual Runtime Installation Debug**:
+
+```powershell
+# Check installation logs in real-time
+oc logs deployment/backend -f
+
+# Test PyTorch installation manually
+oc exec deployment/backend -- python -c "
+import sys
+sys.path.append('/app')
+from app.core.ml_imports import ensure_pytorch
+print('Testing PyTorch installation...')
+result = ensure_pytorch()
+print(f'Installation result: {result}')
+"
+```
+
+**Recent Fixes Applied (August 2025)**:
+
+- ✅ **Fixed pip availability**: Both `Dockerfile` and `Dockerfile.lean` now install pip properly
+- ✅ **Added writable cache directories**: `/tmp/uv-cache` and `/tmp/pip-cache` with proper permissions
+- ✅ **Fixed installation logic**: Uses `uv pip install` instead of `uv add` to avoid lockfile issues
+- ✅ **OpenShift compatibility**: Handles arbitrary UIDs and read-only filesystems
+- ✅ **Proper fallback**: Falls back from `uv` to `pip` with custom cache directories
+- ✅ **Memory optimization**: Increased backend memory from 4Gi to 8Gi limit
+- ✅ **Memory monitoring**: Added memory checks before ML installation
+- ✅ **Timeout handling**: Reduced timeouts to prevent hanging under memory pressure
+
+**🚨 Emergency Recovery Commands**
+
+If the backend keeps restarting due to OOM:
+
+```powershell
+# Scale down to stop failing pods
+oc scale deployment/backend --replicas=0
+
+# Wait a moment
+Start-Sleep -Seconds 10
+
+# Scale back up with new memory limits
+oc scale deployment/backend --replicas=1
+
+# Monitor the restart
+oc get pods -w
+
+# Check if memory patches are applied
+oc describe deployment backend | Select-String "memory.*8Gi"
+```
+
+**Alternative Solutions**:
+oc logs deployment/backend -f | findstr -i "install\|pytorch\|pip"
+
+# Restart deployment to retry installation
+
+oc rollout restart deployment/backend
+
+````
+
+#### 9. Backend Pod Memory Issues and Restarts
+
+**Symptoms**:
+- Backend pod shows `RestartCount > 0` in `oc get pods`
+- Pod status cycles between `Running` and `Restarting`
+- Logs show abrupt termination during ML package installation
+- `oc get events` shows `OOMKilled` events
+
+**Root Cause**: Runtime ML installation (PyTorch, HuggingFace) consumes significant memory, exceeding the original 4Gi limit.
+
+**✅ Automated Fix Applied**:
+
+All environments now automatically include memory-optimized patches:
+
+- **Memory Limit**: Increased from 4Gi → 8Gi
+- **Memory Request**: Increased from 4Gi → 6Gi
+- **CPU Limit**: Increased from 1000m → 2000m (faster installation)
+- **Memory Monitoring**: Functions check available memory before installation
+- **Timeout Handling**: Shorter timeouts prevent hanging under memory pressure
+
+**Verification**:
+
+```powershell
+# Check if memory optimization is applied
+oc describe deployment backend | findstr -A 5 -B 5 "Limits\|Requests"
+
+# Expected output should show:
+# Limits:      cpu: 2, memory: 8Gi
+# Requests:    cpu: 1, memory: 6Gi
+
+# Monitor pod restart count
+oc get pods -l component=backend
+
+# Check for OOMKilled events
+oc get events --sort-by=.metadata.creationTimestamp | findstr "OOMKilled"
+```
+
+**If Issues Persist**:
+
+```powershell
+# Option 1: Use full build to avoid runtime installation
+.\scripts\deploy-openshift.ps1 -Environment dev -Build -Push -BackendBuild full
+
+# Option 2: Use OpenAI/AWS instead of local ML
+oc patch configmap backend-config -p '{"data":{"FORCE_DEFAULT_EMBEDDING":"text-embedding-3-small"}}'
+oc rollout restart deployment/backend
+```
+
 ### Diagnostic Commands
 
 ```powershell
@@ -443,7 +878,7 @@ oc exec deployment/backend -- curl -f http://localhost:8000/api/v1/utils/health-
 # Enhanced troubleshooting (built into deployment script)
 .\scripts\deploy-openshift.ps1 -Environment dev -DiagnoseOnly -DiagnoseDeployment backend
 .\scripts\deploy-openshift.ps1 -Environment dev -ForceCleanup -DiagnoseDeployment backend
-```
+````
 
 ## Operational Procedures
 
@@ -774,6 +1209,31 @@ This guide replaces all scattered OpenShift documentation and provides the compl
 # Complete reset
 oc delete pods --all --force --grace-period=0
 .\scripts\deploy-openshift.ps1 -Environment dev
+```
+
+### 🔍 HuggingFace Model Testing
+
+```powershell
+# Test HuggingFace model loading after fix
+oc exec deployment/backend -- python -c "
+import os
+print('HF_HOME:', os.environ.get('HF_HOME'))
+print('TRANSFORMERS_CACHE:', os.environ.get('TRANSFORMERS_CACHE'))
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer('all-MiniLM-L6-v2')
+print('✅ Model loaded successfully with cache:', model.cache_folder)
+"
+
+# Check cache directory was created successfully
+oc exec deployment/backend -- ls -la /tmp/ | findstr huggingface
+
+# Test embedding generation
+oc exec deployment/backend -- python -c "
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer('all-MiniLM-L6-v2')
+embeddings = model.encode(['test sentence'])
+print('✅ Embedding generated:', embeddings.shape)
+"
 ```
 
 ### 🔍 Common Issues

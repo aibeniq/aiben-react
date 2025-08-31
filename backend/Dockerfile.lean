@@ -1,14 +1,16 @@
-FROM python:3.10
+FROM python:3.10-slim
 
 ENV PYTHONUNBUFFERED=1
+
+# Install curl for health checks and other system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user for OpenShift compatibility (will often be ignored in OpenShift which injects a random UID)
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 WORKDIR /app/
-
-#argument for whether to install huggingface
-ARG INSTALL_HUGGINGFACE=true
 
 # Install uv
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
@@ -26,18 +28,26 @@ ENV UV_COMPILE_BYTECODE=1
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#caching
 ENV UV_LINK_MODE=copy
 
-# Install dependencies
+# Copy lean dependencies configuration
+COPY ./pyproject.lean.toml ./pyproject.toml
+
+# Generate lock file for lean dependencies
+RUN uv lock
+
+# Install dependencies without ML packages
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv sync --frozen --no-install-project
 
 ENV PYTHONPATH=/app
 
+# Set environment variables for lean deployment
+ENV ENABLE_PYTORCH=false
+ENV RUNTIME_INSTALL_PYTORCH=false
+
 COPY ./scripts /app/scripts
 
-COPY ./pyproject.toml ./uv.lock ./alembic.ini /app/
+COPY ./alembic.ini /app/
 
 COPY ./app /app/app
 
@@ -50,9 +60,14 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Use uv pip install (not uv add) to avoid lockfile issues in OpenShift
 RUN uv pip install pip
 
-# Create writable directories for OpenShift arbitrary UID
-RUN mkdir -p /tmp/uv-cache /tmp/pip-cache && \
+# Create target directory with world-writable permissions for OpenShift arbitrary UID
+RUN mkdir -p /tmp/python-packages/lib/python3.10/site-packages && \
+    chmod -R 777 /tmp/python-packages && \
+    mkdir -p /tmp/uv-cache /tmp/pip-cache && \
     chmod 777 /tmp/uv-cache /tmp/pip-cache
+
+# Add target directory to Python path so installed packages are found
+ENV PYTHONPATH="/tmp/python-packages/lib/python3.10/site-packages:${PYTHONPATH}"
 
 # Add graceful shutdown and health check configuration
 STOPSIGNAL SIGTERM

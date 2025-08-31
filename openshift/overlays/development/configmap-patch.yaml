@@ -6,6 +6,7 @@ data:
   ENVIRONMENT: "production"
   BACKEND_CORS_ORIGINS: "http://localhost,http://localhost:5173,http://redhat.aiben.io"
   FRONTEND_HOST: "http://redhat.aiben.io"
+  # ML settings are managed by deployment script via ml-config-patch.yaml
 ---
 apiVersion: v1
 kind: ConfigMap

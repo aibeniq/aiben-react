@@ -1,3 +1,4 @@
+---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
@@ -18,6 +19,29 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: adminer
+spec:
+  host: redhat-adminer.aiben.io
+  tls: null # Disable SSL for development
+  name: backend-api
+spec:
+  host: redhat-api.aiben.io
+  tls: null # Disable SSL for development
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: frontend-dashboard
+spec:
+  host: redhat.aiben.io
+  tls: null # Disable SSL for development
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: adminer
+spec:
+  host: redhat-adminer.aiben.io
+  tls: null # Disable SSL for development
 spec:
   host: redhat-adminer.aiben.io
   tls: null # Disable SSL for development

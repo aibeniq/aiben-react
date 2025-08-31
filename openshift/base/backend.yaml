@@ -19,15 +19,20 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
-        #runAsUser: 1000
-        #fsGroup: 1000
+        # OpenShift will assign a random UID and fsGroup dynamically
+        # Removed fsGroup: 0 as it violates OpenShift Security Context Constraints
       containers:
         - name: backend
           # Use internal image registry service reference for reliability inside cluster
-          image: image-registry.openshift-image-registry.svc:5000/aibeniq-prod/backend:latest
+          image: image-registry.openshift-image-registry.svc:5000/aibeniq-dev/backend:latest
+          # Ensure the node always pulls the latest tag so updated code is used.
+          # Without this, Kubernetes default IfNotPresent may reuse a cached image
+          # causing code changes (e.g., ml_imports.py) to not appear inside the pod.
+          imagePullPolicy: Always
           ports:
             - containerPort: 8000
               name: http
+          # Configuration and secrets managed via ConfigMap and Secret
           envFrom:
             - configMapRef:
                 name: backend-config
@@ -50,10 +55,10 @@ spec:
             timeoutSeconds: 5
           resources:
             requests:
-              memory: "1Gi"
-              cpu: "500m"
+              memory: "4Gi"
+              cpu: "1000m"
             limits:
-              memory: "2Gi"
+              memory: "4Gi"
               cpu: "1000m"
       initContainers:
         - name: wait-for-postgres
@@ -73,7 +78,8 @@ spec:
               "until redis-cli -h redis -p 6379 ping; do echo waiting for redis; sleep 2; done;",
             ]
         - name: run-prestart
-          image: image-registry.openshift-image-registry.svc:5000/aibeniq-prod/backend:latest
+          image: image-registry.openshift-image-registry.svc:5000/aibeniq-dev/backend:latest
+          imagePullPolicy: Always
           command:
             [
               "bash",
@@ -116,6 +122,4 @@ spec:
     name: backend
   port:
     targetPort: http
-  tls:
-    termination: edge
-    insecureEdgeTerminationPolicy: Redirect
+  # TLS removed for development - HTTP only

@@ -1,0 +1,9 @@
+﻿---
+# ML Environment Configuration Patch
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  ENABLE_PYTORCH: "false"
+  RUNTIME_INSTALL_PYTORCH: "true"

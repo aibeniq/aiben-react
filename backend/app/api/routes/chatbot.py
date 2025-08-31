@@ -872,23 +872,31 @@ async def query_knowledge_base(
 
                 # 🚨 NEW FALLBACK: If not found with truncated name, try the whole filename
                 if not source_entry:
-                    print(f"No source entry found for truncated filename: {truncated_filename}")
+                    print(
+                        f"No source entry found for truncated filename: {truncated_filename}"
+                    )
                     print(f"Trying with full filename: {raw_filename}")
-                    
+
                     source_entry = session.exec(
                         select(SourceORM).where(SourceORM.name == raw_filename)
                     ).first()
-                    
+
                     if source_entry:
-                        print(f"✅ Found source entry with full filename: {raw_filename}")
+                        print(
+                            f"✅ Found source entry with full filename: {raw_filename}"
+                        )
                     else:
-                        print(f"❌ No source entry found for either truncated or full filename")
+                        print(
+                            f"❌ No source entry found for either truncated or full filename"
+                        )
 
                 if source_entry:
                     print(f"Found source entry with ID: {source_entry.source_data_id}")
                     metadata["source_data_id"] = str(source_entry.source_data_id)
                 else:
-                    print(f"No source entry found for filename: {truncated_filename} or {raw_filename}")
+                    print(
+                        f"No source entry found for filename: {truncated_filename} or {raw_filename}"
+                    )
 
             source = {
                 "content": doc.page_content,  # Remove 300 character truncation
@@ -1014,9 +1022,15 @@ async def query_document(
             if cached_data:
                 print(f"Found session data for {session_id}")
 
-                # Try to use existing objects first
-                retriever = cached_data.get("retriever")
-                llm = cached_data.get("llm")
+                # Check if this session is for document queries (has retriever data)
+                session_type = cached_data.get("type", "unknown")
+                if session_type == "text_query":
+                    print("Session is from text query, cannot reuse for document query")
+                    cached_data = None  # Force new setup
+                else:
+                    # Try to use existing objects first
+                    retriever = cached_data.get("retriever")
+                    llm = cached_data.get("llm")
 
                 # Check if objects need rebuilding (after Redis deserialization)
                 retriever_needs_rebuild = session_manager.session_needs_rebuild(
@@ -1263,6 +1277,7 @@ async def query_document(
                     "vector_dir": vector_dir,
                     "temp_paths": temp_paths,
                     "file_names": [file.filename for file in files],  # Cache file names
+                    "type": "document_query",  # Add session type
                 },
             )
 
@@ -1537,7 +1552,7 @@ async def startup_event():
     async def cleanup_sessions():
         while True:
             await asyncio.sleep(1800)  # 30 minutes
-            session_cache.cleanup()
+            session_manager.cleanup_expired_sessions()
             print("Session cache cleanup performed")
 
     asyncio.create_task(cleanup_sessions())

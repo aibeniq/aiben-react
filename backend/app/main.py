@@ -1,5 +1,6 @@
 import signal
 import sys
+import os
 import asyncio
 import sentry_sdk
 from fastapi import FastAPI, HTTPException
@@ -11,6 +12,8 @@ from app.api.main import api_router
 from app.core.config import settings
 from app.core.db import engine
 import logging
+from app.models import ModelProvider
+from app.services.embeddings import load_embeddings_model
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -73,7 +76,33 @@ signal.signal(signal.SIGINT, signal_handler)
 @app.on_event("startup")
 async def startup_event():
     """Log startup information."""
-    logging.getLogger(__name__).info("AIBeniq Backend starting up...")
+    logger = logging.getLogger(__name__)
+    logger.info("AIBeniq Backend starting up...")
+    # Optional: preload embedding model to avoid first-request latency
+    preload_model = os.getenv("PRELOAD_EMBEDDING_MODEL")
+    if preload_model:
+        provider_name = os.getenv("PRELOAD_EMBEDDING_PROVIDER", "huggingface").lower()
+        try:
+            provider = (
+                ModelProvider(provider_name)
+                if provider_name in ModelProvider.__members__.values()
+                else ModelProvider.HUGGINGFACE
+            )
+        except Exception:
+            # Fallback if enum mismatch
+            provider = ModelProvider.HUGGINGFACE
+        try:
+            logger.info(
+                f"Preloading embedding model '{preload_model}' (provider={provider.value}) ..."
+            )
+            load_embeddings_model(
+                provider=provider,
+                model_id=preload_model,
+                api_key=os.getenv("OPENAI_API_KEY"),
+            )
+            logger.info(f"Preloaded embedding model '{preload_model}' successfully")
+        except Exception as e:
+            logger.warning(f"Failed to preload embedding model '{preload_model}': {e}")
 
 
 @app.on_event("shutdown")

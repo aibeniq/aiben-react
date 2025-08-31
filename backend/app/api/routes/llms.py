@@ -15,6 +15,13 @@ from langchain_core.messages import HumanMessage
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
+from app.core.ml_imports import (
+    get_transformers,
+    get_huggingface_pipeline,
+    get_transformers_pipeline,
+    get_transformers_model_classes,
+    check_ml_capabilities,
+)
 from app.services.llms import create_llm
 from app.models import (
     LlmModel,
@@ -249,7 +256,15 @@ def _download_ollama_model(model_id: str):
 def _download_huggingface_model(model_id: str):
     """Pre-download a HuggingFace model."""
     try:
-        from transformers import AutoTokenizer, AutoModel
+        # Use lazy loading for transformers
+        transformers_classes = get_transformers()
+        if transformers_classes is None:
+            print(
+                f"Cannot download HuggingFace model {model_id}: ML capabilities not available. Install PyTorch to enable HuggingFace models."
+            )
+            return
+
+        AutoTokenizer, AutoModel = transformers_classes
 
         print(f"Pre-downloading HuggingFace model: {model_id}")
 
@@ -429,9 +444,18 @@ def validate_llm_model(
                 raise HTTPException(status_code=400, detail=detail)
 
         elif provider == ModelProvider.HUGGINGFACE:
-            # only import HERE, to avoid errors in API-only builds
-            from langchain_huggingface import HuggingFacePipeline
-            from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+            # Use lazy loading for HuggingFace models
+            HuggingFacePipeline = get_huggingface_pipeline()
+            model_classes = get_transformers_model_classes()
+            pipeline = get_transformers_pipeline()
+
+            if HuggingFacePipeline is None or model_classes is None or pipeline is None:
+                raise HTTPException(
+                    status_code=503,
+                    detail="HuggingFace models not available. ML capabilities are not installed. Use OpenAI, AWS, or Ollama providers instead.",
+                )
+
+            AutoModelForCausalLM, AutoTokenizer = model_classes
 
             # For HuggingFace, try to load the model
             print(f"Loading HuggingFace model: {model_id}")

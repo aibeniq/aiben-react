@@ -24,6 +24,7 @@ from app.models import (
     User,
 )
 from app.core.config import settings
+from app.core.ml_imports import check_ml_capabilities, get_sentence_transformers
 from datetime import datetime
 from langchain_openai import OpenAIEmbeddings
 
@@ -66,20 +67,11 @@ def get_model_dimensions(model_id: str, provider: ModelProvider) -> int:
 
 # Initialize with default models
 def initialize_default_models(session: SessionDep):
+    # Check if ML capabilities are available
+    ml_available = check_ml_capabilities()
+
     # List of default models to ensure exist
     default_models = [
-        {
-            "name": "MiniLM-L6-v2",
-            "model_id": "all-MiniLM-L6-v2",
-            "provider": ModelProvider.HUGGINGFACE,
-            "description": "A compact and efficient embedding model, good balance of performance and speed.",
-        },
-        {
-            "name": "Amazon Titan 2.0",
-            "model_id": "amazon.titan-embed-text-v2:0",
-            "provider": ModelProvider.AWS,
-            "description": "Amazon's Titan 2.0 embedding model for AWS Bedrock. High-quality text embeddings with 1024 dimensions, optimized for enterprise search and retrieval applications.",
-        },
         {
             "name": "OpenAI Embeddings 3 Small",
             "model_id": "text-embedding-3-small",
@@ -87,24 +79,46 @@ def initialize_default_models(session: SessionDep):
             "description": "OpenAI's compact embedding model with 1536 dimensions. Excellent quality with lower cost and faster performance than the large variant.",
         },
         {
-            "name": "MPNet Base v2",
-            "model_id": "all-mpnet-base-v2",
-            "provider": ModelProvider.HUGGINGFACE,
-            "description": "Higher quality embeddings, but slower and larger than MiniLM.",
+            "name": "Amazon Titan 2.0",
+            "model_id": "amazon.titan-embed-text-v2:0",
+            "provider": ModelProvider.AWS,
+            "description": "Amazon's Titan 2.0 embedding model for AWS Bedrock. High-quality text embeddings with 1024 dimensions, optimized for enterprise search and retrieval applications.",
         },
-        {
-            "name": "MiniLM-L12-v2",
-            "model_id": "all-MiniLM-L12-v2",
-            "provider": ModelProvider.HUGGINGFACE,
-            "description": "Larger version of MiniLM with improved performance.",
-        },
+    ]
+
+    # Only add HuggingFace models if ML capabilities are available
+    if ml_available:
+        huggingface_models = [
+            {
+                "name": "MiniLM-L6-v2",
+                "model_id": "all-MiniLM-L6-v2",
+                "provider": ModelProvider.HUGGINGFACE,
+                "description": "A compact and efficient embedding model, good balance of performance and speed.",
+            },
+            {
+                "name": "MPNet Base v2",
+                "model_id": "all-mpnet-base-v2",
+                "provider": ModelProvider.HUGGINGFACE,
+                "description": "Higher quality embeddings, but slower and larger than MiniLM.",
+            },
+            {
+                "name": "MiniLM-L12-v2",
+                "model_id": "all-MiniLM-L12-v2",
+                "provider": ModelProvider.HUGGINGFACE,
+                "description": "Larger version of MiniLM with improved performance.",
+            },
+        ]
+        default_models.extend(huggingface_models)
+
+    # Always add Ollama model (independent of PyTorch)
+    default_models.append(
         {
             "name": "Ollama - nomic-embed-text",
             "model_id": "nomic-embed-text",
             "provider": ModelProvider.OLLAMA,
             "description": "A local embedding model running via Ollama.",
-        },
-    ]
+        }
+    )
 
     for model_data in default_models:
         # Check if this default model already exists (system model: owner_id is None)
@@ -437,7 +451,14 @@ def _download_ollama_embedding_model(model_id: str):
 def _download_huggingface_embedding_model(model_id: str):
     """Pre-download a HuggingFace embedding model."""
     try:
-        from sentence_transformers import SentenceTransformer
+        # Use lazy loading for SentenceTransformer
+        SentenceTransformer = get_sentence_transformers()
+
+        if SentenceTransformer is None:
+            print(
+                f"Cannot download HuggingFace model {model_id}: ML capabilities not available. Install PyTorch to enable HuggingFace models."
+            )
+            return
 
         print(f"Pre-downloading HuggingFace embedding model: {model_id}")
 

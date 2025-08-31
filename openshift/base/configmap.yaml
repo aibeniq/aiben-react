@@ -27,6 +27,17 @@ data:
   ENABLED_PROVIDERS: "openai"
   OLLAMA_BASE_URL: "http://ollama:11434"
   AWS_REGION: "eu-north-1"
+  # Force OpenAI embeddings to avoid local model downloads
+  FORCE_DEFAULT_EMBEDDING: ""
+  FORCE_DEFAULT_LLM: ""
+  ENABLE_MODEL_SELECTION: "true"
+  # Disable all model preloading to avoid downloads
+  PRELOAD_EMBEDDING_MODEL: ""
+  PRELOAD_EMBEDDING_PROVIDER: ""
+  # ML/Docker optimization settings (dynamically configured by deployment script)
+  # These defaults work for lean deployments without runtime ML
+  ENABLE_PYTORCH: "false" # Will be set to "true" for full builds
+  RUNTIME_INSTALL_PYTORCH: "false" # Will be set to "true" for lean builds with -EnableRuntimeML
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -10,8 +10,10 @@ resources:
 namespace: aibeniq-prod
 
 patchesStrategicMerge:
+  - ml-config-patch.yaml
   - configmap-patch.yaml
   - secret-patch.yaml
+  - backend-memory-patch.yaml # Memory optimization for ML installations
   - internal-registry-patches.yaml
 
 commonLabels:

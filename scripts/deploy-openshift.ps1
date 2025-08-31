@@ -17,6 +17,10 @@ param(
     [switch]$DiagnoseOnly,
     [string]$DiagnoseDeployment = "backend",
     [switch]$ForceCleanup,
+    # New ML/Docker size optimization options
+    [ValidateSet("lean", "full", "auto")]
+    [string]$BackendBuild = "auto",
+    [switch]$EnableRuntimeML,
     # Secret / credential inputs (optional; if omitted, reasonable defaults or randoms are generated)
     [string]$DbPassword,
     [string]$SecretKey,
@@ -183,14 +187,47 @@ PARAMETERS:
     -DiagnoseDeployment     Specify deployment to diagnose (default: backend)
     -ForceCleanup           Force cleanup stuck deployment specified by -DiagnoseDeployment
 
+DOCKER SIZE OPTIMIZATION:
+    -BackendBuild TYPE      Choose backend build type (lean|full|auto) [default: auto]
+                           lean: ~500MB-1GB, OpenAI/AWS/Ollama only
+                           full: ~2-3GB, all ML capabilities pre-installed
+                           auto: lean for prod, full for dev
+    -EnableRuntimeML        Enable runtime ML installation (lean + on-demand ML)
+
 EXAMPLES:
+    # Standard deployments
     .\deploy-openshift.ps1 -Environment dev
     .\deploy-openshift.ps1 -Environment prod -Build -Push
+    
+    # Size-optimized deployments (NEW)
+    .\deploy-openshift.ps1 -Environment prod -Build -Push -BackendBuild lean
+    .\deploy-openshift.ps1 -Environment dev -Build -Push -BackendBuild lean -EnableRuntimeML
+    .\deploy-openshift.ps1 -Environment prod -Build -Push -BackendBuild full
+    
+    # Other options
     .\deploy-openshift.ps1 -Environment prod -Build -Push -NoCache
     .\deploy-openshift.ps1 -Environment dev -DryRun
     .\deploy-openshift.ps1 -Environment prod -InteractiveSecrets
     .\deploy-openshift.ps1 -Environment dev -DiagnoseOnly -DiagnoseDeployment backend
     .\deploy-openshift.ps1 -Environment dev -ForceCleanup -DiagnoseDeployment backend
+
+BUILD TYPE GUIDE:
+    lean (recommended for production):
+        - Image size: ~500MB-1GB (90% smaller)
+        - Features: OpenAI, AWS Bedrock, Ollama
+        - Best for: Production deployments, OpenAI-only usage
+        - Limitation: No HuggingFace models (unless -EnableRuntimeML used)
+    
+    full (for ML-heavy usage):
+        - Image size: ~2-3GB (optimized from 11.3GB)
+        - Features: All ML capabilities pre-installed
+        - Best for: Development, heavy HuggingFace model usage
+        - Note: Still 70% smaller than original
+    
+    auto (smart default):
+        - Production: Uses lean build
+        - Development: Uses full build
+        - Best for: Most use cases
 
 TROUBLESHOOTING:
     -DiagnoseOnly           Run comprehensive diagnostics on stuck deployments
@@ -223,7 +260,12 @@ if ($Environment -eq "dev") {
 function Setup-InternalRegistry {
     Write-Status "Setting up OpenShift internal registry configuration..."
     Write-Status "Attempting 'oc registry login' to configure Docker credentials..."
+    
+    # Always try oc registry login first (handles podman/containers auth)
     oc registry login
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning "oc registry login failed, will try manual Docker login"
+    }
     
     try {
         $script:REGISTRY = (oc registry info).Trim()
@@ -234,35 +276,37 @@ function Setup-InternalRegistry {
         exit 1
     }
 
-    # Check if Docker credentials exist for the registry
-    $dockerConfigPath = Join-Path $env:USERPROFILE '.docker\config.json'
-    $hasAuth = $false
-    if (Test-Path $dockerConfigPath) {
-        try {
-            $cfg = Get-Content $dockerConfigPath -Raw | ConvertFrom-Json
-            if ($cfg.auths -and $cfg.auths.$script:REGISTRY) { $hasAuth = $true }
-        } catch { }
+    # Always perform Docker login with fresh token to ensure authentication works
+    Write-Status "Refreshing Docker credentials for $script:REGISTRY"
+    $token = oc whoami -t
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrEmpty($token)) { 
+        Write-Error-Custom "Could not obtain OpenShift token for docker login" 
+        exit 1 
+    }
+    $user = oc whoami
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrEmpty($user)) { 
+        $user = 'cluster-admin'  # Fallback to a common admin user
     }
 
-    if (-not $hasAuth) {
-        Write-Status "No docker credentials found for $script:REGISTRY - performing manual docker login with token"
-        $token = oc whoami -t
-        if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrEmpty($token)) { 
-            Write-Error-Custom "Could not obtain OpenShift token for docker login" 
-            exit 1 
-        }
-        $user = oc whoami
-        if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrEmpty($user)) { 
-            $user = 'oc-user' 
-        }
+    # Logout first to clear any stale credentials
+    Write-Status "Clearing any existing Docker credentials for $script:REGISTRY"
+    docker logout $script:REGISTRY 2>$null
 
-        $token | docker login --username $user --password-stdin $script:REGISTRY
-        if ($LASTEXITCODE -ne 0) { 
-            Write-Error-Custom "Docker login to $script:REGISTRY failed" 
-            exit 1 
+    # Login with fresh token
+    Write-Status "Performing Docker login with fresh OpenShift token"
+    $loginResult = echo $token | docker login --username $user --password-stdin $script:REGISTRY 2>&1
+    if ($LASTEXITCODE -ne 0) { 
+        Write-Error-Custom "Docker login to $script:REGISTRY failed: $loginResult" 
+        Write-Status "Attempting alternative authentication method..."
+        
+        # Try direct docker login command
+        docker login -u $user -p $token $script:REGISTRY
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error-Custom "Alternative Docker login also failed. Check OpenShift token and registry access."
+            exit 1
         }
-        Write-Status "Docker login to $script:REGISTRY succeeded"
     }
+    Write-Status "Docker login to $script:REGISTRY succeeded"
     
     Write-Success "Internal registry setup completed"
 }
@@ -553,12 +597,77 @@ function Push-Images {
         return
     }
     
-    Write-Status "Pushing $($imagesNeedPush.Count) images..."
+    Write-Status "Pushing $($imagesNeedPush.Count) images with retry logic..."
+    
     foreach ($img in $imagesNeedPush) {
-        Write-Status "Pushing $img..."
-        docker push $img
-        if ($LASTEXITCODE -ne 0) { Write-Error-Custom "Failed to push image: $img" ; exit 1 }
+        $maxRetries = 3
+        $retryCount = 0
+        $pushSucceeded = $false
+        
+        while ($retryCount -lt $maxRetries -and -not $pushSucceeded) {
+            $retryCount++
+            
+            if ($retryCount -gt 1) {
+                Write-Warning "Push attempt $retryCount of $maxRetries for $img"
+                
+                # Re-authenticate before retry
+                Write-Status "Re-authenticating with registry before retry..."
+                $token = oc whoami -t
+                $user = oc whoami
+                docker logout $script:REGISTRY 2>$null
+                echo $token | docker login --username $user --password-stdin $script:REGISTRY 2>$null
+                
+                # Wait a moment before retrying
+                Start-Sleep -Seconds 5
+            }
+            
+            Write-Status "Pushing $img (attempt $retryCount/$maxRetries)..."
+            
+            # Check image size before pushing
+            try {
+                $imageSize = (docker images --format "table {{.Size}}" $img | Select-Object -Skip 1).Trim()
+                Write-Status "Image size: $imageSize"
+                
+                # For large images (>5GB), warn about potential timeout
+                if ($imageSize -match "GB") {
+                    $sizeValue = [float]($imageSize -replace "GB", "")
+                    if ($sizeValue -gt 5) {
+                        Write-Warning "Large image detected ($imageSize). This may take several minutes and could timeout."
+                        Write-Status "Consider optimizing the Dockerfile to reduce image size."
+                    }
+                }
+            } catch {
+                Write-Status "Could not determine image size"
+            }
+            
+            # Perform the push directly (job-based approach was causing false failures)
+            docker push $img
+            $exitCode = $LASTEXITCODE
+            
+            if ($exitCode -eq 0) {
+                Write-Success "Successfully pushed $img"
+                $pushSucceeded = $true
+            } else {
+                Write-Warning "Push failed with exit code $exitCode"
+                # For timeout or network issues, wait before retry
+                if ($retryCount -lt $maxRetries) {
+                    Write-Status "Waiting 10 seconds before retry..."
+                    Start-Sleep -Seconds 10
+                }
+            }
+        }
+        
+        if (-not $pushSucceeded) {
+            Write-Error-Custom "Failed to push image after $maxRetries attempts: $img"
+            Write-Status "Troubleshooting suggestions:"
+            Write-Status "1. Check Docker Desktop memory/disk space settings"
+            Write-Status "2. Check network connectivity to OpenShift registry"
+            Write-Status "3. Try pushing with: docker push $img"
+            Write-Status "4. Consider optimizing Dockerfile to reduce image size"
+            exit 1
+        }
     }
+    
     Write-Success "Optimized image push completed successfully"
 }
 
@@ -585,8 +694,23 @@ function Build-Images {
         Write-Status "NoCache enabled: will bypass Docker build cache"
     }
 
-    Write-Status "Building backend image..."
-    docker build $cacheFlag -t "$script:REGISTRY/$script:NAMESPACE/backend:$script:IMAGE_TAG" ./backend
+    # Determine backend build type
+    $buildType = $BackendBuild
+    if ($buildType -eq "auto") {
+        $buildType = if ($Environment -eq "prod") { "lean" } else { "full" }
+        Write-Status "Auto-selected build type: $buildType (based on environment: $Environment)"
+    }
+
+    # Build backend with appropriate Dockerfile
+    Write-Status "Building backend image (type: $buildType)..."
+    if ($buildType -eq "lean") {
+        Write-Status "Using lean build: ~500MB-1GB, OpenAI/AWS/Ollama support"
+        docker build $cacheFlag -f ./backend/Dockerfile.lean -t "$script:REGISTRY/$script:NAMESPACE/backend:$script:IMAGE_TAG" ./backend
+    } else {
+        Write-Status "Using full build: ~2-3GB, all ML capabilities pre-installed"
+        docker build $cacheFlag -f ./backend/Dockerfile -t "$script:REGISTRY/$script:NAMESPACE/backend:$script:IMAGE_TAG" ./backend
+    }
+    
     if ($LASTEXITCODE -ne 0) { Write-Error-Custom "Failed to build backend image" ; exit 1 }
     docker tag "$script:REGISTRY/$script:NAMESPACE/backend:$script:IMAGE_TAG" "$script:REGISTRY/$script:NAMESPACE/backend:latest"
 
@@ -604,7 +728,106 @@ function Build-Images {
     if ($LASTEXITCODE -ne 0) { Write-Error-Custom "Failed to build frontend image" ; exit 1 }
     docker tag "$script:REGISTRY/$script:NAMESPACE/frontend:$script:IMAGE_TAG" "$script:REGISTRY/$script:NAMESPACE/frontend:latest"
 
-    Write-Success "Images built successfully"
+    # Store build configuration for deployment
+    $script:BACKEND_BUILD_TYPE = $buildType
+    Write-Success "Images built successfully (backend: $buildType)"
+}
+
+function Configure-MLEnvironment {
+    Write-Status "Configuring ML environment variables based on build type..."
+    
+    # Determine build type if not already set
+    if (-not $script:BACKEND_BUILD_TYPE) {
+        $buildType = $BackendBuild
+        if ($buildType -eq "auto") {
+            $buildType = if ($Environment -eq "prod") { "lean" } else { "full" }
+        }
+        $script:BACKEND_BUILD_TYPE = $buildType
+    }
+    
+    # Configure environment variables based on build type
+    if ($script:BACKEND_BUILD_TYPE -eq "lean") {
+        Write-Status "Configuring environment for lean build (PyTorch disabled by default)"
+        $enablePytorch = "false"
+        $runtimeInstall = if ($EnableRuntimeML) { "true" } else { "false" }
+        
+        if ($EnableRuntimeML) {
+            Write-Status "Runtime ML installation enabled - ML packages will be installed on first use"
+        } else {
+            Write-Status "ML capabilities disabled - only OpenAI, AWS, and Ollama available"
+        }
+    } else {
+        Write-Status "Configuring environment for full build (all ML capabilities pre-installed)"
+        $enablePytorch = "true"
+        $runtimeInstall = "false"
+    }
+    
+    # Create ML configuration patch for kustomize
+    Write-Status "Creating ML configuration patch for deployment..."
+    $patchContent = @"
+---
+# ML Environment Configuration Patch
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  ENABLE_PYTORCH: "$enablePytorch"
+  RUNTIME_INSTALL_PYTORCH: "$runtimeInstall"
+"@
+    
+    # Write patch to the overlay directory
+    $patchFile = Join-Path $script:OVERLAY_DIR "ml-config-patch.yaml"
+    Set-Content -Path $patchFile -Value $patchContent -Encoding UTF8
+    Write-Status "Created ML config patch: $patchFile"
+    
+    # Update kustomization.yaml to include the patch
+    $kustomizationFile = Join-Path $script:OVERLAY_DIR "kustomization.yaml"
+    if (Test-Path $kustomizationFile) {
+        $kustomizationContent = Get-Content $kustomizationFile
+        
+        # Check if patchesStrategicMerge section exists and ml-config-patch.yaml is not already there
+        $hasPatches = $false
+        $hasMlPatch = $false
+        $newContent = @()
+        
+        for ($i = 0; $i -lt $kustomizationContent.Length; $i++) {
+            $line = $kustomizationContent[$i]
+            if ($line -match "^patchesStrategicMerge:") {
+                $hasPatches = $true
+                $newContent += $line
+                # Check if ml-config-patch.yaml already exists in the next few lines
+                for ($j = $i + 1; $j -lt $kustomizationContent.Length; $j++) {
+                    if ($kustomizationContent[$j] -match "^\s*-\s*ml-config-patch\.yaml") {
+                        $hasMlPatch = $true
+                        break
+                    } elseif ($kustomizationContent[$j] -notmatch "^\s*-" -and $kustomizationContent[$j].Trim() -ne "") {
+                        break
+                    }
+                }
+                # Add ml-config-patch.yaml if it doesn't exist
+                if (-not $hasMlPatch) {
+                    $newContent += "  - ml-config-patch.yaml"
+                }
+            } else {
+                $newContent += $line
+            }
+        }
+        
+        # If no patchesStrategicMerge section exists, add it
+        if (-not $hasPatches) {
+            $newContent += ""
+            $newContent += "patchesStrategicMerge:"
+            $newContent += "  - ml-config-patch.yaml"
+        }
+        
+        Set-Content -Path $kustomizationFile -Value $newContent -Encoding UTF8
+        Write-Status "Updated kustomization.yaml to include ML configuration patch"
+    } else {
+        Write-Warning "kustomization.yaml not found at $kustomizationFile"
+    }
+    
+    Write-Success "ML environment configured: ENABLE_PYTORCH=$enablePytorch, RUNTIME_INSTALL_PYTORCH=$runtimeInstall"
 }
 
 function Deploy-ToOpenShift {
@@ -801,6 +1024,23 @@ function Main {
         Write-Host "Automatic secret generation will be used (environment variables honored)" -ForegroundColor Green
     }
     
+    # Display build type information
+    $buildType = $BackendBuild
+    if ($buildType -eq "auto") {
+        $buildType = if ($Environment -eq "prod") { "lean" } else { "full" }
+    }
+    Write-Status "Backend build type: $buildType"
+    if ($buildType -eq "lean") {
+        Write-Status "Lean build: ~500MB-1GB, OpenAI/AWS/Ollama support"
+        if ($EnableRuntimeML) {
+            Write-Status "Runtime ML: HuggingFace models available on-demand"
+        } else {
+            Write-Status "ML disabled: Use OpenAI, AWS, or Ollama for embeddings"
+        }
+    } else {
+        Write-Status "Full build: ~2-3GB, all ML capabilities pre-installed"
+    }
+    
     Test-Prerequisites              # Check prerequisites
     
     # Set up internal registry when building/pushing images
@@ -813,6 +1053,7 @@ function Main {
     Create-NamespaceAndImageStreams # Create namespace and ImageStreams before pushing
     Optimize-ImagePush              # ✅ Analyze images to minimize push size
     Push-Images                     # Push only necessary images to registry
+    Configure-MLEnvironment        # Configure ML environment variables based on build type
     Deploy-ToOpenShift             # Deploy the application (includes Ensure-Secrets)
     Write-Success "Deployment script completed successfully!"
 }

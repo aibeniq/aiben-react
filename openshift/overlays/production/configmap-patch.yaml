@@ -22,6 +22,9 @@ data:
   ENABLED_PROVIDERS: "openai"
   OLLAMA_BASE_URL: "http://ollama:11434"
   AWS_REGION: "eu-north-1"
+  # Production defaults to lean deployment (overridden by deployment script)
+  ENABLE_PYTORCH: "false"
+  RUNTIME_INSTALL_PYTORCH: "false"
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -1,0 +1,58 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  template:
+    spec:
+      containers:
+        - name: backend
+          resources:
+            requests:
+              memory: "6Gi"    # Increased from 6Gi to 10Gi
+              cpu: "1000m"
+            limits:
+              memory: "8Gi"    # Increased from 8Gi to 12Gi for ML installations
+              cpu: "2000m"      # Increased from 1000m for faster installation
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  template:
+    spec:
+      containers:
+        - name: backend
+          resources:
+            requests:
+              memory: "10Gi"    # Increased from 6Gi to 10Gi
+              cpu: "1000m"
+            limits:
+              memory: "8Gi"    # Increased from 8Gi to 12Gi for ML installations
+              cpu: "2000m"      # Increased from 1000m for faster installation
+              memory: "6Gi"    # Increased from 6Gi to 10Gi
+              cpu: "1000m"
+            limits:
+              memory: "8Gi"    # Increased from 8Gi to 12Gi for ML installations
+              cpu: "2000m"      # Increased from 1000m for faster installation
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+        - name: wait-for-redis
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+        - name: run-prestart
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"

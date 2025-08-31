@@ -13,20 +13,15 @@ patchesStrategicMerge:
   - internal-registry-patches.yaml
   - configmap-patch.yaml
   - backend-patch.yaml
+  - backend-memory-patch.yaml # Memory optimization for ML installations
   - route-patches.yaml
+  - ml-config-patch.yaml
 
 commonLabels:
   environment: development
 
 images:
-  # Map external route images
-  - name: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/backend
-    newName: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-dev/backend
-    newTag: latest
+  # Map frontend image from aibeniq-prod to internal registry aibeniq-dev
   - name: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-prod/frontend
-    newName: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-dev/frontend
-    newTag: latest
-  # Map internal service images
-  - name: image-registry.openshift-image-registry.svc:5000/aibeniq-prod/backend
-    newName: default-route-openshift-image-registry.apps.aibeniq-prod.gimc.p1.openshiftapps.com/aibeniq-dev/backend
+    newName: image-registry.openshift-image-registry.svc:5000/aibeniq-dev/frontend
     newTag: latest
