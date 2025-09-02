@@ -266,11 +266,25 @@ def _download_huggingface_model(model_id: str):
 
         AutoTokenizer, AutoModel = transformers_classes
 
+        # Debug: Print last 6 chars of HuggingFace token(s)
+        hf_token = os.environ.get("HUGGINGFACEHUB_API_TOKEN", "")
+        hf_token_alt = os.environ.get("HF_TOKEN", "")
+        hf_token_hub = os.environ.get("HF_HUB_TOKEN", "")
+        print(
+            f"[DEBUG] HUGGINGFACEHUB_API_TOKEN ends with: {hf_token[-6:] if hf_token else '[NONE]'}"
+        )
+        print(
+            f"[DEBUG] HF_TOKEN ends with: {hf_token_alt[-6:] if hf_token_alt else '[NONE]'}"
+        )
+        print(
+            f"[DEBUG] HF_HUB_TOKEN ends with: {hf_token_hub[-6:] if hf_token_hub else '[NONE]'}"
+        )
+
         print(f"Pre-downloading HuggingFace model: {model_id}")
 
-        # Download tokenizer and model to cache
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
-        model = AutoModel.from_pretrained(model_id)
+        # Download tokenizer and model to cache, passing token explicitly
+        tokenizer = AutoTokenizer.from_pretrained(model_id, use_auth_token=hf_token)
+        model = AutoModel.from_pretrained(model_id, use_auth_token=hf_token)
 
         print(f"Successfully pre-downloaded HuggingFace model: {model_id}")
     except Exception as e:
@@ -460,8 +474,22 @@ def validate_llm_model(
             # For HuggingFace, try to load the model
             print(f"Loading HuggingFace model: {model_id}")
 
-            # Just check if the model exists - don't fully load it to save resources
-            tokenizer = AutoTokenizer.from_pretrained(model_id)
+            # Debug: Print last 6 chars of HuggingFace token(s)
+            hf_token = os.environ.get("HUGGINGFACEHUB_API_TOKEN", "")
+            hf_token_alt = os.environ.get("HF_TOKEN", "")
+            hf_token_hub = os.environ.get("HF_HUB_TOKEN", "")
+            print(
+                f"[DEBUG] HUGGINGFACEHUB_API_TOKEN ends with: {hf_token[-6:] if hf_token else '[NONE]'}"
+            )
+            print(
+                f"[DEBUG] HF_TOKEN ends with: {hf_token_alt[-6:] if hf_token_alt else '[NONE]'}"
+            )
+            print(
+                f"[DEBUG] HF_HUB_TOKEN ends with: {hf_token_hub[-6:] if hf_token_hub else '[NONE]'}"
+            )
+
+            # Pass token explicitly to from_pretrained
+            tokenizer = AutoTokenizer.from_pretrained(model_id, use_auth_token=hf_token)
             print(f"HuggingFace tokenizer loaded successfully for {model_id}")
 
             # Optional: Check model card to verify it's a language model

@@ -52,6 +52,20 @@ def load_embeddings_model(
                 detail="HuggingFace embeddings not available. ML capabilities are not installed. Use OpenAI, AWS, or Ollama providers instead.",
             )
 
+        # Debug: Print last 6 chars of HuggingFace token(s)
+        hf_token = os.environ.get("HUGGINGFACEHUB_API_TOKEN", "")
+        hf_token_alt = os.environ.get("HF_TOKEN", "")
+        hf_token_hub = os.environ.get("HF_HUB_TOKEN", "")
+        print(
+            f"[DEBUG] HUGGINGFACEHUB_API_TOKEN ends with: {hf_token[-6:] if hf_token else '[NONE]'}"
+        )
+        print(
+            f"[DEBUG] HF_TOKEN ends with: {hf_token_alt[-6:] if hf_token_alt else '[NONE]'}"
+        )
+        print(
+            f"[DEBUG] HF_HUB_TOKEN ends with: {hf_token_hub[-6:] if hf_token_hub else '[NONE]'}"
+        )
+
         print("Loading HuggingFace embeddings model with model_id:", model_id)
         return HuggingFaceEmbeddings(model_name=model_id)
     elif provider == ModelProvider.AWS:

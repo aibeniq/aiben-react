@@ -344,6 +344,44 @@ def create_llm(
         # Create a Replicate wrapper
         return wrapper
 
+    elif provider == ModelProvider.HUGGINGFACE:
+        # HuggingFace LLM support using LangChain's HuggingFacePipeline
+        from app.core.ml_imports import get_huggingface_pipeline
+
+        HuggingFacePipeline = get_huggingface_pipeline()
+        if HuggingFacePipeline is None:
+            raise ValueError(
+                "HuggingFacePipeline not available. Check ML dependencies."
+            )
+
+        # Get the token from the environment (LangChain-specific env var)
+        hf_token = os.environ.get("HUGGINGFACEHUB_API_TOKEN", "")
+
+        # Set HF_TOKEN for transformers to use (avoids duplication and ensures auth)
+        if hf_token:
+            os.environ["HF_TOKEN"] = hf_token
+            print(f"[DEBUG] Set HF_TOKEN for transformers (ends with: {hf_token[-6:]})")
+        else:
+            print("[DEBUG] No HuggingFace token found in HUGGINGFACEHUB_API_TOKEN")
+
+        # Separate kwargs: model_kwargs for model init, generate_kwargs for generation
+        model_kwargs = (
+            {}
+        )  # Add model-specific args here if needed (e.g., {"device_map": "auto"})
+        generate_kwargs = {
+            "temperature": temperature,
+            "return_full_text": False,  # Ensures only the generated text is returned
+            "max_new_tokens": 512,  # Limit response length
+            "do_sample": True,  # Enable sampling for natural responses
+        }
+
+        # Create the pipeline with proper kwarg separation
+        return HuggingFacePipeline.from_model_id(
+            model_id=model_id,
+            task="text-generation",
+            model_kwargs=model_kwargs,  # For model initialization
+            generate_kwargs=generate_kwargs,  # For generation parameters
+        )
     else:
         raise ValueError(f"Unsupported LLM provider: {provider}")
 

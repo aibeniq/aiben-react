@@ -53,6 +53,10 @@ RUN uv pip install pip
 # Create writable directories for OpenShift arbitrary UID
 RUN mkdir -p /tmp/uv-cache /tmp/pip-cache && \
     chmod 777 /tmp/uv-cache /tmp/pip-cache
+# HuggingFace cache workaround for OpenShift arbitrary UID
+ENV HF_HOME=/tmp/huggingface-cache
+ENV TRANSFORMERS_CACHE=/tmp/huggingface-cache
+RUN mkdir -p /tmp/huggingface-cache && chmod 0777 /tmp/huggingface-cache
 
 # Add graceful shutdown and health check configuration
 STOPSIGNAL SIGTERM

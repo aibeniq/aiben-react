@@ -303,6 +303,7 @@ $secretConfig = @{
     AWS_ACCESS_KEY_ID = "REMOVED_AWS_ACCESS_KEY_ID"
     AWS_SECRET_ACCESS_KEY = "REMOVED_AWS_SECRET_ACCESS_KEY"
     SENTRY_DSN = ""
+    HUGGINGFACEHUB_API_TOKEN = "REMOVED_HUGGINGFACE_TOKEN"
 }
 
 # PostgreSQL password mismatch detection (only when updating, not validating)
