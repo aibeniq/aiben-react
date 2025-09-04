@@ -14,6 +14,7 @@ from langchain_core.messages import HumanMessage
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 from app.services.llms import create_llm
+from app.crud import initialize_default_llm_models
 from app.models import (
     LlmModel,
     LlmModelCreate,
@@ -36,62 +37,6 @@ from langchain_aws import ChatBedrockConverse
 from langchain_openai import ChatOpenAI
 
 router = APIRouter(prefix="/llm-models", tags=["llm-models"])
-
-
-# Initialize with default models
-def initialize_default_llm_models(session: SessionDep):
-    default_models = [
-        {
-            "name": "GPT-4o Mini (System Default)",
-            "model_id": "gpt-4o-mini",
-            "provider": ModelProvider.OPENAI,
-            "description": "OpenAI's GPT-4o Mini model - system default for all users.",
-        },
-        {
-            "name": "GPT-4o Mini",
-            "model_id": "gpt-4o-mini",
-            "provider": ModelProvider.OPENAI,
-            "description": "OpenAI's GPT-4o Mini model, good balance of performance and speed.",
-        },
-        {
-            "name": "Claude Sonnet 3.7",
-            "model_id": "arn:aws:bedrock:eu-north-1:888577032067:inference-profile/eu.anthropic.claude-3-7-sonnet-20250219-v1:0",
-            "provider": ModelProvider.AWS,
-            "description": "Anthropic's Claude 3.7 Sonnet model on AWS Bedrock. Highly capable, fast, and excellent at complex reasoning tasks. Great for enterprise use cases requiring advanced reasoning and understanding.",
-        },
-        {
-            "name": "Llama 3 8B",
-            "model_id": "llama3",
-            "provider": ModelProvider.OLLAMA,
-            "description": "Local Llama 3 8B model running via Ollama.",
-        },
-        {
-            "name": "Mistral 7B",
-            "model_id": "mistral",
-            "provider": ModelProvider.OLLAMA,
-            "description": "Local Mistral 7B model running via Ollama.",
-        },
-    ]
-
-    for model_data in default_models:
-        # Check if this default LLM model already exists (system model: owner_id is None)
-        exists = session.exec(
-            select(LlmModel).where(
-                LlmModel.model_id == model_data["model_id"],
-                LlmModel.provider == model_data["provider"],
-                LlmModel.owner_id.is_(None),
-            )
-        ).first()
-        if not exists:
-            model = LlmModel(
-                name=model_data["name"],
-                model_id=model_data["model_id"],
-                provider=model_data["provider"],
-                description=model_data["description"],
-            )
-            session.add(model)
-
-    session.commit()
 
 
 @router.get("/", response_model=LlmModelsPublic)
