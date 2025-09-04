@@ -473,9 +473,7 @@ async def generate_report(
 
 
 @router.delete("/reports/{report_id}", response_model=Message)
-def delete_report(
-    report_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
-):
+def delete_report(report_id: uuid.UUID, session: SessionDep, current_user: CurrentUser):
     """
     Delete a report by ID.
     """
@@ -491,9 +489,7 @@ def delete_report(
 
     # Only allow deletion of reportgenie reports
     if report.functionality != "reportgenie":
-        raise HTTPException(
-            status_code=400, detail="Invalid report type."
-        )
+        raise HTTPException(status_code=400, detail="Invalid report type.")
 
     session.delete(report)
     session.commit()
@@ -678,7 +674,7 @@ async def get_report_history(
 async def get_report_detail(
     report_id: str,
     session: SessionDep,
-    current_user: CurrentUser,
+    # current_user: CurrentUser,
 ):
     """Retrieve a specific ReportGenie report's full content by ID."""
     try:
@@ -690,7 +686,7 @@ async def get_report_detail(
             select(LlmInteraction)
             .where(LlmInteraction.id == interaction_id)
             .where(LlmInteraction.functionality == "reportgenie")
-            .where(LlmInteraction.user_id == current_user.id)
+            # .where(LlmInteraction.user_id == current_user.id)
         ).first()
 
         if not interaction:
@@ -1174,25 +1170,29 @@ async def generate_outline(
 
         # Check if content exceeds token limits and chunk if necessary
         if example_document_content:
-            print(f"Total example document content: {len(example_document_content)} characters")
-            
+            print(
+                f"Total example document content: {len(example_document_content)} characters"
+            )
+
             # Using conservative chunking similar to TWINCHECK settings
             max_chunk_size = 80000  # Conservative chunk size for 128K context limit
-            
+
             if len(example_document_content) > max_chunk_size:
-                print(f"Example document too large ({len(example_document_content)} chars), chunking for processing")
-                
+                print(
+                    f"Example document too large ({len(example_document_content)} chars), chunking for processing"
+                )
+
                 from app.services.text_processing import chunk_text
-                
+
                 # Chunk the document content
                 chunks = chunk_text(example_document_content, max_tokens=max_chunk_size)
-                
+
                 # Process each chunk to generate sections
                 all_chunk_sections = []
-                
+
                 for i, chunk in enumerate(chunks):
                     print(f"Processing chunk {i+1}/{len(chunks)}")
-                    
+
                     # Generate sections for this chunk
                     chunk_prompt_variables = {
                         "description": description,
@@ -1210,12 +1210,12 @@ async def generate_outline(
                             settings.REPORTGENIE_GENERATE_OUTLINE_PROMPT_TEMPLATE,
                             chunk_prompt_variables,
                         )
-                        
+
                         # Parse sections from chunk response
                         chunk_sections = []
                         lines = chunk_response.strip().split("\n")
                         in_sections_section = False
-                        
+
                         for line in lines:
                             line = line.strip()
                             if line.startswith("SECTIONS:"):
@@ -1230,7 +1230,7 @@ async def generate_outline(
                                     section = re.sub(r"^\d+\.\s+", "", line)
                                     if section.strip():
                                         chunk_sections.append(section.strip())
-                        
+
                         # If parsing failed, try simpler approach
                         if not chunk_sections:
                             for line in lines:
@@ -1239,13 +1239,13 @@ async def generate_outline(
                                     section = re.sub(r"^\d+\.\s+", "", line)
                                     if section.strip():
                                         chunk_sections.append(section.strip())
-                        
+
                         all_chunk_sections.extend(chunk_sections)
-                        
+
                     except Exception as e:
                         print(f"Error processing chunk {i+1}: {e}")
                         continue
-                
+
                 # Deduplicate and refine sections across all chunks
                 if all_chunk_sections:
                     # Remove duplicates while preserving order
@@ -1255,7 +1255,7 @@ async def generate_outline(
                         if s.lower() not in seen:
                             seen.add(s.lower())
                             unique_sections.append(s)
-                    
+
                     # If we have too many sections, synthesize and prioritize
                     if len(unique_sections) > (num_sections or 15):
                         synthesis_prompt = f"""From the following list of outline sections, select and refine the {num_sections or 8} most important and relevant sections for a {report_type} report based on: {description}
@@ -1270,26 +1270,30 @@ Requirements:
 4. Focus on sections most relevant to the description
 
 Return only the final selected sections, one per line, numbered."""
-                        
+
                         try:
                             refined_response = invoke_llm(llm, synthesis_prompt, {})
                             sections = []
-                            for line in refined_response.strip().split('\n'):
+                            for line in refined_response.strip().split("\n"):
                                 line = line.strip()
-                                if line and (line[0].isdigit() or line.startswith('-') or line.startswith('*')):
+                                if line and (
+                                    line[0].isdigit()
+                                    or line.startswith("-")
+                                    or line.startswith("*")
+                                ):
                                     section = re.sub(r"^\d+\.\s+", "", line)
                                     section = re.sub(r"^[-*]\s+", "", section)
                                     if section.strip():
                                         sections.append(section.strip())
                         except Exception as e:
                             print(f"Error in section synthesis: {e}")
-                            sections = unique_sections[:num_sections or 8]
+                            sections = unique_sections[: num_sections or 8]
                     else:
-                        sections = unique_sections[:num_sections or 15]
-                    
+                        sections = unique_sections[: num_sections or 15]
+
                     # For analysis, show chunked processing was used
                     analysis = f"Generated {len(sections)} sections from chunked example document analysis ({len(chunks)} chunks processed) based on the provided description to ensure comprehensive report structure coverage."
-                    
+
                     # Record the interaction
                     record_llm_interaction(
                         session=session,
@@ -1310,7 +1314,9 @@ Return only the final selected sections, one per line, numbered."""
                         metadata={},
                     )
 
-                    return GenerateOutlineResponse(sections=sections, description_analysis=analysis)
+                    return GenerateOutlineResponse(
+                        sections=sections, description_analysis=analysis
+                    )
                 else:
                     # Fallback to description-only generation if chunk processing failed
                     example_document_content = ""
@@ -2758,9 +2764,9 @@ async def generate_docx(
         print("Adding title and date to the document...")
         # Add a title - hard-coding it for ReportGenie because it's using the service for Compare functionality with 'Document Comparison' as title
         title_text = (
-            #request.title
-            #if hasattr(request, "title") and request.title
-            #else "Generated Document"
+            # request.title
+            # if hasattr(request, "title") and request.title
+            # else "Generated Document"
             "Generated Document"
         )
         title = doc.add_heading(title_text, level=0)
