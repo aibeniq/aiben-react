@@ -50,11 +50,14 @@ const VeraDoc = () => {
     setReviewResults: setResults,
     reviewActiveTab: activeTab,
     setReviewActiveTab: setActiveTab,
-    clearReviewResults
+    reviewInputs,
+    setReviewInputs,
+    clearReviewResults,
   } = useResults()
-  
+
+  // Initialize form state from persisted inputs or defaults
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
-    null,
+    reviewInputs?.selectedKnowledgeBase || null,
   )
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -66,19 +69,25 @@ const VeraDoc = () => {
   const [loadingDownload, setLoadingDownload] = useState(false)
   const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
 
-  const [questions, setQuestions] = useState("")
+  const [questions, setQuestions] = useState(reviewInputs?.questions || "")
   const [structuredQuestions, setStructuredQuestions] = useState<QuestionData[]>([])
-  const [customInstructions, setCustomInstructions] = useState("")
+  const [customInstructions, setCustomInstructions] = useState(
+    reviewInputs?.customInstructions || "",
+  )
 
-  const [fileItems, setFileItems] = useState<FileItem[]>([])
+  const [fileItems, setFileItems] = useState<FileItem[]>(reviewInputs?.fileItems || [])
 
   const [loading, setLoading] = useState<boolean>(false)
 
   const [checklists, setChecklists] = useState<VeraDocChecklist[]>([])
-  const [selectedChecklist, setSelectedChecklist] = useState<VeraDocChecklist | null>(null)
+  const [selectedChecklist, setSelectedChecklist] = useState<VeraDocChecklist | null>(
+    reviewInputs?.selectedChecklist || null,
+  )
 
   // Search mode state for main review functionality
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">(
+    reviewInputs?.searchMode || "vector",
+  )
 
   // State to track which citations are expanded - using object instead of Set
   const [expandedCitations, setExpandedCitations] = useState<Record<string, boolean>>({})
@@ -108,6 +117,38 @@ const VeraDoc = () => {
     showSuccessToast(`Thank you for marking this response as ${type}!`)
   }
 
+  // Save input parameters to context whenever they change
+  useEffect(() => {
+    setReviewInputs({
+      selectedKnowledgeBase,
+      selectedChecklist,
+      questions,
+      customInstructions,
+      searchMode,
+      fileItems,
+    })
+  }, [
+    selectedKnowledgeBase,
+    selectedChecklist,
+    questions,
+    customInstructions,
+    searchMode,
+    fileItems,
+    setReviewInputs,
+  ])
+
+  // Clear inputs and restore from context when clear button is clicked
+  const handleClearResults = () => {
+    clearReviewResults() // Clears both results and inputs
+    // Reset local state to blank
+    setSelectedKnowledgeBase(null)
+    setSelectedChecklist(null)
+    setQuestions("")
+    setCustomInstructions("")
+    setSearchMode("vector")
+    setFileItems([])
+  }
+
   // Reset active tab when results change
   useEffect(() => {
     console.log("Review tab - results changed:", results.length, results)
@@ -118,10 +159,10 @@ const VeraDoc = () => {
 
   // Debug effect to log context state
   useEffect(() => {
-    console.log("Review tab - context state:", { 
-      resultsLength: results.length, 
-      activeTab, 
-      firstResult: results[0]?.filename 
+    console.log("Review tab - context state:", {
+      resultsLength: results.length,
+      activeTab,
+      firstResult: results[0]?.filename,
     })
   }, [results, activeTab])
 
@@ -763,16 +804,10 @@ const VeraDoc = () => {
   return (
     <Container maxW="container.xl" py={8}>
       {/* Tab description */}
-      <Text 
-        fontSize="sm" 
-        color="gray.500" 
-        textAlign="center" 
-        mb={4}
-        fontStyle="italic"
-      >
+      <Text fontSize="sm" color="gray.500" textAlign="center" mb={4} fontStyle="italic">
         Review a document based on a user-defined checklist and policy database.
       </Text>
-      
+
       {/* Add this overlay spinner that shows when loading is true */}
       {loading && (
         <Box
@@ -894,7 +929,9 @@ const VeraDoc = () => {
           align="stretch"
           mb={4}
           opacity={(!selectedKnowledgeBase || !selectedChecklist) && !results ? 0.3 : 1}
-          pointerEvents={(!selectedKnowledgeBase || !selectedChecklist) && !results ? "none" : "auto"}
+          pointerEvents={
+            (!selectedKnowledgeBase || !selectedChecklist) && !results ? "none" : "auto"
+          }
         >
           <HStack gap={4} justify="center">
             <Button
@@ -964,7 +1001,7 @@ const VeraDoc = () => {
                       variant="outline"
                       colorPalette="red"
                       onClick={() => {
-                        clearReviewResults()
+                        handleClearResults()
                         showSuccessToast("Review results cleared")
                       }}
                     >

@@ -24,22 +24,24 @@ import { useResults } from "../../contexts/ResultsContext"
 
 const FormConnect = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const {
-    matchResult,
-    setMatchResult,
-    clearMatchResult
-  } = useResults()
+  const { matchResult, setMatchResult, matchInputs, setMatchInputs, clearMatchResult } =
+    useResults()
 
-  const [fileItems, setFileItems] = useState<FileItem[]>([])
+  // Initialize form state from persisted inputs or defaults
+  const [fileItems, setFileItems] = useState<FileItem[]>(matchInputs?.fileItems || [])
   const [forms, setForms] = useState<FormConnectForm[]>([])
-  const [selectedForm, setSelectedForm] = useState<FormConnectForm | null>(null)
+  const [selectedForm, setSelectedForm] = useState<FormConnectForm | null>(
+    matchInputs?.selectedForm || null,
+  )
   const [formName, setFormName] = useState("")
   const [formDescription, setFormDescription] = useState("")
-  const [fields, setFields] = useState("")
+  const [fields, setFields] = useState(matchInputs?.fields || "")
   const [loading, setLoading] = useState(false)
   const [showFormModal, setShowFormModal] = useState(false)
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">(
+    matchInputs?.searchMode || "vector",
+  )
 
   // Copy and download states
   const [copySuccess, setCopySuccess] = useState(false)
@@ -52,11 +54,31 @@ const FormConnect = () => {
     showSuccessToast(`Thank you for marking this response as ${type}!`)
   }
 
+  // Save input parameters to context whenever they change
+  useEffect(() => {
+    setMatchInputs({
+      fileItems,
+      selectedForm,
+      fields,
+      searchMode,
+    })
+  }, [fileItems, selectedForm, fields, searchMode, setMatchInputs])
+
+  // Clear inputs and restore from context when clear button is clicked
+  const handleClearResults = () => {
+    clearMatchResult() // Clears both results and inputs
+    // Reset local state to blank
+    setFileItems([])
+    setSelectedForm(null)
+    setFields("")
+    setSearchMode("vector")
+  }
+
   // Debug effect to log context state
   useEffect(() => {
-    console.log("Match tab - context state:", { 
-      hasResult: !!matchResult, 
-      resultsLength: matchResult?.results?.length 
+    console.log("Match tab - context state:", {
+      hasResult: !!matchResult,
+      resultsLength: matchResult?.results?.length,
     })
   }, [matchResult])
 
@@ -245,10 +267,10 @@ const FormConnect = () => {
     onSuccess: (data) => {
       console.log("Match Response data:", data)
       console.log("Match interaction_id:", data.results.interaction_id)
-      
+
       const interactionId = data.results.interaction_id
       console.log("Match interactionId for feedback:", interactionId)
-      
+
       // Handle both comparison and single file responses
       let results = ""
       if (data.results.comparison) {
@@ -259,13 +281,13 @@ const FormConnect = () => {
       } else {
         results = JSON.stringify(data.results, null, 2)
       }
-      
+
       // Store result in global state
       setMatchResult({
         results: results,
-        interactionId: interactionId as string
+        interactionId: interactionId as string,
       })
-      
+
       const searchMethod = searchMode === "vector" ? "vector search" : "full document scan"
       showSuccessToast(`Form processing completed using ${searchMethod}!`)
     },
@@ -311,16 +333,10 @@ const FormConnect = () => {
   return (
     <Container maxW="container.xl" py={8}>
       {/* Tab description */}
-      <Text 
-        fontSize="sm" 
-        color="gray.500" 
-        textAlign="center" 
-        mb={4}
-        fontStyle="italic"
-      >
+      <Text fontSize="sm" color="gray.500" textAlign="center" mb={4} fontStyle="italic">
         Ensure that documents match based on a user-defined list of fields.
       </Text>
-      
+
       <VStack gap={6} align="stretch">
         <HStack width="100%" justify="space-between">
           <VStack gap={4} align="stretch" flex={1}>
@@ -463,7 +479,7 @@ const FormConnect = () => {
                         variant="outline"
                         colorPalette="red"
                         onClick={() => {
-                          clearMatchResult()
+                          handleClearResults()
                           showSuccessToast("Match results cleared")
                         }}
                       >
