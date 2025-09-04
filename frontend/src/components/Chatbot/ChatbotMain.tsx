@@ -59,6 +59,37 @@ const ChatbotMain = () => {
     return () => document.removeEventListener("keydown", handleEscapeKey)
   }, [isOpen])
 
+  // Simplified overlay management - less aggressive than before
+  useEffect(() => {
+    const handleGlobalClick = (event: MouseEvent) => {
+      // Only intervene if there's a clear sign of overlay problems
+      // and the chat is not open (to avoid conflicts)
+      if (!isOpen) {
+        const target = event.target as HTMLElement
+
+        // Check if the click target is obviously blocked
+        if (target && !target.click) {
+          console.warn("🚨 Detected unresponsive element, cleaning overlays")
+
+          // Only clean up clearly problematic overlays
+          const stuckOverlays = document.querySelectorAll(
+            '[data-scope="drawer"][data-part="backdrop"]:not([data-state="open"])',
+          )
+
+          stuckOverlays.forEach((overlay) => {
+            const overlayEl = overlay as HTMLElement
+            overlayEl.style.display = "none"
+            overlayEl.style.pointerEvents = "none"
+          })
+        }
+      }
+    }
+
+    // Use a less intrusive event listener
+    document.addEventListener("click", handleGlobalClick, false)
+    return () => document.removeEventListener("click", handleGlobalClick, false)
+  }, [isOpen])
+
   const handleChatbotResponse = (response: any, userMessage: string) => {
     if (!response?.answer) return
 
@@ -179,15 +210,16 @@ const ChatbotMain = () => {
         }
 
         // Check for large files and adjust timeout
-        const hasVeryLargeFile = uploadedFiles.some(file => file.size > 50 * 1024 * 1024) // > 50MB
-        
+        const hasVeryLargeFile = uploadedFiles.some((file) => file.size > 50 * 1024 * 1024) // > 50MB
+
         if (hasVeryLargeFile && searchMode === "vector") {
           console.log("Large file detected, recommending full text mode")
           setMessages((prev) => [
             ...prev,
-            { 
-              role: "assistant", 
-              content: "⚠️ Large document detected. For better performance with files over 50MB, consider switching to 'Full Text Scan' mode using the toggle above."
+            {
+              role: "assistant",
+              content:
+                "⚠️ Large document detected. For better performance with files over 50MB, consider switching to 'Full Text Scan' mode using the toggle above.",
             },
           ])
         }
@@ -217,39 +249,40 @@ const ChatbotMain = () => {
       }
     } catch (error) {
       console.error("Error querying:", error)
-      
+
       // Better error handling for timeouts and large files
       let errorMessage = "Sorry, I couldn't process your request. Please try again."
-      
-      if (error && typeof error === 'object') {
+
+      if (error && typeof error === "object") {
         const errorObj = error as any
         if (errorObj.code === "ERR_NETWORK" || errorObj.message?.includes("timeout")) {
-          const hasLargeFiles = uploadedFiles.some(file => file.size > 10 * 1024 * 1024)
+          const hasLargeFiles = uploadedFiles.some((file) => file.size > 10 * 1024 * 1024)
           if (hasLargeFiles) {
-            errorMessage = "The document is very large and processing timed out. Please try with a smaller document or switch to 'Full Text Scan' mode which is more efficient for large files."
+            errorMessage =
+              "The document is very large and processing timed out. Please try with a smaller document or switch to 'Full Text Scan' mode which is more efficient for large files."
           } else {
             errorMessage = "Request timed out. Please check your connection and try again."
           }
         } else if (errorObj.response?.status === 413) {
           errorMessage = "The uploaded file is too large. Please try with a smaller document."
         } else if (errorObj.response?.status >= 500) {
-          errorMessage = "Server error occurred. The document might be too large or complex to process. Please try with a smaller file or contact support."
+          errorMessage =
+            "Server error occurred. The document might be too large or complex to process. Please try with a smaller file or contact support."
         }
       }
-      
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: errorMessage },
-      ])
+
+      setMessages((prev) => [...prev, { role: "assistant", content: errorMessage }])
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Defensive: always neutralize any drawer backdrops so chat panel is never dimmed
+  // Simplified overlay management to prevent UI responsiveness issues
   useEffect(() => {
+    console.log("Chat drawer state changed:", { isOpen })
+
     if (isOpen) {
-      // Find the drawer content and ensure it's fully opaque
+      // Ensure drawer content is properly visible
       const drawerContent = document.querySelector('[data-scope="drawer"][data-part="content"]')
       if (drawerContent) {
         const contentEl = drawerContent as HTMLElement
@@ -258,6 +291,21 @@ const ChatbotMain = () => {
         contentEl.style.position = "relative"
         contentEl.style.zIndex = "9001"
       }
+    } else {
+      // When chat is closed, clean up only chat-related overlays
+      setTimeout(() => {
+        console.log("Chat closed - cleaning up chat overlays")
+
+        // Only clean up chat overlays (placement="end")
+        const chatOverlays = document.querySelectorAll(
+          '[data-placement="end"] [data-scope="drawer"][data-part="backdrop"]',
+        )
+        chatOverlays.forEach((overlay) => {
+          const overlayEl = overlay as HTMLElement
+          overlayEl.style.display = "none"
+          overlayEl.style.pointerEvents = "none"
+        })
+      }, 10) // Small delay to allow animation to complete
     }
   }, [isOpen])
 
@@ -267,14 +315,38 @@ const ChatbotMain = () => {
       {isOpen && (
         <Drawer.Root
           open={isOpen}
-          onOpenChange={({ open }) => !open && handleCloseChat()}
+          onOpenChange={({ open }) => {
+            console.log("Drawer onOpenChange called with:", { open })
+            if (!open) {
+              handleCloseChat()
+            }
+          }}
           placement="end"
           size="md"
         >
-          {/* Use the built-in Drawer.Backdrop but with custom styling */}
-          <Drawer.Backdrop />
-          <Drawer.Positioner>
-            <Drawer.Content>
+          {/* Enhanced Drawer.Backdrop with explicit cleanup */}
+          <Drawer.Backdrop
+            onClick={() => {
+              console.log("Backdrop clicked - closing chat")
+              handleCloseChat()
+            }}
+            style={{
+              pointerEvents: "auto",
+              zIndex: 8999, // Lower than floating chat button
+            }}
+          />
+          <Drawer.Positioner
+            style={{
+              pointerEvents: "none", // Allow clicks to pass through positioner
+              zIndex: 9000,
+            }}
+          >
+            <Drawer.Content
+              style={{
+                pointerEvents: "auto", // Re-enable for content
+                zIndex: 9001,
+              }}
+            >
               <ChatbotPanel
                 isOpen={isOpen}
                 messages={messages}

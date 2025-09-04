@@ -1,9 +1,11 @@
 import { Flex } from "@chakra-ui/react"
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router"
+import { useEffect } from "react"
 
 import Navbar from "@/components/Common/Navbar"
 import Sidebar from "@/components/Common/Sidebar"
 import { isLoggedIn } from "@/hooks/useAuth"
+import { addEmergencyEscapeHandlers } from "../utils/overlay-debugger"
 
 import Chatbot from "@/components/Chatbot/ChatbotMain"
 
@@ -19,12 +21,36 @@ export const Route = createFileRoute("/_layout")({
 })
 
 function Layout() {
+  // Simplified emergency handlers - only enable in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔧 Setting up development overlay debugging utilities")
+      const cleanup = addEmergencyEscapeHandlers()
+
+      console.log("📋 Development shortcuts available:")
+      console.log("  Ctrl+Shift+F12: Emergency overlay cleanup")
+      console.log("  Ctrl+Shift+F11: Debug overlay information")
+
+      return cleanup
+    }
+  }, [])
+
   return (
     <Flex direction="column" h="100vh">
       <Navbar />
       <Flex flex="1" overflow="hidden">
         <Sidebar />
-        <Flex flex="1" direction="column" p={4} overflowY="auto">
+        <Flex
+          flex="1"
+          direction="column"
+          p={4}
+          overflowY="auto"
+          // Ensure main content area has explicit pointer events
+          style={{
+            pointerEvents: "auto",
+            isolation: "isolate",
+          }}
+        >
           <Outlet />
           <Chatbot />
         </Flex>
