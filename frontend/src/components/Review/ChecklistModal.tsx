@@ -82,33 +82,33 @@ const ChecklistModal = ({
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // Validation state
-  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({})
 
   // Validation function
   const validateForm = () => {
-    const errors: {[key: string]: string} = {}
-    
+    const errors: { [key: string]: string } = {}
+
     if (!checklistName.trim()) {
       errors.name = "Checklist name is required"
     } else if (checklistName.trim().length < 3) {
       errors.name = "Checklist name must be at least 3 characters long"
     }
-    
+
     // Description is optional - no validation required
-    
-    if (questionsList.length === 0 || questionsList.every(q => !q.trim())) {
+
+    if (questionsList.length === 0 || questionsList.every((q) => !q.trim())) {
       errors.questions = "At least one question is required"
     }
-    
+
     setValidationErrors(errors)
-    
+
     // Show the first error as a toast
     const firstError = Object.values(errors)[0]
     if (firstError) {
       showErrorToast(firstError)
       return false
     }
-    
+
     return true
   }
 
@@ -116,14 +116,14 @@ const ChecklistModal = ({
   const handleNameChange = (value: string) => {
     setChecklistName(value)
     if (validationErrors.name) {
-      setValidationErrors(prev => ({ ...prev, name: '' }))
+      setValidationErrors((prev) => ({ ...prev, name: "" }))
     }
   }
 
   const handleDescriptionChange = (value: string) => {
     setChecklistDescription(value)
     if (validationErrors.description) {
-      setValidationErrors(prev => ({ ...prev, description: '' }))
+      setValidationErrors((prev) => ({ ...prev, description: "" }))
     }
   }
 
@@ -132,7 +132,7 @@ const ChecklistModal = ({
     if (!validateForm()) {
       return // Stop execution if validation fails
     }
-    
+
     // Call the parent's onSave function if validation passes
     onSave()
   }
@@ -196,12 +196,12 @@ const ChecklistModal = ({
 
   const handleOptimized = (optimizedQuestions: string[]) => {
     updateQuestionsList(optimizedQuestions)
-    
+
     // Clear questions validation error if it exists
     if (validationErrors.questions) {
-      setValidationErrors(prev => ({ ...prev, questions: '' }))
+      setValidationErrors((prev) => ({ ...prev, questions: "" }))
     }
-    
+
     showSuccessToast(`Applied ${optimizedQuestions.length} optimized questions`)
   }
 
@@ -289,7 +289,7 @@ const ChecklistModal = ({
 
         // Clear questions validation error if it exists
         if (validationErrors.questions) {
-          setValidationErrors(prev => ({ ...prev, questions: '' }))
+          setValidationErrors((prev) => ({ ...prev, questions: "" }))
         }
 
         // Force re-render of question items
@@ -343,14 +343,19 @@ const ChecklistModal = ({
                 </Dialog.Title>
               </Dialog.Header>
 
-              <Dialog.Body>
+              <Dialog.Body overflowY="auto">
                 <VStack align="stretch" gap={4}>
                   {/* Two-column layout */}
                   <HStack align="stretch" gap={4}>
                     {/* Left Column - Basic Fields and Settings */}
                     <VStack align="stretch" gap={4} flex={1}>
                       {/* Basic Info */}
-                      <Field label="Checklist Name" required invalid={!!validationErrors.name} errorText={validationErrors.name}>
+                      <Field
+                        label="Checklist Name"
+                        required
+                        invalid={!!validationErrors.name}
+                        errorText={validationErrors.name}
+                      >
                         <Input
                           value={checklistName}
                           onChange={(e) => handleNameChange(e.target.value)}
@@ -358,7 +363,11 @@ const ChecklistModal = ({
                         />
                       </Field>
 
-                      <Field label="Description" invalid={!!validationErrors.description} errorText={validationErrors.description}>
+                      <Field
+                        label="Description"
+                        invalid={!!validationErrors.description}
+                        errorText={validationErrors.description}
+                      >
                         <Textarea
                           value={checklistDescription}
                           onChange={(e) => handleDescriptionChange(e.target.value)}
@@ -452,7 +461,8 @@ const ChecklistModal = ({
                               </select>
                               {!knowledgeBases || knowledgeBases.length === 0 ? (
                                 <Text fontSize="sm" color="orange.600">
-                                  No Knowledge Bases available. Create one first to use this feature.
+                                  No Knowledge Bases available. Create one first to use this
+                                  feature.
                                 </Text>
                               ) : null}
                             </Box>
@@ -549,14 +559,14 @@ const ChecklistModal = ({
               </Dialog.Body>
 
               <Dialog.Footer>
-                <Dialog.ActionTrigger asChild>
+                <HStack gap={3}>
                   <CancelButton onClick={handleClose} size="md">
                     Cancel
                   </CancelButton>
-                </Dialog.ActionTrigger>
-                <ConfirmButton onClick={handleSave} size="md">
-                  {editingChecklist ? "Update Checklist" : "Create Checklist"}
-                </ConfirmButton>
+                  <ConfirmButton onClick={handleSave} size="md">
+                    {editingChecklist ? "Update Checklist" : "Create Checklist"}
+                  </ConfirmButton>
+                </HStack>
               </Dialog.Footer>
 
               <Dialog.CloseTrigger asChild>

@@ -57,34 +57,34 @@ const FormTemplateModal = ({
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // Validation state
-  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({})
 
   // Validation function
   const validateForm = () => {
-    const errors: {[key: string]: string} = {}
-    
+    const errors: { [key: string]: string } = {}
+
     if (!formName.trim()) {
       errors.name = "Form template name is required"
     } else if (formName.trim().length < 3) {
       errors.name = "Form template name must be at least 3 characters long"
     }
-    
+
     // Description is optional - no validation required
-    
+
     // Check if fields exist (should be a newline-separated string)
-    if (!fields.trim() || fields.split('\n').every(field => !field.trim())) {
+    if (!fields.trim() || fields.split("\n").every((field) => !field.trim())) {
       errors.fields = "At least one form field is required"
     }
-    
+
     setValidationErrors(errors)
-    
+
     // Show the first error as a toast
     const firstError = Object.values(errors)[0]
     if (firstError) {
       showErrorToast(firstError)
       return false
     }
-    
+
     return true
   }
 
@@ -92,14 +92,14 @@ const FormTemplateModal = ({
   const handleNameChange = (value: string) => {
     setFormName(value)
     if (validationErrors.name) {
-      setValidationErrors(prev => ({ ...prev, name: '' }))
+      setValidationErrors((prev) => ({ ...prev, name: "" }))
     }
   }
 
   const handleDescriptionChange = (value: string) => {
     setFormDescription(value)
     if (validationErrors.description) {
-      setValidationErrors(prev => ({ ...prev, description: '' }))
+      setValidationErrors((prev) => ({ ...prev, description: "" }))
     }
   }
 
@@ -108,7 +108,7 @@ const FormTemplateModal = ({
     if (!validateForm()) {
       return // Stop execution if validation fails
     }
-    
+
     // Call the parent's onSave function if validation passes
     onSave()
   }
@@ -160,7 +160,7 @@ const FormTemplateModal = ({
       if (referenceMode === "files" && exampleFiles.length > 0) {
         // Use the new file upload endpoint
         const apiUrl = `${baseUrl}/api/v1/formconnect/generate-fields-with-files`
-        
+
         const formData = new FormData()
         formData.append("description", formDescription.trim())
         formData.append("num_fields", "15")
@@ -184,7 +184,7 @@ const FormTemplateModal = ({
       } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
         // Use knowledge base reference
         const apiUrl = `${baseUrl}/api/v1/formconnect/generate-fields-json`
-        
+
         const requestData = {
           description: formDescription.trim(),
           num_fields: 15, // Default number of fields
@@ -207,7 +207,7 @@ const FormTemplateModal = ({
       } else {
         // Use description only (no files or knowledge base)
         const apiUrl = `${baseUrl}/api/v1/formconnect/generate-fields-json`
-        
+
         const requestData = {
           description: formDescription.trim(),
           num_fields: 15, // Default number of fields
@@ -242,12 +242,12 @@ const FormTemplateModal = ({
 
         // Clear fields validation error if it exists
         if (validationErrors.fields) {
-          setValidationErrors(prev => ({ ...prev, fields: '' }))
+          setValidationErrors((prev) => ({ ...prev, fields: "" }))
         }
 
         const searchMethodText = searchMode === "vector" ? "vector search" : "full document scan"
         let referenceText = ""
-        
+
         if (referenceMode === "files" && exampleFiles.length > 0) {
           referenceText = ` using ${searchMethodText} on ${exampleFiles.length} uploaded file(s)`
         } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
@@ -333,11 +333,16 @@ const FormTemplateModal = ({
               </Dialog.Title>
             </Dialog.Header>
 
-            <Dialog.Body>
+            <Dialog.Body overflowY="auto">
               <VStack align="stretch" gap={4}>
                 <HStack align="stretch" gap={4}>
                   <VStack align="stretch" gap={4} flex="1">
-                    <Field label="Form Template Name" required invalid={!!validationErrors.name} errorText={validationErrors.name}>
+                    <Field
+                      label="Form Template Name"
+                      required
+                      invalid={!!validationErrors.name}
+                      errorText={validationErrors.name}
+                    >
                       <Input
                         value={formName}
                         onChange={(e) => handleNameChange(e.target.value)}
@@ -345,7 +350,11 @@ const FormTemplateModal = ({
                       />
                     </Field>
 
-                    <Field label="Form Template Description" invalid={!!validationErrors.description} errorText={validationErrors.description}>
+                    <Field
+                      label="Form Template Description"
+                      invalid={!!validationErrors.description}
+                      errorText={validationErrors.description}
+                    >
                       <Textarea
                         value={formDescription}
                         onChange={(e) => handleDescriptionChange(e.target.value)}
@@ -385,7 +394,8 @@ const FormTemplateModal = ({
                         {referenceMode === "files" && (
                           <VStack align="stretch" gap={2}>
                             <Text fontSize="sm" color="gray.700" fontWeight="medium">
-                              Upload reference documents to suggest form fields based on their content
+                              Upload reference documents to suggest form fields based on their
+                              content
                             </Text>
                             <FileUpload
                               files={exampleFiles}
@@ -403,7 +413,8 @@ const FormTemplateModal = ({
                             />
                             {exampleFiles.length > 0 && (
                               <Text fontSize="xs" color="green.600" fontWeight="medium">
-                                ✅ {exampleFiles.length} file(s) will be analyzed to suggest relevant form fields
+                                ✅ {exampleFiles.length} file(s) will be analyzed to suggest
+                                relevant form fields
                               </Text>
                             )}
                           </VStack>
@@ -469,10 +480,10 @@ const FormTemplateModal = ({
                               formDescription.trim().length < 10
                                 ? "Description must be at least 10 characters to suggest fields"
                                 : referenceMode === "files" && exampleFiles.length > 0
-                                ? `Suggest fields based on description and ${exampleFiles.length} uploaded file(s)`
-                                : referenceMode === "knowledge-base" && referenceKnowledgeBase
-                                ? "Suggest fields based on description and knowledge base"
-                                : "Suggest fields based on the description"
+                                  ? `Suggest fields based on description and ${exampleFiles.length} uploaded file(s)`
+                                  : referenceMode === "knowledge-base" && referenceKnowledgeBase
+                                    ? "Suggest fields based on description and knowledge base"
+                                    : "Suggest fields based on the description"
                             }
                           >
                             {suggesting ? "Suggesting..." : "Suggest"}
@@ -515,7 +526,7 @@ const FormTemplateModal = ({
                           onFieldsChange(newFields)
                           // Clear validation error when fields are modified
                           if (validationErrors.fields) {
-                            setValidationErrors(prev => ({ ...prev, fields: '' }))
+                            setValidationErrors((prev) => ({ ...prev, fields: "" }))
                           }
                         }}
                         placeholder="Add a field name (e.g. First Name, Address, SSN) or suggest from description"
@@ -527,12 +538,14 @@ const FormTemplateModal = ({
             </Dialog.Body>
 
             <Dialog.Footer>
-              <CancelButton onClick={handleModalClose} size="md">
-                Cancel
-              </CancelButton>
-              <ConfirmButton onClick={handleSave} size="md">
-                {editingForm ? "Update Form Template" : "Create Form Template"}
-              </ConfirmButton>
+              <HStack gap={3}>
+                <CancelButton onClick={handleModalClose} size="md">
+                  Cancel
+                </CancelButton>
+                <ConfirmButton onClick={handleSave} size="md">
+                  {editingForm ? "Update Form Template" : "Create Form Template"}
+                </ConfirmButton>
+              </HStack>
             </Dialog.Footer>
 
             <Dialog.CloseTrigger asChild>
