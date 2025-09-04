@@ -24,11 +24,8 @@ import { useResults } from "@/contexts/ResultsContext"
 
 const TwinCheck = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const {
-    compareResult,
-    setCompareResult,
-    clearCompareResult
-  } = useResults()
+  const { compareResult, setCompareResult, compareInputs, setCompareInputs, clearCompareResult } =
+    useResults()
 
   const [copySuccess, setCopySuccess] = useState(false)
   const [loadingDownload, setLoadingDownload] = useState(false)
@@ -37,14 +34,16 @@ const TwinCheck = () => {
   // Modal states
   const [showTopicListModal, setShowTopicListModal] = useState(false)
 
-  // File state
-  const [document1, setDocument1] = useState<File | null>(null)
-  const [document2, setDocument2] = useState<File | null>(null)
+  // Initialize form state from persisted inputs or defaults
+  const [document1, setDocument1] = useState<File | null>(compareInputs?.document1 || null)
+  const [document2, setDocument2] = useState<File | null>(compareInputs?.document2 || null)
 
   // Topics state
-  const [topics, setTopics] = useState("")
+  const [topics, setTopics] = useState(compareInputs?.topics || "")
   const [comparisons, setComparisons] = useState<TwinCheckTopicList[]>([])
-  const [selectedComparison, setSelectedComparison] = useState<TwinCheckTopicList | null>(null)
+  const [selectedComparison, setSelectedComparison] = useState<TwinCheckTopicList | null>(
+    compareInputs?.selectedComparison || null,
+  )
 
   // Knowledge base state (only for topic generation)
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
@@ -59,12 +58,32 @@ const TwinCheck = () => {
     showSuccessToast(`Thank you for marking this response as ${type}!`)
   }
 
+  // Save input parameters to context whenever they change
+  useEffect(() => {
+    setCompareInputs({
+      document1,
+      document2,
+      topics,
+      selectedComparison,
+    })
+  }, [document1, document2, topics, selectedComparison, setCompareInputs])
+
+  // Clear inputs and restore from context when clear button is clicked
+  const handleClearResults = () => {
+    clearCompareResult() // Clears both results and inputs
+    // Reset local state to blank
+    setDocument1(null)
+    setDocument2(null)
+    setTopics("")
+    setSelectedComparison(null)
+  }
+
   // Debug effect to log context state
   useEffect(() => {
-    console.log("Compare tab - context state:", { 
-      hasResult: !!compareResult, 
+    console.log("Compare tab - context state:", {
+      hasResult: !!compareResult,
       summaryLength: compareResult?.summary?.length,
-      topicResultsCount: compareResult?.topicResults?.length 
+      topicResultsCount: compareResult?.topicResults?.length,
     })
   }, [compareResult])
 
@@ -280,13 +299,13 @@ const TwinCheck = () => {
       const interactionId = data.results.interaction_id
       console.log("Compare interactionId for feedback:", interactionId)
 
-            // Store result in global state
+      // Store result in global state
       setCompareResult({
         summary: data.results.summary || "",
         topicResults: data.results.topic_analysis || [],
-        interactionId: interactionId
+        interactionId: interactionId,
       })
-      
+
       showSuccessToast("Documents compared successfully!")
     },
     onError: (error: any) => {
@@ -349,16 +368,10 @@ const TwinCheck = () => {
   return (
     <Container maxW="container.xl" py={8}>
       {/* Tab description */}
-      <Text 
-        fontSize="sm" 
-        color="gray.500" 
-        textAlign="center" 
-        mb={4}
-        fontStyle="italic"
-      >
+      <Text fontSize="sm" color="gray.500" textAlign="center" mb={4} fontStyle="italic">
         Compare documents based on a user-defined list of topics.
       </Text>
-      
+
       {/* Loading overlay */}
       {loading && (
         <Box
@@ -514,7 +527,7 @@ const TwinCheck = () => {
                       variant="outline"
                       colorPalette="red"
                       onClick={() => {
-                        clearCompareResult()
+                        handleClearResults()
                         showSuccessToast("Comparison results cleared")
                       }}
                     >

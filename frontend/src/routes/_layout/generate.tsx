@@ -39,9 +39,11 @@ const ReportGenie = () => {
   const {
     generateResult,
     setGenerateResult,
-    clearGenerateResult
+    generateInputs,
+    setGenerateInputs,
+    clearGenerateResult,
   } = useResults()
-  
+
   const [copySuccess, setCopySuccess] = useState(false)
   const [loadingDownload, setLoadingDownload] = useState(false)
   const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
@@ -50,26 +52,32 @@ const ReportGenie = () => {
   const [showKnowledgeBaseModal, setShowKnowledgeBaseModal] = useState(false)
   const [showOutlineModal, setShowOutlineModal] = useState(false)
 
-  // Knowledge base selection state
+  // Initialize form state from persisted inputs or defaults
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
-    null,
+    generateInputs?.selectedKnowledgeBase || null,
   )
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
 
   // Outline content state
-  const [sections, setSections] = useState("")
+  const [sections, setSections] = useState(generateInputs?.sections || "")
   const [outlines, setOutlines] = useState<ReportGenieOutline[]>([])
-  const [selectedOutline, setSelectedOutline] = useState<ReportGenieOutline | null>(null)
+  const [selectedOutline, setSelectedOutline] = useState<ReportGenieOutline | null>(
+    generateInputs?.selectedOutline || null,
+  )
 
   // Loading state
   const [loading, setLoading] = useState(false)
   const [expandedSection, setExpandedSection] = useState<number | null>(null)
 
   // Search mode state
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector") // Default to vector search
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">(
+    generateInputs?.searchMode || "vector",
+  )
 
   // Custom instructions state
-  const [customInstructions, setCustomInstructions] = useState("")
+  const [customInstructions, setCustomInstructions] = useState(
+    generateInputs?.customInstructions || "",
+  )
 
   // State to track which citations are expanded - using object instead of Set
   const [expandedCitations, setExpandedCitations] = useState<Record<string, boolean>>({})
@@ -95,12 +103,41 @@ const ReportGenie = () => {
     showSuccessToast(`Thank you for marking this response as ${type}!`)
   }
 
+  // Save input parameters to context whenever they change
+  useEffect(() => {
+    setGenerateInputs({
+      selectedKnowledgeBase,
+      selectedOutline,
+      sections,
+      customInstructions,
+      searchMode,
+    })
+  }, [
+    selectedKnowledgeBase,
+    selectedOutline,
+    sections,
+    customInstructions,
+    searchMode,
+    setGenerateInputs,
+  ])
+
+  // Clear inputs and restore from context when clear button is clicked
+  const handleClearResults = () => {
+    clearGenerateResult() // Clears both results and inputs
+    // Reset local state to blank
+    setSelectedKnowledgeBase(null)
+    setSelectedOutline(null)
+    setSections("")
+    setCustomInstructions("")
+    setSearchMode("vector")
+  }
+
   // Debug effect to log context state
   useEffect(() => {
-    console.log("Generate tab - context state:", { 
-      hasResult: !!generateResult, 
+    console.log("Generate tab - context state:", {
+      hasResult: !!generateResult,
       reportLength: generateResult?.full_report?.length,
-      sectionsCount: generateResult?.sections?.length 
+      sectionsCount: generateResult?.sections?.length,
     })
   }, [generateResult])
 
@@ -297,17 +334,17 @@ const ReportGenie = () => {
     onSuccess: (data: any) => {
       console.log("Generate Response data:", data)
       console.log("Generate interaction_id:", data.results.interaction_id)
-      
+
       const interactionId = data.results.interaction_id
       console.log("Generate interactionId for feedback:", interactionId)
-      
+
       // Store result with interaction ID in global state
       setGenerateResult({
         full_report: data.results?.full_report || "",
         sections: data.results?.sections || [],
-        interactionId: interactionId
+        interactionId: interactionId,
       })
-      
+
       const searchMethod = searchMode === "vector" ? "vector search" : "full document scan"
       showSuccessToast(`Report generated successfully using ${searchMethod}!`)
     },
@@ -368,16 +405,10 @@ const ReportGenie = () => {
   return (
     <Container maxW="container.xl" py={8}>
       {/* Tab description */}
-      <Text 
-        fontSize="sm" 
-        color="gray.500" 
-        textAlign="center" 
-        mb={4}
-        fontStyle="italic"
-      >
+      <Text fontSize="sm" color="gray.500" textAlign="center" mb={4} fontStyle="italic">
         Generate a document based on a user-defined checklist and document database.
       </Text>
-      
+
       {/* Loading overlay while document generates */}
       {loading && (
         <Box
@@ -482,7 +513,9 @@ const ReportGenie = () => {
           align="stretch"
           mb={4}
           opacity={(!selectedKnowledgeBase || !selectedOutline) && !generateResult ? 0.3 : 1}
-          pointerEvents={(!selectedKnowledgeBase || !selectedOutline) && !generateResult ? "none" : "auto"}
+          pointerEvents={
+            (!selectedKnowledgeBase || !selectedOutline) && !generateResult ? "none" : "auto"
+          }
         >
           <HStack gap={4} justify="center">
             <Button
@@ -548,7 +581,7 @@ const ReportGenie = () => {
                       variant="outline"
                       colorPalette="red"
                       onClick={() => {
-                        clearGenerateResult()
+                        handleClearResults()
                         showSuccessToast("Generated report cleared")
                       }}
                     >
