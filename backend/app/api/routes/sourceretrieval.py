@@ -107,7 +107,7 @@ async def get_source_content(
 ) -> SourceContentResponse:
     """
     Retrieve a source file by ID.
-    Only returns files that the user has access to (either owns or has permissions for).
+    Available to all authenticated users in shared deployment.
     """
     try:
         # Find the source data
@@ -116,34 +116,16 @@ async def get_source_content(
         if not source_data:
             raise HTTPException(status_code=404, detail="Source file not found")
 
-        # Check if current user has access to this file
-        # Either through a source they own or a knowledge base they have access to
+        # Simply verify that the source exists in the database
         source = session.exec(
-            select(Source)
-            .where(Source.source_data_id == source_id)
-            .where(Source.owner_id == current_user.id)
-        ).first()
-
-        if not source and not current_user.is_superuser:
-            # If not direct owner, check if they have access to any knowledge base containing this source
-            kb_access = session.exec(
-                select(KnowledgeBase)
-                .join(Source, KnowledgeBase.id == Source.knowledge_base_id)
-                .where(Source.source_data_id == source_id)
-                .where(KnowledgeBase.owner_id == current_user.id)
-            ).first()
-
-            if not kb_access:
-                raise HTTPException(
-                    status_code=403,
-                    detail="You don't have permission to access this file",
-                )
-
-        # Get source name from the first associated Source (just for display)
-        file_source = session.exec(
             select(Source).where(Source.source_data_id == source_id)
         ).first()
-        file_name = file_source.name if file_source else f"file-{source_id}.txt"
+
+        if not source:
+            raise HTTPException(status_code=404, detail="Source reference not found")
+
+        # Get source name from the associated Source (just for display)
+        file_name = source.name if source else f"file-{source_id}.txt"
 
         # Extract the file content from the ZIP
         zip_data = BytesIO(source_data.data)
