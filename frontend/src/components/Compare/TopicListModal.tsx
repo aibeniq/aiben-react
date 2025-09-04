@@ -63,33 +63,33 @@ const TopicListModal = ({
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // Validation state
-  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({})
 
   // Validation function
   const validateForm = () => {
-    const errors: {[key: string]: string} = {}
-    
+    const errors: { [key: string]: string } = {}
+
     if (!topicListName.trim()) {
       errors.name = "Topic list name is required"
     } else if (topicListName.trim().length < 3) {
       errors.name = "Topic list name must be at least 3 characters long"
     }
-    
+
     // Description is optional - no validation required
-    
-    if (topicsList.length === 0 || topicsList.every(topic => !topic.trim())) {
+
+    if (topicsList.length === 0 || topicsList.every((topic) => !topic.trim())) {
       errors.topics = "At least one topic is required"
     }
-    
+
     setValidationErrors(errors)
-    
+
     // Show the first error as a toast
     const firstError = Object.values(errors)[0]
     if (firstError) {
       showErrorToast(firstError)
       return false
     }
-    
+
     return true
   }
 
@@ -97,14 +97,14 @@ const TopicListModal = ({
   const handleNameChange = (value: string) => {
     setTopicListName(value)
     if (validationErrors.name) {
-      setValidationErrors(prev => ({ ...prev, name: '' }))
+      setValidationErrors((prev) => ({ ...prev, name: "" }))
     }
   }
 
   const handleDescriptionChange = (value: string) => {
     setTopicListDescription(value)
     if (validationErrors.description) {
-      setValidationErrors(prev => ({ ...prev, description: '' }))
+      setValidationErrors((prev) => ({ ...prev, description: "" }))
     }
   }
 
@@ -113,7 +113,7 @@ const TopicListModal = ({
     if (!validateForm()) {
       return // Stop execution if validation fails
     }
-    
+
     // Call the parent's onSave function if validation passes
     onSave()
   }
@@ -179,7 +179,7 @@ const TopicListModal = ({
 
         // Clear topics validation error if it exists
         if (validationErrors.topics) {
-          setValidationErrors(prev => ({ ...prev, topics: '' }))
+          setValidationErrors((prev) => ({ ...prev, topics: "" }))
         }
 
         let successMessage = `Suggested ${suggestedTopics.length} topics from description`
@@ -270,11 +270,16 @@ const TopicListModal = ({
               </Dialog.Title>
             </Dialog.Header>
 
-            <Dialog.Body>
+            <Dialog.Body overflowY="auto">
               <VStack align="stretch" gap={4}>
                 <HStack align="stretch" gap={4}>
                   <VStack align="stretch" gap={4} flex="1">
-                    <Field label="Topic List Name" required invalid={!!validationErrors.name} errorText={validationErrors.name}>
+                    <Field
+                      label="Topic List Name"
+                      required
+                      invalid={!!validationErrors.name}
+                      errorText={validationErrors.name}
+                    >
                       <Input
                         value={topicListName}
                         onChange={(e) => handleNameChange(e.target.value)}
@@ -282,7 +287,11 @@ const TopicListModal = ({
                       />
                     </Field>
 
-                    <Field label="Topic List Description" invalid={!!validationErrors.description} errorText={validationErrors.description}>
+                    <Field
+                      label="Topic List Description"
+                      invalid={!!validationErrors.description}
+                      errorText={validationErrors.description}
+                    >
                       <Textarea
                         value={topicListDescription}
                         onChange={(e) => handleDescriptionChange(e.target.value)}
@@ -453,7 +462,7 @@ const TopicListModal = ({
                             updateTopic(idx, value)
                             // Clear validation error when topics are modified
                             if (validationErrors.topics) {
-                              setValidationErrors(prev => ({ ...prev, topics: '' }))
+                              setValidationErrors((prev) => ({ ...prev, topics: "" }))
                             }
                           }}
                           onBlur={handleTopicBlur}
