@@ -74,10 +74,61 @@ def initialize_default_embedding_models(session: Session):
     session.commit()
 
 
+def initialize_default_llm_models(session: Session):
+    """Initialize default LLM models if they don't exist."""
+    default_models = [
+        {
+            "name": "GPT-4o Mini (System Default)",
+            "model_id": "gpt-4o-mini",
+            "provider": ModelProvider.OPENAI,
+            "description": "OpenAI's GPT-4o Mini model - system default for all users.",
+        },
+        {
+            "name": "Claude Sonnet 3.7",
+            "model_id": "arn:aws:bedrock:eu-north-1:888577032067:inference-profile/eu.anthropic.claude-3-7-sonnet-20250219-v1:0",
+            "provider": ModelProvider.AWS,
+            "description": "Anthropic's Claude 3.7 Sonnet model on AWS Bedrock. Highly capable, fast, and excellent at complex reasoning tasks.",
+        },
+        {
+            "name": "Llama 3 8B",
+            "model_id": "llama3",
+            "provider": ModelProvider.OLLAMA,
+            "description": "Local Llama 3 8B model running via Ollama.",
+        },
+        {
+            "name": "Mistral 7B",
+            "model_id": "mistral",
+            "provider": ModelProvider.OLLAMA,
+            "description": "Local Mistral 7B model running via Ollama.",
+        },
+    ]
+
+    for model_data in default_models:
+        # Check if this default LLM model already exists (system model: owner_id is None)
+        exists = session.exec(
+            select(LlmModel).where(
+                LlmModel.model_id == model_data["model_id"],
+                LlmModel.provider == model_data["provider"],
+                LlmModel.owner_id.is_(None),
+            )
+        ).first()
+        if not exists:
+            model = LlmModel(
+                name=model_data["name"],
+                model_id=model_data["model_id"],
+                provider=model_data["provider"],
+                description=model_data["description"],
+            )
+            session.add(model)
+
+    session.commit()
+
+
 def create_user(*, session: Session, user_create: UserCreate) -> User:
     """Create a new user with default LLM and embedding model settings."""
     # Initialize default models to ensure they exist
     initialize_default_embedding_models(session)
+    initialize_default_llm_models(session)
 
     # Create the user object with password hash
     db_obj = User.model_validate(
@@ -121,26 +172,36 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
 
     # If model selection is disabled, force the configured default
     if not settings.ENABLE_MODEL_SELECTION:
-        print(f"Model selection disabled, forcing embedding: {settings.FORCE_DEFAULT_EMBEDDING}")
+        print(
+            f"Model selection disabled, forcing embedding: {settings.FORCE_DEFAULT_EMBEDDING}"
+        )
         for model in system_embeddings:
             if (
                 model.model_id == settings.FORCE_DEFAULT_EMBEDDING
                 and model.provider.value.lower() in enabled_embedding_providers
             ):
                 default_embedding = model
-                print(f"✅ Found forced embedding model: {model.model_id} (provider: {model.provider})")
+                print(
+                    f"✅ Found forced embedding model: {model.model_id} (provider: {model.provider})"
+                )
                 break
-        
+
         if not default_embedding:
-            print(f"⚠️ Warning: Forced embedding model {settings.FORCE_DEFAULT_EMBEDDING} not found or provider not enabled")
-            print(f"Available embedding models: {[m.model_id for m in system_embeddings]}")
+            print(
+                f"⚠️ Warning: Forced embedding model {settings.FORCE_DEFAULT_EMBEDDING} not found or provider not enabled"
+            )
+            print(
+                f"Available embedding models: {[m.model_id for m in system_embeddings]}"
+            )
             print(f"Enabled embedding providers: {enabled_embedding_providers}")
     else:
         # Normal logic - find first system embedding model with enabled provider
         for model in system_embeddings:
             if model.provider.value.lower() in enabled_embedding_providers:
                 default_embedding = model
-                print(f"Using default embedding model: {model.model_id} (provider: {model.provider})")
+                print(
+                    f"Using default embedding model: {model.model_id} (provider: {model.provider})"
+                )
                 break
 
     if default_embedding:
