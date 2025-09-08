@@ -1,5 +1,5 @@
-import React from "react"
-import { Card, CloseButton, Heading, HStack } from "@chakra-ui/react"
+import { Card, CloseButton, HStack, Heading } from "@chakra-ui/react"
+import type React from "react"
 import ConfirmButton from "../ui/confirm-button"
 
 interface SelectionModalProps {
@@ -9,7 +9,12 @@ interface SelectionModalProps {
   children: React.ReactNode
 }
 
-const SelectionModal = ({ isOpen, onClose, title, children }: SelectionModalProps) => {
+const SelectionModal = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+}: SelectionModalProps) => {
   if (!isOpen) return null
 
   return (
@@ -28,7 +33,12 @@ const SelectionModal = ({ isOpen, onClose, title, children }: SelectionModalProp
       }}
       onClick={onClose}
     >
-      <Card.Root maxW="4xl" maxH="80vh" w="90%" onClick={(e) => e.stopPropagation()}>
+      <Card.Root
+        maxW="4xl"
+        maxH="80vh"
+        w="90%"
+        onClick={(e) => e.stopPropagation()}
+      >
         <Card.Header>
           <HStack justify="space-between" align="center">
             <Heading size="lg">{title}</Heading>

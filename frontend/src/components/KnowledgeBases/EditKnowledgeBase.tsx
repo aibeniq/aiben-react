@@ -1,25 +1,29 @@
 import {
+  Box,
   Button,
   ButtonGroup,
   DialogActionTrigger,
-  Input,
-  Text,
-  VStack,
   HStack,
-  Box,
+  Input,
   Link,
   Spinner,
+  Text,
+  VStack,
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
+import { useDropzone } from "react-dropzone"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { FaExchangeAlt, FaTrash } from "react-icons/fa"
-import { useDropzone } from "react-dropzone"
 
-import { type ApiError, type KnowledgeBasePublic, KnowledgeBasesService } from "@/client"
+import {
+  type ApiError,
+  type KnowledgeBasePublic,
+  KnowledgeBasesService,
+} from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
-import SourceLink from "../Common/SourceLink"
 import { handleError } from "@/utils"
+import SourceLink from "../Common/SourceLink"
 import {
   DialogBody,
   DialogCloseTrigger,
@@ -56,7 +60,9 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
     queryKey: ["knowledge-base", item.id],
     queryFn: async () => {
       console.log("Fetching knowledge base with ID:", item.id)
-      const result = await KnowledgeBasesService.readKnowledgeBase({ id: item.id })
+      const result = await KnowledgeBasesService.readKnowledgeBase({
+        id: item.id,
+      })
       console.log("📊 Knowledge base API response:", result)
       console.log("📊 Embedding model ID:", result.embedding_model_id)
       return result
@@ -69,7 +75,8 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
     const hasTitleValue = !!knowledgeBase?.title
     const hasExistingFiles =
       knowledgeBase?.files &&
-      knowledgeBase.files.filter((f: any) => !removedFileIds.includes(f.id)).length > 0
+      knowledgeBase.files.filter((f: any) => !removedFileIds.includes(f.id))
+        .length > 0
     const hasNewFiles = selectedFiles.length > 0
     const hasFiles = hasExistingFiles || hasNewFiles
 
@@ -111,7 +118,8 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
         description: data.description,
         id: item.id,
         // Preserve the existing embedding model ID
-        embeddingModelId: knowledgeBase?.embedding_model_id || item.embedding_model_id,
+        embeddingModelId:
+          knowledgeBase?.embedding_model_id || item.embedding_model_id,
         formData: {
           files: data.files,
           ...(data.removedFileIds && data.removedFileIds.length > 0
@@ -120,7 +128,10 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
         },
       }
 
-      console.log("Payload being sent to KnowledgeBasesService.updateKnowledgeBase:", payload)
+      console.log(
+        "Payload being sent to KnowledgeBasesService.updateKnowledgeBase:",
+        payload,
+      )
       console.log("Preserving embedding_model_id:", payload.embeddingModelId)
 
       return KnowledgeBasesService.updateKnowledgeBase(payload)
@@ -152,7 +163,8 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
 
     const hasExistingFiles =
       knowledgeBase?.files &&
-      knowledgeBase.files.filter((f: any) => !removedFileIds.includes(f.id)).length > 0
+      knowledgeBase.files.filter((f: any) => !removedFileIds.includes(f.id))
+        .length > 0
     const hasNewFiles = selectedFiles.length > 0
 
     if (!hasExistingFiles && !hasNewFiles) {
@@ -185,7 +197,8 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
       "text/plain": [".txt"],
       "application/pdf": [".pdf"],
       "application/msword": [".doc"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
       "application/rtf": [".rtf"],
     },
     multiple: true,
@@ -277,11 +290,21 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                     <Text mb={2}>Current Files:</Text>
                     <VStack align="start" gap={2}>
                       {knowledgeBase.files
-                        .filter((file: any) => !removedFileIds.includes(file.id))
+                        .filter(
+                          (file: any) => !removedFileIds.includes(file.id),
+                        )
                         .map((file: any) => (
-                          <HStack key={file.id} w="full" justify="space-between">
+                          <HStack
+                            key={file.id}
+                            w="full"
+                            justify="space-between"
+                          >
                             {/* Use SourceLink component for on-demand loading */}
-                            <SourceLink sourceId={file.id} fileName={file.name} useModal={true} />
+                            <SourceLink
+                              sourceId={file.id}
+                              fileName={file.name}
+                              useModal={true}
+                            />
                             <Box
                               as="button"
                               aria-label="Remove file"
@@ -350,7 +373,11 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
             <DialogFooter gap={2}>
               <ButtonGroup>
                 <DialogActionTrigger asChild>
-                  <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
+                  <Button
+                    variant="subtle"
+                    colorPalette="gray"
+                    disabled={isSubmitting}
+                  >
                     Cancel
                   </Button>
                 </DialogActionTrigger>

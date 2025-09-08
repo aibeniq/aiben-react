@@ -10,7 +10,9 @@ interface KnowledgeBaseActionsMenuProps {
   item: KnowledgeBasePublic
 }
 
-export const KnowledgeBaseActionsMenu = ({ item }: KnowledgeBaseActionsMenuProps) => {
+export const KnowledgeBaseActionsMenu = ({
+  item,
+}: KnowledgeBaseActionsMenuProps) => {
   return (
     <MenuRoot>
       <MenuTrigger asChild>

@@ -1,8 +1,9 @@
-import React, { useRef } from "react"
-import { Button, Textarea, HStack, Icon, Box } from "@chakra-ui/react"
-import { FiSend } from "react-icons/fi"
 import SourcePopover from "@/components/Chatbot/SourcePopover"
 import useCustomToast from "@/hooks/useCustomToast"
+import { Box, Button, HStack, Icon, Textarea } from "@chakra-ui/react"
+import type React from "react"
+import { useRef } from "react"
+import { FiSend } from "react-icons/fi"
 
 interface InputAreaProps {
   value: string
@@ -40,7 +41,7 @@ const InputArea: React.FC<InputAreaProps> = ({
     const oversizedFiles = files.filter((file) => file.size > maxSize)
 
     if (oversizedFiles.length > 0) {
-      showErrorToast(`Some files are too large. Maximum size is 10MB per file.`)
+      showErrorToast("Some files are too large. Maximum size is 10MB per file.")
       return
     }
 
@@ -50,7 +51,9 @@ const InputArea: React.FC<InputAreaProps> = ({
         files.map((f) => f.name),
       )
       setUploadedFiles(files)
-      showSuccessToast(`${files.length} file${files.length > 1 ? "s" : ""} selected successfully.`)
+      showSuccessToast(
+        `${files.length} file${files.length > 1 ? "s" : ""} selected successfully.`,
+      )
     }
   }
 

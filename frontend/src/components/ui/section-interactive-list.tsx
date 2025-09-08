@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react"
-import { Box, HStack, Input, IconButton, VStack, Text } from "@chakra-ui/react"
 import { Checkbox } from "@/components/ui/checkbox"
-import { FiChevronUp, FiChevronDown, FiTrash2 } from "react-icons/fi"
+import { Box, HStack, IconButton, Input, Text, VStack } from "@chakra-ui/react"
+import { useEffect, useState } from "react"
 import * as React from "react"
+import { FiChevronDown, FiChevronUp, FiTrash2 } from "react-icons/fi"
 
 interface SectionItem {
   id: string
@@ -76,7 +76,9 @@ const SectionInteractiveListItem = ({
         <Box flex="1" w="full">
           <Input
             value={item.text}
-            onChange={(e) => onChange(item.id, { ...item, text: e.target.value })}
+            onChange={(e) =>
+              onChange(item.id, { ...item, text: e.target.value })
+            }
             onFocus={() => setIsFocused(true)}
             onBlur={(e) => {
               setIsFocused(false)
@@ -208,7 +210,10 @@ export const SectionInteractiveList = ({
         if (
           Array.isArray(parsedValue) &&
           parsedValue.every(
-            (item) => typeof item === "object" && "text" in item && "consultDocuments" in item,
+            (item) =>
+              typeof item === "object" &&
+              "text" in item &&
+              "consultDocuments" in item,
           )
         ) {
           // It's structured data
@@ -308,7 +313,10 @@ export const SectionInteractiveList = ({
     if (index === 0) return
 
     const newItems = [...items]
-    ;[newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]]
+    ;[newItems[index - 1], newItems[index]] = [
+      newItems[index],
+      newItems[index - 1],
+    ]
     updateItemsAndNotify(newItems)
   }
 
@@ -318,7 +326,10 @@ export const SectionInteractiveList = ({
     if (index >= items.length - 2) return // Can't move down past the second to last item
 
     const newItems = [...items]
-    ;[newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]]
+    ;[newItems[index], newItems[index + 1]] = [
+      newItems[index + 1],
+      newItems[index],
+    ]
     updateItemsAndNotify(newItems)
   }
 
@@ -327,7 +338,8 @@ export const SectionInteractiveList = ({
       {/* Header explaining the checkboxes */}
       <Box mb={2} px={2}>
         <Text fontSize="xs" color="gray.600">
-          Check "Consult docs" to generate content from knowledge base, or uncheck to use raw text
+          Check "Consult docs" to generate content from knowledge base, or
+          uncheck to use raw text
         </Text>
       </Box>
 

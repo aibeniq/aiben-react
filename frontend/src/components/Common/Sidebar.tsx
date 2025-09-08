@@ -1,9 +1,9 @@
 import { Box, Flex, IconButton, Text } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FaBars } from "react-icons/fa"
 import { FiLogOut } from "react-icons/fi"
-import { useTranslation } from "react-i18next"
 
 import type { UserPublic } from "@/client"
 import useAuth from "@/hooks/useAuth"
@@ -48,7 +48,9 @@ const Sidebar = () => {
       })
 
       // Also ensure sidebar trigger button remains responsive
-      const sidebarTrigger = document.querySelector('[aria-label="Open Menu"]') as HTMLElement
+      const sidebarTrigger = document.querySelector(
+        '[aria-label="Open Menu"]',
+      ) as HTMLElement
       if (sidebarTrigger) {
         sidebarTrigger.style.pointerEvents = "auto !important"
         sidebarTrigger.style.zIndex = "1001 !important"
@@ -76,7 +78,9 @@ const Sidebar = () => {
 
       // Ensure button is responsive at all screen sizes
       setTimeout(() => {
-        const sidebarTrigger = document.querySelector('[aria-label="Open Menu"]') as HTMLElement
+        const sidebarTrigger = document.querySelector(
+          '[aria-label="Open Menu"]',
+        ) as HTMLElement
         if (sidebarTrigger) {
           // Force button to be interactive, especially at half-size
           sidebarTrigger.style.pointerEvents = "auto"
@@ -84,7 +88,9 @@ const Sidebar = () => {
           sidebarTrigger.style.isolation = "isolate"
           sidebarTrigger.style.cursor = "pointer"
 
-          console.log(`🔧 Ensured sidebar button is responsive at ${windowWidth}px`)
+          console.log(
+            `🔧 Ensured sidebar button is responsive at ${windowWidth}px`,
+          )
         }
       }, 50)
 
@@ -148,7 +154,11 @@ const Sidebar = () => {
   return (
     <>
       {/* Mobile */}
-      <DrawerRoot placement="start" open={open} onOpenChange={(e) => handleSidebarToggle(e.open)}>
+      <DrawerRoot
+        placement="start"
+        open={open}
+        onOpenChange={(e) => handleSidebarToggle(e.open)}
+      >
         <DrawerBackdrop
           onClick={() => {
             console.log("🎯 Sidebar backdrop clicked - force closing")

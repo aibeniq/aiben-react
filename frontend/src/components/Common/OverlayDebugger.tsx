@@ -1,11 +1,11 @@
-import { Box, Button, HStack, Text, VStack, Code } from "@chakra-ui/react"
-import { useState, useEffect } from "react"
+import { Box, Button, Code, HStack, Text, VStack } from "@chakra-ui/react"
+import { useEffect, useState } from "react"
 import {
-  getProblematicOverlays,
-  hasBlockingOverlays,
+  type OverlayInfo,
   cleanupOverlays,
   debugOverlays,
-  OverlayInfo,
+  getProblematicOverlays,
+  hasBlockingOverlays,
 } from "../../utils/overlay-debugger"
 
 interface OverlayDebuggerProps {
@@ -95,7 +95,9 @@ const OverlayDebugger = ({ isVisible = false }: OverlayDebuggerProps) => {
           </Text>
           <HStack gap={2}>
             <Text fontSize="sm" color={hasBlocking ? "red.600" : "green.600"}>
-              {hasBlocking ? "⚠️ Blocking overlays detected" : "✅ No blocking overlays"}
+              {hasBlocking
+                ? "⚠️ Blocking overlays detected"
+                : "✅ No blocking overlays"}
             </Text>
           </HStack>
 

@@ -1,38 +1,39 @@
 import {
+  type KnowledgeBasePublic,
+  KnowledgeBasesService,
+  type ReportGenieOutline,
+  ReportgenieService,
+} from "@/client"
+import SearchModeToggle from "@/components/Common/SearchModeToggle"
+import SourceLink from "@/components/Common/SourceLink"
+import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
+import DownloadButton from "@/components/ui/download-button"
+import HelpTooltip from "@/components/ui/help-tooltip"
+import useCustomToast from "@/hooks/useCustomToast"
+import {
+  Accordion,
   Box,
   Button,
   Container,
-  Heading,
-  Text,
-  VStack,
   HStack,
+  Heading,
   Spinner,
-  Accordion,
+  Text,
   Textarea,
+  VStack,
 } from "@chakra-ui/react"
-import useCustomToast from "@/hooks/useCustomToast"
-import SourceLink from "@/components/Common/SourceLink"
-import DownloadButton from "@/components/ui/download-button"
-import SearchModeToggle from "@/components/Common/SearchModeToggle"
-import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
-import { useState, useEffect } from "react"
-import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
-import {
-  ReportgenieService,
-  KnowledgeBasesService,
-  KnowledgeBasePublic,
-  ReportGenieOutline,
-} from "@/client"
+import { createFileRoute } from "@tanstack/react-router"
+import { useEffect, useState } from "react"
+import { FiCheck, FiCopy, FiDatabase, FiFileText, FiTrash2 } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText, FiCopy, FiCheck, FiDatabase, FiTrash2 } from "react-icons/fi"
+import KnowledgeBaseTable from "../../components/Common/KnowledgeBaseTable"
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
-import KnowledgeBaseTable from "../../components/Common/KnowledgeBaseTable"
 import OutlineTable from "../../components/Generate/OutlineTable"
-import { copyToClipboard } from "../../utils/copyToClipboard"
 import { useResults } from "../../contexts/ResultsContext"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 const ReportGenie = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -442,6 +443,7 @@ const ReportGenie = () => {
               icon={<FiDatabase size={24} />}
               isSelected={!!selectedKnowledgeBase}
               onClick={() => setShowKnowledgeBaseModal(true)}
+              helpKey="knowledgeBaseSelection"
             />
 
             <SelectionCard
@@ -450,15 +452,23 @@ const ReportGenie = () => {
               icon={<FiFileText size={24} />}
               isSelected={!!selectedOutline}
               onClick={() => setShowOutlineModal(true)}
+              helpKey="documentOutline"
             />
 
-            <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
+            <SearchModeToggle
+              searchMode={searchMode}
+              onSearchModeChange={setSearchMode}
+              helpKey="searchMode"
+            />
 
             {/* Custom Instructions Text Box */}
             <Box width="100%">
-              <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
-                Custom Instructions (Optional)
-              </Text>
+              <HStack align="center" mb={2}>
+                <Text fontSize="sm" fontWeight="medium" color="gray.700">
+                  Custom Instructions (Optional)
+                </Text>
+                <HelpTooltip helpKey="customInstructions" />
+              </HStack>
               <Textarea
                 value={customInstructions}
                 onChange={(e) => setCustomInstructions(e.target.value)}
@@ -468,7 +478,10 @@ const ReportGenie = () => {
                 bg="white"
                 borderColor="gray.300"
                 _hover={{ borderColor: "gray.400" }}
-                _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                _focus={{
+                  borderColor: "blue.500",
+                  boxShadow: "0 0 0 1px blue.500",
+                }}
                 fontSize="sm"
                 maxLength={2000}
               />
@@ -737,7 +750,7 @@ const ReportGenie = () => {
                                               const shouldTruncate = citationText.length > 300
                                               const displayText =
                                                 shouldTruncate && !isExpanded
-                                                  ? citationText.substring(0, 300) + "..."
+                                                  ? `${citationText.substring(0, 300)}...`
                                                   : citationText
 
                                               return (

@@ -59,10 +59,10 @@ const UserInformation = () => {
 
   return (
     <VStack gap={6} align="stretch" py={4}>
-      <Heading size="sm">{t("settings.userInformation")}</Heading>
+      <Heading size="sm">{t("settings.profile")}</Heading>
       <Box w={{ sm: "full", md: "md" }} as="form" onSubmit={handleSubmit(onSubmit)}>
         <VStack gap={4} align="stretch">
-          <Field label={t("forms.fullName")}>
+          <Field label={t("forms.firstName")}>
             {editMode ? (
               <Input {...register("full_name", { maxLength: 30 })} type="text" size="md" />
             ) : (

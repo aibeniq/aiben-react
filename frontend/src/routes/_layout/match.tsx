@@ -1,26 +1,27 @@
-import { Box, Button, Container, Heading, Text, VStack, HStack, Spinner } from "@chakra-ui/react"
-import { useState, useEffect } from "react"
-import { createFileRoute } from "@tanstack/react-router"
-import { useMutation } from "@tanstack/react-query"
 import {
+  type FormConnectForm,
   FormconnectService,
-  FormConnectForm,
+  type KnowledgeBasePublic,
   KnowledgeBasesService,
-  KnowledgeBasePublic,
 } from "@/client"
+import DownloadButton from "@/components/ui/download-button"
+import HelpTooltip from "@/components/ui/help-tooltip"
+import useCustomToast from "@/hooks/useCustomToast"
+import { Box, Button, Container, HStack, Heading, Spinner, Text, VStack } from "@chakra-ui/react"
+import { useMutation } from "@tanstack/react-query"
+import { createFileRoute } from "@tanstack/react-router"
+import { useEffect, useState } from "react"
+import { FiCheck, FiCopy, FiFileText, FiTrash2 } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText, FiCopy, FiCheck, FiTrash2 } from "react-icons/fi"
+import FileUpload, { type FileItem } from "../../components/Common/FileUpload"
+import SearchModeToggle from "../../components/Common/SearchModeToggle"
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
-import FileUpload, { FileItem } from "../../components/Common/FileUpload"
-import FormTemplateTable from "../../components/Match/FormTemplateTable"
-import SearchModeToggle from "../../components/Common/SearchModeToggle"
 import FeedbackButtons from "../../components/Feedback/FeedbackButtons"
-import DownloadButton from "@/components/ui/download-button"
-import useCustomToast from "@/hooks/useCustomToast"
-import { copyToClipboard } from "../../utils/copyToClipboard"
+import FormTemplateTable from "../../components/Match/FormTemplateTable"
 import { useResults } from "../../contexts/ResultsContext"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 const FormConnect = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -346,15 +347,21 @@ const FormConnect = () => {
               icon={<FiFileText size={24} />}
               isSelected={!!selectedForm}
               onClick={() => setShowFormModal(true)}
+              helpKey="formTemplate"
             />
 
             <FileUpload
               files={fileItems}
               onFilesChange={setFileItems}
               showHandwrittenToggle={true}
+              helpKey="fileUpload"
             />
 
-            <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
+            <SearchModeToggle
+              searchMode={searchMode}
+              onSearchModeChange={setSearchMode}
+              helpKey="searchMode"
+            />
           </VStack>
         </HStack>
 

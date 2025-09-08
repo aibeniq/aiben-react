@@ -1,4 +1,4 @@
-import React from "react"
+import type React from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import TopicAnalysisDisplay from "../Utils/TopicAnalysisDisplay"
@@ -8,7 +8,10 @@ interface TwincheckResultsProps {
   components: any // Markdown components for table rendering
 }
 
-const TwincheckResults: React.FC<TwincheckResultsProps> = ({ selectedReport, components }) => {
+const TwincheckResults: React.FC<TwincheckResultsProps> = ({
+  selectedReport,
+  components,
+}) => {
   const results = selectedReport.results?.summary || ""
   const topicAnalysis = selectedReport.results?.topic_analysis || []
 

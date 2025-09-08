@@ -18,7 +18,9 @@ const ReportGenieSearchModeToggle = ({
         Search Mode
       </Text>
       <RadioGroup
-        onValueChange={(details) => onSearchModeChange(details.value as "vector" | "full_text")}
+        onValueChange={(details) =>
+          onSearchModeChange(details.value as "vector" | "full_text")
+        }
         value={searchMode}
         disabled={isDisabled}
       >

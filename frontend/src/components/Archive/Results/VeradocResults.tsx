@@ -1,16 +1,19 @@
-import React from "react"
 import { Box } from "@chakra-ui/react"
+import type React from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import type { VeradocGetVeradocDetailResponse } from "../../../client"
 import QAPairDisplay from "../Utils/QAPairDisplay"
-import { VeradocGetVeradocDetailResponse } from "../../../client"
 
 interface VeradocResultsProps {
   selectedReport: VeradocGetVeradocDetailResponse
   components: any // Markdown components for table rendering
 }
 
-const VeradocResults: React.FC<VeradocResultsProps> = ({ selectedReport, components }) => {
+const VeradocResults: React.FC<VeradocResultsProps> = ({
+  selectedReport,
+  components,
+}) => {
   const results = selectedReport.results.final_evaluation || ""
   const qaPairs = selectedReport.results.qa_pairs || []
 

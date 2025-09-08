@@ -1,6 +1,6 @@
-import { IconButton, Popover, Icon, Box } from "@chakra-ui/react"
-import { FiPlus, FiDatabase, FiFile } from "react-icons/fi"
-import React from "react"
+import { Box, Icon, IconButton, Popover } from "@chakra-ui/react"
+import type React from "react"
+import { FiDatabase, FiFile, FiPlus } from "react-icons/fi"
 
 interface SourcePopoverProps {
   onSelectKnowledgeBase: () => void
@@ -36,7 +36,13 @@ const SourcePopover: React.FC<SourcePopoverProps> = ({
         </IconButton>
       </Popover.Trigger>
       <Popover.Positioner>
-        <Popover.Content w="200px" color="gray.700" borderRadius="md" boxShadow="lg" border="none">
+        <Popover.Content
+          w="200px"
+          color="gray.700"
+          borderRadius="md"
+          boxShadow="lg"
+          border="none"
+        >
           <Popover.Arrow>
             <Popover.ArrowTip />
           </Popover.Arrow>

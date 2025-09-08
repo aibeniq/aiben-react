@@ -1,23 +1,23 @@
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
-import { type SubmitHandler, useForm } from "react-hook-form"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useDropzone } from "react-dropzone"
+import { type SubmitHandler, useForm } from "react-hook-form"
 
 import {
+  Box,
   Button,
   DialogActionTrigger,
   DialogTitle,
+  HStack,
   Input,
+  Link,
+  Spinner,
   Text,
   VStack,
-  HStack,
-  Box,
-  Spinner,
-  Link,
 } from "@chakra-ui/react"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { FaPlus, FaTrash } from "react-icons/fa"
 
-import { KnowledgeBasesService, EmbeddingModelsService } from "@/client"
+import { EmbeddingModelsService, KnowledgeBasesService } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
@@ -40,7 +40,9 @@ interface KnowledgeBaseCreate {
 const AddKnowledgeBase = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]) // State for managing selected files
-  const [selectedEmbeddingModelId, setSelectedEmbeddingModelId] = useState<string | null>(null)
+  const [selectedEmbeddingModelId, setSelectedEmbeddingModelId] = useState<
+    string | null
+  >(null)
   const [availableProviders, setAvailableProviders] = useState<string[]>([]) //only show Embedding Model providers allowed in config.py
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -60,7 +62,8 @@ const AddKnowledgeBase = () => {
 
   const { data: embeddingModels = [] } = useQuery({
     queryKey: ["embedding-models"],
-    queryFn: () => EmbeddingModelsService.getEmbeddingModels().then((res) => res.data),
+    queryFn: () =>
+      EmbeddingModelsService.getEmbeddingModels().then((res) => res.data),
     // Don't fetch if modal is closed
     enabled: isOpen,
   })
@@ -75,7 +78,10 @@ const AddKnowledgeBase = () => {
   useEffect(() => {
     EmbeddingModelsService.getAvailableProviders()
       .then((response) => {
-        if (response.embedding_providers && Array.isArray(response.embedding_providers)) {
+        if (
+          response.embedding_providers &&
+          Array.isArray(response.embedding_providers)
+        ) {
           setAvailableProviders(response.embedding_providers)
         } else {
           setAvailableProviders(["openai", "aws"]) // fallback
@@ -97,7 +103,10 @@ const AddKnowledgeBase = () => {
     ) {
       if (defaultModel?.id) {
         setSelectedEmbeddingModelId(defaultModel.id)
-      } else if (filteredEmbeddingModels?.length > 0 && filteredEmbeddingModels[0]?.id) {
+      } else if (
+        filteredEmbeddingModels?.length > 0 &&
+        filteredEmbeddingModels[0]?.id
+      ) {
         setSelectedEmbeddingModelId(filteredEmbeddingModels[0].id)
       }
     }
@@ -140,7 +149,10 @@ const AddKnowledgeBase = () => {
       embedding_model_id: string | null
       files: File[]
     }) => {
-      console.log("🚀 Starting knowledge base creation mutation with data:", data)
+      console.log(
+        "🚀 Starting knowledge base creation mutation with data:",
+        data,
+      )
 
       // Send the FormData object to the backend
       return KnowledgeBasesService.createKnowledgeBase({
@@ -161,7 +173,9 @@ const AddKnowledgeBase = () => {
       console.log("🔄 Invalidating knowledge-bases cache...")
       queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
 
-      console.log("🔄 Invalidating items cache (the one actually used by the list)...")
+      console.log(
+        "🔄 Invalidating items cache (the one actually used by the list)...",
+      )
       queryClient.invalidateQueries({ queryKey: ["items"] })
 
       console.log("🔄 Forcing refetch of items...")
@@ -183,7 +197,9 @@ const AddKnowledgeBase = () => {
       }
     },
     onSettled: () => {
-      console.log("🏁 Knowledge base mutation SETTLED - doing final cache invalidation")
+      console.log(
+        "🏁 Knowledge base mutation SETTLED - doing final cache invalidation",
+      )
       queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
       queryClient.invalidateQueries({ queryKey: ["items"] })
     },
@@ -244,7 +260,8 @@ const AddKnowledgeBase = () => {
       "text/plain": [".txt"], // Plain text files
       "application/pdf": [".pdf"], // PDF files
       "application/msword": [".doc"], // Word documents
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"], // Word documents (modern format)
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"], // Word documents (modern format)
       "application/rtf": [".rtf"], // Rich Text Format files
     },
     multiple: true, // Allow multiple file uploads
@@ -297,7 +314,9 @@ const AddKnowledgeBase = () => {
               <DialogTitle>Add Knowledge Base</DialogTitle>
             </DialogHeader>
             <DialogBody>
-              <Text mb={4}>Fill in the details to add a new Knowledge Base.</Text>
+              <Text mb={4}>
+                Fill in the details to add a new Knowledge Base.
+              </Text>
               <VStack gap={4}>
                 <Field
                   required
@@ -404,7 +423,11 @@ const AddKnowledgeBase = () => {
 
             <DialogFooter gap={2}>
               <DialogActionTrigger asChild>
-                <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
+                <Button
+                  variant="subtle"
+                  colorPalette="gray"
+                  disabled={isSubmitting}
+                >
                   Cancel
                 </Button>
               </DialogActionTrigger>

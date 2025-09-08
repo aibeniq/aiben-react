@@ -1,29 +1,30 @@
-import { useState } from "react"
 import {
-  VStack,
-  Input,
-  Textarea,
-  Dialog,
-  Portal,
+  Box,
+  Button,
   CloseButton,
+  Dialog,
   HStack,
   IconButton,
-  Button,
-  Box,
+  Input,
+  Portal,
   Text,
+  Textarea,
+  VStack,
 } from "@chakra-ui/react"
-import { Field } from "../ui/field"
-import { Tooltip } from "../ui/tooltip"
+import { useState } from "react"
 import { FiCopy } from "react-icons/fi"
-import { VeraDocChecklist, VeradocService } from "../../client"
-import QuestionItem from "./QuestionItem"
-import CancelButton from "../ui/cancel-button"
-import ConfirmButton from "../ui/confirm-button"
+import { type VeraDocChecklist, VeradocService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
-import OptimizeChecklistModal from "./OptimizeChecklistModal"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 import FileUpload from "../Common/FileUpload"
 import SearchModeToggle from "../Common/SearchModeToggle"
-import { copyToClipboard } from "../../utils/copyToClipboard"
+import CancelButton from "../ui/cancel-button"
+import ConfirmButton from "../ui/confirm-button"
+import { Field } from "../ui/field"
+import HelpTooltip from "../ui/help-tooltip"
+import { Tooltip } from "../ui/tooltip"
+import OptimizeChecklistModal from "./OptimizeChecklistModal"
+import QuestionItem from "./QuestionItem"
 
 interface ChecklistModalProps {
   isOpen: boolean
@@ -82,7 +83,9 @@ const ChecklistModal = ({
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // Validation state
-  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({})
+  const [validationErrors, setValidationErrors] = useState<{
+    [key: string]: string
+  }>({})
 
   // Validation function
   const validateForm = () => {
@@ -238,7 +241,7 @@ const ChecklistModal = ({
         const headers: any = {}
 
         if (token) {
-          headers["Authorization"] = `Bearer ${token}`
+          headers.Authorization = `Bearer ${token}`
         }
 
         const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
@@ -338,11 +341,13 @@ const ChecklistModal = ({
           <Dialog.Positioner>
             <Dialog.Content maxW="6xl" maxH="90vh">
               <Dialog.Header>
-                <Dialog.Title>
-                  {editingChecklist ? "Edit Checklist" : "Create New Checklist"}
-                </Dialog.Title>
-              </Dialog.Header>
-
+                <HStack align="center" gap={2}>
+                  <Dialog.Title>
+                    {editingChecklist ? "Edit Checklist" : "Create New Checklist"}
+                  </Dialog.Title>
+                  <HelpTooltip helpKey="createChecklist" />
+                </HStack>
+              </Dialog.Header>{" "}
               <Dialog.Body overflowY="auto">
                 <VStack align="stretch" gap={4}>
                   {/* Two-column layout */}
@@ -364,7 +369,12 @@ const ChecklistModal = ({
                       </Field>
 
                       <Field
-                        label="Description"
+                        label={
+                          <HStack align="center" gap={2}>
+                            <span>Description</span>
+                            <HelpTooltip helpKey="minimumDescriptionLength" />
+                          </HStack>
+                        }
                         invalid={!!validationErrors.description}
                         errorText={validationErrors.description}
                       >
@@ -374,13 +384,6 @@ const ChecklistModal = ({
                           placeholder="Enter checklist description to auto-suggest questions (minimum 10 characters)..."
                           rows={4}
                         />
-                        {checklistDescription.trim().length > 0 &&
-                          checklistDescription.trim().length < 10 && (
-                            <Text fontSize="xs" color="orange.600">
-                              Description needs at least {10 - checklistDescription.trim().length}{" "}
-                              more characters to suggest questions
-                            </Text>
-                          )}
                       </Field>
 
                       <SearchModeToggle
@@ -388,13 +391,15 @@ const ChecklistModal = ({
                         onSearchModeChange={setSearchMode}
                       />
 
-                      <Field label="Reference Documents (Optional)">
+                      <Field
+                        label={
+                          <HStack align="center" gap={2}>
+                            <span>Reference Documents (Optional)</span>
+                            <HelpTooltip helpKey="referenceDocuments" />
+                          </HStack>
+                        }
+                      >
                         <VStack align="stretch" gap={3}>
-                          <Text fontSize="sm" color="gray.600">
-                            Upload reference documents or select a Knowledge Base to help the AI
-                            suggest checklist questions.
-                          </Text>
-
                           {/* Reference Mode Toggle */}
                           <HStack gap={2}>
                             <Button
@@ -417,9 +422,6 @@ const ChecklistModal = ({
                           {/* Reference Mode Content */}
                           {referenceMode === "files" && (
                             <VStack align="stretch" gap={2}>
-                              <Text fontSize="sm" color="gray.700" fontWeight="medium">
-                                Provide reference documents for suggesting a checklist
-                              </Text>
                               <FileUpload
                                 files={referenceFiles}
                                 onFilesChange={setReferenceFiles}
@@ -467,13 +469,6 @@ const ChecklistModal = ({
                               ) : null}
                             </Box>
                           )}
-
-                          {checklistDescription.trim().length < 10 &&
-                            checklistDescription.trim().length > 0 && (
-                              <Text fontSize="sm" color="gray.500">
-                                Description must be at least 10 characters to suggest questions
-                              </Text>
-                            )}
                         </VStack>
                       </Field>
                     </VStack>
@@ -496,6 +491,7 @@ const ChecklistModal = ({
                           >
                             {suggesting ? "Suggesting..." : "Suggest"}
                           </Button>
+                          <HelpTooltip helpKey="suggestChecklistQuestions" />
                           {/* Always show optimization button with tooltip when disabled */}
                           <Tooltip
                             content={
@@ -514,6 +510,7 @@ const ChecklistModal = ({
                               Optimize
                             </Button>
                           </Tooltip>
+                          <HelpTooltip helpKey="optimizeChecklistQuestions" />
                           <IconButton
                             size="xs"
                             onClick={handleCopyQuestions}
@@ -557,7 +554,6 @@ const ChecklistModal = ({
                   </HStack>
                 </VStack>
               </Dialog.Body>
-
               <Dialog.Footer>
                 <HStack gap={3}>
                   <CancelButton onClick={handleClose} size="md">
@@ -568,7 +564,6 @@ const ChecklistModal = ({
                   </ConfirmButton>
                 </HStack>
               </Dialog.Footer>
-
               <Dialog.CloseTrigger asChild>
                 <CloseButton size="sm" />
               </Dialog.CloseTrigger>

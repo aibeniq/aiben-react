@@ -1,6 +1,6 @@
-import { Dialog, Box, Spinner, Text, Image, Button } from "@chakra-ui/react"
+import type { FilesGetSourceContentResponse } from "@/client"
+import { Box, Button, Dialog, Image, Spinner, Text } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
-import { FilesGetSourceContentResponse } from "@/client"
 
 interface FileViewerModalProps {
   file: FilesGetSourceContentResponse | null
@@ -9,7 +9,12 @@ interface FileViewerModalProps {
   onClose: () => void
 }
 
-const FileViewerModal: React.FC<FileViewerModalProps> = ({ file, isOpen, isLoading, onClose }) => {
+const FileViewerModal: React.FC<FileViewerModalProps> = ({
+  file,
+  isOpen,
+  isLoading,
+  onClose,
+}) => {
   const [fileUrl, setFileUrl] = useState<string | null>(null)
 
   useEffect(() => {
@@ -97,7 +102,9 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({ file, isOpen, isLoadi
     // Default case
     return (
       <Box textAlign="center" py={8}>
-        <Text mb={4}>Preview not available for this file type ({file.content_type})</Text>
+        <Text mb={4}>
+          Preview not available for this file type ({file.content_type})
+        </Text>
         <Button onClick={downloadFile} colorPalette="blue">
           Download File
         </Button>
@@ -108,7 +115,11 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({ file, isOpen, isLoadi
   console.log("Modal rendering with isOpen:", isOpen)
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={({ open }) => !open && onClose()} size="xl">
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={({ open }) => !open && onClose()}
+      size="xl"
+    >
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
@@ -129,7 +140,11 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({ file, isOpen, isLoadi
               Close
             </Button>
             {file && (
-              <Button colorPalette="blue" onClick={downloadFile} disabled={!fileUrl}>
+              <Button
+                colorPalette="blue"
+                onClick={downloadFile}
+                disabled={!fileUrl}
+              >
                 Download
               </Button>
             )}

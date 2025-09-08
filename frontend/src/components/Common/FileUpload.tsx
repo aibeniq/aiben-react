@@ -1,16 +1,17 @@
 import {
   Box,
   Button,
+  Card,
+  Field as ChakraField,
+  HStack,
+  Heading,
+  Switch,
   Text,
   VStack,
-  HStack,
-  Switch,
-  Field as ChakraField,
-  Card,
-  Heading,
 } from "@chakra-ui/react"
 import { useDropzone } from "react-dropzone"
-import { FiUpload, FiFile, FiCheck } from "react-icons/fi"
+import { FiCheck, FiFile, FiUpload } from "react-icons/fi"
+import HelpTooltip from "../ui/help-tooltip"
 
 export interface FileItem {
   file: File
@@ -23,6 +24,7 @@ interface FileUploadProps {
   acceptedFileTypes?: Record<string, string[]>
   maxFiles?: number
   showHandwrittenToggle?: boolean
+  helpKey?: string // Optional help key for tooltip
 }
 
 const defaultAcceptedTypes = {
@@ -43,6 +45,7 @@ const FileUpload = ({
   acceptedFileTypes = defaultAcceptedTypes,
   maxFiles,
   showHandwrittenToggle = true,
+  helpKey,
 }: FileUploadProps) => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
@@ -80,7 +83,7 @@ const FileUpload = ({
     const k = 1024
     const sizes = ["Bytes", "KB", "MB", "GB"]
     const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i]
+    return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`
   }
 
   const hasFiles = files.length > 0
@@ -110,11 +113,14 @@ const FileUpload = ({
                 <FiUpload size={24} />
               </Box>
               <VStack gap={1} align="start">
-                <Heading size="md">
-                  {hasFiles
-                    ? `${files.length} File${files.length > 1 ? "s" : ""} Selected`
-                    : "Upload Documents"}
-                </Heading>
+                <HStack align="center">
+                  <Heading size="md">
+                    {hasFiles
+                      ? `${files.length} File${files.length > 1 ? "s" : ""} Selected`
+                      : "Upload Documents"}
+                  </Heading>
+                  {helpKey && !hasFiles && <HelpTooltip helpKey={helpKey} />}
+                </HStack>
                 <Text fontSize="sm" color="gray.600">
                   {isDragActive
                     ? "Drop the files here..."
@@ -166,10 +172,13 @@ const FileUpload = ({
                     <HStack gap={2} flexShrink={0}>
                       {showHandwrittenToggle && (
                         <ChakraField.Root display="flex" alignItems="center" width="auto">
-                          <ChakraField.Label mb="0" fontSize="sm" mr={2}>
-                            Handwritten
-                          </ChakraField.Label>
-                          <Switch.Root colorPalette="blue">
+                          <HStack align="center" gap={1}>
+                            <ChakraField.Label mb="0" fontSize="sm">
+                              Handwritten
+                            </ChakraField.Label>
+                            {helpKey && <HelpTooltip helpKey="handwrittenToggle" />}
+                          </HStack>
+                          <Switch.Root colorPalette="blue" ml={2}>
                             <Switch.HiddenInput
                               checked={fileItem.isHandwritten}
                               onChange={() => toggleHandwritten(index)}

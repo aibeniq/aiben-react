@@ -1,41 +1,42 @@
 import {
+  type KnowledgeBasePublic,
+  KnowledgeBasesService,
+  type VeraDocChecklist,
+  VeradocService,
+} from "@/client"
+import type { CancelablePromise } from "@/client/core/CancelablePromise"
+import FileUpload, { type FileItem } from "@/components/Common/FileUpload"
+import SearchModeToggle from "@/components/Common/SearchModeToggle"
+import SourceLink from "@/components/Common/SourceLink"
+import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
+import DownloadButton from "@/components/ui/download-button"
+import HelpTooltip from "@/components/ui/help-tooltip"
+import useCustomToast from "@/hooks/useCustomToast"
+import {
+  Accordion,
   Box,
   Button,
   Container,
-  Heading,
-  Text,
-  VStack,
   HStack,
+  Heading,
   Spinner,
-  Accordion,
   Tabs,
+  Text,
   Textarea,
+  VStack,
 } from "@chakra-ui/react"
-import useCustomToast from "@/hooks/useCustomToast"
-import { CancelablePromise } from "@/client/core/CancelablePromise"
-import SourceLink from "@/components/Common/SourceLink"
-import FileUpload, { FileItem } from "@/components/Common/FileUpload"
-import SearchModeToggle from "@/components/Common/SearchModeToggle"
-import DownloadButton from "@/components/ui/download-button"
-import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
-import { useState, useEffect, useRef } from "react"
-import { createFileRoute } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
-import {
-  VeradocService,
-  KnowledgeBasesService,
-  KnowledgeBasePublic,
-  VeraDocChecklist,
-} from "@/client"
+import { createFileRoute } from "@tanstack/react-router"
+import { useEffect, useRef, useState } from "react"
+import { FiCheck, FiCopy, FiDatabase, FiFileText, FiTrash2 } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFileText, FiDatabase, FiCopy, FiCheck, FiTrash2 } from "react-icons/fi"
 import KnowledgeBaseTable from "../../components/Common/KnowledgeBaseTable"
-import ChecklistTable from "../../components/Review/ChecklistTable"
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
-import { copyToClipboard } from "../../utils/copyToClipboard"
+import ChecklistTable from "../../components/Review/ChecklistTable"
 import { useResults } from "../../contexts/ResultsContext"
+import { copyToClipboard } from "../../utils/copyToClipboard"
 
 interface QuestionData {
   id: string
@@ -176,10 +177,10 @@ const VeraDoc = () => {
         return
       }
 
-      let fullText = `# Evaluation Summary\n\n`
+      let fullText = "# Evaluation Summary\n\n"
 
       // Add the active result's display content and QA pairs
-      fullText += activeResult.displayResults + "\n\n"
+      fullText += `${activeResult.displayResults}\n\n`
 
       activeResult.qaPairs.forEach((pair, pairIndex) => {
         fullText += `## Question ${pairIndex + 1}: ${pair.question}\n\n`
@@ -214,8 +215,8 @@ const VeraDoc = () => {
         return
       }
 
-      let fullText = `# Evaluation Summary\n\n`
-      fullText += activeResult.displayResults + "\n\n"
+      let fullText = "# Evaluation Summary\n\n"
+      fullText += `${activeResult.displayResults}\n\n`
 
       activeResult.qaPairs.forEach((pair, pairIndex) => {
         fullText += `## Question ${pairIndex + 1}: ${pair.question}\n\n`
@@ -618,7 +619,7 @@ const VeraDoc = () => {
 
         if (response.results.final_evaluation) {
           displayResults += "## FINAL EVALUATION\n\n"
-          displayResults += response.results.final_evaluation + "\n\n"
+          displayResults += `${response.results.final_evaluation}\n\n`
         }
 
         // Store the QA pairs in the results array
@@ -732,7 +733,7 @@ const VeraDoc = () => {
                     const shouldTruncate = citationText.length > 300
                     const displayText =
                       shouldTruncate && !isExpanded
-                        ? citationText.substring(0, 300) + "..."
+                        ? `${citationText.substring(0, 300)}...`
                         : citationText
 
                     return (
@@ -753,8 +754,7 @@ const VeraDoc = () => {
                             color="blue.600"
                             useModal={true}
                           />
-                        ) : citation.metadata.source &&
-                          citation.metadata.source.toLowerCase().endsWith(".docx") ? (
+                        ) : citation.metadata.source?.toLowerCase().endsWith(".docx") ? (
                           <SourceLink
                             sourceId="" // Empty sourceId, will be handled by filename fallback
                             fileName={getDisplayFileName(citation.metadata.source)}
@@ -843,6 +843,7 @@ const VeraDoc = () => {
               icon={<FiDatabase size={24} />}
               isSelected={!!selectedKnowledgeBase}
               onClick={() => setShowKnowledgeBaseModal(true)}
+              helpKey="knowledgeBaseSelection"
             />
 
             <SelectionCard
@@ -851,6 +852,7 @@ const VeraDoc = () => {
               icon={<FiFileText size={24} />}
               isSelected={!!selectedChecklist}
               onClick={() => setShowChecklistModal(true)}
+              helpKey="checklistSelection"
             />
 
             {/* File Upload Component */}
@@ -858,13 +860,17 @@ const VeraDoc = () => {
               files={fileItems}
               onFilesChange={setFileItems}
               showHandwrittenToggle={true}
+              helpKey="fileUpload"
             />
 
             {/* Custom Instructions Text Box */}
             <Box width="100%" mt={4}>
-              <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
-                Custom Instructions (Optional)
-              </Text>
+              <HStack align="center" mb={2}>
+                <Text fontSize="sm" fontWeight="medium" color="gray.700">
+                  Custom Instructions (Optional)
+                </Text>
+                <HelpTooltip helpKey="customInstructions" />
+              </HStack>
               <Textarea
                 value={customInstructions}
                 onChange={(e) => setCustomInstructions(e.target.value)}
@@ -874,7 +880,10 @@ const VeraDoc = () => {
                 bg="white"
                 borderColor="gray.300"
                 _hover={{ borderColor: "gray.400" }}
-                _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px blue.500" }}
+                _focus={{
+                  borderColor: "blue.500",
+                  boxShadow: "0 0 0 1px blue.500",
+                }}
                 fontSize="sm"
                 maxLength={2000}
               />
@@ -886,7 +895,11 @@ const VeraDoc = () => {
 
             {/* Search Mode Toggle */}
             <Box width="100%" mt={4}>
-              <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
+              <SearchModeToggle
+                searchMode={searchMode}
+                onSearchModeChange={setSearchMode}
+                helpKey="searchMode"
+              />
               <Text fontSize="xs" color="gray.500" mt={1}>
                 Vector search provides fast, targeted results. Full document scan reviews all
                 content in the knowledge base.
@@ -1040,7 +1053,7 @@ const VeraDoc = () => {
                     <Tabs.Root
                       defaultValue="0"
                       value={activeTab.toString()}
-                      onValueChange={(details) => setActiveTab(parseInt(details.value))}
+                      onValueChange={(details) => setActiveTab(Number.parseInt(details.value))}
                     >
                       <Tabs.List>
                         {results.map((result, index) => {

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react"
-import { Box, HStack, Input, IconButton, VStack } from "@chakra-ui/react"
-import { FiChevronUp, FiChevronDown, FiTrash2 } from "react-icons/fi"
+import { Box, HStack, IconButton, Input, VStack } from "@chakra-ui/react"
+import { useEffect, useState } from "react"
+import { FiChevronDown, FiChevronUp, FiTrash2 } from "react-icons/fi"
 
 // Individual list item component
 interface InteractiveListItemProps {
@@ -267,7 +267,11 @@ export const InteractiveList = ({
           onRemove={removeItem}
           onMoveUp={moveItemUp}
           onMoveDown={moveItemDown}
-          canRemove={items.length > minItems && item.trim() !== "" && index !== items.length - 1}
+          canRemove={
+            items.length > minItems &&
+            item.trim() !== "" &&
+            index !== items.length - 1
+          }
           totalItems={items.length}
           placeholder={placeholder}
         />

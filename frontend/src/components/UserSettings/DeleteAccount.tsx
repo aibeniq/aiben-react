@@ -6,7 +6,10 @@ const DeleteAccount = () => {
   return (
     <VStack gap={6} align="stretch" py={4}>
       <Heading size="sm">Delete Account</Heading>
-      <Text>Permanently delete your data and everything associated with your account.</Text>
+      <Text>
+        Permanently delete your data and everything associated with your
+        account.
+      </Text>
       <DeleteConfirmation />
     </VStack>
   )

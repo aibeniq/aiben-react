@@ -1,24 +1,29 @@
 import {
+  FormconnectService,
+  ReportgenieService,
+  TwincheckService,
+  VeradocService,
+} from "@/client"
+import {
+  Alert,
+  Badge,
   Box,
-  Text,
   Card,
-  VStack,
   HStack,
   Icon,
-  Badge,
   Skeleton,
-  Alert,
+  Text,
+  VStack,
 } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
-import { VeradocService, ReportgenieService, TwincheckService, FormconnectService } from "@/client"
-import { 
-  FiCheckCircle, 
-  FiFilePlus, 
-  FiClock,
-  FiUser,
-  FiCalendar
-} from "react-icons/fi"
 import { FaBalanceScale } from "react-icons/fa"
+import {
+  FiCalendar,
+  FiCheckCircle,
+  FiClock,
+  FiFilePlus,
+  FiUser,
+} from "react-icons/fi"
 import { TbPlugConnected } from "react-icons/tb"
 
 interface ActivityItem {
@@ -63,7 +68,7 @@ const typeConfig = {
 function ActivityItemCard({ activity }: ActivityItemProps) {
   const config = typeConfig[activity.type]
   const date = new Date(activity.timestamp)
-  
+
   return (
     <Card.Root size="sm" bg={config.bgColor}>
       <Card.Body p={4}>
@@ -79,13 +84,17 @@ function ActivityItemCard({ activity }: ActivityItemProps) {
           </Box>
           <VStack align="start" gap={1} flex={1}>
             <HStack align="center" gap={2}>
-              <Badge variant="subtle" colorPalette={config.color.split('.')[0]}>
+              <Badge variant="subtle" colorPalette={config.color.split(".")[0]}>
                 {config.label}
               </Badge>
               <HStack align="center" gap={1}>
                 <Icon as={FiClock} boxSize={3} color="gray.400" />
                 <Text fontSize="xs" color="gray.500">
-                  {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {date.toLocaleDateString()}{" "}
+                  {date.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </Text>
               </HStack>
             </HStack>
@@ -115,10 +124,11 @@ export default function RecentActivity() {
     error: veradocError,
   } = useQuery({
     queryKey: ["veradocRecent"],
-    queryFn: () => VeradocService.getVeradocHistory({
-      limit: 5,
-      showAll: true
-    }),
+    queryFn: () =>
+      VeradocService.getVeradocHistory({
+        limit: 5,
+        showAll: true,
+      }),
     refetchInterval: 2 * 60 * 1000, // refetch every 2 minutes
   })
 
@@ -128,10 +138,11 @@ export default function RecentActivity() {
     error: reportgenieError,
   } = useQuery({
     queryKey: ["reportgenieRecent"],
-    queryFn: () => ReportgenieService.getReportgenieHistory({
-      limit: 5,
-      showAll: true
-    }),
+    queryFn: () =>
+      ReportgenieService.getReportgenieHistory({
+        limit: 5,
+        showAll: true,
+      }),
     refetchInterval: 2 * 60 * 1000,
   })
 
@@ -141,10 +152,11 @@ export default function RecentActivity() {
     error: twincheckError,
   } = useQuery({
     queryKey: ["twincheckRecent"],
-    queryFn: () => TwincheckService.getComparisonHistory({
-      limit: 5,
-      showAll: true
-    }),
+    queryFn: () =>
+      TwincheckService.getComparisonHistory({
+        limit: 5,
+        showAll: true,
+      }),
     refetchInterval: 2 * 60 * 1000,
   })
 
@@ -154,15 +166,21 @@ export default function RecentActivity() {
     error: formconnectError,
   } = useQuery({
     queryKey: ["formconnectRecent"],
-    queryFn: () => FormconnectService.getFormHistory({
-      limit: 5,
-      showAll: true
-    }),
+    queryFn: () =>
+      FormconnectService.getFormHistory({
+        limit: 5,
+        showAll: true,
+      }),
     refetchInterval: 2 * 60 * 1000,
   })
 
-  const isLoading = veradocLoading || reportgenieLoading || twincheckLoading || formconnectLoading
-  const hasError = veradocError || reportgenieError || twincheckError || formconnectError
+  const isLoading =
+    veradocLoading ||
+    reportgenieLoading ||
+    twincheckLoading ||
+    formconnectLoading
+  const hasError =
+    veradocError || reportgenieError || twincheckError || formconnectError
 
   if (hasError) {
     return (
@@ -205,7 +223,7 @@ export default function RecentActivity() {
       allActivities.push({
         id: `twincheck-${item.id}`,
         type: "twincheck",
-        title: `${item.filename1 || 'Document'} vs ${item.filename2 || 'Document'}`,
+        title: `${item.filename1 || "Document"} vs ${item.filename2 || "Document"}`,
         timestamp: item.created_at || item.timestamp,
         user_email: item.user_email,
       })
@@ -226,7 +244,10 @@ export default function RecentActivity() {
 
   // Sort by timestamp (most recent first) and take top 5
   const recentActivities = allActivities
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    )
     .slice(0, 5)
 
   if (isLoading) {
@@ -259,7 +280,7 @@ export default function RecentActivity() {
           Latest AI operations across all tools
         </Text>
       </Box>
-      
+
       {recentActivities.length === 0 ? (
         <Card.Root>
           <Card.Body p={6} textAlign="center">

@@ -1,5 +1,6 @@
-import React, { ReactNode } from "react"
-import { HStack, Box } from "@chakra-ui/react"
+import { Box, HStack } from "@chakra-ui/react"
+import type React from "react"
+import type { ReactNode } from "react"
 import HistoryPanel from "./HistoryPanel"
 
 interface ToolTabProps {
