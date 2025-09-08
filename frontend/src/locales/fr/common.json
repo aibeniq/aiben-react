@@ -1,0 +1,103 @@
+{
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "review": "Réviser",
+    "generate": "Générer",
+    "compare": "Comparer",
+    "match": "Associer",
+    "modelSelection": "Sélection de Modèle",
+    "knowledgeBases": "Bases de Connaissances",
+    "archive": "Archive",
+    "settings": "Paramètres",
+    "admin": "Administrateur",
+    "menu": "Menu",
+    "tools": "Outils",
+    "configurations": "Configurations",
+    "myProfile": "Mon Profil",
+    "logout": "Se déconnecter",
+    "loggedInAs": "Connecté en tant que : {{email}}"
+  },
+  "buttons": {
+    "upload": "Télécharger",
+    "download": "Télécharger",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "submit": "Soumettre",
+    "clear": "Effacer",
+    "optimize": "Optimiser",
+    "review": "Réviser",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "retry": "Réessayer"
+  },
+  "forms": {
+    "required": "Ce champ est obligatoire",
+    "email": "Email",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "fullName": "Nom complet",
+    "emailRequired": "L'email est obligatoire",
+    "characterCount": "{{count}}/{{max}} caractères"
+  },
+  "chatbot": {
+    "title": "Assistant IA",
+    "placeholder": "Demandez-moi n'importe quoi...",
+    "send": "Envoyer",
+    "selectKnowledgeBase": "Sélectionner une Base de Connaissances",
+    "uploadFiles": "Télécharger des Fichiers",
+    "searchMode": "Mode de Recherche",
+    "vectorSearch": "Recherche Vectorielle",
+    "fullTextScan": "Analyse Complète du Texte",
+    "clearChat": "Effacer le Chat",
+    "typing": "L'IA tape...",
+    "errors": {
+      "generic": "Désolé, je n'ai pas pu traiter votre demande. Veuillez réessayer.",
+      "timeout": "Délai d'attente dépassé. Veuillez vérifier votre connexion et réessayer.",
+      "largeFileTimeout": "Le document est très volumineux et le traitement a expiré. Veuillez essayer avec un document plus petit ou passer en mode Analyse Complète du Texte.",
+      "fileSize": "Le fichier téléchargé est trop volumineux. Veuillez essayer avec un document plus petit.",
+      "serverError": "Une erreur serveur s'est produite. Le document pourrait être trop volumineux ou complexe à traiter. Veuillez essayer avec un fichier plus petit ou contacter le support."
+    },
+    "warnings": {
+      "largeFile": "⚠️ Document volumineux détecté. Pour de meilleures performances avec des fichiers de plus de 50Mo, considérez passer en mode 'Analyse Complète du Texte' en utilisant le bouton ci-dessus."
+    }
+  },
+  "review": {
+    "title": "Révision de Document",
+    "selectChecklist": "Sélectionner une Liste de Contrôle",
+    "customInstructions": "Instructions Personnalisées (Optionnel)",
+    "customInstructionsPlaceholder": "Entrez des instructions spécifiques pour cette révision...",
+    "uploadDocuments": "Télécharger des Documents",
+    "reviewResults": "Résultats de Révision",
+    "startReview": "Commencer la Révision"
+  },
+  "settings": {
+    "title": "Paramètres Utilisateur",
+    "language": "Langue",
+    "preferredLanguage": "Langue Préférée",
+    "saveLanguagePreference": "Enregistrer la Préférence de Langue",
+    "languageUpdated": "Préférence de langue mise à jour",
+    "modelSelection": "Sélection de Modèle",
+    "userInformation": "Informations Utilisateur",
+    "changePassword": "Changer le Mot de Passe"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "warning": "Avertissement",
+    "info": "Information",
+    "notAvailable": "N/D",
+    "user": "Utilisateur",
+    "searchPlaceholder": "Rechercher...",
+    "noResults": "Aucun résultat trouvé",
+    "selectOption": "Sélectionner une option",
+    "fileUpload": "Télécharger un fichier",
+    "dragDropFiles": "Glissez et déposez les fichiers ici, ou cliquez pour sélectionner"
+  }
+}

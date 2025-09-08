@@ -2,6 +2,7 @@ import { Box, Button, Flex, Heading, Input, Text, VStack } from "@chakra-ui/reac
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 
 import { type ApiError, type UserPublic, type UserUpdateMe, UsersService } from "@/client"
 import useAuth from "@/hooks/useAuth"
@@ -14,6 +15,7 @@ const UserInformation = () => {
   const { showSuccessToast } = useCustomToast()
   const [editMode, setEditMode] = useState(false)
   const { user: currentUser } = useAuth()
+  const { t } = useTranslation()
   const {
     register,
     handleSubmit,
@@ -36,7 +38,7 @@ const UserInformation = () => {
   const mutation = useMutation({
     mutationFn: (data: UserUpdateMe) => UsersService.updateUserMe({ requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("User updated successfully.")
+      showSuccessToast(t("common.success"))
     },
     onError: (err: ApiError) => {
       handleError(err)
@@ -57,10 +59,10 @@ const UserInformation = () => {
 
   return (
     <VStack gap={6} align="stretch" py={4}>
-      <Heading size="sm">User Information</Heading>
+      <Heading size="sm">{t("settings.userInformation")}</Heading>
       <Box w={{ sm: "full", md: "md" }} as="form" onSubmit={handleSubmit(onSubmit)}>
         <VStack gap={4} align="stretch">
-          <Field label="Full name">
+          <Field label={t("forms.fullName")}>
             {editMode ? (
               <Input {...register("full_name", { maxLength: 30 })} type="text" size="md" />
             ) : (
@@ -71,15 +73,19 @@ const UserInformation = () => {
                 truncate
                 maxW="sm"
               >
-                {currentUser?.full_name || "N/A"}
+                {currentUser?.full_name || t("common.notAvailable")}
               </Text>
             )}
           </Field>
-          <Field label="Email" invalid={!!errors.email} errorText={errors.email?.message}>
+          <Field
+            label={t("forms.email")}
+            invalid={!!errors.email}
+            errorText={errors.email?.message}
+          >
             {editMode ? (
               <Input
                 {...register("email", {
-                  required: "Email is required",
+                  required: t("forms.emailRequired"),
                   pattern: emailPattern,
                 })}
                 type="email"
@@ -104,7 +110,7 @@ const UserInformation = () => {
                 bg: "rgba(0, 65, 72, 0.85)",
               }}
             >
-              {editMode ? "Save" : "Edit"}
+              {editMode ? t("buttons.save") : t("buttons.edit")}
             </Button>
             {editMode && (
               <Button
@@ -113,7 +119,7 @@ const UserInformation = () => {
                 onClick={onCancel}
                 disabled={isSubmitting}
               >
-                Cancel
+                {t("buttons.cancel")}
               </Button>
             )}
           </Flex>

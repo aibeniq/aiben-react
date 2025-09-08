@@ -1,0 +1,105 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "review": "Review",
+    "generate": "Generate",
+    "compare": "Compare",
+    "match": "Match",
+    "modelSelection": "Model Selection",
+    "knowledgeBases": "Knowledge Bases",
+    "archive": "Archive",
+    "settings": "Settings",
+    "admin": "Admin",
+    "menu": "Menu",
+    "tools": "Tools",
+    "configurations": "Configurations",
+    "myProfile": "My Profile",
+    "logout": "Log Out",
+    "loggedInAs": "Logged in as: {{email}}"
+  },
+  "buttons": {
+    "upload": "Upload",
+    "download": "Download",
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "clear": "Clear",
+    "optimize": "Optimize",
+    "review": "Review",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close",
+    "next": "Next",
+    "previous": "Previous",
+    "retry": "Retry"
+  },
+  "forms": {
+    "required": "This field is required",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "fullName": "Full name",
+    "emailRequired": "Email is required",
+    "characterCount": "{{count}}/{{max}} characters"
+  },
+  "chatbot": {
+    "title": "AI Assistant",
+    "placeholder": "Ask me anything...",
+    "send": "Send",
+    "selectKnowledgeBase": "Select Knowledge Base",
+    "uploadFiles": "Upload Files",
+    "searchMode": "Search Mode",
+    "vectorSearch": "Vector Search",
+    "fullTextScan": "Full Text Scan",
+    "clearChat": "Clear Chat",
+    "typing": "AI is typing...",
+    "errors": {
+      "generic": "Sorry, I couldn't process your request. Please try again.",
+      "timeout": "Request timed out. Please check your connection and try again.",
+      "largeFileTimeout": "The document is very large and processing timed out. Please try with a smaller document or switch to Full Text Scan mode.",
+      "fileSize": "The uploaded file is too large. Please try with a smaller document.",
+      "serverError": "Server error occurred. The document might be too large or complex to process. Please try with a smaller file or contact support."
+    },
+    "warnings": {
+      "largeFile": "⚠️ Large document detected. For better performance with files over 50MB, consider switching to 'Full Text Scan' mode using the toggle above."
+    }
+  },
+  "review": {
+    "title": "Document Review",
+    "selectChecklist": "Select Checklist",
+    "customInstructions": "Custom Instructions (Optional)",
+    "customInstructionsPlaceholder": "Enter any specific instructions for this review...",
+    "uploadDocuments": "Upload Documents",
+    "reviewResults": "Review Results",
+    "startReview": "Start Review"
+  },
+  "settings": {
+    "title": "User Settings",
+    "language": "Language",
+    "preferredLanguage": "Preferred Language",
+    "saveLanguagePreference": "Save Language Preference",
+    "languageUpdated": "Language preference updated",
+    "modelSelection": "Model Selection",
+    "userInformation": "User Information",
+    "changePassword": "Change Password",
+    "appearance": "Appearance",
+    "dangerZone": "Danger Zone"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "notAvailable": "N/A",
+    "user": "User",
+    "searchPlaceholder": "Search...",
+    "noResults": "No results found",
+    "selectOption": "Select an option",
+    "fileUpload": "Upload file",
+    "dragDropFiles": "Drag and drop files here, or click to select"
+  }
+}

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react"
 import { Drawer } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
 import FloatingChatButton from "@/components/Chatbot/FloatingChatButton"
 import ChatbotPanel from "@/components/Chatbot/ChatbotPanel"
 import { ChatService } from "@/client"
@@ -16,6 +17,7 @@ interface ChatMessage {
 }
 
 const ChatbotMain = () => {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [selectedKbId, setSelectedKbId] = useState<string | null>(null)
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
@@ -251,23 +253,21 @@ const ChatbotMain = () => {
       console.error("Error querying:", error)
 
       // Better error handling for timeouts and large files
-      let errorMessage = "Sorry, I couldn't process your request. Please try again."
+      let errorMessage = t("chatbot.errors.generic")
 
       if (error && typeof error === "object") {
         const errorObj = error as any
         if (errorObj.code === "ERR_NETWORK" || errorObj.message?.includes("timeout")) {
           const hasLargeFiles = uploadedFiles.some((file) => file.size > 10 * 1024 * 1024)
           if (hasLargeFiles) {
-            errorMessage =
-              "The document is very large and processing timed out. Please try with a smaller document or switch to 'Full Text Scan' mode which is more efficient for large files."
+            errorMessage = t("chatbot.errors.largeFileTimeout")
           } else {
-            errorMessage = "Request timed out. Please check your connection and try again."
+            errorMessage = t("chatbot.errors.timeout")
           }
         } else if (errorObj.response?.status === 413) {
-          errorMessage = "The uploaded file is too large. Please try with a smaller document."
+          errorMessage = t("chatbot.errors.fileSize")
         } else if (errorObj.response?.status >= 500) {
-          errorMessage =
-            "Server error occurred. The document might be too large or complex to process. Please try with a smaller file or contact support."
+          errorMessage = t("chatbot.errors.serverError")
         }
       }
 

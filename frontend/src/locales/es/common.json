@@ -1,0 +1,103 @@
+{
+  "navigation": {
+    "dashboard": "Tablero",
+    "review": "Revisar",
+    "generate": "Generar",
+    "compare": "Comparar",
+    "match": "Emparejar",
+    "modelSelection": "Selección de Modelo",
+    "knowledgeBases": "Bases de Conocimiento",
+    "archive": "Archivo",
+    "settings": "Configuración",
+    "admin": "Administrador",
+    "menu": "Menú",
+    "tools": "Herramientas",
+    "configurations": "Configuraciones",
+    "myProfile": "Mi Perfil",
+    "logout": "Cerrar Sesión",
+    "loggedInAs": "Conectado como: {{email}}"
+  },
+  "buttons": {
+    "upload": "Subir",
+    "download": "Descargar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "submit": "Enviar",
+    "clear": "Limpiar",
+    "optimize": "Optimizar",
+    "review": "Revisar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "retry": "Reintentar"
+  },
+  "forms": {
+    "required": "Este campo es obligatorio",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "fullName": "Nombre completo",
+    "emailRequired": "El correo electrónico es obligatorio",
+    "characterCount": "{{count}}/{{max}} caracteres"
+  },
+  "chatbot": {
+    "title": "Asistente IA",
+    "placeholder": "Pregúntame cualquier cosa...",
+    "send": "Enviar",
+    "selectKnowledgeBase": "Seleccionar Base de Conocimiento",
+    "uploadFiles": "Subir Archivos",
+    "searchMode": "Modo de Búsqueda",
+    "vectorSearch": "Búsqueda Vectorial",
+    "fullTextScan": "Escaneo de Texto Completo",
+    "clearChat": "Limpiar Chat",
+    "typing": "IA está escribiendo...",
+    "errors": {
+      "generic": "Lo siento, no pude procesar tu solicitud. Por favor intenta nuevamente.",
+      "timeout": "Se agotó el tiempo de espera. Por favor verifica tu conexión e intenta nuevamente.",
+      "largeFileTimeout": "El documento es muy grande y se agotó el tiempo de procesamiento. Por favor intenta con un documento más pequeño o cambia al modo de Escaneo de Texto Completo.",
+      "fileSize": "El archivo subido es demasiado grande. Por favor intenta con un documento más pequeño.",
+      "serverError": "Ocurrió un error del servidor. El documento podría ser demasiado grande o complejo de procesar. Por favor intenta con un archivo más pequeño o contacta soporte."
+    },
+    "warnings": {
+      "largeFile": "⚠️ Documento grande detectado. Para mejor rendimiento con archivos mayores a 50MB, considera cambiar al modo 'Escaneo de Texto Completo' usando el interruptor arriba."
+    }
+  },
+  "review": {
+    "title": "Revisión de Documento",
+    "selectChecklist": "Seleccionar Lista de Verificación",
+    "customInstructions": "Instrucciones Personalizadas (Opcional)",
+    "customInstructionsPlaceholder": "Ingresa instrucciones específicas para esta revisión...",
+    "uploadDocuments": "Subir Documentos",
+    "reviewResults": "Resultados de Revisión",
+    "startReview": "Iniciar Revisión"
+  },
+  "settings": {
+    "title": "Configuración de Usuario",
+    "language": "Idioma",
+    "preferredLanguage": "Idioma Preferido",
+    "saveLanguagePreference": "Guardar Preferencia de Idioma",
+    "languageUpdated": "Preferencia de idioma actualizada",
+    "modelSelection": "Selección de Modelo",
+    "userInformation": "Información de Usuario",
+    "changePassword": "Cambiar Contraseña"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "warning": "Advertencia",
+    "info": "Información",
+    "notAvailable": "N/D",
+    "user": "Usuario",
+    "searchPlaceholder": "Buscar...",
+    "noResults": "No se encontraron resultados",
+    "selectOption": "Seleccionar una opción",
+    "fileUpload": "Subir archivo",
+    "dragDropFiles": "Arrastra y suelta archivos aquí, o haz clic para seleccionar"
+  }
+}
