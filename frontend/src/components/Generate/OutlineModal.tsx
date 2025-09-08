@@ -1,30 +1,31 @@
 import {
-  HStack,
-  VStack,
-  Input,
-  Textarea,
-  Dialog,
-  Portal,
-  CloseButton,
-  Button,
-  Text,
   Box,
+  Button,
+  CloseButton,
+  Dialog,
+  HStack,
   IconButton,
+  Input,
+  Portal,
+  Text,
+  Textarea,
+  VStack,
 } from "@chakra-ui/react"
-import { Field } from "../ui/field"
-import { ReportGenieOutline, KnowledgeBasePublic } from "../../client"
-import SectionEditor from "./SectionEditor" // Import SectionEditor instead of InteractiveList
-import CancelButton from "../ui/cancel-button"
-import ConfirmButton from "../ui/confirm-button"
-import OptimizeOutlineModal from "./OptimizeOutlineModal"
-import FileUpload, { FileItem } from "../Common/FileUpload"
-import { generateUUID } from "../../utils/uuid"
 import { useState } from "react"
+import { FiCopy } from "react-icons/fi"
+import type { KnowledgeBasePublic, ReportGenieOutline } from "../../client"
 import { ReportgenieService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
-import SearchModeToggle from "../Common/SearchModeToggle"
-import { FiCopy } from "react-icons/fi"
 import { copyToClipboard } from "../../utils/copyToClipboard"
+import { generateUUID } from "../../utils/uuid"
+import FileUpload, { type FileItem } from "../Common/FileUpload"
+import SearchModeToggle from "../Common/SearchModeToggle"
+import CancelButton from "../ui/cancel-button"
+import ConfirmButton from "../ui/confirm-button"
+import { Field } from "../ui/field"
+import HelpTooltip from "../ui/help-tooltip"
+import OptimizeOutlineModal from "./OptimizeOutlineModal"
+import SectionEditor from "./SectionEditor" // Import SectionEditor instead of InteractiveList
 
 interface OutlineModalProps {
   isOpen: boolean
@@ -62,47 +63,49 @@ const OutlineModal = ({
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // Validation state
-  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+  const [validationErrors, setValidationErrors] = useState<{
+    [key: string]: string
+  }>({})
 
   // Validation function
   const validateForm = () => {
-    const errors: {[key: string]: string} = {}
-    
+    const errors: { [key: string]: string } = {}
+
     if (!outlineName.trim()) {
       errors.name = "Outline name is required"
     } else if (outlineName.trim().length < 3) {
       errors.name = "Outline name must be at least 3 characters long"
     }
-    
+
     // Description is optional - no validation required
-    
+
     // Check if sections exist (either as JSON array or simple text)
     let hasSections = false
     if (sections.trim()) {
       try {
         const parsedSections = JSON.parse(sections)
         if (Array.isArray(parsedSections)) {
-          hasSections = parsedSections.some(section => section.text && section.text.trim())
+          hasSections = parsedSections.some((section) => section.text?.trim())
         }
       } catch {
         // If JSON parsing fails, treat as simple text
-        hasSections = sections.split('\n').some(line => line.trim())
+        hasSections = sections.split("\n").some((line) => line.trim())
       }
     }
-    
+
     if (!hasSections) {
       errors.sections = "At least one section is required"
     }
-    
+
     setValidationErrors(errors)
-    
+
     // Show the first error as a toast
     const firstError = Object.values(errors)[0]
     if (firstError) {
       showErrorToast(firstError)
       return false
     }
-    
+
     return true
   }
 
@@ -110,14 +113,14 @@ const OutlineModal = ({
   const handleNameChange = (value: string) => {
     setOutlineName(value)
     if (validationErrors.name) {
-      setValidationErrors(prev => ({ ...prev, name: '' }))
+      setValidationErrors((prev) => ({ ...prev, name: "" }))
     }
   }
 
   const handleDescriptionChange = (value: string) => {
     setOutlineDescription(value)
     if (validationErrors.description) {
-      setValidationErrors(prev => ({ ...prev, description: '' }))
+      setValidationErrors((prev) => ({ ...prev, description: "" }))
     }
   }
 
@@ -126,7 +129,7 @@ const OutlineModal = ({
     if (!validateForm()) {
       return // Stop execution if validation fails
     }
-    
+
     // Call the parent's onSave function if validation passes
     onSave()
   }
@@ -212,7 +215,7 @@ const OutlineModal = ({
 
         // Clear sections validation error if it exists
         if (validationErrors.sections) {
-          setValidationErrors(prev => ({ ...prev, sections: '' }))
+          setValidationErrors((prev) => ({ ...prev, sections: "" }))
         }
 
         let successMessage = `Suggested ${suggestedSections.length} sections from description`
@@ -329,7 +332,12 @@ const OutlineModal = ({
         <Dialog.Positioner>
           <Dialog.Content maxW="6xl" maxH="90vh">
             <Dialog.Header>
-              <Dialog.Title>{editingOutline ? "Edit Outline" : "Create New Outline"}</Dialog.Title>
+              <HStack align="center" gap={2}>
+                <Dialog.Title>
+                  {editingOutline ? "Edit Outline" : "Create New Outline"}
+                </Dialog.Title>
+                <HelpTooltip helpKey="createOutline" />
+              </HStack>
               <Dialog.CloseTrigger asChild>
                 <CloseButton size="sm" />
               </Dialog.CloseTrigger>
@@ -341,7 +349,12 @@ const OutlineModal = ({
                 <HStack align="stretch" gap={4}>
                   {/* Left Column - Basic Fields and Settings */}
                   <VStack align="stretch" gap={4} flex="1">
-                    <Field label="Outline Name" required invalid={!!validationErrors.name} errorText={validationErrors.name}>
+                    <Field
+                      label="Outline Name"
+                      required
+                      invalid={!!validationErrors.name}
+                      errorText={validationErrors.name}
+                    >
                       <Input
                         value={outlineName}
                         onChange={(e) => handleNameChange(e.target.value)}
@@ -349,7 +362,16 @@ const OutlineModal = ({
                       />
                     </Field>
 
-                    <Field label="Description" invalid={!!validationErrors.description} errorText={validationErrors.description}>
+                    <Field
+                      label={
+                        <HStack align="center" gap={2}>
+                          <span>Description</span>
+                          <HelpTooltip helpKey="minimumDescriptionLength" />
+                        </HStack>
+                      }
+                      invalid={!!validationErrors.description}
+                      errorText={validationErrors.description}
+                    >
                       <Textarea
                         value={outlineDescription}
                         onChange={(e) => handleDescriptionChange(e.target.value)}
@@ -357,24 +379,19 @@ const OutlineModal = ({
                         resize="vertical"
                         rows={3}
                       />
-                      {outlineDescription.trim().length > 0 &&
-                        outlineDescription.trim().length < 10 && (
-                          <Text fontSize="xs" color="orange.600">
-                            Description needs at least {10 - outlineDescription.trim().length} more
-                            characters to suggest sections
-                          </Text>
-                        )}
                     </Field>
 
                     <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
 
-                    <Field label="Reference Documents (Optional)">
+                    <Field
+                      label={
+                        <HStack align="center" gap={2}>
+                          <span>Reference Documents (Optional)</span>
+                          <HelpTooltip helpKey="referenceDocuments" />
+                        </HStack>
+                      }
+                    >
                       <VStack align="stretch" gap={3}>
-                        <Text fontSize="sm" color="gray.600">
-                          Upload reference documents or select a Knowledge Base to help the AI
-                          suggest outline sections.
-                        </Text>
-
                         {/* Reference Mode Toggle */}
                         <HStack gap={2}>
                           <Button
@@ -397,9 +414,6 @@ const OutlineModal = ({
                         {/* Reference Mode Content */}
                         {referenceMode === "files" && (
                           <VStack align="stretch" gap={2}>
-                            <Text fontSize="sm" color="gray.700" fontWeight="medium">
-                              Provide reference documents for suggesting an outline
-                            </Text>
                             <FileUpload
                               files={exampleFiles}
                               onFilesChange={setExampleFiles}
@@ -446,13 +460,6 @@ const OutlineModal = ({
                             ) : null}
                           </Box>
                         )}
-
-                        {outlineDescription.trim().length < 10 &&
-                          outlineDescription.trim().length > 0 && (
-                            <Text fontSize="sm" color="gray.500">
-                              Description must be at least 10 characters to suggest sections
-                            </Text>
-                          )}
                       </VStack>
                     </Field>
                   </VStack>
@@ -483,6 +490,7 @@ const OutlineModal = ({
                             >
                               {suggesting ? "Suggesting..." : "Suggest"}
                             </Button>
+                            <HelpTooltip helpKey="suggestOutlineSections" />
 
                             <Button
                               size="xs"
@@ -507,6 +515,7 @@ const OutlineModal = ({
                             >
                               Optimize
                             </Button>
+                            <HelpTooltip helpKey="optimizeOutlineSections" />
 
                             <IconButton
                               size="xs"
@@ -532,15 +541,18 @@ const OutlineModal = ({
                         p={3}
                         width="full"
                       >
-                        <SectionEditor 
-                          sections={sections} 
+                        <SectionEditor
+                          sections={sections}
                           onSectionsChange={(newSections) => {
                             onSectionsChange(newSections)
                             // Clear validation error when sections are modified
                             if (validationErrors.sections) {
-                              setValidationErrors(prev => ({ ...prev, sections: '' }))
+                              setValidationErrors((prev) => ({
+                                ...prev,
+                                sections: "",
+                              }))
                             }
-                          }} 
+                          }}
                         />
                       </Box>
                     </Field>

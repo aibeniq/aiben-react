@@ -1,4 +1,13 @@
-import { Container, EmptyState, Flex, Heading, Table, VStack, Badge, Box } from "@chakra-ui/react"
+import {
+  Badge,
+  Box,
+  Container,
+  EmptyState,
+  Flex,
+  Heading,
+  Table,
+  VStack,
+} from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { FiSearch } from "react-icons/fi"
@@ -24,7 +33,10 @@ const PER_PAGE = 5
 function getKnowledgeBasesQueryOptions({ page }: { page: number }) {
   return {
     queryFn: () =>
-      KnowledgeBasesService.readKnowledgeBases({ skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
+      KnowledgeBasesService.readKnowledgeBases({
+        skip: (page - 1) * PER_PAGE,
+        limit: PER_PAGE,
+      }),
     queryKey: ["items", { page }],
   }
 }
@@ -63,8 +75,12 @@ function KnowledgeBasesTable() {
             <FiSearch />
           </EmptyState.Indicator>
           <VStack textAlign="center">
-            <EmptyState.Title>You don't have any Knowledge Bases yet</EmptyState.Title>
-            <EmptyState.Description>Add a new Knowledge Base to get started</EmptyState.Description>
+            <EmptyState.Title>
+              You don't have any Knowledge Bases yet
+            </EmptyState.Title>
+            <EmptyState.Description>
+              Add a new Knowledge Base to get started
+            </EmptyState.Description>
           </VStack>
         </EmptyState.Content>
       </EmptyState.Root>
@@ -79,7 +95,8 @@ function KnowledgeBasesTable() {
             <Table.ColumnHeader w="sm">Title</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Description</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Number of Sources</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Embedding Model</Table.ColumnHeader> {/* Add this line */}
+            <Table.ColumnHeader w="sm">Embedding Model</Table.ColumnHeader>{" "}
+            {/* Add this line */}
             <Table.ColumnHeader w="sm">Date Created</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Date Modified</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Actions</Table.ColumnHeader>
@@ -148,7 +165,13 @@ function KnowledgeBases() {
           </Heading>
           <AddKnowledgeBase />
         </Box>
-        <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4} bg="bg">
+        <Box
+          border="1px solid"
+          borderColor="gray.200"
+          borderRadius="md"
+          p={4}
+          bg="bg"
+        >
           <KnowledgeBasesTable />
         </Box>
       </VStack>

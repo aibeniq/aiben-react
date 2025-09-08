@@ -1,6 +1,6 @@
-import React from "react"
-import { Heading, HStack, Button } from "@chakra-ui/react"
-import { FiCopy, FiCheck } from "react-icons/fi"
+import { Button, HStack, Heading } from "@chakra-ui/react"
+import type React from "react"
+import { FiCheck, FiCopy } from "react-icons/fi"
 import DownloadButton from "../../ui/download-button"
 
 interface ResultsHeaderProps {
@@ -35,11 +35,19 @@ const ResultsHeader: React.FC<ResultsHeaderProps> = ({
           {copySuccess ? <FiCheck color="green" /> : <FiCopy />}
           {copySuccess ? "Copied!" : "Copy Text"}
         </Button>
-        <DownloadButton size="sm" onClick={onDownloadReport} loading={loadingDownload}>
+        <DownloadButton
+          size="sm"
+          onClick={onDownloadReport}
+          loading={loadingDownload}
+        >
           Download DOCX
         </DownloadButton>
         {showCsvDownload && onDownloadCsv && (
-          <DownloadButton size="sm" onClick={onDownloadCsv} loading={loadingCsvDownload}>
+          <DownloadButton
+            size="sm"
+            onClick={onDownloadCsv}
+            loading={loadingCsvDownload}
+          >
             Download CSV
           </DownloadButton>
         )}

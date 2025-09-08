@@ -1,8 +1,9 @@
-import { Box, Card, Heading, Text, VStack, HStack, Spinner, IconButton } from "@chakra-ui/react"
-import { Switch } from "@chakra-ui/react"
 import { Tooltip } from "@/components/ui/tooltip"
+import HelpTooltip from "@/components/ui/help-tooltip"
+import { Box, Card, HStack, Heading, IconButton, Spinner, Text, VStack } from "@chakra-ui/react"
+import { Switch } from "@chakra-ui/react"
 import { format } from "date-fns"
-import { FiFileText, FiDatabase, FiUsers, FiThumbsUp, FiThumbsDown, FiTrash2 } from "react-icons/fi"
+import { FiDatabase, FiFileText, FiThumbsDown, FiThumbsUp, FiTrash2, FiUsers } from "react-icons/fi"
 
 interface HistoryPanelProps {
   reportHistory: any[]
@@ -57,13 +58,14 @@ const HistoryPanel = ({
 
       if (allFiles.length === 1) {
         return allFiles[0]
-      } else if (allFiles.length === 2) {
-        return `${allFiles[0]} vs ${allFiles[1]}`
-      } else if (allFiles.length <= 4) {
-        return allFiles.join(", ")
-      } else {
-        return `${allFiles[0]}, ${allFiles[1]}, +${allFiles.length - 2} more`
       }
+      if (allFiles.length === 2) {
+        return `${allFiles[0]} vs ${allFiles[1]}`
+      }
+      if (allFiles.length <= 4) {
+        return allFiles.join(", ")
+      }
+      return `${allFiles[0]}, ${allFiles[1]}, +${allFiles.length - 2} more`
     }
 
     // Fallback to the existing logic for FormConnect (for backward compatibility)
@@ -111,9 +113,12 @@ const HistoryPanel = ({
               content={showAllUsers ? "Viewing all users' history" : "Viewing only my history"}
             >
               <HStack gap={2}>
-                <Text fontSize="xs" color="gray.500">
-                  All Users
-                </Text>
+                <HStack gap={1} align="center">
+                  <Text fontSize="xs" color="gray.500">
+                    All Users
+                  </Text>
+                  <HelpTooltip helpKey="allUsersToggle" />
+                </HStack>
                 {/* Key added to force remounting when showAllUsers changes */}
                 <Switch.Root
                   key={`switch-${showAllUsers}`}
@@ -158,9 +163,9 @@ const HistoryPanel = ({
                 cursor="pointer"
                 bg={selectedHistoryReport?.id === item?.id ? "blue.50" : "surface"}
                 borderColor={selectedHistoryReport?.id === item?.id ? "blue.300" : "border"}
-                _hover={{ 
+                _hover={{
                   bg: selectedHistoryReport?.id === item?.id ? "blue.100" : "accent.subtle",
-                  borderColor: selectedHistoryReport?.id === item?.id ? "blue.400" : "border"
+                  borderColor: selectedHistoryReport?.id === item?.id ? "blue.400" : "border",
                 }}
                 onClick={() => item?.id && onLoadReport(item.id)}
                 flexShrink={0}
@@ -170,12 +175,7 @@ const HistoryPanel = ({
               >
                 {/* Delete button */}
                 {onDeleteReport && (
-                  <Box
-                    position="absolute"
-                    top={2}
-                    right={2}
-                    zIndex={10}
-                  >
+                  <Box position="absolute" top={2} right={2} zIndex={10}>
                     <IconButton
                       size="xs"
                       variant="ghost"
@@ -184,7 +184,11 @@ const HistoryPanel = ({
                       onClick={(e) => {
                         e.stopPropagation()
                         // Add confirmation dialog
-                        if (window.confirm("Are you sure you want to delete this item? This action cannot be undone.")) {
+                        if (
+                          window.confirm(
+                            "Are you sure you want to delete this item? This action cannot be undone.",
+                          )
+                        ) {
                           onDeleteReport(item.id)
                         }
                       }}
@@ -193,7 +197,7 @@ const HistoryPanel = ({
                     </IconButton>
                   </Box>
                 )}
-                
+
                 <VStack align="start" gap={1} width="100%">
                   <HStack gap={1} width="100%" justify="space-between">
                     <Text fontSize="xs" color="gray.500">

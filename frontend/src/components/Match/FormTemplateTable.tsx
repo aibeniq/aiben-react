@@ -1,7 +1,11 @@
+import { Button, Checkbox, HStack, IconButton, Table } from "@chakra-ui/react"
 import { useState } from "react"
-import { Button, HStack, IconButton, Table, Checkbox } from "@chakra-ui/react"
-import { FiEye, FiCopy, FiTrash2, FiPlus } from "react-icons/fi"
-import { FormConnectForm, FormconnectService, KnowledgeBasePublic } from "../../client"
+import { FiCopy, FiEye, FiPlus, FiTrash2 } from "react-icons/fi"
+import {
+  type FormConnectForm,
+  FormconnectService,
+  type KnowledgeBasePublic,
+} from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import FormTemplateModal from "./FormTemplateModal"
 
@@ -36,18 +40,27 @@ interface FormTemplateTableBodyProps {
   onDeleteForm: (form: FormConnectForm) => void
 }
 
-const FormTemplateTableHeader = ({ onCreateNew }: FormTemplateTableHeaderProps) => {
+const FormTemplateTableHeader = ({
+  onCreateNew,
+}: FormTemplateTableHeaderProps) => {
   return (
     <Table.Header position="sticky" top="0" bg="transparent" zIndex="1">
       <Table.Row>
-        <Table.ColumnHeader w="6"></Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader w="6" />
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           Name
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           Description
         </Table.ColumnHeader>
-        <Table.ColumnHeader w="32" style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          w="32"
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           <Button size="sm" onClick={onCreateNew} ml="auto" variant="ghost">
             <FiPlus size={14} />
           </Button>
@@ -81,7 +94,10 @@ const FormTemplateTableBody = ({
   return (
     <Table.Body>
       {sortedForms.map((form) => (
-        <Table.Row key={form.id} data-selected={selectedForm?.id === form.id ? "" : undefined}>
+        <Table.Row
+          key={form.id}
+          data-selected={selectedForm?.id === form.id ? "" : undefined}
+        >
           <Table.Cell>
             <Checkbox.Root
               size="sm"
@@ -138,7 +154,8 @@ const FormTemplateTableBody = ({
       {forms.length === 0 && (
         <Table.Row>
           <Table.Cell colSpan={4} textAlign="center" py={8} color="gray.500">
-            No form templates available. Create your first form template to get started.
+            No form templates available. Create your first form template to get
+            started.
           </Table.Cell>
         </Table.Row>
       )}
@@ -219,7 +236,7 @@ const FormTemplateTable = ({
 
   const handleSave = async () => {
     try {
-      if (editingForm && editingForm.id) {
+      if (editingForm?.id) {
         await FormconnectService.updateForm({
           formId: editingForm.id,
           requestBody: {
@@ -272,7 +289,12 @@ const FormTemplateTable = ({
   }
 
   return (
-    <div style={{ opacity: isDisabled ? 0.3 : 1, pointerEvents: isDisabled ? "none" : "auto" }}>
+    <div
+      style={{
+        opacity: isDisabled ? 0.3 : 1,
+        pointerEvents: isDisabled ? "none" : "auto",
+      }}
+    >
       {/* Form Template Table */}
       <div
         style={{

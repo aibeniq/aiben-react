@@ -22,7 +22,8 @@ const PER_PAGE = 5
 
 function getUsersQueryOptions({ page }: { page: number }) {
   return {
-    queryFn: () => UsersService.readUsers({ skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
+    queryFn: () =>
+      UsersService.readUsers({ skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
     queryKey: ["users", { page }],
   }
 }
@@ -81,10 +82,15 @@ function UsersTable() {
               <Table.Cell truncate maxW="sm">
                 {user.email}
               </Table.Cell>
-              <Table.Cell>{user.is_superuser ? "Superuser" : "User"}</Table.Cell>
+              <Table.Cell>
+                {user.is_superuser ? "Superuser" : "User"}
+              </Table.Cell>
               <Table.Cell>{user.is_active ? "Active" : "Inactive"}</Table.Cell>
               <Table.Cell>
-                <UserActionsMenu user={user} disabled={currentUser?.id === user.id} />
+                <UserActionsMenu
+                  user={user}
+                  disabled={currentUser?.id === user.id}
+                />
               </Table.Cell>
             </Table.Row>
           ))}

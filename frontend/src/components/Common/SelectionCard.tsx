@@ -1,6 +1,7 @@
-import React from "react"
-import { Box, Card, Heading, Text, VStack, HStack } from "@chakra-ui/react"
+import { Box, Card, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import type React from "react"
 import { FiCheck } from "react-icons/fi"
+import HelpTooltip from "../ui/help-tooltip"
 
 interface SelectionCardProps {
   title: string
@@ -9,6 +10,7 @@ interface SelectionCardProps {
   isSelected: boolean
   isDisabled?: boolean
   onClick: () => void
+  helpKey?: string // Optional help key for tooltip
 }
 
 const SelectionCard = ({
@@ -18,6 +20,7 @@ const SelectionCard = ({
   isSelected,
   isDisabled = false,
   onClick,
+  helpKey,
 }: SelectionCardProps) => {
   return (
     <Card.Root
@@ -42,7 +45,10 @@ const SelectionCard = ({
               {icon}
             </Box>
             <VStack gap={1} align="start">
-              <Heading size="md">{title}</Heading>
+              <HStack align="center">
+                <Heading size="md">{title}</Heading>
+                {helpKey && <HelpTooltip helpKey={helpKey} />}
+              </HStack>
               <Text fontSize="sm" color="gray.600">
                 {description}
               </Text>

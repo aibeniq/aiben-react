@@ -1,6 +1,6 @@
+import { HStack, IconButton, Input, VStack } from "@chakra-ui/react"
 import { useState } from "react"
-import { HStack, VStack, Input, IconButton } from "@chakra-ui/react"
-import { FiChevronUp, FiChevronDown, FiTrash2 } from "react-icons/fi"
+import { FiChevronDown, FiChevronUp, FiTrash2 } from "react-icons/fi"
 
 interface TopicItemProps {
   index: number

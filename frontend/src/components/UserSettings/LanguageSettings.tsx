@@ -1,18 +1,22 @@
-import React from "react"
-import { Card, VStack, Box } from "@chakra-ui/react"
-import { Field } from "@/components/ui/field"
 import { Button } from "@/components/ui/button"
+import { Field } from "@/components/ui/field"
 import { useLanguage } from "@/hooks/useLanguage"
+import { Box, Card, VStack } from "@chakra-ui/react"
+import React from "react"
 
 const LanguageSettings: React.FC = () => {
-  const { currentLanguage, availableLanguages, changeLanguage, isUpdating, t } = useLanguage()
-  const [selectedLanguage, setSelectedLanguage] = React.useState(currentLanguage)
+  const { currentLanguage, availableLanguages, changeLanguage, isUpdating, t } =
+    useLanguage()
+  const [selectedLanguage, setSelectedLanguage] =
+    React.useState(currentLanguage)
 
   const handleSave = () => {
     changeLanguage(selectedLanguage)
   }
 
-  const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleLanguageChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     setSelectedLanguage(event.target.value)
   }
 

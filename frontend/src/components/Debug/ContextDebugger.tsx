@@ -1,6 +1,6 @@
-import React from 'react'
-import { Box, Text, VStack } from '@chakra-ui/react'
-import { useResults } from '../../contexts/ResultsContext'
+import { Box, Text, VStack } from "@chakra-ui/react"
+import type React from "react"
+import { useResults } from "../../contexts/ResultsContext"
 
 export const ContextDebugger: React.FC = () => {
   const {
@@ -8,28 +8,30 @@ export const ContextDebugger: React.FC = () => {
     reviewActiveTab,
     generateResult,
     compareResult,
-    matchResult
+    matchResult,
   } = useResults()
 
   return (
-    <Box 
-      position="fixed" 
-      top={4} 
-      right={4} 
-      bg="black" 
-      color="white" 
-      p={3} 
-      borderRadius="md" 
+    <Box
+      position="fixed"
+      top={4}
+      right={4}
+      bg="black"
+      color="white"
+      p={3}
+      borderRadius="md"
       fontSize="xs"
       zIndex={9999}
       maxWidth="300px"
     >
       <VStack align="start" gap={1}>
         <Text fontWeight="bold">Context Debug:</Text>
-        <Text>Review: {reviewResults.length} results, tab {reviewActiveTab}</Text>
-        <Text>Generate: {generateResult ? 'Has result' : 'No result'}</Text>
-        <Text>Compare: {compareResult ? 'Has result' : 'No result'}</Text>
-        <Text>Match: {matchResult ? 'Has result' : 'No result'}</Text>
+        <Text>
+          Review: {reviewResults.length} results, tab {reviewActiveTab}
+        </Text>
+        <Text>Generate: {generateResult ? "Has result" : "No result"}</Text>
+        <Text>Compare: {compareResult ? "Has result" : "No result"}</Text>
+        <Text>Match: {matchResult ? "Has result" : "No result"}</Text>
       </VStack>
     </Box>
   )

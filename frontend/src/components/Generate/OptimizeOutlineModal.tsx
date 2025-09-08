@@ -1,29 +1,28 @@
 import {
-  VStack,
-  HStack,
-  Dialog,
-  Portal,
-  Text,
   Box,
-  Textarea,
-  IconButton,
   Button,
   Card,
+  Dialog,
+  HStack,
+  IconButton,
+  Portal,
+  Text,
+  Textarea,
+  VStack,
 } from "@chakra-ui/react"
-import { Field } from "../ui/field"
-import CancelButton from "../ui/cancel-button"
-import ConfirmButton from "../ui/confirm-button"
-import SearchModeToggle from "../Common/SearchModeToggle"
-import { useState, useRef } from "react"
+import { useRef, useState } from "react"
+import { FiCheck, FiDownload, FiEdit3, FiSave, FiX } from "react-icons/fi"
 import {
+  type CancelablePromise,
+  type OptimizedOutlineResponse,
+  type OutlineSuggestion,
   ReportgenieService,
-  OptimizedOutlineResponse,
-  OutlineSuggestion,
-  CancelablePromise,
 } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
-import { FiCheck, FiEdit3, FiSave, FiX, FiDownload } from "react-icons/fi"
-
+import SearchModeToggle from "../Common/SearchModeToggle"
+import CancelButton from "../ui/cancel-button"
+import ConfirmButton from "../ui/confirm-button"
+import { Field } from "../ui/field"
 
 interface OptimizeOutlineModalProps {
   isOpen: boolean
@@ -47,14 +46,17 @@ const OptimizeOutlineModal = ({
   const [customInstructions, setCustomInstructions] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector") // Add search mode state
-  const [optimizationResults, setOptimizationResults] = useState<OptimizedOutlineResponse | null>(
-    null,
-  )
+  const [optimizationResults, setOptimizationResults] =
+    useState<OptimizedOutlineResponse | null>(null)
   const [showResults, setShowResults] = useState(false)
 
   // State for editing suggestions
-  const [acceptedSuggestions, setAcceptedSuggestions] = useState<Set<number>>(new Set())
-  const [editingSuggestions, setEditingSuggestions] = useState<Map<number, string>>(new Map())
+  const [acceptedSuggestions, setAcceptedSuggestions] = useState<Set<number>>(
+    new Set(),
+  )
+  const [editingSuggestions, setEditingSuggestions] = useState<
+    Map<number, string>
+  >(new Map())
   const [editingModes, setEditingModes] = useState<Set<number>>(new Set())
   const [expandedContent, setExpandedContent] = useState<Set<number>>(new Set())
   const [loadingCsvDownload, setLoadingCsvDownload] = useState(false)
@@ -170,11 +172,13 @@ const OptimizeOutlineModal = ({
 
       // Initialize all suggestions that need revision as accepted by default
       const needsRevisionIndices = new Set<number>()
-      result.suggestions.forEach((suggestion: OutlineSuggestion, index: number) => {
-        if (suggestion.needs_revision) {
-          needsRevisionIndices.add(index)
-        }
-      })
+      result.suggestions.forEach(
+        (suggestion: OutlineSuggestion, index: number) => {
+          if (suggestion.needs_revision) {
+            needsRevisionIndices.add(index)
+          }
+        },
+      )
       setAcceptedSuggestions(needsRevisionIndices)
 
       showSuccessToast(
@@ -190,7 +194,9 @@ const OptimizeOutlineModal = ({
       console.error("Error optimizing outline:", error)
 
       if (error.status === 422) {
-        showErrorToast("Invalid request. Please check your inputs and try again.")
+        showErrorToast(
+          "Invalid request. Please check your inputs and try again.",
+        )
       } else if (error.status === 401) {
         showErrorToast("You need to be logged in to optimize outlines.")
       } else if (error.status === 403) {
@@ -198,9 +204,13 @@ const OptimizeOutlineModal = ({
       } else if (error.status === 404) {
         showErrorToast("Knowledge base or outline not found.")
       } else if (error.status === 500) {
-        showErrorToast("Server error. Please try again later or contact support.")
+        showErrorToast(
+          "Server error. Please try again later or contact support.",
+        )
       } else {
-        showErrorToast(`Failed to optimize outline: ${error.message || "Unknown error"}`)
+        showErrorToast(
+          `Failed to optimize outline: ${error.message || "Unknown error"}`,
+        )
       }
     } finally {
       setOptimizing(false)
@@ -214,55 +224,82 @@ const OptimizeOutlineModal = ({
     try {
       // Parse the current sections to get the original structure
       const originalSections = JSON.parse(currentSections)
-      console.log("OptimizeOutline: Original sections structure:", originalSections)
-      console.log("OptimizeOutline: Optimization suggestions count:", optimizationResults.suggestions.length)
-      
+      console.log(
+        "OptimizeOutline: Original sections structure:",
+        originalSections,
+      )
+      console.log(
+        "OptimizeOutline: Optimization suggestions count:",
+        optimizationResults.suggestions.length,
+      )
+
       // The backend only returns suggestions for sections with consultDocuments: true
       // We need to reconstruct the full sections array by:
       // 1. Keeping non-consulting sections unchanged from original
       // 2. Updating consulting sections from optimization results
-      
-      let suggestionIndex = 0
-      const optimizedSections = originalSections.map((originalSection: any, originalIndex: number) => {
-        // If this section doesn't consult documents, keep it unchanged
-        if (!originalSection.consultDocuments) {
-          console.log(`OptimizeOutline: Keeping non-consulting section ${originalIndex} unchanged:`, originalSection.text?.substring(0, 50))
-          return originalSection
-        }
-        
-        // This section consults documents, so it should have a corresponding suggestion
-        if (suggestionIndex >= optimizationResults.suggestions.length) {
-          console.warn(`OptimizeOutline: No suggestion found for consulting section at original index ${originalIndex}`)
-          return originalSection
-        }
-        
-        const suggestion = optimizationResults.suggestions[suggestionIndex]
-        console.log(`OptimizeOutline: Processing consulting section ${originalIndex} with suggestion ${suggestionIndex}`)
-        
-        let updatedSection
-        if (acceptedSuggestions.has(suggestionIndex) && suggestion.needs_revision) {
-          // Use edited suggestion if available, otherwise use original suggestion
-          updatedSection = {
-            ...originalSection,
-            text: getSuggestionText(suggestionIndex)
-          }
-          console.log(`OptimizeOutline: Applied optimization for section ${originalIndex}`)
-        } else {
-          // Keep the original section unchanged
-          updatedSection = {
-            ...originalSection,
-            text: suggestion.original_section
-          }
-          console.log(`OptimizeOutline: Kept original content for section ${originalIndex}`)
-        }
-        
-        suggestionIndex++
-        return updatedSection
-      })
 
-      console.log("OptimizeOutline: Final optimized sections:", optimizedSections)
+      let suggestionIndex = 0
+      const optimizedSections = originalSections.map(
+        (originalSection: any, originalIndex: number) => {
+          // If this section doesn't consult documents, keep it unchanged
+          if (!originalSection.consultDocuments) {
+            console.log(
+              `OptimizeOutline: Keeping non-consulting section ${originalIndex} unchanged:`,
+              originalSection.text?.substring(0, 50),
+            )
+            return originalSection
+          }
+
+          // This section consults documents, so it should have a corresponding suggestion
+          if (suggestionIndex >= optimizationResults.suggestions.length) {
+            console.warn(
+              `OptimizeOutline: No suggestion found for consulting section at original index ${originalIndex}`,
+            )
+            return originalSection
+          }
+
+          const suggestion = optimizationResults.suggestions[suggestionIndex]
+          console.log(
+            `OptimizeOutline: Processing consulting section ${originalIndex} with suggestion ${suggestionIndex}`,
+          )
+
+          let updatedSection
+          if (
+            acceptedSuggestions.has(suggestionIndex) &&
+            suggestion.needs_revision
+          ) {
+            // Use edited suggestion if available, otherwise use original suggestion
+            updatedSection = {
+              ...originalSection,
+              text: getSuggestionText(suggestionIndex),
+            }
+            console.log(
+              `OptimizeOutline: Applied optimization for section ${originalIndex}`,
+            )
+          } else {
+            // Keep the original section unchanged
+            updatedSection = {
+              ...originalSection,
+              text: suggestion.original_section,
+            }
+            console.log(
+              `OptimizeOutline: Kept original content for section ${originalIndex}`,
+            )
+          }
+
+          suggestionIndex++
+          return updatedSection
+        },
+      )
+
+      console.log(
+        "OptimizeOutline: Final optimized sections:",
+        optimizedSections,
+      )
       onOptimizedSections(JSON.stringify(optimizedSections))
-      showSuccessToast(`Applied ${acceptedSuggestions.size} optimization suggestions`)
+      showSuccessToast(
+        `Applied ${acceptedSuggestions.size} optimization suggestions`,
+      )
       handleClose()
     } catch (error) {
       console.error("Error applying optimizations:", error)
@@ -283,7 +320,8 @@ const OptimizeOutlineModal = ({
       const csvData = {
         suggestions: optimizationResults.suggestions,
         analysis_summary:
-          optimizationResults.analysis_summary || "Outline optimization results export",
+          optimizationResults.analysis_summary ||
+          "Outline optimization results export",
       }
 
       const response = await ReportgenieService.generateOutlineOptimizationCsv({
@@ -297,7 +335,10 @@ const OptimizeOutlineModal = ({
       // Create download link
       const a = document.createElement("a")
       a.href = url
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").split("T")[0]
+      const timestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")
+        .split("T")[0]
       a.download = `outline_optimization_${timestamp}.csv`
       document.body.appendChild(a)
       a.click()
@@ -307,7 +348,9 @@ const OptimizeOutlineModal = ({
       showSuccessToast("CSV downloaded successfully")
     } catch (error: any) {
       console.error("Error downloading CSV:", error)
-      showErrorToast(`Failed to download CSV: ${error.message || "Unknown error"}`)
+      showErrorToast(
+        `Failed to download CSV: ${error.message || "Unknown error"}`,
+      )
     } finally {
       setLoadingCsvDownload(false)
     }
@@ -350,10 +393,12 @@ const OptimizeOutlineModal = ({
                 <VStack gap={6} align="stretch">
                   <Box>
                     <Text fontSize="sm" mb={4} color="gray.600">
-                      Upload a ground-truth document that represents a high-quality example of the
-                      type of report you want to generate. The system will generate a report using
-                      your current outline and knowledge base, compare it to the ground-truth, and
-                      suggest improvements to your outline sections.
+                      Upload a ground-truth document that represents a
+                      high-quality example of the type of report you want to
+                      generate. The system will generate a report using your
+                      current outline and knowledge base, compare it to the
+                      ground-truth, and suggest improvements to your outline
+                      sections.
                     </Text>
                   </Box>
 
@@ -377,7 +422,10 @@ const OptimizeOutlineModal = ({
                     )}
                   </Field>
 
-                  <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
+                  <SearchModeToggle
+                    searchMode={searchMode}
+                    onSearchModeChange={setSearchMode}
+                  />
 
                   <Field
                     label="Custom Instructions (Optional)"
@@ -411,7 +459,12 @@ const OptimizeOutlineModal = ({
                           animation="pulse 2s infinite"
                         />
                       </Box>
-                      <Text fontSize="sm" mt={2} textAlign="center" color="gray.600">
+                      <Text
+                        fontSize="sm"
+                        mt={2}
+                        textAlign="center"
+                        color="gray.600"
+                      >
                         Analyzing outline and generating optimizations...
                       </Text>
                       <Box textAlign="center" mt={3}>
@@ -474,19 +527,33 @@ const OptimizeOutlineModal = ({
                       (suggestion: OutlineSuggestion, index: number) => (
                         <Card.Root
                           key={index}
-                          variant={suggestion.needs_revision ? "elevated" : "subtle"}
+                          variant={
+                            suggestion.needs_revision ? "elevated" : "subtle"
+                          }
                         >
                           <Card.Body>
                             <VStack gap={3} align="stretch">
                               <HStack justify="space-between">
-                                <Text fontWeight="bold" fontSize="sm" color="gray.600">
+                                <Text
+                                  fontWeight="bold"
+                                  fontSize="sm"
+                                  color="gray.600"
+                                >
                                   Section {index + 1}
                                 </Text>
                                 {suggestion.needs_revision && (
                                   <Button
                                     size="sm"
-                                    variant={acceptedSuggestions.has(index) ? "solid" : "outline"}
-                                    colorPalette={acceptedSuggestions.has(index) ? "green" : "blue"}
+                                    variant={
+                                      acceptedSuggestions.has(index)
+                                        ? "solid"
+                                        : "outline"
+                                    }
+                                    colorPalette={
+                                      acceptedSuggestions.has(index)
+                                        ? "green"
+                                        : "blue"
+                                    }
                                     onClick={() => toggleSuggestion(index)}
                                   >
                                     {acceptedSuggestions.has(index) ? (
@@ -501,10 +568,20 @@ const OptimizeOutlineModal = ({
                               </HStack>
 
                               <Box>
-                                <Text fontSize="xs" fontWeight="medium" color="gray.600" mb={1}>
+                                <Text
+                                  fontSize="xs"
+                                  fontWeight="medium"
+                                  color="gray.600"
+                                  mb={1}
+                                >
                                   Original Section Description:
                                 </Text>
-                                <Text fontSize="sm" p={2} bg="gray.50" borderRadius="md">
+                                <Text
+                                  fontSize="sm"
+                                  p={2}
+                                  bg="gray.50"
+                                  borderRadius="md"
+                                >
                                   {suggestion.original_section}
                                 </Text>
                               </Box>
@@ -513,7 +590,11 @@ const OptimizeOutlineModal = ({
                                 <>
                                   <Box>
                                     <HStack justify="space-between" mb={1}>
-                                      <Text fontSize="xs" fontWeight="medium" color="gray.600">
+                                      <Text
+                                        fontSize="xs"
+                                        fontWeight="medium"
+                                        color="gray.600"
+                                      >
                                         Suggested Section Description:
                                       </Text>
                                       {!editingModes.has(index) ? (
@@ -521,7 +602,9 @@ const OptimizeOutlineModal = ({
                                           size="xs"
                                           variant="ghost"
                                           aria-label="Edit suggestion"
-                                          onClick={() => startEditingSuggestion(index)}
+                                          onClick={() =>
+                                            startEditingSuggestion(index)
+                                          }
                                         >
                                           <FiEdit3 size={12} />
                                         </IconButton>
@@ -532,7 +615,9 @@ const OptimizeOutlineModal = ({
                                             variant="ghost"
                                             colorPalette="green"
                                             aria-label="Save changes"
-                                            onClick={() => saveEditedSuggestion(index)}
+                                            onClick={() =>
+                                              saveEditedSuggestion(index)
+                                            }
                                           >
                                             <FiSave size={12} />
                                           </IconButton>
@@ -541,7 +626,9 @@ const OptimizeOutlineModal = ({
                                             variant="ghost"
                                             colorPalette="red"
                                             aria-label="Cancel editing"
-                                            onClick={() => cancelEditingSuggestion(index)}
+                                            onClick={() =>
+                                              cancelEditingSuggestion(index)
+                                            }
                                           >
                                             <FiX size={12} />
                                           </IconButton>
@@ -553,7 +640,10 @@ const OptimizeOutlineModal = ({
                                       <Textarea
                                         value={getSuggestionText(index)}
                                         onChange={(e) =>
-                                          updateEditingSuggestion(index, e.target.value)
+                                          updateEditingSuggestion(
+                                            index,
+                                            e.target.value,
+                                          )
                                         }
                                         fontSize="sm"
                                         p={2}
@@ -573,7 +663,9 @@ const OptimizeOutlineModal = ({
                                         border="1px solid"
                                         borderColor="blue.200"
                                         cursor="pointer"
-                                        onClick={() => startEditingSuggestion(index)}
+                                        onClick={() =>
+                                          startEditingSuggestion(index)
+                                        }
                                         _hover={{ bg: "blue.100" }}
                                       >
                                         {getSuggestionText(index)}
@@ -582,7 +674,12 @@ const OptimizeOutlineModal = ({
                                   </Box>
 
                                   <Box>
-                                    <Text fontSize="xs" fontWeight="medium" color="gray.600" mb={1}>
+                                    <Text
+                                      fontSize="xs"
+                                      fontWeight="medium"
+                                      color="gray.600"
+                                      mb={1}
+                                    >
                                       Reason for Change:
                                     </Text>
                                     <Text fontSize="sm" color="gray.600">
@@ -592,14 +689,23 @@ const OptimizeOutlineModal = ({
                                 </>
                               ) : (
                                 <Box>
-                                  <Text fontSize="sm" color="green.600" fontWeight="medium">
+                                  <Text
+                                    fontSize="sm"
+                                    color="green.600"
+                                    fontWeight="medium"
+                                  >
                                     ✓ This section is already well-optimized
                                   </Text>
                                 </Box>
                               )}
 
                               <Box>
-                                <Text fontSize="xs" fontWeight="medium" color="gray.600" mb={1}>
+                                <Text
+                                  fontSize="xs"
+                                  fontWeight="medium"
+                                  color="gray.600"
+                                  mb={1}
+                                >
                                   Generated Content (with current description):
                                 </Text>
                                 <Box
@@ -612,31 +718,44 @@ const OptimizeOutlineModal = ({
                                 >
                                   <Text whiteSpace="pre-wrap">
                                     {expandedContent.has(index)
-                                      ? suggestion.current_output || "No content generated"
+                                      ? suggestion.current_output ||
+                                        "No content generated"
                                       : (
-                                          suggestion.current_output || "No content generated"
+                                          suggestion.current_output ||
+                                          "No content generated"
                                         ).substring(0, 300)}
                                     {!expandedContent.has(index) &&
-                                    (suggestion.current_output || "").length > 300
+                                    (suggestion.current_output || "").length >
+                                      300
                                       ? "..."
                                       : ""}
                                   </Text>
-                                  {(suggestion.current_output || "").length > 300 && (
+                                  {(suggestion.current_output || "").length >
+                                    300 && (
                                     <Button
                                       size="xs"
                                       variant="ghost"
                                       mt={1}
-                                      onClick={() => toggleContentExpansion(index)}
+                                      onClick={() =>
+                                        toggleContentExpansion(index)
+                                      }
                                       colorPalette="gray"
                                     >
-                                      {expandedContent.has(index) ? "Show Less" : "Show More"}
+                                      {expandedContent.has(index)
+                                        ? "Show Less"
+                                        : "Show More"}
                                     </Button>
                                   )}
                                 </Box>
                               </Box>
 
                               <Box>
-                                <Text fontSize="xs" fontWeight="medium" color="gray.600" mb={1}>
+                                <Text
+                                  fontSize="xs"
+                                  fontWeight="medium"
+                                  color="gray.600"
+                                  mb={1}
+                                >
                                   Ground-Truth Content (from uploaded document):
                                 </Text>
                                 <Box

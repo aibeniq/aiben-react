@@ -1,5 +1,5 @@
+import type { KnowledgeBasePublic } from "@/client"
 import { Checkbox, Table } from "@chakra-ui/react"
-import { KnowledgeBasePublic } from "@/client"
 import { FiCheck } from "react-icons/fi"
 
 interface TableCardProps {
@@ -28,13 +28,19 @@ const TableHeader = ({ hasSelection }: TableHeaderProps) => {
             {hasSelection ? <FiCheck /> : ""}
           </span>
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           Name
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           Description
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           Sources
         </Table.ColumnHeader>
       </Table.Row>
@@ -42,9 +48,16 @@ const TableHeader = ({ hasSelection }: TableHeaderProps) => {
   )
 }
 
-const TableBody = ({ knowledgeBases, selectedId, onRowSelection }: TableBodyProps) => {
+const TableBody = ({
+  knowledgeBases,
+  selectedId,
+  onRowSelection,
+}: TableBodyProps) => {
   const rows = knowledgeBases.map((kb) => (
-    <Table.Row key={kb.id} data-selected={selectedId === kb.id ? "" : undefined}>
+    <Table.Row
+      key={kb.id}
+      data-selected={selectedId === kb.id ? "" : undefined}
+    >
       <Table.Cell>
         <Checkbox.Root
           size="sm"

@@ -1,21 +1,22 @@
+import { UsageService } from "@/client"
 import {
+  Alert,
   Box,
-  Container,
-  Text,
   Card,
-  VStack,
+  Container,
   HStack,
+  IconButton,
   Progress,
   Skeleton,
-  Alert,
-  IconButton,
+  Text,
+  VStack,
 } from "@chakra-ui/react"
-import { createFileRoute } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
+import { createFileRoute } from "@tanstack/react-router"
 import { HiRefresh } from "react-icons/hi"
-import { UsageService } from "@/client"
 
 import useAuth from "@/hooks/useAuth"
+import { HelpTooltip } from "@/components/ui/help-tooltip"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -67,9 +68,12 @@ function UsageStats() {
     <VStack align="stretch" gap={6}>
       <HStack justify="space-between" align="center">
         <Box>
-          <Text fontSize="xl" fontWeight="semibold" mb={2}>
-            Usage
-          </Text>
+          <HStack align="center" mb={2}>
+            <Text fontSize="xl" fontWeight="semibold">
+              Usage
+            </Text>
+            <HelpTooltip helpKey="usageStats" />
+          </HStack>
           <VStack align="start" gap={1}>
             <Text fontSize="sm" color="gray.500">
               Current period:{" "}

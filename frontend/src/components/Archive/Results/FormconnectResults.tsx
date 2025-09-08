@@ -1,16 +1,20 @@
-import React from "react"
-import { Box, Heading, Text, HStack, Badge, VStack } from "@chakra-ui/react"
+import { Badge, Box, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import type React from "react"
+import { FiEdit3, FiFile } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { FiFile, FiEdit3 } from "react-icons/fi"
 
 interface FormconnectResultsProps {
   selectedReport: any
   components: any // Markdown components for table rendering
 }
 
-const FormconnectResults: React.FC<FormconnectResultsProps> = ({ selectedReport, components }) => {
-  const results = selectedReport.results?.comparison || selectedReport.results?.message || ""
+const FormconnectResults: React.FC<FormconnectResultsProps> = ({
+  selectedReport,
+  components,
+}) => {
+  const results =
+    selectedReport.results?.comparison || selectedReport.results?.message || ""
 
   // Extract metadata for document information
   const metadata = selectedReport.metadata || {}

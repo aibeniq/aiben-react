@@ -1,5 +1,5 @@
-import React from "react"
-import { Box, Text, Heading } from "@chakra-ui/react"
+import { Box, Heading, Text } from "@chakra-ui/react"
+import type React from "react"
 import SourceCitationAccordion from "./SourceCitationAccordion"
 
 interface QAPairDisplayProps {

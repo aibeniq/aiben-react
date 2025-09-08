@@ -71,19 +71,30 @@ const DeleteConfirmation = () => {
             </DialogHeader>
             <DialogBody>
               <Text mb={4}>
-                All your account data will be <strong>permanently deleted.</strong> If you are sure,
-                please click <strong>"Confirm"</strong> to proceed. This action cannot be undone.
+                All your account data will be{" "}
+                <strong>permanently deleted.</strong> If you are sure, please
+                click <strong>"Confirm"</strong> to proceed. This action cannot
+                be undone.
               </Text>
             </DialogBody>
 
             <DialogFooter gap={2}>
               <ButtonGroup>
                 <DialogActionTrigger asChild>
-                  <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
+                  <Button
+                    variant="subtle"
+                    colorPalette="gray"
+                    disabled={isSubmitting}
+                  >
                     Cancel
                   </Button>
                 </DialogActionTrigger>
-                <Button variant="solid" colorPalette="red" type="submit" loading={isSubmitting}>
+                <Button
+                  variant="solid"
+                  colorPalette="red"
+                  type="submit"
+                  loading={isSubmitting}
+                >
                   Delete
                 </Button>
               </ButtonGroup>

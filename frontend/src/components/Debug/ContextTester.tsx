@@ -1,6 +1,6 @@
-import React from 'react'
-import { Button, VStack, Text, Box } from '@chakra-ui/react'
-import { useResults } from '../../contexts/ResultsContext'
+import { Box, Button, Text, VStack } from "@chakra-ui/react"
+import type React from "react"
+import { useResults } from "../../contexts/ResultsContext"
 
 export const ContextTester: React.FC = () => {
   const {
@@ -15,93 +15,111 @@ export const ContextTester: React.FC = () => {
     clearReviewResults,
     clearGenerateResult,
     clearCompareResult,
-    clearMatchResult
+    clearMatchResult,
   } = useResults()
 
   const testReview = () => {
     setReviewResults([
       {
-        filename: 'test-file.pdf',
-        displayResults: 'Test review results',
+        filename: "test-file.pdf",
+        displayResults: "Test review results",
         qaPairs: [
           {
-            question: 'Test question?',
-            answer: 'Test answer',
-            context: 'Test context'
-          }
+            question: "Test question?",
+            answer: "Test answer",
+            context: "Test context",
+          },
         ],
-        interactionId: 'test-review-123'
-      }
+        interactionId: "test-review-123",
+      },
     ])
   }
 
   const testGenerate = () => {
     setGenerateResult({
-      full_report: '# Test Report\n\nThis is a test generated report.',
+      full_report: "# Test Report\n\nThis is a test generated report.",
       sections: [
         {
-          title: 'Test Section',
-          content: 'Test section content'
-        }
+          title: "Test Section",
+          content: "Test section content",
+        },
       ],
-      interactionId: 'test-generate-123'
+      interactionId: "test-generate-123",
     })
   }
 
   const testCompare = () => {
     setCompareResult({
-      summary: 'Test comparison summary',
+      summary: "Test comparison summary",
       topicResults: [
         {
-          topic: 'Test Topic',
-          analysis: 'Test analysis'
-        }
+          topic: "Test Topic",
+          analysis: "Test analysis",
+        },
       ],
-      interactionId: 'test-compare-123'
+      interactionId: "test-compare-123",
     })
   }
 
   const testMatch = () => {
     setMatchResult({
-      results: 'Test match results\n\nThis is a test match output.',
-      interactionId: 'test-match-123'
+      results: "Test match results\n\nThis is a test match output.",
+      interactionId: "test-match-123",
     })
   }
 
   return (
-    <Box 
-      position="fixed" 
-      bottom={4} 
-      left={4} 
-      bg="blue.500" 
-      color="white" 
-      p={4} 
-      borderRadius="md" 
+    <Box
+      position="fixed"
+      bottom={4}
+      left={4}
+      bg="blue.500"
+      color="white"
+      p={4}
+      borderRadius="md"
       zIndex={9999}
       maxWidth="300px"
     >
       <VStack gap={2}>
-        <Text fontWeight="bold" fontSize="sm">Context Tester</Text>
-        
+        <Text fontWeight="bold" fontSize="sm">
+          Context Tester
+        </Text>
+
         <VStack gap={1} fontSize="xs">
           <Text>Review: {reviewResults.length} results</Text>
-          <Text>Generate: {generateResult ? 'Yes' : 'No'}</Text>
-          <Text>Compare: {compareResult ? 'Yes' : 'No'}</Text>
-          <Text>Match: {matchResult ? 'Yes' : 'No'}</Text>
+          <Text>Generate: {generateResult ? "Yes" : "No"}</Text>
+          <Text>Compare: {compareResult ? "Yes" : "No"}</Text>
+          <Text>Match: {matchResult ? "Yes" : "No"}</Text>
         </VStack>
 
         <VStack gap={1}>
-          <Button size="xs" onClick={testReview}>Test Review</Button>
-          <Button size="xs" onClick={testGenerate}>Test Generate</Button>
-          <Button size="xs" onClick={testCompare}>Test Compare</Button>
-          <Button size="xs" onClick={testMatch}>Test Match</Button>
+          <Button size="xs" onClick={testReview}>
+            Test Review
+          </Button>
+          <Button size="xs" onClick={testGenerate}>
+            Test Generate
+          </Button>
+          <Button size="xs" onClick={testCompare}>
+            Test Compare
+          </Button>
+          <Button size="xs" onClick={testMatch}>
+            Test Match
+          </Button>
         </VStack>
 
         <VStack gap={1}>
-          <Button size="xs" colorScheme="red" onClick={clearReviewResults}>Clear Review</Button>
-          <Button size="xs" colorScheme="red" onClick={clearGenerateResult}>Clear Generate</Button>
-          <Button size="xs" colorScheme="red" onClick={clearCompareResult}>Clear Compare</Button>
-          <Button size="xs" colorScheme="red" onClick={clearMatchResult}>Clear Match</Button>
+          <Button size="xs" colorScheme="red" onClick={clearReviewResults}>
+            Clear Review
+          </Button>
+          <Button size="xs" colorScheme="red" onClick={clearGenerateResult}>
+            Clear Generate
+          </Button>
+          <Button size="xs" colorScheme="red" onClick={clearCompareResult}>
+            Clear Compare
+          </Button>
+          <Button size="xs" colorScheme="red" onClick={clearMatchResult}>
+            Clear Match
+          </Button>
         </VStack>
       </VStack>
     </Box>

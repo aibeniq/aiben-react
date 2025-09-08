@@ -1,27 +1,28 @@
-import { useState } from "react"
 import {
-  HStack,
-  VStack,
-  Input,
-  Textarea,
-  Dialog,
-  Portal,
-  CloseButton,
-  Button,
-  Text,
-  IconButton,
   Box,
+  Button,
+  CloseButton,
+  Dialog,
+  HStack,
+  IconButton,
+  Input,
+  Portal,
+  Text,
+  Textarea,
+  VStack,
 } from "@chakra-ui/react"
-import { Field } from "../ui/field"
-import { TwinCheckTopicList, TwincheckService, KnowledgeBasePublic } from "../../client"
-import TopicItem from "./TopicItem"
+import { useState } from "react"
+import { FiCopy } from "react-icons/fi"
+import { type KnowledgeBasePublic, type TwinCheckTopicList, TwincheckService } from "../../client"
+import useCustomToast from "../../hooks/useCustomToast"
+import { copyToClipboard } from "../../utils/copyToClipboard"
+import FileUpload, { type FileItem } from "../Common/FileUpload"
+import SearchModeToggle from "../Common/SearchModeToggle"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
-import FileUpload, { FileItem } from "../Common/FileUpload"
-import SearchModeToggle from "../Common/SearchModeToggle"
-import useCustomToast from "../../hooks/useCustomToast"
-import { FiCopy } from "react-icons/fi"
-import { copyToClipboard } from "../../utils/copyToClipboard"
+import { Field } from "../ui/field"
+import HelpTooltip from "../ui/help-tooltip"
+import TopicItem from "./TopicItem"
 
 interface TopicListModalProps {
   isOpen: boolean
@@ -63,7 +64,9 @@ const TopicListModal = ({
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // Validation state
-  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({})
+  const [validationErrors, setValidationErrors] = useState<{
+    [key: string]: string
+  }>({})
 
   // Validation function
   const validateForm = () => {
@@ -265,9 +268,12 @@ const TopicListModal = ({
         <Dialog.Positioner>
           <Dialog.Content maxW="4xl" maxH="90vh">
             <Dialog.Header>
-              <Dialog.Title>
-                {editingTopicList ? "Edit Topic List" : "Create New Topic List"}
-              </Dialog.Title>
+              <HStack align="center" gap={2}>
+                <Dialog.Title>
+                  {editingTopicList ? "Edit Topic List" : "Create New Topic List"}
+                </Dialog.Title>
+                <HelpTooltip helpKey="createTopicList" />
+              </HStack>
             </Dialog.Header>
 
             <Dialog.Body overflowY="auto">
@@ -310,13 +316,15 @@ const TopicListModal = ({
 
                     <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
 
-                    <Field label="Reference Documents (Optional)">
+                    <Field
+                      label={
+                        <HStack align="center" gap={2}>
+                          <span>Reference Documents (Optional)</span>
+                          <HelpTooltip helpKey="referenceDocuments" />
+                        </HStack>
+                      }
+                    >
                       <VStack align="stretch" gap={3}>
-                        <Text fontSize="sm" color="gray.600">
-                          Upload reference documents or select a Knowledge Base to help the AI
-                          suggest topics.
-                        </Text>
-
                         {/* Reference Mode Toggle */}
                         <HStack gap={2}>
                           <Button
@@ -338,9 +346,6 @@ const TopicListModal = ({
                         {/* Reference Mode Content */}
                         {referenceMode === "files" && (
                           <VStack align="stretch" gap={2}>
-                            <Text fontSize="sm" color="gray.700" fontWeight="medium">
-                              Provide reference documents for suggesting topics
-                            </Text>
                             <FileUpload
                               files={exampleFiles}
                               onFilesChange={setExampleFiles}
@@ -422,6 +427,7 @@ const TopicListModal = ({
                           >
                             {suggesting ? "Suggesting..." : "Suggest"}
                           </Button>
+                          <HelpTooltip helpKey="suggestTopicListTopics" />
 
                           <IconButton
                             size="xs"
@@ -462,7 +468,10 @@ const TopicListModal = ({
                             updateTopic(idx, value)
                             // Clear validation error when topics are modified
                             if (validationErrors.topics) {
-                              setValidationErrors((prev) => ({ ...prev, topics: "" }))
+                              setValidationErrors((prev) => ({
+                                ...prev,
+                                topics: "",
+                              }))
                             }
                           }}
                           onBlur={handleTopicBlur}

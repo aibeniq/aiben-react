@@ -1,27 +1,28 @@
-import { useState, useEffect } from "react"
 import {
-  HStack,
-  VStack,
-  Input,
-  Textarea,
-  Dialog,
-  Portal,
-  CloseButton,
-  Button,
-  Text,
   Box,
+  Button,
+  CloseButton,
+  Dialog,
+  HStack,
   IconButton,
+  Input,
+  Portal,
+  Text,
+  Textarea,
+  VStack,
 } from "@chakra-ui/react"
-import { Field } from "../ui/field"
-import { FormConnectForm, KnowledgeBasePublic } from "../../client"
-import { InteractiveList } from "../ui/interactive-list"
+import { useEffect, useState } from "react"
+import { FiCopy } from "react-icons/fi"
+import type { FormConnectForm, KnowledgeBasePublic } from "../../client"
+import useCustomToast from "../../hooks/useCustomToast"
+import { copyToClipboard } from "../../utils/copyToClipboard"
+import FileUpload, { type FileItem } from "../Common/FileUpload"
+import SearchModeToggle from "../Common/SearchModeToggle"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
-import FileUpload, { FileItem } from "../Common/FileUpload"
-import SearchModeToggle from "../Common/SearchModeToggle"
-import useCustomToast from "../../hooks/useCustomToast"
-import { FiCopy } from "react-icons/fi"
-import { copyToClipboard } from "../../utils/copyToClipboard"
+import { Field } from "../ui/field"
+import HelpTooltip from "../ui/help-tooltip"
+import { InteractiveList } from "../ui/interactive-list"
 
 interface FormTemplateModalProps {
   isOpen: boolean
@@ -57,7 +58,9 @@ const FormTemplateModal = ({
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // Validation state
-  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({})
+  const [validationErrors, setValidationErrors] = useState<{
+    [key: string]: string
+  }>({})
 
   // Validation function
   const validateForm = () => {
@@ -173,7 +176,7 @@ const FormTemplateModal = ({
 
         const headers: Record<string, string> = {}
         if (token) {
-          headers["Authorization"] = `Bearer ${token}`
+          headers.Authorization = `Bearer ${token}`
         }
 
         response = await fetch(apiUrl, {
@@ -196,7 +199,7 @@ const FormTemplateModal = ({
           "Content-Type": "application/json",
         }
         if (token) {
-          headers["Authorization"] = `Bearer ${token}`
+          headers.Authorization = `Bearer ${token}`
         }
 
         response = await fetch(apiUrl, {
@@ -218,7 +221,7 @@ const FormTemplateModal = ({
           "Content-Type": "application/json",
         }
         if (token) {
-          headers["Authorization"] = `Bearer ${token}`
+          headers.Authorization = `Bearer ${token}`
         }
 
         response = await fetch(apiUrl, {
@@ -328,9 +331,12 @@ const FormTemplateModal = ({
         <Dialog.Positioner>
           <Dialog.Content maxW="6xl" maxH="90vh">
             <Dialog.Header>
-              <Dialog.Title>
-                {editingForm ? "Edit Form Template" : "Create New Form Template"}
-              </Dialog.Title>
+              <HStack align="center" gap={2}>
+                <Dialog.Title>
+                  {editingForm ? "Edit Form Template" : "Create New Form Template"}
+                </Dialog.Title>
+                <HelpTooltip helpKey="createFormTemplate" />
+              </HStack>
             </Dialog.Header>
 
             <Dialog.Body overflowY="auto">
@@ -366,13 +372,15 @@ const FormTemplateModal = ({
 
                     <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
 
-                    <Field label="Reference Documents (Optional)">
+                    <Field
+                      label={
+                        <HStack align="center" gap={2}>
+                          <span>Reference Documents (Optional)</span>
+                          <HelpTooltip helpKey="referenceDocuments" />
+                        </HStack>
+                      }
+                    >
                       <VStack align="stretch" gap={3}>
-                        <Text fontSize="sm" color="gray.600">
-                          Upload reference documents or select a Knowledge Base to help the AI
-                          suggest form fields.
-                        </Text>
-
                         {/* Reference Mode Toggle */}
                         <HStack gap={2}>
                           <Button
@@ -393,10 +401,6 @@ const FormTemplateModal = ({
 
                         {referenceMode === "files" && (
                           <VStack align="stretch" gap={2}>
-                            <Text fontSize="sm" color="gray.700" fontWeight="medium">
-                              Upload reference documents to suggest form fields based on their
-                              content
-                            </Text>
                             <FileUpload
                               files={exampleFiles}
                               onFilesChange={setExampleFiles}
@@ -488,6 +492,7 @@ const FormTemplateModal = ({
                           >
                             {suggesting ? "Suggesting..." : "Suggest"}
                           </Button>
+                          <HelpTooltip helpKey="suggestFormTemplateFields" />
 
                           <IconButton
                             size="xs"
@@ -526,7 +531,10 @@ const FormTemplateModal = ({
                           onFieldsChange(newFields)
                           // Clear validation error when fields are modified
                           if (validationErrors.fields) {
-                            setValidationErrors((prev) => ({ ...prev, fields: "" }))
+                            setValidationErrors((prev) => ({
+                              ...prev,
+                              fields: "",
+                            }))
                           }
                         }}
                         placeholder="Add a field name (e.g. First Name, Address, SSN) or suggest from description"

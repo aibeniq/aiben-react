@@ -1,10 +1,14 @@
+import { Button, Checkbox, HStack, IconButton, Table } from "@chakra-ui/react"
 import { useState } from "react"
-import { Button, HStack, IconButton, Table, Checkbox } from "@chakra-ui/react"
-import { FiEye, FiCopy, FiTrash2, FiPlus } from "react-icons/fi"
-import { ReportGenieOutline, ReportgenieService, KnowledgeBasePublic } from "../../client"
+import { FiCopy, FiEye, FiPlus, FiTrash2 } from "react-icons/fi"
+import {
+  type KnowledgeBasePublic,
+  type ReportGenieOutline,
+  ReportgenieService,
+} from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
-import OutlineModal from "./OutlineModal"
 import { generateUUID } from "../../utils/uuid"
+import OutlineModal from "./OutlineModal"
 
 interface OutlineTableProps {
   outlines: ReportGenieOutline[]
@@ -36,14 +40,21 @@ const OutlineTableHeader = ({ onCreateNew }: OutlineTableHeaderProps) => {
   return (
     <Table.Header position="sticky" top="0" bg="transparent" zIndex="1">
       <Table.Row>
-        <Table.ColumnHeader w="6"></Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader w="6" />
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           Name
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           Description
         </Table.ColumnHeader>
-        <Table.ColumnHeader w="32" style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          w="32"
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           <Button size="sm" onClick={onCreateNew} ml="auto" variant="ghost">
             <FiPlus size={14} />
           </Button>
@@ -62,7 +73,10 @@ const OutlineTableBody = ({
   onCopyOutline,
   onDeleteOutline,
 }: OutlineTableBodyProps) => {
-  const handleRowSelection = (outline: ReportGenieOutline, isChecked: boolean) => {
+  const handleRowSelection = (
+    outline: ReportGenieOutline,
+    isChecked: boolean,
+  ) => {
     if (isChecked) {
       onOutlineChange(outline)
       onSectionsChange(outline.sections || "")
@@ -162,54 +176,78 @@ const OutlineTable = ({
 }: OutlineTableProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingOutline, setEditingOutline] = useState<ReportGenieOutline | null>(null)
+  const [editingOutline, setEditingOutline] =
+    useState<ReportGenieOutline | null>(null)
   const [outlineName, setOutlineName] = useState("")
   const [outlineDescription, setOutlineDescription] = useState("")
 
   const handleViewOutline = (outline: ReportGenieOutline) => {
-  console.log("🔍 OutlineTable: Opening edit modal for outline:", outline.name)
-  console.log("🔍 OutlineTable: Raw outline.sections:", outline.sections)
-  console.log("🔍 OutlineTable: Type of outline.sections:", typeof outline.sections)
-  
-  setEditingOutline(outline)
-  setOutlineName(outline.name)
-  setOutlineDescription(outline.description || "")
-  
-  // Ensure sections is always passed as a properly stringified JSON
-  let sectionsString = ""
-  if (outline.sections) {
-    if (typeof outline.sections === "string") {
-      // If it's already a string, verify it's valid JSON, otherwise use as-is
-      try {
-        const parsed = JSON.parse(outline.sections)
-        console.log("🔍 OutlineTable: Successfully parsed sections JSON:", parsed)
-        sectionsString = outline.sections
-      } catch (error) {
-        console.log("🔍 OutlineTable: Failed to parse sections as JSON, treating as plain text:", error)
-        // If parsing fails, treat as plain text and convert to structured format
-        sectionsString = JSON.stringify([{
-          id: generateUUID(),
-          text: outline.sections,
-          consultDocuments: true
-        }])
+    console.log(
+      "🔍 OutlineTable: Opening edit modal for outline:",
+      outline.name,
+    )
+    console.log("🔍 OutlineTable: Raw outline.sections:", outline.sections)
+    console.log(
+      "🔍 OutlineTable: Type of outline.sections:",
+      typeof outline.sections,
+    )
+
+    setEditingOutline(outline)
+    setOutlineName(outline.name)
+    setOutlineDescription(outline.description || "")
+
+    // Ensure sections is always passed as a properly stringified JSON
+    let sectionsString = ""
+    if (outline.sections) {
+      if (typeof outline.sections === "string") {
+        // If it's already a string, verify it's valid JSON, otherwise use as-is
+        try {
+          const parsed = JSON.parse(outline.sections)
+          console.log(
+            "🔍 OutlineTable: Successfully parsed sections JSON:",
+            parsed,
+          )
+          sectionsString = outline.sections
+        } catch (error) {
+          console.log(
+            "🔍 OutlineTable: Failed to parse sections as JSON, treating as plain text:",
+            error,
+          )
+          // If parsing fails, treat as plain text and convert to structured format
+          sectionsString = JSON.stringify([
+            {
+              id: generateUUID(),
+              text: outline.sections,
+              consultDocuments: true,
+            },
+          ])
+        }
+      } else if (Array.isArray(outline.sections)) {
+        console.log(
+          "🔍 OutlineTable: Sections is array, stringifying:",
+          outline.sections,
+        )
+        // If it's already parsed as an array, stringify it
+        sectionsString = JSON.stringify(outline.sections)
+      } else {
+        console.log(
+          "🔍 OutlineTable: Sections is unknown format, using empty string:",
+          outline.sections,
+        )
+        // Fallback for any other format
+        sectionsString = ""
       }
-    } else if (Array.isArray(outline.sections)) {
-      console.log("🔍 OutlineTable: Sections is array, stringifying:", outline.sections)
-      // If it's already parsed as an array, stringify it
-      sectionsString = JSON.stringify(outline.sections)
     } else {
-      console.log("🔍 OutlineTable: Sections is unknown format, using empty string:", outline.sections)
-      // Fallback for any other format
-      sectionsString = ""
+      console.log("🔍 OutlineTable: No sections found in outline")
     }
-  } else {
-    console.log("🔍 OutlineTable: No sections found in outline")
+
+    console.log(
+      "🔍 OutlineTable: Final sectionsString being passed:",
+      sectionsString,
+    )
+    onSectionsChange(sectionsString)
+    setIsModalOpen(true)
   }
-  
-  console.log("🔍 OutlineTable: Final sectionsString being passed:", sectionsString)
-  onSectionsChange(sectionsString)
-  setIsModalOpen(true)
-}
 
   const handleCopyOutline = async (outline: ReportGenieOutline) => {
     try {
@@ -249,7 +287,11 @@ const OutlineTable = ({
     setOutlineName("")
     setOutlineDescription("")
     // Initialize with an empty section for immediate editing
-    onSectionsChange(JSON.stringify([{ id: generateUUID(), text: "", consultDocuments: true }]))
+    onSectionsChange(
+      JSON.stringify([
+        { id: generateUUID(), text: "", consultDocuments: true },
+      ]),
+    )
     setIsModalOpen(true)
   }
 
@@ -295,7 +337,9 @@ const OutlineTable = ({
       onOutlinesUpdate()
     } catch (error: any) {
       console.error("Error saving outline:", error)
-      showErrorToast(`Failed to save outline: ${error.message || "Unknown error"}`)
+      showErrorToast(
+        `Failed to save outline: ${error.message || "Unknown error"}`,
+      )
     }
   }
 
@@ -307,7 +351,12 @@ const OutlineTable = ({
   }
 
   return (
-    <div style={{ opacity: isDisabled ? 0.3 : 1, pointerEvents: isDisabled ? "none" : "auto" }}>
+    <div
+      style={{
+        opacity: isDisabled ? 0.3 : 1,
+        pointerEvents: isDisabled ? "none" : "auto",
+      }}
+    >
       <div
         style={{
           maxHeight: "300px",

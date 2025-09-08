@@ -1,7 +1,8 @@
-import React, { ReactNode } from "react"
 import { Box } from "@chakra-ui/react"
-import ResultsHeader from "./Utils/ResultsHeader"
+import type React from "react"
+import type { ReactNode } from "react"
 import FeedbackButtons from "../Feedback/FeedbackButtons"
+import ResultsHeader from "./Utils/ResultsHeader"
 
 interface BaseResultsContainerProps {
   children: ReactNode
@@ -72,9 +73,14 @@ const BaseResultsContainer: React.FC<BaseResultsContainerProps> = ({
             existingFeedback={
               selectedReport.feedback
                 ? {
-                    feedback: selectedReport.feedback.feedback as "correct" | "incorrect" | null,
-                    feedbackText: selectedReport.feedback.feedbackText || undefined,
-                    feedbackDate: selectedReport.feedback.feedbackDate || undefined,
+                    feedback: selectedReport.feedback.feedback as
+                      | "correct"
+                      | "incorrect"
+                      | null,
+                    feedbackText:
+                      selectedReport.feedback.feedbackText || undefined,
+                    feedbackDate:
+                      selectedReport.feedback.feedbackDate || undefined,
                   }
                 : undefined
             }

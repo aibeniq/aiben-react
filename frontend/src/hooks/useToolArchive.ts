@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { useEffect, useState } from "react"
 import {
-  VeradocGetVeradocDetailResponse,
-  VeradocService,
-  TwincheckService,
   FormconnectService,
   ReportgenieService,
+  TwincheckService,
+  type VeradocGetVeradocDetailResponse,
+  VeradocService,
 } from "../client"
 import useCustomToast from "./useCustomToast"
 
@@ -22,7 +22,11 @@ interface ToolActions {
 }
 
 interface UseToolArchiveReturn {
-  veradoc: ToolState<{ [key: string]: unknown }, VeradocGetVeradocDetailResponse> & ToolActions
+  veradoc: ToolState<
+    { [key: string]: unknown },
+    VeradocGetVeradocDetailResponse
+  > &
+    ToolActions
   reportgenie: ToolState<{ [key: string]: unknown }, any> & ToolActions
   twincheck: ToolState<{ [key: string]: unknown }, any> & ToolActions
   formconnect: ToolState<{ [key: string]: unknown }, any> & ToolActions
@@ -40,27 +44,38 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // Veradoc (Review) state
-  const [veradocHistory, setVeradocHistory] = useState<{ [key: string]: unknown }[]>([])
+  const [veradocHistory, setVeradocHistory] = useState<
+    { [key: string]: unknown }[]
+  >([])
   const [selectedVeradocReport, setSelectedVeradocReport] =
     useState<VeradocGetVeradocDetailResponse | null>(null)
   const [isVeradocLoading, setIsVeradocLoading] = useState(false)
 
   // ReportGenie (Generate) state
-  const [reportgenieHistory, setReportgenieHistory] = useState<{ [key: string]: unknown }[]>([])
-  const [selectedReportgenieReport, setSelectedReportgenieReport] = useState<any>(null)
+  const [reportgenieHistory, setReportgenieHistory] = useState<
+    { [key: string]: unknown }[]
+  >([])
+  const [selectedReportgenieReport, setSelectedReportgenieReport] =
+    useState<any>(null)
 
   // Prevent unused variable warning for setSelectedReportgenieReport
   if (false) setSelectedReportgenieReport(null)
   const [isReportgenieLoading, setIsReportgenieLoading] = useState(false)
 
   // TwinCheck (Compare) state
-  const [twincheckHistory, setTwincheckHistory] = useState<{ [key: string]: unknown }[]>([])
-  const [selectedTwincheckReport, setSelectedTwincheckReport] = useState<any>(null)
+  const [twincheckHistory, setTwincheckHistory] = useState<
+    { [key: string]: unknown }[]
+  >([])
+  const [selectedTwincheckReport, setSelectedTwincheckReport] =
+    useState<any>(null)
   const [isTwincheckLoading, setIsTwincheckLoading] = useState(false)
 
   // FormConnect (Match) state
-  const [formconnectHistory, setFormconnectHistory] = useState<{ [key: string]: unknown }[]>([])
-  const [selectedFormconnectReport, setSelectedFormconnectReport] = useState<any>(null)
+  const [formconnectHistory, setFormconnectHistory] = useState<
+    { [key: string]: unknown }[]
+  >([])
+  const [selectedFormconnectReport, setSelectedFormconnectReport] =
+    useState<any>(null)
   const [isFormconnectLoading, setIsFormconnectLoading] = useState(false)
 
   // UI state
@@ -71,14 +86,16 @@ export const useToolArchive = (): UseToolArchiveReturn => {
 
   // Wrapper for setActiveTab to log state changes
   const setActiveTab = (newTab: string) => {
-    console.log(`Setting active tab to ${newTab}, showAllUsers is currently: ${showAllUsers}`);
-    setActiveTabInternal(newTab);
+    console.log(
+      `Setting active tab to ${newTab}, showAllUsers is currently: ${showAllUsers}`,
+    )
+    setActiveTabInternal(newTab)
   }
 
   // Toggle handler for showing all users
   const toggleShowAllUsers = () => {
-    console.log("All Users toggle clicked. New value:", !showAllUsers);
-    setShowAllUsers(prev => !prev);
+    console.log("All Users toggle clicked. New value:", !showAllUsers)
+    setShowAllUsers((prev) => !prev)
   }
 
   // Veradoc history query
@@ -87,7 +104,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     queryFn: async () => {
       const response = await VeradocService.getVeradocHistory({
         limit: 20,
-        showAll: showAllUsers
+        showAll: showAllUsers,
       })
       return response
     },
@@ -98,15 +115,24 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const reportgenieHistoryQuery = useQuery({
     queryKey: ["reportgenieHistory", showAllUsers],
     queryFn: async () => {
-      console.log("🔄 REPORTGENIE: Starting to fetch history, showAllUsers:", showAllUsers);
+      console.log(
+        "🔄 REPORTGENIE: Starting to fetch history, showAllUsers:",
+        showAllUsers,
+      )
       const response = await ReportgenieService.getReportHistory({
         limit: 20,
-        showAll: showAllUsers
+        showAll: showAllUsers,
       })
-      console.log("✅ REPORTGENIE: History fetch completed, response:", response);
-      console.log("📊 REPORTGENIE: Number of reports returned:", Array.isArray(response) ? response.length : "Response is not an array");
+      console.log(
+        "✅ REPORTGENIE: History fetch completed, response:",
+        response,
+      )
+      console.log(
+        "📊 REPORTGENIE: Number of reports returned:",
+        Array.isArray(response) ? response.length : "Response is not an array",
+      )
       if (Array.isArray(response) && response.length > 0) {
-        console.log("📋 REPORTGENIE: First report sample:", response[0]);
+        console.log("📋 REPORTGENIE: First report sample:", response[0])
       }
       return response
     },
@@ -119,7 +145,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     queryFn: async () => {
       const response = await TwincheckService.getComparisonHistory({
         limit: 20,
-        showAll: showAllUsers
+        showAll: showAllUsers,
       })
       return response
     },
@@ -130,15 +156,24 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const formconnectHistoryQuery = useQuery({
     queryKey: ["formconnectHistory", showAllUsers],
     queryFn: async () => {
-      console.log("🔄 FORMCONNECT: Starting to fetch history, showAllUsers:", showAllUsers);
+      console.log(
+        "🔄 FORMCONNECT: Starting to fetch history, showAllUsers:",
+        showAllUsers,
+      )
       const response = await FormconnectService.getFormHistory({
         limit: 20,
-        showAll: showAllUsers
+        showAll: showAllUsers,
       })
-      console.log("✅ FORMCONNECT: History fetch completed, response:", response);
-      console.log("📊 FORMCONNECT: Number of records returned:", Array.isArray(response) ? response.length : "Response is not an array");
+      console.log(
+        "✅ FORMCONNECT: History fetch completed, response:",
+        response,
+      )
+      console.log(
+        "📊 FORMCONNECT: Number of records returned:",
+        Array.isArray(response) ? response.length : "Response is not an array",
+      )
       if (Array.isArray(response) && response.length > 0) {
-        console.log("📋 FORMCONNECT: First record sample:", response[0]);
+        console.log("📋 FORMCONNECT: First record sample:", response[0])
       }
       return response
     },
@@ -148,22 +183,38 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   // Update states when queries change
   useEffect(() => {
     if (veradocHistoryQuery.data) {
-      setVeradocHistory(Array.isArray(veradocHistoryQuery.data) ? veradocHistoryQuery.data : [])
+      setVeradocHistory(
+        Array.isArray(veradocHistoryQuery.data) ? veradocHistoryQuery.data : [],
+      )
     }
     setIsVeradocLoading(veradocHistoryQuery.isLoading)
   }, [veradocHistoryQuery.data, veradocHistoryQuery.isLoading])
 
   useEffect(() => {
-    console.log("🔄 REPORTGENIE: useEffect triggered for reportgenieHistoryQuery");
-    console.log("📊 REPORTGENIE: Query status - isLoading:", reportgenieHistoryQuery.isLoading, "isError:", reportgenieHistoryQuery.isError, "error:", reportgenieHistoryQuery.error);
+    console.log(
+      "🔄 REPORTGENIE: useEffect triggered for reportgenieHistoryQuery",
+    )
+    console.log(
+      "📊 REPORTGENIE: Query status - isLoading:",
+      reportgenieHistoryQuery.isLoading,
+      "isError:",
+      reportgenieHistoryQuery.isError,
+      "error:",
+      reportgenieHistoryQuery.error,
+    )
 
     if (reportgenieHistoryQuery.data) {
-      console.log("✅ REPORTGENIE: Setting history data:", reportgenieHistoryQuery.data);
+      console.log(
+        "✅ REPORTGENIE: Setting history data:",
+        reportgenieHistoryQuery.data,
+      )
       setReportgenieHistory(
-        Array.isArray(reportgenieHistoryQuery.data) ? reportgenieHistoryQuery.data : [],
+        Array.isArray(reportgenieHistoryQuery.data)
+          ? reportgenieHistoryQuery.data
+          : [],
       )
     } else {
-      console.log("❌ REPORTGENIE: No data received or data is null/undefined");
+      console.log("❌ REPORTGENIE: No data received or data is null/undefined")
     }
     setIsReportgenieLoading(reportgenieHistoryQuery.isLoading)
   }, [reportgenieHistoryQuery.data, reportgenieHistoryQuery.isLoading])
@@ -171,26 +222,40 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   useEffect(() => {
     if (twincheckHistoryQuery.data) {
       setTwincheckHistory(
-        Array.isArray(twincheckHistoryQuery.data) ? twincheckHistoryQuery.data : [],
+        Array.isArray(twincheckHistoryQuery.data)
+          ? twincheckHistoryQuery.data
+          : [],
       )
     }
     setIsTwincheckLoading(twincheckHistoryQuery.isLoading)
   }, [twincheckHistoryQuery.data, twincheckHistoryQuery.isLoading])
 
   useEffect(() => {
-    console.log("🔄 FORMCONNECT: useEffect triggered for formconnectHistoryQuery");
-    console.log("📊 FORMCONNECT: Query status - isLoading:", formconnectHistoryQuery.isLoading, "isError:", formconnectHistoryQuery.isError);
+    console.log(
+      "🔄 FORMCONNECT: useEffect triggered for formconnectHistoryQuery",
+    )
+    console.log(
+      "📊 FORMCONNECT: Query status - isLoading:",
+      formconnectHistoryQuery.isLoading,
+      "isError:",
+      formconnectHistoryQuery.isError,
+    )
     if (formconnectHistoryQuery.error) {
-      console.log("❌ FORMCONNECT: Error:", formconnectHistoryQuery.error);
+      console.log("❌ FORMCONNECT: Error:", formconnectHistoryQuery.error)
     }
 
     if (formconnectHistoryQuery.data) {
-      console.log("✅ FORMCONNECT: Setting history data:", formconnectHistoryQuery.data);
+      console.log(
+        "✅ FORMCONNECT: Setting history data:",
+        formconnectHistoryQuery.data,
+      )
       setFormconnectHistory(
-        Array.isArray(formconnectHistoryQuery.data) ? formconnectHistoryQuery.data : [],
+        Array.isArray(formconnectHistoryQuery.data)
+          ? formconnectHistoryQuery.data
+          : [],
       )
     } else {
-      console.log("❌ FORMCONNECT: No data received or data is null/undefined");
+      console.log("❌ FORMCONNECT: No data received or data is null/undefined")
     }
     setIsFormconnectLoading(formconnectHistoryQuery.isLoading)
   }, [formconnectHistoryQuery.data, formconnectHistoryQuery.isLoading])
@@ -227,7 +292,9 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const loadTwincheckReport = async (comparisonId: string) => {
     try {
       setIsTwincheckLoading(true)
-      const report = await TwincheckService.getComparisonDetail({ comparisonId })
+      const report = await TwincheckService.getComparisonDetail({
+        comparisonId,
+      })
       setSelectedTwincheckReport(report)
       showSuccessToast("Comparison loaded successfully")
     } catch (error) {
@@ -361,6 +428,6 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     loadingDownload,
     setLoadingDownload,
     showAllUsers,
-    toggleShowAllUsers
+    toggleShowAllUsers,
   }
 }

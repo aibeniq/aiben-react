@@ -1,6 +1,6 @@
 import { IconButton } from "@chakra-ui/react"
-import { FiMessageSquare } from "react-icons/fi"
 import { useEffect } from "react"
+import { FiMessageSquare } from "react-icons/fi"
 
 interface FloatingChatButtonProps {
   onClick: () => void
@@ -10,7 +10,9 @@ const FloatingChatButton = ({ onClick }: FloatingChatButtonProps) => {
   // Simplified responsiveness check - less frequent, less aggressive
   useEffect(() => {
     const ensureButtonResponsive = () => {
-      const buttonEl = document.querySelector('[aria-label="Get help"]') as HTMLElement
+      const buttonEl = document.querySelector(
+        '[aria-label="Get help"]',
+      ) as HTMLElement
       if (buttonEl) {
         // Only update if styles are missing/wrong
         if (buttonEl.style.pointerEvents !== "auto") {

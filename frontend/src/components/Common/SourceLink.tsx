@@ -1,8 +1,8 @@
-import { Link, LinkProps } from "@chakra-ui/react"
+import { type FilesGetSourceContentResponse, FilesService } from "@/client"
 import { useFileViewer } from "@/hooks/useFileViewer"
-import FileViewerModal from "./FileViewerModal"
+import { Link, type LinkProps } from "@chakra-ui/react"
 import { useState } from "react"
-import { FilesService, FilesGetSourceContentResponse } from "@/client"
+import FileViewerModal from "./FileViewerModal"
 
 interface SourceLinkProps extends LinkProps {
   sourceId: string
@@ -18,11 +18,11 @@ const SourceLink: React.FC<SourceLinkProps> = ({
 }) => {
   // In Chakra UI v3, we need to manually manage this state
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { viewFile, viewFileInModal, currentFile, isLoading, clearFile } = useFileViewer()
+  const { viewFile, viewFileInModal, currentFile, isLoading, clearFile } =
+    useFileViewer()
   const [isLoadingFile, setIsLoadingFile] = useState(false)
-  const [convertedPdfFile, setConvertedPdfFile] = useState<FilesGetSourceContentResponse | null>(
-    null,
-  ) // For DOCX converted to PDF
+  const [convertedPdfFile, setConvertedPdfFile] =
+    useState<FilesGetSourceContentResponse | null>(null) // For DOCX converted to PDF
 
   const handleClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
@@ -46,9 +46,17 @@ const SourceLink: React.FC<SourceLinkProps> = ({
 
         // If sourceId is empty/null, use filename-based conversion
         if (!sourceId || sourceId.trim() === "") {
-          console.log("No sourceId provided, using filename-based conversion:", fileName)
-          pdfBlob = (await FilesService.convertDocxToPdfByFilename({ filename: fileName })) as Blob
-          console.log("PDF conversion by filename successful, blob size:", pdfBlob.size)
+          console.log(
+            "No sourceId provided, using filename-based conversion:",
+            fileName,
+          )
+          pdfBlob = (await FilesService.convertDocxToPdfByFilename({
+            filename: fileName,
+          })) as Blob
+          console.log(
+            "PDF conversion by filename successful, blob size:",
+            pdfBlob.size,
+          )
         } else {
           console.log("Using sourceId-based conversion:", sourceId)
           // Use the DOCX to PDF conversion endpoint with sourceId
@@ -91,11 +99,19 @@ const SourceLink: React.FC<SourceLinkProps> = ({
         // Handle non-DOCX files normally
 
         // If no sourceId is available, try filename-based viewing for PDFs
-        if ((!sourceId || sourceId.trim() === "") && fileName.toLowerCase().endsWith(".pdf")) {
-          console.log("No sourceId provided for PDF, using filename-based viewing:", fileName)
+        if (
+          (!sourceId || sourceId.trim() === "") &&
+          fileName.toLowerCase().endsWith(".pdf")
+        ) {
+          console.log(
+            "No sourceId provided for PDF, using filename-based viewing:",
+            fileName,
+          )
 
           try {
-            const response = await FilesService.getSourceContentByFilename({ filename: fileName })
+            const response = await FilesService.getSourceContentByFilename({
+              filename: fileName,
+            })
             console.log("PDF file data received:", response)
 
             if (useModal) {
@@ -112,7 +128,9 @@ const SourceLink: React.FC<SourceLinkProps> = ({
               }
 
               const byteArray = new Uint8Array(byteNumbers)
-              const blob = new Blob([byteArray], { type: response.content_type })
+              const blob = new Blob([byteArray], {
+                type: response.content_type,
+              })
               const url = URL.createObjectURL(blob)
 
               window.open(url, "_blank")
@@ -164,7 +182,12 @@ const SourceLink: React.FC<SourceLinkProps> = ({
     setConvertedPdfFile(null) // Clear converted PDF file as well
   }
 
-  console.log("Current file state:", { currentFile, convertedPdfFile, isLoading, isModalOpen })
+  console.log("Current file state:", {
+    currentFile,
+    convertedPdfFile,
+    isLoading,
+    isModalOpen,
+  })
 
   // Determine which file to show in modal - converted PDF takes precedence
   const fileToShow = convertedPdfFile || currentFile

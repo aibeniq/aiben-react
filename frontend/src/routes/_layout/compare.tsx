@@ -1,26 +1,27 @@
-import { useState, useEffect } from "react"
-import { Box, Button, Container, Heading, HStack, Text, VStack, Spinner } from "@chakra-ui/react"
-import { FiUpload, FiFile, FiFileText, FiCheck, FiCopy, FiTrash2 } from "react-icons/fi"
-import { useDropzone } from "react-dropzone"
+import { Box, Button, Container, HStack, Heading, Spinner, Text, VStack } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
+import { useEffect, useState } from "react"
+import { useDropzone } from "react-dropzone"
+import { FiCheck, FiCopy, FiFile, FiFileText, FiTrash2, FiUpload } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
 import {
-  TwincheckService,
-  TwinCheckTopicList,
+  type KnowledgeBasePublic,
   KnowledgeBasesService,
-  KnowledgeBasePublic,
+  type TwinCheckTopicList,
+  TwincheckService,
 } from "@/client"
-import { useMutation } from "@tanstack/react-query"
-import useCustomToast from "@/hooks/useCustomToast"
-import DownloadButton from "@/components/ui/download-button"
 import SelectionCard from "@/components/Common/SelectionCard"
 import SelectionModal from "@/components/Common/SelectionModal"
 import TopicListTable from "@/components/Compare/TopicListTable"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
-import { copyToClipboard } from "@/utils/copyToClipboard"
+import DownloadButton from "@/components/ui/download-button"
+import HelpTooltip from "@/components/ui/help-tooltip"
 import { useResults } from "@/contexts/ResultsContext"
+import useCustomToast from "@/hooks/useCustomToast"
+import { copyToClipboard } from "@/utils/copyToClipboard"
+import { useMutation } from "@tanstack/react-query"
 
 const TwinCheck = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -403,6 +404,7 @@ const TwinCheck = () => {
               icon={<FiFileText size={24} />}
               isSelected={!!selectedComparison}
               onClick={() => setShowTopicListModal(true)}
+              helpKey="topicList"
             />
 
             <VStack gap={4} align="stretch">

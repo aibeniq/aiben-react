@@ -1,12 +1,12 @@
-import { Container, Heading, Tabs, VStack, Box } from "@chakra-ui/react"
+import { Box, Container, Heading, Tabs, VStack } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 
 import Appearance from "@/components/UserSettings/Appearance"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import DeleteAccount from "@/components/UserSettings/DeleteAccount"
-import UserInformation from "@/components/UserSettings/UserInformation"
 import LanguageSettings from "@/components/UserSettings/LanguageSettings"
+import UserInformation from "@/components/UserSettings/UserInformation"
 import useAuth from "@/hooks/useAuth"
 
 const tabsConfig = [
@@ -49,7 +49,9 @@ export const Route = createFileRoute("/_layout/settings")({
 function UserSettings() {
   const { user: currentUser } = useAuth()
   const { t } = useTranslation()
-  const finalTabs = currentUser?.is_superuser ? tabsConfig.slice(0, 3) : tabsConfig
+  const finalTabs = currentUser?.is_superuser
+    ? tabsConfig.slice(0, 3)
+    : tabsConfig
 
   if (!currentUser) {
     return null
@@ -63,7 +65,13 @@ function UserSettings() {
             {t("settings.title")}
           </Heading>
         </Box>
-        <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4} bg="bg">
+        <Box
+          border="1px solid"
+          borderColor="gray.200"
+          borderRadius="md"
+          p={4}
+          bg="bg"
+        >
           <Tabs.Root defaultValue="my-profile" variant="subtle">
             <Tabs.List>
               {finalTabs.map((tab) => (

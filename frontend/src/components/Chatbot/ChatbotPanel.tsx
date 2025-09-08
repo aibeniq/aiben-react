@@ -1,12 +1,12 @@
-import { Box, Button, HStack, Text, Icon, Show } from "@chakra-ui/react"
-import { useQuery } from "@tanstack/react-query"
-import { FiTrash } from "react-icons/fi"
 import { KnowledgeBasesService } from "@/client"
-import SelectionModal from "@/components/Common/SelectionModal"
-import KnowledgeBaseTable from "@/components/Common/KnowledgeBaseTable"
 import ChatMessages from "@/components/Chatbot/ChatMessages"
 import InputArea from "@/components/Chatbot/InputArea"
+import KnowledgeBaseTable from "@/components/Common/KnowledgeBaseTable"
+import SelectionModal from "@/components/Common/SelectionModal"
+import { Box, Button, HStack, Icon, Show, Text } from "@chakra-ui/react"
+import { useQuery } from "@tanstack/react-query"
 import { useEffect } from "react"
+import { FiTrash } from "react-icons/fi"
 import { Radio, RadioGroup } from "../ui/radio"
 
 interface ChatMessage {
@@ -124,10 +124,19 @@ const ChatbotPanel = ({
         </Box>
 
         {/* Search Mode Toggle */}
-        <Box px={4} pt={2} pb={1} bg="bg" borderBottom="1px solid" borderColor="gray.100">
+        <Box
+          px={4}
+          pt={2}
+          pb={1}
+          bg="bg"
+          borderBottom="1px solid"
+          borderColor="gray.100"
+        >
           <RadioGroup
             value={searchMode}
-            onValueChange={(details) => setSearchMode(details.value as "vector" | "full_text")}
+            onValueChange={(details) =>
+              setSearchMode(details.value as "vector" | "full_text")
+            }
             size="sm"
             colorPalette="teal"
           >
@@ -144,8 +153,8 @@ const ChatbotPanel = ({
             </HStack>
           </RadioGroup>
           <Text fontSize="xs" color="gray.500" mt={1}>
-            Vector search provides fast, targeted results. Full text scan reviews all
-            content in the knowledge base.
+            Vector search provides fast, targeted results. Full text scan
+            reviews all content in the knowledge base.
           </Text>
         </Box>
 
@@ -184,11 +193,14 @@ const ChatbotPanel = ({
             {selectedKbId ? (
               <Text>
                 Using knowledge base:{" "}
-                <b>{knowledgeBases.find((kb) => kb.id === selectedKbId)?.title}</b>
+                <b>
+                  {knowledgeBases.find((kb) => kb.id === selectedKbId)?.title}
+                </b>
               </Text>
             ) : uploadedFiles.length > 0 ? (
               <Text>
-                Using {uploadedFiles.length} document{uploadedFiles.length > 1 ? "s" : ""}:{" "}
+                Using {uploadedFiles.length} document
+                {uploadedFiles.length > 1 ? "s" : ""}:{" "}
                 <b>{uploadedFiles.map((f) => f.name).join(", ")}</b>
               </Text>
             ) : (
@@ -222,7 +234,9 @@ const ChatbotPanel = ({
         <KnowledgeBaseTable
           knowledgeBases={knowledgeBases}
           selectedKnowledgeBase={
-            selectedKbId ? knowledgeBases.find((kb) => kb.id === selectedKbId) || null : null
+            selectedKbId
+              ? knowledgeBases.find((kb) => kb.id === selectedKbId) || null
+              : null
           }
           onSelectionChange={(kb) => {
             setSelectedKbId(kb?.id || null)

@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react"
-import { Button, HStack, IconButton, Table, Checkbox } from "@chakra-ui/react"
-import { FiEye, FiCopy, FiTrash2, FiPlus } from "react-icons/fi"
-import { VeraDocChecklist, VeradocService } from "../../client"
+import { Button, Checkbox, HStack, IconButton, Table } from "@chakra-ui/react"
+import { useEffect, useState } from "react"
+import { FiCopy, FiEye, FiPlus, FiTrash2 } from "react-icons/fi"
+import { type VeraDocChecklist, VeradocService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
-import ChecklistModal from "./ChecklistModal"
 import { generateUUID } from "../../utils/uuid"
+import ChecklistModal from "./ChecklistModal"
 
 interface QuestionData {
   id: string
@@ -41,20 +41,25 @@ interface ChecklistTableBodyProps {
   onDeleteChecklist: (checklist: VeraDocChecklist) => void
 }
 
-const ChecklistTableHeader = ({
-  onCreateNew,
-}: ChecklistTableHeaderProps) => {
+const ChecklistTableHeader = ({ onCreateNew }: ChecklistTableHeaderProps) => {
   return (
     <Table.Header position="sticky" top="0" bg="transparent" zIndex="1">
       <Table.Row>
-        <Table.ColumnHeader w="6"></Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader w="6" />
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           Name
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           Description
         </Table.ColumnHeader>
-        <Table.ColumnHeader w="40" style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          w="40"
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           <HStack gap={1} ml="auto">
             <Button size="sm" onClick={onCreateNew} variant="ghost">
               <FiPlus size={14} />
@@ -93,7 +98,9 @@ const ChecklistTableBody = ({
       {sortedChecklists.map((checklist) => (
         <Table.Row
           key={checklist.id}
-          data-selected={selectedChecklist?.id === checklist.id ? "" : undefined}
+          data-selected={
+            selectedChecklist?.id === checklist.id ? "" : undefined
+          }
         >
           <Table.Cell>
             <Checkbox.Root
@@ -109,11 +116,16 @@ const ChecklistTableBody = ({
                   // Parse and provide structured questions
                   if (onStructuredQuestionsChange) {
                     try {
-                      const parsedQuestions = JSON.parse(checklist.questions || "[]")
+                      const parsedQuestions = JSON.parse(
+                        checklist.questions || "[]",
+                      )
                       if (
                         Array.isArray(parsedQuestions) &&
                         parsedQuestions.every(
-                          (q) => typeof q === "object" && "text" in q && "consultDocuments" in q,
+                          (q) =>
+                            typeof q === "object" &&
+                            "text" in q &&
+                            "consultDocuments" in q,
                         )
                       ) {
                         // It's structured data
@@ -208,7 +220,8 @@ const ChecklistTable = ({
   const [questionsList, setQuestionsList] = useState<string[]>([])
   const [questionsData, setQuestionsData] = useState<QuestionData[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingChecklist, setEditingChecklist] = useState<VeraDocChecklist | null>(null)
+  const [editingChecklist, setEditingChecklist] =
+    useState<VeraDocChecklist | null>(null)
 
   // Update local state when editingChecklist changes
   useEffect(() => {
@@ -228,7 +241,8 @@ const ChecklistTable = ({
           if (
             Array.isArray(parsedQuestions) &&
             parsedQuestions.every(
-              (q) => typeof q === "object" && "text" in q && "consultDocuments" in q,
+              (q) =>
+                typeof q === "object" && "text" in q && "consultDocuments" in q,
             )
           ) {
             // It's structured data
@@ -262,13 +276,17 @@ const ChecklistTable = ({
         }
       } else {
         setQuestionsList([""])
-        setQuestionsData([{ id: generateUUID(), text: "", consultDocuments: true }])
+        setQuestionsData([
+          { id: generateUUID(), text: "", consultDocuments: true },
+        ])
       }
     } else {
       setChecklistName("")
       setChecklistDescription("")
       setQuestionsList([""])
-      setQuestionsData([{ id: generateUUID(), text: "", consultDocuments: true }])
+      setQuestionsData([
+        { id: generateUUID(), text: "", consultDocuments: true },
+      ])
     }
   }, [editingChecklist])
 
@@ -276,7 +294,9 @@ const ChecklistTable = ({
   useEffect(() => {
     if (questionsList.length === 0) {
       setQuestionsList([""])
-      setQuestionsData([{ id: generateUUID(), text: "", consultDocuments: true }])
+      setQuestionsData([
+        { id: generateUUID(), text: "", consultDocuments: true },
+      ])
     }
   }, [])
 
@@ -353,7 +373,10 @@ const ChecklistTable = ({
 
     // Ensure we always have at least one empty question at the end
     const hasEmptyQuestion = newQuestions.some((q) => q.trim() === "")
-    if (!hasEmptyQuestion && questionsList[questionsList.length - 1].trim() !== "") {
+    if (
+      !hasEmptyQuestion &&
+      questionsList[questionsList.length - 1].trim() !== ""
+    ) {
       newQuestions.push("")
       newData.push({ id: generateUUID(), text: "", consultDocuments: true })
     }
@@ -519,7 +542,12 @@ const ChecklistTable = ({
   }
 
   return (
-    <div style={{ opacity: isDisabled ? 0.3 : 1, pointerEvents: isDisabled ? "none" : "auto" }}>
+    <div
+      style={{
+        opacity: isDisabled ? 0.3 : 1,
+        pointerEvents: isDisabled ? "none" : "auto",
+      }}
+    >
       {/* Checklist Table */}
       <div
         style={{
@@ -531,9 +559,7 @@ const ChecklistTable = ({
         }}
       >
         <Table.Root variant="line">
-          <ChecklistTableHeader
-            onCreateNew={handleCreateNew}
-          />
+          <ChecklistTableHeader onCreateNew={handleCreateNew} />
           <ChecklistTableBody
             checklists={checklists}
             selectedChecklist={selectedChecklist}

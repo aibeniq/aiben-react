@@ -1,5 +1,5 @@
-import React from "react"
 import { Button } from "@chakra-ui/react"
+import React from "react"
 
 interface CancelButtonProps {
   onClick: () => void
@@ -10,7 +10,16 @@ interface CancelButtonProps {
 }
 
 const CancelButton = React.forwardRef<HTMLButtonElement, CancelButtonProps>(
-  ({ onClick, loading = false, disabled = false, size = "sm", children = "Cancel" }, ref) => {
+  (
+    {
+      onClick,
+      loading = false,
+      disabled = false,
+      size = "sm",
+      children = "Cancel",
+    },
+    ref,
+  ) => {
     return (
       <Button
         ref={ref}

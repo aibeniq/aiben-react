@@ -1,27 +1,32 @@
 import {
-  Box,
-  Text,
-  Card,
-  VStack,
-  HStack,
-  SimpleGrid,
-  Icon,
-  Skeleton,
+  FormconnectService,
+  ReportgenieService,
+  TwincheckService,
+  VeradocService,
+} from "@/client"
+import {
   Alert,
   Badge,
+  Box,
+  Card,
+  HStack,
+  Icon,
+  SimpleGrid,
+  Skeleton,
+  Text,
+  VStack,
 } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
-import { VeradocService, ReportgenieService, TwincheckService, FormconnectService } from "@/client"
-import { 
-  FiCheckCircle, 
-  FiFilePlus, 
-  FiMessageSquare,
-  FiUsers,
-  FiUser
-} from "react-icons/fi"
-import { FaBalanceScale } from "react-icons/fa"
-import { TbPlugConnected } from "react-icons/tb"
 import { useState } from "react"
+import { FaBalanceScale } from "react-icons/fa"
+import {
+  FiCheckCircle,
+  FiFilePlus,
+  FiMessageSquare,
+  FiUser,
+  FiUsers,
+} from "react-icons/fi"
+import { TbPlugConnected } from "react-icons/tb"
 
 interface StatCardProps {
   title: string
@@ -74,10 +79,11 @@ export default function DashboardStats() {
     error: veradocError,
   } = useQuery({
     queryKey: ["veradocHistory", showAllUsers],
-    queryFn: () => VeradocService.getVeradocHistory({
-      limit: 1000, // Get all to count
-      showAll: showAllUsers
-    }),
+    queryFn: () =>
+      VeradocService.getVeradocHistory({
+        limit: 1000, // Get all to count
+        showAll: showAllUsers,
+      }),
     refetchInterval: 5 * 60 * 1000,
   })
 
@@ -87,10 +93,11 @@ export default function DashboardStats() {
     error: reportgenieError,
   } = useQuery({
     queryKey: ["reportgenieHistory", showAllUsers],
-    queryFn: () => ReportgenieService.getReportgenieHistory({
-      limit: 1000,
-      showAll: showAllUsers
-    }),
+    queryFn: () =>
+      ReportgenieService.getReportgenieHistory({
+        limit: 1000,
+        showAll: showAllUsers,
+      }),
     refetchInterval: 5 * 60 * 1000,
   })
 
@@ -100,10 +107,11 @@ export default function DashboardStats() {
     error: twincheckError,
   } = useQuery({
     queryKey: ["twincheckHistory", showAllUsers],
-    queryFn: () => TwincheckService.getComparisonHistory({
-      limit: 1000,
-      showAll: showAllUsers
-    }),
+    queryFn: () =>
+      TwincheckService.getComparisonHistory({
+        limit: 1000,
+        showAll: showAllUsers,
+      }),
     refetchInterval: 5 * 60 * 1000,
   })
 
@@ -113,15 +121,21 @@ export default function DashboardStats() {
     error: formconnectError,
   } = useQuery({
     queryKey: ["formconnectHistory", showAllUsers],
-    queryFn: () => FormconnectService.getFormHistory({
-      limit: 1000,
-      showAll: showAllUsers
-    }),
+    queryFn: () =>
+      FormconnectService.getFormHistory({
+        limit: 1000,
+        showAll: showAllUsers,
+      }),
     refetchInterval: 5 * 60 * 1000,
   })
 
-  const isLoading = veradocLoading || reportgenieLoading || twincheckLoading || formconnectLoading
-  const hasError = veradocError || reportgenieError || twincheckError || formconnectError
+  const isLoading =
+    veradocLoading ||
+    reportgenieLoading ||
+    twincheckLoading ||
+    formconnectLoading
+  const hasError =
+    veradocError || reportgenieError || twincheckError || formconnectError
 
   if (hasError) {
     return (
@@ -134,9 +148,15 @@ export default function DashboardStats() {
 
   const stats = {
     reviews: Array.isArray(veradocData) ? veradocData.length : 0,
-    generated_documents: Array.isArray(reportgenieData) ? reportgenieData.length : 0,
-    document_comparisons: Array.isArray(twincheckData) ? twincheckData.length : 0,
-    matched_document_sets: Array.isArray(formconnectData) ? formconnectData.length : 0,
+    generated_documents: Array.isArray(reportgenieData)
+      ? reportgenieData.length
+      : 0,
+    document_comparisons: Array.isArray(twincheckData)
+      ? twincheckData.length
+      : 0,
+    matched_document_sets: Array.isArray(formconnectData)
+      ? formconnectData.length
+      : 0,
     chat_completions: 0, // TODO: Add chat history endpoint
   }
 
@@ -161,7 +181,7 @@ export default function DashboardStats() {
               type="checkbox"
               checked={showAllUsers}
               onChange={(e) => setShowAllUsers(e.target.checked)}
-              style={{ marginLeft: '8px' }}
+              style={{ marginLeft: "8px" }}
             />
           </label>
         </HStack>

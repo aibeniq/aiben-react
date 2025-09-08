@@ -1,23 +1,24 @@
-import { Box, Flex, Icon, Text, Accordion } from "@chakra-ui/react"
-import { useQueryClient, useQuery } from "@tanstack/react-query"
+import { Accordion, Box, Flex, Icon, Text } from "@chakra-ui/react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Link as RouterLink, useRouterState } from "@tanstack/react-router"
+import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { FaBalanceScale } from "react-icons/fa"
 import {
-  FiHome,
-  FiSettings,
-  FiUsers,
-  FiTool,
-  FiPackage,
-  FiFilePlus,
+  FiArchive,
   FiCheckCircle,
   FiCpu,
-  FiArchive,
   FiDatabase,
+  FiFilePlus,
+  FiHome,
+  FiPackage,
+  FiSettings,
+  FiTool,
+  FiUsers,
 } from "react-icons/fi"
-import { FaBalanceScale } from "react-icons/fa"
-import { TbPlugConnected } from "react-icons/tb"
 import type { IconType } from "react-icons/lib"
-import { useTranslation } from "react-i18next"
-import { useState, useEffect } from "react"
+import { TbPlugConnected } from "react-icons/tb"
+import HelpTooltip from "../ui/help-tooltip"
 
 import type { UserPublic } from "@/client"
 
@@ -29,6 +30,7 @@ interface Item {
   icon: IconType
   title: string
   path: string
+  helpKey?: string // Optional help key for tooltip
 }
 
 interface Category {
@@ -47,26 +49,73 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
   const categories: Category[] = [
     {
       name: null, // No category header for these items
-      items: [{ icon: FiHome, title: t("navigation.dashboard"), path: "/" }],
+      items: [
+        {
+          icon: FiHome,
+          title: t("navigation.dashboard"),
+          path: "/",
+          helpKey: "dashboard",
+        },
+      ],
     },
     {
       name: t("navigation.tools"),
       icon: FiTool,
       items: [
-        { icon: FiCheckCircle, title: t("navigation.review"), path: "/review" },
-        { icon: FiFilePlus, title: t("navigation.generate"), path: "/generate" },
-        { icon: FaBalanceScale, title: t("navigation.compare"), path: "/compare" },
-        { icon: TbPlugConnected, title: t("navigation.match"), path: "/match" },
+        {
+          icon: FiCheckCircle,
+          title: t("navigation.review"),
+          path: "/review",
+          helpKey: "review",
+        },
+        {
+          icon: FiFilePlus,
+          title: t("navigation.generate"),
+          path: "/generate",
+          helpKey: "generate",
+        },
+        {
+          icon: FaBalanceScale,
+          title: t("navigation.compare"),
+          path: "/compare",
+          helpKey: "compare",
+        },
+        {
+          icon: TbPlugConnected,
+          title: t("navigation.match"),
+          path: "/match",
+          helpKey: "match",
+        },
       ],
     },
     {
       name: t("navigation.configurations"),
       icon: FiPackage,
       items: [
-        { icon: FiCpu, title: t("navigation.modelSelection"), path: "/model-selection" },
-        { icon: FiDatabase, title: t("navigation.knowledgeBases"), path: "/knowledge-bases" },
-        { icon: FiArchive, title: t("navigation.archive"), path: "/archive" },
-        { icon: FiSettings, title: t("navigation.settings"), path: "/settings" },
+        {
+          icon: FiCpu,
+          title: t("navigation.modelSelection"),
+          path: "/model-selection",
+          helpKey: "modelSelection",
+        },
+        {
+          icon: FiDatabase,
+          title: t("navigation.knowledgeBases"),
+          path: "/knowledge-bases",
+          helpKey: "knowledgeBases",
+        },
+        {
+          icon: FiArchive,
+          title: t("navigation.archive"),
+          path: "/archive",
+          helpKey: "archive",
+        },
+        {
+          icon: FiSettings,
+          title: t("navigation.settings"),
+          path: "/settings",
+          helpKey: "settings",
+        },
       ],
     },
   ]
@@ -104,7 +153,12 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
   // }, []) // Run once on mount to force reset
 
   // Admin item for superusers
-  const adminItem = { icon: FiUsers, title: t("navigation.admin"), path: "/admin" }
+  const adminItem = {
+    icon: FiUsers,
+    title: t("navigation.admin"),
+    path: "/admin",
+    helpKey: "admin",
+  }
 
   // Fetch system configuration to check if model selection is enabled
   const { data: systemConfig } = useQuery({
@@ -199,6 +253,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
                       >
                         <Icon as={item.icon} alignSelf="center" />
                         <Text ml={2}>{item.title}</Text>
+                        {item.helpKey && <HelpTooltip helpKey={item.helpKey} />}
                       </Flex>
                     </RouterLink>
                   ))}
@@ -230,6 +285,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
                   >
                     <Icon as={item.icon} alignSelf="center" />
                     <Text ml={2}>{item.title}</Text>
+                    {item.helpKey && <HelpTooltip helpKey={item.helpKey} />}
                   </Flex>
                 </RouterLink>
               ))}
