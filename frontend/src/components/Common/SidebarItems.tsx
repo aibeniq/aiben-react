@@ -16,41 +16,10 @@ import {
 import { FaBalanceScale } from "react-icons/fa"
 import { TbPlugConnected } from "react-icons/tb"
 import type { IconType } from "react-icons/lib"
+import { useTranslation } from "react-i18next"
+import { useState, useEffect } from "react"
 
 import type { UserPublic } from "@/client"
-
-// Define categories with their items
-export const categories: Category[] = [
-  {
-    name: null, // No category header for these items
-    items: [{ icon: FiHome, title: "Dashboard", path: "/" }],
-  },
-  {
-    name: "Tools",
-    icon: FiTool,
-    items: [
-      { icon: FiCheckCircle, title: "Review", path: "/review" },
-      { icon: FiFilePlus, title: "Generate", path: "/generate" },
-      { icon: FaBalanceScale, title: "Compare", path: "/compare" },
-      { icon: TbPlugConnected, title: "Match", path: "/match" },
-    ],
-  },
-  {
-    name: "Configurations",
-    icon: FiPackage,
-    items: [
-      // Conditionally include Model Selection
-      //...(false ? [{ icon: FiCpu, title: "Model Selection", path: "/model-selection" }] : []),
-      { icon: FiCpu, title: "Model Selection", path: "/model-selection" },
-      { icon: FiDatabase, title: "Knowledge Bases", path: "/knowledge-bases" },
-      { icon: FiArchive, title: "Archive", path: "/archive" },
-      { icon: FiSettings, title: "Settings", path: "/settings" },
-    ],
-  },
-]
-
-// Admin item for superusers
-const adminItem = { icon: FiUsers, title: "Admin", path: "/admin" }
 
 interface SidebarItemsProps {
   onClose?: () => void
@@ -72,6 +41,70 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
   const queryClient = useQueryClient()
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
   const routerState = useRouterState()
+  const { t } = useTranslation()
+
+  // Define categories with their items
+  const categories: Category[] = [
+    {
+      name: null, // No category header for these items
+      items: [{ icon: FiHome, title: t("navigation.dashboard"), path: "/" }],
+    },
+    {
+      name: t("navigation.tools"),
+      icon: FiTool,
+      items: [
+        { icon: FiCheckCircle, title: t("navigation.review"), path: "/review" },
+        { icon: FiFilePlus, title: t("navigation.generate"), path: "/generate" },
+        { icon: FaBalanceScale, title: t("navigation.compare"), path: "/compare" },
+        { icon: TbPlugConnected, title: t("navigation.match"), path: "/match" },
+      ],
+    },
+    {
+      name: t("navigation.configurations"),
+      icon: FiPackage,
+      items: [
+        { icon: FiCpu, title: t("navigation.modelSelection"), path: "/model-selection" },
+        { icon: FiDatabase, title: t("navigation.knowledgeBases"), path: "/knowledge-bases" },
+        { icon: FiArchive, title: t("navigation.archive"), path: "/archive" },
+        { icon: FiSettings, title: t("navigation.settings"), path: "/settings" },
+      ],
+    },
+  ]
+
+  // Get all category names that have accordions (not null names)
+  const getAllAccordionCategories = () => {
+    return categories
+      .filter((category) => category.name !== null)
+      .map((category) => category.name!.toLowerCase())
+  }
+
+  // Accordion state persistence - all accordions open by default
+  const [expandedItems, setExpandedItems] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("sidebar-accordion-state")
+      // Always ensure all accordions are included in default state
+      const defaultExpanded = getAllAccordionCategories()
+      return saved ? JSON.parse(saved) : defaultExpanded
+    } catch {
+      // Fallback to all accordions open
+      return getAllAccordionCategories()
+    }
+  })
+
+  // Save accordion state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("sidebar-accordion-state", JSON.stringify(expandedItems))
+  }, [expandedItems])
+
+  // Utility function to reset all accordions to open state (for debugging)
+  // Uncomment the following lines if you need to force reset:
+  // useEffect(() => {
+  //   const defaultExpanded = getAllAccordionCategories()
+  //   setExpandedItems(defaultExpanded)
+  // }, []) // Run once on mount to force reset
+
+  // Admin item for superusers
+  const adminItem = { icon: FiUsers, title: t("navigation.admin"), path: "/admin" }
 
   // Fetch system configuration to check if model selection is enabled
   const { data: systemConfig } = useQuery({
@@ -96,11 +129,15 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
     // If model selection is disabled, remove it from configurations
     // Default to showing model selection if config is not available (fail-safe)
     if (systemConfig?.enable_model_selection === false) {
-      const configIndex = filtered.findIndex((category) => category.name === "Configurations")
+      const configIndex = filtered.findIndex(
+        (category) => category.name === t("navigation.configurations"),
+      )
       if (configIndex !== -1) {
         filtered[configIndex] = {
           ...filtered[configIndex],
-          items: filtered[configIndex].items.filter((item) => item.path !== "/model-selection"),
+          items: filtered[configIndex].items.filter(
+            (item: Item) => item.path !== "/model-selection",
+          ),
         }
       }
     }
@@ -127,7 +164,11 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
         <Box key={index} mb={4}>
           {category.name ? (
             // Render category with expandable items
-            <Accordion.Root multiple defaultValue={["tools", "configurations"]}>
+            <Accordion.Root
+              multiple
+              value={expandedItems}
+              onValueChange={(details) => setExpandedItems(details.value)}
+            >
               <Accordion.Item border="none" value={category.name.toLowerCase()}>
                 <Accordion.ItemTrigger px={4} py={2} _hover={{ bg: "gray.subtle" }}>
                   <Box as="span" flex="1" textAlign="left">
@@ -140,7 +181,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
                   </Box>
                 </Accordion.ItemTrigger>
                 <Accordion.ItemContent p={0}>
-                  {category.items.map((item) => (
+                  {category.items.map((item: Item) => (
                     <RouterLink key={item.title} to={item.path} onClick={onClose}>
                       <Flex
                         gap={4}
@@ -169,10 +210,10 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
             <>
               {index === 0 && (
                 <Text fontSize="xs" px={4} py={2} fontWeight="bold">
-                  Menu
+                  {t("navigation.menu")}
                 </Text>
               )}
-              {category.items.map((item) => (
+              {category.items.map((item: Item) => (
                 <RouterLink key={item.title} to={item.path} onClick={onClose}>
                   <Flex
                     gap={4}
