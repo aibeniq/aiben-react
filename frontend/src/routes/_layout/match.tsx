@@ -5,7 +5,6 @@ import {
   KnowledgeBasesService,
 } from "@/client"
 import DownloadButton from "@/components/ui/download-button"
-import HelpTooltip from "@/components/ui/help-tooltip"
 import useCustomToast from "@/hooks/useCustomToast"
 import { Box, Button, Container, HStack, Heading, Spinner, Text, VStack } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
