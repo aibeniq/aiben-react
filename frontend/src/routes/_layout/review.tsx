@@ -28,6 +28,7 @@ import {
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FiCheck, FiCopy, FiDatabase, FiFileText, FiTrash2 } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
@@ -45,6 +46,7 @@ interface QuestionData {
 }
 
 const VeraDoc = () => {
+  const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const {
     reviewResults: results,
@@ -196,7 +198,7 @@ const VeraDoc = () => {
         setCopySuccess(false)
       }, 2000)
 
-      showSuccessToast("Report copied to clipboard")
+      showSuccessToast(t("review.reportCopied"))
     } catch (err) {
       console.error("Failed to copy report:", err)
       showErrorToast("Failed to copy report to clipboard")
@@ -805,7 +807,7 @@ const VeraDoc = () => {
     <Container maxW="container.xl" py={8}>
       {/* Tab description */}
       <Text fontSize="sm" color="gray.500" textAlign="center" mb={4} fontStyle="italic">
-        Review a document based on a user-defined checklist and policy database.
+        {t("review.pageDescription")}
       </Text>
 
       {/* Add this overlay spinner that shows when loading is true */}
@@ -826,7 +828,7 @@ const VeraDoc = () => {
           <VStack gap={4}>
             <Spinner size="xl" color="blue.500" />
             <Text fontWeight="medium">
-              {fileItems.length > 1 ? "Processing files..." : "Processing file..."}
+              {fileItems.length > 1 ? t("review.processingFiles") : t("review.processingFile")}
             </Text>
           </VStack>
         </Box>
@@ -836,9 +838,11 @@ const VeraDoc = () => {
         <HStack width="100%" justify="space-between">
           <VStack gap={4} align="stretch" flex={1}>
             <SelectionCard
-              title="Knowledge Base"
+              title={t("review.knowledgeBaseTitle")}
               description={
-                selectedKnowledgeBase ? `${selectedKnowledgeBase.title}` : "Click to select"
+                selectedKnowledgeBase
+                  ? `${selectedKnowledgeBase.title}`
+                  : t("review.knowledgeBaseDescription")
               }
               icon={<FiDatabase size={24} />}
               isSelected={!!selectedKnowledgeBase}
@@ -847,8 +851,10 @@ const VeraDoc = () => {
             />
 
             <SelectionCard
-              title="Checklist"
-              description={selectedChecklist ? selectedChecklist.name : "Click to select"}
+              title={t("review.checklistTitle")}
+              description={
+                selectedChecklist ? selectedChecklist.name : t("review.checklistDescription")
+              }
               icon={<FiFileText size={24} />}
               isSelected={!!selectedChecklist}
               onClick={() => setShowChecklistModal(true)}
@@ -867,14 +873,14 @@ const VeraDoc = () => {
             <Box width="100%" mt={4}>
               <HStack align="center" mb={2}>
                 <Text fontSize="sm" fontWeight="medium" color="gray.700">
-                  Custom Instructions (Optional)
+                  {t("review.customInstructionsTitle")}
                 </Text>
                 <HelpTooltip helpKey="customInstructions" />
               </HStack>
               <Textarea
                 value={customInstructions}
                 onChange={(e) => setCustomInstructions(e.target.value)}
-                placeholder="Enter any additional instructions that should be considered when answering the checklist questions..."
+                placeholder={t("review.customInstructionsPlaceholder")}
                 rows={3}
                 resize="vertical"
                 bg="white"
@@ -888,8 +894,7 @@ const VeraDoc = () => {
                 maxLength={2000}
               />
               <Text fontSize="xs" color="gray.500" mt={1}>
-                {customInstructions.length}/2000 characters. These instructions will be appended to
-                each question when processing.
+                {t("review.characterCount", { count: customInstructions.length })}
               </Text>
             </Box>
 
@@ -901,8 +906,7 @@ const VeraDoc = () => {
                 helpKey="searchMode"
               />
               <Text fontSize="xs" color="gray.500" mt={1}>
-                Vector search provides fast, targeted results. Full document scan reviews all
-                content in the knowledge base.
+                {t("review.searchModeHelp")}
               </Text>
             </Box>
           </VStack>
@@ -963,7 +967,7 @@ const VeraDoc = () => {
                 bg: "rgba(0, 65, 72, 0.85)",
               }}
             >
-              Review
+              {t("review.reviewButton")}
             </Button>
           </HStack>
 
@@ -979,7 +983,7 @@ const VeraDoc = () => {
           >
             <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
               <HStack justify="space-between" align="center" mb={4}>
-                <Heading size="md">Results</Heading>
+                <Heading size="md">{t("review.results")}</Heading>
 
                 {results.length > 0 && (
                   <HStack gap={2}>
@@ -990,7 +994,9 @@ const VeraDoc = () => {
                       colorPalette={copySuccess ? "rgba(0, 65, 72, 0.9)" : "blue"}
                     >
                       {copySuccess ? <FiCheck color="green" /> : <FiCopy />}
-                      {copySuccess ? "Copied!" : "Copy Text"}
+                      {copySuccess
+                        ? t("review.reportCopied").replace("!", "")
+                        : t("review.copyReport")}
                     </Button>
 
                     <DownloadButton
@@ -998,7 +1004,7 @@ const VeraDoc = () => {
                       onClick={handleDownloadReport}
                       loading={loadingDownload}
                     >
-                      Download DOCX
+                      {t("review.downloadReport")}
                     </DownloadButton>
 
                     <DownloadButton
@@ -1006,7 +1012,7 @@ const VeraDoc = () => {
                       onClick={handleDownloadCsv}
                       loading={loadingCsvDownload}
                     >
-                      Download CSV
+                      {t("review.downloadCsv")}
                     </DownloadButton>
 
                     <Button
@@ -1015,11 +1021,11 @@ const VeraDoc = () => {
                       colorPalette="red"
                       onClick={() => {
                         handleClearResults()
-                        showSuccessToast("Review results cleared")
+                        showSuccessToast(t("review.clearResults"))
                       }}
                     >
                       <FiTrash2 />
-                      Clear Results
+                      {t("review.clearResults")}
                     </Button>
                   </HStack>
                 )}
@@ -1094,7 +1100,7 @@ const VeraDoc = () => {
                     )}
                   </>
                 ) : (
-                  <Text color="gray.500">Results will appear here after running.</Text>
+                  <Text color="gray.500">{t("review.noResults")}</Text>
                 )}
               </Box>
             </Box>

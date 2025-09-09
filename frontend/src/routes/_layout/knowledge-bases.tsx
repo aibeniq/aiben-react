@@ -1,15 +1,7 @@
-import {
-  Badge,
-  Box,
-  Container,
-  EmptyState,
-  Flex,
-  Heading,
-  Table,
-  VStack,
-} from "@chakra-ui/react"
+import { Badge, Box, Container, EmptyState, Flex, Heading, Table, VStack } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { useTranslation } from "react-i18next"
 import { FiSearch } from "react-icons/fi"
 import { z } from "zod"
 
@@ -47,6 +39,7 @@ export const Route = createFileRoute("/_layout/knowledge-bases")({
 })
 
 function KnowledgeBasesTable() {
+  const { t } = useTranslation()
   const navigate = useNavigate({ from: Route.fullPath })
   const { page } = Route.useSearch()
 
@@ -75,11 +68,9 @@ function KnowledgeBasesTable() {
             <FiSearch />
           </EmptyState.Indicator>
           <VStack textAlign="center">
-            <EmptyState.Title>
-              You don't have any Knowledge Bases yet
-            </EmptyState.Title>
+            <EmptyState.Title>{t("knowledgeBases.emptyStateTitle")}</EmptyState.Title>
             <EmptyState.Description>
-              Add a new Knowledge Base to get started
+              {t("knowledgeBases.emptyStateDescription")}
             </EmptyState.Description>
           </VStack>
         </EmptyState.Content>
@@ -92,14 +83,25 @@ function KnowledgeBasesTable() {
       <Table.Root size={{ base: "sm", md: "md" }}>
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeader w="sm">Title</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Description</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Number of Sources</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Embedding Model</Table.ColumnHeader>{" "}
-            {/* Add this line */}
-            <Table.ColumnHeader w="sm">Date Created</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Date Modified</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Actions</Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">{t("knowledgeBases.tableHeaders.title")}</Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">
+              {t("knowledgeBases.tableHeaders.description")}
+            </Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">
+              {t("knowledgeBases.tableHeaders.numberOfSources")}
+            </Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">
+              {t("knowledgeBases.tableHeaders.embeddingModel")}
+            </Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">
+              {t("knowledgeBases.tableHeaders.dateCreated")}
+            </Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">
+              {t("knowledgeBases.tableHeaders.dateModified")}
+            </Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">
+              {t("knowledgeBases.tableHeaders.actions")}
+            </Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -109,7 +111,7 @@ function KnowledgeBasesTable() {
                 {item.title}
               </Table.Cell>
               <Table.Cell truncate maxW="sm">
-                {item.description || "N/A"}
+                {item.description || t("knowledgeBases.status.na")}
               </Table.Cell>
               <Table.Cell truncate maxW="sm">
                 {item.number_of_sources}
@@ -121,7 +123,7 @@ function KnowledgeBasesTable() {
                   </Badge>
                 ) : (
                   <Badge colorPalette="gray" size="sm">
-                    Default
+                    {t("knowledgeBases.status.default")}
                   </Badge>
                 )}
               </Table.Cell>
@@ -156,22 +158,17 @@ function KnowledgeBasesTable() {
 }
 
 function KnowledgeBases() {
+  const { t } = useTranslation()
   return (
     <Container maxW="container.xl" py={8}>
       <VStack gap={6} align="stretch">
         <Box>
           <Heading size="lg" mb={4}>
-            Knowledge Base Management
+            {t("knowledgeBases.title")}
           </Heading>
           <AddKnowledgeBase />
         </Box>
-        <Box
-          border="1px solid"
-          borderColor="gray.200"
-          borderRadius="md"
-          p={4}
-          bg="bg"
-        >
+        <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4} bg="bg">
           <KnowledgeBasesTable />
         </Box>
       </VStack>

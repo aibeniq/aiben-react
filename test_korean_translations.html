@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Korean Translations Test</title>
+</head>
+<body>
+    <h1>Korean Knowledge Bases Translation Test</h1>
+    
+    <h2>Expected Korean Translations:</h2>
+    <ul>
+        <li><strong>Title:</strong> 지식 베이스 관리</li>
+        <li><strong>Empty State Title:</strong> 아직 지식 베이스가 없습니다</li>
+        <li><strong>Empty State Description:</strong> 시작하려면 새 지식 베이스를 추가하세요</li>
+        <li><strong>Table Headers:</strong>
+            <ul>
+                <li>Title: 제목</li>
+                <li>Description: 설명</li>
+                <li>Number of Sources: 소스 수</li>
+                <li>Embedding Model: 임베딩 모델</li>
+                <li>Date Created: 생성일</li>
+                <li>Date Modified: 수정일</li>
+                <li>Actions: 작업</li>
+            </ul>
+        </li>
+        <li><strong>Status:</strong>
+            <ul>
+                <li>Default: 기본값</li>
+                <li>N/A: 해당 없음</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>Translation Keys Used:</h2>
+    <ul>
+        <li>knowledgeBases.title</li>
+        <li>knowledgeBases.emptyStateTitle</li>
+        <li>knowledgeBases.emptyStateDescription</li>
+        <li>knowledgeBases.tableHeaders.title</li>
+        <li>knowledgeBases.tableHeaders.description</li>
+        <li>knowledgeBases.tableHeaders.numberOfSources</li>
+        <li>knowledgeBases.tableHeaders.embeddingModel</li>
+        <li>knowledgeBases.tableHeaders.dateCreated</li>
+        <li>knowledgeBases.tableHeaders.dateModified</li>
+        <li>knowledgeBases.tableHeaders.actions</li>
+        <li>knowledgeBases.status.default</li>
+        <li>knowledgeBases.status.na</li>
+    </ul>
+
+    <p><strong>If Korean translations are not working:</strong></p>
+    <ol>
+        <li>Check that the language is set to Korean (ko) in the application</li>
+        <li>Verify that the i18n.ts file contains the knowledgeBases namespace for Korean</li>
+        <li>Ensure the React component is using the correct translation keys</li>
+        <li>Confirm that the useTranslation hook is properly configured</li>
+    </ol>
+</body>
+</html>

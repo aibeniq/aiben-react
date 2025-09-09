@@ -25,6 +25,7 @@ import {
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FiCheck, FiCopy, FiDatabase, FiFileText, FiTrash2 } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
@@ -36,6 +37,7 @@ import { useResults } from "../../contexts/ResultsContext"
 import { copyToClipboard } from "../../utils/copyToClipboard"
 
 const ReportGenie = () => {
+  const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const {
     generateResult,
@@ -152,10 +154,10 @@ const ReportGenie = () => {
         setCopySuccess(false)
       }, 2000)
 
-      showSuccessToast("Document copied to clipboard")
+      showSuccessToast(t("generate.documentCopiedSuccess"))
     } catch (err) {
       console.error("Failed to copy document:", err)
-      showErrorToast("Failed to copy document to clipboard")
+      showErrorToast(t("generate.documentCopiedError"))
     }
   }
 
@@ -209,7 +211,7 @@ const ReportGenie = () => {
       document.body.removeChild(a)
 
       console.log("DOCX download triggered successfully")
-      showSuccessToast("Document downloaded successfully")
+      showSuccessToast(t("generate.documentDownloadSuccess"))
     } catch (err: any) {
       console.error("Failed to download document:", err)
       console.error("Error details:", {
@@ -218,7 +220,7 @@ const ReportGenie = () => {
         name: err instanceof Error ? err.name : undefined,
       })
 
-      showErrorToast(`Failed to download document: ${err.message || "Unknown error"}`)
+      showErrorToast(t("generate.documentDownloadError", { error: err.message || "Unknown error" }))
     } finally {
       console.log("DOCX download process completed")
       setLoadingDownload(false)
@@ -261,10 +263,10 @@ const ReportGenie = () => {
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
 
-      showSuccessToast("CSV downloaded successfully")
+      showSuccessToast(t("generate.csvDownloadSuccess"))
     } catch (err: any) {
       console.error("Failed to download CSV:", err)
-      showErrorToast(`Failed to download CSV: ${err.message || "Unknown error"}`)
+      showErrorToast(t("generate.csvDownloadError", { error: err.message || "Unknown error" }))
     } finally {
       setLoadingCsvDownload(false)
     }
@@ -346,23 +348,24 @@ const ReportGenie = () => {
         interactionId: interactionId,
       })
 
-      const searchMethod = searchMode === "vector" ? "vector search" : "full document scan"
-      showSuccessToast(`Report generated successfully using ${searchMethod}!`)
+      const searchMethod =
+        searchMode === "vector" ? t("generate.vectorSearch") : t("generate.fullDocumentScan")
+      showSuccessToast(t("generate.generateSuccess", { method: searchMethod }))
     },
     onError: (error: any) => {
-      showErrorToast(`Failed to generate document: ${error.message}`)
+      showErrorToast(t("generate.generateError", { error: error.message }))
     },
   })
 
   // Handle generating the document
   const handleGenerateDocument = async () => {
     if (!sections.trim()) {
-      showErrorToast("Please enter at least one section")
+      showErrorToast(t("generate.enterAtLeastOneSection"))
       return
     }
 
     if (!selectedKnowledgeBase?.id) {
-      showErrorToast("Please select a knowledge base")
+      showErrorToast(t("generate.selectKnowledgeBase"))
       return
     }
 
@@ -407,7 +410,7 @@ const ReportGenie = () => {
     <Container maxW="container.xl" py={8}>
       {/* Tab description */}
       <Text fontSize="sm" color="gray.500" textAlign="center" mb={4} fontStyle="italic">
-        Generate a document based on a user-defined checklist and document database.
+        {t("generate.pageDescription")}
       </Text>
 
       {/* Loading overlay while document generates */}
@@ -427,7 +430,7 @@ const ReportGenie = () => {
         >
           <VStack gap={4}>
             <Spinner size="xl" color="blue.500" />
-            <Text fontWeight="medium">Generating document...</Text>
+            <Text fontWeight="medium">{t("generate.generatingDocument")}</Text>
           </VStack>
         </Box>
       )}
@@ -436,9 +439,11 @@ const ReportGenie = () => {
         <HStack width="100%" justify="space-between">
           <VStack gap={4} align="stretch" flex={1}>
             <SelectionCard
-              title="Knowledge Base"
+              title={t("generate.knowledgeBaseTitle")}
               description={
-                selectedKnowledgeBase ? `${selectedKnowledgeBase.title}` : "Click to select"
+                selectedKnowledgeBase
+                  ? `${selectedKnowledgeBase.title}`
+                  : t("generate.clickToSelect")
               }
               icon={<FiDatabase size={24} />}
               isSelected={!!selectedKnowledgeBase}
@@ -447,8 +452,8 @@ const ReportGenie = () => {
             />
 
             <SelectionCard
-              title="Document Outline"
-              description={selectedOutline ? selectedOutline.name : "Click to select"}
+              title={t("generate.documentOutlineTitle")}
+              description={selectedOutline ? selectedOutline.name : t("generate.clickToSelect")}
               icon={<FiFileText size={24} />}
               isSelected={!!selectedOutline}
               onClick={() => setShowOutlineModal(true)}
@@ -465,14 +470,14 @@ const ReportGenie = () => {
             <Box width="100%">
               <HStack align="center" mb={2}>
                 <Text fontSize="sm" fontWeight="medium" color="gray.700">
-                  Custom Instructions (Optional)
+                  {t("generate.customInstructionsTitle")}
                 </Text>
                 <HelpTooltip helpKey="customInstructions" />
               </HStack>
               <Textarea
                 value={customInstructions}
                 onChange={(e) => setCustomInstructions(e.target.value)}
-                placeholder="Enter any additional instructions that should be considered when generating each section of the report..."
+                placeholder={t("generate.customInstructionsPlaceholder")}
                 rows={3}
                 resize="vertical"
                 bg="white"
@@ -486,8 +491,7 @@ const ReportGenie = () => {
                 maxLength={2000}
               />
               <Text fontSize="xs" color="gray.500" mt={1}>
-                {customInstructions.length}/2000 characters. These instructions will be added to the
-                prompt when generating each section.
+                {t("generate.characterCount", { count: customInstructions.length })}
               </Text>
             </Box>
           </VStack>
@@ -496,7 +500,7 @@ const ReportGenie = () => {
         <SelectionModal
           isOpen={showKnowledgeBaseModal}
           onClose={() => setShowKnowledgeBaseModal(false)}
-          title="Select Knowledge Base"
+          title={t("generate.selectKnowledgeBaseTitle")}
         >
           <KnowledgeBaseTable
             knowledgeBases={knowledgeBases}
@@ -508,7 +512,7 @@ const ReportGenie = () => {
         <SelectionModal
           isOpen={showOutlineModal}
           onClose={() => setShowOutlineModal(false)}
-          title="Select Document Outline"
+          title={t("generate.selectDocumentOutlineTitle")}
         >
           <OutlineTable
             outlines={outlines}
@@ -543,7 +547,7 @@ const ReportGenie = () => {
                 bg: "rgba(0, 65, 72, 0.85)",
               }}
             >
-              Generate
+              {t("generate.generateButton")}
             </Button>
           </HStack>
 
@@ -559,7 +563,7 @@ const ReportGenie = () => {
           >
             <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
               <HStack justify="space-between" align="center" mb={4}>
-                <Heading size="md">Results</Heading>
+                <Heading size="md">{t("generate.results")}</Heading>
 
                 {generateResult && (
                   <HStack gap={2}>
@@ -570,7 +574,7 @@ const ReportGenie = () => {
                       colorPalette={copySuccess ? "green" : "blue"}
                     >
                       {copySuccess ? <FiCheck color="green" /> : <FiCopy />}
-                      {copySuccess ? "Copied!" : "Copy Text"}
+                      {copySuccess ? t("generate.copied") : t("generate.copyText")}
                     </Button>
 
                     <DownloadButton
@@ -578,7 +582,7 @@ const ReportGenie = () => {
                       onClick={handleDownloadDocument}
                       loading={loadingDownload}
                     >
-                      Download DOCX
+                      {t("generate.downloadDocx")}
                     </DownloadButton>
 
                     <DownloadButton
@@ -586,7 +590,7 @@ const ReportGenie = () => {
                       onClick={handleDownloadCsv}
                       loading={loadingCsvDownload}
                     >
-                      Download CSV
+                      {t("generate.downloadCsv")}
                     </DownloadButton>
 
                     <Button
@@ -595,11 +599,11 @@ const ReportGenie = () => {
                       colorPalette="red"
                       onClick={() => {
                         handleClearResults()
-                        showSuccessToast("Generated report cleared")
+                        showSuccessToast(t("generate.reportClearedSuccess"))
                       }}
                     >
                       <FiTrash2 />
-                      Clear Report
+                      {t("generate.clearReport")}
                     </Button>
                   </HStack>
                 )}
@@ -860,9 +864,7 @@ const ReportGenie = () => {
                     )}
                   </>
                 ) : (
-                  <Text color="gray.500">
-                    Results will appear here after generating a document.
-                  </Text>
+                  <Text color="gray.500">{t("generate.resultsPlaceholder")}</Text>
                 )}
               </Box>
             </Box>
