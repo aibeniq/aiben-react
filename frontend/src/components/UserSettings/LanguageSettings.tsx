@@ -5,18 +5,14 @@ import { Box, Card, VStack } from "@chakra-ui/react"
 import React from "react"
 
 const LanguageSettings: React.FC = () => {
-  const { currentLanguage, availableLanguages, changeLanguage, isUpdating, t } =
-    useLanguage()
-  const [selectedLanguage, setSelectedLanguage] =
-    React.useState(currentLanguage)
+  const { currentLanguage, availableLanguages, changeLanguage, isUpdating, t } = useLanguage()
+  const [selectedLanguage, setSelectedLanguage] = React.useState(currentLanguage)
 
   const handleSave = () => {
     changeLanguage(selectedLanguage)
   }
 
-  const handleLanguageChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
+  const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedLanguage(event.target.value)
   }
 
@@ -24,7 +20,7 @@ const LanguageSettings: React.FC = () => {
     <Card.Root p={4}>
       <Card.Body>
         <VStack gap={6} align="stretch">
-          <Field label={t("settings.preferredLanguage")}>
+          <Field label={t("settings.preferredLanguage") as string}>
             <select
               value={selectedLanguage}
               onChange={handleLanguageChange}
@@ -39,7 +35,7 @@ const LanguageSettings: React.FC = () => {
             >
               {Object.entries(availableLanguages).map(([code, name]) => (
                 <option key={code} value={code}>
-                  {name}
+                  {String(name)}
                 </option>
               ))}
             </select>
@@ -52,7 +48,7 @@ const LanguageSettings: React.FC = () => {
               onClick={handleSave}
               disabled={selectedLanguage === currentLanguage}
             >
-              {t("settings.saveLanguagePreference")}
+              {t("settings.saveLanguagePreference") as string}
             </Button>
           </Box>
         </VStack>
