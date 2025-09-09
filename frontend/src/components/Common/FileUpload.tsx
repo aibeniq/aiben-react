@@ -10,6 +10,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useDropzone } from "react-dropzone"
+import { useTranslation } from "react-i18next"
 import { FiCheck, FiFile, FiUpload } from "react-icons/fi"
 import HelpTooltip from "../ui/help-tooltip"
 
@@ -47,6 +48,7 @@ const FileUpload = ({
   showHandwrittenToggle = true,
   helpKey,
 }: FileUploadProps) => {
+  const { t } = useTranslation()
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
       if (acceptedFiles.length > 0) {
@@ -117,14 +119,12 @@ const FileUpload = ({
                   <Heading size="md">
                     {hasFiles
                       ? `${files.length} File${files.length > 1 ? "s" : ""} Selected`
-                      : "Upload Documents"}
+                      : t("review.uploadFiles")}
                   </Heading>
                   {helpKey && !hasFiles && <HelpTooltip helpKey={helpKey} />}
                 </HStack>
                 <Text fontSize="sm" color="gray.600">
-                  {isDragActive
-                    ? "Drop the files here..."
-                    : "Click to add more files or drag and drop"}
+                  {isDragActive ? t("review.dropFilesHere") : t("review.uploadDocuments")}
                 </Text>
               </VStack>
             </HStack>
@@ -141,7 +141,7 @@ const FileUpload = ({
           <Card.Body p={4}>
             <VStack align="stretch" gap={3}>
               <Text fontWeight="medium" color="gray.700">
-                Uploaded Files ({files.length})
+                {t("review.uploadedFiles")} ({files.length})
               </Text>
               <VStack align="stretch" gap={2} maxH="300px" overflowY="auto">
                 {files.map((fileItem, index) => (
@@ -174,7 +174,7 @@ const FileUpload = ({
                         <ChakraField.Root display="flex" alignItems="center" width="auto">
                           <HStack align="center" gap={1}>
                             <ChakraField.Label mb="0" fontSize="sm">
-                              Handwritten
+                              {t("review.handwritten")}
                             </ChakraField.Label>
                             {helpKey && <HelpTooltip helpKey="handwrittenToggle" />}
                           </HStack>
@@ -196,7 +196,7 @@ const FileUpload = ({
                         variant="outline"
                         onClick={() => removeFile(index)}
                       >
-                        Remove
+                        {t("review.removeFile")}
                       </Button>
                     </HStack>
                   </HStack>

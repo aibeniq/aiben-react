@@ -126,6 +126,57 @@ export const addNordicTranslations = (resources: any) => {
         referenceDocumentsFiles: "Tillhandahåll referensdokument för att hjälpa AI:n att generera mer precisa och kontextuellt relevanta förslag",
         minimumDescriptionLength: "Beskrivningar måste vara minst 10 tecken långa för att ge tillräcklig kontext för AI-förslag"
       },
+      review: {
+        pageTitle: "Granska Dokument",
+        pageDescription: "Granska ett dokument baserat på användardefinierad checklista och policydatabas.",
+        knowledgeBaseTitle: "Kunskapsbas",
+        knowledgeBaseDescription: "Klicka för att välja",
+        checklistTitle: "Checklista",
+        checklistDescription: "Klicka för att välja",
+        customInstructionsTitle: "Anpassade Instruktioner (Valfritt)",
+        customInstructionsPlaceholder: "Ange ytterligare instruktioner som bör beaktas när checklistfrågor besvaras...",
+        customInstructionsHelp: "{count}/2000 tecken. Dessa instruktioner kommer att läggas till varje fråga under bearbetning.",
+        searchModeHelp: "Vektorsökning ger snabba, riktade resultat. Fullständig dokumentanalys undersöker allt innehåll i kunskapsbasen.",
+        processingFile: "Bearbetar fil...",
+        processingFiles: "Bearbetar filer...",
+        selectKnowledgeBaseTitle: "Välj Kunskapsbas",
+        selectChecklistTitle: "Välj Checklista",
+        noResults: "Inga resultat ännu",
+        uploadDocuments: "Ladda upp ett eller flera dokument för att granska mot din valda checklista",
+        results: "Resultat",
+        downloadReport: "Ladda ner Rapport",
+        downloadCsv: "Ladda ner CSV",
+        clearResults: "Rensa Resultat",
+        copyReport: "Kopiera Rapport",
+        reportCopied: "Rapport kopierad till urklipp!",
+        reviewButton: "Granska",
+        consultDocuments: "Konsultera dokument",
+        noChecklistsAvailable: "Inga checklistor tillgängliga. Skapa din första checklista för att komma igång.",
+        createChecklist: "Skapa Checklista",
+        editChecklist: "Redigera Checklista",
+        checklistName: "Checklistnamn",
+        checklistNamePlaceholder: "Ange checklistnamn...",
+        checklistDescriptionLabel: "Beskrivning",
+        checklistDescriptionPlaceholder: "Ange checklistbeskrivning för automatiska frågeförslag (minst 10 tecken)...",
+        questions: "Frågor",
+        suggest: "Föreslå",
+        suggesting: "Föreslår...",
+        optimize: "Optimera",
+        optimizeTooltip: "En Kunskapsbas måste väljas för att aktivera Optimera-funktionen",
+        optimizeTooltipEnabled: "Optimera frågor baserat på vald Kunskapsbas",
+        uploadFiles: "Ladda upp Filer",
+        knowledgeBase: "Kunskapsbas",
+        referenceDocuments: "Referensdokument (Valfritt)",
+        selectKnowledgeBasePlaceholder: "Välj Kunskapsbas...",
+        noKnowledgeBasesAvailable: "Ingen Kunskapsbas tillgänglig. Skapa en först för att använda denna funktion.",
+        copyQuestions: "Kopiera Frågor",
+        questionsCopied: "Frågor kopierade till urklipp",
+        noQuestionsToCopy: "Inga frågor att kopiera",
+        failedToCopyQuestions: "Misslyckades att kopiera frågor till urklipp",
+        saveChecklist: "Spara Checklista",
+        cancel: "Avbryt",
+        deleteChecklist: "Ta bort Checklista"
+      },
       common: {
         loading: "Laddar...",
         noData: "Ingen data tillgänglig",
@@ -145,6 +196,56 @@ export const addNordicTranslations = (resources: any) => {
         cut: "Klipp ut",
       },
     },
+  }
+
+  // Add Model Selection translations to Swedish
+  resources.sv.common.modelSelection = {
+    llmManagement: "LLM-hantering",
+    llmDescription: "Konfigurera och hantera LLM:er som används för att generera textsvar. Standardmodellen kommer att användas för alla operationer.",
+    addNewLlm: "Lägg till ny LLM",
+    noLlmsConfigured: "Inga LLM:er konfigurerade",
+    addNewLlmToGetStarted: "Lägg till en ny LLM för att komma igång",
+    embeddingModelManagement: "Inbäddningsmodell-hantering",
+    embeddingDescription: "Konfigurera och hantera inbäddningsmodeller som används för kunskapsbasindexering och hämtning. Standardmodellen kommer att användas när nya kunskapsbaser skapas, men varje kunskapsbas kommer att fortsätta använda sin ursprungliga inbäddningsmodell även om standarden ändras senare.",
+    addEmbeddingModel: "Lägg till inbäddningsmodell",
+    noEmbeddingModelsConfigured: "Inga inbäddningsmodeller konfigurerade",
+    addNewEmbeddingModelToGetStarted: "Lägg till en ny inbäddningsmodell för att komma igång",
+    tableHeaders: {
+      name: "Namn",
+      modelId: "Modell-ID",
+      provider: "Leverantör",
+      description: "Beskrivning",
+      status: "Status",
+      actions: "Åtgärder"
+    },
+    status: {
+      default: "Standard",
+      available: "Tillgänglig"
+    },
+    actions: {
+      setAsDefault: "Ange som standard",
+      delete: "Ta bort",
+      validate: "Validera",
+      validating: "Validerar"
+    },
+    dialog: {
+      addNewLlm: "Lägg till ny LLM",
+      addEmbeddingModel: "Lägg till inbäddningsmodell",
+      displayName: "Visningsnamn",
+      provider: "Leverantör",
+      modelId: "Modell-ID",
+      description: "Beskrivning",
+      cancel: "Avbryt",
+      addModel: "Lägg till modell"
+    },
+    placeholders: {
+      customModel: "t.ex., Min anpassade modell",
+      embeddingModelId: "t.ex., sentence-transformers/all-MiniLM-L6-v2",
+      describeModel: "Beskriv modellen, dess egenskaper och när den ska användas"
+    },
+    validation: {
+      pleaseEnterModelId: "Vänligen ange ett modell-ID"
+    }
   }
 
   // Norwegian
@@ -246,7 +347,108 @@ export const addNordicTranslations = (resources: any) => {
         paste: "Lim inn",
         cut: "Klipp ut",
       },
+      review: {
+        pageTitle: "Gjennomgå Dokumenter",
+        pageDescription: "Gjennomgå et dokument basert på brukerdefinert sjekkliste og policydatabase.",
+        knowledgeBaseTitle: "Kunnskapsbase",
+        knowledgeBaseDescription: "Klikk for å velge",
+        checklistTitle: "Sjekkliste",
+        checklistDescription: "Klikk for å velge",
+        customInstructionsTitle: "Tilpassede Instruksjoner (Valgfritt)",
+        customInstructionsPlaceholder: "Skriv inn tilleggsinstruksjoner som bør vurderes når sjekklistespørsmål besvares...",
+        customInstructionsHelp: "{count}/2000 tegn. Disse instruksjonene vil bli lagt til hvert spørsmål under behandling.",
+        searchModeHelp: "Vektorsøk gir raske, målrettede resultater. Full dokumentanalyse undersøker alt innhold i kunnskapsbasen.",
+        processingFile: "Behandler fil...",
+        processingFiles: "Behandler filer...",
+        selectKnowledgeBaseTitle: "Velg Kunnskapsbase",
+        selectChecklistTitle: "Velg Sjekkliste",
+        noResults: "Ingen resultater ennå",
+        uploadDocuments: "Last opp ett eller flere dokumenter for å gjennomgå mot din valgte sjekkliste",
+        results: "Resultater",
+        downloadReport: "Last ned Rapport",
+        downloadCsv: "Last ned CSV",
+        clearResults: "Fjern Resultater",
+        copyReport: "Kopier Rapport",
+        reportCopied: "Rapport kopiert til utklippstavle!",
+        reviewButton: "Gjennomgå",
+        consultDocuments: "Konsulter dokumenter",
+        noChecklistsAvailable: "Ingen sjekklister tilgjengelig. Opprett din første sjekkliste for å komme i gang.",
+        createChecklist: "Opprett Sjekkliste",
+        editChecklist: "Rediger Sjekkliste",
+        checklistName: "Sjekklistenavn",
+        checklistNamePlaceholder: "Skriv inn sjekklistenavn...",
+        checklistDescriptionLabel: "Beskrivelse",
+        checklistDescriptionPlaceholder: "Skriv inn sjekklistebeskrivelse for automatiske spørsmålsforslag (minimum 10 tegn)...",
+        questions: "Spørsmål",
+        suggest: "Foreslå",
+        suggesting: "Foreslår...",
+        optimize: "Optimaliser",
+        optimizeTooltip: "En Kunnskapsbase må velges for å aktivere Optimaliser-funksjonen",
+        optimizeTooltipEnabled: "Optimaliser spørsmål basert på valgt Kunnskapsbase",
+        uploadFiles: "Last opp Filer",
+        knowledgeBase: "Kunnskapsbase",
+        referenceDocuments: "Referansedokumenter (Valgfritt)",
+        selectKnowledgeBasePlaceholder: "Velg Kunnskapsbase...",
+        noKnowledgeBasesAvailable: "Ingen Kunnskapsbase tilgjengelig. Opprett en først for å bruke denne funksjonen.",
+        copyQuestions: "Kopier Spørsmål",
+        questionsCopied: "Spørsmål kopiert til utklippstavle",
+        noQuestionsToCopy: "Ingen spørsmål å kopiere",
+        failedToCopyQuestions: "Kunne ikke kopiere spørsmål til utklippstavle",
+        saveChecklist: "Lagre Sjekkliste",
+        cancel: "Avbryt",
+        deleteChecklist: "Slett Sjekkliste"
+      },
     },
+  }
+
+  // Add Model Selection translations to Norwegian
+  resources.no.common.modelSelection = {
+    llmManagement: "LLM-håndtering",
+    llmDescription: "Konfigurer og administrer LLM-er som brukes til å generere tekstsvar. Standardmodellen vil bli brukt for alle operasjoner.",
+    addNewLlm: "Legg til ny LLM",
+    noLlmsConfigured: "Ingen LLM-er konfigurert",
+    addNewLlmToGetStarted: "Legg til en ny LLM for å komme i gang",
+    embeddingModelManagement: "Embedding-modellhåndtering",
+    embeddingDescription: "Konfigurer og administrer embedding-modeller som brukes til kunnskapsbaseindeksering og henting. Standardmodellen vil bli brukt når nye kunnskapsbaser opprettes, men hver kunnskapsbase vil fortsette å bruke sin opprinnelige embedding-modell selv om standarden endres senere.",
+    addEmbeddingModel: "Legg til embedding-modell",
+    noEmbeddingModelsConfigured: "Ingen embedding-modeller konfigurert",
+    addNewEmbeddingModelToGetStarted: "Legg til en ny embedding-modell for å komme i gang",
+    tableHeaders: {
+      name: "Navn",
+      modelId: "Modell-ID",
+      provider: "Leverandør",
+      description: "Beskrivelse",
+      status: "Status",
+      actions: "Handlinger"
+    },
+    status: {
+      default: "Standard",
+      available: "Tilgjengelig"
+    },
+    actions: {
+      setAsDefault: "Sett som standard",
+      delete: "Slett",
+      validate: "Valider",
+      validating: "Validerer"
+    },
+    dialog: {
+      addNewLlm: "Legg til ny LLM",
+      addEmbeddingModel: "Legg til embedding-modell",
+      displayName: "Visningsnavn",
+      provider: "Leverandør",
+      modelId: "Modell-ID",
+      description: "Beskrivelse",
+      cancel: "Avbryt",
+      addModel: "Legg til modell"
+    },
+    placeholders: {
+      customModel: "f.eks., Min tilpassede modell",
+      embeddingModelId: "f.eks., sentence-transformers/all-MiniLM-L6-v2",
+      describeModel: "Beskriv modellen, dens egenskaper og når den skal brukes"
+    },
+    validation: {
+      pleaseEnterModelId: "Vennligst skriv inn en modell-ID"
+    }
   }
 
   // Danish
@@ -347,6 +549,57 @@ export const addNordicTranslations = (resources: any) => {
         copy: "Kopier",
         paste: "Indsæt",
         cut: "Klip",
+      },
+      review: {
+        pageTitle: "Gennemgå Dokumenter",
+        pageDescription: "Gennemgå et dokument baseret på brugerdefineret tjekliste og politikdatabase.",
+        knowledgeBaseTitle: "Vidensbase",
+        knowledgeBaseDescription: "Klik for at vælge",
+        checklistTitle: "Tjekliste",
+        checklistDescription: "Klik for at vælge",
+        customInstructionsTitle: "Tilpassede Instruktioner (Valgfrit)",
+        customInstructionsPlaceholder: "Indtast yderligere instruktioner, der skal overvejes, når tjeklistespørgsmål besvares...",
+        customInstructionsHelp: "{count}/2000 tegn. Disse instruktioner vil blive tilføjet til hvert spørgsmål under behandling.",
+        searchModeHelp: "Vektorsøgning giver hurtige, målrettede resultater. Fuld dokumentanalyse undersøger alt indhold i vidensbasen.",
+        processingFile: "Behandler fil...",
+        processingFiles: "Behandler filer...",
+        selectKnowledgeBaseTitle: "Vælg Vidensbase",
+        selectChecklistTitle: "Vælg Tjekliste",
+        noResults: "Ingen resultater endnu",
+        uploadDocuments: "Upload et eller flere dokumenter til gennemgang mod din valgte tjekliste",
+        results: "Resultater",
+        downloadReport: "Download Rapport",
+        downloadCsv: "Download CSV",
+        clearResults: "Ryd Resultater",
+        copyReport: "Kopier Rapport",
+        reportCopied: "Rapport kopieret til udklipsholder!",
+        reviewButton: "Gennemgå",
+        consultDocuments: "Konsulter dokumenter",
+        noChecklistsAvailable: "Ingen tjeklister tilgængelige. Opret din første tjekliste for at komme i gang.",
+        createChecklist: "Opret Tjekliste",
+        editChecklist: "Rediger Tjekliste",
+        checklistName: "Tjeklistenavn",
+        checklistNamePlaceholder: "Indtast tjeklistenavn...",
+        checklistDescriptionLabel: "Beskrivelse",
+        checklistDescriptionPlaceholder: "Indtast tjeklistebeskrivelse for automatiske spørgsmålsforslag (minimum 10 tegn)...",
+        questions: "Spørgsmål",
+        suggest: "Foreslå",
+        suggesting: "Foreslår...",
+        optimize: "Optimer",
+        optimizeTooltip: "En Vidensbase skal vælges for at aktivere Optimer-funktionen",
+        optimizeTooltipEnabled: "Optimer spørgsmål baseret på valgt Vidensbase",
+        uploadFiles: "Upload Filer",
+        knowledgeBase: "Vidensbase",
+        referenceDocuments: "Referencedokumenter (Valgfrit)",
+        selectKnowledgeBasePlaceholder: "Vælg Vidensbase...",
+        noKnowledgeBasesAvailable: "Ingen Vidensbase tilgængelig. Opret en først for at bruge denne funktion.",
+        copyQuestions: "Kopier Spørgsmål",
+        questionsCopied: "Spørgsmål kopieret til udklipsholder",
+        noQuestionsToCopy: "Ingen spørgsmål at kopiere",
+        failedToCopyQuestions: "Kunne ikke kopiere spørgsmål til udklipsholder",
+        saveChecklist: "Gem Tjekliste",
+        cancel: "Annuller",
+        deleteChecklist: "Slet Tjekliste"
       },
     },
   }
@@ -450,6 +703,314 @@ export const addNordicTranslations = (resources: any) => {
         paste: "Liitä",
         cut: "Leikkaa",
       },
+      review: {
+        pageTitle: "Tarkasta Asiakirjat",
+        pageDescription: "Tarkasta asiakirja käyttäjän määrittelemän tarkistuslistan ja käytäntötietokannan perusteella.",
+        knowledgeBaseTitle: "Tietokanta",
+        knowledgeBaseDescription: "Napsauta valitaksesi",
+        checklistTitle: "Tarkistuslista",
+        checklistDescription: "Napsauta valitaksesi",
+        customInstructionsTitle: "Mukautetut Ohjeet (Valinnainen)",
+        customInstructionsPlaceholder: "Syötä lisäohjeita, jotka tulisi ottaa huomioon tarkistuslistakysymyksiä vastattaessa...",
+        customInstructionsHelp: "{count}/2000 merkkiä. Nämä ohjeet lisätään jokaiseen kysymykseen käsittelyn aikana.",
+        searchModeHelp: "Vektorihaku tarjoaa nopeita, kohdennettuja tuloksia. Täydellinen asiakirja-analyysi tutkii kaiken tietokannan sisällön.",
+        processingFile: "Käsitellään tiedostoa...",
+        processingFiles: "Käsitellään tiedostoja...",
+        selectKnowledgeBaseTitle: "Valitse Tietokanta",
+        selectChecklistTitle: "Valitse Tarkistuslista",
+        noResults: "Ei tuloksia vielä",
+        uploadDocuments: "Lataa yksi tai useampi asiakirja tarkastettavaksi valittua tarkistuslistaa vastaan",
+        results: "Tulokset",
+        downloadReport: "Lataa Raportti",
+        downloadCsv: "Lataa CSV",
+        clearResults: "Tyhjennä Tulokset",
+        copyReport: "Kopioi Raportti",
+        reportCopied: "Raportti kopioitu leikepöydälle!",
+        reviewButton: "Tarkasta",
+        consultDocuments: "Konsultoi asiakirjoja",
+        noChecklistsAvailable: "Ei tarkistuslistoja saatavilla. Luo ensimmäinen tarkistuslistasi aloittaaksesi.",
+        createChecklist: "Luo Tarkistuslista",
+        editChecklist: "Muokkaa Tarkistuslistaa",
+        checklistName: "Tarkistuslistan Nimi",
+        checklistNamePlaceholder: "Syötä tarkistuslistan nimi...",
+        checklistDescriptionLabel: "Kuvaus",
+        checklistDescriptionPlaceholder: "Syötä tarkistuslistan kuvaus automaattisia kysymysehdotuksia varten (vähintään 10 merkkiä)...",
+        questions: "Kysymykset",
+        suggest: "Ehdota",
+        suggesting: "Ehdottaa...",
+        optimize: "Optimoi",
+        optimizeTooltip: "Tietokanta on valittava Optimoi-toiminnon käyttöönottamiseksi",
+        optimizeTooltipEnabled: "Optimoi kysymykset valitun Tietokannan perusteella",
+        uploadFiles: "Lataa Tiedostoja",
+        knowledgeBase: "Tietokanta",
+        referenceDocuments: "Viiteasiakirjat (Valinnainen)",
+        selectKnowledgeBasePlaceholder: "Valitse Tietokanta...",
+        noKnowledgeBasesAvailable: "Ei Tietokantaa saatavilla. Luo ensin yksi käyttääksesi tätä toimintoa.",
+        copyQuestions: "Kopioi Kysymykset",
+        questionsCopied: "Kysymykset kopioitu leikepöydälle",
+        noQuestionsToCopy: "Ei kysymyksiä kopioitavaksi",
+        failedToCopyQuestions: "Kysymysten kopiointi leikepöydälle epäonnistui",
+        saveChecklist: "Tallenna Tarkistuslista",
+        cancel: "Peruuta",
+        deleteChecklist: "Poista Tarkistuslista"
+      },
     },
+  }
+
+  // Add Model Selection translations to Danish  
+  resources.da.common.modelSelection = {
+    llmManagement: "LLM-styring",
+    llmDescription: "Konfigurer og administrer LLM'er, der bruges til at generere tekstsvar. Standardmodellen vil blive brugt til alle operationer.",
+    addNewLlm: "Tilføj ny LLM",
+    noLlmsConfigured: "Ingen LLM'er konfigureret",
+    addNewLlmToGetStarted: "Tilføj en ny LLM for at komme i gang",
+    embeddingModelManagement: "Embedding-modelstyring",
+    embeddingDescription: "Konfigurer og administrer embedding-modeller, der bruges til vidensbaseindeksering og hentning. Standardmodellen vil blive brugt, når nye vidensbaserne oprettes, men hver vidensbase vil fortsætte med at bruge sin oprindelige embedding-model, selv om standarden ændres senere.",
+    addEmbeddingModel: "Tilføj embedding-model",
+    noEmbeddingModelsConfigured: "Ingen embedding-modeller konfigureret",
+    addNewEmbeddingModelToGetStarted: "Tilføj en ny embedding-model for at komme i gang",
+    tableHeaders: {
+      name: "Navn",
+      modelId: "Model-ID",
+      provider: "Udbyder",
+      description: "Beskrivelse",
+      status: "Status",
+      actions: "Handlinger"
+    },
+    status: {
+      default: "Standard",
+      available: "Tilgængelig"
+    },
+    actions: {
+      setAsDefault: "Indstil som standard",
+      delete: "Slet",
+      validate: "Valider",
+      validating: "Validerer"
+    },
+    dialog: {
+      addNewLlm: "Tilføj ny LLM",
+      addEmbeddingModel: "Tilføj embedding-model",
+      displayName: "Visningsnavn",
+      provider: "Udbyder",
+      modelId: "Model-ID",
+      description: "Beskrivelse",
+      cancel: "Annuller",
+      addModel: "Tilføj model"
+    },
+    placeholders: {
+      customModel: "f.eks., Min tilpassede model",
+      embeddingModelId: "f.eks., sentence-transformers/all-MiniLM-L6-v2",
+      describeModel: "Beskriv modellen, dens karakteristika og hvornår den skal bruges"
+    },
+    validation: {
+      pleaseEnterModelId: "Indtast venligst et model-ID"
+    }
+  }
+
+  // Add Model Selection translations to Finnish
+  resources.fi.common.modelSelection = {
+    llmManagement: "LLM-hallinta",
+    llmDescription: "Määritä ja hallinnoi LLM-malleja, joita käytetään tekstivastausten luomiseen. Oletusmallia käytetään kaikkiin toimintoihin.",
+    addNewLlm: "Lisää uusi LLM",
+    noLlmsConfigured: "LLM-malleja ei ole määritetty",
+    addNewLlmToGetStarted: "Lisää uusi LLM aloittaaksesi",
+    embeddingModelManagement: "Upotusmallin hallinta",
+    embeddingDescription: "Määritä ja hallinnoi upotusmalleja, joita käytetään tietokantaindeksointiin ja hakuun. Oletusmallia käytetään uusia tietokantoja luotaessa, mutta jokainen tietokanta jatkaa alkuperäisen upotusmalllinsa käyttöä, vaikka oletus muuttuisi myöhemmin.",
+    addEmbeddingModel: "Lisää upotusmalli",
+    noEmbeddingModelsConfigured: "Upotusmalleja ei ole määritetty",
+    addNewEmbeddingModelToGetStarted: "Lisää uusi upotusmalli aloittaaksesi",
+    tableHeaders: {
+      name: "Nimi",
+      modelId: "Mallin ID",
+      provider: "Palveluntarjoaja",
+      description: "Kuvaus",
+      status: "Tila",
+      actions: "Toiminnot"
+    },
+    status: {
+      default: "Oletus",
+      available: "Saatavilla"
+    },
+    actions: {
+      setAsDefault: "Aseta oletukseksi",
+      delete: "Poista",
+      validate: "Vahvista",
+      validating: "Vahvistetaan"
+    },
+    dialog: {
+      addNewLlm: "Lisää uusi LLM",
+      addEmbeddingModel: "Lisää upotusmalli",
+      displayName: "Näyttönimi",
+      provider: "Palveluntarjoaja",
+      modelId: "Mallin ID",
+      description: "Kuvaus",
+      cancel: "Peruuta",
+      addModel: "Lisää malli"
+    },
+    placeholders: {
+      customModel: "esim., Oma mukautettu malli",
+      embeddingModelId: "esim., sentence-transformers/all-MiniLM-L6-v2",
+      describeModel: "Kuvaile malli, sen ominaisuudet ja milloin sitä käytetään"
+    },
+    validation: {
+      pleaseEnterModelId: "Syötä mallin ID"
+    }
+  }
+
+  // Add Knowledge Bases translations
+  if (!resources.sv.common.knowledgeBases) {
+    resources.sv.common.knowledgeBases = {
+      title: "Kunskapsbaser",
+      description: "Hantera och organisera dina dokument i kunskapsbaser för effektiva AI-drivna interaktioner.",
+      createNew: "Skapa ny kunskapsbas",
+      noKnowledgeBases: "Inga kunskapsbaser har skapats ännu",
+      getStarted: "Skapa din första kunskapsbas för att komma igång",
+      tableHeaders: {
+        name: "Namn",
+        description: "Beskrivning",
+        documents: "Dokument",
+        createdAt: "Skapad",
+        actions: "Åtgärder"
+      },
+      actions: {
+        view: "Visa",
+        edit: "Redigera",
+        delete: "Radera",
+        configure: "Konfigurera"
+      },
+      dialog: {
+        createNew: "Skapa ny kunskapsbas",
+        editKnowledgeBase: "Redigera kunskapsbas",
+        name: "Namn",
+        description: "Beskrivning",
+        cancel: "Avbryt",
+        create: "Skapa",
+        save: "Spara"
+      },
+      placeholders: {
+        knowledgeBaseName: "t.ex., Företagspolicyer",
+        knowledgeBaseDescription: "Beskriv vad denna kunskapsbas innehåller och dess syfte"
+      },
+      validation: {
+        pleaseEnterName: "Vänligen ange ett namn för kunskavsbasen"
+      }
+    }
+  }
+
+  if (!resources.no.common.knowledgeBases) {
+    resources.no.common.knowledgeBases = {
+      title: "Kunnskapsbaser",
+      description: "Administrer og organiser dokumentene dine i kunnskapsbaser for effektive AI-drevne interaksjoner.",
+      createNew: "Opprett ny kunnskapsbase",
+      noKnowledgeBases: "Ingen kunnskapsbaser er opprettet ennå",
+      getStarted: "Opprett din første kunnskapsbase for å komme i gang",
+      tableHeaders: {
+        name: "Navn",
+        description: "Beskrivelse",
+        documents: "Dokumenter",
+        createdAt: "Opprettet",
+        actions: "Handlinger"
+      },
+      actions: {
+        view: "Vis",
+        edit: "Rediger",
+        delete: "Slett",
+        configure: "Konfigurer"
+      },
+      dialog: {
+        createNew: "Opprett ny kunnskapsbase",
+        editKnowledgeBase: "Rediger kunnskapsbase",
+        name: "Navn",
+        description: "Beskrivelse",
+        cancel: "Avbryt",
+        create: "Opprett",
+        save: "Lagre"
+      },
+      placeholders: {
+        knowledgeBaseName: "f.eks., Selskapspolicyer",
+        knowledgeBaseDescription: "Beskriv hva denne kunnskapsbasen inneholder og formålet"
+      },
+      validation: {
+        pleaseEnterName: "Vennligst skriv inn et navn for kunnskapsbasen"
+      }
+    }
+  }
+
+  if (!resources.da.common.knowledgeBases) {
+    resources.da.common.knowledgeBases = {
+      title: "Videnbaser",
+      description: "Administrer og organiser dine dokumenter i videnbaser for effektive AI-drevne interaktioner.",
+      createNew: "Opret ny videnbase",
+      noKnowledgeBases: "Ingen videnbaser er oprettet endnu",
+      getStarted: "Opret din første videnbase for at komme i gang",
+      tableHeaders: {
+        name: "Navn",
+        description: "Beskrivelse",
+        documents: "Dokumenter",
+        createdAt: "Oprettet",
+        actions: "Handlinger"
+      },
+      actions: {
+        view: "Vis",
+        edit: "Rediger",
+        delete: "Slet",
+        configure: "Konfigurer"
+      },
+      dialog: {
+        createNew: "Opret ny videnbase",
+        editKnowledgeBase: "Rediger videnbase",
+        name: "Navn",
+        description: "Beskrivelse",
+        cancel: "Annuller",
+        create: "Opret",
+        save: "Gem"
+      },
+      placeholders: {
+        knowledgeBaseName: "f.eks., Firmapolitikker",
+        knowledgeBaseDescription: "Beskriv hvad denne videnbase indeholder og formålet"
+      },
+      validation: {
+        pleaseEnterName: "Indtast venligst et navn til videnbasen"
+      }
+    }
+  }
+
+  if (!resources.fi.common.knowledgeBases) {
+    resources.fi.common.knowledgeBases = {
+      title: "Tietokannat",
+      description: "Hallinnoi ja järjestä dokumenttisi tietokantoihin tehokkaita AI-avusteisia vuorovaikutuksia varten.",
+      createNew: "Luo uusi tietokanta",
+      noKnowledgeBases: "Tietokantoja ei ole vielä luotu",
+      getStarted: "Luo ensimmäinen tietokantasi aloittaaksesi",
+      tableHeaders: {
+        name: "Nimi",
+        description: "Kuvaus",
+        documents: "Dokumentit",
+        createdAt: "Luotu",
+        actions: "Toiminnot"
+      },
+      actions: {
+        view: "Näytä",
+        edit: "Muokkaa",
+        delete: "Poista",
+        configure: "Määritä"
+      },
+      dialog: {
+        createNew: "Luo uusi tietokanta",
+        editKnowledgeBase: "Muokkaa tietokantaa",
+        name: "Nimi",
+        description: "Kuvaus",
+        cancel: "Peruuta",
+        create: "Luo",
+        save: "Tallenna"
+      },
+      placeholders: {
+        knowledgeBaseName: "esim., Yrityksen käytännöt",
+        knowledgeBaseDescription: "Kuvaile mitä tämä tietokanta sisältää ja sen tarkoitus"
+      },
+      validation: {
+        pleaseEnterName: "Anna tietokannalle nimi"
+      }
+    }
   }
 }

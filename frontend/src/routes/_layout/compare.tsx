@@ -5,6 +5,7 @@ import { useDropzone } from "react-dropzone"
 import { FiCheck, FiCopy, FiFile, FiFileText, FiTrash2, FiUpload } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import { useTranslation } from "react-i18next"
 
 import {
   type KnowledgeBasePublic,
@@ -23,6 +24,7 @@ import { copyToClipboard } from "@/utils/copyToClipboard"
 import { useMutation } from "@tanstack/react-query"
 
 const TwinCheck = () => {
+  const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { compareResult, setCompareResult, compareInputs, setCompareInputs, clearCompareResult } =
     useResults()
@@ -319,12 +321,12 @@ const TwinCheck = () => {
 
   const handleCompare = async () => {
     if (!document1) {
-      showErrorToast("Please upload Document 1")
+      showErrorToast(t("compare.selectFirstDocument"))
       return
     }
 
     if (!document2) {
-      showErrorToast("Please upload Document 2")
+      showErrorToast(t("compare.selectSecondDocument"))
       return
     }
 
@@ -369,7 +371,7 @@ const TwinCheck = () => {
     <Container maxW="container.xl" py={8}>
       {/* Tab description */}
       <Text fontSize="sm" color="gray.500" textAlign="center" mb={4} fontStyle="italic">
-        Compare documents based on a user-defined list of topics.
+        {t("compare.subtitle")}
       </Text>
 
       {/* Loading overlay */}
@@ -389,7 +391,7 @@ const TwinCheck = () => {
         >
           <VStack gap={4}>
             <Spinner size="xl" color="blue.500" />
-            <Text fontWeight="medium">Comparing documents...</Text>
+            <Text fontWeight="medium">{t("compare.loadingComparison")}</Text>
           </VStack>
         </Box>
       )}
@@ -398,8 +400,8 @@ const TwinCheck = () => {
         <HStack width="100%" justify="space-between">
           <VStack gap={4} align="stretch" flex={1}>
             <SelectionCard
-              title="Topic List"
-              description={selectedComparison ? selectedComparison.name : "Click to select"}
+              title={t("compare.topicList")}
+              description={selectedComparison ? selectedComparison.name : t("compare.pleaseSelect")}
               icon={<FiFileText size={24} />}
               isSelected={!!selectedComparison}
               onClick={() => setShowTopicListModal(true)}
@@ -410,7 +412,7 @@ const TwinCheck = () => {
               <HStack gap={6} align="stretch">
                 <Box flex="1">
                   <FileUploader
-                    label="Document 1"
+                    label={t("compare.documentA")}
                     file={document1}
                     setFile={setDocument1}
                     accept={{
@@ -425,7 +427,7 @@ const TwinCheck = () => {
 
                 <Box flex="1">
                   <FileUploader
-                    label="Document 2"
+                    label={t("compare.documentB")}
                     file={document2}
                     setFile={setDocument2}
                     accept={{
@@ -445,7 +447,7 @@ const TwinCheck = () => {
         <SelectionModal
           isOpen={showTopicListModal}
           onClose={() => setShowTopicListModal(false)}
-          title="Select Topic List"
+          title={t("compare.title")}
         >
           <TopicListTable
             topicLists={comparisons}
@@ -477,7 +479,7 @@ const TwinCheck = () => {
                 bg: "rgba(0, 65, 72, 0.85)",
               }}
             >
-              Compare
+              {t("compare.compareDocuments")}
             </Button>
           </HStack>
 
@@ -493,7 +495,7 @@ const TwinCheck = () => {
           >
             <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
               <HStack justify="space-between" align="center" mb={4}>
-                <Heading size="md">Results</Heading>
+                <Heading size="md">{t("compare.comparison")}</Heading>
 
                 {compareResult && (
                   <HStack gap={2}>
@@ -647,7 +649,7 @@ const TwinCheck = () => {
                     )}
                   </>
                 ) : (
-                  <Text color="gray.500">Results will appear here after comparing documents.</Text>
+                  <Text color="gray.500">{t("compare.selectTwoDocuments")}</Text>
                 )}
               </Box>
             </Box>
@@ -670,6 +672,7 @@ const FileUploader = ({
   setFile: (file: File) => void
   accept?: Record<string, string[]>
 }) => {
+  const { t } = useTranslation()
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles) => {
       if (acceptedFiles.length > 0) {
@@ -710,9 +713,9 @@ const FileUploader = ({
           ) : (
             <>
               <Box as={FiUpload} color="gray.400" fontSize="2xl" />
-              <Text>Click to browse or drag & drop</Text>
+              <Text>{t("compare.clickToBrowse")}</Text>
               <Text fontSize="xs" color="gray.500">
-                Supports PDF, TXT, and DOCX
+                {t("compare.supportedFormats")}
               </Text>
             </>
           )}

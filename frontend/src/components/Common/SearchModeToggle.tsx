@@ -1,4 +1,5 @@
 import { HStack, Text, VStack } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
 import { Radio, RadioGroup } from "../ui/radio"
 import HelpTooltip from "../ui/help-tooltip"
 
@@ -15,11 +16,13 @@ const SearchModeToggle = ({
   isDisabled = false,
   helpKey,
 }: SearchModeToggleProps) => {
+  const { t } = useTranslation()
+
   return (
     <VStack align="stretch" gap={2}>
       <HStack align="center">
         <Text fontSize="sm" fontWeight="medium">
-          Search Mode
+          {t("review.searchMode")}
         </Text>
         {helpKey && <HelpTooltip helpKey={helpKey} />}
       </HStack>
@@ -29,14 +32,14 @@ const SearchModeToggle = ({
         disabled={isDisabled}
       >
         <HStack gap={4}>
-          <Radio value="vector">Vector Search</Radio>
-          <Radio value="full_scan">Full Document Scan</Radio>
+          <Radio value="vector">{t("review.vectorSearch")}</Radio>
+          <Radio value="full_scan">{t("review.fullDocumentScan")}</Radio>
         </HStack>
       </RadioGroup>
       <Text fontSize="xs" color="gray.500">
         {searchMode === "vector"
-          ? "Finds relevant content using AI similarity search (fast, targeted)"
-          : "Analyzes all documents in the knowledge base (comprehensive, thorough)"}
+          ? t("review.vectorSearchDescription")
+          : t("review.fullScanDescription")}
       </Text>
     </VStack>
   )

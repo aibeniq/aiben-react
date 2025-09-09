@@ -13,6 +13,7 @@ import { useEffect, useState } from "react"
 import { FiCheck, FiCopy, FiFileText, FiTrash2 } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import { useTranslation } from "react-i18next"
 import FileUpload, { type FileItem } from "../../components/Common/FileUpload"
 import SearchModeToggle from "../../components/Common/SearchModeToggle"
 import SelectionCard from "../../components/Common/SelectionCard"
@@ -23,6 +24,7 @@ import { useResults } from "../../contexts/ResultsContext"
 import { copyToClipboard } from "../../utils/copyToClipboard"
 
 const FormConnect = () => {
+  const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { matchResult, setMatchResult, matchInputs, setMatchInputs, clearMatchResult } =
     useResults()
@@ -299,12 +301,12 @@ const FormConnect = () => {
 
   const handleRun = async () => {
     if (fileItems.length < 1) {
-      showErrorToast("Please upload at least one file.")
+      showErrorToast(t("match.selectDocument"))
       return
     }
 
     if (!fields.trim()) {
-      showErrorToast("Please enter at least one field.")
+      showErrorToast(t("match.selectDocumentToMatch"))
       return
     }
 
@@ -334,15 +336,15 @@ const FormConnect = () => {
     <Container maxW="container.xl" py={8}>
       {/* Tab description */}
       <Text fontSize="sm" color="gray.500" textAlign="center" mb={4} fontStyle="italic">
-        Ensure that documents match based on a user-defined list of fields.
+        {t("match.subtitle")}
       </Text>
 
       <VStack gap={6} align="stretch">
         <HStack width="100%" justify="space-between">
           <VStack gap={4} align="stretch" flex={1}>
             <SelectionCard
-              title="Form Template"
-              description={selectedForm ? selectedForm.name : "Click to select"}
+              title={t("match.sourceDocument")}
+              description={selectedForm ? selectedForm.name : t("match.pleaseSelect")}
               icon={<FiFileText size={24} />}
               isSelected={!!selectedForm}
               onClick={() => setShowFormModal(true)}
@@ -367,7 +369,7 @@ const FormConnect = () => {
         <SelectionModal
           isOpen={showFormModal}
           onClose={() => setShowFormModal(false)}
-          title="Select Form Template"
+          title={t("match.title")}
         >
           <FormTemplateTable
             forms={forms}
@@ -408,7 +410,7 @@ const FormConnect = () => {
                 bg: "rgba(0, 65, 72, 0.85)",
               }}
             >
-              Match
+              {t("match.findMatches")}
             </Button>
           </HStack>
 
@@ -516,7 +518,7 @@ const FormConnect = () => {
                     )}
                   </>
                 ) : (
-                  <Text color="gray.500">Results will appear here after running.</Text>
+                  <Text color="gray.500">{t("match.selectDocumentToMatch")}</Text>
                 )}
               </Box>
             </Box>
