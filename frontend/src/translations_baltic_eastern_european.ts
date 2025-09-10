@@ -63,6 +63,10 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         welcome: "Tere! Kuidas saan teid täna aidata?",
         welcomeMessageWithSource: "Valige teadmusbaas või laadige üles failid, seejärel esitage küsimus.",
         welcomeMessageGeneral: "Küsige mult mida tahes! Teadmusbaasi otsinguks valige esmalt teadmusbaas.",
+        knowledgeBaseTableName: "Nimi",
+        knowledgeBaseTableDescription: "Kirjeldus",
+        knowledgeBaseTableSources: "Allikad",
+        knowledgeBaseTablePages: "Leheküljed",
       },
       settings: {
         title: "Seaded",
@@ -435,6 +439,10 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         welcome: "Sveiki! Kā es varu jums palīdzēt šodien?",
         welcomeMessageWithSource: "Izvēlieties zināšanu bāzi vai augšupielādējiet failus, pēc tam uzdodiet jautājumu.",
         welcomeMessageGeneral: "Jautājiet man jebko! Zināšanu bāzes meklēšanai vispirms izvēlieties zināšanu bāzi.",
+        knowledgeBaseTableName: "Nosaukums",
+        knowledgeBaseTableDescription: "Apraksts",
+        knowledgeBaseTableSources: "Avoti",
+        knowledgeBaseTablePages: "Lapas",
       },
       settings: {
         title: "Iestatījumi",
@@ -807,6 +815,10 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         welcome: "Sveiki! Kaip galiu jums šiandien padėti?",
         welcomeMessageWithSource: "Pasirinkite žinių bazę arba įkelkite failus, tada užduokite klausimą.",
         welcomeMessageGeneral: "Klausykite manęs bet ko! Žinių bazės paieškai pirmiausia pasirinkite žinių bazę.",
+        knowledgeBaseTableName: "Pavadinimas",
+        knowledgeBaseTableDescription: "Aprašymas",
+        knowledgeBaseTableSources: "Šaltiniai",
+        knowledgeBaseTablePages: "Puslapiai",
       },
       settings: {
         title: "Nustatymai",
@@ -1179,6 +1191,10 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         welcome: "Γεια σας! Πώς μπορώ να σας βοηθήσω σήμερα;",
         welcomeMessageWithSource: "Επιλέξτε μια βάση γνώσεων ή ανεβάστε αρχεία, στη συνέχεια κάντε μια ερώτηση.",
         welcomeMessageGeneral: "Ρωτήστε με οτιδήποτε! Για αναζήτηση στη βάση γνώσεων, επιλέξτε πρώτα μια βάση γνώσεων.",
+        knowledgeBaseTableName: "Όνομα",
+        knowledgeBaseTableDescription: "Περιγραφή",
+        knowledgeBaseTableSources: "Πηγές",
+        knowledgeBaseTablePages: "Σελίδες",
       },
       settings: {
         title: "Ρυθμίσεις",
