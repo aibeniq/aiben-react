@@ -99,23 +99,30 @@ async def extract_text_from_file_async(file_content: bytes, filename: str) -> st
     Async wrapper for text extraction to prevent blocking on large files.
     Uses ThreadPoolExecutor for CPU-intensive text extraction operations.
     """
-    # Define size threshold for async processing (50KB)
-    SIZE_THRESHOLD = 50 * 1024
+    # Always use thread pool for DOCX files since they can be slow to process
+    # regardless of size
+    is_docx = filename.lower().endswith(('.docx', '.doc'))
+    
+    # Define size threshold for async processing
+    if is_docx:
+        SIZE_THRESHOLD = 10 * 1024  # Very low threshold for DOCX files (10KB)
+    else:
+        SIZE_THRESHOLD = 50 * 1024  # 50KB for other files
 
-    if len(file_content) > SIZE_THRESHOLD:
+    if len(file_content) > SIZE_THRESHOLD or is_docx:
         print(
-            f"Large file detected ({len(file_content)} bytes), processing in thread pool"
+            f"File requires thread pool processing ({len(file_content)} bytes, is_docx: {is_docx})"
         )
 
         # Process in thread pool to avoid blocking the event loop
         loop = asyncio.get_event_loop()
-        with ThreadPoolExecutor() as executor:
+        with ThreadPoolExecutor(max_workers=1) as executor:
             document_text = await loop.run_in_executor(
                 executor, extract_text_from_file, file_content, filename
             )
         return document_text
     else:
-        # For small files, process synchronously
+        # For small non-DOCX files, process synchronously
         return extract_text_from_file(file_content, filename)
 
 
@@ -554,17 +561,14 @@ async def process_rag_checklist(
             # Add regular files
             if files:
                 for file in files:
-                    all_files_to_process.append((file, "digitized"))
+                    if file.filename:
+                        all_files_to_process.append((file, "digitized"))
 
             # Add handwritten files
             if handwritten_files:
                 for file in handwritten_files:
-                    all_files_to_process.append((file, "handwritten"))
-
-            if not all_files_to_process:
-                raise HTTPException(
-                    status_code=400, detail="No files provided for processing"
-                )
+                    if file.filename:
+                        all_files_to_process.append((file, "handwritten"))
 
             # For now, process the first file (can be extended to handle multiple files)
             file, file_type = all_files_to_process[0]
@@ -577,10 +581,23 @@ async def process_rag_checklist(
                         status_code=400, detail="File appears to be empty"
                     )
 
+                # Check if this is a potentially slow file to process
+                is_large_file = len(content) > 50000
+                is_docx_file = file.filename.lower().endswith(('.docx', '.doc'))
+                needs_special_handling = is_large_file or is_docx_file
+
+                # Temporarily disable disconnect monitoring for files that might take time to process
+                temp_disconnect_monitor = None
+                if needs_special_handling and disconnect_monitor:
+                    print(f"Large/DOCX file detected ({file.filename}), temporarily disabling disconnect monitoring during processing")
+                    temp_disconnect_monitor = disconnect_monitor
+                    disconnect_monitor.cancel()
+                    disconnect_monitor = None
+                    cancellation_requested = False  # Reset any false positive
+
                 # Extract text using the async extraction function
                 if file_type == "handwritten":
                     print(f"Processing handwritten file with OCR: {file.filename}")
-                    # For handwritten files, we can use the same extraction but potentially with enhanced OCR
                     document_text = await extract_text_from_file_async(
                         content, file.filename
                     )
@@ -598,17 +615,31 @@ async def process_rag_checklist(
 
                 print(f"Extracted {len(document_text)} characters from {file.filename}")
 
-                # For large files, cancel disconnect monitoring to prevent false positives
-                if (
-                    len(document_text) > 200000
-                ):  # Threshold for large documents like SBI.pdf
-                    print(
-                        "Large document detected, disabling disconnect monitoring to prevent false positives"
-                    )
-                    if disconnect_monitor:
-                        disconnect_monitor.cancel()
-                        disconnect_monitor = None
-                        cancellation_requested = False  # Reset any false positive
+                # Re-enable disconnect monitoring after successful processing, but only for smaller documents
+                # For very large documents, keep it disabled to prevent false positives during LLM processing
+                should_reenable_monitoring = (
+                    needs_special_handling and 
+                    len(document_text) < 150000 and  # Only re-enable for medium-sized documents
+                    request
+                )
+
+                if should_reenable_monitoring:
+                    print("Re-enabling disconnect monitoring after file processing")
+                    
+                    async def monitor_client_disconnect():
+                        nonlocal cancellation_requested
+                        try:
+                            await request.is_disconnected()
+                            print("Client disconnected, canceling operation...")
+                            cancellation_requested = True
+                        except asyncio.CancelledError:
+                            print("Disconnect monitor cancelled because main task completed")
+                        except Exception as e:
+                            print(f"Error in disconnect monitoring: {str(e)}")
+                    
+                    disconnect_monitor = asyncio.create_task(monitor_client_disconnect())
+                elif len(document_text) >= 150000:
+                    print(f"Very large document detected ({len(document_text)} chars), keeping disconnect monitoring disabled")
 
                 # Reset file position
                 await file.seek(0)
@@ -1452,10 +1483,13 @@ async def optimize_checklist(
                 f"Processing test document: {file.filename} ({len(document_text)} characters)"
             )
 
-            # For large files, cancel disconnect monitoring to prevent false positives
-            if len(document_text) > 200000:
+            # For large files or DOCX files, cancel disconnect monitoring to prevent false positives
+            is_docx = file.filename.lower().endswith(('.docx', '.doc'))
+            large_document_threshold = 100000 if is_docx else 200000  # Lower threshold for DOCX
+            
+            if len(document_text) > large_document_threshold or (is_docx and len(content) > 50000):
                 print(
-                    "Large test document detected, disabling disconnect monitoring to prevent false positives"
+                    f"Large document detected ({file.filename}), disabling disconnect monitoring to prevent false positives"
                 )
                 if disconnect_monitor:
                     disconnect_monitor.cancel()
