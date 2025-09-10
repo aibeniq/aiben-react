@@ -7,7 +7,7 @@ import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { FiTrash } from "react-icons/fi"
 import { Radio, RadioGroup } from "../ui/radio"
-import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
+import { useAllKnowledgeBases } from "@/hooks/useAllKnowledgeBases"
 
 interface ChatMessage {
   role: "user" | "assistant"
@@ -62,7 +62,7 @@ const ChatbotPanel = ({
   setSearchMode,
 }: ChatbotPanelProps) => {
   const { t } = useTranslation()
-  const { knowledgeBases } = useKnowledgeBases()
+  const { knowledgeBases } = useAllKnowledgeBases() // Show all users' knowledge bases in dropdown
 
   // Scroll to bottom whenever messages change
   useEffect(() => {

@@ -382,7 +382,7 @@ const TopicListModal = ({
                                 setReferenceKnowledgeBase(kb || null)
                               }}
                             >
-                              <option value="">{t("common.dropdowns.selectKnowledgeBase")}</option>
+                              <option value="">{t("dropdowns.selectKnowledgeBase")}</option>
                               {knowledgeBases?.map((kb) => (
                                 <option key={kb.id} value={kb.id}>
                                   {kb.title}

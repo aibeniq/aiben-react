@@ -50,6 +50,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         emailPlaceholder: "Sisesta oma e-posti aadress",
         passwordPlaceholder: "Sisesta oma parool",
       },
+      dropdowns: {
+        selectKnowledgeBase: "Vali teadmusbaas...",
+      },
       chatbot: {
         placeholder: "Kirjuta oma sõnum siia...",
         send: "Saada",
@@ -418,6 +421,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         optional: "Neobligāts",
         emailPlaceholder: "Ievadiet savu e-pasta adresi",
         passwordPlaceholder: "Ievadiet savu paroli",
+      },
+      dropdowns: {
+        selectKnowledgeBase: "Izvēlieties zināšanu bāzi...",
       },
       chatbot: {
         placeholder: "Ierakstiet savu ziņu šeit...",
@@ -788,6 +794,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         emailPlaceholder: "Įveskite savo el. pašto adresą",
         passwordPlaceholder: "Įveskite savo slaptažodį",
       },
+      dropdowns: {
+        selectKnowledgeBase: "Pasirinkite žinių bazę...",
+      },
       chatbot: {
         placeholder: "Įrašykite savo žinutę čia...",
         send: "Siųsti",
@@ -1156,6 +1165,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         optional: "Προαιρετικό",
         emailPlaceholder: "Εισάγετε τη διεύθυνση email σας",
         passwordPlaceholder: "Εισάγετε τον κωδικό σας",
+      },
+      dropdowns: {
+        selectKnowledgeBase: "Επιλέξτε Βάση Γνώσεων...",
       },
       chatbot: {
         placeholder: "Γράψτε το μήνυμά σας εδώ...",
