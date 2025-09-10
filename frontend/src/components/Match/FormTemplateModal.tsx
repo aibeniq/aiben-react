@@ -44,7 +44,7 @@ interface FormTemplateModalProps {
 const FormTemplateModal = ({
   isOpen,
   onClose,
-  editingForm,
+  editingForm: _editingForm,
   onSave,
   formName,
   setFormName,
