@@ -12,6 +12,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FiCopy } from "react-icons/fi"
 import type { KnowledgeBasePublic, ReportGenieOutline } from "../../client"
 import { ReportgenieService } from "../../client"
@@ -61,6 +62,7 @@ const OutlineModal = ({
   console.log("🔍 OutlineModal: Editing outline:", editingOutline?.name)
 
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { t } = useTranslation()
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -334,7 +336,7 @@ const OutlineModal = ({
             <Dialog.Header>
               <HStack align="center" gap={2}>
                 <Dialog.Title>
-                  {editingOutline ? "Edit Outline" : "Create New Outline"}
+                  {editingOutline ? t("editOutlineModal.title") : t("editOutlineModal.createTitle")}
                 </Dialog.Title>
                 <HelpTooltip helpKey="createOutline" />
               </HStack>
@@ -350,7 +352,7 @@ const OutlineModal = ({
                   {/* Left Column - Basic Fields and Settings */}
                   <VStack align="stretch" gap={4} flex="1">
                     <Field
-                      label="Outline Name"
+                      label={t("editOutlineModal.outlineName")}
                       required
                       invalid={!!validationErrors.name}
                       errorText={validationErrors.name}
@@ -358,14 +360,14 @@ const OutlineModal = ({
                       <Input
                         value={outlineName}
                         onChange={(e) => handleNameChange(e.target.value)}
-                        placeholder="Enter outline name"
+                        placeholder={t("editOutlineModal.outlineNamePlaceholder")}
                       />
                     </Field>
 
                     <Field
                       label={
                         <HStack align="center" gap={2}>
-                          <span>Description</span>
+                          <span>{t("editOutlineModal.description")}</span>
                           <HelpTooltip helpKey="minimumDescriptionLength" />
                         </HStack>
                       }
@@ -375,7 +377,7 @@ const OutlineModal = ({
                       <Textarea
                         value={outlineDescription}
                         onChange={(e) => handleDescriptionChange(e.target.value)}
-                        placeholder="Enter outline description to auto-suggest sections (minimum 10 characters)..."
+                        placeholder={t("editOutlineModal.descriptionPlaceholder")}
                         resize="vertical"
                         rows={3}
                       />
@@ -386,7 +388,7 @@ const OutlineModal = ({
                     <Field
                       label={
                         <HStack align="center" gap={2}>
-                          <span>Reference Documents (Optional)</span>
+                          <span>{t("editOutlineModal.referenceDocuments")}</span>
                           <HelpTooltip helpKey="referenceDocuments" />
                         </HStack>
                       }
@@ -399,7 +401,7 @@ const OutlineModal = ({
                             variant={referenceMode === "files" ? "solid" : "outline"}
                             onClick={() => handleReferenceModeChange("files")}
                           >
-                            Upload Files
+                            {t("editOutlineModal.uploadFiles")}
                           </Button>
                           <Button
                             size="sm"
@@ -407,7 +409,7 @@ const OutlineModal = ({
                             onClick={() => handleReferenceModeChange("knowledge-base")}
                             disabled={!knowledgeBases || knowledgeBases.length === 0}
                           >
-                            Knowledge Base
+                            {t("editOutlineModal.knowledgeBase")}
                           </Button>
                         </HStack>
 
@@ -446,7 +448,7 @@ const OutlineModal = ({
                                 setReferenceKnowledgeBase(kb || null)
                               }}
                             >
-                              <option value="">Select a Knowledge Base...</option>
+                              <option value="">{t("common.dropdowns.selectKnowledgeBase")}</option>
                               {knowledgeBases?.map((kb) => (
                                 <option key={kb.id} value={kb.id}>
                                   {kb.title}
@@ -469,7 +471,7 @@ const OutlineModal = ({
                     <Field
                       label={
                         <HStack justify="space-between" w="full">
-                          <span>Sections *</span>
+                          <span>{t("editOutlineModal.sections")} *</span>
                           <HStack gap={2}>
                             <Button
                               size="xs"
@@ -488,7 +490,7 @@ const OutlineModal = ({
                                   : "Suggest sections based on the description"
                               }
                             >
-                              {suggesting ? "Suggesting..." : "Suggest"}
+                              {suggesting ? "Suggesting..." : t("editOutlineModal.suggest")}
                             </Button>
                             <HelpTooltip helpKey="suggestOutlineSections" />
 
@@ -513,7 +515,7 @@ const OutlineModal = ({
                                       : "Optimize sections using ground-truth document"
                               }
                             >
-                              Optimize
+                              {t("editOutlineModal.optimize")}
                             </Button>
                             <HelpTooltip helpKey="optimizeOutlineSections" />
 
@@ -543,6 +545,7 @@ const OutlineModal = ({
                       >
                         <SectionEditor
                           sections={sections}
+                          placeholder={t("editOutlineModal.addSectionPlaceholder")}
                           onSectionsChange={(newSections) => {
                             onSectionsChange(newSections)
                             // Clear validation error when sections are modified
@@ -564,10 +567,12 @@ const OutlineModal = ({
             <Dialog.Footer>
               <HStack gap={3}>
                 <CancelButton onClick={handleClose} size="md">
-                  Cancel
+                  {t("editOutlineModal.cancel")}
                 </CancelButton>
                 <ConfirmButton onClick={handleSave} size="md">
-                  {editingOutline ? "Update Outline" : "Create Outline"}
+                  {editingOutline
+                    ? t("editOutlineModal.updateOutline")
+                    : t("editOutlineModal.createOutline")}
                 </ConfirmButton>
               </HStack>
             </Dialog.Footer>

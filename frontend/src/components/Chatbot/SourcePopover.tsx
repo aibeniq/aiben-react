@@ -1,6 +1,7 @@
 import { Box, Icon, IconButton, Popover } from "@chakra-ui/react"
 import type React from "react"
 import { FiDatabase, FiFile, FiPlus } from "react-icons/fi"
+import { useTranslation } from "react-i18next"
 
 interface SourcePopoverProps {
   onSelectKnowledgeBase: () => void
@@ -13,6 +14,8 @@ const SourcePopover: React.FC<SourcePopoverProps> = ({
   onSelectFile,
   iconButtonProps,
 }) => {
+  const { t } = useTranslation()
+
   const handleFileClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -36,13 +39,7 @@ const SourcePopover: React.FC<SourcePopoverProps> = ({
         </IconButton>
       </Popover.Trigger>
       <Popover.Positioner>
-        <Popover.Content
-          w="200px"
-          color="gray.700"
-          borderRadius="md"
-          boxShadow="lg"
-          border="none"
-        >
+        <Popover.Content w="200px" color="gray.700" borderRadius="md" boxShadow="lg" border="none">
           <Popover.Arrow>
             <Popover.ArrowTip />
           </Popover.Arrow>
@@ -62,7 +59,7 @@ const SourcePopover: React.FC<SourcePopoverProps> = ({
               onClick={onSelectKnowledgeBase}
             >
               <Icon as={FiDatabase} mr={2} />
-              Knowledge Base
+              {t("chatbot.sourcePopover.knowledgeBase")}
             </Box>
             <Box
               as="button"
@@ -79,7 +76,7 @@ const SourcePopover: React.FC<SourcePopoverProps> = ({
               onClick={handleFileClick}
             >
               <Icon as={FiFile} mr={2} />
-              File
+              {t("chatbot.sourcePopover.file")}
             </Box>
           </Popover.Body>
         </Popover.Content>

@@ -3,6 +3,7 @@ import HelpTooltip from "@/components/ui/help-tooltip"
 import { Box, Card, HStack, Heading, IconButton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { Switch } from "@chakra-ui/react"
 import { format } from "date-fns"
+import { useTranslation } from "react-i18next"
 import { FiDatabase, FiFileText, FiThumbsDown, FiThumbsUp, FiTrash2, FiUsers } from "react-icons/fi"
 
 interface HistoryPanelProps {
@@ -26,6 +27,8 @@ const HistoryPanel = ({
   showAllUsers = false,
   onToggleShowAllUsers,
 }: HistoryPanelProps) => {
+  const { t } = useTranslation()
+
   const getDisplayTitle = (item: any) => {
     // Try different possible title fields
     return (
@@ -34,7 +37,7 @@ const HistoryPanel = ({
       item?.name ||
       item?.comparison_name ||
       item?.form_name ||
-      "Unnamed item"
+      t("archive.unnamedItem")
     )
   }
 
@@ -76,8 +79,9 @@ const HistoryPanel = ({
       const digitizedCount = item.metadata.digitized_files?.length || 0
       const handwrittenCount = item.metadata.handwritten_files?.length || 0
       const parts = []
-      if (digitizedCount > 0) parts.push(`${digitizedCount} digitized`)
-      if (handwrittenCount > 0) parts.push(`${handwrittenCount} handwritten`)
+      if (digitizedCount > 0) parts.push(`${digitizedCount} ${t("archive.metadata.digitized")}`)
+      if (handwrittenCount > 0)
+        parts.push(`${handwrittenCount} ${t("archive.metadata.handwritten")}`)
       return parts.join(", ")
     }
 
@@ -87,16 +91,27 @@ const HistoryPanel = ({
   const getMetadata = (item: any) => {
     // Show relevant metadata for each tool type
     if (item?.qa_count > 0) {
-      return `${item.qa_count} question${item.qa_count !== 1 ? "s" : ""}`
+      return item.qa_count === 1
+        ? `1 ${t("archive.metadata.question")}`
+        : `${item.qa_count} ${t("archive.metadata.questions")}`
     }
     if (item?.topic_count > 0) {
-      return `${item.topic_count} topic${item.topic_count !== 1 ? "s" : ""}`
+      return item.topic_count === 1
+        ? `1 ${t("archive.metadata.topic")}`
+        : `${item.topic_count} ${t("archive.metadata.topics")}`
     }
     if (item?.field_count > 0) {
-      const fieldText = `${item.field_count} field${item.field_count !== 1 ? "s" : ""}`
+      const fieldText =
+        item.field_count === 1
+          ? `1 ${t("archive.metadata.field")}`
+          : `${item.field_count} ${t("archive.metadata.fields")}`
       // For FormConnect, also show document count if available
       if (item?.document_count > 0) {
-        return `${fieldText}, ${item.document_count} document${item.document_count !== 1 ? "s" : ""}`
+        const docText =
+          item.document_count === 1
+            ? `1 ${t("archive.metadata.document")}`
+            : `${item.document_count} ${t("archive.metadata.documents")}`
+        return `${fieldText}, ${docText}`
       }
       return fieldText
     }
@@ -107,15 +122,15 @@ const HistoryPanel = ({
     <Card.Root height="fit-content">
       <Card.Header pb={2}>
         <HStack justifyContent="space-between" width="100%">
-          <Heading size="md">History</Heading>
+          <Heading size="md">{t("archive.history")}</Heading>
           {onToggleShowAllUsers && (
             <Tooltip
-              content={showAllUsers ? "Viewing all users' history" : "Viewing only my history"}
+              content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
             >
               <HStack gap={2}>
                 <HStack gap={1} align="center">
                   <Text fontSize="xs" color="gray.500">
-                    All Users
+                    {t("archive.allUsers")}
                   </Text>
                   <HelpTooltip helpKey="allUsersToggle" />
                 </HStack>
@@ -184,11 +199,7 @@ const HistoryPanel = ({
                       onClick={(e) => {
                         e.stopPropagation()
                         // Add confirmation dialog
-                        if (
-                          window.confirm(
-                            "Are you sure you want to delete this item? This action cannot be undone.",
-                          )
-                        ) {
+                        if (window.confirm(t("archive.deleteConfirmation"))) {
                           onDeleteReport(item.id)
                         }
                       }}
@@ -203,7 +214,7 @@ const HistoryPanel = ({
                     <Text fontSize="xs" color="gray.500">
                       {item?.date_created
                         ? format(new Date(item.date_created as string), "dd/MM/yyyy HH:mm")
-                        : "Unknown date"}
+                        : t("archive.unknownDate")}
                     </Text>
                     {getMetadata(item) && (
                       <Text fontSize="xs" color="gray.500">
@@ -235,15 +246,15 @@ const HistoryPanel = ({
                       <Tooltip
                         content={
                           typeof item.feedback === "object" && item.feedback?.feedback === "correct"
-                            ? "Positive feedback"
+                            ? t("archive.feedback.positive")
                             : typeof item.feedback === "object" &&
                                 item.feedback?.feedback === "incorrect"
-                              ? "Negative feedback"
+                              ? t("archive.feedback.negative")
                               : item.feedback === "correct" || item.feedback === "positive"
-                                ? "Positive feedback"
+                                ? t("archive.feedback.positive")
                                 : item.feedback === "incorrect" || item.feedback === "negative"
-                                  ? "Negative feedback"
-                                  : "Has feedback"
+                                  ? t("archive.feedback.negative")
+                                  : t("archive.feedback.hasFeedback")
                         }
                       >
                         {typeof item.feedback === "object" &&

@@ -1,11 +1,8 @@
 import { Button, Checkbox, HStack, IconButton, Table } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 import { FiCopy, FiEye, FiPlus, FiTrash2 } from "react-icons/fi"
-import {
-  type KnowledgeBasePublic,
-  type TwinCheckTopicList,
-  TwincheckService,
-} from "../../client"
+import { useTranslation } from "react-i18next"
+import { type KnowledgeBasePublic, type TwinCheckTopicList, TwincheckService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import TopicListModal from "./TopicListModal"
 
@@ -35,24 +32,19 @@ interface TopicListTableBodyProps {
 }
 
 const TopicListTableHeader = ({ onCreateNew }: TopicListTableHeaderProps) => {
+  const { t } = useTranslation()
+
   return (
     <Table.Header position="sticky" top="0" bg="transparent" zIndex="1">
       <Table.Row>
         <Table.ColumnHeader w="6" />
-        <Table.ColumnHeader
-          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
-        >
-          Name
+        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+          {t("modelSelection.tableHeaders.name")}
         </Table.ColumnHeader>
-        <Table.ColumnHeader
-          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
-        >
-          Description
+        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+          {t("modelSelection.tableHeaders.description")}
         </Table.ColumnHeader>
-        <Table.ColumnHeader
-          w="32"
-          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
-        >
+        <Table.ColumnHeader w="32" style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
           <Button size="sm" onClick={onCreateNew} ml="auto" variant="ghost">
             <FiPlus size={14} />
           </Button>
@@ -88,9 +80,7 @@ const TopicListTableBody = ({
       {sortedTopicLists.map((topicList) => (
         <Table.Row
           key={topicList.id}
-          data-selected={
-            selectedTopicList?.id === topicList.id ? "" : undefined
-          }
+          data-selected={selectedTopicList?.id === topicList.id ? "" : undefined}
         >
           <Table.Cell>
             <Checkbox.Root
@@ -148,8 +138,7 @@ const TopicListTableBody = ({
       {topicLists.length === 0 && (
         <Table.Row>
           <Table.Cell colSpan={4} textAlign="center" py={8} color="gray.500">
-            No topic lists available. Create your first topic list to get
-            started.
+            No topic lists available. Create your first topic list to get started.
           </Table.Cell>
         </Table.Row>
       )}
@@ -171,8 +160,7 @@ const TopicListTable = ({
   const [topicListDescription, setTopicListDescription] = useState("")
   const [topicsList, setTopicsList] = useState<string[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingTopicList, setEditingTopicList] =
-    useState<TwinCheckTopicList | null>(null)
+  const [editingTopicList, setEditingTopicList] = useState<TwinCheckTopicList | null>(null)
 
   // Update local state when editingTopicList changes
   useEffect(() => {
@@ -304,8 +292,7 @@ const TopicListTable = ({
         body: error.body,
       })
 
-      const errorMessage =
-        error.body?.detail || error.message || "Unknown error occurred"
+      const errorMessage = error.body?.detail || error.message || "Unknown error occurred"
       showErrorToast(`Error copying topic list: ${errorMessage}`)
     }
   }
@@ -398,8 +385,7 @@ const TopicListTable = ({
       })
 
       // Show specific error message from backend if available
-      const errorMessage =
-        error.body?.detail || error.message || "Unknown error occurred"
+      const errorMessage = error.body?.detail || error.message || "Unknown error occurred"
       showErrorToast(`Error saving topic list: ${errorMessage}`)
     }
   }

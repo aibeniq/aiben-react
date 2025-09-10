@@ -39,7 +39,7 @@ interface KnowledgeBaseCreate {
 }
 
 const AddKnowledgeBase = () => {
-  const { t } = useTranslation("knowledgeBases")
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]) // State for managing selected files
   const [selectedEmbeddingModelId, setSelectedEmbeddingModelId] = useState<string | null>(null)
@@ -156,7 +156,7 @@ const AddKnowledgeBase = () => {
     },
     onSuccess: (data) => {
       console.log("✅ Knowledge base creation SUCCESS:", data)
-      showSuccessToast("Knowledge Base created successfully.")
+      showSuccessToast(t("knowledgeBases.modals.messages.createSuccess"))
       setIsOpen(false)
 
       // Invalidate BOTH query keys
@@ -196,7 +196,7 @@ const AddKnowledgeBase = () => {
 
     if (selectedFiles.length === 0) {
       console.log("⚠️ No files selected - showing error")
-      showErrorToast("At least one file is required.")
+      showErrorToast(t("knowledgeBases.modals.add.validation.atLeastOneFile"))
       return
     }
 
@@ -271,7 +271,7 @@ const AddKnowledgeBase = () => {
           my={4}
         >
           <FaPlus fontSize="16px" />
-          {t("addKnowledgeBase")}
+          {t("knowledgeBases.addKnowledgeBase")}
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -296,23 +296,23 @@ const AddKnowledgeBase = () => {
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <DialogHeader>
-              <DialogTitle>Add Knowledge Base</DialogTitle>
+              <DialogTitle>{t("knowledgeBases.modals.add.title")}</DialogTitle>
             </DialogHeader>
             <DialogBody>
-              <Text mb={4}>Fill in the details to add a new Knowledge Base.</Text>
+              <Text mb={4}>{t("knowledgeBases.modals.add.description")}</Text>
               <VStack gap={4}>
                 <Field
                   required
                   invalid={!!errors.title}
                   errorText={errors.title?.message}
-                  label="Title"
+                  label={t("knowledgeBases.modals.fields.title")}
                 >
                   <Input
                     id="title"
                     {...register("title", {
-                      required: "Title is required.",
+                      required: t("knowledgeBases.modals.validation.titleRequired"),
                     })}
-                    placeholder="Title"
+                    placeholder={t("knowledgeBases.modals.fields.title")}
                     type="text"
                   />
                 </Field>
@@ -320,12 +320,12 @@ const AddKnowledgeBase = () => {
                 <Field
                   invalid={!!errors.description}
                   errorText={errors.description?.message}
-                  label="Description"
+                  label={t("knowledgeBases.modals.fields.description")}
                 >
                   <Input
                     id="description"
                     {...register("description")}
-                    placeholder="Description"
+                    placeholder={t("knowledgeBases.modals.fields.description")}
                     type="text"
                   />
                 </Field>
@@ -366,16 +366,16 @@ const AddKnowledgeBase = () => {
                 >
                   <input {...getInputProps()} />
                   {isDragActive ? (
-                    <Text>Drop the files here...</Text>
+                    <Text>{t("knowledgeBases.modals.fileUpload.dropFiles")}</Text>
                   ) : (
-                    <Text>Drag and drop files here, or click to browse</Text>
+                    <Text>{t("knowledgeBases.modals.fileUpload.dragAndDrop")}</Text>
                   )}
                 </Box>
 
                 {/* Display Selected Files */}
                 {selectedFiles.length > 0 && (
                   <Box w="full">
-                    <Text mb={2}>Selected Files:</Text>
+                    <Text mb={2}>{t("knowledgeBases.modals.fileUpload.selectedFiles")}</Text>
                     <VStack align="start" gap={2}>
                       {selectedFiles.map((file, index) => (
                         <HStack key={index} w="full" justify="space-between">
@@ -390,7 +390,7 @@ const AddKnowledgeBase = () => {
                           </Link>
                           <Box
                             as="button"
-                            aria-label="Remove file"
+                            aria-label={t("knowledgeBases.modals.fileUpload.removeFile")}
                             onClick={() => handleRemoveFile(index)}
                             _hover={{ color: "red.500" }}
                           >
@@ -407,7 +407,7 @@ const AddKnowledgeBase = () => {
             <DialogFooter gap={2}>
               <DialogActionTrigger asChild>
                 <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
-                  Cancel
+                  {t("knowledgeBases.modals.buttons.cancel")}
                 </Button>
               </DialogActionTrigger>
               <Button
@@ -420,7 +420,9 @@ const AddKnowledgeBase = () => {
                 type="submit"
                 disabled={!isValid || isSubmitting}
               >
-                {isSubmitting ? "Creating..." : "Save"}
+                {isSubmitting
+                  ? t("knowledgeBases.modals.buttons.creating")
+                  : t("knowledgeBases.modals.buttons.create")}
               </Button>
             </DialogFooter>
           </form>

@@ -14,6 +14,7 @@ import {
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { HiRefresh } from "react-icons/hi"
+import { useTranslation } from "react-i18next"
 
 import useAuth from "@/hooks/useAuth"
 import { HelpTooltip } from "@/components/ui/help-tooltip"
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/_layout/")({
 })
 
 function UsageStats() {
+  const { t } = useTranslation()
   const {
     data: usageData,
     isLoading,
@@ -70,13 +72,13 @@ function UsageStats() {
         <Box>
           <HStack align="center" mb={2}>
             <Text fontSize="xl" fontWeight="semibold">
-              Usage
+              {t("usage.title")}
             </Text>
             <HelpTooltip helpKey="usageStats" />
           </HStack>
           <VStack align="start" gap={1}>
             <Text fontSize="sm" color="gray.500">
-              Current period:{" "}
+              {t("usage.currentPeriod")}{" "}
               {startDate && endDate
                 ? `${formatDate(startDate)} - ${formatDate(endDate)}`
                 : "Loading..."}
@@ -101,7 +103,7 @@ function UsageStats() {
                       {percentage.toFixed(1)}%
                     </Text>
                     <Text fontSize="sm" color="gray.500">
-                      used of your monthly quota
+                      {t("usage.usedOfQuota")}
                     </Text>
                   </HStack>
                   <IconButton
@@ -130,15 +132,16 @@ function UsageStats() {
 
 function Dashboard() {
   const { user: currentUser } = useAuth()
+  const { t } = useTranslation()
 
   return (
     <>
       <Container maxW="full">
         <Box pt={12} m={4}>
           <Text fontSize="2xl" truncate maxW="sm">
-            Hi, {currentUser?.full_name || currentUser?.email} 👋
+            {t("common.hiUser", { name: currentUser?.full_name || currentUser?.email })}
           </Text>
-          <Text mb={8}>Welcome back, nice to see you again!</Text>
+          <Text mb={8}>{t("common.welcomeBack")}</Text>
 
           <UsageStats />
         </Box>

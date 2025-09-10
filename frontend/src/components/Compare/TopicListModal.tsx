@@ -12,6 +12,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FiCopy } from "react-icons/fi"
 import { type KnowledgeBasePublic, type TwinCheckTopicList, TwincheckService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
@@ -62,6 +63,7 @@ const TopicListModal = ({
   knowledgeBases = [],
 }: TopicListModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { t } = useTranslation()
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -270,7 +272,9 @@ const TopicListModal = ({
             <Dialog.Header>
               <HStack align="center" gap={2}>
                 <Dialog.Title>
-                  {editingTopicList ? "Edit Topic List" : "Create New Topic List"}
+                  {editingTopicList
+                    ? t("editTopicListModal.title")
+                    : t("editTopicListModal.createTitle")}
                 </Dialog.Title>
                 <HelpTooltip helpKey="createTopicList" />
               </HStack>
@@ -281,7 +285,7 @@ const TopicListModal = ({
                 <HStack align="stretch" gap={4}>
                   <VStack align="stretch" gap={4} flex="1">
                     <Field
-                      label="Topic List Name"
+                      label={t("editTopicListModal.topicListName")}
                       required
                       invalid={!!validationErrors.name}
                       errorText={validationErrors.name}
@@ -289,19 +293,19 @@ const TopicListModal = ({
                       <Input
                         value={topicListName}
                         onChange={(e) => handleNameChange(e.target.value)}
-                        placeholder="Enter topic list name"
+                        placeholder={t("editTopicListModal.topicListNamePlaceholder")}
                       />
                     </Field>
 
                     <Field
-                      label="Topic List Description"
+                      label={t("editTopicListModal.description")}
                       invalid={!!validationErrors.description}
                       errorText={validationErrors.description}
                     >
                       <Textarea
                         value={topicListDescription}
                         onChange={(e) => handleDescriptionChange(e.target.value)}
-                        placeholder="Enter topic list description to auto-suggest topics (minimum 10 characters)..."
+                        placeholder={t("editTopicListModal.descriptionPlaceholder")}
                         resize="vertical"
                         rows={3}
                       />
@@ -319,7 +323,7 @@ const TopicListModal = ({
                     <Field
                       label={
                         <HStack align="center" gap={2}>
-                          <span>Reference Documents (Optional)</span>
+                          <span>{t("editTopicListModal.referenceDocuments")}</span>
                           <HelpTooltip helpKey="referenceDocuments" />
                         </HStack>
                       }
@@ -332,14 +336,14 @@ const TopicListModal = ({
                             variant={referenceMode === "files" ? "solid" : "outline"}
                             onClick={() => handleReferenceModeChange("files")}
                           >
-                            Upload Files
+                            {t("editTopicListModal.uploadFiles")}
                           </Button>
                           <Button
                             size="sm"
                             variant={referenceMode === "knowledge-base" ? "solid" : "outline"}
                             onClick={() => handleReferenceModeChange("knowledge-base")}
                           >
-                            Knowledge Base
+                            {t("editTopicListModal.knowledgeBase")}
                           </Button>
                         </HStack>
 
@@ -378,7 +382,7 @@ const TopicListModal = ({
                                 setReferenceKnowledgeBase(kb || null)
                               }}
                             >
-                              <option value="">Select a Knowledge Base...</option>
+                              <option value="">{t("common.dropdowns.selectKnowledgeBase")}</option>
                               {knowledgeBases?.map((kb) => (
                                 <option key={kb.id} value={kb.id}>
                                   {kb.title}
@@ -406,7 +410,7 @@ const TopicListModal = ({
                   <Field
                     label={
                       <HStack justify="space-between" w="full">
-                        <span>Comparison Topics</span>
+                        <span>{t("editTopicListModal.comparisonTopics")}</span>
                         <HStack gap={2}>
                           <Button
                             size="xs"
@@ -425,7 +429,7 @@ const TopicListModal = ({
                                 : "Suggest topics based on the description"
                             }
                           >
-                            {suggesting ? "Suggesting..." : "Suggest"}
+                            {suggesting ? "Suggesting..." : t("editTopicListModal.suggest")}
                           </Button>
                           <HelpTooltip helpKey="suggestTopicListTopics" />
 
@@ -464,6 +468,7 @@ const TopicListModal = ({
                           key={index}
                           index={index}
                           topic={topic}
+                          placeholder={t("editTopicListModal.addTopicPlaceholder")}
                           onUpdate={(idx, value) => {
                             updateTopic(idx, value)
                             // Clear validation error when topics are modified
@@ -491,10 +496,12 @@ const TopicListModal = ({
             <Dialog.Footer>
               <HStack gap={3}>
                 <CancelButton onClick={handleModalClose} size="md">
-                  Cancel
+                  {t("editTopicListModal.cancel")}
                 </CancelButton>
                 <ConfirmButton onClick={handleSave} size="md">
-                  {editingTopicList ? "Update Topic List" : "Create Topic List"}
+                  {editingTopicList
+                    ? t("editTopicListModal.updateTopicList")
+                    : t("editTopicListModal.createTopicList")}
                 </ConfirmButton>
               </HStack>
             </Dialog.Footer>

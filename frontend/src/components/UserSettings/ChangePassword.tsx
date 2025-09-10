@@ -1,6 +1,7 @@
 import { Box, Button, Heading, VStack } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { FiLock } from "react-icons/fi"
 
 import { type ApiError, type UpdatePassword, UsersService } from "@/client"
@@ -13,6 +14,7 @@ interface UpdatePasswordForm extends UpdatePassword {
 }
 
 const ChangePassword = () => {
+  const { t } = useTranslation()
   const { showSuccessToast } = useCustomToast()
   const {
     register,
@@ -26,8 +28,7 @@ const ChangePassword = () => {
   })
 
   const mutation = useMutation({
-    mutationFn: (data: UpdatePassword) =>
-      UsersService.updatePasswordMe({ requestBody: data }),
+    mutationFn: (data: UpdatePassword) => UsersService.updatePasswordMe({ requestBody: data }),
     onSuccess: () => {
       showSuccessToast("Password updated successfully.")
       reset()
@@ -43,28 +44,28 @@ const ChangePassword = () => {
 
   return (
     <VStack gap={6} align="stretch" py={4}>
-      <Heading size="sm">Change Password</Heading>
+      <Heading size="sm">{t("settings.changePassword")}</Heading>
       <Box as="form" onSubmit={handleSubmit(onSubmit)}>
         <VStack gap={4} w={{ base: "100%", md: "md" }}>
           <PasswordInput
             type="current_password"
             startElement={<FiLock />}
             {...register("current_password", passwordRules())}
-            placeholder="Current Password"
+            placeholder={t("settings.currentPassword")}
             errors={errors}
           />
           <PasswordInput
             type="new_password"
             startElement={<FiLock />}
             {...register("new_password", passwordRules())}
-            placeholder="New Password"
+            placeholder={t("settings.newPassword")}
             errors={errors}
           />
           <PasswordInput
             type="confirm_password"
             startElement={<FiLock />}
             {...register("confirm_password", confirmPasswordRules(getValues))}
-            placeholder="Confirm Password"
+            placeholder={t("settings.confirmPassword")}
             errors={errors}
           />
           <Button
@@ -79,7 +80,7 @@ const ChangePassword = () => {
             }}
             alignSelf="flex-start"
           >
-            Save
+            {t("settings.save")}
           </Button>
         </VStack>
       </Box>

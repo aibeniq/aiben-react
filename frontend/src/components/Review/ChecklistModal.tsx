@@ -12,6 +12,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FiCopy } from "react-icons/fi"
 import { type VeraDocChecklist, VeradocService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
@@ -81,6 +82,7 @@ const ChecklistModal = ({
   selectedKnowledgeBase,
 }: ChecklistModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { t } = useTranslation()
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -343,7 +345,9 @@ const ChecklistModal = ({
               <Dialog.Header>
                 <HStack align="center" gap={2}>
                   <Dialog.Title>
-                    {editingChecklist ? "Edit Checklist" : "Create New Checklist"}
+                    {editingChecklist
+                      ? t("editChecklistModal.title")
+                      : t("editChecklistModal.createTitle")}
                   </Dialog.Title>
                   <HelpTooltip helpKey="createChecklist" />
                 </HStack>
@@ -356,7 +360,7 @@ const ChecklistModal = ({
                     <VStack align="stretch" gap={4} flex={1}>
                       {/* Basic Info */}
                       <Field
-                        label="Checklist Name"
+                        label={t("editChecklistModal.checklistName")}
                         required
                         invalid={!!validationErrors.name}
                         errorText={validationErrors.name}
@@ -364,14 +368,14 @@ const ChecklistModal = ({
                         <Input
                           value={checklistName}
                           onChange={(e) => handleNameChange(e.target.value)}
-                          placeholder="Enter checklist name..."
+                          placeholder={t("editChecklistModal.checklistNamePlaceholder")}
                         />
                       </Field>
 
                       <Field
                         label={
                           <HStack align="center" gap={2}>
-                            <span>Description</span>
+                            <span>{t("editChecklistModal.description")}</span>
                             <HelpTooltip helpKey="minimumDescriptionLength" />
                           </HStack>
                         }
@@ -381,7 +385,7 @@ const ChecklistModal = ({
                         <Textarea
                           value={checklistDescription}
                           onChange={(e) => handleDescriptionChange(e.target.value)}
-                          placeholder="Enter checklist description to auto-suggest questions (minimum 10 characters)..."
+                          placeholder={t("editChecklistModal.descriptionPlaceholder")}
                           rows={4}
                         />
                       </Field>
@@ -394,7 +398,7 @@ const ChecklistModal = ({
                       <Field
                         label={
                           <HStack align="center" gap={2}>
-                            <span>Reference Documents (Optional)</span>
+                            <span>{t("editChecklistModal.referenceDocuments")}</span>
                             <HelpTooltip helpKey="referenceDocuments" />
                           </HStack>
                         }
@@ -407,7 +411,7 @@ const ChecklistModal = ({
                               variant={referenceMode === "files" ? "solid" : "outline"}
                               onClick={() => handleReferenceModeChange("files")}
                             >
-                              Upload Files
+                              {t("editChecklistModal.uploadFiles")}
                             </Button>
                             <Button
                               size="sm"
@@ -415,7 +419,7 @@ const ChecklistModal = ({
                               onClick={() => handleReferenceModeChange("knowledge-base")}
                               disabled={!knowledgeBases || knowledgeBases.length === 0}
                             >
-                              Knowledge Base
+                              {t("editChecklistModal.knowledgeBase")}
                             </Button>
                           </HStack>
 
@@ -454,7 +458,9 @@ const ChecklistModal = ({
                                   setReferenceKnowledgeBase(kb || null)
                                 }}
                               >
-                                <option value="">Select a Knowledge Base...</option>
+                                <option value="">
+                                  {t("common.dropdowns.selectKnowledgeBase")}
+                                </option>
                                 {knowledgeBases?.map((kb) => (
                                   <option key={kb.id} value={kb.id}>
                                     {kb.title}
@@ -478,7 +484,7 @@ const ChecklistModal = ({
                       {/* Suggest and Optimize buttons above questions */}
                       <HStack justify="space-between" align="center">
                         <Text fontSize="md" fontWeight="medium">
-                          Questions
+                          {t("editChecklistModal.questions")}
                         </Text>
                         <HStack gap={2}>
                           <Button
@@ -489,7 +495,7 @@ const ChecklistModal = ({
                             variant="outline"
                             colorPalette="green"
                           >
-                            {suggesting ? "Suggesting..." : "Suggest"}
+                            {suggesting ? "Suggesting..." : t("editChecklistModal.suggest")}
                           </Button>
                           <HelpTooltip helpKey="suggestChecklistQuestions" />
                           {/* Always show optimization button with tooltip when disabled */}
@@ -507,7 +513,7 @@ const ChecklistModal = ({
                               colorPalette="blue"
                               disabled={!knowledgeBases || !selectedKnowledgeBase}
                             >
-                              Optimize
+                              {t("editChecklistModal.optimize")}
                             </Button>
                           </Tooltip>
                           <HelpTooltip helpKey="optimizeChecklistQuestions" />
@@ -537,6 +543,7 @@ const ChecklistModal = ({
                               id={questionsData[index]?.id || `question-${index}`}
                               index={index}
                               question={question}
+                              placeholder={t("editChecklistModal.addQuestionPlaceholder")}
                               consultDocuments={questionsData[index]?.consultDocuments ?? true}
                               onUpdate={(idx, value) => updateQuestion(idx, value)}
                               onBlur={(idx, value) => handleQuestionBlur(idx, value)}
@@ -557,10 +564,12 @@ const ChecklistModal = ({
               <Dialog.Footer>
                 <HStack gap={3}>
                   <CancelButton onClick={handleClose} size="md">
-                    Cancel
+                    {t("editChecklistModal.cancel")}
                   </CancelButton>
                   <ConfirmButton onClick={handleSave} size="md">
-                    {editingChecklist ? "Update Checklist" : "Create Checklist"}
+                    {editingChecklist
+                      ? t("editChecklistModal.updateChecklist")
+                      : t("editChecklistModal.createChecklist")}
                   </ConfirmButton>
                 </HStack>
               </Dialog.Footer>

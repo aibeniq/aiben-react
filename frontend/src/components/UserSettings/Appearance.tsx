@@ -1,14 +1,16 @@
 import { Heading, Stack, VStack } from "@chakra-ui/react"
 import { useTheme } from "next-themes"
+import { useTranslation } from "react-i18next"
 import { Radio, RadioGroup } from "../ui/radio"
 
 const Appearance = () => {
   const { theme, setTheme } = useTheme()
+  const { t } = useTranslation()
 
   return (
     <VStack gap={6} align="stretch" py={4}>
       <Heading size="sm" color="fg">
-        Appearance
+        {t("settings.appearance")}
       </Heading>
 
       <RadioGroup
@@ -18,13 +20,13 @@ const Appearance = () => {
       >
         <Stack>
           <Radio value="system" color="fg">
-            System
+            {t("settings.system")}
           </Radio>
           <Radio value="light" color="fg">
-            Light Mode
+            {t("settings.lightMode")}
           </Radio>
           <Radio value="dark" color="fg">
-            Dark Mode
+            {t("settings.darkMode")}
           </Radio>
         </Stack>
       </RadioGroup>

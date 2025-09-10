@@ -915,7 +915,7 @@ const VeraDoc = () => {
         <SelectionModal
           isOpen={showKnowledgeBaseModal}
           onClose={() => setShowKnowledgeBaseModal(false)}
-          title="Select Knowledge Base"
+          title={t("review.selectKnowledgeBaseTitle")}
         >
           <KnowledgeBaseTable
             knowledgeBases={knowledgeBases}
@@ -927,7 +927,7 @@ const VeraDoc = () => {
         <SelectionModal
           isOpen={showChecklistModal}
           onClose={() => setShowChecklistModal(false)}
-          title="Select Checklist"
+          title={t("review.selectChecklistTitle")}
         >
           <ChecklistTable
             checklists={checklists}

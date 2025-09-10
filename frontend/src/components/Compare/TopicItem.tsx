@@ -12,6 +12,7 @@ interface TopicItemProps {
   onMoveDown: (index: number) => void
   canRemove: boolean
   totalTopics: number
+  placeholder?: string
 }
 
 const TopicItem = ({
@@ -24,13 +25,14 @@ const TopicItem = ({
   onMoveDown,
   canRemove,
   totalTopics,
+  placeholder = "Add comparison topic",
 }: TopicItemProps) => {
   const [isHovered, setIsHovered] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
 
   const isLastEmptyTopic = index === totalTopics - 2
   const isAddTopic = index === totalTopics - 1
-  const placeholderText = "Add comparison topic"
+  const placeholderText = placeholder
 
   return (
     <div

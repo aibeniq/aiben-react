@@ -1,12 +1,4 @@
-import {
-  Box,
-  HStack,
-  IconButton,
-  Input,
-  Switch,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, HStack, IconButton, Input, Switch, Text, VStack } from "@chakra-ui/react"
 import { useState } from "react"
 import { FiChevronDown, FiChevronUp, FiTrash2 } from "react-icons/fi"
 
@@ -23,6 +15,7 @@ interface QuestionItemProps {
   onConsultDocumentsChange?: (id: string, value: boolean) => void
   canRemove: boolean
   totalQuestions: number
+  placeholder?: string
 }
 
 const QuestionItem = ({
@@ -38,13 +31,14 @@ const QuestionItem = ({
   onConsultDocumentsChange,
   canRemove,
   totalQuestions,
+  placeholder = "Add question",
 }: QuestionItemProps) => {
   const [isHovered, setIsHovered] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
 
   const isLastEmptyQuestion = index === totalQuestions - 2
   const isAddQuestion = index === totalQuestions - 1
-  const placeholderText = "Add question"
+  const placeholderText = placeholder
 
   return (
     <div
