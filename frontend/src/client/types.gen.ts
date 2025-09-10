@@ -274,6 +274,7 @@ export type KnowledgeBasePublic = {
   date_created: string
   date_modified: string
   number_of_sources?: number
+  total_pages?: number
   embedding_model_name?: string | null
 }
 

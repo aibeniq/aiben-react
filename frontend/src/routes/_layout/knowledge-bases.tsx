@@ -194,6 +194,9 @@ function KnowledgeBasesTable() {
               {t("knowledgeBases.tableHeaders.numberOfSources")}
             </Table.ColumnHeader>
             <Table.ColumnHeader w="sm">
+              {t("chatbot.knowledgeBaseTablePages")}
+            </Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">
               {t("knowledgeBases.tableHeaders.embeddingModel")}
             </Table.ColumnHeader>
             <Table.ColumnHeader w="sm">
@@ -218,6 +221,9 @@ function KnowledgeBasesTable() {
               </Table.Cell>
               <Table.Cell truncate maxW="sm">
                 {item.number_of_sources}
+              </Table.Cell>
+              <Table.Cell truncate maxW="sm">
+                {item.total_pages || 0}
               </Table.Cell>
               <Table.Cell truncate maxW="sm">
                 {item.embedding_model_name ? (

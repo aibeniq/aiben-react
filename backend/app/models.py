@@ -184,6 +184,7 @@ class KnowledgeBase(KnowledgeBaseBase, table=True):
     )
     owner: User | None = Relationship(back_populates="knowledge_bases")
     data: bytes | None = Field(default=None, sa_column=LargeBinary)
+    total_pages: int = Field(default=0)
     date_created: datetime
     date_modified: datetime
 
@@ -196,6 +197,7 @@ class KnowledgeBasePublic(KnowledgeBaseBase):
     date_created: datetime
     date_modified: datetime
     number_of_sources: int = Field(default=0)
+    total_pages: int = Field(default=0)
     embedding_model_id: Optional[uuid.UUID] = None
     embedding_model_name: Optional[str] = Field(default=None)
 
@@ -219,6 +221,7 @@ class Source(SQLModel, table=True):
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
     name: str = Field(max_length=255)
+    page_count: int = Field(default=0)
     date_created: datetime = Field(default_factory=datetime.utcnow)
 
 

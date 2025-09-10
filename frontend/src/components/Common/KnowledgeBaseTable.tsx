@@ -40,6 +40,9 @@ const TableHeader = ({ hasSelection }: TableHeaderProps) => {
         <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
           {t("chatbot.knowledgeBaseTableSources")}
         </Table.ColumnHeader>
+        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+          {t("chatbot.knowledgeBaseTablePages")}
+        </Table.ColumnHeader>
       </Table.Row>
     </Table.Header>
   )
@@ -65,6 +68,7 @@ const TableBody = ({ knowledgeBases, selectedId, onRowSelection }: TableBodyProp
       <Table.Cell>{kb.title}</Table.Cell>
       <Table.Cell>{kb.description || "No description"}</Table.Cell>
       <Table.Cell>{kb.number_of_sources || 0} sources</Table.Cell>
+      <Table.Cell>{kb.total_pages || 0} pages</Table.Cell>
     </Table.Row>
   ))
 
