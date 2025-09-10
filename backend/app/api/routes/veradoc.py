@@ -42,6 +42,7 @@ from fastapi import (
 from fastapi.responses import StreamingResponse
 from typing import List, Dict, Any, Optional
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 import json
 import os
@@ -91,6 +92,31 @@ def extract_text_from_file(file_content: bytes, filename: str) -> str:
     from app.services.document_utils import extract_text_from_file_unified
 
     return extract_text_from_file_unified(file_content, filename)
+
+
+async def extract_text_from_file_async(file_content: bytes, filename: str) -> str:
+    """
+    Async wrapper for text extraction to prevent blocking on large files.
+    Uses ThreadPoolExecutor for CPU-intensive text extraction operations.
+    """
+    # Define size threshold for async processing (50KB)
+    SIZE_THRESHOLD = 50 * 1024
+
+    if len(file_content) > SIZE_THRESHOLD:
+        print(
+            f"Large file detected ({len(file_content)} bytes), processing in thread pool"
+        )
+
+        # Process in thread pool to avoid blocking the event loop
+        loop = asyncio.get_event_loop()
+        with ThreadPoolExecutor() as executor:
+            document_text = await loop.run_in_executor(
+                executor, extract_text_from_file, file_content, filename
+            )
+        return document_text
+    else:
+        # For small files, process synchronously
+        return extract_text_from_file(file_content, filename)
 
 
 router = APIRouter(prefix="/veradoc", tags=["veradoc"])
@@ -551,14 +577,19 @@ async def process_rag_checklist(
                         status_code=400, detail="File appears to be empty"
                     )
 
-                # Extract text using the extraction function
+                # Extract text using the async extraction function
                 if file_type == "handwritten":
                     print(f"Processing handwritten file with OCR: {file.filename}")
                     # For handwritten files, we can use the same extraction but potentially with enhanced OCR
-                    document_text = extract_text_from_file(content, file.filename)
+                    document_text = await extract_text_from_file_async(
+                        content, file.filename
+                    )
                 else:
                     print(f"Processing digitized file: {file.filename}")
-                    document_text = extract_text_from_file(content, file.filename)
+                    document_text = await extract_text_from_file_async(
+                        content, file.filename
+                    )
+
                 if not document_text or document_text.strip() == "":
                     raise HTTPException(
                         status_code=400,
@@ -566,6 +597,18 @@ async def process_rag_checklist(
                     )
 
                 print(f"Extracted {len(document_text)} characters from {file.filename}")
+
+                # For large files, cancel disconnect monitoring to prevent false positives
+                if (
+                    len(document_text) > 200000
+                ):  # Threshold for large documents like SBI.pdf
+                    print(
+                        "Large document detected, disabling disconnect monitoring to prevent false positives"
+                    )
+                    if disconnect_monitor:
+                        disconnect_monitor.cancel()
+                        disconnect_monitor = None
+                        cancellation_requested = False  # Reset any false positive
 
                 # Reset file position
                 await file.seek(0)
@@ -672,17 +715,27 @@ async def process_rag_checklist(
 
                                                 # 🚨 NEW FALLBACK: If not found with truncated name, try the whole filename
                                                 if not source_entry:
-                                                    print(f"No source entry found for truncated filename: {filename}")
-                                                    print(f"Trying with full filename: {raw_filename}")
-                                                    
+                                                    print(
+                                                        f"No source entry found for truncated filename: {filename}"
+                                                    )
+                                                    print(
+                                                        f"Trying with full filename: {raw_filename}"
+                                                    )
+
                                                     source_entry = session.exec(
-                                                        select(Source).where(Source.name == raw_filename)
+                                                        select(Source).where(
+                                                            Source.name == raw_filename
+                                                        )
                                                     ).first()
-                                                    
+
                                                     if source_entry:
-                                                        print(f"✅ Found source entry with full filename: {raw_filename}")
+                                                        print(
+                                                            f"✅ Found source entry with full filename: {raw_filename}"
+                                                        )
                                                     else:
-                                                        print(f"❌ No source entry found for either truncated or full filename")
+                                                        print(
+                                                            f"❌ No source entry found for either truncated or full filename"
+                                                        )
 
                                                 if source_entry:
                                                     metadata["source_data_id"] = str(
@@ -1068,9 +1121,7 @@ def delete_evaluation(
 
     # Only allow deletion of veradoc evaluations
     if evaluation.functionality != "veradoc":
-        raise HTTPException(
-            status_code=400, detail="Invalid evaluation type."
-        )
+        raise HTTPException(status_code=400, detail="Invalid evaluation type.")
 
     session.delete(evaluation)
     session.commit()
@@ -1396,10 +1447,20 @@ async def optimize_checklist(
             # 3. Process the test document
             file = files[0]
             content = await file.read()
-            document_text = extract_text_from_file(content, file.filename)
+            document_text = await extract_text_from_file_async(content, file.filename)
             print(
                 f"Processing test document: {file.filename} ({len(document_text)} characters)"
             )
+
+            # For large files, cancel disconnect monitoring to prevent false positives
+            if len(document_text) > 200000:
+                print(
+                    "Large test document detected, disabling disconnect monitoring to prevent false positives"
+                )
+                if disconnect_monitor:
+                    disconnect_monitor.cancel()
+                    disconnect_monitor = None
+                    cancellation_requested = False  # Reset any false positive
 
             # 4. Run the review process with current questions
             question_list = request_data.questions.strip().split("\n")
@@ -1952,7 +2013,7 @@ async def generate_questions_with_files(
     """
     from app.services.text_processing import chunk_text
     from app.core.config import settings
-    
+
     try:
         # Get the default LLM
         llm = get_default_llm(session, current_user)
@@ -2038,23 +2099,29 @@ async def generate_questions_with_files(
 
         # Check if content exceeds token limits and chunk if necessary
         if reference_document_content:
-            print(f"Total document content: {len(reference_document_content)} characters")
-            
+            print(
+                f"Total document content: {len(reference_document_content)} characters"
+            )
+
             # Using conservative chunking similar to TWINCHECK settings
             max_chunk_size = 80000  # Conservative chunk size for 128K context limit
-            
+
             if len(reference_document_content) > max_chunk_size:
-                print(f"Document too large ({len(reference_document_content)} chars), chunking for processing")
-                
+                print(
+                    f"Document too large ({len(reference_document_content)} chars), chunking for processing"
+                )
+
                 # Chunk the document content
-                chunks = chunk_text(reference_document_content, max_tokens=max_chunk_size)
-                
+                chunks = chunk_text(
+                    reference_document_content, max_tokens=max_chunk_size
+                )
+
                 # Process each chunk to generate questions
                 all_chunk_questions = []
-                
+
                 for i, chunk in enumerate(chunks):
                     print(f"Processing chunk {i+1}/{len(chunks)}")
-                    
+
                     # Generate questions for this chunk
                     chunk_prompt_variables = {
                         "description": description,
@@ -2070,12 +2137,12 @@ async def generate_questions_with_files(
                             settings.VERADOC_GENERATE_QUESTIONS_PROMPT_TEMPLATE,
                             chunk_prompt_variables,
                         )
-                        
+
                         # Parse questions from chunk response
                         chunk_questions = []
                         lines = chunk_response.strip().split("\n")
                         in_questions_section = False
-                        
+
                         for line in lines:
                             line = line.strip()
                             if line.startswith("QUESTIONS:"):
@@ -2090,7 +2157,7 @@ async def generate_questions_with_files(
                                     question = re.sub(r"^\d+\.\s+", "", line)
                                     if question.strip():
                                         chunk_questions.append(question.strip())
-                        
+
                         # If parsing failed, try simpler approach
                         if not chunk_questions:
                             for line in lines:
@@ -2099,13 +2166,13 @@ async def generate_questions_with_files(
                                     question = re.sub(r"^\d+\.\s+", "", line)
                                     if question.strip():
                                         chunk_questions.append(question.strip())
-                        
+
                         all_chunk_questions.extend(chunk_questions)
-                        
+
                     except Exception as e:
                         print(f"Error processing chunk {i+1}: {e}")
                         continue
-                
+
                 # Deduplicate and refine questions across all chunks
                 if all_chunk_questions:
                     # Remove duplicates while preserving order
@@ -2115,16 +2182,18 @@ async def generate_questions_with_files(
                         if q.lower() not in seen:
                             seen.add(q.lower())
                             unique_questions.append(q)
-                    
+
                     # If we have too many questions, synthesize and prioritize
                     if len(unique_questions) > (num_questions or 50):
                         synthesis_prompt_variables = {
                             "description": description,
                             "checklist_type": checklist_type,
-                            "questions_list": "\n".join([f"{i+1}. {q}" for i, q in enumerate(unique_questions)]),
+                            "questions_list": "\n".join(
+                                [f"{i+1}. {q}" for i, q in enumerate(unique_questions)]
+                            ),
                             "num_questions": num_questions or 20,
                         }
-                        
+
                         synthesis_prompt = f"""From the following list of checklist questions, select and refine the {num_questions or 20} most important and relevant questions for {checklist_type} verification based on: {description}
 
 Questions to review:
@@ -2137,26 +2206,30 @@ Requirements:
 4. Focus on questions most relevant to the description
 
 Return only the final selected questions, one per line, numbered."""
-                        
+
                         try:
                             refined_response = invoke_llm(llm, synthesis_prompt, {})
                             questions = []
-                            for line in refined_response.strip().split('\n'):
+                            for line in refined_response.strip().split("\n"):
                                 line = line.strip()
-                                if line and (line[0].isdigit() or line.startswith('-') or line.startswith('*')):
+                                if line and (
+                                    line[0].isdigit()
+                                    or line.startswith("-")
+                                    or line.startswith("*")
+                                ):
                                     question = re.sub(r"^\d+\.\s+", "", line)
                                     question = re.sub(r"^[-*]\s+", "", question)
                                     if question.strip():
                                         questions.append(question.strip())
                         except Exception as e:
                             print(f"Error in question synthesis: {e}")
-                            questions = unique_questions[:num_questions or 20]
+                            questions = unique_questions[: num_questions or 20]
                     else:
-                        questions = unique_questions[:num_questions or 20]
-                    
+                        questions = unique_questions[: num_questions or 20]
+
                     # For analysis, show chunked processing was used
                     analysis = f"Generated {len(questions)} questions from chunked document analysis ({len(chunks)} chunks processed) based on the provided description to ensure comprehensive evaluation coverage."
-                    
+
                     # Record the interaction
                     record_llm_interaction(
                         session=session,
