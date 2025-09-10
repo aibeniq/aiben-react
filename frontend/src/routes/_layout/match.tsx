@@ -369,7 +369,7 @@ const FormConnect = () => {
         <SelectionModal
           isOpen={showFormModal}
           onClose={() => setShowFormModal(false)}
-          title={t("match.title")}
+          title={t("match.selectFormTemplateTitle")}
         >
           <FormTemplateTable
             forms={forms}

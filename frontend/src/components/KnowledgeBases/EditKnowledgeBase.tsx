@@ -14,13 +14,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 import { useDropzone } from "react-dropzone"
 import { type SubmitHandler, useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { FaExchangeAlt, FaTrash } from "react-icons/fa"
 
-import {
-  type ApiError,
-  type KnowledgeBasePublic,
-  KnowledgeBasesService,
-} from "@/client"
+import { type ApiError, type KnowledgeBasePublic, KnowledgeBasesService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 import SourceLink from "../Common/SourceLink"
@@ -46,6 +43,7 @@ interface KnowledgeBaseUpdateForm {
 }
 
 const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
+  const { t } = useTranslation()
   console.log("KnowledgeBase item:", item)
   console.log("KnowledgeBase item ID:", item.id)
 
@@ -75,8 +73,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
     const hasTitleValue = !!knowledgeBase?.title
     const hasExistingFiles =
       knowledgeBase?.files &&
-      knowledgeBase.files.filter((f: any) => !removedFileIds.includes(f.id))
-        .length > 0
+      knowledgeBase.files.filter((f: any) => !removedFileIds.includes(f.id)).length > 0
     const hasNewFiles = selectedFiles.length > 0
     const hasFiles = hasExistingFiles || hasNewFiles
 
@@ -118,8 +115,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
         description: data.description,
         id: item.id,
         // Preserve the existing embedding model ID
-        embeddingModelId:
-          knowledgeBase?.embedding_model_id || item.embedding_model_id,
+        embeddingModelId: knowledgeBase?.embedding_model_id || item.embedding_model_id,
         formData: {
           files: data.files,
           ...(data.removedFileIds && data.removedFileIds.length > 0
@@ -128,16 +124,13 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
         },
       }
 
-      console.log(
-        "Payload being sent to KnowledgeBasesService.updateKnowledgeBase:",
-        payload,
-      )
+      console.log("Payload being sent to KnowledgeBasesService.updateKnowledgeBase:", payload)
       console.log("Preserving embedding_model_id:", payload.embeddingModelId)
 
       return KnowledgeBasesService.updateKnowledgeBase(payload)
     },
     onSuccess: () => {
-      showSuccessToast("Knowledge Base updated successfully.")
+      showSuccessToast(t("knowledgeBases.modals.messages.updateSuccess"))
       setIsOpen(false)
       // Force immediate cache invalidation and refetch
       queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
@@ -163,8 +156,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
 
     const hasExistingFiles =
       knowledgeBase?.files &&
-      knowledgeBase.files.filter((f: any) => !removedFileIds.includes(f.id))
-        .length > 0
+      knowledgeBase.files.filter((f: any) => !removedFileIds.includes(f.id)).length > 0
     const hasNewFiles = selectedFiles.length > 0
 
     if (!hasExistingFiles && !hasNewFiles) {
@@ -197,8 +189,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
       "text/plain": [".txt"],
       "application/pdf": [".pdf"],
       "application/msword": [".doc"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        [".docx"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
       "application/rtf": [".rtf"],
     },
     multiple: true,
@@ -224,7 +215,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
       <DialogTrigger asChild>
         <Button variant="ghost">
           <FaExchangeAlt fontSize="16px" />
-          Edit Knowledge Base
+          {t("knowledgeBases.modals.edit.title")}
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -250,23 +241,23 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <DialogHeader>
-              <DialogTitle>Edit Knowledge Base</DialogTitle>
+              <DialogTitle>{t("knowledgeBases.modals.edit.title")}</DialogTitle>
             </DialogHeader>
             <DialogBody>
-              <Text mb={4}>Update the Knowledge Base details below.</Text>
+              <Text mb={4}>{t("knowledgeBases.modals.edit.description")}</Text>
               <VStack gap={4}>
                 <Field
                   required
                   invalid={!!errors.title}
                   errorText={errors.title?.message}
-                  label="Title"
+                  label={t("knowledgeBases.modals.fields.title")}
                 >
                   <Input
                     id="title"
                     {...register("title", {
-                      required: "Title is required",
+                      required: t("knowledgeBases.modals.validation.titleRequired"),
                     })}
-                    placeholder="Title"
+                    placeholder={t("knowledgeBases.modals.fields.title")}
                     type="text"
                   />
                 </Field>
@@ -274,12 +265,12 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                 <Field
                   invalid={!!errors.description}
                   errorText={errors.description?.message}
-                  label="Description"
+                  label={t("knowledgeBases.modals.fields.description")}
                 >
                   <Input
                     id="description"
                     {...register("description")}
-                    placeholder="Description"
+                    placeholder={t("knowledgeBases.modals.fields.description")}
                     type="text"
                   />
                 </Field>
@@ -287,27 +278,17 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                 {/* Existing Files */}
                 {knowledgeBase?.files && knowledgeBase.files.length > 0 && (
                   <Box w="full">
-                    <Text mb={2}>Current Files:</Text>
+                    <Text mb={2}>{t("knowledgeBases.modals.fileUpload.currentFiles")}:</Text>
                     <VStack align="start" gap={2}>
                       {knowledgeBase.files
-                        .filter(
-                          (file: any) => !removedFileIds.includes(file.id),
-                        )
+                        .filter((file: any) => !removedFileIds.includes(file.id))
                         .map((file: any) => (
-                          <HStack
-                            key={file.id}
-                            w="full"
-                            justify="space-between"
-                          >
+                          <HStack key={file.id} w="full" justify="space-between">
                             {/* Use SourceLink component for on-demand loading */}
-                            <SourceLink
-                              sourceId={file.id}
-                              fileName={file.name}
-                              useModal={true}
-                            />
+                            <SourceLink sourceId={file.id} fileName={file.name} useModal={true} />
                             <Box
                               as="button"
-                              aria-label="Remove file"
+                              aria-label={t("knowledgeBases.modals.fileUpload.removeFile")}
                               onClick={() => handleRemoveExistingFile(file.id)}
                               _hover={{ color: "red.500" }}
                             >
@@ -333,15 +314,15 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                   <input {...getInputProps()} />
                   <Text>
                     {isDragActive
-                      ? "Drop the files here..."
-                      : "Drag and drop files here, or click to browse"}
+                      ? t("knowledgeBases.modals.fileUpload.dropFiles")
+                      : t("knowledgeBases.modals.fileUpload.dragAndDrop")}
                   </Text>
                 </Box>
 
                 {/* New Selected Files */}
                 {selectedFiles.length > 0 && (
                   <Box w="full">
-                    <Text mb={2}>New Files:</Text>
+                    <Text mb={2}>{t("knowledgeBases.modals.fileUpload.newFiles")}:</Text>
                     <VStack align="start" gap={2}>
                       {selectedFiles.map((file, index) => (
                         <HStack key={index} w="full" justify="space-between">
@@ -356,7 +337,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                           </Link>
                           <Box
                             as="button"
-                            aria-label="Remove file"
+                            aria-label={t("knowledgeBases.modals.fileUpload.removeFile")}
                             onClick={() => handleRemoveNewFile(index)}
                             _hover={{ color: "red.500" }}
                           >
@@ -373,12 +354,8 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
             <DialogFooter gap={2}>
               <ButtonGroup>
                 <DialogActionTrigger asChild>
-                  <Button
-                    variant="subtle"
-                    colorPalette="gray"
-                    disabled={isSubmitting}
-                  >
-                    Cancel
+                  <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
+                    {t("knowledgeBases.modals.buttons.cancel")}
                   </Button>
                 </DialogActionTrigger>
                 <Button
@@ -392,7 +369,9 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                   disabled={!formIsValid || isSubmitting}
                   loading={isSubmitting}
                 >
-                  {isSubmitting ? "Saving..." : "Save"}
+                  {isSubmitting
+                    ? t("knowledgeBases.modals.buttons.saving")
+                    : t("knowledgeBases.modals.buttons.save")}
                 </Button>
               </ButtonGroup>
             </DialogFooter>

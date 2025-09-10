@@ -1,6 +1,7 @@
 import type { KnowledgeBasePublic } from "@/client"
 import { Checkbox, Table } from "@chakra-ui/react"
 import { FiCheck } from "react-icons/fi"
+import { useTranslation } from "react-i18next"
 
 interface TableCardProps {
   knowledgeBases: KnowledgeBasePublic[]
@@ -20,6 +21,8 @@ interface TableBodyProps {
 }
 
 const TableHeader = ({ hasSelection }: TableHeaderProps) => {
+  const { t } = useTranslation()
+
   return (
     <Table.Header position="sticky" top="0" bg="transparent" zIndex="1">
       <Table.Row>
@@ -28,36 +31,23 @@ const TableHeader = ({ hasSelection }: TableHeaderProps) => {
             {hasSelection ? <FiCheck /> : ""}
           </span>
         </Table.ColumnHeader>
-        <Table.ColumnHeader
-          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
-        >
-          Name
+        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+          {t("chatbot.knowledgeBaseTableName")}
         </Table.ColumnHeader>
-        <Table.ColumnHeader
-          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
-        >
-          Description
+        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+          {t("chatbot.knowledgeBaseTableDescription")}
         </Table.ColumnHeader>
-        <Table.ColumnHeader
-          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
-        >
-          Sources
+        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+          {t("chatbot.knowledgeBaseTableSources")}
         </Table.ColumnHeader>
       </Table.Row>
     </Table.Header>
   )
 }
 
-const TableBody = ({
-  knowledgeBases,
-  selectedId,
-  onRowSelection,
-}: TableBodyProps) => {
+const TableBody = ({ knowledgeBases, selectedId, onRowSelection }: TableBodyProps) => {
   const rows = knowledgeBases.map((kb) => (
-    <Table.Row
-      key={kb.id}
-      data-selected={selectedId === kb.id ? "" : undefined}
-    >
+    <Table.Row key={kb.id} data-selected={selectedId === kb.id ? "" : undefined}>
       <Table.Cell>
         <Checkbox.Root
           size="sm"

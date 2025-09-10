@@ -139,6 +139,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         optimize: "אופטימיזציה",
         optimizeTooltip: "יש לבחור בסיס ידע כדי להפעיל את פונקציית האופטימיזציה",
         optimizeTooltipEnabled: "בצע אופטימיזציה לשאלות על בסיס בסיס הידע שנבחר",
+        allUsersToggleTooltip: "החלף בין צפייה בהיסטוריה שלך בלבד או בהיסטוריה של כל המשתמשים",
         uploadFiles: "העלה קבצים",
         knowledgeBase: "בסיס ידע",
         referenceDocuments: "מסמכי עזר (אופציונלי)",
@@ -152,6 +153,219 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         cancel: "ביטול",
         deleteChecklist: "מחק רשימת בדיקה"
       },
+      compare: {
+        title: "השווה מסמכים",
+        subtitle: "בחר שני מסמכים להשוואה",
+        selectFirstDocument: "בחר מסמך ראשון",
+        selectSecondDocument: "בחר מסמך שני",
+        pleaseSelect: "אנא בחר...",
+        documentA: "מסמך א'",
+        documentB: "מסמך ב'",
+        compareDocuments: "השווה מסמכים",
+        comparison: "השוואה",
+        noDocumentsFound: "לא נמצאו מסמכים",
+        selectTwoDocuments: "אנא בחר שני מסמכים להשוואה",
+        loadingComparison: "טוען השוואה...",
+        topicList: "רשימת נושאים",
+        clickToBrowse: "לחץ לעיון או גרור לכאן",
+        supportedFormats: "פורמטים נתמכים: PDF, TXT, DOCX",
+        analysisType: "סוג ניתוח",
+        quickAnalysis: "ניתוח מהיר",
+        detailedAnalysis: "ניתוח מפורט",
+        comprehensiveAnalysis: "ניתוח מקיף",
+        analysisDepth: "עומק הניתוח",
+        surfaceLevel: "רמה שטחית",
+        moderate: "בינוני",
+        deep: "עמוק",
+        veryDeep: "עמוק מאוד",
+        editTopicList: "ערוך רשימת נושאים"
+      },
+      match: {
+        title: "התאמת מסמכים",
+        subtitle: "מצא מסמכים דומים על בסיס תוכן",
+        selectDocument: "בחר מסמך לחיפוש התאמות",
+        pleaseSelect: "אנא בחר מסמך...",
+        sourceDocument: "מסמך מקור",
+        matchingDocuments: "מסמכים תואמים",
+        findMatches: "מצא התאמות",
+        similarityScore: "ציון דמיון",
+        noDocumentsFound: "לא נמצאו מסמכים",
+        selectDocumentToMatch: "אנא בחר מסמך לחיפוש התאמות",
+        loadingMatches: "מחפש התאמות...",
+        noMatchesFound: "לא נמצאו מסמכים דומים",
+        matchResults: "תוצאות התאמה",
+        similarity: "דמיון",
+        matchingCriteria: "קריטריוני התאמה",
+        semanticSimilarity: "דמיון סמנטי",
+        keywordMatching: "התאמת מילות מפתח",
+        structuralSimilarity: "דמיון מבני",
+        threshold: "סף",
+        minimumSimilarity: "דמיון מינימלי",
+        searchDepth: "עומק חיפוש",
+        maxResults: "תוצאות מקסימליות",
+        editFormTemplate: "ערוך תבנית טופס"
+      },
+      knowledgeBases: {
+        title: "ניהול בסיסי ידע",
+        addKnowledgeBase: "הוסף בסיס ידע",
+        emptyStateTitle: "אין לך עדיין בסיסי ידע",
+        emptyStateDescription: "הוסף בסיס ידע חדש כדי להתחיל",
+        tableHeaders: {
+          title: "כותרת",
+          description: "תיאור",
+          numberOfSources: "מספר מקורות",
+          embeddingModel: "מודל הטמעה",
+          dateCreated: "תאריך יצירה",
+          dateModified: "תאריך שינוי",
+          actions: "פעולות"
+        },
+        status: {
+          default: "ברירת מחדל",
+          na: "לא זמין"
+        },
+        actions: {
+          view: "הצג",
+          edit: "ערוך",
+          delete: "מחק",
+          configure: "הגדר"
+        },
+        deleteModal: {
+          title: "מחק בסיס ידע",
+          buttonText: "מחק בסיס ידע",
+          description: "בסיס הידע הזה יימחק לצמיתות. האם אתה בטוח? לא תוכל לבטל פעולה זו.",
+          confirmButton: "מחק",
+          cancelButton: "בטל",
+          successMessage: "בסיס הידע נמחק בהצלחה",
+          errorMessage: "אירעה שגיאה בעת מחיקת בסיס הידע"
+        },
+        modals: {
+          add: {
+            title: "הוסף בסיס ידע",
+            description: "צור בסיס ידע חדש על ידי מתן פרטים והעלאת מסמכים למטה.",
+            fields: {
+              title: "כותרת",
+              titlePlaceholder: "כותרת",
+              titleRequired: "כותרת נדרשת",
+              description: "תיאור",
+              descriptionPlaceholder: "תיאור",
+            },
+            fileUpload: {
+              dragAndDrop: "גרור קבצים לכאן או לחץ לעיון",
+              dropFiles: "שחרר קבצים כאן...",
+              selectedFiles: "קבצים שנבחרו:",
+              removeFile: "הסר קובץ",
+            },
+            buttons: {
+              cancel: "בטל",
+              save: "שמור",
+              creating: "יוצר...",
+            },
+            validation: {
+              atLeastOneFile: "נדרש לפחות קובץ אחד.",
+            },
+            success: "בסיס הידע נוצר בהצלחה.",
+          },
+          edit: {
+            title: "ערוך בסיס ידע",
+            description: "עדכן פרטי בסיס ידע למטה.",
+            fields: {
+              title: "כותרת",
+              titlePlaceholder: "כותרת",
+              titleRequired: "כותרת נדרשת",
+              description: "תיאור",
+              descriptionPlaceholder: "תיאור",
+            },
+            fileUpload: {
+              currentFiles: "קבצים נוכחיים:",
+              dragAndDrop: "גרור קבצים לכאן או לחץ לעיון",
+              dropFiles: "שחרר קבצים כאן...",
+              selectedFiles: "קבצים שנבחרו:",
+              removeFile: "הסר קובץ",
+            },
+            buttons: {
+              cancel: "בטל",
+              save: "שמור",
+              saving: "שומר...",
+            },
+            success: "בסיס הידע עודכן בהצלחה.",
+          },
+          editFormTemplateModal: {
+            title: "ערוך תבנית טופס",
+            formTemplateName: "שם תבנית הטופס",
+            formTemplateDescription: "תיאור תבנית הטופס",
+            descriptionPlaceholder: "הזן תיאור תבנית הטופס...",
+            referenceDocuments: "מסמכי עזר (אופציונלי)",
+            uploadFiles: "העלה קבצים",
+            knowledgeBase: "בסיס ידע",
+            formFields: "שדות הטופס",
+            suggest: "הצע",
+            fieldPlaceholder: "הוסף שם שדה...",
+            cancel: "בטל",
+            updateFormTemplate: "עדכן תבנית טופס"
+          },
+        },
+        editCustom: {
+          title: "ערוך הוראות מותאמות",
+          currentInstructions: "הוראות נוכחיות:",
+          save: "שמור",
+          cancel: "בטל",
+        },
+      },
+      optimizeChecklistModal: {
+        title: "ייעול רשימת בדיקה",
+        customInstructionsLabel: "הוראות מותאמות (אופציונלי)",
+        customInstructionsHelperText: "הזן הוראות נוספות שיש לקחת בחשבון בעת מענה על שאלות רשימת הבדיקה",
+        analyzing: "מנתח...",
+        analyzeButton: "נתח רשימת בדיקה",
+        analyzingMessage: "מנתח את רשימת הבדיקה שלך לאיתור הזדמנויות ייעול...",
+        cancelAnalysis: "בטל ניתוח",
+        downloading: "מוריד...",
+        downloadCsv: "הורד CSV",
+        questionsNeedingOptimization: "שאלות הדורשות ייעול",
+        questionsAlreadyOptimized: "שאלות שכבר עברו ייעול",
+        selected: "נבחר",
+        select: "בחר",
+        original: "מקורי",
+        suggestedImprovement: "שיפור מוצע",
+        policyContext: "הקשר מדיניות",
+        currentAnswer: "תשובה נוכחית",
+        showLess: "הראה פחות",
+        showMore: "הראה יותר",
+        optimizationsSelectedText: "ייעולים נבחרו ליישום",
+        applying: "מיישם...",
+        applySelectedOptimizations: "יישם ייעולים נבחרים",
+        uploadDocumentsTitle: "העלה מסמכים שרשימת הבדיקה צריכה לקבל *",
+        uploadDocumentsHelperText: "העלה מסמכים שצריכים לעמוד בכל דרישות רשימת הבדיקה כדי לעזור לזהות שאלות שעלולות להיות קפדניות מדי",
+        customInstructionsPlaceholder: "לדוגמה, קח בחשבון שזהו מחקר ילדים בעת הערכת דרישות הקשורות לגיל, פרוטוקול זה מיועד להתערבות בסיכון נמוך, וכו'"
+      },
+      optimizeOutlineModal: {
+        title: "ייעול מתאר",
+        description: "העלה מסמך ייחוס המייצג דוגמה באיכות גבוהה לסוג הדוח שברצונך ליצור. המערכת תיצור דוח באמצעות המתאר ובסיס הידע הנוכחיים שלך, תשווה אותו לייחוס ותציע שיפורים לחלקי המתאר.",
+        groundTruthDocument: "מסמך ייחוס",
+        customInstructionsLabel: "הוראות מותאמות (אופציונלי)",
+        customInstructionsHelperText: "ספק הנחיות נוספות לתהליך הייעול",
+        customInstructionsPlaceholder: "לדוגמה, התמקד בשיפור העומק הטכני, הבטח עמידה בתקנים ספציפיים, וכו'",
+        characters: "תווים",
+        analyzingOutline: "מנתח מתאר ויוצר ייעולים...",
+        cancelAnalysis: "בטל ניתוח",
+        optimizationResults: "תוצאות ייעול",
+        sectionsNeedOptimization: "חלקים זקוקים לייעול",
+        downloadCsv: "הורד CSV",
+        section: "חלק",
+        accepted: "מקובל",
+        accept: "קבל",
+        originalSectionDescription: "תיאור החלק המקורי",
+        suggestedSectionDescription: "תיאור החלק המוצע",
+        generatedContent: "תוכן שנוצר (עם התיאור הנוכחי)",
+        groundTruthReference: "הפניית ייחוס",
+        showLess: "הראה פחות",
+        showMore: "הראה יותר",
+        close: "סגור",
+        cancel: "בטל",
+        optimizing: "מייעל...",
+        optimizeOutline: "ייעל מתאר",
+        applyOptimizations: "יישם {{count}} ייעולים"
+      }
     },
   }
 
@@ -292,6 +506,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         optimize: "بهینه‌سازی",
         optimizeTooltip: "برای فعال کردن عملکرد بهینه‌سازی باید پایگاه دانش انتخاب شود",
         optimizeTooltipEnabled: "بهینه‌سازی سوالات بر اساس پایگاه دانش انتخاب شده",
+        allUsersToggleTooltip: "تغییر بین مشاهده فقط تاریخچه شما یا تاریخچه همه کاربران",
         uploadFiles: "آپلود فایل‌ها",
         knowledgeBase: "پایگاه دانش",
         referenceDocuments: "اسناد مرجع (اختیاری)",
@@ -305,6 +520,219 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         cancel: "لغو",
         deleteChecklist: "حذف چک‌لیست"
       },
+      compare: {
+        title: "مقایسه اسناد",
+        subtitle: "دو سند برای مقایسه انتخاب کنید",
+        selectFirstDocument: "سند اول را انتخاب کنید",
+        selectSecondDocument: "سند دوم را انتخاب کنید",
+        pleaseSelect: "لطفاً انتخاب کنید...",
+        documentA: "سند الف",
+        documentB: "سند ب",
+        compareDocuments: "مقایسه اسناد",
+        comparison: "مقایسه",
+        noDocumentsFound: "هیچ سندی یافت نشد",
+        selectTwoDocuments: "لطفاً دو سند برای مقایسه انتخاب کنید",
+        loadingComparison: "در حال بارگذاری مقایسه...",
+        topicList: "فهرست موضوعات",
+        clickToBrowse: "برای مرور کلیک کنید یا اینجا بکشید",
+        supportedFormats: "فرمت‌های پشتیبانی شده: PDF, TXT, DOCX",
+        analysisType: "نوع تحلیل",
+        quickAnalysis: "تحلیل سریع",
+        detailedAnalysis: "تحلیل تفصیلی",
+        comprehensiveAnalysis: "تحلیل جامع",
+        analysisDepth: "عمق تحلیل",
+        surfaceLevel: "سطح ظاهری",
+        moderate: "متوسط",
+        deep: "عمیق",
+        veryDeep: "بسیار عمیق",
+        editTopicList: "ویرایش فهرست موضوعات"
+      },
+      match: {
+        title: "تطبیق اسناد",
+        subtitle: "اسناد مشابه را بر اساس محتوا پیدا کنید",
+        selectDocument: "سندی برای یافتن تطبیق انتخاب کنید",
+        pleaseSelect: "لطفاً سند انتخاب کنید...",
+        sourceDocument: "سند منبع",
+        matchingDocuments: "اسناد تطبیق یافته",
+        findMatches: "یافتن تطبیق‌ها",
+        similarityScore: "امتیاز شباهت",
+        noDocumentsFound: "هیچ سندی یافت نشد",
+        selectDocumentToMatch: "لطفاً سندی برای یافتن تطبیق انتخاب کنید",
+        loadingMatches: "در حال جستجوی تطبیق‌ها...",
+        noMatchesFound: "هیچ سند مشابهی یافت نشد",
+        matchResults: "نتایج تطبیق",
+        similarity: "شباهت",
+        matchingCriteria: "معیارهای تطبیق",
+        semanticSimilarity: "شباهت معنایی",
+        keywordMatching: "تطبیق کلمه کلیدی",
+        structuralSimilarity: "شباهت ساختاری",
+        threshold: "آستانه",
+        minimumSimilarity: "حداقل شباهت",
+        searchDepth: "عمق جستجو",
+        maxResults: "حداکثر نتایج",
+        editFormTemplate: "ویرایش قالب فرم"
+      },
+      knowledgeBases: {
+        title: "مدیریت پایگاه‌های دانش",
+        addKnowledgeBase: "افزودن پایگاه دانش",
+        emptyStateTitle: "شما هنوز هیچ پایگاه دانشی ندارید",
+        emptyStateDescription: "پایگاه دانش جدیدی اضافه کنید تا شروع کنید",
+        tableHeaders: {
+          title: "عنوان",
+          description: "توضیحات",
+          numberOfSources: "تعداد منابع",
+          embeddingModel: "مدل جاسازی",
+          dateCreated: "تاریخ ایجاد",
+          dateModified: "تاریخ تغییر",
+          actions: "اقدامات"
+        },
+        status: {
+          default: "پیش‌فرض",
+          na: "موجود نیست"
+        },
+        actions: {
+          view: "نمایش",
+          edit: "ویرایش",
+          delete: "حذف",
+          configure: "پیکربندی"
+        },
+        deleteModal: {
+          title: "حذف پایگاه دانش",
+          buttonText: "حذف پایگاه دانش",
+          description: "این پایگاه دانش به طور دائم حذف خواهد شد. آیا مطمئن هستید؟ نمی‌توانید این عمل را لغو کنید.",
+          confirmButton: "حذف",
+          cancelButton: "لغو",
+          successMessage: "پایگاه دانش با موفقیت حذف شد",
+          errorMessage: "خطایی در حین حذف پایگاه دانش رخ داد"
+        },
+        modals: {
+          add: {
+            title: "افزودن پایگاه دانش",
+            description: "با ارائه جزئیات و آپلود اسناد در زیر، پایگاه دانش جدیدی ایجاد کنید.",
+            fields: {
+              title: "عنوان",
+              titlePlaceholder: "عنوان",
+              titleRequired: "عنوان الزامی است",
+              description: "توضیحات",
+              descriptionPlaceholder: "توضیحات",
+            },
+            fileUpload: {
+              dragAndDrop: "فایل‌ها را اینجا بکشید یا برای مرور کلیک کنید",
+              dropFiles: "فایل‌ها را اینجا رها کنید...",
+              selectedFiles: "فایل‌های انتخاب شده:",
+              removeFile: "حذف فایل",
+            },
+            buttons: {
+              cancel: "لغو",
+              save: "ذخیره",
+              creating: "در حال ایجاد...",
+            },
+            validation: {
+              atLeastOneFile: "حداقل یک فایل الزامی است.",
+            },
+            success: "پایگاه دانش با موفقیت ایجاد شد.",
+          },
+          edit: {
+            title: "ویرایش پایگاه دانش",
+            description: "جزئیات پایگاه دانش را در زیر به‌روزرسانی کنید.",
+            fields: {
+              title: "عنوان",
+              titlePlaceholder: "عنوان",
+              titleRequired: "عنوان الزامی است",
+              description: "توضیحات",
+              descriptionPlaceholder: "توضیحات",
+            },
+            fileUpload: {
+              currentFiles: "فایل‌های فعلی:",
+              dragAndDrop: "فایل‌ها را اینجا بکشید یا برای مرور کلیک کنید",
+              dropFiles: "فایل‌ها را اینجا رها کنید...",
+              selectedFiles: "فایل‌های انتخاب شده:",
+              removeFile: "حذف فایل",
+            },
+            buttons: {
+              cancel: "لغو",
+              save: "ذخیره",
+              saving: "در حال ذخیره...",
+            },
+            success: "پایگاه دانش با موفقیت به‌روزرسانی شد.",
+          },
+          editFormTemplateModal: {
+            title: "ویرایش قالب فرم",
+            formTemplateName: "نام قالب فرم",
+            formTemplateDescription: "توضیح قالب فرم",
+            descriptionPlaceholder: "توضیح قالب فرم را وارد کنید...",
+            referenceDocuments: "اسناد مرجع (اختیاری)",
+            uploadFiles: "آپلود فایل‌ها",
+            knowledgeBase: "پایگاه دانش",
+            formFields: "فیلدهای فرم",
+            suggest: "پیشنهاد",
+            fieldPlaceholder: "نام فیلد اضافه کنید...",
+            cancel: "لغو",
+            updateFormTemplate: "به‌روزرسانی قالب فرم"
+          },
+        },
+        editCustom: {
+          title: "ویرایش دستورالعمل‌های سفارشی",
+          currentInstructions: "دستورالعمل‌های فعلی:",
+          save: "ذخیره",
+          cancel: "لغو",
+        },
+      },
+      optimizeChecklistModal: {
+        title: "بهینه‌سازی فهرست بررسی",
+        customInstructionsLabel: "دستورالعمل‌های سفارشی (اختیاری)",
+        customInstructionsHelperText: "دستورالعمل‌های اضافی که باید هنگام پاسخ به سوالات فهرست بررسی در نظر گرفته شود وارد کنید",
+        analyzing: "در حال تحلیل...",
+        analyzeButton: "تحلیل فهرست بررسی",
+        analyzingMessage: "فهرست بررسی شما برای فرصت‌های بهینه‌سازی تحلیل می‌شود...",
+        cancelAnalysis: "لغو تحلیل",
+        downloading: "در حال دانلود...",
+        downloadCsv: "دانلود CSV",
+        questionsNeedingOptimization: "سوالاتی که نیاز به بهینه‌سازی دارند",
+        questionsAlreadyOptimized: "سوالات قبلاً بهینه‌سازی شده",
+        selected: "انتخاب شده",
+        select: "انتخاب",
+        original: "اصلی",
+        suggestedImprovement: "بهبود پیشنهادی",
+        policyContext: "زمینه سیاست",
+        currentAnswer: "پاسخ فعلی",
+        showLess: "نمایش کمتر",
+        showMore: "نمایش بیشتر",
+        optimizationsSelectedText: "بهینه‌سازی برای اعمال انتخاب شده",
+        applying: "در حال اعمال...",
+        applySelectedOptimizations: "اعمال بهینه‌سازی‌های انتخاب شده",
+        uploadDocumentsTitle: "اسناد که فهرست بررسی باید آن‌ها را بپذیرد آپلود کنید *",
+        uploadDocumentsHelperText: "اسنادی را آپلود کنید که باید تمام الزامات فهرست بررسی را برآورده کنند تا به شناسایی سوالاتی که ممکن است خیلی سخت‌گیرانه باشند کمک کند",
+        customInstructionsPlaceholder: "مثال: در نظر بگیرید که این یک مطالعه کودکان است هنگام ارزیابی الزامات مربوط به سن، این پروتکل برای مداخله کم‌خطر است و غیره"
+      },
+      optimizeOutlineModal: {
+        title: "بهینه‌سازی طرح کلی",
+        description: "سند مرجعی که نمونه‌ای با کیفیت بالا از نوع گزارشی که می‌خواهید تولید کنید را نشان می‌دهد آپلود کنید. سیستم گزارشی با استفاده از طرح کلی و پایگاه دانش فعلی شما تولید می‌کند، آن را با مرجع مقایسه می‌کند و بهبودهایی برای بخش‌های طرح کلی پیشنهاد می‌دهد.",
+        groundTruthDocument: "سند مرجع",
+        customInstructionsLabel: "دستورالعمل‌های سفارشی (اختیاری)",
+        customInstructionsHelperText: "راهنمایی اضافی برای فرآیند بهینه‌سازی ارائه دهید",
+        customInstructionsPlaceholder: "مثال: بر بهبود عمق فنی تمرکز کنید، انطباق با استانداردهای خاص را تضمین کنید و غیره",
+        characters: "کاراکتر",
+        analyzingOutline: "در حال تحلیل طرح کلی و تولید بهینه‌سازی‌ها...",
+        cancelAnalysis: "لغو تحلیل",
+        optimizationResults: "نتایج بهینه‌سازی",
+        sectionsNeedOptimization: "بخش نیاز به بهینه‌سازی دارد",
+        downloadCsv: "دانلود CSV",
+        section: "بخش",
+        accepted: "پذیرفته شده",
+        accept: "پذیرش",
+        originalSectionDescription: "توضیح بخش اصلی",
+        suggestedSectionDescription: "توضیح بخش پیشنهادی",
+        generatedContent: "محتوای تولید شده (با توضیح فعلی)",
+        groundTruthReference: "مرجع اصلی",
+        showLess: "نمایش کمتر",
+        showMore: "نمایش بیشتر",
+        close: "بستن",
+        cancel: "لغو",
+        optimizing: "در حال بهینه‌سازی...",
+        optimizeOutline: "بهینه‌سازی طرح کلی",
+        applyOptimizations: "اعمال {{count}} بهینه‌سازی"
+      }
     },
   }
 
@@ -445,6 +873,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         optimize: "Optimize Et",
         optimizeTooltip: "Optimize Et işlevini etkinleştirmek için bir Bilgi Tabanı seçilmelidir",
         optimizeTooltipEnabled: "Seçili Bilgi Tabanına göre soruları optimize et",
+        allUsersToggleTooltip: "Sadece geçmişinizi görüntüleme ile tüm kullanıcıların geçmişini görüntüleme arasında geçiş yap",
         uploadFiles: "Dosyaları Yükle",
         knowledgeBase: "Bilgi Tabanı",
         referenceDocuments: "Referans Belgeler (İsteğe Bağlı)",
@@ -458,6 +887,219 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         cancel: "İptal",
         deleteChecklist: "Kontrol Listesini Sil"
       },
+      compare: {
+        title: "Belgeleri Karşılaştır",
+        subtitle: "Karşılaştırmak için iki belge seçin",
+        selectFirstDocument: "İlk belgeyi seçin",
+        selectSecondDocument: "İkinci belgeyi seçin",
+        pleaseSelect: "Lütfen seçin...",
+        documentA: "Belge A",
+        documentB: "Belge B",
+        compareDocuments: "Belgeleri Karşılaştır",
+        comparison: "Karşılaştırma",
+        noDocumentsFound: "Belge bulunamadı",
+        selectTwoDocuments: "Lütfen karşılaştırmak için iki belge seçin",
+        loadingComparison: "Karşılaştırma yükleniyor...",
+        topicList: "Konu Listesi",
+        clickToBrowse: "Göz atmak için tıklayın veya buraya sürükleyin",
+        supportedFormats: "Desteklenen formatlar: PDF, TXT, DOCX",
+        analysisType: "Analiz Türü",
+        quickAnalysis: "Hızlı Analiz",
+        detailedAnalysis: "Detaylı Analiz",
+        comprehensiveAnalysis: "Kapsamlı Analiz",
+        analysisDepth: "Analiz Derinliği",
+        surfaceLevel: "Yüzey Seviyesi",
+        moderate: "Orta",
+        deep: "Derin",
+        veryDeep: "Çok Derin",
+        editTopicList: "Konu Listesini Düzenle"
+      },
+      match: {
+        title: "Belge Eşleştirme",
+        subtitle: "İçeriğe dayalı benzer belgeler bulun",
+        selectDocument: "Eşleşme bulmak için bir belge seçin",
+        pleaseSelect: "Lütfen belge seçin...",
+        sourceDocument: "Kaynak Belge",
+        matchingDocuments: "Eşleşen Belgeler",
+        findMatches: "Eşleşmeleri Bul",
+        similarityScore: "Benzerlik Puanı",
+        noDocumentsFound: "Belge bulunamadı",
+        selectDocumentToMatch: "Lütfen eşleşme bulmak için bir belge seçin",
+        loadingMatches: "Eşleşmeler aranıyor...",
+        noMatchesFound: "Benzer belge bulunamadı",
+        matchResults: "Eşleşme Sonuçları",
+        similarity: "Benzerlik",
+        matchingCriteria: "Eşleşme Kriterleri",
+        semanticSimilarity: "Anlamsal Benzerlik",
+        keywordMatching: "Anahtar Kelime Eşleştirme",
+        structuralSimilarity: "Yapısal Benzerlik",
+        threshold: "Eşik",
+        minimumSimilarity: "Minimum Benzerlik",
+        searchDepth: "Arama Derinliği",
+        maxResults: "Maksimum Sonuç",
+        editFormTemplate: "Form Şablonunu Düzenle"
+      },
+      knowledgeBases: {
+        title: "Bilgi Tabanı Yönetimi",
+        addKnowledgeBase: "Bilgi Tabanı Ekle",
+        emptyStateTitle: "Henüz hiç bilgi tabanınız yok",
+        emptyStateDescription: "Başlamak için yeni bir bilgi tabanı ekleyin",
+        tableHeaders: {
+          title: "Başlık",
+          description: "Açıklama",
+          numberOfSources: "Kaynak Sayısı",
+          embeddingModel: "Gömme Modeli",
+          dateCreated: "Oluşturulma Tarihi",
+          dateModified: "Değiştirilme Tarihi",
+          actions: "İşlemler"
+        },
+        status: {
+          default: "Varsayılan",
+          na: "Mevcut Değil"
+        },
+        actions: {
+          view: "Görüntüle",
+          edit: "Düzenle",
+          delete: "Sil",
+          configure: "Yapılandır"
+        },
+        deleteModal: {
+          title: "Bilgi Tabanını Sil",
+          buttonText: "Bilgi Tabanını Sil",
+          description: "Bu bilgi tabanı kalıcı olarak silinecek. Emin misiniz? Bu işlemi geri alamazsınız.",
+          confirmButton: "Sil",
+          cancelButton: "İptal",
+          successMessage: "Bilgi tabanı başarıyla silindi",
+          errorMessage: "Bilgi tabanı silinirken bir hata oluştu"
+        },
+        modals: {
+          add: {
+            title: "Bilgi Tabanı Ekle",
+            description: "Aşağıdaki ayrıntıları sağlayarak ve belgeler yükleyerek yeni bir bilgi tabanı oluşturun.",
+            fields: {
+              title: "Başlık",
+              titlePlaceholder: "Başlık",
+              titleRequired: "Başlık gereklidir",
+              description: "Açıklama",
+              descriptionPlaceholder: "Açıklama",
+            },
+            fileUpload: {
+              dragAndDrop: "Dosyaları buraya sürükleyin veya göz atmak için tıklayın",
+              dropFiles: "Dosyaları buraya bırakın...",
+              selectedFiles: "Seçilen Dosyalar:",
+              removeFile: "Dosyayı Kaldır",
+            },
+            buttons: {
+              cancel: "İptal",
+              save: "Kaydet",
+              creating: "Oluşturuluyor...",
+            },
+            validation: {
+              atLeastOneFile: "En az bir dosya gereklidir.",
+            },
+            success: "Bilgi tabanı başarıyla oluşturuldu.",
+          },
+          edit: {
+            title: "Bilgi Tabanını Düzenle",
+            description: "Aşağıdaki bilgi tabanı ayrıntılarını güncelleyin.",
+            fields: {
+              title: "Başlık",
+              titlePlaceholder: "Başlık",
+              titleRequired: "Başlık gereklidir",
+              description: "Açıklama",
+              descriptionPlaceholder: "Açıklama",
+            },
+            fileUpload: {
+              currentFiles: "Mevcut Dosyalar:",
+              dragAndDrop: "Dosyaları buraya sürükleyin veya göz atmak için tıklayın",
+              dropFiles: "Dosyaları buraya bırakın...",
+              selectedFiles: "Seçilen Dosyalar:",
+              removeFile: "Dosyayı Kaldır",
+            },
+            buttons: {
+              cancel: "İptal",
+              save: "Kaydet",
+              saving: "Kaydediliyor...",
+            },
+            success: "Bilgi tabanı başarıyla güncellendi.",
+          },
+          editFormTemplateModal: {
+            title: "Form Şablonunu Düzenle",
+            formTemplateName: "Form Şablonu Adı",
+            formTemplateDescription: "Form Şablonu Açıklaması",
+            descriptionPlaceholder: "Form şablonu açıklaması girin...",
+            referenceDocuments: "Referans Belgeler (İsteğe Bağlı)",
+            uploadFiles: "Dosyaları Yükle",
+            knowledgeBase: "Bilgi Tabanı",
+            formFields: "Form Alanları",
+            suggest: "Öner",
+            fieldPlaceholder: "Alan adı ekle...",
+            cancel: "İptal",
+            updateFormTemplate: "Form Şablonunu Güncelle"
+          },
+        },
+        editCustom: {
+          title: "Özel Talimatları Düzenle",
+          currentInstructions: "Mevcut Talimatlar:",
+          save: "Kaydet",
+          cancel: "İptal",
+        },
+      },
+      optimizeChecklistModal: {
+        title: "Kontrol Listesini Optimize Et",
+        customInstructionsLabel: "Özel Talimatlar (İsteğe Bağlı)",
+        customInstructionsHelperText: "Kontrol listesi sorularını yanıtlarken dikkate alınması gereken ek talimatları girin",
+        analyzing: "Analiz ediliyor...",
+        analyzeButton: "Kontrol Listesini Analiz Et",
+        analyzingMessage: "Optimizasyon fırsatları için kontrol listeniz analiz ediliyor...",
+        cancelAnalysis: "Analizi İptal Et",
+        downloading: "İndiriliyor...",
+        downloadCsv: "CSV İndir",
+        questionsNeedingOptimization: "Optimizasyona İhtiyaç Duyan Sorular",
+        questionsAlreadyOptimized: "Zaten Optimize Edilmiş Sorular",
+        selected: "Seçili",
+        select: "Seç",
+        original: "Orijinal",
+        suggestedImprovement: "Önerilen İyileştirme",
+        policyContext: "Politika Bağlamı",
+        currentAnswer: "Mevcut Cevap",
+        showLess: "Daha Az Göster",
+        showMore: "Daha Fazla Göster",
+        optimizationsSelectedText: "optimizasyon uygulanmak üzere seçildi",
+        applying: "Uygulanıyor...",
+        applySelectedOptimizations: "Seçili Optimizasyonları Uygula",
+        uploadDocumentsTitle: "Kontrol listesinin kabul etmesi gereken belgeleri yükleyin *",
+        uploadDocumentsHelperText: "Tüm kontrol listesi gereksinimlerini karşılaması gereken belgeleri yükleyerek çok katı olabilecek soruları belirlemeye yardımcı olun",
+        customInstructionsPlaceholder: "ör., Yaşla ilgili gereksinimleri değerlendirirken bunun bir pediatrik çalışma olduğunu dikkate alın, Bu protokol düşük riskli müdahale içindir, vb."
+      },
+      optimizeOutlineModal: {
+        title: "Taslağı Optimize Et",
+        description: "Oluşturmak istediğiniz rapor türünün yüksek kaliteli bir örneğini temsil eden bir referans belgesi yükleyin. Sistem mevcut taslağınızı ve bilgi tabanınızı kullanarak bir rapor oluşturacak, bunu referansla karşılaştıracak ve taslak bölümleri için iyileştirmeler önerecektir.",
+        groundTruthDocument: "Referans Belgesi",
+        customInstructionsLabel: "Özel Talimatlar (İsteğe Bağlı)",
+        customInstructionsHelperText: "Optimizasyon süreci için ek rehberlik sağlayın",
+        customInstructionsPlaceholder: "ör., Teknik derinliği artırmaya odaklanın, belirli standartlara uyumu sağlayın, vb.",
+        characters: "karakter",
+        analyzingOutline: "Taslak analiz ediliyor ve optimizasyonlar oluşturuluyor...",
+        cancelAnalysis: "Analizi İptal Et",
+        optimizationResults: "Optimizasyon Sonuçları",
+        sectionsNeedOptimization: "bölüm optimizasyona ihtiyaç duyuyor",
+        downloadCsv: "CSV İndir",
+        section: "Bölüm",
+        accepted: "Kabul Edildi",
+        accept: "Kabul Et",
+        originalSectionDescription: "Orijinal Bölüm Açıklaması",
+        suggestedSectionDescription: "Önerilen Bölüm Açıklaması",
+        generatedContent: "Oluşturulan İçerik (mevcut açıklamayla)",
+        groundTruthReference: "Gerçek Durumu Referansı",
+        showLess: "Daha Az Göster",
+        showMore: "Daha Fazla Göster",
+        close: "Kapat",
+        cancel: "İptal",
+        optimizing: "Optimize ediliyor...",
+        optimizeOutline: "Taslağı Optimize Et",
+        applyOptimizations: "{{count}} Optimizasyonu Uygula"
+      }
     },
   }
 
@@ -598,6 +1240,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         optimize: "Boresha",
         optimizeTooltip: "Msingi wa maarifa unapaswa kuchaguliwa ili kuwezesha kipengele cha kuboresha",
         optimizeTooltipEnabled: "Boresha maswali kulingana na msingi wa maarifa uliyochaguliwa",
+        allUsersToggleTooltip: "Badilisha kati ya kuona historia yako tu au historia ya watumiaji wote",
         uploadFiles: "Pakia Faili",
         knowledgeBase: "Msingi wa Maarifa",
         referenceDocuments: "Hati za Kumbuka (Hiari)",
@@ -611,6 +1254,219 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         cancel: "Ghairi",
         deleteChecklist: "Futa Orodha ya Ukaguzi"
       },
+      compare: {
+        title: "Linganisha Hati",
+        subtitle: "Chagua hati mbili za kulinganisha",
+        selectFirstDocument: "Chagua hati ya kwanza",
+        selectSecondDocument: "Chagua hati ya pili",
+        pleaseSelect: "Tafadhali chagua...",
+        documentA: "Hati A",
+        documentB: "Hati B",
+        compareDocuments: "Linganisha Hati",
+        comparison: "Mlinganisho",
+        noDocumentsFound: "Hakuna hati zilizopatikana",
+        selectTwoDocuments: "Tafadhali chagua hati mbili za kulinganisha",
+        loadingComparison: "Inapakia mlinganisho...",
+        topicList: "Orodha ya Mada",
+        clickToBrowse: "Bofya ili kuvinjari au buruta hapa",
+        supportedFormats: "Miundo inayotumika: PDF, TXT, DOCX",
+        analysisType: "Aina ya Uchambuzi",
+        quickAnalysis: "Uchambuzi wa Haraka",
+        detailedAnalysis: "Uchambuzi wa Kina",
+        comprehensiveAnalysis: "Uchambuzi Kamili",
+        analysisDepth: "Kina cha Uchambuzi",
+        surfaceLevel: "Kiwango cha Uso",
+        moderate: "Wastani",
+        deep: "Kirefu",
+        veryDeep: "Kirefu Sana",
+        editTopicList: "Hariri Orodha ya Mada"
+      },
+      match: {
+        title: "Uoanishaji wa Hati",
+        subtitle: "Tafuta hati zinazofanana kulingana na maudhui",
+        selectDocument: "Chagua hati ili kutafuta vioanishi",
+        pleaseSelect: "Tafadhali chagua hati...",
+        sourceDocument: "Hati ya Chanzo",
+        matchingDocuments: "Hati Zinazooana",
+        findMatches: "Tafuta Vioanishi",
+        similarityScore: "Alama ya Kufanana",
+        noDocumentsFound: "Hakuna hati zilizopatikana",
+        selectDocumentToMatch: "Tafadhali chagua hati ili kutafuta vioanishi",
+        loadingMatches: "Inatafuta vioanishi...",
+        noMatchesFound: "Hakuna hati zinazofanana zilizopatikana",
+        matchResults: "Matokeo ya Uoanishaji",
+        similarity: "Kufanana",
+        matchingCriteria: "Vigezo vya Uoanishaji",
+        semanticSimilarity: "Kufanana kwa Maana",
+        keywordMatching: "Uoanishaji wa Maneno Muhimu",
+        structuralSimilarity: "Kufanana kwa Muundo",
+        threshold: "Kizingiti",
+        minimumSimilarity: "Kufanana Kidogo",
+        searchDepth: "Kina cha Utafutaji",
+        maxResults: "Matokeo ya Juu",
+        editFormTemplate: "Hariri Kiolezo cha Fomu"
+      },
+      knowledgeBases: {
+        title: "Usimamizi wa Misingi ya Maarifa",
+        addKnowledgeBase: "Ongeza Msingi wa Maarifa",
+        emptyStateTitle: "Huna misingi ya maarifa bado",
+        emptyStateDescription: "Ongeza msingi mpya wa maarifa ili kuanza",
+        tableHeaders: {
+          title: "Kichwa",
+          description: "Maelezo",
+          numberOfSources: "Idadi ya Vyanzo",
+          embeddingModel: "Mfano wa Uingizaji",
+          dateCreated: "Tarehe ya Kutengeneza",
+          dateModified: "Tarehe ya Kubadilishwa",
+          actions: "Vitendo"
+        },
+        status: {
+          default: "Chaguo-msingi",
+          na: "Haipatikani"
+        },
+        actions: {
+          view: "Angalia",
+          edit: "Hariri",
+          delete: "Futa",
+          configure: "Sanidi"
+        },
+        deleteModal: {
+          title: "Futa Msingi wa Maarifa",
+          buttonText: "Futa Msingi wa Maarifa",
+          description: "Msingi huu wa maarifa utafutwa kabisa. Una uhakika? Huwezi kutengua kitendo hiki.",
+          confirmButton: "Futa",
+          cancelButton: "Ghairi",
+          successMessage: "Msingi wa maarifa umefutwa kwa mafanikio",
+          errorMessage: "Kosa limetokea wakati wa kufuta msingi wa maarifa"
+        },
+        modals: {
+          add: {
+            title: "Ongeza Msingi wa Maarifa",
+            description: "Tengeneza msingi mpya wa maarifa kwa kutoa maelezo na kupakia hati hapo chini.",
+            fields: {
+              title: "Kichwa",
+              titlePlaceholder: "Kichwa",
+              titleRequired: "Kichwa kinahitajika",
+              description: "Maelezo",
+              descriptionPlaceholder: "Maelezo",
+            },
+            fileUpload: {
+              dragAndDrop: "Buruta faili hapa au bofya ili kuvinjari",
+              dropFiles: "Dondosha faili hapa...",
+              selectedFiles: "Faili Zilizochaguliwa:",
+              removeFile: "Ondoa Faili",
+            },
+            buttons: {
+              cancel: "Ghairi",
+              save: "Hifadhi",
+              creating: "Inatengeneza...",
+            },
+            validation: {
+              atLeastOneFile: "Angalau faili moja inahitajika.",
+            },
+            success: "Msingi wa maarifa umetengenezwa kwa mafanikio.",
+          },
+          edit: {
+            title: "Hariri Msingi wa Maarifa",
+            description: "Sasisha maelezo ya msingi wa maarifa hapo chini.",
+            fields: {
+              title: "Kichwa",
+              titlePlaceholder: "Kichwa",
+              titleRequired: "Kichwa kinahitajika",
+              description: "Maelezo",
+              descriptionPlaceholder: "Maelezo",
+            },
+            fileUpload: {
+              currentFiles: "Faili za Sasa:",
+              dragAndDrop: "Buruta faili hapa au bofya ili kuvinjari",
+              dropFiles: "Dondosha faili hapa...",
+              selectedFiles: "Faili Zilizochaguliwa:",
+              removeFile: "Ondoa Faili",
+            },
+            buttons: {
+              cancel: "Ghairi",
+              save: "Hifadhi",
+              saving: "Inahifadhi...",
+            },
+            success: "Msingi wa maarifa umesasishwa kwa mafanikio.",
+          },
+          editFormTemplateModal: {
+            title: "Hariri Kiolezo cha Fomu",
+            formTemplateName: "Jina la Kiolezo cha Fomu",
+            formTemplateDescription: "Maelezo ya Kiolezo cha Fomu",
+            descriptionPlaceholder: "Ingiza maelezo ya kiolezo cha fomu...",
+            referenceDocuments: "Hati za Marejeleo (Hiari)",
+            uploadFiles: "Pakia Faili",
+            knowledgeBase: "Msingi wa Maarifa",
+            formFields: "Sehemu za Fomu",
+            suggest: "Pendekeza",
+            fieldPlaceholder: "Ongeza jina la sehemu...",
+            cancel: "Ghairi",
+            updateFormTemplate: "Sasisha Kiolezo cha Fomu"
+          },
+        },
+        editCustom: {
+          title: "Hariri Maagizo ya Kawaida",
+          currentInstructions: "Maagizo ya Sasa:",
+          save: "Hifadhi",
+          cancel: "Ghairi",
+        },
+      },
+      optimizeChecklistModal: {
+        title: "Boresha Orodha ya Ukaguzi",
+        customInstructionsLabel: "Maagizo ya Kawaida (Si Lazima)",
+        customInstructionsHelperText: "Ingiza maagizo ya ziada yanayopaswa kuzingatiwa wakati wa kujibu maswali ya orodha ya ukaguzi",
+        analyzing: "Inachambua...",
+        analyzeButton: "Chambua Orodha ya Ukaguzi",
+        analyzingMessage: "Inachambua orodha yako ya ukaguzi kwa fursa za uboreshaji...",
+        cancelAnalysis: "Ghairi Uchambuzi",
+        downloading: "Inapakua...",
+        downloadCsv: "Pakua CSV",
+        questionsNeedingOptimization: "Maswali Yanayohitaji Uboreshaji",
+        questionsAlreadyOptimized: "Maswali Yaliyokwisha Boreshwa",
+        selected: "Imechaguliwa",
+        select: "Chagua",
+        original: "Asili",
+        suggestedImprovement: "Uboreshaji Uliopendekezwa",
+        policyContext: "Muktadha wa Sera",
+        currentAnswer: "Jibu la Sasa",
+        showLess: "Onyesha Kidogo",
+        showMore: "Onyesha Zaidi",
+        optimizationsSelectedText: "maboresho yamechaguliwa kwa matumizi",
+        applying: "Inatumia...",
+        applySelectedOptimizations: "Tumia Maboresho Yaliyochaguliwa",
+        uploadDocumentsTitle: "Pakia hati ambazo orodha ya ukaguzi inapaswa kukubali *",
+        uploadDocumentsHelperText: "Pakia hati ambazo zinapaswa kutimiza mahitaji yote ya orodha ya ukaguzi ili kusaidia kutambua maswali ambayo yanaweza kuwa makali sana",
+        customInstructionsPlaceholder: "mfano, Zingatia hii ni utafiti wa watoto wakati wa kutathmini mahitaji yanayohusiana na umri, Itifaki hii ni kwa uingiliaji wa hatari ndogo, n.k."
+      },
+      optimizeOutlineModal: {
+        title: "Boresha Muhtasari",
+        description: "Pakia hati ya marejeleo inayowakilisha mfano wa ubora wa juu wa aina ya ripoti unayotaka kuunda. Mfumo utaunda ripoti kwa kutumia muhtasari wako wa sasa na msingi wa maarifa, utalinganisha na marejeleo na kupendekeza maboresho kwa sehemu za muhtasari.",
+        groundTruthDocument: "Hati ya Marejeleo",
+        customInstructionsLabel: "Maagizo ya Kawaida (Si Lazima)",
+        customInstructionsHelperText: "Toa mwongozo wa ziada kwa mchakato wa uboreshaji",
+        customInstructionsPlaceholder: "mfano, Zingatia kuimarisha kina cha kiufundi, hakikisha utii kwa viwango maalum, n.k.",
+        characters: "herufi",
+        analyzingOutline: "Inachambua muhtasari na kuunda maboresho...",
+        cancelAnalysis: "Ghairi Uchambuzi",
+        optimizationResults: "Matokeo ya Uboreshaji",
+        sectionsNeedOptimization: "sehemu zinahitaji uboreshaji",
+        downloadCsv: "Pakua CSV",
+        section: "Sehemu",
+        accepted: "Imekubaliwa",
+        accept: "Kubali",
+        originalSectionDescription: "Maelezo ya Asili ya Sehemu",
+        suggestedSectionDescription: "Maelezo Yaliyopendekezwa ya Sehemu",
+        generatedContent: "Maudhui Yaliyoumbwa (na maelezo ya sasa)",
+        groundTruthReference: "Marejeleo ya Ukweli wa Msingi",
+        showLess: "Onyesha Kidogo",
+        showMore: "Onyesha Zaidi",
+        close: "Funga",
+        cancel: "Ghairi",
+        optimizing: "Inaboresha...",
+        optimizeOutline: "Boresha Muhtasari",
+        applyOptimizations: "Tumia Maboresho {{count}}"
+      }
     },
   }
 
@@ -713,6 +1569,271 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         paste: "Colar",
         cut: "Cortar",
       },
+      review: {
+        pageTitle: "Revisão de Documentos",
+        pageDescription: "Revise documentos com base em uma lista de verificação definida pelo usuário e banco de dados de políticas.",
+        knowledgeBaseTitle: "Base de Conhecimento",
+        knowledgeBaseDescription: "Clique para selecionar",
+        checklistTitle: "Lista de Verificação",
+        checklistDescription: "Clique para selecionar",
+        customInstructionsTitle: "Instruções Personalizadas (Opcional)",
+        customInstructionsPlaceholder: "Digite instruções adicionais que devem ser consideradas ao responder às perguntas da lista de verificação...",
+        customInstructionsHelp: "{count}/2000 caracteres. Essas instruções serão adicionadas a cada pergunta durante o processamento.",
+        searchModeHelp: "A busca vetorial fornece resultados rápidos e focados. A análise completa de documentos examina todo o conteúdo da base de conhecimento.",
+        processingFile: "Processando arquivo...",
+        processingFiles: "Processando arquivos...",
+        selectKnowledgeBaseTitle: "Selecionar Base de Conhecimento",
+        selectChecklistTitle: "Selecionar Lista de Verificação",
+        noResults: "Nenhum resultado ainda",
+        uploadDocuments: "Envie um ou mais documentos para revisão contra a lista de verificação selecionada",
+        results: "Resultados",
+        downloadReport: "Baixar Relatório",
+        downloadCsv: "Baixar CSV",
+        clearResults: "Limpar Resultados",
+        copyReport: "Copiar Relatório",
+        reportCopied: "Relatório copiado para a área de transferência!",
+        reviewButton: "Revisão",
+        consultDocuments: "Consultar Documentos",
+        noChecklistsAvailable: "Nenhuma lista de verificação disponível. Crie sua primeira lista de verificação para começar.",
+        createChecklist: "Criar Lista de Verificação",
+        editChecklist: "Editar Lista de Verificação",
+        checklistName: "Nome da Lista de Verificação",
+        checklistNamePlaceholder: "Digite o nome da lista de verificação...",
+        checklistDescriptionLabel: "Descrição",
+        checklistDescriptionPlaceholder: "Digite a descrição da lista de verificação para sugestões automáticas de perguntas (mínimo 10 caracteres)...",
+        questions: "Perguntas",
+        suggest: "Sugerir",
+        suggesting: "Sugerindo...",
+        optimize: "Otimizar",
+        optimizeTooltip: "Uma Base de Conhecimento deve ser selecionada para habilitar o recurso de otimização",
+        optimizeTooltipEnabled: "Otimizar perguntas com base na Base de Conhecimento selecionada",
+        allUsersToggleTooltip: "Alternar entre visualizar apenas seu histórico ou o histórico de todos os usuários",
+        uploadFiles: "Enviar Arquivos",
+        knowledgeBase: "Base de Conhecimento",
+        referenceDocuments: "Documentos de Referência (Opcional)",
+        selectKnowledgeBasePlaceholder: "Selecionar base de conhecimento...",
+        noKnowledgeBasesAvailable: "Nenhuma base de conhecimento disponível. Crie uma primeiro para usar este recurso.",
+        copyQuestions: "Copiar Perguntas",
+        questionsCopied: "Perguntas copiadas para a área de transferência",
+        noQuestionsToCopy: "Nenhuma pergunta para copiar",
+        failedToCopyQuestions: "Falha ao copiar perguntas para a área de transferência",
+        saveChecklist: "Salvar Lista de Verificação",
+        cancel: "Cancelar",
+        deleteChecklist: "Excluir Lista de Verificação"
+      },
+      compare: {
+        title: "Comparar Documentos",
+        subtitle: "Selecione dois documentos para comparar",
+        selectFirstDocument: "Selecione o primeiro documento",
+        selectSecondDocument: "Selecione o segundo documento",
+        pleaseSelect: "Por favor, selecione...",
+        documentA: "Documento A",
+        documentB: "Documento B",
+        compareDocuments: "Comparar Documentos",
+        comparison: "Comparação",
+        noDocumentsFound: "Nenhum documento encontrado",
+        selectTwoDocuments: "Por favor, selecione dois documentos para comparar",
+        loadingComparison: "Carregando comparação...",
+        topicList: "Lista de Tópicos",
+        clickToBrowse: "Clique para navegar ou arraste aqui",
+        supportedFormats: "Formatos suportados: PDF, TXT, DOCX",
+        analysisType: "Tipo de Análise",
+        quickAnalysis: "Análise Rápida",
+        detailedAnalysis: "Análise Detalhada",
+        comprehensiveAnalysis: "Análise Abrangente",
+        analysisDepth: "Profundidade da Análise",
+        surfaceLevel: "Nível Superficial",
+        moderate: "Moderado",
+        deep: "Profundo",
+        veryDeep: "Muito Profundo",
+        editTopicList: "Editar Lista de Tópicos"
+      },
+      match: {
+        title: "Correspondência de Documentos",
+        subtitle: "Encontre documentos similares baseados no conteúdo",
+        selectDocument: "Selecione um documento para encontrar correspondências",
+        pleaseSelect: "Por favor, selecione documento...",
+        sourceDocument: "Documento Fonte",
+        matchingDocuments: "Documentos Correspondentes",
+        findMatches: "Encontrar Correspondências",
+        similarityScore: "Pontuação de Similaridade",
+        noDocumentsFound: "Nenhum documento encontrado",
+        selectDocumentToMatch: "Por favor, selecione um documento para encontrar correspondências",
+        loadingMatches: "Procurando correspondências...",
+        noMatchesFound: "Nenhum documento similar encontrado",
+        matchResults: "Resultados de Correspondência",
+        similarity: "Similaridade",
+        matchingCriteria: "Critérios de Correspondência",
+        semanticSimilarity: "Similaridade Semântica",
+        keywordMatching: "Correspondência de Palavras-chave",
+        structuralSimilarity: "Similaridade Estrutural",
+        threshold: "Limiar",
+        minimumSimilarity: "Similaridade Mínima",
+        searchDepth: "Profundidade da Busca",
+        maxResults: "Resultados Máximos",
+        editFormTemplate: "Editar Modelo de Formulário"
+      },
+      knowledgeBases: {
+        title: "Gerenciamento de Bases de Conhecimento",
+        addKnowledgeBase: "Adicionar Base de Conhecimento",
+        emptyStateTitle: "Você ainda não tem bases de conhecimento",
+        emptyStateDescription: "Adicione uma nova base de conhecimento para começar",
+        tableHeaders: {
+          title: "Título",
+          description: "Descrição",
+          numberOfSources: "Número de Fontes",
+          embeddingModel: "Modelo de Incorporação",
+          dateCreated: "Data de Criação",
+          dateModified: "Data de Modificação",
+          actions: "Ações"
+        },
+        status: {
+          default: "Padrão",
+          na: "Não Disponível"
+        },
+        actions: {
+          view: "Visualizar",
+          edit: "Editar",
+          delete: "Excluir",
+          configure: "Configurar"
+        },
+        deleteModal: {
+          title: "Excluir Base de Conhecimento",
+          buttonText: "Excluir Base de Conhecimento",
+          description: "Esta base de conhecimento será excluída permanentemente. Tem certeza? Você não poderá desfazer esta ação.",
+          confirmButton: "Excluir",
+          cancelButton: "Cancelar",
+          successMessage: "Base de conhecimento excluída com sucesso",
+          errorMessage: "Ocorreu um erro ao excluir a base de conhecimento"
+        },
+        modals: {
+          add: {
+            title: "Adicionar Base de Conhecimento",
+            description: "Crie uma nova base de conhecimento fornecendo detalhes e enviando documentos abaixo.",
+            fields: {
+              title: "Título",
+              titlePlaceholder: "Título",
+              titleRequired: "Título é obrigatório",
+              description: "Descrição",
+              descriptionPlaceholder: "Descrição",
+            },
+            fileUpload: {
+              dragAndDrop: "Arraste arquivos aqui ou clique para navegar",
+              dropFiles: "Solte arquivos aqui...",
+              selectedFiles: "Arquivos Selecionados:",
+              removeFile: "Remover Arquivo",
+            },
+            buttons: {
+              cancel: "Cancelar",
+              save: "Salvar",
+              creating: "Criando...",
+            },
+            validation: {
+              atLeastOneFile: "Pelo menos um arquivo é necessário.",
+            },
+            success: "Base de conhecimento criada com sucesso.",
+          },
+          edit: {
+            title: "Editar Base de Conhecimento",
+            description: "Atualize os detalhes da base de conhecimento abaixo.",
+            fields: {
+              title: "Título",
+              titlePlaceholder: "Título",
+              titleRequired: "Título é obrigatório",
+              description: "Descrição",
+              descriptionPlaceholder: "Descrição",
+            },
+            fileUpload: {
+              currentFiles: "Arquivos Atuais:",
+              dragAndDrop: "Arraste arquivos aqui ou clique para navegar",
+              dropFiles: "Solte arquivos aqui...",
+              selectedFiles: "Arquivos Selecionados:",
+              removeFile: "Remover Arquivo",
+            },
+            buttons: {
+              cancel: "Cancelar",
+              save: "Salvar",
+              saving: "Salvando...",
+            },
+            success: "Base de conhecimento atualizada com sucesso.",
+          },
+          editFormTemplateModal: {
+            title: "Editar Modelo de Formulário",
+            formTemplateName: "Nome do Modelo de Formulário",
+            formTemplateDescription: "Descrição do Modelo de Formulário",
+            descriptionPlaceholder: "Digite a descrição do modelo de formulário...",
+            referenceDocuments: "Documentos de Referência (Opcional)",
+            uploadFiles: "Enviar Arquivos",
+            knowledgeBase: "Base de Conhecimento",
+            formFields: "Campos do Formulário",
+            suggest: "Sugerir",
+            fieldPlaceholder: "Adicionar nome do campo...",
+            cancel: "Cancelar",
+            updateFormTemplate: "Atualizar Modelo de Formulário"
+          },
+        },
+        editCustom: {
+          title: "Editar Instruções Personalizadas",
+          currentInstructions: "Instruções Atuais:",
+          save: "Salvar",
+          cancel: "Cancelar",
+        },
+      },
+      optimizeChecklistModal: {
+        title: "Otimizar Lista de Verificação",
+        customInstructionsLabel: "Instruções Personalizadas (Opcional)",
+        customInstructionsHelperText: "Insira instruções adicionais que devem ser consideradas ao responder às perguntas da lista de verificação",
+        analyzing: "Analisando...",
+        analyzeButton: "Analisar Lista de Verificação",
+        analyzingMessage: "Analisando sua lista de verificação para oportunidades de otimização...",
+        cancelAnalysis: "Cancelar Análise",
+        downloading: "Baixando...",
+        downloadCsv: "Baixar CSV",
+        questionsNeedingOptimization: "Perguntas que Precisam de Otimização",
+        questionsAlreadyOptimized: "Perguntas Já Otimizadas",
+        selected: "Selecionado",
+        select: "Selecionar",
+        original: "Original",
+        suggestedImprovement: "Melhoria Sugerida",
+        policyContext: "Contexto da Política",
+        currentAnswer: "Resposta Atual",
+        showLess: "Mostrar Menos",
+        showMore: "Mostrar Mais",
+        optimizationsSelectedText: "otimizações selecionadas para aplicação",
+        applying: "Aplicando...",
+        applySelectedOptimizations: "Aplicar Otimizações Selecionadas",
+        uploadDocumentsTitle: "Envie documento(s) que devem ser aceitos pela lista de verificação *",
+        uploadDocumentsHelperText: "Envie documentos que devem atender a todos os requisitos da lista de verificação para ajudar a identificar perguntas que podem ser muito rigorosas",
+        customInstructionsPlaceholder: "ex., Considere que este é um estudo pediátrico ao avaliar requisitos relacionados à idade, Este protocolo é para intervenção de baixo risco, etc."
+      },
+      optimizeOutlineModal: {
+        title: "Otimizar Esboço",
+        description: "Envie um documento de referência que represente um exemplo de alta qualidade do tipo de relatório que você deseja gerar. O sistema gerará um relatório usando seu esboço atual e base de conhecimento, comparará com a referência e sugerirá melhorias para as seções do esboço.",
+        groundTruthDocument: "Documento de Referência",
+        customInstructionsLabel: "Instruções Personalizadas (Opcional)",
+        customInstructionsHelperText: "Forneça orientações adicionais para o processo de otimização",
+        customInstructionsPlaceholder: "ex., Foque em melhorar a profundidade técnica, garanta conformidade com padrões específicos, etc.",
+        characters: "caracteres",
+        analyzingOutline: "Analisando esboço e gerando otimizações...",
+        cancelAnalysis: "Cancelar Análise",
+        optimizationResults: "Resultados da Otimização",
+        sectionsNeedOptimization: "seções precisam de otimização",
+        downloadCsv: "Baixar CSV",
+        section: "Seção",
+        accepted: "Aceito",
+        accept: "Aceitar",
+        originalSectionDescription: "Descrição Original da Seção",
+        suggestedSectionDescription: "Descrição Sugerida da Seção",
+        generatedContent: "Conteúdo Gerado (com descrição atual)",
+        groundTruthReference: "Referência de Verdade Fundamental",
+        showLess: "Mostrar Menos",
+        showMore: "Mostrar Mais",
+        close: "Fechar",
+        cancel: "Cancelar",
+        optimizing: "Otimizando...",
+        optimizeOutline: "Otimizar Esboço",
+        applyOptimizations: "Aplicar {{count}} Otimizações"
+      }
     },
   }
 
@@ -815,6 +1936,271 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         paste: "Pegar",
         cut: "Cortar",
       },
+      review: {
+        pageTitle: "Revisión de Documentos",
+        pageDescription: "Revise documentos basados en una lista de verificación definida por el usuario y base de datos de políticas.",
+        knowledgeBaseTitle: "Base de Conocimiento",
+        knowledgeBaseDescription: "Haga clic para seleccionar",
+        checklistTitle: "Lista de Verificación",
+        checklistDescription: "Haga clic para seleccionar",
+        customInstructionsTitle: "Instrucciones Personalizadas (Opcional)",
+        customInstructionsPlaceholder: "Ingrese instrucciones adicionales que deben considerarse al responder las preguntas de la lista de verificación...",
+        customInstructionsHelp: "{count}/2000 caracteres. Estas instrucciones se agregarán a cada pregunta durante el procesamiento.",
+        searchModeHelp: "La búsqueda vectorial proporciona resultados rápidos y enfocados. El análisis completo de documentos examina todo el contenido de la base de conocimiento.",
+        processingFile: "Procesando archivo...",
+        processingFiles: "Procesando archivos...",
+        selectKnowledgeBaseTitle: "Seleccionar Base de Conocimiento",
+        selectChecklistTitle: "Seleccionar Lista de Verificación",
+        noResults: "Aún no hay resultados",
+        uploadDocuments: "Suba uno o más documentos para revisión contra la lista de verificación seleccionada",
+        results: "Resultados",
+        downloadReport: "Descargar Informe",
+        downloadCsv: "Descargar CSV",
+        clearResults: "Limpiar Resultados",
+        copyReport: "Copiar Informe",
+        reportCopied: "¡Informe copiado al portapapeles!",
+        reviewButton: "Revisión",
+        consultDocuments: "Consultar Documentos",
+        noChecklistsAvailable: "No hay listas de verificación disponibles. Cree su primera lista de verificación para comenzar.",
+        createChecklist: "Crear Lista de Verificación",
+        editChecklist: "Editar Lista de Verificación",
+        checklistName: "Nombre de Lista de Verificación",
+        checklistNamePlaceholder: "Ingrese el nombre de la lista de verificación...",
+        checklistDescriptionLabel: "Descripción",
+        checklistDescriptionPlaceholder: "Ingrese la descripción de la lista de verificación para sugerencias automáticas de preguntas (mínimo 10 caracteres)...",
+        questions: "Preguntas",
+        suggest: "Sugerir",
+        suggesting: "Sugiriendo...",
+        optimize: "Optimizar",
+        optimizeTooltip: "Se debe seleccionar una Base de Conocimiento para habilitar la función de optimización",
+        optimizeTooltipEnabled: "Optimizar preguntas basadas en la Base de Conocimiento seleccionada",
+        allUsersToggleTooltip: "Alternar entre ver solo tu historial o el historial de todos los usuarios",
+        uploadFiles: "Subir Archivos",
+        knowledgeBase: "Base de Conocimiento",
+        referenceDocuments: "Documentos de Referencia (Opcional)",
+        selectKnowledgeBasePlaceholder: "Seleccionar base de conocimiento...",
+        noKnowledgeBasesAvailable: "No hay bases de conocimiento disponibles. Cree una primero para usar esta función.",
+        copyQuestions: "Copiar Preguntas",
+        questionsCopied: "Preguntas copiadas al portapapeles",
+        noQuestionsToCopy: "No hay preguntas para copiar",
+        failedToCopyQuestions: "Error al copiar preguntas al portapapeles",
+        saveChecklist: "Guardar Lista de Verificación",
+        cancel: "Cancelar",
+        deleteChecklist: "Eliminar Lista de Verificación"
+      },
+      compare: {
+        title: "Comparar Documentos",
+        subtitle: "Seleccione dos documentos para comparar",
+        selectFirstDocument: "Seleccione el primer documento",
+        selectSecondDocument: "Seleccione el segundo documento",
+        pleaseSelect: "Por favor seleccione...",
+        documentA: "Documento A",
+        documentB: "Documento B",
+        compareDocuments: "Comparar Documentos",
+        comparison: "Comparación",
+        noDocumentsFound: "No se encontraron documentos",
+        selectTwoDocuments: "Por favor seleccione dos documentos para comparar",
+        loadingComparison: "Cargando comparación...",
+        topicList: "Lista de Temas",
+        clickToBrowse: "Haga clic para navegar o arrastre aquí",
+        supportedFormats: "Formatos soportados: PDF, TXT, DOCX",
+        analysisType: "Tipo de Análisis",
+        quickAnalysis: "Análisis Rápido",
+        detailedAnalysis: "Análisis Detallado",
+        comprehensiveAnalysis: "Análisis Integral",
+        analysisDepth: "Profundidad del Análisis",
+        surfaceLevel: "Nivel Superficial",
+        moderate: "Moderado",
+        deep: "Profundo",
+        veryDeep: "Muy Profundo",
+        editTopicList: "Editar Lista de Temas"
+      },
+      match: {
+        title: "Coincidencia de Documentos",
+        subtitle: "Encuentre documentos similares basados en el contenido",
+        selectDocument: "Seleccione un documento para encontrar coincidencias",
+        pleaseSelect: "Por favor seleccione documento...",
+        sourceDocument: "Documento Fuente",
+        matchingDocuments: "Documentos Coincidentes",
+        findMatches: "Encontrar Coincidencias",
+        similarityScore: "Puntuación de Similitud",
+        noDocumentsFound: "No se encontraron documentos",
+        selectDocumentToMatch: "Por favor seleccione un documento para encontrar coincidencias",
+        loadingMatches: "Buscando coincidencias...",
+        noMatchesFound: "No se encontraron documentos similares",
+        matchResults: "Resultados de Coincidencia",
+        similarity: "Similitud",
+        matchingCriteria: "Criterios de Coincidencia",
+        semanticSimilarity: "Similitud Semántica",
+        keywordMatching: "Coincidencia de Palabras Clave",
+        structuralSimilarity: "Similitud Estructural",
+        threshold: "Umbral",
+        minimumSimilarity: "Similitud Mínima",
+        searchDepth: "Profundidad de Búsqueda",
+        maxResults: "Resultados Máximos",
+        editFormTemplate: "Editar Plantilla de Formulario"
+      },
+      knowledgeBases: {
+        title: "Gestión de Bases de Conocimiento",
+        addKnowledgeBase: "Agregar Base de Conocimiento",
+        emptyStateTitle: "Aún no tienes bases de conocimiento",
+        emptyStateDescription: "Agrega una nueva base de conocimiento para comenzar",
+        tableHeaders: {
+          title: "Título",
+          description: "Descripción",
+          numberOfSources: "Número de Fuentes",
+          embeddingModel: "Modelo de Incrustación",
+          dateCreated: "Fecha de Creación",
+          dateModified: "Fecha de Modificación",
+          actions: "Acciones"
+        },
+        status: {
+          default: "Predeterminado",
+          na: "No Disponible"
+        },
+        actions: {
+          view: "Ver",
+          edit: "Editar",
+          delete: "Eliminar",
+          configure: "Configurar"
+        },
+        deleteModal: {
+          title: "Eliminar Base de Conocimiento",
+          buttonText: "Eliminar Base de Conocimiento",
+          description: "Esta base de conocimiento será eliminada permanentemente. ¿Está seguro? No podrá deshacer esta acción.",
+          confirmButton: "Eliminar",
+          cancelButton: "Cancelar",
+          successMessage: "Base de conocimiento eliminada exitosamente",
+          errorMessage: "Ocurrió un error al eliminar la base de conocimiento"
+        },
+        modals: {
+          add: {
+            title: "Agregar Base de Conocimiento",
+            description: "Cree una nueva base de conocimiento proporcionando detalles y subiendo documentos a continuación.",
+            fields: {
+              title: "Título",
+              titlePlaceholder: "Título",
+              titleRequired: "El título es requerido",
+              description: "Descripción",
+              descriptionPlaceholder: "Descripción",
+            },
+            fileUpload: {
+              dragAndDrop: "Arrastre archivos aquí o haga clic para navegar",
+              dropFiles: "Suelte archivos aquí...",
+              selectedFiles: "Archivos Seleccionados:",
+              removeFile: "Remover Archivo",
+            },
+            buttons: {
+              cancel: "Cancelar",
+              save: "Guardar",
+              creating: "Creando...",
+            },
+            validation: {
+              atLeastOneFile: "Se requiere al menos un archivo.",
+            },
+            success: "Base de conocimiento creada exitosamente.",
+          },
+          edit: {
+            title: "Editar Base de Conocimiento",
+            description: "Actualice los detalles de la base de conocimiento a continuación.",
+            fields: {
+              title: "Título",
+              titlePlaceholder: "Título",
+              titleRequired: "El título es requerido",
+              description: "Descripción",
+              descriptionPlaceholder: "Descripción",
+            },
+            fileUpload: {
+              currentFiles: "Archivos Actuales:",
+              dragAndDrop: "Arrastre archivos aquí o haga clic para navegar",
+              dropFiles: "Suelte archivos aquí...",
+              selectedFiles: "Archivos Seleccionados:",
+              removeFile: "Remover Archivo",
+            },
+            buttons: {
+              cancel: "Cancelar",
+              save: "Guardar",
+              saving: "Guardando...",
+            },
+            success: "Base de conocimiento actualizada exitosamente.",
+          },
+          editFormTemplateModal: {
+            title: "Editar Plantilla de Formulario",
+            formTemplateName: "Nombre de la Plantilla de Formulario",
+            formTemplateDescription: "Descripción de la Plantilla de Formulario",
+            descriptionPlaceholder: "Ingrese la descripción de la plantilla de formulario...",
+            referenceDocuments: "Documentos de Referencia (Opcional)",
+            uploadFiles: "Subir Archivos",
+            knowledgeBase: "Base de Conocimiento",
+            formFields: "Campos del Formulario",
+            suggest: "Sugerir",
+            fieldPlaceholder: "Agregar nombre del campo...",
+            cancel: "Cancelar",
+            updateFormTemplate: "Actualizar Plantilla de Formulario"
+          },
+        },
+        editCustom: {
+          title: "Editar Instrucciones Personalizadas",
+          currentInstructions: "Instrucciones Actuales:",
+          save: "Guardar",
+          cancel: "Cancelar",
+        },
+      },
+      optimizeChecklistModal: {
+        title: "Optimizar Lista de Verificación",
+        customInstructionsLabel: "Instrucciones Personalizadas (Opcional)",
+        customInstructionsHelperText: "Ingrese instrucciones adicionales que deben considerarse al responder las preguntas de la lista de verificación",
+        analyzing: "Analizando...",
+        analyzeButton: "Analizar Lista de Verificación",
+        analyzingMessage: "Analizando su lista de verificación para oportunidades de optimización...",
+        cancelAnalysis: "Cancelar Análisis",
+        downloading: "Descargando...",
+        downloadCsv: "Descargar CSV",
+        questionsNeedingOptimization: "Preguntas que Necesitan Optimización",
+        questionsAlreadyOptimized: "Preguntas Ya Optimizadas",
+        selected: "Seleccionado",
+        select: "Seleccionar",
+        original: "Original",
+        suggestedImprovement: "Mejora Sugerida",
+        policyContext: "Contexto de Política",
+        currentAnswer: "Respuesta Actual",
+        showLess: "Mostrar Menos",
+        showMore: "Mostrar Más",
+        optimizationsSelectedText: "optimizaciones seleccionadas para aplicar",
+        applying: "Aplicando...",
+        applySelectedOptimizations: "Aplicar Optimizaciones Seleccionadas",
+        uploadDocumentsTitle: "Suba documento(s) que deben ser aceptados por la lista de verificación *",
+        uploadDocumentsHelperText: "Suba documentos que deben cumplir todos los requisitos de la lista de verificación para ayudar a identificar preguntas que pueden ser demasiado estrictas",
+        customInstructionsPlaceholder: "ej., Considere que este es un estudio pediátrico al evaluar requisitos relacionados con la edad, Este protocolo es para intervención de bajo riesgo, etc."
+      },
+      optimizeOutlineModal: {
+        title: "Optimizar Esquema",
+        description: "Suba un documento de referencia que represente un ejemplo de alta calidad del tipo de informe que desea generar. El sistema generará un informe usando su esquema actual y base de conocimientos, lo comparará con la referencia y sugerirá mejoras para las secciones del esquema.",
+        groundTruthDocument: "Documento de Referencia",
+        customInstructionsLabel: "Instrucciones Personalizadas (Opcional)",
+        customInstructionsHelperText: "Proporcione orientación adicional para el proceso de optimización",
+        customInstructionsPlaceholder: "ej., Enfóquese en mejorar la profundidad técnica, asegure el cumplimiento con estándares específicos, etc.",
+        characters: "caracteres",
+        analyzingOutline: "Analizando esquema y generando optimizaciones...",
+        cancelAnalysis: "Cancelar Análisis",
+        optimizationResults: "Resultados de Optimización",
+        sectionsNeedOptimization: "secciones necesitan optimización",
+        downloadCsv: "Descargar CSV",
+        section: "Sección",
+        accepted: "Aceptado",
+        accept: "Aceptar",
+        originalSectionDescription: "Descripción Original de la Sección",
+        suggestedSectionDescription: "Descripción Sugerida de la Sección",
+        generatedContent: "Contenido Generado (con descripción actual)",
+        groundTruthReference: "Referencia de Verdad Fundamental",
+        showLess: "Mostrar Menos",
+        showMore: "Mostrar Más",
+        close: "Cerrar",
+        cancel: "Cancelar",
+        optimizing: "Optimizando...",
+        optimizeOutline: "Optimizar Esquema",
+        applyOptimizations: "Aplicar {{count}} Optimizaciones"
+      }
     },
   }
 
@@ -1124,6 +2510,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
   if (!resources.he.common.knowledgeBases) {
     resources.he.common.knowledgeBases = {
       title: "בסיסי ידע",
+      addKnowledgeBase: "הוסף בסיס ידע",
       description: "נהל וארגן את המסמכים שלך בבסיסי ידע לאינטראקציות יעילות הנתמכות על ידי AI.",
       createNew: "צור בסיס ידע חדש",
       noKnowledgeBases: "עדיין לא נוצרו בסיסי ידע",
@@ -1164,6 +2551,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
   if (!resources.fa.common.knowledgeBases) {
     resources.fa.common.knowledgeBases = {
       title: "پایگاه‌های دانش",
+      addKnowledgeBase: "افزودن پایگاه دانش",
       description: "اسناد خود را در پایگاه‌های دانش مدیریت و سازماندهی کنید تا تعاملات کارآمد با پشتیبانی هوش مصنوعی داشته باشید.",
       createNew: "ایجاد پایگاه دانش جدید",
       noKnowledgeBases: "هنوز هیچ پایگاه دانشی ایجاد نشده است",
@@ -1204,6 +2592,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
   if (!resources.tr.common.knowledgeBases) {
     resources.tr.common.knowledgeBases = {
       title: "Bilgi Tabanları",
+      addKnowledgeBase: "Bilgi tabanı ekle",
       description: "Belgelerinizi bilgi tabanlarında yönetin ve düzenleyin, AI destekli etkili etkileşimler için.",
       createNew: "Yeni bilgi tabanı oluştur",
       noKnowledgeBases: "Henüz hiç bilgi tabanı oluşturulmamış",
@@ -1244,6 +2633,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
   if (!resources.sw.common.knowledgeBases) {
     resources.sw.common.knowledgeBases = {
       title: "Misingi ya Ujuzi",
+      addKnowledgeBase: "Ongeza msingi wa ujuzi",
       description: "Simamia na panga hati zako katika misingi ya ujuzi kwa ajili ya mwingiliano wa ufanisi unaotumia AI.",
       createNew: "Unda msingi mpya wa ujuzi",
       noKnowledgeBases: "Bado hakuna misingi ya ujuzi iliyoundwa",
@@ -1284,6 +2674,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
   if (!resources["pt-BR"].common.knowledgeBases) {
     resources["pt-BR"].common.knowledgeBases = {
       title: "Bases de Conhecimento",
+      addKnowledgeBase: "Adicionar base de conhecimento",
       description: "Gerencie e organize seus documentos em bases de conhecimento para interações eficientes com suporte de IA.",
       createNew: "Criar nova base de conhecimento",
       noKnowledgeBases: "Nenhuma base de conhecimento foi criada ainda",
@@ -1324,6 +2715,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
   if (!resources["es-LATAM"].common.knowledgeBases) {
     resources["es-LATAM"].common.knowledgeBases = {
       title: "Bases de Conocimiento",
+      addKnowledgeBase: "Agregar base de conocimiento",
       description: "Administra y organiza tus documentos en bases de conocimiento para interacciones eficientes con soporte de IA.",
       createNew: "Crear nueva base de conocimiento",
       noKnowledgeBases: "Aún no se han creado bases de conocimiento",
@@ -1358,5 +2750,301 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         pleaseEnterName: "Por favor ingresa un nombre para la base de conocimiento"
       }
     }
+  }
+
+  // Add Archive translations for Middle Eastern and Other languages
+  if (!resources.he.common.archive) {
+    resources.he.common.archive = {
+      tabs: {
+        review: "סקירה",
+        generate: "יצירה",
+        compare: "השוואה",
+        match: "התאמה"
+      },
+      metadata: {
+        questions: "שאלות",
+        questions_one: "שאלה",
+        fields: "שדות",
+        fields_one: "שדה",
+        documents: "מסמכים",
+        documents_one: "מסמך",
+        digitized: "דיגיטלי",
+        handwritten: "כתב יד"
+      },
+      feedback: {
+        positive: "תן משוב חיובי לתוצאה זו",
+        negative: "תן משוב שלילי לתוצאה זו",
+        hasFeedback: "לתוצאה זו יש משוב"
+      },
+      emptyMessages: {
+        review: "אין עדיין היסטוריית סקירה",
+        generate: "אין עדיין היסטוריית יצירה",
+        compare: "אין עדיין היסטוריית השוואה",
+        match: "אין עדיין היסטוריית התאמה"
+      },
+      deleteConfirmation: "האם אתה בטוח שברצונך למחוק פריט זה?",
+      history: "היסטוריה",
+      allUsers: "כל המשתמשים"
+    }
+  }
+
+  if (!resources.fa.common.archive) {
+    resources.fa.common.archive = {
+      tabs: {
+        review: "بررسی",
+        generate: "تولید",
+        compare: "مقایسه",
+        match: "تطبیق"
+      },
+      metadata: {
+        questions: "سوالات",
+        questions_one: "سوال",
+        fields: "فیلدها",
+        fields_one: "فیلد",
+        documents: "اسناد",
+        documents_one: "سند",
+        digitized: "دیجیتالی شده",
+        handwritten: "دست نویس"
+      },
+      feedback: {
+        positive: "بازخورد مثبت برای این نتیجه ارائه دهید",
+        negative: "بازخورد منفی برای این نتیجه ارائه دهید",
+        hasFeedback: "این نتیجه دارای بازخورد است"
+      },
+      emptyMessages: {
+        review: "هنوز سابقه بررسی وجود ندارد",
+        generate: "هنوز سابقه تولید وجود ندارد",
+        compare: "هنوز سابقه مقایسه وجود ندارد",
+        match: "هنوز سابقه تطبیق وجود ندارد"
+      },
+      deleteConfirmation: "آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟",
+      history: "تاریخچه",
+      allUsers: "همه کاربران"
+    }
+  }
+
+  if (!resources.tr.common.archive) {
+    resources.tr.common.archive = {
+      tabs: {
+        review: "Gözden Geçir",
+        generate: "Oluştur",
+        compare: "Karşılaştır",
+        match: "Eşleştir"
+      },
+      metadata: {
+        questions: "soru",
+        questions_one: "soru",
+        fields: "alan",
+        fields_one: "alan",
+        documents: "belge",
+        documents_one: "belge",
+        digitized: "dijitalleştirilmiş",
+        handwritten: "el yazısı"
+      },
+      feedback: {
+        positive: "Bu sonuç için olumlu geri bildirim ver",
+        negative: "Bu sonuç için olumsuz geri bildirim ver",
+        hasFeedback: "Bu sonucun geri bildirimi var"
+      },
+      emptyMessages: {
+        review: "Henüz gözden geçirme geçmişi yok",
+        generate: "Henüz oluşturma geçmişi yok",
+        compare: "Henüz karşılaştırma geçmişi yok",
+        match: "Henüz eşleştirme geçmişi yok"
+      },
+      deleteConfirmation: "Bu öğeyi silmek istediğinizden emin misiniz?",
+      history: "Geçmiş",
+      allUsers: "Tüm kullanıcılar"
+    }
+  }
+
+  if (!resources.sw.common.archive) {
+    resources.sw.common.archive = {
+      tabs: {
+        review: "Hakiki",
+        generate: "Zalisha",
+        compare: "Linganisha",
+        match: "Oanisha"
+      },
+      metadata: {
+        questions: "maswali",
+        questions_one: "swali",
+        fields: "uga",
+        fields_one: "uga",
+        documents: "nyaraka",
+        documents_one: "nyaraka",
+        digitized: "kimezalishwa kielektroniki",
+        handwritten: "kimeandikwa kwa mkono"
+      },
+      feedback: {
+        positive: "Toa maoni mazuri kuhusu matokeo haya",
+        negative: "Toa maoni mabaya kuhusu matokeo haya",
+        hasFeedback: "Matokeo haya yana maoni"
+      },
+      emptyMessages: {
+        review: "Bado hakuna historia ya uhakiki",
+        generate: "Bado hakuna historia ya uzalishaji",
+        compare: "Bado hakuna historia ya kulinganisha",
+        match: "Bado hakuna historia ya kuoanisha"
+      },
+      deleteConfirmation: "Je, una uhakika ungependa kufuta kipengee hiki?",
+      history: "Historia",
+      allUsers: "Watumiaji wote"
+    }
+  }
+
+  if (!resources["pt-BR"].common.archive) {
+    resources["pt-BR"].common.archive = {
+      tabs: {
+        review: "Revisar",
+        generate: "Gerar",
+        compare: "Comparar",
+        match: "Corresponder"
+      },
+      metadata: {
+        questions: "perguntas",
+        questions_one: "pergunta",
+        fields: "campos",
+        fields_one: "campo",
+        documents: "documentos",
+        documents_one: "documento",
+        digitized: "digitalizado",
+        handwritten: "manuscrito"
+      },
+      feedback: {
+        positive: "Dar feedback positivo para este resultado",
+        negative: "Dar feedback negativo para este resultado",
+        hasFeedback: "Este resultado tem feedback"
+      },
+      emptyMessages: {
+        review: "Ainda não há histórico de revisão",
+        generate: "Ainda não há histórico de geração",
+        compare: "Ainda não há histórico de comparação",
+        match: "Ainda não há histórico de correspondência"
+      },
+      deleteConfirmation: "Tem certeza de que deseja excluir este item?",
+      history: "Histórico",
+      allUsers: "Todos os usuários"
+    }
+  }
+
+  if (!resources["es-LATAM"].common.archive) {
+    resources["es-LATAM"].common.archive = {
+      tabs: {
+        review: "Revisar",
+        generate: "Generar",
+        compare: "Comparar",
+        match: "Coincidir"
+      },
+      metadata: {
+        questions: "preguntas",
+        questions_one: "pregunta",
+        fields: "campos",
+        fields_one: "campo",
+        documents: "documentos", 
+        documents_one: "documento",
+        digitized: "digitalizado",
+        handwritten: "manuscrito"
+      },
+      feedback: {
+        positive: "Dar retroalimentación positiva para este resultado",
+        negative: "Dar retroalimentación negativa para este resultado",
+        hasFeedback: "Este resultado tiene retroalimentación"
+      },
+      emptyMessages: {
+        review: "Aún no hay historial de revisión",
+        generate: "Aún no hay historial de generación",
+        compare: "Aún no hay historial de comparación",
+        match: "Aún no hay historial de coincidencias"
+      },
+      deleteConfirmation: "¿Estás seguro de que quieres eliminar este elemento?",
+      history: "Historial",
+      allUsers: "Todos los usuarios"
+    }
+  }
+
+  // Add Settings extensions for Middle Eastern and Other languages
+  if (resources.he.common.settings) {
+    Object.assign(resources.he.common.settings, {
+      currentPassword: "סיסמה נוכחית",
+      newPassword: "סיסמה חדשה",
+      confirmPassword: "אישור סיסמה",
+      save: "שמירה",
+      system: "מערכת",
+      lightMode: "מצב בהיר",
+      darkMode: "מצב כהה",
+      deleteAccountDescription: "מחק לצמיתות את הנתונים שלך וכל מה שקשור לחשבון שלך.",
+      delete: "מחק"
+    })
+  }
+
+  if (resources.fa.common.settings) {
+    Object.assign(resources.fa.common.settings, {
+      currentPassword: "رمز عبور فعلی",
+      newPassword: "رمز عبور جدید",
+      confirmPassword: "تایید رمز عبور",
+      save: "ذخیره",
+      system: "سیستم",
+      lightMode: "حالت روشن",
+      darkMode: "حالت تاریک",
+      deleteAccountDescription: "داده‌های خود و همه چیزهای مرتبط با حساب کاربری‌تان را برای همیشه حذف کنید.",
+      delete: "حذف"
+    })
+  }
+
+  if (resources.tr.common.settings) {
+    Object.assign(resources.tr.common.settings, {
+      currentPassword: "Mevcut Şifre",
+      newPassword: "Yeni Şifre",
+      confirmPassword: "Şifreyi Onayla",
+      save: "Kaydet",
+      system: "Sistem",
+      lightMode: "Açık Mod",
+      darkMode: "Koyu Mod",
+      deleteAccountDescription: "Verilerinizi ve hesabınızla ilişkili her şeyi kalıcı olarak silin.",
+      delete: "Sil"
+    })
+  }
+
+  if (resources.sw.common.settings) {
+    Object.assign(resources.sw.common.settings, {
+      currentPassword: "Nenosiri la Sasa",
+      newPassword: "Nenosiri Jipya",
+      confirmPassword: "Thibitisha Nenosiri",
+      save: "Hifadhi",
+      system: "Mfumo",
+      lightMode: "Hali ya Mwanga",
+      darkMode: "Hali ya Giza",
+      deleteAccountDescription: "Futa data yako na kila kitu kinachohusiana na akaunti yako kabisa.",
+      delete: "Futa"
+    })
+  }
+
+  if (resources["pt-BR"].common.settings) {
+    Object.assign(resources["pt-BR"].common.settings, {
+      currentPassword: "Senha Atual",
+      newPassword: "Nova Senha",
+      confirmPassword: "Confirmar Senha",
+      save: "Salvar",
+      system: "Sistema",
+      lightMode: "Modo Claro",
+      darkMode: "Modo Escuro",
+      deleteAccountDescription: "Excluir permanentemente seus dados e tudo associado à sua conta.",
+      delete: "Excluir"
+    })
+  }
+
+  if (resources["es-LATAM"].common.settings) {
+    Object.assign(resources["es-LATAM"].common.settings, {
+      currentPassword: "Contraseña Actual",
+      newPassword: "Nueva Contraseña",
+      confirmPassword: "Confirmar Contraseña",
+      save: "Guardar",
+      system: "Sistema",
+      lightMode: "Modo Claro",
+      darkMode: "Modo Oscuro",
+      deleteAccountDescription: "Eliminar permanentemente tus datos y todo lo asociado con tu cuenta.",
+      delete: "Eliminar"
+    })
   }
 }

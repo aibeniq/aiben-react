@@ -447,7 +447,7 @@ const TwinCheck = () => {
         <SelectionModal
           isOpen={showTopicListModal}
           onClose={() => setShowTopicListModal(false)}
-          title={t("compare.title")}
+          title={t("compare.selectTopicListTitle")}
         >
           <TopicListTable
             topicLists={comparisons}

@@ -2,6 +2,7 @@ import { Button, ButtonGroup, Text } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 
 import { type ApiError, UsersService } from "@/client"
 import {
@@ -23,6 +24,7 @@ const DeleteConfirmation = () => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
+  const { t } = useTranslation()
   const {
     handleSubmit,
     formState: { isSubmitting },
@@ -59,7 +61,7 @@ const DeleteConfirmation = () => {
       >
         <DialogTrigger asChild>
           <Button variant="solid" colorPalette="red" mt={4}>
-            Delete
+            {t("settings.delete")}
           </Button>
         </DialogTrigger>
 
@@ -67,35 +69,21 @@ const DeleteConfirmation = () => {
           <form onSubmit={handleSubmit(onSubmit)}>
             <DialogCloseTrigger />
             <DialogHeader>
-              <DialogTitle>Confirmation Required</DialogTitle>
+              <DialogTitle>{t("settings.confirmationRequired")}</DialogTitle>
             </DialogHeader>
             <DialogBody>
-              <Text mb={4}>
-                All your account data will be{" "}
-                <strong>permanently deleted.</strong> If you are sure, please
-                click <strong>"Confirm"</strong> to proceed. This action cannot
-                be undone.
-              </Text>
+              <Text mb={4}>{t("settings.deleteConfirmationText")}</Text>
             </DialogBody>
 
             <DialogFooter gap={2}>
               <ButtonGroup>
                 <DialogActionTrigger asChild>
-                  <Button
-                    variant="subtle"
-                    colorPalette="gray"
-                    disabled={isSubmitting}
-                  >
-                    Cancel
+                  <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
+                    {t("settings.cancel")}
                   </Button>
                 </DialogActionTrigger>
-                <Button
-                  variant="solid"
-                  colorPalette="red"
-                  type="submit"
-                  loading={isSubmitting}
-                >
-                  Delete
+                <Button variant="solid" colorPalette="red" type="submit" loading={isSubmitting}>
+                  {t("settings.delete")}
                 </Button>
               </ButtonGroup>
             </DialogFooter>

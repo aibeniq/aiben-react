@@ -6,6 +6,7 @@ import SelectionModal from "@/components/Common/SelectionModal"
 import { Box, Button, HStack, Icon, Show, Text } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import { FiTrash } from "react-icons/fi"
 import { Radio, RadioGroup } from "../ui/radio"
 
@@ -61,6 +62,8 @@ const ChatbotPanel = ({
   searchMode,
   setSearchMode,
 }: ChatbotPanelProps) => {
+  const { t } = useTranslation()
+
   // Get knowledge bases
   const { data: knowledgeBases = [] } = useQuery({
     queryKey: ["knowledge-bases"],
@@ -101,7 +104,7 @@ const ChatbotPanel = ({
         >
           <Box flex="1" />
           <Text fontWeight="bold" fontSize="lg" py={2}>
-            Chat
+            {t("chatbot.title")}
           </Text>
           <HStack gap={2} flex="1" justifyContent="flex-end">
             <Show when={messages.length > 0}>
@@ -124,37 +127,27 @@ const ChatbotPanel = ({
         </Box>
 
         {/* Search Mode Toggle */}
-        <Box
-          px={4}
-          pt={2}
-          pb={1}
-          bg="bg"
-          borderBottom="1px solid"
-          borderColor="gray.100"
-        >
+        <Box px={4} pt={2} pb={1} bg="bg" borderBottom="1px solid" borderColor="gray.100">
           <RadioGroup
             value={searchMode}
-            onValueChange={(details) =>
-              setSearchMode(details.value as "vector" | "full_text")
-            }
+            onValueChange={(details) => setSearchMode(details.value as "vector" | "full_text")}
             size="sm"
             colorPalette="teal"
           >
             <HStack gap={4}>
               <Text fontSize="xs" color="gray.600" fontWeight="medium">
-                Search Mode:
+                {t("chatbot.searchMode")}
               </Text>
               <Radio value="vector">
-                <Text fontSize="xs">Vector Search</Text>
+                <Text fontSize="xs">{t("chatbot.vectorSearch")}</Text>
               </Radio>
               <Radio value="full_text">
-                <Text fontSize="xs">Full Text Scan</Text>
+                <Text fontSize="xs">{t("chatbot.fullTextScan")}</Text>
               </Radio>
             </HStack>
           </RadioGroup>
           <Text fontSize="xs" color="gray.500" mt={1}>
-            Vector search provides fast, targeted results. Full text scan
-            reviews all content in the knowledge base.
+            {t("chatbot.searchModeDescription")}
           </Text>
         </Box>
 
@@ -192,19 +185,19 @@ const ChatbotPanel = ({
           <HStack gap={2} fontSize="xs" color="gray.500" pl={5} pb={3}>
             {selectedKbId ? (
               <Text>
-                Using knowledge base:{" "}
-                <b>
-                  {knowledgeBases.find((kb) => kb.id === selectedKbId)?.title}
-                </b>
+                {t("chatbot.usingKnowledgeBase")}{" "}
+                <b>{knowledgeBases.find((kb) => kb.id === selectedKbId)?.title}</b>
               </Text>
             ) : uploadedFiles.length > 0 ? (
               <Text>
-                Using {uploadedFiles.length} document
-                {uploadedFiles.length > 1 ? "s" : ""}:{" "}
+                {t("chatbot.usingFiles", {
+                  count: uploadedFiles.length,
+                  plural: uploadedFiles.length > 1 ? "s" : "",
+                })}{" "}
                 <b>{uploadedFiles.map((f) => f.name).join(", ")}</b>
               </Text>
             ) : (
-              <Text>Using general AI assistant</Text>
+              <Text>{t("chatbot.usingGeneralAI")}</Text>
             )}
             <Show when={selectedKbId || uploadedFiles.length > 0}>
               <Text
@@ -219,7 +212,7 @@ const ChatbotPanel = ({
                   setCurrentFileNames([])
                 }}
               >
-                Remove
+                {t("chatbot.remove")}
               </Text>
             </Show>
           </HStack>
@@ -229,14 +222,12 @@ const ChatbotPanel = ({
       <SelectionModal
         isOpen={showKnowledgeBaseModal}
         onClose={() => setShowKnowledgeBaseModal(false)}
-        title="Select Knowledge Base"
+        title={t("chatbot.selectKnowledgeBase")}
       >
         <KnowledgeBaseTable
           knowledgeBases={knowledgeBases}
           selectedKnowledgeBase={
-            selectedKbId
-              ? knowledgeBases.find((kb) => kb.id === selectedKbId) || null
-              : null
+            selectedKbId ? knowledgeBases.find((kb) => kb.id === selectedKbId) || null : null
           }
           onSelectionChange={(kb) => {
             setSelectedKbId(kb?.id || null)

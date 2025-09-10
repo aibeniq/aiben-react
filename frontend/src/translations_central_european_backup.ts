@@ -157,7 +157,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       compare: {
         title: "Porovnat dokumenty",
-        subtitle: "Porovnejte dva dokumenty, abyste viděli, jak se liší s ohledem na uživatelem definovaný seznam témat.",
+        subtitle: "Vyberte dva dokumenty k porovnání",
         selectFirstDocument: "Vybrat první dokument",
         selectSecondDocument: "Vybrat druhý dokument",
         pleaseSelect: "Prosím vyberte...",
@@ -184,7 +184,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       match: {
         title: "Párování dokumentů",
-        subtitle: "Zajistit, aby se záznamy polí shodovaly napříč dokumenty různých formátů.",
+        subtitle: "Najít podobné dokumenty na základě obsahu",
         selectDocument: "Vyberte dokument pro hledání shod",
         pleaseSelect: "Prosím vyberte dokument...",
         sourceDocument: "Zdrojový dokument",
@@ -320,56 +320,19 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         defaultOption: "Vyberte možnost"
       },
       optimizeChecklistModal: {
-        title: "Optimalizovat kontrolní seznam",
-        customInstructionsLabel: "Vlastní instrukce (volitelné)",
-        customInstructionsHelperText: "Zadejte další instrukce, které je třeba zvážit při odpovídání na otázky kontrolního seznamu",
-        analyzing: "Analyzování...",
-        analyzeButton: "Analyzovat kontrolní seznam",
-        analyzingMessage: "Analyzujeme váš kontrolní seznam pro nalezení příležitostí k optimalizaci...",
-        cancelAnalysis: "Zrušit analýzu",
-        downloading: "Stahování...",
-        downloadCsv: "Stáhnout CSV",
-        questionsNeedingOptimization: "Otázky vyžadující optimalizaci",
-        questionsAlreadyOptimized: "Již optimalizované otázky",
-        selected: "Vybráno",
-        select: "Vybrat",
-        original: "Původní",
-        suggestedImprovement: "Navrhované zlepšení",
-        policyContext: "Kontext politiky",
-        currentAnswer: "Současná odpověď",
-        showLess: "Zobrazit méně",
-        showMore: "Zobrazit více",
-        optimizationsSelectedText: "{{s}} optimalizací vybráno k aplikaci",
-        applying: "Aplikování...",
-        applySelectedOptimizations: "Aplikovat vybrané optimalizace"
+        optimizeChecklistTitle: "Optimalizovat kontrolní seznam",
+        optimizeChecklistDescription: "Nahrajte dokumenty, které by měl kontrolní seznam přijmout",
+        uploadDocumentPrompt: "Nahrajte dokument(y), které by měl kontrolní seznam přijmout",
+        fileDropMessage: "Přetáhněte soubory sem nebo klikněte pro výběr",
+        optimizeButton: "Optimalizovat"
       },
       optimizeOutlineModal: {
-        title: "Optimalizovat osnovu",
-        description: "Nahrajte referenční dokument, který představuje vysoce kvalitní příklad typu zprávy, kterou chcete vytvořit. Systém vygeneruje zprávu s vaší současnou osnovou a znalostní bází, porovná ji s referencí a navrhne zlepšení oddílů osnovy.",
-        groundTruthDocument: "Referenční dokument",
-        customInstructionsLabel: "Vlastní instrukce (volitelné)",
-        customInstructionsHelperText: "Poskytnutí dalšího vedení pro proces optimalizace",
-        customInstructionsPlaceholder: "např. Zaměřte se na zlepšení technické hloubky, zajistěte dodržování specifických standardů atd.",
-        characters: "znaků",
-        analyzingOutline: "Analyzování osnovy a generování optimalizací...",
-        cancelAnalysis: "Zrušit analýzu",
-        optimizationResults: "Výsledky optimalizace",
-        sectionsNeedOptimization: "oddílů potřebuje optimalizaci",
-        downloadCsv: "Stáhnout CSV",
-        section: "Oddíl",
-        accepted: "Přijato",
-        accept: "Přijmout",
-        originalSectionDescription: "Původní popis oddílu",
-        suggestedSectionDescription: "Navrhovaný popis oddílu",
-        generatedContent: "Generovaný obsah (s aktuálním popisem)",
-        groundTruthReference: "Reference pravdy",
-        showLess: "Zobrazit méně",
-        showMore: "Zobrazit více",
-        close: "Zavřít",
-        cancel: "Zrušit",
-        optimizing: "Optimalizování...",
-        optimizeOutline: "Optimalizovat osnovu",
-        applyOptimizations: "Aplikovat {{count}} optimalizací"
+        optimizeOutlineTitle: "Optimalizovat osnovu",
+        optimizeOutlineDescription: "Vyberte znalostní bázi",
+        selectKnowledgeBase: "Vyberte znalostní bázi",
+        selectKnowledgeBasePlaceholder: "Vyberte znalostní bázi",
+        optimizeButton: "Optimalizovat",
+        createPediatricStudyPlaceholder: "např., vytvořte pediatrickou studii pro diabetes 1. typu"
       }
     },
   }
@@ -529,7 +492,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       compare: {
         title: "Porovnať dokumenty",
-        subtitle: "Porovnajte dva dokumenty, aby ste videli, ako sa líšia vzhľadom na používateľom definovaný zoznam tém.",
+        subtitle: "Vyberte dva dokumenty na porovnanie",
         selectFirstDocument: "Vybrať prvý dokument",
         selectSecondDocument: "Vybrať druhý dokument",
         pleaseSelect: "Prosím vyberte...",
@@ -556,7 +519,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       match: {
         title: "Párovanie dokumentov",
-        subtitle: "Zabezpečiť, aby sa záznamy polí zhodovali naprieč dokumentmi rôznych formátov.",
+        subtitle: "Nájsť podobné dokumenty na základe obsahu",
         selectDocument: "Vyberte dokument pre hľadanie zhôd",
         pleaseSelect: "Prosím vyberte dokument...",
         sourceDocument: "Zdrojový dokument",
@@ -898,7 +861,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       compare: {
         title: "Dokumentumok összehasonlítása",
-        subtitle: "Hasonlítson össze két dokumentumot, hogy lássa, miben térnek el egy felhasználó által meghatározott témalistával kapcsolatban.",
+        subtitle: "Válasszon ki két dokumentumot az összehasonlításhoz",
         selectFirstDocument: "Első dokumentum kiválasztása",
         selectSecondDocument: "Második dokumentum kiválasztása",
         pleaseSelect: "Kérjük válasszon...",
@@ -925,7 +888,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       match: {
         title: "Dokumentumok párosítása",
-        subtitle: "Biztosítsa, hogy a mezőbejegyzések megegyezzenek a különböző formátumú dokumentumok között.",
+        subtitle: "Hasonló dokumentumok keresése tartalom alapján",
         selectDocument: "Válasszon dokumentumot a párosításhoz",
         pleaseSelect: "Kérjük válasszon dokumentumot...",
         sourceDocument: "Forrás dokumentum",
@@ -1265,7 +1228,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       compare: {
         title: "Compararea documentelor",
-        subtitle: "Comparați două documente pentru a vedea cum diferă în raport cu o listă de subiecte definită de utilizator.",
+        subtitle: "Selectați două documente pentru comparare",
         selectFirstDocument: "Selectați primul document",
         selectSecondDocument: "Selectați al doilea document",
         pleaseSelect: "Vă rugăm selectați...",
@@ -1292,7 +1255,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       match: {
         title: "Potrivirea documentelor",
-        subtitle: "Asigurați-vă că intrările din câmpuri se potrivesc în documente de diferite formate.",
+        subtitle: "Găsiți documente similare pe baza conținutului",
         selectDocument: "Selectați documentul pentru găsirea potrivirilor",
         pleaseSelect: "Vă rugăm selectați un document...",
         sourceDocument: "Document sursă",
@@ -1632,7 +1595,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       compare: {
         title: "Сравняване на документи",
-        subtitle: "Сравнете два документа, за да видите как се различават по отношение на дефиниран от потребителя списък с теми.",
+        subtitle: "Изберете два документа за сравняване",
         selectFirstDocument: "Изберете първия документ",
         selectSecondDocument: "Изберете втория документ",
         pleaseSelect: "Моля изберете...",
@@ -1659,7 +1622,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       match: {
         title: "Съвпадение на документи",
-        subtitle: "Уверете се, че записите в полетата съвпадат между документи с различни формати.",
+        subtitle: "Намерете подобни документи въз основа на съдържанието",
         selectDocument: "Изберете документ за намиране на съвпадения",
         pleaseSelect: "Моля изберете документ...",
         sourceDocument: "Изходен документ",
@@ -1999,7 +1962,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       compare: {
         title: "Usporedi dokumente",
-        subtitle: "Usporedite dva dokumenta da vidite kako se razlikuju s obzirom na korisnički definirani popis tema.",
+        subtitle: "Odaberite dva dokumenta za usporedbu",
         selectFirstDocument: "Odaberite prvi dokument",
         selectSecondDocument: "Odaberite drugi dokument",
         pleaseSelect: "Molimo odaberite...",
@@ -2026,7 +1989,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       match: {
         title: "Podudarne dokumente",
-        subtitle: "Osigurajte da se unosi polja podudaraju između dokumenata različitih formata.",
+        subtitle: "Pronađite slične dokumente na temelju sadržaja",
         selectDocument: "Odaberite dokument za pronalaženje podudaranja",
         pleaseSelect: "Molimo odaberite dokument...",
         sourceDocument: "Izvorni dokument",
@@ -2366,7 +2329,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       compare: {
         title: "Упореди документе",
-        subtitle: "Упоредите два документа да видите како се разликују у односу на корисничку листу тема.",
+        subtitle: "Изаберите два документа за поређење",
         selectFirstDocument: "Изаберите први документ",
         selectSecondDocument: "Изаберите други документ",
         pleaseSelect: "Молимо изаберите...",
@@ -2393,7 +2356,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       match: {
         title: "Подударање докумената",
-        subtitle: "Обезбедите да се уноси поља подударају између докумената различитих формата.",
+        subtitle: "Пронађите сличне документе на основу садржаја",
         selectDocument: "Изаберите документ за проналажење подударања",
         pleaseSelect: "Молимо изаберите документ...",
         sourceDocument: "Изворни документ",
@@ -2733,7 +2696,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       compare: {
         title: "Primerjaj dokumente",
-        subtitle: "Primerjajte dva dokumenta, da vidite, kako se razlikujeta glede na uporabniško določen seznam tem.",
+        subtitle: "Izberite dva dokumenta za primerjavo",
         selectFirstDocument: "Izberite prvi dokument",
         selectSecondDocument: "Izberite drugi dokument",
         pleaseSelect: "Prosimo izberite...",
@@ -2760,7 +2723,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       match: {
         title: "Ujemanje dokumentov",
-        subtitle: "Zagotovite, da se vnosi polj ujemajo med dokumenti različnih formatov.",
+        subtitle: "Poiščite podobne dokumente na podlagi vsebine",
         selectDocument: "Izberite dokument za iskanje ujemanj",
         pleaseSelect: "Prosimo izberite dokument...",
         sourceDocument: "Izvorni dokument",

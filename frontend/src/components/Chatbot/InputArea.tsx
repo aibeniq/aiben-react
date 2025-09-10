@@ -3,6 +3,7 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { Box, Button, HStack, Icon, Textarea } from "@chakra-ui/react"
 import type React from "react"
 import { useRef } from "react"
+import { useTranslation } from "react-i18next"
 import { FiSend } from "react-icons/fi"
 
 interface InputAreaProps {
@@ -22,12 +23,16 @@ const InputArea: React.FC<InputAreaProps> = ({
   onSendClick,
   isLoading = false,
   isSendDisabled = false,
-  placeholder = "Ask a question...",
+  placeholder,
   setShowKnowledgeBaseModal,
   setUploadedFiles,
 }) => {
+  const { t } = useTranslation()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { showSuccessToast, showErrorToast } = useCustomToast()
+
+  // Use translation if no placeholder provided
+  const displayPlaceholder = placeholder || t("chatbot.placeholder")
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log("handleFileSelect called")
@@ -51,9 +56,7 @@ const InputArea: React.FC<InputAreaProps> = ({
         files.map((f) => f.name),
       )
       setUploadedFiles(files)
-      showSuccessToast(
-        `${files.length} file${files.length > 1 ? "s" : ""} selected successfully.`,
-      )
+      showSuccessToast(`${files.length} file${files.length > 1 ? "s" : ""} selected successfully.`)
     }
   }
 
@@ -88,25 +91,18 @@ const InputArea: React.FC<InputAreaProps> = ({
       <Textarea
         value={value}
         onChange={onChange}
-        placeholder={placeholder}
-        resize="none"
-        rows={1}
-        fontSize="sm"
-        height="40px"
-        pl="40px"
-        pr="40px"
-        borderRadius="md"
-        border="1px solid"
-        borderColor="gray.200"
-        _focus={{
-          borderColor: "blue.500",
-          boxShadow: "0 0 0 1px var(--chakra-colors-blue-500)",
+        placeholder={displayPlaceholder}
+        resize="vertical"
+        minHeight="40px"
+        maxHeight="200px"
+        bg="white"
+        border="1px solid #d0d7de"
+        _hover={{
+          borderColor: "#0969da",
         }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault()
-            onSendClick()
-          }
+        _focus={{
+          borderColor: "#0969da",
+          boxShadow: "0 0 0 1px #0969da",
         }}
       />
       <HStack

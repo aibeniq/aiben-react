@@ -11,7 +11,8 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FiCopy } from "react-icons/fi"
 import type { FormConnectForm, KnowledgeBasePublic } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
@@ -55,6 +56,7 @@ const FormTemplateModal = ({
   knowledgeBases,
   searchMode: passedSearchMode = "vector",
 }: FormTemplateModalProps) => {
+  const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // Validation state
@@ -332,9 +334,7 @@ const FormTemplateModal = ({
           <Dialog.Content maxW="6xl" maxH="90vh">
             <Dialog.Header>
               <HStack align="center" gap={2}>
-                <Dialog.Title>
-                  {editingForm ? "Edit Form Template" : "Create New Form Template"}
-                </Dialog.Title>
+                <Dialog.Title>{t("editFormTemplateModal.title")}</Dialog.Title>
                 <HelpTooltip helpKey="createFormTemplate" />
               </HStack>
             </Dialog.Header>
@@ -344,7 +344,7 @@ const FormTemplateModal = ({
                 <HStack align="stretch" gap={4}>
                   <VStack align="stretch" gap={4} flex="1">
                     <Field
-                      label="Form Template Name"
+                      label={t("editFormTemplateModal.formTemplateName")}
                       required
                       invalid={!!validationErrors.name}
                       errorText={validationErrors.name}
@@ -352,19 +352,19 @@ const FormTemplateModal = ({
                       <Input
                         value={formName}
                         onChange={(e) => handleNameChange(e.target.value)}
-                        placeholder="Enter form template name"
+                        placeholder={t("editFormTemplateModal.formTemplateNamePlaceholder")}
                       />
                     </Field>
 
                     <Field
-                      label="Form Template Description"
+                      label={t("editFormTemplateModal.formTemplateDescription")}
                       invalid={!!validationErrors.description}
                       errorText={validationErrors.description}
                     >
                       <Textarea
                         value={formDescription}
                         onChange={(e) => handleDescriptionChange(e.target.value)}
-                        placeholder="Enter form template description to auto-suggest fields (minimum 10 characters)..."
+                        placeholder={t("editFormTemplateModal.descriptionPlaceholder")}
                         resize="vertical"
                         rows={3}
                       />
@@ -375,7 +375,7 @@ const FormTemplateModal = ({
                     <Field
                       label={
                         <HStack align="center" gap={2}>
-                          <span>Reference Documents (Optional)</span>
+                          <span>{t("editFormTemplateModal.referenceDocuments")}</span>
                           <HelpTooltip helpKey="referenceDocuments" />
                         </HStack>
                       }
@@ -388,14 +388,14 @@ const FormTemplateModal = ({
                             variant={referenceMode === "files" ? "solid" : "outline"}
                             onClick={() => handleReferenceModeChange("files")}
                           >
-                            Upload Files
+                            {t("editFormTemplateModal.uploadFiles")}
                           </Button>
                           <Button
                             size="sm"
                             variant={referenceMode === "knowledge-base" ? "solid" : "outline"}
                             onClick={() => handleReferenceModeChange("knowledge-base")}
                           >
-                            Knowledge Base
+                            {t("editFormTemplateModal.knowledgeBase")}
                           </Button>
                         </HStack>
 
@@ -439,7 +439,7 @@ const FormTemplateModal = ({
                                 setReferenceKnowledgeBase(kb || null)
                               }}
                             >
-                              <option value="">Select a Knowledge Base...</option>
+                              <option value="">{t("common.dropdowns.selectKnowledgeBase")}</option>
                               {knowledgeBases?.map((kb) => (
                                 <option key={kb.id} value={kb.id}>
                                   {kb.title}
@@ -467,7 +467,7 @@ const FormTemplateModal = ({
                   <Field
                     label={
                       <HStack justify="space-between" w="full">
-                        <span>Form Fields</span>
+                        <span>{t("editFormTemplateModal.formFields")}</span>
                         <HStack gap={2}>
                           <Button
                             size="xs"
@@ -490,7 +490,7 @@ const FormTemplateModal = ({
                                     : "Suggest fields based on the description"
                             }
                           >
-                            {suggesting ? "Suggesting..." : "Suggest"}
+                            {suggesting ? "Suggesting..." : t("editFormTemplateModal.suggest")}
                           </Button>
                           <HelpTooltip helpKey="suggestFormTemplateFields" />
 
@@ -537,7 +537,7 @@ const FormTemplateModal = ({
                             }))
                           }
                         }}
-                        placeholder="Add a field name (e.g. First Name, Address, SSN) or suggest from description"
+                        placeholder={t("editFormTemplateModal.fieldPlaceholder")}
                       />
                     </VStack>
                   </Field>
@@ -548,10 +548,10 @@ const FormTemplateModal = ({
             <Dialog.Footer>
               <HStack gap={3}>
                 <CancelButton onClick={handleModalClose} size="md">
-                  Cancel
+                  {t("editFormTemplateModal.cancel")}
                 </CancelButton>
                 <ConfirmButton onClick={handleSave} size="md">
-                  {editingForm ? "Update Form Template" : "Create Form Template"}
+                  {t("editFormTemplateModal.updateFormTemplate")}
                 </ConfirmButton>
               </HStack>
             </Dialog.Footer>
