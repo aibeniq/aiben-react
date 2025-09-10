@@ -459,7 +459,7 @@ const ChecklistModal = ({
                                 }}
                               >
                                 <option value="">
-                                  {t("common.dropdowns.selectKnowledgeBase")}
+                                  {t("dropdowns.selectKnowledgeBase")}
                                 </option>
                                 {knowledgeBases?.map((kb) => (
                                   <option key={kb.id} value={kb.id}>

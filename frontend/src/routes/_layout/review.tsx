@@ -11,7 +11,7 @@ import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import HelpTooltip from "@/components/ui/help-tooltip"
 import useCustomToast from "@/hooks/useCustomToast"
-import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
+import { useAllKnowledgeBases } from "@/hooks/useAllKnowledgeBases"
 import {
   Accordion,
   Box,
@@ -62,7 +62,7 @@ const VeraDoc = () => {
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     reviewInputs?.selectedKnowledgeBase || null,
   )
-  const { knowledgeBases } = useKnowledgeBases()
+  const { knowledgeBases } = useAllKnowledgeBases() // Show all users' knowledge bases in dropdown
   const abortControllerRef = useRef<AbortController | null>(null)
   const ongoingRequest = useRef<CancelablePromise<any> | null>(null)
 

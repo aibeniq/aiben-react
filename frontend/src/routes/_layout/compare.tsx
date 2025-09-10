@@ -18,7 +18,7 @@ import TopicListTable from "@/components/Compare/TopicListTable"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import useCustomToast from "@/hooks/useCustomToast"
-import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
+import { useAllKnowledgeBases } from "@/hooks/useAllKnowledgeBases"
 import { useResults } from "@/contexts/ResultsContext"
 import { copyToClipboard } from "@/utils/copyToClipboard"
 
@@ -47,7 +47,7 @@ const TwinCheck = () => {
   )
 
   // Knowledge base state (only for topic generation)
-  const { knowledgeBases } = useKnowledgeBases()
+  const { knowledgeBases } = useAllKnowledgeBases() // Show all users' knowledge bases in dropdown
 
   // Loading state
   const [loading, setLoading] = useState(false)
