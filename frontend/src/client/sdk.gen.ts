@@ -1091,6 +1091,7 @@ export class KnowledgeBasesService {
    * @param data The data for the request.
    * @param data.skip
    * @param data.limit
+   * @param data.show_all
    * @returns KnowledgeBasesPublic Successful Response
    * @throws ApiError
    */
@@ -1103,6 +1104,7 @@ export class KnowledgeBasesService {
       query: {
         skip: data.skip,
         limit: data.limit,
+        show_all: data.show_all,
       },
       errors: {
         422: "Validation Error",

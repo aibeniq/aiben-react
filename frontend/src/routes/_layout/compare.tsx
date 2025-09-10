@@ -6,10 +6,9 @@ import { FiCheck, FiCopy, FiFile, FiFileText, FiTrash2, FiUpload } from "react-i
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { useTranslation } from "react-i18next"
+import { useMutation } from "@tanstack/react-query"
 
 import {
-  type KnowledgeBasePublic,
-  KnowledgeBasesService,
   type TwinCheckTopicList,
   TwincheckService,
 } from "@/client"
@@ -18,10 +17,10 @@ import SelectionModal from "@/components/Common/SelectionModal"
 import TopicListTable from "@/components/Compare/TopicListTable"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
-import { useResults } from "@/contexts/ResultsContext"
 import useCustomToast from "@/hooks/useCustomToast"
+import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
+import { useResults } from "@/contexts/ResultsContext"
 import { copyToClipboard } from "@/utils/copyToClipboard"
-import { useMutation } from "@tanstack/react-query"
 
 const TwinCheck = () => {
   const { t } = useTranslation()
@@ -48,7 +47,7 @@ const TwinCheck = () => {
   )
 
   // Knowledge base state (only for topic generation)
-  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
+  const { knowledgeBases } = useKnowledgeBases()
 
   // Loading state
   const [loading, setLoading] = useState(false)
@@ -269,18 +268,8 @@ const TwinCheck = () => {
     }
   }
 
-  const fetchKnowledgeBases = async () => {
-    try {
-      const response = await KnowledgeBasesService.readKnowledgeBases({})
-      setKnowledgeBases(response.data || [])
-    } catch (error) {
-      console.error("Error fetching knowledge bases:", error)
-    }
-  }
-
   useEffect(() => {
     fetchComparisons()
-    fetchKnowledgeBases()
   }, [])
 
   // Mutation for comparing documents

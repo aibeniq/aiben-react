@@ -1,11 +1,10 @@
 import {
   type FormConnectForm,
   FormconnectService,
-  type KnowledgeBasePublic,
-  KnowledgeBasesService,
 } from "@/client"
 import DownloadButton from "@/components/ui/download-button"
 import useCustomToast from "@/hooks/useCustomToast"
+import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
 import { Box, Button, Container, HStack, Heading, Spinner, Text, VStack } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
@@ -40,7 +39,7 @@ const FormConnect = () => {
   const [fields, setFields] = useState(matchInputs?.fields || "")
   const [loading, setLoading] = useState(false)
   const [showFormModal, setShowFormModal] = useState(false)
-  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
+  const { knowledgeBases } = useKnowledgeBases()
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">(
     matchInputs?.searchMode || "vector",
   )
@@ -223,16 +222,6 @@ const FormConnect = () => {
     }
   }
 
-  const fetchKnowledgeBases = async () => {
-    try {
-      const data = await KnowledgeBasesService.readKnowledgeBases()
-      setKnowledgeBases(data.data || [])
-    } catch (error) {
-      console.error("Error fetching knowledge bases:", error)
-      setKnowledgeBases([])
-    }
-  }
-
   const fetchForms = async () => {
     try {
       const data = await FormconnectService.getForms()
@@ -244,7 +233,6 @@ const FormConnect = () => {
 
   useEffect(() => {
     fetchForms()
-    fetchKnowledgeBases()
   }, [])
 
   const mutation = useMutation({

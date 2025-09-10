@@ -1,11 +1,12 @@
-import { Badge, Box, Container, EmptyState, Flex, Heading, Table, VStack } from "@chakra-ui/react"
-import { useQuery } from "@tanstack/react-query"
+import { Badge, Box, Container, EmptyState, Flex, Heading, HStack, Table, Text, VStack } from "@chakra-ui/react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { FiSearch } from "react-icons/fi"
 import { z } from "zod"
+import { Switch } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import HelpTooltip from "@/components/ui/help-tooltip"
 
-import { KnowledgeBasesService } from "@/client"
 import { KnowledgeBaseActionsMenu } from "@/components/Common/KnowledgeBaseActionsMenu"
 import AddKnowledgeBase from "@/components/KnowledgeBases/AddKnowledgeBase"
 import PendingKnowledgeBases from "@/components/Pending/PendingKnowledgeBases"
@@ -15,23 +16,13 @@ import {
   PaginationPrevTrigger,
   PaginationRoot,
 } from "@/components/ui/pagination.tsx"
+import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
 
 const knowledgeBasesSearchSchema = z.object({
   page: z.number().catch(1),
 })
 
 const PER_PAGE = 5
-
-function getKnowledgeBasesQueryOptions({ page }: { page: number }) {
-  return {
-    queryFn: () =>
-      KnowledgeBasesService.readKnowledgeBases({
-        skip: (page - 1) * PER_PAGE,
-        limit: PER_PAGE,
-      }),
-    queryKey: ["items", { page }],
-  }
-}
 
 export const Route = createFileRoute("/_layout/knowledge-bases")({
   component: KnowledgeBases,
@@ -42,44 +33,156 @@ function KnowledgeBasesTable() {
   const { t } = useTranslation()
   const navigate = useNavigate({ from: Route.fullPath })
   const { page } = Route.useSearch()
+  const { knowledgeBases, isLoading, showAllUsers, toggleShowAllUsers } = useKnowledgeBases()
 
-  const { data, isLoading, isPlaceholderData } = useQuery({
-    ...getKnowledgeBasesQueryOptions({ page }),
-    placeholderData: (prevData) => prevData,
-  })
-
+  // Use pagination on the client side since useKnowledgeBases fetches all data
   const setPage = (page: number) =>
     navigate({
       search: (prev: { [key: string]: string }) => ({ ...prev, page }),
     })
 
-  const items = data?.data.slice(0, PER_PAGE) ?? []
-  const count = data?.count ?? 0
+  const startIndex = (page - 1) * PER_PAGE
+  const endIndex = startIndex + PER_PAGE
+  const items = knowledgeBases.slice(startIndex, endIndex)
+  const count = knowledgeBases.length
+  const isPlaceholderData = false
 
   if (isLoading) {
-    return <PendingKnowledgeBases />
+    return (
+      <>
+        {/* All Users Toggle - Always visible */}
+        <HStack justifyContent="flex-end" mb={4}>
+          <Tooltip
+            content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
+          >
+            <HStack gap={2}>
+              <HStack gap={1} align="center">
+                <Text fontSize="xs" color="gray.500">
+                  {t("archive.allUsers")}
+                </Text>
+                <HelpTooltip helpKey="allUsersToggle" />
+              </HStack>
+              <Switch.Root
+                key={`switch-${showAllUsers}`}
+                size="sm"
+                colorPalette="blue"
+                checked={showAllUsers}
+              >
+                <Switch.HiddenInput
+                  checked={showAllUsers}
+                  onChange={() => {
+                    console.log(
+                      "Knowledge Bases toggle clicked, current showAllUsers:",
+                      showAllUsers,
+                    )
+                    if (toggleShowAllUsers) toggleShowAllUsers()
+                  }}
+                />
+                <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
+                  <Switch.Thumb />
+                </Switch.Control>
+              </Switch.Root>
+            </HStack>
+          </Tooltip>
+        </HStack>
+        <PendingKnowledgeBases />
+      </>
+    )
   }
 
-  if (items.length === 0) {
+  if (knowledgeBases.length === 0) {
     return (
-      <EmptyState.Root>
-        <EmptyState.Content>
-          <EmptyState.Indicator>
-            <FiSearch />
-          </EmptyState.Indicator>
-          <VStack textAlign="center">
-            <EmptyState.Title>{t("knowledgeBases.emptyStateTitle")}</EmptyState.Title>
-            <EmptyState.Description>
-              {t("knowledgeBases.emptyStateDescription")}
-            </EmptyState.Description>
-          </VStack>
-        </EmptyState.Content>
-      </EmptyState.Root>
+      <>
+        {/* All Users Toggle - Always visible */}
+        <HStack justifyContent="flex-end" mb={4}>
+          <Tooltip
+            content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
+          >
+            <HStack gap={2}>
+              <HStack gap={1} align="center">
+                <Text fontSize="xs" color="gray.500">
+                  {t("archive.allUsers")}
+                </Text>
+                <HelpTooltip helpKey="allUsersToggle" />
+              </HStack>
+              <Switch.Root
+                key={`switch-${showAllUsers}`}
+                size="sm"
+                colorPalette="blue"
+                checked={showAllUsers}
+              >
+                <Switch.HiddenInput
+                  checked={showAllUsers}
+                  onChange={() => {
+                    console.log(
+                      "Knowledge Bases toggle clicked, current showAllUsers:",
+                      showAllUsers,
+                    )
+                    if (toggleShowAllUsers) toggleShowAllUsers()
+                  }}
+                />
+                <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
+                  <Switch.Thumb />
+                </Switch.Control>
+              </Switch.Root>
+            </HStack>
+          </Tooltip>
+        </HStack>
+        <EmptyState.Root>
+          <EmptyState.Content>
+            <EmptyState.Indicator>
+              <FiSearch />
+            </EmptyState.Indicator>
+            <VStack textAlign="center">
+              <EmptyState.Title>{t("knowledgeBases.emptyStateTitle")}</EmptyState.Title>
+              <EmptyState.Description>
+                {t("knowledgeBases.emptyStateDescription")}
+              </EmptyState.Description>
+            </VStack>
+          </EmptyState.Content>
+        </EmptyState.Root>
+      </>
     )
   }
 
   return (
     <>
+      {/* All Users Toggle - Always visible */}
+      <HStack justifyContent="flex-end" mb={4}>
+        <Tooltip
+          content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
+        >
+          <HStack gap={2}>
+            <HStack gap={1} align="center">
+              <Text fontSize="xs" color="gray.500">
+                {t("archive.allUsers")}
+              </Text>
+              <HelpTooltip helpKey="allUsersToggle" />
+            </HStack>
+            <Switch.Root
+              key={`switch-${showAllUsers}`}
+              size="sm"
+              colorPalette="blue"
+              checked={showAllUsers}
+            >
+              <Switch.HiddenInput
+                checked={showAllUsers}
+                onChange={() => {
+                  console.log(
+                    "Knowledge Bases toggle clicked, current showAllUsers:",
+                    showAllUsers,
+                  )
+                  if (toggleShowAllUsers) toggleShowAllUsers()
+                }}
+              />
+              <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch.Root>
+          </HStack>
+        </Tooltip>
+      </HStack>
+
       <Table.Root size={{ base: "sm", md: "md" }}>
         <Table.Header>
           <Table.Row>
@@ -140,19 +243,21 @@ function KnowledgeBasesTable() {
           ))}
         </Table.Body>
       </Table.Root>
-      <Flex justifyContent="flex-end" mt={4}>
-        <PaginationRoot
-          count={count}
-          pageSize={PER_PAGE}
-          onPageChange={({ page }) => setPage(page)}
-        >
-          <Flex>
-            <PaginationPrevTrigger />
-            <PaginationItems />
-            <PaginationNextTrigger />
-          </Flex>
-        </PaginationRoot>
-      </Flex>
+      {count > PER_PAGE && (
+        <Flex justifyContent="flex-end" mt={4}>
+          <PaginationRoot
+            count={count}
+            pageSize={PER_PAGE}
+            onPageChange={({ page }) => setPage(page)}
+          >
+            <Flex>
+              <PaginationPrevTrigger />
+              <PaginationItems />
+              <PaginationNextTrigger />
+            </Flex>
+          </PaginationRoot>
+        </Flex>
+      )}
     </>
   )
 }

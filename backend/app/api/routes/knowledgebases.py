@@ -319,7 +319,7 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
 
 @router.get("/", response_model=KnowledgeBasesPublic)
 def read_knowledge_bases(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100, show_all: bool = False
 ) -> Any:
     """
     Retrieve knowledge bases with additional metadata: Number of Sources, Date Created, and Date Modified.
@@ -337,7 +337,7 @@ def read_knowledge_bases(
     )
 
     # Apply filters based on user permissions
-    if current_user.is_superuser:
+    if show_all or current_user.is_superuser:
         count_statement = select(func.count()).select_from(KnowledgeBase)
         count = session.exec(count_statement).one()
         query = query.offset(skip).limit(limit)
