@@ -50,6 +50,9 @@ export const addAsianTranslations = (resources: any) => {
         emailPlaceholder: "輸入您的電子郵件地址",
         passwordPlaceholder: "輸入您的密碼",
       },
+      dropdowns: {
+        selectKnowledgeBase: "選擇知識庫...",
+      },
       chatbot: {
         placeholder: "在此輸入您的訊息...",
         send: "發送",
@@ -416,6 +419,9 @@ export const addAsianTranslations = (resources: any) => {
         optional: "ทางเลือก",
         emailPlaceholder: "ใส่ที่อยู่อีเมลของคุณ",
         passwordPlaceholder: "ใส่รหัสผ่านของคุณ",
+      },
+      dropdowns: {
+        selectKnowledgeBase: "เลือกฐานความรู้...",
       },
       chatbot: {
         placeholder: "พิมพ์ข้อความของคุณที่นี่...",
@@ -784,6 +790,9 @@ export const addAsianTranslations = (resources: any) => {
         emailPlaceholder: "Nhập địa chỉ email của bạn",
         passwordPlaceholder: "Nhập mật khẩu của bạn",
       },
+      dropdowns: {
+        selectKnowledgeBase: "Chọn Cơ sở Tri thức...",
+      },
       chatbot: {
         placeholder: "Nhập tin nhắn của bạn ở đây...",
         send: "Gửi",
@@ -1150,6 +1159,9 @@ export const addAsianTranslations = (resources: any) => {
         optional: "Opsional",
         emailPlaceholder: "Masukkan alamat email Anda",
         passwordPlaceholder: "Masukkan kata sandi Anda",
+      },
+      dropdowns: {
+        selectKnowledgeBase: "Pilih Basis Pengetahuan...",
       },
       chatbot: {
         placeholder: "Ketik pesan Anda di sini...",
@@ -1518,6 +1530,9 @@ export const addAsianTranslations = (resources: any) => {
         emailPlaceholder: "Masukkan alamat e-mel anda",
         passwordPlaceholder: "Masukkan kata laluan anda",
       },
+      dropdowns: {
+        selectKnowledgeBase: "Pilih Pangkalan Pengetahuan...",
+      },
       chatbot: {
         placeholder: "Taip mesej anda di sini...",
         send: "Hantar",
@@ -1884,6 +1899,9 @@ export const addAsianTranslations = (resources: any) => {
         optional: "Opsyonal",
         emailPlaceholder: "Ilagay ang inyong email address",
         passwordPlaceholder: "Ilagay ang inyong password",
+      },
+      dropdowns: {
+        selectKnowledgeBase: "Pumili ng Knowledge Base...",
       },
       chatbot: {
         placeholder: "Mag-type ng inyong mensahe dito...",
@@ -2505,7 +2523,7 @@ export const addAsianTranslations = (resources: any) => {
   }
 
   // Add Knowledge Bases translations for Asian languages
-  
+
   // Chinese Traditional
   if (!resources["zh-TW"].common.knowledgeBases) {
     resources["zh-TW"].common.knowledgeBases = {

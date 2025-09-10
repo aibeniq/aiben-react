@@ -9,7 +9,7 @@ import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import HelpTooltip from "@/components/ui/help-tooltip"
 import useCustomToast from "@/hooks/useCustomToast"
-import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
+import { useAllKnowledgeBases } from "@/hooks/useAllKnowledgeBases"
 import {
   Accordion,
   Box,
@@ -59,7 +59,7 @@ const ReportGenie = () => {
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     generateInputs?.selectedKnowledgeBase || null,
   )
-  const { knowledgeBases } = useKnowledgeBases()
+  const { knowledgeBases } = useAllKnowledgeBases() // Show all users' knowledge bases in dropdown
 
   // Outline content state
   const [sections, setSections] = useState(generateInputs?.sections || "")

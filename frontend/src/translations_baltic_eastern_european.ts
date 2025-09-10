@@ -50,6 +50,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         emailPlaceholder: "Sisesta oma e-posti aadress",
         passwordPlaceholder: "Sisesta oma parool",
       },
+      dropdowns: {
+        selectKnowledgeBase: "Vali teadmusbaas...",
+      },
       chatbot: {
         placeholder: "Kirjuta oma sõnum siia...",
         send: "Saada",
@@ -416,6 +419,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         optional: "Neobligāts",
         emailPlaceholder: "Ievadiet savu e-pasta adresi",
         passwordPlaceholder: "Ievadiet savu paroli",
+      },
+      dropdowns: {
+        selectKnowledgeBase: "Izvēlieties zināšanu bāzi...",
       },
       chatbot: {
         placeholder: "Ierakstiet savu ziņu šeit...",
@@ -784,6 +790,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         emailPlaceholder: "Įveskite savo el. pašto adresą",
         passwordPlaceholder: "Įveskite savo slaptažodį",
       },
+      dropdowns: {
+        selectKnowledgeBase: "Pasirinkite žinių bazę...",
+      },
       chatbot: {
         placeholder: "Įrašykite savo žinutę čia...",
         send: "Siųsti",
@@ -1150,6 +1159,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         optional: "Προαιρετικό",
         emailPlaceholder: "Εισάγετε τη διεύθυνση email σας",
         passwordPlaceholder: "Εισάγετε τον κωδικό σας",
+      },
+      dropdowns: {
+        selectKnowledgeBase: "Επιλέξτε Βάση Γνώσεων...",
       },
       chatbot: {
         placeholder: "Γράψτε το μήνυμά σας εδώ...",
@@ -1671,7 +1683,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
   }
 
   // Add Knowledge Bases translations for Baltic and Eastern European languages
-  
+
   // Estonian
   if (!resources.et.common.knowledgeBases) {
     resources.et.common.knowledgeBases = {
@@ -1851,7 +1863,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         fields: "välja",
         fields_one: "väli",
         documents: "dokumenti",
-        documents_one: "dokument", 
+        documents_one: "dokument",
         digitized: "digiteeritud",
         handwritten: "käsitsi kirjutatud"
       },
@@ -1898,7 +1910,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       emptyMessages: {
         review: "Nav pārskata vēstures",
         generate: "Nav ģenerēšanas vēstures",
-        compare: "Nav salīdzināšanas vēstures", 
+        compare: "Nav salīdzināšanas vēstures",
         match: "Nav saskaņošanas vēstures"
       },
       deleteConfirmation: "Vai esat pārliecināts, ka vēlaties dzēst šo vienumu?",
@@ -1954,7 +1966,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         questions: "pytania",
         questions_one: "pytanie",
         fields: "pola",
-        fields_one: "pole", 
+        fields_one: "pole",
         documents: "dokumenty",
         documents_one: "dokument",
         digitized: "zdigitalizowany",

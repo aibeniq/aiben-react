@@ -50,6 +50,9 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         emailPlaceholder: 'הזן את כתובת הדוא"ל שלך',
         passwordPlaceholder: "הזן את הסיסמה שלך",
       },
+      dropdowns: {
+        selectKnowledgeBase: "בחר בסיס ידע...",
+      },
       chatbot: {
         placeholder: "הקלד את ההודעה שלך כאן...",
         send: "שלח",
@@ -416,6 +419,9 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         optional: "اختیاری",
         emailPlaceholder: "آدرس ایمیل خود را وارد کنید",
         passwordPlaceholder: "رمز عبور خود را وارد کنید",
+      },
+      dropdowns: {
+        selectKnowledgeBase: "پایگاه دانش را انتخاب کنید...",
       },
       chatbot: {
         placeholder: "پیام خود را اینجا بنویسید...",
@@ -784,6 +790,9 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         emailPlaceholder: "E-posta adresinizi girin",
         passwordPlaceholder: "Şifrenizi girin",
       },
+      dropdowns: {
+        selectKnowledgeBase: "Bilgi Bankası Seç...",
+      },
       chatbot: {
         placeholder: "Mesajınızı buraya yazın...",
         send: "Gönder",
@@ -1150,6 +1159,9 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         optional: "Si Lazima",
         emailPlaceholder: "Ingiza anwani yako ya barua pepe",
         passwordPlaceholder: "Ingiza nenosiri lako",
+      },
+      dropdowns: {
+        selectKnowledgeBase: "Chagua Msingi wa Maarifa...",
       },
       chatbot: {
         placeholder: "Andika ujumbe wako hapa...",
@@ -1518,6 +1530,9 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         emailPlaceholder: "Digite seu endereço de e-mail",
         passwordPlaceholder: "Digite sua senha",
       },
+      dropdowns: {
+        selectKnowledgeBase: "Selecione uma Base de Conhecimento...",
+      },
       chatbot: {
         placeholder: "Digite sua mensagem aqui...",
         send: "Enviar",
@@ -1884,6 +1899,9 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         optional: "Opcional",
         emailPlaceholder: "Ingresa tu dirección de correo",
         passwordPlaceholder: "Ingresa tu contraseña",
+      },
+      dropdowns: {
+        selectKnowledgeBase: "Selecciona una Base de Conocimiento...",
       },
       chatbot: {
         placeholder: "Escribe tu mensaje aquí...",
@@ -2505,7 +2523,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
   }
 
   // Add Knowledge Bases translations for Middle Eastern and Other languages
-  
+
   // Hebrew
   if (!resources.he.common.knowledgeBases) {
     resources.he.common.knowledgeBases = {
@@ -2941,7 +2959,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         questions_one: "pregunta",
         fields: "campos",
         fields_one: "campo",
-        documents: "documentos", 
+        documents: "documentos",
         documents_one: "documento",
         digitized: "digitalizado",
         handwritten: "manuscrito"
