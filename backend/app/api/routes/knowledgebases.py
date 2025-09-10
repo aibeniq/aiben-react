@@ -374,6 +374,7 @@ def read_knowledge_bases(
             description=kb.KnowledgeBase.description,
             files=[],  # Files can be populated separately if needed
             number_of_sources=kb.number_of_sources,
+            total_pages=kb.KnowledgeBase.total_pages,
             date_created=kb.date_created,
             date_modified=kb.date_modified,
             embedding_model_id=kb.KnowledgeBase.embedding_model_id,
@@ -603,6 +604,9 @@ async def create_knowledge_base(
             file=file,
         )
 
+    # Recalculate total pages for the knowledge base
+    KnowledgeBaseService.recalculate_total_pages(session, knowledge_base.id)
+
     session.commit()
     session.refresh(knowledge_base)
     return knowledge_base
@@ -764,6 +768,10 @@ def update_knowledge_base(
 
     # Update the date_modified field
     knowledge_base.date_modified = datetime.utcnow()
+
+    # Recalculate total pages if files were added or removed
+    if files or knowledge_base_in.removed_file_ids:
+        KnowledgeBaseService.recalculate_total_pages(session, knowledge_base.id)
 
     session.add(knowledge_base)
 

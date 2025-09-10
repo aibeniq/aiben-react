@@ -61,6 +61,10 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         typing: "AI kirjutab...",
         error: "Vabandust, midagi läks valesti. Proovi uuesti.",
         welcome: "Tere! Kuidas saan teid täna aidata?",
+        knowledgeBaseTableName: "Nimi",
+        knowledgeBaseTableDescription: "Kirjeldus",
+        knowledgeBaseTableSources: "Allikad",
+        knowledgeBaseTablePages: "Leheküljed",
       },
       settings: {
         title: "Seaded",
@@ -431,6 +435,10 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         typing: "AI raksta...",
         error: "Atvainojiet, kaut kas nogāja greizi. Mēģiniet vēlreiz.",
         welcome: "Sveiki! Kā es varu jums palīdzēt šodien?",
+        knowledgeBaseTableName: "Nosaukums",
+        knowledgeBaseTableDescription: "Apraksts",
+        knowledgeBaseTableSources: "Avoti",
+        knowledgeBaseTablePages: "Lapas",
       },
       settings: {
         title: "Iestatījumi",
@@ -801,6 +809,10 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         typing: "AI rašo...",
         error: "Atsiprašome, kažkas nutiko. Bandykite dar kartą.",
         welcome: "Sveiki! Kaip galiu jums šiandien padėti?",
+        knowledgeBaseTableName: "Pavadinimas",
+        knowledgeBaseTableDescription: "Aprašymas",
+        knowledgeBaseTableSources: "Šaltiniai",
+        knowledgeBaseTablePages: "Puslapiai",
       },
       settings: {
         title: "Nustatymai",
@@ -1171,6 +1183,10 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         typing: "Το AI γράφει...",
         error: "Συγγνώμη, κάτι πήγε στραβά. Δοκιμάστε ξανά.",
         welcome: "Γεια σας! Πώς μπορώ να σας βοηθήσω σήμερα;",
+        knowledgeBaseTableName: "Όνομα",
+        knowledgeBaseTableDescription: "Περιγραφή",
+        knowledgeBaseTableSources: "Πηγές",
+        knowledgeBaseTablePages: "Σελίδες",
       },
       settings: {
         title: "Ρυθμίσεις",

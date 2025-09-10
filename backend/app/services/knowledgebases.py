@@ -3,7 +3,7 @@ import uuid
 import hashlib
 from fastapi import UploadFile
 from sqlmodel import select, Session, delete
-from app.models import Source, SourceData, EmbeddingModel
+from app.models import Source, SourceData, EmbeddingModel, KnowledgeBase
 from app.api.deps import CurrentUser
 from io import BytesIO
 import zipfile
@@ -31,10 +31,15 @@ class KnowledgeBaseService:
             knowledge_base_id: ID of parent knowledge base
             file: Uploaded file
         """
+        from app.services.page_counter import PageCounter
+        
         # file.file.seek(0)
         file_content = file.file.read()
 
         file_hash = hashlib.sha256(file_content).hexdigest()
+
+        # COUNT PAGES FOR THIS FILE
+        page_count = PageCounter.count_pages_from_bytes(file_content, file.filename)
 
         # Check if this file hash already exists
         existing_source_data = session.exec(
@@ -48,6 +53,7 @@ class KnowledgeBaseService:
                 owner_id=current_user.id,
                 name=file.filename,
                 knowledge_base_id=knowledge_base_id,
+                page_count=page_count,
             )
             session.add(source)
         else:
@@ -72,10 +78,27 @@ class KnowledgeBaseService:
                 owner_id=current_user.id,
                 name=file.filename,
                 knowledge_base_id=knowledge_base_id,
+                page_count=page_count,
             )
             session.add(source)
 
         file.file.seek(0)
+
+    @staticmethod
+    def recalculate_total_pages(session: Session, knowledge_base_id: uuid.UUID) -> None:
+        """Recalculate total pages for a knowledge base."""
+        from sqlalchemy.sql import func
+        
+        total_pages = session.exec(
+            select(func.sum(Source.page_count)).where(
+                Source.knowledge_base_id == knowledge_base_id
+            )
+        ).one() or 0
+        
+        kb = session.get(KnowledgeBase, knowledge_base_id)
+        if kb:
+            kb.total_pages = total_pages
+            session.add(kb)
 
     @staticmethod
     def get_source_by_id(session: Session, source_id: uuid.UUID) -> Source | None:

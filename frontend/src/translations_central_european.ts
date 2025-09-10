@@ -58,6 +58,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "AI píše...",
         error: "Omlouváme se, něco se pokazilo. Zkuste to znovu.",
         welcome: "Ahoj! Jak vám dnes mohu pomoci?",
+        knowledgeBaseTableName: "Název",
+        knowledgeBaseTableDescription: "Popis",
+        knowledgeBaseTableSources: "Zdroje",
+        knowledgeBaseTablePages: "Stránky",
       },
       settings: {
         title: "Nastavení",
@@ -430,6 +434,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "AI píše...",
         error: "Ospravedlňujeme sa, niečo sa pokazilo. Skúste to znovu.",
         welcome: "Ahoj! Ako vám dnes môžem pomôcť?",
+        knowledgeBaseTableName: "Názov",
+        knowledgeBaseTableDescription: "Popis",
+        knowledgeBaseTableSources: "Zdroje",
+        knowledgeBaseTablePages: "Stránky",
       },
       settings: {
         title: "Nastavenia",
@@ -799,6 +807,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "Az AI gépel...",
         error: "Sajnáljuk, valami hiba történt. Próbálja újra.",
         welcome: "Üdvözöljük! Hogyan segíthetek ma?",
+        knowledgeBaseTableName: "Név",
+        knowledgeBaseTableDescription: "Leírás",
+        knowledgeBaseTableSources: "Források",
+        knowledgeBaseTablePages: "Oldalak",
       },
       settings: {
         title: "Beállítások",
@@ -1168,6 +1180,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "AI scrie...",
         error: "Ne pare rău, ceva a mers prost. Încercați din nou.",
         welcome: "Salut! Cum vă pot ajuta astăzi?",
+        knowledgeBaseTableName: "Nume",
+        knowledgeBaseTableDescription: "Descriere",
+        knowledgeBaseTableSources: "Surse",
+        knowledgeBaseTablePages: "Pagini",
       },
       settings: {
         title: "Setări",
@@ -1535,6 +1551,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "ИИ пише...",
         error: "Съжаляваме, нещо се обърка. Опитайте отново.",
         welcome: "Здравейте! Как мога да ви помогна днес?",
+        knowledgeBaseTableName: "Име",
+        knowledgeBaseTableDescription: "Описание",
+        knowledgeBaseTableSources: "Източници",
+        knowledgeBaseTablePages: "Страници",
       },
       settings: {
         title: "Настройки",
@@ -1902,6 +1922,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "AI piše...",
         error: "Žao nam je, nešto je pošlo po zlu. Pokušajte ponovno.",
         welcome: "Pozdrav! Kako vam mogu pomoći danas?",
+        knowledgeBaseTableName: "Naziv",
+        knowledgeBaseTableDescription: "Opis",
+        knowledgeBaseTableSources: "Izvori",
+        knowledgeBaseTablePages: "Stranice",
       },
       settings: {
         title: "Postavke",
@@ -2269,6 +2293,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "АИ куца...",
         error: "Жао нам је, нешто је пошло по злу. Покушајте поново.",
         welcome: "Здраво! Како могу да вам помогнем данас?",
+        knowledgeBaseTableName: "Назив",
+        knowledgeBaseTableDescription: "Опис",
+        knowledgeBaseTableSources: "Извори",
+        knowledgeBaseTablePages: "Странице",
       },
       settings: {
         title: "Подешавања",
@@ -2636,6 +2664,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "AI tipka...",
         error: "Oprostite, nekaj je šlo narobe. Poskusite znova.",
         welcome: "Pozdravljeni! Kako vam lahko danes pomagam?",
+        knowledgeBaseTableName: "Ime",
+        knowledgeBaseTableDescription: "Opis",
+        knowledgeBaseTableSources: "Viri",
+        knowledgeBaseTablePages: "Strani",
       },
       settings: {
         title: "Nastavitve",
@@ -3348,7 +3380,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
   }
 
   // Add Knowledge Bases translations for Central European languages
-  
+
   // Czech
   if (!resources.cs.common.knowledgeBases) {
     resources.cs.common.knowledgeBases = {
@@ -3683,7 +3715,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       tabs: {
         review: "Überprüfen",
         generate: "Generieren",
-        compare: "Vergleichen", 
+        compare: "Vergleichen",
         match: "Zuordnen"
       },
       metadata: {
@@ -3723,7 +3755,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       metadata: {
         questions: "questions",
-        questions_one: "question", 
+        questions_one: "question",
         fields: "champs",
         fields_one: "champ",
         documents: "documents",
@@ -3796,7 +3828,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         questions_one: "pregunta",
         fields: "campos",
         fields_one: "campo",
-        documents: "documentos", 
+        documents: "documentos",
         documents_one: "documento",
         digitized: "digitalizado",
         handwritten: "manuscrito"
@@ -3878,7 +3910,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       emptyMessages: {
         review: "Nog geen beoordelingsgeschiedenis",
-        generate: "Nog geen genereringsgeschiedenis", 
+        generate: "Nog geen genereringsgeschiedenis",
         compare: "Nog geen vergelijkingsgeschiedenis",
         match: "Nog geen matchgeschiedenis"
       },
@@ -3963,7 +3995,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       tabs: {
         review: "Kontrola",
         generate: "Generovanie",
-        compare: "Porovnanie", 
+        compare: "Porovnanie",
         match: "Zhoda"
       },
       metadata: {
