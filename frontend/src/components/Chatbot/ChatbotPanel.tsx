@@ -1,14 +1,13 @@
-import { KnowledgeBasesService } from "@/client"
 import ChatMessages from "@/components/Chatbot/ChatMessages"
 import InputArea from "@/components/Chatbot/InputArea"
 import KnowledgeBaseTable from "@/components/Common/KnowledgeBaseTable"
 import SelectionModal from "@/components/Common/SelectionModal"
 import { Box, Button, HStack, Icon, Show, Text } from "@chakra-ui/react"
-import { useQuery } from "@tanstack/react-query"
 import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { FiTrash } from "react-icons/fi"
 import { Radio, RadioGroup } from "../ui/radio"
+import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
 
 interface ChatMessage {
   role: "user" | "assistant"
@@ -43,7 +42,7 @@ interface ChatbotPanelProps {
 }
 
 const ChatbotPanel = ({
-  isOpen,
+  isOpen: _isOpen,
   messages,
   question,
   setQuestion,
@@ -63,19 +62,7 @@ const ChatbotPanel = ({
   setSearchMode,
 }: ChatbotPanelProps) => {
   const { t } = useTranslation()
-
-  // Get knowledge bases
-  const { data: knowledgeBases = [] } = useQuery({
-    queryKey: ["knowledge-bases"],
-    queryFn: async () => {
-      const response = await KnowledgeBasesService.readKnowledgeBases({
-        skip: 0,
-        limit: 100,
-      })
-      return response.data || []
-    },
-    enabled: isOpen,
-  })
+  const { knowledgeBases } = useKnowledgeBases()
 
   // Scroll to bottom whenever messages change
   useEffect(() => {

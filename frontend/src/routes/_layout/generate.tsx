@@ -1,6 +1,5 @@
 import {
   type KnowledgeBasePublic,
-  KnowledgeBasesService,
   type ReportGenieOutline,
   ReportgenieService,
 } from "@/client"
@@ -10,6 +9,7 @@ import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import HelpTooltip from "@/components/ui/help-tooltip"
 import useCustomToast from "@/hooks/useCustomToast"
+import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
 import {
   Accordion,
   Box,
@@ -59,7 +59,7 @@ const ReportGenie = () => {
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     generateInputs?.selectedKnowledgeBase || null,
   )
-  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
+  const { knowledgeBases } = useKnowledgeBases()
 
   // Outline content state
   const [sections, setSections] = useState(generateInputs?.sections || "")
@@ -294,22 +294,8 @@ const ReportGenie = () => {
     return source
   }
 
-  // Fetch knowledge bases on component mount
+  // Fetch outlines on component mount
   useEffect(() => {
-    const fetchKnowledgeBases = async () => {
-      try {
-        const response = await KnowledgeBasesService.readKnowledgeBases({
-          skip: 0,
-          limit: 100,
-        })
-        setKnowledgeBases(response.data || [])
-      } catch (error) {
-        console.error("Error fetching knowledge bases:", error)
-        showErrorToast("Failed to fetch knowledge bases")
-      }
-    }
-
-    fetchKnowledgeBases()
     fetchOutlines()
   }, [])
 
