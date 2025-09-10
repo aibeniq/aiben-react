@@ -830,6 +830,7 @@ export type ItemsDeleteItemResponse = Message
 
 export type KnowledgeBasesReadKnowledgeBasesData = {
   limit?: number
+  show_all?: boolean
   skip?: number
 }
 

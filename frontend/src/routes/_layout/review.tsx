@@ -1,6 +1,5 @@
 import {
   type KnowledgeBasePublic,
-  KnowledgeBasesService,
   type VeraDocChecklist,
   VeradocService,
 } from "@/client"
@@ -12,6 +11,7 @@ import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import HelpTooltip from "@/components/ui/help-tooltip"
 import useCustomToast from "@/hooks/useCustomToast"
+import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
 import {
   Accordion,
   Box,
@@ -62,7 +62,7 @@ const VeraDoc = () => {
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     reviewInputs?.selectedKnowledgeBase || null,
   )
-  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBasePublic[]>([])
+  const { knowledgeBases } = useKnowledgeBases()
   const abortControllerRef = useRef<AbortController | null>(null)
   const ongoingRequest = useRef<CancelablePromise<any> | null>(null)
 
@@ -357,22 +357,6 @@ const VeraDoc = () => {
 
     return source
   }
-
-  useEffect(() => {
-    const fetchKnowledgeBases = async () => {
-      try {
-        const response = await KnowledgeBasesService.readKnowledgeBases({
-          skip: 0,
-          limit: 100,
-        })
-        setKnowledgeBases(response.data || [])
-      } catch (error) {
-        console.error("Error fetching knowledge bases:", error)
-      }
-    }
-
-    fetchKnowledgeBases()
-  }, [])
 
   const fetchChecklists = async () => {
     try {
