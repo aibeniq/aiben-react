@@ -16,7 +16,7 @@ export const useAllKnowledgeBases = (): UseAllKnowledgeBasesReturn => {
             )
             const response = await KnowledgeBasesService.readKnowledgeBases({
                 limit: 1000, // Fetch more records
-                show_all: true, // Always show all users' knowledge bases
+                showAll: true, // Always show all users' knowledge bases
             })
             console.log(
                 "✅ ALL-KNOWLEDGE-BASES: Fetch completed, response:",

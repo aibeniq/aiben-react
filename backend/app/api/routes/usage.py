@@ -4,8 +4,10 @@ from calendar import monthrange
 from typing_extensions import TypedDict
 import httpx
 from fastapi import APIRouter, HTTPException
-from app.api.deps import CurrentUser
+from sqlmodel import Session, select, func
+from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
+from app.models import KnowledgeBase
 
 
 class QuotaPeriod(TypedDict):
@@ -19,6 +21,12 @@ class QuotaPeriod(TypedDict):
 class TokenUsageResponse(TypedDict):
     total_tokens: int
     quota_period: QuotaPeriod
+
+
+class PageUsageResponse(TypedDict):
+    total_pages: int
+    max_pages: int
+    percentage: float
 
 
 router = APIRouter(prefix="/usage", tags=["usage"])
@@ -213,3 +221,39 @@ async def get_token_usage(
 
     except httpx.RequestError as e:
         raise HTTPException(status_code=500, detail="Failed to connect to OpenAI API")
+
+
+@router.get("/page-usage")
+async def get_page_usage(
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> PageUsageResponse:
+    """
+    Get the total page count across all knowledge bases and calculate usage percentage.
+    The maximum is set to 5,000 pages as specified.
+    """
+    try:
+        # Get the sum of all total_pages across all knowledge bases
+        total_pages_result = session.exec(
+            select(func.sum(KnowledgeBase.total_pages))
+        ).one()
+        
+        total_pages = total_pages_result or 0
+        max_pages = 5000  # As specified in the requirements
+        percentage = min((total_pages / max_pages) * 100, 100) if max_pages > 0 else 0
+        
+        print(f"=== PAGE USAGE CALCULATION ===")
+        print(f"Total pages across all knowledge bases: {total_pages:,}")
+        print(f"Max pages allowed: {max_pages:,}")
+        print(f"Usage percentage: {percentage:.2f}%")
+        print(f"===========================")
+        
+        return PageUsageResponse(
+            total_pages=total_pages,
+            max_pages=max_pages,
+            percentage=percentage
+        )
+        
+    except Exception as e:
+        print(f"Error calculating page usage: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to calculate page usage")

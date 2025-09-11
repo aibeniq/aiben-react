@@ -473,6 +473,8 @@ const generateAllLanguageResources = () => {
         title: "Usage",
         currentPeriod: "Current period:",
         usedOfQuota: "used of your monthly quota",
+        knowledgeBasePages: "Knowledge Base Pages",
+        pagesCount: "pages",
       },
       compare: {
         title: "Compare Documents",
@@ -1053,6 +1055,8 @@ const generateAllLanguageResources = () => {
         title: "Uso",
         currentPeriod: "Período actual:",
         usedOfQuota: "usado de tu cuota mensual",
+        knowledgeBasePages: "Páginas de Bases de Conocimiento",
+        pagesCount: "páginas",
       },
       compare: {
         title: "Comparar Documentos",
@@ -1725,6 +1729,8 @@ const generateAllLanguageResources = () => {
         title: "Utilisation",
         currentPeriod: "Période actuelle :",
         usedOfQuota: "utilisé de votre quota mensuel",
+        knowledgeBasePages: "Pages de Bases de Connaissances",
+        pagesCount: "pages",
       },
       compare: {
         title: "Comparer les Documents",
@@ -2397,6 +2403,8 @@ const generateAllLanguageResources = () => {
         title: "Nutzung",
         currentPeriod: "Aktueller Zeitraum:",
         usedOfQuota: "von Ihrem monatlichen Kontingent verbraucht",
+        knowledgeBasePages: "Wissensbasis-Seiten",
+        pagesCount: "Seiten",
       },
       compare: {
         title: "Dokumente Vergleichen",
@@ -2979,6 +2987,8 @@ const generateAllLanguageResources = () => {
         title: "Utilizzo",
         currentPeriod: "Periodo corrente:",
         usedOfQuota: "utilizzato della tua quota mensile",
+        knowledgeBasePages: "Pagine delle Basi di Conoscenza",
+        pagesCount: "pagine",
       },
       compare: {
         title: "Confronta Documenti",
@@ -3523,6 +3533,8 @@ const generateAllLanguageResources = () => {
         title: "Uso",
         currentPeriod: "Período atual:",
         usedOfQuota: "usado da sua cota mensal",
+        knowledgeBasePages: "Páginas de Bases de Conhecimento",
+        pagesCount: "páginas",
       },
       compare: {
         title: "Comparar Documentos",
@@ -4030,6 +4042,8 @@ const generateAllLanguageResources = () => {
         title: "Использование",
         currentPeriod: "Текущий период:",
         usedOfQuota: "использовано из вашей месячной квоты",
+        knowledgeBasePages: "Страницы Баз Знаний",
+        pagesCount: "страниц",
       },
       compare: {
         title: "Сравнить Документы",
@@ -4384,6 +4398,21 @@ const generateAllLanguageResources = () => {
         security: "安全",
         changePassword: "更改密码",
         appearance: "外观",
+        // Password section
+        currentPassword: "当前密码",
+        newPassword: "新密码",
+        confirmPassword: "确认密码",
+        save: "保存",
+        // Appearance section
+        system: "系统",
+        lightMode: "浅色模式",
+        darkMode: "深色模式",
+        // Danger Zone section
+        deleteAccountDescription: "永久删除您的数据和与您账户相关的所有内容。",
+        delete: "删除",
+        confirmationRequired: "需要确认",
+        deleteConfirmationText: "您的所有账户数据将被永久删除。如果您确定，请点击\"确认\"继续。此操作无法撤销。",
+        cancel: "取消"
       },
       errors: {
         somethingWentWrong: "出了点问题",
@@ -4564,6 +4593,8 @@ const generateAllLanguageResources = () => {
         title: "使用情况",
         currentPeriod: "当前周期：",
         usedOfQuota: "已使用您的月度配额",
+        knowledgeBasePages: "知识库页面",
+        pagesCount: "页面",
       },
       compare: {
         title: "比较文档",
@@ -4818,6 +4849,21 @@ const generateAllLanguageResources = () => {
         security: "セキュリティ",
         changePassword: "パスワード変更",
         appearance: "外観",
+        // Password section
+        currentPassword: "現在のパスワード",
+        newPassword: "新しいパスワード",
+        confirmPassword: "パスワードを確認",
+        save: "保存",
+        // Appearance section
+        system: "システム",
+        lightMode: "ライトモード",
+        darkMode: "ダークモード",
+        // Danger Zone section
+        deleteAccountDescription: "あなたのデータとアカウントに関連するすべてを完全に削除します。",
+        delete: "削除",
+        confirmationRequired: "確認が必要",
+        deleteConfirmationText: "すべてのアカウントデータが完全に削除されます。確実な場合は、「確認」をクリックして続行してください。この操作は元に戻せません。",
+        cancel: "キャンセル"
       },
       errors: {
         somethingWentWrong: "何かが間違っています",
@@ -4853,6 +4899,8 @@ const generateAllLanguageResources = () => {
         title: "使用状況",
         currentPeriod: "現在の期間：",
         usedOfQuota: "月間クォータの使用量",
+        knowledgeBasePages: "ナレッジベースページ",
+        pagesCount: "ページ",
       },
       modelSelection: {
         llmManagement: "LLM管理",
@@ -5215,6 +5263,21 @@ const generateAllLanguageResources = () => {
         security: "Безпека",
         changePassword: "Змінити пароль",
         appearance: "Зовнішній вигляд",
+        // Password section
+        currentPassword: "Поточний пароль",
+        newPassword: "Новий пароль",
+        confirmPassword: "Підтвердити пароль",
+        save: "Зберегти",
+        // Appearance section
+        system: "Система",
+        lightMode: "Світлий режим",
+        darkMode: "Темний режим",
+        // Danger Zone section
+        deleteAccountDescription: "Назавжди видалити ваші дані та все, що пов'язано з вашим обліковим записом.",
+        delete: "Видалити",
+        confirmationRequired: "Потрібно підтвердження",
+        deleteConfirmationText: "Усі дані вашого облікового запису будуть назавжди видалені. Якщо ви впевнені, натисніть \"Підтвердити\", щоб продовжити. Цю дію неможливо скасувати.",
+        cancel: "Скасувати"
       },
       errors: {
         somethingWentWrong: "Щось пішло не так",
@@ -5250,6 +5313,8 @@ const generateAllLanguageResources = () => {
         title: "Використання",
         currentPeriod: "Поточний період:",
         usedOfQuota: "використано з вашої місячної квоти",
+        knowledgeBasePages: "Сторінки Бази Знань",
+        pagesCount: "сторінок",
       },
       modelSelection: {
         llmManagement: "Управління LLM",
@@ -5612,6 +5677,21 @@ const generateAllLanguageResources = () => {
         security: "Bezpieczeństwo",
         changePassword: "Zmień hasło",
         appearance: "Wygląd",
+        // Password section
+        currentPassword: "Obecne hasło",
+        newPassword: "Nowe hasło",
+        confirmPassword: "Potwierdź hasło",
+        save: "Zapisz",
+        // Appearance section
+        system: "System",
+        lightMode: "Tryb jasny",
+        darkMode: "Tryb ciemny",
+        // Danger Zone section
+        deleteAccountDescription: "Trwale usuń swoje dane i wszystko, co jest związane z Twoim kontem.",
+        delete: "Usuń",
+        confirmationRequired: "Wymagane potwierdzenie",
+        deleteConfirmationText: "Wszystkie dane Twojego konta zostaną trwale usunięte. Jeśli jesteś pewien, kliknij \"Potwierdź\", aby kontynuować. Ta akcja nie może być cofnięta.",
+        cancel: "Anuluj"
       },
       errors: {
         somethingWentWrong: "Coś poszło nie tak",
@@ -5647,6 +5727,8 @@ const generateAllLanguageResources = () => {
         title: "Użycie",
         currentPeriod: "Obecny okres:",
         usedOfQuota: "wykorzystano z miesięcznego limitu",
+        knowledgeBasePages: "Strony Baz Wiedzy",
+        pagesCount: "stron",
       },
       review: {
         pageTitle: "Przejrzyj Dokumenty",
@@ -6009,6 +6091,21 @@ const generateAllLanguageResources = () => {
         security: "Beveiliging",
         changePassword: "Wachtwoord wijzigen",
         appearance: "Uiterlijk",
+        // Password section
+        currentPassword: "Huidig wachtwoord",
+        newPassword: "Nieuw wachtwoord",
+        confirmPassword: "Bevestig wachtwoord",
+        save: "Opslaan",
+        // Appearance section
+        system: "Systeem",
+        lightMode: "Lichte modus",
+        darkMode: "Donkere modus",
+        // Danger Zone section
+        deleteAccountDescription: "Uw gegevens en alles wat met uw account is verbonden permanent verwijderen.",
+        delete: "Verwijderen",
+        confirmationRequired: "Bevestiging vereist",
+        deleteConfirmationText: "Al uw accountgegevens worden permanent verwijderd. Als u zeker bent, klik dan op \"Bevestigen\" om door te gaan. Deze actie kan niet ongedaan worden gemaakt.",
+        cancel: "Annuleren"
       },
       errors: {
         somethingWentWrong: "Er is iets misgegaan",
@@ -6044,6 +6141,8 @@ const generateAllLanguageResources = () => {
         title: "Gebruik",
         currentPeriod: "Huidige periode:",
         usedOfQuota: "gebruikt van uw maandelijkse quotum",
+        knowledgeBasePages: "Kennisbank Pagina's",
+        pagesCount: "pagina's",
       },
       review: {
         pageTitle: "Documenten Beoordelen",
@@ -6442,6 +6541,21 @@ const generateAllLanguageResources = () => {
         security: "보안",
         changePassword: "비밀번호 변경",
         appearance: "외관",
+        // Password section
+        currentPassword: "현재 비밀번호",
+        newPassword: "새 비밀번호",
+        confirmPassword: "비밀번호 확인",
+        save: "저장",
+        // Appearance section
+        system: "시스템",
+        lightMode: "라이트 모드",
+        darkMode: "다크 모드",
+        // Danger Zone section
+        deleteAccountDescription: "귀하의 데이터와 계정과 관련된 모든 것을 영구적으로 삭제합니다.",
+        delete: "삭제",
+        confirmationRequired: "확인 필요",
+        deleteConfirmationText: "모든 계정 데이터가 영구적으로 삭제됩니다. 확실하다면 \"확인\"을 클릭하여 계속하세요. 이 작업은 되돌릴 수 없습니다.",
+        cancel: "취소"
       },
       errors: {
         somethingWentWrong: "문제가 발생했습니다",
@@ -6477,6 +6591,8 @@ const generateAllLanguageResources = () => {
         title: "사용량",
         currentPeriod: "현재 기간:",
         usedOfQuota: "월간 할당량 중 사용됨",
+        knowledgeBasePages: "지식 베이스 페이지",
+        pagesCount: "페이지",
       },
       review: {
         pageTitle: "문서 검토",
@@ -6991,6 +7107,21 @@ const generateAllLanguageResources = () => {
         security: "الأمان",
         changePassword: "تغيير كلمة المرور",
         appearance: "المظهر",
+        // Password section
+        currentPassword: "كلمة المرور الحالية",
+        newPassword: "كلمة المرور الجديدة",
+        confirmPassword: "تأكيد كلمة المرور",
+        save: "حفظ",
+        // Appearance section
+        system: "النظام",
+        lightMode: "الوضع الفاتح",
+        darkMode: "الوضع الداكن",
+        // Danger Zone section
+        deleteAccountDescription: "حذف بياناتك وكل ما يرتبط بحسابك نهائياً.",
+        delete: "حذف",
+        confirmationRequired: "مطلوب تأكيد",
+        deleteConfirmationText: "سيتم حذف جميع بيانات حسابك نهائياً. إذا كنت متأكداً، انقر على \"تأكيد\" للمتابعة. لا يمكن التراجع عن هذا الإجراء.",
+        cancel: "إلغاء"
       },
       errors: {
         somethingWentWrong: "حدث خطأ ما",
@@ -7026,6 +7157,8 @@ const generateAllLanguageResources = () => {
         title: "الاستخدام",
         currentPeriod: "الفترة الحالية:",
         usedOfQuota: "مستخدم من حصتك الشهرية",
+        knowledgeBasePages: "صفحات قواعد المعرفة",
+        pagesCount: "صفحات",
       },
       review: {
         pageTitle: "مراجعة المستندات",
@@ -7351,6 +7484,21 @@ const generateAllLanguageResources = () => {
         security: "सुरक्षा",
         changePassword: "पासवर्ड बदलें",
         appearance: "दिखावट",
+        // Password section
+        currentPassword: "वर्तमान पासवर्ड",
+        newPassword: "नया पासवर्ड",
+        confirmPassword: "पासवर्ड की पुष्टि करें",
+        save: "सहेजें",
+        // Appearance section
+        system: "सिस्टम",
+        lightMode: "लाइट मोड",
+        darkMode: "डार्क मोड",
+        // Danger Zone section
+        deleteAccountDescription: "अपना डेटा और अपने खाते से जुड़ी हर चीज़ को स्थायी रूप से हटा दें।",
+        delete: "हटाएं",
+        confirmationRequired: "पुष्टि आवश्यक",
+        deleteConfirmationText: "आपके सभी खाता डेटा स्थायी रूप से हटा दिया जाएगा। यदि आप सुनिश्चित हैं, तो जारी रखने के लिए \"पुष्टि करें\" पर क्लिक करें। इस क्रिया को पूर्ववत नहीं किया जा सकता।",
+        cancel: "रद्द करें"
       },
       errors: {
         somethingWentWrong: "कुछ गलत हुआ",
@@ -7386,6 +7534,8 @@ const generateAllLanguageResources = () => {
         title: "उपयोग",
         currentPeriod: "वर्तमान अवधि:",
         usedOfQuota: "आपके मासिक कोटे का उपयोग किया गया",
+        knowledgeBasePages: "ज्ञान आधार पृष्ठ",
+        pagesCount: "पृष्ठ",
       },
       review: {
         pageTitle: "दस्तावेज़ समीक्षा",

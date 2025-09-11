@@ -37,8 +37,21 @@ function UsageStats() {
     refetchInterval: 5 * 60 * 1000, // refetch every 5 minutes
   })
 
+  const {
+    data: pageUsageData,
+    isLoading: isPageLoading,
+    error: pageError,
+    refetch: refetchPageUsage,
+    isFetching: isPageFetching,
+  } = useQuery({
+    queryKey: ["usage", "page-usage"],
+    queryFn: () => UsageService.getPageUsage(),
+    refetchInterval: 5 * 60 * 1000, // refetch every 5 minutes
+  })
+
   const handleRefresh = () => {
     refetch()
+    refetchPageUsage()
   }
 
   const formatDate = (date: Date) => {
@@ -49,7 +62,7 @@ function UsageStats() {
     })
   }
 
-  if (error) {
+  if (error || pageError) {
     return (
       <Alert.Root status="error">
         <Alert.Indicator />
@@ -62,6 +75,10 @@ function UsageStats() {
   const quotaPeriod = usageData?.quota_period
   const maxTokens = quotaPeriod?.max_tokens || 50_000_000
   const percentage = Math.min((totalTokens / maxTokens) * 100, 100)
+
+  const totalPages = pageUsageData?.total_pages || 0
+  const maxPages = pageUsageData?.max_pages || 5000
+  const pagePercentage = pageUsageData?.percentage || 0
 
   const startDate = quotaPeriod?.start_date ? new Date(quotaPeriod.start_date) : null
   const endDate = quotaPeriod?.end_date ? new Date(quotaPeriod.end_date) : null
@@ -89,13 +106,14 @@ function UsageStats() {
 
       <Card.Root>
         <Card.Body p={8}>
-          {isLoading ? (
+          {isLoading || isPageLoading ? (
             <VStack align="stretch" gap={4}>
               <Skeleton height="6" />
               <Skeleton height="4" width="100px" mx="auto" />
             </VStack>
           ) : (
             <VStack align="stretch" gap={6}>
+              {/* Token Usage Section */}
               <VStack align="stretch" gap={4}>
                 <HStack justify="space-between" align="center">
                   <HStack align="center" gap={1}>
@@ -111,12 +129,34 @@ function UsageStats() {
                     size="sm"
                     variant="ghost"
                     onClick={handleRefresh}
-                    disabled={isFetching}
+                    disabled={isFetching || isPageFetching}
                   >
                     <HiRefresh />
                   </IconButton>
                 </HStack>
                 <Progress.Root value={percentage} size="lg" colorPalette="blue">
+                  <Progress.Track>
+                    <Progress.Range />
+                  </Progress.Track>
+                </Progress.Root>
+              </VStack>
+
+              {/* Knowledge Base Pages Section */}
+              <VStack align="stretch" gap={4}>
+                <HStack justify="space-between" align="center">
+                  <HStack align="center" gap={1}>
+                    <Text fontSize="2xl" fontWeight="bold" color="green.600">
+                      {pagePercentage.toFixed(1)}%
+                    </Text>
+                    <Text fontSize="sm" color="gray.500">
+                      {t("usage.knowledgeBasePages")}
+                    </Text>
+                  </HStack>
+                  <Text fontSize="sm" color="gray.500">
+                    {totalPages.toLocaleString()} / {maxPages.toLocaleString()} {t("usage.pagesCount")}
+                  </Text>
+                </HStack>
+                <Progress.Root value={pagePercentage} size="lg" colorPalette="green">
                   <Progress.Track>
                     <Progress.Range />
                   </Progress.Track>

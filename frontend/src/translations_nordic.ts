@@ -111,6 +111,21 @@ export const addNordicTranslations = (resources: any) => {
         security: "Säkerhet",
         changePassword: "Ändra lösenord",
         appearance: "Utseende",
+        // Password section
+        currentPassword: "Nuvarande lösenord",
+        newPassword: "Nytt lösenord",
+        confirmPassword: "Bekräfta lösenord",
+        save: "Spara",
+        // Appearance section
+        system: "System",
+        lightMode: "Ljust läge",
+        darkMode: "Mörkt läge",
+        // Danger Zone section
+        deleteAccountDescription: "Radera dina data och allt som är associerat med ditt konto permanent.",
+        delete: "Radera",
+        confirmationRequired: "Bekräftelse krävs",
+        deleteConfirmationText: "All din kontoinformation kommer att raderas permanent. Om du är säker, klicka \"Bekräfta\" för att fortsätta. Denna åtgärd kan inte ångras.",
+        cancel: "Avbryt"
       },
       errors: {
         somethingWentWrong: "Något gick fel",
@@ -181,6 +196,8 @@ export const addNordicTranslations = (resources: any) => {
         title: "Användning",
         currentPeriod: "Nuvarande period:",
         usedOfQuota: "Använt av månadskvot",
+        knowledgeBasePages: "Kunskapsbas Sidor",
+        pagesCount: "sidor",
       },
       review: {
         pageTitle: "Granska dokument",
@@ -712,6 +729,21 @@ export const addNordicTranslations = (resources: any) => {
         security: "Sikkerhet",
         changePassword: "Endre passord",
         appearance: "Utseende",
+        // Password section
+        currentPassword: "Nåværende passord",
+        newPassword: "Nytt passord",
+        confirmPassword: "Bekreft passord",
+        save: "Lagre",
+        // Appearance section
+        system: "System",
+        lightMode: "Lys modus",
+        darkMode: "Mørk modus",
+        // Danger Zone section
+        deleteAccountDescription: "Slett dataene dine og alt som er knyttet til kontoen din permanent.",
+        delete: "Slett",
+        confirmationRequired: "Bekreftelse påkrevd",
+        deleteConfirmationText: "All kontoinformasjonen din vil bli slettet permanent. Hvis du er sikker, klikk \"Bekreft\" for å fortsette. Denne handlingen kan ikke angres.",
+        cancel: "Avbryt"
       },
       errors: {
         somethingWentWrong: "Noe gikk galt",
@@ -782,6 +814,8 @@ export const addNordicTranslations = (resources: any) => {
         title: "Bruk",
         currentPeriod: "Nåværende periode:",
         usedOfQuota: "Brukt av månedlig kvote",
+        knowledgeBasePages: "Kunskapsbas Sidor",
+        pagesCount: "sidor",
       },
       review: {
         pageTitle: "Gjennomgå dokumenter",
@@ -1313,6 +1347,21 @@ export const addNordicTranslations = (resources: any) => {
         security: "Sikkerhed",
         changePassword: "Skift adgangskode",
         appearance: "Udseende",
+        // Password section
+        currentPassword: "Nuværende adgangskode",
+        newPassword: "Ny adgangskode",
+        confirmPassword: "Bekræft adgangskode",
+        save: "Gem",
+        // Appearance section
+        system: "System",
+        lightMode: "Lys tilstand",
+        darkMode: "Mørk tilstand",
+        // Danger Zone section
+        deleteAccountDescription: "Slet dine data og alt hvad der er forbundet med din konto permanent.",
+        delete: "Slet",
+        confirmationRequired: "Bekræftelse påkrævet",
+        deleteConfirmationText: "Alle dine kontodata vil blive slettet permanent. Hvis du er sikker, klik \"Bekræft\" for at fortsætte. Denne handling kan ikke fortrydes.",
+        cancel: "Annuller"
       },
       errors: {
         somethingWentWrong: "Noget gik galt",
@@ -1383,6 +1432,8 @@ export const addNordicTranslations = (resources: any) => {
         title: "Forbrug",
         currentPeriod: "Nuværende periode:",
         usedOfQuota: "Brugt af månedlig kvote",
+        knowledgeBasePages: "Kunskapsbas Sidor",
+        pagesCount: "sidor",
       },
       review: {
         pageTitle: "Gennemgå dokumenter",
@@ -1914,6 +1965,21 @@ export const addNordicTranslations = (resources: any) => {
         security: "Turvallisuus",
         changePassword: "Vaihda salasana",
         appearance: "Ulkoasu",
+        // Password section
+        currentPassword: "Nykyinen salasana",
+        newPassword: "Uusi salasana",
+        confirmPassword: "Vahvista salasana",
+        save: "Tallenna",
+        // Appearance section
+        system: "Järjestelmä",
+        lightMode: "Vaalea tila",
+        darkMode: "Tumma tila",
+        // Danger Zone section
+        deleteAccountDescription: "Poista tietosi ja kaikki tilisi kanssa liittyvä pysyvästi.",
+        delete: "Poista",
+        confirmationRequired: "Vahvistus vaaditaan",
+        deleteConfirmationText: "Kaikki tilisi tiedot poistetaan pysyvästi. Jos olet varma, napsauta \"Vahvista\" jatkaaksesi. Tätä toimintoa ei voi peruuttaa.",
+        cancel: "Peruuta"
       },
       errors: {
         somethingWentWrong: "Jotain meni pieleen",
@@ -1984,6 +2050,8 @@ export const addNordicTranslations = (resources: any) => {
         title: "Käyttö",
         currentPeriod: "Nykyinen jakso:",
         usedOfQuota: "Käytetty kuukausikiintiöstä",
+        knowledgeBasePages: "Kunskapsbas Sidor",
+        pagesCount: "sidor",
       },
       review: {
         pageTitle: "Tarkastele asiakirjoja",
