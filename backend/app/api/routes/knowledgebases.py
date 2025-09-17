@@ -289,6 +289,19 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
         ):
             print("Loading DOCX with python-docx library...")
             loaded_documents = extract_text_from_docx(temp_file_path, file.filename)
+        elif (
+            content_type == "text/csv" 
+            or content_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            or content_type == "application/vnd.ms-excel"
+            or file.filename.lower().endswith((".csv", ".xlsx", ".xls"))
+        ):
+            print(f"Loading spreadsheet file with unified document processor...")
+            # Read file content as bytes and use unified processor
+            with open(temp_file_path, 'rb') as f:
+                file_content = f.read()
+            
+            from app.services.document_utils import extract_documents_from_file_unified
+            loaded_documents = extract_documents_from_file_unified(file_content, file.filename)
         else:
             print("Loading text with TextLoader...")
             # Try with different encodings if utf-8 fails
