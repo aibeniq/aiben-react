@@ -436,6 +436,8 @@ const ChecklistModal = ({
                                     [".docx"],
                                   "text/plain": [".txt"],
                                   "text/csv": [".csv"],
+                                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+                                  "application/vnd.ms-excel": [".xls"],
                                   "application/json": [".json"],
                                 }}
                                 maxFiles={5}

@@ -1,12 +1,20 @@
-import { Card, CloseButton, HStack, Heading } from "@chakra-ui/react"
+import { Card, CloseButton, HStack, Heading, Text, Switch } from "@chakra-ui/react"
 import type React from "react"
 import ConfirmButton from "../ui/confirm-button"
+import { Tooltip } from "../ui/tooltip"
+import HelpTooltip from "../ui/help-tooltip"
 
 interface SelectionModalProps {
   isOpen: boolean
   onClose: () => void
   title: string
   children: React.ReactNode
+  // Optional toggle props
+  showToggle?: boolean
+  toggleLabel?: string
+  toggleValue?: boolean
+  onToggleChange?: () => void
+  toggleTooltipContent?: string
 }
 
 const SelectionModal = ({
@@ -14,6 +22,11 @@ const SelectionModal = ({
   onClose,
   title,
   children,
+  showToggle = false,
+  toggleLabel = "",
+  toggleValue = false,
+  onToggleChange,
+  toggleTooltipContent = "",
 }: SelectionModalProps) => {
   if (!isOpen) return null
 
@@ -44,6 +57,35 @@ const SelectionModal = ({
             <Heading size="lg">{title}</Heading>
             <CloseButton size="xl" onClick={onClose} variant="ghost" />
           </HStack>
+          {/* Toggle section */}
+          {showToggle && (
+            <HStack justifyContent="flex-end" mt={2}>
+              <Tooltip content={toggleTooltipContent}>
+                <HStack gap={2}>
+                  <HStack gap={1} align="center">
+                    <Text fontSize="xs" color="gray.500">
+                      {toggleLabel}
+                    </Text>
+                    <HelpTooltip helpKey="allUsersToggle" />
+                  </HStack>
+                  <Switch.Root
+                    key={`switch-${toggleValue}`}
+                    size="sm"
+                    colorPalette="blue"
+                    checked={toggleValue}
+                  >
+                    <Switch.HiddenInput
+                      checked={toggleValue}
+                      onChange={onToggleChange}
+                    />
+                    <Switch.Control data-state={toggleValue ? "checked" : "unchecked"}>
+                      <Switch.Thumb />
+                    </Switch.Control>
+                  </Switch.Root>
+                </HStack>
+              </Tooltip>
+            </HStack>
+          )}
         </Card.Header>
         <Card.Body>{children}</Card.Body>
         <Card.Footer justifyContent="flex-end">

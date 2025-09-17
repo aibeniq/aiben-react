@@ -32,6 +32,7 @@ import {
   DialogTrigger,
 } from "../ui/dialog"
 import { Field } from "../ui/field"
+import { Tooltip } from "../ui/tooltip"
 
 interface EditKnowledgeBaseProps {
   item: KnowledgeBasePublic
@@ -46,6 +47,12 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
   const { t } = useTranslation()
   console.log("KnowledgeBase item:", item)
   console.log("KnowledgeBase item ID:", item.id)
+
+  // Helper function to truncate text with ellipsis
+  const truncateText = (text: string, maxLength: number = 30): string => {
+    if (text.length <= maxLength) return text
+    return text.substring(0, maxLength) + "..."
+  }
 
   const [isOpen, setIsOpen] = useState(false)
   const [formIsValid, setFormIsValid] = useState(false)
@@ -191,6 +198,9 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
       "application/msword": [".doc"],
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
       "application/rtf": [".rtf"],
+      "text/csv": [".csv"],
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+      "application/vnd.ms-excel": [".xls"],
     },
     multiple: true,
   })
@@ -324,27 +334,49 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                   <Box w="full">
                     <Text mb={2}>{t("knowledgeBases.modals.fileUpload.newFiles")}:</Text>
                     <VStack align="start" gap={2}>
-                      {selectedFiles.map((file, index) => (
-                        <HStack key={index} w="full" justify="space-between">
-                          <Link
-                            href={URL.createObjectURL(file)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            color="blue.500"
-                            _hover={{ textDecoration: "underline" }}
-                          >
-                            {file.name}
-                          </Link>
-                          <Box
-                            as="button"
-                            aria-label={t("knowledgeBases.modals.fileUpload.removeFile")}
-                            onClick={() => handleRemoveNewFile(index)}
-                            _hover={{ color: "red.500" }}
-                          >
-                            <FaTrash />
-                          </Box>
-                        </HStack>
-                      ))}
+                      {selectedFiles.map((file, index) => {
+                        const truncatedName = truncateText(file.name)
+                        const needsTooltip = file.name.length > 30
+                        
+                        return (
+                          <HStack key={index} w="full" justify="space-between" minW="0">
+                            <Box flex="1" minW="0">
+                              {needsTooltip ? (
+                                <Tooltip content={file.name} showArrow>
+                                  <Link
+                                    href={URL.createObjectURL(file)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    color="blue.500"
+                                    _hover={{ textDecoration: "underline" }}
+                                  >
+                                    {truncatedName}
+                                  </Link>
+                                </Tooltip>
+                              ) : (
+                                <Link
+                                  href={URL.createObjectURL(file)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  color="blue.500"
+                                  _hover={{ textDecoration: "underline" }}
+                                >
+                                  {file.name}
+                                </Link>
+                              )}
+                            </Box>
+                            <Box
+                              as="button"
+                              aria-label={t("knowledgeBases.modals.fileUpload.removeFile")}
+                              onClick={() => handleRemoveNewFile(index)}
+                              _hover={{ color: "red.500" }}
+                              flexShrink={0}
+                            >
+                              <FaTrash />
+                            </Box>
+                          </HStack>
+                        )
+                      })}
                     </VStack>
                   </Box>
                 )}

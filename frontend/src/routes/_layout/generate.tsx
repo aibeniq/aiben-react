@@ -9,7 +9,7 @@ import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import HelpTooltip from "@/components/ui/help-tooltip"
 import useCustomToast from "@/hooks/useCustomToast"
-import { useAllKnowledgeBases } from "@/hooks/useAllKnowledgeBases"
+import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
 import {
   Accordion,
   Box,
@@ -29,7 +29,7 @@ import { useTranslation } from "react-i18next"
 import { FiCheck, FiCopy, FiDatabase, FiFileText, FiTrash2 } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import KnowledgeBaseTable from "../../components/Common/KnowledgeBaseTable"
+import KnowledgeBaseSelectionModal from "../../components/Common/KnowledgeBaseSelectionModal"
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
 import OutlineTable from "../../components/Generate/OutlineTable"
@@ -59,7 +59,7 @@ const ReportGenie = () => {
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
     generateInputs?.selectedKnowledgeBase || null,
   )
-  const { knowledgeBases } = useAllKnowledgeBases() // Show all users' knowledge bases in dropdown
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases() // Respect All Users toggle state
 
   // Outline content state
   const [sections, setSections] = useState(generateInputs?.sections || "")
@@ -483,17 +483,16 @@ const ReportGenie = () => {
           </VStack>
         </HStack>
 
-        <SelectionModal
+        <KnowledgeBaseSelectionModal
           isOpen={showKnowledgeBaseModal}
           onClose={() => setShowKnowledgeBaseModal(false)}
           title={t("generate.selectKnowledgeBaseTitle")}
-        >
-          <KnowledgeBaseTable
-            knowledgeBases={knowledgeBases}
-            selectedKnowledgeBase={selectedKnowledgeBase}
-            onSelectionChange={setSelectedKnowledgeBase}
-          />
-        </SelectionModal>
+          knowledgeBases={knowledgeBases}
+          selectedKnowledgeBase={selectedKnowledgeBase}
+          onSelectionChange={setSelectedKnowledgeBase}
+          showAllUsers={showAllUsers}
+          toggleShowAllUsers={toggleShowAllUsers}
+        />
 
         <SelectionModal
           isOpen={showOutlineModal}

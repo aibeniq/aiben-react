@@ -165,6 +165,119 @@ def extract_text_from_docx_langchain(file_path: str, filename: str) -> List[Docu
         return [error_doc]
 
 
+def extract_text_from_csv_bytes(file_content: bytes, filename: str) -> str:
+    """
+    Extract text from CSV file content (bytes).
+
+    Args:
+        file_content: Raw bytes of the CSV file
+        filename: Name of the file (for metadata/error reporting)
+
+    Returns:
+        Extracted text content as string
+    """
+    try:
+        import pandas as pd
+        from io import BytesIO
+
+        # Try to read the CSV with different encodings
+        try:
+            # Try UTF-8 first
+            csv_string = file_content.decode('utf-8')
+        except UnicodeDecodeError:
+            try:
+                # Fall back to latin-1
+                csv_string = file_content.decode('latin-1')
+            except UnicodeDecodeError:
+                # Fall back to cp1252 (Windows encoding)
+                csv_string = file_content.decode('cp1252')
+
+        # Read CSV into DataFrame
+        csv_io = BytesIO(csv_string.encode('utf-8'))
+        df = pd.read_csv(csv_io)
+
+        # Convert DataFrame to readable text format
+        text_parts = []
+        
+        # Add column headers
+        text_parts.append("Column Headers:")
+        text_parts.append(" | ".join(df.columns.astype(str)))
+        text_parts.append("")  # Empty line for separation
+        
+        # Add data rows (limit to reasonable number for text extraction)
+        max_rows = min(1000, len(df))  # Limit to 1000 rows for performance
+        text_parts.append(f"Data ({max_rows} of {len(df)} rows):")
+        
+        for index, row in df.head(max_rows).iterrows():
+            row_text = " | ".join(row.astype(str).fillna(""))
+            text_parts.append(row_text)
+
+        # Add summary information
+        text_parts.append("")
+        text_parts.append(f"CSV Summary: {len(df)} rows, {len(df.columns)} columns")
+        
+        return "\n".join(text_parts)
+
+    except Exception as e:
+        print(f"Error extracting text from CSV {filename}: {e}")
+        return f"Failed to extract text from CSV {filename}: {str(e)}"
+
+
+def extract_text_from_xlsx_bytes(file_content: bytes, filename: str) -> str:
+    """
+    Extract text from XLSX file content (bytes).
+
+    Args:
+        file_content: Raw bytes of the XLSX file
+        filename: Name of the file (for metadata/error reporting)
+
+    Returns:
+        Extracted text content as string
+    """
+    try:
+        import pandas as pd
+        from io import BytesIO
+
+        # Read XLSX into DataFrame
+        xlsx_io = BytesIO(file_content)
+        
+        # Read all sheets
+        excel_file = pd.ExcelFile(xlsx_io)
+        text_parts = []
+        
+        text_parts.append(f"Excel file with {len(excel_file.sheet_names)} sheet(s)")
+        text_parts.append("")
+        
+        for sheet_name in excel_file.sheet_names:
+            df = pd.read_excel(xlsx_io, sheet_name=sheet_name)
+            
+            text_parts.append(f"=== Sheet: {sheet_name} ===")
+            
+            # Add column headers
+            text_parts.append("Column Headers:")
+            text_parts.append(" | ".join(df.columns.astype(str)))
+            text_parts.append("")
+            
+            # Add data rows (limit to reasonable number for text extraction)
+            max_rows = min(500, len(df))  # Limit to 500 rows per sheet for performance
+            text_parts.append(f"Data ({max_rows} of {len(df)} rows):")
+            
+            for index, row in df.head(max_rows).iterrows():
+                row_text = " | ".join(row.astype(str).fillna(""))
+                text_parts.append(row_text)
+            
+            # Add summary for this sheet
+            text_parts.append("")
+            text_parts.append(f"Sheet Summary: {len(df)} rows, {len(df.columns)} columns")
+            text_parts.append("")
+        
+        return "\n".join(text_parts)
+
+    except Exception as e:
+        print(f"Error extracting text from XLSX {filename}: {e}")
+        return f"Failed to extract text from XLSX {filename}: {str(e)}"
+
+
 def extract_text_from_file_unified(file_content: bytes, filename: str) -> str:
     """
     Unified file text extraction function that handles multiple file types.
@@ -223,6 +336,14 @@ def extract_text_from_file_unified(file_content: bytes, filename: str) -> str:
                     return file_content.decode("latin-1")
                 except UnicodeDecodeError:
                     return f"Unable to extract text from {filename} - encoding issue"
+
+        elif file_ext == ".csv":
+            # Handle CSV files
+            return extract_text_from_csv_bytes(file_content, filename)
+
+        elif file_ext in [".xlsx", ".xls"]:
+            # Handle Excel files
+            return extract_text_from_xlsx_bytes(file_content, filename)
 
         else:
             # Try to decode as text for unknown file types
@@ -328,6 +449,26 @@ def extract_documents_from_file_unified(
                 Document(
                     page_content=text_content,
                     metadata={"source": filename, "content_type": "text/plain"},
+                )
+            ]
+
+        elif file_ext == ".csv":
+            # Handle CSV files
+            text_content = extract_text_from_csv_bytes(file_content, filename)
+            return [
+                Document(
+                    page_content=text_content,
+                    metadata={"source": filename, "content_type": "text/csv"},
+                )
+            ]
+
+        elif file_ext in [".xlsx", ".xls"]:
+            # Handle Excel files
+            text_content = extract_text_from_xlsx_bytes(file_content, filename)
+            return [
+                Document(
+                    page_content=text_content,
+                    metadata={"source": filename, "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
                 )
             ]
 

@@ -18,7 +18,7 @@ import TopicListTable from "@/components/Compare/TopicListTable"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import useCustomToast from "@/hooks/useCustomToast"
-import { useAllKnowledgeBases } from "@/hooks/useAllKnowledgeBases"
+import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
 import { useResults } from "@/contexts/ResultsContext"
 import { copyToClipboard } from "@/utils/copyToClipboard"
 
@@ -47,7 +47,7 @@ const TwinCheck = () => {
   )
 
   // Knowledge base state (only for topic generation)
-  const { knowledgeBases } = useAllKnowledgeBases() // Show all users' knowledge bases in dropdown
+  const { knowledgeBases } = useKnowledgeBases() // Respect All Users toggle state
 
   // Loading state
   const [loading, setLoading] = useState(false)
@@ -410,6 +410,9 @@ const TwinCheck = () => {
                       "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
                         ".docx",
                       ],
+                      "text/csv": [".csv"],
+                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+                      "application/vnd.ms-excel": [".xls"],
                     }}
                   />
                 </Box>
@@ -425,6 +428,9 @@ const TwinCheck = () => {
                       "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
                         ".docx",
                       ],
+                      "text/csv": [".csv"],
+                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+                      "application/vnd.ms-excel": [".xls"],
                     }}
                   />
                 </Box>
