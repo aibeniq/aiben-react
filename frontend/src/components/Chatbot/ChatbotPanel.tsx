@@ -180,6 +180,7 @@ const ChatbotPanel = ({
               isSendDisabled={!question.trim() || isLoading}
               setShowKnowledgeBaseModal={setShowKnowledgeBaseModal}
               setUploadedFiles={setUploadedFiles}
+              setSelectedKbId={setSelectedKbId}
             />
           </Box>
           <HStack gap={2} fontSize="xs" color="gray.500" pl={5} pb={3}>

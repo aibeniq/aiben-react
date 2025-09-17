@@ -58,6 +58,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         typing: "הבינה המלאכותית כותבת...",
         error: "סליחה, משהו השתבש. נסה שוב.",
         welcome: "שלום! איך אני יכול לעזור לך היום?",
+        welcomeMessageWithSource: "בחר בסיס ידע או העלה קבצים, ואז שאל שאלה.",
+        welcomeMessageGeneral: "שאל אותי כל דבר! לחיפוש בבסיס ידע, בחר קודם בסיס ידע.",
       },
       settings: {
         title: "הגדרות",
@@ -425,6 +427,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         typing: "هوش مصنوعی در حال نوشتن...",
         error: "متأسفیم، مشکلی پیش آمد. دوباره تلاش کنید.",
         welcome: "سلام! امروز چگونه می‌توانم کمکتان کنم؟",
+        welcomeMessageWithSource: "یک پایگاه دانش انتخاب کنید یا فایل‌ها را آپلود کنید، سپس سوال بپرسید.",
+        welcomeMessageGeneral: "هر چیزی از من بپرسید! برای جستجو در پایگاه دانش، ابتدا یک پایگاه دانش انتخاب کنید.",
       },
       settings: {
         title: "تنظیمات",
@@ -792,6 +796,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         typing: "AI yazıyor...",
         error: "Üzgünüz, bir şeyler ters gitti. Tekrar deneyin.",
         welcome: "Merhaba! Bugün size nasıl yardımcı olabilirim?",
+        welcomeMessageWithSource: "Bir bilgi tabanı seçin veya dosyalar yükleyin, ardından soru sorun.",
+        welcomeMessageGeneral: "Bana her şeyi sorabilirsiniz! Bilgi tabanı aramak için önce bir bilgi tabanı seçin.",
       },
       settings: {
         title: "Ayarlar",
@@ -1159,6 +1165,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         typing: "AI inaandika...",
         error: "Samahani, kuna hitilafu. Jaribu tena.",
         welcome: "Hujambo! Ninawezaje kukusaidia leo?",
+        welcomeMessageWithSource: "Chagua hifadhi ya maarifa au pakia faili, kisha uliza swali.",
+        welcomeMessageGeneral: "Niulize chochote! Kwa utafutaji wa hifadhi ya maarifa, chagua hifadhi ya maarifa kwanza.",
       },
       settings: {
         title: "Mipangilio",
@@ -1526,6 +1534,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         typing: "IA está digitando...",
         error: "Desculpe, algo deu errado. Tente novamente.",
         welcome: "Olá! Como posso te ajudar hoje?",
+        welcomeMessageWithSource: "Selecione uma base de conhecimento ou carregue arquivos, depois faça uma pergunta.",
+        welcomeMessageGeneral: "Me pergunte qualquer coisa! Para busca na base de conhecimento, selecione primeiro uma base de conhecimento.",
       },
       settings: {
         title: "Configurações",
@@ -1893,6 +1903,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         typing: "IA está escribiendo...",
         error: "Lo sentimos, algo salió mal. Inténtalo de nuevo.",
         welcome: "¡Hola! ¿Cómo puedo ayudarte hoy?",
+        welcomeMessageWithSource: "Selecciona una base de conocimiento o sube archivos, luego haz una pregunta.",
+        welcomeMessageGeneral: "¡Pregúntame lo que quieras! Para búsqueda en la base de conocimiento, selecciona primero una base de conocimiento.",
       },
       settings: {
         title: "Configuraciones",
@@ -2505,7 +2517,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
   }
 
   // Add Knowledge Bases translations for Middle Eastern and Other languages
-  
+
   // Hebrew
   if (!resources.he.common.knowledgeBases) {
     resources.he.common.knowledgeBases = {
@@ -2941,7 +2953,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         questions_one: "pregunta",
         fields: "campos",
         fields_one: "campo",
-        documents: "documentos", 
+        documents: "documentos",
         documents_one: "documento",
         digitized: "digitalizado",
         handwritten: "manuscrito"

@@ -58,6 +58,8 @@ export const addAsianTranslations = (resources: any) => {
         typing: "AI 正在輸入...",
         error: "抱歉，發生錯誤。請重試。",
         welcome: "您好！今天我可以如何協助您？",
+        welcomeMessageWithSource: "選擇知識庫或上傳檔案，然後提出問題。",
+        welcomeMessageGeneral: "請隨意提問！如需搜尋知識庫，請先選擇知識庫。",
       },
       settings: {
         title: "設定",
@@ -425,6 +427,8 @@ export const addAsianTranslations = (resources: any) => {
         typing: "AI กำลังพิมพ์...",
         error: "ขออภัย มีบางอย่างผิดพลาด โปรดลองอีกครั้ง",
         welcome: "สวัสดี! วันนี้ฉันช่วยคุณอย่างไร?",
+        welcomeMessageWithSource: "เลือกฐานความรู้หรืออัปโหลดไฟล์ แล้วถามคำถาม",
+        welcomeMessageGeneral: "ถามฉันอะไรก็ได้! สำหรับการค้นหาในฐานความรู้ ให้เลือกฐานความรู้ก่อน",
       },
       settings: {
         title: "การตั้งค่า",
@@ -792,6 +796,8 @@ export const addAsianTranslations = (resources: any) => {
         typing: "AI đang gõ...",
         error: "Xin lỗi, có lỗi xảy ra. Vui lòng thử lại.",
         welcome: "Xin chào! Hôm nay tôi có thể giúp gì cho bạn?",
+        welcomeMessageWithSource: "Chọn cơ sở tri thức hoặc tải lên tệp, sau đó đặt câu hỏi.",
+        welcomeMessageGeneral: "Hỏi tôi bất cứ điều gì! Để tìm kiếm cơ sở tri thức, hãy chọn cơ sở tri thức trước.",
       },
       settings: {
         title: "Cài đặt",
@@ -1159,6 +1165,8 @@ export const addAsianTranslations = (resources: any) => {
         typing: "AI sedang mengetik...",
         error: "Maaf, terjadi kesalahan. Silakan coba lagi.",
         welcome: "Halo! Bagaimana saya bisa membantu Anda hari ini?",
+        welcomeMessageWithSource: "Pilih basis pengetahuan atau unggah file, lalu ajukan pertanyaan.",
+        welcomeMessageGeneral: "Tanyakan apa saja kepada saya! Untuk pencarian basis pengetahuan, pilih basis pengetahuan terlebih dahulu.",
       },
       settings: {
         title: "Pengaturan",
@@ -1526,6 +1534,8 @@ export const addAsianTranslations = (resources: any) => {
         typing: "AI sedang menaip...",
         error: "Maaf, ada yang tidak kena. Sila cuba lagi.",
         welcome: "Hai! Bagaimana saya boleh membantu anda hari ini?",
+        welcomeMessageWithSource: "Pilih pangkalan pengetahuan atau muat naik fail, kemudian tanya soalan.",
+        welcomeMessageGeneral: "Tanya saya apa sahaja! Untuk carian pangkalan pengetahuan, pilih pangkalan pengetahuan dahulu.",
       },
       settings: {
         title: "Tetapan",
@@ -1893,6 +1903,8 @@ export const addAsianTranslations = (resources: any) => {
         typing: "Nag-ta-type ang AI...",
         error: "Pasensya na, may nangyaring mali. Subukan muli.",
         welcome: "Kumusta! Paano kita matutulungan ngayon?",
+        welcomeMessageWithSource: "Pumili ng knowledge base o mag-upload ng mga file, pagkatapos magtanong.",
+        welcomeMessageGeneral: "Tanungin mo ako ng kahit ano! Para sa paghahanap sa knowledge base, pumili muna ng knowledge base.",
       },
       settings: {
         title: "Mga Setting",
@@ -2505,7 +2517,7 @@ export const addAsianTranslations = (resources: any) => {
   }
 
   // Add Knowledge Bases translations for Asian languages
-  
+
   // Chinese Traditional
   if (!resources["zh-TW"].common.knowledgeBases) {
     resources["zh-TW"].common.knowledgeBases = {
