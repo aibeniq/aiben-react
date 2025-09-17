@@ -58,6 +58,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         typing: "AI kirjutab...",
         error: "Vabandust, midagi läks valesti. Proovi uuesti.",
         welcome: "Tere! Kuidas saan teid täna aidata?",
+        welcomeMessageWithSource: "Valige teadmusbaas või laadige üles failid, seejärel esitage küsimus.",
+        welcomeMessageGeneral: "Küsige mult mida tahes! Teadmusbaasi otsinguks valige esmalt teadmusbaas.",
       },
       settings: {
         title: "Seaded",
@@ -425,6 +427,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         typing: "AI raksta...",
         error: "Atvainojiet, kaut kas nogāja greizi. Mēģiniet vēlreiz.",
         welcome: "Sveiki! Kā es varu jums palīdzēt šodien?",
+        welcomeMessageWithSource: "Izvēlieties zināšanu bāzi vai augšupielādējiet failus, pēc tam uzdodiet jautājumu.",
+        welcomeMessageGeneral: "Jautājiet man jebko! Zināšanu bāzes meklēšanai vispirms izvēlieties zināšanu bāzi.",
       },
       settings: {
         title: "Iestatījumi",
@@ -792,6 +796,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         typing: "AI rašo...",
         error: "Atsiprašome, kažkas nutiko. Bandykite dar kartą.",
         welcome: "Sveiki! Kaip galiu jums šiandien padėti?",
+        welcomeMessageWithSource: "Pasirinkite žinių bazę arba įkelkite failus, tada užduokite klausimą.",
+        welcomeMessageGeneral: "Klausykite manęs bet ko! Žinių bazės paieškai pirmiausia pasirinkite žinių bazę.",
       },
       settings: {
         title: "Nustatymai",
@@ -1159,6 +1165,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         typing: "Το AI γράφει...",
         error: "Συγγνώμη, κάτι πήγε στραβά. Δοκιμάστε ξανά.",
         welcome: "Γεια σας! Πώς μπορώ να σας βοηθήσω σήμερα;",
+        welcomeMessageWithSource: "Επιλέξτε μια βάση γνώσεων ή ανεβάστε αρχεία, στη συνέχεια κάντε μια ερώτηση.",
+        welcomeMessageGeneral: "Ρωτήστε με οτιδήποτε! Για αναζήτηση στη βάση γνώσεων, επιλέξτε πρώτα μια βάση γνώσεων.",
       },
       settings: {
         title: "Ρυθμίσεις",
@@ -1671,7 +1679,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
   }
 
   // Add Knowledge Bases translations for Baltic and Eastern European languages
-  
+
   // Estonian
   if (!resources.et.common.knowledgeBases) {
     resources.et.common.knowledgeBases = {
@@ -1851,7 +1859,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         fields: "välja",
         fields_one: "väli",
         documents: "dokumenti",
-        documents_one: "dokument", 
+        documents_one: "dokument",
         digitized: "digiteeritud",
         handwritten: "käsitsi kirjutatud"
       },
@@ -1898,7 +1906,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       emptyMessages: {
         review: "Nav pārskata vēstures",
         generate: "Nav ģenerēšanas vēstures",
-        compare: "Nav salīdzināšanas vēstures", 
+        compare: "Nav salīdzināšanas vēstures",
         match: "Nav saskaņošanas vēstures"
       },
       deleteConfirmation: "Vai esat pārliecināts, ka vēlaties dzēst šo vienumu?",
@@ -1954,7 +1962,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         questions: "pytania",
         questions_one: "pytanie",
         fields: "pola",
-        fields_one: "pole", 
+        fields_one: "pole",
         documents: "dokumenty",
         documents_one: "dokument",
         digitized: "zdigitalizowany",

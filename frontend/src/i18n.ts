@@ -6,7 +6,6 @@ import { addBalticEasternEuropeanTranslations } from "./translations_baltic_east
 import { addCentralEuropeanTranslations } from "./translations_central_european"
 import { addMiddleEasternOtherTranslations } from "./translations_middle_eastern_other"
 import { addNordicTranslations } from "./translations_nordic"
-import { addAdditionalTranslations } from "./translations_additional"
 import { addHelpTranslations } from "./utils/helpTranslations"
 
 // Generate all supported language resources with full translations
@@ -85,7 +84,7 @@ const generateAllLanguageResources = () => {
         usingGeneralAI: "Using general AI assistant",
         usingKnowledgeBase: "Using knowledge base:",
         usingDocuments: "Using # document(s)",
-        usingFiles: "Using {count} document{plural}:",
+        usingFiles: "Using {{count}} document{{plural}}:",
         remove: "Remove",
         selectKnowledgeBase: "Select Knowledge Base",
         knowledgeBaseTable: {
@@ -100,6 +99,8 @@ const generateAllLanguageResources = () => {
         noKnowledgeBasesAvailable: "No Knowledge Bases available. Create one first to use this feature.",
         knowledgeBase: "Knowledge Base",
         file: "File",
+        welcomeMessageWithSource: "Select a knowledge base or upload files, then ask a question.",
+        welcomeMessageGeneral: "Ask me anything! For knowledge base search, select a knowledge base first.",
         errors: {
           generic: "Sorry, something went wrong. Please try again.",
           timeout: "Request timed out. Please try again.",
@@ -711,7 +712,7 @@ const generateAllLanguageResources = () => {
         usingGeneralAI: "Usando asistente de IA general",
         usingKnowledgeBase: "Usando base de conocimiento:",
         usingDocuments: "Usando # documento(s)",
-        usingFiles: "Usando {count} documento{plural}:",
+        usingFiles: "Usando {{count}} documento{{plural}}:",
         remove: "Quitar",
         selectKnowledgeBase: "Seleccionar Base de Conocimiento",
         knowledgeBaseTable: {
@@ -726,6 +727,8 @@ const generateAllLanguageResources = () => {
         noKnowledgeBasesAvailable: "No hay Bases de Conocimiento disponibles. Crea una primero para usar esta función.",
         knowledgeBase: "Base de Conocimiento",
         file: "Archivo",
+        welcomeMessageWithSource: "Selecciona una base de conocimiento o sube archivos, luego haz una pregunta.",
+        welcomeMessageGeneral: "¡Pregúntame cualquier cosa! Para búsqueda en base de conocimiento, selecciona una base de conocimiento primero.",
         errors: {
           generic: "Lo siento, algo salió mal. Inténtalo de nuevo.",
           timeout: "Se agotó el tiempo de espera. Inténtalo de nuevo.",
@@ -1365,7 +1368,7 @@ const generateAllLanguageResources = () => {
         usingGeneralAI: "Utilisation de l'assistant IA général",
         usingKnowledgeBase: "Utilisation de la base de connaissances :",
         usingDocuments: "Utilisation de # document(s)",
-        usingFiles: "Utilisation de {count} document{plural} :",
+        usingFiles: "Utilisation de {{count}} document{{plural}} :",
         remove: "Supprimer",
         selectKnowledgeBase: "Sélectionner une Base de Connaissances",
         knowledgeBaseTable: {
@@ -1380,6 +1383,8 @@ const generateAllLanguageResources = () => {
         noKnowledgeBasesAvailable: "Aucune Base de Connaissances disponible. Créez-en une d'abord pour utiliser cette fonctionnalité.",
         knowledgeBase: "Base de Connaissances",
         file: "Fichier",
+        welcomeMessageWithSource: "Sélectionnez une base de connaissances ou téléchargez des fichiers, puis posez une question.",
+        welcomeMessageGeneral: "Demandez-moi n'importe quoi ! Pour une recherche dans la base de connaissances, sélectionnez d'abord une base de connaissances.",
         errors: {
           generic: "Désolé, quelque chose s'est mal passé. Veuillez réessayer.",
           timeout: "Délai d'attente dépassé. Veuillez réessayer.",
@@ -2033,7 +2038,7 @@ const generateAllLanguageResources = () => {
         usingGeneralAI: "Verwende allgemeine KI-Assistenz",
         usingKnowledgeBase: "Verwende Wissensbasis:",
         usingDocuments: "Verwende # Dokument(e)",
-        usingFiles: "Verwende {count} Dokument{plural}:",
+        usingFiles: "Verwende {{count}} Dokument{{plural}}:",
         remove: "Entfernen",
         selectKnowledgeBase: "Wissensbasis auswählen",
         knowledgeBaseTable: {
@@ -2048,6 +2053,8 @@ const generateAllLanguageResources = () => {
         noKnowledgeBasesAvailable: "Keine Wissensbasis verfügbar. Erstellen Sie zuerst eine, um diese Funktion zu nutzen.",
         knowledgeBase: "Wissensbasis",
         file: "Datei",
+        welcomeMessageWithSource: "Wählen Sie eine Wissensbasis aus oder laden Sie Dateien hoch, dann stellen Sie eine Frage.",
+        welcomeMessageGeneral: "Fragen Sie mich alles! Für die Wissensbasis-Suche wählen Sie zuerst eine Wissensbasis aus.",
         sourcePopover: {
           knowledgeBase: "Wissensbasis",
           file: "Datei",
@@ -2694,6 +2701,8 @@ const generateAllLanguageResources = () => {
         typing: "L'IA sta scrivendo...",
         error: "Spiacente, qualcosa è andato storto. Riprova.",
         welcome: "Ciao! Come posso aiutarti oggi?",
+        welcomeMessageWithSource: "Seleziona una base di conoscenza o carica file, poi fai una domanda.",
+        welcomeMessageGeneral: "Chiedi pure qualsiasi cosa! Per la ricerca nella base di conoscenza, seleziona prima una base di conoscenza.",
       },
       settings: {
         title: "Impostazioni",
@@ -3276,6 +3285,8 @@ const generateAllLanguageResources = () => {
         typing: "IA está digitando...",
         error: "Desculpe, algo deu errado. Tente novamente.",
         welcome: "Olá! Como posso ajudá-lo hoje?",
+        welcomeMessageWithSource: "Selecione uma base de conhecimento ou faça upload de arquivos, depois faça uma pergunta.",
+        welcomeMessageGeneral: "Pergunte-me qualquer coisa! Para pesquisa na base de conhecimento, selecione primeiro uma base de conhecimento.",
       },
       settings: {
         title: "Configurações",
@@ -3817,6 +3828,8 @@ const generateAllLanguageResources = () => {
         typing: "ИИ печатает...",
         error: "Извините, что-то пошло не так. Попробуйте еще раз.",
         welcome: "Привет! Как я могу помочь вам сегодня?",
+        welcomeMessageWithSource: "Выберите базу знаний или загрузите файлы, затем задайте вопрос.",
+        welcomeMessageGeneral: "Спрашивайте меня о чём угодно! Для поиска в базе знаний сначала выберите базу знаний.",
       },
       settings: {
         title: "Настройки",
@@ -4800,6 +4813,8 @@ const generateAllLanguageResources = () => {
         error:
           "申し訳ございませんが、エラーが発生しました。もう一度お試しください。",
         welcome: "こんにちは！今日はどのようにお手伝いできますか？",
+        welcomeMessageWithSource: "ナレッジベースを選択するか、ファイルをアップロードしてから質問してください。",
+        welcomeMessageGeneral: "何でもお聞きください！ナレッジベース検索には、最初にナレッジベースを選択してください。",
       },
       settings: {
         title: "設定",
@@ -5197,6 +5212,8 @@ const generateAllLanguageResources = () => {
         typing: "ШІ друкує...",
         error: "Вибачте, щось пішло не так. Спробуйте ще раз.",
         welcome: "Привіт! Як я можу допомогти вам сьогодні?",
+        welcomeMessageWithSource: "Оберіть базу знань або завантажте файли, потім поставте запитання.",
+        welcomeMessageGeneral: "Запитуйте мене про будь-що! Для пошуку в базі знань спочатку оберіть базу знань.",
       },
       settings: {
         title: "Налаштування",
@@ -5594,6 +5611,8 @@ const generateAllLanguageResources = () => {
         typing: "AI pisze...",
         error: "Przepraszamy, coś poszło nie tak. Spróbuj ponownie.",
         welcome: "Cześć! Jak mogę ci dzisiaj pomóc?",
+        welcomeMessageWithSource: "Wybierz bazę wiedzy lub wczytaj pliki, a następnie zadaj pytanie.",
+        welcomeMessageGeneral: "Zapytaj mnie o cokolwiek! Aby wyszukać w bazie wiedzy, najpierw wybierz bazę wiedzy.",
       },
       settings: {
         title: "Ustawienia",
@@ -5991,6 +6010,8 @@ const generateAllLanguageResources = () => {
         typing: "AI is aan het typen...",
         error: "Sorry, er is iets misgegaan. Probeer het opnieuw.",
         welcome: "Hallo! Hoe kan ik u vandaag helpen?",
+        welcomeMessageWithSource: "Selecteer een kennisbank of upload bestanden, stel dan een vraag.",
+        welcomeMessageGeneral: "Vraag me alles! Voor het zoeken in de kennisbank, selecteer eerst een kennisbank.",
       },
       settings: {
         title: "Instellingen",
@@ -6401,7 +6422,7 @@ const generateAllLanguageResources = () => {
         usingGeneralAI: "일반 AI 어시스턴트 사용 중",
         usingKnowledgeBase: "지식 베이스 사용 중:",
         usingDocuments: "# 개의 문서 사용 중",
-        usingFiles: "{count}개의 문서{plural} 사용 중:",
+        usingFiles: "{{count}}개의 문서{{plural}} 사용 중:",
         remove: "제거",
         selectKnowledgeBase: "지식 베이스 선택",
         knowledgeBaseTable: {
@@ -6416,6 +6437,8 @@ const generateAllLanguageResources = () => {
         noKnowledgeBasesAvailable: "사용 가능한 지식 베이스가 없습니다. 이 기능을 사용하려면 먼저 하나를 생성하세요.",
         knowledgeBase: "지식 베이스",
         file: "파일",
+        welcomeMessageWithSource: "지식 베이스를 선택하거나 파일을 업로드한 후 질문하세요.",
+        welcomeMessageGeneral: "무엇이든 물어보세요! 지식 베이스 검색을 위해서는 먼저 지식 베이스를 선택하세요.",
         errors: {
           generic: "죄송합니다. 문제가 발생했습니다. 다시 시도해 주세요.",
           timeout: "요청 시간이 초과되었습니다. 다시 시도해 주세요.",
@@ -6972,6 +6995,8 @@ const generateAllLanguageResources = () => {
         typing: "الذكاء الاصطناعي يكتب...",
         error: "عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.",
         welcome: "مرحباً! كيف يمكنني مساعدتك اليوم؟",
+        welcomeMessageWithSource: "اختر قاعدة معرفة أو ارفع ملفات، ثم اطرح سؤالاً.",
+        welcomeMessageGeneral: "اسألني أي شيء! للبحث في قاعدة المعرفة، اختر قاعدة معرفة أولاً.",
       },
       settings: {
         title: "الإعدادات",
@@ -7332,6 +7357,8 @@ const generateAllLanguageResources = () => {
         typing: "AI टाइप कर रहा है...",
         error: "क्षमा करें, कुछ गलत हुआ। कृपया फिर से कोशिश करें।",
         welcome: "नमस्ते! आज मैं आपकी कैसे सहायता कर सकता हूँ?",
+        welcomeMessageWithSource: "एक नॉलेज बेस चुनें या फाइलें अपलोड करें, फिर प्रश्न पूछें।",
+        welcomeMessageGeneral: "मुझसे कुछ भी पूछें! नॉलेज बेस खोज के लिए, पहले एक नॉलेज बेस चुनें।",
       },
       settings: {
         title: "सेटिंग्स",
@@ -7642,7 +7669,6 @@ const generateAllLanguageResources = () => {
   addBalticEasternEuropeanTranslations(resources)
   addAsianTranslations(resources)
   addMiddleEasternOtherTranslations(resources)
-  addAdditionalTranslations(resources)
 
   // Add help translations to all languages
   addHelpTranslations(resources)

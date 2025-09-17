@@ -12,6 +12,7 @@ import {
 } from "@chakra-ui/react"
 import type React from "react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FiFileText } from "react-icons/fi"
 import SourceLink from "../Common/SourceLink"
 
@@ -52,6 +53,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
   uploadedFiles,
   messagesEndRef,
 }) => {
+  const { t } = useTranslation()
+  
   // State to track which citations are expanded - using object instead of Set
   const [expandedCitations, setExpandedCitations] = useState<
     Record<string, boolean>
@@ -80,8 +83,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
       <Show when={messages.length === 0}>
         <Text color="gray.500" textAlign="center" py={10} fontSize="sm">
           {selectedKbId || uploadedFiles.length > 0
-            ? "Select a knowledge base or upload files, then ask a question."
-            : "Ask me anything! For knowledge base search, select a knowledge base first."}
+            ? t("chatbot.welcomeMessageWithSource")
+            : t("chatbot.welcomeMessageGeneral")}
         </Text>
       </Show>
       <Show when={messages.length > 0}>

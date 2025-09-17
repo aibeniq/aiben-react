@@ -15,6 +15,7 @@ interface InputAreaProps {
   placeholder?: string
   setShowKnowledgeBaseModal: (show: boolean) => void
   setUploadedFiles: (files: File[]) => void
+  setSelectedKbId: (id: string | null) => void
 }
 
 const InputArea: React.FC<InputAreaProps> = ({
@@ -26,6 +27,7 @@ const InputArea: React.FC<InputAreaProps> = ({
   placeholder,
   setShowKnowledgeBaseModal,
   setUploadedFiles,
+  setSelectedKbId,
 }) => {
   const { t } = useTranslation()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -56,6 +58,8 @@ const InputArea: React.FC<InputAreaProps> = ({
         files.map((f) => f.name),
       )
       setUploadedFiles(files)
+      // Clear knowledge base selection when files are uploaded
+      setSelectedKbId(null)
       showSuccessToast(`${files.length} file${files.length > 1 ? "s" : ""} selected successfully.`)
     }
   }
@@ -97,6 +101,8 @@ const InputArea: React.FC<InputAreaProps> = ({
         maxHeight="200px"
         bg="white"
         border="1px solid #d0d7de"
+        pl="50px" // Add left padding to make room for the plus icon
+        pr="50px" // Add right padding to make room for the send button
         _hover={{
           borderColor: "#0969da",
         }}
@@ -108,10 +114,10 @@ const InputArea: React.FC<InputAreaProps> = ({
       <HStack
         className="input-buttons"
         position="absolute"
-        top="0"
-        left="0"
-        right="0"
-        height="40px"
+        top="2px" // Slightly inset from the top
+        left="2px" // Slightly inset from the left
+        right="2px" // Slightly inset from the right
+        height="36px" // Slightly smaller than textarea min height
         pointerEvents="none"
         transition="opacity 0.2s"
       >
