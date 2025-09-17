@@ -5,3 +5,10 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 .env
+.env.local
+.env.production
+.env.development
+docker-compose.override.yml
+docker-compose.traefik.yml
+docker-compose.yml
+ssl-certs/
