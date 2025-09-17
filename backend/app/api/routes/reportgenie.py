@@ -119,11 +119,6 @@ async def generate_report(
         if not kb:
             raise HTTPException(status_code=404, detail="Knowledge base not found")
 
-        if kb.owner_id != current_user.id:
-            raise HTTPException(
-                status_code=403, detail="You don't have access to this knowledge base"
-            )
-
         # Initialize the LLM
         llm = get_default_llm(session, current_user)
 
@@ -1496,11 +1491,6 @@ async def optimize_outline(
         kb = session.get(KnowledgeBase, knowledge_base_id)
         if not kb:
             raise HTTPException(status_code=404, detail="Knowledge base not found")
-
-        if kb.owner_id != current_user.id:
-            raise HTTPException(
-                status_code=403, detail="You don't have access to this knowledge base"
-            )
 
         # 2. Set up the same infrastructure as generate_report
         with tempfile.TemporaryDirectory() as temp_dir:
