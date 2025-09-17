@@ -89,7 +89,7 @@ const InputArea: React.FC<InputAreaProps> = ({
         ref={fileInputRef}
         onChange={handleFileSelect}
         style={{ display: "none" }}
-        accept=".pdf,.txt,.docx,.doc,.rtf"
+        accept=".pdf,.txt,.docx,.doc,.rtf,.csv,.xlsx,.xls"
         multiple
       />
       <Textarea

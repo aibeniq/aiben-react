@@ -1,13 +1,13 @@
 import ChatMessages from "@/components/Chatbot/ChatMessages"
 import InputArea from "@/components/Chatbot/InputArea"
-import KnowledgeBaseTable from "@/components/Common/KnowledgeBaseTable"
-import SelectionModal from "@/components/Common/SelectionModal"
+import KnowledgeBaseSelectionModal from "@/components/Common/KnowledgeBaseSelectionModal"
 import { Box, Button, HStack, Icon, Show, Text } from "@chakra-ui/react"
 import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { FiTrash } from "react-icons/fi"
 import { Radio, RadioGroup } from "../ui/radio"
-import { useAllKnowledgeBases } from "@/hooks/useAllKnowledgeBases"
+import { Tooltip } from "../ui/tooltip"
+import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
 
 interface ChatMessage {
   role: "user" | "assistant"
@@ -41,6 +41,12 @@ interface ChatbotPanelProps {
   setSearchMode: (mode: "vector" | "full_text") => void
 }
 
+// Helper function to truncate text with ellipsis
+const truncateText = (text: string, maxLength: number = 40): string => {
+  if (text.length <= maxLength) return text
+  return text.substring(0, maxLength) + "..."
+}
+
 const ChatbotPanel = ({
   isOpen: _isOpen,
   messages,
@@ -62,7 +68,7 @@ const ChatbotPanel = ({
   setSearchMode,
 }: ChatbotPanelProps) => {
   const { t } = useTranslation()
-  const { knowledgeBases } = useAllKnowledgeBases() // Show all users' knowledge bases in dropdown
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases() // Respect All Users toggle state
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -170,23 +176,56 @@ const ChatbotPanel = ({
               setSelectedKbId={setSelectedKbId}
             />
           </Box>
-          <HStack gap={2} fontSize="xs" color="gray.500" pl={5} pb={3}>
-            {selectedKbId ? (
-              <Text>
-                {t("chatbot.usingKnowledgeBase")}{" "}
-                <b>{knowledgeBases.find((kb) => kb.id === selectedKbId)?.title}</b>
-              </Text>
-            ) : uploadedFiles.length > 0 ? (
-              <Text>
-                {t("chatbot.usingFiles", {
-                  count: uploadedFiles.length,
-                  plural: uploadedFiles.length > 1 ? "s" : "",
-                })}{" "}
-                <b>{uploadedFiles.map((f) => f.name).join(", ")}</b>
-              </Text>
-            ) : (
-              <Text>{t("chatbot.usingGeneralAI")}</Text>
-            )}
+          <HStack gap={2} fontSize="xs" color="gray.500" pl={5} pb={3} justify="space-between" align="center">
+            <Box flex="1" minW="0">
+              {selectedKbId ? (
+                (() => {
+                  const kbTitle = knowledgeBases.find((kb) => kb.id === selectedKbId)?.title || ""
+                  const truncatedTitle = truncateText(kbTitle)
+                  const needsTooltip = kbTitle.length > 40
+                  
+                  const content = (
+                    <Text>
+                      {t("chatbot.usingKnowledgeBase")}{" "}
+                      <b>{truncatedTitle}</b>
+                    </Text>
+                  )
+                  
+                  return needsTooltip ? (
+                    <Tooltip content={`${t("chatbot.usingKnowledgeBase")} ${kbTitle}`} showArrow>
+                      {content}
+                    </Tooltip>
+                  ) : content
+                })()
+              ) : uploadedFiles.length > 0 ? (
+                (() => {
+                  const fileNames = uploadedFiles.map((f) => f.name).join(", ")
+                  const truncatedFileNames = truncateText(fileNames)
+                  const needsTooltip = fileNames.length > 40
+                  
+                  const content = (
+                    <Text>
+                      {t("chatbot.usingFiles", {
+                        count: uploadedFiles.length,
+                        plural: uploadedFiles.length > 1 ? "s" : "",
+                      })}{" "}
+                      <b>{truncatedFileNames}</b>
+                    </Text>
+                  )
+                  
+                  return needsTooltip ? (
+                    <Tooltip content={`${t("chatbot.usingFiles", {
+                      count: uploadedFiles.length,
+                      plural: uploadedFiles.length > 1 ? "s" : "",
+                    })} ${fileNames}`} showArrow>
+                      {content}
+                    </Tooltip>
+                  ) : content
+                })()
+              ) : (
+                <Text>{t("chatbot.usingGeneralAI")}</Text>
+              )}
+            </Box>
             <Show when={selectedKbId || uploadedFiles.length > 0}>
               <Text
                 as="span"
@@ -199,6 +238,7 @@ const ChatbotPanel = ({
                   setUploadedFiles([])
                   setCurrentFileNames([])
                 }}
+                flexShrink={0}
               >
                 {t("chatbot.remove")}
               </Text>
@@ -207,22 +247,21 @@ const ChatbotPanel = ({
         </Box>
       </Box>
 
-      <SelectionModal
+      <KnowledgeBaseSelectionModal
         isOpen={showKnowledgeBaseModal}
         onClose={() => setShowKnowledgeBaseModal(false)}
         title={t("chatbot.selectKnowledgeBase")}
-      >
-        <KnowledgeBaseTable
-          knowledgeBases={knowledgeBases}
-          selectedKnowledgeBase={
-            selectedKbId ? knowledgeBases.find((kb) => kb.id === selectedKbId) || null : null
-          }
-          onSelectionChange={(kb) => {
-            setSelectedKbId(kb?.id || null)
-            setUploadedFiles([])
-          }}
-        />
-      </SelectionModal>
+        knowledgeBases={knowledgeBases}
+        selectedKnowledgeBase={
+          selectedKbId ? knowledgeBases.find((kb) => kb.id === selectedKbId) || null : null
+        }
+        onSelectionChange={(kb) => {
+          setSelectedKbId(kb?.id || null)
+          setUploadedFiles([])
+        }}
+        showAllUsers={showAllUsers}
+        toggleShowAllUsers={toggleShowAllUsers}
+      />
     </>
   )
 }

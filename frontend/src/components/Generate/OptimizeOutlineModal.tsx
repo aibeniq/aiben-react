@@ -370,7 +370,7 @@ const OptimizeOutlineModal = ({
                   <Field label={t("optimizeOutlineModal.groundTruthDocument")} required>
                     <input
                       type="file"
-                      accept=".pdf,.docx,.doc,.txt"
+                      accept=".pdf,.docx,.doc,.txt,.csv,.xlsx,.xls"
                       onChange={handleFileSelect}
                       style={{
                         width: "100%",
