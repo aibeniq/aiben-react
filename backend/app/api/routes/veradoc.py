@@ -285,11 +285,6 @@ async def process_rag_checklist(
         if not kb:
             raise HTTPException(status_code=404, detail="Knowledge base not found")
 
-        if kb.owner_id != current_user.id:
-            raise HTTPException(
-                status_code=403, detail="You don't have access to this knowledge base"
-            )
-
         # 2. Create a temporary directory for ChromaDB
         with tempfile.TemporaryDirectory() as temp_dir:
             # Extract the zipped ChromaDB into the temp directory
@@ -1388,11 +1383,6 @@ async def optimize_checklist(
         kb = session.get(KnowledgeBase, request_data.knowledge_base_id)
         if not kb:
             raise HTTPException(status_code=404, detail="Knowledge base not found")
-
-        if kb.owner_id != current_user.id:
-            raise HTTPException(
-                status_code=403, detail="You don't have access to this knowledge base"
-            )
 
         # 2. Set up the same infrastructure as process_rag_checklist
         with tempfile.TemporaryDirectory() as temp_dir:
