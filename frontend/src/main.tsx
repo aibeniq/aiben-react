@@ -9,6 +9,9 @@ import React, { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
 import { routeTree } from "./routeTree.gen"
 
+// Import global axios configuration FIRST to ensure 30-minute timeouts
+import "./client/axiosGlobalConfig"
+
 import { ApiError, OpenAPI } from "./client"
 import { CustomProvider } from "./components/ui/provider"
 import { ResultsProvider } from "./contexts/ResultsContext"

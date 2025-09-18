@@ -17,7 +17,7 @@ services:
       
       # HTTPS Dashboard route
       - traefik.http.routers.traefik-dashboard-https.entrypoints=https
-      - traefik.http.routers.traefik-dashboard-https.rule=Host(`recq-traefik.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.traefik-dashboard-https.rule=Host(`traefik.${DOMAIN?Variable not set}`)
       - traefik.http.routers.traefik-dashboard-https.tls=true
       - traefik.http.routers.traefik-dashboard-https.tls.certresolver=le
       - traefik.http.routers.traefik-dashboard-https.service=api@internal
@@ -25,7 +25,7 @@ services:
       
       # HTTP Dashboard route (redirect to HTTPS)
       - traefik.http.routers.traefik-dashboard-http.entrypoints=http
-      - traefik.http.routers.traefik-dashboard-http.rule=Host(`recq-traefik.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.traefik-dashboard-http.rule=Host(`traefik.${DOMAIN?Variable not set}`)
       - traefik.http.routers.traefik-dashboard-http.middlewares=https-redirect
       
       # admin-auth middleware with HTTP Basic auth
@@ -48,6 +48,19 @@ services:
       - --entrypoints.http.address=:80
       # Create an entrypoint "https" listening on port 443
       - --entrypoints.https.address=:443
+      
+      # Extended timeouts for large file uploads (60 minutes)
+      - --entrypoints.http.transport.respondingtimeouts.readtimeout=3600s
+      - --entrypoints.http.transport.respondingtimeouts.writetimeout=3600s
+      - --entrypoints.http.transport.respondingtimeouts.idletimeout=3600s
+      - --entrypoints.https.transport.respondingtimeouts.readtimeout=3600s
+      - --entrypoints.https.transport.respondingtimeouts.writetimeout=3600s
+      - --entrypoints.https.transport.respondingtimeouts.idletimeout=3600s
+      
+      # Global timeout settings for all services
+      - --serversTransport.forwardingTimeouts.dialTimeout=60s
+      - --serversTransport.forwardingTimeouts.responseHeaderTimeout=3600s
+      - --serversTransport.forwardingTimeouts.idleConnTimeout=3600s
       
       # Certificate resolvers for Let's Encrypt
       - --certificatesresolvers.le.acme.tlschallenge=true

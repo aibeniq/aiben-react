@@ -1,0 +1,165 @@
+services:
+  traefik:
+    image: traefik:3.0
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+      - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080
+      - traefik.http.routers.traefik-dashboard-https.entrypoints=https
+      - traefik.http.routers.traefik-dashboard-https.rule=Host(`recq-traefik.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.traefik-dashboard-https.tls=true
+      - traefik.http.routers.traefik-dashboard-https.tls.certresolver=le
+      - traefik.http.routers.traefik-dashboard-https.service=api@internal
+      - traefik.http.routers.traefik-dashboard-https.middlewares=admin-auth
+      - traefik.http.routers.traefik-dashboard-http.entrypoints=http
+      - traefik.http.routers.traefik-dashboard-http.rule=Host(`recq-traefik.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.traefik-dashboard-http.middlewares=https-redirect
+      - traefik.http.middlewares.admin-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-public-certificates:/certificates
+      - ./traefik/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml:ro
+    command:
+      - --providers.docker
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+      - --entrypoints.http.transport.respondingtimeouts.readtimeout=1800s
+      - --entrypoints.http.transport.respondingtimeouts.writetimeout=1800s
+      - --entrypoints.http.transport.respondingtimeouts.idletimeout=1800s
+      - --entrypoints.https.transport.respondingtimeouts.readtimeout=1800s
+      - --entrypoints.https.transport.respondingtimeouts.writetimeout=1800s
+      - --entrypoints.https.transport.respondingtimeouts.idletimeout=1800s
+      - --serversTransport.forwardingTimeouts.dialTimeout=60s
+      - --serversTransport.forwardingTimeouts.responseHeaderTimeout=1800s
+      - --serversTransport.forwardingTimeouts.idleConnTimeout=1800s
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
+      - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+      - --accesslog
+      - --log
+      - --api
+      - --providers.file.filename=/etc/traefik/dynamic_conf.yml
+      - --providers.file.watch=true
+    networks:
+      - traefik-public
+
+volumes:
+  traefik-public-certificates:
+
+networks:
+  traefik-public:
+    external: true
+services:
+  traefik:
+    image: traefik:3.0
+    ports:
+      # Listen on port 80, default for HTTP, necessary to redirect to HTTPS
+      - 80:80
+      # Listen on port 443, default for HTTPS
+      - 443:443
+    restart: always
+    labels:
+      # Enable Traefik for this service, to make it available in the public network
+      - traefik.enable=true
+      # Use the traefik-public network (declared below)
+      - traefik.docker.network=traefik-public
+      # Define the port inside of the Docker service to use
+      - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080
+      
+      # HTTPS Dashboard route
+      - traefik.http.routers.traefik-dashboard-https.entrypoints=https
+      - traefik.http.routers.traefik-dashboard-https.rule=Host(`recq-traefik.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.traefik-dashboard-https.tls=true
+      - traefik.http.routers.traefik-dashboard-https.tls.certresolver=le
+      - traefik.http.routers.traefik-dashboard-https.service=api@internal
+      - traefik.http.routers.traefik-dashboard-https.middlewares=admin-auth
+      
+      # HTTP Dashboard route (redirect to HTTPS)
+      - traefik.http.routers.traefik-dashboard-http.entrypoints=http
+      - traefik.http.routers.traefik-dashboard-http.rule=Host(`recq-traefik.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.traefik-dashboard-http.middlewares=https-redirect
+      
+      # admin-auth middleware with HTTP Basic auth
+      - traefik.http.middlewares.admin-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+      
+      # HTTPS redirect middleware
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+    volumes:
+      # Add Docker as a mounted volume, so that Traefik can read the labels of other services
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount the volume to store the certificates
+      - traefik-public-certificates:/certificates
+      services:
+        traefik:
+          image: traefik:3.0
+          ports:
+            - "80:80"
+            - "443:443"
+          restart: always
+          labels:
+            - traefik.enable=true
+            - traefik.docker.network=traefik-public
+            - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080
+
+            - traefik.http.routers.traefik-dashboard-https.entrypoints=https
+            - traefik.http.routers.traefik-dashboard-https.rule=Host(`recq-traefik.${DOMAIN?Variable not set}`)
+            - traefik.http.routers.traefik-dashboard-https.tls=true
+            - traefik.http.routers.traefik-dashboard-https.tls.certresolver=le
+            - traefik.http.routers.traefik-dashboard-https.service=api@internal
+            - traefik.http.routers.traefik-dashboard-https.middlewares=admin-auth
+
+            - traefik.http.routers.traefik-dashboard-http.entrypoints=http
+            - traefik.http.routers.traefik-dashboard-http.rule=Host(`recq-traefik.${DOMAIN?Variable not set}`)
+            - traefik.http.routers.traefik-dashboard-http.middlewares=https-redirect
+
+            - traefik.http.middlewares.admin-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+
+            - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+            - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+          volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - traefik-public-certificates:/certificates
+            - ./traefik/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml:ro
+          command:
+            - --providers.docker
+            - --providers.docker.exposedbydefault=false
+            - --entrypoints.http.address=:80
+            - --entrypoints.https.address=:443
+
+            - --entrypoints.http.transport.respondingtimeouts.readtimeout=1800s
+            - --entrypoints.http.transport.respondingtimeouts.writetimeout=1800s
+            - --entrypoints.http.transport.respondingtimeouts.idletimeout=1800s
+            - --entrypoints.https.transport.respondingtimeouts.readtimeout=1800s
+            - --entrypoints.https.transport.respondingtimeouts.writetimeout=1800s
+            - --entrypoints.https.transport.respondingtimeouts.idletimeout=1800s
+
+            - --serversTransport.forwardingTimeouts.dialTimeout=60s
+            - --serversTransport.forwardingTimeouts.responseHeaderTimeout=1800s
+            - --serversTransport.forwardingTimeouts.idleConnTimeout=1800s
+
+            - --certificatesresolvers.le.acme.tlschallenge=true
+            - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
+            - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+
+            - --accesslog
+            - --log
+            - --api
+            - --providers.file.filename=/etc/traefik/dynamic_conf.yml
+            - --providers.file.watch=true
+          networks:
+            - traefik-public
+
+      volumes:
+        traefik-public-certificates:
+
+      networks:
+        traefik-public:
+          external: true

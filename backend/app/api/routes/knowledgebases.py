@@ -1,14 +1,20 @@
 import uuid
 from typing import Any, List, Optional
+import asyncio
+import gc
+import logging
+import psutil
+import os
+from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
 from sqlmodel import func, select, delete
 
 import zipfile
 import io
-import os
 import shutil
 from io import BytesIO
+from contextlib import contextmanager
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
@@ -47,6 +53,143 @@ import tiktoken
 import asyncio
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
+
+# Setup logging for this module
+logger = logging.getLogger(__name__)
+
+
+@contextmanager
+def error_recovery_context(operation_name: str):
+    """Context manager for error recovery during knowledge base creation."""
+    try:
+        logger.info(f"Starting {operation_name}")
+        yield
+        logger.info(f"Completed {operation_name}")
+    except Exception as e:
+        logger.error(f"Error in {operation_name}: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error during {operation_name}: {str(e)}"
+        )
+
+
+def get_memory_usage_mb() -> float:
+    """Get current memory usage in MB."""
+    try:
+        process = psutil.Process(os.getpid())
+        return process.memory_info().rss / 1024 / 1024
+    except:
+        return 0.0
+
+
+def get_available_memory_mb() -> float:
+    """Get available system memory in MB."""
+    try:
+        return psutil.virtual_memory().available / 1024 / 1024
+    except:
+        return 2048.0  # Default fallback
+
+
+def calculate_optimal_batch_size(files: List[UploadFile], current_memory_mb: float) -> int:
+    """
+    Calculate optimal batch size based on file sizes and available memory.
+    """
+    if not files:
+        return settings.KB_MIN_BATCH_SIZE
+    
+    # Get file sizes (without consuming streams)
+    file_sizes = []
+    for file in files:
+        file.file.seek(0, 2)  # Seek to end
+        size = file.file.tell()
+        file.file.seek(0)  # Reset to beginning
+        file_sizes.append(size)
+    
+    # Calculate average file size
+    avg_file_size_mb = sum(file_sizes) / len(file_sizes) / 1024 / 1024
+    
+    # Available memory considering current usage and threshold
+    available_memory = get_available_memory_mb()
+    memory_budget = min(available_memory * 0.5, settings.KB_MEMORY_THRESHOLD_MB)  # Use 50% of available or threshold
+    
+    # Estimate memory per file (processing overhead is ~3x file size)
+    estimated_memory_per_file = avg_file_size_mb * 3
+    
+    if estimated_memory_per_file <= 0:
+        return settings.KB_MAX_BATCH_SIZE
+    
+    # Calculate optimal batch size
+    optimal_batch = int(memory_budget / estimated_memory_per_file)
+    
+    # Constrain to min/max bounds
+    batch_size = max(settings.KB_MIN_BATCH_SIZE, min(optimal_batch, settings.KB_MAX_BATCH_SIZE))
+    
+    logger.info(f"Memory-based batch sizing: {len(files)} files, avg size: {avg_file_size_mb:.1f}MB, "
+                f"available memory: {available_memory:.1f}MB, batch size: {batch_size}")
+    
+    return batch_size
+
+
+def log_progress(current: int, total: int, operation: str = "Processing"):
+    """Log progress for long-running operations."""
+    percentage = (current / total) * 100 if total > 0 else 0
+    logger.info(f"{operation} progress: {current}/{total} ({percentage:.1f}%)")
+
+
+def analyze_upload_feasibility(files: List[UploadFile]) -> dict:
+    """
+    Analyze upload feasibility and provide recommendations.
+    Returns analysis with warnings and recommendations.
+    """
+    analysis = {
+        "total_files": len(files),
+        "total_size_mb": 0,
+        "largest_file_mb": 0,
+        "warnings": [],
+        "recommendations": [],
+        "estimated_time_minutes": 0
+    }
+    
+    if not files:
+        analysis["warnings"].append("No files provided")
+        return analysis
+    
+    # Analyze file sizes
+    total_size = 0
+    largest_file = 0
+    
+    for file in files:
+        file.file.seek(0, 2)
+        size = file.file.tell()
+        file.file.seek(0)
+        
+        total_size += size
+        largest_file = max(largest_file, size)
+    
+    analysis["total_size_mb"] = total_size / 1024 / 1024
+    analysis["largest_file_mb"] = largest_file / 1024 / 1024
+    
+    # Estimate processing time (rough: 1MB = 10 seconds including embedding)
+    analysis["estimated_time_minutes"] = (analysis["total_size_mb"] * 10) / 60
+    
+    # Generate warnings and recommendations
+    if analysis["total_size_mb"] > 1000:  # >1GB
+        analysis["warnings"].append(f"Large upload detected: {analysis['total_size_mb']:.1f}MB total")
+        analysis["recommendations"].append("Consider splitting into smaller knowledge bases for better performance")
+    
+    if analysis["largest_file_mb"] > 100:  # >100MB
+        analysis["warnings"].append(f"Very large file detected: {analysis['largest_file_mb']:.1f}MB")
+        analysis["recommendations"].append("Large files may take significant time to process")
+    
+    if len(files) > 100:
+        analysis["warnings"].append(f"Many files detected: {len(files)} files")
+        analysis["recommendations"].append("Processing will be done in batches to manage memory")
+    
+    if analysis["estimated_time_minutes"] > 30:
+        analysis["warnings"].append(f"Estimated processing time: {analysis['estimated_time_minutes']:.1f} minutes")
+        analysis["recommendations"].append("This is a long-running operation. Please be patient.")
+    
+    return analysis
 
 
 def estimate_tokens_for_embedding(text: str) -> int:
@@ -454,8 +597,25 @@ async def create_knowledge_base(
     Create new knowledge base with a compressed folder with the Chroma VectorDB.
     """
 
+    """
+    Create new knowledge base with a compressed folder with the Chroma VectorDB.
+    Intelligently handles large uploads with dynamic resource management.
+    """
+
+    print(f"Creating knowledge base with {len(files)} files")
     print("Received the following metadata for the knowledge base:")
     print(knowledge_base_in)
+
+    # Analyze upload feasibility and provide recommendations
+    analysis = analyze_upload_feasibility(files)
+    logger.info(f"Upload analysis: {analysis}")
+    
+    # Log warnings but don't block processing
+    for warning in analysis["warnings"]:
+        logger.warning(warning)
+    
+    for recommendation in analysis["recommendations"]:
+        logger.info(f"Recommendation: {recommendation}")
 
     # Check if a knowledge base with this title already exists for this user
     existing_kb = session.exec(
@@ -465,12 +625,251 @@ async def create_knowledge_base(
         )
     ).first()
 
-    print("Checking for existing knowledge base")
-
     if existing_kb:
         raise HTTPException(
-            status_code=409,  # Using 409 Conflict for duplicate resource
+            status_code=409,
             detail=f"A knowledge base with the title '{knowledge_base_in.title}' already exists",
+        )
+
+    try:
+        # Initialize variables for document processing
+        all_documents = []
+        failed_files = []
+        initial_memory = get_memory_usage_mb()
+        
+        with error_recovery_context("document processing"):
+            # Calculate optimal batch size based on memory and file sizes
+            batch_size = calculate_optimal_batch_size(files, initial_memory)
+            
+            # Process files in optimally-sized batches
+            for i in range(0, len(files), batch_size):
+                batch_files = files[i:i + batch_size]
+                batch_num = i // batch_size + 1
+                total_batches = (len(files) + batch_size - 1) // batch_size
+                
+                print(f"Processing batch {batch_num}/{total_batches} with {len(batch_files)} files")
+                log_progress(i, len(files), "File processing")
+                
+                # Monitor memory before processing batch
+                current_memory = get_memory_usage_mb()
+                if current_memory > initial_memory + settings.KB_MEMORY_THRESHOLD_MB:
+                    logger.warning(f"High memory usage detected: {current_memory:.1f}MB. Triggering garbage collection.")
+                    gc.collect()
+                    current_memory = get_memory_usage_mb()
+                    logger.info(f"Memory after GC: {current_memory:.1f}MB")
+                
+                batch_documents = []
+                for file_idx, file in enumerate(batch_files):
+                    try:
+                        # Log progress every few files
+                        if (i + file_idx) % settings.KB_PROGRESS_UPDATE_INTERVAL == 0:
+                            log_progress(i + file_idx + 1, len(files), "Processing files")
+                        
+                        loaded_documents = load_uploaded_file(file)
+                        batch_documents.extend(loaded_documents)
+                        print(f"✅ Processed {file.filename}: {len(loaded_documents)} documents")
+                    except Exception as e:
+                        failed_files.append(f"{file.filename}: {str(e)}")
+                        print(f"❌ Failed to process {file.filename}: {e}")
+                        continue
+                    finally:
+                        file.file.seek(0)
+                
+                all_documents.extend(batch_documents)
+                
+                # Force garbage collection between batches for memory management
+                gc.collect()
+                
+                # Adaptive delay based on batch size and system load
+                delay = min(0.5, len(batch_files) * 0.1)
+                if i + batch_size < len(files):
+                    await asyncio.sleep(delay)
+
+            log_progress(len(files), len(files), "File processing")
+
+            if failed_files:
+                logger.warning(f"{len(failed_files)} files failed to process: {failed_files}")
+            
+            if not all_documents:
+                raise HTTPException(
+                    status_code=400,
+                    detail="No documents could be processed from the uploaded files"
+                )
+
+            print(f"Successfully processed {len(all_documents)} documents from {len(files)} files")
+
+        # Clean up temporary files
+        with error_recovery_context("temporary file cleanup"):
+            for root, dirs, files_in_dir in os.walk(tempfile.gettempdir()):
+                for filename in files_in_dir:
+                    if any(uploaded_file.filename in filename for uploaded_file in files):
+                        try:
+                            os.unlink(os.path.join(root, filename))
+                        except:
+                            pass
+
+        with error_recovery_context("document splitting"):
+            print("Splitting documents...")
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=settings.RAG_DOCUMENT_CHUNK_SIZE,
+                chunk_overlap=settings.RAG_DOCUMENT_CHUNK_OVERLAP,
+            )
+            splits = text_splitter.split_documents(all_documents)
+            print(f"Split into {len(splits)} chunks")
+
+        with error_recovery_context("embedding initialization"):
+            print("Initializing embeddings...")
+            embeddings, model_id, provider = load_correct_embeddings_model(
+                session=session,
+                current_user=current_user,
+                embedding_model_id=knowledge_base_in.embedding_model_id,
+            )
+            print(f"Using embedding model: {model_id}")
+
+        with error_recovery_context("document chunking for embedding"):
+            print("Chunking documents for embedding...")
+            # Use adaptive chunk size based on total document count
+            if len(splits) > 10000:  # Large knowledge base
+                chunk_size = settings.KB_EMBEDDING_CHUNK_SIZE // 2  # Smaller chunks for stability
+            else:
+                chunk_size = settings.KB_EMBEDDING_CHUNK_SIZE
+            
+            document_chunks = chunk_documents_for_embedding(splits, max_tokens_per_chunk=chunk_size)
+            print(f"Split into {len(document_chunks)} chunks for embedding")
+
+        # Clear out any existing chroma_db directory
+        chroma_dir = tempfile.mkdtemp()
+        chroma_db = None
+
+        with error_recovery_context("vector database creation"):
+            try:
+                # Process each chunk separately to avoid token limits
+                for i, chunk in enumerate(document_chunks):
+                    log_progress(i + 1, len(document_chunks), "Creating embeddings")
+                    
+                    print(f"Processing embedding chunk {i+1}/{len(document_chunks)} with {len(chunk)} documents")
+
+                    # Estimate total tokens in this chunk for logging
+                    total_chunk_tokens = sum(
+                        estimate_tokens_for_embedding(doc.page_content) for doc in chunk
+                    )
+                    print(f"Chunk {i+1} contains approximately {total_chunk_tokens:,} tokens")
+
+                    # Monitor memory during embedding creation
+                    pre_embed_memory = get_memory_usage_mb()
+                    
+                    if chroma_db is None:
+                        # Initialize Chroma database with first chunk
+                        chroma_db = Chroma.from_documents(
+                            documents=chunk,
+                            embedding=embeddings,
+                            persist_directory=chroma_dir,
+                        )
+                    else:
+                        # Add subsequent chunks to existing database
+                        chroma_db.add_documents(documents=chunk)
+
+                    post_embed_memory = get_memory_usage_mb()
+                    print(f"Memory usage: {pre_embed_memory:.1f}MB → {post_embed_memory:.1f}MB")
+
+                    # Adaptive delay based on processing time and memory usage
+                    if post_embed_memory > pre_embed_memory + 200:  # Large memory increase
+                        await asyncio.sleep(1.0)
+                        gc.collect()
+                    elif i < len(document_chunks) - 1:
+                        await asyncio.sleep(0.3)
+
+                # Persist the database
+                if chroma_db:
+                    chroma_db.persist()
+
+                print("Successfully created vector database with adaptive processing")
+
+            except Exception as e:
+                print(f"Error creating Chroma VectorDB: {str(e)}")
+                # Clean up the directory on error
+                if os.path.exists(chroma_dir):
+                    shutil.rmtree(chroma_dir)
+                raise HTTPException(
+                    status_code=400, detail=f"Error creating vector database: {str(e)}"
+                )
+
+        with error_recovery_context("database compression"):
+            print("Zipping Chroma database...")
+            # Compress the Chroma database directory into a zip file
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+                for root, _, filenames in os.walk(chroma_dir):
+                    for filename in filenames:
+                        file_path = os.path.join(root, filename)
+                        arcname = os.path.relpath(file_path, chroma_dir)
+                        zip_file.write(file_path, arcname)
+            zip_buffer.seek(0)
+
+            # Clean up the temporary chroma directory
+            try:
+                if os.path.exists(chroma_dir):
+                    shutil.rmtree(chroma_dir)
+            except Exception as e:
+                print(f"Warning: Could not clean up temporary directory {chroma_dir}: {e}")
+
+        with error_recovery_context("knowledge base creation"):
+            print("Creating knowledge base record...")
+            knowledge_base = KnowledgeBase.model_validate(
+                knowledge_base_in,
+                update={
+                    "owner_id": current_user.id,
+                    "data": zip_buffer.read(),
+                    "embedding_model_id": knowledge_base_in.embedding_model_id,
+                    "date_created": datetime.utcnow(),
+                    "date_modified": datetime.utcnow(),
+                },
+            )
+
+            session.add(knowledge_base)
+            session.flush()
+
+        with error_recovery_context("source entries creation"):
+            print("Creating source entries...")
+            # Process each file to create source entries
+            for i, file in enumerate(files):
+                if i % settings.KB_PROGRESS_UPDATE_INTERVAL == 0:
+                    log_progress(i + 1, len(files), "Creating source entries")
+                
+                try:
+                    KnowledgeBaseService.create_source_entries(
+                        session=session,
+                        current_user=current_user,
+                        knowledge_base_id=knowledge_base.id,
+                        file=file,
+                    )
+                except Exception as e:
+                    print(f"Warning: Failed to create source entry for {file.filename}: {e}")
+                    # Continue with other files
+
+            # Recalculate total pages for the knowledge base
+            KnowledgeBaseService.recalculate_total_pages(session, knowledge_base.id)
+
+            session.commit()
+            session.refresh(knowledge_base)
+
+        final_memory = get_memory_usage_mb()
+        print(f"✅ Successfully created knowledge base '{knowledge_base.title}' with {len(files)} files")
+        print(f"📊 Processing stats: {len(all_documents)} documents, {analysis['total_size_mb']:.1f}MB total")
+        print(f"🧠 Memory usage: {initial_memory:.1f}MB → {final_memory:.1f}MB")
+        
+        if failed_files:
+            print(f"⚠️ Note: {len(failed_files)} files failed to process but knowledge base was created")
+
+        return knowledge_base
+
+    except HTTPException:
+        raise  # Re-raise HTTP exceptions as-is
+    except Exception as e:
+        logger.error(f"Unexpected error creating knowledge base: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error creating knowledge base: {str(e)}"
         )
 
     # Initialize variables for Chroma

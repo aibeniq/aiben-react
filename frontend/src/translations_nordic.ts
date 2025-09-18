@@ -1816,7 +1816,7 @@ export const addNordicTranslations = (resources: any) => {
     common: {
       navigation: {
         dashboard: "Kojelauta",
-        review: "Arviointi",
+        review: "Arvioi",
         generate: "Luo",
         compare: "Vertaile",
         match: "Yhdistä",
@@ -2379,7 +2379,7 @@ export const addNordicTranslations = (resources: any) => {
         viewingAllUsers: "Näytetään kaikkien käyttäjien historia",
         viewingMyHistory: "Näytetään vain oma historia",
         tabs: {
-          review: "Arviointi",
+          review: "Arvioi",
           generate: "Luo",
           compare: "Vertaile",
           match: "Yhdistä"

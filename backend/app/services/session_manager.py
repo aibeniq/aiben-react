@@ -20,7 +20,7 @@ class SessionManager:
     """
     
     def __init__(self):
-        self.default_ttl = 1800  # 30 minutes
+        self.default_ttl = 3600  # 60 minutes
         
         # Try to connect to Redis
         redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
