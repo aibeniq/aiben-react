@@ -18,10 +18,9 @@ import { useEffect, useState } from "react"
 import { FaPlus, FaTrash } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
 
-import { EmbeddingModelsService, KnowledgeBasesService } from "@/client"
-import type { ApiError } from "@/client/core/ApiError"
+import { EmbeddingModelsService } from "@/client"
+import { createKnowledgeBaseWithTimeout } from "@/client/knowledgeBaseClient"
 import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"
 import {
   DialogBody,
   DialogCloseTrigger,
@@ -152,8 +151,16 @@ const AddKnowledgeBase = () => {
     }) => {
       console.log("🚀 Starting knowledge base creation mutation with data:", data)
 
-      // Send the FormData object to the backend
-      return KnowledgeBasesService.createKnowledgeBase({
+      // Basic validation - ensure we have files
+      if (data.files.length === 0) {
+        throw new Error("Please select at least one file to upload")
+      }
+
+      const totalSize = data.files.reduce((sum, file) => sum + file.size, 0)
+      console.log(`📊 Upload stats: ${data.files.length} files, ${(totalSize / (1024*1024)).toFixed(1)}MB total`)
+
+      // Send the FormData object to the backend with extended timeout
+      return createKnowledgeBaseWithTimeout({
         title: data.title, // Still required for the `query` object
         description: data.description, // Still required for the `query` object
         embeddingModelId: data.embedding_model_id,
@@ -179,18 +186,34 @@ const AddKnowledgeBase = () => {
 
       console.log("✨ Knowledge base creation success flow completed")
     },
-    onError: (err: ApiError) => {
+    onError: (err: any) => {
       console.error("❌ Knowledge base creation ERROR:", err)
-      if (err.status === 409) {
-        // Handle duplicate title error specifically
-        showErrorToast(
-          (err.body as { detail: string }).detail ||
-            "A knowledge base with this title already exists",
-        )
-      } else {
-        // Handle other errors
-        handleError(err)
+      
+      let errorMessage = "Failed to create knowledge base"
+      
+      // Handle client-side validation errors
+      if (err.message?.includes("Too many files") || 
+          err.message?.includes("file size") || 
+          err.message?.includes("Files too large")) {
+        errorMessage = err.message
       }
+      // Handle server-side errors
+      else if (err.status === 409) {
+        // Handle duplicate title error specifically
+        errorMessage = (err.body as { detail: string }).detail ||
+            "A knowledge base with this title already exists"
+      } 
+      else if (err.status === 400 && err.body?.detail?.includes("File validation failed")) {
+        errorMessage = err.body.detail
+      }
+      else if (err.message?.includes("Network Error") || err.code === "ERR_NETWORK") {
+        errorMessage = "Upload timeout or server error. Try with fewer/smaller files or check your connection."
+      }
+      else if (err.body?.detail) {
+        errorMessage = err.body.detail
+      }
+      
+      showErrorToast(errorMessage)
     },
     onSettled: () => {
       console.log("🏁 Knowledge base mutation SETTLED - doing final cache invalidation")
@@ -381,6 +404,18 @@ const AddKnowledgeBase = () => {
                   ) : (
                     <Text>{t("knowledgeBases.modals.fileUpload.dragAndDrop")}</Text>
                   )}
+                </Box>
+
+                {/* File Upload Limits Info */}
+                <Box fontSize="sm" color="gray.600" textAlign="center" px={2}>
+                  <Box>
+                  <Text fontSize="xs" color="gray.500">
+                    Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX
+                  </Text>
+                  <Text fontSize="xs" color="gray.500">
+                    The system will intelligently process files based on available resources
+                  </Text>
+                </Box>
                 </Box>
 
                 {/* Display Selected Files */}

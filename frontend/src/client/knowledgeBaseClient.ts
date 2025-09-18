@@ -1,0 +1,135 @@
+import axios from "axios"
+import "./axiosGlobalConfig" // Ensure global timeout configuration is applied
+import { OpenAPI } from "./core/OpenAPI"
+import type {
+    KnowledgeBasesCreateKnowledgeBaseData,
+    KnowledgeBasesCreateKnowledgeBaseResponse
+} from "./types.gen"
+
+// Override global axios defaults to prevent interference
+axios.defaults.timeout = 60 * 60 * 1000 // 60 minutes globally
+
+// Create a custom axios client for knowledge base operations with extended timeout
+export const knowledgeBaseAxiosClient = axios.create({
+    timeout: 60 * 60 * 1000, // 60 minutes for large file processing
+    // Explicitly override any global defaults
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+})
+
+// Add request interceptor to include auth headers
+knowledgeBaseAxiosClient.interceptors.request.use(async (config) => {
+    // Copy relevant config from the main OpenAPI client
+    config.baseURL = OpenAPI.BASE
+    config.withCredentials = OpenAPI.WITH_CREDENTIALS
+
+    // Ensure timeout is always set to 60 minutes (override any defaults)
+    config.timeout = 60 * 60 * 1000
+
+    // Get token directly from localStorage (same way the main client does)
+    const token = localStorage.getItem("access_token")
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+    }
+
+    console.log("🕐 Request interceptor: Set timeout to", config.timeout / 1000 / 60, "minutes")
+
+    return config
+})
+
+// Add response interceptor for error handling
+knowledgeBaseAxiosClient.interceptors.response.use(
+    (response) => {
+        console.log("✅ Response received successfully")
+        return response
+    },
+    (error) => {
+        // Enhanced timeout error logging
+        if (error.code === "ECONNABORTED") {
+            console.error("❌ Request was aborted (likely timeout)")
+            console.error("⏰ Error after:", error.config?.timeout || "unknown", "ms")
+        } else if (error.message?.includes("timeout")) {
+            console.error("❌ Timeout error:", error.message)
+        } else if (error.message?.includes("Network Error")) {
+            console.error("❌ Network error:", error.message)
+        }
+
+        return Promise.reject(error)
+    }
+)
+
+/**
+ * Extended timeout version of createKnowledgeBase for handling large uploads
+ */
+export const createKnowledgeBaseWithTimeout = async (
+    data: KnowledgeBasesCreateKnowledgeBaseData,
+): Promise<KnowledgeBasesCreateKnowledgeBaseResponse> => {
+    try {
+        console.log("🚀 Starting knowledge base upload with timeout client")
+        console.log("📊 Files to upload:", data.formData?.files?.length || 0)
+
+        const formData = new FormData()
+
+        // Add files to form data
+        if (data.formData?.files) {
+            for (const file of data.formData.files) {
+                formData.append('files', file)
+                const fileName = file instanceof File ? file.name : 'blob'
+                const fileSize = (file.size / 1024 / 1024).toFixed(2)
+                console.log(`📁 Added file: ${fileName} (${fileSize}MB)`)
+            }
+        }
+
+        console.log("⏰ Using 60-minute timeout for upload request")
+
+        // Log the exact timeout being used
+        const currentTimeout = knowledgeBaseAxiosClient.defaults.timeout || 0
+        console.log("🔧 Axios client timeout:", currentTimeout / 1000 / 60, "minutes")
+
+        // Make the request with our custom axios client
+        const response = await knowledgeBaseAxiosClient.post(
+            `/api/v1/knowledge-bases/`,
+            formData,
+            {
+                params: {
+                    title: data.title,
+                    description: data.description,
+                    embedding_model_id: data.embeddingModelId,
+                },
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                // Triple-redundancy: set timeout here too
+                timeout: 60 * 60 * 1000, // 60 minutes
+                maxContentLength: Infinity,
+                maxBodyLength: Infinity,
+            }
+        )
+
+        console.log("✅ Knowledge base upload completed successfully")
+        return response.data
+    } catch (error: any) {
+        console.error("❌ Knowledge base creation error:", error)
+
+        // Enhanced error logging for debugging
+        if (error.code === "ECONNABORTED") {
+            console.error("🕐 Request timed out")
+            console.error("⏱️  Timeout was set to:", error.config?.timeout || "unknown", "ms")
+            console.error("⏱️  That's", (error.config?.timeout || 0) / 1000 / 60, "minutes")
+        } else if (error.message?.includes("timeout")) {
+            console.error("🕐 Timeout error:", error.message)
+        } else if (error.message?.includes("Network Error")) {
+            console.error("🌐 Network error:", error.message)
+        } else {
+            console.error("🔍 Error details:", {
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                data: error.response?.data,
+                message: error.message,
+                code: error.code
+            })
+        }
+
+        throw error
+    }
+}

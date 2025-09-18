@@ -26,7 +26,7 @@ Successfully implemented Redis-based session caching to replace in-memory sessio
 - **Created new session manager** (`app/services/session_manager.py`):
   - Redis-based session storage with in-memory fallback
   - Handles serialization/deserialization of session data
-  - Automatic TTL (30 minutes) for session expiration
+  - Automatic TTL (60 minutes) for session expiration
   - Graceful fallback to in-memory cache if Redis is unavailable
 
 - **Updated chatbot routes** (`app/api/routes/chatbot.py`):

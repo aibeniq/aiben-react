@@ -1522,8 +1522,8 @@ async def chat(
 async def startup_event():
     async def cleanup_sessions():
         while True:
-            await asyncio.sleep(1800)  # 30 minutes
-            session_cache.cleanup()
+            await asyncio.sleep(3600)  # 60 minutes
+            session_manager.cleanup_expired_sessions()
             print("Session cache cleanup performed")
 
     asyncio.create_task(cleanup_sessions())

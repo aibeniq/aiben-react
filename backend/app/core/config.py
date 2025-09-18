@@ -55,6 +55,14 @@ class Settings(BaseSettings):
         250000  # Safe limit below OpenAI's 300k token limit
     )
 
+    # Knowledge base processing parameters (resource management, not arbitrary limits)
+    KB_PROCESSING_TIMEOUT: int = 3600  # Processing timeout in seconds (60 minutes)
+    KB_MIN_BATCH_SIZE: int = 1  # Minimum files to process at once
+    KB_MAX_BATCH_SIZE: int = 20  # Maximum files to process at once (dynamic sizing)
+    KB_MEMORY_THRESHOLD_MB: int = 1024  # Memory threshold for batch adjustment (1GB)
+    KB_EMBEDDING_CHUNK_SIZE: int = 50000  # Tokens per embedding request
+    KB_PROGRESS_UPDATE_INTERVAL: int = 5  # Files processed before progress update
+
     # FormConnect processing parameters
     FORMCONNECT_MAX_TOKENS_PER_REQUEST: int = 150000  # Token limit for full text mode
     FORMCONNECT_VECTOR_SEARCH_CHUNKS: int = 5  # Number of chunks to retrieve per field
@@ -170,7 +178,7 @@ class Settings(BaseSettings):
     }
 
     # OpenAI API Configuration
-    OPENAI_TIMEOUT: int = 600  # 10 minutes timeout for OpenAI API calls
+    OPENAI_TIMEOUT: int = 3600  # 60 minutes timeout for OpenAI API calls
 
     # Usage Quota Configuration
     QUOTA_PERIOD_START_DAY: int = 1  # Day of month when quota period starts (1-28)
