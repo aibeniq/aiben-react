@@ -2074,7 +2074,7 @@ export const addAsianTranslations = (resources: any) => {
         subtitle: "Maghanap ng mga katulad na dokumento batay sa nilalaman",
         selectDocument: "Pumili ng dokumento upang maghanap ng mga tumugma",
         pleaseSelect: "Pakiselect ang dokumento...",
-        sourceDocument: "Source Document",
+        sourceDocument: "Form Template",
         matchingDocuments: "Mga Tumugmang Dokumento",
         findMatches: "Maghanap ng mga Tugma",
         similarityScore: "Similarity Score",

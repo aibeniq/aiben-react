@@ -499,7 +499,7 @@ const generateAllLanguageResources = () => {
         subtitle: "Ensure that field entries match across documents of different format.",
         selectDocument: "Select a document to find matches",
         pleaseSelect: "Please select a document...",
-        sourceDocument: "Source Document",
+        sourceDocument: "Form Template",
         matchingDocuments: "Matching Documents",
         findMatches: "Find Matches",
         similarityScore: "Similarity Score",
