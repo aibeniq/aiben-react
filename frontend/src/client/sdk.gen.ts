@@ -391,6 +391,14 @@ export class FilesService {
             path: {
                 source_id: data.sourceId
             },
+            responseType: 'arraybuffer',
+            responseTransformer: async (data: any) => {
+                // Handle binary PDF response
+                if (data instanceof ArrayBuffer) {
+                    return new Blob([data], { type: 'application/pdf' });
+                }
+                return data;
+            },
             errors: {
                 422: 'Validation Error'
             }
@@ -412,6 +420,14 @@ export class FilesService {
             url: '/api/v1/files/source/by-filename/{filename}/pdf',
             path: {
                 filename: data.filename
+            },
+            responseType: 'arraybuffer',
+            responseTransformer: async (data: any) => {
+                // Handle binary PDF response
+                if (data instanceof ArrayBuffer) {
+                    return new Blob([data], { type: 'application/pdf' });
+                }
+                return data;
             },
             errors: {
                 422: 'Validation Error'

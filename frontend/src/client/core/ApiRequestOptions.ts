@@ -17,5 +17,6 @@ export type ApiRequestOptions<T = unknown> = {
 	readonly query?: Record<string, unknown>;
 	readonly responseHeader?: string;
 	readonly responseTransformer?: (data: unknown) => Promise<T>;
+	readonly responseType?: 'arraybuffer' | 'blob' | 'document' | 'json' | 'text';
 	readonly url: string;
 };

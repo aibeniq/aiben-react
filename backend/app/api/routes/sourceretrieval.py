@@ -141,9 +141,7 @@ async def get_source_content(
             file_content = source_data.data
 
         # Determine content type
-        content_type = (
-            mimetypes.guess_type(file_name)[0] or "application/octet-stream"
-        )
+        content_type = mimetypes.guess_type(file_name)[0] or "application/octet-stream"
 
         # Base64 encode for transmission
         content_base64 = base64.b64encode(file_content).decode("utf-8")
@@ -210,63 +208,56 @@ async def convert_docx_to_pdf(
         if not file_name.lower().endswith(".docx"):
             raise HTTPException(status_code=400, detail="File is not a DOCX document")
 
-        # Extract the DOCX file content from the ZIP
-        zip_data = BytesIO(source_data.data)
-        with zipfile.ZipFile(zip_data, "r") as zip_file:
-            file_info = zip_file.infolist()[0]
-            docx_content = zip_file.read(file_info.filename)
+        # DOCX files are already ZIP files internally, so we don't need to extract from another ZIP
+        # Write the source data directly to a temporary DOCX file
+        with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as temp_docx:
+            with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp_pdf:
+                try:
+                    # Write the source data directly as DOCX content
+                    temp_docx.write(source_data.data)
+                    temp_docx.flush()
 
-            # Create temporary files for conversion
-            with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as temp_docx:
-                with tempfile.NamedTemporaryFile(
-                    suffix=".pdf", delete=False
-                ) as temp_pdf:
+                    print(f"Converting DOCX to PDF: {file_name}")
+
+                    # Convert DOCX to HTML using mammoth
+                    with open(temp_docx.name, "rb") as docx_file:
+                        result = mammoth.convert_to_html(docx_file)
+                        html_content = result.value
+
+                    print(f"Converting HTML to PDF for: {file_name}")
+
+                    # Convert HTML to PDF using ReportLab
+                    html_to_pdf_with_reportlab(html_content, temp_pdf.name)
+
+                    # Read the generated PDF
+                    with open(temp_pdf.name, "rb") as pdf_file:
+                        pdf_content = pdf_file.read()
+
+                    # Generate PDF filename
+                    pdf_filename = f"{os.path.splitext(file_name)[0]}.pdf"
+
+                    print(
+                        f"Successfully converted {file_name} to PDF ({len(pdf_content)} bytes)"
+                    )
+
+                    # Return the PDF
+                    return Response(
+                        content=pdf_content,
+                        media_type="application/pdf",
+                        headers={
+                            "Content-Disposition": f'inline; filename="{pdf_filename}"'
+                        },
+                    )
+
+                finally:
+                    # Clean up temp files
                     try:
-                        # Write DOCX content to temp file
-                        temp_docx.write(docx_content)
-                        temp_docx.flush()
-
-                        print(f"Converting DOCX to PDF: {file_name}")
-
-                        # Convert DOCX to HTML using mammoth
-                        with open(temp_docx.name, "rb") as docx_file:
-                            result = mammoth.convert_to_html(docx_file)
-                            html_content = result.value
-
-                        print(f"Converting HTML to PDF for: {file_name}")
-
-                        # Convert HTML to PDF using ReportLab
-                        html_to_pdf_with_reportlab(html_content, temp_pdf.name)
-
-                        # Read the generated PDF
-                        with open(temp_pdf.name, "rb") as pdf_file:
-                            pdf_content = pdf_file.read()
-
-                        # Generate PDF filename
-                        pdf_filename = f"{os.path.splitext(file_name)[0]}.pdf"
-
+                        os.unlink(temp_docx.name)
+                        os.unlink(temp_pdf.name)
+                    except Exception as cleanup_error:
                         print(
-                            f"Successfully converted {file_name} to PDF ({len(pdf_content)} bytes)"
+                            f"Warning: Failed to clean up temp files: {cleanup_error}"
                         )
-
-                        # Return the PDF
-                        return Response(
-                            content=pdf_content,
-                            media_type="application/pdf",
-                            headers={
-                                "Content-Disposition": f'inline; filename="{pdf_filename}"'
-                            },
-                        )
-
-                    finally:
-                        # Clean up temp files
-                        try:
-                            os.unlink(temp_docx.name)
-                            os.unlink(temp_pdf.name)
-                        except Exception as cleanup_error:
-                            print(
-                                f"Warning: Failed to clean up temp files: {cleanup_error}"
-                            )
 
     except Exception as e:
         import traceback
@@ -316,63 +307,56 @@ async def convert_docx_to_pdf_by_filename(
         if not source_data:
             raise HTTPException(status_code=404, detail="Source data not found")
 
-        # Extract the DOCX file content from the ZIP
-        zip_data = BytesIO(source_data.data)
-        with zipfile.ZipFile(zip_data, "r") as zip_file:
-            file_info = zip_file.infolist()[0]
-            docx_content = zip_file.read(file_info.filename)
+        # DOCX files are already ZIP files internally, so we don't need to extract from another ZIP
+        # Write the source data directly to a temporary DOCX file
+        with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as temp_docx:
+            with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp_pdf:
+                try:
+                    # Write the source data directly as DOCX content
+                    temp_docx.write(source_data.data)
+                    temp_docx.flush()
 
-            # Create temporary files for conversion
-            with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as temp_docx:
-                with tempfile.NamedTemporaryFile(
-                    suffix=".pdf", delete=False
-                ) as temp_pdf:
+                    print(f"Converting DOCX to PDF by filename: {filename}")
+
+                    # Convert DOCX to HTML using mammoth
+                    with open(temp_docx.name, "rb") as docx_file:
+                        result = mammoth.convert_to_html(docx_file)
+                        html_content = result.value
+
+                    print(f"Converting HTML to PDF for filename: {filename}")
+
+                    # Convert HTML to PDF using ReportLab
+                    html_to_pdf_with_reportlab(html_content, temp_pdf.name)
+
+                    # Read the generated PDF
+                    with open(temp_pdf.name, "rb") as pdf_file:
+                        pdf_content = pdf_file.read()
+
+                    # Generate PDF filename
+                    pdf_filename = f"{os.path.splitext(filename)[0]}.pdf"
+
+                    print(
+                        f"Successfully converted {filename} to PDF ({len(pdf_content)} bytes)"
+                    )
+
+                    # Return the PDF
+                    return Response(
+                        content=pdf_content,
+                        media_type="application/pdf",
+                        headers={
+                            "Content-Disposition": f'inline; filename="{pdf_filename}"'
+                        },
+                    )
+
+                finally:
+                    # Clean up temp files
                     try:
-                        # Write DOCX content to temp file
-                        temp_docx.write(docx_content)
-                        temp_docx.flush()
-
-                        print(f"Converting DOCX to PDF by filename: {filename}")
-
-                        # Convert DOCX to HTML using mammoth
-                        with open(temp_docx.name, "rb") as docx_file:
-                            result = mammoth.convert_to_html(docx_file)
-                            html_content = result.value
-
-                        print(f"Converting HTML to PDF for filename: {filename}")
-
-                        # Convert HTML to PDF using ReportLab
-                        html_to_pdf_with_reportlab(html_content, temp_pdf.name)
-
-                        # Read the generated PDF
-                        with open(temp_pdf.name, "rb") as pdf_file:
-                            pdf_content = pdf_file.read()
-
-                        # Generate PDF filename
-                        pdf_filename = f"{os.path.splitext(filename)[0]}.pdf"
-
+                        os.unlink(temp_docx.name)
+                        os.unlink(temp_pdf.name)
+                    except Exception as cleanup_error:
                         print(
-                            f"Successfully converted {filename} to PDF ({len(pdf_content)} bytes)"
+                            f"Warning: Failed to clean up temp files: {cleanup_error}"
                         )
-
-                        # Return the PDF
-                        return Response(
-                            content=pdf_content,
-                            media_type="application/pdf",
-                            headers={
-                                "Content-Disposition": f'inline; filename="{pdf_filename}"'
-                            },
-                        )
-
-                    finally:
-                        # Clean up temp files
-                        try:
-                            os.unlink(temp_docx.name)
-                            os.unlink(temp_pdf.name)
-                        except Exception as cleanup_error:
-                            print(
-                                f"Warning: Failed to clean up temp files: {cleanup_error}"
-                            )
 
     except Exception as e:
         import traceback

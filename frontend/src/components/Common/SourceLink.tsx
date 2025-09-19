@@ -1,5 +1,6 @@
 import { type FilesGetSourceContentResponse, FilesService } from "@/client"
 import { useFileViewer } from "@/hooks/useFileViewer"
+import useCustomToast from "@/hooks/useCustomToast"
 import { Link, type LinkProps } from "@chakra-ui/react"
 import { useState } from "react"
 import FileViewerModal from "./FileViewerModal"
@@ -18,11 +19,12 @@ const SourceLink: React.FC<SourceLinkProps> = ({
 }) => {
   // In Chakra UI v3, we need to manually manage this state
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { viewFile, viewFileInModal, currentFile, isLoading, clearFile } =
-    useFileViewer()
+  const { viewFile, viewFileInModal, currentFile, isLoading, clearFile } = useFileViewer()
   const [isLoadingFile, setIsLoadingFile] = useState(false)
-  const [convertedPdfFile, setConvertedPdfFile] =
-    useState<FilesGetSourceContentResponse | null>(null) // For DOCX converted to PDF
+  const [convertedPdfFile, setConvertedPdfFile] = useState<FilesGetSourceContentResponse | null>(
+    null,
+  ) // For DOCX converted to PDF
+  const { showErrorToast } = useCustomToast()
 
   const handleClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
@@ -46,17 +48,11 @@ const SourceLink: React.FC<SourceLinkProps> = ({
 
         // If sourceId is empty/null, use filename-based conversion
         if (!sourceId || sourceId.trim() === "") {
-          console.log(
-            "No sourceId provided, using filename-based conversion:",
-            fileName,
-          )
+          console.log("No sourceId provided, using filename-based conversion:", fileName)
           pdfBlob = (await FilesService.convertDocxToPdfByFilename({
             filename: fileName,
           })) as Blob
-          console.log(
-            "PDF conversion by filename successful, blob size:",
-            pdfBlob.size,
-          )
+          console.log("PDF conversion by filename successful, blob size:", pdfBlob.size)
         } else {
           console.log("Using sourceId-based conversion:", sourceId)
           // Use the DOCX to PDF conversion endpoint with sourceId
@@ -64,10 +60,22 @@ const SourceLink: React.FC<SourceLinkProps> = ({
           console.log("PDF conversion successful, blob size:", pdfBlob.size)
         }
 
+        // Verify blob is valid
+        if (!pdfBlob || pdfBlob.size === 0) {
+          throw new Error("PDF conversion resulted in empty or invalid blob")
+        }
+
         // Convert PDF blob to base64 for modal viewing
         const pdfArrayBuffer = await pdfBlob.arrayBuffer()
         const pdfUint8Array = new Uint8Array(pdfArrayBuffer)
-        const pdfBase64 = btoa(String.fromCharCode(...pdfUint8Array))
+
+        // Use a more robust method for large files to avoid call stack issues
+        let binary = ""
+        const len = pdfUint8Array.byteLength
+        for (let i = 0; i < len; i++) {
+          binary += String.fromCharCode(pdfUint8Array[i])
+        }
+        const pdfBase64 = btoa(binary)
 
         // Create a fake response object compatible with FilesGetSourceContentResponse
         const pdfFilename = fileName.replace(/\.docx$/i, ".pdf")
@@ -81,6 +89,7 @@ const SourceLink: React.FC<SourceLinkProps> = ({
         console.log("Created fake response for modal:", {
           name: fakeResponse.name,
           contentType: fakeResponse.content_type,
+          base64Length: pdfBase64.length,
         })
 
         if (useModal) {
@@ -103,10 +112,7 @@ const SourceLink: React.FC<SourceLinkProps> = ({
           (!sourceId || sourceId.trim() === "") &&
           (fileName.toLowerCase().endsWith(".pdf") || fileName.toLowerCase().endsWith(".txt"))
         ) {
-          console.log(
-            "No sourceId provided for PDF/TXT, using filename-based viewing:",
-            fileName,
-          )
+          console.log("No sourceId provided for PDF/TXT, using filename-based viewing:", fileName)
 
           try {
             const response = await FilesService.getSourceContentByFilename({
@@ -144,7 +150,7 @@ const SourceLink: React.FC<SourceLinkProps> = ({
           // Use normal sourceId-based viewing
           // For .txt files, if sourceId method fails, try filename-based viewing as fallback
           const isTxtFile = fileName.toLowerCase().endsWith(".txt")
-          
+
           try {
             if (useModal) {
               await viewFileInModal(sourceId)
@@ -154,7 +160,7 @@ const SourceLink: React.FC<SourceLinkProps> = ({
             }
           } catch (sourceIdError) {
             console.error("SourceId-based viewing failed:", sourceIdError)
-            
+
             // For .txt files, try filename-based viewing as fallback
             if (isTxtFile) {
               console.log("Attempting filename-based fallback for .txt file:", fileName)
@@ -204,18 +210,29 @@ const SourceLink: React.FC<SourceLinkProps> = ({
         name: error instanceof Error ? error.name : typeof error,
       })
 
-      // Fallback to original method if conversion fails
-      console.log("Attempting fallback to original viewing method")
-      try {
-        if (useModal) {
-          await viewFileInModal(sourceId)
-          setIsModalOpen(true)
-        } else {
-          await viewFile(sourceId)
+      // Check if this was a DOCX file that failed conversion
+      const isDocx = fileName.toLowerCase().endsWith(".docx")
+
+      if (isDocx) {
+        // For DOCX files, don't fall back to original method since they can't be displayed natively
+        console.error("DOCX to PDF conversion failed, not attempting fallback")
+        showErrorToast(
+          `Failed to convert DOCX file "${fileName}" to PDF for viewing. Please try again or download the file directly.`,
+        )
+      } else {
+        // Fallback to original method if conversion fails for non-DOCX files
+        console.log("Attempting fallback to original viewing method")
+        try {
+          if (useModal) {
+            await viewFileInModal(sourceId)
+            setIsModalOpen(true)
+          } else {
+            await viewFile(sourceId)
+          }
+          console.log("Fallback method succeeded")
+        } catch (fallbackError) {
+          console.error("Fallback method also failed:", fallbackError)
         }
-        console.log("Fallback method succeeded")
-      } catch (fallbackError) {
-        console.error("Fallback method also failed:", fallbackError)
       }
     } finally {
       setIsLoadingFile(false)
