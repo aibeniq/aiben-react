@@ -202,6 +202,11 @@ class KnowledgeBasePublic(KnowledgeBaseBase):
     embedding_model_name: Optional[str] = Field(default=None)
 
 
+class KnowledgeBaseCreateResponse(SQLModel):
+    knowledge_base: KnowledgeBasePublic
+    task_id: str
+
+
 class KnowledgeBasesPublic(SQLModel):
     data: list[KnowledgeBasePublic]
     count: int

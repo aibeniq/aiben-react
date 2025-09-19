@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useDropzone } from "react-dropzone"
 import { type SubmitHandler, useForm } from "react-hook-form"
+import { useEffect, useState, useRef } from "react"
 
 import {
   Box,
@@ -10,17 +11,17 @@ import {
   HStack,
   Input,
   Link,
-  Spinner,
+  Progress,
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { useEffect, useState } from "react"
 import { FaPlus, FaTrash } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
 
 import { EmbeddingModelsService } from "@/client"
 import { createKnowledgeBaseWithTimeout } from "@/client/knowledgeBaseClient"
 import useCustomToast from "@/hooks/useCustomToast"
+import { useKnowledgeBaseProgress } from "@/hooks/useKnowledgeBaseProgress"
 import {
   DialogBody,
   DialogCloseTrigger,
@@ -51,6 +52,12 @@ const AddKnowledgeBase = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]) // State for managing selected files
   const [selectedEmbeddingModelId, setSelectedEmbeddingModelId] = useState<string | null>(null)
   const [availableProviders, setAvailableProviders] = useState<string[]>([]) //only show Embedding Model providers allowed in config.py
+  const [taskId, setTaskId] = useState<string | null>(null)
+  const hasHandledCompletionRef = useRef(false) // Prevent multiple success toasts
+  
+  // Progress state from the backend
+  const progress = useKnowledgeBaseProgress(taskId)
+  
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const {
@@ -79,6 +86,34 @@ const AddKnowledgeBase = () => {
     queryFn: () => EmbeddingModelsService.getDefaultEmbeddingModel(),
     enabled: isOpen,
   })
+
+  // Handle progress completion and close modal
+  useEffect(() => {
+    // Only handle completion if we have an active task
+    if (taskId && progress.completed && !progress.error && !hasHandledCompletionRef.current) {
+      console.log("✅ Knowledge base creation completed successfully - handling completion")
+      
+      // Mark completion as handled to prevent multiple toasts
+      hasHandledCompletionRef.current = true
+      
+      // Show success toast only when entire process is complete
+      showSuccessToast(t("knowledgeBases.modals.messages.createSuccess"))
+      
+      // Invalidate queries to refresh the list with the new knowledge base
+      queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
+      queryClient.invalidateQueries({ queryKey: ["items"] })
+      queryClient.refetchQueries({ queryKey: ["items"] })
+      
+      // Close modal and reset task ID
+      setIsOpen(false)
+      setTaskId(null)
+    } else if (taskId && progress.error && !hasHandledCompletionRef.current) {
+      console.error("❌ Knowledge base creation failed:", progress.error)
+      hasHandledCompletionRef.current = true
+      showErrorToast(progress.error)
+      setTaskId(null)
+    }
+  }, [taskId, progress.completed, progress.error, showErrorToast, showSuccessToast, queryClient, t])
 
   // determine which embedding models are allowed
   useEffect(() => {
@@ -120,6 +155,8 @@ const AddKnowledgeBase = () => {
       console.log("🔒 Modal is closing - resetting form and files")
       setSelectedFiles([])
       setSelectedEmbeddingModelId(null)
+      setTaskId(null)
+      hasHandledCompletionRef.current = false // Reset completion handler for next time
 
       // Also reset the form completely, including errors
       reset(
@@ -139,17 +176,22 @@ const AddKnowledgeBase = () => {
       queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
       queryClient.invalidateQueries({ queryKey: ["items"] })
       console.log("✅ Modal close cleanup completed")
+    } else {
+      // Modal is opening - ensure clean state
+      console.log("🔓 Modal is opening - ensuring clean state")
+      setTaskId(null)
+      hasHandledCompletionRef.current = false
     }
   }, [isOpen, reset, queryClient])
 
   const mutation = useMutation({
-    mutationFn: (data: {
+    mutationFn: async (data: {
       title: string
       description: string
       embedding_model_id: string | null
       files: File[]
     }) => {
-      console.log("🚀 Starting knowledge base creation mutation with data:", data)
+      console.log("🚀 Starting knowledge base creation mutation")
 
       // Basic validation - ensure we have files
       if (data.files.length === 0) {
@@ -160,60 +202,49 @@ const AddKnowledgeBase = () => {
       console.log(`📊 Upload stats: ${data.files.length} files, ${(totalSize / (1024*1024)).toFixed(1)}MB total`)
 
       // Send the FormData object to the backend with extended timeout
-      return createKnowledgeBaseWithTimeout({
-        title: data.title, // Still required for the `query` object
-        description: data.description, // Still required for the `query` object
+      const result = await createKnowledgeBaseWithTimeout({
+        title: data.title,
+        description: data.description,
         embeddingModelId: data.embedding_model_id,
         formData: {
-          files: data.files, // ✅ this is what the SDK expects
-        }, // Include all fields in the FormData payload
+          files: data.files,
+        },
       })
+      
+      // Start tracking progress with the task ID from the response
+      if (result.task_id) {
+        setTaskId(result.task_id)
+        hasHandledCompletionRef.current = false // Reset for new task
+      }
+      
+      return result
     },
     onSuccess: (data) => {
-      console.log("✅ Knowledge base creation SUCCESS:", data)
-      showSuccessToast(t("knowledgeBases.modals.messages.createSuccess"))
-      setIsOpen(false)
-
-      // Invalidate BOTH query keys
-      console.log("🔄 Invalidating knowledge-bases cache...")
-      queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
-
-      console.log("🔄 Invalidating items cache (the one actually used by the list)...")
-      queryClient.invalidateQueries({ queryKey: ["items"] })
-
-      console.log("🔄 Forcing refetch of items...")
-      queryClient.refetchQueries({ queryKey: ["items"] })
-
-      console.log("✨ Knowledge base creation success flow completed")
+      console.log("✅ Knowledge base creation API call SUCCESS - background processing started:", data)
+      
+      // Note: Success toast and modal close will happen when progress reaches completion
+      // This onSuccess only means the API call succeeded and background processing started
     },
     onError: (err: any) => {
       console.error("❌ Knowledge base creation ERROR:", err)
       
       let errorMessage = "Failed to create knowledge base"
       
-      // Handle client-side validation errors
-      if (err.message?.includes("Too many files") || 
-          err.message?.includes("file size") || 
-          err.message?.includes("Files too large")) {
+      if (err.message?.includes("Too many files")) {
         errorMessage = err.message
-      }
-      // Handle server-side errors
-      else if (err.status === 409) {
-        // Handle duplicate title error specifically
+      } else if (err.status === 409) {
         errorMessage = (err.body as { detail: string }).detail ||
             "A knowledge base with this title already exists"
-      } 
-      else if (err.status === 400 && err.body?.detail?.includes("File validation failed")) {
-        errorMessage = err.body.detail
-      }
-      else if (err.message?.includes("Network Error") || err.code === "ERR_NETWORK") {
+      } else if (err.message?.includes("Network Error") || err.code === "ERR_NETWORK") {
         errorMessage = "Upload timeout or server error. Try with fewer/smaller files or check your connection."
-      }
-      else if (err.body?.detail) {
+      } else if (err.body?.detail) {
         errorMessage = err.body.detail
       }
       
       showErrorToast(errorMessage)
+      
+      // Reset task ID on error
+      setTaskId(null)
     },
     onSettled: () => {
       console.log("🏁 Knowledge base mutation SETTLED - doing final cache invalidation")
@@ -310,21 +341,40 @@ const AddKnowledgeBase = () => {
       </DialogTrigger>
       <DialogContent>
         <Box position="relative">
-          {isSubmitting && (
+          {(isSubmitting || progress.isActive || (taskId && !progress.completed)) && (
             <Box
               position="absolute"
               top="0"
               left="0"
               right="0"
               bottom="0"
-              bg="blackAlpha.300"
+              bg="blackAlpha.800"
               zIndex="50"
               display="flex"
+              flexDirection="column"
               alignItems="center"
               justifyContent="center"
               borderRadius="md"
+              p={6}
             >
-              <Spinner color="blue.500" size="xl" />
+              <VStack gap={4} width="80%" maxWidth="400px">
+                <Text color="white" fontSize="lg" fontWeight="medium" textAlign="center">
+                  {progress.message || "Processing..."}
+                </Text>
+                <Box width="100%">
+                  <Progress.Root value={progress.percentage} size="lg" colorPalette="blue">
+                    <Progress.Track>
+                      <Progress.Range />
+                    </Progress.Track>
+                  </Progress.Root>
+                  <Text color="white" fontSize="sm" textAlign="center" mt={2}>
+                    {Math.round(progress.percentage)}%
+                  </Text>
+                </Box>
+                <Text color="gray.300" fontSize="sm" textAlign="center">
+                  Please wait while we process your files...
+                </Text>
+              </VStack>
             </Box>
           )}
 
@@ -411,9 +461,6 @@ const AddKnowledgeBase = () => {
                   <Box>
                   <Text fontSize="xs" color="gray.500">
                     Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX
-                  </Text>
-                  <Text fontSize="xs" color="gray.500">
-                    The system will intelligently process files based on available resources
                   </Text>
                 </Box>
                 </Box>

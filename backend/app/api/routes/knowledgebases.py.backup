@@ -132,21 +132,14 @@ def calculate_optimal_batch_size(files: List[UploadFile], current_memory_mb: flo
     return batch_size
 
 
-def log_progress(current: int, total: int, operation: str = "Processing", task_id: str = None, global_step: int = 1, total_steps: int = 3):
+def log_progress(current: int, total: int, operation: str = "Processing", task_id: str = None):
     """Log progress for long-running operations."""
     percentage = (current / total) * 100 if total > 0 else 0
     logger.info(f"{operation} progress: {current}/{total} ({percentage:.1f}%)")
     
     # Also update progress tracker if task_id is provided
-    # Map local progress to global task progress
     if task_id:
-        # Calculate the progress within the current step
-        step_progress = current / total if total > 0 else 0
-        # Calculate overall progress: (completed_steps + current_step_progress) / total_steps
-        overall_progress = ((global_step - 1) + step_progress) / total_steps
-        # Convert to the task's total scale (assuming task total = total_steps)
-        global_current = overall_progress * total_steps
-        progress_tracker.update_progress(task_id, global_current, f"{operation}: {current}/{total} ({percentage:.1f}%)")
+        progress_tracker.update_progress(task_id, current, f"{operation}: {current}/{total} ({percentage:.1f}%)")
 
 
 def analyze_upload_feasibility(files: List[UploadFile]) -> dict:
@@ -411,54 +404,6 @@ def extract_text_from_docx(file_path: str, filename: str) -> List[Any]:
     return extract_text_from_docx_langchain(file_path, filename)
 
 
-def create_source_entry_from_file_data(
-    session: SessionDep,
-    knowledge_base_id: uuid.UUID,
-    file_info: dict,
-    user_id: uuid.UUID
-) -> None:
-    """Create a source entry from file metadata."""
-    try:
-        import hashlib
-        
-        # Get file information
-        content = file_info.get('content', b'')
-        filename = file_info.get('filename', 'unknown')
-        content_size = len(content)
-        
-        # Calculate file hash for SourceData
-        file_hash = hashlib.sha256(content).hexdigest()
-        
-        # Estimate pages based on content size
-        estimated_pages = max(1, content_size // 3000)  # ~3000 characters per page
-        
-        # Create source data entry with manual UUID generation
-        source_data = SourceData(
-            id=uuid.uuid4(),  # Manually generate UUID
-            data=content,
-            file_hash=file_hash
-        )
-        session.add(source_data)
-        session.flush()  # Get the ID
-        
-        # Create source entry
-        source = Source(
-            name=filename,
-            knowledge_base_id=knowledge_base_id,
-            source_data_id=source_data.id,
-            owner_id=user_id,
-            page_count=estimated_pages  # Use correct field name
-        )
-        session.add(source)
-        session.flush()
-        
-        print(f"✅ Created source entry for {filename} ({content_size} bytes, {estimated_pages} pages)")
-        
-    except Exception as e:
-        print(f"❌ Failed to create source entry for {file_info.get('filename', 'unknown')}: {e}")
-        # Don't raise - this shouldn't fail the entire knowledge base creation
-
-
 def load_uploaded_file(file: UploadFile) -> List[Any]:
     """
     Load an uploaded file based on its type (e.g., PDF, text file).
@@ -664,19 +609,8 @@ async def create_knowledge_base(
     print("Received the following metadata for the knowledge base:")
     print(knowledge_base_in)
 
-    # Create progress tracking task with 3 main steps
-    task_id = progress_tracker.create_task("Initializing knowledge base creation", 3)
-    
-    # Analyze upload feasibility and provide recommendations
-    analysis = analyze_upload_feasibility(files)
-    logger.info(f"Upload analysis: {analysis}")
-    
-    # Log warnings but don't block processing
-    for warning in analysis["warnings"]:
-        logger.warning(warning)
-    
-    for recommendation in analysis["recommendations"]:
-        logger.info(f"Recommendation: {recommendation}")
+    # Create progress tracking task
+    task_id = progress_tracker.create_task("Initializing knowledge base creation", len(files) * 3)
     
     try:
         # Check if a knowledge base with this title already exists for this user
@@ -699,9 +633,7 @@ async def create_knowledge_base(
             title=knowledge_base_in.title,
             description=knowledge_base_in.description,
             owner_id=current_user.id,
-            embedding_model_id=knowledge_base_in.embedding_model_id,
-            date_created=datetime.utcnow(),
-            date_modified=datetime.utcnow()
+            embedding_model_id=knowledge_base_in.embedding_model_id
         )
         session.add(knowledge_base)
         session.commit()
@@ -765,84 +697,88 @@ async def process_knowledge_base_creation(
     
     # Create a new session for background processing
     with Session(engine) as session:
-        try:
-            # Check if a knowledge base with this title already exists for this user
-            knowledge_base = session.get(KnowledgeBase, knowledge_base_id)
-            
-            if not knowledge_base:
-                progress_tracker.fail_task(task_id, "Knowledge base not found")
-                raise HTTPException(
-                    status_code=404,
-                    detail="Knowledge base not found",
-                )
+    
+    try:
+        # Analyze upload feasibility and provide recommendations
+        analysis = analyze_upload_feasibility(files)
+        logger.info(f"Upload analysis: {analysis}")
+        
+        # Log warnings but don't block processing
+        for warning in analysis["warnings"]:
+            logger.warning(warning)
+        
+        for recommendation in analysis["recommendations"]:
+            logger.info(f"Recommendation: {recommendation}")
 
-            # Initialize variables for document processing
-            all_documents = []
-            failed_files = []
-            initial_memory = get_memory_usage_mb()
+        # Check if a knowledge base with this title already exists for this user
+        existing_kb = session.exec(
+            select(KnowledgeBase).where(
+                KnowledgeBase.title == knowledge_base_in.title,
+                KnowledgeBase.owner_id == current_user.id,
+            )
+        ).first()
+
+        if existing_kb:
+            progress_tracker.fail_task(task_id, f"A knowledge base with the title '{knowledge_base_in.title}' already exists")
+            raise HTTPException(
+                status_code=409,
+                detail=f"A knowledge base with the title '{knowledge_base_in.title}' already exists",
+            )
+
+        # Initialize variables for document processing
+        all_documents = []
+        failed_files = []
+        initial_memory = get_memory_usage_mb()
+        
+        with error_recovery_context("document processing"):
+            # Calculate optimal batch size based on memory and file sizes
+            batch_size = calculate_optimal_batch_size(files, initial_memory)
             
-            with error_recovery_context("document processing"):
-                # Process files from file_data
-                total_files = len(file_data)
-                print(f"Processing {total_files} files from file_data")
+            # Process files in optimally-sized batches
+            for i in range(0, len(files), batch_size):
+                batch_files = files[i:i + batch_size]
+                batch_num = i // batch_size + 1
+                total_batches = (len(files) + batch_size - 1) // batch_size
                 
-                # Process each file from the serialized data
-                for i, file_info in enumerate(file_data):
+                print(f"Processing batch {batch_num}/{total_batches} with {len(batch_files)} files")
+                log_progress(i, len(files), "File processing", task_id)
+                
+                # Monitor memory before processing batch
+                current_memory = get_memory_usage_mb()
+                if current_memory > initial_memory + settings.KB_MEMORY_THRESHOLD_MB:
+                    logger.warning(f"High memory usage detected: {current_memory:.1f}MB. Triggering garbage collection.")
+                    gc.collect()
+                    current_memory = get_memory_usage_mb()
+                    logger.info(f"Memory after GC: {current_memory:.1f}MB")
+                
+                batch_documents = []
+                for file_idx, file in enumerate(batch_files):
                     try:
                         # Log progress every few files
-                        if i % settings.KB_PROGRESS_UPDATE_INTERVAL == 0:
-                            log_progress(i + 1, total_files, "Processing files", task_id, global_step=1)
+                        if (i + file_idx) % settings.KB_PROGRESS_UPDATE_INTERVAL == 0:
+                            log_progress(i + file_idx + 1, len(files), "Processing files", task_id)
                         
-                        # Create a temporary file with the content
-                        filename = file_info['filename']
-                        content = file_info['content']
-                        content_type = file_info.get('content_type', 'application/octet-stream')
-                        
-                        print(f"Processing file {i+1}/{total_files}: {filename}")
-                        
-                        # Create a temporary file for processing
-                        with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{filename}") as temp_file:
-                            temp_file.write(content)
-                            temp_file_path = temp_file.name
-                        
-                        try:
-                            # Process the temporary file based on its type
-                            if filename.lower().endswith('.pdf'):
-                                loaded_documents = load_pdf_with_pypdf(temp_file_path, filename)
-                            elif filename.lower().endswith('.txt'):
-                                loader = TextLoader(temp_file_path)
-                                loaded_documents = loader.load()
-                            elif filename.lower().endswith('.docx'):
-                                loaded_documents = extract_text_from_docx(temp_file_path, filename)
-                            else:
-                                # Try to process as text
-                                try:
-                                    loader = TextLoader(temp_file_path)
-                                    loaded_documents = loader.load()
-                                except Exception:
-                                    print(f"⚠️ Unsupported file type for {filename}, skipping")
-                                    failed_files.append(f"{filename}: Unsupported file type")
-                                    continue
-                            
-                            all_documents.extend(loaded_documents)
-                            print(f"✅ Processed {filename}: {len(loaded_documents)} documents")
-                            
-                        except Exception as e:
-                            failed_files.append(f"{filename}: {str(e)}")
-                            print(f"❌ Failed to process {filename}: {e}")
-                        finally:
-                            # Clean up temporary file
-                            try:
-                                os.unlink(temp_file_path)
-                            except:
-                                pass
-                        
+                        loaded_documents = load_uploaded_file(file)
+                        batch_documents.extend(loaded_documents)
+                        print(f"✅ Processed {file.filename}: {len(loaded_documents)} documents")
                     except Exception as e:
-                        failed_files.append(f"File {i}: {str(e)}")
-                        print(f"❌ Failed to process file {i}: {e}")
+                        failed_files.append(f"{file.filename}: {str(e)}")
+                        print(f"❌ Failed to process {file.filename}: {e}")
                         continue
+                    finally:
+                        file.file.seek(0)
+                
+                all_documents.extend(batch_documents)
+                
+                # Force garbage collection between batches for memory management
+                gc.collect()
+                
+                # Adaptive delay based on batch size and system load
+                delay = min(0.5, len(batch_files) * 0.1)
+                if i + batch_size < len(files):
+                    await asyncio.sleep(delay)
 
-                log_progress(total_files, total_files, "File processing", task_id, global_step=1)
+            log_progress(len(files), len(files), "File processing", task_id)
 
             if failed_files:
                 logger.warning(f"{len(failed_files)} files failed to process: {failed_files}")
@@ -853,177 +789,192 @@ async def process_knowledge_base_creation(
                     detail="No documents could be processed from the uploaded files"
                 )
 
-            print(f"Successfully processed {len(all_documents)} documents from {total_files} files")
+            print(f"Successfully processed {len(all_documents)} documents from {len(files)} files")
 
-            # Temporary files are already cleaned up in the processing loop
+        # Clean up temporary files
+        with error_recovery_context("temporary file cleanup"):
+            for root, dirs, files_in_dir in os.walk(tempfile.gettempdir()):
+                for filename in files_in_dir:
+                    if any(uploaded_file.filename in filename for uploaded_file in files):
+                        try:
+                            os.unlink(os.path.join(root, filename))
+                        except:
+                            pass
+
+        with error_recovery_context("document splitting"):
+            print("Splitting documents...")
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=settings.RAG_DOCUMENT_CHUNK_SIZE,
+                chunk_overlap=settings.RAG_DOCUMENT_CHUNK_OVERLAP,
+            )
+            splits = text_splitter.split_documents(all_documents)
+            print(f"Split into {len(splits)} chunks")
+
+        with error_recovery_context("embedding initialization"):
+            print("Initializing embeddings...")
+            embeddings, model_id, provider = load_correct_embeddings_model(
+                session=session,
+                current_user=current_user,
+                embedding_model_id=knowledge_base_in.embedding_model_id,
+            )
+            print(f"Using embedding model: {model_id}")
+
+        with error_recovery_context("document chunking for embedding"):
+            print("Chunking documents for embedding...")
+            # Use adaptive chunk size based on total document count
+            if len(splits) > 10000:  # Large knowledge base
+                chunk_size = settings.KB_EMBEDDING_CHUNK_SIZE // 2  # Smaller chunks for stability
+            else:
+                chunk_size = settings.KB_EMBEDDING_CHUNK_SIZE
             
-            with error_recovery_context("document splitting"):
-                print("Splitting documents...")
-                text_splitter = RecursiveCharacterTextSplitter(
-                    chunk_size=settings.RAG_DOCUMENT_CHUNK_SIZE,
-                    chunk_overlap=settings.RAG_DOCUMENT_CHUNK_OVERLAP,
-                )
-                splits = text_splitter.split_documents(all_documents)
-                print(f"Split into {len(splits)} chunks")
+            document_chunks = chunk_documents_for_embedding(splits, max_tokens_per_chunk=chunk_size)
+            print(f"Split into {len(document_chunks)} chunks for embedding")
 
-            with error_recovery_context("embedding initialization"):
-                print("Initializing embeddings...")
-                embeddings, model_id, provider = load_correct_embeddings_model(
-                    session=session,
-                    current_user=None,  # Pass None since we only have user_id
-                    embedding_model_id=embedding_model_id,
-                )
-                print(f"Using embedding model: {model_id}")
+        # Clear out any existing chroma_db directory
+        chroma_dir = tempfile.mkdtemp()
+        chroma_db = None
 
-            with error_recovery_context("document chunking for embedding"):
-                print("Chunking documents for embedding...")
-                # Use adaptive chunk size based on total document count
-                if len(splits) > 10000:  # Large knowledge base
-                    chunk_size = settings.KB_EMBEDDING_CHUNK_SIZE // 2  # Smaller chunks for stability
-                else:
-                    chunk_size = settings.KB_EMBEDDING_CHUNK_SIZE
-                
-                document_chunks = chunk_documents_for_embedding(splits, max_tokens_per_chunk=chunk_size)
-                print(f"Split into {len(document_chunks)} chunks for embedding")
-
-            # Clear out any existing chroma_db directory
-            chroma_dir = tempfile.mkdtemp()
-            chroma_db = None
-
-            with error_recovery_context("vector database creation"):
-                try:
-                    # Process each chunk separately to avoid token limits
-                    for i, chunk in enumerate(document_chunks):
-                        log_progress(i + 1, len(document_chunks), "Creating embeddings", task_id, global_step=2)
-                        
-                        print(f"Processing embedding chunk {i+1}/{len(document_chunks)} with {len(chunk)} documents")
-
-                        # Estimate total tokens in this chunk for logging
-                        total_chunk_tokens = sum(
-                            estimate_tokens_for_embedding(doc.page_content) for doc in chunk
-                        )
-                        print(f"Chunk {i+1} contains approximately {total_chunk_tokens:,} tokens")
-
-                        # Monitor memory during embedding creation
-                        pre_embed_memory = get_memory_usage_mb()
-                        
-                        if chroma_db is None:
-                            # Initialize Chroma database with first chunk
-                            chroma_db = Chroma.from_documents(
-                                documents=chunk,
-                                embedding=embeddings,
-                                persist_directory=chroma_dir,
-                            )
-                        else:
-                            # Add subsequent chunks to existing database
-                            chroma_db.add_documents(documents=chunk)
-
-                        post_embed_memory = get_memory_usage_mb()
-                        print(f"Memory usage: {pre_embed_memory:.1f}MB → {post_embed_memory:.1f}MB")
-
-                        # Adaptive delay based on processing time and memory usage
-                        if post_embed_memory > pre_embed_memory + 200:  # Large memory increase
-                            await asyncio.sleep(1.0)
-                            gc.collect()
-                        elif i < len(document_chunks) - 1:
-                            await asyncio.sleep(0.3)
-
-                    # Persist the database
-                    if chroma_db:
-                        chroma_db.persist()
-
-                    print("Successfully created vector database with adaptive processing")
-
-                except Exception as e:
-                    print(f"Error creating Chroma VectorDB: {str(e)}")
-                    # Clean up the directory on error
-                    if os.path.exists(chroma_dir):
-                        shutil.rmtree(chroma_dir)
-                    raise HTTPException(
-                        status_code=400, detail=f"Error creating vector database: {str(e)}"
-                    )
-
-            with error_recovery_context("database compression"):
-                print("Zipping Chroma database...")
-                # Compress the Chroma database directory into a zip file
-                zip_buffer = io.BytesIO()
-                with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-                    for root, _, filenames in os.walk(chroma_dir):
-                        for filename in filenames:
-                            file_path = os.path.join(root, filename)
-                            arcname = os.path.relpath(file_path, chroma_dir)
-                            zip_file.write(file_path, arcname)
-                zip_buffer.seek(0)
-
-                # Clean up the temporary chroma directory
-                try:
-                    if os.path.exists(chroma_dir):
-                        shutil.rmtree(chroma_dir)
-                except Exception as e:
-                    print(f"Warning: Could not clean up temporary directory {chroma_dir}: {e}")
-
-            with error_recovery_context("knowledge base creation"):
-                print("Creating knowledge base record...")
-                # Update the knowledge base with the processed data
-                knowledge_base.data = zip_buffer.read()
-                knowledge_base.date_modified = datetime.utcnow()
-
-                session.add(knowledge_base)
-                session.flush()
-
-            with error_recovery_context("source entries creation"):
-                print("Creating source entries...")
-                # Process each file to create source entries
-                for i, file_info in enumerate(file_data):
-                    if i % settings.KB_PROGRESS_UPDATE_INTERVAL == 0:
-                        log_progress(i + 1, total_files, "Creating source entries", task_id, global_step=3)
+        with error_recovery_context("vector database creation"):
+            try:
+                # Process each chunk separately to avoid token limits
+                for i, chunk in enumerate(document_chunks):
+                    log_progress(i + 1, len(document_chunks), "Creating embeddings", task_id)
                     
-                    try:
-                        create_source_entry_from_file_data(
-                            session=session,
-                            knowledge_base_id=knowledge_base.id,
-                            file_info=file_info,
-                            user_id=user_id
+                    print(f"Processing embedding chunk {i+1}/{len(document_chunks)} with {len(chunk)} documents")
+
+                    # Estimate total tokens in this chunk for logging
+                    total_chunk_tokens = sum(
+                        estimate_tokens_for_embedding(doc.page_content) for doc in chunk
+                    )
+                    print(f"Chunk {i+1} contains approximately {total_chunk_tokens:,} tokens")
+
+                    # Monitor memory during embedding creation
+                    pre_embed_memory = get_memory_usage_mb()
+                    
+                    if chroma_db is None:
+                        # Initialize Chroma database with first chunk
+                        chroma_db = Chroma.from_documents(
+                            documents=chunk,
+                            embedding=embeddings,
+                            persist_directory=chroma_dir,
                         )
-                    except Exception as e:
-                        print(f"Warning: Failed to create source entry for {file_info['filename']}: {e}")
-                        # Continue with other files
+                    else:
+                        # Add subsequent chunks to existing database
+                        chroma_db.add_documents(documents=chunk)
 
-                # Recalculate total pages for the knowledge base
-                KnowledgeBaseService.recalculate_total_pages(session, knowledge_base.id)
+                    post_embed_memory = get_memory_usage_mb()
+                    print(f"Memory usage: {pre_embed_memory:.1f}MB → {post_embed_memory:.1f}MB")
 
-                session.commit()
-                session.refresh(knowledge_base)
+                    # Adaptive delay based on processing time and memory usage
+                    if post_embed_memory > pre_embed_memory + 200:  # Large memory increase
+                        await asyncio.sleep(1.0)
+                        gc.collect()
+                    elif i < len(document_chunks) - 1:
+                        await asyncio.sleep(0.3)
 
-            final_memory = get_memory_usage_mb()
-            print(f"✅ Successfully created knowledge base '{knowledge_base.title}' with {total_files} files")
-            print(f"📊 Processing stats: {len(all_documents)} documents")
-            print(f"🧠 Memory usage: {initial_memory:.1f}MB → {final_memory:.1f}MB")
-            
-            if failed_files:
-                print(f"⚠️ Note: {len(failed_files)} files failed to process but knowledge base was created")
+                # Persist the database
+                if chroma_db:
+                    chroma_db.persist()
 
-            # Mark task as completed (3 out of 3 steps done)
-            progress_tracker.update_progress(task_id, 3, "Knowledge base created successfully")
+                print("Successfully created vector database with adaptive processing")
 
-            # Return the knowledge base with task_id for progress tracking
-            return KnowledgeBaseCreateResponse(
-                knowledge_base=knowledge_base,
-                task_id=task_id
+            except Exception as e:
+                print(f"Error creating Chroma VectorDB: {str(e)}")
+                # Clean up the directory on error
+                if os.path.exists(chroma_dir):
+                    shutil.rmtree(chroma_dir)
+                raise HTTPException(
+                    status_code=400, detail=f"Error creating vector database: {str(e)}"
+                )
+
+        with error_recovery_context("database compression"):
+            print("Zipping Chroma database...")
+            # Compress the Chroma database directory into a zip file
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+                for root, _, filenames in os.walk(chroma_dir):
+                    for filename in filenames:
+                        file_path = os.path.join(root, filename)
+                        arcname = os.path.relpath(file_path, chroma_dir)
+                        zip_file.write(file_path, arcname)
+            zip_buffer.seek(0)
+
+            # Clean up the temporary chroma directory
+            try:
+                if os.path.exists(chroma_dir):
+                    shutil.rmtree(chroma_dir)
+            except Exception as e:
+                print(f"Warning: Could not clean up temporary directory {chroma_dir}: {e}")
+
+        with error_recovery_context("knowledge base creation"):
+            print("Creating knowledge base record...")
+            knowledge_base = KnowledgeBase.model_validate(
+                knowledge_base_in,
+                update={
+                    "owner_id": current_user.id,
+                    "data": zip_buffer.read(),
+                    "embedding_model_id": knowledge_base_in.embedding_model_id,
+                    "date_created": datetime.utcnow(),
+                    "date_modified": datetime.utcnow(),
+                },
             )
 
-        except HTTPException:
-            # Mark task as failed for HTTP exceptions
-            progress_tracker.fail_task(task_id, "Knowledge base creation failed")
-            raise  # Re-raise HTTP exceptions as-is
-        except Exception as e:
-            # Mark task as failed for unexpected errors
-            progress_tracker.fail_task(task_id, f"Unexpected error: {str(e)}")
-            logger.error(f"Unexpected error creating knowledge base: {str(e)}")
-            raise HTTPException(
-                status_code=500,
-                detail=f"Unexpected error creating knowledge base: {str(e)}"
-            )
+            session.add(knowledge_base)
+            session.flush()
+
+        with error_recovery_context("source entries creation"):
+            print("Creating source entries...")
+            # Process each file to create source entries
+            for i, file in enumerate(files):
+                if i % settings.KB_PROGRESS_UPDATE_INTERVAL == 0:
+                    log_progress(i + 1, len(files), "Creating source entries", task_id)
+                
+                try:
+                    KnowledgeBaseService.create_source_entries(
+                        session=session,
+                        current_user=current_user,
+                        knowledge_base_id=knowledge_base.id,
+                        file=file,
+                    )
+                except Exception as e:
+                    print(f"Warning: Failed to create source entry for {file.filename}: {e}")
+                    # Continue with other files
+
+            # Recalculate total pages for the knowledge base
+            KnowledgeBaseService.recalculate_total_pages(session, knowledge_base.id)
+
+            session.commit()
+            session.refresh(knowledge_base)
+
+        final_memory = get_memory_usage_mb()
+        print(f"✅ Successfully created knowledge base '{knowledge_base.title}' with {len(files)} files")
+        print(f"📊 Processing stats: {len(all_documents)} documents, {analysis['total_size_mb']:.1f}MB total")
+        print(f"🧠 Memory usage: {initial_memory:.1f}MB → {final_memory:.1f}MB")
+        
+        if failed_files:
+            print(f"⚠️ Note: {len(failed_files)} files failed to process but knowledge base was created")
+
+        # Mark task as completed
+        progress_tracker.update_progress(task_id, len(files) * 3, "Knowledge base created successfully")
+
+        # Return the knowledge base with task_id for progress tracking
+        return KnowledgeBaseCreateResponse(
+            knowledge_base=knowledge_base,
+            task_id=task_id
+        )
+
+    except HTTPException:
+        # Mark task as failed for HTTP exceptions
+        progress_tracker.fail_task(task_id, "Knowledge base creation failed")
+        raise  # Re-raise HTTP exceptions as-is
+    except Exception as e:
+        # Mark task as failed for unexpected errors
+        progress_tracker.fail_task(task_id, f"Unexpected error: {str(e)}")
+        logger.error(f"Unexpected error creating knowledge base: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error creating knowledge base: {str(e)}"
+        )
 
 
 @router.put("/{id}", response_model=KnowledgeBasePublic)

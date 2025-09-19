@@ -2,9 +2,14 @@ import axios from "axios"
 import "./axiosGlobalConfig" // Ensure global timeout configuration is applied
 import { OpenAPI } from "./core/OpenAPI"
 import type {
-    KnowledgeBasesCreateKnowledgeBaseData,
-    KnowledgeBasesCreateKnowledgeBaseResponse
+    KnowledgeBasesCreateKnowledgeBaseData
 } from "./types.gen"
+
+// Temporary interface for the new response format until types are regenerated
+interface KnowledgeBaseCreateResponse {
+    knowledge_base: any;
+    task_id: string;
+}
 
 // Override global axios defaults to prevent interference
 axios.defaults.timeout = 60 * 60 * 1000 // 60 minutes globally
@@ -63,7 +68,7 @@ knowledgeBaseAxiosClient.interceptors.response.use(
  */
 export const createKnowledgeBaseWithTimeout = async (
     data: KnowledgeBasesCreateKnowledgeBaseData,
-): Promise<KnowledgeBasesCreateKnowledgeBaseResponse> => {
+): Promise<KnowledgeBaseCreateResponse> => {
     try {
         console.log("🚀 Starting knowledge base upload with timeout client")
         console.log("📊 Files to upload:", data.formData?.files?.length || 0)

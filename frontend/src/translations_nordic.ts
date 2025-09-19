@@ -1875,7 +1875,7 @@ export const addNordicTranslations = (resources: any) => {
         typing: "Tekoäly kirjoittaa...",
         error: "Anteeksi, jotain meni pieleen. Yritä uudelleen.",
         welcome: "Hei! Miten voin auttaa sinua tänään?",
-        searchMode: "Hakutila:",
+        searchMode: "Hakutapa:",
         vectorSearch: "Vektorihaku",
         fullTextScan: "Koko tekstin skannaus",
         searchModeDescription: "Vektorihaku tarjoaa nopeita, kohdennettuja tuloksia. Koko tekstin skannaus käy läpi kaiken sisällön tietokannassa.",
