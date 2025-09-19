@@ -436,6 +436,66 @@ export class FilesService {
     }
     
     /**
+     * Convert Rtf To Pdf
+     * Convert an RTF source file to PDF on-demand.
+     * Only works with RTF files that the user has access to.
+     * @param data The data for the request.
+     * @param data.sourceId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static convertRtfToPdf(data: { sourceId: string }): CancelablePromise<unknown> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/files/source/{source_id}/rtf-pdf',
+            path: {
+                source_id: data.sourceId
+            },
+            responseType: 'arraybuffer',
+            responseTransformer: async (data: any) => {
+                // Handle binary PDF response
+                if (data instanceof ArrayBuffer) {
+                    return new Blob([data], { type: 'application/pdf' });
+                }
+                return data;
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Convert Rtf To Pdf By Filename
+     * Convert an RTF source file to PDF on-demand using filename.
+     * Only works with RTF files that the user has access to.
+     * @param data The data for the request.
+     * @param data.filename
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static convertRtfToPdfByFilename(data: { filename: string }): CancelablePromise<unknown> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/files/source/by-filename/{filename}/rtf-pdf',
+            path: {
+                filename: data.filename
+            },
+            responseType: 'arraybuffer',
+            responseTransformer: async (data: any) => {
+                // Handle binary PDF response
+                if (data instanceof ArrayBuffer) {
+                    return new Blob([data], { type: 'application/pdf' });
+                }
+                return data;
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
      * Get Source Content By Filename
      * Retrieve a source file by filename.
      * Only returns files that the user has access to (either owns or has permissions for).

@@ -34,29 +34,42 @@ const SourceLink: React.FC<SourceLinkProps> = ({
       fileName,
       toLowerCase: fileName.toLowerCase(),
       endsWithDocx: fileName.toLowerCase().endsWith(".docx"),
+      endsWithRtf: fileName.toLowerCase().endsWith(".rtf"),
     })
     setIsLoadingFile(true)
 
     try {
-      // Check if the file is a DOCX
+      // Check if the file is a DOCX or RTF
       const isDocx = fileName.toLowerCase().endsWith(".docx")
+      const isRtf = fileName.toLowerCase().endsWith(".rtf")
 
-      if (isDocx) {
-        console.log("DOCX detected! Converting to PDF for viewing:", fileName)
+      if (isDocx || isRtf) {
+        const fileType = isDocx ? "DOCX" : "RTF"
+        console.log(`${fileType} detected! Converting to PDF for viewing:`, fileName)
 
         let pdfBlob: Blob
 
         // If sourceId is empty/null, use filename-based conversion
         if (!sourceId || sourceId.trim() === "") {
           console.log("No sourceId provided, using filename-based conversion:", fileName)
-          pdfBlob = (await FilesService.convertDocxToPdfByFilename({
-            filename: fileName,
-          })) as Blob
+          if (isDocx) {
+            pdfBlob = (await FilesService.convertDocxToPdfByFilename({
+              filename: fileName,
+            })) as Blob
+          } else {
+            pdfBlob = (await FilesService.convertRtfToPdfByFilename({
+              filename: fileName,
+            })) as Blob
+          }
           console.log("PDF conversion by filename successful, blob size:", pdfBlob.size)
         } else {
           console.log("Using sourceId-based conversion:", sourceId)
-          // Use the DOCX to PDF conversion endpoint with sourceId
-          pdfBlob = (await FilesService.convertDocxToPdf({ sourceId })) as Blob
+          // Use the appropriate conversion endpoint with sourceId
+          if (isDocx) {
+            pdfBlob = (await FilesService.convertDocxToPdf({ sourceId })) as Blob
+          } else {
+            pdfBlob = (await FilesService.convertRtfToPdf({ sourceId })) as Blob
+          }
           console.log("PDF conversion successful, blob size:", pdfBlob.size)
         }
 
@@ -210,17 +223,19 @@ const SourceLink: React.FC<SourceLinkProps> = ({
         name: error instanceof Error ? error.name : typeof error,
       })
 
-      // Check if this was a DOCX file that failed conversion
+      // Check if this was a DOCX or RTF file that failed conversion
       const isDocx = fileName.toLowerCase().endsWith(".docx")
+      const isRtf = fileName.toLowerCase().endsWith(".rtf")
 
-      if (isDocx) {
-        // For DOCX files, don't fall back to original method since they can't be displayed natively
-        console.error("DOCX to PDF conversion failed, not attempting fallback")
+      if (isDocx || isRtf) {
+        const fileType = isDocx ? "DOCX" : "RTF"
+        // For DOCX/RTF files, don't fall back to original method since they can't be displayed natively
+        console.error(`${fileType} to PDF conversion failed, not attempting fallback`)
         showErrorToast(
-          `Failed to convert DOCX file "${fileName}" to PDF for viewing. Please try again or download the file directly.`,
+          `Failed to convert ${fileType} file "${fileName}" to PDF for viewing. Please try again or download the file directly.`,
         )
       } else {
-        // Fallback to original method if conversion fails for non-DOCX files
+        // Fallback to original method if conversion fails for non-DOCX/RTF files
         console.log("Attempting fallback to original viewing method")
         try {
           if (useModal) {
