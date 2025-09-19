@@ -1,0 +1,1 @@
+This is a test document for knowledge base creation. It contains multiple sentences to ensure proper processing. The document should be processed through all three stages: file processing, embedding creation, and source entry creation. Each stage should report progress accurately with proper synchronization between progress text and the progress bar.

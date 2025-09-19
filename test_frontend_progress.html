@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Progress Tracking Test</title>
+</head>
+
+<body>
+    <h1>Manual Progress Tracking Test</h1>
+    <div id="log"></div>
+
+    <script>
+        const log = (msg) => {
+            console.log(msg);
+            document.getElementById('log').innerHTML += '<div>' + msg + '</div>';
+        };
+
+        async function testProgressTracking() {
+            log('🚀 Starting manual progress tracking test...');
+
+            // Get auth token (simulate localStorage)
+            const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Use a real token
+
+            // Test the progress endpoint like the frontend does
+            const taskId = '9feb3101-aee4-4bf7-bd58-14d7807abf47'; // Use the task ID from our test
+
+            try {
+                log(`📊 Testing progress for task: ${taskId}`);
+
+                const response = await fetch(`/api/v1/knowledge-bases/progress/${taskId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                log(`📡 Response status: ${response.status}`);
+
+                if (!response.ok) {
+                    throw new Error(`Progress polling failed: ${response.status} ${response.statusText}`);
+                }
+
+                const progressData = await response.json();
+                log('📈 Progress data: ' + JSON.stringify(progressData, null, 2));
+
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+            }
+        }
+
+        // Run the test
+        testProgressTracking();
+    </script>
+</body>
+
+</html>

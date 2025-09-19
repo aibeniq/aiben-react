@@ -28,7 +28,7 @@ export const useKnowledgeBases = (): UseKnowledgeBasesReturn => {
             )
             const response = await KnowledgeBasesService.readKnowledgeBases({
                 limit: 1000, // Increased to fetch more records for proper pagination
-                show_all: showAllUsers,
+                showAll: showAllUsers,
             })
             console.log(
                 "✅ KNOWLEDGE-BASES: Fetch completed, response:",
