@@ -98,13 +98,13 @@ const SourceLink: React.FC<SourceLinkProps> = ({
         console.log("Non-DOCX file, using normal viewing method")
         // Handle non-DOCX files normally
 
-        // If no sourceId is available, try filename-based viewing for PDFs
+        // If no sourceId is available, try filename-based viewing for PDFs and TXT files
         if (
           (!sourceId || sourceId.trim() === "") &&
-          fileName.toLowerCase().endsWith(".pdf")
+          (fileName.toLowerCase().endsWith(".pdf") || fileName.toLowerCase().endsWith(".txt"))
         ) {
           console.log(
-            "No sourceId provided for PDF, using filename-based viewing:",
+            "No sourceId provided for PDF/TXT, using filename-based viewing:",
             fileName,
           )
 
@@ -112,14 +112,14 @@ const SourceLink: React.FC<SourceLinkProps> = ({
             const response = await FilesService.getSourceContentByFilename({
               filename: fileName,
             })
-            console.log("PDF file data received:", response)
+            console.log("PDF/TXT file data received:", response)
 
             if (useModal) {
               setConvertedPdfFile(response)
               setIsModalOpen(true)
-              console.log("Opened PDF in modal using filename")
+              console.log("Opened PDF/TXT in modal using filename")
             } else {
-              // Create a blob URL for the PDF and open in new tab
+              // Create a blob URL for the PDF/TXT and open in new tab
               const byteCharacters = atob(response.data_base64)
               const byteNumbers = new Array(byteCharacters.length)
 
@@ -134,19 +134,65 @@ const SourceLink: React.FC<SourceLinkProps> = ({
               const url = URL.createObjectURL(blob)
 
               window.open(url, "_blank")
-              console.log("Opened PDF in new tab using filename")
+              console.log("Opened PDF/TXT in new tab using filename")
             }
           } catch (filenameError) {
-            console.error("Filename-based PDF viewing failed:", filenameError)
+            console.error("Filename-based PDF/TXT viewing failed:", filenameError)
             throw filenameError // Re-throw to trigger fallback
           }
         } else {
           // Use normal sourceId-based viewing
-          if (useModal) {
-            await viewFileInModal(sourceId)
-            setIsModalOpen(true)
-          } else {
-            await viewFile(sourceId)
+          // For .txt files, if sourceId method fails, try filename-based viewing as fallback
+          const isTxtFile = fileName.toLowerCase().endsWith(".txt")
+          
+          try {
+            if (useModal) {
+              await viewFileInModal(sourceId)
+              setIsModalOpen(true)
+            } else {
+              await viewFile(sourceId)
+            }
+          } catch (sourceIdError) {
+            console.error("SourceId-based viewing failed:", sourceIdError)
+            
+            // For .txt files, try filename-based viewing as fallback
+            if (isTxtFile) {
+              console.log("Attempting filename-based fallback for .txt file:", fileName)
+              try {
+                const response = await FilesService.getSourceContentByFilename({
+                  filename: fileName,
+                })
+                console.log("TXT file data received via filename fallback:", response)
+
+                if (useModal) {
+                  setConvertedPdfFile(response)
+                  setIsModalOpen(true)
+                  console.log("Opened TXT in modal using filename fallback")
+                } else {
+                  // Create a blob URL for the TXT and open in new tab
+                  const byteCharacters = atob(response.data_base64)
+                  const byteNumbers = new Array(byteCharacters.length)
+
+                  for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i)
+                  }
+
+                  const byteArray = new Uint8Array(byteNumbers)
+                  const blob = new Blob([byteArray], {
+                    type: response.content_type,
+                  })
+                  const url = URL.createObjectURL(blob)
+
+                  window.open(url, "_blank")
+                  console.log("Opened TXT in new tab using filename fallback")
+                }
+              } catch (filenameError) {
+                console.error("Filename-based TXT viewing also failed:", filenameError)
+                throw sourceIdError // Re-throw the original error
+              }
+            } else {
+              throw sourceIdError // Re-throw for non-txt files
+            }
           }
         }
       }
