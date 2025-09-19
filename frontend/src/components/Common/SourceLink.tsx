@@ -4,17 +4,22 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { Link, type LinkProps } from "@chakra-ui/react"
 import { useState } from "react"
 import FileViewerModal from "./FileViewerModal"
+import { Tooltip } from "../ui/tooltip"
 
 interface SourceLinkProps extends LinkProps {
   sourceId: string
   fileName: string
   useModal?: boolean
+  truncateText?: boolean
+  maxLength?: number
 }
 
 const SourceLink: React.FC<SourceLinkProps> = ({
   sourceId,
   fileName,
   useModal = false,
+  truncateText = false,
+  maxLength = 60,
   ...rest
 }) => {
   // In Chakra UI v3, we need to manually manage this state
@@ -267,19 +272,40 @@ const SourceLink: React.FC<SourceLinkProps> = ({
     isModalOpen,
   })
 
+  // Helper function to truncate text with ellipsis
+  const truncateFileName = (text: string): string => {
+    if (!truncateText || text.length <= maxLength) return text
+    return text.substring(0, maxLength) + "..."
+  }
+
   // Determine which file to show in modal - converted PDF takes precedence
   const fileToShow = convertedPdfFile || currentFile
+  const displayName = isLoadingFile ? "Loading..." : truncateFileName(fileName)
+  const needsTooltip = truncateText && fileName.length > maxLength
 
   return (
     <>
-      <Link
-        color="blue.500"
-        _hover={{ textDecoration: "underline" }}
-        onClick={handleClick}
-        {...rest}
-      >
-        {isLoadingFile ? "Loading..." : fileName}
-      </Link>
+      {needsTooltip ? (
+        <Tooltip content={fileName} showArrow>
+          <Link
+            color="blue.500"
+            _hover={{ textDecoration: "underline" }}
+            onClick={handleClick}
+            {...rest}
+          >
+            {displayName}
+          </Link>
+        </Tooltip>
+      ) : (
+        <Link
+          color="blue.500"
+          _hover={{ textDecoration: "underline" }}
+          onClick={handleClick}
+          {...rest}
+        >
+          {displayName}
+        </Link>
+      )}
 
       {useModal && fileToShow && (
         <FileViewerModal

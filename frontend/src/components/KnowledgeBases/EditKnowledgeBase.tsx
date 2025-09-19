@@ -49,7 +49,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
   console.log("KnowledgeBase item ID:", item.id)
 
   // Helper function to truncate text with ellipsis
-  const truncateText = (text: string, maxLength: number = 30): string => {
+  const truncateText = (text: string, maxLength: number = 60): string => {
     if (text.length <= maxLength) return text
     return text.substring(0, maxLength) + "..."
   }
@@ -295,7 +295,13 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                         .map((file: any) => (
                           <HStack key={file.id} w="full" justify="space-between">
                             {/* Use SourceLink component for on-demand loading */}
-                            <SourceLink sourceId={file.id} fileName={file.name} useModal={true} />
+                            <SourceLink
+                              sourceId={file.id}
+                              fileName={file.name}
+                              useModal={true}
+                              truncateText={true}
+                              maxLength={60}
+                            />
                             <Box
                               as="button"
                               aria-label={t("knowledgeBases.modals.fileUpload.removeFile")}
@@ -336,8 +342,8 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                     <VStack align="start" gap={2}>
                       {selectedFiles.map((file, index) => {
                         const truncatedName = truncateText(file.name)
-                        const needsTooltip = file.name.length > 30
-                        
+                        const needsTooltip = file.name.length > 60
+
                         return (
                           <HStack key={index} w="full" justify="space-between" minW="0">
                             <Box flex="1" minW="0">
