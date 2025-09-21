@@ -262,6 +262,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
               dropFiles: "Přetáhněte soubory sem...",
               selectedFiles: "Vybrané soubory:",
               removeFile: "Odebrat soubor",
+              supportedFormats: "Podporuje: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "Zrušit",
@@ -289,6 +290,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
               dropFiles: "Přetáhněte soubory sem...",
               selectedFiles: "Vybrané soubory:",
               removeFile: "Odebrat soubor",
+              supportedFormats: "Podporuje: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "Zrušit",
@@ -297,6 +299,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
             },
             success: "Znalostní báze byla úspěšně aktualizována.",
           },
+          messages: {
+            processing: "Zpracování...",
+            pleaseWait: "Počkejte prosím, než zpracujeme vaše soubory..."
+          }
         },
         editCustom: {
           title: "Upravit vlastní pokyny",
@@ -640,6 +646,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
               dropFiles: "Pretiahnite súbory sem...",
               selectedFiles: "Vybrané súbory:",
               removeFile: "Odobrať súbor",
+              supportedFormats: "Podporuje: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "Zrušiť",
@@ -667,6 +674,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
               dropFiles: "Pretiahnite súbory sem...",
               selectedFiles: "Vybrané súbory:",
               removeFile: "Odobrať súbor",
+              supportedFormats: "Podporuje: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "Zrušiť",
@@ -675,6 +683,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
             },
             success: "Znalostná báza bola úspešne aktualizovaná.",
           },
+          messages: {
+            processing: "Spracovanie...",
+            pleaseWait: "Prosím čakajte, kým spracujeme vaše súbory..."
+          }
         },
         editCustom: {
           title: "Upraviť vlastné pokyny",
@@ -1050,6 +1062,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
             },
             success: "A tudásbázis sikeresen frissítve.",
           },
+          messages: {
+            processing: "Feldolgozás...",
+            pleaseWait: "Kérjük várjon, amíg feldolgozzuk a fájljait..."
+          }
         },
         editCustom: {
           title: "Egyéni utasítások szerkesztése",
@@ -1423,6 +1439,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
             },
             success: "Baza de cunoștințe a fost actualizată cu succes.",
           },
+          messages: {
+            processing: "Procesare...",
+            pleaseWait: "Vă rugăm așteptați în timp ce procesăm fișierele dumneavoastră..."
+          }
         },
         editCustom: {
           title: "Editați instrucțiunile personalizate",
@@ -1796,6 +1816,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
             },
             success: "Базата знания беше успешно актуализирана.",
           },
+          messages: {
+            processing: "Обработка...",
+            pleaseWait: "Моля изчакайте, докато обработваме вашите файлове..."
+          }
         },
         editCustom: {
           title: "Редактиране на персонализирани инструкции",

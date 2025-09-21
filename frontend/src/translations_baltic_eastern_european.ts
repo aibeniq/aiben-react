@@ -298,6 +298,10 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
             },
             success: "Teadmusbaas värskendati edukalt.",
           },
+          messages: {
+            processing: "Töötlemine...",
+            pleaseWait: "Palun oodake, kuni töötleme teie faile..."
+          },
           editFormTemplateModal: {
             title: "Muuda Vormi Malli",
             formTemplateName: "Vormi Malli Nimi",

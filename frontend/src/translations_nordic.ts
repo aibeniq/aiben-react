@@ -525,6 +525,7 @@ export const addNordicTranslations = (resources: any) => {
               dropFiles: "Släpp filer här...",
               selectedFiles: "Valda filer:",
               removeFile: "Ta bort fil",
+              supportedFormats: "Stöder: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "Avbryt",
@@ -552,6 +553,7 @@ export const addNordicTranslations = (resources: any) => {
               dropFiles: "Släpp filer här...",
               selectedFiles: "Valda filer:",
               removeFile: "Ta bort fil",
+              supportedFormats: "Stöder: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "Avbryt",
@@ -560,6 +562,10 @@ export const addNordicTranslations = (resources: any) => {
             },
             success: "Kunskapsbas uppdaterades framgångsrikt.",
           },
+          messages: {
+            processing: "Bearbetar...",
+            pleaseWait: "Vänta medan vi bearbetar dina filer..."
+          }
         },
       },
       archive: {
@@ -1128,6 +1134,7 @@ export const addNordicTranslations = (resources: any) => {
               dropFiles: "Slipp filer her...",
               selectedFiles: "Valgte filer:",
               removeFile: "Fjern fil",
+              supportedFormats: "Støtter: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "Avbryt",
@@ -1155,6 +1162,7 @@ export const addNordicTranslations = (resources: any) => {
               dropFiles: "Slipp filer her...",
               selectedFiles: "Valgte filer:",
               removeFile: "Fjern fil",
+              supportedFormats: "Støtter: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "Avbryt",
@@ -1163,6 +1171,10 @@ export const addNordicTranslations = (resources: any) => {
             },
             success: "Kunnskapsbase oppdatert vellykket.",
           },
+          messages: {
+            processing: "Behandler...",
+            pleaseWait: "Vent mens vi behandler filene dine..."
+          }
         },
       },
       archive: {
@@ -1731,6 +1743,7 @@ export const addNordicTranslations = (resources: any) => {
               dropFiles: "Slip filer her...",
               selectedFiles: "Valgte filer:",
               removeFile: "Fjern fil",
+              supportedFormats: "Understøtter: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "Annuller",
@@ -1758,6 +1771,7 @@ export const addNordicTranslations = (resources: any) => {
               dropFiles: "Slip filer her...",
               selectedFiles: "Valgte filer:",
               removeFile: "Fjern fil",
+              supportedFormats: "Understøtter: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "Annuller",
@@ -1766,6 +1780,10 @@ export const addNordicTranslations = (resources: any) => {
             },
             success: "Videnbase opdateret succesfuldt.",
           },
+          messages: {
+            processing: "Behandler...",
+            pleaseWait: "Vent venligst mens vi behandler dine filer..."
+          }
         },
       },
       archive: {
@@ -2334,6 +2352,7 @@ export const addNordicTranslations = (resources: any) => {
               dropFiles: "Pudota tiedostoja tähän...",
               selectedFiles: "Valitut tiedostot:",
               removeFile: "Poista tiedosto",
+              supportedFormats: "Tukee: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "Peruuta",
@@ -2361,6 +2380,7 @@ export const addNordicTranslations = (resources: any) => {
               dropFiles: "Pudota tiedostoja tähän...",
               selectedFiles: "Valitut tiedostot:",
               removeFile: "Poista tiedosto",
+              supportedFormats: "Tukee: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "Peruuta",
@@ -2369,6 +2389,10 @@ export const addNordicTranslations = (resources: any) => {
             },
             success: "Tietokanta päivitettiin onnistuneesti.",
           },
+          messages: {
+            processing: "Käsitellään...",
+            pleaseWait: "Odota, kun käsittelemme tiedostojasi..."
+          }
         },
       },
       archive: {

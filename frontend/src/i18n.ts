@@ -393,6 +393,7 @@ const generateAllLanguageResources = () => {
             dragAndDrop: "Drag and drop files here, or click to browse",
             dropFiles: "Drop the files here...",
             removeFile: "Remove file",
+            supportedFormats: "Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
           },
           buttons: {
             cancel: "Cancel",
@@ -406,7 +407,9 @@ const generateAllLanguageResources = () => {
           },
           messages: {
             createSuccess: "Knowledge Base created successfully.",
-            updateSuccess: "Knowledge Base updated successfully."
+            updateSuccess: "Knowledge Base updated successfully.",
+            processing: "Processing...",
+            pleaseWait: "Please wait while we process your files...",
           },
         },
       },
@@ -1015,6 +1018,7 @@ const generateAllLanguageResources = () => {
             dragAndDrop: "Arrastra y suelta archivos aquí, o haz clic para explorar",
             dropFiles: "Suelta los archivos aquí...",
             removeFile: "Eliminar archivo",
+            supportedFormats: "Soporta: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
           },
           buttons: {
             cancel: "Cancelar",
@@ -1028,7 +1032,9 @@ const generateAllLanguageResources = () => {
           },
           messages: {
             createSuccess: "Base de Conocimiento creada exitosamente.",
-            updateSuccess: "Base de Conocimiento actualizada exitosamente."
+            updateSuccess: "Base de Conocimiento actualizada exitosamente.",
+            processing: "Procesando...",
+            pleaseWait: "Por favor espere mientras procesamos sus archivos...",
           }
         },
       },
@@ -1656,53 +1662,40 @@ const generateAllLanguageResources = () => {
         modals: {
           add: {
             title: "Ajouter une Base de Connaissances",
-            description: "Remplissez les détails pour ajouter une nouvelle Base de Connaissances.",
-            fields: {
-              title: "Titre",
-              titlePlaceholder: "Titre",
-              titleRequired: "Le titre est requis.",
-              description: "Description",
-              descriptionPlaceholder: "Description",
-            },
-            fileUpload: {
-              dragAndDrop: "Glissez-déposez des fichiers ici, ou cliquez pour parcourir",
-              dropFiles: "Déposez les fichiers ici...",
-              selectedFiles: "Fichiers Sélectionnés :",
-              removeFile: "Supprimer le fichier",
-            },
-            buttons: {
-              cancel: "Annuler",
-              save: "Enregistrer",
-              creating: "Création...",
-            },
-            validation: {
-              atLeastOneFile: "Au moins un fichier est requis.",
-            },
-            success: "Base de Connaissances créée avec succès.",
+            description: "Créer une nouvelle base de connaissances en fournissant des détails et en téléchargeant des documents ci-dessous.",
           },
           edit: {
             title: "Modifier la Base de Connaissances",
-            description: "Mettez à jour les détails de la Base de Connaissances ci-dessous.",
-            fields: {
-              title: "Titre",
-              titlePlaceholder: "Titre",
-              titleRequired: "Le titre est requis",
-              description: "Description",
-              descriptionPlaceholder: "Description",
-            },
-            fileUpload: {
-              currentFiles: "Fichiers Actuels :",
-              dragAndDrop: "Glissez-déposez des fichiers ici, ou cliquez pour parcourir",
-              dropFiles: "Déposez les fichiers ici...",
-              selectedFiles: "Fichiers Sélectionnés :",
-              removeFile: "Supprimer le fichier",
-            },
-            buttons: {
-              cancel: "Annuler",
-              save: "Enregistrer",
-              saving: "Enregistrement...",
-            },
-            success: "Base de Connaissances mise à jour avec succès.",
+            description: "Mettre à jour les détails de la Base de Connaissances ci-dessous.",
+          },
+          fields: {
+            title: "Titre",
+            description: "Description"
+          },
+          fileUpload: {
+            currentFiles: "Fichiers Actuels",
+            newFiles: "Nouveaux Fichiers",
+            selectedFiles: "Fichiers Sélectionnés",
+            dragAndDrop: "Glissez-déposez des fichiers ici, ou cliquez pour parcourir",
+            dropFiles: "Déposez les fichiers ici...",
+            removeFile: "Supprimer le fichier",
+            supportedFormats: "Soutient: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
+          },
+          buttons: {
+            cancel: "Annuler",
+            create: "Créer",
+            save: "Enregistrer",
+            saving: "Enregistrement...",
+            creating: "Création..."
+          },
+          validation: {
+            titleRequired: "Le titre est requis"
+          },
+          messages: {
+            createSuccess: "Base de Connaissances créée avec succès.",
+            updateSuccess: "Base de Connaissances mise à jour avec succès.",
+            processing: "Traitement...",
+            pleaseWait: "Veuillez patienter pendant que nous traitons vos fichiers...",
           },
         },
       },
@@ -2330,53 +2323,40 @@ const generateAllLanguageResources = () => {
         modals: {
           add: {
             title: "Wissensbasis hinzufügen",
-            description: "Füllen Sie die Details aus, um eine neue Wissensbasis hinzuzufügen.",
-            fields: {
-              title: "Titel",
-              titlePlaceholder: "Titel",
-              titleRequired: "Titel ist erforderlich.",
-              description: "Beschreibung",
-              descriptionPlaceholder: "Beschreibung",
-            },
-            fileUpload: {
-              dragAndDrop: "Dateien hierher ziehen und ablegen oder klicken zum Durchsuchen",
-              dropFiles: "Dateien hier ablegen...",
-              selectedFiles: "Ausgewählte Dateien:",
-              removeFile: "Datei entfernen",
-            },
-            buttons: {
-              cancel: "Abbrechen",
-              save: "Speichern",
-              creating: "Erstelle...",
-            },
-            validation: {
-              atLeastOneFile: "Mindestens eine Datei ist erforderlich.",
-            },
-            success: "Wissensbasis erfolgreich erstellt.",
+            description: "Erstellen Sie eine neue Wissensbasis, indem Sie Details eingeben und Dokumente unten hochladen.",
           },
           edit: {
             title: "Wissensbasis bearbeiten",
             description: "Aktualisieren Sie die Details der Wissensbasis unten.",
-            fields: {
-              title: "Titel",
-              titlePlaceholder: "Titel",
-              titleRequired: "Titel ist erforderlich",
-              description: "Beschreibung",
-              descriptionPlaceholder: "Beschreibung",
-            },
-            fileUpload: {
-              currentFiles: "Aktuelle Dateien:",
-              dragAndDrop: "Dateien hierher ziehen und ablegen oder klicken zum Durchsuchen",
-              dropFiles: "Dateien hier ablegen...",
-              selectedFiles: "Ausgewählte Dateien:",
-              removeFile: "Datei entfernen",
-            },
-            buttons: {
-              cancel: "Abbrechen",
-              save: "Speichern",
-              saving: "Speichere...",
-            },
-            success: "Wissensbasis erfolgreich aktualisiert.",
+          },
+          fields: {
+            title: "Titel",
+            description: "Beschreibung"
+          },
+          fileUpload: {
+            currentFiles: "Aktuelle Dateien",
+            newFiles: "Neue Dateien",
+            selectedFiles: "Ausgewählte Dateien",
+            dragAndDrop: "Dateien hierher ziehen und ablegen oder klicken zum Durchsuchen",
+            dropFiles: "Dateien hier ablegen...",
+            removeFile: "Datei entfernen",
+            supportedFormats: "Unterstützt: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
+          },
+          buttons: {
+            cancel: "Abbrechen",
+            create: "Erstellen",
+            save: "Speichern",
+            saving: "Speichere...",
+            creating: "Erstelle..."
+          },
+          validation: {
+            titleRequired: "Titel ist erforderlich"
+          },
+          messages: {
+            createSuccess: "Wissensbasis erfolgreich erstellt.",
+            updateSuccess: "Wissensbasis erfolgreich aktualisiert.",
+            processing: "Verarbeitung...",
+            pleaseWait: "Bitte warten Sie, während wir Ihre Dateien verarbeiten...",
           },
         },
       },
@@ -2963,6 +2943,45 @@ const generateAllLanguageResources = () => {
           successMessage: "La Base di Conoscenza è stata eliminata con successo",
           errorMessage: "Si è verificato un errore durante l'eliminazione della Base di Conoscenza"
         },
+        modals: {
+          add: {
+            title: "Aggiungi Base di Conoscenza",
+            description: "Crea una nuova base di conoscenza fornendo dettagli e caricando documenti qui sotto.",
+          },
+          edit: {
+            title: "Modifica Base di Conoscenza",
+            description: "Aggiorna i dettagli della Base di Conoscenza qui sotto.",
+          },
+          fields: {
+            title: "Titolo",
+            description: "Descrizione"
+          },
+          fileUpload: {
+            currentFiles: "File Attuali",
+            newFiles: "Nuovi File",
+            selectedFiles: "File Selezionati",
+            dragAndDrop: "Trascina e rilascia i file qui, o clicca per sfogliare",
+            dropFiles: "Rilascia i file qui...",
+            removeFile: "Rimuovi file",
+            supportedFormats: "Supporta: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
+          },
+          buttons: {
+            cancel: "Annulla",
+            create: "Crea",
+            save: "Salva",
+            saving: "Salvataggio...",
+            creating: "Creazione..."
+          },
+          validation: {
+            titleRequired: "Il titolo è obbligatorio"
+          },
+          messages: {
+            createSuccess: "Base di Conoscenza creata con successo.",
+            updateSuccess: "Base di Conoscenza aggiornata con successo.",
+            processing: "Elaborazione...",
+            pleaseWait: "Attendere mentre elaboriamo i vostri file...",
+          },
+        },
       },
       common: {
         loading: "Caricamento...",
@@ -3508,6 +3527,45 @@ const generateAllLanguageResources = () => {
           cancelButton: "Cancelar",
           successMessage: "A Base de Conhecimento foi excluída com sucesso",
           errorMessage: "Ocorreu um erro ao excluir a Base de Conhecimento"
+        },
+        modals: {
+          add: {
+            title: "Adicionar Base de Conhecimento",
+            description: "Crie uma nova base de conhecimento fornecendo detalhes e carregando documentos abaixo.",
+          },
+          edit: {
+            title: "Editar Base de Conhecimento",
+            description: "Atualize os detalhes da Base de Conhecimento abaixo.",
+          },
+          fields: {
+            title: "Título",
+            description: "Descrição"
+          },
+          fileUpload: {
+            currentFiles: "Arquivos Atuais",
+            newFiles: "Novos Arquivos",
+            selectedFiles: "Arquivos Selecionados",
+            dragAndDrop: "Arraste e solte arquivos aqui, ou clique para navegar",
+            dropFiles: "Solte os arquivos aqui...",
+            removeFile: "Remover arquivo",
+            supportedFormats: "Suporta: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
+          },
+          buttons: {
+            cancel: "Cancelar",
+            create: "Criar",
+            save: "Salvar",
+            saving: "Salvando...",
+            creating: "Criando..."
+          },
+          validation: {
+            titleRequired: "Título é obrigatório"
+          },
+          messages: {
+            createSuccess: "Base de Conhecimento criada com sucesso.",
+            updateSuccess: "Base de Conhecimento atualizada com sucesso.",
+            processing: "Processando...",
+            pleaseWait: "Aguarde enquanto processamos seus arquivos...",
+          },
         },
       },
       common: {
@@ -4128,6 +4186,45 @@ const generateAllLanguageResources = () => {
           cancelButton: "Отмена",
           successMessage: "База знаний была успешно удалена",
           errorMessage: "Произошла ошибка при удалении базы знаний"
+        },
+        modals: {
+          add: {
+            title: "Добавить базу знаний",
+            description: "Создайте новую базу знаний, предоставив детали и загрузив документы ниже.",
+          },
+          edit: {
+            title: "Редактировать базу знаний",
+            description: "Обновите детали базы знаний ниже.",
+          },
+          fields: {
+            title: "Заголовок",
+            description: "Описание"
+          },
+          fileUpload: {
+            currentFiles: "Текущие файлы",
+            newFiles: "Новые файлы",
+            selectedFiles: "Выбранные файлы",
+            dragAndDrop: "Перетащите файлы сюда или нажмите для обзора",
+            dropFiles: "Бросьте файлы сюда...",
+            removeFile: "Удалить файл",
+            supportedFormats: "Поддерживает: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
+          },
+          buttons: {
+            cancel: "Отмена",
+            create: "Создать",
+            save: "Сохранить",
+            saving: "Сохранение...",
+            creating: "Создание..."
+          },
+          validation: {
+            titleRequired: "Заголовок обязателен"
+          },
+          messages: {
+            createSuccess: "База знаний создана успешно.",
+            updateSuccess: "База знаний обновлена успешно.",
+            processing: "Обработка...",
+            pleaseWait: "Пожалуйста, подождите, пока мы обрабатываем ваши файлы...",
+          },
         },
         compare: {
           title: "Сравнить документы",
@@ -4755,7 +4852,61 @@ const generateAllLanguageResources = () => {
         status: {
           default: "默认",
           na: "不适用"
-        }
+        },
+        actions: {
+          view: "查看",
+          edit: "编辑",
+          delete: "删除",
+          configure: "配置"
+        },
+        deleteModal: {
+          title: "删除知识库",
+          buttonText: "删除知识库",
+          description: "此知识库将被永久删除。您确定吗？您将无法撤消此操作。",
+          confirmButton: "删除",
+          cancelButton: "取消",
+          successMessage: "知识库已成功删除",
+          errorMessage: "删除知识库时发生错误"
+        },
+        modals: {
+          add: {
+            title: "添加知识库",
+            description: "通过提供详细信息并在下面上传文档来创建新的知识库。",
+          },
+          edit: {
+            title: "编辑知识库",
+            description: "在下面更新知识库详细信息。",
+          },
+          fields: {
+            title: "标题",
+            description: "描述"
+          },
+          fileUpload: {
+            currentFiles: "当前文件",
+            newFiles: "新文件",
+            selectedFiles: "选定的文件",
+            dragAndDrop: "将文件拖放到这里，或点击浏览",
+            dropFiles: "将文件拖放到这里...",
+            removeFile: "删除文件",
+            supportedFormats: "支持：PDF、TXT、DOC/DOCX、RTF、CSV、XLSX",
+          },
+          buttons: {
+            cancel: "取消",
+            create: "创建",
+            save: "保存",
+            saving: "保存中...",
+            creating: "创建中..."
+          },
+          validation: {
+            titleRequired: "标题是必需的"
+          },
+          messages: {
+            createSuccess: "知识库创建成功。",
+            updateSuccess: "知识库更新成功。",
+            processing: "处理中...",
+            pleaseWait: "请等待我们处理您的文件...",
+          },
+        },
       }
     },
   }
@@ -5155,6 +5306,15 @@ const generateAllLanguageResources = () => {
         status: {
           default: "デフォルト",
           na: "該当なし"
+        },
+        modals: {
+          fileUpload: {
+            supportedFormats: "対応形式：PDF、TXT、DOC/DOCX、RTF、CSV、XLSX"
+          },
+          messages: {
+            processing: "処理中...",
+            pleaseWait: "ファイルを処理中です。しばらくお待ちください..."
+          }
         }
       }
     },
@@ -5554,6 +5714,15 @@ const generateAllLanguageResources = () => {
         status: {
           default: "За замовчуванням",
           na: "Не застосовується"
+        },
+        modals: {
+          fileUpload: {
+            supportedFormats: "Підтримує: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+          },
+          messages: {
+            processing: "Обробка...",
+            pleaseWait: "Будь ласка, зачекайте, поки ми обробляємо ваші файли..."
+          }
         }
       }
     },
@@ -5953,6 +6122,15 @@ const generateAllLanguageResources = () => {
         status: {
           default: "Domyślny",
           na: "Nie dotyczy"
+        },
+        modals: {
+          fileUpload: {
+            supportedFormats: "Obsługuje: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+          },
+          messages: {
+            processing: "Przetwarzanie...",
+            pleaseWait: "Proszę czekać, podczas gdy przetwarzamy Twoje pliki..."
+          }
         }
       }
     },
@@ -6352,6 +6530,15 @@ const generateAllLanguageResources = () => {
         status: {
           default: "Standaard",
           na: "Niet van toepassing"
+        },
+        modals: {
+          fileUpload: {
+            supportedFormats: "Ondersteunt: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+          },
+          messages: {
+            processing: "Verwerken...",
+            pleaseWait: "Wacht even terwijl we uw bestanden verwerken..."
+          }
         }
       }
     },
@@ -6842,6 +7029,7 @@ const generateAllLanguageResources = () => {
               dropFiles: "파일을 여기에 놓으세요...",
               selectedFiles: "선택된 파일:",
               removeFile: "파일 제거",
+              supportedFormats: "지원 형식: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "취소",
@@ -6869,6 +7057,7 @@ const generateAllLanguageResources = () => {
               dropFiles: "파일을 여기에 놓으세요...",
               selectedFiles: "선택된 파일:",
               removeFile: "파일 제거",
+              supportedFormats: "지원 형식: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "취소",
@@ -6877,6 +7066,10 @@ const generateAllLanguageResources = () => {
             },
             success: "지식 베이스가 성공적으로 업데이트되었습니다.",
           },
+          messages: {
+            processing: "처리 중...",
+            pleaseWait: "파일을 처리하는 동안 잠시 기다려 주세요..."
+          }
         },
         editCustom: {
           title: "사용자 정의 지침 편집",
@@ -7301,6 +7494,15 @@ const generateAllLanguageResources = () => {
         status: {
           default: "افتراضي",
           na: "غير متاح"
+        },
+        modals: {
+          fileUpload: {
+            supportedFormats: "يدعم: PDF، TXT، DOC/DOCX، RTF، CSV، XLSX"
+          },
+          messages: {
+            processing: "جاري المعالجة...",
+            pleaseWait: "يرجى الانتظار بينما نعالج ملفاتك..."
+          }
         }
       }
     },
@@ -7555,6 +7757,15 @@ const generateAllLanguageResources = () => {
         status: {
           default: "डिफ़ॉल्ट",
           na: "लागू नहीं"
+        },
+        modals: {
+          fileUpload: {
+            supportedFormats: "समर्थित: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+          },
+          messages: {
+            processing: "प्रोसेसिंग...",
+            pleaseWait: "कृपया प्रतीक्षा करें जब तक हम आपकी फाइलों को प्रोसेस करते हैं..."
+          }
         }
       },
       editOutlineModal: {
