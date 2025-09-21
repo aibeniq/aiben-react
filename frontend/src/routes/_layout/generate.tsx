@@ -1,8 +1,4 @@
-import {
-  type KnowledgeBasePublic,
-  type ReportGenieOutline,
-  ReportgenieService,
-} from "@/client"
+import { type KnowledgeBasePublic, type ReportGenieOutline, ReportgenieService } from "@/client"
 import SearchModeToggle from "@/components/Common/SearchModeToggle"
 import SourceLink from "@/components/Common/SourceLink"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
@@ -761,6 +757,7 @@ const ReportGenie = () => {
                                                       fontWeight="normal"
                                                       color="blue.600"
                                                       useModal={true}
+                                                      highlightSnippet={citation.content}
                                                     />
                                                   ) : citation.metadata?.source &&
                                                     (citation.metadata.source
@@ -778,6 +775,7 @@ const ReportGenie = () => {
                                                       fontWeight="normal"
                                                       color="blue.600"
                                                       useModal={true}
+                                                      highlightSnippet={citation.content}
                                                     />
                                                   ) : (
                                                     <Text

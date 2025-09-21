@@ -12,6 +12,7 @@ interface SourceLinkProps extends LinkProps {
   useModal?: boolean
   truncateText?: boolean
   maxLength?: number
+  highlightSnippet?: string // Text snippet to search for and highlight in the file
 }
 
 const SourceLink: React.FC<SourceLinkProps> = ({
@@ -20,6 +21,7 @@ const SourceLink: React.FC<SourceLinkProps> = ({
   useModal = false,
   truncateText = false,
   maxLength = 60,
+  highlightSnippet,
   ...rest
 }) => {
   // In Chakra UI v3, we need to manually manage this state
@@ -313,6 +315,7 @@ const SourceLink: React.FC<SourceLinkProps> = ({
           onClose={handleCloseModal}
           file={fileToShow}
           isLoading={isLoading}
+          highlightSnippet={highlightSnippet}
         />
       )}
     </>

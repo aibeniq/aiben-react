@@ -101,8 +101,8 @@ async def extract_text_from_file_async(file_content: bytes, filename: str) -> st
     """
     # Always use thread pool for DOCX files since they can be slow to process
     # regardless of size
-    is_docx = filename.lower().endswith(('.docx', '.doc'))
-    
+    is_docx = filename.lower().endswith((".docx", ".doc"))
+
     # Define size threshold for async processing
     if is_docx:
         SIZE_THRESHOLD = 10 * 1024  # Very low threshold for DOCX files (10KB)
@@ -578,13 +578,15 @@ async def process_rag_checklist(
 
                 # Check if this is a potentially slow file to process
                 is_large_file = len(content) > 50000
-                is_docx_file = file.filename.lower().endswith(('.docx', '.doc'))
+                is_docx_file = file.filename.lower().endswith((".docx", ".doc"))
                 needs_special_handling = is_large_file or is_docx_file
 
                 # Temporarily disable disconnect monitoring for files that might take time to process
                 temp_disconnect_monitor = None
                 if needs_special_handling and disconnect_monitor:
-                    print(f"Large/DOCX file detected ({file.filename}), temporarily disabling disconnect monitoring during processing")
+                    print(
+                        f"Large/DOCX file detected ({file.filename}), temporarily disabling disconnect monitoring during processing"
+                    )
                     temp_disconnect_monitor = disconnect_monitor
                     disconnect_monitor.cancel()
                     disconnect_monitor = None
@@ -613,14 +615,15 @@ async def process_rag_checklist(
                 # Re-enable disconnect monitoring after successful processing, but only for smaller documents
                 # For very large documents, keep it disabled to prevent false positives during LLM processing
                 should_reenable_monitoring = (
-                    needs_special_handling and 
-                    len(document_text) < 150000 and  # Only re-enable for medium-sized documents
-                    request
+                    needs_special_handling
+                    and len(document_text)
+                    < 150000  # Only re-enable for medium-sized documents
+                    and request
                 )
 
                 if should_reenable_monitoring:
                     print("Re-enabling disconnect monitoring after file processing")
-                    
+
                     async def monitor_client_disconnect():
                         nonlocal cancellation_requested
                         try:
@@ -628,13 +631,19 @@ async def process_rag_checklist(
                             print("Client disconnected, canceling operation...")
                             cancellation_requested = True
                         except asyncio.CancelledError:
-                            print("Disconnect monitor cancelled because main task completed")
+                            print(
+                                "Disconnect monitor cancelled because main task completed"
+                            )
                         except Exception as e:
                             print(f"Error in disconnect monitoring: {str(e)}")
-                    
-                    disconnect_monitor = asyncio.create_task(monitor_client_disconnect())
+
+                    disconnect_monitor = asyncio.create_task(
+                        monitor_client_disconnect()
+                    )
                 elif len(document_text) >= 150000:
-                    print(f"Very large document detected ({len(document_text)} chars), keeping disconnect monitoring disabled")
+                    print(
+                        f"Very large document detected ({len(document_text)} chars), keeping disconnect monitoring disabled"
+                    )
 
                 # Reset file position
                 await file.seek(0)
@@ -1474,10 +1483,14 @@ async def optimize_checklist(
             )
 
             # For large files or DOCX files, cancel disconnect monitoring to prevent false positives
-            is_docx = file.filename.lower().endswith(('.docx', '.doc'))
-            large_document_threshold = 100000 if is_docx else 200000  # Lower threshold for DOCX
-            
-            if len(document_text) > large_document_threshold or (is_docx and len(content) > 50000):
+            is_docx = file.filename.lower().endswith((".docx", ".doc"))
+            large_document_threshold = (
+                100000 if is_docx else 200000
+            )  # Lower threshold for DOCX
+
+            if len(document_text) > large_document_threshold or (
+                is_docx and len(content) > 50000
+            ):
                 print(
                     f"Large document detected ({file.filename}), disabling disconnect monitoring to prevent false positives"
                 )
@@ -1833,9 +1846,16 @@ async def generate_csv(
                             source_path = citation["metadata"]["source"]
                             # Extract filename from path
                             source_name = source_path.split("/")[-1].split("\\")[-1]
-                            # Remove UUID prefix if present
+                            # Remove prefixes using more robust logic
                             if "_" in source_name:
-                                source_name = source_name.split("_", 1)[1]
+                                parts = source_name.split("_")
+                                if len(parts) > 1:
+                                    first_part = parts[0]
+                                    # If first part is short and alphanumeric (likely a prefix), remove it
+                                    if len(first_part) <= 10 and first_part.isalnum():
+                                        source_name = "_".join(parts[1:])
+                                    # Otherwise keep the original filename
+                                    # This prevents removing legitimate parts of the filename
 
                         citation_text = (
                             citation.get("content", "")

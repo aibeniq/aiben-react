@@ -1,4 +1,4 @@
-import { Accordion, Box, Button, HStack, Text } from "@chakra-ui/react"
+impoimport SourceLink from \"../../Common/SourceLink\"\nimport { getCleanFileName } from \"../../../utils/filename\"t { Accordion, Box, Button, HStack, Text } from "@chakra-ui/react"
 import type React from "react"
 import { useState } from "react"
 import { FiFileText } from "react-icons/fi"
@@ -14,9 +14,7 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
   accordionValue,
 }) => {
   // State to track which citations are expanded - using object instead of Set
-  const [expandedCitations, setExpandedCitations] = useState<
-    Record<number, boolean>
-  >({})
+  const [expandedCitations, setExpandedCitations] = useState<Record<number, boolean>>({})
 
   // Function to toggle citation expansion
   const toggleCitationExpansion = (citationIndex: number) => {
@@ -31,16 +29,8 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
     return expandedCitations[citationIndex] || false
   }
 
-  const getDisplayFileName = (source: string): string => {
-    if (!source) return "Unknown"
-    if (source.includes("/tmp/") || source.includes("\\tmp\\")) {
-      const filename = source.split("/").pop() || source.split("\\").pop() || ""
-      return filename.includes("_")
-        ? filename.substring(filename.indexOf("_") + 1)
-        : filename
-    }
-    return source
-  }
+  // Use shared filename utility
+  const getDisplayFileName = getCleanFileName
 
   return (
     <Accordion.Root collapsible mt={2}>
@@ -61,19 +51,10 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
             const citationText = citation.content
             const shouldTruncate = citationText.length > 300
             const displayText =
-              shouldTruncate && !isExpanded
-                ? `${citationText.substring(0, 300)}...`
-                : citationText
+              shouldTruncate && !isExpanded ? `${citationText.substring(0, 300)}...` : citationText
 
             return (
-              <Box
-                key={cIndex}
-                p={3}
-                mb={2}
-                borderWidth="1px"
-                borderRadius="md"
-                bg="bg"
-              >
+              <Box key={cIndex} p={3} mb={2} borderWidth="1px" borderRadius="md" bg="bg">
                 {citation.metadata.source_data_id ? (
                   <SourceLink
                     sourceId={citation.metadata.source_data_id}
@@ -82,10 +63,9 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
                     fontWeight="normal"
                     color="blue.600"
                     useModal={true}
+                    highlightSnippet={citation.content}
                   />
-                ) : citation.metadata.source
-                    ?.toLowerCase()
-                    .endsWith(".docx") ? (
+                ) : citation.metadata.source?.toLowerCase().endsWith(".docx") ? (
                   <SourceLink
                     sourceId="" // Empty sourceId, will be handled by filename fallback
                     fileName={getDisplayFileName(citation.metadata.source)}
@@ -93,6 +73,7 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
                     fontWeight="normal"
                     color="blue.600"
                     useModal={true}
+                    highlightSnippet={citation.content}
                   />
                 ) : (
                   <Text as="span" ml={1} fontWeight="normal" color="blue.600">
