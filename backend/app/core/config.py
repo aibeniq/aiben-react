@@ -362,6 +362,38 @@ class Settings(BaseSettings):
     IF A FIELD ENTRY WASN'T FOUND FOR A GIVEN DOCUMENT, SAY SO EXPLICITLY.
     """
 
+    FORMCONNECT_SINGLE_DOCUMENT_PROMPT_TEMPLATE: str = """
+    I have extracted the following field values from a document:
+
+    Document: {document_name}
+    Extracted Data: {extracted_data}
+
+    Please create a clear, well-formatted presentation of the extracted field values from this document.
+
+    Create a markdown table with the following format:
+    1. First column should be titled "FIELD" 
+    2. Second column should be titled "VALUE"
+    3. Include ALL fields from the template, even if no value was found
+
+    Example format:
+    ```markdown
+    | FIELD | VALUE |
+    |-------|-------|
+    | Name  | John Smith |
+    | Date  | 2023-01-01 |
+    | Address | Not found |
+    ```
+
+    After the table, provide a brief summary of:
+    1. How many fields were successfully extracted
+    2. Which fields had missing or unclear values
+    3. Overall data quality assessment
+
+    ONLY return the Markdown table and summary -- do NOT return any other text.
+    Also, do NOT add tick marks like ``` and the label 'markdown': just give the actual markdown table content as raw text.
+    IF A FIELD VALUE WASN'T FOUND, CLEARLY STATE "Not found" OR "Not detected" in the VALUE column.
+    """
+
     FORMCONNECT_GENERATE_FIELDS_PROMPT_TEMPLATE: str = """
     Generate a list of form fields for data extraction based on the following description:
 

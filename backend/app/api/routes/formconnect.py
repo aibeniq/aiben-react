@@ -130,9 +130,9 @@ async def extract_fields_using_vector_search(
         print(f"🔍 Using vector search mode for field extraction from {file.filename}")
 
         # Get embedding model
-        from app.api.deps import get_session
+        from app.api.deps import get_db
 
-        session = next(get_session())
+        session = next(get_db())
         embedding_info = get_embedding_model(session)
 
         if not embedding_info:
@@ -432,12 +432,17 @@ async def extract_fields_from_handwritten_document(
     file: UploadFile, template: Dict[str, str], llm
 ) -> Dict[str, str]:
     """
-    Extract fields from a handwritten document.
+    Extract fields from a handwritten document or convert documents to images.
+
+    Logic:
+    - Image files: Always process as images
+    - PDF/DOCX/DOC files: Convert to page screenshots and process as images
+    - CSV/XLSX/RTF/TXT files: Return error (incompatible with handwritten processing)
     """
     print("Now extracting fields from handwritten document:", file.filename)
     content = await file.read()
 
-    # Define image file extensions
+    # Define file type categories
     image_extensions = [
         ".jpg",
         ".jpeg",
@@ -448,44 +453,385 @@ async def extract_fields_from_handwritten_document(
         ".tiff",
         ".webp",
     ]
+    convertible_extensions = [".pdf", ".docx", ".doc"]
+    incompatible_extensions = [".csv", ".xlsx", ".xls", ".txt", ".rtf"]
+
     file_ext = Path(file.filename).suffix.lower()
 
-    # Check if the file is an image
+    # Check for incompatible file types first
+    if file_ext in incompatible_extensions:
+        error_msg = f"File type {file_ext.upper()} is not compatible with handwritten processing. Please uncheck the 'Handwritten' toggle for this file type."
+        print(f"❌ Incompatible file type: {file.filename} ({file_ext})")
+        return {k: error_msg for k in template.keys()}
+
+    # Process image files directly
     if file_ext in image_extensions:
+        return await process_image_file(content, file_ext, template, llm, file.filename)
+
+    # Convert PDF/DOCX/DOC files to images and process
+    elif file_ext in convertible_extensions:
+        return await process_document_as_images(
+            content, file_ext, template, llm, file.filename
+        )
+
+    # Unknown file type - try as digitized document
+    else:
+        print(f"⚠️ Unknown file type {file_ext}, falling back to digitized processing")
+        await file.seek(0)
+        return await extract_fields_from_digitized_document(
+            file, template, llm, "full_scan"
+        )
+
+
+async def process_image_file(
+    content: bytes, file_ext: str, template: Dict[str, str], llm, filename: str
+) -> Dict[str, str]:
+    """
+    Process an image file directly.
+    """
+    try:
+        img_base64 = base64.b64encode(content).decode("utf-8")
+
+        # Use the template from config
+        prompt_template = settings.FORMCONNECT_HANDWRITTEN_PROMPT_TEMPLATE
+        variables = {"template": template}
+
+        print(f"📷 Processing image file: {filename}")
+        response = invoke_llm_with_image(
+            llm,
+            prompt_template,
+            variables=variables,
+            image_base64=img_base64,
+            image_type=file_ext[1:] if file_ext.startswith(".") else file_ext,
+        )
+
+        # Try to parse JSON from the response
         try:
-            img_base64 = base64.b64encode(content).decode("utf-8")
+            import json
+            import re
 
-            # Use the template from config
-            prompt_template = settings.FORMCONNECT_HANDWRITTEN_PROMPT_TEMPLATE
-            variables = {"template": template}
+            if isinstance(response, dict):
+                print(f"✅ Response is already a dict: {response}")
+                return response
 
-            print("Now invoking LLM with base-encoded image...")
-            response = invoke_llm_with_image(
-                llm,
-                prompt_template,
-                variables=variables,
-                image_base64=img_base64,
-                image_type=file_ext[1:] if file_ext.startswith(".") else file_ext,
+            # Handle LangChain response object
+            response_text = str(response)
+            if hasattr(response, "content"):
+                response_text = response.content
+
+            print(f"🔍 Raw response text: {response_text[:200]}...")
+
+            # Remove markdown code block wrappers if present
+            if "```json" in response_text or "```" in response_text:
+                # Extract JSON from markdown code blocks
+                json_match = re.search(
+                    r"```(?:json)?\s*\n?({.*?})\s*\n?```", response_text, re.DOTALL
+                )
+                if json_match:
+                    response_text = json_match.group(1)
+                    print(f"📝 Extracted JSON from markdown: {response_text[:100]}...")
+                else:
+                    # Fallback: remove all ``` markers
+                    response_text = re.sub(r"```(?:json)?\s*\n?", "", response_text)
+                    response_text = re.sub(r"\n?```", "", response_text)
+                    print(f"📝 Cleaned response: {response_text[:100]}...")
+
+            content_dict = json.loads(response_text.strip())
+            print(f"✅ Successfully parsed JSON: {content_dict}")
+            return content_dict
+
+        except Exception as e:
+            print(f"❌ JSON parsing failed: {str(e)}")
+            print(f"📄 Raw response for debugging: {str(response)}")
+            return {"raw_content": str(response)}
+    except Exception as e:
+        print(f"❌ Error processing image {filename}: {str(e)}")
+        return {k: f"Error processing image: {str(e)}" for k in template.keys()}
+
+
+async def process_document_as_images(
+    content: bytes, file_ext: str, template: Dict[str, str], llm, filename: str
+) -> Dict[str, str]:
+    """
+    Convert PDF/DOCX/DOC files to page images and process each page.
+    """
+    print(f"📄➡️📷 Converting {filename} to images for handwritten processing")
+
+    try:
+        # Import conversion utilities
+        if file_ext == ".pdf":
+            page_images = await convert_pdf_to_images(content)
+        elif file_ext in [".docx", ".doc"]:
+            page_images = await convert_docx_to_images(content, file_ext)
+        else:
+            raise ValueError(f"Unsupported file type for image conversion: {file_ext}")
+
+        # If conversion succeeded, process the images
+        if page_images:
+            print(
+                f"✅ Successfully converted {filename} to {len(page_images)} image(s)"
             )
 
-            # Try to parse JSON from the response
+            # Process each page image and collect results
+            all_extractions = []
+            for page_num, img_base64 in enumerate(page_images, 1):
+                print(f"🔍 Processing page {page_num} of {filename}")
+
+                prompt_template = settings.FORMCONNECT_HANDWRITTEN_PROMPT_TEMPLATE
+                variables = {"template": template}
+
+                try:
+                    response = invoke_llm_with_image(
+                        llm,
+                        prompt_template,
+                        variables=variables,
+                        image_base64=img_base64,
+                        image_type="png",  # Converted images are typically PNG
+                    )
+
+                    # Parse response
+                    import json
+                    import re
+
+                    if isinstance(response, dict):
+                        print(
+                            f"✅ Page {page_num} response is already a dict: {response}"
+                        )
+                        all_extractions.append(response)
+                    else:
+                        try:
+                            # Handle LangChain response object
+                            response_text = str(response)
+                            if hasattr(response, "content"):
+                                response_text = response.content
+
+                            print(
+                                f"🔍 Page {page_num} raw response: {response_text[:200]}..."
+                            )
+
+                            # Remove markdown code block wrappers if present
+                            if "```json" in response_text or "```" in response_text:
+                                # Extract JSON from markdown code blocks
+                                json_match = re.search(
+                                    r"```(?:json)?\s*\n?({.*?})\s*\n?```",
+                                    response_text,
+                                    re.DOTALL,
+                                )
+                                if json_match:
+                                    response_text = json_match.group(1)
+                                    print(
+                                        f"📝 Page {page_num} extracted JSON: {response_text[:100]}..."
+                                    )
+                                else:
+                                    # Fallback: remove all ``` markers
+                                    response_text = re.sub(
+                                        r"```(?:json)?\s*\n?", "", response_text
+                                    )
+                                    response_text = re.sub(r"\n?```", "", response_text)
+                                    print(
+                                        f"📝 Page {page_num} cleaned response: {response_text[:100]}..."
+                                    )
+
+                            content_dict = json.loads(response_text.strip())
+                            print(
+                                f"✅ Page {page_num} successfully parsed JSON: {content_dict}"
+                            )
+                            all_extractions.append(content_dict)
+
+                        except Exception as parse_error:
+                            print(
+                                f"❌ Page {page_num} JSON parsing failed: {str(parse_error)}"
+                            )
+                            print(
+                                f"📄 Page {page_num} raw response for debugging: {str(response)}"
+                            )
+                            all_extractions.append({"raw_content": str(response)})
+
+                except Exception as e:
+                    print(f"❌ Error processing page {page_num}: {str(e)}")
+                    all_extractions.append(
+                        {
+                            k: f"Error on page {page_num}: {str(e)}"
+                            for k in template.keys()
+                        }
+                    )
+
+            # Merge results from all pages
+            return merge_page_extractions(all_extractions, template)
+
+        else:
+            # Image conversion failed - show helpful error message
+            print(f"❌ Image conversion failed for {filename}")
+            error_msg = f"Unable to convert {file_ext.upper()} to images for handwritten processing. This may be due to:\n- Document is encrypted or protected\n- Document contains unsupported formatting\n- PyMuPDF library not available\n\nPlease try uploading the document as individual image files (PNG, JPG) instead, or uncheck the 'Handwritten' toggle to use text-based extraction."
+            return {k: error_msg for k in template.keys()}
+
+    except Exception as e:
+        print(f"❌ Error converting {filename} to images: {str(e)}")
+        error_msg = f"Error converting {file_ext.upper()} to images for handwritten processing: {str(e)}\n\nPlease try uploading as individual image files (PNG, JPG) instead, or uncheck the 'Handwritten' toggle."
+        return {k: error_msg for k in template.keys()}
+
+
+async def convert_pdf_to_images(content: bytes) -> List[str]:
+    """
+    Convert PDF pages to base64-encoded images.
+    """
+    try:
+        import fitz  # PyMuPDF - optional dependency
+
+        # Open PDF from bytes
+        pdf_doc = fitz.open(stream=content, filetype="pdf")
+        page_images = []
+
+        for page_num in range(len(pdf_doc)):
+            page = pdf_doc.load_page(page_num)
+            # Render page as image (higher DPI for better OCR)
+            pix = page.get_pixmap(matrix=fitz.Matrix(2.0, 2.0))  # 2x scaling
+            img_data = pix.tobytes("png")
+            img_base64 = base64.b64encode(img_data).decode("utf-8")
+            page_images.append(img_base64)
+
+        pdf_doc.close()
+        print(f"✅ Successfully converted PDF to {len(page_images)} images")
+        return page_images
+
+    except ImportError:
+        print("❌ PyMuPDF (fitz) not available - cannot convert PDF to images")
+        print(
+            "💡 To fix this: Install PyMuPDF with 'pip install PyMuPDF' in the container"
+        )
+        return []
+    except Exception as e:
+        print(f"❌ Error converting PDF to images: {str(e)}")
+        # Try to detect specific error types for better user guidance
+        error_str = str(e).lower()
+        if "password" in error_str or "encrypted" in error_str:
+            print("💡 PDF appears to be password protected or encrypted")
+        elif "corrupt" in error_str or "invalid" in error_str:
+            print("💡 PDF file may be corrupted or invalid")
+        else:
+            print("💡 PDF conversion failed - try uploading as separate image files")
+        return []
+
+
+async def convert_docx_to_images(content: bytes, file_ext: str) -> List[str]:
+    """
+    Convert DOCX/DOC pages to base64-encoded images.
+    Note: This is a placeholder implementation. In practice, you might need
+    additional libraries like python-docx2pdf + pdf2image or similar.
+    """
+    try:
+        # For now, fall back to text extraction and create a simple image
+        # In a full implementation, you'd use libraries to convert DOCX to images
+        print(f"⚠️ DOCX/DOC to image conversion not fully implemented for {file_ext}")
+        print(f"📝 Falling back to text-based processing for handwritten document")
+        return []  # Return empty to trigger fallback
+
+    except Exception as e:
+        print(f"❌ Error converting DOCX to images: {str(e)}")
+        return []
+
+
+def merge_page_extractions(
+    extractions: List[Dict[str, str]], template: Dict[str, str]
+) -> Dict[str, str]:
+    """
+    Merge field extractions from multiple pages, prioritizing non-empty values.
+    """
+    print(f"🔀 Merging extractions from {len(extractions)} page(s)")
+    for i, extraction in enumerate(extractions):
+        print(f"📄 Page {i+1} extraction: {extraction}")
+
+    merged = {k: "" for k in template.keys()}
+
+    for extraction in extractions:
+        # Handle raw_content responses (unparsed JSON)
+        if "raw_content" in extraction and len(extraction) == 1:
+            print(
+                f"⚠️ Found raw_content, attempting to parse: {extraction['raw_content'][:100]}..."
+            )
             try:
                 import json
+                import re
 
-                if isinstance(response, dict):
-                    return response
-                content_dict = json.loads(response)
-                return content_dict
-            except Exception:
-                return {"raw_content": str(response)}
-        except Exception as e:
-            return {k: f"Error processing image: {str(e)}" for k in template.keys()}
+                raw_content = extraction["raw_content"]
 
-    # Fallback for non-image files
-    await file.seek(0)
-    return await extract_fields_from_digitized_document(
-        file, template, llm, "full_scan"
-    )
+                # Remove markdown code block wrappers if present
+                if "```json" in raw_content or "```" in raw_content:
+                    json_match = re.search(
+                        r"```(?:json)?\s*\n?({.*?})\s*\n?```", raw_content, re.DOTALL
+                    )
+                    if json_match:
+                        raw_content = json_match.group(1)
+                        print(
+                            f"🎯 Extracted JSON from raw_content: {raw_content[:100]}..."
+                        )
+
+                parsed_content = json.loads(raw_content.strip())
+                print(f"✅ Successfully parsed raw_content: {parsed_content}")
+                extraction = parsed_content
+
+            except Exception as e:
+                print(f"❌ Failed to parse raw_content: {str(e)}")
+                continue
+
+        # Merge field values
+        for field, value in extraction.items():
+            if field in merged and value and str(value).strip():
+                value_str = str(value).strip()
+
+                # Skip obviously bad values
+                if value_str.lower() in [
+                    "not found",
+                    "n/a",
+                    "null",
+                    "none",
+                    "",
+                ] or value_str.startswith("Error"):
+                    continue
+
+                # If we don't have a value yet, or current value is better
+                current_value = str(merged[field]).strip()
+                if (
+                    not current_value
+                    or current_value.lower() in ["not found", "n/a", "null", "none"]
+                    or current_value.startswith("Error")
+                    or len(value_str) > len(current_value)
+                ):
+                    merged[field] = value_str
+                    print(f"✅ Updated field '{field}': '{value_str}'")
+
+    # Mark fields not found across all pages
+    for field in merged:
+        if not merged[field] or not str(merged[field]).strip():
+            merged[field] = "Not found in document"
+            print(f"❌ Field '{field}' not found in any page")
+
+    print(f"🎯 Final merged result: {merged}")
+    return merged
+
+
+async def format_single_document_result(
+    extracted_data: Dict[str, str], file_name: str, llm
+) -> str:
+    """
+    Format the results from a single document into a clear presentation.
+    """
+    # Clean the filename (remove " (digitized)" or " (handwritten)" suffix)
+    clean_filename = file_name.replace(" (digitized)", "").replace(" (handwritten)", "")
+
+    # Convert dict to string, escaping any curly braces for the formatter
+    data_str = str(extracted_data).replace("{", "{{").replace("}", "}}")
+
+    # Use the single document template from config
+    prompt_template = settings.FORMCONNECT_SINGLE_DOCUMENT_PROMPT_TEMPLATE
+    variables = {"document_name": clean_filename, "extracted_data": data_str}
+
+    print(f"Formatting single document result for: {clean_filename}")
+
+    # Invoke the LLM to format the results
+    response = invoke_llm(llm, prompt_template, variables)
+
+    return response
 
 
 async def compare_multiple_documents(
@@ -543,6 +889,68 @@ Format your response in markdown with clear tables and analysis."""
     return translated_response
 
 
+def validate_and_reclassify_files(
+    digitized_files: List[UploadFile], handwritten_files: List[UploadFile]
+) -> Dict[str, Any]:
+    """
+    Validate file types and reclassify files based on the new logic:
+    1. Image files -> Always go to handwritten processing (regardless of toggle)
+    2. PDF/DOCX/DOC -> Go to handwritten if toggle is set
+    3. CSV/XLSX/TXT/RTF -> Error if handwritten toggle is set
+    """
+    image_extensions = [
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".bmp",
+        ".tif",
+        ".tiff",
+        ".webp",
+    ]
+    convertible_extensions = [".pdf", ".docx", ".doc"]
+    incompatible_extensions = [".csv", ".xlsx", ".xls", ".txt", ".rtf"]
+
+    new_digitized = []
+    new_handwritten = []
+
+    # Process digitized files - check for images that should be reclassified
+    if digitized_files:
+        for file in digitized_files:
+            file_ext = Path(file.filename).suffix.lower()
+
+            if file_ext in image_extensions:
+                # Image files always go to handwritten processing
+                print(
+                    f"🔄 Reclassifying image file {file.filename} to handwritten processing"
+                )
+                new_handwritten.append(file)
+            else:
+                # Keep in digitized
+                new_digitized.append(file)
+
+    # Process handwritten files - validate compatibility
+    if handwritten_files:
+        for file in handwritten_files:
+            file_ext = Path(file.filename).suffix.lower()
+
+            if file_ext in incompatible_extensions:
+                # These file types are not compatible with handwritten processing
+                error_msg = f"File '{file.filename}' with extension '{file_ext.upper()}' is not compatible with handwritten processing. Supported handwritten file types are: images (JPG, PNG, etc.), PDF, DOCX, and DOC files."
+                return {"error": error_msg}
+            elif file_ext in image_extensions or file_ext in convertible_extensions:
+                # These are valid for handwritten processing
+                new_handwritten.append(file)
+            else:
+                # Unknown extension - allow but warn
+                print(
+                    f"⚠️ Unknown file extension {file_ext} for handwritten processing: {file.filename}"
+                )
+                new_handwritten.append(file)
+
+    return {"digitized_files": new_digitized, "handwritten_files": new_handwritten}
+
+
 @router.post("/process", response_model=FormConnectResponse)
 async def process_form(
     session: SessionDep,
@@ -586,6 +994,19 @@ async def process_form(
         raise HTTPException(
             status_code=400, detail="At least one file must be uploaded."
         )
+
+    # Validate and reclassify files based on new logic
+    validated_result = validate_and_reclassify_files(digitized_files, handwritten_files)
+    if "error" in validated_result:
+        raise HTTPException(status_code=400, detail=validated_result["error"])
+
+    # Use the reclassified file lists
+    digitized_files = validated_result["digitized_files"]
+    handwritten_files = validated_result["handwritten_files"]
+
+    print(
+        f"After reclassification: {len(digitized_files) if digitized_files else 0} digitized, {len(handwritten_files) if handwritten_files else 0} handwritten"
+    )
 
     # Parse the fields into a list
     field_list = fields.splitlines()
@@ -631,10 +1052,15 @@ async def process_form(
             # Reset file position for potential future reads
             await file.seek(0)
 
-    # If there's only one file, we can't do comparison
+    # If there's only one file, format the results nicely instead of just showing raw data
     if total_files == 1:
+        # Format the single document result for better presentation
+        formatted_result = await format_single_document_result(
+            extracted_results[0], file_names[0], llm
+        )
         result = {
-            "message": "Only one document provided. No comparison performed.",
+            "message": "Field values extracted from single document.",
+            "comparison": formatted_result,
             "extracted_data": extracted_results[0],
         }
     else:
@@ -1184,29 +1610,30 @@ async def generate_form_fields_with_files(
         # Extract text from all uploaded files
         extracted_documents = []
         file_names = []
-        
+
         print(f"🔍 Processing {len(files)} reference files for field suggestion...")
-        
+
         for file in files:
             try:
                 # Read file content
                 content = await file.read()
-                
+
                 # Extract text using unified document processing
                 from app.services.document_utils import extract_text_from_file_unified
-                
-                text = extract_text_from_file_unified(content, file.filename or "unknown")
-                
+
+                text = extract_text_from_file_unified(
+                    content, file.filename or "unknown"
+                )
+
                 if text.strip():
-                    extracted_documents.append({
-                        "filename": file.filename,
-                        "content": text
-                    })
+                    extracted_documents.append(
+                        {"filename": file.filename, "content": text}
+                    )
                     file_names.append(file.filename)
                     print(f"✅ Successfully extracted text from {file.filename}")
                 else:
                     print(f"⚠️ No text extracted from {file.filename}")
-                    
+
             except Exception as e:
                 print(f"❌ Error processing {file.filename}: {str(e)}")
                 # Continue with other files instead of failing completely
@@ -1214,19 +1641,23 @@ async def generate_form_fields_with_files(
 
         if not extracted_documents:
             raise HTTPException(
-                status_code=400, 
-                detail="No text could be extracted from any of the uploaded files. Please check your files and try again."
+                status_code=400,
+                detail="No text could be extracted from any of the uploaded files. Please check your files and try again.",
             )
 
         # Combine all document content for analysis
         combined_content = ""
         for doc in extracted_documents:
             combined_content += f"\n\n--- DOCUMENT: {doc['filename']} ---\n"
-            combined_content += doc['content']
+            combined_content += doc["content"]
 
         # Prepare variables for the prompt
         prompt_variables = {
-            "description": description.strip() if description else "Form template based on reference documents",
+            "description": (
+                description.strip()
+                if description
+                else "Form template based on reference documents"
+            ),
             "example_instruction": f"\n12. Use the following {len(extracted_documents)} reference document(s) as examples to understand the types of fields that are typically found in similar documents:",
             "analysis_instruction": f". Briefly mention how the {len(extracted_documents)} reference document(s) influenced the field selection using {search_mode} analysis",
             "analysis_note": f" (analyzed {len(extracted_documents)} reference documents)",
@@ -1334,6 +1765,7 @@ async def generate_form_fields_with_files(
     except Exception as e:
         print(f"Error generating form fields with files: {e}")
         import traceback
+
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error generating form fields: {str(e)}"
