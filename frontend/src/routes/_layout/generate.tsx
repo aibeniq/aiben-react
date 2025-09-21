@@ -291,6 +291,15 @@ const ReportGenie = () => {
     return source
   }
 
+  // Helper function to format source display with page number
+  const formatSourceWithPage = (source: string, page?: number | string): string => {
+    const fileName = getDisplayFileName(source)
+    if (page && page !== "" && page !== 0) {
+      return `${fileName} (Page ${page})`
+    }
+    return fileName
+  }
+
   // Fetch outlines on component mount
   useEffect(() => {
     fetchOutlines()
@@ -753,8 +762,9 @@ const ReportGenie = () => {
                                                   {citation.metadata?.source_data_id ? (
                                                     <SourceLink
                                                       sourceId={citation.metadata.source_data_id}
-                                                      fileName={getDisplayFileName(
+                                                      fileName={formatSourceWithPage(
                                                         citation.metadata.source,
+                                                        citation.metadata.page,
                                                       )}
                                                       ml={1}
                                                       fontWeight="normal"
@@ -771,8 +781,9 @@ const ReportGenie = () => {
                                                         .endsWith(".pdf")) ? (
                                                     <SourceLink
                                                       sourceId="" // Empty sourceId, will be handled by filename fallback
-                                                      fileName={getDisplayFileName(
+                                                      fileName={formatSourceWithPage(
                                                         citation.metadata.source,
+                                                        citation.metadata.page,
                                                       )}
                                                       ml={1}
                                                       fontWeight="normal"
@@ -787,8 +798,9 @@ const ReportGenie = () => {
                                                       fontWeight="normal"
                                                       color="blue.600"
                                                     >
-                                                      {getDisplayFileName(
+                                                      {formatSourceWithPage(
                                                         citation.metadata?.source || "Unknown",
+                                                        citation.metadata?.page,
                                                       )}
                                                     </Text>
                                                   )}

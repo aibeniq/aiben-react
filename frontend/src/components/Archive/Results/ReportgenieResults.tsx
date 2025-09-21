@@ -42,6 +42,15 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
     return source
   }
 
+  // Helper function to format source display with page number
+  const formatSourceWithPage = (source: string, page?: number | string): string => {
+    const fileName = getDisplayFileName(source)
+    if (page && page !== "" && page !== 0) {
+      return `${fileName} (Page ${page})`
+    }
+    return fileName
+  }
+
   // Get all sections (including those without citations for display)
   const allSections = sections || []
 
@@ -171,7 +180,10 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
                                 {citation.metadata?.source_data_id ? (
                                   <SourceLink
                                     sourceId={citation.metadata.source_data_id}
-                                    fileName={getDisplayFileName(citation.metadata.source)}
+                                    fileName={formatSourceWithPage(
+                                      citation.metadata.source,
+                                      citation.metadata.page,
+                                    )}
                                     fontWeight="medium"
                                     color="blue.600"
                                     useModal={true}
@@ -182,7 +194,10 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
                                     citation.metadata.source.toLowerCase().endsWith(".docx")) ? (
                                   <SourceLink
                                     sourceId={citation.metadata.source} // Use filename as fallback
-                                    fileName={getDisplayFileName(citation.metadata.source)}
+                                    fileName={formatSourceWithPage(
+                                      citation.metadata.source,
+                                      citation.metadata.page,
+                                    )}
                                     fontWeight="medium"
                                     color="blue.600"
                                     useModal={true}
@@ -190,8 +205,9 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
                                   />
                                 ) : (
                                   <Text fontWeight="medium" color="blue.600">
-                                    {getDisplayFileName(
+                                    {formatSourceWithPage(
                                       citation.metadata?.source || "Unknown Source",
+                                      citation.metadata?.page,
                                     )}
                                   </Text>
                                 )}
