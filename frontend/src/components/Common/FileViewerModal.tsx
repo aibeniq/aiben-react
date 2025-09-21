@@ -1,6 +1,7 @@
 import type { FilesGetSourceContentResponse } from "@/client"
 import { Box, Button, Dialog, Image, Spinner, Text } from "@chakra-ui/react"
 import { useEffect, useRef, useState } from "react"
+import { cleanRTFFormatting } from "../../utils/rtfCleaner"
 
 interface FileViewerModalProps {
   file: FilesGetSourceContentResponse | null
@@ -360,6 +361,14 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
     if (file.content_type.startsWith("text/")) {
       const textContent = atob(file.data_base64)
 
+      // Check if this is an RTF file and clean the formatting
+      const isRtfFile =
+        file.name.toLowerCase().endsWith(".rtf") ||
+        file.content_type.includes("rtf") ||
+        textContent.startsWith("{\\rtf")
+
+      const displayContent = isRtfFile ? cleanRTFFormatting(textContent) : textContent
+
       return (
         <Box
           ref={textContentRef}
@@ -373,7 +382,7 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
           whiteSpace="pre-wrap"
           style={{ fontFamily: "monospace" }}
         >
-          {highlightSnippet ? highlightText(textContent, highlightSnippet) : textContent}
+          {highlightSnippet ? highlightText(displayContent, highlightSnippet) : displayContent}
         </Box>
       )
     }

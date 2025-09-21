@@ -28,11 +28,14 @@ import { useTranslation } from "react-i18next"
 import { FiCheck, FiCopy, FiDatabase, FiFileText, FiTrash2 } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import { cleanRTFFormatting } from "../../utils/rtfCleaner"
 import KnowledgeBaseSelectionModal from "../../components/Common/KnowledgeBaseSelectionModal"
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
 import ChecklistTable from "../../components/Review/ChecklistTable"
-import { useResults } from \"../../contexts/ResultsContext\"\nimport { copyToClipboard } from \"../../utils/copyToClipboard\"\nimport { getCleanFileName } from \"../../utils/filename\"
+import { useResults } from "../../contexts/ResultsContext"
+import { copyToClipboard } from "../../utils/copyToClipboard"
+import { getCleanFileName } from "../../utils/filename"
 
 interface QuestionData {
   id: string
@@ -698,7 +701,7 @@ const VeraDoc = () => {
                 <Accordion.ItemContent pb={4} bg="surface">
                   {pair.source_citations.map((citation: any, cIndex: number) => {
                     const isExpanded = isCitationExpanded(resultIndex, pairIndex, cIndex)
-                    const citationText = citation.content
+                    const citationText = cleanRTFFormatting(citation.content)
                     const shouldTruncate = citationText.length > 300
                     const displayText =
                       shouldTruncate && !isExpanded
@@ -722,7 +725,7 @@ const VeraDoc = () => {
                             fontWeight="normal"
                             color="blue.600"
                             useModal={true}
-                            highlightSnippet={citation.content}
+                            highlightSnippet={citationText}
                           />
                         ) : citation.metadata.source?.toLowerCase().endsWith(".docx") ? (
                           <SourceLink
@@ -732,7 +735,7 @@ const VeraDoc = () => {
                             fontWeight="normal"
                             color="blue.600"
                             useModal={true}
-                            highlightSnippet={citation.content}
+                            highlightSnippet={citationText}
                           />
                         ) : (
                           <Text as="span" ml={1} fontWeight="normal" color="blue.600">

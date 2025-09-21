@@ -15,6 +15,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiFileText } from "react-icons/fi"
 import SourceLink from "../Common/SourceLink"
+import { cleanRTFFormatting } from "../../utils/rtfCleaner"
 
 interface ChatMessage {
   role: "user" | "assistant"
@@ -114,7 +115,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                     <Accordion.ItemContent pb={2} bg="gray.50 _dark:gray.900">
                       {msg.sources.map((source, sIdx) => {
                         const isExpanded = isCitationExpanded(idx, sIdx)
-                        const citationText = source.content
+                        const citationText = cleanRTFFormatting(source.content)
                         const shouldTruncate = citationText.length > 300
                         const displayText =
                           shouldTruncate && !isExpanded
@@ -141,7 +142,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                                     fontWeight="normal"
                                     color="blue.600"
                                     useModal={true}
-                                    highlightSnippet={source.content}
+                                    highlightSnippet={citationText}
                                   />
                                 ) : (
                                   // For temporary uploaded files without source_data_id, show as plain text
