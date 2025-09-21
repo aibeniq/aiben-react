@@ -54,10 +54,10 @@ const AddKnowledgeBase = () => {
   const [availableProviders, setAvailableProviders] = useState<string[]>([]) //only show Embedding Model providers allowed in config.py
   const [taskId, setTaskId] = useState<string | null>(null)
   const hasHandledCompletionRef = useRef(false) // Prevent multiple success toasts
-  
+
   // Progress state from the backend
   const progress = useKnowledgeBaseProgress(taskId)
-  
+
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const {
@@ -92,18 +92,18 @@ const AddKnowledgeBase = () => {
     // Only handle completion if we have an active task
     if (taskId && progress.completed && !progress.error && !hasHandledCompletionRef.current) {
       console.log("✅ Knowledge base creation completed successfully - handling completion")
-      
+
       // Mark completion as handled to prevent multiple toasts
       hasHandledCompletionRef.current = true
-      
+
       // Show success toast only when entire process is complete
       showSuccessToast(t("knowledgeBases.modals.messages.createSuccess"))
-      
+
       // Invalidate queries to refresh the list with the new knowledge base
       queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] })
       queryClient.invalidateQueries({ queryKey: ["items"] })
       queryClient.refetchQueries({ queryKey: ["items"] })
-      
+
       // Close modal and reset task ID
       setIsOpen(false)
       setTaskId(null)
@@ -199,7 +199,9 @@ const AddKnowledgeBase = () => {
       }
 
       const totalSize = data.files.reduce((sum, file) => sum + file.size, 0)
-      console.log(`📊 Upload stats: ${data.files.length} files, ${(totalSize / (1024*1024)).toFixed(1)}MB total`)
+      console.log(
+        `📊 Upload stats: ${data.files.length} files, ${(totalSize / (1024 * 1024)).toFixed(1)}MB total`,
+      )
 
       // Send the FormData object to the backend with extended timeout
       const result = await createKnowledgeBaseWithTimeout({
@@ -210,39 +212,44 @@ const AddKnowledgeBase = () => {
           files: data.files,
         },
       })
-      
+
       // Start tracking progress with the task ID from the response
       if (result.task_id) {
         setTaskId(result.task_id)
         hasHandledCompletionRef.current = false // Reset for new task
       }
-      
+
       return result
     },
     onSuccess: (data) => {
-      console.log("✅ Knowledge base creation API call SUCCESS - background processing started:", data)
-      
+      console.log(
+        "✅ Knowledge base creation API call SUCCESS - background processing started:",
+        data,
+      )
+
       // Note: Success toast and modal close will happen when progress reaches completion
       // This onSuccess only means the API call succeeded and background processing started
     },
     onError: (err: any) => {
       console.error("❌ Knowledge base creation ERROR:", err)
-      
+
       let errorMessage = "Failed to create knowledge base"
-      
+
       if (err.message?.includes("Too many files")) {
         errorMessage = err.message
       } else if (err.status === 409) {
-        errorMessage = (err.body as { detail: string }).detail ||
-            "A knowledge base with this title already exists"
+        errorMessage =
+          (err.body as { detail: string }).detail ||
+          "A knowledge base with this title already exists"
       } else if (err.message?.includes("Network Error") || err.code === "ERR_NETWORK") {
-        errorMessage = "Upload timeout or server error. Try with fewer/smaller files or check your connection."
+        errorMessage =
+          "Upload timeout or server error. Try with fewer/smaller files or check your connection."
       } else if (err.body?.detail) {
         errorMessage = err.body.detail
       }
-      
+
       showErrorToast(errorMessage)
-      
+
       // Reset task ID on error
       setTaskId(null)
     },
@@ -359,7 +366,7 @@ const AddKnowledgeBase = () => {
             >
               <VStack gap={4} width="80%" maxWidth="400px">
                 <Text color="white" fontSize="lg" fontWeight="medium" textAlign="center">
-                  {progress.message || "Processing..."}
+                  {progress.message || t("knowledgeBases.modals.messages.processing")}
                 </Text>
                 <Box width="100%">
                   <Progress.Root value={progress.percentage} size="lg" colorPalette="blue">
@@ -372,7 +379,7 @@ const AddKnowledgeBase = () => {
                   </Text>
                 </Box>
                 <Text color="gray.300" fontSize="sm" textAlign="center">
-                  Please wait while we process your files...
+                  {t("knowledgeBases.modals.messages.pleaseWait")}
                 </Text>
               </VStack>
             </Box>
@@ -459,10 +466,10 @@ const AddKnowledgeBase = () => {
                 {/* File Upload Limits Info */}
                 <Box fontSize="sm" color="gray.600" textAlign="center" px={2}>
                   <Box>
-                  <Text fontSize="xs" color="gray.500">
-                    Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX
-                  </Text>
-                </Box>
+                    <Text fontSize="xs" color="gray.500">
+                      {t("knowledgeBases.modals.fileUpload.supportedFormats")}
+                    </Text>
+                  </Box>
                 </Box>
 
                 {/* Display Selected Files */}
@@ -473,7 +480,7 @@ const AddKnowledgeBase = () => {
                       {selectedFiles.map((file, index) => {
                         const truncatedName = truncateText(file.name)
                         const needsTooltip = file.name.length > 30
-                        
+
                         return (
                           <HStack key={index} w="full" justify="space-between" minW="0">
                             <Box flex="1" minW="0">
