@@ -31,6 +31,7 @@ import SelectionModal from "../../components/Common/SelectionModal"
 import OutlineTable from "../../components/Generate/OutlineTable"
 import { useResults } from "../../contexts/ResultsContext"
 import { copyToClipboard } from "../../utils/copyToClipboard"
+import { cleanRTFFormatting } from "../../utils/rtfCleaner"
 
 const ReportGenie = () => {
   const { t } = useTranslation()
@@ -731,7 +732,9 @@ const ReportGenie = () => {
                                           {section.source_citations.map(
                                             (citation: any, cIndex: number) => {
                                               const isExpanded = isCitationExpanded(index, cIndex)
-                                              const citationText = citation.content
+                                              const citationText = cleanRTFFormatting(
+                                                citation.content,
+                                              )
                                               const shouldTruncate = citationText.length > 300
                                               const displayText =
                                                 shouldTruncate && !isExpanded
@@ -757,7 +760,7 @@ const ReportGenie = () => {
                                                       fontWeight="normal"
                                                       color="blue.600"
                                                       useModal={true}
-                                                      highlightSnippet={citation.content}
+                                                      highlightSnippet={citationText}
                                                     />
                                                   ) : citation.metadata?.source &&
                                                     (citation.metadata.source
@@ -775,7 +778,7 @@ const ReportGenie = () => {
                                                       fontWeight="normal"
                                                       color="blue.600"
                                                       useModal={true}
-                                                      highlightSnippet={citation.content}
+                                                      highlightSnippet={citationText}
                                                     />
                                                   ) : (
                                                     <Text

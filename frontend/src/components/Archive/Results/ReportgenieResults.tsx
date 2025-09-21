@@ -5,6 +5,7 @@ import { useState } from "react"
 import { FiFileText } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import { cleanRTFFormatting } from "../../../utils/rtfCleaner"
 
 interface ReportgenieResultsProps {
   selectedReport: any
@@ -174,7 +175,7 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
                                     fontWeight="medium"
                                     color="blue.600"
                                     useModal={true}
-                                    highlightSnippet={citation.content}
+                                    highlightSnippet={cleanRTFFormatting(citation.content)}
                                   />
                                 ) : citation.metadata?.source &&
                                   (citation.metadata.source.toLowerCase().endsWith(".pdf") ||
@@ -185,7 +186,7 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
                                     fontWeight="medium"
                                     color="blue.600"
                                     useModal={true}
-                                    highlightSnippet={citation.content}
+                                    highlightSnippet={cleanRTFFormatting(citation.content)}
                                   />
                                 ) : (
                                   <Text fontWeight="medium" color="blue.600">
@@ -208,7 +209,7 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
                                 borderLeft="3px solid"
                                 borderColor="blue.200"
                               >
-                                {citation.content}
+                                {cleanRTFFormatting(citation.content)}
                               </Box>
                             </Box>
                           ))}

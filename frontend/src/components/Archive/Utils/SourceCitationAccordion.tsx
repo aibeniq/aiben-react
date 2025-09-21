@@ -1,8 +1,10 @@
-impoimport SourceLink from \"../../Common/SourceLink\"\nimport { getCleanFileName } from \"../../../utils/filename\"t { Accordion, Box, Button, HStack, Text } from "@chakra-ui/react"
+import { Accordion, Box, Button, HStack, Text } from "@chakra-ui/react"
 import type React from "react"
 import { useState } from "react"
 import { FiFileText } from "react-icons/fi"
 import SourceLink from "../../Common/SourceLink"
+import { getCleanFileName } from "../../../utils/filename"
+import { cleanRTFFormatting } from "../../../utils/rtfCleaner"
 
 interface SourceCitationAccordionProps {
   sourceCitations: any[]
@@ -48,7 +50,7 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
         <Accordion.ItemContent pb={4} bg="surface">
           {sourceCitations.map((citation: any, cIndex: number) => {
             const isExpanded = isCitationExpanded(cIndex)
-            const citationText = citation.content
+            const citationText = cleanRTFFormatting(citation.content)
             const shouldTruncate = citationText.length > 300
             const displayText =
               shouldTruncate && !isExpanded ? `${citationText.substring(0, 300)}...` : citationText
@@ -63,7 +65,7 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
                     fontWeight="normal"
                     color="blue.600"
                     useModal={true}
-                    highlightSnippet={citation.content}
+                    highlightSnippet={citationText}
                   />
                 ) : citation.metadata.source?.toLowerCase().endsWith(".docx") ? (
                   <SourceLink
@@ -73,7 +75,7 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
                     fontWeight="normal"
                     color="blue.600"
                     useModal={true}
-                    highlightSnippet={citation.content}
+                    highlightSnippet={citationText}
                   />
                 ) : (
                   <Text as="span" ml={1} fontWeight="normal" color="blue.600">
