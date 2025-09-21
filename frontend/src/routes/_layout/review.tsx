@@ -1,8 +1,4 @@
-import {
-  type KnowledgeBasePublic,
-  type VeraDocChecklist,
-  VeradocService,
-} from "@/client"
+import { type KnowledgeBasePublic, type VeraDocChecklist, VeradocService } from "@/client"
 import type { CancelablePromise } from "@/client/core/CancelablePromise"
 import FileUpload, { type FileItem } from "@/components/Common/FileUpload"
 import SearchModeToggle from "@/components/Common/SearchModeToggle"
@@ -36,8 +32,7 @@ import KnowledgeBaseSelectionModal from "../../components/Common/KnowledgeBaseSe
 import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
 import ChecklistTable from "../../components/Review/ChecklistTable"
-import { useResults } from "../../contexts/ResultsContext"
-import { copyToClipboard } from "../../utils/copyToClipboard"
+import { useResults } from \"../../contexts/ResultsContext\"\nimport { copyToClipboard } from \"../../utils/copyToClipboard\"\nimport { getCleanFileName } from \"../../utils/filename\"
 
 interface QuestionData {
   id: string
@@ -343,20 +338,8 @@ const VeraDoc = () => {
     }
   }
 
-  const getDisplayFileName = (source: string): string => {
-    if (!source) return "Unknown"
-
-    // Clean up temporary file paths
-    if (source.includes("/tmp/") || source.includes("\\tmp\\")) {
-      // First get the filename without the path
-      const filename = source.split("/").pop() || source.split("\\").pop() || ""
-
-      // Then remove everything before and including the first underscore
-      return filename.includes("_") ? filename.substring(filename.indexOf("_") + 1) : filename
-    }
-
-    return source
-  }
+  // Use shared filename utility
+  const getDisplayFileName = getCleanFileName
 
   const fetchChecklists = async () => {
     try {
@@ -739,6 +722,7 @@ const VeraDoc = () => {
                             fontWeight="normal"
                             color="blue.600"
                             useModal={true}
+                            highlightSnippet={citation.content}
                           />
                         ) : citation.metadata.source?.toLowerCase().endsWith(".docx") ? (
                           <SourceLink
@@ -748,6 +732,7 @@ const VeraDoc = () => {
                             fontWeight="normal"
                             color="blue.600"
                             useModal={true}
+                            highlightSnippet={citation.content}
                           />
                         ) : (
                           <Text as="span" ml={1} fontWeight="normal" color="blue.600">
