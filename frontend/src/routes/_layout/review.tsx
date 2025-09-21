@@ -344,6 +344,15 @@ const VeraDoc = () => {
   // Use shared filename utility
   const getDisplayFileName = getCleanFileName
 
+  // Helper function to format source display with page number
+  const formatSourceWithPage = (source: string, page?: number | string): string => {
+    const fileName = getDisplayFileName(source)
+    if (page && page !== "" && page !== 0) {
+      return `${fileName} (Page ${page})`
+    }
+    return fileName
+  }
+
   const fetchChecklists = async () => {
     try {
       const data = await VeradocService.getChecklists()
@@ -720,7 +729,10 @@ const VeraDoc = () => {
                         {citation.metadata.source_data_id ? (
                           <SourceLink
                             sourceId={citation.metadata.source_data_id}
-                            fileName={getDisplayFileName(citation.metadata.source)}
+                            fileName={formatSourceWithPage(
+                              citation.metadata.source,
+                              citation.metadata.page,
+                            )}
                             ml={1}
                             fontWeight="normal"
                             color="blue.600"
@@ -730,7 +742,10 @@ const VeraDoc = () => {
                         ) : citation.metadata.source?.toLowerCase().endsWith(".docx") ? (
                           <SourceLink
                             sourceId="" // Empty sourceId, will be handled by filename fallback
-                            fileName={getDisplayFileName(citation.metadata.source)}
+                            fileName={formatSourceWithPage(
+                              citation.metadata.source,
+                              citation.metadata.page,
+                            )}
                             ml={1}
                             fontWeight="normal"
                             color="blue.600"
@@ -739,7 +754,7 @@ const VeraDoc = () => {
                           />
                         ) : (
                           <Text as="span" ml={1} fontWeight="normal" color="blue.600">
-                            {getDisplayFileName(citation.metadata.source)}
+                            {formatSourceWithPage(citation.metadata.source, citation.metadata.page)}
                           </Text>
                         )}
                         <Box

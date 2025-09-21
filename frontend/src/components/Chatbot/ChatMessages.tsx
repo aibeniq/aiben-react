@@ -45,6 +45,14 @@ function getDisplayFileName(source: string): string {
   return source
 }
 
+function formatSourceWithPage(source: string, page?: number | string): string {
+  const fileName = getDisplayFileName(source)
+  if (page && page !== "" && page !== 0) {
+    return `${fileName} (Page ${page})`
+  }
+  return fileName
+}
+
 const ChatMessages: React.FC<ChatMessagesProps> = ({
   messages,
   isLoading,
@@ -137,7 +145,10 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                                 (source.metadata.source_data_id ? (
                                   <SourceLink
                                     sourceId={source.metadata.source_data_id}
-                                    fileName={getDisplayFileName(source.metadata.source)}
+                                    fileName={formatSourceWithPage(
+                                      source.metadata.source,
+                                      source.metadata.page,
+                                    )}
                                     ml={1}
                                     fontWeight="normal"
                                     color="blue.600"
@@ -147,7 +158,10 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                                 ) : (
                                   // For temporary uploaded files without source_data_id, show as plain text
                                   <Text as="span" ml={1} fontWeight="normal" color="gray.600">
-                                    {getDisplayFileName(source.metadata.source)}
+                                    {formatSourceWithPage(
+                                      source.metadata.source,
+                                      source.metadata.page,
+                                    )}
                                   </Text>
                                 ))}
                             </Text>
