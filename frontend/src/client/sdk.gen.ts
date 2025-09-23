@@ -770,6 +770,7 @@ export class FormconnectService {
             url: '/api/v1/formconnect/generate/docx',
             body: data.requestBody,
             mediaType: 'application/json',
+            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -790,6 +791,7 @@ export class FormconnectService {
             url: '/api/v1/formconnect/generate/csv',
             body: data.requestBody,
             mediaType: 'application/json',
+            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -1522,6 +1524,7 @@ export class ReportgenieService {
             url: '/api/v1/reportgenie/optimize-outline/csv',
             body: data.requestBody,
             mediaType: 'application/json',
+            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -1542,6 +1545,7 @@ export class ReportgenieService {
             url: '/api/v1/reportgenie/generate/docx',
             body: data.requestBody,
             mediaType: 'application/json',
+            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -1563,6 +1567,7 @@ export class ReportgenieService {
             url: '/api/v1/reportgenie/generate/csv',
             body: data.requestBody,
             mediaType: 'application/json',
+            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -1756,6 +1761,7 @@ export class TwincheckService {
             url: '/api/v1/twincheck/generate/docx',
             body: data.requestBody,
             mediaType: 'application/json',
+            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -1776,6 +1782,7 @@ export class TwincheckService {
             url: '/api/v1/twincheck/generate/csv',
             body: data.requestBody,
             mediaType: 'application/json',
+            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -2371,6 +2378,7 @@ export class VeradocService {
             url: '/api/v1/veradoc/generate/docx',
             body: data.requestBody,
             mediaType: 'application/json',
+            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -2392,6 +2400,7 @@ export class VeradocService {
             url: '/api/v1/veradoc/generate/csv',
             body: data.requestBody,
             mediaType: 'application/json',
+            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -2413,6 +2422,7 @@ export class VeradocService {
             url: '/api/v1/veradoc/optimization/csv',
             body: data.requestBody,
             mediaType: 'application/json',
+            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
