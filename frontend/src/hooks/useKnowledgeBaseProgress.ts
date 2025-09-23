@@ -18,8 +18,25 @@ export const useKnowledgeBaseProgress = (taskId: string | null) => {
 
     useEffect(() => {
         if (!taskId) {
+            // Reset progress state when no task is active
+            setProgress({
+                percentage: 0,
+                message: "",
+                isActive: false,
+                completed: false,
+                error: undefined
+            })
             return
         }
+
+        // Reset progress state when starting a new task
+        setProgress({
+            percentage: 0,
+            message: "",
+            isActive: false,
+            completed: false,
+            error: undefined
+        })
 
         console.log("🔄 Starting progress polling for task:", taskId)
 
