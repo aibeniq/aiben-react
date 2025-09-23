@@ -454,6 +454,7 @@ def create_source_entry_from_file_data(
     """Create a source entry from file metadata."""
     try:
         import hashlib
+        from app.services.page_counter import PageCounter
 
         # Get file information
         content = file_info.get("content", b"")
@@ -463,8 +464,8 @@ def create_source_entry_from_file_data(
         # Calculate file hash for SourceData
         file_hash = hashlib.sha256(content).hexdigest()
 
-        # Estimate pages based on content size
-        estimated_pages = max(1, content_size // 3000)  # ~3000 characters per page
+        # Count pages using the proper PageCounter service
+        page_count = PageCounter.count_pages_from_bytes(content, filename)
 
         # Create source data entry with manual UUID generation
         source_data = SourceData(
@@ -479,13 +480,13 @@ def create_source_entry_from_file_data(
             knowledge_base_id=knowledge_base_id,
             source_data_id=source_data.id,
             owner_id=user_id,
-            page_count=estimated_pages,  # Use correct field name
+            page_count=page_count,  # Use proper page count from PageCounter service
         )
         session.add(source)
         session.flush()
 
         print(
-            f"✅ Created source entry for {filename} ({content_size} bytes, {estimated_pages} pages)"
+            f"✅ Created source entry for {filename} ({content_size} bytes, {page_count} pages)"
         )
 
     except Exception as e:
