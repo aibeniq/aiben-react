@@ -289,7 +289,7 @@ async def process_rag_checklist(
         # 2. Create a temporary directory for ChromaDB
         with tempfile.TemporaryDirectory() as temp_dir:
             # Extract the zipped ChromaDB into the temp directory
-            if kb.storage_type == 'file' and kb.file_path:
+            if kb.storage_type == "file" and kb.file_path:
                 # File-based storage: extract from file path
                 if os.path.exists(kb.file_path):
                     with zipfile.ZipFile(kb.file_path, "r") as zip_ref:
@@ -1407,7 +1407,7 @@ async def optimize_checklist(
         # 2. Set up the same infrastructure as process_rag_checklist
         with tempfile.TemporaryDirectory() as temp_dir:
             # Extract ChromaDB
-            if kb.storage_type == 'file' and kb.file_path:
+            if kb.storage_type == "file" and kb.file_path:
                 # File-based storage: extract from file path
                 if os.path.exists(kb.file_path):
                     with zipfile.ZipFile(kb.file_path, "r") as zip_ref:
@@ -2461,6 +2461,9 @@ async def generate_questions(
                     retrieve_knowledge_base_content,
                 )
 
+                print(
+                    f"Retrieving knowledge base content for KB ID: {request.knowledge_base_id}, search mode: {request.search_mode}"
+                )
                 content, instruction = await retrieve_knowledge_base_content(
                     session=session,
                     current_user=current_user,
@@ -2470,15 +2473,26 @@ async def generate_questions(
                 )
 
                 if content:
+                    print(
+                        f"Successfully retrieved KB content: {len(content)} characters"
+                    )
                     prompt_variables["reference_documents_content"] = content
                     prompt_variables["reference_documents_instruction"] = (
                         f"{instruction} The questions should be relevant to the description while also "
                         f"considering the content and requirements found in these reference documents. "
                         f"Search mode used: {request.search_mode}"
                     )
+                    prompt_variables["additional_instructions"] = (
+                        "\n11. Use the reference documents provided below to identify additional requirements that should be included in the checklist questions"
+                    )
+                else:
+                    print("Warning: No content retrieved from knowledge base")
 
             except Exception as e:
                 print(f"Error retrieving knowledge base documents: {e}")
+                import traceback
+
+                traceback.print_exc()
                 # Continue without reference documents if there's an error
                 pass
 
