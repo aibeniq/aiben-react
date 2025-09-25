@@ -17,9 +17,11 @@ import { FiCopy } from "react-icons/fi"
 import type { KnowledgeBasePublic, ReportGenieOutline } from "../../client"
 import { ReportgenieService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
+import { useKnowledgeBases } from "../../hooks/useKnowledgeBases"
 import { copyToClipboard } from "../../utils/copyToClipboard"
 import { generateUUID } from "../../utils/uuid"
 import FileUpload, { type FileItem } from "../Common/FileUpload"
+import KnowledgeBaseSelectionModal from "../Common/KnowledgeBaseSelectionModal"
 import SearchModeToggle from "../Common/SearchModeToggle"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
@@ -39,8 +41,6 @@ interface OutlineModalProps {
   setOutlineDescription: (description: string) => void
   sections: string
   onSectionsChange: (sections: string) => void
-  selectedKnowledgeBase?: KnowledgeBasePublic | null
-  knowledgeBases?: KnowledgeBasePublic[]
 }
 
 const OutlineModal = ({
@@ -54,8 +54,6 @@ const OutlineModal = ({
   setOutlineDescription,
   sections,
   onSectionsChange,
-  selectedKnowledgeBase,
-  knowledgeBases,
 }: OutlineModalProps) => {
   console.log("🔍 OutlineModal: Received sections prop:", sections)
   console.log("🔍 OutlineModal: Type of sections prop:", typeof sections)
@@ -63,6 +61,13 @@ const OutlineModal = ({
 
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { t } = useTranslation()
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases()
+
+  // Knowledge Base for optimization functionality
+  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
+    null,
+  )
+  const [showKnowledgeBaseModal, setShowKnowledgeBaseModal] = useState(false)
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -144,6 +149,7 @@ const OutlineModal = ({
     null,
   )
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
+  const [showReferenceKnowledgeBaseModal, setShowReferenceKnowledgeBaseModal] = useState(false)
 
   const handleSuggestOutline = async () => {
     if (!outlineDescription.trim()) {
@@ -325,13 +331,19 @@ const OutlineModal = ({
     }
   }
 
+  const handleMainModalClose = (e: { open: boolean }) => {
+    if (!e.open) {
+      handleClose()
+    }
+  }
+
   if (!isOpen) return null
 
   return (
     <Portal>
-      <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && handleClose()}>
+      <Dialog.Root open={isOpen} onOpenChange={handleMainModalClose}>
         <Dialog.Backdrop />
-        <Dialog.Positioner>
+        <Dialog.Positioner style={{ zIndex: 1500 }}>
           <Dialog.Content maxW="6xl" maxH="90vh">
             <Dialog.Header>
               <HStack align="center" gap={2}>
@@ -426,7 +438,8 @@ const OutlineModal = ({
                                   [".docx"],
                                 "text/plain": [".txt"],
                                 "text/csv": [".csv"],
-                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                                  [".xlsx"],
                                 "application/vnd.ms-excel": [".xls"],
                                 "application/json": [".json"],
                               }}
@@ -437,26 +450,16 @@ const OutlineModal = ({
 
                         {referenceMode === "knowledge-base" && (
                           <Box>
-                            <select
-                              style={{
-                                width: "100%",
-                                padding: "8px",
-                                borderRadius: "6px",
-                                border: "1px solid #e2e8f0",
-                              }}
-                              value={referenceKnowledgeBase?.id || ""}
-                              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                                const kb = knowledgeBases?.find((kb) => kb.id === e.target.value)
-                                setReferenceKnowledgeBase(kb || null)
-                              }}
+                            <Button
+                              w="full"
+                              variant={referenceKnowledgeBase ? "solid" : "outline"}
+                              onClick={() => setShowReferenceKnowledgeBaseModal(true)}
+                              justifyContent="flex-start"
+                              textAlign="left"
+                              color={referenceKnowledgeBase ? "white" : "gray.600"}
                             >
-                              <option value="">{t("dropdowns.selectKnowledgeBase")}</option>
-                              {knowledgeBases?.map((kb) => (
-                                <option key={kb.id} value={kb.id}>
-                                  {kb.title}
-                                </option>
-                              ))}
-                            </select>
+                              {referenceKnowledgeBase?.title || t("dropdowns.selectKnowledgeBase")}
+                            </Button>
                             {!knowledgeBases || knowledgeBases.length === 0 ? (
                               <Text fontSize="sm" color="orange.600">
                                 No Knowledge Bases available. Create one first to use this feature.
@@ -470,6 +473,20 @@ const OutlineModal = ({
 
                   {/* Right Column - Sections List */}
                   <VStack align="stretch" gap={4} flex="1">
+                    {/* Knowledge Base Selection for Optimization */}
+                    <Field label={t("editOutlineModal.knowledgeBase")}>
+                      <Button
+                        w="full"
+                        variant={selectedKnowledgeBase ? "solid" : "outline"}
+                        onClick={() => setShowKnowledgeBaseModal(true)}
+                        justifyContent="flex-start"
+                        textAlign="left"
+                        color={selectedKnowledgeBase ? "white" : "gray.600"}
+                      >
+                        {selectedKnowledgeBase?.title || t("dropdowns.selectKnowledgeBase")}
+                      </Button>
+                    </Field>
+
                     <Field
                       label={
                         <HStack justify="space-between" w="full">
@@ -593,6 +610,28 @@ const OutlineModal = ({
           onOptimizedSections={onSectionsChange}
         />
       )}
+
+      <KnowledgeBaseSelectionModal
+        isOpen={showKnowledgeBaseModal}
+        onClose={() => setShowKnowledgeBaseModal(false)}
+        title={t("editOutlineModal.knowledgeBase")}
+        knowledgeBases={knowledgeBases}
+        selectedKnowledgeBase={selectedKnowledgeBase}
+        onSelectionChange={setSelectedKnowledgeBase}
+        showAllUsers={showAllUsers}
+        toggleShowAllUsers={toggleShowAllUsers}
+      />
+
+      <KnowledgeBaseSelectionModal
+        isOpen={showReferenceKnowledgeBaseModal}
+        onClose={() => setShowReferenceKnowledgeBaseModal(false)}
+        title={t("dropdowns.selectKnowledgeBase")}
+        knowledgeBases={knowledgeBases}
+        selectedKnowledgeBase={referenceKnowledgeBase}
+        onSelectionChange={setReferenceKnowledgeBase}
+        showAllUsers={showAllUsers}
+        toggleShowAllUsers={toggleShowAllUsers}
+      />
     </Portal>
   )
 }

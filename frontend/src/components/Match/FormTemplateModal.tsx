@@ -11,13 +11,15 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react"
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiCopy } from "react-icons/fi"
 import type { FormConnectForm, KnowledgeBasePublic } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
+import { useKnowledgeBases } from "../../hooks/useKnowledgeBases"
 import { copyToClipboard } from "../../utils/copyToClipboard"
 import FileUpload, { type FileItem } from "../Common/FileUpload"
+import KnowledgeBaseSelectionModal from "../Common/KnowledgeBaseSelectionModal"
 import SearchModeToggle from "../Common/SearchModeToggle"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
@@ -36,9 +38,6 @@ interface FormTemplateModalProps {
   setFormDescription: (description: string) => void
   fields: string
   onFieldsChange: (fields: string) => void
-  selectedKnowledgeBase?: KnowledgeBasePublic | null
-  knowledgeBases?: KnowledgeBasePublic[]
-  searchMode?: "vector" | "full_scan"
 }
 
 const FormTemplateModal = ({
@@ -52,12 +51,10 @@ const FormTemplateModal = ({
   setFormDescription,
   fields,
   onFieldsChange,
-  selectedKnowledgeBase,
-  knowledgeBases,
-  searchMode: passedSearchMode = "vector",
 }: FormTemplateModalProps) => {
   const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases()
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -122,16 +119,10 @@ const FormTemplateModal = ({
   const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
   const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
   const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
-    selectedKnowledgeBase || null,
+    null,
   )
-  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">(passedSearchMode)
-
-  // Set reference mode based on preselected knowledge base
-  useEffect(() => {
-    if (selectedKnowledgeBase) {
-      setReferenceMode("knowledge-base")
-    }
-  }, [selectedKnowledgeBase])
+  const [showReferenceKnowledgeBaseModal, setShowReferenceKnowledgeBaseModal] = useState(false)
+  const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
 
   const handleSuggestFields = async () => {
     if (!formDescription.trim()) {
@@ -326,11 +317,17 @@ const FormTemplateModal = ({
     }
   }
 
+  const handleMainModalClose = (e: { open: boolean }) => {
+    if (!e.open) {
+      handleModalClose()
+    }
+  }
+
   return (
-    <Dialog.Root open={isOpen} onOpenChange={(e) => (e.open ? null : handleModalClose())}>
-      <Portal>
+    <Portal>
+      <Dialog.Root open={isOpen} onOpenChange={handleMainModalClose}>
         <Dialog.Backdrop />
-        <Dialog.Positioner>
+        <Dialog.Positioner style={{ zIndex: 1500 }}>
           <Dialog.Content maxW="6xl" maxH="90vh">
             <Dialog.Header>
               <HStack align="center" gap={2}>
@@ -411,7 +408,8 @@ const FormTemplateModal = ({
                                   [".docx"],
                                 "text/plain": [".txt"],
                                 "text/csv": [".csv"],
-                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                                  [".xlsx"],
                                 "application/vnd.ms-excel": [".xls"],
                                 "application/json": [".json"],
                               }}
@@ -428,26 +426,16 @@ const FormTemplateModal = ({
 
                         {referenceMode === "knowledge-base" && (
                           <Box>
-                            <select
-                              style={{
-                                width: "100%",
-                                padding: "8px",
-                                borderRadius: "6px",
-                                border: "1px solid #e2e8f0",
-                              }}
-                              value={referenceKnowledgeBase?.id || ""}
-                              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                                const kb = knowledgeBases?.find((kb) => kb.id === e.target.value)
-                                setReferenceKnowledgeBase(kb || null)
-                              }}
+                            <Button
+                              w="full"
+                              variant={referenceKnowledgeBase ? "solid" : "outline"}
+                              onClick={() => setShowReferenceKnowledgeBaseModal(true)}
+                              justifyContent="flex-start"
+                              textAlign="left"
+                              color={referenceKnowledgeBase ? "white" : "gray.600"}
                             >
-                              <option value="">{t("dropdowns.selectKnowledgeBase")}</option>
-                              {knowledgeBases?.map((kb) => (
-                                <option key={kb.id} value={kb.id}>
-                                  {kb.title}
-                                </option>
-                              ))}
-                            </select>
+                              {referenceKnowledgeBase?.title || t("dropdowns.selectKnowledgeBase")}
+                            </Button>
                             {!knowledgeBases || knowledgeBases.length === 0 ? (
                               <Text fontSize="sm" color="orange.600">
                                 No Knowledge Bases available. Create one first to use this feature.
@@ -563,8 +551,19 @@ const FormTemplateModal = ({
             </Dialog.CloseTrigger>
           </Dialog.Content>
         </Dialog.Positioner>
-      </Portal>
-    </Dialog.Root>
+      </Dialog.Root>
+
+      <KnowledgeBaseSelectionModal
+        isOpen={showReferenceKnowledgeBaseModal}
+        onClose={() => setShowReferenceKnowledgeBaseModal(false)}
+        title={t("dropdowns.selectKnowledgeBase")}
+        knowledgeBases={knowledgeBases}
+        selectedKnowledgeBase={referenceKnowledgeBase}
+        onSelectionChange={setReferenceKnowledgeBase}
+        showAllUsers={showAllUsers}
+        toggleShowAllUsers={toggleShowAllUsers}
+      />
+    </Portal>
   )
 }
 

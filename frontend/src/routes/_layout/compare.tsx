@@ -8,17 +8,14 @@ import remarkGfm from "remark-gfm"
 import { useTranslation } from "react-i18next"
 import { useMutation } from "@tanstack/react-query"
 
-import {
-  type TwinCheckTopicList,
-  TwincheckService,
-} from "@/client"
+import { type TwinCheckTopicList, TwincheckService } from "@/client"
 import SelectionCard from "@/components/Common/SelectionCard"
 import SelectionModal from "@/components/Common/SelectionModal"
 import TopicListTable from "@/components/Compare/TopicListTable"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import useCustomToast from "@/hooks/useCustomToast"
-import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
+
 import { useResults } from "@/contexts/ResultsContext"
 import { copyToClipboard } from "@/utils/copyToClipboard"
 
@@ -45,9 +42,6 @@ const TwinCheck = () => {
   const [selectedComparison, setSelectedComparison] = useState<TwinCheckTopicList | null>(
     compareInputs?.selectedComparison || null,
   )
-
-  // Knowledge base state (only for topic generation)
-  const { knowledgeBases } = useKnowledgeBases() // Respect All Users toggle state
 
   // Loading state
   const [loading, setLoading] = useState(false)
@@ -411,7 +405,9 @@ const TwinCheck = () => {
                         ".docx",
                       ],
                       "text/csv": [".csv"],
-                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+                        ".xlsx",
+                      ],
                       "application/vnd.ms-excel": [".xls"],
                     }}
                   />
@@ -429,7 +425,9 @@ const TwinCheck = () => {
                         ".docx",
                       ],
                       "text/csv": [".csv"],
-                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+                        ".xlsx",
+                      ],
                       "application/vnd.ms-excel": [".xls"],
                     }}
                   />
@@ -451,7 +449,6 @@ const TwinCheck = () => {
             onTopicsChange={setTopics}
             onTopicListsUpdate={fetchComparisons}
             topics={topics}
-            knowledgeBases={knowledgeBases}
           />
         </SelectionModal>
 

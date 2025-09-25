@@ -1,10 +1,7 @@
-import {
-  type FormConnectForm,
-  FormconnectService,
-} from "@/client"
+import { type FormConnectForm, FormconnectService } from "@/client"
 import DownloadButton from "@/components/ui/download-button"
 import useCustomToast from "@/hooks/useCustomToast"
-import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
+
 import { Box, Button, Container, HStack, Heading, Spinner, Text, VStack } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
@@ -39,7 +36,7 @@ const FormConnect = () => {
   const [fields, setFields] = useState(matchInputs?.fields || "")
   const [loading, setLoading] = useState(false)
   const [showFormModal, setShowFormModal] = useState(false)
-  const { knowledgeBases } = useKnowledgeBases() // Respect All Users toggle state
+
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">(
     matchInputs?.searchMode || "vector",
   )
@@ -370,8 +367,6 @@ const FormConnect = () => {
             setFormName={setFormName}
             formDescription={formDescription}
             setFormDescription={setFormDescription}
-            knowledgeBases={knowledgeBases}
-            searchMode={searchMode}
           />
         </SelectionModal>
 
