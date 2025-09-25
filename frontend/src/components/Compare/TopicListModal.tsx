@@ -16,8 +16,10 @@ import { useTranslation } from "react-i18next"
 import { FiCopy } from "react-icons/fi"
 import { type KnowledgeBasePublic, type TwinCheckTopicList, TwincheckService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
+import { useKnowledgeBases } from "../../hooks/useKnowledgeBases"
 import { copyToClipboard } from "../../utils/copyToClipboard"
 import FileUpload, { type FileItem } from "../Common/FileUpload"
+import KnowledgeBaseSelectionModal from "../Common/KnowledgeBaseSelectionModal"
 import SearchModeToggle from "../Common/SearchModeToggle"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
@@ -41,7 +43,6 @@ interface TopicListModalProps {
   removeTopic: (index: number) => void
   moveTopicUp: (index: number) => void
   moveTopicDown: (index: number) => void
-  knowledgeBases?: KnowledgeBasePublic[]
 }
 
 const TopicListModal = ({
@@ -60,10 +61,10 @@ const TopicListModal = ({
   removeTopic,
   moveTopicUp,
   moveTopicDown,
-  knowledgeBases = [],
 }: TopicListModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { t } = useTranslation()
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases()
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -130,6 +131,7 @@ const TopicListModal = ({
     null,
   )
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
+  const [showReferenceKnowledgeBaseModal, setShowReferenceKnowledgeBaseModal] = useState(false)
 
   // Remove the knowledge base effect
   // useEffect(() => {
@@ -282,11 +284,17 @@ const TopicListModal = ({
     }
   }
 
+  const handleMainModalClose = (e: { open: boolean }) => {
+    if (!e.open) {
+      handleModalClose()
+    }
+  }
+
   return (
-    <Dialog.Root open={isOpen} onOpenChange={(e) => (e.open ? null : handleModalClose())}>
-      <Portal>
+    <Portal>
+      <Dialog.Root open={isOpen} onOpenChange={handleMainModalClose}>
         <Dialog.Backdrop />
-        <Dialog.Positioner>
+        <Dialog.Positioner style={{ zIndex: 1500 }}>
           <Dialog.Content maxW="4xl" maxH="90vh">
             <Dialog.Header>
               <HStack align="center" gap={2}>
@@ -391,26 +399,16 @@ const TopicListModal = ({
 
                         {referenceMode === "knowledge-base" && (
                           <Box>
-                            <select
-                              style={{
-                                width: "100%",
-                                padding: "8px",
-                                borderRadius: "6px",
-                                border: "1px solid #e2e8f0",
-                              }}
-                              value={referenceKnowledgeBase?.id || ""}
-                              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                                const kb = knowledgeBases?.find((kb) => kb.id === e.target.value)
-                                setReferenceKnowledgeBase(kb || null)
-                              }}
+                            <Button
+                              w="full"
+                              variant={referenceKnowledgeBase ? "solid" : "outline"}
+                              onClick={() => setShowReferenceKnowledgeBaseModal(true)}
+                              justifyContent="flex-start"
+                              textAlign="left"
+                              color={referenceKnowledgeBase ? "white" : "gray.600"}
                             >
-                              <option value="">{t("dropdowns.selectKnowledgeBase")}</option>
-                              {knowledgeBases?.map((kb) => (
-                                <option key={kb.id} value={kb.id}>
-                                  {kb.title}
-                                </option>
-                              ))}
-                            </select>
+                              {referenceKnowledgeBase?.title || t("dropdowns.selectKnowledgeBase")}
+                            </Button>
                             {!knowledgeBases || knowledgeBases.length === 0 ? (
                               <Text fontSize="sm" color="orange.600">
                                 No Knowledge Bases available. Create one first to use this feature.
@@ -533,8 +531,19 @@ const TopicListModal = ({
             </Dialog.CloseTrigger>
           </Dialog.Content>
         </Dialog.Positioner>
-      </Portal>
-    </Dialog.Root>
+      </Dialog.Root>
+
+      <KnowledgeBaseSelectionModal
+        isOpen={showReferenceKnowledgeBaseModal}
+        onClose={() => setShowReferenceKnowledgeBaseModal(false)}
+        title={t("dropdowns.selectKnowledgeBase")}
+        knowledgeBases={knowledgeBases}
+        selectedKnowledgeBase={referenceKnowledgeBase}
+        onSelectionChange={setReferenceKnowledgeBase}
+        showAllUsers={showAllUsers}
+        toggleShowAllUsers={toggleShowAllUsers}
+      />
+    </Portal>
   )
 }
 

@@ -22,9 +22,6 @@ interface ChecklistTableProps {
   onChecklistsUpdate: () => void
   questions: string
   isDisabled?: boolean
-  // New props for optimization
-  knowledgeBases?: any[]
-  selectedKnowledgeBase?: any
 }
 
 interface ChecklistTableHeaderProps {
@@ -200,8 +197,6 @@ const ChecklistTable = ({
   onStructuredQuestionsChange,
   onChecklistsUpdate,
   isDisabled = false,
-  knowledgeBases: _knowledgeBases = [],
-  selectedKnowledgeBase = null,
 }: ChecklistTableProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [checklistName, setChecklistName] = useState("")
@@ -567,8 +562,6 @@ const ChecklistTable = ({
         removeQuestion={removeQuestion}
         moveQuestionUp={moveQuestionUp}
         moveQuestionDown={moveQuestionDown}
-        knowledgeBases={_knowledgeBases}
-        selectedKnowledgeBase={selectedKnowledgeBase}
       />
     </div>
   )

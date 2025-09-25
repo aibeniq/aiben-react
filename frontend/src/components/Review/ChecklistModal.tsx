@@ -14,10 +14,12 @@ import {
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiCopy } from "react-icons/fi"
-import { type VeraDocChecklist, VeradocService } from "../../client"
+import { type VeraDocChecklist, VeradocService, type KnowledgeBasePublic } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
+import { useKnowledgeBases } from "../../hooks/useKnowledgeBases"
 import { copyToClipboard } from "../../utils/copyToClipboard"
 import FileUpload from "../Common/FileUpload"
+import KnowledgeBaseSelectionModal from "../Common/KnowledgeBaseSelectionModal"
 import SearchModeToggle from "../Common/SearchModeToggle"
 import CancelButton from "../ui/cancel-button"
 import ConfirmButton from "../ui/confirm-button"
@@ -45,8 +47,6 @@ interface ChecklistModalProps {
   removeQuestion: (index: number) => void
   moveQuestionUp: (index: number) => void
   moveQuestionDown: (index: number) => void
-  knowledgeBases?: any[]
-  selectedKnowledgeBase?: any
 }
 
 interface QuestionData {
@@ -78,11 +78,16 @@ const ChecklistModal = ({
   removeQuestion,
   moveQuestionUp,
   moveQuestionDown,
-  knowledgeBases,
-  selectedKnowledgeBase,
 }: ChecklistModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { t } = useTranslation()
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases()
+
+  // Knowledge Base for optimization functionality
+  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
+    null,
+  )
+  const [showKnowledgeBaseModal, setShowKnowledgeBaseModal] = useState(false)
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -159,9 +164,12 @@ const ChecklistModal = ({
   const [suggesting, setSuggesting] = useState(false)
   const [questionsKey, setQuestionsKey] = useState(0)
   const [referenceFiles, setReferenceFiles] = useState<FileItem[]>([])
-  const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<any>(null)
+  const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
+    null,
+  )
   const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
+  const [showReferenceKnowledgeBaseModal, setShowReferenceKnowledgeBaseModal] = useState(false)
 
   const handleCopyQuestions = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -335,12 +343,18 @@ const ChecklistModal = ({
     }
   }
 
+  const handleMainModalClose = (details: { open: boolean }) => {
+    if (!details.open) {
+      onClose()
+    }
+  }
+
   return (
     <>
-      <Dialog.Root open={isOpen} onOpenChange={onClose}>
-        <Portal>
+      <Portal>
+        <Dialog.Root open={isOpen} onOpenChange={handleMainModalClose}>
           <Dialog.Backdrop />
-          <Dialog.Positioner>
+          <Dialog.Positioner style={{ zIndex: 1500 }}>
             <Dialog.Content maxW="6xl" maxH="90vh">
               <Dialog.Header>
                 <HStack align="center" gap={2}>
@@ -436,7 +450,8 @@ const ChecklistModal = ({
                                     [".docx"],
                                   "text/plain": [".txt"],
                                   "text/csv": [".csv"],
-                                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+                                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                                    [".xlsx"],
                                   "application/vnd.ms-excel": [".xls"],
                                   "application/json": [".json"],
                                 }}
@@ -447,28 +462,17 @@ const ChecklistModal = ({
 
                           {referenceMode === "knowledge-base" && (
                             <Box>
-                              <select
-                                style={{
-                                  width: "100%",
-                                  padding: "8px",
-                                  borderRadius: "6px",
-                                  border: "1px solid #e2e8f0",
-                                }}
-                                value={referenceKnowledgeBase?.id || ""}
-                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                                  const kb = knowledgeBases?.find((kb) => kb.id === e.target.value)
-                                  setReferenceKnowledgeBase(kb || null)
-                                }}
+                              <Button
+                                w="full"
+                                variant={referenceKnowledgeBase ? "solid" : "outline"}
+                                onClick={() => setShowReferenceKnowledgeBaseModal(true)}
+                                justifyContent="flex-start"
+                                textAlign="left"
+                                color={referenceKnowledgeBase ? "white" : "gray.600"}
                               >
-                                <option value="">
-                                  {t("dropdowns.selectKnowledgeBase")}
-                                </option>
-                                {knowledgeBases?.map((kb) => (
-                                  <option key={kb.id} value={kb.id}>
-                                    {kb.title}
-                                  </option>
-                                ))}
-                              </select>
+                                {referenceKnowledgeBase?.title ||
+                                  t("dropdowns.selectKnowledgeBase")}
+                              </Button>
                               {!knowledgeBases || knowledgeBases.length === 0 ? (
                                 <Text fontSize="sm" color="orange.600">
                                   No Knowledge Bases available. Create one first to use this
@@ -483,6 +487,20 @@ const ChecklistModal = ({
 
                     {/* Right Column - Questions List */}
                     <VStack align="stretch" gap={4} flex={1} height="100%">
+                      {/* Knowledge Base Selection for Optimization */}
+                      <Field label={t("editChecklistModal.knowledgeBase")}>
+                        <Button
+                          w="full"
+                          variant={selectedKnowledgeBase ? "solid" : "outline"}
+                          onClick={() => setShowKnowledgeBaseModal(true)}
+                          justifyContent="flex-start"
+                          textAlign="left"
+                          color={selectedKnowledgeBase ? "white" : "gray.600"}
+                        >
+                          {selectedKnowledgeBase?.title || t("dropdowns.selectKnowledgeBase")}
+                        </Button>
+                      </Field>
+
                       {/* Suggest and Optimize buttons above questions */}
                       <HStack justify="space-between" align="center">
                         <Text fontSize="md" fontWeight="medium">
@@ -580,23 +598,49 @@ const ChecklistModal = ({
               </Dialog.CloseTrigger>
             </Dialog.Content>
           </Dialog.Positioner>
-        </Portal>
-      </Dialog.Root>
+        </Dialog.Root>
 
-      {/* Optimize Checklist Modal */}
-      <OptimizeChecklistModal
-        isOpen={showOptimizeModal}
-        onClose={() => setShowOptimizeModal(false)}
-        checklist={{
-          id: editingChecklist?.id || "",
-          name: checklistName,
-          description: checklistDescription,
-          questions: questionsList.filter((q) => q.trim()).join("\n"),
-          owner_id: editingChecklist?.owner_id || "",
-        }}
-        selectedKnowledgeBase={selectedKnowledgeBase}
-        onOptimized={handleOptimized}
-      />
+        {/* Optimize Checklist Modal */}
+        <OptimizeChecklistModal
+          isOpen={showOptimizeModal}
+          onClose={() => setShowOptimizeModal(false)}
+          checklist={{
+            id: editingChecklist?.id || "",
+            name: checklistName,
+            description: checklistDescription,
+            questions: questionsList.filter((q) => q.trim()).join("\n"),
+            owner_id: editingChecklist?.owner_id || "",
+          }}
+          selectedKnowledgeBase={selectedKnowledgeBase}
+          onOptimized={handleOptimized}
+        />
+
+        <KnowledgeBaseSelectionModal
+          isOpen={showKnowledgeBaseModal}
+          onClose={() => {
+            setShowKnowledgeBaseModal(false)
+          }}
+          title={t("editChecklistModal.knowledgeBase")}
+          knowledgeBases={knowledgeBases}
+          selectedKnowledgeBase={selectedKnowledgeBase}
+          onSelectionChange={setSelectedKnowledgeBase}
+          showAllUsers={showAllUsers}
+          toggleShowAllUsers={toggleShowAllUsers}
+        />
+
+        <KnowledgeBaseSelectionModal
+          isOpen={showReferenceKnowledgeBaseModal}
+          onClose={() => {
+            setShowReferenceKnowledgeBaseModal(false)
+          }}
+          title={t("dropdowns.selectKnowledgeBase")}
+          knowledgeBases={knowledgeBases}
+          selectedKnowledgeBase={referenceKnowledgeBase}
+          onSelectionChange={setReferenceKnowledgeBase}
+          showAllUsers={showAllUsers}
+          toggleShowAllUsers={toggleShowAllUsers}
+        />
+      </Portal>
     </>
   )
 }

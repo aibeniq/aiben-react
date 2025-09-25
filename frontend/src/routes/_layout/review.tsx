@@ -923,8 +923,6 @@ const VeraDoc = () => {
             onStructuredQuestionsChange={setStructuredQuestions}
             onChecklistsUpdate={fetchChecklists}
             questions={questions}
-            knowledgeBases={knowledgeBases}
-            selectedKnowledgeBase={selectedKnowledgeBase}
           />
         </SelectionModal>
 

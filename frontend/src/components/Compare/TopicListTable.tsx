@@ -2,7 +2,7 @@ import { Button, Checkbox, HStack, IconButton, Table } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 import { FiCopy, FiEye, FiPlus, FiTrash2 } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
-import { type KnowledgeBasePublic, type TwinCheckTopicList, TwincheckService } from "../../client"
+import { type TwinCheckTopicList, TwincheckService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import TopicListModal from "./TopicListModal"
 
@@ -14,7 +14,6 @@ interface TopicListTableProps {
   onTopicListsUpdate: () => void
   topics: string
   isDisabled?: boolean
-  knowledgeBases?: KnowledgeBasePublic[]
 }
 
 interface TopicListTableHeaderProps {
@@ -153,7 +152,6 @@ const TopicListTable = ({
   onTopicsChange,
   onTopicListsUpdate,
   isDisabled = false,
-  knowledgeBases = [],
 }: TopicListTableProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [topicListName, setTopicListName] = useState("")
@@ -448,7 +446,6 @@ const TopicListTable = ({
         removeTopic={removeTopic}
         moveTopicUp={moveTopicUp}
         moveTopicDown={moveTopicDown}
-        knowledgeBases={knowledgeBases}
       />
     </div>
   )
