@@ -184,6 +184,8 @@ class KnowledgeBase(KnowledgeBaseBase, table=True):
     )
     owner: User | None = Relationship(back_populates="knowledge_bases")
     data: bytes | None = Field(default=None, sa_column=LargeBinary)
+    file_path: str | None = Field(default=None, max_length=512)  # Path to file-based storage
+    storage_type: str = Field(default="database", max_length=20)  # "database" or "file"
     total_pages: int = Field(default=0)
     date_created: datetime
     date_modified: datetime

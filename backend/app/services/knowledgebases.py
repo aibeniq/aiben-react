@@ -1,7 +1,9 @@
 from typing import List
 import uuid
 import hashlib
-from fastapi import UploadFile
+import tempfile
+import os
+from fastapi import UploadFile, HTTPException
 from sqlmodel import select, Session, delete
 from app.models import Source, SourceData, EmbeddingModel, KnowledgeBase
 from app.api.deps import CurrentUser
@@ -58,11 +60,43 @@ class KnowledgeBaseService:
             session.add(source)
         else:
 
-            # Compress the file content into .zip format
-            zip_buffer = BytesIO()
-            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-                zip_file.writestr(file.filename, file_content)
-            compressed_content = zip_buffer.getvalue()
+            # Compress the file content into .zip format using temporary file
+            # for memory efficiency with large files
+            temp_zip_path = None
+            try:
+                temp_zip_fd, temp_zip_path = tempfile.mkstemp(suffix=".zip")
+                os.close(temp_zip_fd)  # Close file descriptor, but keep path
+                
+                with zipfile.ZipFile(temp_zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as zip_file:
+                    zip_file.writestr(file.filename, file_content)
+                
+                # Read compressed content from file
+                with open(temp_zip_path, "rb") as zip_read_file:
+                    compressed_content = zip_read_file.read()
+                    
+                # Check file size - warn if very large
+                file_size_mb = len(compressed_content) / 1024 / 1024
+                if file_size_mb > 100:  # Warn for files > 100MB
+                    print(f"Warning: Large compressed file {file.filename}: {file_size_mb:.1f}MB")
+
+            except Exception as e:
+                # Clean up temporary file on error
+                if temp_zip_path and os.path.exists(temp_zip_path):
+                    try:
+                        os.unlink(temp_zip_path)
+                    except Exception as cleanup_error:
+                        logger.warning(f"Could not clean up temp ZIP file: {cleanup_error}")
+                raise HTTPException(
+                    status_code=500, 
+                    detail=f"Error compressing file {file.filename}: {str(e)}"
+                )
+            finally:
+                # Always clean up temporary file
+                if temp_zip_path and os.path.exists(temp_zip_path):
+                    try:
+                        os.unlink(temp_zip_path)
+                    except Exception as cleanup_error:
+                        logger.warning(f"Could not clean up temp ZIP file: {cleanup_error}")
 
             # Create new source_data entry
             source_data_id = uuid.uuid4()

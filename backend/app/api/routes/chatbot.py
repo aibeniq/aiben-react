@@ -719,7 +719,16 @@ async def query_knowledge_base(
             temp_dir = tempfile.mkdtemp()
 
             # Extract the zipped ChromaDB into the temp directory
-            if kb.data:
+            if kb.storage_type == "file" and kb.file_path:
+                # Handle file-based storage
+                if not os.path.exists(kb.file_path):
+                    raise HTTPException(
+                        status_code=400, detail="Knowledge base file not found on disk"
+                    )
+                with zipfile.ZipFile(kb.file_path, "r") as zip_ref:
+                    zip_ref.extractall(temp_dir)
+            elif kb.data:
+                # Handle database storage
                 with zipfile.ZipFile(BytesIO(kb.data), "r") as zip_ref:
                     zip_ref.extractall(temp_dir)
             else:

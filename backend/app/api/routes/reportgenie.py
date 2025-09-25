@@ -7,6 +7,7 @@ import tempfile
 import traceback
 import asyncio
 import os
+import shutil
 import markdown
 import uuid
 from pathlib import Path
@@ -65,6 +66,92 @@ from langchain_community.document_loaders import TextLoader
 from app.services.pdf_utils import load_pdf_with_pypdf
 
 router = APIRouter(prefix="/reportgenie", tags=["reportgenie"])
+
+
+class KnowledgeBaseCache:
+    """Cache for knowledge base retrievers to avoid reloading large databases multiple times."""
+    
+    def __init__(self):
+        self.cached_retrievers = {}
+        self.temp_dirs = {}
+        self.cached_chroma_dbs = {}
+    
+    def get_retriever(self, kb_id: str, kb: 'KnowledgeBase', session, current_user):
+        """Get or create a cached retriever for the knowledge base."""
+        cache_key = f"{kb_id}_{kb.embedding_model_id}"
+        
+        if cache_key not in self.cached_retrievers:
+            # Create temporary directory for this knowledge base
+            temp_dir = tempfile.mkdtemp()
+            self.temp_dirs[cache_key] = temp_dir
+            
+            print(f"Loading knowledge base {kb_id} into cache (first time)")
+            
+            # Extract ChromaDB to temp directory
+            if kb.storage_type == 'file' and kb.file_path:
+                if os.path.exists(kb.file_path):
+                    with zipfile.ZipFile(kb.file_path, "r") as zip_ref:
+                        zip_ref.extractall(temp_dir)
+                else:
+                    raise HTTPException(
+                        status_code=400, detail="Knowledge base file not found on disk"
+                    )
+            elif kb.data:
+                with zipfile.ZipFile(BytesIO(kb.data), "r") as zip_ref:
+                    zip_ref.extractall(temp_dir)
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Knowledge base has no vector database data",
+                )
+            
+            # Load embeddings model
+            if kb.embedding_model_id:
+                embedding_model = session.get(EmbeddingModel, kb.embedding_model_id)
+                if embedding_model:
+                    model_id = embedding_model.model_id
+                    provider = embedding_model.provider
+                else:
+                    embedding_info = get_embedding_model(session, current_user)
+                    model_id = embedding_info["model_id"]
+                    provider = embedding_info["provider"]
+            else:
+                embedding_info = get_embedding_model(session, current_user)
+                model_id = embedding_info["model_id"]
+                provider = embedding_info["provider"]
+            
+            embeddings = load_embeddings_model(provider=provider, model_id=model_id)
+            chroma_db = Chroma(persist_directory=temp_dir, embedding_function=embeddings)
+            
+            # Create ensemble retriever
+            retriever = create_ensemble_retriever(
+                chroma_db=chroma_db,
+                vector_weight=0.7,
+                keyword_weight=0.3,
+                search_kwargs={"k": settings.RAG_NUM_CHUNKS},
+            )
+            
+            # Cache both retriever and chroma_db
+            self.cached_retrievers[cache_key] = retriever
+            self.cached_chroma_dbs[cache_key] = chroma_db
+            
+            print(f"✅ Knowledge base {kb_id} loaded and cached successfully")
+        else:
+            print(f"♻️  Using cached knowledge base {kb_id}")
+            
+        return self.cached_retrievers[cache_key]
+    
+    def cleanup(self):
+        """Clean up all temporary directories and cached resources."""
+        print(f"🧹 Cleaning up knowledge base cache ({len(self.temp_dirs)} temp dirs)")
+        for temp_dir in self.temp_dirs.values():
+            try:
+                shutil.rmtree(temp_dir, ignore_errors=True)
+            except Exception as e:
+                print(f"Warning: Failed to cleanup temp dir {temp_dir}: {e}")
+        self.cached_retrievers.clear()
+        self.cached_chroma_dbs.clear()
+        self.temp_dirs.clear()
 
 
 def sanitize_text_for_json(text: str) -> str:
@@ -143,174 +230,133 @@ async def generate_report(
         # Process each section
         sections = []
         draft_report = ""
+        
+        # Initialize knowledge base cache for this report generation
+        kb_cache = KnowledgeBaseCache()
+        
+        try:
+            for section_item in section_items:
+                section_description = section_item["text"]
+                consult_documents = section_item.get("consultDocuments", True)
+                search_type = section_item.get("searchType", "vector")  # Default to vector
 
-        for section_item in section_items:
-            section_description = section_item["text"]
-            consult_documents = section_item.get("consultDocuments", True)
-            search_type = section_item.get("searchType", "vector")  # Default to vector
+                if not section_description:
+                    continue
 
-            if not section_description:
-                continue
+                # Initialize variables for this section
+                section_content = ""
+                source_citations = []
 
-            # Initialize variables for this section
-            section_content = ""
-            source_citations = []
+                if consult_documents:
+                    if search_type == "full_text":
+                        # Full Text Scan Logic
+                        print(f"Performing Full Text Scan for: {section_description}")
+                        all_source_text = ""
+                        sources = session.exec(
+                            select(Source).where(Source.knowledge_base_id == kb.id)
+                        ).all()
+                        for source in sources:
+                            # Get source data
+                            source_data = session.get(SourceData, source.source_data_id)
+                            if not source_data:
+                                print(f"No source data found for source {source.name}")
+                                continue
 
-            if consult_documents:
-                if search_type == "full_text":
-                    # Full Text Scan Logic
-                    print(f"Performing Full Text Scan for: {section_description}")
-                    all_source_text = ""
-                    sources = session.exec(
-                        select(Source).where(Source.knowledge_base_id == kb.id)
-                    ).all()
-                    for source in sources:
-                        # Get source data
-                        source_data = session.get(SourceData, source.source_data_id)
-                        if not source_data:
-                            print(f"No source data found for source {source.name}")
-                            continue
-
-                        try:
-                            # Extract text from the source data
-                            if not source_data.data.startswith(b"PK"):
-                                # Direct file extraction
-                                file_content = extract_text_from_file(
-                                    source_data.data, source.name
-                                )
-                            else:
-                                # Extract from ZIP file
-                                zip_data = BytesIO(source_data.data)
-                                with zipfile.ZipFile(zip_data, "r") as zip_file:
-                                    file_info = zip_file.infolist()[0]
-                                    raw_file_content = zip_file.read(file_info.filename)
+                            try:
+                                # Extract text from the source data
+                                if not source_data.data.startswith(b"PK"):
+                                    # Direct file extraction
                                     file_content = extract_text_from_file(
-                                        raw_file_content, source.name
+                                        source_data.data, source.name
                                     )
+                                else:
+                                    # Extract from ZIP file
+                                    zip_data = BytesIO(source_data.data)
+                                    with zipfile.ZipFile(zip_data, "r") as zip_file:
+                                        file_info = zip_file.infolist()[0]
+                                        raw_file_content = zip_file.read(file_info.filename)
+                                        file_content = extract_text_from_file(
+                                            raw_file_content, source.name
+                                        )
 
-                            all_source_text += (
-                                f"\n\n--- Source: {source.name} ---\n\n{file_content}"
-                            )
-                        except Exception as e:
-                            print(f"Error extracting content from {source.name}: {e}")
-                            # Continue with other sources instead of failing completely
-                            continue
+                                all_source_text += (
+                                    f"\n\n--- Source: {source.name} ---\n\n{file_content}"
+                                )
+                            except Exception as e:
+                                print(f"Error extracting content from {source.name}: {e}")
+                                # Continue with other sources instead of failing completely
+                                continue
 
-                    text_chunks = chunk_text(
-                        all_source_text,
-                        max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE,
-                    )
-                    chunk_analyses = []
-                    for chunk in text_chunks:
-                        analysis = invoke_llm(
-                            llm,
-                            settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
-                            {"chunk": chunk, "question": section_description},
+                        text_chunks = chunk_text(
+                            all_source_text,
+                            max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE,
                         )
-                        chunk_analyses.append(analysis)
-
-                    # Synthesize the chunk analyses
-                    print(f"About to synthesize {len(chunk_analyses)} chunk analyses")
-
-                    if not chunk_analyses:
-                        print("No chunk analyses found - using fallback message")
-                        section_content = "No relevant information found in the knowledge base to answer this question."
-                        source_citations = []
-                    else:
-                        chunk_analyses_text = "\n\n".join(chunk_analyses)
-                        print(
-                            f"Template variables: chunk_analyses={len(chunk_analyses_text)} chars, question={len(section_description)} chars"
-                        )
-
-                        try:
-                            synthesized_answer = invoke_llm(
+                        chunk_analyses = []
+                        for chunk in text_chunks:
+                            analysis = invoke_llm(
                                 llm,
-                                settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
-                                {
-                                    "chunk_analyses": "\n\n".join(chunk_analyses),
-                                    "question": section_description,
-                                },
+                                settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
+                                {"chunk": chunk, "question": section_description},
                             )
-                            # Translate the synthesized answer if needed
-                            section_content = await translate_text_if_needed(
-                                synthesized_answer, session, current_user, llm
-                            )
+                            chunk_analyses.append(analysis)
 
-                            # Create source citations from all sources used in full text scan
+                        # Synthesize the chunk analyses
+                        print(f"About to synthesize {len(chunk_analyses)} chunk analyses")
+
+                        if not chunk_analyses:
+                            print("No chunk analyses found - using fallback message")
+                            section_content = "No relevant information found in the knowledge base to answer this question."
                             source_citations = []
-                            for source in sources:
-                                source_citations.append(
-                                    {
-                                        "content": f"Full document scan from {source.name}",
-                                        "metadata": {
-                                            "source": source.name,
-                                            "source_data_id": str(
-                                                source.source_data_id
-                                            ),
-                                            "scan_type": "full_text",
-                                        },
-                                    }
-                                )
-                        except Exception as e:
-                            print(f"Error in synthesis: {e}")
+                        else:
+                            chunk_analyses_text = "\n\n".join(chunk_analyses)
                             print(
-                                f"Template: {settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE}"
-                            )
-                            raise
-                else:
-                    # Vector Search Logic
-                    print(f"Performing Vector Search for: {section_description}")
-
-                    # Set up ChromaDB and retriever (similar to optimize_outline)
-                    with tempfile.TemporaryDirectory() as temp_dir:
-                        # Extract ChromaDB
-                        if kb.data:
-                            with zipfile.ZipFile(BytesIO(kb.data), "r") as zip_ref:
-                                zip_ref.extractall(temp_dir)
-                        else:
-                            raise HTTPException(
-                                status_code=400,
-                                detail="Knowledge base has no vector database data",
+                                f"Template variables: chunk_analyses={len(chunk_analyses_text)} chars, question={len(section_description)} chars"
                             )
 
-                        # Load embeddings and vector database
-                        if kb.embedding_model_id:
-                            embedding_model = session.get(
-                                EmbeddingModel, kb.embedding_model_id
-                            )
-                            if embedding_model:
-                                model_id = embedding_model.model_id
-                                provider = embedding_model.provider
-                            else:
-                                embedding_info = get_embedding_model(
-                                    session, current_user
+                            try:
+                                synthesized_answer = invoke_llm(
+                                    llm,
+                                    settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+                                    {
+                                        "chunk_analyses": "\n\n".join(chunk_analyses),
+                                        "question": section_description,
+                                    },
                                 )
-                                model_id = embedding_info["model_id"]
-                                provider = embedding_info["provider"]
-                        else:
-                            embedding_info = get_embedding_model(session, current_user)
-                            model_id = embedding_info["model_id"]
-                            provider = embedding_info["provider"]
+                                # Translate the synthesized answer if needed
+                                section_content = await translate_text_if_needed(
+                                    synthesized_answer, session, current_user, llm
+                                )
 
-                        embeddings = load_embeddings_model(
-                            provider=provider, model_id=model_id
-                        )
-                        chroma_db = Chroma(
-                            persist_directory=temp_dir, embedding_function=embeddings
-                        )
+                                # Create source citations from all sources used in full text scan
+                                source_citations = []
+                                for source in sources:
+                                    source_citations.append(
+                                        {
+                                            "content": f"Full document scan from {source.name}",
+                                            "metadata": {
+                                                "source": source.name,
+                                                "source_data_id": str(
+                                                    source.source_data_id
+                                                ),
+                                                "scan_type": "full_text",
+                                            },
+                                        }
+                                    )
+                            except Exception as e:
+                                print(f"Error in synthesis: {e}")
+                                print(
+                                    f"Template: {settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE}"
+                                )
+                                raise
+                    else:
+                        # Vector Search Logic
+                        print(f"Performing Vector Search for: {section_description}")
 
-                        # Create retriever with proper parameters
-                        retriever = create_ensemble_retriever(
-                            chroma_db=chroma_db,
-                            vector_weight=0.7,
-                            keyword_weight=0.3,
-                            search_kwargs={"k": settings.RAG_NUM_CHUNKS},
-                        )
-
-                        # Use the retriever's get_relevant_documents method
-                        search_results = retriever.get_relevant_documents(
-                            section_description
-                        )
+                        # Use cached retriever instead of creating new temp directory each time
+                        retriever = kb_cache.get_retriever(knowledge_base_id, kb, session, current_user)
+                        
+                        # Use the cached retriever's get_relevant_documents method
+                        search_results = retriever.get_relevant_documents(section_description)
 
                         # Format search results for the synthesis prompt
                         context = "\n\n".join(
@@ -361,28 +407,32 @@ async def generate_report(
                                 },
                             }
                             source_citations.append(citation)
-            else:
-                # Use raw text directly without consulting knowledge base
-                section_content = section_description
-                source_citations = []
+                else:
+                    # Use raw text directly without consulting knowledge base
+                    section_content = section_description
+                    source_citations = []
 
-            section_title = section_description
+                section_title = section_description
 
-            # Store the section with its content and sources
-            sections.append(
-                {
-                    "title": section_title,
-                    "content": section_content,
-                    "source_citations": source_citations,
-                    "consult_documents": consult_documents,
-                }
+                # Store the section with its content and sources
+                sections.append(
+                    {
+                        "title": section_title,
+                        "content": section_content,
+                        "source_citations": source_citations,
+                        "consult_documents": consult_documents,
+                    }
+                )
+                draft_report += f"\n\n## {section_title}\n\n{section_content}"
+
+            # 7. Compile the final report
+            full_report = "\n\n\n\n".join(
+                [section["content"].strip() for section in sections]
             )
-            draft_report += f"\n\n## {section_title}\n\n{section_content}"
 
-        # 7. Compile the final report
-        full_report = "\n\n\n\n".join(
-            [section["content"].strip() for section in sections]
-        )
+        finally:
+            # Always cleanup the knowledge base cache
+            kb_cache.cleanup()
 
         result = {"full_report": full_report, "sections": sections}
 
@@ -1495,7 +1545,17 @@ async def optimize_outline(
         # 2. Set up the same infrastructure as generate_report
         with tempfile.TemporaryDirectory() as temp_dir:
             # Extract ChromaDB
-            if kb.data:
+            if kb.storage_type == 'file' and kb.file_path:
+                # File-based storage: extract from file path
+                if os.path.exists(kb.file_path):
+                    with zipfile.ZipFile(kb.file_path, "r") as zip_ref:
+                        zip_ref.extractall(temp_dir)
+                else:
+                    raise HTTPException(
+                        status_code=400, detail="Knowledge base file not found on disk"
+                    )
+            elif kb.data:
+                # Database storage: extract from data field
                 with zipfile.ZipFile(BytesIO(kb.data), "r") as zip_ref:
                     zip_ref.extractall(temp_dir)
             else:
