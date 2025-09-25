@@ -55,13 +55,23 @@ class Settings(BaseSettings):
         250000  # Safe limit below OpenAI's 300k token limit
     )
 
-    # Knowledge base processing parameters (resource management, not arbitrary limits)
-    KB_PROCESSING_TIMEOUT: int = 3600  # Processing timeout in seconds (60 minutes)
-    KB_MIN_BATCH_SIZE: int = 1  # Minimum files to process at once
-    KB_MAX_BATCH_SIZE: int = 20  # Maximum files to process at once (dynamic sizing)
-    KB_MEMORY_THRESHOLD_MB: int = 1024  # Memory threshold for batch adjustment (1GB)
-    KB_EMBEDDING_CHUNK_SIZE: int = 50000  # Tokens per embedding request
-    KB_PROGRESS_UPDATE_INTERVAL: int = 5  # Files processed before progress update
+        # Knowledge Base settings
+    KB_PROGRESS_UPDATE_INTERVAL: int = 10  # How often to update progress during processing
+    KB_MIN_BATCH_SIZE: int = 1
+    KB_MAX_BATCH_SIZE: int = 50
+    KB_EMBEDDING_CHUNK_SIZE: int = 250000  # Max tokens per embedding chunk
+    KB_MEMORY_THRESHOLD_MB: float = 1000  # Memory threshold for warnings
+    
+    # Memory management settings for large files
+    KB_MAX_IN_MEMORY_SIZE_MB: int = 100  # Files larger than this use streaming
+    KB_STREAM_CHUNK_SIZE_MB: int = 8     # Chunk size for streaming (8MB)
+    KB_MAX_DB_SIZE_MB: int = 200         # Maximum size for database storage (reduced to prevent crashes)
+    KB_MEMORY_SAFETY_THRESHOLD: float = 0.2  # Use chunked reading if file > 20% of available memory
+    KB_HIGH_MEMORY_USAGE_THRESHOLD: float = 60.0  # Memory usage % that triggers chunked reading
+    
+    # File-based storage settings for large knowledge bases
+    KB_USE_FILE_STORAGE_ABOVE_MB: int = 200  # Store files on disk instead of DB if larger than this
+    KB_FILE_STORAGE_PATH: str = "/app/data/knowledge_bases"  # Path for file-based storage
 
     # FormConnect processing parameters
     FORMCONNECT_MAX_TOKENS_PER_REQUEST: int = 150000  # Token limit for full text mode

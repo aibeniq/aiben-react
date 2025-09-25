@@ -103,6 +103,8 @@ services:
         condition: service_completed_successfully
       #ollama:
       #  condition: service_healthy
+    volumes:
+      - knowledge-base-files:/app/data/knowledge_bases
     env_file:
       - .env
     environment:
@@ -236,6 +238,7 @@ services:
 volumes:
   app-db-data:
   redis-data:
+  knowledge-base-files:
   #ollama-data:
 
 networks:

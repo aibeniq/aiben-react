@@ -1,5 +1,6 @@
 import uuid
 import json
+import traceback
 from app.models import (
     VeraDocResponse,
     VeraDocChecklist,
@@ -288,7 +289,17 @@ async def process_rag_checklist(
         # 2. Create a temporary directory for ChromaDB
         with tempfile.TemporaryDirectory() as temp_dir:
             # Extract the zipped ChromaDB into the temp directory
-            if kb.data:
+            if kb.storage_type == 'file' and kb.file_path:
+                # File-based storage: extract from file path
+                if os.path.exists(kb.file_path):
+                    with zipfile.ZipFile(kb.file_path, "r") as zip_ref:
+                        zip_ref.extractall(temp_dir)
+                else:
+                    raise HTTPException(
+                        status_code=400, detail="Knowledge base file not found on disk"
+                    )
+            elif kb.data:
+                # Database storage: extract from data field
                 with zipfile.ZipFile(BytesIO(kb.data), "r") as zip_ref:
                     zip_ref.extractall(temp_dir)
             else:
@@ -1396,7 +1407,17 @@ async def optimize_checklist(
         # 2. Set up the same infrastructure as process_rag_checklist
         with tempfile.TemporaryDirectory() as temp_dir:
             # Extract ChromaDB
-            if kb.data:
+            if kb.storage_type == 'file' and kb.file_path:
+                # File-based storage: extract from file path
+                if os.path.exists(kb.file_path):
+                    with zipfile.ZipFile(kb.file_path, "r") as zip_ref:
+                        zip_ref.extractall(temp_dir)
+                else:
+                    raise HTTPException(
+                        status_code=400, detail="Knowledge base file not found on disk"
+                    )
+            elif kb.data:
+                # Database storage: extract from data field
                 with zipfile.ZipFile(BytesIO(kb.data), "r") as zip_ref:
                     zip_ref.extractall(temp_dir)
             else:
