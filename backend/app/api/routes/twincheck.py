@@ -667,23 +667,31 @@ def create_comparison(
     Save a new comparison topic set to the database.
     """
     print(f"🐛 DEBUG: Received comparison data: {comparison}")
-    print(f"🐛 DEBUG: Name: '{comparison.name}', Topics: '{comparison.topics}', Description: '{comparison.description}'")
-    
+    print(
+        f"🐛 DEBUG: Name: '{comparison.name}', Topics: '{comparison.topics}', Description: '{comparison.description}'"
+    )
+
     # Validate required fields
     if not comparison.name or not comparison.name.strip():
         print(f"🐛 DEBUG: Name validation failed - name is empty or None")
-        raise HTTPException(status_code=400, detail="Comparison name is required and cannot be empty")
-    
+        raise HTTPException(
+            status_code=400, detail="Comparison name is required and cannot be empty"
+        )
+
     if not comparison.topics or not comparison.topics.strip():
         print(f"🐛 DEBUG: Topics validation failed - topics is empty or None")
-        raise HTTPException(status_code=400, detail="Comparison topics are required and cannot be empty")
-    
+        raise HTTPException(
+            status_code=400, detail="Comparison topics are required and cannot be empty"
+        )
+
     existing_comparison = session.exec(
         select(TwinCheckTopicList).where(TwinCheckTopicList.name == comparison.name)
     ).first()
 
     if existing_comparison:
-        print(f"🐛 DEBUG: Duplicate name found - existing comparison: {existing_comparison.name}")
+        print(
+            f"🐛 DEBUG: Duplicate name found - existing comparison: {existing_comparison.name}"
+        )
         raise HTTPException(
             status_code=400, detail="A comparison with this name already exists."
         )
@@ -1042,13 +1050,14 @@ async def generate_csv(
 
 
 @router.post("/generate-topics", response_model=GenerateTopicsResponse)
-def generate_topics(
+async def generate_topics(
     session: SessionDep,
     current_user: CurrentUser,
     description: str = Form(...),
     comparison_type: str = Form("general"),
     num_topics: Optional[int] = Form(None),
     search_mode: str = "vector",
+    knowledge_base_id: Optional[str] = Form(None),
     files: List[UploadFile] = File(default=[]),
 ):
     """
@@ -1084,24 +1093,26 @@ def generate_topics(
         # Check if example document exceeds token limits and chunk if necessary
         if example_document:
             print(f"Total example document content: {len(example_document)} characters")
-            
+
             # Using conservative chunking similar to TWINCHECK settings
             max_chunk_size = 80000  # Conservative chunk size for 128K context limit
-            
+
             if len(example_document) > max_chunk_size:
-                print(f"Example document too large ({len(example_document)} chars), chunking for processing")
-                
+                print(
+                    f"Example document too large ({len(example_document)} chars), chunking for processing"
+                )
+
                 from app.services.text_processing import chunk_text
-                
+
                 # Chunk the document content
                 chunks = chunk_text(example_document, max_tokens=max_chunk_size)
-                
+
                 # Process each chunk to generate topics
                 all_chunk_topics = []
-                
+
                 for i, chunk in enumerate(chunks):
                     print(f"Processing chunk {i+1}/{len(chunks)}")
-                    
+
                     # Generate topics for this chunk
                     chunk_prompt_variables = {
                         "description": description,
@@ -1113,18 +1124,66 @@ def generate_topics(
                         "knowledge_base_instruction": "",
                     }
 
+                    # If knowledge base is specified, retrieve content using selected search mode
+                    if knowledge_base_id:
+                        print(f"\n=== KB INTEGRATION FOR CHUNK {i+1} ====")
+                        try:
+                            from app.services.content_retrieval import (
+                                retrieve_knowledge_base_content,
+                            )
+
+                            print(
+                                f"Retrieving knowledge base content for chunk {i+1}, KB ID: {knowledge_base_id}, search mode: {search_mode}"
+                            )
+                            content, instruction = (
+                                await retrieve_knowledge_base_content(
+                                    session=session,
+                                    current_user=current_user,
+                                    knowledge_base_id=knowledge_base_id,
+                                    search_mode=search_mode,
+                                    query=description,
+                                )
+                            )
+
+                            if content:
+                                print(
+                                    f"✅ Successfully retrieved KB content for chunk {i+1}: {len(content)} characters"
+                                )
+                                chunk_prompt_variables["knowledge_base_content"] = (
+                                    f"REFERENCE DOCUMENTS FROM KNOWLEDGE BASE:\n{content}"
+                                )
+                                chunk_prompt_variables["knowledge_base_instruction"] = (
+                                    f"\n12. {instruction} Use them as inspiration for the type of comparison topics and scope, "
+                                    f"adapting the topics to match the specific requirements in the description. "
+                                    f"Search mode used: {search_mode}"
+                                )
+                                chunk_prompt_variables[
+                                    "example_analysis_instruction"
+                                ] += f". Briefly mention how the knowledge base content (using {search_mode}) influenced the topic selection"
+                            else:
+                                print(
+                                    f"No content retrieved from knowledge base for chunk {i+1}"
+                                )
+                        except Exception as e:
+                            print(
+                                f"Error retrieving knowledge base content for chunk {i+1}: {e}"
+                            )
+                            import traceback
+
+                            traceback.print_exc()
+
                     try:
                         chunk_response = invoke_llm(
                             llm,
                             settings.TWINCHECK_GENERATE_TOPICS_PROMPT_TEMPLATE,
                             chunk_prompt_variables,
                         )
-                        
+
                         # Parse topics from chunk response
                         chunk_topics = []
                         lines = chunk_response.strip().split("\n")
                         in_topics_section = False
-                        
+
                         for line in lines:
                             line = line.strip()
                             if line.startswith("TOPICS:"):
@@ -1139,7 +1198,7 @@ def generate_topics(
                                     topic = re.sub(r"^\d+\.\s+", "", line)
                                     if topic.strip():
                                         chunk_topics.append(topic.strip())
-                        
+
                         # If parsing failed, try simpler approach
                         if not chunk_topics:
                             for line in lines:
@@ -1148,13 +1207,13 @@ def generate_topics(
                                     topic = re.sub(r"^\d+\.\s+", "", line)
                                     if topic.strip():
                                         chunk_topics.append(topic.strip())
-                        
+
                         all_chunk_topics.extend(chunk_topics)
-                        
+
                     except Exception as e:
                         print(f"Error processing chunk {i+1}: {e}")
                         continue
-                
+
                 # Deduplicate and refine topics across all chunks
                 if all_chunk_topics:
                     # Remove duplicates while preserving order
@@ -1164,7 +1223,7 @@ def generate_topics(
                         if t.lower() not in seen:
                             seen.add(t.lower())
                             unique_topics.append(t)
-                    
+
                     # If we have too many topics, synthesize and prioritize
                     if len(unique_topics) > (num_topics or 20):
                         synthesis_prompt = f"""From the following list of comparison topics, select and refine the {num_topics or 10} most important and relevant topics for {comparison_type} comparison based on: {description}
@@ -1179,26 +1238,30 @@ Requirements:
 4. Focus on topics most relevant to the description
 
 Return only the final selected topics, one per line, numbered."""
-                        
+
                         try:
                             refined_response = invoke_llm(llm, synthesis_prompt, {})
                             topics = []
-                            for line in refined_response.strip().split('\n'):
+                            for line in refined_response.strip().split("\n"):
                                 line = line.strip()
-                                if line and (line[0].isdigit() or line.startswith('-') or line.startswith('*')):
+                                if line and (
+                                    line[0].isdigit()
+                                    or line.startswith("-")
+                                    or line.startswith("*")
+                                ):
                                     topic = re.sub(r"^\d+\.\s+", "", line)
                                     topic = re.sub(r"^[-*]\s+", "", topic)
                                     if topic.strip():
                                         topics.append(topic.strip())
                         except Exception as e:
                             print(f"Error in topic synthesis: {e}")
-                            topics = unique_topics[:num_topics or 10]
+                            topics = unique_topics[: num_topics or 10]
                     else:
-                        topics = unique_topics[:num_topics or 20]
-                    
+                        topics = unique_topics[: num_topics or 20]
+
                     # For analysis, show chunked processing was used
                     analysis = f"Generated {len(topics)} topics from chunked example document analysis ({len(chunks)} chunks processed) based on the provided description to ensure comprehensive document comparison coverage."
-                    
+
                     # Record the interaction
                     record_llm_interaction(
                         session=session,
@@ -1220,7 +1283,9 @@ Return only the final selected topics, one per line, numbered."""
                         metadata={},
                     )
 
-                    return GenerateTopicsResponse(topics=topics, description_analysis=analysis)
+                    return GenerateTopicsResponse(
+                        topics=topics, description_analysis=analysis
+                    )
                 else:
                     # Fallback to description-only generation if chunk processing failed
                     example_document = ""
@@ -1242,7 +1307,70 @@ Return only the final selected topics, one per line, numbered."""
             "knowledge_base_instruction": "",
         }
 
+        # If knowledge base is specified, retrieve content using selected search mode
+        if knowledge_base_id:
+            print(f"\n=== KNOWLEDGE BASE INTEGRATION START ===")
+            print(f"Knowledge Base ID: {knowledge_base_id}")
+            print(f"Search Mode: {search_mode}")
+            print(f"Query (description): {description[:100]}...")
+            try:
+                from app.services.content_retrieval import (
+                    retrieve_knowledge_base_content,
+                )
+
+                print(
+                    f"Retrieving knowledge base content for KB ID: {knowledge_base_id}, search mode: {search_mode}"
+                )
+                content, instruction = await retrieve_knowledge_base_content(
+                    session=session,
+                    current_user=current_user,
+                    knowledge_base_id=knowledge_base_id,
+                    search_mode=search_mode,
+                    query=description,
+                )
+
+                if content:
+                    print(
+                        f"✅ Successfully retrieved KB content: {len(content)} characters"
+                    )
+                    print(f"Instruction: {instruction}")
+                    print(f"Content preview: {content[:200]}...")
+                    prompt_variables["knowledge_base_content"] = (
+                        f"REFERENCE DOCUMENTS FROM KNOWLEDGE BASE:\n{content}"
+                    )
+                    prompt_variables["knowledge_base_instruction"] = (
+                        f"\n12. {instruction} Use them as inspiration for the type of comparison topics and scope, "
+                        f"adapting the topics to match the specific requirements in the description. "
+                        f"Search mode used: {search_mode}"
+                    )
+                    prompt_variables[
+                        "example_analysis_instruction"
+                    ] += f". Briefly mention how the knowledge base content (using {search_mode}) influenced the topic selection"
+                    print("✅ Knowledge base content added to prompt variables")
+                else:
+                    print("❌ No content retrieved from knowledge base")
+                    print("This means either:")
+                    print("  - No sources found in the knowledge base")
+                    print("  - No extractable content in the sources")
+                    print("  - Knowledge base doesn't exist or access denied")
+                print(f"=== KNOWLEDGE BASE INTEGRATION END ===\n")
+            except Exception as e:
+                print(f"❌ Error retrieving knowledge base content: {e}")
+                import traceback
+
+                traceback.print_exc()
+                print(f"=== KNOWLEDGE BASE INTEGRATION FAILED ===\n")
+
         # Generate topics using the LLM
+        print(f"\n=== PROMPT VARIABLES SUMMARY ===")
+        print(f"Description: {prompt_variables['description'][:100]}...")
+        print(f"KB Content Length: {len(prompt_variables['knowledge_base_content'])}")
+        print(
+            f"KB Instruction: {prompt_variables['knowledge_base_instruction'][:100]}..."
+        )
+        print(f"Example Document Length: {len(prompt_variables['example_document'])}")
+        print(f"=== CALLING LLM ===\n")
+
         topics_response = invoke_llm(
             llm,
             settings.TWINCHECK_GENERATE_TOPICS_PROMPT_TEMPLATE,

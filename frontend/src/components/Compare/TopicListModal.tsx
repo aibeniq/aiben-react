@@ -155,23 +155,39 @@ const TopicListModal = ({
     try {
       let response
 
+      // Prepare base form data
+      const baseFormData = {
+        description: topicListDescription.trim(),
+        comparison_type: "general",
+        search_mode: searchMode,
+        knowledge_base_id:
+          referenceMode === "knowledge-base" ? referenceKnowledgeBase?.id : undefined,
+      }
+
+      // Debug logging
+      console.log("🔍 Topic Generation Debug:", {
+        referenceMode,
+        searchMode,
+        knowledgeBaseSelected: referenceKnowledgeBase?.title,
+        knowledgeBaseId: referenceKnowledgeBase?.id,
+        baseFormData,
+      })
+
       if (exampleFiles.length > 0) {
-        // Use the existing file upload endpoint
+        // Use the existing file upload endpoint with files
         const files = exampleFiles.map((item) => item.file)
         response = await TwincheckService.generateTopics({
+          searchMode: searchMode,
           formData: {
-            description: topicListDescription.trim(),
-            comparison_type: "general",
+            ...baseFormData,
             files: files.length > 0 ? files : undefined,
           },
         })
       } else {
-        // Use the basic file upload endpoint without files
+        // Use the basic endpoint without files
         response = await TwincheckService.generateTopics({
-          formData: {
-            description: topicListDescription.trim(),
-            comparison_type: "general",
-          },
+          searchMode: searchMode,
+          formData: baseFormData,
         })
       }
 
@@ -190,6 +206,9 @@ const TopicListModal = ({
         let successMessage = `Suggested ${suggestedTopics.length} topics from description`
         if (exampleFiles.length > 0) {
           successMessage += ` and ${exampleFiles.length} example file(s)`
+        }
+        if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
+          successMessage += ` using knowledge base "${referenceKnowledgeBase.title}" (${searchMode} search)`
         }
 
         showSuccessToast(successMessage)
@@ -360,7 +379,8 @@ const TopicListModal = ({
                                   [".docx"],
                                 "text/plain": [".txt"],
                                 "text/csv": [".csv"],
-                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                                  [".xlsx"],
                                 "application/vnd.ms-excel": [".xls"],
                                 "application/json": [".json"],
                               }}
