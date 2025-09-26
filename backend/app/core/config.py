@@ -48,11 +48,16 @@ class Settings(BaseSettings):
     FULL_SCAN_DOCUMENT_CHUNK_OVERLAP: int = 200
     RAG_DOCUMENT_CHUNK_SIZE: int = 1000
     RAG_DOCUMENT_CHUNK_OVERLAP: int = 200
-    RAG_NUM_CHUNKS: int = 5  # Number of chunks to retrieve for RAG search
+    RAG_NUM_CHUNKS: int = 20  # Number of chunks to retrieve for RAG search
+
+    # Content filtering settings for improved RAG quality
+    RAG_FILTER_BIBLIOGRAPHY: bool = True  # Filter bibliography content from RAG results
+    RAG_MIN_QUALITY_SCORE: float = 0.3  # Minimum quality score for content chunks
+    RAG_MAX_BIBLIOGRAPHY_CHUNKS: int = 0  # Maximum bibliography chunks to include
 
     # Embedding processing parameters
     EMBEDDING_MAX_TOKENS_PER_REQUEST: int = (
-        250000  # Safe limit below OpenAI's 300k token limit
+        250000  # Maximum tokens per embedding API request (safe limit below OpenAI's 300k token limit)
     )
 
     # Knowledge Base settings
@@ -61,7 +66,6 @@ class Settings(BaseSettings):
     )
     KB_MIN_BATCH_SIZE: int = 1
     KB_MAX_BATCH_SIZE: int = 50
-    KB_EMBEDDING_CHUNK_SIZE: int = 250000  # Max tokens per embedding chunk
     KB_MEMORY_THRESHOLD_MB: float = 1000  # Memory threshold for warnings
 
     # Memory management settings for large files
@@ -86,7 +90,7 @@ class Settings(BaseSettings):
     )
 
     # FormConnect processing parameters
-    FORMCONNECT_MAX_TOKENS_PER_REQUEST: int = 150000  # Token limit for full text mode
+    FORMCONNECT_MAX_TOKENS_PER_REQUEST: int = 3000  # Token limit for full text mode
     FORMCONNECT_VECTOR_SEARCH_CHUNKS: int = 5  # Number of chunks to retrieve per field
     FORMCONNECT_CHUNK_OVERLAP: int = 200  # Overlap for document chunking
 
@@ -268,10 +272,18 @@ class Settings(BaseSettings):
 
     SOURCE POLICY CITATIONS:
     {context}
-    ONLY INCLUDE POLICY INFORMATION THAT WOULD BE SPECIFICALLY PERTINENT TO THE QUESTION -- do NOT just repeat general requirements.
+    
+    CRITICAL INSTRUCTIONS:
+    1. ONLY include policy information that is EXPLICITLY stated in the provided SOURCE POLICY CITATIONS above
+    2. Do NOT make assumptions or infer requirements that are not directly written in the source material
+    3. Do NOT add general knowledge about policies or regulations that is not contained in the citations
+    4. If the provided citations do not contain information relevant to the question, state "No relevant policy information found in the provided citations"
+    5. Quote or directly reference specific sections from the citations when possible
+    6. ONLY include policy information that would be SPECIFICALLY pertinent to the question -- do NOT repeat general requirements
+    7. If you cannot find specific, relevant policy information in the citations, it is better to say so than to make up requirements
     
     ANSWER:
-    According to the policy context, the following should be kept in mind when answering the question:
+    Based strictly on the provided policy citations, the following should be kept in mind when answering the question:
     """
 
     VERADOC_QA_PROMPT_TEMPLATE: str = """
@@ -790,7 +802,7 @@ QUALITY_GAP_SEVERITY: [none/minor/moderate/significant]
         "claude-3-5-sonnet",
     ]
 
-    MAX_IMAGES_PER_DOCUMENT: int = 10
+    MAX_IMAGES_PER_DOCUMENT: int = 50
     MAX_IMAGE_SIZE_MB: int = 5
 
     # Vision prompt templates for different functionalities

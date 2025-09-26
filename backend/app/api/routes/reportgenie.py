@@ -45,6 +45,7 @@ from app.services.translation import translate_text_if_needed
 from app.services.retrievers import (
     create_ensemble_retriever,
 )  # Import the ensemble retriever
+from app.services.enhanced_retrieval import SmartRetrieverFactory
 from app.services.text_processing import chunk_text, estimate_tokens
 
 from sqlmodel import select
@@ -125,11 +126,9 @@ class KnowledgeBaseCache:
                 persist_directory=temp_dir, embedding_function=embeddings
             )
 
-            # Create ensemble retriever
-            retriever = create_ensemble_retriever(
+            # Create enhanced retriever with content filtering
+            retriever = SmartRetrieverFactory.create_general_document_retriever(
                 chroma_db=chroma_db,
-                vector_weight=0.7,
-                keyword_weight=0.3,
                 search_kwargs={"k": settings.RAG_NUM_CHUNKS},
             )
 

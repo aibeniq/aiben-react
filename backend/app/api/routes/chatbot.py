@@ -19,6 +19,9 @@ from app.services.translation import translate_text_if_needed
 from app.services.knowledgebases import get_embedding_model
 from app.services.retrievers import (
     create_ensemble_retriever,
+)
+from app.services.enhanced_retrieval import (
+    SmartRetrieverFactory,
 )  # Import the ensemble retriever
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
@@ -751,12 +754,12 @@ async def query_knowledge_base(
                             persist_directory=temp_dir, embedding_function=embeddings
                         )
 
-                        # Rebuild retriever
-                        retriever = create_ensemble_retriever(
-                            chroma_db=chroma_db,
-                            vector_weight=0.7,
-                            keyword_weight=0.3,
-                            search_kwargs={"k": settings.RAG_NUM_CHUNKS},
+                        # Rebuild enhanced retriever with content filtering
+                        retriever = (
+                            SmartRetrieverFactory.create_general_document_retriever(
+                                chroma_db=chroma_db,
+                                search_kwargs={"k": settings.RAG_NUM_CHUNKS},
+                            )
                         )
                         print("Successfully rebuilt retriever")
 
@@ -875,12 +878,9 @@ async def query_knowledge_base(
                 persist_directory=temp_dir, embedding_function=embeddings
             )
 
-            # Create a hybrid retriever that combines vector-based and keyword-based retrieval
-            retriever = create_ensemble_retriever(
-                chroma_db=chroma_db,
-                vector_weight=0.7,  # Weight for vector-based retrieval
-                keyword_weight=0.3,  # Weight for keyword-based retrieval
-                search_kwargs={"k": settings.RAG_NUM_CHUNKS},  # Use config value
+            # Create an enhanced retriever that filters bibliography content
+            retriever = SmartRetrieverFactory.create_general_document_retriever(
+                chroma_db=chroma_db, search_kwargs={"k": settings.RAG_NUM_CHUNKS}
             )
 
             # 4. Get the LLM
@@ -1170,12 +1170,12 @@ async def query_document(
                                 embedding_function=embeddings,
                             )
 
-                            # Rebuild retriever
-                            retriever = create_ensemble_retriever(
-                                chroma_db=vector_store,
-                                vector_weight=0.7,
-                                keyword_weight=0.3,
-                                search_kwargs={"k": 5},
+                            # Rebuild enhanced retriever with content filtering
+                            retriever = (
+                                SmartRetrieverFactory.create_academic_paper_retriever(
+                                    chroma_db=vector_store,
+                                    search_kwargs={"k": settings.RAG_NUM_CHUNKS},
+                                )
                             )
                             print("Successfully rebuilt retriever")
 
@@ -1332,12 +1332,9 @@ async def query_document(
             vector_store = Chroma.from_documents(
                 documents=chunks, embedding=embeddings, persist_directory=vector_dir
             )
-            # Create a hybrid retriever that combines vector-based and keyword-based retrieval
-            retriever = create_ensemble_retriever(
-                chroma_db=vector_store,
-                vector_weight=0.7,  # Weight for vector-based retrieval
-                keyword_weight=0.3,  # Weight for keyword-based retrieval
-                search_kwargs={"k": 5},  # Search parameters
+            # Create an enhanced retriever that filters bibliography content for documents
+            retriever = SmartRetrieverFactory.create_academic_paper_retriever(
+                chroma_db=vector_store, search_kwargs={"k": settings.RAG_NUM_CHUNKS}
             )
 
             # Create LLM

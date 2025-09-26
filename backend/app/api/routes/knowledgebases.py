@@ -55,6 +55,7 @@ import mimetypes
 import tiktoken
 import asyncio
 import mmap
+from app.services.smart_chunking import create_smart_text_splitter
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
 
@@ -1126,13 +1127,17 @@ async def process_knowledge_base_creation(
             # Temporary files are already cleaned up in the processing loop
 
             with error_recovery_context("document splitting"):
-                print("Splitting documents...")
-                text_splitter = RecursiveCharacterTextSplitter(
+                print("Splitting documents with smart chunking...")
+                # Use smart text splitter that filters bibliography and low-quality content
+                smart_splitter = create_smart_text_splitter(
                     chunk_size=settings.RAG_DOCUMENT_CHUNK_SIZE,
                     chunk_overlap=settings.RAG_DOCUMENT_CHUNK_OVERLAP,
+                    filter_bibliography=True,  # Filter out bibliography content
                 )
-                splits = text_splitter.split_documents(all_documents)
-                print(f"Split into {len(splits)} chunks")
+                splits = smart_splitter.process_documents(all_documents)
+                print(
+                    f"Smart splitting: {len(all_documents)} documents -> {len(splits)} quality chunks"
+                )
 
             with error_recovery_context("embedding initialization"):
                 print("Initializing embeddings...")
@@ -1148,10 +1153,10 @@ async def process_knowledge_base_creation(
                 # Use adaptive chunk size based on total document count
                 if len(splits) > 10000:  # Large knowledge base
                     chunk_size = (
-                        settings.KB_EMBEDDING_CHUNK_SIZE // 2
+                        settings.EMBEDDING_MAX_TOKENS_PER_REQUEST // 2
                     )  # Smaller chunks for stability
                 else:
-                    chunk_size = settings.KB_EMBEDDING_CHUNK_SIZE
+                    chunk_size = settings.EMBEDDING_MAX_TOKENS_PER_REQUEST
 
                 document_chunks = chunk_documents_for_embedding(
                     splits, max_tokens_per_chunk=chunk_size
