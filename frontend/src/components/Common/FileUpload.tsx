@@ -1,14 +1,4 @@
-import {
-  Box,
-  Button,
-  Card,
-  Field as ChakraField,
-  HStack,
-  Heading,
-  Switch,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Button, Card, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { useDropzone } from "react-dropzone"
 import { useTranslation } from "react-i18next"
 import { FiCheck, FiFile, FiUpload } from "react-icons/fi"
@@ -16,7 +6,6 @@ import HelpTooltip from "../ui/help-tooltip"
 
 export interface FileItem {
   file: File
-  isHandwritten: boolean
 }
 
 interface FileUploadProps {
@@ -24,7 +13,6 @@ interface FileUploadProps {
   onFilesChange: (files: FileItem[]) => void
   acceptedFileTypes?: Record<string, string[]>
   maxFiles?: number
-  showHandwrittenToggle?: boolean
   helpKey?: string // Optional help key for tooltip
 }
 
@@ -48,7 +36,6 @@ const FileUpload = ({
   onFilesChange,
   acceptedFileTypes = defaultAcceptedTypes,
   maxFiles,
-  showHandwrittenToggle = true,
   helpKey,
 }: FileUploadProps) => {
   const { t } = useTranslation()
@@ -57,7 +44,6 @@ const FileUpload = ({
       if (acceptedFiles.length > 0) {
         const newFileItems = acceptedFiles.map((file) => ({
           file,
-          isHandwritten: false,
         }))
 
         const updatedFiles = [...files, ...newFileItems]
@@ -73,13 +59,6 @@ const FileUpload = ({
 
   const removeFile = (index: number) => {
     const updatedFiles = files.filter((_, i) => i !== index)
-    onFilesChange(updatedFiles)
-  }
-
-  const toggleHandwritten = (index: number) => {
-    const updatedFiles = files.map((item, i) =>
-      i === index ? { ...item, isHandwritten: !item.isHandwritten } : item,
-    )
     onFilesChange(updatedFiles)
   }
 
@@ -173,26 +152,6 @@ const FileUpload = ({
                     </HStack>
 
                     <HStack gap={2} flexShrink={0}>
-                      {showHandwrittenToggle && (
-                        <ChakraField.Root display="flex" alignItems="center" width="auto">
-                          <HStack align="center" gap={1}>
-                            <ChakraField.Label mb="0" fontSize="sm">
-                              {t("review.handwritten")}
-                            </ChakraField.Label>
-                            {helpKey && <HelpTooltip helpKey="handwrittenToggle" />}
-                          </HStack>
-                          <Switch.Root colorPalette="blue" ml={2}>
-                            <Switch.HiddenInput
-                              checked={fileItem.isHandwritten}
-                              onChange={() => toggleHandwritten(index)}
-                            />
-                            <Switch.Control>
-                              <Switch.Thumb />
-                            </Switch.Control>
-                          </Switch.Root>
-                        </ChakraField.Root>
-                      )}
-
                       <Button
                         size="sm"
                         colorPalette="red"

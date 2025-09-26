@@ -41,6 +41,7 @@ interface OutlineModalProps {
   setOutlineDescription: (description: string) => void
   sections: string
   onSectionsChange: (sections: string) => void
+  selectedKnowledgeBase: KnowledgeBasePublic | null // Parent's selected KB
 }
 
 const OutlineModal = ({
@@ -54,6 +55,7 @@ const OutlineModal = ({
   setOutlineDescription,
   sections,
   onSectionsChange,
+  selectedKnowledgeBase, // Use parent's selected KB
 }: OutlineModalProps) => {
   console.log("🔍 OutlineModal: Received sections prop:", sections)
   console.log("🔍 OutlineModal: Type of sections prop:", typeof sections)
@@ -63,11 +65,8 @@ const OutlineModal = ({
   const { t } = useTranslation()
   const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases()
 
-  // Knowledge Base for optimization functionality
-  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
-    null,
-  )
-  const [showKnowledgeBaseModal, setShowKnowledgeBaseModal] = useState(false)
+  // Note: selectedKnowledgeBase now comes from parent props
+  // Internal KB selection not needed since we use parent's selection
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -473,20 +472,6 @@ const OutlineModal = ({
 
                   {/* Right Column - Sections List */}
                   <VStack align="stretch" gap={4} flex="1">
-                    {/* Knowledge Base Selection for Optimization */}
-                    <Field label={t("editOutlineModal.knowledgeBase")}>
-                      <Button
-                        w="full"
-                        variant={selectedKnowledgeBase ? "solid" : "outline"}
-                        onClick={() => setShowKnowledgeBaseModal(true)}
-                        justifyContent="flex-start"
-                        textAlign="left"
-                        color={selectedKnowledgeBase ? "white" : "gray.600"}
-                      >
-                        {selectedKnowledgeBase?.title || t("dropdowns.selectKnowledgeBase")}
-                      </Button>
-                    </Field>
-
                     <Field
                       label={
                         <HStack justify="space-between" w="full">
@@ -611,16 +596,7 @@ const OutlineModal = ({
         />
       )}
 
-      <KnowledgeBaseSelectionModal
-        isOpen={showKnowledgeBaseModal}
-        onClose={() => setShowKnowledgeBaseModal(false)}
-        title={t("editOutlineModal.knowledgeBase")}
-        knowledgeBases={knowledgeBases}
-        selectedKnowledgeBase={selectedKnowledgeBase}
-        onSelectionChange={setSelectedKnowledgeBase}
-        showAllUsers={showAllUsers}
-        toggleShowAllUsers={toggleShowAllUsers}
-      />
+      {/* KB Selection Modal removed - using parent's selectedKnowledgeBase */}
 
       <KnowledgeBaseSelectionModal
         isOpen={showReferenceKnowledgeBaseModal}

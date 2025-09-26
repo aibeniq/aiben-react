@@ -87,7 +87,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
     setIsLoading(true)
     try {
       const validItems = fileItems.filter((item) => item.file.size > 0)
-      const regularFiles = validItems.filter((item) => !item.isHandwritten).map((item) => item.file)
+      const files = validItems.map((item) => item.file)
 
       // Store the cancelable promise
       ongoingRequestRef.current = VeradocService.optimizeChecklist({
@@ -96,7 +96,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
         customInstructions: customInstructions || undefined,
         searchMode: searchMode === "full_scan" ? "full_text" : searchMode,
         formData: {
-          files: regularFiles,
+          files: files,
         },
       })
 
@@ -291,7 +291,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
     <Portal>
       <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && handleClose()}>
         <Dialog.Backdrop />
-        <Dialog.Positioner>
+        <Dialog.Positioner style={{ zIndex: 2500 }}>
           <Dialog.Content maxW="6xl" maxH="90vh" display="flex" flexDirection="column">
             <Dialog.Header flexShrink={0}>
               <Dialog.Title>{t("optimizeChecklistModal.title")}</Dialog.Title>
@@ -334,11 +334,7 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                     <Text fontSize="sm" color="gray.600" mb={2}>
                       {t("optimizeChecklistModal.uploadDocumentsHelperText")}
                     </Text>
-                    <FileUpload
-                      files={fileItems}
-                      onFilesChange={setFileItems}
-                      showHandwrittenToggle={false}
-                    />
+                    <FileUpload files={fileItems} onFilesChange={setFileItems} />
                   </Box>
                 </HStack>
 

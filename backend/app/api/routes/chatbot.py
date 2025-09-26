@@ -32,7 +32,11 @@ from app.models import (
 from app.services.session_manager import session_manager
 from app.core.config import settings
 from app.services.pdf_utils import load_pdf_with_pypdf
-from app.services.document_utils import extract_documents_from_file_unified
+from app.services.document_utils import (
+    extract_documents_from_file_unified,
+    extract_documents_and_images_from_file_unified,
+    ensure_documents_for_vector_search,
+)
 from sqlmodel import select
 
 # from langchain_community.document_loaders import PyPDFLoader  # Removed - using pypdf instead
@@ -337,8 +341,13 @@ async def _handle_full_text_document_query(
     """Handle full text scan for document query with multiple files."""
     from app.services.text_processing import chunk_text
 
-    # Get LLM
+    # Get LLM and check vision capabilities
     llm = get_default_llm(session, current_user)
+
+    # Check if LLM supports vision
+    from app.services.vision_service import VisionService
+
+    vision_enabled = VisionService.is_vision_enabled(llm)
 
     # Rephrase the question using chat history if available
     if chat_history:
@@ -373,6 +382,18 @@ async def _handle_full_text_document_query(
             # Use the unified document extraction function
             documents = extract_documents_from_file_unified(file_content, file.filename)
             full_text = "\n\n".join([doc.page_content for doc in documents])
+
+            # Extract images if vision is enabled
+            file_images = []
+            if vision_enabled:
+                from app.services.document_utils import (
+                    extract_documents_and_images_from_file_unified,
+                )
+
+                _, file_images = extract_documents_and_images_from_file_unified(
+                    file_content, file.filename
+                )
+                print(f"Extracted {len(file_images)} images from {file.filename}")
 
             # Chunk the text
             chunks = chunk_text(
@@ -427,10 +448,76 @@ async def _handle_full_text_document_query(
                     },
                 )
 
-                # Store the analysis for this document
-                all_document_analyses.append(
-                    {"filename": file.filename, "analysis": document_analysis}
-                )
+                # Add vision analysis if images exist and LLM supports it
+                if vision_enabled and file_images:
+                    print(f"Adding vision analysis for {file.filename}")
+
+                    # Prepare images for processing
+                    image_data_list = []
+                    for idx, img_b64 in enumerate(file_images):
+                        image_data_list.append(
+                            {
+                                "image_data": img_b64,
+                                "source_file": file.filename,
+                                "image_index": idx,
+                                "metadata": {"extracted_from": file.filename},
+                            }
+                        )
+
+                    try:
+                        vision_analysis = (
+                            await VisionService.process_images_with_prompt(
+                                llm=llm,
+                                images=image_data_list,
+                                prompt_template=settings.CHATBOT_VISION_PROMPT_TEMPLATE,
+                                variables={
+                                    "question": rephrased_question,
+                                    "context": chat_history or "",
+                                    "image_count": len(image_data_list),
+                                    "source_files": file.filename,
+                                },
+                            )
+                        )
+
+                        # Translate vision analysis if needed
+                        vision_analysis = await translate_text_if_needed(
+                            vision_analysis, session, current_user, llm
+                        )
+
+                        # Combine text and vision analysis
+                        combined_analysis = (
+                            VisionService.combine_text_and_vision_analysis(
+                                document_analysis, vision_analysis, "integrated"
+                            )
+                        )
+
+                        # Store the combined analysis for this document
+                        all_document_analyses.append(
+                            {
+                                "filename": file.filename,
+                                "analysis": combined_analysis,
+                                "has_vision_analysis": True,
+                                "image_count": len(file_images),
+                            }
+                        )
+
+                    except Exception as vision_error:
+                        print(
+                            f"Vision analysis error for {file.filename}: {vision_error}"
+                        )
+                        # Fall back to text-only analysis
+                        all_document_analyses.append(
+                            {
+                                "filename": file.filename,
+                                "analysis": document_analysis,
+                                "vision_error": str(vision_error),
+                            }
+                        )
+                else:
+                    # Store the text-only analysis for this document
+                    all_document_analyses.append(
+                        {"filename": file.filename, "analysis": document_analysis}
+                    )
 
                 # Add source citations for this file
                 all_source_citations.extend(file_source_citations)
@@ -867,23 +954,31 @@ async def query_knowledge_base(
 
                 # 🚨 NEW FALLBACK: If not found with truncated name, try the whole filename
                 if not source_entry:
-                    print(f"No source entry found for truncated filename: {truncated_filename}")
+                    print(
+                        f"No source entry found for truncated filename: {truncated_filename}"
+                    )
                     print(f"Trying with full filename: {raw_filename}")
-                    
+
                     source_entry = session.exec(
                         select(SourceORM).where(SourceORM.name == raw_filename)
                     ).first()
-                    
+
                     if source_entry:
-                        print(f"✅ Found source entry with full filename: {raw_filename}")
+                        print(
+                            f"✅ Found source entry with full filename: {raw_filename}"
+                        )
                     else:
-                        print(f"❌ No source entry found for either truncated or full filename")
+                        print(
+                            f"❌ No source entry found for either truncated or full filename"
+                        )
 
                 if source_entry:
                     print(f"Found source entry with ID: {source_entry.source_data_id}")
                     metadata["source_data_id"] = str(source_entry.source_data_id)
                 else:
-                    print(f"No source entry found for filename: {truncated_filename} or {raw_filename}")
+                    print(
+                        f"No source entry found for filename: {truncated_filename} or {raw_filename}"
+                    )
 
             source = {
                 "content": doc.page_content,  # Remove 300 character truncation
@@ -1189,6 +1284,7 @@ async def query_document(
 
             # Process all uploaded files and combine them into a single document collection
             all_documents = []
+            all_images = []
 
             for file in files:
                 # Save uploaded file temporarily
@@ -1198,11 +1294,11 @@ async def query_document(
                     temp_paths.append(temp_path)
                 # File is now closed and ready to be read by loaders
 
-                # Use unified document processing for all file types
+                # Use enhanced unified document processing for both text and images
                 with open(temp_path, "rb") as f:
                     file_content = f.read()
 
-                documents = extract_documents_from_file_unified(
+                documents, images = extract_documents_and_images_from_file_unified(
                     file_content, file.filename
                 )
 
@@ -1213,12 +1309,18 @@ async def query_document(
                     doc.metadata["source_filename"] = file.filename
 
                 all_documents.extend(documents)
+                all_images.extend(images)
+
+            # Ensure we have documents for vector search (create fallbacks if needed)
+            resilient_documents = ensure_documents_for_vector_search(
+                all_documents, all_images, "uploaded_files"
+            )
 
             # Split all documents
             text_splitter = RecursiveCharacterTextSplitter(
                 chunk_size=1000, chunk_overlap=200
             )
-            chunks = text_splitter.split_documents(all_documents)
+            chunks = text_splitter.split_documents(resilient_documents)
 
             # Create embeddings
             embeddings = load_embeddings_model(
@@ -1278,6 +1380,54 @@ async def query_document(
         # Retrieve relevant context
         docs = retriever.get_relevant_documents(rephrased_question)
         context = "\n\n".join([doc.page_content for doc in docs])
+
+        # Check if we need vision analysis for image-only fallback documents
+        from app.services.vision_service import VisionService
+
+        vision_enabled = VisionService.is_vision_enabled(llm)
+
+        # Check if any of the retrieved docs are vision fallbacks
+        has_vision_fallbacks = any(
+            doc.metadata.get("is_vision_fallback", False) for doc in docs
+        )
+
+        # If we have vision fallbacks and images available, use vision analysis
+        if vision_enabled and has_vision_fallbacks and all_images:
+            print(f"Using vision analysis for {len(all_images)} images")
+            try:
+                # Convert base64 images to the format expected by VisionService
+                vision_images = []
+                for img_b64 in all_images:
+                    vision_images.append(
+                        {
+                            "image_data": img_b64,
+                            "metadata": {"source": "uploaded_files"},
+                        }
+                    )
+
+                vision_result = VisionService.safe_vision_analysis(
+                    llm=llm,
+                    prompt_template=settings.CHATBOT_VISION_PROMPT_TEMPLATE,
+                    variables={
+                        "image_count": len(all_images),
+                        "source_files": "uploaded_files",
+                        "question": rephrased_question,
+                        "context": context,
+                    },
+                    images=vision_images,
+                )
+
+                # Use combined analysis for documents with vision content
+                final_context = VisionService.combine_text_and_vision_analysis(
+                    text_analysis=context,
+                    vision_analysis=vision_result,
+                    combination_strategy="comprehensive",
+                )
+                context = final_context
+                print(f"Enhanced context with vision analysis: {len(context)} chars")
+
+            except Exception as e:
+                print(f"Vision analysis failed, using text-only: {e}")
 
         # Create a list of sources for citation
         sources = []

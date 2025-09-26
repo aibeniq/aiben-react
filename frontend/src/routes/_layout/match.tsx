@@ -295,17 +295,14 @@ const FormConnect = () => {
       return
     }
 
-    // Filter out placeholder files and separate into digitized vs handwritten
+    // Filter out placeholder files
     const validItems = fileItems.filter((item) => item.file.size > 0)
-    const digitizedFiles = validItems.filter((item) => !item.isHandwritten).map((item) => item.file)
-    const handwrittenFiles = validItems
-      .filter((item) => item.isHandwritten)
-      .map((item) => item.file)
+    const files = validItems.map((item) => item.file)
 
     const requestData = {
       fields: fields,
-      digitized_files: digitizedFiles,
-      handwritten_files: handwrittenFiles,
+      digitized_files: files, // Temporarily use digitized_files until API types are regenerated
+      handwritten_files: [], // Empty array for now
       search_mode: searchMode,
     }
 
@@ -336,12 +333,7 @@ const FormConnect = () => {
               helpKey="formTemplate"
             />
 
-            <FileUpload
-              files={fileItems}
-              onFilesChange={setFileItems}
-              showHandwrittenToggle={true}
-              helpKey="fileUpload"
-            />
+            <FileUpload files={fileItems} onFilesChange={setFileItems} helpKey="fileUpload" />
 
             <SearchModeToggle
               searchMode={searchMode}

@@ -70,25 +70,25 @@ router = APIRouter(prefix="/reportgenie", tags=["reportgenie"])
 
 class KnowledgeBaseCache:
     """Cache for knowledge base retrievers to avoid reloading large databases multiple times."""
-    
+
     def __init__(self):
         self.cached_retrievers = {}
         self.temp_dirs = {}
         self.cached_chroma_dbs = {}
-    
-    def get_retriever(self, kb_id: str, kb: 'KnowledgeBase', session, current_user):
+
+    def get_retriever(self, kb_id: str, kb: "KnowledgeBase", session, current_user):
         """Get or create a cached retriever for the knowledge base."""
         cache_key = f"{kb_id}_{kb.embedding_model_id}"
-        
+
         if cache_key not in self.cached_retrievers:
             # Create temporary directory for this knowledge base
             temp_dir = tempfile.mkdtemp()
             self.temp_dirs[cache_key] = temp_dir
-            
+
             print(f"Loading knowledge base {kb_id} into cache (first time)")
-            
+
             # Extract ChromaDB to temp directory
-            if kb.storage_type == 'file' and kb.file_path:
+            if kb.storage_type == "file" and kb.file_path:
                 if os.path.exists(kb.file_path):
                     with zipfile.ZipFile(kb.file_path, "r") as zip_ref:
                         zip_ref.extractall(temp_dir)
@@ -104,7 +104,7 @@ class KnowledgeBaseCache:
                     status_code=400,
                     detail="Knowledge base has no vector database data",
                 )
-            
+
             # Load embeddings model
             if kb.embedding_model_id:
                 embedding_model = session.get(EmbeddingModel, kb.embedding_model_id)
@@ -119,10 +119,12 @@ class KnowledgeBaseCache:
                 embedding_info = get_embedding_model(session, current_user)
                 model_id = embedding_info["model_id"]
                 provider = embedding_info["provider"]
-            
+
             embeddings = load_embeddings_model(provider=provider, model_id=model_id)
-            chroma_db = Chroma(persist_directory=temp_dir, embedding_function=embeddings)
-            
+            chroma_db = Chroma(
+                persist_directory=temp_dir, embedding_function=embeddings
+            )
+
             # Create ensemble retriever
             retriever = create_ensemble_retriever(
                 chroma_db=chroma_db,
@@ -130,17 +132,17 @@ class KnowledgeBaseCache:
                 keyword_weight=0.3,
                 search_kwargs={"k": settings.RAG_NUM_CHUNKS},
             )
-            
+
             # Cache both retriever and chroma_db
             self.cached_retrievers[cache_key] = retriever
             self.cached_chroma_dbs[cache_key] = chroma_db
-            
+
             print(f"✅ Knowledge base {kb_id} loaded and cached successfully")
         else:
             print(f"♻️  Using cached knowledge base {kb_id}")
-            
+
         return self.cached_retrievers[cache_key]
-    
+
     def cleanup(self):
         """Clean up all temporary directories and cached resources."""
         print(f"🧹 Cleaning up knowledge base cache ({len(self.temp_dirs)} temp dirs)")
@@ -230,15 +232,17 @@ async def generate_report(
         # Process each section
         sections = []
         draft_report = ""
-        
+
         # Initialize knowledge base cache for this report generation
         kb_cache = KnowledgeBaseCache()
-        
+
         try:
             for section_item in section_items:
                 section_description = section_item["text"]
                 consult_documents = section_item.get("consultDocuments", True)
-                search_type = section_item.get("searchType", "vector")  # Default to vector
+                search_type = section_item.get(
+                    "searchType", "vector"
+                )  # Default to vector
 
                 if not section_description:
                     continue
@@ -274,16 +278,18 @@ async def generate_report(
                                     zip_data = BytesIO(source_data.data)
                                     with zipfile.ZipFile(zip_data, "r") as zip_file:
                                         file_info = zip_file.infolist()[0]
-                                        raw_file_content = zip_file.read(file_info.filename)
+                                        raw_file_content = zip_file.read(
+                                            file_info.filename
+                                        )
                                         file_content = extract_text_from_file(
                                             raw_file_content, source.name
                                         )
 
-                                all_source_text += (
-                                    f"\n\n--- Source: {source.name} ---\n\n{file_content}"
-                                )
+                                all_source_text += f"\n\n--- Source: {source.name} ---\n\n{file_content}"
                             except Exception as e:
-                                print(f"Error extracting content from {source.name}: {e}")
+                                print(
+                                    f"Error extracting content from {source.name}: {e}"
+                                )
                                 # Continue with other sources instead of failing completely
                                 continue
 
@@ -301,7 +307,9 @@ async def generate_report(
                             chunk_analyses.append(analysis)
 
                         # Synthesize the chunk analyses
-                        print(f"About to synthesize {len(chunk_analyses)} chunk analyses")
+                        print(
+                            f"About to synthesize {len(chunk_analyses)} chunk analyses"
+                        )
 
                         if not chunk_analyses:
                             print("No chunk analyses found - using fallback message")
@@ -353,10 +361,14 @@ async def generate_report(
                         print(f"Performing Vector Search for: {section_description}")
 
                         # Use cached retriever instead of creating new temp directory each time
-                        retriever = kb_cache.get_retriever(knowledge_base_id, kb, session, current_user)
-                        
+                        retriever = kb_cache.get_retriever(
+                            knowledge_base_id, kb, session, current_user
+                        )
+
                         # Use the cached retriever's get_relevant_documents method
-                        search_results = retriever.get_relevant_documents(section_description)
+                        search_results = retriever.get_relevant_documents(
+                            section_description
+                        )
 
                         # Format search results for the synthesis prompt
                         context = "\n\n".join(
@@ -1145,66 +1157,25 @@ async def generate_outline(
             for file in files:
                 if file.size > 0:
                     try:
-                        # Read and process the file content
+                        # Read and process the file content with visual enhancement
                         file_content = await file.read()
-                        filename = file.filename.lower() if file.filename else ""
 
-                        if file.content_type == "application/pdf" or filename.endswith(
-                            ".pdf"
-                        ):
-                            # Extract text from PDF using pypdf (BSD license)
-                            with tempfile.NamedTemporaryFile(
-                                delete=False, suffix=".pdf"
-                            ) as temp_file:
-                                temp_file.write(file_content)
-                                temp_file_path = temp_file.name
+                        # Use enhanced processing with vision capabilities
+                        from app.services.document_utils import (
+                            extract_text_with_vision_enhancement,
+                        )
 
-                            try:
-                                documents = load_pdf_with_pypdf(
-                                    temp_file_path, file.filename
-                                )
-                                file_text = "\n\n".join(
-                                    [doc.page_content for doc in documents]
-                                )
-                            finally:
-                                os.unlink(temp_file_path)
-                        elif (
-                            file.content_type
-                            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                            or filename.endswith((".docx", ".doc"))
-                        ):
-                            # Extract text from DOCX/DOC files
-                            # Create a BytesIO object from the file content
-                            doc_stream = BytesIO(file_content)
-                            doc = Document(doc_stream)
-
-                            # Extract text from all paragraphs
-                            doc_text_parts = []
-                            for paragraph in doc.paragraphs:
-                                if paragraph.text.strip():
-                                    doc_text_parts.append(paragraph.text.strip())
-
-                            file_text = "\n".join(doc_text_parts)
-                            print(
-                                f"Successfully extracted text from DOCX: {len(file_text)} characters"
-                            )
-
-                        elif file.content_type == "text/plain" or filename.endswith(
-                            (".txt", ".md")
-                        ):
-                            # Handle text file
-                            file_text = file_content.decode("utf-8", errors="ignore")
-                        else:
-                            # For unknown file types, try to decode as text but warn about it
-                            print(
-                                f"Warning: Unknown file type for {file.filename} (content-type: {file.content_type}), attempting text decode"
-                            )
-                            file_text = file_content.decode("utf-8", errors="ignore")
+                        file_text = await extract_text_with_vision_enhancement(
+                            file_content,
+                            file.filename or "unknown",
+                            llm,
+                            purpose="outline generation",
+                        )
 
                         if file_text.strip():
                             example_document_content += f"\n\n--- Content from {file.filename} ---\n{file_text.strip()}"
                             print(
-                                f"Extracted {len(file_text)} characters from {file.filename}"
+                                f"Extracted {len(file_text)} characters from {file.filename} (with vision enhancement)"
                             )
 
                     except Exception as e:
@@ -1545,7 +1516,7 @@ async def optimize_outline(
         # 2. Set up the same infrastructure as generate_report
         with tempfile.TemporaryDirectory() as temp_dir:
             # Extract ChromaDB
-            if kb.storage_type == 'file' and kb.file_path:
+            if kb.storage_type == "file" and kb.file_path:
                 # File-based storage: extract from file path
                 if os.path.exists(kb.file_path):
                     with zipfile.ZipFile(kb.file_path, "r") as zip_ref:

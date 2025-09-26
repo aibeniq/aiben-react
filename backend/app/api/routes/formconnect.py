@@ -145,13 +145,108 @@ async def extract_fields_using_vector_search(
             f"Using embedding model: {embedding_info['model_id']} ({embedding_info['provider']})"
         )
 
-        # Extract text from the document first using unified processing
-        from app.services.document_utils import extract_text_from_file_unified
+        # Extract text and images from the document using enhanced unified processing
+        from app.services.document_utils import (
+            extract_text_from_file_unified,
+            extract_documents_and_images_from_file_unified,
+            ensure_documents_for_vector_search,
+        )
+        from app.services.vision_service import VisionService
 
+        # First try regular text extraction
         text = extract_text_from_file_unified(content, file.filename or "unknown")
 
+        # Also extract images for vision-enhanced processing (for PDFs)
+        document_images = []
+        vision_enabled = VisionService.is_vision_enabled(llm)
+        file_ext = Path(file.filename or "").suffix.lower()
+
+        if vision_enabled and file_ext == ".pdf":
+            try:
+                print(
+                    f"🖼️ Extracting images from PDF for enhanced vector search: {file.filename}"
+                )
+                _, document_images = extract_documents_and_images_from_file_unified(
+                    content, file.filename or "unknown"
+                )
+                if document_images:
+                    print(
+                        f"✅ Found {len(document_images)} images to enhance vector search"
+                    )
+                else:
+                    print(f"ℹ️ No images found in {file.filename}")
+            except Exception as e:
+                print(f"⚠️ Failed to extract images from {file.filename}: {str(e)}")
+                document_images = []
+
+        # If no text, try vision extraction for image-only documents
         if not text.strip():
-            return {k: "Could not extract: Empty document" for k in template.keys()}
+            print("No text found, checking for images...")
+            documents, images = extract_documents_and_images_from_file_unified(
+                content, file.filename or "unknown"
+            )
+
+            # Check if we have vision capabilities for image-only processing
+            if images and VisionService.is_vision_enabled(llm):
+                print(f"Found {len(images)} images, using vision extraction")
+                # Use VisionService for image-only extraction
+                try:
+                    # Convert base64 images to the format expected by VisionService
+                    vision_images = []
+                    for img_b64 in images:
+                        vision_images.append(
+                            {
+                                "image_data": img_b64,
+                                "metadata": {"source": file.filename or "unknown"},
+                            }
+                        )
+
+                    vision_result = VisionService.safe_vision_analysis(
+                        llm=llm,
+                        prompt_template=settings.FORMCONNECT_VISION_PROMPT_TEMPLATE,
+                        variables={
+                            "template_fields": list(template.keys()),
+                            "image_count": len(images),
+                        },
+                        images=vision_images,
+                    )
+
+                    # Parse the vision result as JSON if possible
+                    import json
+                    import re
+
+                    try:
+                        # Try to extract JSON from the response
+                        json_match = re.search(
+                            r"```(?:json)?\s*\n?({.*?})\s*\n?```",
+                            vision_result,
+                            re.DOTALL | re.IGNORECASE,
+                        )
+                        if json_match:
+                            vision_result = json_match.group(1)
+
+                        extracted_data = json.loads(vision_result)
+                        print(
+                            f"Successfully extracted data using vision: {extracted_data}"
+                        )
+                        return extracted_data
+
+                    except (json.JSONDecodeError, AttributeError) as e:
+                        print(f"Could not parse vision result as JSON: {e}")
+                        # Fall back to text processing with the vision result
+                        text = vision_result
+
+                except Exception as e:
+                    print(f"Vision extraction failed: {e}")
+                    return {
+                        k: "Could not extract: Document contains only images and vision extraction failed"
+                        for k in template.keys()
+                    }
+            else:
+                return {
+                    k: "Could not extract: Empty document or no vision support available"
+                    for k in template.keys()
+                }
 
         # Create temporary directory for ChromaDB
         temp_dir = tempfile.mkdtemp()
@@ -170,17 +265,29 @@ async def extract_fields_using_vector_search(
             )
             chunks = text_splitter.split_text(text)
 
+            # Ensure we have at least one chunk for vector search
+            if not chunks:
+                chunks = [text or f"Fallback content for {file.filename or 'document'}"]
+
             print(f"📄 Split document into {len(chunks)} chunks for vector search")
 
-            # Create ChromaDB vector store
-            chroma_db = Chroma.from_texts(
-                texts=chunks,
-                embedding=embeddings,
-                persist_directory=temp_dir,
-                metadatas=[
-                    {"source": file.filename, "chunk_id": i} for i in range(len(chunks))
-                ],
-            )
+            # Create ChromaDB vector store with error handling
+            try:
+                chroma_db = Chroma.from_texts(
+                    texts=chunks,
+                    embedding=embeddings,
+                    persist_directory=temp_dir,
+                    metadatas=[
+                        {"source": file.filename, "chunk_id": i}
+                        for i in range(len(chunks))
+                    ],
+                )
+            except Exception as e:
+                print(f"Error creating vector store: {e}")
+                # Fall back to full text extraction if vector store fails
+                return await extract_fields_using_full_text(
+                    content, file.filename, template, llm
+                )
 
             # Create retriever for semantic search
             retriever = create_ensemble_retriever(
@@ -250,15 +357,100 @@ Extracted value:"""
                                 if hasattr(field_response, "content")
                                 else str(field_response)
                             )
-                            extracted_data[field_name] = extracted_value.strip()
 
-                            print(f"   ✅ Found: {extracted_value.strip()[:50]}...")
+                            # Check if we got a good result or should try vision
+                            if (
+                                extracted_value.strip().lower()
+                                in ["not found", "n/a", "none", "null", ""]
+                                and vision_enabled
+                                and document_images
+                            ):
+                                print(
+                                    f"   🔍 Text search failed for {field_name}, trying vision analysis..."
+                                )
+                                vision_value = await extract_field_from_images(
+                                    field_name,
+                                    field_description,
+                                    document_images,
+                                    llm,
+                                    file.filename,
+                                )
+                                if (
+                                    vision_value
+                                    and vision_value.strip().lower()
+                                    not in ["not found", "n/a", "none", "null"]
+                                ):
+                                    extracted_data[field_name] = vision_value.strip()
+                                    print(
+                                        f"   ✅ Vision found: {vision_value.strip()[:50]}..."
+                                    )
+                                else:
+                                    extracted_data[field_name] = extracted_value.strip()
+                                    print(
+                                        f"   ⚠️ Both text and vision failed for {field_name}"
+                                    )
+                            else:
+                                extracted_data[field_name] = extracted_value.strip()
+                                print(f"   ✅ Found: {extracted_value.strip()[:50]}...")
+                        else:
+                            # No relevant text found, try vision if available
+                            if vision_enabled and document_images:
+                                print(
+                                    f"   🔍 No relevant text for {field_name}, trying vision analysis..."
+                                )
+                                vision_value = await extract_field_from_images(
+                                    field_name,
+                                    field_description,
+                                    document_images,
+                                    llm,
+                                    file.filename,
+                                )
+                                if (
+                                    vision_value
+                                    and vision_value.strip().lower()
+                                    not in ["not found", "n/a", "none", "null"]
+                                ):
+                                    extracted_data[field_name] = vision_value.strip()
+                                    print(
+                                        f"   ✅ Vision found: {vision_value.strip()[:50]}..."
+                                    )
+                                else:
+                                    extracted_data[field_name] = "Not found"
+                                    print(
+                                        f"   ❌ No relevant content found (text or vision)"
+                                    )
+                            else:
+                                extracted_data[field_name] = "Not found"
+                                print(f"   ❌ No relevant content found")
+                    else:
+                        # No search results, try vision if available
+                        if vision_enabled and document_images:
+                            print(
+                                f"   🔍 No search results for {field_name}, trying vision analysis..."
+                            )
+                            vision_value = await extract_field_from_images(
+                                field_name,
+                                field_description,
+                                document_images,
+                                llm,
+                                file.filename,
+                            )
+                            if vision_value and vision_value.strip().lower() not in [
+                                "not found",
+                                "n/a",
+                                "none",
+                                "null",
+                            ]:
+                                extracted_data[field_name] = vision_value.strip()
+                                print(
+                                    f"   ✅ Vision found: {vision_value.strip()[:50]}..."
+                                )
+                            else:
+                                extracted_data[field_name] = "Not found"
+                                print(f"   ❌ No search results (text or vision)")
                         else:
                             extracted_data[field_name] = "Not found"
-                            print(f"   ❌ No relevant content found")
-                    else:
-                        extracted_data[field_name] = "Not found"
-                        print(f"   ❌ No search results")
+                            print(f"   ❌ No search results")
 
                 except Exception as e:
                     print(f"   ❌ Error searching for {field_name}: {str(e)}")
@@ -286,20 +478,53 @@ async def extract_fields_using_full_text(
     content: bytes, filename: str, template: Dict[str, str], llm=None
 ) -> Dict[str, str]:
     """
-    Extract fields using full text processing (original method).
+    Extract fields using full text processing with enhanced visual processing.
+    Now includes image extraction and vision analysis for PDFs with embedded images.
     """
     print(f"📄 Using full text mode for field extraction from {filename}")
 
     # Check file extension to determine processing method
     file_ext = Path(filename).suffix.lower() if filename else ""
 
+    # Import vision service for image processing
+    from app.services.vision_service import VisionService
+
+    # Check if vision is enabled for this LLM
+    vision_enabled = VisionService.is_vision_enabled(llm)
+    print(f"🔍 Vision processing enabled: {vision_enabled}")
+
     try:
         # Use unified document processing for all file types
-        from app.services.document_utils import extract_text_from_file_unified
+        from app.services.document_utils import (
+            extract_text_from_file_unified,
+            extract_documents_and_images_from_file_unified,
+        )
 
         text = extract_text_from_file_unified(content, filename)
+        document_images = []
 
-        if not text.strip():
+        # Extract images if vision is enabled and we're processing a PDF
+        if vision_enabled and file_ext == ".pdf":
+            try:
+                print(f"🖼️ Extracting images from PDF: {filename}")
+                _, document_images = extract_documents_and_images_from_file_unified(
+                    content, filename
+                )
+                if document_images:
+                    print(f"✅ Extracted {len(document_images)} images from {filename}")
+                else:
+                    print(f"ℹ️ No images found in {filename}")
+            except Exception as e:
+                print(f"⚠️ Failed to extract images from {filename}: {str(e)}")
+                document_images = []
+
+        # Handle case where document has no text but has images
+        if not text.strip() and document_images and vision_enabled:
+            print(f"📷 Processing image-only document: {filename}")
+            return await process_images_only(document_images, template, llm, filename)
+
+        # If no text and no images, return error
+        elif not text.strip():
             return {
                 k: f"Could not extract: Empty document {filename}"
                 for k in template.keys()
@@ -321,10 +546,21 @@ async def extract_fields_using_full_text(
             for k in template.keys()
         }
 
-    # Create the prompt for full text extraction
-    prompt_template = settings.FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE
-    variables = {"template": json.dumps(template), "document_text": text}
-    response = invoke_llm(llm, prompt_template, variables)
+    # Process with or without vision depending on available images
+    if vision_enabled and document_images:
+        print(
+            f"🔍 Processing {filename} with both text and {len(document_images)} images"
+        )
+        # Use vision-enhanced processing
+        response = await process_with_text_and_images(
+            text, document_images, template, llm, filename
+        )
+    else:
+        print(f"📄 Processing {filename} with text only (no images or vision disabled)")
+        # Use standard text-only processing
+        prompt_template = settings.FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE
+        variables = {"template": json.dumps(template), "document_text": text}
+        response = invoke_llm(llm, prompt_template, variables)
 
     # Try to parse JSON from the response
     try:
@@ -350,6 +586,234 @@ def count_tokens(text: str, model: str = "gpt-4o-mini") -> int:
 
         encoding = tiktoken.get_encoding("cl100k_base")
         return len(encoding.encode(text))
+
+
+async def process_images_only(
+    document_images: List[str], template: Dict[str, str], llm, filename: str
+) -> Dict[str, str]:
+    """
+    Process a document that contains only images (no extractable text).
+    Uses vision analysis to extract form fields from the images.
+    """
+    try:
+        from app.services.vision_service import VisionService
+
+        # Convert base64 images to the format expected by VisionService
+        vision_images = []
+        for i, img_b64 in enumerate(document_images):
+            vision_images.append(
+                {
+                    "image_data": img_b64,
+                    "metadata": {"source": filename, "page": i + 1},
+                }
+            )
+
+        vision_result = VisionService.safe_vision_analysis(
+            llm=llm,
+            prompt_template=settings.FORMCONNECT_VISION_PROMPT_TEMPLATE,
+            variables={
+                "template_fields": list(template.keys()),
+                "image_count": len(document_images),
+                "filename": filename,
+            },
+            images=vision_images,
+        )
+
+        # Parse the vision result as JSON if possible
+        import json
+        import re
+
+        try:
+            # Try to extract JSON from the response
+            json_match = re.search(
+                r"```(?:json)?\s*\n?({.*?})\s*\n?```",
+                vision_result,
+                re.DOTALL | re.IGNORECASE,
+            )
+            if json_match:
+                vision_result = json_match.group(1)
+
+            extracted_data = json.loads(vision_result)
+            print(
+                f"✅ Successfully extracted data using vision from {filename}: {extracted_data}"
+            )
+            return extracted_data
+
+        except (json.JSONDecodeError, AttributeError) as e:
+            print(f"⚠️ Could not parse vision result as JSON: {e}")
+            # Return structured response indicating vision processing was attempted
+            return {
+                k: f"Vision analysis completed but data format unclear: {vision_result[:100]}..."
+                for k in template.keys()
+            }
+
+    except Exception as e:
+        print(f"❌ Vision processing failed for {filename}: {e}")
+        return {
+            k: f"Could not extract: Vision processing failed - {str(e)}"
+            for k in template.keys()
+        }
+
+
+async def process_with_text_and_images(
+    text: str, document_images: List[str], template: Dict[str, str], llm, filename: str
+) -> Dict[str, str]:
+    """
+    Process a document that has both text and images using enhanced vision analysis.
+    Combines text extraction with vision analysis for comprehensive field extraction.
+    """
+    try:
+        from app.services.vision_service import VisionService
+
+        print(f"🔄 Processing {filename} with combined text and vision analysis")
+
+        # Convert base64 images to the format expected by VisionService
+        vision_images = []
+        for i, img_b64 in enumerate(document_images):
+            vision_images.append(
+                {
+                    "image_data": img_b64,
+                    "metadata": {"source": filename, "page": i + 1},
+                }
+            )
+
+        # Use a specialized prompt that combines text and vision analysis
+        prompt_template = settings.FORMCONNECT_VISION_PROMPT_TEMPLATE
+        vision_variables = {
+            "template_fields": list(template.keys()),
+            "document_text": text[:10000],  # Limit text to avoid token overflow
+            "image_count": len(document_images),
+            "filename": filename,
+            "has_text": True,
+        }
+
+        vision_result = VisionService.safe_vision_analysis(
+            llm=llm,
+            prompt_template=prompt_template,
+            variables=vision_variables,
+            images=vision_images,
+        )
+
+        # Parse the combined result
+        import json
+        import re
+
+        try:
+            # Try to extract JSON from the response
+            json_match = re.search(
+                r"```(?:json)?\s*\n?({.*?})\s*\n?```",
+                vision_result,
+                re.DOTALL | re.IGNORECASE,
+            )
+            if json_match:
+                vision_result = json_match.group(1)
+
+            extracted_data = json.loads(vision_result)
+            print(
+                f"✅ Successfully extracted data using combined text+vision from {filename}"
+            )
+            return extracted_data
+
+        except (json.JSONDecodeError, AttributeError) as e:
+            print(
+                f"⚠️ JSON parsing failed for combined analysis, falling back to text-only"
+            )
+            # Fallback to text-only processing
+            prompt_template = settings.FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE
+            variables = {"template": json.dumps(template), "document_text": text}
+            response = invoke_llm(llm, prompt_template, variables)
+
+            if isinstance(response, dict):
+                return response
+            try:
+                return json.loads(response)
+            except:
+                return {"raw_content": str(response)}
+
+    except Exception as e:
+        print(
+            f"⚠️ Combined processing failed for {filename}, falling back to text-only: {e}"
+        )
+        # Fallback to text-only processing
+        prompt_template = settings.FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE
+        variables = {"template": json.dumps(template), "document_text": text}
+        response = invoke_llm(llm, prompt_template, variables)
+
+        if isinstance(response, dict):
+            return response
+        try:
+            return json.loads(response)
+        except:
+            return {"raw_content": str(response)}
+
+
+async def extract_field_from_images(
+    field_name: str,
+    field_description: str,
+    document_images: List[str],
+    llm,
+    filename: str,
+) -> str:
+    """
+    Extract a specific field value from document images using vision analysis.
+    Used as a fallback when vector/text search doesn't find the field.
+    """
+    try:
+        from app.services.vision_service import VisionService
+
+        # Convert base64 images to the format expected by VisionService
+        vision_images = []
+        for i, img_b64 in enumerate(document_images):
+            vision_images.append(
+                {
+                    "image_data": img_b64,
+                    "metadata": {"source": filename, "page": i + 1},
+                }
+            )
+
+        # Create a focused prompt for this specific field
+        field_specific_prompt = f"""You are analyzing document images to extract a specific piece of information.
+
+FIELD TO FIND: "{field_name}"
+FIELD DESCRIPTION: {field_description}
+
+Please look through all the provided images and find the value for "{field_name}".
+
+Instructions:
+1. Carefully examine each image for information related to "{field_name}"
+2. If you find the information, return ONLY the value (no explanations)
+3. If you cannot find the information, return "Not found"
+4. Be precise and extract only the specific value requested
+
+The images are from: {filename}
+
+Value for "{field_name}":"""
+
+        vision_result = VisionService.safe_vision_analysis(
+            llm=llm,
+            prompt_template=field_specific_prompt,
+            variables={},
+            images=vision_images,
+        )
+
+        # Clean up the response
+        if isinstance(vision_result, str):
+            result = vision_result.strip()
+            # Remove common wrapper text that might appear
+            if result.lower().startswith("the value"):
+                # Try to extract just the value part
+                import re
+
+                value_match = re.search(r"value.*?is:?\s*(.+?)(?:\.|$)", result.lower())
+                if value_match:
+                    result = value_match.group(1).strip()
+            return result
+        else:
+            return str(vision_result).strip()
+
+    except Exception as e:
+        print(f"❌ Vision field extraction failed for {field_name}: {e}")
+        return "Not found"
 
 
 async def extract_fields_with_chunking(
@@ -428,249 +892,6 @@ def merge_field_extractions(
     return merged
 
 
-async def extract_fields_from_handwritten_document(
-    file: UploadFile, template: Dict[str, str], llm
-) -> Dict[str, str]:
-    """
-    Extract fields from a handwritten document or convert documents to images.
-
-    Logic:
-    - Image files: Always process as images
-    - PDF/DOCX/DOC files: Convert to page screenshots and process as images
-    - CSV/XLSX/RTF/TXT files: Return error (incompatible with handwritten processing)
-    """
-    print("Now extracting fields from handwritten document:", file.filename)
-    content = await file.read()
-
-    # Define file type categories
-    image_extensions = [
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".gif",
-        ".bmp",
-        ".tif",
-        ".tiff",
-        ".webp",
-    ]
-    convertible_extensions = [".pdf", ".docx", ".doc"]
-    incompatible_extensions = [".csv", ".xlsx", ".xls", ".txt", ".rtf"]
-
-    file_ext = Path(file.filename).suffix.lower()
-
-    # Check for incompatible file types first
-    if file_ext in incompatible_extensions:
-        error_msg = f"File type {file_ext.upper()} is not compatible with handwritten processing. Please uncheck the 'Handwritten' toggle for this file type."
-        print(f"❌ Incompatible file type: {file.filename} ({file_ext})")
-        return {k: error_msg for k in template.keys()}
-
-    # Process image files directly
-    if file_ext in image_extensions:
-        return await process_image_file(content, file_ext, template, llm, file.filename)
-
-    # Convert PDF/DOCX/DOC files to images and process
-    elif file_ext in convertible_extensions:
-        return await process_document_as_images(
-            content, file_ext, template, llm, file.filename
-        )
-
-    # Unknown file type - try as digitized document
-    else:
-        print(f"⚠️ Unknown file type {file_ext}, falling back to digitized processing")
-        await file.seek(0)
-        return await extract_fields_from_digitized_document(
-            file, template, llm, "full_scan"
-        )
-
-
-async def process_image_file(
-    content: bytes, file_ext: str, template: Dict[str, str], llm, filename: str
-) -> Dict[str, str]:
-    """
-    Process an image file directly.
-    """
-    try:
-        img_base64 = base64.b64encode(content).decode("utf-8")
-
-        # Use the template from config
-        prompt_template = settings.FORMCONNECT_HANDWRITTEN_PROMPT_TEMPLATE
-        variables = {"template": template}
-
-        print(f"📷 Processing image file: {filename}")
-        response = invoke_llm_with_image(
-            llm,
-            prompt_template,
-            variables=variables,
-            image_base64=img_base64,
-            image_type=file_ext[1:] if file_ext.startswith(".") else file_ext,
-        )
-
-        # Try to parse JSON from the response
-        try:
-            import json
-            import re
-
-            if isinstance(response, dict):
-                print(f"✅ Response is already a dict: {response}")
-                return response
-
-            # Handle LangChain response object
-            response_text = str(response)
-            if hasattr(response, "content"):
-                response_text = response.content
-
-            print(f"🔍 Raw response text: {response_text[:200]}...")
-
-            # Remove markdown code block wrappers if present
-            if "```json" in response_text or "```" in response_text:
-                # Extract JSON from markdown code blocks
-                json_match = re.search(
-                    r"```(?:json)?\s*\n?({.*?})\s*\n?```", response_text, re.DOTALL
-                )
-                if json_match:
-                    response_text = json_match.group(1)
-                    print(f"📝 Extracted JSON from markdown: {response_text[:100]}...")
-                else:
-                    # Fallback: remove all ``` markers
-                    response_text = re.sub(r"```(?:json)?\s*\n?", "", response_text)
-                    response_text = re.sub(r"\n?```", "", response_text)
-                    print(f"📝 Cleaned response: {response_text[:100]}...")
-
-            content_dict = json.loads(response_text.strip())
-            print(f"✅ Successfully parsed JSON: {content_dict}")
-            return content_dict
-
-        except Exception as e:
-            print(f"❌ JSON parsing failed: {str(e)}")
-            print(f"📄 Raw response for debugging: {str(response)}")
-            return {"raw_content": str(response)}
-    except Exception as e:
-        print(f"❌ Error processing image {filename}: {str(e)}")
-        return {k: f"Error processing image: {str(e)}" for k in template.keys()}
-
-
-async def process_document_as_images(
-    content: bytes, file_ext: str, template: Dict[str, str], llm, filename: str
-) -> Dict[str, str]:
-    """
-    Convert PDF/DOCX/DOC files to page images and process each page.
-    """
-    print(f"📄➡️📷 Converting {filename} to images for handwritten processing")
-
-    try:
-        # Import conversion utilities
-        if file_ext == ".pdf":
-            page_images = await convert_pdf_to_images(content)
-        elif file_ext in [".docx", ".doc"]:
-            page_images = await convert_docx_to_images(content, file_ext)
-        else:
-            raise ValueError(f"Unsupported file type for image conversion: {file_ext}")
-
-        # If conversion succeeded, process the images
-        if page_images:
-            print(
-                f"✅ Successfully converted {filename} to {len(page_images)} image(s)"
-            )
-
-            # Process each page image and collect results
-            all_extractions = []
-            for page_num, img_base64 in enumerate(page_images, 1):
-                print(f"🔍 Processing page {page_num} of {filename}")
-
-                prompt_template = settings.FORMCONNECT_HANDWRITTEN_PROMPT_TEMPLATE
-                variables = {"template": template}
-
-                try:
-                    response = invoke_llm_with_image(
-                        llm,
-                        prompt_template,
-                        variables=variables,
-                        image_base64=img_base64,
-                        image_type="png",  # Converted images are typically PNG
-                    )
-
-                    # Parse response
-                    import json
-                    import re
-
-                    if isinstance(response, dict):
-                        print(
-                            f"✅ Page {page_num} response is already a dict: {response}"
-                        )
-                        all_extractions.append(response)
-                    else:
-                        try:
-                            # Handle LangChain response object
-                            response_text = str(response)
-                            if hasattr(response, "content"):
-                                response_text = response.content
-
-                            print(
-                                f"🔍 Page {page_num} raw response: {response_text[:200]}..."
-                            )
-
-                            # Remove markdown code block wrappers if present
-                            if "```json" in response_text or "```" in response_text:
-                                # Extract JSON from markdown code blocks
-                                json_match = re.search(
-                                    r"```(?:json)?\s*\n?({.*?})\s*\n?```",
-                                    response_text,
-                                    re.DOTALL,
-                                )
-                                if json_match:
-                                    response_text = json_match.group(1)
-                                    print(
-                                        f"📝 Page {page_num} extracted JSON: {response_text[:100]}..."
-                                    )
-                                else:
-                                    # Fallback: remove all ``` markers
-                                    response_text = re.sub(
-                                        r"```(?:json)?\s*\n?", "", response_text
-                                    )
-                                    response_text = re.sub(r"\n?```", "", response_text)
-                                    print(
-                                        f"📝 Page {page_num} cleaned response: {response_text[:100]}..."
-                                    )
-
-                            content_dict = json.loads(response_text.strip())
-                            print(
-                                f"✅ Page {page_num} successfully parsed JSON: {content_dict}"
-                            )
-                            all_extractions.append(content_dict)
-
-                        except Exception as parse_error:
-                            print(
-                                f"❌ Page {page_num} JSON parsing failed: {str(parse_error)}"
-                            )
-                            print(
-                                f"📄 Page {page_num} raw response for debugging: {str(response)}"
-                            )
-                            all_extractions.append({"raw_content": str(response)})
-
-                except Exception as e:
-                    print(f"❌ Error processing page {page_num}: {str(e)}")
-                    all_extractions.append(
-                        {
-                            k: f"Error on page {page_num}: {str(e)}"
-                            for k in template.keys()
-                        }
-                    )
-
-            # Merge results from all pages
-            return merge_page_extractions(all_extractions, template)
-
-        else:
-            # Image conversion failed - show helpful error message
-            print(f"❌ Image conversion failed for {filename}")
-            error_msg = f"Unable to convert {file_ext.upper()} to images for handwritten processing. This may be due to:\n- Document is encrypted or protected\n- Document contains unsupported formatting\n- PyMuPDF library not available\n\nPlease try uploading the document as individual image files (PNG, JPG) instead, or uncheck the 'Handwritten' toggle to use text-based extraction."
-            return {k: error_msg for k in template.keys()}
-
-    except Exception as e:
-        print(f"❌ Error converting {filename} to images: {str(e)}")
-        error_msg = f"Error converting {file_ext.upper()} to images for handwritten processing: {str(e)}\n\nPlease try uploading as individual image files (PNG, JPG) instead, or uncheck the 'Handwritten' toggle."
-        return {k: error_msg for k in template.keys()}
-
-
 async def convert_pdf_to_images(content: bytes) -> List[str]:
     """
     Convert PDF pages to base64-encoded images.
@@ -723,7 +944,7 @@ async def convert_docx_to_images(content: bytes, file_ext: str) -> List[str]:
         # For now, fall back to text extraction and create a simple image
         # In a full implementation, you'd use libraries to convert DOCX to images
         print(f"⚠️ DOCX/DOC to image conversion not fully implemented for {file_ext}")
-        print(f"📝 Falling back to text-based processing for handwritten document")
+
         return []  # Return empty to trigger fallback
 
     except Exception as e:
@@ -816,8 +1037,8 @@ async def format_single_document_result(
     """
     Format the results from a single document into a clear presentation.
     """
-    # Clean the filename (remove " (digitized)" or " (handwritten)" suffix)
-    clean_filename = file_name.replace(" (digitized)", "").replace(" (handwritten)", "")
+    # Use original filename
+    clean_filename = file_name
 
     # Convert dict to string, escaping any curly braces for the formatter
     data_str = str(extracted_data).replace("{", "{{").replace("}", "}}")
@@ -845,8 +1066,8 @@ async def compare_multiple_documents(
     clean_filenames = []
 
     for i, (doc, name) in enumerate(zip(documents, file_names)):
-        # Clean the filename (remove " (digitized)" or " (handwritten)" suffix)
-        clean_filename = name.replace(" (digitized)", "").replace(" (handwritten)", "")
+        # Use original filename
+        clean_filename = name
         clean_filenames.append(clean_filename)
 
         # Convert dict to string, escaping any curly braces for the formatter
@@ -889,83 +1110,17 @@ Format your response in markdown with clear tables and analysis."""
     return translated_response
 
 
-def validate_and_reclassify_files(
-    digitized_files: List[UploadFile], handwritten_files: List[UploadFile]
-) -> Dict[str, Any]:
-    """
-    Validate file types and reclassify files based on the new logic:
-    1. Image files -> Always go to handwritten processing (regardless of toggle)
-    2. PDF/DOCX/DOC -> Go to handwritten if toggle is set
-    3. CSV/XLSX/TXT/RTF -> Error if handwritten toggle is set
-    """
-    image_extensions = [
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".gif",
-        ".bmp",
-        ".tif",
-        ".tiff",
-        ".webp",
-    ]
-    convertible_extensions = [".pdf", ".docx", ".doc"]
-    incompatible_extensions = [".csv", ".xlsx", ".xls", ".txt", ".rtf"]
-
-    new_digitized = []
-    new_handwritten = []
-
-    # Process digitized files - check for images that should be reclassified
-    if digitized_files:
-        for file in digitized_files:
-            file_ext = Path(file.filename).suffix.lower()
-
-            if file_ext in image_extensions:
-                # Image files always go to handwritten processing
-                print(
-                    f"🔄 Reclassifying image file {file.filename} to handwritten processing"
-                )
-                new_handwritten.append(file)
-            else:
-                # Keep in digitized
-                new_digitized.append(file)
-
-    # Process handwritten files - validate compatibility
-    if handwritten_files:
-        for file in handwritten_files:
-            file_ext = Path(file.filename).suffix.lower()
-
-            if file_ext in incompatible_extensions:
-                # These file types are not compatible with handwritten processing
-                error_msg = f"File '{file.filename}' with extension '{file_ext.upper()}' is not compatible with handwritten processing. Supported handwritten file types are: images (JPG, PNG, etc.), PDF, DOCX, and DOC files."
-                return {"error": error_msg}
-            elif file_ext in image_extensions or file_ext in convertible_extensions:
-                # These are valid for handwritten processing
-                new_handwritten.append(file)
-            else:
-                # Unknown extension - allow but warn
-                print(
-                    f"⚠️ Unknown file extension {file_ext} for handwritten processing: {file.filename}"
-                )
-                new_handwritten.append(file)
-
-    return {"digitized_files": new_digitized, "handwritten_files": new_handwritten}
-
-
 @router.post("/process", response_model=FormConnectResponse)
 async def process_form(
     session: SessionDep,
     current_user: CurrentUser,
     fields: str,
     search_mode: Literal["vector", "full_scan"] = "vector",
-    digitized_files: List[UploadFile] = File(None),
-    handwritten_files: List[UploadFile] = File(None),
+    files: List[UploadFile] = File(None),
 ):
     """
-    Process the uploaded files and fields.
-
-    Handles two types of files:
-    - digitized_files: Standard text extraction
-    - handwritten_files: OCR-based extraction (placeholder)
+    Process the uploaded files and fields with unified visual processing.
+    All files now benefit from automatic visual enhancement for embedded images.
     """
     print("process_form function invoked!")
     print(f"Received search_mode: {search_mode}")
@@ -982,32 +1137,14 @@ async def process_form(
     else:
         print(f"Using LangChain model for FormConnect: {type(llm).__name__}")
 
-    total_files = (len(digitized_files) if digitized_files else 0) + (
-        len(handwritten_files) if handwritten_files else 0
-    )
-    print(
-        f"Now processing {total_files} files ({len(digitized_files) if digitized_files else 0} digitized, {len(handwritten_files) if handwritten_files else 0} handwritten)..."
-    )
+    total_files = len(files) if files else 0
+    print(f"Now processing {total_files} files with unified visual processing...")
 
     # Check if we have at least one file
     if total_files < 1:
         raise HTTPException(
             status_code=400, detail="At least one file must be uploaded."
         )
-
-    # Validate and reclassify files based on new logic
-    validated_result = validate_and_reclassify_files(digitized_files, handwritten_files)
-    if "error" in validated_result:
-        raise HTTPException(status_code=400, detail=validated_result["error"])
-
-    # Use the reclassified file lists
-    digitized_files = validated_result["digitized_files"]
-    handwritten_files = validated_result["handwritten_files"]
-
-    print(
-        f"After reclassification: {len(digitized_files) if digitized_files else 0} digitized, {len(handwritten_files) if handwritten_files else 0} handwritten"
-    )
-
     # Parse the fields into a list
     field_list = fields.splitlines()
 
@@ -1017,37 +1154,24 @@ async def process_form(
     # Generate the JSON template
     template = generate_template(field_list)
 
-    # Extract fields from all documents
+    # Extract fields from all documents using unified visual processing
     extracted_results = []
     file_names = []
 
-    # Process digitized files using the existing function
-    if digitized_files:
-        for file in digitized_files:
-            extracted = await extract_fields_from_digitized_document(
-                file, template, llm, search_mode
-            )
+    # Process all files with unified visual enhancement
+    if files:
+        for file in files:
+            if search_mode == "vector":
+                # Use vector search with visual enhancement
+                extracted = await process_images_only(file, template, llm)
+            else:
+                # Use full text processing with visual enhancement
+                extracted = await process_with_text_and_images(file, template, llm)
 
             print("Results for file name:", file.filename)
             print("Extracted fields:", extracted)
             extracted_results.append(extracted)
-            file_names.append(f"{file.filename} (digitized)")
-
-            # Reset file position for potential future reads
-            await file.seek(0)
-
-    # Process handwritten files using a specialized function (placeholder)
-    if handwritten_files:
-        for file in handwritten_files:
-            extracted = await extract_fields_from_handwritten_document(
-                file, template, llm
-            )
-            extracted_results.append(extracted)
-
-            print("Results for file name:", file.filename)
-            print("Extracted fields:", extracted)
-
-            file_names.append(f"{file.filename} (handwritten)")
+            file_names.append(file.filename)
 
             # Reset file position for potential future reads
             await file.seek(0)
@@ -1340,8 +1464,7 @@ async def get_form_history(
                     "has_feedback": interaction.feedback is not None,
                     # Add metadata information for enhanced display
                     "metadata": metadata,
-                    "digitized_files": metadata.get("digitized_files", []),
-                    "handwritten_files": metadata.get("handwritten_files", []),
+                    "files": metadata.get("files", metadata.get("digitized_files", [])),
                     "document_count": metadata.get("document_count", file_count),
                     "search_mode": metadata.get("search_mode", "unknown"),
                 }
@@ -1379,8 +1502,7 @@ async def get_form_history(
                     "has_feedback": interaction.feedback is not None,
                     # Add empty metadata for consistency
                     "metadata": {},
-                    "digitized_files": [],
-                    "handwritten_files": [],
+                    "files": [],
                     "document_count": 0,
                     "search_mode": "unknown",
                 }
@@ -1618,11 +1740,16 @@ async def generate_form_fields_with_files(
                 # Read file content
                 content = await file.read()
 
-                # Extract text using unified document processing
-                from app.services.document_utils import extract_text_from_file_unified
+                # Extract text using enhanced processing with vision capabilities
+                from app.services.document_utils import (
+                    extract_text_with_vision_enhancement,
+                )
 
-                text = extract_text_from_file_unified(
-                    content, file.filename or "unknown"
+                text = await extract_text_with_vision_enhancement(
+                    content,
+                    file.filename or "unknown",
+                    llm,
+                    purpose="form field generation",
                 )
 
                 if text.strip():
@@ -1630,9 +1757,11 @@ async def generate_form_fields_with_files(
                         {"filename": file.filename, "content": text}
                     )
                     file_names.append(file.filename)
-                    print(f"✅ Successfully extracted text from {file.filename}")
+                    print(
+                        f"✅ Successfully processed {file.filename} (with vision enhancement)"
+                    )
                 else:
-                    print(f"⚠️ No text extracted from {file.filename}")
+                    print(f"⚠️ No content extracted from {file.filename}")
 
             except Exception as e:
                 print(f"❌ Error processing {file.filename}: {str(e)}")

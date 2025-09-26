@@ -177,7 +177,7 @@ const generateAllLanguageResources = () => {
         formTemplate: "Choose a form template that your documents should be matched against",
         documentOutline: "Select an outline structure for generating your report",
         allUsersToggle: "Toggle between viewing only your history or all users' history",
-        handwrittenToggle: "Enable OCR processing for handwritten or low-quality text documents",
+
         createChecklist: "Create a new checklist with custom questions to evaluate documents against specific criteria",
         createOutline: "Create a new outline structure to guide the generation of structured reports",
         createTopicList: "Create a new topic list to focus comparison analysis on specific subjects or themes",
@@ -244,7 +244,7 @@ const generateAllLanguageResources = () => {
         deleteChecklist: "Delete Checklist",
         dropFilesHere: "Drop the files here",
         uploadedFiles: "Uploaded Files",
-        handwritten: "Handwritten",
+
         removeFile: "Remove",
         characterCount: "{{count}}/2000 characters. These instructions will be appended to each question when processing.",
         searchMode: "Search Mode",
@@ -442,7 +442,7 @@ const generateAllLanguageResources = () => {
           document: "document",
           documents: "documents",
           digitized: "digitized",
-          handwritten: "handwritten"
+
         },
         feedback: {
           positive: "Positive feedback",
@@ -811,7 +811,7 @@ const generateAllLanguageResources = () => {
         formTemplate: "Elegir una plantilla de formulario contra la cual sus documentos deben ser comparados",
         documentOutline: "Seleccionar una estructura de esquema para generar su informe",
         allUsersToggle: "Alternar entre ver solo su historial o el historial de todos los usuarios",
-        handwrittenToggle: "Habilitar procesamiento OCR para documentos manuscritos o de texto de baja calidad",
+
         createChecklist: "Crear una nueva lista de verificación con preguntas personalizadas para evaluar documentos contra criterios específicos",
         createOutline: "Crear una nueva estructura de esquema para guiar la generación de informes estructurados",
         createTopicList: "Crear una nueva lista de temas para enfocar el análisis de comparación en materias específicas",
@@ -1472,7 +1472,7 @@ const generateAllLanguageResources = () => {
         formTemplate: "Choisir un modèle de formulaire contre lequel vos documents doivent être comparés",
         documentOutline: "Sélectionner une structure de plan pour générer votre rapport",
         allUsersToggle: "Basculer entre l'affichage de votre historique uniquement ou de l'historique de tous les utilisateurs",
-        handwrittenToggle: "Activer le traitement OCR pour les documents manuscrits ou de texte de faible qualité",
+
         createChecklist: "Créer une nouvelle liste de contrôle avec des questions personnalisées pour évaluer les documents selon des critères spécifiques",
         createOutline: "Créer une nouvelle structure de plan pour guider la génération de rapports structurés",
         createTopicList: "Créer une nouvelle liste de sujets pour concentrer l'analyse de comparaison sur des thèmes spécifiques",
@@ -1530,7 +1530,7 @@ const generateAllLanguageResources = () => {
         deleteChecklist: "Supprimer la Liste de Contrôle",
         dropFilesHere: "Déposez les fichiers ici",
         uploadedFiles: "Fichiers Téléchargés",
-        handwritten: "Manuscrit",
+
         removeFile: "Supprimer",
         characterCount: "{{count}}/2000 caractères. Ces instructions seront ajoutées à chaque question lors du traitement.",
         searchMode: "Mode de Recherche",
@@ -2133,7 +2133,7 @@ const generateAllLanguageResources = () => {
         formTemplate: "Wählen Sie eine Formularvorlage, gegen die Ihre Dokumente abgeglichen werden sollen",
         documentOutline: "Wählen Sie eine Gliederungsstruktur für die Erstellung Ihres Berichts",
         allUsersToggle: "Zwischen der Anzeige nur Ihrer Historie oder der Historie aller Benutzer wechseln",
-        handwrittenToggle: "OCR-Verarbeitung für handgeschriebene oder qualitativ schlechte Textdokumente aktivieren",
+
         createChecklist: "Erstellen Sie eine neue Checkliste mit benutzerdefinierten Fragen zur Bewertung von Dokumenten anhand spezifischer Kriterien",
         createOutline: "Erstellen Sie eine neue Gliederungsstruktur zur Anleitung der Erstellung strukturierter Berichte",
         createTopicList: "Erstellen Sie eine neue Themenliste, um die Vergleichsanalyse auf spezifische Themen zu fokussieren",
@@ -2191,7 +2191,7 @@ const generateAllLanguageResources = () => {
         deleteChecklist: "Checkliste löschen",
         dropFilesHere: "Dateien hier ablegen",
         uploadedFiles: "Hochgeladene Dateien",
-        handwritten: "Handgeschrieben",
+
         removeFile: "Entfernen",
         characterCount: "{{count}}/2000 Zeichen. Diese Anweisungen werden bei der Verarbeitung an jede Frage angehängt.",
         searchMode: "Suchmodus",
@@ -2748,7 +2748,7 @@ const generateAllLanguageResources = () => {
         formTemplate: "Scegli un modello di modulo con cui i tuoi documenti dovrebbero essere abbinati",
         documentOutline: "Seleziona una struttura di schema per generare il tuo report",
         allUsersToggle: "Alterna tra visualizzare solo la tua cronologia o quella di tutti gli utenti",
-        handwrittenToggle: "Abilita l'elaborazione OCR per documenti scritti a mano o con testo di bassa qualità",
+
         createChecklist: "Crea una nuova checklist con domande personalizzate per valutare documenti contro criteri specifici",
         createOutline: "Crea una nuova struttura di schema per guidare la generazione di report strutturati",
         createTopicList: "Crea un nuovo elenco di argomenti per focalizzare l'analisi di confronto su soggetti o temi specifici",
@@ -2815,7 +2815,7 @@ const generateAllLanguageResources = () => {
         deleteChecklist: "Elimina Checklist",
         dropFilesHere: "Rilascia i file qui",
         uploadedFiles: "File Caricati",
-        handwritten: "Scritto a mano",
+
         removeFile: "Rimuovi",
         characterCount: "{{count}}/2000 caratteri. Queste istruzioni verranno aggiunte a ogni domanda durante l'elaborazione.",
         searchMode: "Modalità di Ricerca",
@@ -3371,7 +3371,7 @@ const generateAllLanguageResources = () => {
         formTemplate: "Escolha um modelo de formulário com o qual seus documentos devem ser combinados",
         documentOutline: "Selecione uma estrutura de esboço para gerar seu relatório",
         allUsersToggle: "Alternar entre visualizar apenas seu histórico ou o histórico de todos os usuários",
-        handwrittenToggle: "Habilitar processamento OCR para documentos manuscritos ou de texto de baixa qualidade",
+
         createChecklist: "Criar uma nova lista de verificação com perguntas personalizadas para avaliar documentos contra critérios específicos",
         createOutline: "Criar uma nova estrutura de esboço para orientar a geração de relatórios estruturados",
         createTopicList: "Criar uma nova lista de tópicos para focar a análise de comparação em assuntos ou temas específicos",
@@ -3953,7 +3953,7 @@ const generateAllLanguageResources = () => {
         formTemplate: "Выберите шаблон формы, с которым должны быть сопоставлены ваши документы",
         documentOutline: "Выберите структуру плана для генерации вашего отчета",
         allUsersToggle: "Переключение между просмотром только вашей истории или истории всех пользователей",
-        handwrittenToggle: "Включить обработку OCR для рукописных документов или документов с низким качеством текста",
+
         createChecklist: "Создать новый контрольный список с пользовательскими вопросами для оценки документов против конкретных критериев",
         createOutline: "Создать новую структуру плана для руководства генерацией структурированных отчетов",
         createTopicList: "Создать новый список тем для фокусировки анализа сравнения на конкретных предметах или темах",
@@ -4020,7 +4020,7 @@ const generateAllLanguageResources = () => {
         deleteChecklist: "Удалить Контрольный Список",
         dropFilesHere: "Перетащите файлы сюда",
         uploadedFiles: "Загруженные Файлы",
-        handwritten: "Рукописный",
+
         removeFile: "Удалить",
         characterCount: "{{count}}/2000 символов. Эти инструкции будут добавлены к каждому вопросу при обработке.",
         searchMode: "Режим Поиска",
@@ -4526,7 +4526,7 @@ const generateAllLanguageResources = () => {
         formTemplate: "选择您的文档应该与之匹配的表单模板",
         documentOutline: "选择用于生成报告的大纲结构",
         allUsersToggle: "在仅查看您的历史记录或所有用户的历史记录之间切换",
-        handwrittenToggle: "为手写或低质量文本文档启用OCR处理",
+
         createChecklist: "创建新的检查清单，包含自定义问题以根据特定标准评估文档",
         createOutline: "创建新的大纲结构以指导结构化报告的生成",
         createTopicList: "创建新的主题列表以将比较分析集中在特定主题或主题上",
@@ -4593,7 +4593,7 @@ const generateAllLanguageResources = () => {
         deleteChecklist: "删除检查清单",
         dropFilesHere: "将文件拖放到此处",
         uploadedFiles: "已上传文件",
-        handwritten: "手写",
+
         removeFile: "删除",
         characterCount: "{{count}}/2000个字符。这些说明将在处理时附加到每个问题。",
         searchMode: "搜索模式",
@@ -5120,7 +5120,7 @@ const generateAllLanguageResources = () => {
         deleteChecklist: "チェックリストを削除",
         dropFilesHere: "ファイルをここにドロップ",
         uploadedFiles: "アップロードされたファイル",
-        handwritten: "手書き",
+
         removeFile: "削除",
         characterCount: "{{count}}/2000文字。これらの指示は処理時に各質問に追加されます。",
         searchMode: "検索モード",
@@ -5528,7 +5528,7 @@ const generateAllLanguageResources = () => {
         deleteChecklist: "Видалити Контрольний Список",
         dropFilesHere: "Перетягніть файли сюди",
         uploadedFiles: "Завантажені Файли",
-        handwritten: "Рукописний",
+
         removeFile: "Видалити",
         characterCount: "{{count}}/2000 символів. Ці інструкції будуть додані до кожного питання під час обробки.",
         searchMode: "Режим Пошуку",
@@ -5888,7 +5888,7 @@ const generateAllLanguageResources = () => {
         deleteChecklist: "Usuń Listę Kontrolną",
         dropFilesHere: "Upuść pliki tutaj",
         uploadedFiles: "Przesłane Pliki",
-        handwritten: "Odręczny",
+
         removeFile: "Usuń",
         characterCount: "{{count}}/2000 znaków. Te instrukcje będą dołączone do każdego pytania podczas przetwarzania.",
         searchMode: "Tryb Wyszukiwania",
@@ -6296,7 +6296,7 @@ const generateAllLanguageResources = () => {
         deleteChecklist: "Checklist Verwijderen",
         dropFilesHere: "Sleep de bestanden hierheen",
         uploadedFiles: "Geüploade Bestanden",
-        handwritten: "Handgeschreven",
+
         removeFile: "Verwijder",
         characterCount: "{{count}}/2000 tekens. Deze instructies worden toegevoegd aan elke vraag tijdens verwerking.",
         searchMode: "Zoek Modus",
@@ -6740,7 +6740,7 @@ const generateAllLanguageResources = () => {
         deleteChecklist: "체크리스트 삭제",
         dropFilesHere: "파일을 여기에 드롭하세요",
         uploadedFiles: "업로드된 파일",
-        handwritten: "손글씨",
+
         removeFile: "제거",
         characterCount: "{{count}}/2000자. 이 지시사항은 처리 시 각 질문에 추가됩니다.",
         searchMode: "검색 모드",
@@ -7297,7 +7297,7 @@ const generateAllLanguageResources = () => {
         deleteChecklist: "حذف قائمة المراجعة",
         dropFilesHere: "اسقط الملفات هنا",
         uploadedFiles: "الملفات المرفوعة",
-        handwritten: "مكتوب بخط اليد",
+
         removeFile: "إزالة",
         characterCount: "{{count}}/2000 حرف. ستُضاف هذه التعليمات إلى كل سؤال أثناء المعالجة.",
         searchMode: "وضع البحث",
@@ -7668,7 +7668,7 @@ const generateAllLanguageResources = () => {
         deleteChecklist: "चेकलिस्ट हटाएं",
         dropFilesHere: "फाइलों को यहाँ छोड़ें",
         uploadedFiles: "अपलोड की गई फाइलें",
-        handwritten: "हस्तलिखित",
+
         removeFile: "हटाएं",
         characterCount: "{{count}}/2000 अक्षर। ये निर्देश प्रसंस्करण के दौरान प्रत्येक प्रश्न के साथ जोड़े जाएंगे।",
         searchMode: "खोज मोड",

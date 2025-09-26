@@ -639,3 +639,90 @@ def record_llm_interaction(
     session.commit()
     print(f"[DEBUG] Interaction saved successfully with id: {interaction.id}")
     return interaction.id
+
+
+def invoke_llm_with_images(llm, prompt, variables=None, images_list=None):
+    """
+    Enhanced function to invoke an LLM with multiple images (for multimodal models).
+
+    Args:
+        llm: The LLM instance to use
+        prompt: The prompt template string
+        variables: Dictionary of variables to substitute in the prompt
+        images_list: List of base64-encoded images
+
+    Returns:
+        The LLM response content
+    """
+    from langchain_core.messages import HumanMessage
+    from langchain.prompts import ChatPromptTemplate
+    import traceback
+
+    # First, prepare the text content properly
+    if variables is None:
+        variables = {}
+
+    if images_list is None:
+        images_list = []
+
+    # Format the text content based on prompt type and variables
+    if isinstance(prompt, str):
+        text_content = prompt.format(**variables) if variables else prompt
+    else:
+        text_content = str(prompt)
+
+    # For Replicate models, use fallback to text-only
+    if hasattr(llm, "__class__") and "ReplicateWrapper" in llm.__class__.__name__:
+        print("Using ReplicateWrapper for multimodal LLM invocation")
+        print("WARNING: Replicate models may not support multiple image processing")
+
+        # Fall back to text-only prompt
+        try:
+            response_text = llm.invoke(text_content)
+            return response_text
+        except Exception as e:
+            print(f"Error with Replicate image extraction: {e}")
+            return f"Error processing images with Replicate: {str(e)}"
+
+    # For LangChain models that support images
+    else:
+        print(
+            f"Using LangChain-based LLM for multimodal invocation with {len(images_list)} images"
+        )
+
+        try:
+            # Create the message content with text and multiple images
+            content_parts = [{"type": "text", "text": text_content}]
+
+            # Add each image to the content
+            for i, image_b64 in enumerate(images_list):
+                content_parts.append(
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/png;base64,{image_b64}"},
+                    }
+                )
+
+            # Create the message
+            message = HumanMessage(content=content_parts)
+
+            print(
+                f"Invoking LLM with {len(content_parts)} content parts (1 text + {len(images_list)} images)"
+            )
+
+            # Call the LLM with image capability
+            response = llm.invoke([message])
+
+            print("Successfully received response from multimodal LLM")
+
+            # Extract content from the response object
+            if hasattr(response, "content"):
+                return response.content
+
+            # Otherwise return the string representation
+            return str(response)
+
+        except Exception as e:
+            print(f"Error using LangChain for multiple images: {str(e)}")
+            print(traceback.format_exc())
+            return f"Error processing multiple images: {str(e)}"

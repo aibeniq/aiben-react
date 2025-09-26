@@ -219,7 +219,6 @@ async def process_rag_checklist(
     current_user: CurrentUser,
     request_data: RagChecklistRequest = Depends(),
     files: List[UploadFile] = File(None),
-    handwritten_files: List[UploadFile] = File(None),
     request: FastAPIRequest = None,
 ):
     """
@@ -238,10 +237,8 @@ async def process_rag_checklist(
     if not request_data.questions or not request_data.questions.strip():
         raise HTTPException(status_code=400, detail="Questions are required")
 
-    # Check for at least one file in either files or handwritten_files
-    total_files = (len(files) if files else 0) + (
-        len(handwritten_files) if handwritten_files else 0
-    )
+    # Check for at least one file
+    total_files = len(files) if files else 0
     if total_files == 0:
         raise HTTPException(status_code=400, detail="At least one file is required")
 
@@ -530,6 +527,11 @@ async def process_rag_checklist(
             llm = get_default_llm(session, current_user)
             print("LLM successfully loaded.")
 
+            # Check if LLM supports vision
+            from app.services.vision_service import VisionService
+
+            vision_enabled = VisionService.is_vision_enabled(llm)
+
             # 5. Define the prompts for the different stages
             context_prompt_template = settings.VERADOC_CONTEXT_PROMPT_TEMPLATE
             qa_prompt_template = settings.VERADOC_QA_PROMPT_TEMPLATE
@@ -561,24 +563,12 @@ async def process_rag_checklist(
                     if q.strip()
                 ]
 
-            # Get file content - process both regular and handwritten files
-            all_files_to_process = []
+            # Get file content with unified processing
+            if not files or not files[0].filename:
+                raise HTTPException(status_code=400, detail="No valid file provided")
 
-            # Add regular files
-            if files:
-                for file in files:
-                    if file.filename:
-                        all_files_to_process.append((file, "digitized"))
-
-            # Add handwritten files
-            if handwritten_files:
-                for file in handwritten_files:
-                    if file.filename:
-                        all_files_to_process.append((file, "handwritten"))
-
-            # For now, process the first file (can be extended to handle multiple files)
-            file, file_type = all_files_to_process[0]
-            print(f"Processing {file_type} file: {file.filename}")
+            file = files[0]
+            print(f"Processing file with unified visual enhancement: {file.filename}")
 
             try:
                 content = await file.read()
@@ -603,23 +593,47 @@ async def process_rag_checklist(
                     disconnect_monitor = None
                     cancellation_requested = False  # Reset any false positive
 
-                # Extract text using the async extraction function
-                if file_type == "handwritten":
-                    print(f"Processing handwritten file with OCR: {file.filename}")
-                    document_text = await extract_text_from_file_async(
-                        content, file.filename
-                    )
-                else:
-                    print(f"Processing digitized file: {file.filename}")
-                    document_text = await extract_text_from_file_async(
-                        content, file.filename
-                    )
+                # Extract text using unified processing
+                print(f"Processing file with unified text extraction: {file.filename}")
+                document_text = await extract_text_from_file_async(
+                    content, file.filename
+                )
 
+                # Extract images if vision is enabled (do this early so we can use as fallback)
+                document_images = []
+                if vision_enabled:
+                    try:
+                        from app.services.document_utils import (
+                            extract_documents_and_images_from_file_unified,
+                        )
+
+                        _, document_images = (
+                            extract_documents_and_images_from_file_unified(
+                                content, file.filename
+                            )
+                        )
+                        print(
+                            f"Extracted {len(document_images)} images from {file.filename}"
+                        )
+                    except Exception as img_error:
+                        print(
+                            f"Warning: Could not extract images from {file.filename}: {img_error}"
+                        )
+
+                # Handle case where no text was extracted
                 if not document_text or document_text.strip() == "":
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"Could not extract text from file {file.filename}",
-                    )
+                    # If vision is enabled and we have images, use vision as fallback
+                    if vision_enabled and document_images:
+                        print(
+                            f"No text extracted from {file.filename}, but {len(document_images)} images found. Using vision analysis as fallback."
+                        )
+                        # Create placeholder text for image-only document
+                        document_text = f"This document ({file.filename}) contains images but no extractable text. Vision analysis will be used to answer questions about the visual content."
+                    else:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"Could not extract text from file {file.filename}",
+                        )
 
                 print(f"Extracted {len(document_text)} characters from {file.filename}")
 
@@ -899,6 +913,7 @@ async def process_rag_checklist(
                     )
 
                     try:
+                        # Generate text-based answer
                         answer = invoke_llm(
                             llm,
                             qa_prompt_template,
@@ -909,7 +924,76 @@ async def process_rag_checklist(
                                 "custom_instructions_section": custom_instructions_section,
                             },
                         )
-                        print(f"Got answer: {answer[:100]}...")
+                        print(f"Got text answer: {answer[:100]}...")
+
+                        # Add vision analysis if images exist and LLM supports it
+                        if vision_enabled and document_images:
+                            print(
+                                f"Adding vision analysis for question: {question_text[:50]}..."
+                            )
+
+                            # Prepare images for processing
+                            image_data_list = []
+                            for idx, img_b64 in enumerate(document_images):
+                                image_data_list.append(
+                                    {
+                                        "image_data": img_b64,
+                                        "source_file": file.filename,
+                                        "image_index": idx,
+                                        "metadata": {"extracted_from": file.filename},
+                                    }
+                                )
+
+                            try:
+                                vision_variables = {
+                                    "question": question_text,
+                                    "filename": file.filename,
+                                    "custom_instructions": (
+                                        request_data.custom_instructions
+                                        if hasattr(request_data, "custom_instructions")
+                                        else ""
+                                    ),
+                                }
+
+                                vision_analysis = await VisionService.process_images_with_prompt(
+                                    llm=llm,
+                                    images=image_data_list,
+                                    prompt_template=settings.VERADOC_VISION_PROMPT_TEMPLATE,
+                                    variables=vision_variables,
+                                )
+
+                                # Translate vision analysis if needed
+                                vision_analysis = await translate_text_if_needed(
+                                    vision_analysis, session, current_user, llm
+                                )
+
+                                # Combine text and vision analysis
+                                # If we have placeholder text (image-only document), prioritize vision
+                                if (
+                                    "contains images but no extractable text"
+                                    in document_text
+                                    and len(document_text) < 200
+                                ):
+                                    # For image-only documents, use vision-primary combination
+                                    combined_answer = f"## Visual Analysis\n{vision_analysis}\n\n## Document Note\nThis analysis is based on visual content as the document contains images but no extractable text."
+                                else:
+                                    # Normal text + vision combination
+                                    combined_answer = (
+                                        VisionService.combine_text_and_vision_analysis(
+                                            answer, vision_analysis, "comprehensive"
+                                        )
+                                    )
+
+                                answer = combined_answer
+                                print(
+                                    f"Combined answer with vision analysis: {answer[:100]}..."
+                                )
+
+                            except Exception as vision_error:
+                                print(
+                                    f"Vision analysis error for question '{question_text[:50]}...': {vision_error}"
+                                )
+                                # Continue with text-only answer
 
                         # Translate the answer if needed
                         answer = await translate_text_if_needed(
@@ -2091,69 +2175,25 @@ async def generate_questions_with_files(
             for file in files:
                 if file.size > 0:
                     try:
-                        # Read and process the file content
+                        # Read and process the file content with visual enhancement
                         file_content = await file.read()
-                        filename = file.filename.lower() if file.filename else ""
 
-                        if file.content_type == "application/pdf" or filename.endswith(
-                            ".pdf"
-                        ):
-                            # Extract text from PDF using pypdf (BSD license)
-                            with tempfile.NamedTemporaryFile(
-                                delete=False, suffix=".pdf"
-                            ) as temp_file:
-                                temp_file.write(file_content)
-                                temp_file_path = temp_file.name
+                        # Use enhanced processing with vision capabilities
+                        from app.services.document_utils import (
+                            extract_text_with_vision_enhancement,
+                        )
 
-                            try:
-                                documents = load_pdf_with_pypdf(
-                                    temp_file_path, file.filename
-                                )
-                                file_text = "\n\n".join(
-                                    [doc.page_content for doc in documents]
-                                )
-                            finally:
-                                os.unlink(temp_file_path)
-                        elif (
-                            file.content_type
-                            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                            or filename.endswith((".docx", ".doc"))
-                        ):
-                            # Extract text from DOCX/DOC files
-                            from docx import Document
-                            from io import BytesIO
-
-                            # Create a BytesIO object from the file content
-                            doc_stream = BytesIO(file_content)
-                            doc = Document(doc_stream)
-
-                            # Extract text from all paragraphs
-                            doc_text_parts = []
-                            for paragraph in doc.paragraphs:
-                                if paragraph.text.strip():
-                                    doc_text_parts.append(paragraph.text.strip())
-
-                            file_text = "\n".join(doc_text_parts)
-                            print(
-                                f"Successfully extracted text from DOCX: {len(file_text)} characters"
-                            )
-
-                        elif file.content_type == "text/plain" or filename.endswith(
-                            (".txt", ".md")
-                        ):
-                            # Handle text file
-                            file_text = file_content.decode("utf-8", errors="ignore")
-                        else:
-                            # For unknown file types, try to decode as text but warn about it
-                            print(
-                                f"Warning: Unknown file type for {file.filename} (content-type: {file.content_type}), attempting text decode"
-                            )
-                            file_text = file_content.decode("utf-8", errors="ignore")
+                        file_text = await extract_text_with_vision_enhancement(
+                            file_content,
+                            file.filename or "unknown",
+                            llm,
+                            purpose="checklist question generation",
+                        )
 
                         if file_text.strip():
                             reference_document_content += f"\n\n--- Content from {file.filename} ---\n{file_text.strip()}"
                             print(
-                                f"Extracted {len(file_text)} characters from {file.filename}"
+                                f"Extracted {len(file_text)} characters from {file.filename} (with vision enhancement)"
                             )
 
                     except Exception as e:
