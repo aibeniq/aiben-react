@@ -738,14 +738,16 @@ async def extract_text_with_vision_enhancement(
         print(f"ℹ️ Vision not enabled, using text-only extraction for {filename}")
         return text_content
 
-    # Only try vision enhancement for PDFs (most likely to have embedded images)
-    if file_ext != ".pdf":
-        print(f"ℹ️ File {filename} is not a PDF, skipping vision enhancement")
+    # Try vision enhancement for PDFs and DOCX files (both can contain images)
+    if file_ext not in [".pdf", ".docx"]:
+        print(
+            f"ℹ️ File {filename} format doesn't support embedded images, skipping vision enhancement"
+        )
         return text_content
 
-    # Try to extract images from PDF
+    # Try to extract images from PDF or DOCX
     try:
-        print(f"🖼️ Attempting to extract images from PDF: {filename}")
+        print(f"🖼️ Attempting to extract images from {file_ext.upper()}: {filename}")
         _, document_images = extract_documents_and_images_from_file_unified(
             file_content, filename
         )
