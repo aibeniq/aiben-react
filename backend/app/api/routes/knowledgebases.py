@@ -105,47 +105,57 @@ def check_memory_availability():
 
 def create_streaming_zip_from_directory(source_dir: str, temp_file_path: str):
     """Create ZIP file using streaming to avoid loading entire ZIP into memory."""
-    _, size_mb = MemoryManager.create_streaming_zip_from_directory(source_dir, temp_file_path)
+    _, size_mb = MemoryManager.create_streaming_zip_from_directory(
+        source_dir, temp_file_path
+    )
     return size_mb
 
 
 def read_file_with_memory_management(file_path: str) -> bytes:
     """Read file with memory management based on available memory and file size."""
     from app.core.config import settings
-    
+
     file_size_mb = os.path.getsize(file_path) / 1024 / 1024
     memory_info = MemoryManager.get_memory_info()
-    available_memory_mb = memory_info['system_available_mb']
-    current_usage_percent = memory_info['system_memory_percent']
-    
-    print(f"File size: {file_size_mb:.1f}MB, Available memory: {available_memory_mb:.1f}MB, Current usage: {current_usage_percent:.1f}%")
-    
+    available_memory_mb = memory_info["system_available_mb"]
+    current_usage_percent = memory_info["system_memory_percent"]
+
+    print(
+        f"File size: {file_size_mb:.1f}MB, Available memory: {available_memory_mb:.1f}MB, Current usage: {current_usage_percent:.1f}%"
+    )
+
     # More conservative memory management to prevent crashes
     # Use chunked reading if:
     # 1. File is larger than configured threshold, OR
     # 2. File is more than 20% of available memory (reduced from 30%), OR
     # 3. Current memory usage is already high (>60%)
-    
+
     should_use_chunked = (
-        file_size_mb > settings.KB_MAX_IN_MEMORY_SIZE_MB or
-        file_size_mb > available_memory_mb * settings.KB_MEMORY_SAFETY_THRESHOLD or
-        current_usage_percent > settings.KB_HIGH_MEMORY_USAGE_THRESHOLD
+        file_size_mb > settings.KB_MAX_IN_MEMORY_SIZE_MB
+        or file_size_mb > available_memory_mb * settings.KB_MEMORY_SAFETY_THRESHOLD
+        or current_usage_percent > settings.KB_HIGH_MEMORY_USAGE_THRESHOLD
     )
-    
+
     if should_use_chunked:
         reason = []
         if file_size_mb > settings.KB_MAX_IN_MEMORY_SIZE_MB:
-            reason.append(f"exceeds size threshold ({settings.KB_MAX_IN_MEMORY_SIZE_MB}MB)")
+            reason.append(
+                f"exceeds size threshold ({settings.KB_MAX_IN_MEMORY_SIZE_MB}MB)"
+            )
         if file_size_mb > available_memory_mb * settings.KB_MEMORY_SAFETY_THRESHOLD:
-            reason.append(f"exceeds {settings.KB_MEMORY_SAFETY_THRESHOLD*100:.0f}% of available memory")
+            reason.append(
+                f"exceeds {settings.KB_MEMORY_SAFETY_THRESHOLD*100:.0f}% of available memory"
+            )
         if current_usage_percent > settings.KB_HIGH_MEMORY_USAGE_THRESHOLD:
             reason.append(f"high current memory usage ({current_usage_percent:.1f}%)")
-            
+
         print(f"Using memory-safe reading because file {', '.join(reason)}")
         return read_file_in_chunks(file_path, settings.KB_STREAM_CHUNK_SIZE_MB)
     else:
         # Read normally for small files with low memory usage
-        print(f"Small file ({file_size_mb:.1f}MB) with sufficient memory - loading normally")
+        print(
+            f"Small file ({file_size_mb:.1f}MB) with sufficient memory - loading normally"
+        )
         with open(file_path, "rb") as f:
             return f.read()
 
@@ -155,13 +165,19 @@ def read_file_in_chunks(file_path: str, chunk_size_mb: int = 8) -> bytes:
     # For files that would cause memory issues with chunked approach,
     # read directly without intermediate storage
     file_size_mb = os.path.getsize(file_path) / 1024 / 1024
-    available_memory_mb = MemoryManager.get_memory_info()['system_available_mb']
-    
-    print(f"Reading file in memory-safe mode: {file_size_mb:.1f}MB file, {available_memory_mb:.1f}MB available")
-    
+    available_memory_mb = MemoryManager.get_memory_info()["system_available_mb"]
+
+    print(
+        f"Reading file in memory-safe mode: {file_size_mb:.1f}MB file, {available_memory_mb:.1f}MB available"
+    )
+
     # If file is very large relative to available memory, use direct reading
-    if file_size_mb > available_memory_mb * 0.4:  # File is more than 40% of available memory
-        print(f"Large file detected - using direct file reading to avoid memory doubling")
+    if (
+        file_size_mb > available_memory_mb * 0.4
+    ):  # File is more than 40% of available memory
+        print(
+            f"Large file detected - using direct file reading to avoid memory doubling"
+        )
         try:
             with open(file_path, "rb") as f:
                 file_data = f.read()
@@ -169,15 +185,18 @@ def read_file_in_chunks(file_path: str, chunk_size_mb: int = 8) -> bytes:
             return file_data
         except MemoryError:
             # Fallback: Try to use OS-level file operations or streaming
-            print("Direct reading failed due to memory constraints, using minimal chunking...")
+            print(
+                "Direct reading failed due to memory constraints, using minimal chunking..."
+            )
             return _read_file_with_minimal_memory_footprint(file_path)
-            
+
     # For medium-sized files, use optimized chunking that minimizes peak memory
     chunk_size_bytes = chunk_size_mb * 1024 * 1024
-    
+
     try:
         # Use a memory-mapped approach for better efficiency
         import mmap
+
         try:
             with open(file_path, "rb") as f:
                 with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
@@ -191,7 +210,7 @@ def read_file_in_chunks(file_path: str, chunk_size_mb: int = 8) -> bytes:
                 data = f.read()
             print(f"Successfully read {file_size_mb:.1f}MB file using direct reading")
             return data
-            
+
     except Exception as e:
         print(f"Error reading file: {e}")
         raise
@@ -200,16 +219,16 @@ def read_file_in_chunks(file_path: str, chunk_size_mb: int = 8) -> bytes:
 def _read_file_with_minimal_memory_footprint(file_path: str) -> bytes:
     """Fallback method for reading very large files with minimal memory usage."""
     print("Using minimal memory footprint reading strategy...")
-    
+
     # Create a temporary file to rebuild the data in smaller chunks
     try:
         import tempfile
-        
+
         # Use a temporary file as intermediate storage to avoid memory accumulation
         with tempfile.NamedTemporaryFile() as temp_file:
             chunk_size = 4 * 1024 * 1024  # 4MB chunks
             total_bytes = 0
-            
+
             with open(file_path, "rb") as source_file:
                 while True:
                     chunk = source_file.read(chunk_size)
@@ -217,19 +236,21 @@ def _read_file_with_minimal_memory_footprint(file_path: str) -> bytes:
                         break
                     temp_file.write(chunk)
                     total_bytes += len(chunk)
-                    
+
                     # Log progress
                     if total_bytes % (32 * 1024 * 1024) == 0:  # Every 32MB
                         print(f"Processed {total_bytes // 1024 // 1024}MB...")
                         gc.collect()
-            
+
             # Now read the temporary file in one go
             temp_file.seek(0)
             result = temp_file.read()
-            
-        print(f"Successfully read {total_bytes // 1024 // 1024}MB file using minimal memory approach")
+
+        print(
+            f"Successfully read {total_bytes // 1024 // 1024}MB file using minimal memory approach"
+        )
         return result
-        
+
     except Exception as e:
         print(f"Minimal memory approach failed: {e}")
         # Final fallback - direct reading and hope for the best
@@ -688,11 +709,33 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
             with open(temp_file_path, "rb") as f:
                 file_content = f.read()
 
-            from app.services.document_utils import extract_documents_from_file_unified
+            from app.services.document_utils import (
+                extract_documents_from_file_unified,
+                extract_documents_and_images_from_file_unified,
+                ensure_documents_for_vector_search,
+            )
 
+            # First try regular document extraction
             loaded_documents = extract_documents_from_file_unified(
                 file_content, file.filename
             )
+
+            # If no documents, try enhanced extraction with images
+            if not loaded_documents or all(
+                not doc.page_content.strip() for doc in loaded_documents
+            ):
+                print(
+                    f"No text content found in {file.filename}, trying enhanced extraction..."
+                )
+                documents, images = extract_documents_and_images_from_file_unified(
+                    file_content, file.filename
+                )
+
+                # Use resilient document creation to ensure we have something for vector search
+                loaded_documents = ensure_documents_for_vector_search(
+                    documents, images, file.filename
+                )
+                print(f"Enhanced extraction created {len(loaded_documents)} documents")
         else:
             print("Loading text with TextLoader...")
             # Try with different encodings if utf-8 fails
@@ -1147,16 +1190,38 @@ async def process_knowledge_base_creation(
                         # Monitor memory during embedding creation
                         pre_embed_memory = get_memory_usage_mb()
 
+                        # Ensure chunk is not empty before processing
+                        valid_documents = [
+                            doc for doc in chunk if doc.page_content.strip()
+                        ]
+                        if not valid_documents:
+                            print(
+                                f"Chunk {i+1} contains no valid documents, skipping..."
+                            )
+                            continue
+
                         if chroma_db is None:
                             # Initialize Chroma database with first chunk
-                            chroma_db = Chroma.from_documents(
-                                documents=chunk,
-                                embedding=embeddings,
-                                persist_directory=chroma_dir,
-                            )
+                            try:
+                                chroma_db = Chroma.from_documents(
+                                    documents=valid_documents,
+                                    embedding=embeddings,
+                                    persist_directory=chroma_dir,
+                                )
+                            except Exception as e:
+                                print(f"Error creating Chroma database: {e}")
+                                raise HTTPException(
+                                    status_code=500,
+                                    detail=f"Failed to create vector database: {str(e)}",
+                                )
                         else:
                             # Add subsequent chunks to existing database
-                            chroma_db.add_documents(documents=chunk)
+                            try:
+                                chroma_db.add_documents(documents=valid_documents)
+                            except Exception as e:
+                                print(f"Error adding documents to Chroma database: {e}")
+                                # Continue with other chunks instead of failing completely
+                                continue
 
                         post_embed_memory = get_memory_usage_mb()
                         print(
@@ -1166,24 +1231,30 @@ async def process_knowledge_base_creation(
                         # Enhanced memory management with more aggressive cleanup
                         memory_increase = post_embed_memory - pre_embed_memory
                         memory_percent = psutil.virtual_memory().percent
-                        
+
                         if memory_percent > 80:  # Critical memory usage
-                            print(f"Critical memory usage: {memory_percent:.1f}%, forcing cleanup")
+                            print(
+                                f"Critical memory usage: {memory_percent:.1f}%, forcing cleanup"
+                            )
                             gc.collect()
                             await asyncio.sleep(2.0)
                         elif memory_increase > 200:  # Large memory increase
-                            print(f"Large memory increase detected: +{memory_increase:.1f}MB")
+                            print(
+                                f"Large memory increase detected: +{memory_increase:.1f}MB"
+                            )
                             gc.collect()
                             await asyncio.sleep(1.0)
                         elif i < len(document_chunks) - 1:
                             await asyncio.sleep(0.3)
-                            
+
                         # Additional memory check - stop if memory is critically low
                         if memory_percent > 90:
-                            print("CRITICAL: Memory usage above 90%, stopping processing")
+                            print(
+                                "CRITICAL: Memory usage above 90%, stopping processing"
+                            )
                             raise HTTPException(
                                 status_code=507,
-                                detail="Insufficient memory to continue processing. Please try with smaller batch or upgrade instance."
+                                detail="Insufficient memory to continue processing. Please try with smaller batch or upgrade instance.",
                             )
 
                     # Persist the database
@@ -1211,15 +1282,17 @@ async def process_knowledge_base_creation(
                     # Check memory availability before compression
                     check_memory_availability()
                     log_memory_usage("before compression")
-                    
+
                     print("Compressing Chroma database with streaming...")
                     # Create ZIP file directly on disk to avoid memory overflow
                     temp_zip_fd, temp_zip_path = tempfile.mkstemp(suffix=".zip")
                     os.close(temp_zip_fd)  # Close file descriptor, but keep path
-                    
-                    zip_size_mb = create_streaming_zip_from_directory(chroma_dir, temp_zip_path)
+
+                    zip_size_mb = create_streaming_zip_from_directory(
+                        chroma_dir, temp_zip_path
+                    )
                     print(f"Created ZIP file: {zip_size_mb:.1f}MB")
-                    
+
                     log_memory_usage("after compression")
 
                     # Clean up the temporary chroma directory
@@ -1233,62 +1306,88 @@ async def process_knowledge_base_creation(
 
                 with error_recovery_context("knowledge base creation"):
                     print("Creating knowledge base record...")
-                    
+
                     # Decide storage strategy based on file size
-                    use_file_storage = zip_size_mb > settings.KB_USE_FILE_STORAGE_ABOVE_MB
-                    
+                    use_file_storage = (
+                        zip_size_mb > settings.KB_USE_FILE_STORAGE_ABOVE_MB
+                    )
+
                     if use_file_storage:
-                        print(f"Large file ({zip_size_mb:.1f}MB) - using file-based storage instead of database")
-                        
+                        print(
+                            f"Large file ({zip_size_mb:.1f}MB) - using file-based storage instead of database"
+                        )
+
                         # Move file to persistent storage
                         stored_file_path = MemoryManager.store_large_file(
-                            temp_zip_path, 
-                            str(knowledge_base.id), 
-                            settings.KB_FILE_STORAGE_PATH
+                            temp_zip_path,
+                            str(knowledge_base.id),
+                            settings.KB_FILE_STORAGE_PATH,
                         )
-                        
+
                         # Update knowledge base with file storage info
                         knowledge_base.file_path = stored_file_path
                         knowledge_base.storage_type = "file"
                         knowledge_base.data = None  # Don't store in database
-                        
+
                         print(f"Knowledge base stored as file: {stored_file_path}")
-                        
+
                     else:
-                        print(f"Small file ({zip_size_mb:.1f}MB) - using database storage")
-                        
+                        print(
+                            f"Small file ({zip_size_mb:.1f}MB) - using database storage"
+                        )
+
                         # Check memory availability before reading file for database storage
-                        available_memory = MemoryManager.get_memory_info()['system_available_mb']
-                        required_memory = zip_size_mb * 2  # Estimate 2x file size needed for safe operation
-                        
-                        print(f"Memory check: {zip_size_mb:.1f}MB file, {available_memory:.1f}MB available, {required_memory:.1f}MB required")
-                        
-                        if required_memory > available_memory * 0.7:  # Need more than 70% of available memory
-                            print(f"WARNING: Large file may cause memory issues. Using optimized reading strategy.")
+                        available_memory = MemoryManager.get_memory_info()[
+                            "system_available_mb"
+                        ]
+                        required_memory = (
+                            zip_size_mb * 2
+                        )  # Estimate 2x file size needed for safe operation
+
+                        print(
+                            f"Memory check: {zip_size_mb:.1f}MB file, {available_memory:.1f}MB available, {required_memory:.1f}MB required"
+                        )
+
+                        if (
+                            required_memory > available_memory * 0.7
+                        ):  # Need more than 70% of available memory
+                            print(
+                                f"WARNING: Large file may cause memory issues. Using optimized reading strategy."
+                            )
                             # Force garbage collection before large operation
                             gc.collect()
                             log_memory_usage("after pre-operation cleanup")
-                        
+
                         # Use memory-managed file reading with enhanced safety
-                        print(f"Reading ZIP file with memory management: {zip_size_mb:.1f}MB")
-                        knowledge_base.data = read_file_with_memory_management(temp_zip_path)
+                        print(
+                            f"Reading ZIP file with memory management: {zip_size_mb:.1f}MB"
+                        )
+                        knowledge_base.data = read_file_with_memory_management(
+                            temp_zip_path
+                        )
                         knowledge_base.storage_type = "database"
                         knowledge_base.file_path = None
-                    
+
                     knowledge_base.date_modified = datetime.utcnow()
                     log_memory_usage("after saving to database")
-                    
+
                     session.add(knowledge_base)
                     session.flush()
-                    
+
             except Exception as e:
                 # Clean up temporary ZIP file on error (only if not moved to persistent storage)
-                if not (hasattr(knowledge_base, 'storage_type') and knowledge_base.storage_type == "file"):
+                if not (
+                    hasattr(knowledge_base, "storage_type")
+                    and knowledge_base.storage_type == "file"
+                ):
                     MemoryManager.cleanup_temp_file(temp_zip_path, log_success=False)
                 raise e
             finally:
                 # Clean up temporary ZIP file only if using database storage
-                if not (hasattr(knowledge_base, 'storage_type') and knowledge_base.storage_type == "file"):
+                if not (
+                    hasattr(knowledge_base, "storage_type")
+                    and knowledge_base.storage_type == "file"
+                ):
                     MemoryManager.cleanup_temp_file(temp_zip_path)
 
             with error_recovery_context("source entries creation"):
@@ -1394,10 +1493,13 @@ async def update_knowledge_base(
             # Extract the zipped ChromaDB into the temp directory
             if knowledge_base.storage_type == "file" and knowledge_base.file_path:
                 # Read from file-based storage
-                print(f"Reading knowledge base from file storage: {knowledge_base.file_path}")
+                print(
+                    f"Reading knowledge base from file storage: {knowledge_base.file_path}"
+                )
                 if not os.path.exists(knowledge_base.file_path):
                     raise HTTPException(
-                        status_code=500, detail="Knowledge base file not found in storage"
+                        status_code=500,
+                        detail="Knowledge base file not found in storage",
                     )
                 with zipfile.ZipFile(knowledge_base.file_path, "r") as zip_ref:
                     zip_ref.extractall(chroma_dir)
@@ -1499,7 +1601,7 @@ async def update_knowledge_base(
             # Check memory availability before compression
             check_memory_availability()
             log_memory_usage("before update compression")
-            
+
             # Zip the updated VectorDB using streaming
             print("Compressing updated VectorDB with streaming...")
             temp_zip_path = None
@@ -1507,70 +1609,96 @@ async def update_knowledge_base(
                 # Create ZIP file directly on disk to avoid memory overflow
                 temp_zip_fd, temp_zip_path = tempfile.mkstemp(suffix=".zip")
                 os.close(temp_zip_fd)  # Close file descriptor, but keep path
-                
-                zip_size_mb = create_streaming_zip_from_directory(chroma_dir, temp_zip_path)
+
+                zip_size_mb = create_streaming_zip_from_directory(
+                    chroma_dir, temp_zip_path
+                )
                 print(f"Updated ZIP file: {zip_size_mb:.1f}MB")
-                
+
                 log_memory_usage("after update compression")
-                
+
                 # Decide storage strategy based on file size
                 use_file_storage = zip_size_mb > settings.KB_USE_FILE_STORAGE_ABOVE_MB
-                
+
                 if use_file_storage:
-                    print(f"Large update ({zip_size_mb:.1f}MB) - using file-based storage")
-                    
+                    print(
+                        f"Large update ({zip_size_mb:.1f}MB) - using file-based storage"
+                    )
+
                     # Clean up old file storage if it exists
-                    if knowledge_base.storage_type == "file" and knowledge_base.file_path:
+                    if (
+                        knowledge_base.storage_type == "file"
+                        and knowledge_base.file_path
+                    ):
                         MemoryManager.cleanup_stored_file(knowledge_base.file_path)
-                    
+
                     # Move file to persistent storage
                     stored_file_path = MemoryManager.store_large_file(
-                        temp_zip_path, 
-                        str(knowledge_base.id), 
-                        settings.KB_FILE_STORAGE_PATH
+                        temp_zip_path,
+                        str(knowledge_base.id),
+                        settings.KB_FILE_STORAGE_PATH,
                     )
-                    
+
                     # Update knowledge base with file storage info
                     knowledge_base.file_path = stored_file_path
                     knowledge_base.storage_type = "file"
                     knowledge_base.data = None  # Clear database storage
-                    
+
                     print(f"Updated knowledge base stored as file: {stored_file_path}")
-                    
+
                 else:
-                    print(f"Small update ({zip_size_mb:.1f}MB) - using database storage")
-                    
+                    print(
+                        f"Small update ({zip_size_mb:.1f}MB) - using database storage"
+                    )
+
                     # Clean up old file storage if switching from file to database
-                    if knowledge_base.storage_type == "file" and knowledge_base.file_path:
+                    if (
+                        knowledge_base.storage_type == "file"
+                        and knowledge_base.file_path
+                    ):
                         MemoryManager.cleanup_stored_file(knowledge_base.file_path)
                         knowledge_base.file_path = None
-                    
+
                     # Check memory availability before reading file for database storage
-                    available_memory = MemoryManager.get_memory_info()['system_available_mb']
+                    available_memory = MemoryManager.get_memory_info()[
+                        "system_available_mb"
+                    ]
                     required_memory = zip_size_mb * 2
-                    
-                    print(f"Memory check for update: {zip_size_mb:.1f}MB file, {available_memory:.1f}MB available, {required_memory:.1f}MB required")
-                    
+
+                    print(
+                        f"Memory check for update: {zip_size_mb:.1f}MB file, {available_memory:.1f}MB available, {required_memory:.1f}MB required"
+                    )
+
                     if required_memory > available_memory * 0.7:
-                        print(f"WARNING: Large file update may cause memory issues. Using optimized strategy.")
+                        print(
+                            f"WARNING: Large file update may cause memory issues. Using optimized strategy."
+                        )
                         gc.collect()
                         log_memory_usage("after pre-update cleanup")
-                    
-                    knowledge_base.data = read_file_with_memory_management(temp_zip_path)
+
+                    knowledge_base.data = read_file_with_memory_management(
+                        temp_zip_path
+                    )
                     knowledge_base.storage_type = "database"
-                
+
                 log_memory_usage("after updating database")
 
             except Exception as e:
                 # Clean up temporary ZIP file on error (only if not moved to persistent storage)
-                if temp_zip_path and not (hasattr(knowledge_base, 'storage_type') and knowledge_base.storage_type == "file"):
+                if temp_zip_path and not (
+                    hasattr(knowledge_base, "storage_type")
+                    and knowledge_base.storage_type == "file"
+                ):
                     MemoryManager.cleanup_temp_file(temp_zip_path, log_success=False)
                 raise e
             finally:
                 # Clean up temporary ZIP file only if using database storage
-                if temp_zip_path and not (hasattr(knowledge_base, 'storage_type') and knowledge_base.storage_type == "file"):
+                if temp_zip_path and not (
+                    hasattr(knowledge_base, "storage_type")
+                    and knowledge_base.storage_type == "file"
+                ):
                     MemoryManager.cleanup_temp_file(temp_zip_path)
-                        
+
         except Exception as e:
             # Clean up on error
             if os.path.exists(chroma_dir):
@@ -1625,12 +1753,12 @@ def delete_knowledge_base(
         raise HTTPException(status_code=404, detail="Knowledge base not found")
     if not current_user.is_superuser and (knowledge_base.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
-    
+
     # Clean up file-based storage if it exists
     if knowledge_base.storage_type == "file" and knowledge_base.file_path:
         print(f"Cleaning up file-based storage: {knowledge_base.file_path}")
         MemoryManager.cleanup_stored_file(knowledge_base.file_path)
-    
+
     session.delete(knowledge_base)
     session.commit()
     return Message(message="Knowledge base deleted successfully")

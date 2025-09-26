@@ -468,12 +468,9 @@ const VeraDoc = () => {
       return
     }
 
-    // Filter out placeholder files and separate into regular vs handwritten
+    // Filter out placeholder files
     const validItems = fileItems.filter((item) => item.file.size > 0)
-    const regularFiles = validItems.filter((item) => !item.isHandwritten).map((item) => item.file)
-    const handwrittenFiles = validItems
-      .filter((item) => item.isHandwritten)
-      .map((item) => item.file)
+    const files = validItems.map((item) => item.file)
 
     if (validItems.length < 1) {
       const errorResult = {
@@ -488,8 +485,8 @@ const VeraDoc = () => {
     const requestData = {
       questions: structuredQuestions.length > 0 ? JSON.stringify(structuredQuestions) : questions,
       knowledgeBaseId: selectedKnowledgeBase.id,
-      files: regularFiles,
-      handwrittenFiles: handwrittenFiles,
+      files: files,
+      handwrittenFiles: [], // Empty array for now
       customInstructions: customInstructions.trim() || undefined,
       searchMode: searchMode,
     }
@@ -569,17 +566,16 @@ const VeraDoc = () => {
         }
         const fileItem = fileItems[i]
 
-        // Separate files based on handwritten flag
-        const regularFiles = fileItem.isHandwritten ? [] : [fileItem.file]
-        const handwrittenFiles = fileItem.isHandwritten ? [fileItem.file] : []
+        // Process this file with unified approach
+        const files = [fileItem.file]
 
         // Process this file
         const requestData = {
           questions:
             structuredQuestions.length > 0 ? JSON.stringify(structuredQuestions) : questions,
           knowledgeBaseId: selectedKnowledgeBase.id,
-          files: regularFiles,
-          handwrittenFiles: handwrittenFiles,
+          files: files,
+          handwrittenFiles: [], // Empty array for now
           customInstructions: customInstructions.trim() || undefined,
           searchMode: searchMode,
         }
@@ -849,12 +845,7 @@ const VeraDoc = () => {
             />
 
             {/* File Upload Component */}
-            <FileUpload
-              files={fileItems}
-              onFilesChange={setFileItems}
-              showHandwrittenToggle={true}
-              helpKey="fileUpload"
-            />
+            <FileUpload files={fileItems} onFilesChange={setFileItems} helpKey="fileUpload" />
 
             {/* Custom Instructions Text Box */}
             <Box width="100%" mt={4}>
@@ -922,7 +913,7 @@ const VeraDoc = () => {
             onQuestionsChange={setQuestions}
             onStructuredQuestionsChange={setStructuredQuestions}
             onChecklistsUpdate={fetchChecklists}
-            questions={questions}
+            selectedKnowledgeBase={selectedKnowledgeBase}
           />
         </SelectionModal>
 

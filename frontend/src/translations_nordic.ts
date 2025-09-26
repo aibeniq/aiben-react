@@ -145,7 +145,7 @@ export const addNordicTranslations = (resources: any) => {
         formTemplate: "Välj en formulärmall som dina dokument ska matchas mot",
         documentOutline: "Välj en dispositionsstruktur för att generera din rapport",
         allUsersToggle: "Växla mellan att visa endast din historik eller alla användares historik",
-        handwrittenToggle: "Aktivera OCR-bearbetning för handskrivna eller lågkvalitativa textdokument",
+
         createChecklist: "Skapa en ny checklista med anpassade frågor för att utvärdera dokument mot specifika kriterier",
         createOutline: "Skapa en ny dispositionsstruktur för att vägleda genereringen av strukturerade rapporter",
         createTopicList: "Skapa en ny ämneslista för att fokusera jämförelseanalys på specifika ämnen eller teman",
@@ -236,7 +236,7 @@ export const addNordicTranslations = (resources: any) => {
         deleteChecklist: "Ta bort checklista",
         dropFilesHere: "Släpp filer här",
         uploadedFiles: "Uppladdade filer",
-        handwritten: "Handskrivet",
+
         removeFile: "Ta bort",
         characterCount: "{{count}}/2000 tecken. Dessa instruktioner kommer att läggas till varje fråga under bearbetning.",
         searchMode: "Sökläge",
@@ -597,7 +597,7 @@ export const addNordicTranslations = (resources: any) => {
           document: "dokument",
           documents: "dokument",
           digitized: "digitaliserad",
-          handwritten: "handskriven"
+
         },
         feedback: {
           positive: "Positiv feedback",
@@ -754,7 +754,7 @@ export const addNordicTranslations = (resources: any) => {
         formTemplate: "Velg en skjemamal som dokumentene dine skal matches mot",
         documentOutline: "Velg en disposisjonsstruktur for å generere rapporten din",
         allUsersToggle: "Bytt mellom å vise kun din historikk eller alle brukeres historikk",
-        handwrittenToggle: "Aktiver OCR-behandling for håndskrevne eller lavkvalitets tekstdokumenter",
+
         createChecklist: "Opprett en ny sjekkliste med tilpassede spørsmål for å evaluere dokumenter mot spesifikke kriterier",
         createOutline: "Opprett en ny disposisjonsstruktur for å veilede genereringen av strukturerte rapporter",
         createTopicList: "Opprett en ny emneliste for å fokusere sammenligningsanalyse på spesifikke emner eller temaer",
@@ -1363,7 +1363,7 @@ export const addNordicTranslations = (resources: any) => {
         formTemplate: "Vælg en formularskabelon, som dine dokumenter skal matches imod",
         documentOutline: "Vælg en dispositionsstruktur til at generere din rapport",
         allUsersToggle: "Skift mellem kun at vise din historik eller alle brugeres historik",
-        handwrittenToggle: "Aktiver OCR-behandling for håndskrevne eller lavkvalitetstekstdokumenter",
+
         createChecklist: "Opret en ny tjekliste med tilpassede spørgsmål til at evaluere dokumenter mod specifikke kriterier",
         createOutline: "Opret en ny dispositionsstruktur til at guide genereringen af strukturerede rapporter",
         createTopicList: "Opret en ny emneliste for at fokusere sammenligningsanalyse på specifikke emner eller temaer",
@@ -1972,7 +1972,7 @@ export const addNordicTranslations = (resources: any) => {
         formTemplate: "Valitse lomakemalli, johon asiakirjasi tulisi sovittaa",
         documentOutline: "Valitse jäsentelyn rakenne raporttisi luomiseen",
         allUsersToggle: "Vaihda pelkän oman historiasi tai kaikkien käyttäjien historian näkymän välillä",
-        handwrittenToggle: "Ota käyttöön OCR-käsittely käsinkirjoitetuille tai heikkolaatuisille tekstiasiakirjoille",
+
         createChecklist: "Luo uusi tarkistuslista mukautetuilla kysymyksillä asiakirjojen arviointiin tiettyjä kriteerejä vastaan",
         createOutline: "Luo uusi jäsentelyn rakenne rakenteellisten raporttien luomisen ohjaamiseksi",
         createTopicList: "Luo uusi aiheluettelo vertailuanalyysin keskittämiseksi tiettyihin aiheisiin tai teemoihin",
@@ -2063,7 +2063,7 @@ export const addNordicTranslations = (resources: any) => {
         deleteChecklist: "Poista checklist",
         dropFilesHere: "Pudota tiedostot tähän",
         uploadedFiles: "Ladatut tiedostot",
-        handwritten: "Käsinkirjoitettu",
+
         removeFile: "Poista",
         characterCount: "{{count}}/2000 merkkiä. Nämä ohjeet lisätään jokaiseen kysymykseen käsittelyn aikana.",
         searchMode: "Hakutila",
@@ -2424,7 +2424,7 @@ export const addNordicTranslations = (resources: any) => {
           document: "asiakirja",
           documents: "asiakirjat",
           digitized: "digitoitu",
-          handwritten: "käsinkirjoitettu"
+
         },
         feedback: {
           positive: "Positiivinen palaute",

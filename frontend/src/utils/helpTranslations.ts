@@ -23,7 +23,7 @@ const helpTranslations = {
     "formTemplate": "Choose a form template that your documents should be matched against",
     "documentOutline": "Select an outline structure for generating your report",
     "allUsersToggle": "Toggle between viewing only your history or all users' history",
-    "handwrittenToggle": "Enable OCR processing for handwritten or low-quality text documents",
+
     "createChecklist": "Create a new checklist with custom questions to evaluate documents against specific criteria",
     "createOutline": "Create a new outline structure to guide the generation of structured reports",
     "createTopicList": "Create a new topic list to focus comparison analysis on specific subjects or themes",
@@ -67,7 +67,7 @@ const helpTranslations = {
     formTemplate: "Elegir una plantilla de formulario contra la cual sus documentos deben ser comparados",
     documentOutline: "Seleccionar una estructura de esquema para generar su informe",
     allUsersToggle: "Alternar entre ver solo su historial o el historial de todos los usuarios",
-    handwrittenToggle: "Habilitar procesamiento OCR para documentos manuscritos o de texto de baja calidad",
+
     createChecklist: "Crear una nueva lista de verificación con preguntas personalizadas para evaluar documentos contra criterios específicos",
     createOutline: "Crear una nueva estructura de esquema para guiar la generación de informes estructurados",
     createTopicList: "Crear una nueva lista de temas para enfocar el análisis de comparación en materias específicas",
@@ -112,7 +112,7 @@ const helpTranslations = {
     formTemplate: "Choisir un modèle de formulaire contre lequel vos documents doivent être comparés",
     documentOutline: "Sélectionner une structure de plan pour générer votre rapport",
     allUsersToggle: "Basculer entre l'affichage de votre historique uniquement ou de l'historique de tous les utilisateurs",
-    handwrittenToggle: "Activer le traitement OCR pour les documents manuscrits ou de texte de faible qualité",
+
     createChecklist: "Créer une nouvelle liste de contrôle avec des questions personnalisées pour évaluer les documents selon des critères spécifiques",
     createOutline: "Créer une nouvelle structure de plan pour guider la génération de rapports structurés",
     createTopicList: "Créer une nouvelle liste de sujets pour concentrer l'analyse de comparaison sur des thèmes spécifiques",
@@ -156,7 +156,7 @@ const helpTranslations = {
     formTemplate: "Wählen Sie eine Formularvorlage, gegen die Ihre Dokumente abgeglichen werden sollen",
     documentOutline: "Wählen Sie eine Gliederungsstruktur für die Erstellung Ihres Berichts",
     allUsersToggle: "Zwischen der Anzeige nur Ihrer Historie oder der Historie aller Benutzer wechseln",
-    handwrittenToggle: "OCR-Verarbeitung für handgeschriebene oder qualitativ schlechte Textdokumente aktivieren",
+
     createChecklist: "Erstellen Sie eine neue Checkliste mit benutzerdefinierten Fragen zur Bewertung von Dokumenten anhand spezifischer Kriterien",
     createOutline: "Erstellen Sie eine neue Gliederungsstruktur zur Anleitung der Erstellung strukturierter Berichte",
     createTopicList: "Erstellen Sie eine neue Themenliste, um die Vergleichsanalyse auf spezifische Themen zu fokussieren",
@@ -192,7 +192,7 @@ const helpTranslations = {
     formTemplate: "Scegli un modello di modulo con cui i tuoi documenti dovrebbero essere abbinati",
     documentOutline: "Seleziona una struttura di schema per generare il tuo report",
     allUsersToggle: "Alterna tra visualizzare solo la tua cronologia o quella di tutti gli utenti",
-    handwrittenToggle: "Abilita l'elaborazione OCR per documenti scritti a mano o con testo di bassa qualità",
+
     createChecklist: "Crea una nuova checklist con domande personalizzate per valutare documenti contro criteri specifici",
     createOutline: "Crea una nuova struttura di schema per guidare la generazione di report strutturati",
     createTopicList: "Crea un nuovo elenco di argomenti per focalizzare l'analisi di confronto su soggetti o temi specifici",
@@ -235,7 +235,7 @@ const helpTranslations = {
     formTemplate: "Välj en formulärmall som dina dokument ska matchas mot",
     documentOutline: "Välj en dispositionsstruktur för att generera din rapport",
     allUsersToggle: "Växla mellan att visa endast din historik eller alla användares historik",
-    handwrittenToggle: "Aktivera OCR-bearbetning för handskrivna eller lågkvalitativa textdokument",
+
     createChecklist: "Skapa en ny checklista med anpassade frågor för att utvärdera dokument mot specifika kriterier",
     createOutline: "Skapa en ny dispositionsstruktur för att vägleda genereringen av strukturerade rapporter",
     createTopicList: "Skapa en ny ämneslista för att fokusera jämförelseanalysen på specifika ämnen eller teman",
@@ -271,7 +271,7 @@ const helpTranslations = {
     formTemplate: "Escolha um modelo de formulário com o qual seus documentos devem ser combinados",
     documentOutline: "Selecione uma estrutura de esboço para gerar seu relatório",
     allUsersToggle: "Alternar entre visualizar apenas seu histórico ou o histórico de todos os usuários",
-    handwrittenToggle: "Habilitar processamento OCR para documentos manuscritos ou de texto de baixa qualidade",
+
     createChecklist: "Criar uma nova lista de verificação com perguntas personalizadas para avaliar documentos contra critérios específicos",
     createOutline: "Criar uma nova estrutura de esboço para orientar a geração de relatórios estruturados",
     createTopicList: "Criar uma nova lista de tópicos para focar a análise de comparação em assuntos ou temas específicos",
@@ -307,7 +307,7 @@ const helpTranslations = {
     formTemplate: "Выберите шаблон формы, с которым должны быть сопоставлены ваши документы",
     documentOutline: "Выберите структуру плана для генерации вашего отчета",
     allUsersToggle: "Переключение между просмотром только вашей истории или истории всех пользователей",
-    handwrittenToggle: "Включить обработку OCR для рукописных документов или документов с низким качеством текста",
+
     createChecklist: "Создать новый контрольный список с пользовательскими вопросами для оценки документов против конкретных критериев",
     createOutline: "Создать новую структуру плана для руководства генерацией структурированных отчетов",
     createTopicList: "Создать новый список тем для фокусировки анализа сравнения на конкретных предметах или темах",
@@ -343,7 +343,7 @@ const helpTranslations = {
     formTemplate: "选择您的文档应该与之匹配的表单模板",
     documentOutline: "选择用于生成报告的大纲结构",
     allUsersToggle: "在仅查看您的历史记录或所有用户的历史记录之间切换",
-    handwrittenToggle: "为手写或低质量文本文档启用OCR处理",
+
     createChecklist: "创建新的检查清单，包含自定义问题以根据特定标准评估文档",
     createOutline: "创建新的大纲结构以指导结构化报告的生成",
     createTopicList: "创建新的主题列表以将比较分析集中在特定主题或主题上",
@@ -379,7 +379,7 @@ const helpTranslations = {
     formTemplate: "ドキュメントと一致させるフォームテンプレートを選択",
     documentOutline: "レポート生成用のアウトライン構造を選択",
     allUsersToggle: "自分の履歴のみを表示するか、全ユーザーの履歴を表示するかを切り替え",
-    handwrittenToggle: "手書きまたは低品質テキストドキュメントのOCR処理を有効化",
+
     createChecklist: "特定の基準に対してドキュメントを評価するためのカスタム質問を含む新しいチェックリストを作成",
     createOutline: "構造化されたレポートの生成を指導する新しいアウトライン構造を作成",
     createTopicList: "特定の主題やテーマに比較分析を焦点を当てる新しいトピックリストを作成",
@@ -415,7 +415,7 @@ const helpTranslations = {
     formTemplate: "Виберіть шаблон форми, з яким мають бути зіставлені ваші документи",
     documentOutline: "Виберіть структуру плану для генерації вашого звіту",
     allUsersToggle: "Перемикання між переглядом лише вашої історії або історії всіх користувачів",
-    handwrittenToggle: "Увімкнути обробку OCR для рукописних документів або документів з низькою якістю тексту",
+
     createChecklist: "Створити новий контрольний список з користувацькими питаннями для оцінки документів за конкретними критеріями",
     createOutline: "Створити нову структуру плану для керівництва генерацією структурованих звітів",
     createTopicList: "Створити новий список тем для фокусування аналізу порівняння на конкретних предметах або темах",
@@ -451,7 +451,7 @@ const helpTranslations = {
     formTemplate: "Wybierz szablon formularza, do którego powinny zostać dopasowane Twoje dokumenty",
     documentOutline: "Wybierz strukturę konspektu do wygenerowania swojego raportu",
     allUsersToggle: "Przełączaj między przeglądaniem tylko swojej historii lub historii wszystkich użytkowników",
-    handwrittenToggle: "Włącz przetwarzanie OCR dla dokumentów odręcznych lub o niskiej jakości tekstu",
+
     createChecklist: "Utwórz nową listę kontrolną z niestandardowymi pytaniami do oceny dokumentów względem określonych kryteriów",
     createOutline: "Utwórz nową strukturę konspektu do kierowania generowaniem ustrukturyzowanych raportów",
     createTopicList: "Utwórz nową listę tematów, aby skupić analizę porównawczą na określonych przedmiotach lub tematach",
@@ -487,7 +487,7 @@ const helpTranslations = {
     formTemplate: "Kies een formuliersjabloon waaraan uw documenten moeten worden gekoppeld",
     documentOutline: "Selecteer een outlinestructuur voor het genereren van uw rapport",
     allUsersToggle: "Schakel tussen het bekijken van alleen uw geschiedenis of de geschiedenis van alle gebruikers",
-    handwrittenToggle: "Schakel OCR-verwerking in voor handgeschreven of tekstdocumenten van lage kwaliteit",
+
     createChecklist: "Maak een nieuwe checklist met aangepaste vragen om documenten te evalueren tegen specifieke criteria",
     createOutline: "Maak een nieuwe outlinestructuur om de generatie van gestructureerde rapporten te begeleiden",
     createTopicList: "Maak een nieuwe onderwerpenlijst om vergelijkingsanalyse te focussen op specifieke onderwerpen of thema's",
@@ -523,7 +523,7 @@ const helpTranslations = {
     formTemplate: "문서와 일치시킬 양식 템플릿 선택",
     documentOutline: "보고서 생성을 위한 개요 구조 선택",
     allUsersToggle: "자신의 기록만 보기 또는 모든 사용자의 기록 보기 사이 전환",
-    handwrittenToggle: "필기 또는 저품질 텍스트 문서에 대한 OCR 처리 활성화",
+
     createChecklist: "특정 기준에 대해 문서를 평가하기 위한 사용자 정의 질문이 포함된 새 체크리스트 생성",
     createOutline: "구조화된 보고서 생성을 안내할 새 개요 구조 생성",
     createTopicList: "특정 주제나 테마에 비교 분석을 집중시킬 새 주제 목록 생성",

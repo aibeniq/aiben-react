@@ -512,6 +512,7 @@ const ReportGenie = () => {
             onSectionsChange={setSections}
             onOutlinesUpdate={fetchOutlines}
             sections={sections}
+            selectedKnowledgeBase={selectedKnowledgeBase}
           />
         </SelectionModal>
 

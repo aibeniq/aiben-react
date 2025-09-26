@@ -1,7 +1,7 @@
 import os
 import secrets
 import warnings
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, List
 
 from pydantic import (
     AnyUrl,
@@ -55,23 +55,35 @@ class Settings(BaseSettings):
         250000  # Safe limit below OpenAI's 300k token limit
     )
 
-        # Knowledge Base settings
-    KB_PROGRESS_UPDATE_INTERVAL: int = 10  # How often to update progress during processing
+    # Knowledge Base settings
+    KB_PROGRESS_UPDATE_INTERVAL: int = (
+        10  # How often to update progress during processing
+    )
     KB_MIN_BATCH_SIZE: int = 1
     KB_MAX_BATCH_SIZE: int = 50
     KB_EMBEDDING_CHUNK_SIZE: int = 250000  # Max tokens per embedding chunk
     KB_MEMORY_THRESHOLD_MB: float = 1000  # Memory threshold for warnings
-    
+
     # Memory management settings for large files
     KB_MAX_IN_MEMORY_SIZE_MB: int = 100  # Files larger than this use streaming
-    KB_STREAM_CHUNK_SIZE_MB: int = 8     # Chunk size for streaming (8MB)
-    KB_MAX_DB_SIZE_MB: int = 200         # Maximum size for database storage (reduced to prevent crashes)
-    KB_MEMORY_SAFETY_THRESHOLD: float = 0.2  # Use chunked reading if file > 20% of available memory
-    KB_HIGH_MEMORY_USAGE_THRESHOLD: float = 60.0  # Memory usage % that triggers chunked reading
-    
+    KB_STREAM_CHUNK_SIZE_MB: int = 8  # Chunk size for streaming (8MB)
+    KB_MAX_DB_SIZE_MB: int = (
+        200  # Maximum size for database storage (reduced to prevent crashes)
+    )
+    KB_MEMORY_SAFETY_THRESHOLD: float = (
+        0.2  # Use chunked reading if file > 20% of available memory
+    )
+    KB_HIGH_MEMORY_USAGE_THRESHOLD: float = (
+        60.0  # Memory usage % that triggers chunked reading
+    )
+
     # File-based storage settings for large knowledge bases
-    KB_USE_FILE_STORAGE_ABOVE_MB: int = 200  # Store files on disk instead of DB if larger than this
-    KB_FILE_STORAGE_PATH: str = "/app/data/knowledge_bases"  # Path for file-based storage
+    KB_USE_FILE_STORAGE_ABOVE_MB: int = (
+        200  # Store files on disk instead of DB if larger than this
+    )
+    KB_FILE_STORAGE_PATH: str = (
+        "/app/data/knowledge_bases"  # Path for file-based storage
+    )
 
     # FormConnect processing parameters
     FORMCONNECT_MAX_TOKENS_PER_REQUEST: int = 150000  # Token limit for full text mode
@@ -329,17 +341,6 @@ class Settings(BaseSettings):
     Here is a template of the fields that I want you to extract from this document: {template}
     Here is the full text of a document: {document_text}
     Fill out the template based on the fields you can find.
-    """
-
-    FORMCONNECT_HANDWRITTEN_PROMPT_TEMPLATE: str = """
-    Here is a template of the fields that I want you to extract from this image: {template}
-
-    I'm sending you an image with handwritten content.
-
-    For each field in the template, try to locate and extract the corresponding value from the image.
-    Pay special attention to handwritten text and ensure accuracy in your extraction.
-
-    Return your results as a JSON object matching the template structure.
     """
 
     FORMCONNECT_COMPARISON_PROMPT_TEMPLATE: str = """
@@ -776,6 +777,92 @@ NEEDS_REVISION: [Yes/No]
 SUGGESTED_SECTION: [Improved section description if revision needed, otherwise same as original]
 REASON: [Specific explanation of significant gaps requiring revision, or why current content is adequate]
 QUALITY_GAP_SEVERITY: [none/minor/moderate/significant]
+"""
+
+    # Vision-related settings for multimodal document analysis
+    VISION_ENABLED_MODELS: List[str] = [
+        "gpt-4-vision-preview",
+        "gpt-4o",
+        "gpt-4o-mini",
+        "claude-3-opus",
+        "claude-3-sonnet",
+        "claude-3-haiku",
+        "claude-3-5-sonnet",
+    ]
+
+    MAX_IMAGES_PER_DOCUMENT: int = 10
+    MAX_IMAGE_SIZE_MB: int = 5
+
+    # Vision prompt templates for different functionalities
+    CHATBOT_VISION_PROMPT_TEMPLATE: str = """
+You are an AI assistant analyzing visual content to answer questions.
+
+Images provided: {image_count} from files: {source_files}
+
+Question: {question}
+
+Context from previous conversation:
+{context}
+
+Analyze the visual elements in the images and provide a comprehensive answer based on what you can see. Focus on:
+1. Text content visible in images
+2. Charts, diagrams, and visual data
+3. Layout and formatting
+4. Any relevant visual information
+
+Answer:
+"""
+
+    TWINCHECK_VISION_COMPARISON_PROMPT_TEMPLATE: str = """
+Analyze and compare the visual content in these images from two documents.
+
+Topic to analyze: {topic}
+
+Document 1 Images: {doc1_image_count} images
+Document 2 Images: {doc2_image_count} images
+
+Focus on:
+1. Visual elements, charts, diagrams, tables
+2. Layout and formatting differences
+3. Any visual information that differs between documents
+4. Text content and annotations
+
+Provide a detailed comparison focusing on the topic: {topic}
+"""
+
+    FORMCONNECT_VISION_PROMPT_TEMPLATE: str = """
+Extract information from these images to fill the form template.
+
+Template fields to fill:
+{template_fields}
+
+Images provided: {image_count}
+
+Analyze the visual content and extract relevant information for each template field. Look for:
+1. Text content in images
+2. Form fields and their values
+3. Tables and structured data
+4. Text content and annotations
+5. Signatures and checkboxes
+
+Return the extracted information in JSON format matching the template structure.
+"""
+
+    VERADOC_VISION_PROMPT_TEMPLATE: str = """
+Analyze the visual content in these images to answer the checklist question.
+
+Question: {question}
+
+Images provided: {image_count} from document: {filename}
+
+Look for visual evidence that helps answer the question, including:
+1. Charts, graphs, and diagrams
+2. Tables and structured data
+3. Images and photographs
+4. Layout and formatting
+5. Visual indicators or symbols
+
+Provide a detailed answer based on the visual analysis:
 """
 
 

@@ -1,28 +1,43 @@
 import type React from "react"
 import { type ReactNode, createContext, useContext, useState } from "react"
 
+// Vision analysis metadata interface
+interface VisionAnalysisMetadata {
+  hasVisionAnalysis: boolean
+  imageCount: number
+  sourceFiles: string[]
+  visionModel?: string
+}
+
 interface ReviewResult {
   filename: string
   displayResults: string
   qaPairs: any[]
   interactionId?: string
+  visionMetadata?: VisionAnalysisMetadata
 }
 
 interface GenerateResult {
   full_report: string
   sections: any[]
   interactionId?: string
+  visionMetadata?: VisionAnalysisMetadata
 }
 
 interface CompareResult {
   summary: string
-  topicResults: any[]
+  topicResults: Array<{
+    topic: string
+    analysis: string
+    visionMetadata?: VisionAnalysisMetadata
+  }>
   interactionId?: string
 }
 
 interface MatchResult {
   results: string
   interactionId?: string
+  visionMetadata?: VisionAnalysisMetadata
 }
 
 // Input parameter interfaces
@@ -107,21 +122,15 @@ export const useResults = () => {
   return context
 }
 
-export const ResultsProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const ResultsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Review state
   const [reviewResults, setReviewResults] = useState<ReviewResult[]>([])
   const [reviewActiveTab, setReviewActiveTab] = useState<number>(0)
   const [reviewInputs, setReviewInputs] = useState<ReviewInputs | null>(null)
 
   // Generate state
-  const [generateResult, setGenerateResult] = useState<GenerateResult | null>(
-    null,
-  )
-  const [generateInputs, setGenerateInputs] = useState<GenerateInputs | null>(
-    null,
-  )
+  const [generateResult, setGenerateResult] = useState<GenerateResult | null>(null)
+  const [generateInputs, setGenerateInputs] = useState<GenerateInputs | null>(null)
 
   // Compare state
   const [compareResult, setCompareResult] = useState<CompareResult | null>(null)

@@ -187,12 +187,47 @@ async def compare_documents(
         document1.file.seek(0)
         document2.file.seek(0)
 
+        # Load the LLM model first to check vision capabilities
+        llm = get_default_llm(session, current_user)
+
+        # Check if LLM supports vision
+        from app.services.vision_service import VisionService
+
+        vision_enabled = VisionService.is_vision_enabled(llm)
+
         # Extract text from both documents
         doc1_text = extract_text_from_file(document1)
 
         # Reset file pointer for document2
         document2.file.seek(0)
         doc2_text = extract_text_from_file(document2)
+
+        # Extract images if vision is enabled
+        doc1_images = []
+        doc2_images = []
+        if vision_enabled:
+            # Reset file pointers for image extraction
+            document1.file.seek(0)
+            document2.file.seek(0)
+
+            # Extract images from both documents
+            from app.services.document_utils import (
+                extract_documents_and_images_from_file_unified,
+            )
+
+            doc1_content = document1.file.read()
+            _, doc1_images = extract_documents_and_images_from_file_unified(
+                doc1_content, document1.filename
+            )
+
+            document2.file.seek(0)
+            doc2_content = document2.file.read()
+            _, doc2_images = extract_documents_and_images_from_file_unified(
+                doc2_content, document2.filename
+            )
+
+            print(f"Extracted {len(doc1_images)} images from {document1.filename}")
+            print(f"Extracted {len(doc2_images)} images from {document2.filename}")
 
         # Split files into lines for diffing
         doc1_lines = doc1_text.splitlines()
@@ -204,9 +239,6 @@ async def compare_documents(
         diff_text = "\n".join(diff_result)
 
         print(f"Generated diff text with {estimate_tokens(diff_text)} estimated tokens")
-
-        # Load the LLM model
-        llm = get_default_llm(session, current_user)
 
         # Parse comparison topics
         topic_list = request.comparison_topics.strip().split("\n")
@@ -282,14 +314,82 @@ async def compare_documents(
                         synthesized_result, session, current_user, llm
                     )
 
-                    topic_analysis.append(
-                        {
+                    # Add vision analysis if images exist and LLM supports it
+                    if vision_enabled and (doc1_images or doc2_images):
+                        print(f"  Adding vision analysis for chunked topic: {topic}")
+
+                        # Prepare images for comparison
+                        combined_images = VisionService.prepare_images_for_comparison(
+                            doc1_images,
+                            doc2_images,
+                            document1.filename,
+                            document2.filename,
+                        )
+
+                        vision_variables = {
                             "topic": topic,
-                            "analysis": synthesized_result,
-                            "chunk_count": len(diff_chunks),
-                            "source_citations": source_citations,
+                            "doc1_image_count": len(doc1_images),
+                            "doc2_image_count": len(doc2_images),
                         }
-                    )
+
+                        try:
+                            vision_analysis = await VisionService.process_images_with_prompt(
+                                llm=llm,
+                                images=combined_images,
+                                prompt_template=settings.TWINCHECK_VISION_COMPARISON_PROMPT_TEMPLATE,
+                                variables=vision_variables,
+                            )
+
+                            # Translate vision analysis if needed
+                            vision_analysis = await translate_text_if_needed(
+                                vision_analysis, session, current_user, llm
+                            )
+
+                            # Combine text and vision analysis
+                            final_analysis = (
+                                VisionService.combine_text_and_vision_analysis(
+                                    synthesized_result, vision_analysis
+                                )
+                            )
+
+                            topic_analysis.append(
+                                {
+                                    "topic": topic,
+                                    "analysis": final_analysis,
+                                    "chunk_count": len(diff_chunks),
+                                    "has_vision_analysis": True,
+                                    "image_count": {
+                                        "doc1": len(doc1_images),
+                                        "doc2": len(doc2_images),
+                                    },
+                                    "source_citations": source_citations,
+                                }
+                            )
+
+                        except Exception as vision_error:
+                            print(
+                                f"Vision analysis error for chunked topic {topic}: {vision_error}"
+                            )
+                            # Fall back to text-only analysis
+                            topic_analysis.append(
+                                {
+                                    "topic": topic,
+                                    "analysis": synthesized_result,
+                                    "chunk_count": len(diff_chunks),
+                                    "vision_error": str(vision_error),
+                                    "source_citations": source_citations,
+                                }
+                            )
+                    else:
+                        # Text-only analysis for chunked processing
+                        topic_analysis.append(
+                            {
+                                "topic": topic,
+                                "analysis": synthesized_result,
+                                "chunk_count": len(diff_chunks),
+                                "source_citations": source_citations,
+                            }
+                        )
 
                 except Exception as e:
                     # Fallback: combine chunk results manually
@@ -328,18 +428,84 @@ async def compare_documents(
                         prompt_variables,
                     )
 
-                    # Translate the topic result if needed
-                    topic_result = await translate_text_if_needed(
-                        topic_result, session, current_user, llm
-                    )
+                    # Add vision analysis if images exist and LLM supports it
+                    if vision_enabled and (doc1_images or doc2_images):
+                        print(f"  Adding vision analysis for topic: {topic}")
 
-                    topic_analysis.append(
-                        {
+                        # Prepare images for comparison
+                        combined_images = VisionService.prepare_images_for_comparison(
+                            doc1_images,
+                            doc2_images,
+                            document1.filename,
+                            document2.filename,
+                        )
+
+                        vision_variables = {
                             "topic": topic,
-                            "analysis": topic_result,
-                            "source_citations": source_citations,
+                            "doc1_image_count": len(doc1_images),
+                            "doc2_image_count": len(doc2_images),
                         }
-                    )
+
+                        try:
+                            vision_analysis = await VisionService.process_images_with_prompt(
+                                llm=llm,
+                                images=combined_images,
+                                prompt_template=settings.TWINCHECK_VISION_COMPARISON_PROMPT_TEMPLATE,
+                                variables=vision_variables,
+                            )
+
+                            # Translate vision analysis if needed
+                            vision_analysis = await translate_text_if_needed(
+                                vision_analysis, session, current_user, llm
+                            )
+
+                            # Combine text and vision analysis
+                            combined_analysis = (
+                                VisionService.combine_text_and_vision_analysis(
+                                    topic_result, vision_analysis
+                                )
+                            )
+
+                            topic_analysis.append(
+                                {
+                                    "topic": topic,
+                                    "analysis": combined_analysis,
+                                    "has_vision_analysis": True,
+                                    "image_count": {
+                                        "doc1": len(doc1_images),
+                                        "doc2": len(doc2_images),
+                                    },
+                                    "source_citations": source_citations,
+                                }
+                            )
+
+                        except Exception as vision_error:
+                            print(
+                                f"Vision analysis error for topic {topic}: {vision_error}"
+                            )
+                            # Fall back to text-only analysis
+                            topic_analysis.append(
+                                {
+                                    "topic": topic,
+                                    "analysis": topic_result,
+                                    "vision_error": str(vision_error),
+                                    "source_citations": source_citations,
+                                }
+                            )
+                    else:
+                        # Text-only analysis
+                        # Translate the topic result if needed
+                        topic_result = await translate_text_if_needed(
+                            topic_result, session, current_user, llm
+                        )
+
+                        topic_analysis.append(
+                            {
+                                "topic": topic,
+                                "analysis": topic_result,
+                                "source_citations": source_citations,
+                            }
+                        )
 
                 except Exception as e:
                     topic_analysis.append(
@@ -1086,7 +1252,19 @@ async def generate_topics(
             if file.size > 0:
                 # Reset file pointer to beginning before processing
                 file.file.seek(0)
-                example_document = extract_text_from_file(file)
+                file_content = file.file.read()
+
+                # Use enhanced processing with vision capabilities
+                from app.services.document_utils import (
+                    extract_text_with_vision_enhancement,
+                )
+
+                example_document = await extract_text_with_vision_enhancement(
+                    file_content,
+                    file.filename or "unknown",
+                    llm,
+                    purpose="comparison topic generation",
+                )
                 example_instruction = f" and use the uploaded example document ({file.filename}) as a reference for the appropriate scope and depth of comparison topics"
                 example_analysis_instruction = f" and explain how they align with the scope shown in the example document ({file.filename})"
 

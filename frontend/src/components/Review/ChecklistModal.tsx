@@ -47,6 +47,7 @@ interface ChecklistModalProps {
   removeQuestion: (index: number) => void
   moveQuestionUp: (index: number) => void
   moveQuestionDown: (index: number) => void
+  selectedKnowledgeBase: KnowledgeBasePublic | null // Parent's selected KB
 }
 
 interface QuestionData {
@@ -57,7 +58,6 @@ interface QuestionData {
 
 interface FileItem {
   file: File
-  isHandwritten: boolean
 }
 
 const ChecklistModal = ({
@@ -78,16 +78,14 @@ const ChecklistModal = ({
   removeQuestion,
   moveQuestionUp,
   moveQuestionDown,
+  selectedKnowledgeBase, // Use parent's selected KB
 }: ChecklistModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { t } = useTranslation()
   const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases()
 
-  // Knowledge Base for optimization functionality
-  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
-    null,
-  )
-  const [showKnowledgeBaseModal, setShowKnowledgeBaseModal] = useState(false)
+  // Note: selectedKnowledgeBase now comes from parent props
+  // Internal KB selection not needed since we use parent's selection
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -487,20 +485,6 @@ const ChecklistModal = ({
 
                     {/* Right Column - Questions List */}
                     <VStack align="stretch" gap={4} flex={1} height="100%">
-                      {/* Knowledge Base Selection for Optimization */}
-                      <Field label={t("editChecklistModal.knowledgeBase")}>
-                        <Button
-                          w="full"
-                          variant={selectedKnowledgeBase ? "solid" : "outline"}
-                          onClick={() => setShowKnowledgeBaseModal(true)}
-                          justifyContent="flex-start"
-                          textAlign="left"
-                          color={selectedKnowledgeBase ? "white" : "gray.600"}
-                        >
-                          {selectedKnowledgeBase?.title || t("dropdowns.selectKnowledgeBase")}
-                        </Button>
-                      </Field>
-
                       {/* Suggest and Optimize buttons above questions */}
                       <HStack justify="space-between" align="center">
                         <Text fontSize="md" fontWeight="medium">
@@ -615,18 +599,7 @@ const ChecklistModal = ({
           onOptimized={handleOptimized}
         />
 
-        <KnowledgeBaseSelectionModal
-          isOpen={showKnowledgeBaseModal}
-          onClose={() => {
-            setShowKnowledgeBaseModal(false)
-          }}
-          title={t("editChecklistModal.knowledgeBase")}
-          knowledgeBases={knowledgeBases}
-          selectedKnowledgeBase={selectedKnowledgeBase}
-          onSelectionChange={setSelectedKnowledgeBase}
-          showAllUsers={showAllUsers}
-          toggleShowAllUsers={toggleShowAllUsers}
-        />
+        {/* KB Selection Modal removed - using parent's selectedKnowledgeBase */}
 
         <KnowledgeBaseSelectionModal
           isOpen={showReferenceKnowledgeBaseModal}

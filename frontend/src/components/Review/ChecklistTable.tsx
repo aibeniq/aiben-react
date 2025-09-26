@@ -2,7 +2,7 @@ import { Button, Checkbox, HStack, IconButton, Table } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 import { FiCopy, FiEye, FiPlus, FiTrash2 } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
-import { type VeraDocChecklist, VeradocService } from "../../client"
+import { type VeraDocChecklist, type KnowledgeBasePublic, VeradocService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import { generateUUID } from "../../utils/uuid"
 import ChecklistModal from "./ChecklistModal"
@@ -20,7 +20,7 @@ interface ChecklistTableProps {
   onQuestionsChange: (questions: string) => void
   onStructuredQuestionsChange?: (questions: QuestionData[]) => void
   onChecklistsUpdate: () => void
-  questions: string
+  selectedKnowledgeBase: KnowledgeBasePublic | null // Parent's selected KB
   isDisabled?: boolean
 }
 
@@ -196,6 +196,7 @@ const ChecklistTable = ({
   onQuestionsChange,
   onStructuredQuestionsChange,
   onChecklistsUpdate,
+  selectedKnowledgeBase,
   isDisabled = false,
 }: ChecklistTableProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -562,6 +563,7 @@ const ChecklistTable = ({
         removeQuestion={removeQuestion}
         moveQuestionUp={moveQuestionUp}
         moveQuestionDown={moveQuestionDown}
+        selectedKnowledgeBase={selectedKnowledgeBase}
       />
     </div>
   )

@@ -352,7 +352,7 @@ const OptimizeOutlineModal = ({
     <Portal>
       <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && handleClose()}>
         <Dialog.Backdrop />
-        <Dialog.Positioner>
+        <Dialog.Positioner style={{ zIndex: 2500 }}>
           <Dialog.Content maxW="6xl" maxH="90vh">
             <Dialog.Header>
               <Dialog.Title>{t("optimizeOutlineModal.title")}</Dialog.Title>
