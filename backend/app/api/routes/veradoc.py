@@ -29,6 +29,7 @@ from app.services.translation import translate_text_if_needed
 from app.services.retrievers import (
     create_ensemble_retriever,
 )  # Import the ensemble retriever
+from app.services.enhanced_retrieval import SmartRetrieverFactory
 
 from sqlmodel import select
 from fastapi import (
@@ -492,25 +493,28 @@ async def process_rag_checklist(
 
                     retriever = FullScanRetriever(chroma_db)
                 else:
-                    # Vector search mode (default)
-                    print("Using vector search mode")
+                    # Vector search mode (default) with enhanced content filtering
+                    print("Using enhanced vector search mode with content filtering")
                     try:
-                        retriever = create_ensemble_retriever(
-                            chroma_db=chroma_db,
-                            vector_weight=0.7,  # Weight for vector-based retrieval
-                            keyword_weight=0.3,  # Weight for keyword-based retrieval
-                            search_kwargs={
-                                "k": settings.RAG_NUM_CHUNKS
-                            },  # Use config value
+                        retriever = (
+                            SmartRetrieverFactory.create_academic_paper_retriever(
+                                chroma_db=chroma_db,
+                                search_kwargs={"k": settings.RAG_NUM_CHUNKS},
+                            )
                         )
-                        print("Ensemble retriever created successfully")
+                        print(
+                            "Enhanced academic retriever created successfully - will filter bibliography content"
+                        )
                     except Exception as retriever_error:
-                        print(f"Error creating ensemble retriever: {retriever_error}")
-                        # Fallback to basic vector retriever
-                        retriever = chroma_db.as_retriever(
-                            search_kwargs={"k": settings.RAG_NUM_CHUNKS}
+                        print(f"Error creating enhanced retriever: {retriever_error}")
+                        # Fallback to general document retriever with smart filtering
+                        retriever = (
+                            SmartRetrieverFactory.create_general_document_retriever(
+                                chroma_db=chroma_db,
+                                search_kwargs={"k": settings.RAG_NUM_CHUNKS},
+                            )
                         )
-                        print("Using fallback vector retriever")
+                        print("Using fallback smart retriever with content filtering")
 
             except Exception as retriever_setup_error:
                 print(f"Error setting up retriever: {retriever_setup_error}")
@@ -1568,11 +1572,9 @@ async def optimize_checklist(
 
                 retriever = FullScanRetriever(chroma_db)
             else:
-                print("Using vector search mode for optimization")
-                retriever = create_ensemble_retriever(
+                print("Using enhanced vector search mode for optimization")
+                retriever = SmartRetrieverFactory.create_academic_paper_retriever(
                     chroma_db=chroma_db,
-                    vector_weight=0.7,
-                    keyword_weight=0.3,
                     search_kwargs={"k": settings.RAG_NUM_CHUNKS},
                 )
 

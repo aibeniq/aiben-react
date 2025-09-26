@@ -9,7 +9,8 @@ import logging
 from typing import Dict, Any, List, Optional, Union, Sequence
 
 from langchain_community.vectorstores import Chroma
-from langchain.retrievers import BM25Retriever, EnsembleRetriever
+from langchain_community.retrievers import BM25Retriever
+from langchain.retrievers import EnsembleRetriever
 from langchain.schema import Document
 import numpy as np
 

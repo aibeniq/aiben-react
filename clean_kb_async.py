@@ -205,7 +205,7 @@ async def process_knowledge_base_async(
 
             # Chunk documents for embedding
             document_chunks = chunk_documents_for_embedding(
-                splits, max_tokens_per_chunk=settings.KB_EMBEDDING_CHUNK_SIZE
+                splits, max_tokens_per_chunk=settings.EMBEDDING_MAX_TOKENS_PER_REQUEST
             )
             print(f"Split into {len(document_chunks)} chunks for embedding")
 

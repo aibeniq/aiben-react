@@ -291,12 +291,12 @@ async def retrieve_knowledge_base_content(
                     shutil.rmtree(temp_dir, ignore_errors=True)
                     return "", ""
 
-            # Create retriever and get documents - SAME AS CHATBOT
+            # Create enhanced retriever and get documents - WITH SMART FILTERING
             try:
-                retriever = create_ensemble_retriever(
+                from app.services.enhanced_retrieval import SmartRetrieverFactory
+
+                retriever = SmartRetrieverFactory.create_general_document_retriever(
                     chroma_db=chroma_db,
-                    vector_weight=0.7,
-                    keyword_weight=0.3,
                     search_kwargs={"k": 8},
                 )
 

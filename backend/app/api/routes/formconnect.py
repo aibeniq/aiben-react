@@ -53,6 +53,7 @@ from dotenv import load_dotenv
 from app.services.embeddings import load_embeddings_model
 from app.services.knowledgebases import get_embedding_model
 from app.services.retrievers import create_ensemble_retriever
+from app.services.enhanced_retrieval import SmartRetrieverFactory
 
 import base64
 from tempfile import NamedTemporaryFile
@@ -126,8 +127,11 @@ async def extract_fields_using_vector_search(
         from app.services.embeddings import load_embeddings_model
         from app.services.knowledgebases import get_embedding_model
         from app.services.retrievers import create_ensemble_retriever
+        from app.services.enhanced_retrieval import SmartRetrieverFactory
 
-        print(f"🔍 Using vector search mode for field extraction from {file.filename}")
+        print(
+            f"🔍 Using enhanced vector search mode for field extraction from {file.filename}"
+        )
 
         # Get embedding model
         from app.api.deps import get_db
