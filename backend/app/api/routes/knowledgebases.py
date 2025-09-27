@@ -33,6 +33,7 @@ from app.services.progress_tracker import progress_tracker
 from app.services.embeddings import load_embeddings_model
 from app.core.config import settings
 from app.services.pdf_utils import load_pdf_with_pypdf
+from app.services.document_utils import extract_documents_from_file_table_aware
 import hashlib
 
 from app.services.knowledgebases import KnowledgeBaseService
@@ -45,6 +46,7 @@ import tempfile
 from datetime import datetime
 
 from langchain_community.document_loaders import TextLoader
+from langchain_community.vectorstores.utils import filter_complex_metadata
 
 # from langchain_community.document_loaders import PyPDFLoader  # Removed - using pypdf instead
 import docx
@@ -689,8 +691,23 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
 
     try:
         if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
-            print("Loading PDF with PyPDF...")
-            loaded_documents = load_pdf_with_pypdf(temp_file_path, file.filename)
+            print("Loading PDF with table-aware processing...")
+            # Read file content as bytes for table-aware processing
+            with open(temp_file_path, "rb") as f:
+                file_content = f.read()
+
+            # Use table-aware processing for better table handling in PDFs
+            try:
+                loaded_documents = extract_documents_from_file_table_aware(
+                    file_content, file.filename  # use_table_processing will use config
+                )
+                print(
+                    f"Table-aware processing created {len(loaded_documents)} documents"
+                )
+            except Exception as e:
+                # Fallback to regular PDF processing
+                print(f"Table-aware processing failed for PDF {file.filename}: {e}")
+                loaded_documents = load_pdf_with_pypdf(temp_file_path, file.filename)
         elif (
             content_type
             == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -712,14 +729,22 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
 
             from app.services.document_utils import (
                 extract_documents_from_file_unified,
+                extract_documents_from_file_table_aware,
                 extract_documents_and_images_from_file_unified,
                 ensure_documents_for_vector_search,
             )
 
-            # First try regular document extraction
-            loaded_documents = extract_documents_from_file_unified(
-                file_content, file.filename
-            )
+            # First try table-aware document extraction for better table handling
+            try:
+                loaded_documents = extract_documents_from_file_table_aware(
+                    file_content, file.filename  # use_table_processing will use config
+                )
+            except Exception as e:
+                # Fallback to regular document extraction
+                print(f"Table-aware processing failed for {file.filename}: {e}")
+                loaded_documents = extract_documents_from_file_unified(
+                    file_content, file.filename
+                )
 
             # If no documents, try enhanced extraction with images
             if not loaded_documents or all(
@@ -1061,9 +1086,23 @@ async def process_knowledge_base_creation(
                         try:
                             # Process the temporary file based on its type
                             if filename.lower().endswith(".pdf"):
-                                loaded_documents = load_pdf_with_pypdf(
-                                    temp_file_path, filename
-                                )
+                                # Use table-aware processing for PDFs
+                                try:
+                                    loaded_documents = extract_documents_from_file_table_aware(
+                                        content,
+                                        filename,  # use_table_processing will use config
+                                    )
+                                    print(
+                                        f"Table-aware processing created {len(loaded_documents)} documents for {filename}"
+                                    )
+                                except Exception as e:
+                                    # Fallback to regular PDF processing
+                                    print(
+                                        f"Table-aware processing failed for PDF {filename}: {e}"
+                                    )
+                                    loaded_documents = load_pdf_with_pypdf(
+                                        temp_file_path, filename
+                                    )
                             elif filename.lower().endswith(".txt"):
                                 loader = TextLoader(temp_file_path)
                                 loaded_documents = loader.load()
@@ -1208,8 +1247,12 @@ async def process_knowledge_base_creation(
                         if chroma_db is None:
                             # Initialize Chroma database with first chunk
                             try:
+                                # Filter complex metadata (lists, dicts) that Chroma can't handle
+                                filtered_documents = filter_complex_metadata(
+                                    valid_documents
+                                )
                                 chroma_db = Chroma.from_documents(
-                                    documents=valid_documents,
+                                    documents=filtered_documents,
                                     embedding=embeddings,
                                     persist_directory=chroma_dir,
                                 )
@@ -1222,7 +1265,11 @@ async def process_knowledge_base_creation(
                         else:
                             # Add subsequent chunks to existing database
                             try:
-                                chroma_db.add_documents(documents=valid_documents)
+                                # Filter complex metadata (lists, dicts) that Chroma can't handle
+                                filtered_documents = filter_complex_metadata(
+                                    valid_documents
+                                )
+                                chroma_db.add_documents(documents=filtered_documents)
                             except Exception as e:
                                 print(f"Error adding documents to Chroma database: {e}")
                                 # Continue with other chunks instead of failing completely
@@ -1551,7 +1598,9 @@ async def update_knowledge_base(
 
                 # Add the new documents to the VectorDB only if we have new files
                 if documents:
-                    chroma_vector_database.add_documents(documents)
+                    # Filter complex metadata (lists, dicts) that Chroma can't handle
+                    filtered_documents = filter_complex_metadata(documents)
+                    chroma_vector_database.add_documents(filtered_documents)
 
             # Handle file deletions
             if knowledge_base_in.removed_file_ids:

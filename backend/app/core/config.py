@@ -94,6 +94,17 @@ class Settings(BaseSettings):
     FORMCONNECT_VECTOR_SEARCH_CHUNKS: int = 5  # Number of chunks to retrieve per field
     FORMCONNECT_CHUNK_OVERLAP: int = 200  # Overlap for document chunking
 
+    # Table-aware processing settings
+    TABLE_AWARE_PROCESSING_ENABLED: bool = True  # Enable enhanced table processing
+    TABLE_PRESERVE_HEADERS: bool = True  # Preserve column headers in each row
+    TABLE_MAX_ROWS_PER_TABLE: int = (
+        1000  # Maximum rows to process per table (performance)
+    )
+    TABLE_MAX_ROW_DOCUMENTS: int = 50  # Maximum individual row documents to create
+    TABLE_ENABLE_JSON_FORMAT: bool = True  # Create JSON representation of tables
+    TABLE_ENABLE_STRUCTURED_FORMAT: bool = True  # Create structured text format
+    TABLE_ENABLE_ROW_DOCUMENTS: bool = True  # Create individual row documents
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def all_cors_origins(self) -> list[str]:

@@ -503,6 +503,45 @@ def extract_documents_from_file_unified(
         return [error_doc]
 
 
+def extract_documents_from_file_table_aware(
+    file_content: bytes, filename: str, use_table_processing: bool = None
+) -> List[Document]:
+    """
+    Enhanced document extraction with table-aware processing.
+
+    Args:
+        file_content: Raw bytes of the file
+        filename: Name of the file
+        use_table_processing: Whether to use enhanced table processing (None = use config)
+
+    Returns:
+        List of Document objects with enhanced table representation
+    """
+    try:
+        # Check configuration if not explicitly specified
+        if use_table_processing is None:
+            try:
+                from app.core.config import settings
+
+                use_table_processing = settings.TABLE_AWARE_PROCESSING_ENABLED
+            except ImportError:
+                use_table_processing = True  # Default to enabled
+
+        if use_table_processing:
+            from app.services.table_aware_processing import enhance_document_with_tables
+
+            return enhance_document_with_tables(file_content, filename)
+        else:
+            return extract_documents_from_file_unified(file_content, filename)
+    except ImportError:
+        # Fall back to regular processing if table processing is unavailable
+        return extract_documents_from_file_unified(file_content, filename)
+    except Exception as e:
+        print(f"Error in table-aware processing for {filename}: {e}")
+        # Fall back to regular processing
+        return extract_documents_from_file_unified(file_content, filename)
+
+
 def extract_documents_and_images_from_file_unified(
     file_content: bytes, filename: str
 ) -> Tuple[List[Document], List[str]]:

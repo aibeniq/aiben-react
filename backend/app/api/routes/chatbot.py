@@ -378,12 +378,25 @@ async def _handle_full_text_document_query(
                 temp_paths.append(temp_path)
             # File is now closed and ready to be read by loaders
 
-            # Extract text from file using unified document processing
+            # Extract text from file using enhanced table-aware processing
             with open(temp_path, "rb") as f:
                 file_content = f.read()
 
-            # Use the unified document extraction function
-            documents = extract_documents_from_file_unified(file_content, file.filename)
+            # Use table-aware processing for better table structure preservation
+            try:
+                from app.services.document_utils import (
+                    extract_documents_from_file_table_aware,
+                )
+
+                documents = extract_documents_from_file_table_aware(
+                    file_content, file.filename  # use_table_processing will use config
+                )
+            except Exception as e:
+                # Fallback to regular processing
+                print(f"Table-aware processing failed for {file.filename}: {e}")
+                documents = extract_documents_from_file_unified(
+                    file_content, file.filename
+                )
             full_text = "\n\n".join([doc.page_content for doc in documents])
 
             # Extract images if vision is enabled
