@@ -1581,13 +1581,36 @@ async def optimize_checklist(
             # Initialize LLM
             llm = get_default_llm(session, current_user)
 
-            # 3. Process the test document
+            # 3. Process the test document with table-aware processing
             file = files[0]
             content = await file.read()
-            document_text = await extract_text_from_file_async(content, file.filename)
+
+            # Use table-aware document processing for better table handling
+            from app.services.document_utils import (
+                extract_documents_with_table_processing_async,
+            )
+
+            print(
+                f"🔍 Processing test document with table-aware extraction: {file.filename}"
+            )
+            processed_documents, table_data = (
+                await extract_documents_with_table_processing_async(
+                    content, file.filename, llm
+                )
+            )
+
+            # Convert documents back to text
+            document_text = "\n\n".join(
+                [doc.page_content for doc in processed_documents]
+            )
+
             print(
                 f"Processing test document: {file.filename} ({len(document_text)} characters)"
             )
+            if table_data.get("tables"):
+                print(
+                    f"✅ Extracted {len(table_data['tables'])} tables for better analysis"
+                )
 
             # For large files or DOCX files, cancel disconnect monitoring to prevent false positives
             is_docx = file.filename.lower().endswith((".docx", ".doc"))

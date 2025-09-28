@@ -3,10 +3,14 @@ import json
 import csv
 import tempfile
 import os
+import logging
 import markdown
 from pathlib import Path
 from io import BytesIO, StringIO
 from datetime import datetime
+
+# Set up logger for FormConnect routes
+logger = logging.getLogger(__name__)
 from fastapi.responses import StreamingResponse
 from docx import Document
 from docx.shared import Inches
@@ -149,108 +153,58 @@ async def extract_fields_using_vector_search(
             f"Using embedding model: {embedding_info['model_id']} ({embedding_info['provider']})"
         )
 
-        # Extract text and images from the document using enhanced unified processing
+        # Extract text and images from the document using enhanced table-aware processing
         from app.services.document_utils import (
             extract_text_from_file_unified,
             extract_documents_and_images_from_file_unified,
             ensure_documents_for_vector_search,
+            extract_documents_with_table_processing,
+            search_in_table_data,
         )
         from app.services.vision_service import VisionService
 
-        # First try regular text extraction
-        text = extract_text_from_file_unified(content, file.filename or "unknown")
+        logger.info(
+            f"🔍 FormConnect: Using table-aware vector search for {file.filename}"
+        )
 
-        # Also extract images for vision-enhanced processing (for PDFs)
+        # Use table-aware document processing
+        logger.debug(
+            f"Invoking table-aware document processing for file: {file.filename}"
+        )
+        processed_documents, table_data = extract_documents_with_table_processing(
+            content, file.filename or "unknown", llm
+        )
+        logger.info(
+            f"📄 Table processing complete: {len(processed_documents)} processed documents, {len(table_data.get('tables', []))} tables extracted"
+        )
+
+        # Convert documents back to text for chunking
+        text = "\n\n".join([doc.page_content for doc in processed_documents])
+
+        # Extract images for vision fallback if needed
         document_images = []
         vision_enabled = VisionService.is_vision_enabled(llm)
-        file_ext = Path(file.filename or "").suffix.lower()
 
-        if vision_enabled and file_ext == ".pdf":
+        if vision_enabled:
             try:
-                print(
-                    f"🖼️ Extracting images from PDF for enhanced vector search: {file.filename}"
-                )
                 _, document_images = extract_documents_and_images_from_file_unified(
                     content, file.filename or "unknown"
                 )
                 if document_images:
                     print(
-                        f"✅ Found {len(document_images)} images to enhance vector search"
+                        f"🖼️ Found {len(document_images)} images available for vision fallback"
                     )
-                else:
-                    print(f"ℹ️ No images found in {file.filename}")
             except Exception as e:
-                print(f"⚠️ Failed to extract images from {file.filename}: {str(e)}")
+                print(f"⚠️ Failed to extract images: {str(e)}")
                 document_images = []
 
-        # If no text, try vision extraction for image-only documents
+        # Handle empty text documents
         if not text.strip():
-            print("No text found, checking for images...")
-            documents, images = extract_documents_and_images_from_file_unified(
-                content, file.filename or "unknown"
-            )
-
-            # Check if we have vision capabilities for image-only processing
-            if images and VisionService.is_vision_enabled(llm):
-                print(f"Found {len(images)} images, using vision extraction")
-                # Use VisionService for image-only extraction
-                try:
-                    # Convert base64 images to the format expected by VisionService
-                    vision_images = []
-                    for img_b64 in images:
-                        vision_images.append(
-                            {
-                                "image_data": img_b64,
-                                "metadata": {"source": file.filename or "unknown"},
-                            }
-                        )
-
-                    vision_result = VisionService.safe_vision_analysis(
-                        llm=llm,
-                        prompt_template=settings.FORMCONNECT_VISION_PROMPT_TEMPLATE,
-                        variables={
-                            "template_fields": list(template.keys()),
-                            "image_count": len(images),
-                        },
-                        images=vision_images,
-                    )
-
-                    # Parse the vision result as JSON if possible
-                    import json
-                    import re
-
-                    try:
-                        # Try to extract JSON from the response
-                        json_match = re.search(
-                            r"```(?:json)?\s*\n?({.*?})\s*\n?```",
-                            vision_result,
-                            re.DOTALL | re.IGNORECASE,
-                        )
-                        if json_match:
-                            vision_result = json_match.group(1)
-
-                        extracted_data = json.loads(vision_result)
-                        print(
-                            f"Successfully extracted data using vision: {extracted_data}"
-                        )
-                        return extracted_data
-
-                    except (json.JSONDecodeError, AttributeError) as e:
-                        print(f"Could not parse vision result as JSON: {e}")
-                        # Fall back to text processing with the vision result
-                        text = vision_result
-
-                except Exception as e:
-                    print(f"Vision extraction failed: {e}")
-                    return {
-                        k: "Could not extract: Document contains only images and vision extraction failed"
-                        for k in template.keys()
-                    }
-            else:
-                return {
-                    k: "Could not extract: Empty document or no vision support available"
-                    for k in template.keys()
-                }
+            print("⚠️ No text content found after table-aware processing")
+            return {
+                k: "Could not extract: No readable content found in document"
+                for k in template.keys()
+            }
 
         # Create temporary directory for ChromaDB
         temp_dir = tempfile.mkdtemp()
@@ -362,36 +316,67 @@ Extracted value:"""
                                 else str(field_response)
                             )
 
-                            # Check if we got a good result or should try vision
-                            if (
-                                extracted_value.strip().lower()
-                                in ["not found", "n/a", "none", "null", ""]
-                                and vision_enabled
-                                and document_images
-                            ):
-                                print(
-                                    f"   🔍 Text search failed for {field_name}, trying vision analysis..."
-                                )
-                                vision_value = await extract_field_from_images(
-                                    field_name,
-                                    field_description,
-                                    document_images,
-                                    llm,
-                                    file.filename,
-                                )
-                                if (
-                                    vision_value
-                                    and vision_value.strip().lower()
-                                    not in ["not found", "n/a", "none", "null"]
-                                ):
-                                    extracted_data[field_name] = vision_value.strip()
-                                    print(
-                                        f"   ✅ Vision found: {vision_value.strip()[:50]}..."
+                            # Check if we got a good result or should try other methods
+                            if extracted_value.strip().lower() in [
+                                "not found",
+                                "n/a",
+                                "none",
+                                "null",
+                                "",
+                            ]:
+                                # First, try searching in extracted table data
+                                if table_data.get("tables"):
+                                    logger.info(
+                                        f"   🔍 Text search failed for {field_name}, searching in extracted table data ({len(table_data['tables'])} tables available)..."
                                     )
+                                    table_value = search_in_table_data(
+                                        field_name, field_description, table_data
+                                    )
+                                    if table_value:
+                                        extracted_data[field_name] = table_value
+                                        logger.info(
+                                            f"   ✅ FOUND IN TABLE DATA: {field_name} = {table_value[:50]}..."
+                                        )
+                                        continue
+                                    else:
+                                        logger.debug(
+                                            f"   ❌ Field '{field_name}' not found in table data"
+                                        )
+
+                                # If table search failed and vision is available, try vision
+                                if vision_enabled and document_images:
+                                    print(
+                                        f"   🔍 Table search failed for {field_name}, trying vision analysis..."
+                                    )
+                                    vision_value = await extract_field_from_images(
+                                        field_name,
+                                        field_description,
+                                        document_images,
+                                        llm,
+                                        file.filename,
+                                    )
+                                    if (
+                                        vision_value
+                                        and vision_value.strip().lower()
+                                        not in ["not found", "n/a", "none", "null"]
+                                    ):
+                                        extracted_data[field_name] = (
+                                            vision_value.strip()
+                                        )
+                                        print(
+                                            f"   ✅ Vision found: {vision_value.strip()[:50]}..."
+                                        )
+                                    else:
+                                        extracted_data[field_name] = (
+                                            extracted_value.strip()
+                                        )
+                                        print(
+                                            f"   ⚠️ All methods failed for {field_name}"
+                                        )
                                 else:
                                     extracted_data[field_name] = extracted_value.strip()
                                     print(
-                                        f"   ⚠️ Both text and vision failed for {field_name}"
+                                        f"   ⚠️ Text search failed, no other methods available for {field_name}"
                                     )
                             else:
                                 extracted_data[field_name] = extracted_value.strip()

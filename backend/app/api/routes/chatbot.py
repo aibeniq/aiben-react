@@ -46,6 +46,10 @@ from sqlmodel import select
 
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from app.services.smart_chunking import (
+    StructureAwareTextSplitter,
+    TablePreservingTextSplitter,
+)
 from langchain_community.vectorstores import Chroma
 import tempfile
 import os
@@ -1282,6 +1286,14 @@ async def query_document(
                         status_code=404, detail="No default LLM model found"
                     )
 
+            # Create the actual LLM client from the model configuration
+            llm = create_llm(
+                provider=llm_model.provider,
+                model_id=llm_model.model_id,
+                temperature=0.0,
+            )
+            print(f"✅ Created LLM client: {llm_model.provider}/{llm_model.model_id}")
+
             # Process all uploaded files and combine them into a single document collection
             all_documents = []
             all_images = []
@@ -1294,33 +1306,65 @@ async def query_document(
                     temp_paths.append(temp_path)
                 # File is now closed and ready to be read by loaders
 
-                # Use enhanced unified document processing for both text and images
+                # Use table-aware document processing for better table handling
                 with open(temp_path, "rb") as f:
                     file_content = f.read()
 
-                documents, images = extract_documents_and_images_from_file_unified(
+                from app.services.document_utils import (
+                    extract_documents_with_table_processing,
+                )
+
+                # Process document with table awareness
+                processed_documents, table_data = (
+                    extract_documents_with_table_processing(
+                        file_content, file.filename, llm
+                    )
+                )
+
+                # Also get images for potential vision analysis
+                _, images = extract_documents_and_images_from_file_unified(
                     file_content, file.filename
                 )
 
                 # Add file source information to metadata
-                for doc in documents:
+                for doc in processed_documents:
                     if not hasattr(doc, "metadata") or doc.metadata is None:
                         doc.metadata = {}
                     doc.metadata["source_filename"] = file.filename
+                    # Add table processing info if available
+                    if table_data.get("tables"):
+                        doc.metadata["has_table_data"] = True
+                        doc.metadata["table_count"] = len(table_data["tables"])
 
-                all_documents.extend(documents)
+                all_documents.extend(processed_documents)
                 all_images.extend(images)
+
+                # Store table data for future reference
+                if table_data.get("tables"):
+                    # Note: Table data will be stored in session manager along with other session data
+                    pass
 
             # Ensure we have documents for vector search (create fallbacks if needed)
             resilient_documents = ensure_documents_for_vector_search(
                 all_documents, all_images, "uploaded_files"
             )
 
-            # Split all documents
-            text_splitter = RecursiveCharacterTextSplitter(
+            # Split all documents using table-preserving splitter to keep table structures intact
+            text_splitter = TablePreservingTextSplitter(
                 chunk_size=1000, chunk_overlap=200
             )
             chunks = text_splitter.split_documents(resilient_documents)
+
+            print(f"📊 Created {len(chunks)} chunks with table preservation")
+
+            # Log table processing summary
+            table_chunks_count = sum(
+                1 for chunk in chunks if chunk.metadata.get("has_table_data")
+            )
+            if table_chunks_count > 0:
+                print(
+                    f"✅ TABLE PROCESSING: {table_chunks_count} chunks contain table data with JSON embedding"
+                )
 
             # Create embeddings
             embeddings = load_embeddings_model(
@@ -1444,7 +1488,7 @@ async def query_document(
                     metadata["source_data_id"] = str(source_entry.source_data_id)
 
             source = {
-                "content": doc.page_content,  # Remove 300 character truncation
+                "content": doc.page_content,  # Content now includes JSON table data for table pages
                 "metadata": metadata,
             }
             sources.append(source)

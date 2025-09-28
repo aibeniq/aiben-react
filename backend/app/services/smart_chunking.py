@@ -13,6 +13,213 @@ from app.services.content_filtering import content_filter
 logger = logging.getLogger(__name__)
 
 
+class TablePreservingTextSplitter:
+    """
+    Text splitter that preserves structured table data markers and prevents
+    splitting within table JSON structures.
+    """
+
+    def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200):
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
+
+        # Base splitter for regular content
+        self.base_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            length_function=len,
+            separators=["\n\n", "\n", ". ", " ", ""],
+        )
+
+    def _extract_table_blocks(self, text: str):
+        """
+        Extract table blocks and their positions from text.
+
+        Returns:
+            List of dicts with 'start', 'end', 'content', and 'type' keys
+        """
+        blocks = []
+
+        # Patterns for different table markers
+        table_patterns = [
+            # New JSON format (primary)
+            (r"=== TABLE DATA \(JSON\) ===.*?=== END TABLE DATA ===", "json"),
+            # Legacy formats (for backward compatibility)
+            (
+                r"=== STRUCTURED TABLE DATA ===.*?=== END STRUCTURED TABLE DATA ===",
+                "structured",
+            ),
+            (
+                r"=== STRUCTURED TABLE DATA \(FALLBACK\) ===.*?=== END STRUCTURED TABLE DATA ===",
+                "fallback",
+            ),
+            (r"=== RAW TABLE CONTENT ===.*?=== END RAW TABLE CONTENT ===", "raw"),
+            (r"=== SEARCHABLE SUMMARY ===.*?=== END SEARCHABLE SUMMARY ===", "summary"),
+            (r"<TABLE_START>.*?<TABLE_END>", "test"),  # For testing
+        ]
+
+        for pattern, table_type in table_patterns:
+            matches = re.finditer(pattern, text, re.DOTALL | re.MULTILINE)
+            for match in matches:
+                blocks.append(
+                    {
+                        "start": match.start(),
+                        "end": match.end(),
+                        "content": match.group(0),
+                        "type": table_type,
+                    }
+                )
+
+        # Sort by start position
+        blocks.sort(key=lambda x: x["start"])
+        return blocks
+
+    def _create_table_aware_chunks(self, text: str):
+        """
+        Create chunks that preserve table structure.
+        """
+        table_blocks = self._extract_table_blocks(text)
+        chunks = []
+        last_end = 0
+
+        for block in table_blocks:
+            # Process text before this table block
+            if block["start"] > last_end:
+                pre_table_text = text[last_end : block["start"]].strip()
+                if pre_table_text:
+                    # Use base splitter for regular content
+                    pre_chunks = self.base_splitter.split_text(pre_table_text)
+                    chunks.extend(pre_chunks)
+
+            # Handle the table block as a single unit - NEVER split JSON tables
+            table_content = block["content"]
+            table_type = block["type"]
+
+            # JSON tables must ALWAYS remain atomic (never split or merged)
+            if table_type == "json":
+                logger.info(
+                    f"📊 Preserving JSON table as atomic chunk ({len(table_content)} chars)"
+                )
+                chunks.append(table_content)
+            elif len(table_content) > self.chunk_size * 2:
+                logger.warning(
+                    f"Large {table_type} table block ({len(table_content)} chars) may need special handling"
+                )
+                # For very large non-JSON tables, keep as single chunk to preserve structure
+                chunks.append(table_content)
+            else:
+                # For non-JSON tables, we can try combining with previous chunk
+                if chunks and len(chunks[-1]) + len(table_content) < self.chunk_size:
+                    chunks[-1] += "\n\n" + table_content
+                else:
+                    chunks.append(table_content)
+
+            last_end = block["end"]
+
+        # Process remaining text after last table block
+        if last_end < len(text):
+            remaining_text = text[last_end:].strip()
+            if remaining_text:
+                remaining_chunks = self.base_splitter.split_text(remaining_text)
+                chunks.extend(remaining_chunks)
+
+        # If no table blocks found, use base splitter
+        if not table_blocks:
+            chunks = self.base_splitter.split_text(text)
+
+        return chunks
+
+    def split_text(self, text: str):
+        """
+        Split text while preserving table structure.
+        """
+        return self._create_table_aware_chunks(text)
+
+    def split_documents(self, documents):
+        """
+        Split documents while preserving table structure.
+        """
+        result_documents = []
+
+        for doc in documents:
+            # Check if document has table data
+            has_table_markers = any(
+                marker in doc.page_content
+                for marker in [
+                    "=== TABLE DATA (JSON) ===",  # New JSON format
+                    "=== STRUCTURED TABLE DATA ===",  # Legacy formats
+                    "=== RAW TABLE CONTENT ===",
+                    "=== SEARCHABLE SUMMARY ===",
+                ]
+            )
+
+            if has_table_markers:
+                logger.info(
+                    f"📊 Processing document with table markers using table-aware splitting"
+                )
+                chunks = self._create_table_aware_chunks(doc.page_content)
+            else:
+                # Use regular splitting for non-table documents
+                logger.info(
+                    f"📋 Processing regular document: length={len(doc.page_content)}, has_tables=False"
+                )
+                chunks = self.base_splitter.split_text(doc.page_content)
+
+            logger.info(f"📄 Document produced {len(chunks)} raw chunks")
+
+            # Create new documents from chunks
+            for i, chunk in enumerate(chunks):
+                # Use very permissive minimum size threshold - just 10 characters to avoid empty content
+                min_threshold = 10
+                chunk_length = len(chunk.strip())
+                logger.info(
+                    f"🔍 Chunk {i}: {chunk_length} chars (min: {min_threshold}) - {'PASS' if chunk_length >= min_threshold else 'FAIL'}"
+                )
+                if chunk_length >= min_threshold:
+                    chunk_doc = Document(
+                        page_content=chunk,
+                        metadata={
+                            **doc.metadata,
+                            "chunk_index": i,
+                            "total_chunks": len(chunks),
+                            "has_table_content": has_table_markers
+                            and any(
+                                marker in chunk
+                                for marker in [
+                                    "=== TABLE DATA (JSON) ===",  # New JSON format
+                                    "=== STRUCTURED TABLE DATA ===",
+                                    "=== RAW TABLE CONTENT ===",
+                                ]
+                            ),
+                        },
+                    )
+                    result_documents.append(chunk_doc)
+
+        # If no chunks were created (due to size filtering), create at least one chunk per document
+        if len(result_documents) == 0 and len(documents) > 0:
+            logger.warning(
+                f"⚠️ No chunks met minimum size threshold, creating fallback chunks"
+            )
+            for doc in documents:
+                if len(doc.page_content.strip()) > 0:
+                    fallback_chunk = Document(
+                        page_content=doc.page_content,
+                        metadata={
+                            **doc.metadata,
+                            "chunk_index": 0,
+                            "total_chunks": 1,
+                            "has_table_content": False,
+                            "fallback_chunk": True,  # Mark as fallback
+                        },
+                    )
+                    result_documents.append(fallback_chunk)
+
+        logger.info(
+            f"📋 Split {len(documents)} documents into {len(result_documents)} table-aware chunks"
+        )
+        return result_documents
+
+
 class StructureAwareTextSplitter:
     """
     Text splitter that understands document structure and creates better chunks

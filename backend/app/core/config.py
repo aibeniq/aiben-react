@@ -94,6 +94,17 @@ class Settings(BaseSettings):
     FORMCONNECT_VECTOR_SEARCH_CHUNKS: int = 5  # Number of chunks to retrieve per field
     FORMCONNECT_CHUNK_OVERLAP: int = 200  # Overlap for document chunking
 
+    # Table processing settings for enhanced vector search
+    ENABLE_TABLE_VISION_PROCESSING: bool = True  # Enable table-aware vision processing
+    TABLE_DETECTION_THRESHOLD: float = 0.3  # Threshold for table detection algorithms
+    MAX_TABLE_PAGES_PER_DOCUMENT: int = (
+        10  # Maximum table pages to process per document
+    )
+    TABLE_VISION_MAX_IMAGES: int = (
+        5  # Maximum images to send to vision for table extraction
+    )
+    TABLE_PROCESSING_TIMEOUT: int = 120  # Timeout in seconds for table processing
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def all_cors_origins(self) -> list[str]:
@@ -479,10 +490,14 @@ class Settings(BaseSettings):
     QUESTION: {question}
     
     INSTRUCTIONS:
-    1. Answer the question based ONLY on the information provided in the CONTEXT.
-    2. If the context doesn't contain enough information to answer the question, say "I don't have enough information to answer this question."
-    3. Be concise and to the point.
-    4. Don't make up information or use knowledge outside the provided context.
+    1. Answer the question based on the information provided in the CONTEXT.
+    2. Look carefully through ALL the provided context for ANY relevant information, including structured data, tables, and JSON content.
+    3. If you find relevant information, provide a helpful answer even if the information is partial or requires interpretation.
+    4. For structured data or tables, extract and interpret the relevant information to answer the question.
+    5. If the context contains information that could reasonably address the question, provide that information rather than declining to answer.
+    6. Only say you don't have enough information if there is absolutely NO relevant information in the entire context.
+    7. Be helpful and proactive in finding relevant details in the provided content.
+    8. Don't make up information, but do interpret and explain structured data that's present in the context.
     
     ANSWER:
     """

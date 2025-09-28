@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Chunking Fix</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .source { 
+            background: #f5f5f5; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-left: 3px solid #007bff;
+        }
+        .complete-table { border-left-color: #28a745; }
+        .partial-table { border-left-color: #dc3545; }
+        .header { background: #007bff; color: white; padding: 5px; margin: 5px 0; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test JSON Table Chunking Fix</h1>
+    <p>This test will query the backend and check if table chunks are properly formatted with wrapper markers.</p>
+    
+    <button onclick="testChunking()">🔍 Test Table Chunking</button>
+    <button onclick="clearResults()">🗑️ Clear Results</button>
+    
+    <div id="results"></div>
+
+    <script>
+        async function testChunking() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="header">🔄 Testing chunking fix...</div>';
+            
+            try {
+                const response = await fetch('/api/v1/chat/document?question=What are the fees for E-Accounts?&use_default_models=true&search_mode=vector', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Extract and analyze sources
+                const sources = data.sources || [];
+                let completeTableChunks = 0;
+                let partialTableChunks = 0;
+                let regularChunks = 0;
+                
+                let html = '<div class="header">📊 Analysis Results</div>';
+                html += `<p><strong>Total Sources:</strong> ${sources.length}</p>`;
+                html += `<p><strong>Answer:</strong> ${data.answer}</p>`;
+                html += '<div class="header">📄 Source Analysis</div>';
+                
+                sources.forEach((source, index) => {
+                    const content = source.page_content || '';
+                    const isCompleteTable = content.includes('=== TABLE DATA (JSON) ===') && content.includes('=== END TABLE DATA ===');
+                    const hasTableFragments = !isCompleteTable && (
+                        content.includes('"Description"') || 
+                        content.includes('"Fee"') || 
+                        content.includes('E-Account') ||
+                        content.includes('0.000822%')
+                    );
+                    
+                    let className = 'source';
+                    let status = '📝 Regular Content';
+                    
+                    if (isCompleteTable) {
+                        className += ' complete-table';
+                        status = '✅ Complete Table Block';
+                        completeTableChunks++;
+                    } else if (hasTableFragments) {
+                        className += ' partial-table';
+                        status = '❌ Partial Table Fragment';
+                        partialTableChunks++;
+                    } else {
+                        regularChunks++;
+                    }
+                    
+                    const preview = content.substring(0, 200);
+                    
+                    html += `
+                        <div class="${className}">
+                            <strong>Source ${index + 1}</strong> - ${status}<br>
+                            <em>Page ${source.page || 'Unknown'}</em><br>
+                            <strong>Preview:</strong> ${preview}${content.length > 200 ? '...' : ''}
+                        </div>
+                    `;
+                });
+                
+                // Summary
+                html += '<div class="header">📈 Summary</div>';
+                html += `<p>✅ Complete Table Blocks: <strong>${completeTableChunks}</strong></p>`;
+                html += `<p>❌ Partial Table Fragments: <strong>${partialTableChunks}</strong></p>`;
+                html += `<p>📝 Regular Content Chunks: <strong>${regularChunks}</strong></p>`;
+                
+                if (partialTableChunks === 0 && completeTableChunks > 0) {
+                    html += '<div style="background: #d4edda; color: #155724; padding: 10px; margin: 10px 0; border: 1px solid #c3e6cb;">🎉 <strong>SUCCESS:</strong> All table content is properly preserved in complete blocks!</div>';
+                } else if (partialTableChunks > 0) {
+                    html += '<div style="background: #f8d7da; color: #721c24; padding: 10px; margin: 10px 0; border: 1px solid #f5c6cb;">⚠️ <strong>ISSUE:</strong> Some table content is split across chunks without proper markers.</div>';
+                } else {
+                    html += '<div style="background: #fff3cd; color: #856404; padding: 10px; margin: 10px 0; border: 1px solid #ffeaa7;">ℹ️ No table content found in this query.</div>';
+                }
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="header">❌ Error</div>
+                    <div style="background: #f8d7da; color: #721c24; padding: 10px;">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

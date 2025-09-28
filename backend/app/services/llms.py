@@ -443,8 +443,8 @@ def invoke_llm(llm, prompt, variables=None):
 
         # Apply appropriate retry logic based on model type
         if "ChatOpenAI" in model_class_name or "OpenAI" in model_class_name:
-            # Apply OpenAI retry logic
-            return retry_openai_api(min_wait=1, max_wait=60, max_attempts=6)(
+            # Apply OpenAI retry logic with rate-limit friendly settings
+            return retry_openai_api(min_wait=5, max_wait=300, max_attempts=6)(
                 _invoke_langchain_model
             )()
         elif "ChatBedrock" in model_class_name or "Bedrock" in model_class_name:
@@ -549,8 +549,8 @@ def invoke_llm_with_image(
             model_class_name = llm.__class__.__name__
 
             if "ChatOpenAI" in model_class_name or "OpenAI" in model_class_name:
-                # Apply OpenAI retry logic
-                return retry_openai_api(min_wait=1, max_wait=60, max_attempts=6)(
+                # Apply OpenAI retry logic with rate-limit friendly settings
+                return retry_openai_api(min_wait=5, max_wait=300, max_attempts=6)(
                     _invoke_multimodal_langchain
                 )()
             elif "ChatBedrock" in model_class_name or "Bedrock" in model_class_name:
@@ -644,6 +644,7 @@ def record_llm_interaction(
 def invoke_llm_with_images(llm, prompt, variables=None, images_list=None):
     """
     Enhanced function to invoke an LLM with multiple images (for multimodal models).
+    Includes retry logic for handling rate limits during vision processing.
 
     Args:
         llm: The LLM instance to use
@@ -656,6 +657,7 @@ def invoke_llm_with_images(llm, prompt, variables=None, images_list=None):
     """
     from langchain_core.messages import HumanMessage
     from langchain.prompts import ChatPromptTemplate
+    from app.services.retry_utils import retry_openai_api
     import traceback
 
     # First, prepare the text content properly
@@ -690,6 +692,12 @@ def invoke_llm_with_images(llm, prompt, variables=None, images_list=None):
             f"Using LangChain-based LLM for multimodal invocation with {len(images_list)} images"
         )
 
+        # Create a retry-wrapped version of the LLM invoke method
+        @retry_openai_api(min_wait=5, max_wait=180, max_attempts=6)
+        def invoke_with_retry(llm_instance, message_list):
+            """Invoke LLM with retry logic for rate limiting."""
+            return llm_instance.invoke(message_list)
+
         try:
             # Create the message content with text and multiple images
             content_parts = [{"type": "text", "text": text_content}]
@@ -710,8 +718,8 @@ def invoke_llm_with_images(llm, prompt, variables=None, images_list=None):
                 f"Invoking LLM with {len(content_parts)} content parts (1 text + {len(images_list)} images)"
             )
 
-            # Call the LLM with image capability
-            response = llm.invoke([message])
+            # Call the LLM with image capability using retry logic
+            response = invoke_with_retry(llm, [message])
 
             print("Successfully received response from multimodal LLM")
 

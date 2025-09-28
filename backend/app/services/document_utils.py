@@ -5,10 +5,14 @@ Centralizes all document text extraction logic for consistent handling across th
 
 import tempfile
 import os
+import logging
 from pathlib import Path
-from typing import List, Union, Any, Tuple
+from typing import List, Union, Any, Tuple, Dict, Optional
 from langchain_core.documents import Document
 from langchain_community.document_loaders import TextLoader
+
+# Set up logger for document processing
+logger = logging.getLogger(__name__)
 
 
 def extract_text_from_docx_bytes(file_content: bytes, filename: str) -> str:
@@ -821,3 +825,631 @@ Provide a detailed description of the visual content that would be useful for {p
     except Exception as e:
         print(f"⚠️ Vision enhancement failed for {filename}: {str(e)}")
         return text_content
+
+
+def extract_documents_with_table_processing(
+    file_content: bytes, filename: str, llm=None
+) -> Tuple[List[Document], Dict[str, Any]]:
+    """
+    Enhanced document extraction that processes tables with vision when detected.
+
+    Args:
+        file_content: Raw bytes of the file
+        filename: Name of the file
+        llm: LLM instance for vision processing (optional)
+
+    Returns:
+        Tuple of (processed_documents, table_data)
+    """
+    from app.services.table_detection import TableDetector
+    from app.services.vision_service import VisionService
+
+    print(f"🔍 Processing {filename} with table-aware document extraction")
+
+    # First, extract documents normally
+    documents = extract_documents_from_file_unified(file_content, filename)
+    logger.info(f"📄 Extracted {len(documents)} documents from {filename}")
+
+    # Detect which pages have tables
+    table_pages = TableDetector.identify_table_pages(documents)
+
+    table_data = {}
+    processed_documents = []
+    file_ext = Path(filename).suffix.lower() if filename else ""
+
+    # Enhanced diagnostic logging for table processing conditions
+    logger.info(f"🔍 TABLE PROCESSING DIAGNOSTIC:")
+    logger.info(f"  📊 Table pages detected: {len(table_pages)} pages {table_pages}")
+
+    # For table processing, we need PAGE IMAGES, not embedded images
+    page_images = []
+    if table_pages and file_ext == ".pdf":
+        logger.info(f"  🖼️ Generating page images for PDF table processing...")
+
+        # Try PyMuPDF first (already installed in your system)
+        try:
+            import fitz  # PyMuPDF
+            import base64  # Add missing import
+
+            doc = fitz.open(stream=file_content, filetype="pdf")
+
+            for page_num in range(doc.page_count):
+                page = doc[page_num]
+                # Render page as image
+                mat = fitz.Matrix(2.0, 2.0)  # 2x zoom for better quality
+                pix = page.get_pixmap(matrix=mat)
+                img_data = pix.tobytes("png")
+                img_base64 = base64.b64encode(img_data).decode()
+                page_images.append(img_base64)
+
+            doc.close()
+            logger.info(f"  ✅ Generated {len(page_images)} page images using PyMuPDF")
+
+        except ImportError:
+            logger.warning(f"  ⚠️ PyMuPDF not available, trying pdf2image...")
+            # Fallback to pdf2image
+            try:
+                from pdf2image import convert_from_bytes
+                import io
+                import base64
+
+                pages = convert_from_bytes(file_content, dpi=150, fmt="PNG")
+                for page in pages:
+                    img_buffer = io.BytesIO()
+                    page.save(img_buffer, format="PNG")
+                    img_str = base64.b64encode(img_buffer.getvalue()).decode()
+                    page_images.append(img_str)
+                logger.info(
+                    f"  ✅ Generated {len(page_images)} page images using pdf2image"
+                )
+            except ImportError:
+                logger.error(
+                    f"  ❌ Neither PyMuPDF nor pdf2image available - cannot generate page images"
+                )
+            except Exception as e:
+                logger.error(f"  ❌ Error with pdf2image: {e}")
+
+        except Exception as e:
+            logger.error(f"  ❌ Error with PyMuPDF: {e}")
+
+    logger.info(f"  🖼️ Page images available: {len(page_images)} images")
+
+    # Check vision capability
+    vision_enabled = VisionService.is_vision_enabled(llm)
+    logger.info(f"  🔮 Vision enabled: {vision_enabled}")
+
+    # Enhanced LLM debugging
+    if llm:
+        model_name = (
+            getattr(llm, "model_name", "")
+            or getattr(llm, "model", "")
+            or str(type(llm).__name__)
+        )
+        class_name = type(llm).__name__
+        logger.info(f"  🤖 LLM model: '{model_name}', type: {class_name}")
+
+        # Check for wrapped models
+        if hasattr(llm, "_llm"):
+            inner_llm = getattr(llm, "_llm", None)
+            if inner_llm:
+                inner_model = getattr(inner_llm, "model_name", "") or getattr(
+                    inner_llm, "model", ""
+                )
+                inner_class = type(inner_llm).__name__
+                logger.info(f"  🤖 Inner LLM: '{inner_model}', type: {inner_class}")
+
+        # Debug vision-enabled models list
+        from app.core.config import settings
+
+        logger.info(
+            f"  🔮 Vision-enabled models in config: {settings.VISION_ENABLED_MODELS}"
+        )
+
+        # Check if model matches any vision-enabled model
+        matches = [
+            vm for vm in settings.VISION_ENABLED_MODELS if vm in model_name.lower()
+        ]
+        if matches:
+            logger.info(f"  ✅ Model matches vision patterns: {matches}")
+        else:
+            logger.warning(
+                f"  ❌ Model '{model_name}' doesn't match any vision-enabled patterns"
+            )
+            logger.warning(
+                f"  💡 Add '{model_name.lower()}' to VISION_ENABLED_MODELS if it supports vision"
+            )
+
+        # If vision is not enabled, explain why
+        if not vision_enabled:
+            logger.warning(f"  ❌ VISION DISABLED for model '{model_name}'")
+            logger.warning(
+                f"  💡 Ensure model name contains one of: {settings.VISION_ENABLED_MODELS}"
+            )
+        else:
+            logger.info(f"  ✅ VISION ENABLED for model '{model_name}'")
+    else:
+        logger.warning(f"  ❌ No LLM provided for vision processing")
+        logger.warning(f"  💡 LLM parameter is None - check chatbot LLM initialization")
+
+    # Check each condition separately
+    if not table_pages:
+        logger.info(f"❌ CONDITION 1 FAILED: No table pages detected")
+    else:
+        logger.info(f"✅ CONDITION 1 PASSED: {len(table_pages)} table pages detected")
+
+    if not page_images:
+        logger.info(
+            f"❌ CONDITION 2 FAILED: No page images generated for table processing"
+        )
+    else:
+        logger.info(
+            f"✅ CONDITION 2 PASSED: {len(page_images)} page images available for table processing"
+        )
+
+    if not vision_enabled:
+        logger.info(
+            f"❌ CONDITION 3 FAILED: Vision processing not enabled for this LLM"
+        )
+    else:
+        logger.info(f"✅ CONDITION 3 PASSED: Vision processing enabled")
+
+    # Try vision processing if all conditions are met
+    vision_processing_attempted = False
+
+    if table_pages and page_images and VisionService.is_vision_enabled(llm):
+        logger.info(f"🔍 Detected tables on pages: {table_pages}")
+
+        # Check if we should use vision for these tables
+        should_use_vision = TableDetector.should_use_vision_for_tables(
+            documents, file_ext
+        )
+
+        if should_use_vision:
+            vision_processing_attempted = True
+            logger.info(
+                f"📊 Tables are complex enough to benefit from vision processing"
+            )
+
+            # Extract table page images for vision processing
+            table_images = []
+            table_page_numbers = []
+
+            for page_num in table_pages:
+                # Use 0-based indexing for page_images array
+                page_index = page_num - 1 if page_num > 0 else page_num
+                if page_index < len(page_images):
+                    table_images.append(page_images[page_index])
+                    table_page_numbers.append(page_num)
+
+            # Process tables with vision
+            if table_images:
+                logger.info(
+                    f"� VISION PROCESSING INVOKED: Processing {len(table_images)} table pages with vision model"
+                )
+                logger.debug(
+                    f"Vision processing details: pages={table_page_numbers}, model={getattr(llm, 'model_name', 'unknown')}"
+                )
+                try:
+                    table_data = VisionService.extract_table_as_json(
+                        llm=llm,
+                        page_images=table_images,
+                        page_numbers=table_page_numbers,
+                        filename=filename,
+                    )
+                    if table_data.get("extraction_successful", False):
+                        logger.info(
+                            f"✅ Vision processing complete: extracted data for {len(table_data.get('tables', []))} tables"
+                        )
+                    else:
+                        error_msg = table_data.get("error", "Unknown error")
+                        logger.warning(f"⚠️ Vision processing failed: {error_msg}")
+                except Exception as vision_error:
+                    logger.error(
+                        f"💥 Vision processing error: {type(vision_error).__name__}: {vision_error}"
+                    )
+                    # Create empty table_data to trigger fallback processing
+                    table_data = {}
+            else:
+                logger.warning(
+                    f"⚠️ No valid table images found despite detecting table pages"
+                )
+        else:
+            logger.info(
+                f"📄 Tables are simple, using text-only processing (vision not needed)"
+            )
+    else:
+        # Log which specific condition failed
+        failed_conditions = []
+        if not table_pages:
+            failed_conditions.append("no table pages")
+        if not page_images:
+            failed_conditions.append("no page images generated")
+        if not VisionService.is_vision_enabled(llm):
+            failed_conditions.append("vision not enabled")
+
+        logger.info(f"❌ TABLE ENHANCEMENT SKIPPED: {', '.join(failed_conditions)}")
+
+        # Even without vision, mark table pages for enhanced text processing
+        if table_pages:
+            logger.info(
+                f"📄 Using enhanced text-based table processing for {len(table_pages)} table pages"
+            )
+
+    # Process documents and enhance table-containing ones
+    for i, doc in enumerate(documents):
+        page_num = doc.metadata.get("page", doc.metadata.get("page_number", i))
+
+        if page_num in table_pages:
+            # Check if we have vision-extracted tables for this page
+            vision_tables = []
+            if table_data.get("tables"):
+                vision_tables = [
+                    table
+                    for table in table_data["tables"]
+                    if table.get("page") == page_num
+                ]
+
+            if vision_tables:
+                # Replace raw table content with clean JSON formatted data
+                logger.info(
+                    f"📊 Processing page {page_num} with {len(vision_tables)} vision-extracted tables"
+                )
+
+                # For pages with tables, replace the raw content entirely with clean JSON
+                # This prevents duplicate/conflicting information in citations
+                all_table_content = []
+
+                # Process each vision-extracted table
+                for table in vision_tables:
+                    import json
+
+                    # Create structured JSON representation for table data
+                    table_json = {
+                        "table_id": table.get(
+                            "table_id", f"table_{page_num}_{vision_tables.index(table)}"
+                        ),
+                        "page": page_num,
+                        "title": table.get("title", table.get("summary", "Data Table")),
+                        "headers": table.get("headers", []),
+                        "rows": table.get("rows", []),
+                        "summary": table.get("summary", ""),
+                        "context": table.get("context", ""),
+                        "metadata": {
+                            "row_count": table.get("metadata", {}).get(
+                                "row_count", len(table.get("rows", []))
+                            ),
+                            "column_count": table.get("metadata", {}).get(
+                                "column_count", len(table.get("headers", []))
+                            ),
+                            "table_type": table.get("metadata", {}).get(
+                                "table_type", "data"
+                            ),
+                            "processing_method": "vision_enhanced",
+                            "source_filename": filename,
+                            "extraction_timestamp": table.get("metadata", {}).get(
+                                "extraction_timestamp", ""
+                            ),
+                        },
+                    }
+
+                    # Convert table data to JSON array format for better LLM interpretation
+                    json_rows = []
+
+                    # Get headers and validate we have data
+                    headers = table_json.get("headers", [])
+                    rows = table_json.get("rows", [])
+
+                    if headers and rows:
+                        # Convert each row to a JSON object using headers as keys
+                        for row in rows:
+                            if isinstance(row, list) and len(row) > 0:
+                                # Create object with header-value pairs
+                                row_obj = {}
+                                for i, header in enumerate(headers):
+                                    # Get value at index i, or empty string if index doesn't exist
+                                    value = row[i] if i < len(row) else ""
+                                    # Clean up the value
+                                    if value is None:
+                                        value = ""
+                                    else:
+                                        value = str(value).strip()
+                                    row_obj[header] = value
+                                json_rows.append(row_obj)
+
+                    # Create clean JSON table representation WITHOUT wrapper markers
+                    # This makes it more LLM-friendly and eliminates parsing issues
+                    table_content = {
+                        "table_metadata": {
+                            "title": table_json.get("title", "Data Table"),
+                            "page": page_num,
+                            "summary": table_json.get("summary", ""),
+                            "context": table_json.get("context", ""),
+                            "dimensions": f"{len(json_rows)} rows × {len(headers)} columns",
+                        },
+                        "table_data": json_rows,
+                    }
+
+                    all_table_content.append(table_content)
+
+                # Create enhanced content with proper wrapper markers for chunking system
+                # Each table gets its own JSON block with proper markers
+                enhanced_content_parts = []
+
+                for table_content in all_table_content:
+                    table_block = f"\n=== TABLE DATA (JSON) ===\n"
+
+                    # Add metadata header
+                    metadata_header = {
+                        "_table_metadata": table_content["table_metadata"]
+                    }
+                    table_block += (
+                        json.dumps(metadata_header, indent=2, ensure_ascii=False)
+                        + "\n\n"
+                    )
+
+                    # Add table data as JSON array
+                    table_block += json.dumps(
+                        table_content["table_data"], indent=2, ensure_ascii=False
+                    )
+                    table_block += "\n=== END TABLE DATA ===\n"
+
+                    enhanced_content_parts.append(table_block)
+
+                # Combine all table blocks
+                enhanced_content = "\n".join(enhanced_content_parts)
+
+                # Create new document with enhanced content for vision processing
+                enhanced_doc = Document(
+                    page_content=enhanced_content,
+                    metadata={
+                        **doc.metadata,
+                        "has_processed_tables": True,
+                        "table_count": len(vision_tables),
+                        "processing_method": "vision_enhanced",
+                    },
+                )
+                processed_documents.append(enhanced_doc)
+
+            else:
+                # Vision processing failed or returned no tables for this page
+                # Create a fallback structured representation from the raw content
+                enhanced_content = doc.page_content
+
+                logger.warning(
+                    f"⚠️ Page {page_num} detected as table page but no vision data available. Creating fallback structure."
+                )
+
+                # Create a fallback table structure from raw content
+                import json
+
+                fallback_table = {
+                    "table_id": f"fallback_table_{page_num}",
+                    "page": page_num,
+                    "title": f"Table Content from Page {page_num}",
+                    "headers": [],  # We don't have structured headers
+                    "rows": [],  # We don't have structured rows
+                    "raw_content": doc.page_content.strip(),  # Include the raw content
+                    "summary": "Table content extracted as raw text (vision processing unavailable)",
+                    "context": f"Content from page {page_num} of {filename}",
+                    "metadata": {
+                        "row_count": 0,
+                        "column_count": 0,
+                        "table_type": "raw_text_fallback",
+                        "processing_method": "text_only_fallback",
+                        "source_filename": filename,
+                        "extraction_timestamp": "",
+                    },
+                }
+
+                # Format as JSON array for consistency (even for fallback)
+                # Create a single JSON object representing the raw text content
+                fallback_json_rows = [
+                    {
+                        "content_type": "raw_text",
+                        "page_content": doc.page_content.strip(),
+                        "processing_note": "Vision processing was unavailable - content preserved as raw text",
+                    }
+                ]
+
+                table_text = f"\n\n=== TABLE DATA (JSON) ===\n"
+
+                # Add metadata header for fallback context
+                metadata_header = {
+                    "_table_metadata": {
+                        "title": f"Table Content from Page {page_num}",
+                        "page": page_num,
+                        "summary": "Table content extracted as raw text (vision processing unavailable)",
+                        "context": f"Content from page {page_num} of {filename}",
+                        "dimensions": "1 content block (fallback mode)",
+                        "processing_method": "text_only_fallback",
+                    }
+                }
+
+                table_text += (
+                    json.dumps(metadata_header, indent=2, ensure_ascii=False) + "\n\n"
+                )
+                table_text += json.dumps(
+                    fallback_json_rows, indent=2, ensure_ascii=False
+                )
+                table_text += "\n=== END TABLE DATA ===\n"
+
+                enhanced_content += table_text
+
+                # Create new document with enhanced content (fallback mode)
+                enhanced_doc = Document(
+                    page_content=enhanced_content,
+                    metadata={
+                        **doc.metadata,
+                        "has_processed_tables": True,
+                        "table_count": 1,  # One fallback table
+                        "processing_method": "text_only_fallback",
+                    },
+                )
+                processed_documents.append(enhanced_doc)
+        else:
+            # No tables detected on this page
+            processed_documents.append(doc)
+
+    # Log processing results
+    if table_data.get("tables"):
+        print(
+            f"✅ Enhanced {len(processed_documents)} documents with {len(table_data['tables'])} extracted tables"
+        )
+    else:
+        print(
+            f"📄 Processed {len(processed_documents)} documents (no table enhancement)"
+        )
+
+    return processed_documents, table_data
+
+
+def search_in_table_data(
+    field_name: str, field_description: str, table_data: Dict[str, Any]
+) -> Optional[str]:
+    """
+    Search for field values in extracted table data.
+
+    Args:
+        field_name: The field name to search for
+        field_description: Description of the field for better matching
+        table_data: Dictionary containing extracted table data
+
+    Returns:
+        Found value or None
+    """
+    from typing import Optional
+
+    if not table_data.get("tables"):
+        return None
+
+    # Normalize search terms
+    field_lower = field_name.lower().strip()
+    desc_lower = field_description.lower().strip()
+
+    # Extract key terms from field name and description
+    field_terms = set(field_lower.split())
+    desc_terms = set(desc_lower.split())
+    search_terms = field_terms.union(desc_terms)
+
+    # Remove common stop words
+    stop_words = {
+        "the",
+        "a",
+        "an",
+        "and",
+        "or",
+        "but",
+        "in",
+        "on",
+        "at",
+        "to",
+        "for",
+        "of",
+        "with",
+        "by",
+        "is",
+        "are",
+        "was",
+        "were",
+    }
+    search_terms = search_terms - stop_words
+
+    # Search through all tables
+    for table in table_data["tables"]:
+        headers = table.get("headers", [])
+        rows = table.get("rows", [])
+
+        if not headers or not rows:
+            continue
+
+        # Search in headers for field name matches
+        for header_idx, header in enumerate(headers):
+            header_lower = header.lower().strip()
+
+            # Direct match
+            if field_lower in header_lower or header_lower in field_lower:
+                column_values = extract_column_values(rows, header_idx)
+                if column_values:
+                    return format_column_values(column_values)
+
+            # Term-based matching
+            header_terms = set(header_lower.split())
+            if search_terms.intersection(header_terms):
+                # Calculate match score
+                match_score = len(search_terms.intersection(header_terms)) / len(
+                    search_terms
+                )
+                if match_score >= 0.5:  # At least 50% of search terms match
+                    column_values = extract_column_values(rows, header_idx)
+                    if column_values:
+                        return format_column_values(column_values)
+
+        # Search in table title/summary
+        title = table.get("title", "").lower()
+        summary = table.get("summary", "").lower()
+        context = table.get("context", "").lower()
+
+        table_text = f"{title} {summary} {context}"
+        if any(term in table_text for term in search_terms):
+            # If field name relates to table content, return a summary
+            return f"Found in {table.get('title', 'table')}: {table.get('summary', 'Contains relevant data')}"
+
+    return None
+
+
+def extract_column_values(rows: List[List], column_index: int) -> List[str]:
+    """Extract non-empty values from a specific column."""
+    column_values = []
+    for row in rows:
+        if isinstance(row, list) and column_index < len(row):
+            value = str(row[column_index]).strip()
+            if value and value.lower() not in ["", "null", "none", "n/a", "-", "--"]:
+                column_values.append(value)
+    return column_values
+
+
+def format_column_values(values: List[str]) -> str:
+    """Format column values for display."""
+    if not values:
+        return None
+
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_values = []
+    for value in values:
+        if value not in seen:
+            seen.add(value)
+            unique_values.append(value)
+
+    if len(unique_values) == 1:
+        return unique_values[0]
+    elif len(unique_values) <= 3:
+        return ", ".join(unique_values)
+    else:
+        # Return first 3 values and indicate more
+        return f"{', '.join(unique_values[:3])} (and {len(unique_values) - 3} more)"
+
+
+async def extract_documents_with_table_processing_async(
+    file_content: bytes, filename: str, llm=None
+) -> Tuple[List[Document], Dict[str, Any]]:
+    """
+    Async version of table-aware document extraction.
+
+    Args:
+        file_content: Raw bytes of the file
+        filename: Name of the file
+        llm: LLM instance for vision processing (optional)
+
+    Returns:
+        Tuple of (processed_documents, table_data)
+    """
+    import asyncio
+    from concurrent.futures import ThreadPoolExecutor
+
+    # Use thread pool for CPU-intensive document processing
+    with ThreadPoolExecutor() as executor:
+        future = executor.submit(
+            extract_documents_with_table_processing, file_content, filename, llm
+        )
+        return await asyncio.wrap_future(future)

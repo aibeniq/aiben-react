@@ -122,8 +122,11 @@ def extract_openai_wait_time(exception: Exception) -> float:
 
 class OpenAIWaitStrategy:
     """
-    Custom wait strategy that respects OpenAI's suggested wait times.
+    Custom wait strategy that respects OpenAI's suggested wait times with intelligent scaling.
     Falls back to exponential backoff if no suggestion is provided.
+    
+    For sustained rate limits (when at 100% capacity), uses progressively longer waits
+    to allow the sliding window to reset properly.
     """
 
     def __init__(self, min_wait: int = 5, max_wait: int = 120, multiplier: int = 1):
@@ -134,22 +137,74 @@ class OpenAIWaitStrategy:
             multiplier=multiplier, min=min_wait, max=max_wait
         )
 
+    def _extract_rate_limit_info(self, exception):
+        """Extract rate limit usage information from OpenAI error message."""
+        try:
+            error_message = str(exception)
+            
+            # Pattern to extract: "Limit 200000, Used 200000, Requested 4521"
+            limit_match = re.search(r"Limit (\d+), Used (\d+), Requested (\d+)", error_message)
+            if limit_match:
+                limit = int(limit_match.group(1))
+                used = int(limit_match.group(2))
+                requested = int(limit_match.group(3))
+                return limit, used, requested
+            
+            return None, None, None
+        except Exception as e:
+            logger.debug(f"Could not extract rate limit info: {e}")
+            return None, None, None
+
     def __call__(self, retry_state: RetryCallState) -> float:
-        """Calculate wait time based on OpenAI suggestion or exponential backoff."""
+        """Calculate wait time based on OpenAI suggestion with intelligent scaling."""
         if retry_state.outcome and retry_state.outcome.failed:
             exception = retry_state.outcome.exception()
 
             # Check if this is an OpenAI RateLimitError with suggested wait time
             if isinstance(exception, RateLimitError):
                 suggested_wait = extract_openai_wait_time(exception)
+                limit, used, requested = self._extract_rate_limit_info(exception)
+                
                 if suggested_wait > 0:
-                    # Add a small buffer (10%) to the suggested wait time
-                    buffered_wait = suggested_wait * 1.1
+                    # Calculate usage percentage
+                    usage_percent = (used / limit * 100) if limit and used else 0
+                    attempt_number = retry_state.attempt_number
+                    
+                    # Base wait time from OpenAI suggestion
+                    base_wait = suggested_wait
+                    
+                    # Apply intelligent scaling based on usage and retry count
+                    if usage_percent >= 100:
+                        # At 100% capacity - use aggressive scaling for sliding window reset
+                        scaling_factor = 2.0 + (attempt_number * 1.5)  # Start at 2x, increase by 1.5x per retry
+                        logger.warning(
+                            f"� SUSTAINED RATE LIMIT: At {usage_percent:.1f}% capacity, "
+                            f"scaling wait time by {scaling_factor:.1f}x (attempt #{attempt_number})"
+                        )
+                    elif usage_percent >= 95:
+                        # Near capacity - moderate scaling
+                        scaling_factor = 1.5 + (attempt_number * 0.5)
+                        logger.info(
+                            f"⚠️ HIGH USAGE: At {usage_percent:.1f}% capacity, "
+                            f"scaling wait time by {scaling_factor:.1f}x (attempt #{attempt_number})"
+                        )
+                    else:
+                        # Normal usage - minimal scaling
+                        scaling_factor = 1.1 + (attempt_number * 0.1)
+                        logger.info(
+                            f"✅ NORMAL USAGE: At {usage_percent:.1f}% capacity, "
+                            f"scaling wait time by {scaling_factor:.1f}x (attempt #{attempt_number})"
+                        )
+                    
+                    # Apply scaling and ensure minimum/maximum bounds
+                    scaled_wait = base_wait * scaling_factor
+                    final_wait = max(self.min_wait, min(scaled_wait, self.max_wait))
+                    
                     logger.info(
-                        f"🕒 OpenAI suggested wait time: {suggested_wait:.3f}s, "
-                        f"using buffered time: {buffered_wait:.3f}s"
+                        f"🕒 OpenAI suggested {suggested_wait:.3f}s, scaled to {final_wait:.3f}s "
+                        f"(usage: {usage_percent:.1f}%, attempt: #{attempt_number})"
                     )
-                    return buffered_wait
+                    return final_wait
 
         # Fall back to exponential backoff for other errors or when no suggestion
         fallback_wait = self.exponential_backoff(retry_state)
@@ -273,9 +328,9 @@ def is_retryable_replicate_error(exception: Exception) -> bool:
 
 
 def retry_openai_api(
-    min_wait: int = 5,  # Increased minimum wait to avoid overwhelming API
-    max_wait: int = 180,  # Increased to handle longer OpenAI suggested waits
-    max_attempts: int = 5,  # Reduced max attempts to prevent runaway retries
+    min_wait: int = 5,  # Minimum wait time for any retry
+    max_wait: int = 300,  # Increased to handle sustained rate limits (5 minutes max)
+    max_attempts: int = 6,  # Allow more attempts for rate limit recovery
 ) -> Callable[[F], F]:
     """
     Decorator for OpenAI API calls with intelligent wait strategy that respects OpenAI's suggested wait times.
