@@ -704,6 +704,15 @@ def invoke_llm_with_images(llm, prompt, variables=None, images_list=None):
 
             # Add each image to the content
             for i, image_b64 in enumerate(images_list):
+                # 🐛 DEBUG: Validate image data
+                print(f"🐛 DEBUG: Processing image {i+1}: {len(image_b64)} chars")
+                if not image_b64:
+                    print(f"🐛 DEBUG: WARNING: Image {i+1} is empty!")
+                elif len(image_b64) < 100:
+                    print(
+                        f"🐛 DEBUG: WARNING: Image {i+1} seems too small: '{image_b64[:50]}...'"
+                    )
+
                 content_parts.append(
                     {
                         "type": "image_url",
@@ -715,7 +724,15 @@ def invoke_llm_with_images(llm, prompt, variables=None, images_list=None):
             message = HumanMessage(content=content_parts)
 
             print(
-                f"Invoking LLM with {len(content_parts)} content parts (1 text + {len(images_list)} images)"
+                f"🐛 DEBUG: Invoking LLM with {len(content_parts)} content parts (1 text + {len(images_list)} images)"
+            )
+            print(f"🐛 DEBUG: Text content length: {len(text_content)} chars")
+            print(f"🐛 DEBUG: Text content preview: '{text_content[:200]}...'")
+
+            # 🐛 DEBUG: Validate message structure
+            print(f"🐛 DEBUG: Message type: {type(message)}")
+            print(
+                f"🐛 DEBUG: Message content length: {len(message.content) if hasattr(message, 'content') else 'No content attr'}"
             )
 
             # Call the LLM with image capability using retry logic
@@ -731,6 +748,14 @@ def invoke_llm_with_images(llm, prompt, variables=None, images_list=None):
             return str(response)
 
         except Exception as e:
-            print(f"Error using LangChain for multiple images: {str(e)}")
-            print(traceback.format_exc())
+            print(f"🐛 DEBUG: Error using LangChain for multiple images: {str(e)}")
+            print(f"🐛 DEBUG: Exception type: {type(e).__name__}")
+            print(f"🐛 DEBUG: Exception repr: {repr(e)}")
+            print(f"🐛 DEBUG: Full traceback: {traceback.format_exc()}")
+
+            # 🐛 DEBUG: Analyze the specific error
+            if "KeyError" in str(type(e)):
+                print(f"🐛 DEBUG: KeyError detected in invoke_llm_with_images!")
+                print(f"🐛 DEBUG: KeyError details: {e}")
+
             return f"Error processing multiple images: {str(e)}"

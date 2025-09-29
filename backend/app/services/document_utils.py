@@ -850,8 +850,164 @@ def extract_documents_with_table_processing(
     documents = extract_documents_from_file_unified(file_content, filename)
     logger.info(f"📄 Extracted {len(documents)} documents from {filename}")
 
+    # Check if this might be a vector graphics PDF that needs fallback processing
+    is_vector_graphics_pdf = False
+    file_ext = Path(filename).suffix.lower() if filename else ""
+
+    if file_ext == ".pdf":
+        # Calculate text characteristics for vector graphics detection
+        total_text_length = sum(len(doc.page_content.strip()) for doc in documents)
+        page_count = len(documents) if documents else 0
+
+        # Get actual PDF page count for comparison
+        actual_page_count = page_count
+        try:
+            import fitz
+
+            pdf_doc = fitz.open(stream=file_content, filetype="pdf")
+            actual_page_count = pdf_doc.page_count
+            pdf_doc.close()
+        except Exception:
+            pass
+
+        # Detect vector graphics PDF characteristics
+        avg_text_per_page = total_text_length / max(actual_page_count, 1)
+        missing_pages = actual_page_count - page_count
+
+        # Check for fragmented text patterns (common in vector graphics PDFs)
+        fragmented_patterns = 0
+        for doc in documents:
+            text = doc.page_content.strip()
+            if text:
+                # Count indicators of fragmented/metadata text
+                if any(
+                    pattern in text.lower()
+                    for pattern in [
+                        "http",
+                        "www.",
+                        "page ",
+                        "of ",
+                        "sample",
+                        "©",
+                        "®",
+                        "™",
+                    ]
+                ):
+                    fragmented_patterns += 1
+                # Very short text chunks
+                if len(text) < 100:
+                    fragmented_patterns += 1
+
+        # Check for web-based PDF patterns (common in APA sample tables)
+        web_pdf_indicators = 0
+        for doc in documents:
+            content = doc.page_content.strip().lower()
+            if any(
+                indicator in content
+                for indicator in [
+                    "https://",
+                    "http://",
+                    ".apa.org",
+                    "sample-",
+                    "style-grammar-guidelines",
+                    "of 7",
+                    "pm",
+                    "am",
+                ]
+            ):
+                web_pdf_indicators += 1
+
+        logger.info(
+            f"📊 Vector graphics analysis: avg_text={avg_text_per_page:.1f} chars/page, "
+            f"missing_pages={missing_pages}, fragmented_patterns={fragmented_patterns}, "
+            f"web_pdf_indicators={web_pdf_indicators}/{len(documents)}"
+        )
+
+        # Decision criteria for vector graphics PDF (relaxed for web-based PDFs)
+        is_vector_graphics_pdf = (
+            avg_text_per_page < 50  # Very low text density
+            or missing_pages > 0  # Some pages have no extractable text
+            or (
+                fragmented_patterns > 0 and avg_text_per_page < 200
+            )  # Fragmented text with low density
+            or (
+                web_pdf_indicators >= len(documents) * 0.5 and avg_text_per_page < 300
+            )  # Web-based PDF with URL patterns
+        )
+
+        # Process vector graphics PDF if detected
+        if is_vector_graphics_pdf:
+            logger.info(
+                f"🎨 Detected vector graphics PDF - applying fallback processing"
+            )
+
+            try:
+                import fitz
+
+                pdf_doc = fitz.open(stream=file_content, filetype="pdf")
+
+                # Create enhanced documents for all pages
+                enhanced_documents = []
+                existing_by_page = {}
+                for doc in documents:
+                    page_num = doc.metadata.get("page", 1)
+                    existing_by_page[page_num] = doc
+
+                # Process each page
+                for page_num in range(1, pdf_doc.page_count + 1):
+                    if page_num in existing_by_page:
+                        # Use existing document but mark it for vision processing
+                        existing_doc = existing_by_page[page_num]
+                        enhanced_doc = Document(
+                            page_content=existing_doc.page_content,
+                            metadata={
+                                **existing_doc.metadata,
+                                "content_type": "vector_graphics_with_text",
+                                "requires_vision": True,
+                                "processing_method": "hybrid_text_vision",
+                            },
+                        )
+                        enhanced_documents.append(enhanced_doc)
+                    else:
+                        # Create placeholder for pages with no extractable text
+                        placeholder_doc = Document(
+                            page_content=f"Page {page_num} contains visual content that requires vision analysis. "
+                            f"This appears to be a vector graphics PDF (e.g., from Print-as-PDF) "
+                            f"where text is rendered as graphics rather than searchable text.",
+                            metadata={
+                                "source": filename,
+                                "page": page_num,
+                                "total_pages": pdf_doc.page_count,
+                                "content_type": "vector_graphics",
+                                "requires_vision": True,
+                                "processing_method": "vision_only",
+                            },
+                        )
+                        enhanced_documents.append(placeholder_doc)
+
+                pdf_doc.close()
+                documents = enhanced_documents
+                logger.info(
+                    f"🎨 Created {len(documents)} enhanced documents for vector graphics PDF"
+                )
+
+            except Exception as e:
+                logger.error(f"❌ Error processing vector graphics PDF: {e}")
+                # Fallback: mark existing documents with vision flags
+                for doc in documents:
+                    doc.metadata["content_type"] = "vector_graphics_fallback"
+                    doc.metadata["requires_vision"] = True
+
     # Detect which pages have tables
-    table_pages = TableDetector.identify_table_pages(documents)
+    # For vector graphics PDFs, assume all pages might contain visual tables
+    if is_vector_graphics_pdf:
+        # For vector graphics PDFs, treat all pages as potential table pages
+        table_pages = list(range(1, len(documents) + 1))
+        logger.info(
+            f"📊 Vector graphics PDF - treating all {len(table_pages)} pages as potential table pages"
+        )
+    else:
+        table_pages = TableDetector.identify_table_pages(documents)
 
     table_data = {}
     processed_documents = []
@@ -971,11 +1127,52 @@ def extract_documents_with_table_processing(
         logger.warning(f"  ❌ No LLM provided for vision processing")
         logger.warning(f"  💡 LLM parameter is None - check chatbot LLM initialization")
 
+    # Check for minimal text pages that likely need vision processing even if not detected as "table pages"
+    minimal_text_pages = []
+    for i, doc in enumerate(documents):
+        text_length = len(doc.page_content.strip())
+        page_num = doc.metadata.get("page", doc.metadata.get("page_number", i + 1))
+
+        # Enhanced debugging - log text content length for all pages
+        logger.info(f"📄 Page {page_num}: {text_length} characters of text content")
+
+        # Check for minimal text OR URL-heavy content that indicates image pages
+        content_preview = doc.page_content.strip()
+        is_url_heavy = (
+            ("https://" in content_preview and len(content_preview.split("\n")) <= 3)
+            or ("Sample tables" in content_preview and "apa.org" in content_preview)
+            or ("style-grammar-guidelines" in content_preview)
+            or (content_preview.count("/") > 5 and "http" in content_preview)
+        )  # URL-heavy content
+
+        if text_length < 500 or is_url_heavy:  # Increased threshold to catch more cases
+            minimal_text_pages.append(page_num)
+            if is_url_heavy:
+                logger.info(
+                    f"🌐 Page {page_num} flagged as URL-heavy content (likely image page with metadata): {text_length} chars"
+                )
+            else:
+                logger.info(
+                    f"🎯 Page {page_num} flagged as minimal text (likely image-heavy): {text_length} chars"
+                )
+            logger.debug(f"📝 Content preview: {content_preview[:100]}...")
+        elif text_length < 500:  # Log pages that are close to the threshold
+            logger.info(
+                f"📋 Page {page_num} has moderate text content: {text_length} chars - using text processing"
+            )
+
+    # Extend table_pages to include minimal text pages
+    all_vision_candidate_pages = list(set(table_pages + minimal_text_pages))
+
     # Check each condition separately
-    if not table_pages:
-        logger.info(f"❌ CONDITION 1 FAILED: No table pages detected")
+    if not table_pages and not minimal_text_pages:
+        logger.info(
+            f"❌ CONDITION 1 FAILED: No table pages or minimal text pages detected"
+        )
     else:
-        logger.info(f"✅ CONDITION 1 PASSED: {len(table_pages)} table pages detected")
+        logger.info(
+            f"✅ CONDITION 1 PASSED: {len(table_pages)} table pages + {len(minimal_text_pages)} minimal text pages = {len(all_vision_candidate_pages)} total vision candidates"
+        )
 
     if not page_images:
         logger.info(
@@ -996,13 +1193,39 @@ def extract_documents_with_table_processing(
     # Try vision processing if all conditions are met
     vision_processing_attempted = False
 
-    if table_pages and page_images and VisionService.is_vision_enabled(llm):
-        logger.info(f"🔍 Detected tables on pages: {table_pages}")
+    if (
+        (table_pages or minimal_text_pages)
+        and page_images
+        and VisionService.is_vision_enabled(llm)
+    ):
+        if table_pages and minimal_text_pages:
+            logger.info(
+                f"🔍 Processing pages: {len(table_pages)} table pages + {len(minimal_text_pages)} minimal text pages = {len(all_vision_candidate_pages)} total"
+            )
+        elif table_pages:
+            logger.info(f"🔍 Detected tables on pages: {table_pages}")
+        else:
+            logger.info(
+                f"🔍 Detected {len(minimal_text_pages)} minimal text pages (likely image-heavy): {minimal_text_pages}"
+            )
 
-        # Check if we should use vision for these tables
-        should_use_vision = TableDetector.should_use_vision_for_tables(
-            documents, file_ext
-        )
+        # For vector graphics PDFs, always use vision processing
+        if is_vector_graphics_pdf:
+            should_use_vision = True
+            logger.info(
+                f"🎨 Vector graphics PDF detected - forcing vision processing for all pages"
+            )
+        elif minimal_text_pages:
+            # Prioritize vision processing for minimal text pages
+            should_use_vision = True
+            logger.info(
+                f"📄 Minimal text pages detected - forcing vision processing for image-heavy content"
+            )
+        else:
+            # Check if we should use vision for these tables
+            should_use_vision = TableDetector.should_use_vision_for_tables(
+                documents, file_ext
+            )
 
         if should_use_vision:
             vision_processing_attempted = True
@@ -1010,11 +1233,11 @@ def extract_documents_with_table_processing(
                 f"📊 Tables are complex enough to benefit from vision processing"
             )
 
-            # Extract table page images for vision processing
+            # Extract images for all vision candidate pages (table pages + minimal text pages)
             table_images = []
             table_page_numbers = []
 
-            for page_num in table_pages:
+            for page_num in all_vision_candidate_pages:
                 # Use 0-based indexing for page_images array
                 page_index = page_num - 1 if page_num > 0 else page_num
                 if page_index < len(page_images):
@@ -1054,14 +1277,14 @@ def extract_documents_with_table_processing(
                     f"⚠️ No valid table images found despite detecting table pages"
                 )
         else:
-            logger.info(
-                f"📄 Tables are simple, using text-only processing (vision not needed)"
+            logger.warning(
+                f"⚠️ Vision processing skipped - using text-only fallback (may miss image-heavy content)"
             )
     else:
         # Log which specific condition failed
         failed_conditions = []
-        if not table_pages:
-            failed_conditions.append("no table pages")
+        if not table_pages and not minimal_text_pages:
+            failed_conditions.append("no table pages or minimal text pages")
         if not page_images:
             failed_conditions.append("no page images generated")
         if not VisionService.is_vision_enabled(llm):
@@ -1069,17 +1292,17 @@ def extract_documents_with_table_processing(
 
         logger.info(f"❌ TABLE ENHANCEMENT SKIPPED: {', '.join(failed_conditions)}")
 
-        # Even without vision, mark table pages for enhanced text processing
-        if table_pages:
+        # Even without vision, mark pages for enhanced text processing
+        if table_pages or minimal_text_pages:
             logger.info(
-                f"📄 Using enhanced text-based table processing for {len(table_pages)} table pages"
+                f"📄 Using enhanced text-based processing for {len(table_pages)} table pages + {len(minimal_text_pages)} minimal text pages"
             )
 
     # Process documents and enhance table-containing ones
     for i, doc in enumerate(documents):
         page_num = doc.metadata.get("page", doc.metadata.get("page_number", i))
 
-        if page_num in table_pages:
+        if page_num in all_vision_candidate_pages:
             # Check if we have vision-extracted tables for this page
             vision_tables = []
             if table_data.get("tables"):
@@ -1137,22 +1360,246 @@ def extract_documents_with_table_processing(
 
                     # Get headers and validate we have data
                     headers = table_json.get("headers", [])
-                    rows = table_json.get("rows", [])
 
-                    if headers and rows:
-                        # Convert each row to a JSON object using headers as keys
-                        for row in rows:
+                    # Handle grouped headers format (for demographic tables)
+                    if isinstance(headers, dict):
+                        # Convert grouped headers to flat list for processing
+                        # Format: {"Group1": ["n", "%"], "Group2": ["n", "%"]}
+                        # Convert to: ["Group1 n", "Group1 %", "Group2 n", "Group2 %"]
+                        flattened_headers = []
+                        for group_name, subcolumns in headers.items():
+                            if isinstance(subcolumns, list):
+                                for subcol in subcolumns:
+                                    flattened_headers.append(f"{group_name} {subcol}")
+                            else:
+                                flattened_headers.append(str(group_name))
+                        headers = flattened_headers
+                        logger.info(
+                            f"🔄 Converted grouped headers to flat format: {len(headers)} columns"
+                        )
+
+                    # Normalize complex headers to simple strings to prevent unhashable type errors
+                    if isinstance(headers, list) and len(headers) > 0:
+                        normalized_headers = []
+                        for h in headers:
+                            if h is None:
+                                continue
+                            elif isinstance(h, dict):
+                                # Handle complex header objects like {"main": "Group A", "sub": "n"}
+                                if "main" in h and "sub" in h:
+                                    normalized_headers.append(
+                                        f"{h['main']} - {h['sub']}"
+                                    )
+                                elif "name" in h:
+                                    normalized_headers.append(str(h["name"]))
+                                else:
+                                    # Fallback: join all values
+                                    normalized_headers.append(
+                                        " - ".join(str(v) for v in h.values() if v)
+                                    )
+                            elif isinstance(h, list):
+                                # Handle header arrays
+                                normalized_headers.append(
+                                    " - ".join(str(item) for item in h if item)
+                                )
+                            else:
+                                # Simple string header
+                                normalized_headers.append(str(h).strip())
+
+                        headers = [
+                            h for h in normalized_headers if h
+                        ]  # Remove empty headers
+
+                        logger.info(
+                            f"🐛 DEBUG: Normalized {len(headers)} headers for table on page {page_num}"
+                        )
+                        logger.info(f"🐛 DEBUG: Headers: {headers}")
+
+                    # Check for new structured rows format (from improved demographic table prompt)
+                    structured_rows = table_json.get("rows", [])
+                    if (
+                        structured_rows
+                        and isinstance(structured_rows, list)
+                        and len(structured_rows) > 0
+                    ):
+                        # Check if this is the new structured format with "Baseline characteristic" and "values"
+                        first_row = structured_rows[0]
+                        if (
+                            isinstance(first_row, dict)
+                            and "Baseline characteristic" in first_row
+                            and "values" in first_row
+                        ):
+                            logger.info(
+                                f"🔄 Processing structured demographic table format with {len(structured_rows)} rows"
+                            )
+
+                            # Process structured rows format
+                            for row in structured_rows:
+                                characteristic = row.get(
+                                    "Baseline characteristic", "Unknown"
+                                )
+                                is_subheader = row.get("is_subheader", False)
+                                values = row.get("values", {})
+
+                                if not is_subheader and values:
+                                    # Create row object with flattened values
+                                    row_obj = {
+                                        "Baseline characteristic": characteristic
+                                    }
+
+                                    # Flatten grouped values to match flattened headers
+                                    for group_name, group_data in values.items():
+                                        if isinstance(group_data, dict):
+                                            for subcol, val in group_data.items():
+                                                flat_header = f"{group_name} {subcol}"
+                                                row_obj[flat_header] = (
+                                                    str(val) if val is not None else ""
+                                                )
+                                        else:
+                                            row_obj[group_name] = (
+                                                str(group_data)
+                                                if group_data is not None
+                                                else ""
+                                            )
+
+                                    # Add to JSON rows for this table
+                                    json_rows.append(row_obj)
+
+                                    # Also add as structured content
+                                    all_table_content.append(
+                                        f"Table Row: {json.dumps(row_obj)}"
+                                    )
+
+                            # Skip other processing for this table since we handled it
+                            continue
+
+                    # Handle new category_sections structure
+                    category_sections = table_json.get("category_sections", [])
+                    standalone_rows = table_json.get("standalone_rows", [])
+                    legacy_rows = table_json.get(
+                        "rows", []
+                    )  # For backward compatibility
+
+                    # Process category sections (new structured format)
+                    if category_sections and headers:
+                        for section in category_sections:
+                            category_name = section.get("category", "")
+                            section_rows = section.get("rows", [])
+
+                            for row in section_rows:
+                                if isinstance(row, list) and len(row) > 0:
+                                    row_obj = {
+                                        "_category": category_name
+                                    }  # Add category metadata
+                                    for i, header in enumerate(headers):
+                                        # Get value with bounds checking
+                                        raw_value = row[i] if i < len(row) else ""
+
+                                        # Normalize the value to a string
+                                        if raw_value is None:
+                                            value = ""
+                                        elif isinstance(raw_value, dict):
+                                            # Handle object values by converting to readable string
+                                            value = ", ".join(
+                                                f"{k}: {v}"
+                                                for k, v in raw_value.items()
+                                                if v is not None
+                                            )
+                                        elif isinstance(raw_value, list):
+                                            # Handle array values
+                                            value = ", ".join(
+                                                str(item)
+                                                for item in raw_value
+                                                if item is not None
+                                            )
+                                        else:
+                                            value = str(raw_value).strip()
+
+                                        # Ensure header is a string (should be after normalization, but double-check)
+                                        if not isinstance(header, str):
+                                            logger.warning(
+                                                f"🐛 DEBUG: Non-string header detected in category sections: {type(header)} - {header}"
+                                            )
+                                            header = str(header)
+
+                                        row_obj[header] = value
+                                    json_rows.append(row_obj)
+
+                    # Process standalone rows
+                    if standalone_rows and headers:
+                        for row in standalone_rows:
                             if isinstance(row, list) and len(row) > 0:
-                                # Create object with header-value pairs
                                 row_obj = {}
                                 for i, header in enumerate(headers):
-                                    # Get value at index i, or empty string if index doesn't exist
-                                    value = row[i] if i < len(row) else ""
-                                    # Clean up the value
-                                    if value is None:
+                                    # Get value with bounds checking
+                                    raw_value = row[i] if i < len(row) else ""
+
+                                    # Normalize the value to a string
+                                    if raw_value is None:
                                         value = ""
+                                    elif isinstance(raw_value, dict):
+                                        # Handle object values by converting to readable string
+                                        value = ", ".join(
+                                            f"{k}: {v}"
+                                            for k, v in raw_value.items()
+                                            if v is not None
+                                        )
+                                    elif isinstance(raw_value, list):
+                                        # Handle array values
+                                        value = ", ".join(
+                                            str(item)
+                                            for item in raw_value
+                                            if item is not None
+                                        )
                                     else:
-                                        value = str(value).strip()
+                                        value = str(raw_value).strip()
+
+                                    # Ensure header is a string (should be after normalization, but double-check)
+                                    if not isinstance(header, str):
+                                        logger.warning(
+                                            f"🐛 DEBUG: Non-string header detected in standalone rows: {type(header)} - {header}"
+                                        )
+                                        header = str(header)
+
+                                    row_obj[header] = value
+                                json_rows.append(row_obj)
+
+                    # Fallback to legacy rows format for compatibility
+                    if legacy_rows and headers and not json_rows:
+                        for row in legacy_rows:
+                            if isinstance(row, list) and len(row) > 0:
+                                row_obj = {}
+                                for i, header in enumerate(headers):
+                                    # Get value with bounds checking
+                                    raw_value = row[i] if i < len(row) else ""
+
+                                    # Normalize the value to a string
+                                    if raw_value is None:
+                                        value = ""
+                                    elif isinstance(raw_value, dict):
+                                        # Handle object values by converting to readable string
+                                        value = ", ".join(
+                                            f"{k}: {v}"
+                                            for k, v in raw_value.items()
+                                            if v is not None
+                                        )
+                                    elif isinstance(raw_value, list):
+                                        # Handle array values
+                                        value = ", ".join(
+                                            str(item)
+                                            for item in raw_value
+                                            if item is not None
+                                        )
+                                    else:
+                                        value = str(raw_value).strip()
+
+                                    # Ensure header is a string
+                                    if not isinstance(header, str):
+                                        logger.warning(
+                                            f"🐛 DEBUG: Non-string header detected in legacy rows: {type(header)} - {header}"
+                                        )
+                                        header = str(header)
+
                                     row_obj[header] = value
                                 json_rows.append(row_obj)
 
@@ -1212,14 +1659,24 @@ def extract_documents_with_table_processing(
 
             else:
                 # Vision processing failed or returned no tables for this page
-                # Create a fallback structured representation from the raw content
+                # Check if this is a minimal text page that needs vision processing
                 enhanced_content = doc.page_content
+                text_length = len(doc.page_content.strip())
+
+                # Skip fallback processing for pages with minimal text (likely image-heavy)
+                if text_length < 200:
+                    logger.warning(
+                        f"⚠️ Skipping text-only fallback for page {page_num} - minimal text detected ({text_length} chars). This page likely contains images that require vision processing."
+                    )
+                    # Don't process this page - it needs vision processing
+                    processed_documents.append(doc)
+                    continue
 
                 logger.warning(
                     f"⚠️ Page {page_num} detected as table page but no vision data available. Creating fallback structure."
                 )
 
-                # Create a fallback table structure from raw content
+                # Create a fallback table structure from raw content for text-rich pages
                 import json
 
                 fallback_table = {
@@ -1296,9 +1753,14 @@ def extract_documents_with_table_processing(
             f"✅ Enhanced {len(processed_documents)} documents with {len(table_data['tables'])} extracted tables"
         )
     else:
-        print(
-            f"📄 Processed {len(processed_documents)} documents (no table enhancement)"
-        )
+        if is_vector_graphics_pdf:
+            print(
+                f"🎨 Processed {len(processed_documents)} vector graphics PDF documents (vision processing attempted)"
+            )
+        else:
+            print(
+                f"📄 Processed {len(processed_documents)} documents (no table enhancement)"
+            )
 
     return processed_documents, table_data
 

@@ -243,6 +243,7 @@ class TableDetector:
     ) -> bool:
         """
         Determine if vision processing should be used for table extraction.
+        Prioritizes vision processing for image-heavy pages with minimal text.
 
         Args:
             documents: List of documents to analyze
@@ -263,9 +264,65 @@ class TableDetector:
             )
             return False
 
+        # Check for pages with minimal text or web-based PDF patterns
+        minimal_text_pages = 0
+        web_pdf_pages = 0
+        total_text_length = 0
+
+        for i, doc in enumerate(documents):
+            text_length = len(doc.page_content.strip())
+            total_text_length += text_length
+            content = doc.page_content.strip().lower()
+
+            # Check for web-based PDF patterns (like APA sample tables)
+            is_web_pdf = any(
+                indicator in content
+                for indicator in [
+                    "https://",
+                    "apa.org",
+                    "sample tables",
+                    "style-grammar-guidelines",
+                    "of 7",
+                    "pm",
+                    "am",
+                ]
+            )
+
+            # Pages with limited text or web PDF patterns likely contain images/tables
+            if text_length < 500 or is_web_pdf:  # Increased threshold
+                minimal_text_pages += 1
+                if is_web_pdf:
+                    web_pdf_pages += 1
+                    logger.debug(
+                        f"🌐 Page {i+1}: Web PDF pattern detected ({text_length} chars) - likely image-heavy webpage"
+                    )
+                else:
+                    logger.debug(
+                        f"📄 Page {i+1}: Minimal text detected ({text_length} chars) - likely image-heavy"
+                    )
+
+        # If we have pages with minimal text or web patterns, prioritize vision processing
+        if minimal_text_pages > 0:
+            avg_text_per_page = total_text_length / len(documents) if documents else 0
+            if (
+                avg_text_per_page < 1000 or web_pdf_pages > 0
+            ):  # Relaxed threshold for web PDFs
+                reason = (
+                    "web-based PDF patterns"
+                    if web_pdf_pages > 0
+                    else "minimal text content"
+                )
+                logger.info(
+                    f"✅ Vision RECOMMENDED: {minimal_text_pages} pages with {reason} detected (avg: {avg_text_per_page:.0f} chars/page, web_pages: {web_pdf_pages})"
+                )
+                return True
+
         table_pages = TableDetector.identify_table_pages(documents)
-        if not table_pages:
-            logger.info(f"❌ Vision not recommended: No table pages detected")
+        # Don't reject if no table pages detected - minimal text pages might still need vision
+        if not table_pages and minimal_text_pages == 0:
+            logger.info(
+                f"❌ Vision not recommended: No table pages or minimal text pages detected"
+            )
             return False
 
         # Analyze table complexity on table pages
