@@ -1,0 +1,22 @@
+{
+  "mode": "vector_search", 
+  "session_id": "test", 
+  "config": {
+    "llm_provider": "openai", 
+    "llm_model": "gpt-4o-mini", 
+    "fields": [
+      {
+        "field_name": "provider_name", 
+        "description": "Name of the healthcare provider or facility"
+      }, 
+      {
+        "field_name": "provider_npi", 
+        "description": "National Provider Identifier number"
+      }, 
+      {
+        "field_name": "provider_address", 
+        "description": "Complete address of the provider"
+      }
+    ]
+  }
+}

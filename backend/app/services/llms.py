@@ -394,7 +394,7 @@ def invoke_llm(llm, prompt, variables=None):
     """
     # ReplicateWrapper: expects a formatted string prompt (already has retry logic)
     if hasattr(llm, "__class__") and "ReplicateWrapper" in llm.__class__.__name__:
-        if variables:
+        if variables and len(variables) > 0:
             prompt_text = prompt.format(**variables)
         else:
             prompt_text = prompt
@@ -402,7 +402,7 @@ def invoke_llm(llm, prompt, variables=None):
 
     # BedrockWrapper: already has retry logic
     elif hasattr(llm, "__class__") and "BedrockWrapper" in llm.__class__.__name__:
-        if variables:
+        if variables and len(variables) > 0:
             prompt_text = (
                 prompt.format(**variables) if isinstance(prompt, str) else prompt
             )
@@ -430,7 +430,12 @@ def invoke_llm(llm, prompt, variables=None):
                 result = chain.invoke(variables)
             elif isinstance(prompt, str):
                 # Create a proper chat message from the string
-                formatted_text = prompt.format(**variables)
+                if variables and len(variables) > 0:
+                    # Only format if we have actual variables to substitute
+                    formatted_text = prompt.format(**variables)
+                else:
+                    # Use prompt as-is to avoid template formatting errors
+                    formatted_text = prompt
                 result = llm.invoke([HumanMessage(content=formatted_text)])
             else:
                 # If prompt is a plain string, just pass as-is
@@ -469,7 +474,7 @@ def invoke_llm_with_image(
 
     # Format the text content based on prompt type and variables
     if isinstance(prompt, str):
-        text_content = prompt.format(**variables) if variables else prompt
+        text_content = prompt.format(**variables) if (variables and len(variables) > 0) else prompt
     else:
         text_content = str(prompt)
 
@@ -503,19 +508,17 @@ def invoke_llm_with_image(
         def _invoke_multimodal_langchain():
             print("Using LangChain model for image extraction")
 
-            # If we were given a template string, use it directly
-            if isinstance(prompt, str) and prompt:
-                # Create a prompt template from the string
-                prompt_template = ChatPromptTemplate.from_template(prompt)
-                # Format it with variables
-                formatted_prompt = prompt_template.format_prompt(**variables)
-                # Get messages
-                messages = formatted_prompt.to_messages()
-            else:
-                # Create a basic message about the image
-                messages = [HumanMessage(content=text_content)]
-
-            # Add the image to the first message's content
+        # If we were given a template string, use it directly
+        if isinstance(prompt, str) and prompt and variables and len(variables) > 0:
+            # Create a prompt template from the string
+            prompt_template = ChatPromptTemplate.from_template(prompt)
+            # Format it with variables
+            formatted_prompt = prompt_template.format_prompt(**variables)
+            # Get messages
+            messages = formatted_prompt.to_messages()
+        else:
+            # Create a basic message about the image
+            messages = [HumanMessage(content=text_content)]            # Add the image to the first message's content
             if messages and isinstance(messages[0].content, str):
                 # Convert to multimodal format
                 content_parts = [

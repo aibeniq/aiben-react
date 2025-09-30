@@ -262,6 +262,9 @@ async def process_rag_checklist(
             async def monitor_client_disconnect():
                 nonlocal cancellation_requested
                 try:
+                    # Add a delay before starting disconnect monitoring to avoid false positives
+                    await asyncio.sleep(5.0)  # Wait 5 seconds before starting monitoring
+                    
                     # Don't create a separate task - just await directly
                     # This is fine because this whole function runs as a background task
                     await request.is_disconnected()
@@ -624,6 +627,66 @@ async def process_rag_checklist(
                             f"Warning: Could not extract images from {file.filename}: {img_error}"
                         )
 
+                # Determine if we have minimal text content (same logic as chatbot Full Document Scan)
+                has_minimal_text = False
+                structured_documents = []
+                table_extraction_data = {}
+                
+                if document_text and document_text.strip():
+                    # Check for minimal text content using the same logic as Full Document Scan
+                    total_text_length = len(document_text.strip())
+                    
+                    # Analyze content to detect minimal text pages (similar to chatbot logic)
+                    if total_text_length < 2000:  # Less than 2000 characters total
+                        # Sample first few pages to check text density
+                        content_preview = document_text[:1000].lower()
+                        text_length = len(document_text.strip())
+                        
+                        # Check for URL-heavy or minimal content patterns
+                        is_url_heavy = (
+                            ("Sample tables" in content_preview and "apa.org" in content_preview)
+                            or ("style-grammar-guidelines" in content_preview)
+                            or (content_preview.count("/") > 5 and "http" in content_preview)
+                        )  # URL-heavy content
+
+                        if text_length < 500 or is_url_heavy:
+                            has_minimal_text = True
+                            if is_url_heavy:
+                                print(f"🌐 Document flagged as URL-heavy content (likely image page): {text_length} chars")
+                            else:
+                                print(f"🎯 Document flagged as minimal text (likely image-heavy): {text_length} chars")
+
+                # If minimal text detected and vision enabled, use structured table extraction
+                if has_minimal_text and vision_enabled and document_images:
+                    print(f"📸 Using structured table extraction for {file.filename} due to minimal text content")
+                    
+                    try:
+                        # Use the same table-aware processing as Full Document Scan and Vector Search
+                        from app.services.document_utils import (
+                            extract_documents_with_table_processing,
+                        )
+
+                        # Process document with table awareness to get structured table data
+                        structured_documents, table_extraction_data = (
+                            extract_documents_with_table_processing(
+                                content, file.filename, llm
+                            )
+                        )
+                        
+                        print(f"📊 Table processing extracted {len(table_extraction_data.get('tables', []))} structured tables")
+
+                        # Use the processed documents (with embedded table JSON) as the document text
+                        if structured_documents:
+                            # Combine processed document content (includes structured table data)
+                            document_text = "\n\n".join([doc.page_content for doc in structured_documents])
+                            print(f"✅ Using structured table content ({len(document_text)} chars) instead of minimal text")
+                        else:
+                            print(f"⚠️ Table processing returned no documents, keeping original text")
+                            
+                    except Exception as table_error:
+                        print(f"⚠️ Table processing failed for {file.filename}: {table_error}")
+                        # Continue with original document_text
+
                 # Handle case where no text was extracted
                 if not document_text or document_text.strip() == "":
                     # If vision is enabled and we have images, use vision as fallback
@@ -646,8 +709,9 @@ async def process_rag_checklist(
                 should_reenable_monitoring = (
                     needs_special_handling
                     and len(document_text)
-                    < 150000  # Only re-enable for medium-sized documents
+                    < 50000  # Only re-enable for smaller documents (reduced from 150000)
                     and request
+                    and not has_minimal_text  # Don't re-enable for minimal text documents that will need more processing
                 )
 
                 if should_reenable_monitoring:
@@ -656,6 +720,8 @@ async def process_rag_checklist(
                     async def monitor_client_disconnect():
                         nonlocal cancellation_requested
                         try:
+                            # Add a delay before checking disconnect to avoid false positives
+                            await asyncio.sleep(2.0)  # Wait 2 seconds before starting disconnect monitoring
                             await request.is_disconnected()
                             print("Client disconnected, canceling operation...")
                             cancellation_requested = True
@@ -669,9 +735,9 @@ async def process_rag_checklist(
                     disconnect_monitor = asyncio.create_task(
                         monitor_client_disconnect()
                     )
-                elif len(document_text) >= 150000:
+                elif len(document_text) >= 50000 or has_minimal_text:
                     print(
-                        f"Very large document detected ({len(document_text)} chars), keeping disconnect monitoring disabled"
+                        f"Large document or minimal text document detected ({len(document_text)} chars, minimal_text: {has_minimal_text}), keeping disconnect monitoring disabled"
                     )
 
                 # Reset file position

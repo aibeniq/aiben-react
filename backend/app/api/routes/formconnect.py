@@ -96,8 +96,76 @@ def generate_template(fields: List[str]) -> Dict[str, str]:
     return {field: "" for field in fields}
 
 
+def parse_llm_json_response(response_text: str) -> Dict[str, Any]:
+    """
+    Robust JSON parsing that handles both objects and arrays from LLM responses.
+    
+    Args:
+        response_text: The raw response text from LLM that may contain JSON
+        
+    Returns:
+        Dictionary with parsed JSON data
+        
+    Raises:
+        json.JSONDecodeError: If no valid JSON can be extracted
+    """
+    try:
+        # First try: JSON in code blocks - use non-greedy match and proper bracket matching
+        json_match = re.search(
+            r"```(?:json)?\s*\n?([\[\{].*?[\}\]])\s*\n?```",
+            response_text,
+            re.DOTALL | re.IGNORECASE,
+        )
+        
+        if not json_match:
+            # Second try: Complete JSON arrays
+            json_match = re.search(
+                r"(\[[\s\S]*?\])",
+                response_text,
+                re.DOTALL
+            )
+            
+        if not json_match:
+            # Third try: Complete JSON objects
+            json_match = re.search(
+                r"(\{[\s\S]*?\})",
+                response_text,
+                re.DOTALL
+            )
+        
+        if json_match:
+            json_text = json_match.group(1).strip()
+            print(f"🐛 DEBUG: Extracted JSON text: {json_text[:200]}...")
+        else:
+            # Use the raw response if no JSON pattern found
+            json_text = response_text.strip()
+            print(f"🐛 DEBUG: No JSON pattern found, using raw response: {json_text[:200]}...")
+
+        # Parse the JSON
+        parsed_json = json.loads(json_text)
+        print(f"🐛 DEBUG: Successfully parsed JSON type: {type(parsed_json)}")
+        
+        # Handle case where LLM returns an array with a single object
+        if isinstance(parsed_json, list) and len(parsed_json) > 0:
+            print(f"🐛 DEBUG: JSON is an array with {len(parsed_json)} items, extracting first object")
+            return parsed_json[0]  # Extract first object from array
+        else:
+            print(f"🐛 DEBUG: JSON is an object, returning as-is")
+            return parsed_json
+            
+    except json.JSONDecodeError as e:
+        print(f"🐛 DEBUG: JSON parsing failed: {str(e)}")
+        print(f"🐛 DEBUG: Problematic text: {response_text[:500]}...")
+        # Re-raise with more context
+        raise json.JSONDecodeError(
+            f"Failed to parse JSON from LLM response: {str(e)}", 
+            response_text, 
+            e.pos
+        )
+
+
 async def extract_fields_from_digitized_document(
-    file: UploadFile, template: Dict[str, str], llm=None, search_mode: str = "full_scan"
+    file: UploadFile, template: Dict[str, str], llm=None, search_mode: str = "full_scan", session=None, current_user=None
 ) -> Dict[str, str]:
     """
     Extract fields from a document using the LLM.
@@ -108,7 +176,7 @@ async def extract_fields_from_digitized_document(
 
     if search_mode == "vector":
         # TRUE VECTOR SEARCH IMPLEMENTATION
-        return await extract_fields_using_vector_search(file, content, template, llm)
+        return await extract_fields_using_vector_search(file, content, template, llm, session, current_user)
     else:
         # FULL TEXT MODE (existing implementation)
         return await extract_fields_using_full_text(
@@ -117,7 +185,7 @@ async def extract_fields_from_digitized_document(
 
 
 async def extract_fields_using_vector_search(
-    file: UploadFile, content: bytes, template: Dict[str, str], llm=None
+    file: UploadFile, content: bytes, template: Dict[str, str], llm=None, session=None, current_user=None
 ) -> Dict[str, str]:
     """
     Extract fields using vector search to find relevant document sections.
@@ -136,12 +204,17 @@ async def extract_fields_using_vector_search(
         print(
             f"🔍 Using enhanced vector search mode for field extraction from {file.filename}"
         )
+        print(f"🐛 DEBUG: Vector search - session: {session is not None}, current_user: {current_user is not None}")
 
         # Get embedding model
-        from app.api.deps import get_db
-
-        session = next(get_db())
-        embedding_info = get_embedding_model(session)
+        if not session or not current_user:
+            print("❌ No session or user available, falling back to full text mode")
+            return await extract_fields_using_full_text(
+                content, file.filename, template, llm
+            )
+            
+        print(f"🐛 DEBUG: About to call get_embedding_model with session and current_user")
+        embedding_info = get_embedding_model(session, current_user)
 
         if not embedding_info:
             print("❌ No embedding model available, falling back to full text mode")
@@ -292,21 +365,16 @@ async def extract_fields_using_vector_search(
                         relevant_text = "\n\n".join(relevant_chunks)
 
                         if relevant_text.strip():
-                            # Create field-specific extraction prompt
-                            field_prompt = f"""Extract the value for "{field_name}" from the following text.
-
-Field description: {field_description}
-
-Relevant text:
-{relevant_text}
-
-Instructions:
-1. Look for the specific information related to "{field_name}"
-2. If found, return only the extracted value
-3. If not found, return "Not found"
-4. Be precise and concise
-
-Extracted value:"""
+                            # Create field-specific extraction prompt without f-strings to avoid template conflicts
+                            field_prompt = "Extract the value for \"" + field_name + "\" from the following text.\n\n"
+                            field_prompt += "Field description: " + field_description + "\n\n"
+                            field_prompt += "Relevant text:\n" + relevant_text + "\n\n"
+                            field_prompt += "Instructions:\n"
+                            field_prompt += "1. Look for the specific information related to \"" + field_name + "\"\n"
+                            field_prompt += "2. If found, return only the extracted value\n"
+                            field_prompt += "3. If not found, return \"Not found\"\n"
+                            field_prompt += "4. Be precise and concise\n\n"
+                            field_prompt += "Extracted value:"
 
                             # Extract field value using LLM
                             field_response = invoke_llm(llm, field_prompt, {})
@@ -613,16 +681,8 @@ async def process_images_only(
         import re
 
         try:
-            # Try to extract JSON from the response
-            json_match = re.search(
-                r"```(?:json)?\s*\n?({.*?})\s*\n?```",
-                vision_result,
-                re.DOTALL | re.IGNORECASE,
-            )
-            if json_match:
-                vision_result = json_match.group(1)
-
-            extracted_data = json.loads(vision_result)
+            # Use the robust JSON parsing helper
+            extracted_data = parse_llm_json_response(vision_result)
             print(
                 f"✅ Successfully extracted data using vision from {filename}: {extracted_data}"
             )
@@ -687,23 +747,19 @@ async def process_with_text_and_images(
         import json
         import re
 
-        try:
-            # Try to extract JSON from the response
-            json_match = re.search(
-                r"```(?:json)?\s*\n?({.*?})\s*\n?```",
-                vision_result,
-                re.DOTALL | re.IGNORECASE,
-            )
-            if json_match:
-                vision_result = json_match.group(1)
+        print(f"🐛 DEBUG: Raw vision result length: {len(vision_result)} chars")
+        print(f"🐛 DEBUG: Vision result preview: {vision_result[:500]}...")
 
-            extracted_data = json.loads(vision_result)
+        try:
+            # Use the robust JSON parsing helper
+            extracted_data = parse_llm_json_response(vision_result)
             print(
                 f"✅ Successfully extracted data using combined text+vision from {filename}"
             )
             return extracted_data
 
         except (json.JSONDecodeError, AttributeError) as e:
+            print(f"🐛 DEBUG: JSON parsing error: {str(e)}")
             print(
                 f"⚠️ JSON parsing failed for combined analysis, falling back to text-only"
             )
@@ -1105,7 +1161,8 @@ async def process_form(
     current_user: CurrentUser,
     fields: str,
     search_mode: Literal["vector", "full_scan"] = "vector",
-    files: List[UploadFile] = File(None),
+    digitized_files: List[UploadFile] = File(default=[]),
+    handwritten_files: List[UploadFile] = File(default=[]),
 ):
     """
     Process the uploaded files and fields with unified visual processing.
@@ -1114,6 +1171,13 @@ async def process_form(
     print("process_form function invoked!")
     print(f"Received search_mode: {search_mode}")
     print(f"Request data: fields={fields[:50]}...")
+
+    # Combine digitized and handwritten files into a single list
+    files = []
+    if digitized_files:
+        files.extend(digitized_files)
+    if handwritten_files:
+        files.extend(handwritten_files)
 
     # Get the default LLM
     llm = get_default_llm(session, current_user)
@@ -1128,6 +1192,9 @@ async def process_form(
 
     total_files = len(files) if files else 0
     print(f"Now processing {total_files} files with unified visual processing...")
+    print(f"Digitized files: {len(digitized_files) if digitized_files else 0}")
+    print(f"Handwritten files: {len(handwritten_files) if handwritten_files else 0}")
+    print(f"Files received: {[f.filename if f else 'None' for f in files] if files else 'No files'}")
 
     # Check if we have at least one file
     if total_files < 1:
@@ -1150,12 +1217,10 @@ async def process_form(
     # Process all files with unified visual enhancement
     if files:
         for file in files:
-            if search_mode == "vector":
-                # Use vector search with visual enhancement
-                extracted = await process_images_only(file, template, llm)
-            else:
-                # Use full text processing with visual enhancement
-                extracted = await process_with_text_and_images(file, template, llm)
+            # Use the main extraction function that handles both search modes
+            extracted = await extract_fields_from_digitized_document(
+                file, template, llm, search_mode, session, current_user
+            )
 
             print("Results for file name:", file.filename)
             print("Extracted fields:", extracted)

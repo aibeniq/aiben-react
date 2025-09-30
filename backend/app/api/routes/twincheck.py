@@ -51,9 +51,9 @@ router = APIRouter(prefix="/twincheck", tags=["twincheck"])
 
 def extract_text_from_file(file: UploadFile) -> str:
     """
-    Extract text content from uploaded files using unified document processing.
+    Extract text content from uploaded files using unified document processing with minimal text detection.
     """
-    from app.services.document_utils import extract_text_from_file_unified
+    from app.services.document_utils import extract_text_from_file_unified, extract_documents_with_table_processing
 
     print(f"Processing file: {file.filename}")
 
@@ -66,7 +66,77 @@ def extract_text_from_file(file: UploadFile) -> str:
         )
 
     try:
-        return extract_text_from_file_unified(file_content, file.filename or "unknown")
+        # First, extract text using standard method
+        document_text = extract_text_from_file_unified(file_content, file.filename or "unknown")
+        
+        # Determine if we have minimal text content (same logic as other enhanced modes)
+        has_minimal_text = False
+        
+        if document_text and document_text.strip():
+            # Check for minimal text content using the same logic as VeraDoc and chatbot
+            total_text_length = len(document_text.strip())
+            
+            # Analyze content to detect minimal text pages
+            if total_text_length < 2000:  # Less than 2000 characters total
+                # Sample content to check text density
+                content_preview = document_text[:1000].lower()
+                text_length = len(document_text.strip())
+                
+                # Check for URL-heavy or minimal content patterns
+                is_url_heavy = (
+                    ("Sample tables" in content_preview and "apa.org" in content_preview)
+                    or ("style-grammar-guidelines" in content_preview)
+                    or (content_preview.count("/") > 5 and "http" in content_preview)
+                )  # URL-heavy content
+
+                if text_length < 500 or is_url_heavy:
+                    has_minimal_text = True
+                    if is_url_heavy:
+                        print(f"🌐 TwinCheck: {file.filename} flagged as URL-heavy content (likely image page): {text_length} chars")
+                    else:
+                        print(f"🎯 TwinCheck: {file.filename} flagged as minimal text (likely image-heavy): {text_length} chars")
+        
+        # If minimal text detected, try structured table extraction
+        if has_minimal_text:
+            print(f"📸 TwinCheck: Using structured table extraction for {file.filename} due to minimal text content")
+            
+            try:
+                # For TwinCheck, we'll need to check if we can access the current session/user context
+                # Since this is a utility function, we'll try to use table processing when possible
+                from app.services.llms import ChatOpenAI
+                
+                # Create a basic LLM instance for table processing
+                try:
+                    # Use a simple OpenAI instance for table processing
+                    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+                    
+                    # Use the same table-aware processing as other enhanced modes
+                    structured_documents, table_extraction_data = (
+                        extract_documents_with_table_processing(
+                            file_content, file.filename or "unknown", llm
+                        )
+                    )
+                    
+                    print(f"📊 TwinCheck: Table processing extracted {len(table_extraction_data.get('tables', []))} structured tables")
+
+                    # Use the processed documents (with embedded table JSON) as the document text
+                    if structured_documents:
+                        # Combine processed document content (includes structured table data)
+                        enhanced_text = "\n\n".join([doc.page_content for doc in structured_documents])
+                        print(f"✅ TwinCheck: Using structured table content ({len(enhanced_text)} chars) instead of minimal text")
+                        return enhanced_text
+                    else:
+                        print(f"⚠️ TwinCheck: Table processing returned no documents, keeping original text")
+                        
+                except Exception as llm_error:
+                    print(f"⚠️ TwinCheck: LLM initialization failed: {llm_error}, keeping original text")
+                    
+            except Exception as table_error:
+                print(f"⚠️ TwinCheck: Table processing failed for {file.filename}: {table_error}")
+                # Continue with original document_text
+
+        return document_text
+        
     except Exception as e:
         print(f"Error processing file {file.filename}: {str(e)}")
         raise HTTPException(
@@ -183,9 +253,73 @@ async def compare_documents(
     Supports PDF, DOCX, and plain text files.
     """
     try:
-        # Reset file pointers (in case they were read elsewhere)
+        # Check if documents are identical at the binary level to prevent false positive differences
         document1.file.seek(0)
         document2.file.seek(0)
+        
+        doc1_content = document1.file.read()
+        doc2_content = document2.file.read()
+        
+        # Reset file pointers for subsequent processing
+        document1.file.seek(0)
+        document2.file.seek(0)
+        
+        # Check for identical files
+        if doc1_content == doc2_content:
+            print(f"🎯 IDENTICAL FILES DETECTED: {document1.filename} and {document2.filename}")
+            print(f"File size: {len(doc1_content)} bytes")
+            
+            # Record the interaction for identical files
+            try:
+                interaction_id = record_llm_interaction(
+                    session=session,
+                    user_id=current_user.id,
+                    functionality="twincheck",
+                    input_data={
+                        "comparison_topics": request.comparison_topics,
+                        "document1_name": document1.filename,
+                        "document2_name": document2.filename,
+                        "identical_files": True,
+                    },
+                    output_data={"summary": "Identical files detected", "identical_files": True},
+                    metadata={
+                        "file_size": len(doc1_content),
+                        "processing_method": "identical_file_detection",
+                    },
+                )
+            except Exception as interaction_error:
+                print(f"Error recording identical files interaction: {interaction_error}")
+                interaction_id = None
+            
+            # Parse comparison topics for consistent response format
+            topic_list = request.comparison_topics.strip().split("\n")
+            topic_analysis = []
+            
+            for topic in topic_list:
+                if topic.strip():
+                    topic_analysis.append({
+                        "topic": topic.strip(),
+                        "analysis": f"📄 **Identical Files Analysis**\n\nThe uploaded documents (`{document1.filename}` and `{document2.filename}`) are **identical at the binary level**.\n\n**Key Findings:**\n- File size: {len(doc1_content):,} bytes\n- Binary content: 100% identical\n- All data, structure, formatting, and metadata are exactly the same\n\n**Topic Analysis for '{topic.strip()}':**\nSince both documents are identical, there are **no differences** to analyze for this topic. Any content related to '{topic.strip()}' appears exactly the same in both files.\n\n**Conclusion:**\nNo comparison is needed as these are the exact same document. All content, including any tables, text, images, and formatting related to '{topic.strip()}', is identical between the two files.",
+                        "source_citations": [],
+                        "identical_files": True,
+                    })
+            
+            # Return a specialized response for identical documents
+            result = {
+                "summary": f"**Identical Documents Detected** 📋\n\nThe uploaded documents (`{document1.filename}` and `{document2.filename}`) are **completely identical** at the binary level.\n\n**Analysis Summary:**\n- File size: {len(doc1_content):,} bytes\n- Content match: 100% identical\n- No differences exist between the documents\n- All topics show identical content\n\n**Recommendation:**\nSince these are the exact same file, no meaningful comparison can be performed. Consider uploading two different documents to identify actual differences and similarities.",
+                "topic_analysis": topic_analysis,
+                "interaction_id": str(interaction_id) if interaction_id else None,
+                "processing_info": {
+                    "was_chunked": False,
+                    "chunk_count": 0,
+                    "estimated_tokens": 0,
+                    "identical_files": True,
+                    "file_size": len(doc1_content),
+                    "processing_method": "identical_file_detection",
+                },
+            }
+            
+            return TwinCheckResponse(results=result)
 
         # Load the LLM model first to check vision capabilities
         llm = get_default_llm(session, current_user)
