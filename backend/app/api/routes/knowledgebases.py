@@ -17,6 +17,7 @@ from io import BytesIO
 from contextlib import contextmanager
 
 from app.api.deps import CurrentUser, SessionDep
+from app.services.llms import get_default_llm
 from app.models import (
     KnowledgeBase,
     KnowledgeBaseCreate,
@@ -55,7 +56,10 @@ import mimetypes
 import tiktoken
 import asyncio
 import mmap
-from app.services.smart_chunking import create_smart_text_splitter
+from app.services.smart_chunking import (
+    create_smart_text_splitter,
+    TablePreservingTextSplitter,
+)
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
 
@@ -456,8 +460,8 @@ def chunk_documents_for_embedding(
                 current_chunk = []
                 current_tokens = 0
 
-            # Split this large document into smaller pieces
-            text_splitter = RecursiveCharacterTextSplitter(
+            # Split this large document into smaller pieces using table-preserving splitter
+            text_splitter = TablePreservingTextSplitter(
                 chunk_size=max_tokens_per_chunk
                 * 3,  # Rough character estimate (4 chars per token)
                 chunk_overlap=200,
@@ -664,12 +668,13 @@ def create_source_entry_from_file_data(
         # Don't raise - this shouldn't fail the entire knowledge base creation
 
 
-def load_uploaded_file(file: UploadFile) -> List[Any]:
+def load_uploaded_file(file: UploadFile, llm=None) -> List[Any]:
     """
     Load an uploaded file based on its type (e.g., PDF, text file).
 
     Args:
         file (UploadFile): The uploaded file to process.
+        llm: LLM instance for vision-enabled table processing (optional)
 
     Returns:
         List[Any]: A list of loaded documents from the file.
@@ -713,30 +718,94 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
             from app.services.document_utils import (
                 extract_documents_from_file_unified,
                 extract_documents_and_images_from_file_unified,
+                extract_documents_with_table_processing,
                 ensure_documents_for_vector_search,
             )
 
-            # First try regular document extraction
-            loaded_documents = extract_documents_from_file_unified(
-                file_content, file.filename
+            print(
+                f"📊 Processing {file.filename} with table-aware extraction for Knowledge Base..."
             )
 
-            # If no documents, try enhanced extraction with images
-            if not loaded_documents or all(
-                not doc.page_content.strip() for doc in loaded_documents
-            ):
+            # Use table-aware document processing for Knowledge Base creation
+            try:
+                if llm:
+                    # Use vision-enabled table processing (same as chatbot)
+                    processed_documents, table_data = (
+                        extract_documents_with_table_processing(
+                            file_content, file.filename, llm
+                        )
+                    )
+
+                    # Also extract images for OCR/vision analysis (same as chatbot)
+                    _, images = extract_documents_and_images_from_file_unified(
+                        file_content, file.filename
+                    )
+
+                    loaded_documents = processed_documents
+                    print(
+                        f"✅ Vision-enabled table extraction created {len(loaded_documents)} documents with {len(images)} images"
+                    )
+                    if table_data.get("tables"):
+                        print(
+                            f"📊 Extracted {len(table_data['tables'])} tables from {file.filename}"
+                        )
+
+                    # Store images for ensure_documents_for_vector_search step
+                    if not hasattr(loaded_documents, "_kb_images"):
+                        for doc in loaded_documents:
+                            if not hasattr(doc, "metadata"):
+                                doc.metadata = {}
+                            doc.metadata["_kb_images"] = images
+                else:
+                    # Fallback to basic table processing
+                    loaded_documents = extract_documents_with_table_processing(
+                        file_content, file.filename
+                    )
+
+                    # Also extract images for OCR/vision analysis even without LLM
+                    _, images = extract_documents_and_images_from_file_unified(
+                        file_content, file.filename
+                    )
+
+                    print(
+                        f"✅ Basic table extraction created {len(loaded_documents)} documents with {len(images)} images"
+                    )
+
+                    # Store images for ensure_documents_for_vector_search step
+                    if not hasattr(loaded_documents, "_kb_images"):
+                        for doc in loaded_documents:
+                            if not hasattr(doc, "metadata"):
+                                doc.metadata = {}
+                            doc.metadata["_kb_images"] = images
+            except Exception as table_error:
                 print(
-                    f"No text content found in {file.filename}, trying enhanced extraction..."
+                    f"⚠️ Table-aware extraction failed for {file.filename}: {table_error}"
                 )
-                documents, images = extract_documents_and_images_from_file_unified(
+                print("🔄 Falling back to standard document extraction...")
+
+                # Fallback to regular document extraction
+                loaded_documents = extract_documents_from_file_unified(
                     file_content, file.filename
                 )
 
-                # Use resilient document creation to ensure we have something for vector search
-                loaded_documents = ensure_documents_for_vector_search(
-                    documents, images, file.filename
-                )
-                print(f"Enhanced extraction created {len(loaded_documents)} documents")
+                # If no documents, try enhanced extraction with images
+                if not loaded_documents or all(
+                    not doc.page_content.strip() for doc in loaded_documents
+                ):
+                    print(
+                        f"No text content found in {file.filename}, trying enhanced extraction..."
+                    )
+                    documents, images = extract_documents_and_images_from_file_unified(
+                        file_content, file.filename
+                    )
+
+                    # Use resilient document creation to ensure we have something for vector search
+                    loaded_documents = ensure_documents_for_vector_search(
+                        documents, images, file.filename
+                    )
+                    print(
+                        f"Enhanced extraction created {len(loaded_documents)} documents"
+                    )
         else:
             print("Loading text with TextLoader...")
             # Try with different encodings if utf-8 fails
@@ -1059,31 +1128,107 @@ async def process_knowledge_base_creation(
                             temp_file_path = temp_file.name
 
                         try:
-                            # Process the temporary file based on its type
-                            if filename.lower().endswith(".pdf"):
-                                loaded_documents = load_pdf_with_pypdf(
-                                    temp_file_path, filename
-                                )
-                            elif filename.lower().endswith(".txt"):
-                                loader = TextLoader(temp_file_path)
-                                loaded_documents = loader.load()
-                            elif filename.lower().endswith(".docx"):
-                                loaded_documents = extract_text_from_docx(
-                                    temp_file_path, filename
-                                )
-                            else:
-                                # Try to process as text
+                            # Use unified table-aware document processing (same as update function)
+                            from app.services.document_utils import (
+                                extract_documents_with_table_processing,
+                                extract_documents_from_file_unified,
+                                extract_documents_and_images_from_file_unified,
+                            )
+
+                            # Get user object for LLM creation
+                            from app.models import User
+
+                            user = session.get(User, user_id)
+
+                            # Get LLM for vision-enabled table processing
+                            llm = get_default_llm(session, user) if user else None
+                            print(
+                                f"🔮 Using LLM for vision-enabled table processing: {type(llm).__name__ if llm else 'None'}"
+                            )
+
+                            # Read file content for processing
+                            with open(temp_file_path, "rb") as f:
+                                file_content = f.read()
+
+                            # Use table-aware processing when LLM is available
+                            if llm:
                                 try:
-                                    loader = TextLoader(temp_file_path)
-                                    loaded_documents = loader.load()
-                                except Exception:
+                                    processed_documents, table_data = (
+                                        extract_documents_with_table_processing(
+                                            file_content, filename, llm
+                                        )
+                                    )
+
+                                    # Extract images for OCR/vision analysis (same as chatbot)
+                                    _, images = (
+                                        extract_documents_and_images_from_file_unified(
+                                            file_content, filename
+                                        )
+                                    )
+
+                                    loaded_documents = processed_documents
                                     print(
-                                        f"⚠️ Unsupported file type for {filename}, skipping"
+                                        f"✅ Vision-enabled table processing for {filename}: {len(loaded_documents)} documents with {len(images)} images"
                                     )
-                                    failed_files.append(
-                                        f"{filename}: Unsupported file type"
+                                    if table_data.get("tables"):
+                                        print(
+                                            f"📊 Extracted {len(table_data['tables'])} tables from {filename}"
+                                        )
+
+                                    # Store images in document metadata for later use
+                                    for doc in loaded_documents:
+                                        if not hasattr(doc, "metadata"):
+                                            doc.metadata = {}
+                                        doc.metadata["_kb_images"] = images
+                                except Exception as table_error:
+                                    print(
+                                        f"⚠️ Vision table processing failed for {filename}: {table_error}"
                                     )
-                                    continue
+                                    # Fallback to basic processing
+                                    loaded_documents = (
+                                        extract_documents_from_file_unified(
+                                            file_content, filename
+                                        )
+                                    )
+
+                                    # Still extract images for OCR fallback
+                                    _, images = (
+                                        extract_documents_and_images_from_file_unified(
+                                            file_content, filename
+                                        )
+                                    )
+
+                                    print(
+                                        f"✅ Fallback processing for {filename}: {len(loaded_documents)} documents with {len(images)} images"
+                                    )
+
+                                    # Store images in document metadata
+                                    for doc in loaded_documents:
+                                        if not hasattr(doc, "metadata"):
+                                            doc.metadata = {}
+                                        doc.metadata["_kb_images"] = images
+                            else:
+                                # Basic processing without vision
+                                loaded_documents = extract_documents_from_file_unified(
+                                    file_content, filename
+                                )
+
+                                # Extract images for OCR processing even without LLM
+                                _, images = (
+                                    extract_documents_and_images_from_file_unified(
+                                        file_content, filename
+                                    )
+                                )
+
+                                print(
+                                    f"✅ Basic processing for {filename}: {len(loaded_documents)} documents with {len(images)} images"
+                                )
+
+                                # Store images in document metadata
+                                for doc in loaded_documents:
+                                    if not hasattr(doc, "metadata"):
+                                        doc.metadata = {}
+                                    doc.metadata["_kb_images"] = images
 
                             all_documents.extend(loaded_documents)
                             print(
@@ -1124,20 +1269,62 @@ async def process_knowledge_base_creation(
                 f"Successfully processed {len(all_documents)} documents from {total_files} files"
             )
 
+            # Ensure we have documents for vector search (create fallbacks if needed) - same as chatbot
+            with error_recovery_context("document vector search preparation"):
+                print("Ensuring documents are ready for vector search...")
+                from app.services.document_utils import (
+                    ensure_documents_for_vector_search,
+                )
+
+                # Collect all images from document metadata (extracted during processing)
+                all_images = []
+                for doc in all_documents:
+                    if (
+                        hasattr(doc, "metadata")
+                        and doc.metadata
+                        and "_kb_images" in doc.metadata
+                    ):
+                        kb_images = doc.metadata.get("_kb_images", [])
+                        all_images.extend(kb_images)
+                        # Clean up the metadata after extraction
+                        del doc.metadata["_kb_images"]
+
+                print(f"📸 Collected {len(all_images)} images from processed documents")
+
+                # Use same parameters as chatbot - now with images for OCR processing
+                resilient_documents = ensure_documents_for_vector_search(
+                    all_documents,
+                    all_images,
+                    "knowledge_base_files",  # Include images like chatbot
+                )
+                all_documents = resilient_documents
+                print(
+                    f"✅ Prepared {len(all_documents)} documents for vector search with OCR fallbacks (same as chatbot)"
+                )
+
             # Temporary files are already cleaned up in the processing loop
 
             with error_recovery_context("document splitting"):
-                print("Splitting documents with smart chunking...")
-                # Use smart text splitter that filters bibliography and low-quality content
-                smart_splitter = create_smart_text_splitter(
-                    chunk_size=settings.RAG_DOCUMENT_CHUNK_SIZE,
-                    chunk_overlap=settings.RAG_DOCUMENT_CHUNK_OVERLAP,
-                    filter_bibliography=True,  # Filter out bibliography content
-                )
-                splits = smart_splitter.process_documents(all_documents)
                 print(
-                    f"Smart splitting: {len(all_documents)} documents -> {len(splits)} quality chunks"
+                    "Splitting documents with table-preserving chunking (same as chatbot)..."
                 )
+                # Use table-preserving splitter to keep table structures intact (same as chatbot)
+                text_splitter = TablePreservingTextSplitter(
+                    chunk_size=1000, chunk_overlap=200
+                )
+                splits = text_splitter.split_documents(all_documents)
+                print(
+                    f"📊 Table-preserving splitting: {len(all_documents)} documents -> {len(splits)} chunks with table preservation"
+                )
+
+                # Log table processing summary (same as chatbot)
+                table_chunks_count = sum(
+                    1 for chunk in splits if chunk.metadata.get("has_table_data")
+                )
+                if table_chunks_count > 0:
+                    print(
+                        f"✅ TABLE PROCESSING: {table_chunks_count} chunks contain table data with JSON embedding"
+                    )
 
             with error_recovery_context("embedding initialization"):
                 print("Initializing embeddings...")
@@ -1533,9 +1720,15 @@ async def update_knowledge_base(
             # Process new files (if any)
             if files:
                 print("Adding new files to VectorDB...")
+                # Get default LLM for vision-enabled table processing
+                llm = get_default_llm(session, current_user)
+                print(
+                    f"🔮 Using LLM for vision-enabled table processing: {type(llm).__name__ if llm else 'None'}"
+                )
+
                 documents = []
                 for file in files:
-                    loaded_documents = load_uploaded_file(file)
+                    loaded_documents = load_uploaded_file(file, llm)
                     documents.extend(loaded_documents)
 
                     # Reset the file pointer before passing to create_source_entries

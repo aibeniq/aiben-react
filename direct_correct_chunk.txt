@@ -1,0 +1,49 @@
+
+=== TABLE DATA (JSON) ===
+{
+  "table_id": "table_1",
+  "page": 1,
+  "title": "Exchange-traded Stocks, bonds, ETFs",
+  "headers": [
+    "Description",
+    "Smart",
+    "All-inclusive"
+  ],
+  "rows": [
+    [
+      "Minimum balance",
+      "USD 2,000",
+      "USD 25,000"
+    ],
+    [
+      "Brokerage commission",
+      "USD 8.95 per trade",
+      "USD 0 per trade"
+    ],
+    [
+      "Platform fee",
+      "USD 0 per month",
+      "USD 89.95 per month"
+    ],
+    [
+      "Account maintenance fee",
+      "USD 0 per quarter",
+      "USD 0 per quarter"
+    ],
+    [
+      "Safekeeping",
+      "Free of charge",
+      "Free of charge"
+    ],
+    [
+      "Dividend processing",
+      "Free of charge",
+      "Free of charge"
+    ]
+  ],
+  "summary": "Fees for exchange-traded stocks, bonds, and ETFs with Smart and All-inclusive plans",
+  "context": "This table shows the fee structure for trading US equities and other exchange-traded securities"
+}
+=== END TABLE DATA ===
+
+This table shows the fee structure for trading US equities with Smart and All-inclusive plans.

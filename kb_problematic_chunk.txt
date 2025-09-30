@@ -1,0 +1,34 @@
+
+=== TABLE DATA (JSON) ===
+{
+  "table_id": "table_4",
+  "page": 9,
+  "title": "Swaps and Structured Products",
+  "headers": [
+    "Description",
+    "Fee"
+  ],
+  "rows": [
+    [
+      "Brokerage commission, per trade",
+      "0.12%"
+    ],
+    [
+      "Safekeeping",
+      "Free of charge"
+    ],
+    [
+      "Early termination",
+      "Free of charge"
+    ],
+    [
+      "Any transaction involving change of ownership",
+      "0.1% of transaction amount but not less than 100 EUR"
+    ]
+  ],
+  "summary": "Fees related to swaps and structured products",
+  "context": "Details of fees for swaps and structured products"
+}
+=== END TABLE DATA ===
+
+This table shows the fee structure for swaps and structured products trading.

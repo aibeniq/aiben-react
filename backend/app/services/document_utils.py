@@ -640,6 +640,210 @@ def extract_images_from_docx_bytes(file_content: bytes) -> List[str]:
     return images
 
 
+def extract_documents_with_table_processing(
+    file_content: bytes, filename: str
+) -> List[Document]:
+    """
+    Extract documents with table-aware processing for Knowledge Base creation.
+    Uses vision-enabled table extraction when available and appropriate.
+
+    Args:
+        file_content: Raw bytes of the file
+        filename: Name of the file
+
+    Returns:
+        List[Document]: Documents with enhanced table content
+    """
+    try:
+        from app.services.llms import get_default_llm_from_request
+        from app.services.vision_service import VisionService
+
+        logger.info(f"📊 Starting table-aware processing for KB file: {filename}")
+
+        # Extract documents and images
+        documents, images = extract_documents_and_images_from_file_unified(
+            file_content, filename
+        )
+
+        # If no images or minimal text content, use vision processing for table extraction
+        if images and len(images) > 0:
+            try:
+                # Get default LLM for vision processing
+                llm = get_default_llm_from_request()
+
+                if VisionService.is_vision_enabled(llm):
+                    logger.info(
+                        f"🔮 Vision enabled - processing {len(images)} images for tables"
+                    )
+
+                    # Extract tables from images
+                    page_numbers = list(range(1, len(images) + 1))
+                    table_results = VisionService.extract_table_as_json(
+                        llm, images, page_numbers, filename
+                    )
+
+                    if table_results and table_results.get(
+                        "extraction_successful", False
+                    ):
+                        tables = table_results.get("tables", [])
+                        logger.info(
+                            f"📊 Extracted {len(tables)} tables from {filename}"
+                        )
+
+                        # Create enhanced documents with table content
+                        enhanced_documents = []
+
+                        # Add original text content
+                        for doc in documents:
+                            enhanced_documents.append(doc)
+
+                        # Add table content as separate documents
+                        for table in tables:
+                            table_content = _format_table_for_knowledge_base(table)
+
+                            table_doc = Document(
+                                page_content=table_content,
+                                metadata={
+                                    "filename": filename,
+                                    "table_id": table.get("table_id", "unknown"),
+                                    "page": table.get("page", 0),
+                                    "content_type": "structured_table",
+                                    "table_title": table.get("title", ""),
+                                    "extraction_method": "vision_table_aware",
+                                },
+                            )
+                            enhanced_documents.append(table_doc)
+
+                        logger.info(
+                            f"✅ KB processing: Created {len(enhanced_documents)} total documents ({len(tables)} tables)"
+                        )
+                        return enhanced_documents
+                    else:
+                        logger.info(
+                            f"📊 No tables extracted from {filename}, using standard processing"
+                        )
+                else:
+                    logger.info(
+                        f"🔮 Vision not enabled for {filename}, using standard processing"
+                    )
+            except Exception as vision_error:
+                logger.warning(
+                    f"⚠️ Vision processing failed for KB file {filename}: {vision_error}"
+                )
+
+        # Fallback to standard document processing
+        logger.info(f"📄 Using standard document processing for {filename}")
+        return documents
+
+    except Exception as e:
+        logger.error(f"❌ Error in table-aware KB processing for {filename}: {e}")
+        # Fallback to basic extraction
+        try:
+            text_content = extract_text_from_file_unified(file_content, filename)
+            fallback_doc = Document(
+                page_content=text_content,
+                metadata={
+                    "filename": filename,
+                    "extraction_method": "fallback",
+                    "error": str(e),
+                },
+            )
+            return [fallback_doc]
+        except Exception as fallback_error:
+            logger.error(
+                f"❌ Even fallback processing failed for {filename}: {fallback_error}"
+            )
+            error_doc = Document(
+                page_content=f"Failed to process {filename}: {str(e)}",
+                metadata={"filename": filename, "error": str(e)},
+            )
+            return [error_doc]
+
+
+def _format_table_for_knowledge_base(table: Dict[str, Any]) -> str:
+    """
+    Format extracted table data for Knowledge Base storage.
+    Creates a readable text representation of structured table data.
+    """
+    try:
+        formatted_parts = []
+
+        # Add table title and context
+        if table.get("title"):
+            formatted_parts.append(f"Table: {table['title']}")
+
+        if table.get("summary"):
+            formatted_parts.append(f"Summary: {table['summary']}")
+
+        if table.get("context"):
+            formatted_parts.append(f"Context: {table['context']}")
+
+        formatted_parts.append("")  # Empty line
+
+        # Format table data
+        headers = table.get("headers", [])
+        rows = table.get("rows", [])
+
+        if isinstance(headers, dict):
+            # Handle grouped headers (complex tables)
+            formatted_parts.append("Structured Data:")
+            for group_name, sub_headers in headers.items():
+                formatted_parts.append(f"\n{group_name}:")
+                if isinstance(sub_headers, list):
+                    formatted_parts.append(f"  Columns: {', '.join(sub_headers)}")
+        elif isinstance(headers, list) and headers:
+            # Handle simple headers
+            formatted_parts.append("Columns: " + " | ".join(str(h) for h in headers))
+            formatted_parts.append("-" * 50)
+
+        # Format rows
+        if rows:
+            for i, row in enumerate(rows[:50]):  # Limit rows for KB storage
+                if isinstance(row, dict):
+                    # Handle structured rows
+                    row_label = row.get("row_label", f"Row {i+1}")
+                    is_category = row.get("is_category", False)
+
+                    if is_category:
+                        formatted_parts.append(f"\n--- {row_label} ---")
+                    else:
+                        values = row.get("values", {})
+                        if isinstance(values, dict):
+                            value_strs = []
+                            for key, val in values.items():
+                                if isinstance(val, dict):
+                                    val_str = ", ".join(
+                                        f"{k}: {v}" for k, v in val.items()
+                                    )
+                                    value_strs.append(f"{key}: ({val_str})")
+                                else:
+                                    value_strs.append(f"{key}: {val}")
+                            formatted_parts.append(
+                                f"{row_label}: {' | '.join(value_strs)}"
+                            )
+                        else:
+                            formatted_parts.append(f"{row_label}: {values}")
+                elif isinstance(row, list):
+                    # Handle simple rows
+                    formatted_parts.append(" | ".join(str(cell) for cell in row))
+
+        # Add metadata
+        metadata = table.get("metadata", {})
+        if metadata:
+            formatted_parts.append("")
+            formatted_parts.append(
+                f"Table Metadata: {metadata.get('row_count', 'Unknown')} rows, {metadata.get('column_count', 'Unknown')} columns"
+            )
+            if metadata.get("table_type"):
+                formatted_parts.append(f"Type: {metadata['table_type']}")
+
+        return "\n".join(formatted_parts)
+
+    except Exception as e:
+        logger.error(f"Error formatting table for KB: {e}")
+        return f"Table data (formatting error): {str(table)[:500]}..."
+
+
 def create_fallback_document_for_vision(
     images: List[str], source_filename: str
 ) -> Document:

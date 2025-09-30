@@ -402,42 +402,81 @@ async def _handle_full_text_document_query(
                 )
                 print(f"Extracted {len(file_images)} images from {file.filename}")
 
-            # Chunk the text
-            chunks = chunk_text(
-                full_text, max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE
-            )
+            # Determine processing strategy: check for minimal text content
+            has_minimal_text = False
+            total_text_length = sum(len(doc.page_content.strip()) for doc in documents)
+            
+            if vision_enabled and file_images:
+                # Check if any page has minimal text (< 500 chars) indicating image-heavy content
+                for i, doc in enumerate(documents):
+                    text_length = len(doc.page_content.strip())
+                    page_num = doc.metadata.get("page", doc.metadata.get("page_number", i + 1))
+                    
+                    # Check for minimal text OR URL-heavy content that indicates image pages
+                    content_preview = doc.page_content.strip()
+                    is_url_heavy = (
+                        ("https://" in content_preview and len(content_preview.split("\n")) <= 3)
+                        or ("Sample tables" in content_preview and "apa.org" in content_preview)
+                        or ("style-grammar-guidelines" in content_preview)
+                        or (content_preview.count("/") > 5 and "http" in content_preview)
+                    )  # URL-heavy content
 
-            # Analyze each chunk for this file
+                    if text_length < 500 or is_url_heavy:
+                        has_minimal_text = True
+                        if is_url_heavy:
+                            print(f"🌐 Page {page_num} flagged as URL-heavy content (likely image page): {text_length} chars")
+                        else:
+                            print(f"🎯 Page {page_num} flagged as minimal text (likely image-heavy): {text_length} chars")
+                        break
+            
+            print(f"📊 Full Document Scan strategy for {file.filename}: {'Images' if has_minimal_text else 'Text'} (total text: {total_text_length} chars, vision enabled: {vision_enabled}, images available: {len(file_images)})")
+
+            # Choose processing strategy based on text content
+            if has_minimal_text:
+                # Use image-based processing for minimal text documents
+                print(f"📸 Using image processing for {file.filename} due to minimal text content")
+                # Skip text chunking - we'll use vision analysis instead
+                chunks = []
+            else:
+                # Use traditional text chunking for documents with sufficient text
+                print(f"📝 Using text processing for {file.filename} with sufficient embedded text")
+                chunks = chunk_text(
+                    full_text, max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE
+                )
+
+            # Analyze chunks or use image processing
             file_chunk_analyses = []
             file_source_citations = []
 
-            for i, chunk in enumerate(chunks):
-                try:
-                    chunk_analysis = invoke_llm(
-                        llm,
-                        settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
-                        {"chunk": chunk, "question": rephrased_question},
-                    )
-
-                    if "No relevant information found" not in chunk_analysis:
-                        file_chunk_analyses.append(chunk_analysis)
-                        file_source_citations.append(
-                            {
-                                "content": chunk,  # Remove 300 character truncation
-                                "metadata": {
-                                    "source": file.filename,
-                                    "chunk": i + 1,
-                                    "file_index": file_idx + 1,
-                                },
-                            }
+            if chunks:
+                # Process text chunks for documents with sufficient text
+                for i, chunk in enumerate(chunks):
+                    try:
+                        chunk_analysis = invoke_llm(
+                            llm,
+                            settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
+                            {"chunk": chunk, "question": rephrased_question},
                         )
-                except Exception as e:
-                    print(f"Error analyzing chunk {i} in file {file.filename}: {e}")
-                    continue
 
-            # If we found relevant chunks in this file, create a document-level analysis
+                        if "No relevant information found" not in chunk_analysis:
+                            file_chunk_analyses.append(chunk_analysis)
+                            file_source_citations.append(
+                                {
+                                    "content": chunk,  # Remove 300 character truncation
+                                    "metadata": {
+                                        "source": file.filename,
+                                        "chunk": i + 1,
+                                        "file_index": file_idx + 1,
+                                    },
+                                }
+                            )
+                    except Exception as e:
+                        print(f"Error analyzing chunk {i} in file {file.filename}: {e}")
+                        continue
+
+            # Process the file based on whether we have text chunks or need image processing
             if file_chunk_analyses:
-                # Synthesize chunks for this specific document
+                # We have text-based analysis - create document-level synthesis
                 file_chunk_analyses_text = "\n\n".join(
                     [
                         f"Chunk {i+1}: {analysis}"
@@ -455,9 +494,9 @@ async def _handle_full_text_document_query(
                     },
                 )
 
-                # Add vision analysis if images exist and LLM supports it
-                if vision_enabled and file_images:
-                    print(f"Adding vision analysis for {file.filename}")
+                # Add vision analysis if images exist and LLM supports it (for supplementing text analysis)
+                if vision_enabled and file_images and not has_minimal_text:
+                    print(f"Adding supplemental vision analysis for {file.filename}")
 
                     # Prepare images for processing
                     image_data_list = []
@@ -528,6 +567,163 @@ async def _handle_full_text_document_query(
 
                 # Add source citations for this file
                 all_source_citations.extend(file_source_citations)
+            
+            elif has_minimal_text and vision_enabled and file_images:
+                # Use image-only processing for minimal text documents with structured table extraction
+                print(f"📸 Processing {file.filename} using image-only analysis with table extraction due to minimal text")
+                
+                # Use the same table-aware processing as Vector Search mode
+                from app.services.document_utils import (
+                    extract_documents_with_table_processing,
+                )
+
+                # Process document with table awareness to get structured table data
+                processed_documents, table_data = (
+                    extract_documents_with_table_processing(
+                        file_content, file.filename, llm
+                    )
+                )
+                
+                print(f"📊 Table processing extracted {len(table_data.get('tables', []))} structured tables")
+
+                # Use the processed documents (with embedded table JSON) as the analysis content
+                if processed_documents:
+                    # Combine processed document content (includes structured table data)
+                    structured_content = "\n\n".join([doc.page_content for doc in processed_documents])
+                    
+                    # Create document-level analysis using structured content
+                    document_analysis = invoke_llm(
+                        llm,
+                        settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+                        {
+                            "question": rephrased_question,
+                            "chunk_analyses": f"Structured document content with table data: {structured_content}",
+                        },
+                    )
+
+                    # Store the structured table-aware analysis for this document
+                    all_document_analyses.append(
+                        {
+                            "filename": file.filename,
+                            "analysis": document_analysis,
+                            "processing_method": "structured_table_extraction",
+                            "has_table_data": len(table_data.get('tables', [])) > 0,
+                            "table_count": len(table_data.get('tables', [])),
+                        }
+                    )
+                    
+                    # Create source citations using the structured table data
+                    for i, doc in enumerate(processed_documents):
+                        all_source_citations.append(
+                            {
+                                "content": doc.page_content,  # This includes structured table JSON
+                                "metadata": {
+                                    "source": file.filename,
+                                    "page": doc.metadata.get("page", i + 1),
+                                    "processing_method": "structured_table_extraction",
+                                    "file_index": file_idx + 1,
+                                    "has_table_data": "=== TABLE DATA (JSON) ===" in doc.page_content,
+                                    "table_count": len(table_data.get('tables', [])),
+                                },
+                            }
+                        )
+                        
+                else:
+                    # Fallback to basic vision analysis if table processing fails
+                    print(f"⚠️ Table processing failed, falling back to basic vision analysis for {file.filename}")
+                    
+                    # Prepare images for processing
+                    image_data_list = []
+                    for idx, img_b64 in enumerate(file_images):
+                        image_data_list.append(
+                            {
+                                "image_data": img_b64,
+                                "source_file": file.filename,
+                                "image_index": idx,
+                                "metadata": {"extracted_from": file.filename},
+                            }
+                        )
+
+                    try:
+                        # Use vision analysis as fallback
+                        vision_analysis = (
+                            await VisionService.process_images_with_prompt(
+                                llm=llm,
+                                images=image_data_list,
+                                prompt_template=settings.CHATBOT_VISION_PROMPT_TEMPLATE,
+                                variables={
+                                    "question": rephrased_question,
+                                    "context": chat_history or "",
+                                    "image_count": len(image_data_list),
+                                    "source_files": file.filename,
+                                },
+                            )
+                        )
+
+                        # Translate vision analysis if needed
+                        vision_analysis = await translate_text_if_needed(
+                            vision_analysis, session, current_user, llm
+                        )
+
+                        # Store the fallback vision analysis
+                        all_document_analyses.append(
+                            {
+                                "filename": file.filename,
+                                "analysis": vision_analysis,
+                                "processing_method": "vision_fallback",
+                                "has_vision_analysis": True,
+                                "image_count": len(file_images),
+                            }
+                        )
+                        
+                        # Create source citation for fallback vision processing
+                        all_source_citations.append(
+                            {
+                                "content": f"Vision-based analysis of {file.filename} containing {len(file_images)} images with minimal text content.",
+                                "metadata": {
+                                    "source": file.filename,
+                                    "processing_method": "vision_fallback",
+                                    "file_index": file_idx + 1,
+                                    "image_count": len(file_images),
+                                },
+                            }
+                        )
+
+                    except Exception as vision_error:
+                        print(f"Both table processing and vision analysis failed for {file.filename}: {vision_error}")
+                        # Last resort: use minimal text content
+                        fallback_analysis = invoke_llm(
+                            llm,
+                            settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+                            {
+                                "question": rephrased_question,
+                                "chunk_analyses": f"Document contains minimal text content: {full_text[:1000]}",
+                            },
+                        )
+                        
+                        all_document_analyses.append(
+                            {
+                                "filename": file.filename,
+                                "analysis": fallback_analysis,
+                                "processing_method": "text_fallback",
+                                "vision_error": str(vision_error),
+                            }
+                        )
+                        
+                        all_source_citations.append(
+                            {
+                                "content": full_text[:500] + "..." if len(full_text) > 500 else full_text,
+                                "metadata": {
+                                    "source": file.filename,
+                                    "processing_method": "text_fallback",
+                                    "file_index": file_idx + 1,
+                                },
+                            }
+                        )
+            else:
+                # No relevant content found in this file
+                print(f"⚠️ No relevant content found in {file.filename}")
+                continue
 
         # If no documents had relevant information
         if not all_document_analyses:
@@ -882,8 +1078,8 @@ async def query_knowledge_base(
                 persist_directory=temp_dir, embedding_function=embeddings
             )
 
-            # Create an enhanced retriever that filters bibliography content
-            retriever = SmartRetrieverFactory.create_general_document_retriever(
+            # Create an enhanced retriever that filters bibliography content (using academic paper retriever for better table retrieval)
+            retriever = SmartRetrieverFactory.create_academic_paper_retriever(
                 chroma_db=chroma_db, search_kwargs={"k": settings.RAG_NUM_CHUNKS}
             )
 
@@ -924,6 +1120,30 @@ async def query_knowledge_base(
         docs = retriever.get_relevant_documents(rephrased_question)
         context = "\n\n".join([doc.page_content for doc in docs])
         print("Retrieved context:", context)
+
+        # 🐛 DEBUG: Compare KB retrieval with direct upload
+        print(
+            f"🐛 KNOWLEDGE BASE DEBUG: Retrieved {len(docs)} documents for question: '{rephrased_question}'"
+        )
+        for i, doc in enumerate(docs):
+            metadata = doc.metadata
+            content_preview = (
+                doc.page_content[:200] + "..."
+                if len(doc.page_content) > 200
+                else doc.page_content
+            )
+            print(
+                f"🐛 KB Doc {i+1}: Page {metadata.get('page', 'Unknown')} - {content_preview}"
+            )
+            if "=== TABLE DATA (JSON) ===" in doc.page_content:
+                # Extract table title for debugging
+                import re
+
+                title_match = re.search(r'"title":\s*"([^"]+)"', doc.page_content)
+                if title_match:
+                    print(f"🐛 KB Doc {i+1}: Contains table '{title_match.group(1)}'")
+        print("🐛 KB DEBUG END")
+        print("-" * 80)
 
         # Create a list of sources for citation
         sources = []
@@ -1421,6 +1641,32 @@ async def query_document(
         # Retrieve relevant context
         docs = retriever.get_relevant_documents(rephrased_question)
         context = "\n\n".join([doc.page_content for doc in docs])
+
+        # 🐛 DEBUG: Compare direct upload retrieval with KB
+        print(
+            f"🐛 DIRECT UPLOAD DEBUG: Retrieved {len(docs)} documents for question: '{rephrased_question}'"
+        )
+        for i, doc in enumerate(docs):
+            metadata = doc.metadata
+            content_preview = (
+                doc.page_content[:200] + "..."
+                if len(doc.page_content) > 200
+                else doc.page_content
+            )
+            print(
+                f"🐛 Direct Doc {i+1}: Page {metadata.get('page', 'Unknown')} - {content_preview}"
+            )
+            if "=== TABLE DATA (JSON) ===" in doc.page_content:
+                # Extract table title for debugging
+                import re
+
+                title_match = re.search(r'"title":\s*"([^"]+)"', doc.page_content)
+                if title_match:
+                    print(
+                        f"🐛 Direct Doc {i+1}: Contains table '{title_match.group(1)}'"
+                    )
+        print("🐛 DIRECT UPLOAD DEBUG END")
+        print("-" * 80)
 
         # Check if we need vision analysis for image-only fallback documents
         from app.services.vision_service import VisionService

@@ -1,0 +1,37 @@
+{
+  "problem": {
+    "description": "KB and Direct Upload return different results for same document/question",
+    "kb_result": "0.12% per trade (Swaps table)",
+    "direct_result": "Smart: $8.95, All-inclusive: $0 (Exchange-traded table)"
+  },
+  "root_cause": {
+    "kb_issue": "Retrieves wrong table (Swaps instead of Exchange-traded)",
+    "chunking_issue": "Context loss during KB document processing",
+    "embedding_issue": "Both tables have 'brokerage commission' term",
+    "quality_issue": "Different quality scores between systems"
+  },
+  "solution": {
+    "immediate": [
+      "Add metadata-based filtering to KB retrieval",
+      "Improve table context preservation in chunking",
+      "Prefer early-document tables for general queries",
+      "Add document section awareness to similarity search"
+    ],
+    "medium_term": [
+      "Re-process existing KBs with improved chunking",
+      "Implement semantic filtering by table titles",
+      "Add hybrid retrieval with metadata filtering",
+      "Use query-to-section mapping"
+    ]
+  },
+  "test_files": {
+    "debug_scripts": [
+      "debug_simple_analysis.py",
+      "debug_log_checker.py",
+      "debug_log_monitor.py",
+      "debug_api_retrieval_comparison.py"
+    ],
+    "test_document": "test_files/Appendix 6 Fee Schedule.pdf",
+    "test_question": "What are the fees for trading US equities?"
+  }
+}

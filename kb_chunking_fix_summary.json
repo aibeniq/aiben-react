@@ -1,0 +1,17 @@
+{
+  "problem": "KB used different chunking than chatbot, causing retrieval disparity",
+  "root_cause": "create_smart_text_splitter vs TablePreservingTextSplitter",
+  "solution": "Align KB chunking with chatbot approach",
+  "changes_made": [
+    "Import TablePreservingTextSplitter in knowledgebases.py",
+    "Replace create_smart_text_splitter with TablePreservingTextSplitter",
+    "Use same chunk_size=1000, chunk_overlap=200 parameters",
+    "Add ensure_documents_for_vector_search step",
+    "Add table processing logging for consistency",
+    "Update RecursiveCharacterTextSplitter to TablePreservingTextSplitter"
+  ],
+  "files_modified": [
+    "backend/app/api/routes/knowledgebases.py"
+  ],
+  "expected_result": "KB and direct upload now return identical results"
+}
