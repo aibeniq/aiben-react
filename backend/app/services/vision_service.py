@@ -315,6 +315,101 @@ The analysis above integrates both textual content and visual elements to provid
             return f"Vision analysis unavailable: {str(e)}"
 
     @staticmethod
+    def analyze_general_image_content(
+        llm, page_images: List[str], page_numbers: List[int], filename: str
+    ) -> Dict[str, Any]:
+        """
+        Analyze general image content (non-table) for comprehensive understanding.
+        Used when images don't contain tables but have visual content that needs analysis.
+
+        Args:
+            llm: The LLM instance to use
+            page_images: List of base64 encoded images
+            page_numbers: List of corresponding page numbers
+            filename: Source filename for context
+
+        Returns:
+            Dict containing image analysis results and metadata
+        """
+
+        if not VisionService.is_vision_enabled(llm):
+            return {"analysis_successful": False, "error": "Vision not supported"}
+
+        if not page_images:
+            return {"analysis_successful": False, "error": "No images provided"}
+
+        # Process images to understand their content
+        BATCH_SIZE = 3  # Smaller batch for detailed analysis
+        all_analyses = []
+
+        logger.info(
+            f"🔍 Analyzing {len(page_images)} pages with general image content in batches of {BATCH_SIZE}"
+        )
+
+        for batch_start in range(0, len(page_images), BATCH_SIZE):
+            batch_end = min(batch_start + BATCH_SIZE, len(page_images))
+            batch_images = page_images[batch_start:batch_end]
+            batch_page_numbers = page_numbers[batch_start:batch_end]
+
+            logger.info(
+                f"🖼️ Analyzing batch {batch_start//BATCH_SIZE + 1}: pages {batch_page_numbers}"
+            )
+
+            vision_images = []
+            for i, img_b64 in enumerate(batch_images):
+                vision_images.append(
+                    {
+                        "image_data": img_b64,
+                        "metadata": {
+                            "source": filename,
+                            "page": batch_page_numbers[i],
+                            "content_type": "general_image",
+                        },
+                    }
+                )
+
+            general_analysis_prompt = """
+Analyze these images and provide a comprehensive description of their visual content, focusing especially on embedded images, photos, logos, and visual elements.
+
+For each image, describe:
+1. **Embedded Images/Photos**: Any photographs, product images, logos, or graphics embedded in the document
+2. **Main Visual Elements**: Primary visual focus - products, people, objects, branding elements
+3. **Visual Details**: Colors, composition, style, quality, size, positioning
+4. **Text Content**: Any visible text, labels, captions, or written information overlaid on images
+5. **Context and Purpose**: What role do these visual elements play in the document?
+6. **Product/Object Details**: If there are products, describe their appearance, features, colors, style
+
+Document: {filename}
+Pages: {batch_pages}
+
+IMPORTANT: Pay special attention to any embedded images (photos, product images, logos) that are separate from the page layout. These should be described in detail as they contain important visual information that users may ask about.
+
+Format your response as clear, organized text that describes the visual content comprehensively.
+            """
+
+            batch_analysis = VisionService._process_batch_for_general_analysis(
+                llm,
+                general_analysis_prompt,
+                filename,
+                batch_page_numbers,
+                vision_images,
+            )
+
+            # Add analysis from this batch to the overall results
+            all_analyses.extend(batch_analysis)
+
+        # Return combined results from all batches
+        logger.info(f"🖼️ Completed image analysis for {filename}: {len(all_analyses)} pages analyzed")
+
+        return {
+            "analyses": all_analyses,
+            "source": filename,
+            "analysis_successful": len(all_analyses) > 0,
+            "page_count": len(page_images),
+            "batches_processed": (len(page_images) + BATCH_SIZE - 1) // BATCH_SIZE,
+        }
+
+    @staticmethod
     def extract_table_as_json(
         llm, page_images: List[str], page_numbers: List[int], filename: str
     ) -> Dict[str, Any]:
@@ -369,7 +464,7 @@ The analysis above integrates both textual content and visual elements to provid
                 )
 
             table_extraction_prompt = """
-Analyze the images and extract all table data as structured JSON.
+Analyze the images and extract all table data as structured JSON, AND also describe any embedded images or visual content.
 
 For each table found, create a JSON object with:
 1. "table_id": Unique identifier for the table (e.g., "table_1", "table_2")
@@ -380,6 +475,9 @@ For each table found, create a JSON object with:
 6. "summary": Brief description of what the table contains
 7. "context": Any surrounding text that provides table context
 8. "metadata": Object with "row_count", "column_count", "table_type"
+
+ADDITIONALLY, if you see any embedded images, logos, photos, diagrams, or other visual elements (not tables), describe them in a separate "visual_content" section:
+9. "visual_content": Detailed description of any embedded images, logos, products, photos, or visual elements visible in the page
 
 CRITICAL GUIDELINES FOR TABLE STRUCTURE:
 - CAREFULLY identify all columns including unlabeled ones
@@ -448,6 +546,76 @@ Example format for a typical fee schedule table:
             "page_count": len(page_images),
             "batches_processed": (len(page_images) + BATCH_SIZE - 1) // BATCH_SIZE,
         }
+
+    @staticmethod
+    def _process_batch_for_general_analysis(
+        llm,
+        prompt_template: str,
+        filename: str,
+        page_numbers: List[int],
+        vision_images: List[Dict],
+    ) -> List[Dict]:
+        """
+        Process a single batch of images for general content analysis.
+
+        Args:
+            llm: The LLM instance
+            prompt_template: The analysis prompt template
+            filename: Source filename
+            page_numbers: Page numbers for this batch
+            vision_images: Vision images for this batch
+
+        Returns:
+            List of analysis dictionaries
+        """
+        try:
+            result = VisionService.safe_vision_analysis(
+                llm=llm,
+                prompt_template=prompt_template,
+                variables={
+                    "filename": filename,
+                    "batch_pages": (
+                        f"{page_numbers[0]}-{page_numbers[-1]}"
+                        if len(page_numbers) > 1
+                        else str(page_numbers[0])
+                    ),
+                },
+                images=vision_images,
+            )
+
+            # 🐛 DEBUG: Print the raw LLM response for debugging general analysis
+            logger.info("=" * 80)
+            logger.info("🔍 DEBUG: RAW LLM RESPONSE FOR GENERAL IMAGE ANALYSIS (BATCH)")
+            logger.info(f"📄 File: {filename}")
+            logger.info(f"🖼️ Pages in batch: {page_numbers}")
+            logger.info(f"📝 Response length: {len(result)} characters")
+            logger.info("-" * 80)
+            logger.info(f"RAW RESPONSE:\n{result}")
+            logger.info("=" * 80)
+
+            # Create analysis objects for each page
+            analyses = []
+            for i, page_num in enumerate(page_numbers):
+                analysis = {
+                    "page": page_num,
+                    "content_description": result,
+                    "analysis_type": "general_image_content",
+                    "source": filename,
+                    "metadata": {
+                        "processing_method": "vision_analysis",
+                        "batch_index": i,
+                        "total_pages_in_batch": len(page_numbers),
+                        "analysis_timestamp": "",
+                    }
+                }
+                analyses.append(analysis)
+                logger.info(f"✅ Created analysis for page {page_num}")
+
+            return analyses
+
+        except Exception as e:
+            logger.error(f"Error processing general analysis batch {page_numbers}: {e}")
+            return []
 
     @staticmethod
     def _process_batch_for_tables(

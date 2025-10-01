@@ -66,6 +66,57 @@ from pathlib import Path
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 
+def is_vision_related_question(question: str) -> bool:
+    """
+    Detect if a user's question is asking about visual content that would require vision analysis.
+    
+    Args:
+        question: The user's question
+        
+    Returns:
+        bool: True if the question appears to be asking about visual content
+    """
+    if not question:
+        return False
+    
+    question_lower = question.lower()
+    
+    # Visual element keywords
+    visual_keywords = [
+        "logo", "image", "picture", "photo", "graphic", "icon", "symbol",
+        "diagram", "chart", "graph", "figure", "illustration", "drawing",
+        "visual", "color", "shape", "design", "layout", "appearance",
+        "banner", "header", "footer", "watermark", "signature",
+        "screenshot", "snapshot", "capture", "shoe", "shoes", "product",
+        "item", "clothing", "footwear", "object", "thing", "brand"
+    ]
+    
+    # Question patterns that suggest visual analysis
+    visual_patterns = [
+        r"what.*(?:looks|appears|shows|displays|shown)",
+        r"what.*(?:look like|appear like|shown)",
+        r"(?:can you see|do you see|is there).*(?:in the|on the)",
+        r"(?:describe|identify|recognize).*(?:the|any)",
+        r"what.*(?:at the top|at the bottom|in the corner|on the side)",
+        r"what.*(?:color|size|style|format)",
+        r"(?:show|display|contain|include).*(?:image|picture|logo)",
+        r"(?:what|how).*(?:does|do).*(?:look|appear)",
+        r"what.*(?:shoe|product|item|object).*(?:look|appear|shown)"
+    ]
+    
+    # Check for visual keywords
+    for keyword in visual_keywords:
+        if keyword in question_lower:
+            return True
+    
+    # Check for visual question patterns
+    for pattern in visual_patterns:
+        if re.search(pattern, question_lower):
+            return True
+    
+    return False
+
+
 # Request models for chat endpoints
 class ChatRequest(BaseModel):
     """Request model for general chat endpoint"""
@@ -1255,6 +1306,7 @@ async def query_knowledge_base(
 
     except Exception as e:
         # Don't delete the temp dir on error if it's cached
+        import traceback
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error querying knowledge base: {str(e)}"
@@ -1546,6 +1598,11 @@ async def query_document(
                     file_content, file.filename
                 )
 
+                print(f"🖼️ IMAGE EXTRACTION DEBUG for {file.filename}:")
+                print(f"  - Extracted {len(images)} images")
+                for i, img in enumerate(images):
+                    print(f"  - Image {i+1}: {len(img)} characters")
+
                 # Add file source information to metadata
                 for doc in processed_documents:
                     if not hasattr(doc, "metadata") or doc.metadata is None:
@@ -1586,6 +1643,24 @@ async def query_document(
                     f"✅ TABLE PROCESSING: {table_chunks_count} chunks contain table data with JSON embedding"
                 )
 
+            # Filter complex metadata to ensure ChromaDB compatibility
+            def filter_complex_metadata_for_chroma(chunks):
+                """Filter out complex metadata values that ChromaDB can't handle."""
+                for chunk in chunks:
+                    # Modify metadata in-place
+                    for key, value in list(chunk.metadata.items()):
+                        # Convert lists to comma-separated strings
+                        if isinstance(value, list):
+                            chunk.metadata[key] = ",".join(str(item) for item in value)
+                        # Convert dicts to string representation  
+                        elif isinstance(value, dict):
+                            chunk.metadata[key] = str(value)
+                        # Keep scalars as-is (str, int, float, bool, None)
+                return chunks
+                
+            filtered_chunks = filter_complex_metadata_for_chroma(chunks)
+            print(f"🔧 Filtered {len(chunks)} chunks for ChromaDB compatibility")
+
             # Create embeddings
             embeddings = load_embeddings_model(
                 provider=embedding_model.provider, model_id=embedding_model.model_id
@@ -1594,7 +1669,7 @@ async def query_document(
             # Create vector store in a temp directory that persists for the session
             vector_dir = tempfile.mkdtemp()
             vector_store = Chroma.from_documents(
-                documents=chunks, embedding=embeddings, persist_directory=vector_dir
+                documents=filtered_chunks, embedding=embeddings, persist_directory=vector_dir
             )
             # Create an enhanced retriever that filters bibliography content for documents
             retriever = SmartRetrieverFactory.create_academic_paper_retriever(
@@ -1668,7 +1743,7 @@ async def query_document(
         print("🐛 DIRECT UPLOAD DEBUG END")
         print("-" * 80)
 
-        # Check if we need vision analysis for image-only fallback documents
+        # Check if we need vision analysis for image-only fallback documents OR vision-related questions
         from app.services.vision_service import VisionService
 
         vision_enabled = VisionService.is_vision_enabled(llm)
@@ -1678,9 +1753,19 @@ async def query_document(
             doc.metadata.get("is_vision_fallback", False) for doc in docs
         )
 
-        # If we have vision fallbacks and images available, use vision analysis
-        if vision_enabled and has_vision_fallbacks and all_images:
-            print(f"Using vision analysis for {len(all_images)} images")
+        # Check if user is asking a vision-related question
+        is_vision_question = is_vision_related_question(rephrased_question)
+
+        print(f"🔍 Vision Analysis Check:")
+        print(f"  - Vision enabled: {vision_enabled}")
+        print(f"  - Has vision fallbacks: {has_vision_fallbacks}")
+        print(f"  - Is vision question: {is_vision_question}")
+        print(f"  - Available images: {len(all_images)}")
+
+        # If we have vision capabilities and either fallbacks OR vision questions with images, use vision analysis
+        if vision_enabled and all_images and (has_vision_fallbacks or is_vision_question):
+            print(f"🖼️ Triggering vision analysis for {len(all_images)} images")
+            print(f"   Reason: {'Vision fallbacks detected' if has_vision_fallbacks else 'Vision-related question detected'}")
             try:
                 # Convert base64 images to the format expected by VisionService
                 vision_images = []
@@ -1692,29 +1777,78 @@ async def query_document(
                         }
                     )
 
-                vision_result = VisionService.safe_vision_analysis(
-                    llm=llm,
-                    prompt_template=settings.CHATBOT_VISION_PROMPT_TEMPLATE,
-                    variables={
+                # Use more specific prompt for vision questions
+                if is_vision_question and not has_vision_fallbacks:
+                    # For direct vision questions, use a more targeted prompt
+                    vision_prompt = f"""Analyze the provided images to answer this specific question: "{rephrased_question}"
+
+Please look carefully at all visual elements in the images and provide a detailed answer focusing on what the user is asking about.
+
+If the question asks about specific visual elements (like logos, text, graphics, etc.), describe them in detail including:
+- What you can see
+- Where it's located in the image
+- Any text content visible
+- Colors, shapes, and design elements
+- Any other relevant visual details
+
+Question: {rephrased_question}
+Context from document text: {context}
+
+Please provide a comprehensive answer based on the visual analysis."""
+                    
+                    variables = {
+                        "question": rephrased_question,
+                        "context": context,
+                        "image_count": len(all_images),
+                        "source_files": "uploaded_files",
+                    }
+                else:
+                    # Use default chatbot vision prompt for fallback scenarios
+                    vision_prompt = settings.CHATBOT_VISION_PROMPT_TEMPLATE
+                    variables = {
                         "image_count": len(all_images),
                         "source_files": "uploaded_files",
                         "question": rephrased_question,
                         "context": context,
-                    },
+                    }
+
+                vision_result = VisionService.safe_vision_analysis(
+                    llm=llm,
+                    prompt_template=vision_prompt,
+                    variables=variables,
                     images=vision_images,
                 )
 
                 # Use combined analysis for documents with vision content
-                final_context = VisionService.combine_text_and_vision_analysis(
-                    text_analysis=context,
-                    vision_analysis=vision_result,
-                    combination_strategy="comprehensive",
-                )
+                if is_vision_question and not has_vision_fallbacks:
+                    # For direct vision questions, prioritize vision analysis
+                    final_context = f"""## Document Text Content
+{context}
+
+## Visual Analysis
+{vision_result}
+
+Note: The above visual analysis was performed specifically to answer your question about visual elements in the document."""
+                else:
+                    # For fallback scenarios, use comprehensive combination
+                    final_context = VisionService.combine_text_and_vision_analysis(
+                        text_analysis=context,
+                        vision_analysis=vision_result,
+                        combination_strategy="comprehensive",
+                    )
+                
                 context = final_context
-                print(f"Enhanced context with vision analysis: {len(context)} chars")
+                print(f"✅ Enhanced context with vision analysis: {len(context)} chars")
 
             except Exception as e:
-                print(f"Vision analysis failed, using text-only: {e}")
+                print(f"❌ Vision analysis failed, using text-only: {e}")
+                import traceback
+                traceback.print_exc()
+
+        elif is_vision_question and not all_images:
+            print(f"⚠️ Vision question detected but no images available in documents")
+        elif is_vision_question and not vision_enabled:
+            print(f"⚠️ Vision question detected but vision not enabled for current model")
 
         # Create a list of sources for citation
         sources = []
@@ -1800,6 +1934,7 @@ async def query_document(
         }
 
     except Exception as e:
+        import traceback
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error querying document: {str(e)}"
@@ -1959,6 +2094,7 @@ async def chat(
             )
 
     except Exception as e:
+        import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error in chat: {str(e)}")
 

@@ -608,6 +608,80 @@ def extract_images_from_pdf_bytes(file_content: bytes) -> List[str]:
     return images
 
 
+def extract_embedded_and_page_images_separately(file_content: bytes) -> tuple[List[str], List[str]]:
+    """
+    Extract embedded images and page renders separately from PDF.
+    
+    Returns:
+        tuple: (embedded_images, page_images) - two separate lists
+    """
+    import base64
+    import logging
+
+    logger = logging.getLogger(__name__)
+    embedded_images = []
+    page_images = []
+
+    try:
+        import fitz
+
+        doc = fitz.open("pdf", file_content)
+
+        for page_num in range(min(doc.page_count, 10)):  # Limit pages
+            page = doc[page_num]
+
+            # Extract embedded images first
+            image_list = page.get_images()
+            logger.info(f"📸 Page {page_num + 1}: Found {len(image_list)} embedded images")
+            
+            for img_index, img in enumerate(image_list[:3]):  # Limit embedded images per page
+                try:
+                    xref = img[0]
+                    base_image = doc.extract_image(xref)
+                    image_bytes = base_image["image"]
+                    img_base64 = base64.b64encode(image_bytes).decode()
+                    embedded_images.append(img_base64)
+                    logger.info(f"  ✅ Extracted embedded image {img_index + 1}: {len(image_bytes)} bytes")
+                except Exception as e:
+                    logger.warning(f"  ❌ Failed to extract embedded image {img_index + 1}: {e}")
+                    continue
+
+            # Convert page to image for table/layout analysis
+            pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))
+            img_data = pix.tobytes("png")
+            img_base64 = base64.b64encode(img_data).decode()
+            page_images.append(img_base64)
+
+        doc.close()
+        
+        logger.info(f"🖼️ Extracted {len(embedded_images)} embedded images and {len(page_images)} page renders")
+
+    except ImportError:
+        logger.warning("PyMuPDF not available - falling back to page images only")
+        # Fallback: Convert entire PDF to page images using pdf2image
+        try:
+            from pdf2image import convert_from_bytes
+
+            pages = convert_from_bytes(file_content, dpi=150, fmt="PNG")
+            for page in pages[:5]:  # Limit to 5 pages
+                import io
+
+                img_buffer = io.BytesIO()
+                page.save(img_buffer, format="PNG")
+                img_data = img_buffer.getvalue()
+                img_base64 = base64.b64encode(img_data).decode()
+                page_images.append(img_base64)
+                
+            logger.info(f"🖼️ Fallback: Created {len(page_images)} page images (no embedded image extraction)")
+
+        except ImportError:
+            logger.warning("pdf2image not available for PDF image extraction")
+    except Exception as e:
+        logger.error(f"PDF image extraction error: {e}")
+
+    return embedded_images, page_images
+
+
 def extract_images_from_docx_bytes(file_content: bytes) -> List[str]:
     """Extract images from DOCX bytes."""
     import base64
@@ -1221,9 +1295,44 @@ def extract_documents_with_table_processing(
     logger.info(f"🔍 TABLE PROCESSING DIAGNOSTIC:")
     logger.info(f"  📊 Table pages detected: {len(table_pages)} pages {table_pages}")
 
-    # For table processing, we need PAGE IMAGES, not embedded images
-    page_images = []
-    if table_pages and file_ext == ".pdf":
+    # STEP 1: Always extract and analyze embedded images (separate from page analysis)
+    embedded_image_analysis = {}
+    if file_ext == ".pdf":
+        try:
+            embedded_images, page_images = extract_embedded_and_page_images_separately(file_content)
+            
+            # Always analyze embedded images if they exist
+            if embedded_images and VisionService.is_vision_enabled(llm):
+                logger.info(f"🖼️ Found {len(embedded_images)} embedded images - analyzing by default")
+                
+                embedded_analysis = VisionService.analyze_general_image_content(
+                    llm=llm,
+                    page_images=embedded_images,
+                    page_numbers=list(range(1, len(embedded_images) + 1)),  # Map to image indices
+                    filename=f"{filename}_embedded_images"
+                )
+                
+                if embedded_analysis.get("analysis_successful", False):
+                    embedded_image_analysis = embedded_analysis
+                    logger.info(f"✅ Embedded image analysis complete: {len(embedded_analysis.get('analyses', []))} images analyzed")
+                else:
+                    logger.warning(f"⚠️ Embedded image analysis failed")
+            else:
+                if not embedded_images:
+                    logger.info(f"📄 No embedded images found in {filename}")
+                else:
+                    logger.info(f"🔮 Vision not enabled - skipping embedded image analysis")
+                    
+        except Exception as e:
+            logger.error(f"❌ Error extracting embedded images: {e}")
+            # Fallback to original method
+            _, page_images = extract_documents_and_images_from_file_unified(file_content, filename)
+
+    # STEP 2: For table processing, we need PAGE IMAGES (only when tables detected or minimal text)
+    if not 'page_images' in locals():
+        page_images = []
+    
+    if table_pages and file_ext == ".pdf" and 'page_images' not in locals():
         logger.info(f"  🖼️ Generating page images for PDF table processing...")
 
         # Try PyMuPDF first (already installed in your system)
@@ -1463,13 +1572,43 @@ def extract_documents_with_table_processing(
                         page_numbers=table_page_numbers,
                         filename=filename,
                     )
-                    if table_data.get("extraction_successful", False):
-                        logger.info(
-                            f"✅ Vision processing complete: extracted data for {len(table_data.get('tables', []))} tables"
+                    
+                    # Always try general image analysis for comprehensive understanding
+                    # This captures visual content that may not be in table format
+                    logger.info(f"� Performing general image content analysis for comprehensive understanding...")
+                    
+                    try:
+                        image_analysis_data = VisionService.analyze_general_image_content(
+                            llm=llm,
+                            page_images=table_images,
+                            page_numbers=table_page_numbers,
+                            filename=filename,
                         )
-                    else:
-                        error_msg = table_data.get("error", "Unknown error")
-                        logger.warning(f"⚠️ Vision processing failed: {error_msg}")
+                        
+                        if image_analysis_data.get("analysis_successful", False):
+                            logger.info(f"✅ General image analysis complete: analyzed {len(image_analysis_data.get('analyses', []))} pages")
+                            # Add image analysis to table_data
+                            table_data["image_analyses"] = image_analysis_data.get("analyses", [])
+                            table_data["has_image_analysis"] = True
+                        else:
+                            error_msg = image_analysis_data.get("error", "Unknown error")
+                            logger.warning(f"⚠️ General image analysis failed: {error_msg}")
+                            table_data["has_image_analysis"] = False
+                    except Exception as analysis_error:
+                        logger.error(f"💥 General image analysis error: {type(analysis_error).__name__}: {analysis_error}")
+                        table_data["has_image_analysis"] = False
+                    
+                    # Log overall success
+                    if table_data.get("extraction_successful", False):
+                        tables_count = len(table_data.get('tables', []))
+                        analyses_count = len(table_data.get('image_analyses', []))
+                        logger.info(f"✅ Vision processing complete: {tables_count} tables + {analyses_count} image analyses")
+                    elif table_data.get("has_image_analysis", False):
+                        analyses_count = len(table_data.get('image_analyses', []))
+                        logger.info(f"✅ Vision processing complete: {analyses_count} image analyses (no tables)")
+                        # Mark as successful since we have image analysis
+                        table_data["extraction_successful"] = True
+                        table_data["analysis_type"] = "general_image_content"
                 except Exception as vision_error:
                     logger.error(
                         f"💥 Vision processing error: {type(vision_error).__name__}: {vision_error}"
@@ -1848,6 +1987,28 @@ def extract_documents_with_table_processing(
 
                 # Combine all table blocks
                 enhanced_content = "\n".join(enhanced_content_parts)
+                
+                # Check if we also have general image analysis for this page
+                image_analyses = []
+                if table_data.get("image_analyses"):
+                    image_analyses = [
+                        analysis
+                        for analysis in table_data["image_analyses"]
+                        if analysis.get("page") == page_num
+                    ]
+                
+                # Add image analysis content if available
+                if image_analyses:
+                    analysis = image_analyses[0]  # Use first analysis for this page
+                    image_description = analysis.get("content_description", "")
+                    
+                    image_content = f"""
+=== VISUAL CONTENT ANALYSIS ===
+{image_description}
+=== END VISUAL CONTENT ===
+"""
+                    enhanced_content += image_content
+                    logger.info(f"🖼️ Added image analysis to page {page_num} with tables")
 
                 # Create new document with enhanced content for vision processing
                 enhanced_doc = Document(
@@ -1856,34 +2017,81 @@ def extract_documents_with_table_processing(
                         **doc.metadata,
                         "has_processed_tables": True,
                         "table_count": len(vision_tables),
+                        "has_visual_analysis": len(image_analyses) > 0,
                         "processing_method": "vision_enhanced",
+                        "content_types": ",".join(["tables"] + (["visual_analysis"] if image_analyses else []))
                     },
                 )
                 processed_documents.append(enhanced_doc)
 
             else:
-                # Vision processing failed or returned no tables for this page
-                # Check if this is a minimal text page that needs vision processing
-                enhanced_content = doc.page_content
-                text_length = len(doc.page_content.strip())
+                # Check if we have general image analysis for this page
+                image_analyses = []
+                if table_data.get("image_analyses"):
+                    image_analyses = [
+                        analysis
+                        for analysis in table_data["image_analyses"]
+                        if analysis.get("page") == page_num
+                    ]
 
-                # Skip fallback processing for pages with minimal text (likely image-heavy)
-                if text_length < 200:
-                    logger.warning(
-                        f"⚠️ Skipping text-only fallback for page {page_num} - minimal text detected ({text_length} chars). This page likely contains images that require vision processing."
+                if image_analyses:
+                    # Process page with general image analysis results
+                    logger.info(
+                        f"🖼️ Processing page {page_num} with general image analysis"
                     )
-                    # Don't process this page - it needs vision processing
-                    processed_documents.append(doc)
-                    continue
 
-                logger.warning(
-                    f"⚠️ Page {page_num} detected as table page but no vision data available. Creating fallback structure."
-                )
+                    # Create enhanced content with image analysis
+                    analysis = image_analyses[0]  # Use first analysis for this page
+                    image_description = analysis.get("content_description", "")
+                    
+                    enhanced_content = f"""Page {page_num} contains visual content that requires vision analysis. This appears to be a vector graphics PDF (e.g., from Print-as-PDF) where text is rendered as graphics rather than searchable text.
 
-                # Create a fallback table structure from raw content for text-rich pages
-                import json
+=== VISUAL CONTENT ANALYSIS ===
+{image_description}
 
-                fallback_table = {
+=== METADATA ===
+- Source: {filename}
+- Page: {page_num}
+- Analysis Type: General Image Content
+- Processing Method: Vision Analysis
+"""
+
+                    enhanced_doc = Document(
+                        page_content=enhanced_content,
+                        metadata={
+                            **doc.metadata,
+                            "has_visual_analysis": True,
+                            "processing_method": "vision_analysis",
+                            "content_type": "image_with_analysis",
+                            "analysis_type": "general_image_content",
+                        },
+                    )
+                    processed_documents.append(enhanced_doc)
+                    continue  # Skip fallback processing since we have image analysis
+
+                else:
+                    # No vision data available - handle as before
+                    # Check if this is a minimal text page that needs vision processing
+                    enhanced_content = doc.page_content
+                    text_length = len(doc.page_content.strip())
+
+                    # Skip fallback processing for pages with minimal text (likely image-heavy)
+                    if text_length < 200:
+                        logger.warning(
+                            f"⚠️ Skipping text-only fallback for page {page_num} - minimal text detected ({text_length} chars). This page likely contains images that require vision processing."
+                        )
+                        # Don't process this page - it needs vision processing
+                        processed_documents.append(doc)
+                        continue
+
+                    logger.warning(
+                        f"⚠️ Page {page_num} detected as table page but no vision data available. Creating fallback structure."
+                    )
+
+                    # Create a fallback table structure from raw content for text-rich pages
+                    import json
+
+                    fallback_table = {
                     "table_id": f"fallback_table_{page_num}",
                     "page": page_num,
                     "title": f"Table Content from Page {page_num}",
@@ -1965,6 +2173,38 @@ def extract_documents_with_table_processing(
             print(
                 f"📄 Processed {len(processed_documents)} documents (no table enhancement)"
             )
+
+    # STEP 3: Add embedded image analysis as separate documents
+    if embedded_image_analysis and embedded_image_analysis.get("analysis_successful", False):
+        logger.info(f"📸 Adding embedded image analysis to document set")
+        
+        # Add embedded image analysis to table_data for tracking
+        table_data["embedded_image_analysis"] = embedded_image_analysis
+        
+        for analysis in embedded_image_analysis.get("analyses", []):
+            image_description = analysis.get("content_description", "")
+            image_index = analysis.get("page", 1)  # This is actually image index, not page
+            
+            embedded_image_doc = Document(
+                page_content=f"""=== EMBEDDED IMAGE ANALYSIS ===
+{image_description}
+=== END EMBEDDED IMAGE ANALYSIS ===
+
+Source: {filename}
+Image Index: {image_index}
+Analysis Type: Embedded Image Content
+Processing Method: Vision Analysis""",
+                metadata={
+                    "source": filename,
+                    "content_type": "embedded_image_analysis",
+                    "image_index": image_index,
+                    "processing_method": "vision_analysis",
+                    "analysis_type": "embedded_image_content",
+                    "has_visual_content": True,
+                },
+            )
+            processed_documents.append(embedded_image_doc)
+            logger.info(f"✅ Added embedded image analysis document for image {image_index}")
 
     return processed_documents, table_data
 
