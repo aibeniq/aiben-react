@@ -36,7 +36,7 @@ from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 
 from sqlmodel import Session, select
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, Request as FastAPIRequest
 from typing import List, Dict, Any, Literal
 import re
 import json
@@ -1120,7 +1120,9 @@ async def process_form(
     current_user: CurrentUser,
     fields: str,
     search_mode: Literal["vector", "full_scan"] = "vector",
-    files: List[UploadFile] = File(None),
+    digitized_files: List[UploadFile] = File(None),
+    handwritten_files: List[UploadFile] = File(None),
+    request: FastAPIRequest = None,
 ):
     """
     Process the uploaded files and fields with unified visual processing.
@@ -1141,8 +1143,17 @@ async def process_form(
     else:
         print(f"Using LangChain model for FormConnect: {type(llm).__name__}")
 
-    total_files = len(files) if files else 0
+    # Combine digitized and handwritten files
+    files = []
+    if digitized_files:
+        files.extend(digitized_files)
+    if handwritten_files:
+        files.extend(handwritten_files)
+    
+    total_files = len(files)
     print(f"Now processing {total_files} files with unified visual processing...")
+    print(f"  - Digitized files: {len(digitized_files) if digitized_files else 0}")
+    print(f"  - Handwritten files: {len(handwritten_files) if handwritten_files else 0}")
 
     # Check if we have at least one file
     if total_files < 1:
@@ -1164,18 +1175,52 @@ async def process_form(
 
     # Process all files with unified visual enhancement
     if files:
-        for file in files:
+        for i, file in enumerate(files):
+            # CRITICAL: Check if client has disconnected before processing each file
+            try:
+                if request and await request.is_disconnected():
+                    print(f"❌ CLIENT DISCONNECTED - Stopping at file {i + 1}")
+                    return FormConnectResponse(
+                        results={
+                            "status": "cancelled",
+                            "message": "Request cancelled - client disconnected"
+                        }
+                    )
+            except Exception as e:
+                print(f"Warning: Could not check disconnect status: {e}")
+            
+            # Read file content
+            file_content = await file.read()
+            filename = file.filename
+            
             if search_mode == "vector":
                 # Use vector search with visual enhancement
-                extracted = await process_images_only(file, template, llm)
+                extracted = await extract_fields_using_vector_search(
+                    file, file_content, template, llm
+                )
             else:
                 # Use full text processing with visual enhancement
-                extracted = await process_with_text_and_images(file, template, llm)
+                extracted = await extract_fields_using_full_text(
+                    file_content, filename, template, llm
+                )
 
-            print("Results for file name:", file.filename)
+            # CRITICAL: Check if client disconnected after field extraction
+            try:
+                if request and await request.is_disconnected():
+                    print(f"❌ CLIENT DISCONNECTED - After processing file {i + 1}")
+                    return FormConnectResponse(
+                        results={
+                            "status": "cancelled",
+                            "message": "Request cancelled - client disconnected after file processing"
+                        }
+                    )
+            except Exception as e:
+                print(f"Warning: Could not check disconnect status: {e}")
+
+            print("Results for file name:", filename)
             print("Extracted fields:", extracted)
             extracted_results.append(extracted)
-            file_names.append(file.filename)
+            file_names.append(filename)
 
             # Reset file position for potential future reads
             await file.seek(0)

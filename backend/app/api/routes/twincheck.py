@@ -18,9 +18,11 @@ import markdown
 from bs4 import BeautifulSoup
 import tiktoken
 
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form, Request as FastAPIRequest
 from fastapi.responses import StreamingResponse
 from sqlmodel import select
+import asyncio
+import threading
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
@@ -38,6 +40,22 @@ from app.core.config import settings
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
 from app.services.translation import translate_text_if_needed
 from app.services.pdf_utils import load_pdf_with_pypdf
+
+# Async wrapper for invoke_llm that respects cancellation
+async def invoke_llm_async(llm, prompt, variables=None):
+    """Async wrapper for invoke_llm that properly handles cancellation"""
+    # Simple approach: just call invoke_llm directly since we're checking
+    # disconnection at the caller level anyway
+    try:
+        # Run in a thread to avoid blocking the event loop
+        loop = asyncio.get_running_loop()
+        result = await loop.run_in_executor(None, invoke_llm, llm, prompt, variables)
+        return result
+    except Exception as e:
+        print(f"Error in invoke_llm_async: {e}")
+        raise
+
+# No longer using global cancellation tracking - relying on asyncio cancellation
 
 # from langchain_community.document_loaders import PyPDFLoader  # Removed - using pypdf instead
 import mimetypes
@@ -174,14 +192,19 @@ def create_synthesis_prompt(
 async def compare_documents(
     session: SessionDep,
     current_user: CurrentUser,
-    request: TwinCheckRequest = Depends(),
+    request_data: TwinCheckRequest = Depends(),
     document1: UploadFile = File(...),
     document2: UploadFile = File(...),
+    request: FastAPIRequest = None,
 ):
     """
     Compare two documents based on the provided comparison topics.
     Supports PDF, DOCX, and plain text files.
     """
+    # Generate unique operation ID for logging
+    operation_id = str(uuid.uuid4())
+    print(f"Starting comparison operation {operation_id}")
+    
     try:
         # Reset file pointers (in case they were read elsewhere)
         document1.file.seek(0)
@@ -241,7 +264,7 @@ async def compare_documents(
         print(f"Generated diff text with {estimate_tokens(diff_text)} estimated tokens")
 
         # Parse comparison topics
-        topic_list = request.comparison_topics.strip().split("\n")
+        topic_list = request_data.comparison_topics.strip().split("\n")
         topic_analysis = []
 
         # Check if we need to chunk the diff text
@@ -251,11 +274,24 @@ async def compare_documents(
         print(f"Split diff into {len(diff_chunks)} chunks")
 
         # Process each topic with the LLM
-        for topic in topic_list:
+        for topic_idx, topic in enumerate(topic_list):
+            # CRITICAL: Check if client has disconnected before processing each topic
+            try:
+                if request and await request.is_disconnected():
+                    print(f"❌ CLIENT DISCONNECTED - Stopping at topic {topic_idx + 1}")
+                    return TwinCheckResponse(
+                        results={
+                            "status": "cancelled",
+                            "message": "Request cancelled - client disconnected"
+                        }
+                    )
+            except Exception as e:
+                print(f"Warning: Could not check disconnect status: {e}")
+            
             if not topic.strip():
                 continue
 
-            print(f"Processing topic: {topic}")
+            print(f"Processing topic {topic_idx + 1}/{len(topic_list)}: {topic}")
 
             # Simplified topic processing without Knowledge Base
             source_citations = []  # Keep this empty array for consistency
@@ -265,6 +301,19 @@ async def compare_documents(
                 chunk_results = []
 
                 for i, chunk in enumerate(diff_chunks):
+                    # CRITICAL: Check if client has disconnected before each chunk
+                    try:
+                        if request and await request.is_disconnected():
+                            print(f"❌ CLIENT DISCONNECTED - Stopping at chunk {i + 1}")
+                            return TwinCheckResponse(
+                                results={
+                                    "status": "cancelled",
+                                    "message": "Request cancelled - client disconnected during chunk processing"
+                                }
+                            )
+                    except Exception as e:
+                        print(f"Warning: Could not check disconnect status: {e}")
+                    
                     print(
                         f"  Processing chunk {i+1}/{len(diff_chunks)} for topic: {topic}"
                     )
@@ -284,6 +333,19 @@ async def compare_documents(
                             settings.TWINCHECK_ANALYSIS_PROMPT_TEMPLATE,
                             prompt_variables,
                         )
+                        
+                        # CRITICAL: Check if client disconnected after LLM call
+                        try:
+                            if request and await request.is_disconnected():
+                                print(f"❌ CLIENT DISCONNECTED - After LLM call for chunk {i + 1}")
+                                return TwinCheckResponse(
+                                    results={
+                                        "status": "cancelled",
+                                        "message": "Request cancelled - client disconnected after LLM call"
+                                    }
+                                )
+                        except Exception as e:
+                            print(f"Warning: Could not check disconnect status: {e}")
 
                         chunk_results.append(
                             {"chunk_index": i + 1, "analysis": chunk_result}
@@ -430,6 +492,8 @@ async def compare_documents(
 
                     # Add vision analysis if images exist and LLM supports it
                     if vision_enabled and (doc1_images or doc2_images):
+                        # Check for cancellation before vision processing
+                        await asyncio.sleep(0.01)
                         print(f"  Adding vision analysis for topic: {topic}")
 
                         # Prepare images for comparison
@@ -495,6 +559,7 @@ async def compare_documents(
                     else:
                         # Text-only analysis
                         # Translate the topic result if needed
+                        await asyncio.sleep(0.01)  # Allow cancellation during translation
                         topic_result = await translate_text_if_needed(
                             topic_result, session, current_user, llm
                         )
@@ -549,7 +614,7 @@ async def compare_documents(
             """
 
             try:
-                summary = invoke_llm(llm, summary_prompt, {})
+                summary = await invoke_llm_async(llm, summary_prompt, {})
 
                 # Translate the summary if needed
                 summary = await translate_text_if_needed(
@@ -568,7 +633,7 @@ async def compare_documents(
                     "diff_text": diff_text,
                     "doc1_name": document1.filename,
                     "doc2_name": document2.filename,
-                    "topics": request.comparison_topics,
+                    "topics": request_data.comparison_topics,
                 },
             )
 
@@ -583,7 +648,7 @@ async def compare_documents(
             user_id=current_user.id,
             functionality="twincheck",
             input_data={
-                "comparison_topics": request.comparison_topics,
+                "comparison_topics": request_data.comparison_topics,
                 "document1_name": document1.filename,
                 "document2_name": document2.filename,
             },
@@ -615,11 +680,16 @@ async def compare_documents(
 
         return TwinCheckResponse(results=result)
 
+    except asyncio.CancelledError:
+        print(f"Comparison operation {operation_id} was cancelled")
+        raise  # Re-raise to properly handle the cancellation
     except Exception as e:
+        print(f"Error in comparison operation {operation_id}: {str(e)}")
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error comparing documents: {str(e)}"
         )
+
 
 
 # Get history of comparison operations
@@ -1549,7 +1619,7 @@ Return only the final selected topics, one per line, numbered."""
         print(f"Example Document Length: {len(prompt_variables['example_document'])}")
         print(f"=== CALLING LLM ===\n")
 
-        topics_response = invoke_llm(
+        topics_response = await invoke_llm_async(
             llm,
             settings.TWINCHECK_GENERATE_TOPICS_PROMPT_TEMPLATE,
             prompt_variables,
@@ -1699,7 +1769,7 @@ async def generate_topics_json(
                 pass
 
         # Generate topics using the LLM
-        topics_response = invoke_llm(
+        topics_response = await invoke_llm_async(
             llm,
             settings.TWINCHECK_GENERATE_TOPICS_PROMPT_TEMPLATE,
             prompt_variables,

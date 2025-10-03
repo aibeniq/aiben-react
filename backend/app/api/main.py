@@ -17,6 +17,7 @@ from app.api.routes import (
     feedback,
     twincheck,
     usage,
+    rate_limiter,
 )
 from app.core.config import settings
 
@@ -36,6 +37,7 @@ api_router.include_router(chatbot.router)
 api_router.include_router(sourceretrieval.router)
 api_router.include_router(feedback.router, prefix="/api/v1")
 api_router.include_router(usage.router)
+api_router.include_router(rate_limiter.router)
 
 
 if settings.ENVIRONMENT == "local":

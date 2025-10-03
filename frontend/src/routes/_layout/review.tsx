@@ -8,6 +8,7 @@ import DownloadButton from "@/components/ui/download-button"
 import HelpTooltip from "@/components/ui/help-tooltip"
 import useCustomToast from "@/hooks/useCustomToast"
 import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
+import { useOperationCancellation } from "@/hooks/useOperationCancellation"
 import {
   Accordion,
   Box,
@@ -61,6 +62,7 @@ const VeraDoc = () => {
     reviewInputs?.selectedKnowledgeBase || null,
   )
   const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases() // Respect All Users toggle state
+  const { registerOperation } = useOperationCancellation()
   const abortControllerRef = useRef<AbortController | null>(null)
   const ongoingRequest = useRef<CancelablePromise<any> | null>(null)
 
@@ -366,9 +368,9 @@ const VeraDoc = () => {
     fetchChecklists()
   }, [])
 
-  // Add this mutation hook inside your VeraDoc component, before your handleRun function
+  // Single file mutation for individual file processing
   const mutation = useMutation({
-    mutationFn: (data: {
+    mutationFn: async (data: {
       questions: string
       knowledgeBaseId: string
       files: File[]
@@ -376,21 +378,14 @@ const VeraDoc = () => {
       customInstructions?: string
       searchMode?: "vector" | "full_scan"
     }) => {
-      if (ongoingRequest.current) {
-        ongoingRequest.current.cancel()
-      }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
-
-      // Create a new controller and store directly in the ref
-      const controller = new AbortController()
-      abortControllerRef.current = controller
+      // Clear previous results
+      setResults([])
+      setLoading(true)
 
       console.log("Creating new request with fresh AbortController")
       console.log("Search mode being sent to backend:", data.searchMode)
 
-      // Create the promise and store it
+      // Create the promise and register it for cancellation
       const promise = VeradocService.processRagChecklist({
         questions: data.questions,
         knowledgeBaseId: data.knowledgeBaseId,
@@ -402,26 +397,59 @@ const VeraDoc = () => {
         },
       })
 
-      ongoingRequest.current = promise
-      return promise
+      // Register the operation for automatic cancellation on navigation
+      const cancellablePromise = registerOperation(promise)
+      ongoingRequest.current = cancellablePromise
+      return cancellablePromise
     },
     onSuccess: (data: any) => {
       console.log("Response data:", data)
 
-      const singleResult = {
-        filename: data.results.filename,
-        displayResults: data.results.final_evaluation || "",
-        qaPairs: (data.results.qa_pairs as any[]) || [],
-        interactionId: data.results.interaction_id as string | undefined,
+      // Check if the request was cancelled
+      if (data.results.status === "cancelled") {
+        console.log("Review operation was cancelled")
+        showErrorToast("Request cancelled")
+        return
       }
 
-      setResults([singleResult])
+      const interactionId = data.results.interaction_id
+      console.log("Review interactionId for feedback:", interactionId)
 
-      // Show success message with search mode information
-      const searchMethod = searchMode === "vector" ? "vector search" : "full document scan"
-      showSuccessToast(`Document review completed using ${searchMethod}`)
+      // Convert to array format and store in global state
+      const reviewData = [
+        {
+          filename: data.results?.filename || "Review Result",
+          displayResults: data.results?.final_evaluation || "",
+          qaPairs: data.results?.qa_pairs || [],
+          interactionId: interactionId,
+        },
+      ]
+
+      setResults(reviewData) // Store in both local and global state
+
+      showSuccessToast("Document review completed successfully!")
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.log("Review onError triggered:", error)
+
+      // Check if it's a cancellation error from CancelablePromise
+      if (error.name === "CancelError" || error.message === "Request aborted") {
+        console.log("Review operation was cancelled (CancelError)")
+        showErrorToast("Request cancelled")
+        return
+      }
+
+      // Check if it's a cancellation error (HTTP 408)
+      if (
+        error.status === 408 ||
+        error.message?.includes("Operation cancelled") ||
+        error.detail?.includes("Operation cancelled")
+      ) {
+        console.log("Review operation was cancelled (HTTP 408)")
+        showErrorToast("Request cancelled")
+        return
+      }
+
       console.log("RAG mutation unsuccessful!")
       // Convert error to array format
       const errorResult = {
@@ -436,6 +464,115 @@ const VeraDoc = () => {
       setLoading(false)
     },
   })
+
+  // Simplified batch processing function with cancellation support
+  const handleBatchProcessing = async () => {
+    console.log("Starting batch processing for", fileItems.length, "files")
+    setLoading(true)
+    setResults([])
+
+    // Cancel any ongoing requests
+    if (ongoingRequest.current) {
+      ongoingRequest.current.cancel()
+    }
+
+    const batchResults: Array<{
+      filename: string
+      displayResults: string
+      qaPairs: any[]
+      interactionId?: string
+    }> = []
+
+    try {
+      // Process each file sequentially with cancellation checks
+      for (let i = 0; i < fileItems.length; i++) {
+        const fileItem = fileItems[i]
+        console.log(`Processing file ${i + 1}/${fileItems.length}: ${fileItem.file.name}`)
+
+        // Create individual request data
+        const requestData = {
+          questions: structuredQuestions.length > 0 ? JSON.stringify(structuredQuestions) : questions,
+          knowledgeBaseId: selectedKnowledgeBase!.id,
+          customInstructions: customInstructions.trim() || undefined,
+          searchMode: searchMode,
+          formData: {
+            files: [fileItem.file],
+            handwritten_files: [],
+          },
+        }
+
+        // Create the promise and register it for cancellation
+        const promise = VeradocService.processRagChecklist(requestData)
+        const cancellablePromise = registerOperation(promise)
+        ongoingRequest.current = cancellablePromise
+
+        try {
+          const response = await cancellablePromise
+
+          // Check if this individual file processing was cancelled
+          if (response.results.status === "cancelled") {
+            console.log(`Batch processing cancelled at file ${i + 1}`)
+            showErrorToast("Request cancelled")
+            return
+          }
+
+          // Store the result
+          batchResults.push({
+            filename: fileItem.file.name,
+            displayResults: (response.results?.final_evaluation as string) || "",
+            qaPairs: (response.results?.qa_pairs as any[]) || [],
+            interactionId: response.results?.interaction_id as string | undefined,
+          })
+
+          // Update results incrementally so user can see progress
+          setResults([...batchResults])
+
+        } catch (error: any) {
+          // Handle cancellation errors gracefully
+          if (error.name === "CancelError" || error.message === "Request aborted") {
+            console.log(`Batch processing cancelled at file ${i + 1} (CancelError)`)
+            showErrorToast("Request cancelled")
+            return
+          }
+
+          if (
+            error.status === 408 ||
+            error.message?.includes("Operation cancelled") ||
+            error.detail?.includes("Operation cancelled")
+          ) {
+            console.log(`Batch processing cancelled at file ${i + 1} (HTTP 408)`)
+            showErrorToast("Request cancelled")
+            return
+          }
+
+          // Handle other errors - add error result and continue with next file
+          console.error(`Error processing file ${fileItem.file.name}:`, error)
+          batchResults.push({
+            filename: fileItem.file.name,
+            displayResults: `Error processing ${fileItem.file.name}: ${error.message}`,
+            qaPairs: [],
+          })
+          setResults([...batchResults])
+        }
+      }
+
+      // Store final results in global state
+      setResults(batchResults)
+
+      // Show success message
+      const searchMethod = searchMode === "vector" ? "vector search" : "full document scan"
+      showSuccessToast(
+        `Batch processing completed for ${batchResults.length} files using ${searchMethod}`,
+      )
+
+    } catch (error: any) {
+      console.error("Batch processing error:", error)
+      showErrorToast(`Batch processing failed: ${error.message}`)
+    } finally {
+      ongoingRequest.current = null
+      setLoading(false)
+    }
+  }
 
   const handleRun = async () => {
     if (fileItems.length < 1) {
@@ -468,74 +605,6 @@ const VeraDoc = () => {
       return
     }
 
-    // Filter out placeholder files
-    const validItems = fileItems.filter((item) => item.file.size > 0)
-    const files = validItems.map((item) => item.file)
-
-    if (validItems.length < 1) {
-      const errorResult = {
-        filename: "Error",
-        displayResults: "Please upload at least one valid file.",
-        qaPairs: [],
-      }
-      setResults([errorResult])
-      return
-    }
-
-    const requestData = {
-      questions: structuredQuestions.length > 0 ? JSON.stringify(structuredQuestions) : questions,
-      knowledgeBaseId: selectedKnowledgeBase.id,
-      files: files,
-      handwrittenFiles: [], // Empty array for now
-      customInstructions: customInstructions.trim() || undefined,
-      searchMode: searchMode,
-    }
-
-    console.log("Request Data:", requestData)
-
-    setLoading(true) // Set loading to true
-    mutation.mutate(requestData, {
-      onSettled: () => {
-        setLoading(false) // Set loading to false when the process finishes
-      },
-    })
-  }
-
-  const handleProcessBatch = async () => {
-    if (fileItems.length === 0) {
-      const errorResult = {
-        filename: "Error",
-        displayResults: "Error: Please upload at least one file for batch processing.",
-        qaPairs: [],
-      }
-      setResults([errorResult])
-      return
-    }
-
-    if (!questions.trim()) {
-      const errorResult = {
-        filename: "Error",
-        displayResults: "Error: Please enter at least one question.",
-        qaPairs: [],
-      }
-      setResults([errorResult])
-      return
-    }
-
-    if (!selectedKnowledgeBase) {
-      const errorResult = {
-        filename: "Error",
-        displayResults: "Error: Please select a knowledge base for context.",
-        qaPairs: [],
-      }
-      setResults([errorResult])
-      return
-    }
-
-    // Clear previous results
-    setResults([])
-    setLoading(true)
-
     // Cancel any ongoing requests
     if (ongoingRequest.current) {
       ongoingRequest.current.cancel()
@@ -546,93 +615,32 @@ const VeraDoc = () => {
       abortControllerRef.current.abort()
     }
 
-    // Create a new controller and store directly in the ref
-    const controller = new AbortController()
-    abortControllerRef.current = controller
+    // Store current inputs in global state
+    setReviewInputs({
+      selectedKnowledgeBase,
+      selectedChecklist,
+      questions,
+      customInstructions,
+      searchMode,
+      fileItems,
+    })
 
-    try {
-      const batchResults: Array<{
-        filename: string
-        displayResults: string
-        qaPairs: any[]
-        interactionId?: string
-      }> = []
-
-      // Process each file individually
-      for (let i = 0; i < fileItems.length; i++) {
-        if (controller.signal.aborted) {
-          console.log("Batch processing aborted")
-          break
-        }
-        const fileItem = fileItems[i]
-
-        // Process this file with unified approach
-        const files = [fileItem.file]
-
-        // Process this file
-        const requestData = {
-          questions:
-            structuredQuestions.length > 0 ? JSON.stringify(structuredQuestions) : questions,
-          knowledgeBaseId: selectedKnowledgeBase.id,
-          files: files,
-          handwrittenFiles: [], // Empty array for now
-          customInstructions: customInstructions.trim() || undefined,
-          searchMode: searchMode,
-        }
-
-        // Call the API using our mutation
-        const response = await VeradocService.processRagChecklist({
-          questions: requestData.questions,
-          knowledgeBaseId: requestData.knowledgeBaseId,
-          customInstructions: requestData.customInstructions,
-          searchMode: requestData.searchMode,
-          formData: {
-            files: requestData.files,
-            handwritten_files: requestData.handwrittenFiles,
-          },
-        })
-
-        let displayResults = ""
-
-        if (response.results.final_evaluation) {
-          displayResults += "## FINAL EVALUATION\n\n"
-          displayResults += `${response.results.final_evaluation}\n\n`
-        }
-
-        // Store the QA pairs in the results array
-        batchResults.push({
-          filename: fileItem.file.name,
-          displayResults,
-          qaPairs: (response.results.qa_pairs as any[]) || [],
-          interactionId: response.results.interaction_id as string | undefined,
-        })
-
-        // Update your state for batch results
-        setResults([...batchResults])
+    // Check if we have multiple files - if so, use optimized batch processing
+    if (fileItems.length > 1) {
+      console.log(`Starting optimized batch processing for ${fileItems.length} files`)
+      await handleBatchProcessing()
+    } else {
+      // Single file processing using the mutation
+      const requestData = {
+        questions: structuredQuestions.length > 0 ? JSON.stringify(structuredQuestions) : questions,
+        knowledgeBaseId: selectedKnowledgeBase.id,
+        files: [fileItems[0].file],
+        handwrittenFiles: [],
+        customInstructions: customInstructions.trim() || undefined,
+        searchMode: searchMode,
       }
 
-      // Show success message for batch processing
-      if (batchResults.length > 0) {
-        const searchMethod = searchMode === "vector" ? "vector search" : "full document scan"
-        showSuccessToast(
-          `Batch processing completed for ${batchResults.length} files using ${searchMethod}`,
-        )
-      }
-    } catch (error: any) {
-      // Handle errors, checking if it's an abort
-      if (error.name === "AbortError") {
-        console.log("Batch processing was aborted")
-      } else {
-        console.error("Batch processing error:", error)
-        const errorResult = {
-          filename: "Error",
-          displayResults: `Error processing batch: ${error.message}`,
-          qaPairs: [],
-        }
-        setResults([errorResult])
-      }
-    } finally {
-      setLoading(false)
+      mutation.mutate(requestData)
     }
   }
 
@@ -928,7 +936,7 @@ const VeraDoc = () => {
           <HStack gap={4} justify="center">
             <Button
               variant="solid"
-              onClick={fileItems.length > 0 ? handleProcessBatch : handleRun}
+              onClick={handleRun}
               disabled={
                 fileItems.length < 1 ||
                 !questions.trim() ||

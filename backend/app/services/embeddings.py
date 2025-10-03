@@ -457,12 +457,12 @@ class RetryOpenAIEmbeddings:
             request_timeout=30,  # Set reasonable timeout
         )
 
-    @retry_openai_api(min_wait=5, max_wait=120, max_attempts=5)
+    @retry_openai_api(min_wait=10, max_wait=300, max_attempts=7)
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         """Embed a list of documents with retry logic."""
         return self.embeddings.embed_documents(texts)
 
-    @retry_openai_api(min_wait=5, max_wait=120, max_attempts=5)
+    @retry_openai_api(min_wait=10, max_wait=300, max_attempts=7)
     def embed_query(self, text: str) -> List[float]:
         """Embed a query text with retry logic."""
         return self.embeddings.embed_query(text)

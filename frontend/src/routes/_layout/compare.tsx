@@ -15,6 +15,7 @@ import TopicListTable from "@/components/Compare/TopicListTable"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import useCustomToast from "@/hooks/useCustomToast"
+import { useOperationCancellation } from "@/hooks/useOperationCancellation"
 
 import { useResults } from "@/contexts/ResultsContext"
 import { copyToClipboard } from "@/utils/copyToClipboard"
@@ -22,6 +23,7 @@ import { copyToClipboard } from "@/utils/copyToClipboard"
 const TwinCheck = () => {
   const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { registerOperation } = useOperationCancellation()
   const { compareResult, setCompareResult, compareInputs, setCompareInputs, clearCompareResult } =
     useResults()
 
@@ -270,16 +272,26 @@ const TwinCheck = () => {
   const mutation = useMutation({
     mutationFn: (data: { comparison_topics: string; document1: File; document2: File }) => {
       // Simplified API call without knowledge base parameters
-      return TwincheckService.compareDocuments({
+      const promise = TwincheckService.compareDocuments({
         comparisonTopics: data.comparison_topics,
         formData: {
           document1: data.document1,
           document2: data.document2,
         },
       })
+
+      // Register the operation for automatic cancellation on navigation
+      return registerOperation(promise)
     },
     onSuccess: (data: any) => {
       console.log("Response data:", data)
+
+      // Check if the request was cancelled
+      if (data.results.status === "cancelled") {
+        console.log("Compare operation was cancelled")
+        showErrorToast("Request cancelled")
+        return
+      }
 
       const interactionId = data.results.interaction_id
       console.log("Compare interactionId for feedback:", interactionId)

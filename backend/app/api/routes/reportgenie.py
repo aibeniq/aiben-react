@@ -193,6 +193,7 @@ async def generate_report(
     outline_id: str = Form(...),
     search_mode: str = Form("vector"),  # Default to vector search
     custom_instructions: Optional[str] = Form(None),
+    request: FastAPIRequest = None,
 ):
     """
     Generate a report based on sections outline and knowledge base search results.
@@ -237,6 +238,19 @@ async def generate_report(
 
         try:
             for section_item in section_items:
+                # CRITICAL: Check if client has disconnected before processing each section
+                try:
+                    if request and await request.is_disconnected():
+                        print(f"❌ CLIENT DISCONNECTED - Stopping report generation")
+                        return ReportGenieResponse(
+                            results={
+                                "status": "cancelled",
+                                "message": "Request cancelled - client disconnected"
+                            }
+                        )
+                except Exception as e:
+                    print(f"Warning: Could not check disconnect status: {e}")
+                
                 section_description = section_item["text"]
                 consult_documents = section_item.get("consultDocuments", True)
                 search_type = section_item.get(
@@ -297,12 +311,39 @@ async def generate_report(
                             max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE,
                         )
                         chunk_analyses = []
-                        for chunk in text_chunks:
+                        for i, chunk in enumerate(text_chunks):
+                            # CRITICAL: Check if client has disconnected before processing each chunk
+                            try:
+                                if request and await request.is_disconnected():
+                                    print(f"❌ CLIENT DISCONNECTED - Stopping at chunk {i + 1}")
+                                    return ReportGenieResponse(
+                                        results={
+                                            "status": "cancelled",
+                                            "message": "Request cancelled - client disconnected during chunk processing"
+                                        }
+                                    )
+                            except Exception as e:
+                                print(f"Warning: Could not check disconnect status: {e}")
+                            
                             analysis = invoke_llm(
                                 llm,
                                 settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
                                 {"chunk": chunk, "question": section_description},
                             )
+                            
+                            # CRITICAL: Check if client disconnected after LLM call
+                            try:
+                                if request and await request.is_disconnected():
+                                    print(f"❌ CLIENT DISCONNECTED - After LLM call for chunk {i + 1}")
+                                    return ReportGenieResponse(
+                                        results={
+                                            "status": "cancelled",
+                                            "message": "Request cancelled - client disconnected after LLM call"
+                                        }
+                                    )
+                            except Exception as e:
+                                print(f"Warning: Could not check disconnect status: {e}")
+                            
                             chunk_analyses.append(analysis)
 
                         # Synthesize the chunk analyses
@@ -329,6 +370,20 @@ async def generate_report(
                                         "question": section_description,
                                     },
                                 )
+                                
+                                # CRITICAL: Check if client disconnected after synthesis LLM call
+                                try:
+                                    if request and await request.is_disconnected():
+                                        print(f"❌ CLIENT DISCONNECTED - After synthesis LLM call")
+                                        return ReportGenieResponse(
+                                            results={
+                                                "status": "cancelled",
+                                                "message": "Request cancelled - client disconnected after synthesis"
+                                            }
+                                        )
+                                except Exception as e:
+                                    print(f"Warning: Could not check disconnect status: {e}")
+                                
                                 # Translate the synthesized answer if needed
                                 section_content = await translate_text_if_needed(
                                     synthesized_answer, session, current_user, llm
@@ -388,6 +443,19 @@ async def generate_report(
                                 ),
                             },
                         )
+
+                        # CRITICAL: Check if client disconnected after vector search LLM call
+                        try:
+                            if request and await request.is_disconnected():
+                                print(f"❌ CLIENT DISCONNECTED - After vector search LLM call")
+                                return ReportGenieResponse(
+                                    results={
+                                        "status": "cancelled",
+                                        "message": "Request cancelled - client disconnected after LLM call"
+                                    }
+                                )
+                        except Exception as e:
+                            print(f"Warning: Could not check disconnect status: {e}")
 
                         # Translate the synthesized answer if needed
                         section_content = await translate_text_if_needed(
@@ -2016,8 +2084,13 @@ IMPORTANT:
 
                 # Check for potential LLM issues before calling
                 try:
-                    # Call LLM directly since we have a fully formatted prompt
-                    mapping_response = llm.invoke(mapping_prompt).content
+                    # Call LLM through rate limiter for proper token management
+                    from app.services.universal_llm_wrapper import execute_llm_request_safely_sync
+                    mapping_response = execute_llm_request_safely_sync(
+                        llm, 
+                        mapping_prompt, 
+                        model_name=getattr(llm, 'model_name', 'gpt-4o')
+                    ).content
                 except Exception as llm_error:
                     print(f"LLM ERROR: {str(llm_error)}")
                     print(f"Prompt was {prompt_size} characters")
