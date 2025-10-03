@@ -123,19 +123,31 @@ def extract_openai_wait_time(exception: Exception) -> float:
 class OpenAIWaitStrategy:
     """
     Custom wait strategy that respects OpenAI's suggested wait times.
-    Falls back to exponential backoff if no suggestion is provided.
+    Falls back to aggressive exponential backoff if no suggestion is provided.
     """
 
-    def __init__(self, min_wait: int = 5, max_wait: int = 120, multiplier: int = 1):
+    def __init__(self, min_wait: int = 10, max_wait: int = 300, multiplier: int = 2):
         self.min_wait = min_wait
         self.max_wait = max_wait
         self.multiplier = multiplier
+        # More aggressive exponential backoff with higher multiplier
         self.exponential_backoff = wait_random_exponential(
             multiplier=multiplier, min=min_wait, max=max_wait
         )
 
     def __call__(self, retry_state: RetryCallState) -> float:
-        """Calculate wait time based on OpenAI suggestion or exponential backoff."""
+        """Calculate wait time based on OpenAI suggestion AND exponential backoff - use the longer of the two."""
+        
+        # Always calculate exponential backoff
+        attempt_number = retry_state.attempt_number
+        progressive_multiplier = self.multiplier * (attempt_number ** 1.5)  # Exponentially increase multiplier
+        
+        # Calculate exponential backoff with progressive multiplier
+        base_wait = min(self.min_wait * (2 ** attempt_number), self.max_wait)
+        exponential_wait = min(base_wait * progressive_multiplier, self.max_wait)
+        
+        # Check for OpenAI suggested wait time
+        openai_wait = 0.0
         if retry_state.outcome and retry_state.outcome.failed:
             exception = retry_state.outcome.exception()
 
@@ -143,18 +155,28 @@ class OpenAIWaitStrategy:
             if isinstance(exception, RateLimitError):
                 suggested_wait = extract_openai_wait_time(exception)
                 if suggested_wait > 0:
-                    # Add a small buffer (10%) to the suggested wait time
-                    buffered_wait = suggested_wait * 1.1
+                    # Add buffer to the suggested wait time for safety
+                    openai_wait = suggested_wait * 3.0
                     logger.info(
                         f"🕒 OpenAI suggested wait time: {suggested_wait:.3f}s, "
-                        f"using buffered time: {buffered_wait:.3f}s"
+                        f"buffered to: {openai_wait:.3f}s"
                     )
-                    return buffered_wait
 
-        # Fall back to exponential backoff for other errors or when no suggestion
-        fallback_wait = self.exponential_backoff(retry_state)
-        logger.info(f"🔄 Using exponential backoff: {fallback_wait:.3f}s")
-        return fallback_wait
+        # Use the LONGER of exponential backoff or OpenAI suggestion
+        final_wait = max(exponential_wait, openai_wait)
+        
+        if openai_wait > 0:
+            logger.info(
+                f"🔄 HYBRID STRATEGY: Exponential={exponential_wait:.3f}s, OpenAI={openai_wait:.3f}s, "
+                f"using LONGER wait: {final_wait:.3f}s (attempt #{attempt_number + 1})"
+            )
+        else:
+            logger.info(
+                f"🔄 Using exponential backoff: attempt #{attempt_number + 1}, "
+                f"wait time: {final_wait:.3f}s (multiplier: {progressive_multiplier:.2f})"
+            )
+        
+        return final_wait
 
 
 def log_before_sleep(retry_state: RetryCallState) -> None:
@@ -273,9 +295,9 @@ def is_retryable_replicate_error(exception: Exception) -> bool:
 
 
 def retry_openai_api(
-    min_wait: int = 5,  # Increased minimum wait to avoid overwhelming API
-    max_wait: int = 180,  # Increased to handle longer OpenAI suggested waits
-    max_attempts: int = 5,  # Reduced max attempts to prevent runaway retries
+    min_wait: int = 10,  # Even higher minimum wait for aggressive backoff
+    max_wait: int = 300,  # Much higher maximum wait to handle severe rate limiting
+    max_attempts: int = 7,  # More attempts with longer waits
 ) -> Callable[[F], F]:
     """
     Decorator for OpenAI API calls with intelligent wait strategy that respects OpenAI's suggested wait times.
@@ -292,7 +314,7 @@ def retry_openai_api(
 
     def decorator(func: F) -> F:
         @retry(
-            wait=OpenAIWaitStrategy(min_wait=min_wait, max_wait=max_wait),
+            wait=OpenAIWaitStrategy(min_wait=min_wait, max_wait=max_wait, multiplier=2),
             stop=stop_after_attempt(max_attempts),
             retry=retry_if_exception(is_retryable_openai_error),
             before_sleep=log_before_sleep,
@@ -496,3 +518,50 @@ def with_retries(
 
 # Legacy function removal - these are no longer needed with the new implementation
 # Removed the old helper functions that were causing KeyError issues
+
+
+def retry_openai_ultra_aggressive(
+    min_wait: int = 20,  # Very high minimum wait
+    max_wait: int = 600,  # 10 minutes maximum wait
+    max_attempts: int = 10,  # More attempts with very long waits
+) -> Callable[[F], F]:
+    """
+    Ultra-aggressive retry decorator for OpenAI API calls that are experiencing severe rate limiting.
+    This should be used as a last resort when standard retry logic isn't working.
+    
+    Features:
+    - Very high minimum wait times (20+ seconds)
+    - Very high maximum wait times (up to 10 minutes)
+    - Progressive exponential backoff with increasing multipliers
+    - 3x buffer on OpenAI suggested wait times
+    - More retry attempts to handle persistent rate limiting
+    
+    Args:
+        min_wait: Minimum wait time in seconds (default: 20)
+        max_wait: Maximum wait time in seconds (default: 600)
+        max_attempts: Maximum number of retry attempts (default: 10)
+    """
+    
+    def decorator(func: F) -> F:
+        @retry(
+            wait=OpenAIWaitStrategy(min_wait=min_wait, max_wait=max_wait, multiplier=3),
+            stop=stop_after_attempt(max_attempts),
+            retry=retry_if_exception(is_retryable_openai_error),
+            before_sleep=log_before_sleep,
+            after=log_after_attempt,
+            reraise=True,
+        )
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            logger.warning(f"🚨 ULTRA-AGGRESSIVE RETRY: Starting {func.__name__} with ultra-conservative backoff")
+            try:
+                result = func(*args, **kwargs)
+                logger.info(f"✅ ULTRA-AGGRESSIVE RETRY: {func.__name__} succeeded after ultra-conservative retries")
+                return result
+            except Exception as e:
+                logger.error(f"💥 ULTRA-AGGRESSIVE RETRY: {func.__name__} failed - {type(e).__name__}: {str(e)}")
+                raise
+
+        return wrapper
+
+    return decorator

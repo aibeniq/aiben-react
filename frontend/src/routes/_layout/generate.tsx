@@ -6,6 +6,7 @@ import DownloadButton from "@/components/ui/download-button"
 import HelpTooltip from "@/components/ui/help-tooltip"
 import useCustomToast from "@/hooks/useCustomToast"
 import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
+import { useOperationCancellation } from "@/hooks/useOperationCancellation"
 import {
   Accordion,
   Box,
@@ -57,6 +58,7 @@ const ReportGenie = () => {
     generateInputs?.selectedKnowledgeBase || null,
   )
   const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases() // Respect All Users toggle state
+  const { registerOperation } = useOperationCancellation()
 
   // Outline content state
   const [sections, setSections] = useState(generateInputs?.sections || "")
@@ -322,13 +324,23 @@ const ReportGenie = () => {
         custom_instructions: data.customInstructions || undefined,
       }
 
-      return ReportgenieService.generateReport({
+      const promise = ReportgenieService.generateReport({
         formData: formData,
       })
+
+      // Register the operation for automatic cancellation on navigation
+      return registerOperation(promise)
     },
     onSuccess: (data: any) => {
       console.log("Generate Response data:", data)
       console.log("Generate interaction_id:", data.results.interaction_id)
+
+      // Check if the request was cancelled
+      if (data.results.status === "cancelled") {
+        console.log("Generate operation was cancelled")
+        showErrorToast("Request cancelled")
+        return
+      }
 
       const interactionId = data.results.interaction_id
       console.log("Generate interactionId for feedback:", interactionId)
@@ -345,6 +357,26 @@ const ReportGenie = () => {
       showSuccessToast(t("generate.generateSuccess", { method: searchMethod }))
     },
     onError: (error: any) => {
+      console.log("Generate onError triggered:", error)
+
+      // Check if it's a cancellation error from CancelablePromise
+      if (error.name === "CancelError" || error.message === "Request aborted") {
+        console.log("Generate operation was cancelled (CancelError)")
+        showErrorToast("Request cancelled")
+        return
+      }
+
+      // Check if it's a cancellation error (HTTP 408)
+      if (
+        error.status === 408 ||
+        error.message?.includes("Operation cancelled") ||
+        error.detail?.includes("Operation cancelled")
+      ) {
+        console.log("Generate operation was cancelled (HTTP 408)")
+        showErrorToast("Request cancelled")
+        return
+      }
+
       showErrorToast(t("generate.generateError", { error: error.message }))
     },
   })

@@ -29,7 +29,7 @@ def with_openai_retries(func: F) -> F:
     Returns:
         Function decorated with OpenAI retry logic
     """
-    return retry_openai_api(min_wait=1, max_wait=60, max_attempts=6)(func)
+    return retry_openai_api(min_wait=10, max_wait=300, max_attempts=7)(func)
 
 
 def with_aws_retries(func: F) -> F:

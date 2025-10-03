@@ -1,6 +1,7 @@
 import { type FormConnectForm, FormconnectService } from "@/client"
 import DownloadButton from "@/components/ui/download-button"
 import useCustomToast from "@/hooks/useCustomToast"
+import { useOperationCancellation } from "@/hooks/useOperationCancellation"
 
 import { Box, Button, Container, HStack, Heading, Spinner, Text, VStack } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
@@ -22,6 +23,7 @@ import { copyToClipboard } from "../../utils/copyToClipboard"
 const FormConnect = () => {
   const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { registerOperation } = useOperationCancellation()
   const { matchResult, setMatchResult, matchInputs, setMatchInputs, clearMatchResult } =
     useResults()
 
@@ -242,7 +244,7 @@ const FormConnect = () => {
       console.log("Now beginning mutation...")
       console.log(`Using search mode: ${data.search_mode}`)
 
-      return FormconnectService.processForm({
+      const promise = FormconnectService.processForm({
         fields: data.fields,
         searchMode: data.search_mode,
         formData: {
@@ -250,10 +252,20 @@ const FormConnect = () => {
           handwritten_files: data.handwritten_files,
         },
       })
+
+      // Register the operation for automatic cancellation on navigation
+      return registerOperation(promise)
     },
     onSuccess: (data) => {
       console.log("Match Response data:", data)
       console.log("Match interaction_id:", data.results.interaction_id)
+
+      // Check if the request was cancelled
+      if (data.results.status === "cancelled") {
+        console.log("Match operation was cancelled")
+        showErrorToast("Request cancelled")
+        return
+      }
 
       const interactionId = data.results.interaction_id
       console.log("Match interactionId for feedback:", interactionId)

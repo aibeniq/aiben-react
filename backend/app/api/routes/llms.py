@@ -191,7 +191,8 @@ def validate_llm_model(
             )
 
             # Test with a simple query to verify the model exists
-            response = llm.invoke("Hello")
+            from app.services.universal_llm_wrapper import execute_llm_request_safely_sync
+            response = execute_llm_request_safely_sync(llm, "Hello", model_name=model_id)
             print(f"OpenAI model validation successful: {model_id}")
 
         elif model_data.provider == ModelProvider.AWS:
@@ -246,7 +247,8 @@ def validate_llm_model(
                             content="Translate this sentence from English to French. I love programming."
                         )
                     ]
-                    response = bedrock_llm.invoke(messages)
+                    from app.services.universal_llm_wrapper import execute_llm_request_safely_sync
+                    response = execute_llm_request_safely_sync(bedrock_llm, messages, model_name=model_id)
 
                 else:
                     # Use standard Bedrock for other models like Titan
@@ -271,7 +273,8 @@ def validate_llm_model(
 
                     llm = LLMChain(llm=bedrock_llm, prompt=prompt)
 
-                    response = llm.invoke({"country": "Canada"})
+                    from app.services.universal_llm_wrapper import execute_llm_request_safely_sync
+                    response = execute_llm_request_safely_sync(llm, str({"country": "Canada"}), model_name=model_id)
 
                 print(f"Received response from AWS Bedrock: {response}")
                 print(f"AWS Bedrock model validation successful: {model_id}")

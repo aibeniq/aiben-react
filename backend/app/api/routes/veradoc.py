@@ -1,6 +1,7 @@
 import uuid
 import json
 import traceback
+import re  # Add missing import for regex operations
 from app.models import (
     VeraDocResponse,
     VeraDocChecklist,
@@ -250,33 +251,7 @@ async def process_rag_checklist(
         )
         request_data.search_mode = "vector"
 
-    # Create a cancellation flag
-    cancellation_requested = False
-
     try:
-        print("Setting up disconnect monitor for VeraDoc RAG processing...")
-        # Create a monitor task but don't wait for it
-        disconnect_monitor = None
-        if request:
-
-            async def monitor_client_disconnect():
-                nonlocal cancellation_requested
-                try:
-                    # Don't create a separate task - just await directly
-                    # This is fine because this whole function runs as a background task
-                    await request.is_disconnected()
-
-                    # This only executes after client disconnects
-                    print("Client disconnected, canceling operation...")
-                    cancellation_requested = True
-                except asyncio.CancelledError:
-                    print("Disconnect monitor cancelled because main task completed")
-                except Exception as e:
-                    print(f"Error in disconnect monitoring: {str(e)}")
-
-            # Start monitoring in background without blocking
-            disconnect_monitor = asyncio.create_task(monitor_client_disconnect())
-
         print("Processing RAG checklist...")
 
         # 1. Retrieve knowledge base from database
@@ -595,7 +570,6 @@ async def process_rag_checklist(
                     temp_disconnect_monitor = disconnect_monitor
                     disconnect_monitor.cancel()
                     disconnect_monitor = None
-                    cancellation_requested = False  # Reset any false positive
 
                 # Extract text using unified processing
                 print(f"Processing file with unified text extraction: {file.filename}")
@@ -641,38 +615,7 @@ async def process_rag_checklist(
 
                 print(f"Extracted {len(document_text)} characters from {file.filename}")
 
-                # Re-enable disconnect monitoring after successful processing, but only for smaller documents
-                # For very large documents, keep it disabled to prevent false positives during LLM processing
-                should_reenable_monitoring = (
-                    needs_special_handling
-                    and len(document_text)
-                    < 150000  # Only re-enable for medium-sized documents
-                    and request
-                )
-
-                if should_reenable_monitoring:
-                    print("Re-enabling disconnect monitoring after file processing")
-
-                    async def monitor_client_disconnect():
-                        nonlocal cancellation_requested
-                        try:
-                            await request.is_disconnected()
-                            print("Client disconnected, canceling operation...")
-                            cancellation_requested = True
-                        except asyncio.CancelledError:
-                            print(
-                                "Disconnect monitor cancelled because main task completed"
-                            )
-                        except Exception as e:
-                            print(f"Error in disconnect monitoring: {str(e)}")
-
-                    disconnect_monitor = asyncio.create_task(
-                        monitor_client_disconnect()
-                    )
-                elif len(document_text) >= 150000:
-                    print(
-                        f"Very large document detected ({len(document_text)} chars), keeping disconnect monitoring disabled"
-                    )
+                # Disconnect monitoring disabled due to false positives
 
                 # Reset file position
                 await file.seek(0)
@@ -684,20 +627,126 @@ async def process_rag_checklist(
                     detail=f"Error processing file {file.filename}: {str(file_error)}",
                 )
 
-            # 7. Process each question using the RAG approach
+        # Handle optimization: pre-compute contexts only mode
+        if request_data.precompute_contexts_only:
+            print("🚀 OPTIMIZATION MODE: Pre-computing knowledge base contexts only...")
+            
+            precomputed_contexts = {}
+            
+            # Process each question to get KB context but don't process any document
             for i, question_item in enumerate(question_list):
                 try:
-                    if cancellation_requested:
-                        print(
-                            "Operation cancelled by client disconnect, stopping processing"
-                        )
-                        return VeraDocResponse(
-                            results={
-                                "status": "cancelled",
-                                "message": "Operation cancelled by user",
-                            }
-                        )
+                    # Check for cancellation
+                    try:
+                        if request and await request.is_disconnected():
+                            print(f"❌ CLIENT DISCONNECTED - Stopping context pre-computation at question {i + 1}")
+                            return VeraDocResponse(
+                                results={
+                                    "status": "cancelled",
+                                    "message": "Request cancelled - client disconnected"
+                                }
+                            )
+                    except Exception as e:
+                        print(f"Warning: Could not check disconnect status: {e}")
+                    
+                    question_text = question_item.get("text", "").strip()
+                    consult_documents = question_item.get("consultDocuments", True)
 
+                    if not question_text:
+                        continue
+
+                    print(f"Pre-computing context for question {i+1}/{len(question_list)}: {question_text[:50]}...")
+
+                    if consult_documents:
+                        # Retrieve context from knowledge base (this is what we want to cache)
+                        docs = retriever.get_relevant_documents(question_text)
+
+                        if not docs:
+                            context = "No relevant documents found in the knowledge base for this question."
+                            source_citations = []
+                        else:
+                            context = "\\n\\n".join([doc.page_content for doc in docs if doc.page_content])
+                            
+                            # Store source documents for citation
+                            source_citations = []
+                            for doc in docs:
+                                try:
+                                    metadata = doc.metadata.copy() if hasattr(doc, "metadata") and doc.metadata else {}
+                                    
+                                    if "source" in metadata and isinstance(metadata["source"], str):
+                                        source_path = metadata["source"]
+                                        raw_filename = Path(source_path).name
+                                        
+                                        # Find corresponding source_data_id
+                                        source_record = session.exec(
+                                            select(Source).where(
+                                                Source.file_name.like(f"%{raw_filename}%")
+                                            )
+                                        ).first()
+                                        
+                                        if source_record:
+                                            metadata["source_data_id"] = str(source_record.id)
+                                    
+                                    source_citations.append({
+                                        "content": doc.page_content,
+                                        "metadata": metadata
+                                    })
+                                except Exception as source_error:
+                                    print(f"Error processing source citation: {source_error}")
+                                    continue
+                        
+                        # Store pre-computed context for this question
+                        precomputed_contexts[question_text] = {
+                            "context": context,
+                            "source_citations": source_citations,
+                            "consult_documents": consult_documents
+                        }
+                    else:
+                        # Question doesn't consult documents
+                        precomputed_contexts[question_text] = {
+                            "context": "",
+                            "source_citations": [],
+                            "consult_documents": False
+                        }
+                
+                except Exception as context_error:
+                    print(f"Error pre-computing context for question '{question_text[:50]}...': {context_error}")
+                    # Add empty context for this question
+                    precomputed_contexts[question_text] = {
+                        "context": "Error retrieving context for this question.",
+                        "source_citations": [],
+                        "consult_documents": consult_documents
+                    }
+                    continue
+            
+            print(f"✅ Pre-computed contexts for {len(precomputed_contexts)} questions")
+            
+            # Return the pre-computed contexts
+            return VeraDocResponse(
+                results={
+                    "precomputed_contexts": precomputed_contexts,
+                    "status": "contexts_precomputed",
+                    "message": f"Successfully pre-computed contexts for {len(precomputed_contexts)} questions"
+                }
+            )
+
+        # 7. Process each question using the RAG approach
+            for i, question_item in enumerate(question_list):
+                try:
+                    # CRITICAL: Check if client has disconnected before processing each question
+                    # Check more frequently for better responsiveness
+                    try:
+                        if request and await request.is_disconnected():
+                            print(f"❌ CLIENT DISCONNECTED - Stopping at question {i + 1}")
+                            return VeraDocResponse(
+                                results={
+                                    "status": "cancelled",
+                                    "message": "Request cancelled - client disconnected"
+                                }
+                            )
+                    except Exception as e:
+                        print(f"Warning: Could not check disconnect status: {e}")
+                    
                     question_text = question_item.get("text", "").strip()
                     consult_documents = question_item.get("consultDocuments", True)
 
@@ -710,45 +759,53 @@ async def process_rag_checklist(
                     )
 
                     if consult_documents:
-                        # Standard process: retrieve context from knowledge base
-                        try:
-                            # Step 1: Retrieve relevant context from the knowledge base
-                            docs = retriever.get_relevant_documents(question_text)
+                        # Check if we have pre-computed contexts (optimization mode)
+                        if request_data.precomputed_contexts and question_text in request_data.precomputed_contexts:
+                            print(f"🚀 Using pre-computed context for question: {question_text[:50]}...")
+                            precomputed_data = request_data.precomputed_contexts[question_text]
+                            context = precomputed_data["context"]
+                            source_citations = precomputed_data["source_citations"]
+                            print(f"Pre-computed context length: {len(context)} characters")
+                        else:
+                            # Standard process: retrieve context from knowledge base
+                            try:
+                                # Step 1: Retrieve relevant context from the knowledge base
+                                docs = retriever.get_relevant_documents(question_text)
 
-                            if not docs:
-                                print(
-                                    f"No documents retrieved for question: {question_text[:50]}..."
-                                )
-                                context = "No relevant documents found in the knowledge base for this question."
-                                source_citations = []
-                            else:
-                                context = "\n\n".join(
-                                    [
-                                        doc.page_content
-                                        for doc in docs
-                                        if doc.page_content
-                                    ]
-                                )
-                                print(
-                                    f"Retrieved {len(docs)} documents, context length: {len(context)} characters"
-                                )
+                                if not docs:
+                                    print(
+                                        f"No documents retrieved for question: {question_text[:50]}..."
+                                    )
+                                    context = "No relevant documents found in the knowledge base for this question."
+                                    source_citations = []
+                                else:
+                                    context = "\\n\\n".join(
+                                        [
+                                            doc.page_content
+                                            for doc in docs
+                                            if doc.page_content
+                                        ]
+                                    )
+                                    print(
+                                        f"Retrieved {len(docs)} documents, context length: {len(context)} characters"
+                                    )
 
-                                # Store source documents for citation
-                                source_citations = []
-                                for doc in docs:
-                                    try:
-                                        # Ensure source_data_id is included in metadata if available
-                                        metadata = (
-                                            doc.metadata.copy()
-                                            if hasattr(doc, "metadata") and doc.metadata
-                                            else {}
-                                        )  # Copy to avoid modifying the original
+                                    # Store source documents for citation
+                                    source_citations = []
+                                    for doc in docs:
+                                        try:
+                                            # Ensure source_data_id is included in metadata if available
+                                            metadata = (
+                                                doc.metadata.copy()
+                                                if hasattr(doc, "metadata") and doc.metadata
+                                                else {}
+                                            )  # Copy to avoid modifying the original
 
-                                        # If the metadata contains a source path that matches a pattern from a KB
-                                        if "source" in metadata and isinstance(
-                                            metadata["source"], str
-                                        ):
-                                            # Try to find the corresponding source_data_id
+                                            # If the metadata contains a source path that matches a pattern from a KB
+                                            if "source" in metadata and isinstance(
+                                                metadata["source"], str
+                                            ):
+                                                # Try to find the corresponding source_data_id
                                             source_path = metadata["source"]
                                             # Extract just the filename
                                             raw_filename = Path(source_path).name
@@ -827,17 +884,6 @@ async def process_rag_checklist(
                             context = "Error occurred while retrieving relevant documents from the knowledge base."
                             source_citations = []
 
-                        if cancellation_requested:
-                            print(
-                                "Operation cancelled by client disconnect, stopping processing"
-                            )
-                            return VeraDocResponse(
-                                results={
-                                    "status": "cancelled",
-                                    "message": "Operation cancelled by user",
-                                }
-                            )
-
                         try:
                             # Step 2: Get the relevant policy context for this question
                             print("Generating context for question...")
@@ -874,17 +920,6 @@ async def process_rag_checklist(
                         source_citations = []
                         print(
                             f"Skipping document consultation for question: {question_text[:50]}..."
-                        )
-
-                    if cancellation_requested:
-                        print(
-                            "Operation cancelled by client disconnect, stopping processing"
-                        )
-                        return VeraDocResponse(
-                            results={
-                                "status": "cancelled",
-                                "message": "Operation cancelled by user",
-                            }
                         )
 
                     # Step 3: Answer the question based on the uploaded document and policy context
@@ -928,6 +963,7 @@ async def process_rag_checklist(
                                 "custom_instructions_section": custom_instructions_section,
                             },
                         )
+                        
                         print(f"Got text answer: {answer[:100]}...")
 
                         # Add vision analysis if images exist and LLM supports it
@@ -1040,15 +1076,18 @@ async def process_rag_checklist(
                     )
                     continue
 
-            # 8. Generate the final evaluation
-            if cancellation_requested:
-                print("Operation cancelled by client disconnect, stopping processing")
-                return VeraDocResponse(
-                    results={
-                        "status": "cancelled",
-                        "message": "Operation cancelled by user",
-                    }
-                )
+            # 8. Generate the final evaluation - check for cancellation before final processing
+            try:
+                if request and await request.is_disconnected():
+                    print("❌ CLIENT DISCONNECTED - Before final evaluation")
+                    return VeraDocResponse(
+                        results={
+                            "status": "cancelled",
+                            "message": "Request cancelled - client disconnected before final evaluation"
+                        }
+                    )
+            except Exception as e:
+                print(f"Warning: Could not check disconnect status before final evaluation: {e}")
 
             qa_pairs_text = ""
             for i, qa in enumerate(qa_pairs):
@@ -1116,10 +1155,6 @@ async def process_rag_checklist(
         raise HTTPException(
             status_code=500, detail=f"Error processing RAG checklist: {str(e)}"
         )
-    finally:
-        # Clean up the disconnect monitor if it exists
-        if disconnect_monitor:
-            disconnect_monitor.cancel()
 
 
 # Functions related to Checklists
@@ -1465,26 +1500,9 @@ async def optimize_checklist(
     Suggests revisions for questions that resulted in negative answers.
     """
     print("optimize_checklist function invoked!")
-    cancellation_requested = False
+    # Disconnect monitoring disabled due to false positives
 
     try:
-        print("Setting up disconnect monitor for checklist optimization...")
-        disconnect_monitor = None
-        if request:
-
-            async def monitor_client_disconnect():
-                nonlocal cancellation_requested
-                try:
-                    await request.is_disconnected()
-                    print("Client disconnected, canceling optimization...")
-                    cancellation_requested = True
-                except asyncio.CancelledError:
-                    print("Disconnect monitor cancelled because main task completed")
-                except Exception as e:
-                    print(f"Error in disconnect monitoring: {str(e)}")
-
-            disconnect_monitor = asyncio.create_task(monitor_client_disconnect())
-
         print("Starting checklist optimization...")
 
         # 1. Retrieve knowledge base
@@ -1604,7 +1622,6 @@ async def optimize_checklist(
                 if disconnect_monitor:
                     disconnect_monitor.cancel()
                     disconnect_monitor = None
-                    cancellation_requested = False  # Reset any false positive
 
             # 4. Run the review process with current questions
             question_list = request_data.questions.strip().split("\n")
@@ -1617,11 +1634,6 @@ async def optimize_checklist(
             print(f"Evaluating {len(question_list)} questions...")
 
             for question in question_list:
-                if cancellation_requested:
-                    print("Operation cancelled by client disconnect")
-                    raise HTTPException(
-                        status_code=408, detail="Operation cancelled by user"
-                    )
 
                 question = question.strip()
                 if not question:
@@ -1680,11 +1692,6 @@ async def optimize_checklist(
             optimization_count = 0
 
             for qa in qa_results:
-                if cancellation_requested:
-                    print("Operation cancelled by client disconnect")
-                    raise HTTPException(
-                        status_code=408, detail="Operation cancelled by user"
-                    )
 
                 if needs_optimization(qa["answer"]):
                     optimization_count += 1
