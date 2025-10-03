@@ -368,7 +368,7 @@ const VeraDoc = () => {
     fetchChecklists()
   }, [])
 
-  // Single file mutation for individual file processing
+  // Optimized single-request mutation for both single and multi-file processing
   const mutation = useMutation({
     mutationFn: async (data: {
       questions: string
@@ -382,8 +382,10 @@ const VeraDoc = () => {
       setResults([])
       setLoading(true)
 
-      console.log("Creating new request with fresh AbortController")
+      console.log("🚀 Creating optimized multi-file request")
       console.log("Search mode being sent to backend:", data.searchMode)
+      console.log("Number of files:", data.files.length)
+      console.log("Optimization: Context will be pre-fetched ONCE for all files")
 
       // Create the promise and register it for cancellation
       const promise = VeradocService.processRagChecklist({
@@ -392,7 +394,7 @@ const VeraDoc = () => {
         customInstructions: data.customInstructions,
         searchMode: data.searchMode,
         formData: {
-          files: data.files,
+          files: data.files, // Send ALL files for optimized processing
           handwritten_files: data.handwrittenFiles,
         },
       })
@@ -403,7 +405,7 @@ const VeraDoc = () => {
       return cancellablePromise
     },
     onSuccess: (data: any) => {
-      console.log("Response data:", data)
+      console.log("🚀 Optimized multi-file response data:", data)
 
       // Check if the request was cancelled
       if (data.results.status === "cancelled") {
@@ -412,22 +414,48 @@ const VeraDoc = () => {
         return
       }
 
-      const interactionId = data.results.interaction_id
-      console.log("Review interactionId for feedback:", interactionId)
+      // Handle optimized multi-file results
+      let reviewData = []
 
-      // Convert to array format and store in global state
-      const reviewData = [
-        {
-          filename: data.results?.filename || "Review Result",
-          displayResults: data.results?.final_evaluation || "",
-          qaPairs: data.results?.qa_pairs || [],
-          interactionId: interactionId,
-        },
-      ]
+      if (data.results.multi_file_results) {
+        // 🚀 New optimized multi-file format
+        reviewData = data.results.multi_file_results.map((fileResult: any) => ({
+          filename: fileResult.filename || "Unknown File",
+          displayResults: fileResult.final_evaluation || "",
+          qaPairs: fileResult.qa_pairs || [],
+          interactionId: fileResult.interaction_id,
+        }))
+
+        console.log(
+          `✅ Processed ${data.results.total_files_processed} files with optimized context sharing`,
+        )
+        console.log(`🚀 Context pre-fetch count: ${data.results.context_prefetch_count}`)
+        console.log(`🚀 Optimization applied: ${data.results.optimization_applied}`)
+
+        const searchMethod =
+          data.results.search_mode === "vector" ? "vector search" : "full document scan"
+        showSuccessToast(
+          `🚀 ${reviewData.length} files processed with optimized context sharing! (${searchMethod})`,
+        )
+      } else {
+        // Fallback to single file format for backward compatibility
+        const interactionId = data.results.interaction_id
+        console.log("Review interactionId for feedback:", interactionId)
+
+        reviewData = [
+          {
+            filename: data.results?.filename || "Review Result",
+            displayResults: data.results?.final_evaluation || "",
+            qaPairs: data.results?.qa_pairs || [],
+            interactionId: interactionId,
+          },
+        ]
+
+        const optimizationNote = data.results.optimization_applied ? " (Optimized)" : ""
+        showSuccessToast(`Document review completed successfully!${optimizationNote}`)
+      }
 
       setResults(reviewData) // Store in both local and global state
-
-      showSuccessToast("Document review completed successfully!")
     },
     onError: (error: any) => {
       console.log("Review onError triggered:", error)
@@ -464,115 +492,6 @@ const VeraDoc = () => {
       setLoading(false)
     },
   })
-
-  // Simplified batch processing function with cancellation support
-  const handleBatchProcessing = async () => {
-    console.log("Starting batch processing for", fileItems.length, "files")
-    setLoading(true)
-    setResults([])
-
-    // Cancel any ongoing requests
-    if (ongoingRequest.current) {
-      ongoingRequest.current.cancel()
-    }
-
-    const batchResults: Array<{
-      filename: string
-      displayResults: string
-      qaPairs: any[]
-      interactionId?: string
-    }> = []
-
-    try {
-      // Process each file sequentially with cancellation checks
-      for (let i = 0; i < fileItems.length; i++) {
-        const fileItem = fileItems[i]
-        console.log(`Processing file ${i + 1}/${fileItems.length}: ${fileItem.file.name}`)
-
-        // Create individual request data
-        const requestData = {
-          questions: structuredQuestions.length > 0 ? JSON.stringify(structuredQuestions) : questions,
-          knowledgeBaseId: selectedKnowledgeBase!.id,
-          customInstructions: customInstructions.trim() || undefined,
-          searchMode: searchMode,
-          formData: {
-            files: [fileItem.file],
-            handwritten_files: [],
-          },
-        }
-
-        // Create the promise and register it for cancellation
-        const promise = VeradocService.processRagChecklist(requestData)
-        const cancellablePromise = registerOperation(promise)
-        ongoingRequest.current = cancellablePromise
-
-        try {
-          const response = await cancellablePromise
-
-          // Check if this individual file processing was cancelled
-          if (response.results.status === "cancelled") {
-            console.log(`Batch processing cancelled at file ${i + 1}`)
-            showErrorToast("Request cancelled")
-            return
-          }
-
-          // Store the result
-          batchResults.push({
-            filename: fileItem.file.name,
-            displayResults: (response.results?.final_evaluation as string) || "",
-            qaPairs: (response.results?.qa_pairs as any[]) || [],
-            interactionId: response.results?.interaction_id as string | undefined,
-          })
-
-          // Update results incrementally so user can see progress
-          setResults([...batchResults])
-
-        } catch (error: any) {
-          // Handle cancellation errors gracefully
-          if (error.name === "CancelError" || error.message === "Request aborted") {
-            console.log(`Batch processing cancelled at file ${i + 1} (CancelError)`)
-            showErrorToast("Request cancelled")
-            return
-          }
-
-          if (
-            error.status === 408 ||
-            error.message?.includes("Operation cancelled") ||
-            error.detail?.includes("Operation cancelled")
-          ) {
-            console.log(`Batch processing cancelled at file ${i + 1} (HTTP 408)`)
-            showErrorToast("Request cancelled")
-            return
-          }
-
-          // Handle other errors - add error result and continue with next file
-          console.error(`Error processing file ${fileItem.file.name}:`, error)
-          batchResults.push({
-            filename: fileItem.file.name,
-            displayResults: `Error processing ${fileItem.file.name}: ${error.message}`,
-            qaPairs: [],
-          })
-          setResults([...batchResults])
-        }
-      }
-
-      // Store final results in global state
-      setResults(batchResults)
-
-      // Show success message
-      const searchMethod = searchMode === "vector" ? "vector search" : "full document scan"
-      showSuccessToast(
-        `Batch processing completed for ${batchResults.length} files using ${searchMethod}`,
-      )
-
-    } catch (error: any) {
-      console.error("Batch processing error:", error)
-      showErrorToast(`Batch processing failed: ${error.message}`)
-    } finally {
-      ongoingRequest.current = null
-      setLoading(false)
-    }
-  }
 
   const handleRun = async () => {
     if (fileItems.length < 1) {
@@ -625,23 +544,18 @@ const VeraDoc = () => {
       fileItems,
     })
 
-    // Check if we have multiple files - if so, use optimized batch processing
-    if (fileItems.length > 1) {
-      console.log(`Starting optimized batch processing for ${fileItems.length} files`)
-      await handleBatchProcessing()
-    } else {
-      // Single file processing using the mutation
-      const requestData = {
-        questions: structuredQuestions.length > 0 ? JSON.stringify(structuredQuestions) : questions,
-        knowledgeBaseId: selectedKnowledgeBase.id,
-        files: [fileItems[0].file],
-        handwrittenFiles: [],
-        customInstructions: customInstructions.trim() || undefined,
-        searchMode: searchMode,
-      }
-
-      mutation.mutate(requestData)
+    // 🚀 OPTIMIZATION: Send ALL files to backend for optimized processing
+    console.log(`🚀 Starting optimized review for ${fileItems.length} files`)
+    const requestData = {
+      questions: structuredQuestions.length > 0 ? JSON.stringify(structuredQuestions) : questions,
+      knowledgeBaseId: selectedKnowledgeBase.id,
+      files: fileItems.map((item) => item.file), // Send ALL files for optimized processing
+      handwrittenFiles: [],
+      customInstructions: customInstructions.trim() || undefined,
+      searchMode: searchMode,
     }
+
+    mutation.mutate(requestData)
   }
 
   // Create custom components for table rendering

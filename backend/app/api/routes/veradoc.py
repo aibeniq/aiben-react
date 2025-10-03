@@ -2,6 +2,10 @@ import uuid
 import json
 import traceback
 import re  # Add missing import for regex operations
+import tempfile
+import zipfile
+import os
+from pathlib import Path
 from app.models import (
     VeraDocResponse,
     VeraDocChecklist,
@@ -88,6 +92,151 @@ else:
     print(
         "WARNING: OPENAI_API_KEY is not set in environment variables. Some FormConnect features will be limited."
     )
+
+
+async def prefetch_knowledge_base_context(
+    retriever,
+    question_list: List[Dict],
+    llm,
+    context_prompt_template: str,
+    session,
+    current_user,
+    request: FastAPIRequest = None,
+) -> Dict[str, Dict[str, Any]]:
+    """
+    Pre-fetch knowledge base context for all questions to avoid redundant retrieval.
+    Returns a dictionary mapping question text to its context and source citations.
+    """
+    print(f"Pre-fetching knowledge base context for {len(question_list)} questions...")
+    
+    question_contexts = {}
+    
+    for i, question_item in enumerate(question_list):
+        # Check for cancellation during context pre-fetching
+        try:
+            if request and await request.is_disconnected():
+                print(f"❌ CLIENT DISCONNECTED - Stopping context prefetch at question {i + 1}")
+                raise HTTPException(
+                    status_code=408,
+                    detail="Request cancelled - client disconnected during context prefetch"
+                )
+        except Exception as e:
+            print(f"Warning: Could not check disconnect status during prefetch: {e}")
+        
+        question_text = question_item.get("text", "").strip()
+        consult_documents = question_item.get("consultDocuments", True)
+        
+        if not question_text:
+            continue
+            
+        print(f"Pre-fetching context for question {i+1}/{len(question_list)}: {question_text[:50]}...")
+        
+        if consult_documents:
+            try:
+                # Step 1: Retrieve relevant context from the knowledge base
+                docs = retriever.get_relevant_documents(question_text)
+                
+                if not docs:
+                    print(f"No documents retrieved for question: {question_text[:50]}...")
+                    context = "No relevant documents found in the knowledge base for this question."
+                    source_citations = []
+                else:
+                    context = "\n\n".join([
+                        doc.page_content for doc in docs if doc.page_content
+                    ])
+                    print(f"Retrieved {len(docs)} documents, context length: {len(context)} characters")
+                    
+                    # Store source documents for citation
+                    source_citations = []
+                    for doc in docs:
+                        try:
+                            # Process metadata and source citations
+                            metadata = (
+                                doc.metadata.copy()
+                                if hasattr(doc, "metadata") and doc.metadata
+                                else {}
+                            )
+                            
+                            # Source lookup logic (same as original)
+                            if "source" in metadata and isinstance(metadata["source"], str):
+                                source_path = metadata["source"]
+                                raw_filename = Path(source_path).name
+                                
+                                match = re.search(r"^[^_]*_(.+)$", raw_filename)
+                                if match:
+                                    filename = match.group(1)
+                                else:
+                                    filename = raw_filename
+                                
+                                try:
+                                    source_entry = session.exec(
+                                        select(Source).where(Source.name == filename)
+                                    ).first()
+                                    
+                                    if not source_entry:
+                                        source_entry = session.exec(
+                                            select(Source).where(Source.name == raw_filename)
+                                        ).first()
+                                    
+                                    if source_entry:
+                                        metadata["source_data_id"] = str(source_entry.source_data_id)
+                                except Exception as source_lookup_error:
+                                    print(f"Error looking up source: {source_lookup_error}")
+                            
+                            source = {
+                                "content": doc.page_content or "",
+                                "metadata": metadata,
+                            }
+                            source_citations.append(source)
+                        except Exception as citation_error:
+                            print(f"Error processing citation: {citation_error}")
+                            continue
+                            
+            except Exception as retrieval_error:
+                print(f"Error retrieving documents for question '{question_text[:50]}...': {retrieval_error}")
+                context = "Error occurred while retrieving relevant documents from the knowledge base."
+                source_citations = []
+            
+            try:
+                # Step 2: Get the relevant policy context for this question
+                print("Generating context for question...")
+                question_context = invoke_llm(
+                    llm,
+                    context_prompt_template,
+                    {"context": context, "question": question_text},
+                )
+                print(f"Got context: {question_context[:100]}...")
+                
+                # Translate the question context if needed
+                question_context = await translate_text_if_needed(
+                    question_context, session, current_user, llm
+                )
+                
+            except Exception as context_error:
+                print(f"Error generating context for question: {context_error}")
+                question_context = f"Error generating context: {str(context_error)}"
+                # Translate the error message if needed
+                question_context = await translate_text_if_needed(
+                    question_context, session, current_user, llm
+                )
+        else:
+            # Skip knowledge base consultation
+            question_context = "No policy context consultation requested for this question."
+            question_context = await translate_text_if_needed(
+                question_context, session, current_user, llm
+            )
+            source_citations = []
+            print(f"Skipping document consultation for question: {question_text[:50]}...")
+        
+        # Store the pre-fetched context and citations
+        question_contexts[question_text] = {
+            "context": question_context,
+            "source_citations": source_citations,
+            "consult_documents": consult_documents
+        }
+    
+    print(f"✅ Pre-fetched context for {len(question_contexts)} questions")
+    return question_contexts
 
 
 def extract_text_from_file(file_content: bytes, filename: str) -> str:
@@ -516,10 +665,7 @@ async def process_rag_checklist(
             qa_prompt_template = settings.VERADOC_QA_PROMPT_TEMPLATE
             final_prompt_template = settings.VERADOC_FINAL_PROMPT_TEMPLATE
 
-            # 6. Process each uploaded file
-            qa_pairs = []
-
-            # Parse questions - support both legacy string format and new structured format
+            # 6. Parse questions first - support both legacy string format and new structured format
             try:
                 # Try to parse as structured JSON format
                 questions_data = json.loads(request_data.questions)
@@ -542,610 +688,417 @@ async def process_rag_checklist(
                     if q.strip()
                 ]
 
-            # Get file content with unified processing
-            if not files or not files[0].filename:
-                raise HTTPException(status_code=400, detail="No valid file provided")
-
-            file = files[0]
-            print(f"Processing file with unified visual enhancement: {file.filename}")
-
+            # 7. PRE-FETCH KNOWLEDGE BASE CONTEXT (OPTIMIZATION)
+            # This step is the same regardless of which document is being reviewed
+            print("🚀 OPTIMIZATION: Pre-fetching knowledge base context for all questions...")
             try:
-                content = await file.read()
-                if not content:
-                    raise HTTPException(
-                        status_code=400, detail="File appears to be empty"
-                    )
-
-                # Check if this is a potentially slow file to process
-                is_large_file = len(content) > 50000
-                is_docx_file = file.filename.lower().endswith((".docx", ".doc"))
-                needs_special_handling = is_large_file or is_docx_file
-
-                # Temporarily disable disconnect monitoring for files that might take time to process
-                temp_disconnect_monitor = None
-                if needs_special_handling and disconnect_monitor:
-                    print(
-                        f"Large/DOCX file detected ({file.filename}), temporarily disabling disconnect monitoring during processing"
-                    )
-                    temp_disconnect_monitor = disconnect_monitor
-                    disconnect_monitor.cancel()
-                    disconnect_monitor = None
-
-                # Extract text using unified processing
-                print(f"Processing file with unified text extraction: {file.filename}")
-                document_text = await extract_text_from_file_async(
-                    content, file.filename
+                question_contexts = await prefetch_knowledge_base_context(
+                    retriever=retriever,
+                    question_list=question_list,
+                    llm=llm,
+                    context_prompt_template=context_prompt_template,
+                    session=session,
+                    current_user=current_user,
+                    request=request
                 )
+                print(f"✅ Pre-fetched context for {len(question_contexts)} questions")
+            except HTTPException:
+                # Re-raise cancellation errors
+                raise
+            except Exception as prefetch_error:
+                print(f"Error during context pre-fetch: {prefetch_error}")
+                # Fall back to processing without pre-fetch
+                question_contexts = {}
 
-                # Extract images if vision is enabled (do this early so we can use as fallback)
-                document_images = []
-                if vision_enabled:
-                    try:
-                        from app.services.document_utils import (
-                            extract_documents_and_images_from_file_unified,
-                        )
+            # 8. Process each uploaded file using the pre-fetched context
+            qa_pairs = []
 
-                        _, document_images = (
-                            extract_documents_and_images_from_file_unified(
-                                content, file.filename
-                            )
-                        )
-                        print(
-                            f"Extracted {len(document_images)} images from {file.filename}"
-                        )
-                    except Exception as img_error:
-                        print(
-                            f"Warning: Could not extract images from {file.filename}: {img_error}"
-                        )
-
-                # Handle case where no text was extracted
-                if not document_text or document_text.strip() == "":
-                    # If vision is enabled and we have images, use vision as fallback
-                    if vision_enabled and document_images:
-                        print(
-                            f"No text extracted from {file.filename}, but {len(document_images)} images found. Using vision analysis as fallback."
-                        )
-                        # Create placeholder text for image-only document
-                        document_text = f"This document ({file.filename}) contains images but no extractable text. Vision analysis will be used to answer questions about the visual content."
-                    else:
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"Could not extract text from file {file.filename}",
-                        )
-
-                print(f"Extracted {len(document_text)} characters from {file.filename}")
-
-                # Disconnect monitoring disabled due to false positives
-
-                # Reset file position
-                await file.seek(0)
-
-            except Exception as file_error:
-                print(f"Error processing file {file.filename}: {file_error}")
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Error processing file {file.filename}: {str(file_error)}",
-                )
-
-        # Handle optimization: pre-compute contexts only mode
-        if request_data.precompute_contexts_only:
-            print("🚀 OPTIMIZATION MODE: Pre-computing knowledge base contexts only...")
+            # 8. Process each uploaded file using the pre-fetched context
+            all_files_results = []
             
-            precomputed_contexts = {}
-            
-            # Process each question to get KB context but don't process any document
-            for i, question_item in enumerate(question_list):
-                try:
-                    # Check for cancellation
-                    try:
-                        if request and await request.is_disconnected():
-                            print(f"❌ CLIENT DISCONNECTED - Stopping context pre-computation at question {i + 1}")
-                            return VeraDocResponse(
-                                results={
-                                    "status": "cancelled",
-                                    "message": "Request cancelled - client disconnected"
-                                }
-                            )
-                    except Exception as e:
-                        print(f"Warning: Could not check disconnect status: {e}")
-                    
-                    question_text = question_item.get("text", "").strip()
-                    consult_documents = question_item.get("consultDocuments", True)
-
-                    if not question_text:
-                        continue
-
-                    print(f"Pre-computing context for question {i+1}/{len(question_list)}: {question_text[:50]}...")
-
-                    if consult_documents:
-                        # Retrieve context from knowledge base (this is what we want to cache)
-                        docs = retriever.get_relevant_documents(question_text)
-
-                        if not docs:
-                            context = "No relevant documents found in the knowledge base for this question."
-                            source_citations = []
-                        else:
-                            context = "\\n\\n".join([doc.page_content for doc in docs if doc.page_content])
-                            
-                            # Store source documents for citation
-                            source_citations = []
-                            for doc in docs:
-                                try:
-                                    metadata = doc.metadata.copy() if hasattr(doc, "metadata") and doc.metadata else {}
-                                    
-                                    if "source" in metadata and isinstance(metadata["source"], str):
-                                        source_path = metadata["source"]
-                                        raw_filename = Path(source_path).name
-                                        
-                                        # Find corresponding source_data_id
-                                        source_record = session.exec(
-                                            select(Source).where(
-                                                Source.file_name.like(f"%{raw_filename}%")
-                                            )
-                                        ).first()
-                                        
-                                        if source_record:
-                                            metadata["source_data_id"] = str(source_record.id)
-                                    
-                                    source_citations.append({
-                                        "content": doc.page_content,
-                                        "metadata": metadata
-                                    })
-                                except Exception as source_error:
-                                    print(f"Error processing source citation: {source_error}")
-                                    continue
-                        
-                        # Store pre-computed context for this question
-                        precomputed_contexts[question_text] = {
-                            "context": context,
-                            "source_citations": source_citations,
-                            "consult_documents": consult_documents
-                        }
-                    else:
-                        # Question doesn't consult documents
-                        precomputed_contexts[question_text] = {
-                            "context": "",
-                            "source_citations": [],
-                            "consult_documents": False
-                        }
-                
-                except Exception as context_error:
-                    print(f"Error pre-computing context for question '{question_text[:50]}...': {context_error}")
-                    # Add empty context for this question
-                    precomputed_contexts[question_text] = {
-                        "context": "Error retrieving context for this question.",
-                        "source_citations": [],
-                        "consult_documents": consult_documents
-                    }
+            # Support multiple files - process each one
+            for file_index, file in enumerate(files):
+                if not file.filename:
+                    print(f"Skipping file {file_index + 1}: No filename")
                     continue
-            
-            print(f"✅ Pre-computed contexts for {len(precomputed_contexts)} questions")
-            
-            # Return the pre-computed contexts
-            return VeraDocResponse(
-                results={
-                    "precomputed_contexts": precomputed_contexts,
-                    "status": "contexts_precomputed",
-                    "message": f"Successfully pre-computed contexts for {len(precomputed_contexts)} questions"
-                }
-            )
-
-        # 7. Process each question using the RAG approach
-            for i, question_item in enumerate(question_list):
-                try:
-                    # CRITICAL: Check if client has disconnected before processing each question
-                    # Check more frequently for better responsiveness
-                    try:
-                        if request and await request.is_disconnected():
-                            print(f"❌ CLIENT DISCONNECTED - Stopping at question {i + 1}")
-                            return VeraDocResponse(
-                                results={
-                                    "status": "cancelled",
-                                    "message": "Request cancelled - client disconnected"
-                                }
-                            )
-                    except Exception as e:
-                        print(f"Warning: Could not check disconnect status: {e}")
                     
-                    question_text = question_item.get("text", "").strip()
-                    consult_documents = question_item.get("consultDocuments", True)
-
-                    if not question_text:
-                        print(f"Skipping empty question at index {i}")
+                print(f"Processing file {file_index + 1}/{len(files)}: {file.filename}")
+                
+                # Check for cancellation before processing each file
+                try:
+                    if request and await request.is_disconnected():
+                        print(f"❌ CLIENT DISCONNECTED - Stopping at file {file_index + 1}")
+                        return VeraDocResponse(
+                            results={
+                                "status": "cancelled",
+                                "message": "Request cancelled - client disconnected"
+                            }
+                        )
+                except Exception as e:
+                    print(f"Warning: Could not check disconnect status: {e}")
+                
+                qa_pairs = []
+                
+                try:
+                    content = await file.read()
+                    if not content:
+                        print(f"File {file.filename} appears to be empty, skipping")
                         continue
 
-                    print(
-                        f"Processing question {i+1}/{len(question_list)}: {question_text[:50]}... (consult documents: {consult_documents})"
+                    # Check if this is a potentially slow file to process
+                    is_large_file = len(content) > 50000
+                    is_docx_file = file.filename.lower().endswith((".docx", ".doc"))
+                    needs_special_handling = is_large_file or is_docx_file
+
+                    # Extract text using unified processing
+                    print(f"Processing file with unified text extraction: {file.filename}")
+                    document_text = await extract_text_from_file_async(
+                        content, file.filename
                     )
 
-                    if consult_documents:
-                        # Check if we have pre-computed contexts (optimization mode)
-                        if request_data.precomputed_contexts and question_text in request_data.precomputed_contexts:
-                            print(f"🚀 Using pre-computed context for question: {question_text[:50]}...")
-                            precomputed_data = request_data.precomputed_contexts[question_text]
-                            context = precomputed_data["context"]
-                            source_citations = precomputed_data["source_citations"]
-                            print(f"Pre-computed context length: {len(context)} characters")
-                        else:
-                            # Standard process: retrieve context from knowledge base
-                            try:
-                                # Step 1: Retrieve relevant context from the knowledge base
-                                docs = retriever.get_relevant_documents(question_text)
-
-                                if not docs:
-                                    print(
-                                        f"No documents retrieved for question: {question_text[:50]}..."
-                                    )
-                                    context = "No relevant documents found in the knowledge base for this question."
-                                    source_citations = []
-                                else:
-                                    context = "\\n\\n".join(
-                                        [
-                                            doc.page_content
-                                            for doc in docs
-                                            if doc.page_content
-                                        ]
-                                    )
-                                    print(
-                                        f"Retrieved {len(docs)} documents, context length: {len(context)} characters"
-                                    )
-
-                                    # Store source documents for citation
-                                    source_citations = []
-                                    for doc in docs:
-                                        try:
-                                            # Ensure source_data_id is included in metadata if available
-                                            metadata = (
-                                                doc.metadata.copy()
-                                                if hasattr(doc, "metadata") and doc.metadata
-                                                else {}
-                                            )  # Copy to avoid modifying the original
-
-                                            # If the metadata contains a source path that matches a pattern from a KB
-                                            if "source" in metadata and isinstance(
-                                                metadata["source"], str
-                                            ):
-                                                # Try to find the corresponding source_data_id
-                                            source_path = metadata["source"]
-                                            # Extract just the filename
-                                            raw_filename = Path(source_path).name
-
-                                            # Extract the real filename after the underscore using regex
-                                            # This looks for any characters followed by an underscore, then captures everything after
-                                            match = re.search(
-                                                r"^[^_]*_(.+)$", raw_filename
-                                            )
-                                            if match:
-                                                # Use the captured group (everything after the underscore)
-                                                filename = match.group(1)
-                                            else:
-                                                # Fallback to the original filename if no underscore found
-                                                filename = raw_filename
-
-                                            # Debug info
-                                            print(f"Raw filename: {raw_filename}")
-                                            print(f"Extracted filename: {filename}")
-
-                                            # Try to find the source by the extracted name
-                                            try:
-                                                source_entry = session.exec(
-                                                    select(Source).where(
-                                                        Source.name == filename
-                                                    )
-                                                ).first()
-
-                                                # 🚨 NEW FALLBACK: If not found with truncated name, try the whole filename
-                                                if not source_entry:
-                                                    print(
-                                                        f"No source entry found for truncated filename: {filename}"
-                                                    )
-                                                    print(
-                                                        f"Trying with full filename: {raw_filename}"
-                                                    )
-
-                                                    source_entry = session.exec(
-                                                        select(Source).where(
-                                                            Source.name == raw_filename
-                                                        )
-                                                    ).first()
-
-                                                    if source_entry:
-                                                        print(
-                                                            f"✅ Found source entry with full filename: {raw_filename}"
-                                                        )
-                                                    else:
-                                                        print(
-                                                            f"❌ No source entry found for either truncated or full filename"
-                                                        )
-
-                                                if source_entry:
-                                                    metadata["source_data_id"] = str(
-                                                        source_entry.source_data_id
-                                                    )
-                                            except Exception as source_lookup_error:
-                                                print(
-                                                    f"Error looking up source: {source_lookup_error}"
-                                                )
-
-                                        source = {
-                                            "content": doc.page_content or "",
-                                            "metadata": metadata,
-                                        }
-                                        source_citations.append(source)
-                                    except Exception as citation_error:
-                                        print(
-                                            f"Error processing citation: {citation_error}"
-                                        )
-                                        continue
-                        except Exception as retrieval_error:
-                            print(
-                                f"Error retrieving documents for question '{question_text[:50]}...': {retrieval_error}"
-                            )
-                            context = "Error occurred while retrieving relevant documents from the knowledge base."
-                            source_citations = []
-
+                    # Extract images if vision is enabled
+                    document_images = []
+                    if vision_enabled:
                         try:
-                            # Step 2: Get the relevant policy context for this question
-                            print("Generating context for question...")
-                            question_context = invoke_llm(
-                                llm,
-                                context_prompt_template,
-                                {"context": context, "question": question_text},
-                            )
-                            print(f"Got context: {question_context[:100]}...")
-
-                            # Translate the question context if needed
-                            question_context = await translate_text_if_needed(
-                                question_context, session, current_user, llm
+                            from app.services.document_utils import (
+                                extract_documents_and_images_from_file_unified,
                             )
 
-                        except Exception as context_error:
+                            _, document_images = (
+                                extract_documents_and_images_from_file_unified(
+                                    content, file.filename
+                                )
+                            )
                             print(
-                                f"Error generating context for question: {context_error}"
+                                f"Extracted {len(document_images)} images from {file.filename}"
                             )
-                            question_context = (
-                                f"Error generating context: {str(context_error)}"
+                        except Exception as img_error:
+                            print(
+                                f"Warning: Could not extract images from {file.filename}: {img_error}"
                             )
-                            # Translate the error message if needed
-                            question_context = await translate_text_if_needed(
-                                question_context, session, current_user, llm
-                            )
-                    else:
-                        # Skip knowledge base consultation - use empty context and citations
-                        question_context = "No policy context consultation requested for this question."
-                        # Translate the fallback message if needed
-                        question_context = await translate_text_if_needed(
-                            question_context, session, current_user, llm
-                        )
-                        source_citations = []
-                        print(
-                            f"Skipping document consultation for question: {question_text[:50]}..."
-                        )
 
-                    # Step 3: Answer the question based on the uploaded document and policy context
-                    print("Generating answer based on document and context...")
-
-                    # Prepare custom instructions section
-                    custom_instructions_section = ""
-                    if (
-                        hasattr(request_data, "custom_instructions")
-                        and request_data.custom_instructions
-                    ):
-                        custom_instructions_section = f"\nADDITIONAL INSTRUCTIONS:\n{request_data.custom_instructions.strip()}\n"
-
-                    # DEBUG: Print the full prompt sent to the LLM
-                    try:
-                        rendered_prompt = qa_prompt_template.format(
-                            document_text=document_text,
-                            question=question_text,
-                            question_context=question_context,
-                            custom_instructions_section=custom_instructions_section,
-                        )
-                    except Exception as e:
-                        rendered_prompt = f"[ERROR rendering prompt: {e}]"
-                    print(
-                        "\n===== VERADOC_QA_PROMPT_TEMPLATE PROMPT SENT TO LLM =====\n"
-                    )
-                    print(rendered_prompt)
-                    print(
-                        "\n========================================================\n"
-                    )
-
-                    try:
-                        # Generate text-based answer
-                        answer = invoke_llm(
-                            llm,
-                            qa_prompt_template,
-                            {
-                                "document_text": document_text,
-                                "question": question_text,
-                                "question_context": question_context,
-                                "custom_instructions_section": custom_instructions_section,
-                            },
-                        )
-                        
-                        print(f"Got text answer: {answer[:100]}...")
-
-                        # Add vision analysis if images exist and LLM supports it
+                    # Handle case where no text was extracted
+                    if not document_text or document_text.strip() == "":
                         if vision_enabled and document_images:
                             print(
-                                f"Adding vision analysis for question: {question_text[:50]}..."
+                                f"No text extracted from {file.filename}, but {len(document_images)} images found. Using vision analysis as fallback."
                             )
+                            document_text = f"This document ({file.filename}) contains images but no extractable text. Vision analysis will be used to answer questions about the visual content."
+                        else:
+                            print(f"Could not extract text from {file.filename}, skipping")
+                            continue
 
-                            # Prepare images for processing
-                            image_data_list = []
-                            for idx, img_b64 in enumerate(document_images):
-                                image_data_list.append(
-                                    {
-                                        "image_data": img_b64,
-                                        "source_file": file.filename,
-                                        "image_index": idx,
-                                        "metadata": {"extracted_from": file.filename},
-                                    }
-                                )
+                    print(f"Extracted {len(document_text)} characters from {file.filename}")
+                    await file.seek(0)
 
-                            try:
-                                vision_variables = {
-                                    "question": question_text,
-                                    "filename": file.filename,
-                                    "custom_instructions": (
-                                        request_data.custom_instructions
-                                        if hasattr(request_data, "custom_instructions")
-                                        else ""
-                                    ),
-                                }
-
-                                vision_analysis = await VisionService.process_images_with_prompt(
-                                    llm=llm,
-                                    images=image_data_list,
-                                    prompt_template=settings.VERADOC_VISION_PROMPT_TEMPLATE,
-                                    variables=vision_variables,
-                                )
-
-                                # Translate vision analysis if needed
-                                vision_analysis = await translate_text_if_needed(
-                                    vision_analysis, session, current_user, llm
-                                )
-
-                                # Combine text and vision analysis
-                                # If we have placeholder text (image-only document), prioritize vision
-                                if (
-                                    "contains images but no extractable text"
-                                    in document_text
-                                    and len(document_text) < 200
-                                ):
-                                    # For image-only documents, use vision-primary combination
-                                    combined_answer = f"## Visual Analysis\n{vision_analysis}\n\n## Document Note\nThis analysis is based on visual content as the document contains images but no extractable text."
-                                else:
-                                    # Normal text + vision combination
-                                    combined_answer = (
-                                        VisionService.combine_text_and_vision_analysis(
-                                            answer, vision_analysis, "comprehensive"
-                                        )
-                                    )
-
-                                answer = combined_answer
-                                print(
-                                    f"Combined answer with vision analysis: {answer[:100]}..."
-                                )
-
-                            except Exception as vision_error:
-                                print(
-                                    f"Vision analysis error for question '{question_text[:50]}...': {vision_error}"
-                                )
-                                # Continue with text-only answer
-
-                        # Translate the answer if needed
-                        answer = await translate_text_if_needed(
-                            answer, session, current_user, llm
-                        )
-
-                    except Exception as answer_error:
-                        print(f"Error generating answer for question: {answer_error}")
-                        answer = f"Error generating answer: {str(answer_error)}"
-
-                    print("Source citations for question:", question_text)
-                    # for source in source_citations:
-                    # print(f"Source: {source['metadata'].get('source', 'Unknown')}, Content: {source['content']}")
-
-                    # Store the question-answer pair with context
-                    qa_pairs.append(
-                        {
-                            "question": question_text,
-                            "answer": answer,
-                            "context": question_context,
-                            "source_citations": source_citations,
-                        }
-                    )
-
-                except Exception as question_processing_error:
-                    print(
-                        f"Error processing question '{question_text[:50]}...': {question_processing_error}"
-                    )
-                    import traceback
-
-                    traceback.print_exc()
-                    # Add error result instead of failing completely
-                    qa_pairs.append(
-                        {
-                            "question": question_text,
-                            "answer": f"Error processing this question: {str(question_processing_error)}",
-                            "context": "Error occurred during processing",
-                            "source_citations": [],
-                        }
-                    )
+                except Exception as file_error:
+                    print(f"Error processing file {file.filename}: {file_error}")
+                    # Add error result for this file and continue with next file
+                    all_files_results.append({
+                        "filename": file.filename,
+                        "final_evaluation": f"Error processing file {file.filename}: {str(file_error)}",
+                        "qa_pairs": [],
+                        "interaction_id": None,
+                    })
                     continue
 
-            # 8. Generate the final evaluation - check for cancellation before final processing
-            try:
-                if request and await request.is_disconnected():
-                    print("❌ CLIENT DISCONNECTED - Before final evaluation")
-                    return VeraDocResponse(
-                        results={
-                            "status": "cancelled",
-                            "message": "Request cancelled - client disconnected before final evaluation"
-                        }
+                # 9. Process each question using the PRE-FETCHED context
+                # 9. Process each question using the PRE-FETCHED context
+                for i, question_item in enumerate(question_list):
+                    try:
+                        # Check if client has disconnected before processing each question
+                        try:
+                            if request and await request.is_disconnected():
+                                print(f"❌ CLIENT DISCONNECTED - Stopping at question {i + 1} for file {file.filename}")
+                                return VeraDocResponse(
+                                    results={
+                                        "status": "cancelled",
+                                        "message": "Request cancelled - client disconnected"
+                                    }
+                                )
+                        except Exception as e:
+                            print(f"Warning: Could not check disconnect status: {e}")
+                        
+                        question_text = question_item.get("text", "").strip()
+                        
+                        if not question_text:
+                            print(f"Skipping empty question at index {i}")
+                            continue
+
+                        print(
+                            f"Processing question {i+1}/{len(question_list)} for {file.filename}: {question_text[:50]}..."
+                        )
+
+                        # 🚀 OPTIMIZATION: Use pre-fetched context instead of retrieving again
+                        if question_text in question_contexts:
+                            # Use pre-fetched context and citations
+                            cached_context = question_contexts[question_text]
+                            question_context = cached_context["context"]
+                            source_citations = cached_context["source_citations"]
+                            consult_documents = cached_context["consult_documents"]
+                            print(f"✅ Using pre-fetched context for question: {question_text[:30]}...")
+                        else:
+                            # Fallback to original logic if pre-fetch failed for this question
+                            print(f"⚠️ No pre-fetched context found for question: {question_text[:30]}..., using fallback")
+                            consult_documents = question_item.get("consultDocuments", True)
+                            
+                            if consult_documents:
+                                try:
+                                    docs = retriever.get_relevant_documents(question_text)
+                                    if not docs:
+                                        context = "No relevant documents found in the knowledge base for this question."
+                                        source_citations = []
+                                    else:
+                                        context = "\n\n".join([doc.page_content for doc in docs if doc.page_content])
+                                        source_citations = [{"content": doc.page_content or "", "metadata": doc.metadata or {}} for doc in docs]
+                                    
+                                    question_context = invoke_llm(
+                                        llm, context_prompt_template, {"context": context, "question": question_text}
+                                    )
+                                    question_context = await translate_text_if_needed(question_context, session, current_user, llm)
+                                except Exception as fallback_error:
+                                    print(f"Error in fallback context generation: {fallback_error}")
+                                    question_context = f"Error generating context: {str(fallback_error)}"
+                                    source_citations = []
+                            else:
+                                question_context = "No policy context consultation requested for this question."
+                                question_context = await translate_text_if_needed(question_context, session, current_user, llm)
+                                source_citations = []
+
+                        print("Generating answer based on document and context...")
+
+                        # Prepare custom instructions section
+                        custom_instructions_section = ""
+                        if (
+                            hasattr(request_data, "custom_instructions")
+                            and request_data.custom_instructions
+                        ):
+                            custom_instructions_section = f"\nADDITIONAL INSTRUCTIONS:\n{request_data.custom_instructions.strip()}\n"
+
+                        # DEBUG: Print the full prompt sent to the LLM
+                        try:
+                            rendered_prompt = qa_prompt_template.format(
+                                document_text=document_text,
+                                question=question_text,
+                                question_context=question_context,
+                                custom_instructions_section=custom_instructions_section,
+                            )
+                        except Exception as e:
+                            rendered_prompt = f"[ERROR rendering prompt: {e}]"
+                        print(
+                            "\n===== VERADOC_QA_PROMPT_TEMPLATE PROMPT SENT TO LLM =====\n"
+                        )
+                        print(rendered_prompt)
+                        print(
+                            "\n========================================================\n"
+                        )
+
+                        try:
+                            # Generate text-based answer
+                            answer = invoke_llm(
+                                llm,
+                                qa_prompt_template,
+                                {
+                                    "document_text": document_text,
+                                    "question": question_text,
+                                    "question_context": question_context,
+                                    "custom_instructions_section": custom_instructions_section,
+                                },
+                            )
+                            
+                            print(f"Got text answer: {answer[:100]}...")
+
+                            # Add vision analysis if images exist and LLM supports it
+                            if vision_enabled and document_images:
+                                print(
+                                    f"Adding vision analysis for question: {question_text[:50]}..."
+                                )
+
+                                # Prepare images for processing
+                                image_data_list = []
+                                for idx, img_b64 in enumerate(document_images):
+                                    image_data_list.append(
+                                        {
+                                            "image_data": img_b64,
+                                            "source_file": file.filename,
+                                            "image_index": idx,
+                                            "metadata": {"extracted_from": file.filename},
+                                        }
+                                    )
+
+                                try:
+                                    vision_variables = {
+                                        "question": question_text,
+                                        "filename": file.filename,
+                                        "custom_instructions": (
+                                            request_data.custom_instructions
+                                            if hasattr(request_data, "custom_instructions")
+                                            else ""
+                                        ),
+                                    }
+
+                                    vision_analysis = await VisionService.process_images_with_prompt(
+                                        llm=llm,
+                                        images=image_data_list,
+                                        prompt_template=settings.VERADOC_VISION_PROMPT_TEMPLATE,
+                                        variables=vision_variables,
+                                    )
+
+                                    # Translate vision analysis if needed
+                                    vision_analysis = await translate_text_if_needed(
+                                        vision_analysis, session, current_user, llm
+                                    )
+
+                                    # Combine text and vision analysis
+                                    if (
+                                        "contains images but no extractable text"
+                                        in document_text
+                                        and len(document_text) < 200
+                                    ):
+                                        # For image-only documents, use vision-primary combination
+                                        combined_answer = f"## Visual Analysis\n{vision_analysis}\n\n## Document Note\nThis analysis is based on visual content as the document contains images but no extractable text."
+                                    else:
+                                        # Normal text + vision combination
+                                        combined_answer = (
+                                            VisionService.combine_text_and_vision_analysis(
+                                                answer, vision_analysis, "comprehensive"
+                                            )
+                                        )
+
+                                    answer = combined_answer
+                                    print(
+                                        f"Combined answer with vision analysis: {answer[:100]}..."
+                                    )
+
+                                except Exception as vision_error:
+                                    print(
+                                        f"Vision analysis error for question '{question_text[:50]}...': {vision_error}"
+                                    )
+                                    # Continue with text-only answer
+
+                            # Translate the answer if needed
+                            answer = await translate_text_if_needed(
+                                answer, session, current_user, llm
+                            )
+
+                        except Exception as answer_error:
+                            print(f"Error generating answer for question: {answer_error}")
+                            answer = f"Error generating answer: {str(answer_error)}"
+
+                        print("Source citations for question:", question_text)                        # Store the question-answer pair with context
+                        qa_pairs.append(
+                            {
+                                "question": question_text,
+                                "answer": answer,
+                                "context": question_context,
+                                "source_citations": source_citations,
+                            }
+                        )
+
+                    except Exception as question_processing_error:
+                        print(
+                            f"Error processing question '{question_text[:50]}...': {question_processing_error}"
+                        )
+                        import traceback
+                        traceback.print_exc()
+                        # Add error result instead of failing completely
+                        qa_pairs.append(
+                            {
+                                "question": question_text,
+                                "answer": f"Error processing this question: {str(question_processing_error)}",
+                                "context": "Error occurred during processing",
+                                "source_citations": [],
+                            }
+                        )
+                        continue                # Store file-specific QA pairs and final evaluation
+                qa_pairs_text = ""
+                for i, qa in enumerate(qa_pairs):
+                    qa_pairs_text += (
+                        f"Question {i+1}: {qa['question']}\nAnswer: {qa['answer']}\n\n"
                     )
-            except Exception as e:
-                print(f"Warning: Could not check disconnect status before final evaluation: {e}")
 
-            qa_pairs_text = ""
-            for i, qa in enumerate(qa_pairs):
-                qa_pairs_text += (
-                    f"Question {i+1}: {qa['question']}\nAnswer: {qa['answer']}\n\n"
-                )
+                # Generate final evaluation for this file
+                try:
+                    print(f"Generating final evaluation for {file.filename}...")
+                    final_evaluation = invoke_llm(
+                        llm, final_prompt_template, {"qa_pairs": qa_pairs_text}
+                    )
+                    print(f"Got final evaluation: {final_evaluation[:100]}...")
+                    final_evaluation = await translate_text_if_needed(
+                        final_evaluation, session, current_user, llm
+                    )
+                except Exception as final_eval_error:
+                    print(f"Error generating final evaluation for {file.filename}: {final_eval_error}")
+                    final_evaluation = f"Error generating final evaluation: {str(final_eval_error)}"
 
-            # Final evaluation
-            try:
-                print("Generating final evaluation...")
-                final_evaluation = invoke_llm(
-                    llm, final_prompt_template, {"qa_pairs": qa_pairs_text}
-                )
-                print(f"Got final evaluation: {final_evaluation[:100]}...")
+                # Record interaction for this file
+                try:
+                    interaction_id = record_llm_interaction(
+                        session=session,
+                        user_id=current_user.id,
+                        functionality="veradoc",
+                        input_data={
+                            "questions": request_data.questions,
+                            "document_name": file.filename,
+                            "kb_id": request_data.knowledge_base_id,
+                            "search_mode": request_data.search_mode,
+                            "multi_file_batch": len(files) > 1,
+                            "file_index": file_index + 1,
+                            "total_files": len(files),
+                            "optimization_applied": True,
+                        },
+                        output_data={
+                            "final_evaluation": final_evaluation,
+                            "qa_count": len(qa_pairs),
+                        },
+                        metadata={
+                            "qa_pairs": qa_pairs
+                        },
+                    )
+                except Exception as interaction_error:
+                    print(f"Error recording interaction for {file.filename}: {interaction_error}")
+                    interaction_id = None
 
-                # Translate the final evaluation if needed
-                final_evaluation = await translate_text_if_needed(
-                    final_evaluation, session, current_user, llm
-                )
+                # Store results for this file
+                file_result = {
+                    "filename": file.filename,
+                    "final_evaluation": final_evaluation,
+                    "qa_pairs": qa_pairs,
+                    "interaction_id": str(interaction_id) if interaction_id else None,
+                }
+                all_files_results.append(file_result)
 
-            except Exception as final_eval_error:
-                print(f"Error generating final evaluation: {final_eval_error}")
-                final_evaluation = (
-                    f"Error generating final evaluation: {str(final_eval_error)}"
-                )
-
-            try:
-                interaction_id = record_llm_interaction(
-                    session=session,
-                    user_id=current_user.id,
-                    functionality="veradoc",
-                    input_data={
-                        "questions": request_data.questions,
-                        "document_name": file.filename,
-                        "kb_id": request_data.knowledge_base_id,
+            # 10. Return results based on number of files processed
+            if len(all_files_results) == 0:
+                raise HTTPException(status_code=400, detail="No files were successfully processed")
+            
+            # Return optimized multi-file response
+            if len(all_files_results) > 1:
+                # Multiple files: return optimized format with all results
+                return VeraDocResponse(
+                    results={
+                        "multi_file_results": all_files_results,
+                        "total_files_processed": len(all_files_results),
+                        "optimization_applied": True,
+                        "context_prefetch_count": len(question_contexts),
                         "search_mode": request_data.search_mode,
-                    },
-                    output_data={
-                        "final_evaluation": final_evaluation,
-                        "qa_count": len(qa_pairs),
-                    },
-                    metadata={
-                        "qa_pairs": qa_pairs  # Store the full QA pairs with sources for retrieval
-                    },
+                        # For backward compatibility, include first file's data at root level
+                        "filename": all_files_results[0]["filename"],
+                        "final_evaluation": all_files_results[0]["final_evaluation"],
+                        "qa_pairs": all_files_results[0]["qa_pairs"],
+                        "interaction_id": all_files_results[0]["interaction_id"],
+                    }
                 )
-            except Exception as interaction_error:
-                print(f"Error recording interaction: {interaction_error}")
-                interaction_id = None
-
-            # 9. Compile the results
-            result = {
-                "filename": file.filename,
-                "final_evaluation": final_evaluation,
-                "qa_pairs": qa_pairs,
-                "interaction_id": str(interaction_id) if interaction_id else None,
-            }
-
-            return VeraDocResponse(results=result)
+            else:
+                # Single file: return traditional format for compatibility
+                return VeraDocResponse(
+                    results={
+                        **all_files_results[0],
+                        "optimization_applied": True,
+                        "context_prefetch_count": len(question_contexts),
+                        "search_mode": request_data.search_mode,
+                    }
+                )
 
     except Exception as e:
         print("Error processing RAG checklist:")
