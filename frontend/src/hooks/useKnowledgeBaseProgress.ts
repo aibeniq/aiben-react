@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { OpenAPI } from "@/client/core/OpenAPI"
+import { request as __request } from "@/client/core/request"
 
 interface ProgressData {
     percentage: number
@@ -10,6 +11,14 @@ interface ProgressData {
 }
 
 export const useKnowledgeBaseProgress = (taskId: string | null) => {
+    // Force console logs with timestamp to ensure they appear
+    console.warn("🔄 HOOK CALLED:", new Date().toISOString(), "taskId:", taskId)
+
+    // Log when task ID is received
+    if (taskId) {
+        console.warn("🎯 TASK ID RECEIVED:", taskId)
+    }
+
     const [progress, setProgress] = useState<ProgressData>({
         percentage: 0,
         message: "",
@@ -17,6 +26,9 @@ export const useKnowledgeBaseProgress = (taskId: string | null) => {
     })
 
     useEffect(() => {
+        const timestamp = new Date().toISOString()
+        console.log(`🚀 FRONTEND HOOK EFFECT TRIGGERED at ${timestamp} with taskId:`, taskId)
+
         if (!taskId) {
             // Reset progress state when no task is active
             setProgress({
@@ -26,77 +38,125 @@ export const useKnowledgeBaseProgress = (taskId: string | null) => {
                 completed: false,
                 error: undefined
             })
+            console.log("🔄 No taskId - resetting progress state to initial")
             return
         }
 
-        // Reset progress state when starting a new task
+        // CRITICAL FIX: Force immediate reset of all state to prevent cached completion
+        // This ensures a completely fresh start for each new task
+        console.log("🔄 New task started, FORCE resetting ALL progress state for:", taskId)
         setProgress({
             percentage: 0,
-            message: "",
-            isActive: false,
+            message: "Starting knowledge base creation...",
+            isActive: true,
             completed: false,
             error: undefined
         })
 
-        console.log("🔄 Starting progress polling for task:", taskId)
+        console.log(`🔄 Starting progress polling for task: ${taskId} at ${timestamp}`)
 
         let intervalId: NodeJS.Timeout
         let isPolling = true
+        let pollCount = 0
 
         const pollProgress = async () => {
-            if (!isPolling) return
+            if (!isPolling) {
+                console.log("🛑 POLLING STOPPED: isPolling is false for task:", taskId)
+                return
+            }
+
+            pollCount++
+            const timestamp = new Date().toISOString()
+            console.log(`📡 POLL #${pollCount} at ${timestamp} for task:`, taskId)
 
             try {
-                const token = localStorage.getItem("access_token")
-                const response = await fetch(
-                    `${OpenAPI.BASE}/api/v1/knowledge-bases/progress/${taskId}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                )
+                console.log("🔐 Making authenticated request to progress API for task:", taskId)
 
-                if (!response.ok) {
-                    console.warn("Progress endpoint returned error:", response.status)
-                    return
-                }
+                const data = await __request(OpenAPI, {
+                    method: 'GET',
+                    url: `/api/v1/knowledge-bases/progress/${taskId}`,
+                })
 
-                const data = await response.json()
-                console.log("📊 Progress update:", data)
+                // Enhanced debug logging
+                console.log("📊 FRONTEND RECEIVED PROGRESS:", {
+                    percentage: (data as any).percentage,
+                    message: (data as any).message,
+                    status: (data as any).status,
+                    current_stage: (data as any).current_stage,
+                    taskId: taskId,
+                    pollCount: pollCount
+                })
 
                 const newProgress: ProgressData = {
-                    percentage: Math.round(data.percentage || 0),
-                    message: data.message || "Processing...",
-                    isActive: data.status === "in_progress" || data.status === "started",
-                    completed: data.status === "completed",
-                    error: data.status === "failed" ? (data.error_message || data.message) : undefined
+                    percentage: Math.round((data as any).percentage || 0),
+                    message: (data as any).message || "Processing...",
+                    isActive: (data as any).status === "in_progress" || (data as any).status === "started",
+                    completed: (data as any).status === "completed",
+                    error: (data as any).status === "failed" ? ((data as any).error_message || (data as any).message) : undefined
                 }
+
+                console.log("📊 FRONTEND SETTING PROGRESS STATE:", {
+                    ...newProgress,
+                    willStopPolling: (data as any).status === "completed" || (data as any).status === "failed",
+                    receivedStatus: (data as any).status
+                })
 
                 setProgress(newProgress)
 
                 // Stop polling if completed or errored
-                if (data.status === "completed" || data.status === "failed") {
-                    console.log("✅ Progress polling completed:", data.status === "completed" ? "success" : "error")
+                if ((data as any).status === "completed" || (data as any).status === "failed") {
+                    console.log("🛑 FRONTEND STOPPING POLLING:", (data as any).status === "completed" ? "success" : "error")
                     isPolling = false
                     clearInterval(intervalId)
+                } else {
+                    console.log("✅ FRONTEND CONTINUING POLLING: status =", (data as any).status, "poll count =", pollCount)
                 }
 
             } catch (error) {
-                console.error("❌ Error polling progress:", error)
-                // Continue polling on network errors in case it's temporary
+                console.error("❌ Error polling progress for task", taskId, "poll #" + pollCount + ":", error)
+
+                // Check if this is a 404 (task not found) which indicates completion or task cleanup
+                if (error instanceof Error && error.message.includes('404')) {
+                    console.log("🔍 Task not found (404) - may have been cleaned up after completion")
+                    // Don't stop polling immediately on 404 - it might be temporary
+                    // Only stop if we've had multiple 404s in a row
+                } else {
+                    console.log("🔄 Network error, continuing to poll...")
+                }
+
+                // Continue polling on errors in case they're temporary
             }
         }
 
         // Start polling immediately, then every 2 seconds
+        console.log("🚀 STARTING INITIAL POLL for task:", taskId)
         pollProgress()
-        intervalId = setInterval(pollProgress, 2000)
+
+        // CRITICAL FIX: Add a small delay before starting the interval to ensure
+        // component re-renders don't interfere with the polling setup
+        const startInterval = () => {
+            intervalId = setInterval(() => {
+                console.log("⏰ INTERVAL TICK - polling for task:", taskId, "isPolling:", isPolling)
+                pollProgress()
+            }, 2000)
+        }
+
+        // Start interval immediately if no task is being processed, 
+        // or with small delay to avoid interference from component re-renders
+        setTimeout(startInterval, 50)
+
+        // CRITICAL DEBUG: Log any external factors that might disrupt polling
+        console.log("🎯 Progress polling setup complete for task:", taskId, "- polling should continue until 100%")
 
         // Cleanup function
         return () => {
-            console.log("🛑 Stopping progress polling for task:", taskId)
+            const timestamp = new Date().toISOString()
+            console.log(`🛑 CLEANUP at ${timestamp}: Stopping progress polling for task:`, taskId, "isPolling was:", isPolling, "pollCount was:", pollCount)
             isPolling = false
-            clearInterval(intervalId)
+            if (intervalId) {
+                clearInterval(intervalId)
+                console.log("🧹 CLEANUP: Interval cleared for task:", taskId)
+            }
         }
     }, [taskId])
 

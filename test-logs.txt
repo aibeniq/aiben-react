@@ -1,0 +1,5 @@
+OpenAI API key configured successfully
+OpenAI API key configured successfully
+Warning: striprtf not available, using basic RTF conversion
+2025-10-05 03:08:27 |     INFO | app | Logging configuration initialized successfully
+2025-10-05 03:08:32 |     INFO | uvicorn.access | 127.0.0.1:57098 - "GET /api/v1/utils/health-check/ HTTP/1.1" 200

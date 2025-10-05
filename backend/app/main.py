@@ -6,6 +6,7 @@ from starlette.middleware.cors import CORSMiddleware
 from app.api.main import api_router
 from app.core.config import settings
 from app.core.logging_config import setup_logging
+from app.middleware.upload_middleware import UploadProgressMiddleware
 
 
 # Initialize logging configuration early
@@ -38,5 +39,8 @@ if settings.all_cors_origins:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+# Add upload progress middleware for multipart form monitoring
+app.add_middleware(UploadProgressMiddleware)
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
