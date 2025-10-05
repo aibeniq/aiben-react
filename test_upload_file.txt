@@ -1,0 +1,13 @@
+This is a simple test document for knowledge base upload.
+
+It contains some basic content to test the progress tracking system.
+
+The upload progress should show:
+1. File upload (0-20%)
+2. Processing (20-40%) 
+3. Chunking (40-60%)
+4. Embedding (60-80%)
+5. Storing (80-97%)
+6. Finalizing (97-100%)
+
+This test will help verify that the beautiful upload progress logs are working correctly.

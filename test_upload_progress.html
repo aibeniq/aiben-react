@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Upload Progress</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .progress {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f9f9f9;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            background: #007bff;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .log {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Test Upload Progress</h1>
+
+    <form id="uploadForm">
+        <div class="form-group">
+            <label for="title">Knowledge Base Title:</label>
+            <input type="text" id="title" name="title" required value="Test Upload Progress">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description"
+                rows="3">Testing the upload progress tracking system</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="files">Select Files:</label>
+            <input type="file" id="files" name="files" multiple accept=".txt,.pdf,.docx,.md">
+        </div>
+
+        <button type="submit" id="submitBtn">Create Knowledge Base</button>
+    </form>
+
+    <div id="progressContainer" class="progress" style="display: none;">
+        <h3>Upload Progress</h3>
+        <div class="progress-bar">
+            <div id="progressFill" class="progress-fill" style="width: 0%;"></div>
+        </div>
+        <div id="progressText">0% - Initializing...</div>
+        <div id="currentStage">Waiting...</div>
+    </div>
+
+    <div id="log" class="log"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:7860/api/v1';
+        let taskId = null;
+        let progressInterval = null;
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function updateProgress(data) {
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const currentStage = document.getElementById('currentStage');
+
+            progressContainer.style.display = 'block';
+
+            if (data.percentage !== undefined) {
+                const percentage = Math.round(data.percentage);
+                progressFill.style.width = `${percentage}%`;
+                progressText.textContent = `${percentage}% - ${data.status || 'Processing...'}`;
+            }
+
+            if (data.current_stage) {
+                currentStage.textContent = `Current Stage: ${data.current_stage}`;
+            }
+        }
+
+        async function pollProgress(taskId) {
+            try {
+                const response = await fetch(`${API_BASE}/knowledge-bases/progress/${taskId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                log(`Progress: ${JSON.stringify(data)}`);
+
+                updateProgress(data);
+
+                if (data.status === 'completed') {
+                    log('✅ Knowledge base creation completed!');
+                    clearInterval(progressInterval);
+                    document.getElementById('submitBtn').disabled = false;
+                    document.getElementById('submitBtn').textContent = 'Create Knowledge Base';
+                } else if (data.status === 'failed') {
+                    log('❌ Knowledge base creation failed!');
+                    clearInterval(progressInterval);
+                    document.getElementById('submitBtn').disabled = false;
+                    document.getElementById('submitBtn').textContent = 'Create Knowledge Base';
+                }
+            } catch (error) {
+                log(`❌ Progress polling error: ${error.message}`);
+            }
+        }
+
+        async function createKnowledgeBase(formData) {
+            try {
+                // Step 1: Create task to get immediate task_id
+                log('🎯 Step 1: Creating task to get immediate task_id...');
+
+                const title = formData.get('title');
+                const description = formData.get('description');
+
+                const taskParams = new URLSearchParams({
+                    title: title,
+                    description: description,
+                    embedding_model_id: 'text-embedding-3-small'
+                });
+
+                const taskResponse = await fetch(`${API_BASE}/knowledge-bases/create-task?${taskParams}`, {
+                    method: 'POST'
+                });
+
+                if (!taskResponse.ok) {
+                    throw new Error(`Task creation failed: ${taskResponse.status} ${taskResponse.statusText}`);
+                }
+
+                const taskData = await taskResponse.json();
+                taskId = taskData.task_id;
+
+                log(`✅ Got task_id immediately: ${taskId}`);
+
+                // Start progress polling
+                progressInterval = setInterval(() => pollProgress(taskId), 2000);
+
+                // Step 2: Start file upload with task_id
+                log('🚀 Step 2: Starting file upload with task_id...');
+
+                // Add task_id to form data
+                formData.append('task_id', taskId);
+
+                const uploadResponse = await fetch(`${API_BASE}/knowledge-bases`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+                }
+
+                const uploadData = await uploadResponse.json();
+                log(`✅ Upload initiated: ${JSON.stringify(uploadData)}`);
+
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('submitBtn').textContent = 'Create Knowledge Base';
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                }
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+
+            log('📝 Form submitted');
+
+            const formData = new FormData(e.target);
+            const files = document.getElementById('files').files;
+
+            if (files.length === 0) {
+                log('❌ No files selected');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Knowledge Base';
+                return;
+            }
+
+            log(`📁 Selected ${files.length} files`);
+
+            await createKnowledgeBase(formData);
+        });
+
+        // Initial log
+        log('🚀 Test page loaded and ready');
+    </script>
+</body>
+
+</html>

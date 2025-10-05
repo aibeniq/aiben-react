@@ -11,12 +11,18 @@ interface KnowledgeBaseCreateResponse {
     task_id: string;
 }
 
-// Override global axios defaults to prevent interference
-axios.defaults.timeout = 60 * 60 * 1000 // 60 minutes globally
+// Extended interface that includes timeout option and task_id
+interface KnowledgeBasesCreateKnowledgeBaseDataWithTimeout extends KnowledgeBasesCreateKnowledgeBaseData {
+    timeout?: number; // Optional timeout in milliseconds
+    taskId?: string; // Optional task_id for existing progress tracking
+}
 
-// Create a custom axios client for knowledge base operations with extended timeout
+// Override global axios defaults to prevent interference (reasonable timeout)
+axios.defaults.timeout = 5 * 60 * 1000 // 5 minutes globally (async processing should return immediately)
+
+// Create a custom axios client for knowledge base operations with appropriate timeout
 export const knowledgeBaseAxiosClient = axios.create({
-    timeout: 60 * 60 * 1000, // 60 minutes for large file processing
+    timeout: 5 * 60 * 1000, // 5 minutes for initial request (should return immediately with task_id)
     // Explicitly override any global defaults
     maxContentLength: Infinity,
     maxBodyLength: Infinity,
@@ -28,8 +34,10 @@ knowledgeBaseAxiosClient.interceptors.request.use(async (config) => {
     config.baseURL = OpenAPI.BASE
     config.withCredentials = OpenAPI.WITH_CREDENTIALS
 
-    // Ensure timeout is always set to 60 minutes (override any defaults)
-    config.timeout = 60 * 60 * 1000
+    // DON'T override timeout if it's already set - preserve the dynamic timeout!
+    if (!config.timeout) {
+        config.timeout = 5 * 60 * 1000 // Only set default if not already set
+    }
 
     // Get token directly from localStorage (same way the main client does)
     const token = localStorage.getItem("access_token")
@@ -67,11 +75,15 @@ knowledgeBaseAxiosClient.interceptors.response.use(
  * Extended timeout version of createKnowledgeBase for handling large uploads
  */
 export const createKnowledgeBaseWithTimeout = async (
-    data: KnowledgeBasesCreateKnowledgeBaseData,
+    data: KnowledgeBasesCreateKnowledgeBaseDataWithTimeout,
 ): Promise<KnowledgeBaseCreateResponse> => {
     try {
         console.log("🚀 Starting knowledge base upload with timeout client")
         console.log("📊 Files to upload:", data.formData?.files?.length || 0)
+
+        // Extract timeout from data, default to 1 hour for large uploads
+        const requestTimeout = data.timeout || (60 * 60 * 1000); // 1 hour default
+        console.log("⏰ Using timeout:", requestTimeout / 1000 / 60, "minutes")
 
         const formData = new FormData()
 
@@ -85,11 +97,8 @@ export const createKnowledgeBaseWithTimeout = async (
             }
         }
 
-        console.log("⏰ Using 60-minute timeout for upload request")
-
         // Log the exact timeout being used
-        const currentTimeout = knowledgeBaseAxiosClient.defaults.timeout || 0
-        console.log("🔧 Axios client timeout:", currentTimeout / 1000 / 60, "minutes")
+        console.log("🔧 Using dynamic timeout:", requestTimeout / 1000 / 60, "minutes")
 
         // Make the request with our custom axios client
         const response = await knowledgeBaseAxiosClient.post(
@@ -100,12 +109,12 @@ export const createKnowledgeBaseWithTimeout = async (
                     title: data.title,
                     description: data.description,
                     embedding_model_id: data.embeddingModelId,
+                    task_id: data.taskId, // Add task_id if provided
                 },
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
-                // Triple-redundancy: set timeout here too
-                timeout: 60 * 60 * 1000, // 60 minutes
+                timeout: requestTimeout, // Use the dynamic timeout
                 maxContentLength: Infinity,
                 maxBodyLength: Infinity,
             }

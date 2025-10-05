@@ -19,7 +19,6 @@ import { FaPlus, FaTrash } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
 
 import { EmbeddingModelsService } from "@/client"
-import { createKnowledgeBaseWithTimeout } from "@/client/knowledgeBaseClient"
 import useCustomToast from "@/hooks/useCustomToast"
 import { useKnowledgeBaseProgress } from "@/hooks/useKnowledgeBaseProgress"
 import {
@@ -89,9 +88,20 @@ const AddKnowledgeBase = () => {
 
   // Handle progress completion and close modal
   useEffect(() => {
-    // Only handle completion if we have an active task
-    if (taskId && progress.completed && !progress.error && !hasHandledCompletionRef.current) {
-      console.log("✅ Knowledge base creation completed successfully - handling completion")
+    console.log("🔍 Completion handler check:", {
+      taskId,
+      "progress.completed": progress.completed,
+      "progress.error": progress.error,
+      "hasHandledCompletionRef.current": hasHandledCompletionRef.current,
+      "progress.percentage": progress.percentage,
+      "progress.isActive": progress.isActive
+    })
+
+    // CRITICAL FIX: Only handle completion if we have an active task AND reasonable progress
+    // This prevents cached completion state from immediately triggering success on modal reopen
+    if (taskId && progress.completed && !progress.error && !hasHandledCompletionRef.current && 
+        progress.percentage > 80) { // Ensure we actually made meaningful progress
+      console.log("✅ Knowledge base creation completed successfully - handling completion for task:", taskId)
 
       // Mark completion as handled to prevent multiple toasts
       hasHandledCompletionRef.current = true
@@ -114,6 +124,14 @@ const AddKnowledgeBase = () => {
       setTaskId(null)
     }
   }, [taskId, progress.completed, progress.error, showErrorToast, showSuccessToast, queryClient, t])
+
+  // Reset completion handler whenever taskId changes (new task starts)
+  useEffect(() => {
+    if (taskId) {
+      console.log("🔄 New task started:", taskId, "- resetting completion handler")
+      hasHandledCompletionRef.current = false
+    }
+  }, [taskId])
 
   // determine which embedding models are allowed
   useEffect(() => {
@@ -177,10 +195,17 @@ const AddKnowledgeBase = () => {
       queryClient.invalidateQueries({ queryKey: ["items"] })
       console.log("✅ Modal close cleanup completed")
     } else {
-      // Modal is opening - ensure clean state
-      console.log("🔓 Modal is opening - ensuring clean state")
+      // CRITICAL FIX: Modal is opening - aggressively reset ALL state
+      console.log("🔓 Modal is opening - AGGRESSIVELY resetting ALL state to prevent cached completion")
       setTaskId(null)
       hasHandledCompletionRef.current = false
+      
+      // Force immediate state reset to prevent any cached progress from previous session
+      setTimeout(() => {
+        console.log("🧹 AGGRESSIVE CLEANUP: Ensuring all state is reset after modal open")
+        setTaskId(null)
+        hasHandledCompletionRef.current = false
+      }, 50)
     }
   }, [isOpen, reset, queryClient])
 
@@ -203,32 +228,94 @@ const AddKnowledgeBase = () => {
         `📊 Upload stats: ${data.files.length} files, ${(totalSize / (1024 * 1024)).toFixed(1)}MB total`,
       )
 
-      // Send the FormData object to the backend with extended timeout
-      const result = await createKnowledgeBaseWithTimeout({
-        title: data.title,
-        description: data.description,
-        embeddingModelId: data.embedding_model_id,
-        formData: {
-          files: data.files,
+      // Step 1: Create task first to get task_id immediately using OpenAPI client
+      console.log("🎯 Step 1: Creating task first to get immediate task_id...")
+      
+      // Import OpenAPI client dynamically to avoid circular dependencies
+      const { OpenAPI } = await import("@/client/core/OpenAPI")
+      const { request } = await import("@/client/core/request")
+      
+      const taskPromise = request(OpenAPI, {
+        method: "POST",
+        url: "/api/v1/knowledge-bases/create-task",
+        query: {
+          title: data.title,
+          description: data.description,
+          embedding_model_id: data.embedding_model_id,
         },
       })
 
-      // Start tracking progress with the task ID from the response
-      if (result.task_id) {
-        setTaskId(result.task_id)
-        hasHandledCompletionRef.current = false // Reset for new task
-      }
+      const taskData = await taskPromise as { task_id: string }
 
-      return result
+      console.log("✅ Got task_id immediately:", taskData.task_id)
+
+      // Return task_id immediately so progress tracking can start
+      return { task_id: taskData.task_id }
     },
-    onSuccess: (data) => {
+    onSuccess: async (data, variables) => {
       console.log(
-        "✅ Knowledge base creation API call SUCCESS - background processing started:",
+        "✅ Task creation SUCCESS - got task_id immediately:",
         data,
       )
 
+      // Check for task_id and log the response structure
+      console.log("🔍 Response structure:", Object.keys(data))
+      console.log("🔍 Full response data:", data)
+      
+      if (data.task_id) {
+        console.log("✅ Found task_id in response:", data.task_id)
+        
+        // CRITICAL FIX: Reset completion handler BEFORE setting new task ID to prevent race conditions
+        hasHandledCompletionRef.current = false
+        
+        // SAFETY: Ensure no stale task ID exists before setting new one
+        setTaskId(null)
+        
+        // Small delay to ensure state is fully reset before setting new task ID
+        setTimeout(() => {
+          console.log("🎯 Setting new Task ID after reset:", data.task_id)
+          setTaskId(data.task_id)
+          console.log("🎯 Task ID set to:", data.task_id, "- progress polling should now be active")
+        }, 100)
+
+        // Step 2: Start the actual file upload in the background
+        console.log("🚀 Step 2: Starting file upload in background...")
+        
+        // CRITICAL FIX: Use setTimeout to ensure the upload starts after the component re-render
+        // This prevents the mutation completion from interfering with progress polling
+        setTimeout(async () => {
+          try {
+            const { createKnowledgeBaseWithTimeout } = await import("@/client/knowledgeBaseClient")
+            console.log("📤 Starting file upload with task_id:", data.task_id)
+            
+            const uploadResult = await createKnowledgeBaseWithTimeout({
+              title: variables.title,
+              description: variables.description,
+              embeddingModelId: variables.embedding_model_id,
+              formData: {
+                files: variables.files,
+              },
+              taskId: data.task_id, // Pass the task_id
+            })
+            console.log("✅ File upload POST completed successfully:", uploadResult)
+            console.log("🔄 Background processing should now continue with task_id:", data.task_id)
+            console.log("⚠️ Frontend should KEEP POLLING until task reaches 100%")
+            
+            // CRITICAL: Ensure the taskId remains set even after POST completes
+            // The background processing will continue and update progress via the same task_id
+            console.log("🎯 Ensuring taskId remains set for continued polling:", data.task_id)
+          } catch (err) {
+            console.error("❌ File upload failed:", err)
+            // Error will be shown via progress tracker
+          }
+        }, 100) // Small delay to let the component re-render complete
+      } else {
+        console.error("❌ No task_id in response. Response keys:", Object.keys(data))
+        console.error("❌ Full response object:", data)
+      }
+
       // Note: Success toast and modal close will happen when progress reaches completion
-      // This onSuccess only means the API call succeeded and background processing started
+      // This onSuccess only means the task was created and file upload started
     },
     onError: (err: any) => {
       console.error("❌ Knowledge base creation ERROR:", err)
@@ -262,6 +349,7 @@ const AddKnowledgeBase = () => {
 
   const onSubmit: SubmitHandler<KnowledgeBaseCreate> = async (data) => {
     console.log("📝 Form submitted with data:", data)
+    console.log("🔍 isSubmitting at start:", isSubmitting)
 
     if (selectedFiles.length === 0) {
       console.log("⚠️ No files selected - showing error")
@@ -274,6 +362,15 @@ const AddKnowledgeBase = () => {
       selectedFiles.map((f) => f.name),
     )
 
+    // For large uploads, inform user about async processing
+    const fileCount = selectedFiles.length
+    const totalSizeMB = selectedFiles.reduce((sum, file) => sum + file.size, 0) / (1024 * 1024)
+    
+    if (fileCount > 100 || totalSizeMB > 100) {
+      console.log(`⚠️ Large upload detected: ${fileCount} files, ${totalSizeMB.toFixed(1)}MB`)
+      // Could add a confirmation dialog here in the future
+    }
+
     // Prepare the data for the SDK function
     const requestData = {
       title: data.title,
@@ -282,16 +379,22 @@ const AddKnowledgeBase = () => {
       files: selectedFiles, // Pass the selected files
     }
 
-    console.log("📤 Prepared request data:", requestData)
+    console.log("📤 Prepared request data:", { 
+      ...requestData, 
+      files: `${requestData.files.length} files` 
+    })
 
     try {
       console.log("🚀 Calling mutation.mutateAsync...")
+      console.log("🔍 isSubmitting before mutation:", isSubmitting)
       await mutation.mutateAsync(requestData)
       console.log("✅ Mutation completed successfully")
+      console.log("🔍 isSubmitting after mutation:", isSubmitting)
       // The success handling is now in the mutation's onSuccess callback
     } catch (error) {
       // Error handling is in the mutation's onError callback
       console.error("❌ Mutation failed:", error)
+      console.log("🔍 isSubmitting after error:", isSubmitting)
     }
   }
 
