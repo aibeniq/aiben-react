@@ -112,6 +112,11 @@ async def prefetch_knowledge_base_context(
     question_contexts = {}
     
     for i, question_item in enumerate(question_list):
+        # Add delay between questions to prevent rate limit exhaustion
+        if i > 0 and settings.VERADOC_ENABLE_PROCESSING_DELAYS:
+            import asyncio
+            await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_QUESTIONS)
+            
         # Check for cancellation during context pre-fetching
         try:
             if request and await request.is_disconnected():
@@ -198,13 +203,51 @@ async def prefetch_knowledge_base_context(
                 source_citations = []
             
             try:
-                # Step 2: Get the relevant policy context for this question
+                # Step 2: Get the relevant policy context for this question with chunking for large contexts
                 print("Generating context for question...")
-                question_context = invoke_llm(
-                    llm,
-                    context_prompt_template,
-                    {"context": context, "question": question_text},
-                )
+                
+                # Check if context is too large and needs chunking
+                from app.services.text_processing import estimate_tokens, chunk_text
+                context_tokens = estimate_tokens(context)
+                
+                if context_tokens > settings.VERADOC_KB_CHUNK_SIZE_LIMIT:
+                    print(f"⚠️ Large context detected ({context_tokens} tokens). Chunking for processing...")
+                    
+                    # Chunk the context to prevent rate limit issues
+                    context_chunks = chunk_text(context, max_tokens=settings.VERADOC_KB_CHUNK_SIZE_LIMIT)
+                    
+                    # Process chunks and synthesize context
+                    chunk_contexts = []
+                    for i, chunk in enumerate(context_chunks):
+                        try:
+                            # Add delay between chunks
+                            if i > 0 and settings.VERADOC_ENABLE_PROCESSING_DELAYS:
+                                import asyncio
+                                await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
+                            
+                            print(f"Processing context chunk {i+1}/{len(context_chunks)}")
+                            chunk_context = invoke_llm(
+                                llm,
+                                context_prompt_template,
+                                {"context": chunk, "question": question_text},
+                            )
+                            chunk_contexts.append(chunk_context)
+                            
+                        except Exception as chunk_error:
+                            print(f"Error processing context chunk {i+1}: {chunk_error}")
+                            chunk_contexts.append(f"Error processing part of context: {str(chunk_error)}")
+                    
+                    # Combine chunk contexts
+                    question_context = "\n\n".join([ctx for ctx in chunk_contexts if ctx])
+                    
+                else:
+                    # Context is small enough, process normally
+                    question_context = invoke_llm(
+                        llm,
+                        context_prompt_template,
+                        {"context": context, "question": question_text},
+                    )
+                    
                 print(f"Got context: {question_context[:100]}...")
                 
                 # Translate the question context if needed
@@ -214,8 +257,28 @@ async def prefetch_knowledge_base_context(
                 
             except Exception as context_error:
                 print(f"Error generating context for question: {context_error}")
-                question_context = f"Error generating context: {str(context_error)}"
-                # Translate the error message if needed
+                
+                # Implement fallback strategy for rate limit errors
+                if "rate limiter" in str(context_error).lower() or "rate limit" in str(context_error).lower():
+                    print("🚨 Rate limit detected. Using fallback context strategy...")
+                    
+                    # Fallback 1: Use a simplified context from document titles/metadata
+                    if source_citations:
+                        fallback_context = "Based on available documents: " + "; ".join([
+                            f"Document: {citation.get('metadata', {}).get('source', 'Unknown')}"
+                            for citation in source_citations[:5]  # Limit to first 5 documents
+                        ])
+                        question_context = f"Limited context due to processing constraints: {fallback_context}"
+                    else:
+                        # Fallback 2: Generic context about knowledge base availability
+                        question_context = "Knowledge base documents are available but detailed context generation failed due to processing constraints. Please answer based on the question content."
+                    
+                    print(f"Using fallback context: {question_context[:100]}...")
+                else:
+                    # For other errors, use error message
+                    question_context = f"Error generating context: {str(context_error)}"
+                
+                # Translate the fallback context if needed
                 question_context = await translate_text_if_needed(
                     question_context, session, current_user, llm
                 )
@@ -528,9 +591,14 @@ async def process_rag_checklist(
                                     f"FullScanRetriever: Processing query '{query[:50]}...'"
                                 )
 
-                                # Return all documents in the knowledge base with better error handling
+                                # Get all documents for true Full Document Scan
                                 try:
+                                    # Get all documents - no sampling to ensure nothing is missed
                                     all_data = self.chroma_db.get()
+                                    
+                                    if all_data and "documents" in all_data:
+                                        print(f"📚 Full Document Scan: Processing ALL {len(all_data['documents'])} documents")
+                                        
                                 except Exception as get_error:
                                     print(
                                         f"Error getting documents from ChromaDB: {get_error}"
@@ -803,8 +871,12 @@ async def process_rag_checklist(
                     continue
 
                 # 9. Process each question using the PRE-FETCHED context
-                # 9. Process each question using the PRE-FETCHED context
                 for i, question_item in enumerate(question_list):
+                    # Add delay between question processing to prevent rate limit exhaustion
+                    if i > 0 and settings.VERADOC_ENABLE_PROCESSING_DELAYS:
+                        import asyncio
+                        await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_REQUESTS)
+                        
                     try:
                         # Check if client has disconnected before processing each question
                         try:
@@ -1515,7 +1587,12 @@ async def optimize_checklist(
 
                     def get_relevant_documents(self, query):
                         try:
+                            # Get all documents for full optimization scan
                             all_data = self.chroma_db.get()
+                            
+                            if all_data and "documents" in all_data:
+                                print(f"📚 Full Optimization Scan: Processing ALL {len(all_data['documents'])} documents")
+                            
                             documents = []
 
                             if (

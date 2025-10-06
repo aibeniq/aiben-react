@@ -44,8 +44,9 @@ class Settings(BaseSettings):
     )
 
     # Document processing parameters
-    FULL_SCAN_DOCUMENT_CHUNK_SIZE: int = 100000
+    FULL_SCAN_DOCUMENT_CHUNK_SIZE: int = 30000
     FULL_SCAN_DOCUMENT_CHUNK_OVERLAP: int = 200
+    FULL_SCAN_PROMPT_RESERVE_TOKENS: int = 5000  # Reserve for chatbot full scan prompts
     RAG_DOCUMENT_CHUNK_SIZE: int = 1000
     RAG_DOCUMENT_CHUNK_OVERLAP: int = 200
     RAG_NUM_CHUNKS: int = 20  # Number of chunks to retrieve for RAG search
@@ -204,7 +205,38 @@ class Settings(BaseSettings):
     }
 
     # OpenAI API Configuration
-    OPENAI_TIMEOUT: int = 3600  # 60 minutes timeout for OpenAI API calls
+    OPENAI_TIMEOUT: int = 36000  # 600 minutes timeout for OpenAI API calls
+    
+    # ========================================
+    # CENTRALIZED RATE LIMITING CONFIGURATION
+    # ========================================
+    
+    # Global OpenAI Rate Limits (applied to all services)
+    OPENAI_TOKENS_PER_MINUTE: int = 180000  # Token limit (90% of typical 200k limit)
+    OPENAI_REQUESTS_PER_MINUTE: int = 500   # Request limit (conservative but practical)
+    OPENAI_RATE_LIMIT_MAX_WAIT: int = 30000   # Max wait time for rate limiting (500 minutes)
+    
+    # Processing Delays (to prevent cascading rate limit failures)
+    PROCESSING_DELAY_BETWEEN_CHUNKS: float = 0.5    # Delay between processing chunks
+    PROCESSING_DELAY_BETWEEN_QUESTIONS: float = 2.0  # Delay between questions (VeraDoc, etc.)
+    PROCESSING_DELAY_BETWEEN_DOCUMENTS: float = 1.0  # Delay between document processing
+    PROCESSING_DELAY_BETWEEN_REQUESTS: float = 0.1   # Minimum delay between any LLM requests
+    
+    # Chunk Processing Settings
+    CHUNK_PROCESSING_PROMPT_RESERVE_SMALL: int = 5000   # Reserve tokens for smaller operations
+    CHUNK_PROCESSING_PROMPT_RESERVE_LARGE: int = 20000  # Reserve tokens for large operations
+    CHUNK_PROCESSING_SIZE_THRESHOLD: int = 50000        # Threshold for small vs large reserve
+    
+    # Service-Specific Overrides (if needed)
+    CHATBOT_ENABLE_CHUNK_DELAYS: bool = True
+    VERADOC_ENABLE_PROCESSING_DELAYS: bool = True
+    VERADOC_KB_CHUNK_SIZE_LIMIT: int = 15000      # Smaller chunks for KB processing
+    VERADOC_KB_CONTEXT_TIMEOUT: int = 180         # 3 minute timeout for context generation
+    VERADOC_CIRCUIT_BREAKER_ENABLED: bool = True  # Enable circuit breaker for rate limits
+    VERADOC_CIRCUIT_BREAKER_FAILURE_THRESHOLD: int = 3  # Failures before opening circuit
+    VERADOC_CIRCUIT_BREAKER_RESET_TIME: int = 300       # 5 minutes before retry
+    TWINCHECK_ENABLE_PROCESSING_DELAYS: bool = True
+    REPORTGENIE_ENABLE_PROCESSING_DELAYS: bool = True
 
     # Usage Quota Configuration
     QUOTA_PERIOD_START_DAY: int = 1  # Day of month when quota period starts (1-28)

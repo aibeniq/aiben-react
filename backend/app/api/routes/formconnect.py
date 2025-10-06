@@ -1176,6 +1176,11 @@ async def process_form(
     # Process all files with unified visual enhancement
     if files:
         for i, file in enumerate(files):
+            # Add delay between file processing to prevent rate limit exhaustion
+            if i > 0:
+                import asyncio
+                await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_DOCUMENTS)
+                
             # CRITICAL: Check if client has disconnected before processing each file
             try:
                 if request and await request.is_disconnected():
@@ -1784,7 +1789,12 @@ async def generate_form_fields_with_files(
 
         print(f"🔍 Processing {len(files)} reference files for field suggestion...")
 
-        for file in files:
+        for i, file in enumerate(files):
+            # Add delay between reference file processing to prevent rate limit exhaustion
+            if i > 0:
+                import asyncio
+                await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_DOCUMENTS)
+                
             try:
                 # Read file content
                 content = await file.read()

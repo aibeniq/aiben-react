@@ -116,7 +116,7 @@ async def get_token_usage(
         ("start_time", quota_period["start_time"]),
         ("end_time", quota_period["end_time"]),
         ("bucket_width", "1d"),
-        ("api_key_ids", "key_G3FMVaA6B071wZ5M"), #DAVID TODO - hardcoded in the key ID...
+        ("api_key_ids", "key_BiGdXxRyZJgf1SWp"), #DAVID TODO - hardcoded in the key ID...
         ("group_by[]", "api_key_id"),
         #("group_by[]", "model"),
         #("group_by[]", "bucket"),

@@ -6,7 +6,7 @@ import axios from "axios"
  */
 
 // Set global axios defaults to 60 minutes
-axios.defaults.timeout = 60 * 60 * 1000 // 60 minutes globally
+axios.defaults.timeout = 60 * 60 * 10000 // 600 minutes globally
 axios.defaults.maxContentLength = Infinity
 axios.defaults.maxBodyLength = Infinity
 
@@ -16,9 +16,9 @@ console.log("✅ Global axios timeout set to 60 minutes")
 axios.interceptors.request.use(
     (config) => {
         // Force 30-minute timeout on ALL requests unless explicitly overridden
-        if (!config.timeout || config.timeout < 60 * 60 * 1000) {
-            config.timeout = 60 * 60 * 1000
-            console.log("🔧 Global interceptor: Enhanced timeout to 60 minutes for:", config.url)
+        if (!config.timeout || config.timeout < 60 * 60 * 10000) {
+            config.timeout = 60 * 60 * 10000
+            console.log("🔧 Global interceptor: Enhanced timeout to 600 minutes for:", config.url)
         }
         return config
     },
