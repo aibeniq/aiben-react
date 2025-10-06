@@ -275,6 +275,11 @@ async def compare_documents(
 
         # Process each topic with the LLM
         for topic_idx, topic in enumerate(topic_list):
+            # Add delay between topic processing to prevent rate limit exhaustion
+            if topic_idx > 0 and settings.TWINCHECK_ENABLE_PROCESSING_DELAYS:
+                import asyncio
+                await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_REQUESTS)
+                
             # CRITICAL: Check if client has disconnected before processing each topic
             try:
                 if request and await request.is_disconnected():
@@ -1359,6 +1364,11 @@ async def generate_topics(
                 all_chunk_topics = []
 
                 for i, chunk in enumerate(chunks):
+                    # Add delay between chunk processing to prevent rate limit exhaustion
+                    if i > 0 and settings.TWINCHECK_ENABLE_PROCESSING_DELAYS:
+                        import asyncio
+                        await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
+                        
                     print(f"Processing chunk {i+1}/{len(chunks)}")
 
                     # Generate topics for this chunk

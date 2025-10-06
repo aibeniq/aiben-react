@@ -23,13 +23,13 @@ class GlobalOpenAIRateLimiter:
     would exceed the limits.
     """
     
-    def __init__(self, tokens_per_minute: int = 120000, requests_per_minute: int = 300):
+    def __init__(self, tokens_per_minute: int = 180000, requests_per_minute: int = 500):
         """
-        Initialize the rate limiter with ultra-conservative limits.
+        Initialize the rate limiter with realistic limits based on typical OpenAI capacity.
         
         Args:
-            tokens_per_minute: Ultra-conservative token limit (default 120k vs OpenAI's 200k - 60% limit)
-            requests_per_minute: Ultra-conservative request limit (default 300 vs OpenAI's higher limits)
+            tokens_per_minute: Realistic token limit (default 180k - 90% of typical 200k limit)
+            requests_per_minute: Realistic request limit (default 500 - conservative but practical)
         """
         self.tokens_per_minute = tokens_per_minute
         self.requests_per_minute = requests_per_minute
@@ -150,17 +150,20 @@ class GlobalOpenAIRateLimiter:
                 "request_window_remaining": request_window_remaining,
             }
     
-    def wait_for_capacity(self, estimated_tokens: int, max_wait_time: float = 120) -> bool:
+    def wait_for_capacity(self, estimated_tokens: int, max_wait_time: float = None) -> bool:
         """
         Wait until there's capacity for the request.
         
         Args:
             estimated_tokens: Estimated tokens needed
-            max_wait_time: Maximum time to wait in seconds
+            max_wait_time: Maximum time to wait in seconds (uses config default if None)
             
         Returns:
             True if capacity is available, False if max wait time exceeded
         """
+        if max_wait_time is None:
+            from app.core.config import settings
+            max_wait_time = settings.OPENAI_RATE_LIMIT_MAX_WAIT
         start_time = time.time()
         
         while time.time() - start_time < max_wait_time:
@@ -228,8 +231,13 @@ class GlobalOpenAIRateLimiter:
 
 
 # Global instance - shared across all OpenAI requests
-# Using ultra-conservative limits: 120k tokens (60% of 200k limit) for maximum safety
-global_rate_limiter = GlobalOpenAIRateLimiter(tokens_per_minute=120000, requests_per_minute=300)
+# Using centralized configuration from settings
+from app.core.config import settings
+
+global_rate_limiter = GlobalOpenAIRateLimiter(
+    tokens_per_minute=settings.OPENAI_TOKENS_PER_MINUTE, 
+    requests_per_minute=settings.OPENAI_REQUESTS_PER_MINUTE
+)
 
 
 def estimate_tokens(text: str, response_buffer: int = 1000) -> int:

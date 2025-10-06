@@ -81,7 +81,8 @@ def create_openai_request_wrapper(formatted_text: str, model_class_name: str):
         # Wait for capacity using the global rate limiter
         estimated_tokens = estimate_tokens(formatted_text)
         
-        if not global_rate_limiter.wait_for_capacity(estimated_tokens, max_wait_time=120):
+        from app.core.config import settings
+        if not global_rate_limiter.wait_for_capacity(estimated_tokens, max_wait_time=settings.OPENAI_RATE_LIMIT_MAX_WAIT):
             raise Exception("Global rate limiter: Maximum wait time exceeded for OpenAI request")
         
         logger.info(f"🚀 Proceeding with OpenAI request ({estimated_tokens} estimated tokens)")
@@ -506,7 +507,8 @@ def invoke_llm(llm, prompt, variables=None):
                 estimated_tokens = estimate_tokens(formatted_text)
                 
                 # Wait for capacity if needed
-                if not global_rate_limiter.wait_for_capacity(estimated_tokens, max_wait_time=120):
+                from app.core.config import settings
+                if not global_rate_limiter.wait_for_capacity(estimated_tokens, max_wait_time=settings.OPENAI_RATE_LIMIT_MAX_WAIT):
                     raise Exception("Global rate limiter: Maximum wait time exceeded for OpenAI request")
                 
                 logger.info(f"🚀 Proceeding with OpenAI request ({estimated_tokens} estimated tokens)")

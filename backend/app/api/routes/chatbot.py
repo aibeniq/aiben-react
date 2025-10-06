@@ -250,6 +250,10 @@ async def _handle_full_text_kb_query(
             for i, chunk in enumerate(chunks):
                 try:
                     print(f"Analyzing chunk {i+1}/{len(chunks)} from {source.name}")
+                    # Add delay between chunks to prevent rate limit exhaustion
+                    if i > 0 and settings.CHATBOT_ENABLE_CHUNK_DELAYS:
+                        await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
+                        
                     chunk_analysis = invoke_llm(
                         llm,
                         settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
@@ -408,6 +412,11 @@ async def _handle_full_text_document_query(
             file_source_citations = []
 
             for i, chunk in enumerate(chunks):
+                # Add delay between chunks to prevent rate limit exhaustion
+                if i > 0 and settings.CHATBOT_ENABLE_CHUNK_DELAYS:
+                    import asyncio
+                    await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
+                    
                 try:
                     chunk_analysis = invoke_llm(
                         llm,

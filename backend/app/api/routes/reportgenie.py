@@ -312,6 +312,11 @@ async def generate_report(
                         )
                         chunk_analyses = []
                         for i, chunk in enumerate(text_chunks):
+                            # Add delay between chunk processing to prevent rate limit exhaustion
+                            if i > 0 and settings.REPORTGENIE_ENABLE_PROCESSING_DELAYS:
+                                import asyncio
+                                await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
+                                
                             # CRITICAL: Check if client has disconnected before processing each chunk
                             try:
                                 if request and await request.is_disconnected():
@@ -1274,6 +1279,11 @@ async def generate_outline(
                 all_chunk_sections = []
 
                 for i, chunk in enumerate(chunks):
+                    # Add delay between chunk processing to prevent rate limit exhaustion
+                    if i > 0 and settings.REPORTGENIE_ENABLE_PROCESSING_DELAYS:
+                        import asyncio
+                        await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
+                        
                     print(f"Processing chunk {i+1}/{len(chunks)}")
 
                     # Generate sections for this chunk
@@ -1679,7 +1689,12 @@ async def optimize_outline(
             generated_sections = {}
             section_consult_settings = {}  # Track which sections consult documents
 
-            for section in current_sections:
+            for i, section in enumerate(current_sections):
+                # Add delay between section processing to prevent rate limit exhaustion
+                if i > 0 and settings.REPORTGENIE_ENABLE_PROCESSING_DELAYS:
+                    import asyncio
+                    await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_REQUESTS)
+                    
                 if cancellation_requested:
                     print("Operation cancelled by client disconnect")
                     raise HTTPException(

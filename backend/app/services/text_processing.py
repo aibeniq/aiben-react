@@ -26,7 +26,14 @@ def chunk_text(text: str, max_tokens: int = None) -> list[str]:
     lines = text.split("\n")
     current_chunk = []
     current_tokens = 0
-    chunk_token_limit = max_tokens - settings.TWINCHECK_PROMPT_RESERVE_TOKENS
+    
+    # Use centralized prompt reserve settings based on chunk size
+    if max_tokens <= settings.CHUNK_PROCESSING_SIZE_THRESHOLD:
+        prompt_reserve = settings.CHUNK_PROCESSING_PROMPT_RESERVE_SMALL
+    else:
+        prompt_reserve = settings.CHUNK_PROCESSING_PROMPT_RESERVE_LARGE
+    
+    chunk_token_limit = max_tokens - prompt_reserve
 
     for line in lines:
         line_tokens = estimate_tokens(line + "\n")
