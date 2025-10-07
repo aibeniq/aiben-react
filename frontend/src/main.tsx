@@ -17,9 +17,28 @@ import { CustomProvider } from "./components/ui/provider"
 import { ResultsProvider } from "./contexts/ResultsContext"
 import "./i18n" // Initialize i18n
 
-console.log("API URL:", import.meta.env.VITE_API_URL)
+const envApiUrl = import.meta.env.VITE_API_URL
+console.log("API URL (env):", envApiUrl)
 
-OpenAPI.BASE = import.meta.env.VITE_API_URL
+// If the env API URL points to a production host while the app is running on localhost
+// or a different origin, prefer same-origin API base to avoid CORS blocking during local/dev testing.
+let computedBase = envApiUrl || ""
+try {
+  if (typeof window !== "undefined" && envApiUrl) {
+    const envUrl = new URL(envApiUrl)
+    const envHost = envUrl.hostname
+    const currentHost = window.location.hostname
+    // If env points at production API but we're on localhost (or a different host), use same origin
+    if (envHost !== currentHost && (currentHost === "localhost" || currentHost === "127.0.0.1")) {
+      computedBase = window.location.origin
+      console.log(`API URL override: running on ${currentHost}, overriding API base to ${computedBase}`)
+    }
+  }
+} catch (e) {
+  console.warn("Could not parse VITE_API_URL, using as-is", e)
+}
+
+OpenAPI.BASE = computedBase
 OpenAPI.TOKEN = async () => {
   return localStorage.getItem("access_token") || ""
 }

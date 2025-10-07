@@ -38,6 +38,8 @@ if settings.all_cors_origins:
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=["*"],  # Expose all headers to the client
+        max_age=3600,  # Cache preflight requests for 1 hour
     )
 
 # Add upload progress middleware for multipart form monitoring

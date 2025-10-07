@@ -35,6 +35,7 @@ from app.services.retrievers import (
     create_ensemble_retriever,
 )  # Import the ensemble retriever
 from app.services.enhanced_retrieval import SmartRetrieverFactory
+from app.services.progress_tracker import progress_tracker
 
 from sqlmodel import select
 from fastapi import (
@@ -103,6 +104,7 @@ async def prefetch_knowledge_base_context(
     session,
     current_user,
     request: FastAPIRequest = None,
+    task_id: str = None,
 ) -> Dict[str, Dict[str, Any]]:
     """
     Pre-fetch knowledge base context for all questions to avoid redundant retrieval.
@@ -113,9 +115,18 @@ async def prefetch_knowledge_base_context(
     question_contexts = {}
     
     for i, question_item in enumerate(question_list):
+        # Yield to event loop at start of each question iteration
+        await asyncio.sleep(0.05)  # Prevent connection timeouts during long operations
+        
+        # Update progress for context fetching
+        if task_id:
+            progress_tracker.update_stage_progress(
+                task_id, "fetching_context", i, len(question_list),
+                f"Retrieving policy context for question {i+1}/{len(question_list)}..."
+            )
+        
         # Add delay between questions to prevent rate limit exhaustion
         if i > 0 and settings.VERADOC_ENABLE_PROCESSING_DELAYS:
-            import asyncio
             await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_QUESTIONS)
             
         # Check for cancellation during context pre-fetching
@@ -162,9 +173,20 @@ async def prefetch_knowledge_base_context(
                         
                         for doc_idx, doc in enumerate(docs):
                             try:
+                                # Yield to event loop more frequently for long-running Full Document Scan
+                                # This prevents connection timeouts and allows progress polling to work
+                                await asyncio.sleep(0.05)  # Increased from 0.01 to ensure event loop processing
+                                
+                                # Update progress during relevance filtering (crucial for Full Document Scan)
+                                if task_id:
+                                    # Show detailed progress: question X, analyzing chunk Y/Z
+                                    progress_tracker.update_stage_progress(
+                                        task_id, "fetching_context", i, len(question_list),
+                                        f"Question {i+1}/{len(question_list)}: Analyzing chunk {doc_idx + 1}/{len(docs)} for relevance..."
+                                    )
+                                
                                 # Add delay between chunk analyses to prevent rate limits
                                 if doc_idx > 0 and settings.VERADOC_ENABLE_PROCESSING_DELAYS:
-                                    import asyncio
                                     await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
                                 
                                 # Check for cancellation during filtering
@@ -184,6 +206,9 @@ async def prefetch_knowledge_base_context(
                                     {"chunk": doc.page_content or "", "question": question_text},
                                 )
                                 
+                                # Yield again after LLM call to prevent connection timeout
+                                await asyncio.sleep(0.02)
+                                
                                 # Filter based on LLM response (similar to chatbot)
                                 if "No relevant information found" not in relevance_check:
                                     print(f"✅ Chunk {doc_idx + 1} is relevant")
@@ -195,6 +220,7 @@ async def prefetch_knowledge_base_context(
                                 print(f"Error filtering chunk {doc_idx + 1}: {filter_error}")
                                 # On error, include the chunk to be safe
                                 filtered_docs.append(doc)
+                                await asyncio.sleep(0.01)  # Yield even on error
                         
                         print(f"📊 Relevance filtering: {len(filtered_docs)}/{len(docs)} chunks are relevant")
                         docs = filtered_docs
@@ -272,14 +298,22 @@ async def prefetch_knowledge_base_context(
                     
                     # Process chunks and synthesize context
                     chunk_contexts = []
-                    for i, chunk in enumerate(context_chunks):
+                    for chunk_idx, chunk in enumerate(context_chunks):
                         try:
+                            # Update progress during context chunk processing
+                            if task_id:
+                                progress_tracker.update_stage_progress(
+                                    task_id, "fetching_context", i, len(question_list),
+                                    f"Question {i+1}/{len(question_list)}: Processing context chunk {chunk_idx + 1}/{len(context_chunks)}..."
+                                )
+                                await asyncio.sleep(0.01)  # Allow progress API to respond
+                            
                             # Add delay between chunks
-                            if i > 0 and settings.VERADOC_ENABLE_PROCESSING_DELAYS:
+                            if chunk_idx > 0 and settings.VERADOC_ENABLE_PROCESSING_DELAYS:
                                 import asyncio
                                 await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
                             
-                            print(f"Processing context chunk {i+1}/{len(context_chunks)}")
+                            print(f"Processing context chunk {chunk_idx+1}/{len(context_chunks)}")
                             chunk_context = invoke_llm(
                                 llm,
                                 context_prompt_template,
@@ -288,7 +322,7 @@ async def prefetch_knowledge_base_context(
                             chunk_contexts.append(chunk_context)
                             
                         except Exception as chunk_error:
-                            print(f"Error processing context chunk {i+1}: {chunk_error}")
+                            print(f"Error processing context chunk {chunk_idx+1}: {chunk_error}")
                             chunk_contexts.append(f"Error processing part of context: {str(chunk_error)}")
                     
                     # Combine chunk contexts
@@ -397,6 +431,126 @@ async def extract_text_from_file_async(file_content: bytes, filename: str) -> st
 
 router = APIRouter(prefix="/veradoc", tags=["veradoc"])
 
+
+
+
+
+@router.get("/progress/{task_id}")
+async def get_veradoc_progress(
+    task_id: str,
+    current_user: CurrentUser,
+    request: FastAPIRequest = None,
+) -> Any:
+    """
+    Get progress information for a VeraDoc task (review).
+    """
+    # Log incoming request headers to help diagnose cross-host/CORS routing issues
+    try:
+        client_addr = request.client.host if request and getattr(request, "client", None) else "unknown"
+        host_hdr = request.headers.get("host") if request else None
+        origin_hdr = request.headers.get("origin") if request else None
+        print(f"🔗 VERADOC PROGRESS REQUEST: task_id={task_id}, client={client_addr}, host={host_hdr}, origin={origin_hdr}")
+    except Exception as _:
+        print("🔗 VERADOC PROGRESS: could not read request headers")
+
+    # Make this async to prevent blocking during intensive operations
+    progress_data = progress_tracker.get_progress(task_id)
+    if not progress_data:
+        # Don't immediately return 404 here. In high-latency flows (LLM calls, heavy processing)
+        # the frontend may start polling before the backend has persisted progress or during
+        # transient Redis/connectivity issues. Returning 404 causes the frontend to stop
+        # polling and surface a "Task not found or expired" error to users.
+        #
+        # Instead, return a lightweight placeholder indicating the task is initializing.
+        # The frontend will continue polling and pick up the real progress once available.
+        print(f"⚠️ VERADOC PROGRESS: No progress found for task {task_id} - returning initializing placeholder")
+        placeholder = {
+            "task_id": task_id,
+            "operation": "Reviewing documents",
+            "stages": {},
+            "current_stage": "",
+            "percentage": 0.0,
+            "status": "pending",
+            "message": "Initializing task - progress not yet available. Polling will continue."
+        }
+        # Yield control back to the event loop before returning
+        await asyncio.sleep(0)
+        return placeholder
+
+    # Debug logging to see what's actually being returned
+    print(f"🔍 VERADOC API RETURNING PROGRESS: task_id={task_id}")
+    print(f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}")
+    print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
+    print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
+    
+    # Check each stage completion status
+    stages = progress_data.get('stages', {})
+    for stage_name, stage_data in stages.items():
+        completed = stage_data.get('completed', False) if isinstance(stage_data, dict) else False
+        print(f"🔍 STAGE {stage_name}: completed={completed}")
+
+    # Yield control to allow other async operations (like this API call) to run
+    await asyncio.sleep(0)
+
+    return progress_data
+
+
+@router.get("/results/{task_id}")
+async def get_veradoc_results(
+    task_id: str,
+    current_user: CurrentUser,
+    request: FastAPIRequest = None,
+) -> Any:
+    """
+    Get the results for a completed VeraDoc review task.
+    This endpoint should be called after progress shows status='completed'.
+    """
+    # Log incoming request headers to help diagnose cross-host/CORS routing issues
+    try:
+        client_addr = request.client.host if request and getattr(request, "client", None) else "unknown"
+        host_hdr = request.headers.get("host") if request else None
+        origin_hdr = request.headers.get("origin") if request else None
+        print(f"🔗 VERADOC RESULTS REQUEST: task_id={task_id}, client={client_addr}, host={host_hdr}, origin={origin_hdr}")
+    except Exception:
+        print("🔗 VERADOC RESULTS: could not read request headers")
+
+    # Retrieve results from task metadata
+    results = progress_tracker.get_task_metadata(task_id)
+    if not results:
+        # Don't return a hard 404 here; callers (browsers) may be hitting a different host or race with metadata
+        print(f"⚠️ VERADOC RESULTS: No metadata found for task {task_id} - returning placeholder to allow frontend to retry")
+        placeholder = {
+            "task_id": task_id,
+            "status": "pending",
+            "message": "Results not yet available. Polling will continue.",
+        }
+        await asyncio.sleep(0)
+        return placeholder
+
+    return results
+
+
+@router.post("/review/task")
+async def create_review_task():
+    """
+    Create a progress tracking task for document review and return task_id immediately.
+    This allows frontend to start progress polling before form submission.
+    """
+    task_id = progress_tracker.create_task(
+        "Reviewing documents",
+        {
+            "setup": 0.05,
+            "fetching_context": 0.60,
+            "reviewing": 0.30,
+            "finalizing": 0.05
+        }
+    )
+    progress_tracker.update_stage_progress(
+        task_id, "setup", 0, 1, "Waiting to start document review..."
+    )
+    return {"task_id": task_id}
+
+
 # Initialize the LLM
 # llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
 
@@ -485,24 +639,29 @@ def needs_optimization(answer: str) -> bool:
 async def process_rag_checklist(
     session: SessionDep,
     current_user: CurrentUser,
-    request_data: RagChecklistRequest = Depends(),
-    files: List[UploadFile] = File(None),
+    questions: str = Form(...),
+    knowledge_base_id: str = Form(...),
+    files: List[UploadFile] = File(...),
+    custom_instructions: Optional[str] = Form(None),
+    search_mode: str = Form("vector"),
+    task_id: Optional[str] = Form(None),
     request: FastAPIRequest = None,
 ):
     """
     Process the uploaded files using RAG with a knowledge base.
+    Includes real-time progress tracking similar to ReportGenie.
     """
     print("process_rag_checklist function invoked!")
-    print(f"Received search_mode: {request_data.search_mode}")
+    print(f"Received search_mode: {search_mode}")
     print(
-        f"Request data: knowledge_base_id={request_data.knowledge_base_id}, questions length={len(request_data.questions)}"
+        f"Request data: knowledge_base_id={knowledge_base_id}, questions length={len(questions)}"
     )
 
     # Input validation
-    if not request_data.knowledge_base_id:
+    if not knowledge_base_id:
         raise HTTPException(status_code=400, detail="Knowledge base ID is required")
 
-    if not request_data.questions or not request_data.questions.strip():
+    if not questions or not questions.strip():
         raise HTTPException(status_code=400, detail="Questions are required")
 
     # Check for at least one file
@@ -511,11 +670,52 @@ async def process_rag_checklist(
         raise HTTPException(status_code=400, detail="At least one file is required")
 
     # Validate search mode
-    if request_data.search_mode not in ["vector", "full_scan"]:
+    if search_mode not in ["vector", "full_scan"]:
         print(
-            f"Warning: Invalid search mode '{request_data.search_mode}', defaulting to 'vector'"
+            f"Warning: Invalid search mode '{search_mode}', defaulting to 'vector'"
         )
-        request_data.search_mode = "vector"
+        search_mode = "vector"
+
+    # Create or initialize progress tracking task
+    if not task_id:
+        # No task_id provided, create a new one
+        task_id = progress_tracker.create_task(
+            "Reviewing documents",
+            {
+                "setup": 0.05,
+                "fetching_context": 0.60,
+                "reviewing": 0.30,
+                "finalizing": 0.05
+            }
+        )
+        print(f"Created new task_id: {task_id}")
+    else:
+        # Task_id provided by frontend, initialize it in the progress tracker
+        print(f"Using provided task_id: {task_id}")
+        progress_tracker.create_task_with_id(
+            task_id,
+            "Reviewing documents",
+            {
+                "setup": 0.05,
+                "fetching_context": 0.60,
+                "reviewing": 0.30,
+                "finalizing": 0.05
+            }
+        )
+    
+    # Create request_data object for backward compatibility with rest of the code
+    class RequestData:
+        pass
+    request_data = RequestData()
+    request_data.questions = questions
+    request_data.knowledge_base_id = knowledge_base_id
+    request_data.custom_instructions = custom_instructions
+    request_data.search_mode = search_mode
+    request_data.task_id = task_id
+    
+    progress_tracker.update_stage_progress(
+        task_id, "setup", 0, 1, "Initializing document review..."
+    )
 
     try:
         print("Processing RAG checklist...")
@@ -524,6 +724,15 @@ async def process_rag_checklist(
         kb = session.get(KnowledgeBase, request_data.knowledge_base_id)
         if not kb:
             raise HTTPException(status_code=404, detail="Knowledge base not found")
+
+        progress_tracker.complete_stage(task_id, "setup", "Setup complete")
+        
+        # Start fetching context stage
+        progress_tracker.update_stage_progress(
+            task_id, "fetching_context", 0, 1, "Preparing to retrieve policy context..."
+        )
+        
+        await asyncio.sleep(0.01)  # Allow progress API to respond
 
         # 2. Create a temporary directory for ChromaDB
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -821,7 +1030,8 @@ async def process_rag_checklist(
                     context_prompt_template=context_prompt_template,
                     session=session,
                     current_user=current_user,
-                    request=request
+                    request=request,
+                    task_id=task_id
                 )
                 print(f"✅ Pre-fetched context for {len(question_contexts)} questions")
             except HTTPException:
@@ -831,6 +1041,16 @@ async def process_rag_checklist(
                 print(f"Error during context pre-fetch: {prefetch_error}")
                 # Fall back to processing without pre-fetch
                 question_contexts = {}
+            
+            # Complete context fetching stage
+            progress_tracker.complete_stage(task_id, "fetching_context", "Policy context retrieved")
+            
+            # Start reviewing documents stage
+            progress_tracker.update_stage_progress(
+                task_id, "reviewing", 0, total_files,
+                "Beginning document review with policy context..."
+            )
+            await asyncio.sleep(0.01)  # Allow progress API to respond
 
             # 8. Process each uploaded file using the pre-fetched context
             qa_pairs = []
@@ -840,6 +1060,15 @@ async def process_rag_checklist(
             
             # Support multiple files - process each one
             for file_index, file in enumerate(files):
+                # Update progress for each file
+                file_preview = file.filename[:30] + "..." if file.filename and len(file.filename) > 30 else file.filename
+                progress_tracker.update_stage_progress(
+                    task_id, "reviewing", file_index, len(files),
+                    f"Reviewing file {file_index + 1}/{len(files)}: {file_preview}"
+                )
+                
+                await asyncio.sleep(0.01)  # Allow progress API to respond
+                
                 if not file.filename:
                     print(f"Skipping file {file_index + 1}: No filename")
                     continue
@@ -926,9 +1155,22 @@ async def process_rag_checklist(
 
                 # 9. Process each question using the PRE-FETCHED context
                 for i, question_item in enumerate(question_list):
+                    # Yield to event loop at start of each question
+                    await asyncio.sleep(0.05)  # Prevent connection timeouts
+                    
+                    # Update progress for answering questions
+                    # Calculate overall progress: (files completed * questions per file + current question) / total work
+                    total_questions = len(files) * len(question_list)
+                    questions_completed = file_index * len(question_list) + i
+                    
+                    question_preview = question_item.get("text", "")[:50] + "..." if len(question_item.get("text", "")) > 50 else question_item.get("text", "")
+                    progress_tracker.update_stage_progress(
+                        task_id, "reviewing", questions_completed, total_questions,
+                        f"Answering question {i+1}/{len(question_list)} for file {file_index+1}/{len(files)}: {question_preview}"
+                    )
+                    
                     # Add delay between question processing to prevent rate limit exhaustion
                     if i > 0 and settings.VERADOC_ENABLE_PROCESSING_DELAYS:
-                        import asyncio
                         await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_REQUESTS)
                         
                     try:
@@ -956,6 +1198,10 @@ async def process_rag_checklist(
                         )
 
                         # 🚀 OPTIMIZATION: Use pre-fetched context instead of retrieving again
+                        # Debug: Show what keys are available
+                        print(f"🔍 DEBUG: Looking for question key: '{question_text[:50]}'")
+                        print(f"🔍 DEBUG: Available keys in question_contexts: {[key[:50] for key in question_contexts.keys()]}")
+                        
                         if question_text in question_contexts:
                             # Use pre-fetched context and citations
                             cached_context = question_contexts[question_text]
@@ -1031,6 +1277,9 @@ async def process_rag_checklist(
                                     "custom_instructions_section": custom_instructions_section,
                                 },
                             )
+                            
+                            # Yield after LLM call to prevent connection timeout
+                            await asyncio.sleep(0.05)
                             
                             print(f"Got text answer: {answer[:100]}...")
 
@@ -1120,6 +1369,17 @@ async def process_rag_checklist(
                                 "source_citations": source_citations,
                             }
                         )
+                        
+                        # Update progress AFTER question is completed
+                        total_questions = len(files) * len(question_list)
+                        questions_completed = file_index * len(question_list) + (i + 1)  # +1 because we just completed this question
+                        print(f"📊 PROGRESS UPDATE: Completed {questions_completed}/{total_questions} questions")
+                        progress_tracker.update_stage_progress(
+                            task_id, "reviewing", questions_completed, total_questions,
+                            f"Completed question {i+1}/{len(question_list)} for file {file_index+1}/{len(files)}"
+                        )
+                        # Give MORE time for progress polling to see the update, especially for Full Document Scan
+                        await asyncio.sleep(0.1)  # Increased from 0.01 to ensure progress is visible
 
                     except Exception as question_processing_error:
                         print(
@@ -1145,6 +1405,14 @@ async def process_rag_checklist(
 
                 # Generate final evaluation for this file
                 try:
+                    # Update progress for final evaluation
+                    progress_tracker.update_stage_progress(
+                        task_id, "reviewing", file_index * len(question_list) + len(question_list), 
+                        len(files) * len(question_list),
+                        f"Generating final evaluation for file {file_index+1}/{len(files)}: {file_preview}"
+                    )
+                    await asyncio.sleep(0.01)  # Allow progress API to respond
+                    
                     print(f"Generating final evaluation for {file.filename}...")
                     final_evaluation = invoke_llm(
                         llm, final_prompt_template, {"qa_pairs": qa_pairs_text}
@@ -1198,11 +1466,24 @@ async def process_rag_checklist(
             if len(all_files_results) == 0:
                 raise HTTPException(status_code=400, detail="No files were successfully processed")
             
+            # Complete reviewing stage and start finalizing
+            print(f"📊 COMPLETING REVIEWING STAGE for task {task_id}")
+            progress_tracker.complete_stage(task_id, "reviewing", "Review complete")
+            await asyncio.sleep(0.1)  # Allow progress polling to see reviewing completion
+            
+            print(f"📊 STARTING FINALIZING STAGE for task {task_id}")
+            progress_tracker.update_stage_progress(
+                task_id, "finalizing", 0, 1, "Finalizing results..."
+            )
+            
+            await asyncio.sleep(0.1)  # Allow progress API to respond
+            
             # Return optimized multi-file response
             if len(all_files_results) > 1:
                 # Multiple files: return optimized format with all results
-                return VeraDocResponse(
+                result = VeraDocResponse(
                     results={
+                        "task_id": task_id,  # Include task_id for progress tracking
                         "multi_file_results": all_files_results,
                         "total_files_processed": len(all_files_results),
                         "optimization_applied": True,
@@ -1217,16 +1498,33 @@ async def process_rag_checklist(
                 )
             else:
                 # Single file: return traditional format for compatibility
-                return VeraDocResponse(
+                result = VeraDocResponse(
                     results={
+                        "task_id": task_id,  # Include task_id for progress tracking
                         **all_files_results[0],
                         "optimization_applied": True,
                         "context_prefetch_count": len(question_contexts),
                         "search_mode": request_data.search_mode,
                     }
                 )
+            
+            # Complete finalizing stage
+            print(f"📊 COMPLETING FINALIZING STAGE for task {task_id}")
+            progress_tracker.complete_stage(task_id, "finalizing", "Review completed successfully")
+            await asyncio.sleep(0.1)  # Allow progress polling to see finalizing completion
+            
+            print(f"📊 COMPLETING TASK for task {task_id}")
+            progress_tracker.complete_task(task_id, "Review completed successfully")
+            await asyncio.sleep(0.1)  # Allow progress polling to see task completion
+            
+            # Store results in task metadata for later retrieval
+            print(f"📊 STORING RESULTS METADATA for task {task_id}")
+            progress_tracker.update_task_metadata(task_id, result.results)
+            
+            return result
 
     except Exception as e:
+        import traceback
         print("Error processing RAG checklist:")
         print(str(e))
 

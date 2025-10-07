@@ -1,6 +1,6 @@
-import { Box, Button, Container, HStack, Heading, Spinner, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Container, HStack, Heading, Progress, Text, VStack } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useDropzone } from "react-dropzone"
 import { FiCheck, FiCopy, FiFile, FiFileText, FiTrash2, FiUpload } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
@@ -8,7 +8,7 @@ import remarkGfm from "remark-gfm"
 import { useTranslation } from "react-i18next"
 import { useMutation } from "@tanstack/react-query"
 
-import { type TwinCheckTopicList, TwincheckService } from "@/client"
+import { type TwinCheckTopicList, TwincheckService, ReportgenieService } from "@/client"
 import SelectionCard from "@/components/Common/SelectionCard"
 import SelectionModal from "@/components/Common/SelectionModal"
 import TopicListTable from "@/components/Compare/TopicListTable"
@@ -16,6 +16,7 @@ import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { useOperationCancellation } from "@/hooks/useOperationCancellation"
+import { useReportGenieProgress } from "@/hooks/useReportGenieProgress"
 
 import { useResults } from "@/contexts/ResultsContext"
 import { copyToClipboard } from "@/utils/copyToClipboard"
@@ -49,11 +50,46 @@ const TwinCheck = () => {
   const [loading, setLoading] = useState(false)
   const [expandedTopic, setExpandedTopic] = useState<number | null>(null)
 
+  // Progress tracking
+  const [taskId, setTaskId] = useState<string | null>(null)
+  const progress = useReportGenieProgress(taskId)
+  const hasHandledCompletionRef = useRef(false)
+
   // Handle feedback submission
   const handleFeedbackSubmitted = (type: string) => {
     console.log("Feedback submitted for compare result:", type)
     showSuccessToast(`Thank you for marking this response as ${type}!`)
   }
+
+  // Handle progress completion
+  useEffect(() => {
+    if (taskId && progress.completed && !hasHandledCompletionRef.current && progress.percentage >= 95) {
+      console.log("✅ Compare task completed, clearing taskId")
+      hasHandledCompletionRef.current = true
+      
+      setTimeout(() => {
+        setTaskId(null)
+        hasHandledCompletionRef.current = false
+        setLoading(false)
+      }, 1500)
+    }
+
+    if (taskId && progress.error) {
+      console.log("❌ Compare task failed:", progress.error)
+      setTaskId(null)
+      setLoading(false)
+      hasHandledCompletionRef.current = false
+      showErrorToast(progress.error)
+    }
+  }, [taskId, progress.completed, progress.error, progress.percentage])
+
+  // Reset completion handler when taskId changes
+  useEffect(() => {
+    if (taskId) {
+      console.log("🔄 New compare task started, resetting completion handler")
+      hasHandledCompletionRef.current = false
+    }
+  }, [taskId])
 
   // Save input parameters to context whenever they change
   useEffect(() => {
@@ -270,7 +306,16 @@ const TwinCheck = () => {
 
   // Mutation for comparing documents
   const mutation = useMutation({
-    mutationFn: (data: { comparison_topics: string; document1: File; document2: File }) => {
+    mutationFn: async (data: { comparison_topics: string; document1: File; document2: File }) => {
+      console.log("🎯 Creating compare task for progress tracking...")
+
+      // First, create a task to get the task_id for progress tracking
+      const taskResponse = await ReportgenieService.createOptimizeOutlineTask()
+
+      const newTaskId = (taskResponse as any).task_id
+      console.log("📋 Generated compare task_id:", newTaskId)
+      setTaskId(newTaskId)
+
       // Simplified API call without knowledge base parameters
       const promise = TwincheckService.compareDocuments({
         comparisonTopics: data.comparison_topics,
@@ -369,24 +414,40 @@ const TwinCheck = () => {
         {t("compare.subtitle")}
       </Text>
 
-      {/* Loading overlay */}
-      {loading && (
+      {/* Progress bar overlay while comparing */}
+      {(loading || progress.isActive || (taskId && !progress.completed)) && (
         <Box
           position="absolute"
           top="0"
           left="0"
           right="0"
           bottom="0"
-          bg="rgba(255, 255, 255, 0.7)"
-          zIndex="10"
+          bg="blackAlpha.800"
+          zIndex="50"
           display="flex"
+          flexDirection="column"
           alignItems="center"
           justifyContent="center"
           borderRadius="md"
+          p={6}
         >
-          <VStack gap={4}>
-            <Spinner size="xl" color="blue.500" />
-            <Text fontWeight="medium">{t("compare.loadingComparison")}</Text>
+          <VStack gap={4} width="80%" maxWidth="400px">
+            <Text color="white" fontSize="lg" fontWeight="medium" textAlign="center">
+              {progress.message || t("compare.loadingComparison")}
+            </Text>
+            <Box width="100%">
+              <Progress.Root value={progress.percentage} size="lg" colorPalette="blue">
+                <Progress.Track>
+                  <Progress.Range />
+                </Progress.Track>
+              </Progress.Root>
+              <Text color="white" fontSize="sm" textAlign="center" mt={2}>
+                {Math.round(progress.percentage)}%
+              </Text>
+            </Box>
+            <Text color="gray.300" fontSize="sm" textAlign="center">
+              {t("compare.pleaseWait")}
+            </Text>
           </VStack>
         </Box>
       )}
@@ -555,19 +616,7 @@ const TwinCheck = () => {
                 maxH={{ base: "400px", md: "600px" }}
                 overflowY="auto"
                 position="relative"
-                opacity={loading ? 0.5 : 1}
               >
-                {loading && (
-                  <Box
-                    position="absolute"
-                    top="50%"
-                    left="50%"
-                    transform="translate(-50%, -50%)"
-                    zIndex="1"
-                  >
-                    <Spinner size="lg" color="blue.500" />
-                  </Box>
-                )}
                 {compareResult ? (
                   <>
                     {/* Summary Section */}

@@ -7,6 +7,7 @@ import HelpTooltip from "@/components/ui/help-tooltip"
 import useCustomToast from "@/hooks/useCustomToast"
 import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
 import { useOperationCancellation } from "@/hooks/useOperationCancellation"
+import { useReportGenieProgress } from "@/hooks/useReportGenieProgress"
 import {
   Accordion,
   Box,
@@ -14,6 +15,7 @@ import {
   Container,
   HStack,
   Heading,
+  Progress,
   Spinner,
   Text,
   Textarea,
@@ -21,7 +23,7 @@ import {
 } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiCheck, FiCopy, FiDatabase, FiFileText, FiTrash2 } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
@@ -52,6 +54,11 @@ const ReportGenie = () => {
   // Modal states
   const [showKnowledgeBaseModal, setShowKnowledgeBaseModal] = useState(false)
   const [showOutlineModal, setShowOutlineModal] = useState(false)
+
+  // Progress tracking
+  const [taskId, setTaskId] = useState<string | null>(null)
+  const progress = useReportGenieProgress(taskId)
+  const hasHandledCompletionRef = useRef(false)
 
   // Initialize form state from persisted inputs or defaults
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
@@ -104,6 +111,36 @@ const ReportGenie = () => {
     console.log("Feedback submitted for generate result:", type)
     showSuccessToast(`Thank you for marking this response as ${type}!`)
   }
+
+  // Handle progress completion
+  useEffect(() => {
+    if (taskId && progress.completed && !hasHandledCompletionRef.current && progress.percentage >= 95) {
+      console.log("✅ Generate task completed, clearing taskId")
+      hasHandledCompletionRef.current = true
+      
+      setTimeout(() => {
+        setTaskId(null)
+        hasHandledCompletionRef.current = false
+        setLoading(false)
+      }, 1500)
+    }
+
+    if (taskId && progress.error) {
+      console.log("❌ Generate task failed:", progress.error)
+      setTaskId(null)
+      setLoading(false)
+      hasHandledCompletionRef.current = false
+      showErrorToast(progress.error)
+    }
+  }, [taskId, progress.completed, progress.error, progress.percentage])
+
+  // Reset completion handler when taskId changes
+  useEffect(() => {
+    if (taskId) {
+      console.log("🔄 New generate task started, resetting completion handler")
+      hasHandledCompletionRef.current = false
+    }
+  }, [taskId])
 
   // Save input parameters to context whenever they change
   useEffect(() => {
@@ -309,19 +346,29 @@ const ReportGenie = () => {
 
   // Mutation hook for generating the document
   const mutation = useMutation({
-    mutationFn: (data: {
+    mutationFn: async (data: {
       sections: string
       knowledgeBaseId: string
       outlineId?: string
       searchMode?: string
       customInstructions?: string
     }) => {
+      // First, create a task to get the task_id for progress tracking
+      console.log("🎯 Creating generate task for progress tracking...")
+      const taskResponse = await ReportgenieService.createGenerateTask()
+
+      const newTaskId = (taskResponse as any).task_id
+      console.log("📋 Generated task_id:", newTaskId)
+      setTaskId(newTaskId)
+
+      // Now call the actual generation endpoint with the task_id
       const formData = {
         knowledge_base_id: data.knowledgeBaseId,
         sections: data.sections,
         outline_id: data.outlineId || "",
-        search_mode: data.searchMode === "full_scan" ? "full_text" : data.searchMode || "vector", // Map full_scan to full_text for ReportGenie backend
+        search_mode: data.searchMode === "full_scan" ? "full_text" : data.searchMode || "vector",
         custom_instructions: data.customInstructions || undefined,
+        task_id: newTaskId,
       }
 
       const promise = ReportgenieService.generateReport({
@@ -437,24 +484,40 @@ const ReportGenie = () => {
         {t("generate.pageDescription")}
       </Text>
 
-      {/* Loading overlay while document generates */}
-      {loading && (
+      {/* Progress bar overlay while document generates */}
+      {(loading || progress.isActive || (taskId && !progress.completed)) && (
         <Box
           position="absolute"
           top="0"
           left="0"
           right="0"
           bottom="0"
-          bg="rgba(255, 255, 255, 0.7)"
-          zIndex="10"
+          bg="blackAlpha.800"
+          zIndex="50"
           display="flex"
+          flexDirection="column"
           alignItems="center"
           justifyContent="center"
           borderRadius="md"
+          p={6}
         >
-          <VStack gap={4}>
-            <Spinner size="xl" color="blue.500" />
-            <Text fontWeight="medium">{t("generate.generatingDocument")}</Text>
+          <VStack gap={4} width="80%" maxWidth="400px">
+            <Text color="white" fontSize="lg" fontWeight="medium" textAlign="center">
+              {progress.message || t("generate.generatingDocument")}
+            </Text>
+            <Box width="100%">
+              <Progress.Root value={progress.percentage} size="lg" colorPalette="blue">
+                <Progress.Track>
+                  <Progress.Range />
+                </Progress.Track>
+              </Progress.Root>
+              <Text color="white" fontSize="sm" textAlign="center" mt={2}>
+                {Math.round(progress.percentage)}%
+              </Text>
+            </Box>
+            <Text color="gray.300" fontSize="sm" textAlign="center">
+              {t("generate.pleaseWait")}
+            </Text>
           </VStack>
         </Box>
       )}

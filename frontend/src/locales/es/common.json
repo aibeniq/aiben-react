@@ -67,6 +67,10 @@
       "largeFile": "⚠️ Documento grande detectado. Para mejor rendimiento con archivos mayores a 50MB, considera cambiar al modo 'Escaneo de Texto Completo' usando el interruptor arriba."
     }
   },
+  "generate": {
+    "title": "Generar Informe",
+    "pleaseWait": "Por favor espere mientras generamos su informe"
+  },
   "review": {
     "title": "Revisión de Documento",
     "selectChecklist": "Seleccionar Lista de Verificación",
@@ -74,7 +78,8 @@
     "customInstructionsPlaceholder": "Ingresa instrucciones específicas para esta revisión...",
     "uploadDocuments": "Subir Documentos",
     "reviewResults": "Resultados de Revisión",
-    "startReview": "Iniciar Revisión"
+    "startReview": "Iniciar Revisión",
+    "pleaseWait": "Por favor espere mientras revisamos sus documentos"
   },
   "settings": {
     "title": "Configuración de Usuario",

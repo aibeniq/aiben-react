@@ -290,7 +290,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
       // Load summary only (no sections)
       const summary = await ReportgenieService.getReportDetail({
         reportId,
-        includeSections: false,  // Fast: metadata only, no heavy sections
+        // includeSections: false,  // Parameter not supported in current API
       })
       setSelectedReportgenieReport(summary)
       setIsReportgenieLoading(false)  // Show summary immediately
