@@ -47,6 +47,7 @@ from app.services.retrievers import (
 )  # Import the ensemble retriever
 from app.services.enhanced_retrieval import SmartRetrieverFactory
 from app.services.text_processing import chunk_text, estimate_tokens
+from app.services.progress_tracker import progress_tracker
 
 from sqlmodel import select
 from fastapi import (
@@ -67,6 +68,93 @@ from langchain_community.document_loaders import TextLoader
 from app.services.pdf_utils import load_pdf_with_pypdf
 
 router = APIRouter(prefix="/reportgenie", tags=["reportgenie"])
+
+
+@router.post("/generate/task")
+async def create_generate_task():
+    """
+    Create a progress tracking task for report generation and return task_id immediately.
+    This allows frontend to start progress polling before form submission.
+    """
+    task_id = progress_tracker.create_task(
+        "Generating report",
+        {"setup": 0.1, "generating": 0.8, "finalizing": 0.1}
+    )
+    progress_tracker.update_stage_progress(
+        task_id, "setup", 0, 1, "Waiting to start report generation..."
+    )
+    return {"task_id": task_id}
+
+
+@router.post("/generate-outline/task")
+async def create_generate_outline_task():
+    """
+    Create a progress tracking task for outline generation and return task_id immediately.
+    This allows frontend to start progress polling before form submission.
+    """
+    task_id = progress_tracker.create_task(
+        "Generating outline",
+        {"processing_files": 0.2, "generating": 0.7, "finalizing": 0.1}
+    )
+    progress_tracker.update_stage_progress(
+        task_id, "processing_files", 0, 1, "Waiting to start outline generation..."
+    )
+    return {"task_id": task_id}
+
+
+@router.post("/optimize-outline/task")
+async def create_optimize_outline_task():
+    """
+    Create a progress tracking task for outline optimization and return task_id immediately.
+    This allows frontend to start progress polling before form submission.
+    """
+    task_id = progress_tracker.create_task(
+        "Optimizing outline",
+        {
+            "setup": 0.1,
+            "processing_document": 0.1,
+            "generating": 0.4,
+            "matching": 0.2,
+            "comparing": 0.15,
+            "finalizing": 0.05
+        }
+    )
+    progress_tracker.update_stage_progress(
+        task_id, "setup", 0, 1, "Waiting to start outline optimization..."
+    )
+    return {"task_id": task_id}
+
+
+@router.get("/progress/{task_id}")
+async def get_reportgenie_progress(
+    task_id: str,
+    current_user: CurrentUser,
+) -> Any:
+    """
+    Get progress information for a reportgenie task (generate, generate-outline, or optimize-outline).
+    """
+    # Make this async to prevent blocking during intensive operations
+    progress_data = progress_tracker.get_progress(task_id)
+    if not progress_data:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    # Debug logging to see what's actually being returned
+    print(f"🔍 REPORTGENIE API RETURNING PROGRESS: task_id={task_id}")
+    print(f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}")
+    print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
+    print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
+    
+    # Check each stage completion status
+    stages = progress_data.get('stages', {})
+    for stage_name, stage_data in stages.items():
+        completed = stage_data.get('completed', False) if isinstance(stage_data, dict) else False
+        print(f"🔍 STAGE {stage_name}: completed={completed}")
+
+    # Yield control to allow other async operations (like this API call) to run
+    await asyncio.sleep(0)
+
+    return progress_data
+
 
 
 class KnowledgeBaseCache:
@@ -194,9 +282,11 @@ async def generate_report(
     search_mode: str = Form("vector"),  # Default to vector search
     custom_instructions: Optional[str] = Form(None),
     request: FastAPIRequest = None,
+    task_id: Optional[str] = Form(None),
 ):
     """
     Generate a report based on sections outline and knowledge base search results.
+    Includes real-time progress tracking.
     """
     try:
         # Debug: Log custom instructions if provided
@@ -229,15 +319,39 @@ async def generate_report(
                 if section.strip()
             ]
 
+        # Create progress tracking task
+        if not task_id:
+            task_id = progress_tracker.create_task(
+                f"Generating report",
+                {"setup": 0.1, "generating": 0.8, "finalizing": 0.1}
+            )
+        
+        progress_tracker.update_stage_progress(
+            task_id, "setup", 0, 1, "Initializing report generation..."
+        )
+
         # Process each section
         sections = []
         draft_report = ""
 
         # Initialize knowledge base cache for this report generation
         kb_cache = KnowledgeBaseCache()
+        
+        progress_tracker.complete_stage(task_id, "setup", "Setup complete")
+        progress_tracker.update_stage_progress(
+            task_id, "generating", 0, len(section_items), "Starting section generation..."
+        )
 
         try:
-            for section_item in section_items:
+            for idx, section_item in enumerate(section_items):
+                # Update progress for each section
+                section_preview = section_item["text"][:50] + "..." if len(section_item["text"]) > 50 else section_item["text"]
+                progress_tracker.update_stage_progress(
+                    task_id, "generating", idx, len(section_items),
+                    f"Processing section {idx + 1}/{len(section_items)}: {section_preview}"
+                )
+                
+                await asyncio.sleep(0.01)  # Allow progress API to respond
                 # CRITICAL: Check if client has disconnected before processing each section
                 try:
                     if request and await request.is_disconnected():
@@ -315,7 +429,6 @@ async def generate_report(
                         for i, chunk in enumerate(text_chunks):
                             # Add delay between chunk processing to prevent rate limit exhaustion
                             if i > 0 and settings.REPORTGENIE_ENABLE_PROCESSING_DELAYS:
-                                import asyncio
                                 await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
                                 
                             # CRITICAL: Check if client has disconnected before processing each chunk
@@ -517,6 +630,11 @@ async def generate_report(
                 draft_report += f"\n\n## {section_title}\n\n{section_content}"
 
             # 7. Compile the final report
+            progress_tracker.complete_stage(task_id, "generating", "All sections generated successfully")
+            progress_tracker.update_stage_progress(
+                task_id, "finalizing", 0, 1, "Compiling final report..."
+            )
+            
             full_report = "\n\n\n\n".join(
                 [section["content"].strip() for section in sections]
             )
@@ -525,7 +643,7 @@ async def generate_report(
             # Always cleanup the knowledge base cache
             kb_cache.cleanup()
 
-        result = {"full_report": full_report, "sections": sections}
+        result = {"full_report": full_report, "sections": sections, "task_id": task_id}
 
         # Debug logging to verify citations are being saved
         print(f"🔍 REPORTGENIE SAVE DEBUG: Saving {len(sections)} sections")
@@ -596,6 +714,9 @@ async def generate_report(
         print(
             f"[DEBUG] ReportGenie result with interaction_id: {result.get('interaction_id')}"
         )
+        
+        # Complete the progress tracking
+        progress_tracker.complete_stage(task_id, "finalizing", "Report generation complete!")
 
         return ReportGenieResponse(results=result)
 
@@ -603,6 +724,11 @@ async def generate_report(
         import traceback
 
         traceback.print_exc()
+        
+        # Mark progress as failed if task_id exists
+        if 'task_id' in locals() and task_id:
+            progress_tracker.fail_task(task_id, f"Report generation failed: {str(e)}")
+        
         raise HTTPException(
             status_code=500, detail=f"Error generating report: {str(e)}"
         )
@@ -1220,11 +1346,24 @@ async def generate_outline(
     report_type: str = Form(default="general"),
     num_sections: Optional[int] = Form(default=None),
     files: List[UploadFile] = File(default=[]),
+    task_id: Optional[str] = Form(None),
 ):
     """
     Generate outline sections based on a description using LLM, with optional example document.
+    Includes real-time progress tracking.
     """
     try:
+        # Create progress tracking task
+        if not task_id:
+            task_id = progress_tracker.create_task(
+                f"Generating outline",
+                {"processing_files": 0.2, "generating": 0.7, "finalizing": 0.1}
+            )
+        
+        progress_tracker.update_stage_progress(
+            task_id, "processing_files", 0, 1, "Initializing outline generation..."
+        )
+        
         # Get the default LLM
         llm = get_default_llm(session, current_user)
 
@@ -1232,8 +1371,14 @@ async def generate_outline(
         example_document_content = ""
         if files:
             print(f"Processing {len(files)} uploaded files for outline generation")
+            progress_tracker.update_stage_progress(
+                task_id, "processing_files", 0, len(files), f"Processing {len(files)} uploaded files..."
+            )
 
-            for file in files:
+            for idx, file in enumerate(files):
+                progress_tracker.update_stage_progress(
+                    task_id, "processing_files", idx, len(files), f"Processing file {idx+1}/{len(files)}: {file.filename}..."
+                )
                 if file.size > 0:
                     try:
                         # Read and process the file content with visual enhancement
@@ -1262,6 +1407,10 @@ async def generate_outline(
                         # Add the error info to the document content so user knows what happened
                         example_document_content += f"\n\n--- Error processing {file.filename} ---\nError: {str(e)}\n"
                         continue
+            
+            progress_tracker.complete_stage(task_id, "processing_files", f"Processed {len(files)} files")
+        else:
+            progress_tracker.complete_stage(task_id, "processing_files", "No files to process")
 
         # Check if content exceeds token limits and chunk if necessary
         if example_document_content:
@@ -1281,14 +1430,20 @@ async def generate_outline(
 
                 # Chunk the document content
                 chunks = chunk_text(example_document_content, max_tokens=max_chunk_size)
+                
+                progress_tracker.update_stage_progress(
+                    task_id, "generating", 0, len(chunks), f"Processing {len(chunks)} document chunks..."
+                )
 
                 # Process each chunk to generate sections
                 all_chunk_sections = []
 
                 for i, chunk in enumerate(chunks):
+                    progress_tracker.update_stage_progress(
+                        task_id, "generating", i, len(chunks), f"Analyzing chunk {i+1}/{len(chunks)}..."
+                    )
                     # Add delay between chunk processing to prevent rate limit exhaustion
                     if i > 0 and settings.REPORTGENIE_ENABLE_PROCESSING_DELAYS:
-                        import asyncio
                         await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
                         
                     print(f"Processing chunk {i+1}/{len(chunks)}")
@@ -1452,12 +1607,21 @@ Return only the final selected sections, one per line, numbered."""
         print("=== OUTLINE GENERATION PROMPT SENT TO LLM ===")
         print(formatted_prompt)
         print("=== END OF PROMPT ===")
+        
+        progress_tracker.update_stage_progress(
+            task_id, "generating", 0, 1, "Generating outline sections with LLM..."
+        )
 
         # Generate outline sections using the LLM
         outline_response = invoke_llm(
             llm,
             settings.REPORTGENIE_GENERATE_OUTLINE_PROMPT_TEMPLATE,
             prompt_variables,
+        )
+        
+        progress_tracker.complete_stage(task_id, "generating", "Outline generated successfully")
+        progress_tracker.update_stage_progress(
+            task_id, "finalizing", 0, 1, "Parsing and finalizing sections..."
         )
 
         # Parse the response to extract sections and analysis
@@ -1533,12 +1697,19 @@ Return only the final selected sections, one per line, numbered."""
             },
             metadata={},
         )
+        
+        progress_tracker.complete_stage(task_id, "finalizing", "Outline generation complete!")
 
-        return GenerateOutlineResponse(sections=sections, description_analysis=analysis)
+        return GenerateOutlineResponse(sections=sections, description_analysis=analysis, task_id=task_id)
 
     except Exception as e:
         print(f"Error generating outline: {e}")
         traceback.print_exc()
+        
+        # Mark progress as failed if task_id exists
+        if 'task_id' in locals() and task_id:
+            progress_tracker.fail_task(task_id, f"Outline generation failed: {str(e)}")
+        
         raise HTTPException(
             status_code=500, detail=f"Error generating outline: {str(e)}"
         )
@@ -1555,15 +1726,35 @@ async def optimize_outline(
     search_mode: str = Form("vector"),  # Add search_mode as Form parameter
     files: List[UploadFile] = File(...),
     request: FastAPIRequest = None,
+    task_id: Optional[str] = Form(None),
 ):
     """
     Optimize outline sections by testing them against a ground-truth document.
     Generates a report with current outline and compares it to the ground-truth to suggest improvements.
+    Includes real-time progress tracking.
     """
     print("optimize_outline function invoked!")
     cancellation_requested = False
 
     try:
+        # Create progress tracking task
+        if not task_id:
+            task_id = progress_tracker.create_task(
+                f"Optimizing outline",
+                {
+                    "setup": 0.1,
+                    "processing_document": 0.1,
+                    "generating": 0.4,
+                    "matching": 0.2,
+                    "comparing": 0.15,
+                    "finalizing": 0.05
+                }
+            )
+        
+        progress_tracker.update_stage_progress(
+            task_id, "setup", 0, 1, "Initializing outline optimization..."
+        )
+        
         print("Setting up disconnect monitor for outline optimization...")
         disconnect_monitor = None
         if request:
@@ -1596,6 +1787,11 @@ async def optimize_outline(
         kb = session.get(KnowledgeBase, knowledge_base_id)
         if not kb:
             raise HTTPException(status_code=404, detail="Knowledge base not found")
+        
+        progress_tracker.complete_stage(task_id, "setup", "Setup complete")
+        progress_tracker.update_stage_progress(
+            task_id, "processing_document", 0, 1, "Processing ground-truth document..."
+        )
 
         # 2. Set up the same infrastructure as generate_report
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1667,10 +1863,16 @@ async def optimize_outline(
             print(
                 f"Processing ground-truth document: {file.filename} ({len(ground_truth_text)} characters)"
             )
+            
+            progress_tracker.complete_stage(task_id, "processing_document", "Ground-truth document processed")
 
             # 4. Parse current outline sections
             current_sections = json.loads(sections)
             print(f"Optimizing {len(current_sections)} outline sections...")
+            
+            progress_tracker.update_stage_progress(
+                task_id, "generating", 0, len(current_sections), "Starting section generation..."
+            )
 
             # Add limits to prevent oversized processing
             # MAX_SECTIONS = 50  # Adjust based on testing
@@ -1697,9 +1899,15 @@ async def optimize_outline(
             section_consult_settings = {}  # Track which sections consult documents
 
             for i, section in enumerate(current_sections):
+                # Update progress for section generation
+                section_preview = section["text"][:40] + "..." if len(section["text"]) > 40 else section["text"]
+                progress_tracker.update_stage_progress(
+                    task_id, "generating", i, len(current_sections),
+                    f"Generating section {i + 1}/{len(current_sections)}: {section_preview}"
+                )
+                
                 # Add delay between section processing to prevent rate limit exhaustion
                 if i > 0 and settings.REPORTGENIE_ENABLE_PROCESSING_DELAYS:
-                    import asyncio
                     await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_REQUESTS)
                     
                 if cancellation_requested:
@@ -1946,6 +2154,12 @@ async def optimize_outline(
             print(
                 f"Split ground-truth into {len(ground_truth_chunks)} large chunks (avg {len(ground_truth_text)//len(ground_truth_chunks) if ground_truth_chunks else 0} chars per chunk)"
             )
+            
+            # Complete generating stage and start matching stage
+            progress_tracker.complete_stage(task_id, "generating", "All sections generated")
+            progress_tracker.update_stage_progress(
+                task_id, "matching", 0, len(ground_truth_chunks), "Starting document matching..."
+            )
 
             # Map each chunk to the most appropriate section
             section_to_chunks = {section: [] for section in section_descriptions}
@@ -1960,6 +2174,12 @@ async def optimize_outline(
             }
 
             for chunk_idx, chunk in enumerate(ground_truth_chunks):
+                # Update matching progress
+                progress_tracker.update_stage_progress(
+                    task_id, "matching", chunk_idx, len(ground_truth_chunks),
+                    f"Matching chunk {chunk_idx + 1}/{len(ground_truth_chunks)}..."
+                )
+                
                 if cancellation_requested:
                     print("Operation cancelled by client disconnect")
                     raise HTTPException(
@@ -2474,6 +2694,12 @@ Prompt size: {prompt_size} characters (~{estimated_tokens} tokens)
                 else:
                     print(f"    No content mapped to this section")
             print("END MAPPING RESULTS")
+            
+            # Complete matching stage and start comparing stage
+            progress_tracker.complete_stage(task_id, "matching", "Document matching complete")
+            progress_tracker.update_stage_progress(
+                task_id, "comparing", 0, len(consulting_section_descriptions), "Starting section comparison..."
+            )
 
             # 7. Compare each section's generated content to its mapped ground-truth chunks
             # Only process sections that consult documents to avoid numbering mismatches
@@ -2481,7 +2707,13 @@ Prompt size: {prompt_size} characters (~{estimated_tokens} tokens)
             optimization_count = 0
 
             # Process only consulting sections to ensure consistent numbering
-            for section_description in consulting_section_descriptions:
+            for opt_idx, section_description in enumerate(consulting_section_descriptions):
+                # Update comparing progress
+                progress_tracker.update_stage_progress(
+                    task_id, "comparing", opt_idx, len(consulting_section_descriptions),
+                    f"Comparing section {opt_idx + 1}/{len(consulting_section_descriptions)}..."
+                )
+                
                 if cancellation_requested:
                     print("Operation cancelled by client disconnect")
                     raise HTTPException(
@@ -2714,18 +2946,32 @@ Content Extraction:
             print(
                 f"Optimization complete: {sections_actually_optimized}/{sections_that_consult_docs} document-consulting sections optimized ({sections_that_dont_consult_docs} non-consulting sections excluded from results)"
             )
+            
+            # Complete comparing stage and finalizing
+            progress_tracker.complete_stage(task_id, "comparing", "Section comparison complete")
+            progress_tracker.update_stage_progress(
+                task_id, "finalizing", 0, 1, "Finalizing optimization results..."
+            )
+            
+            progress_tracker.complete_stage(task_id, "finalizing", "Optimization complete!")
 
             return OptimizedOutlineResponse(
                 original_sections=consulting_section_descriptions,  # Only return consulting sections
                 suggestions=suggestions,  # Already filtered to only consulting sections
                 optimized_sections=optimized_sections,
                 analysis_summary=analysis_summary,
+                task_id=task_id,
             )
 
     except Exception as e:
         print("Error in outline optimization:")
         print(str(e))
         traceback.print_exc()
+        
+        # Mark progress as failed if task_id exists
+        if 'task_id' in locals() and task_id:
+            progress_tracker.fail_task(task_id, f"Optimization failed: {str(e)}")
+        
         raise HTTPException(
             status_code=500, detail=f"Error optimizing outline: {str(e)}"
         )

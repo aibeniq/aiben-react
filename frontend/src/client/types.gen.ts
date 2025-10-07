@@ -41,6 +41,7 @@ export type Body_reportgenie_generate_outline = {
     report_type?: string;
     num_sections?: (number | null);
     files?: Array<((Blob | File))>;
+    task_id?: (string | null);
 };
 
 export type Body_reportgenie_generate_report = {
@@ -49,6 +50,7 @@ export type Body_reportgenie_generate_report = {
     outline_id: string;
     search_mode?: string;
     custom_instructions?: (string | null);
+    task_id?: (string | null);
 };
 
 export type Body_reportgenie_optimize_outline = {
@@ -58,6 +60,7 @@ export type Body_reportgenie_optimize_outline = {
     custom_instructions?: (string | null);
     search_mode?: string;
     files: Array<((Blob | File))>;
+    task_id?: (string | null);
 };
 
 export type Body_twincheck_compare_documents = {
@@ -932,6 +935,18 @@ export type MonitoringGetRateLimiterStatusResponse = (unknown);
 
 export type MonitoringResetRateLimiterResponse = (unknown);
 
+export type ReportgenieCreateGenerateTaskResponse = (unknown);
+
+export type ReportgenieCreateGenerateOutlineTaskResponse = (unknown);
+
+export type ReportgenieCreateOptimizeOutlineTaskResponse = (unknown);
+
+export type ReportgenieGetReportgenieProgressData = {
+    taskId: string;
+};
+
+export type ReportgenieGetReportgenieProgressResponse = (unknown);
+
 export type ReportgenieGenerateReportData = {
     formData: Body_reportgenie_generate_report;
 };
@@ -955,10 +970,6 @@ export type ReportgenieGetReportHistoryResponse = (Array<{
 }>);
 
 export type ReportgenieGetReportDetailData = {
-    /**
-     * If False, excludes the heavy sections with citations to improve performance
-     */
-    includeSections?: boolean;
     reportId: string;
 };
 
@@ -1180,12 +1191,25 @@ export type UtilsGetSystemConfigResponse = ({
     [key: string]: unknown;
 });
 
+export type VeradocGetVeradocProgressData = {
+    taskId: string;
+};
+
+export type VeradocGetVeradocProgressResponse = (unknown);
+
+export type VeradocGetVeradocResultsData = {
+    taskId: string;
+};
+
+export type VeradocGetVeradocResultsResponse = (unknown);
+
 export type VeradocProcessRagChecklistData = {
     customInstructions?: (string | null);
     formData?: Body_veradoc_process_rag_checklist;
     knowledgeBaseId: string;
     questions: string;
     searchMode?: 'vector' | 'full_scan';
+    taskId?: (string | null);
 };
 
 export type VeradocProcessRagChecklistResponse = (VeraDocResponse);

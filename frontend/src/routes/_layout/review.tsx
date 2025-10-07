@@ -9,6 +9,7 @@ import HelpTooltip from "@/components/ui/help-tooltip"
 import useCustomToast from "@/hooks/useCustomToast"
 import { useKnowledgeBases } from "@/hooks/useKnowledgeBases"
 import { useOperationCancellation } from "@/hooks/useOperationCancellation"
+import { useVeradocProgress } from "@/hooks/useVeradocProgress"
 import {
   Accordion,
   Box,
@@ -16,6 +17,7 @@ import {
   Container,
   HStack,
   Heading,
+  Progress,
   Spinner,
   Tabs,
   Text,
@@ -66,6 +68,21 @@ const VeraDoc = () => {
   const abortControllerRef = useRef<AbortController | null>(null)
   const ongoingRequest = useRef<CancelablePromise<any> | null>(null)
 
+  // Progress tracking
+  const [taskId, setTaskId] = useState<string | null>(null)
+  const progress = useVeradocProgress(taskId)
+  const hasHandledCompletionRef = useRef(false)
+  
+  // Debug: Log progress changes
+  useEffect(() => {
+    console.log("📊 REVIEW PAGE: Progress object updated:", {
+      message: progress.message,
+      percentage: progress.percentage,
+      isActive: progress.isActive,
+      completed: progress.completed
+    })
+  }, [progress])
+
   const [showKnowledgeBaseModal, setShowKnowledgeBaseModal] = useState(false)
   const [showChecklistModal, setShowChecklistModal] = useState(false)
   const [copySuccess, setCopySuccess] = useState(false)
@@ -113,6 +130,83 @@ const VeraDoc = () => {
     const citationKey = `${resultIndex}-${pairIndex}-${citationIndex}`
     return expandedCitations[citationKey] || false
   }
+
+  // Handle progress completion
+  useEffect(() => {
+    if (taskId && progress.completed && !hasHandledCompletionRef.current && progress.results) {
+      console.log("✅ Review task completed with results, processing...")
+      hasHandledCompletionRef.current = true
+      
+      // Process the results from progress
+      const data = { results: progress.results }
+      
+      // Handle optimized multi-file results
+      let reviewData = []
+
+      if (data.results.multi_file_results) {
+        // 🚀 New optimized multi-file format
+        reviewData = data.results.multi_file_results.map((fileResult: any) => ({
+          filename: fileResult.filename || "Unknown File",
+          displayResults: fileResult.final_evaluation || "",
+          qaPairs: fileResult.qa_pairs || [],
+          interactionId: fileResult.interaction_id,
+        }))
+
+        console.log(
+          `✅ Processed ${data.results.total_files_processed} files with optimized context sharing`,
+        )
+        console.log(`🚀 Context pre-fetch count: ${data.results.context_prefetch_count}`)
+        console.log(`🚀 Optimization applied: ${data.results.optimization_applied}`)
+
+        const searchMethod =
+          data.results.search_mode === "vector" ? "vector search" : "full document scan"
+        showSuccessToast(
+          `🚀 ${reviewData.length} files processed with optimized context sharing! (${searchMethod})`,
+        )
+      } else {
+        // Fallback to single file format for backward compatibility
+        const interactionId = data.results.interaction_id
+        console.log("Review interactionId for feedback:", interactionId)
+
+        reviewData = [
+          {
+            filename: data.results?.filename || "Review Result",
+            displayResults: data.results?.final_evaluation || "",
+            qaPairs: data.results?.qa_pairs || [],
+            interactionId: interactionId,
+          },
+        ]
+
+        const optimizationNote = data.results.optimization_applied ? " (Optimized)" : ""
+        showSuccessToast(`Document review completed successfully!${optimizationNote}`)
+      }
+
+      setResults(reviewData)
+      
+      // Clear taskId after a short delay to allow user to see 100% completion
+      setTimeout(() => {
+        setTaskId(null)
+        hasHandledCompletionRef.current = false
+        setLoading(false)
+      }, 1500)
+    }
+
+    if (taskId && progress.error) {
+      console.log("❌ Review task failed:", progress.error)
+      setTaskId(null)
+      setLoading(false)
+      hasHandledCompletionRef.current = false
+      showErrorToast(progress.error)
+    }
+  }, [taskId, progress.completed, progress.error, progress.results])
+
+  // Reset completion handler when taskId changes
+  useEffect(() => {
+    if (taskId) {
+      console.log("🔄 New review task started, resetting completion handler")
+      hasHandledCompletionRef.current = false
+    }
+  }, [taskId])
 
   // Handle feedback submission
   const handleFeedbackSubmitted = (type: string) => {
@@ -382,79 +476,53 @@ const VeraDoc = () => {
       setResults([])
       setLoading(true)
 
-      console.log("🚀 Creating optimized multi-file request")
-      console.log("Search mode being sent to backend:", data.searchMode)
-      console.log("Number of files:", data.files.length)
-      console.log("Optimization: Context will be pre-fetched ONCE for all files")
+      // STEP 1: Create a task to get the task_id for progress tracking (backend creates it in Redis immediately)
+      console.log("🎯 Creating review task for progress tracking...")
+      const taskResponse = await VeradocService.createReviewTask()
+      
+      const newTaskId = (taskResponse as any).task_id
+      console.log("📋 Review task_id created by backend:", newTaskId)
+      setTaskId(newTaskId)
 
-      // Create the promise and register it for cancellation
+      console.log("🎯 Submitting review (synchronous with progress tracking)...")
+      console.log("Number of files:", data.files.length)
+      console.log("Search mode being sent to backend:", data.searchMode)
+
+      // STEP 2: Call the review endpoint with the task_id
+      // Backend will use this task_id for progress tracking
       const promise = VeradocService.processRagChecklist({
         questions: data.questions,
         knowledgeBaseId: data.knowledgeBaseId,
         customInstructions: data.customInstructions,
         searchMode: data.searchMode,
+        taskId: newTaskId,  // Pass the task_id to the endpoint
         formData: {
-          files: data.files, // Send ALL files for optimized processing
+          files: data.files,
         },
       })
 
       // Register the operation for automatic cancellation on navigation
       const cancellablePromise = registerOperation(promise)
       ongoingRequest.current = cancellablePromise
+      
+      // Wait for the full response (processes synchronously while updating progress)
       return cancellablePromise
     },
     onSuccess: (data: any) => {
-      console.log("🚀 Optimized multi-file response data:", data)
+      console.log("🚀 Review backend processing complete:", data)
 
       // Check if the request was cancelled
       if (data.results.status === "cancelled") {
         console.log("Review operation was cancelled")
         showErrorToast("Request cancelled")
+        setTaskId(null)
+        setLoading(false)
         return
       }
 
-      // Handle optimized multi-file results
-      let reviewData = []
-
-      if (data.results.multi_file_results) {
-        // 🚀 New optimized multi-file format
-        reviewData = data.results.multi_file_results.map((fileResult: any) => ({
-          filename: fileResult.filename || "Unknown File",
-          displayResults: fileResult.final_evaluation || "",
-          qaPairs: fileResult.qa_pairs || [],
-          interactionId: fileResult.interaction_id,
-        }))
-
-        console.log(
-          `✅ Processed ${data.results.total_files_processed} files with optimized context sharing`,
-        )
-        console.log(`🚀 Context pre-fetch count: ${data.results.context_prefetch_count}`)
-        console.log(`🚀 Optimization applied: ${data.results.optimization_applied}`)
-
-        const searchMethod =
-          data.results.search_mode === "vector" ? "vector search" : "full document scan"
-        showSuccessToast(
-          `🚀 ${reviewData.length} files processed with optimized context sharing! (${searchMethod})`,
-        )
-      } else {
-        // Fallback to single file format for backward compatibility
-        const interactionId = data.results.interaction_id
-        console.log("Review interactionId for feedback:", interactionId)
-
-        reviewData = [
-          {
-            filename: data.results?.filename || "Review Result",
-            displayResults: data.results?.final_evaluation || "",
-            qaPairs: data.results?.qa_pairs || [],
-            interactionId: interactionId,
-          },
-        ]
-
-        const optimizationNote = data.results.optimization_applied ? " (Optimized)" : ""
-        showSuccessToast(`Document review completed successfully!${optimizationNote}`)
-      }
-
-      setResults(reviewData) // Store in both local and global state
+      // Don't process results here - let the progress hook handle it
+      // The progress hook will fetch results via getVeradocResults and process them
+      console.log("✅ Review complete, waiting for progress hook to fetch and display results...")
     },
     onError: (error: any) => {
       console.log("Review onError triggered:", error)
@@ -488,7 +556,8 @@ const VeraDoc = () => {
     },
     onSettled: () => {
       ongoingRequest.current = null
-      setLoading(false)
+      // Don't set loading to false here - let the progress hook handle it
+      console.log("🏁 Mutation settled, progress hook will handle cleanup")
     },
   })
 
@@ -714,25 +783,39 @@ const VeraDoc = () => {
         {t("review.pageDescription")}
       </Text>
 
-      {/* Add this overlay spinner that shows when loading is true */}
-      {loading && (
+      {/* Progress bar overlay while reviewing */}
+      {(loading || progress.isActive || (taskId && !progress.completed)) && (
         <Box
           position="absolute"
           top="0"
           left="0"
           right="0"
           bottom="0"
-          bg="rgba(255, 255, 255, 0.7)"
-          zIndex="10"
+          bg="blackAlpha.800"
+          zIndex="50"
           display="flex"
+          flexDirection="column"
           alignItems="center"
           justifyContent="center"
           borderRadius="md"
+          p={6}
         >
-          <VStack gap={4}>
-            <Spinner size="xl" color="blue.500" />
-            <Text fontWeight="medium">
-              {fileItems.length > 1 ? t("review.processingFiles") : t("review.processingFile")}
+          <VStack gap={4} width="80%" maxWidth="400px">
+            <Text color="white" fontSize="lg" fontWeight="medium" textAlign="center">
+              {progress.message || (fileItems.length > 1 ? t("review.processingFiles") : t("review.processingFile"))}
+            </Text>
+            <Box width="100%">
+              <Progress.Root value={progress.percentage} size="lg" colorPalette="blue">
+                <Progress.Track>
+                  <Progress.Range />
+                </Progress.Track>
+              </Progress.Root>
+              <Text color="white" fontSize="sm" textAlign="center" mt={2}>
+                {Math.round(progress.percentage)}%
+              </Text>
+            </Box>
+            <Text color="gray.300" fontSize="sm" textAlign="center">
+              {t("review.pleaseWait")}
             </Text>
           </VStack>
         </Box>

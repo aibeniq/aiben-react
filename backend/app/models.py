@@ -409,6 +409,7 @@ class RagChecklistRequest(VeraDocRequest):
     knowledge_base_id: str
     questions: str
     search_mode: Literal["vector", "full_scan"] = Field(default="vector")
+    task_id: Optional[str] = None
 
 
 # Enum for model providers

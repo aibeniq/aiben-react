@@ -1,12 +1,13 @@
-import { type FormConnectForm, FormconnectService } from "@/client"
+import { type FormConnectForm, FormconnectService, ReportgenieService } from "@/client"
 import DownloadButton from "@/components/ui/download-button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { useOperationCancellation } from "@/hooks/useOperationCancellation"
+import { useReportGenieProgress } from "@/hooks/useReportGenieProgress"
 
-import { Box, Button, Container, HStack, Heading, Spinner, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Container, HStack, Heading, Progress, Text, VStack } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { FiCheck, FiCopy, FiFileText, FiTrash2 } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
@@ -43,6 +44,11 @@ const FormConnect = () => {
     matchInputs?.searchMode || "vector",
   )
 
+  // Progress tracking
+  const [taskId, setTaskId] = useState<string | null>(null)
+  const progress = useReportGenieProgress(taskId)
+  const hasHandledCompletionRef = useRef(false)
+
   // Copy and download states
   const [copySuccess, setCopySuccess] = useState(false)
   const [loadingDownload, setLoadingDownload] = useState(false)
@@ -53,6 +59,36 @@ const FormConnect = () => {
     console.log("Feedback submitted for match result:", type)
     showSuccessToast(`Thank you for marking this response as ${type}!`)
   }
+
+  // Handle progress completion
+  useEffect(() => {
+    if (taskId && progress.completed && !hasHandledCompletionRef.current && progress.percentage >= 95) {
+      console.log("✅ Match task completed, clearing taskId")
+      hasHandledCompletionRef.current = true
+      
+      setTimeout(() => {
+        setTaskId(null)
+        hasHandledCompletionRef.current = false
+        setLoading(false)
+      }, 1500)
+    }
+
+    if (taskId && progress.error) {
+      console.log("❌ Match task failed:", progress.error)
+      setTaskId(null)
+      setLoading(false)
+      hasHandledCompletionRef.current = false
+      showErrorToast(progress.error)
+    }
+  }, [taskId, progress.completed, progress.error, progress.percentage])
+
+  // Reset completion handler when taskId changes
+  useEffect(() => {
+    if (taskId) {
+      console.log("🔄 New match task started, resetting completion handler")
+      hasHandledCompletionRef.current = false
+    }
+  }, [taskId])
 
   // Save input parameters to context whenever they change
   useEffect(() => {
@@ -235,14 +271,21 @@ const FormConnect = () => {
   }, [])
 
   const mutation = useMutation({
-    mutationFn: (data: {
+    mutationFn: async (data: {
       fields: string
       digitized_files: File[]
       handwritten_files: File[]
       search_mode: "vector" | "full_scan"
     }) => {
-      console.log("Now beginning mutation...")
+      console.log("🎯 Creating match task for progress tracking...")
       console.log(`Using search mode: ${data.search_mode}`)
+
+      // First, create a task to get the task_id for progress tracking
+      const taskResponse = await ReportgenieService.createOptimizeOutlineTask()
+
+      const newTaskId = (taskResponse as any).task_id
+      console.log("📋 Generated match task_id:", newTaskId)
+      setTaskId(newTaskId)
 
       const promise = FormconnectService.processForm({
         fields: data.fields,
@@ -332,6 +375,44 @@ const FormConnect = () => {
       <Text fontSize="sm" color="gray.500" textAlign="center" mb={4} fontStyle="italic">
         {t("match.subtitle")}
       </Text>
+
+      {/* Progress bar overlay while processing */}
+      {(loading || progress.isActive || (taskId && !progress.completed)) && (
+        <Box
+          position="absolute"
+          top="0"
+          left="0"
+          right="0"
+          bottom="0"
+          bg="blackAlpha.800"
+          zIndex="50"
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          borderRadius="md"
+          p={6}
+        >
+          <VStack gap={4} width="80%" maxWidth="400px">
+            <Text color="white" fontSize="lg" fontWeight="medium" textAlign="center">
+              {progress.message || t("match.processing")}
+            </Text>
+            <Box width="100%">
+              <Progress.Root value={progress.percentage} size="lg" colorPalette="blue">
+                <Progress.Track>
+                  <Progress.Range />
+                </Progress.Track>
+              </Progress.Root>
+              <Text color="white" fontSize="sm" textAlign="center" mt={2}>
+                {Math.round(progress.percentage)}%
+              </Text>
+            </Box>
+            <Text color="gray.300" fontSize="sm" textAlign="center">
+              {t("match.pleaseWait")}
+            </Text>
+          </VStack>
+        </Box>
+      )}
 
       <VStack gap={6} align="stretch">
         <HStack width="100%" justify="space-between">
@@ -426,19 +507,7 @@ const FormConnect = () => {
                 maxH={{ base: "400px", md: "600px" }}
                 overflowY="auto"
                 position="relative"
-                opacity={loading ? 0.5 : 1}
               >
-                {loading && (
-                  <Box
-                    position="absolute"
-                    top="50%"
-                    left="50%"
-                    transform="translate(-50%, -50%)"
-                    zIndex="1"
-                  >
-                    <Spinner size="lg" color="blue.500" />
-                  </Box>
-                )}
                 {matchResult ? (
                   <>
                     {/* Copy and Download buttons */}

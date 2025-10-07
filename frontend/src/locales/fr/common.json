@@ -67,6 +67,10 @@
       "largeFile": "⚠️ Document volumineux détecté. Pour de meilleures performances avec des fichiers de plus de 50Mo, considérez passer en mode 'Analyse Complète du Texte' en utilisant le bouton ci-dessus."
     }
   },
+  "generate": {
+    "title": "Générer un Rapport",
+    "pleaseWait": "Veuillez patienter pendant que nous générons votre rapport"
+  },
   "review": {
     "title": "Révision de Document",
     "selectChecklist": "Sélectionner une Liste de Contrôle",
@@ -74,7 +78,8 @@
     "customInstructionsPlaceholder": "Entrez des instructions spécifiques pour cette révision...",
     "uploadDocuments": "Télécharger des Documents",
     "reviewResults": "Résultats de Révision",
-    "startReview": "Commencer la Révision"
+    "startReview": "Commencer la Révision",
+    "pleaseWait": "Veuillez patienter pendant que nous révisons vos documents"
   },
   "settings": {
     "title": "Paramètres Utilisateur",

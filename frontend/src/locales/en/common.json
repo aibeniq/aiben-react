@@ -67,6 +67,10 @@
       "largeFile": "⚠️ Large document detected. For better performance with files over 50MB, consider switching to 'Full Text Scan' mode using the toggle above."
     }
   },
+  "generate": {
+    "title": "Generate Report",
+    "pleaseWait": "Please wait while we generate your report"
+  },
   "review": {
     "title": "Document Review",
     "selectChecklist": "Select Checklist",
@@ -74,7 +78,8 @@
     "customInstructionsPlaceholder": "Enter any specific instructions for this review...",
     "uploadDocuments": "Upload Documents",
     "reviewResults": "Review Results",
-    "startReview": "Start Review"
+    "startReview": "Start Review",
+    "pleaseWait": "Please wait while we review your documents"
   },
   "settings": {
     "title": "User Settings",

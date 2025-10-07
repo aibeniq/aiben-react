@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ChatQueryKnowledgeBaseData, ChatQueryKnowledgeBaseResponse, ChatQueryDocumentData, ChatQueryDocumentResponse, ChatQueryTextData, ChatQueryTextResponse, ChatChatData, ChatChatResponse, EmbeddingModelsGetAvailableProvidersResponse, EmbeddingModelsGetEmbeddingModelsData, EmbeddingModelsGetEmbeddingModelsResponse, EmbeddingModelsCreateEmbeddingModelData, EmbeddingModelsCreateEmbeddingModelResponse, EmbeddingModelsGetDefaultEmbeddingModelResponse, EmbeddingModelsGetEmbeddingModelData, EmbeddingModelsGetEmbeddingModelResponse, EmbeddingModelsUpdateEmbeddingModelData, EmbeddingModelsUpdateEmbeddingModelResponse, EmbeddingModelsDeleteEmbeddingModelData, EmbeddingModelsDeleteEmbeddingModelResponse, EmbeddingModelsSetDefaultEmbeddingModelData, EmbeddingModelsSetDefaultEmbeddingModelResponse, EmbeddingModelsValidateEmbeddingModelData, EmbeddingModelsValidateEmbeddingModelResponse, EmbeddingModelsCheckApiKeyConfiguredData, EmbeddingModelsCheckApiKeyConfiguredResponse, FeedbackSubmitFeedbackData, FeedbackSubmitFeedbackResponse, FilesGetSourceContentData, FilesGetSourceContentResponse, FilesConvertDocxToPdfData, FilesConvertDocxToPdfResponse, FilesConvertDocxToPdfByFilenameData, FilesConvertDocxToPdfByFilenameResponse, FilesConvertRtfToPdfData, FilesConvertRtfToPdfResponse, FilesConvertRtfToPdfByFilenameData, FilesConvertRtfToPdfByFilenameResponse, FilesGetSourceContentByFilenameData, FilesGetSourceContentByFilenameResponse, FormconnectProcessFormData, FormconnectProcessFormResponse, FormconnectGetFormsResponse, FormconnectCreateFormData, FormconnectCreateFormResponse, FormconnectGetFormData, FormconnectGetFormResponse, FormconnectUpdateFormData, FormconnectUpdateFormResponse, FormconnectDeleteFormData, FormconnectDeleteFormResponse, FormconnectGetFormDetailData, FormconnectGetFormDetailResponse, FormconnectGetFormHistoryData, FormconnectGetFormHistoryResponse, FormconnectGenerateFormFieldsData, FormconnectGenerateFormFieldsResponse, FormconnectGenerateFormFieldsJsonData, FormconnectGenerateFormFieldsJsonResponse, FormconnectGenerateFormFieldsWithFilesData, FormconnectGenerateFormFieldsWithFilesResponse, FormconnectGenerateDocxData, FormconnectGenerateDocxResponse, FormconnectGenerateCsvData, FormconnectGenerateCsvResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, KnowledgeBasesReadKnowledgeBasesData, KnowledgeBasesReadKnowledgeBasesResponse, KnowledgeBasesCreateKnowledgeBaseData, KnowledgeBasesCreateKnowledgeBaseResponse, KnowledgeBasesReadKnowledgeBaseData, KnowledgeBasesReadKnowledgeBaseResponse, KnowledgeBasesUpdateKnowledgeBaseData, KnowledgeBasesUpdateKnowledgeBaseResponse, KnowledgeBasesDeleteKnowledgeBaseData, KnowledgeBasesDeleteKnowledgeBaseResponse, KnowledgeBasesCreateKnowledgeBaseTaskData, KnowledgeBasesCreateKnowledgeBaseTaskResponse, KnowledgeBasesGetKnowledgeBaseProgressData, KnowledgeBasesGetKnowledgeBaseProgressResponse, LlmModelsGetLlmModelsData, LlmModelsGetLlmModelsResponse, LlmModelsCreateLlmModelData, LlmModelsCreateLlmModelResponse, LlmModelsGetDefaultLlmModelResponse, LlmModelsDeleteLlmModelData, LlmModelsDeleteLlmModelResponse, LlmModelsValidateLlmModelData, LlmModelsValidateLlmModelResponse, LlmModelsSetDefaultLlmModelData, LlmModelsSetDefaultLlmModelResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MonitoringGetRateLimiterStatusResponse, MonitoringResetRateLimiterResponse, ReportgenieGenerateReportData, ReportgenieGenerateReportResponse, ReportgenieDeleteReportData, ReportgenieDeleteReportResponse, ReportgenieGetReportHistoryData, ReportgenieGetReportHistoryResponse, ReportgenieGetReportDetailData, ReportgenieGetReportDetailResponse, ReportgenieGetOutlinesResponse, ReportgenieCreateOutlineData, ReportgenieCreateOutlineResponse, ReportgenieGetOutlineData, ReportgenieGetOutlineResponse, ReportgenieUpdateOutlineData, ReportgenieUpdateOutlineResponse, ReportgenieDeleteOutlineData, ReportgenieDeleteOutlineResponse, ReportgenieGenerateOutlineJsonData, ReportgenieGenerateOutlineJsonResponse, ReportgenieGenerateOutlineData, ReportgenieGenerateOutlineResponse, ReportgenieOptimizeOutlineData, ReportgenieOptimizeOutlineResponse, ReportgenieGenerateOutlineOptimizationCsvData, ReportgenieGenerateOutlineOptimizationCsvResponse, ReportgenieGenerateDocxData, ReportgenieGenerateDocxResponse, ReportgenieGenerateCsvData, ReportgenieGenerateCsvResponse, TwincheckCompareDocumentsData, TwincheckCompareDocumentsResponse, TwincheckGetComparisonHistoryData, TwincheckGetComparisonHistoryResponse, TwincheckGetComparisonDetailData, TwincheckGetComparisonDetailResponse, TwincheckGetComparisonsResponse, TwincheckCreateComparisonData, TwincheckCreateComparisonResponse, TwincheckGetComparisonData, TwincheckGetComparisonResponse, TwincheckUpdateComparisonData, TwincheckUpdateComparisonResponse, TwincheckDeleteComparisonData, TwincheckDeleteComparisonResponse, TwincheckGenerateDocxData, TwincheckGenerateDocxResponse, TwincheckGenerateCsvData, TwincheckGenerateCsvResponse, TwincheckGenerateTopicsData, TwincheckGenerateTopicsResponse, TwincheckGenerateTopicsJsonData, TwincheckGenerateTopicsJsonResponse, UsageGetTokenUsageResponse, UsersGetSupportedLanguagesResponse, UsersUpdateLanguageData, UsersUpdateLanguageResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, UtilsGetSystemConfigResponse, VeradocProcessRagChecklistData, VeradocProcessRagChecklistResponse, VeradocGetChecklistsResponse, VeradocCreateChecklistData, VeradocCreateChecklistResponse, VeradocGetChecklistData, VeradocGetChecklistResponse, VeradocUpdateChecklistData, VeradocUpdateChecklistResponse, VeradocDeleteChecklistData, VeradocDeleteChecklistResponse, VeradocDeleteEvaluationData, VeradocDeleteEvaluationResponse, VeradocGetVeradocHistoryData, VeradocGetVeradocHistoryResponse, VeradocGetVeradocDetailData, VeradocGetVeradocDetailResponse, VeradocGetVeradocQaPairData, VeradocGetVeradocQaPairResponse, VeradocOptimizeChecklistData, VeradocOptimizeChecklistResponse, VeradocGenerateDocxData, VeradocGenerateDocxResponse, VeradocGenerateCsvData, VeradocGenerateCsvResponse, VeradocGenerateOptimizationCsvData, VeradocGenerateOptimizationCsvResponse, VeradocGenerateQuestionsWithFilesData, VeradocGenerateQuestionsWithFilesResponse, VeradocGenerateQuestionsData, VeradocGenerateQuestionsResponse } from './types.gen';
+import type { ChatQueryKnowledgeBaseData, ChatQueryKnowledgeBaseResponse, ChatQueryDocumentData, ChatQueryDocumentResponse, ChatQueryTextData, ChatQueryTextResponse, ChatChatData, ChatChatResponse, EmbeddingModelsGetAvailableProvidersResponse, EmbeddingModelsGetEmbeddingModelsData, EmbeddingModelsGetEmbeddingModelsResponse, EmbeddingModelsCreateEmbeddingModelData, EmbeddingModelsCreateEmbeddingModelResponse, EmbeddingModelsGetDefaultEmbeddingModelResponse, EmbeddingModelsGetEmbeddingModelData, EmbeddingModelsGetEmbeddingModelResponse, EmbeddingModelsUpdateEmbeddingModelData, EmbeddingModelsUpdateEmbeddingModelResponse, EmbeddingModelsDeleteEmbeddingModelData, EmbeddingModelsDeleteEmbeddingModelResponse, EmbeddingModelsSetDefaultEmbeddingModelData, EmbeddingModelsSetDefaultEmbeddingModelResponse, EmbeddingModelsValidateEmbeddingModelData, EmbeddingModelsValidateEmbeddingModelResponse, EmbeddingModelsCheckApiKeyConfiguredData, EmbeddingModelsCheckApiKeyConfiguredResponse, FeedbackSubmitFeedbackData, FeedbackSubmitFeedbackResponse, FilesGetSourceContentData, FilesGetSourceContentResponse, FilesConvertDocxToPdfData, FilesConvertDocxToPdfResponse, FilesConvertDocxToPdfByFilenameData, FilesConvertDocxToPdfByFilenameResponse, FilesConvertRtfToPdfData, FilesConvertRtfToPdfResponse, FilesConvertRtfToPdfByFilenameData, FilesConvertRtfToPdfByFilenameResponse, FilesGetSourceContentByFilenameData, FilesGetSourceContentByFilenameResponse, FormconnectProcessFormData, FormconnectProcessFormResponse, FormconnectGetFormsResponse, FormconnectCreateFormData, FormconnectCreateFormResponse, FormconnectGetFormData, FormconnectGetFormResponse, FormconnectUpdateFormData, FormconnectUpdateFormResponse, FormconnectDeleteFormData, FormconnectDeleteFormResponse, FormconnectGetFormDetailData, FormconnectGetFormDetailResponse, FormconnectGetFormHistoryData, FormconnectGetFormHistoryResponse, FormconnectGenerateFormFieldsData, FormconnectGenerateFormFieldsResponse, FormconnectGenerateFormFieldsJsonData, FormconnectGenerateFormFieldsJsonResponse, FormconnectGenerateFormFieldsWithFilesData, FormconnectGenerateFormFieldsWithFilesResponse, FormconnectGenerateDocxData, FormconnectGenerateDocxResponse, FormconnectGenerateCsvData, FormconnectGenerateCsvResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, KnowledgeBasesReadKnowledgeBasesData, KnowledgeBasesReadKnowledgeBasesResponse, KnowledgeBasesCreateKnowledgeBaseData, KnowledgeBasesCreateKnowledgeBaseResponse, KnowledgeBasesReadKnowledgeBaseData, KnowledgeBasesReadKnowledgeBaseResponse, KnowledgeBasesUpdateKnowledgeBaseData, KnowledgeBasesUpdateKnowledgeBaseResponse, KnowledgeBasesDeleteKnowledgeBaseData, KnowledgeBasesDeleteKnowledgeBaseResponse, KnowledgeBasesCreateKnowledgeBaseTaskData, KnowledgeBasesCreateKnowledgeBaseTaskResponse, KnowledgeBasesGetKnowledgeBaseProgressData, KnowledgeBasesGetKnowledgeBaseProgressResponse, LlmModelsGetLlmModelsData, LlmModelsGetLlmModelsResponse, LlmModelsCreateLlmModelData, LlmModelsCreateLlmModelResponse, LlmModelsGetDefaultLlmModelResponse, LlmModelsDeleteLlmModelData, LlmModelsDeleteLlmModelResponse, LlmModelsValidateLlmModelData, LlmModelsValidateLlmModelResponse, LlmModelsSetDefaultLlmModelData, LlmModelsSetDefaultLlmModelResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MonitoringGetRateLimiterStatusResponse, MonitoringResetRateLimiterResponse, ReportgenieCreateGenerateTaskResponse, ReportgenieCreateGenerateOutlineTaskResponse, ReportgenieCreateOptimizeOutlineTaskResponse, ReportgenieGetReportgenieProgressData, ReportgenieGetReportgenieProgressResponse, ReportgenieGenerateReportData, ReportgenieGenerateReportResponse, ReportgenieDeleteReportData, ReportgenieDeleteReportResponse, ReportgenieGetReportHistoryData, ReportgenieGetReportHistoryResponse, ReportgenieGetReportDetailData, ReportgenieGetReportDetailResponse, ReportgenieGetOutlinesResponse, ReportgenieCreateOutlineData, ReportgenieCreateOutlineResponse, ReportgenieGetOutlineData, ReportgenieGetOutlineResponse, ReportgenieUpdateOutlineData, ReportgenieUpdateOutlineResponse, ReportgenieDeleteOutlineData, ReportgenieDeleteOutlineResponse, ReportgenieGenerateOutlineJsonData, ReportgenieGenerateOutlineJsonResponse, ReportgenieGenerateOutlineData, ReportgenieGenerateOutlineResponse, ReportgenieOptimizeOutlineData, ReportgenieOptimizeOutlineResponse, ReportgenieGenerateOutlineOptimizationCsvData, ReportgenieGenerateOutlineOptimizationCsvResponse, ReportgenieGenerateDocxData, ReportgenieGenerateDocxResponse, ReportgenieGenerateCsvData, ReportgenieGenerateCsvResponse, TwincheckCompareDocumentsData, TwincheckCompareDocumentsResponse, TwincheckGetComparisonHistoryData, TwincheckGetComparisonHistoryResponse, TwincheckGetComparisonDetailData, TwincheckGetComparisonDetailResponse, TwincheckGetComparisonsResponse, TwincheckCreateComparisonData, TwincheckCreateComparisonResponse, TwincheckGetComparisonData, TwincheckGetComparisonResponse, TwincheckUpdateComparisonData, TwincheckUpdateComparisonResponse, TwincheckDeleteComparisonData, TwincheckDeleteComparisonResponse, TwincheckGenerateDocxData, TwincheckGenerateDocxResponse, TwincheckGenerateCsvData, TwincheckGenerateCsvResponse, TwincheckGenerateTopicsData, TwincheckGenerateTopicsResponse, TwincheckGenerateTopicsJsonData, TwincheckGenerateTopicsJsonResponse, UsageGetTokenUsageResponse, UsersGetSupportedLanguagesResponse, UsersUpdateLanguageData, UsersUpdateLanguageResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, UtilsGetSystemConfigResponse, VeradocGetVeradocProgressData, VeradocGetVeradocProgressResponse, VeradocGetVeradocResultsData, VeradocGetVeradocResultsResponse, VeradocProcessRagChecklistData, VeradocProcessRagChecklistResponse, VeradocGetChecklistsResponse, VeradocCreateChecklistData, VeradocCreateChecklistResponse, VeradocGetChecklistData, VeradocGetChecklistResponse, VeradocUpdateChecklistData, VeradocUpdateChecklistResponse, VeradocDeleteChecklistData, VeradocDeleteChecklistResponse, VeradocDeleteEvaluationData, VeradocDeleteEvaluationResponse, VeradocGetVeradocHistoryData, VeradocGetVeradocHistoryResponse, VeradocGetVeradocDetailData, VeradocGetVeradocDetailResponse, VeradocGetVeradocQaPairData, VeradocGetVeradocQaPairResponse, VeradocOptimizeChecklistData, VeradocOptimizeChecklistResponse, VeradocGenerateDocxData, VeradocGenerateDocxResponse, VeradocGenerateCsvData, VeradocGenerateCsvResponse, VeradocGenerateOptimizationCsvData, VeradocGenerateOptimizationCsvResponse, VeradocGenerateQuestionsWithFilesData, VeradocGenerateQuestionsWithFilesResponse, VeradocGenerateQuestionsData, VeradocGenerateQuestionsResponse } from './types.gen';
 
 export class ChatService {
     /**
@@ -40,7 +40,7 @@ export class ChatService {
             }
         });
     }
-    
+
     /**
      * Query Document
      * Query uploaded documents with a question using either vector search or full text scan.
@@ -74,7 +74,7 @@ export class ChatService {
             }
         });
     }
-    
+
     /**
      * Query Text
      * Answer a direct text question without a knowledge base or document.
@@ -101,7 +101,7 @@ export class ChatService {
             }
         });
     }
-    
+
     /**
      * Chat
      * Main chat endpoint that routes to appropriate handlers based on context.
@@ -121,7 +121,7 @@ export class ChatService {
             }
         });
     }
-    
+
 }
 
 export class EmbeddingModelsService {
@@ -137,7 +137,7 @@ export class EmbeddingModelsService {
             url: '/api/v1/embedding-models/providers'
         });
     }
-    
+
     /**
      * Get Embedding Models
      * Get all embedding models.
@@ -160,7 +160,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-    
+
     /**
      * Create Embedding Model
      * Create a new embedding model.
@@ -180,7 +180,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-    
+
     /**
      * Get Default Embedding Model
      * Get the user's default embedding model (or system default if not set).
@@ -193,7 +193,7 @@ export class EmbeddingModelsService {
             url: '/api/v1/embedding-models/default'
         });
     }
-    
+
     /**
      * Get Embedding Model
      * Get a specific embedding model by ID.
@@ -214,7 +214,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-    
+
     /**
      * Update Embedding Model
      * Update an embedding model.
@@ -238,7 +238,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-    
+
     /**
      * Delete Embedding Model
      * Delete an embedding model.
@@ -259,7 +259,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-    
+
     /**
      * Set Default Embedding Model
      * Set an embedding model as the default for the current user.
@@ -280,7 +280,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-    
+
     /**
      * Validate Embedding Model
      * Validate if an embedding model ID is valid for the specified provider.
@@ -300,7 +300,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-    
+
     /**
      * Check Api Key Configured
      * Check if the API key for a specific provider is configured in the backend.
@@ -321,7 +321,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-    
+
 }
 
 export class FeedbackService {
@@ -349,7 +349,7 @@ export class FeedbackService {
             }
         });
     }
-    
+
 }
 
 export class FilesService {
@@ -374,7 +374,7 @@ export class FilesService {
             }
         });
     }
-    
+
     /**
      * Convert Docx To Pdf
      * Convert a DOCX source file to PDF on-demand.
@@ -396,7 +396,7 @@ export class FilesService {
             }
         });
     }
-    
+
     /**
      * Convert Docx To Pdf By Filename
      * Convert a DOCX source file to PDF on-demand using filename.
@@ -418,7 +418,7 @@ export class FilesService {
             }
         });
     }
-    
+
     /**
      * Convert Rtf To Pdf
      * Convert an RTF source file to PDF on-demand.
@@ -440,7 +440,7 @@ export class FilesService {
             }
         });
     }
-    
+
     /**
      * Convert Rtf To Pdf By Filename
      * Convert an RTF source file to PDF on-demand using filename.
@@ -462,7 +462,7 @@ export class FilesService {
             }
         });
     }
-    
+
     /**
      * Get Source Content By Filename
      * Retrieve a source file by filename.
@@ -484,7 +484,7 @@ export class FilesService {
             }
         });
     }
-    
+
 }
 
 export class FormconnectService {
@@ -514,7 +514,7 @@ export class FormconnectService {
             }
         });
     }
-    
+
     /**
      * Get Forms
      * Retrieve all forms from the database for this user.
@@ -527,7 +527,7 @@ export class FormconnectService {
             url: '/api/v1/formconnect/forms'
         });
     }
-    
+
     /**
      * Create Form
      * Save a new form to the database.
@@ -547,7 +547,7 @@ export class FormconnectService {
             }
         });
     }
-    
+
     /**
      * Get Form
      * Retrieve a specific form by ID.
@@ -568,7 +568,7 @@ export class FormconnectService {
             }
         });
     }
-    
+
     /**
      * Update Form
      * Update an existing form.
@@ -592,7 +592,7 @@ export class FormconnectService {
             }
         });
     }
-    
+
     /**
      * Delete Form
      * Delete a form by ID.
@@ -613,7 +613,7 @@ export class FormconnectService {
             }
         });
     }
-    
+
     /**
      * Get Form Detail
      * Retrieve a specific form processing's full content by ID.
@@ -634,7 +634,7 @@ export class FormconnectService {
             }
         });
     }
-    
+
     /**
      * Get Form History
      * Retrieve past form processing history for the current user or all users.
@@ -659,7 +659,7 @@ export class FormconnectService {
             }
         });
     }
-    
+
     /**
      * Generate Form Fields
      * Generate form fields based on a description with optional knowledge base reference.
@@ -679,7 +679,7 @@ export class FormconnectService {
             }
         });
     }
-    
+
     /**
      * Generate Form Fields Json
      * Generate form fields based on a description with optional knowledge base reference (JSON version).
@@ -699,7 +699,7 @@ export class FormconnectService {
             }
         });
     }
-    
+
     /**
      * Generate Form Fields With Files
      * Generate form fields based on a description and uploaded reference documents.
@@ -719,7 +719,7 @@ export class FormconnectService {
             }
         });
     }
-    
+
     /**
      * Generate Docx
      * Generate a DOCX file from the FormConnect results content.
@@ -740,7 +740,7 @@ export class FormconnectService {
             }
         });
     }
-    
+
     /**
      * Generate Csv
      * Generate a CSV file from the FormConnect results content using LLM formatting.
@@ -760,7 +760,7 @@ export class FormconnectService {
             }
         });
     }
-    
+
 }
 
 export class ItemsService {
@@ -786,7 +786,7 @@ export class ItemsService {
             }
         });
     }
-    
+
     /**
      * Create Item
      * Create new item.
@@ -806,7 +806,7 @@ export class ItemsService {
             }
         });
     }
-    
+
     /**
      * Read Item
      * Get item by ID.
@@ -827,7 +827,7 @@ export class ItemsService {
             }
         });
     }
-    
+
     /**
      * Update Item
      * Update an item.
@@ -851,7 +851,7 @@ export class ItemsService {
             }
         });
     }
-    
+
     /**
      * Delete Item
      * Delete an item.
@@ -872,7 +872,7 @@ export class ItemsService {
             }
         });
     }
-    
+
 }
 
 export class KnowledgeBasesService {
@@ -900,7 +900,7 @@ export class KnowledgeBasesService {
             }
         });
     }
-    
+
     /**
      * Create Knowledge Base
      * Create new knowledge base asynchronously with real-time progress tracking.
@@ -931,7 +931,7 @@ export class KnowledgeBasesService {
             }
         });
     }
-    
+
     /**
      * Read Knowledge Base
      * Get knowledge base by ID.
@@ -952,7 +952,7 @@ export class KnowledgeBasesService {
             }
         });
     }
-    
+
     /**
      * Update Knowledge Base
      * Update a knowledge base.
@@ -984,7 +984,7 @@ export class KnowledgeBasesService {
             }
         });
     }
-    
+
     /**
      * Delete Knowledge Base
      * Delete a knowledge base.
@@ -1005,7 +1005,7 @@ export class KnowledgeBasesService {
             }
         });
     }
-    
+
     /**
      * Create Knowledge Base Task
      * Create a knowledge base task and return task_id immediately for progress tracking.
@@ -1031,7 +1031,7 @@ export class KnowledgeBasesService {
             }
         });
     }
-    
+
     /**
      * Get Knowledge Base Progress
      * Get progress information for a knowledge base creation task.
@@ -1052,7 +1052,7 @@ export class KnowledgeBasesService {
             }
         });
     }
-    
+
 }
 
 export class LlmModelsService {
@@ -1078,7 +1078,7 @@ export class LlmModelsService {
             }
         });
     }
-    
+
     /**
      * Create Llm Model
      * Create a new LLM.
@@ -1098,7 +1098,7 @@ export class LlmModelsService {
             }
         });
     }
-    
+
     /**
      * Get Default Llm Model
      * Get the user's default LLM model (database record).
@@ -1111,7 +1111,7 @@ export class LlmModelsService {
             url: '/api/v1/llm-models/default'
         });
     }
-    
+
     /**
      * Delete Llm Model
      * Delete an LLM.
@@ -1132,7 +1132,7 @@ export class LlmModelsService {
             }
         });
     }
-    
+
     /**
      * Validate Llm Model
      * Validate if an LLM ID is valid for the specified provider.
@@ -1152,7 +1152,7 @@ export class LlmModelsService {
             }
         });
     }
-    
+
     /**
      * Set Default Llm Model
      * Set an LLM as the default.
@@ -1173,7 +1173,7 @@ export class LlmModelsService {
             }
         });
     }
-    
+
 }
 
 export class LoginService {
@@ -1196,7 +1196,7 @@ export class LoginService {
             }
         });
     }
-    
+
     /**
      * Test Token
      * Test access token
@@ -1209,7 +1209,7 @@ export class LoginService {
             url: '/api/v1/login/test-token'
         });
     }
-    
+
     /**
      * Recover Password
      * Password Recovery
@@ -1230,7 +1230,7 @@ export class LoginService {
             }
         });
     }
-    
+
     /**
      * Reset Password
      * Reset password
@@ -1250,7 +1250,7 @@ export class LoginService {
             }
         });
     }
-    
+
     /**
      * Recover Password Html Content
      * HTML Content for Password Recovery
@@ -1271,7 +1271,7 @@ export class LoginService {
             }
         });
     }
-    
+
 }
 
 export class MonitoringService {
@@ -1290,7 +1290,7 @@ export class MonitoringService {
             url: '/api/v1/rate-limiter/status'
         });
     }
-    
+
     /**
      * Reset Rate Limiter
      * Reset the rate limiter counters (admin function).
@@ -1305,13 +1305,77 @@ export class MonitoringService {
             url: '/api/v1/rate-limiter/reset'
         });
     }
-    
+
 }
 
 export class ReportgenieService {
     /**
+     * Create Generate Task
+     * Create a progress tracking task for report generation and return task_id immediately.
+     * This allows frontend to start progress polling before form submission.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static createGenerateTask(): CancelablePromise<ReportgenieCreateGenerateTaskResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/reportgenie/generate/task'
+        });
+    }
+
+    /**
+     * Create Generate Outline Task
+     * Create a progress tracking task for outline generation and return task_id immediately.
+     * This allows frontend to start progress polling before form submission.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static createGenerateOutlineTask(): CancelablePromise<ReportgenieCreateGenerateOutlineTaskResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/reportgenie/generate-outline/task'
+        });
+    }
+
+    /**
+     * Create Optimize Outline Task
+     * Create a progress tracking task for outline optimization and return task_id immediately.
+     * This allows frontend to start progress polling before form submission.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static createOptimizeOutlineTask(): CancelablePromise<ReportgenieCreateOptimizeOutlineTaskResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/reportgenie/optimize-outline/task'
+        });
+    }
+
+    /**
+     * Get Reportgenie Progress
+     * Get progress information for a reportgenie task (generate, generate-outline, or optimize-outline).
+     * @param data The data for the request.
+     * @param data.taskId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getReportgenieProgress(data: ReportgenieGetReportgenieProgressData): CancelablePromise<ReportgenieGetReportgenieProgressResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/reportgenie/progress/{task_id}',
+            path: {
+                task_id: data.taskId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+
+    /**
      * Generate Report
      * Generate a report based on sections outline and knowledge base search results.
+     * Includes real-time progress tracking.
      * @param data The data for the request.
      * @param data.formData
      * @returns ReportGenieResponse Successful Response
@@ -1328,7 +1392,7 @@ export class ReportgenieService {
             }
         });
     }
-    
+
     /**
      * Delete Report
      * Delete a report by ID.
@@ -1349,7 +1413,7 @@ export class ReportgenieService {
             }
         });
     }
-    
+
     /**
      * Get Report History
      * Retrieve past ReportGenie generation history for the current user or all users.
@@ -1374,20 +1438,12 @@ export class ReportgenieService {
             }
         });
     }
-    
+
     /**
      * Get Report Detail
-     * Retrieve a specific ReportGenie report by ID.
-     *
-     * Args:
-     * report_id: The UUID of the report to retrieve
-     * include_sections: If False, excludes the heavy sections with citations (default: True)
-     *
-     * Returns summary (without detailed sections) when include_sections=False,
-     * or full detail (with sections and citations) when include_sections=True.
+     * Retrieve a specific ReportGenie report's full content by ID.
      * @param data The data for the request.
      * @param data.reportId
-     * @param data.includeSections If False, excludes the heavy sections with citations to improve performance
      * @returns unknown Successful Response
      * @throws ApiError
      */
@@ -1398,15 +1454,12 @@ export class ReportgenieService {
             path: {
                 report_id: data.reportId
             },
-            query: {
-                include_sections: data.includeSections
-            },
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-    
+
     /**
      * Get Outlines
      * Retrieve all outlines from the database for this user.
@@ -1419,7 +1472,7 @@ export class ReportgenieService {
             url: '/api/v1/reportgenie/outlines'
         });
     }
-    
+
     /**
      * Create Outline
      * Save a new outline to the database.
@@ -1439,7 +1492,7 @@ export class ReportgenieService {
             }
         });
     }
-    
+
     /**
      * Get Outline
      * Retrieve a specific outline by ID.
@@ -1460,7 +1513,7 @@ export class ReportgenieService {
             }
         });
     }
-    
+
     /**
      * Update Outline
      * Update an existing outline.
@@ -1484,7 +1537,7 @@ export class ReportgenieService {
             }
         });
     }
-    
+
     /**
      * Delete Outline
      * Delete an outline by ID.
@@ -1505,7 +1558,7 @@ export class ReportgenieService {
             }
         });
     }
-    
+
     /**
      * Generate Outline Json
      * Generate outline sections based on a description using LLM, with optional knowledge base reference (JSON version).
@@ -1525,10 +1578,11 @@ export class ReportgenieService {
             }
         });
     }
-    
+
     /**
      * Generate Outline
      * Generate outline sections based on a description using LLM, with optional example document.
+     * Includes real-time progress tracking.
      * @param data The data for the request.
      * @param data.formData
      * @returns GenerateOutlineResponse Successful Response
@@ -1545,11 +1599,12 @@ export class ReportgenieService {
             }
         });
     }
-    
+
     /**
      * Optimize Outline
      * Optimize outline sections by testing them against a ground-truth document.
      * Generates a report with current outline and compares it to the ground-truth to suggest improvements.
+     * Includes real-time progress tracking.
      * @param data The data for the request.
      * @param data.formData
      * @returns OptimizedOutlineResponse Successful Response
@@ -1566,7 +1621,7 @@ export class ReportgenieService {
             }
         });
     }
-    
+
     /**
      * Generate Outline Optimization Csv
      * Generate a CSV file from outline optimization results with columns for:
@@ -1587,7 +1642,7 @@ export class ReportgenieService {
             }
         });
     }
-    
+
     /**
      * Generate Docx
      * Generate a DOCX file from the report content.
@@ -1607,7 +1662,7 @@ export class ReportgenieService {
             }
         });
     }
-    
+
     /**
      * Generate Csv
      * Generate a CSV file from report content with columns for:
@@ -1628,7 +1683,7 @@ export class ReportgenieService {
             }
         });
     }
-    
+
 }
 
 export class TwincheckService {
@@ -1656,7 +1711,7 @@ export class TwincheckService {
             }
         });
     }
-    
+
     /**
      * Get Comparison History
      * Retrieve past document comparison history for the current user or all users.
@@ -1681,7 +1736,7 @@ export class TwincheckService {
             }
         });
     }
-    
+
     /**
      * Get Comparison Detail
      * Retrieve a specific comparison's full content by ID.
@@ -1702,7 +1757,7 @@ export class TwincheckService {
             }
         });
     }
-    
+
     /**
      * Get Comparisons
      * Retrieve all saved comparison topic sets from the database for this user.
@@ -1715,7 +1770,7 @@ export class TwincheckService {
             url: '/api/v1/twincheck/comparisons'
         });
     }
-    
+
     /**
      * Create Comparison
      * Save a new comparison topic set to the database.
@@ -1735,7 +1790,7 @@ export class TwincheckService {
             }
         });
     }
-    
+
     /**
      * Get Comparison
      * Retrieve a specific comparison topic set by ID.
@@ -1756,7 +1811,7 @@ export class TwincheckService {
             }
         });
     }
-    
+
     /**
      * Update Comparison
      * Update an existing comparison topic set.
@@ -1780,7 +1835,7 @@ export class TwincheckService {
             }
         });
     }
-    
+
     /**
      * Delete Comparison
      * Delete a comparison topic set by ID.
@@ -1801,7 +1856,7 @@ export class TwincheckService {
             }
         });
     }
-    
+
     /**
      * Generate Docx
      * Generate a DOCX file from the comparison content.
@@ -1821,7 +1876,7 @@ export class TwincheckService {
             }
         });
     }
-    
+
     /**
      * Generate Csv
      * Generate a CSV file from the comparison content.
@@ -1841,7 +1896,7 @@ export class TwincheckService {
             }
         });
     }
-    
+
     /**
      * Generate Topics
      * Generate comparison topics based on a description using LLM, with optional example document.
@@ -1865,7 +1920,7 @@ export class TwincheckService {
             }
         });
     }
-    
+
     /**
      * Generate Topics Json
      * Generate comparison topics based on a description using LLM, with optional knowledge base reference (JSON version).
@@ -1885,7 +1940,7 @@ export class TwincheckService {
             }
         });
     }
-    
+
 }
 
 export class UsageService {
@@ -1904,7 +1959,7 @@ export class UsageService {
             url: '/api/v1/usage/token-usage'
         });
     }
-    
+
 }
 
 export class UsersService {
@@ -1920,7 +1975,7 @@ export class UsersService {
             url: '/api/v1/users/supported-languages'
         });
     }
-    
+
     /**
      * Update Language
      * Update current user language preference.
@@ -1940,7 +1995,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Read Users
      * Retrieve users.
@@ -1963,7 +2018,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Create User
      * Create new user.
@@ -1983,7 +2038,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Read User Me
      * Get current user.
@@ -1996,7 +2051,7 @@ export class UsersService {
             url: '/api/v1/users/me'
         });
     }
-    
+
     /**
      * Delete User Me
      * Delete own user.
@@ -2009,7 +2064,7 @@ export class UsersService {
             url: '/api/v1/users/me'
         });
     }
-    
+
     /**
      * Update User Me
      * Update own user.
@@ -2029,7 +2084,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Update Password Me
      * Update own password.
@@ -2049,7 +2104,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Register User
      * Create new user without the need to be logged in.
@@ -2069,7 +2124,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Read User By Id
      * Get a specific user by id.
@@ -2090,7 +2145,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Update User
      * Update a user.
@@ -2114,7 +2169,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Delete User
      * Delete a user.
@@ -2135,7 +2190,7 @@ export class UsersService {
             }
         });
     }
-    
+
 }
 
 export class UtilsService {
@@ -2159,7 +2214,7 @@ export class UtilsService {
             }
         });
     }
-    
+
     /**
      * Health Check
      * @returns boolean Successful Response
@@ -2171,7 +2226,7 @@ export class UtilsService {
             url: '/api/v1/utils/health-check/'
         });
     }
-    
+
     /**
      * Get System Config
      * Get system configuration for frontend.
@@ -2184,18 +2239,78 @@ export class UtilsService {
             url: '/api/v1/utils/system-config'
         });
     }
-    
+
 }
 
 export class VeradocService {
     /**
+     * Create Review Task
+     * Create a progress tracking task for document review and return task_id immediately.
+     * This allows frontend to start progress polling before form submission.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static createReviewTask(): CancelablePromise<{ task_id: string }> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/veradoc/review/task'
+        });
+    }
+
+    /**
+     * Get Veradoc Progress
+     * Get progress information for a VeraDoc task (review).
+     * @param data The data for the request.
+     * @param data.taskId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getVeradocProgress(data: VeradocGetVeradocProgressData): CancelablePromise<VeradocGetVeradocProgressResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/veradoc/progress/{task_id}',
+            path: {
+                task_id: data.taskId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+
+    /**
+     * Get Veradoc Results
+     * Get the results for a completed VeraDoc review task.
+     * This endpoint should be called after progress shows status='completed'.
+     * @param data The data for the request.
+     * @param data.taskId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getVeradocResults(data: VeradocGetVeradocResultsData): CancelablePromise<VeradocGetVeradocResultsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/veradoc/results/{task_id}',
+            path: {
+                task_id: data.taskId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+
+    /**
      * Process Rag Checklist
      * Process the uploaded files using RAG with a knowledge base.
+     * This endpoint now returns immediately with a task_id for progress tracking.
+     * The actual processing happens in a background task.
      * @param data The data for the request.
      * @param data.questions
      * @param data.knowledgeBaseId
      * @param data.customInstructions
      * @param data.searchMode
+     * @param data.taskId
      * @param data.formData
      * @returns VeraDocResponse Successful Response
      * @throws ApiError
@@ -2204,20 +2319,21 @@ export class VeradocService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/veradoc/process-rag',
-            query: {
+            formData: {
+                ...data.formData,
                 questions: data.questions,
                 custom_instructions: data.customInstructions,
                 knowledge_base_id: data.knowledgeBaseId,
-                search_mode: data.searchMode
+                search_mode: data.searchMode,
+                task_id: data.taskId
             },
-            formData: data.formData,
             mediaType: 'multipart/form-data',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-    
+
     /**
      * Get Checklists
      * Retrieve all checklists from the database for this user.
@@ -2230,7 +2346,7 @@ export class VeradocService {
             url: '/api/v1/veradoc/checklists'
         });
     }
-    
+
     /**
      * Create Checklist
      * Save a new checklist to the database.
@@ -2250,7 +2366,7 @@ export class VeradocService {
             }
         });
     }
-    
+
     /**
      * Get Checklist
      * Retrieve a specific checklist by ID.
@@ -2271,7 +2387,7 @@ export class VeradocService {
             }
         });
     }
-    
+
     /**
      * Update Checklist
      * Update an existing checklist.
@@ -2295,7 +2411,7 @@ export class VeradocService {
             }
         });
     }
-    
+
     /**
      * Delete Checklist
      * Delete a checklist by ID.
@@ -2316,7 +2432,7 @@ export class VeradocService {
             }
         });
     }
-    
+
     /**
      * Delete Evaluation
      * Delete an evaluation/report by ID.
@@ -2337,7 +2453,7 @@ export class VeradocService {
             }
         });
     }
-    
+
     /**
      * Get Veradoc History
      * Retrieve past VeraDoc evaluation history for the current user or all users.
@@ -2362,7 +2478,7 @@ export class VeradocService {
             }
         });
     }
-    
+
     /**
      * Get Veradoc Detail
      * Retrieve a specific VeraDoc evaluation by ID.
@@ -2394,7 +2510,7 @@ export class VeradocService {
             }
         });
     }
-    
+
     /**
      * Get Veradoc Qa Pair
      * Retrieve a specific QA pair from a VeraDoc evaluation by index.
@@ -2425,7 +2541,7 @@ export class VeradocService {
             }
         });
     }
-    
+
     /**
      * Optimize Checklist
      * Optimize checklist questions by testing them against a document that should meet all requirements.
@@ -2458,7 +2574,7 @@ export class VeradocService {
             }
         });
     }
-    
+
     /**
      * Generate Docx
      * Generate a DOCX file from the evaluation content.
@@ -2478,7 +2594,7 @@ export class VeradocService {
             }
         });
     }
-    
+
     /**
      * Generate Csv
      * Generate a CSV file from VeraDoc review results with columns for:
@@ -2499,7 +2615,7 @@ export class VeradocService {
             }
         });
     }
-    
+
     /**
      * Generate Optimization Csv
      * Generate a CSV file from checklist optimization results with columns for:
@@ -2520,7 +2636,7 @@ export class VeradocService {
             }
         });
     }
-    
+
     /**
      * Generate Questions With Files
      * Generate checklist questions based on a description using LLM, with optional reference documents.
@@ -2540,7 +2656,7 @@ export class VeradocService {
             }
         });
     }
-    
+
     /**
      * Generate Questions
      * Generate checklist questions based on a description using LLM (JSON version).
@@ -2561,5 +2677,5 @@ export class VeradocService {
             }
         });
     }
-    
+
 }
