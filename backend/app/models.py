@@ -336,6 +336,43 @@ class VeraDocDetailResponse(SQLModel):
     feedback: VeraDocDetailFeedback
 
 
+# Summary response models for lightweight archive list views
+class QaPairSummary(SQLModel):
+    """Lightweight QA pair with just the question (for expandable sections)"""
+    index: int
+    question: str
+
+
+class VeraDocSummaryResults(SQLModel):
+    """Lightweight results without heavy qa_pairs data"""
+    final_evaluation: str
+    interaction_id: str
+    qa_pairs_count: int = 0  # Just the count, not the full data
+    qa_pairs_summary: Optional[List[QaPairSummary]] = None  # Question headers for lazy loading
+
+
+class VeraDocSummaryResponse(SQLModel):
+    """Lightweight response for archive list - excludes heavy qa_pairs"""
+    id: str
+    date_created: datetime
+    document_name: Optional[str] = None
+    kb_name: Optional[str] = None
+    kb_id: Optional[str] = None
+    questions: Optional[str] = None
+    results: VeraDocSummaryResults
+    feedback: VeraDocDetailFeedback
+
+
+# Individual QA pair model for lazy loading
+class QaPairDetail(SQLModel):
+    """Full QA pair with answer, context, and citations"""
+    index: int
+    question: str
+    answer: str
+    context: str
+    source_citations: List[Dict[str, Any]] = []
+
+
 # Form, i.e., list of questions for VeraDoc functionality
 class VeraDocChecklist(SQLModel, table=True):
     __tablename__ = "questions"

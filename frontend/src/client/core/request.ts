@@ -194,7 +194,6 @@ export const sendRequest = async <T>(
 		signal: controller.signal,
 		url,
 		withCredentials: config.WITH_CREDENTIALS,
-		responseType: options.responseType || 'json',
 	};
 
 	onCancel(() => controller.abort());

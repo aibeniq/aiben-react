@@ -1,9 +1,10 @@
-import { Box } from "@chakra-ui/react"
+import { Box, Text, VStack } from "@chakra-ui/react"
 import type React from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import type { VeradocGetVeradocDetailResponse } from "../../../client"
 import QAPairDisplay from "../Utils/QAPairDisplay"
+import LazyQAPairDisplay from "./LazyQAPairDisplay"
 
 interface VeradocResultsProps {
   selectedReport: VeradocGetVeradocDetailResponse
@@ -14,8 +15,9 @@ const VeradocResults: React.FC<VeradocResultsProps> = ({
   selectedReport,
   components,
 }) => {
-  const results = selectedReport.results.final_evaluation || ""
-  const qaPairs = selectedReport.results.qa_pairs || []
+  const results = (selectedReport.results as any)?.final_evaluation || ""
+  const qaPairs = (selectedReport.results as any)?.qa_pairs || []
+  const qaPairsSummary = (selectedReport.results as any)?.qa_pairs_summary || []
 
   return (
     <>
@@ -25,14 +27,27 @@ const VeradocResults: React.FC<VeradocResultsProps> = ({
         </ReactMarkdown>
       )}
 
-      {/* Show Q&A pairs for Veradoc */}
-      {qaPairs.length > 0 && (
+      {/* Show Q&A pairs - use lazy loading if we have summaries, otherwise show full pairs */}
+      {qaPairsSummary.length > 0 ? (
+        <VStack mt={4} gap={3} align="stretch">
+          <Text fontSize="lg" fontWeight="bold">
+            Questions & Answers ({qaPairsSummary.length})
+          </Text>
+          {qaPairsSummary.map((summary: any) => (
+            <LazyQAPairDisplay
+              key={summary.index}
+              reportId={String(selectedReport.id)}
+              qaPairSummary={summary}
+            />
+          ))}
+        </VStack>
+      ) : qaPairs.length > 0 ? (
         <Box mt={4}>
           {qaPairs.map((pair: any, index: number) => (
             <QAPairDisplay key={index} pair={pair} index={index} />
           ))}
         </Box>
-      )}
+      ) : null}
     </>
   )
 }

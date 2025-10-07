@@ -26,7 +26,7 @@ interface UseToolArchiveReturn {
     { [key: string]: unknown },
     VeradocGetVeradocDetailResponse
   > &
-    ToolActions
+  ToolActions
   reportgenie: ToolState<{ [key: string]: unknown }, any> & ToolActions
   twincheck: ToolState<{ [key: string]: unknown }, any> & ToolActions
   formconnect: ToolState<{ [key: string]: unknown }, any> & ToolActions
@@ -264,13 +264,21 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const loadVeradocReport = async (reportId: string) => {
     try {
       setIsVeradocLoading(true)
-      const report = await VeradocService.getVeradocDetail({ reportId })
-      setSelectedVeradocReport(report)
+
+      // Load summary with question headers (expandable sections)
+      const summary = await VeradocService.getVeradocDetail({
+        reportId,
+        includeQaPairs: false,  // Fast: ~2KB, includes qa_pairs_summary with question headers
+      })
+      setSelectedVeradocReport(summary)
+      setIsVeradocLoading(false)  // Show summary and question headers immediately
       showSuccessToast("Evaluation loaded successfully")
+
+      // Note: Individual QA pairs will be loaded on-demand when user clicks to expand a question
+      // This provides true lazy loading - only fetch what the user actually wants to see
     } catch (error) {
       console.error("Error loading report:", error)
       showErrorToast("Failed to load evaluation")
-    } finally {
       setIsVeradocLoading(false)
     }
   }
@@ -278,13 +286,20 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const loadReportgenieReport = async (reportId: string) => {
     try {
       setIsReportgenieLoading(true)
-      const report = await ReportgenieService.getReportDetail({ reportId })
-      setSelectedReportgenieReport(report)
+
+      // Load summary only (no sections)
+      const summary = await ReportgenieService.getReportDetail({
+        reportId,
+        includeSections: false,  // Fast: metadata only, no heavy sections
+      })
+      setSelectedReportgenieReport(summary)
+      setIsReportgenieLoading(false)  // Show summary immediately
       showSuccessToast("Report loaded successfully")
+
+      // Note: Sections should be loaded on-demand when user requests them
     } catch (error) {
       console.error("Error loading report:", error)
       showErrorToast("Failed to load report")
-    } finally {
       setIsReportgenieLoading(false)
     }
   }

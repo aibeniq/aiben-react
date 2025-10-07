@@ -318,6 +318,25 @@ class Settings(BaseSettings):
     Based strictly on the provided policy citations, the following should be kept in mind when answering the question:
     """
 
+    # Relevance filter for Full Document Scan mode - prevents entire KB from being included as citations
+    VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE: str = """
+    You are an AI assistant analyzing a policy text chunk to determine if it contains information relevant to a specific question.
+
+    TEXT CHUNK:
+    {chunk}
+
+    QUESTION: {question}
+
+    INSTRUCTIONS:
+    1. Carefully analyze the text chunk to determine if it contains information directly relevant to answering the question.
+    2. If the chunk contains relevant policy information, procedures, requirements, or context that would help answer the question, respond with a brief summary of the relevant information.
+    3. If the chunk does NOT contain information relevant to the question, respond EXACTLY with: "No relevant information found in this chunk."
+    4. Do not make assumptions or infer relevance that is not clearly present in the text.
+    5. Consider information relevant if it provides requirements, procedures, definitions, or context that would help answer the question.
+
+    ANALYSIS:
+    """
+
     VERADOC_QA_PROMPT_TEMPLATE: str = """
         INSTRUCTION: 
         You are an AI assistant that helps answer questions about documents based on specific policy regulations.

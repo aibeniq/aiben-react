@@ -253,9 +253,8 @@ async def generate_report(
                 
                 section_description = section_item["text"]
                 consult_documents = section_item.get("consultDocuments", True)
-                search_type = section_item.get(
-                    "searchType", "vector"
-                )  # Default to vector
+                # Use search_mode from form parameter, not from section_item (which doesn't have searchType)
+                # search_type = section_item.get("searchType", "vector")  # ❌ WRONG - this field doesn't exist
 
                 if not section_description:
                     continue
@@ -265,7 +264,7 @@ async def generate_report(
                 source_citations = []
 
                 if consult_documents:
-                    if search_type == "full_text":
+                    if search_mode == "full_text":
                         # Full Text Scan Logic
                         print(f"Performing Full Text Scan for: {section_description}")
                         all_source_text = ""
@@ -311,6 +310,8 @@ async def generate_report(
                             max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE,
                         )
                         chunk_analyses = []
+                        relevant_chunk_indices = []
+                        
                         for i, chunk in enumerate(text_chunks):
                             # Add delay between chunk processing to prevent rate limit exhaustion
                             if i > 0 and settings.REPORTGENIE_ENABLE_PROCESSING_DELAYS:
@@ -330,9 +331,10 @@ async def generate_report(
                             except Exception as e:
                                 print(f"Warning: Could not check disconnect status: {e}")
                             
+                            # Use relevance filter to check if chunk is relevant
                             analysis = invoke_llm(
                                 llm,
-                                settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
+                                settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
                                 {"chunk": chunk, "question": section_description},
                             )
                             
@@ -349,11 +351,14 @@ async def generate_report(
                             except Exception as e:
                                 print(f"Warning: Could not check disconnect status: {e}")
                             
-                            chunk_analyses.append(analysis)
+                            # Only include relevant chunks
+                            if "No relevant information found" not in analysis:
+                                chunk_analyses.append(analysis)
+                                relevant_chunk_indices.append(i)
 
                         # Synthesize the chunk analyses
                         print(
-                            f"About to synthesize {len(chunk_analyses)} chunk analyses"
+                            f"📊 Relevance filtering: {len(chunk_analyses)} relevant chunks from {len(text_chunks)} total chunks"
                         )
 
                         if not chunk_analyses:
@@ -394,17 +399,19 @@ async def generate_report(
                                     synthesized_answer, session, current_user, llm
                                 )
 
-                                # Create source citations from all sources used in full text scan
+                                # Create source citations from relevant chunks only
                                 source_citations = []
-                                for source in sources:
+                                for idx in relevant_chunk_indices:
+                                    chunk_content = text_chunks[idx]
+                                    # Truncate to 500 chars for display
+                                    display_content = chunk_content[:500] + ("..." if len(chunk_content) > 500 else "")
+                                    
                                     source_citations.append(
                                         {
-                                            "content": f"Full document scan from {source.name}",
+                                            "content": display_content,
                                             "metadata": {
-                                                "source": source.name,
-                                                "source_data_id": str(
-                                                    source.source_data_id
-                                                ),
+                                                "source": "Full Document Scan",
+                                                "chunk_index": idx,
                                                 "scan_type": "full_text",
                                             },
                                         }

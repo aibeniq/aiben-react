@@ -395,7 +395,6 @@ const VeraDoc = () => {
         searchMode: data.searchMode,
         formData: {
           files: data.files, // Send ALL files for optimized processing
-          handwritten_files: data.handwrittenFiles,
         },
       })
 
