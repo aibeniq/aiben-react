@@ -60,8 +60,8 @@ function Archive() {
       let fullText = ""
 
       if (activeTab === "review" && veradoc.selectedReport) {
-        fullText = `# Evaluation Summary\n\n${veradoc.selectedReport.results.final_evaluation || ""}\n\n# Question-Answer Details\n\n`
-        const qaPairs = veradoc.selectedReport.results.qa_pairs || []
+        fullText = `# Evaluation Summary\n\n${(veradoc.selectedReport.results as any)?.final_evaluation || ""}\n\n# Question-Answer Details\n\n`
+        const qaPairs = (veradoc.selectedReport.results as any)?.qa_pairs || []
         qaPairs.forEach((pair: any, index: number) => {
           fullText += `## Question ${index + 1}: ${pair.question}\n\n`
           fullText += `### Answer\n${pair.answer}\n\n`
@@ -108,8 +108,8 @@ function Archive() {
 
       if (activeTab === "review" && veradoc.selectedReport) {
         // Prepare combined text with evaluation summary and QA pairs
-        fullText = `# Evaluation Summary\n\n${veradoc.selectedReport.results.final_evaluation || ""}\n\n# Question-Answer Details\n\n`
-        const qaPairs = veradoc.selectedReport.results.qa_pairs || []
+        fullText = `# Evaluation Summary\n\n${(veradoc.selectedReport.results as any)?.final_evaluation || ""}\n\n# Question-Answer Details\n\n`
+        const qaPairs = (veradoc.selectedReport.results as any)?.qa_pairs || []
         qaPairs.forEach((pair: any, index: number) => {
           fullText += `## Question ${index + 1}: ${pair.question}\n\n`
           fullText += `### Answer\n${pair.answer}\n\n`

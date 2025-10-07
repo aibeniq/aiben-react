@@ -45,6 +45,7 @@ from fastapi import (
     HTTPException,
     Depends,
     Request as FastAPIRequest,
+    Query,
 )
 from fastapi.responses import StreamingResponse
 from typing import List, Dict, Any, Optional
@@ -146,12 +147,65 @@ async def prefetch_knowledge_base_context(
                     context = "No relevant documents found in the knowledge base for this question."
                     source_citations = []
                 else:
+                    print(f"Retrieved {len(docs)} documents for question: {question_text[:50]}...")
+                    
+                    # Check if this is a Full Document Scan (retriever returns ALL docs)
+                    # We detect this by checking if we got more than RAG_NUM_CHUNKS documents
+                    is_full_scan = len(docs) > settings.RAG_NUM_CHUNKS
+                    
+                    if is_full_scan:
+                        print(f"🔍 Full Document Scan detected: Filtering {len(docs)} chunks for relevance...")
+                        
+                        # LLM-based relevance filtering for Full Document Scan
+                        # This prevents the entire KB from being included as citations
+                        filtered_docs = []
+                        
+                        for doc_idx, doc in enumerate(docs):
+                            try:
+                                # Add delay between chunk analyses to prevent rate limits
+                                if doc_idx > 0 and settings.VERADOC_ENABLE_PROCESSING_DELAYS:
+                                    import asyncio
+                                    await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
+                                
+                                # Check for cancellation during filtering
+                                if request and await request.is_disconnected():
+                                    print(f"❌ CLIENT DISCONNECTED - Stopping relevance filtering at chunk {doc_idx + 1}")
+                                    raise HTTPException(
+                                        status_code=408,
+                                        detail="Request cancelled during relevance filtering"
+                                    )
+                                
+                                print(f"Analyzing chunk {doc_idx + 1}/{len(docs)} for relevance...")
+                                
+                                # Use LLM to determine if this chunk is relevant
+                                relevance_check = invoke_llm(
+                                    llm,
+                                    settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
+                                    {"chunk": doc.page_content or "", "question": question_text},
+                                )
+                                
+                                # Filter based on LLM response (similar to chatbot)
+                                if "No relevant information found" not in relevance_check:
+                                    print(f"✅ Chunk {doc_idx + 1} is relevant")
+                                    filtered_docs.append(doc)
+                                else:
+                                    print(f"❌ Chunk {doc_idx + 1} is not relevant - excluding from citations")
+                                    
+                            except Exception as filter_error:
+                                print(f"Error filtering chunk {doc_idx + 1}: {filter_error}")
+                                # On error, include the chunk to be safe
+                                filtered_docs.append(doc)
+                        
+                        print(f"📊 Relevance filtering: {len(filtered_docs)}/{len(docs)} chunks are relevant")
+                        docs = filtered_docs
+                    
+                    # Build context from filtered documents
                     context = "\n\n".join([
                         doc.page_content for doc in docs if doc.page_content
                     ])
-                    print(f"Retrieved {len(docs)} documents, context length: {len(context)} characters")
+                    print(f"Final context length: {len(context)} characters from {len(docs)} documents")
                     
-                    # Store source documents for citation
+                    # Store source documents for citation (now filtered if Full Document Scan)
                     source_citations = []
                     for doc in docs:
                         try:
@@ -1426,13 +1480,26 @@ async def get_veradoc_history(
         )
 
 
-@router.get("/history/{report_id}", response_model=VeraDocDetailResponse)
+@router.get("/history/{report_id}", response_model=Dict[str, Any])
 async def get_veradoc_detail(
     report_id: uuid.UUID,
     session: SessionDep,
     current_user: CurrentUser,
+    include_qa_pairs: bool = Query(
+        default=True,
+        description="If False, excludes the heavy qa_pairs data to improve performance"
+    ),
 ):
-    """Retrieve a specific VeraDoc evaluation's full content by ID."""
+    """
+    Retrieve a specific VeraDoc evaluation by ID.
+    
+    Args:
+        report_id: The UUID of the report to retrieve
+        include_qa_pairs: If False, excludes the heavy qa_pairs data (default: True)
+    
+    Returns summary (without qa_pairs) when include_qa_pairs=False,
+    or full detail (with qa_pairs) when include_qa_pairs=True.
+    """
     try:
         report = session.get(LlmInteraction, report_id)
         if not report:
@@ -1464,6 +1531,8 @@ async def get_veradoc_detail(
                 kb = session.get(KnowledgeBase, kb_id)
                 kb_name = kb.title if kb else "Unknown Knowledge Base"
 
+            qa_pairs = extra_data.get("qa_pairs", [])
+            
             # Create a response that matches the structure expected by the frontend
             result = {
                 "id": str(report.id),
@@ -1474,7 +1543,6 @@ async def get_veradoc_detail(
                 "questions": input_data.get("questions", ""),
                 "results": {
                     "final_evaluation": output_data.get("final_evaluation", ""),
-                    "qa_pairs": extra_data.get("qa_pairs", []),
                     "interaction_id": str(report.id),
                 },
                 # Add feedback information
@@ -1488,20 +1556,41 @@ async def get_veradoc_detail(
                     ),
                 },
             }
+            
+            # Conditionally include qa_pairs based on parameter
+            if include_qa_pairs:
+                result["results"]["qa_pairs"] = qa_pairs
+            else:
+                # For summary view, include question headers (without answers/context/citations)
+                result["results"]["qa_pairs_summary"] = [
+                    {
+                        "index": i,
+                        "question": qa.get("question", ""),
+                    }
+                    for i, qa in enumerate(qa_pairs)
+                ]
+                result["results"]["qa_pairs_count"] = len(qa_pairs)
 
             return result
 
         except Exception as e:
             # Fallback if parsing fails
-            return {
+            fallback = {
                 "id": str(report.id),
                 "date_created": report.date_created,
                 "results": {
                     "final_evaluation": f"Unable to reconstruct evaluation from {report.date_created}.\n\n"
                     f"This might be due to an older format or incomplete data.",
-                    "qa_pairs": [],
+                    "interaction_id": str(report.id),
                 },
             }
+            
+            if include_qa_pairs:
+                fallback["results"]["qa_pairs"] = []
+            else:
+                fallback["results"]["qa_pairs_count"] = 0
+                
+            return fallback
 
     except Exception as e:
         import traceback
@@ -1509,6 +1598,73 @@ async def get_veradoc_detail(
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error retrieving evaluation details: {str(e)}"
+        )
+
+
+@router.get("/history/{report_id}/qa-pair/{qa_index}", response_model=Dict[str, Any])
+async def get_veradoc_qa_pair(
+    report_id: uuid.UUID,
+    qa_index: int,
+    session: SessionDep,
+    current_user: CurrentUser,
+):
+    """
+    Retrieve a specific QA pair from a VeraDoc evaluation by index.
+    
+    This enables lazy loading of individual QA pairs for better performance.
+    
+    Args:
+        report_id: The UUID of the report
+        qa_index: The zero-based index of the QA pair to retrieve
+    
+    Returns the QA pair with question, answer, context, and source_citations.
+    """
+    try:
+        report = session.get(LlmInteraction, report_id)
+        if not report:
+            raise HTTPException(status_code=404, detail="Report not found")
+
+        if report.functionality != "veradoc":
+            raise HTTPException(
+                status_code=400, detail="This is not a VeraDoc evaluation"
+            )
+
+        try:
+            extra_data = report.extra_data or {}
+            qa_pairs = extra_data.get("qa_pairs", [])
+            
+            if qa_index < 0 or qa_index >= len(qa_pairs):
+                raise HTTPException(
+                    status_code=404, 
+                    detail=f"QA pair index {qa_index} not found. Valid range: 0-{len(qa_pairs)-1}"
+                )
+            
+            qa_pair = qa_pairs[qa_index]
+            
+            return {
+                "index": qa_index,
+                "question": qa_pair.get("question", ""),
+                "answer": qa_pair.get("answer", ""),
+                "context": qa_pair.get("context", ""),
+                "source_citations": qa_pair.get("source_citations", []),
+            }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error retrieving QA pair: {str(e)}"
+            )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error retrieving QA pair: {str(e)}"
         )
 
 

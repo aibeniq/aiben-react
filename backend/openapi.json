@@ -1104,6 +1104,16 @@
               "default": 100,
               "title": "Limit"
             }
+          },
+          {
+            "name": "show_all",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Show All"
+            }
           }
         ],
         "responses": {
@@ -1134,7 +1144,7 @@
           "knowledge-bases"
         ],
         "summary": "Create Knowledge Base",
-        "description": "Create new knowledge base with a compressed folder with the Chroma VectorDB.",
+        "description": "Create new knowledge base asynchronously with real-time progress tracking.\nReturns immediately with task_id for progress monitoring.",
         "operationId": "knowledge-bases-create_knowledge_base",
         "security": [
           {
@@ -1142,6 +1152,22 @@
           }
         ],
         "parameters": [
+          {
+            "name": "task_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Task Id"
+            }
+          },
           {
             "name": "title",
             "in": "query",
@@ -1204,7 +1230,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/KnowledgeBasePublic"
+                  "$ref": "#/components/schemas/KnowledgeBaseCreateResponse"
                 }
               }
             }
@@ -1426,13 +1452,147 @@
         }
       }
     },
+    "/api/v1/knowledge-bases/create-task": {
+      "post": {
+        "tags": [
+          "knowledge-bases"
+        ],
+        "summary": "Create Knowledge Base Task",
+        "description": "Create a knowledge base task and return task_id immediately for progress tracking.\nThis allows frontend to start progress polling before file upload begins.",
+        "operationId": "knowledge-bases-create_knowledge_base_task",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "title",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "title": "Title"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 255
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Description"
+            }
+          },
+          {
+            "name": "embedding_model_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Embedding Model Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Knowledge-Bases-Create Knowledge Base Task"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/knowledge-bases/progress/{task_id}": {
+      "get": {
+        "tags": [
+          "knowledge-bases"
+        ],
+        "summary": "Get Knowledge Base Progress",
+        "description": "Get progress information for a knowledge base creation task.",
+        "operationId": "knowledge-bases-get_knowledge_base_progress",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Knowledge-Bases-Get Knowledge Base Progress"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/formconnect/process": {
       "post": {
         "tags": [
           "formconnect"
         ],
         "summary": "Process Form",
-        "description": "Process the uploaded files and fields.\n\nHandles two types of files:\n- digitized_files: Standard text extraction\n- handwritten_files: OCR-based extraction (placeholder)",
+        "description": "Process the uploaded files and fields with unified visual processing.\nAll files now benefit from automatic visual enhancement for embedded images.",
         "operationId": "formconnect-process_form",
         "security": [
           {
@@ -1938,6 +2098,53 @@
         ]
       }
     },
+    "/api/v1/formconnect/generate-fields-with-files": {
+      "post": {
+        "tags": [
+          "formconnect"
+        ],
+        "summary": "Generate Form Fields With Files",
+        "description": "Generate form fields based on a description and uploaded reference documents.",
+        "operationId": "formconnect-generate_form_fields_with_files",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_formconnect-generate_form_fields_with_files"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateFormFieldsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/formconnect/generate/docx": {
       "post": {
         "tags": [
@@ -2065,6 +2272,55 @@
         ]
       }
     },
+    "/api/v1/reportgenie/reports/{report_id}": {
+      "delete": {
+        "tags": [
+          "reportgenie"
+        ],
+        "summary": "Delete Report",
+        "description": "Delete a report by ID.",
+        "operationId": "reportgenie-delete_report",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Report Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/reportgenie/history": {
       "get": {
         "tags": [
@@ -2145,13 +2401,8 @@
           "reportgenie"
         ],
         "summary": "Get Report Detail",
-        "description": "Retrieve a specific ReportGenie report's full content by ID.",
+        "description": "Retrieve a specific ReportGenie report by ID.\n\nArgs:\n    report_id: The UUID of the report to retrieve\n    include_sections: If False, excludes the heavy sections with citations (default: True)\n\nReturns summary (without detailed sections) when include_sections=False,\nor full detail (with sections and citations) when include_sections=True.",
         "operationId": "reportgenie-get_report_detail",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
         "parameters": [
           {
             "name": "report_id",
@@ -2161,6 +2412,18 @@
               "type": "string",
               "title": "Report Id"
             }
+          },
+          {
+            "name": "include_sections",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "If False, excludes the heavy sections with citations to improve performance",
+              "default": true,
+              "title": "Include Sections"
+            },
+            "description": "If False, excludes the heavy sections with citations to improve performance"
           }
         ],
         "responses": {
@@ -2995,6 +3258,55 @@
         }
       }
     },
+    "/api/v1/veradoc/evaluations/{evaluation_id}": {
+      "delete": {
+        "tags": [
+          "veradoc"
+        ],
+        "summary": "Delete Evaluation",
+        "description": "Delete an evaluation/report by ID.",
+        "operationId": "veradoc-delete_evaluation",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "evaluation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Evaluation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/veradoc/history": {
       "get": {
         "tags": [
@@ -3075,7 +3387,7 @@
           "veradoc"
         ],
         "summary": "Get Veradoc Detail",
-        "description": "Retrieve a specific VeraDoc evaluation's full content by ID.",
+        "description": "Retrieve a specific VeraDoc evaluation by ID.\n\nArgs:\n    report_id: The UUID of the report to retrieve\n    include_qa_pairs: If False, excludes the heavy qa_pairs data (default: True)\n\nReturns summary (without qa_pairs) when include_qa_pairs=False,\nor full detail (with qa_pairs) when include_qa_pairs=True.",
         "operationId": "veradoc-get_veradoc_detail",
         "security": [
           {
@@ -3092,6 +3404,18 @@
               "format": "uuid",
               "title": "Report Id"
             }
+          },
+          {
+            "name": "include_qa_pairs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "If False, excludes the heavy qa_pairs data to improve performance",
+              "default": true,
+              "title": "Include Qa Pairs"
+            },
+            "description": "If False, excludes the heavy qa_pairs data to improve performance"
           }
         ],
         "responses": {
@@ -3100,7 +3424,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/VeraDocDetailResponse"
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Veradoc-Get Veradoc Detail"
                 }
               }
             }
@@ -5084,7 +5410,7 @@
           "files"
         ],
         "summary": "Get Source Content",
-        "description": "Retrieve a source file by ID.\nOnly returns files that the user has access to (either owns or has permissions for).",
+        "description": "Retrieve a source file by ID.\nAvailable to all authenticated users in shared deployment.",
         "operationId": "files-get_source_content",
         "security": [
           {
@@ -5182,6 +5508,99 @@
         "summary": "Convert Docx To Pdf By Filename",
         "description": "Convert a DOCX source file to PDF on-demand using filename.\nOnly works with DOCX files that the user has access to.",
         "operationId": "files-convert_docx_to_pdf_by_filename",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Filename"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/files/source/{source_id}/rtf-pdf": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Convert Rtf To Pdf",
+        "description": "Convert an RTF source file to PDF on-demand.\nOnly works with RTF files that the user has access to.",
+        "operationId": "files-convert_rtf_to_pdf",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "source_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Source Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/files/source/by-filename/{filename}/rtf-pdf": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Convert Rtf To Pdf By Filename",
+        "description": "Convert an RTF source file to PDF on-demand using filename.\nOnly works with RTF files that the user has access to.",
+        "operationId": "files-convert_rtf_to_pdf_by_filename",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -5369,46 +5788,54 @@
         ]
       }
     },
-    "/api/v1/private/users/": {
-      "post": {
+    "/api/v1/rate-limiter/status": {
+      "get": {
         "tags": [
-          "private"
+          "monitoring"
         ],
-        "summary": "Create User",
-        "description": "Create a new user.",
-        "operationId": "private-create_user",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PrivateUserCreate"
-              }
-            }
-          },
-          "required": true
-        },
+        "summary": "Get Rate Limiter Status",
+        "description": "Get current rate limiter status and usage statistics.\n\nReturns:\n    Dictionary with current rate limiter usage and capacity information",
+        "operationId": "monitoring-get_rate_limiter_status",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserPublic"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": {}
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rate-limiter/reset": {
+      "post": {
+        "tags": [
+          "monitoring"
+        ],
+        "summary": "Reset Rate Limiter",
+        "description": "Reset the rate limiter counters (admin function).\n\nNote: This should only be used in development or emergency situations.",
+        "operationId": "monitoring-reset_rate_limiter",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     }
   },
@@ -5427,6 +5854,42 @@
         },
         "type": "object",
         "title": "Body_chat-query_document"
+      },
+      "Body_formconnect-generate_form_fields_with_files": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "num_fields": {
+            "type": "integer",
+            "title": "Num Fields",
+            "default": 15
+          },
+          "search_mode": {
+            "type": "string",
+            "enum": [
+              "vector",
+              "full_scan"
+            ],
+            "title": "Search Mode",
+            "default": "vector"
+          },
+          "files": {
+            "items": {
+              "type": "string",
+              "format": "binary"
+            },
+            "type": "array",
+            "title": "Files"
+          }
+        },
+        "type": "object",
+        "required": [
+          "description",
+          "files"
+        ],
+        "title": "Body_formconnect-generate_form_fields_with_files"
       },
       "Body_formconnect-process_form": {
         "properties": {
@@ -5719,6 +6182,17 @@
             ],
             "title": "Num Topics"
           },
+          "knowledge_base_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Knowledge Base Id"
+          },
           "files": {
             "items": {
               "type": "string",
@@ -5799,14 +6273,6 @@
             },
             "type": "array",
             "title": "Files"
-          },
-          "handwritten_files": {
-            "items": {
-              "type": "string",
-              "format": "binary"
-            },
-            "type": "array",
-            "title": "Handwritten Files"
           }
         },
         "type": "object",
@@ -5890,6 +6356,31 @@
           "needs_revision": {
             "type": "boolean",
             "title": "Needs Revision"
+          },
+          "policy_context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Context"
+          },
+          "source_citations": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Citations"
           }
         },
         "type": "object",
@@ -6259,9 +6750,15 @@
       "GenerateFormFieldsRequest": {
         "properties": {
           "description": {
-            "type": "string",
-            "maxLength": 2000,
-            "minLength": 10,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Description"
           },
           "num_fields": {
@@ -6300,9 +6797,6 @@
           }
         },
         "type": "object",
-        "required": [
-          "description"
-        ],
         "title": "GenerateFormFieldsRequest"
       },
       "GenerateFormFieldsResponse": {
@@ -6329,9 +6823,15 @@
       "GenerateOutlineRequest": {
         "properties": {
           "description": {
-            "type": "string",
-            "maxLength": 20000,
-            "minLength": 10,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20000
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Description"
           },
           "num_sections": {
@@ -6374,9 +6874,6 @@
           }
         },
         "type": "object",
-        "required": [
-          "description"
-        ],
         "title": "GenerateOutlineRequest"
       },
       "GenerateOutlineResponse": {
@@ -6477,9 +6974,15 @@
       "GenerateTopicsRequest": {
         "properties": {
           "description": {
-            "type": "string",
-            "maxLength": 20000,
-            "minLength": 10,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20000
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Description"
           },
           "num_topics": {
@@ -6522,9 +7025,6 @@
           }
         },
         "type": "object",
-        "required": [
-          "description"
-        ],
         "title": "GenerateTopicsRequest"
       },
       "GenerateTopicsResponse": {
@@ -6679,6 +7179,23 @@
         ],
         "title": "ItemsPublic"
       },
+      "KnowledgeBaseCreateResponse": {
+        "properties": {
+          "knowledge_base": {
+            "$ref": "#/components/schemas/KnowledgeBasePublic"
+          },
+          "task_id": {
+            "type": "string",
+            "title": "Task Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "knowledge_base",
+          "task_id"
+        ],
+        "title": "KnowledgeBaseCreateResponse"
+      },
       "KnowledgeBasePublic": {
         "properties": {
           "title": {
@@ -6742,6 +7259,11 @@
           "number_of_sources": {
             "type": "integer",
             "title": "Number Of Sources",
+            "default": 0
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages",
             "default": 0
           },
           "embedding_model_name": {
@@ -7068,34 +7590,6 @@
           "needs_revision"
         ],
         "title": "OutlineSuggestion"
-      },
-      "PrivateUserCreate": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "title": "Email"
-          },
-          "password": {
-            "type": "string",
-            "title": "Password"
-          },
-          "full_name": {
-            "type": "string",
-            "title": "Full Name"
-          },
-          "is_verified": {
-            "type": "boolean",
-            "title": "Is Verified",
-            "default": false
-          }
-        },
-        "type": "object",
-        "required": [
-          "email",
-          "password",
-          "full_name"
-        ],
-        "title": "PrivateUserCreate"
       },
       "QueryResponse": {
         "properties": {
@@ -7985,142 +8479,6 @@
           "owner_id"
         ],
         "title": "VeraDocChecklist"
-      },
-      "VeraDocDetailFeedback": {
-        "properties": {
-          "feedback": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Feedback"
-          },
-          "feedbackText": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Feedbacktext"
-          },
-          "feedbackDate": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Feedbackdate"
-          }
-        },
-        "type": "object",
-        "title": "VeraDocDetailFeedback"
-      },
-      "VeraDocDetailResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "date_created": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Date Created"
-          },
-          "document_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Document Name"
-          },
-          "kb_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kb Name"
-          },
-          "kb_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kb Id"
-          },
-          "questions": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Questions"
-          },
-          "results": {
-            "$ref": "#/components/schemas/VeraDocDetailResults"
-          },
-          "feedback": {
-            "$ref": "#/components/schemas/VeraDocDetailFeedback"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "date_created",
-          "results",
-          "feedback"
-        ],
-        "title": "VeraDocDetailResponse"
-      },
-      "VeraDocDetailResults": {
-        "properties": {
-          "final_evaluation": {
-            "type": "string",
-            "title": "Final Evaluation"
-          },
-          "qa_pairs": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "type": "array",
-            "title": "Qa Pairs"
-          },
-          "interaction_id": {
-            "type": "string",
-            "title": "Interaction Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "final_evaluation",
-          "interaction_id"
-        ],
-        "title": "VeraDocDetailResults"
       },
       "VeraDocResponse": {
         "properties": {

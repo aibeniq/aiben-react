@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ChatQueryKnowledgeBaseData, ChatQueryKnowledgeBaseResponse, ChatQueryDocumentData, ChatQueryDocumentResponse, ChatQueryTextData, ChatQueryTextResponse, ChatChatData, ChatChatResponse, EmbeddingModelsGetAvailableProvidersResponse, EmbeddingModelsGetEmbeddingModelsData, EmbeddingModelsGetEmbeddingModelsResponse, EmbeddingModelsCreateEmbeddingModelData, EmbeddingModelsCreateEmbeddingModelResponse, EmbeddingModelsGetDefaultEmbeddingModelResponse, EmbeddingModelsGetEmbeddingModelData, EmbeddingModelsGetEmbeddingModelResponse, EmbeddingModelsUpdateEmbeddingModelData, EmbeddingModelsUpdateEmbeddingModelResponse, EmbeddingModelsDeleteEmbeddingModelData, EmbeddingModelsDeleteEmbeddingModelResponse, EmbeddingModelsSetDefaultEmbeddingModelData, EmbeddingModelsSetDefaultEmbeddingModelResponse, EmbeddingModelsValidateEmbeddingModelData, EmbeddingModelsValidateEmbeddingModelResponse, EmbeddingModelsCheckApiKeyConfiguredData, EmbeddingModelsCheckApiKeyConfiguredResponse, FeedbackSubmitFeedbackData, FeedbackSubmitFeedbackResponse, FilesGetSourceContentData, FilesGetSourceContentResponse, FilesConvertDocxToPdfData, FilesConvertDocxToPdfResponse, FilesConvertDocxToPdfByFilenameData, FilesConvertDocxToPdfByFilenameResponse, FilesGetSourceContentByFilenameData, FilesGetSourceContentByFilenameResponse, FormconnectProcessFormData, FormconnectProcessFormResponse, FormconnectGetFormsResponse, FormconnectCreateFormData, FormconnectCreateFormResponse, FormconnectGetFormData, FormconnectGetFormResponse, FormconnectUpdateFormData, FormconnectUpdateFormResponse, FormconnectDeleteFormData, FormconnectDeleteFormResponse, FormconnectGetFormDetailData, FormconnectGetFormDetailResponse, FormconnectGetFormHistoryData, FormconnectGetFormHistoryResponse, FormconnectGenerateFormFieldsData, FormconnectGenerateFormFieldsResponse, FormconnectGenerateFormFieldsJsonData, FormconnectGenerateFormFieldsJsonResponse, FormconnectGenerateFormFieldsWithFilesData, FormconnectGenerateFormFieldsWithFilesResponse, FormconnectGenerateDocxData, FormconnectGenerateDocxResponse, FormconnectGenerateCsvData, FormconnectGenerateCsvResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, KnowledgeBasesReadKnowledgeBasesData, KnowledgeBasesReadKnowledgeBasesResponse, KnowledgeBasesCreateKnowledgeBaseData, KnowledgeBasesCreateKnowledgeBaseResponse, KnowledgeBasesReadKnowledgeBaseData, KnowledgeBasesReadKnowledgeBaseResponse, KnowledgeBasesUpdateKnowledgeBaseData, KnowledgeBasesUpdateKnowledgeBaseResponse, KnowledgeBasesDeleteKnowledgeBaseData, KnowledgeBasesDeleteKnowledgeBaseResponse, LlmModelsGetLlmModelsData, LlmModelsGetLlmModelsResponse, LlmModelsCreateLlmModelData, LlmModelsCreateLlmModelResponse, LlmModelsGetDefaultLlmModelResponse, LlmModelsDeleteLlmModelData, LlmModelsDeleteLlmModelResponse, LlmModelsValidateLlmModelData, LlmModelsValidateLlmModelResponse, LlmModelsSetDefaultLlmModelData, LlmModelsSetDefaultLlmModelResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, ReportgenieGenerateReportData, ReportgenieGenerateReportResponse, ReportgenieDeleteReportData, ReportgenieDeleteReportResponse, ReportgenieGetReportHistoryData, ReportgenieGetReportHistoryResponse, ReportgenieGetReportDetailData, ReportgenieGetReportDetailResponse, ReportgenieGetOutlinesResponse, ReportgenieCreateOutlineData, ReportgenieCreateOutlineResponse, ReportgenieGetOutlineData, ReportgenieGetOutlineResponse, ReportgenieUpdateOutlineData, ReportgenieUpdateOutlineResponse, ReportgenieDeleteOutlineData, ReportgenieDeleteOutlineResponse, ReportgenieGenerateOutlineJsonData, ReportgenieGenerateOutlineJsonResponse, ReportgenieGenerateOutlineData, ReportgenieGenerateOutlineResponse, ReportgenieOptimizeOutlineData, ReportgenieOptimizeOutlineResponse, ReportgenieGenerateOutlineOptimizationCsvData, ReportgenieGenerateOutlineOptimizationCsvResponse, ReportgenieGenerateDocxData, ReportgenieGenerateDocxResponse, ReportgenieGenerateCsvData, ReportgenieGenerateCsvResponse, TwincheckCompareDocumentsData, TwincheckCompareDocumentsResponse, TwincheckGetComparisonHistoryData, TwincheckGetComparisonHistoryResponse, TwincheckGetComparisonDetailData, TwincheckGetComparisonDetailResponse, TwincheckGetComparisonsResponse, TwincheckCreateComparisonData, TwincheckCreateComparisonResponse, TwincheckGetComparisonData, TwincheckGetComparisonResponse, TwincheckUpdateComparisonData, TwincheckUpdateComparisonResponse, TwincheckDeleteComparisonData, TwincheckDeleteComparisonResponse, TwincheckGenerateDocxData, TwincheckGenerateDocxResponse, TwincheckGenerateCsvData, TwincheckGenerateCsvResponse, TwincheckGenerateTopicsData, TwincheckGenerateTopicsResponse, TwincheckGenerateTopicsJsonData, TwincheckGenerateTopicsJsonResponse, UsageGetTokenUsageResponse, UsersGetSupportedLanguagesResponse, UsersUpdateLanguageData, UsersUpdateLanguageResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, UtilsGetSystemConfigResponse, VeradocProcessRagChecklistData, VeradocProcessRagChecklistResponse, VeradocGetChecklistsResponse, VeradocCreateChecklistData, VeradocCreateChecklistResponse, VeradocGetChecklistData, VeradocGetChecklistResponse, VeradocUpdateChecklistData, VeradocUpdateChecklistResponse, VeradocDeleteChecklistData, VeradocDeleteChecklistResponse, VeradocDeleteEvaluationData, VeradocDeleteEvaluationResponse, VeradocGetVeradocHistoryData, VeradocGetVeradocHistoryResponse, VeradocGetVeradocDetailData, VeradocGetVeradocDetailResponse, VeradocOptimizeChecklistData, VeradocOptimizeChecklistResponse, VeradocGenerateDocxData, VeradocGenerateDocxResponse, VeradocGenerateCsvData, VeradocGenerateCsvResponse, VeradocGenerateOptimizationCsvData, VeradocGenerateOptimizationCsvResponse, VeradocGenerateQuestionsWithFilesData, VeradocGenerateQuestionsWithFilesResponse, VeradocGenerateQuestionsData, VeradocGenerateQuestionsResponse } from './types.gen';
+import type { ChatQueryKnowledgeBaseData, ChatQueryKnowledgeBaseResponse, ChatQueryDocumentData, ChatQueryDocumentResponse, ChatQueryTextData, ChatQueryTextResponse, ChatChatData, ChatChatResponse, EmbeddingModelsGetAvailableProvidersResponse, EmbeddingModelsGetEmbeddingModelsData, EmbeddingModelsGetEmbeddingModelsResponse, EmbeddingModelsCreateEmbeddingModelData, EmbeddingModelsCreateEmbeddingModelResponse, EmbeddingModelsGetDefaultEmbeddingModelResponse, EmbeddingModelsGetEmbeddingModelData, EmbeddingModelsGetEmbeddingModelResponse, EmbeddingModelsUpdateEmbeddingModelData, EmbeddingModelsUpdateEmbeddingModelResponse, EmbeddingModelsDeleteEmbeddingModelData, EmbeddingModelsDeleteEmbeddingModelResponse, EmbeddingModelsSetDefaultEmbeddingModelData, EmbeddingModelsSetDefaultEmbeddingModelResponse, EmbeddingModelsValidateEmbeddingModelData, EmbeddingModelsValidateEmbeddingModelResponse, EmbeddingModelsCheckApiKeyConfiguredData, EmbeddingModelsCheckApiKeyConfiguredResponse, FeedbackSubmitFeedbackData, FeedbackSubmitFeedbackResponse, FilesGetSourceContentData, FilesGetSourceContentResponse, FilesConvertDocxToPdfData, FilesConvertDocxToPdfResponse, FilesConvertDocxToPdfByFilenameData, FilesConvertDocxToPdfByFilenameResponse, FilesConvertRtfToPdfData, FilesConvertRtfToPdfResponse, FilesConvertRtfToPdfByFilenameData, FilesConvertRtfToPdfByFilenameResponse, FilesGetSourceContentByFilenameData, FilesGetSourceContentByFilenameResponse, FormconnectProcessFormData, FormconnectProcessFormResponse, FormconnectGetFormsResponse, FormconnectCreateFormData, FormconnectCreateFormResponse, FormconnectGetFormData, FormconnectGetFormResponse, FormconnectUpdateFormData, FormconnectUpdateFormResponse, FormconnectDeleteFormData, FormconnectDeleteFormResponse, FormconnectGetFormDetailData, FormconnectGetFormDetailResponse, FormconnectGetFormHistoryData, FormconnectGetFormHistoryResponse, FormconnectGenerateFormFieldsData, FormconnectGenerateFormFieldsResponse, FormconnectGenerateFormFieldsJsonData, FormconnectGenerateFormFieldsJsonResponse, FormconnectGenerateFormFieldsWithFilesData, FormconnectGenerateFormFieldsWithFilesResponse, FormconnectGenerateDocxData, FormconnectGenerateDocxResponse, FormconnectGenerateCsvData, FormconnectGenerateCsvResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, KnowledgeBasesReadKnowledgeBasesData, KnowledgeBasesReadKnowledgeBasesResponse, KnowledgeBasesCreateKnowledgeBaseData, KnowledgeBasesCreateKnowledgeBaseResponse, KnowledgeBasesReadKnowledgeBaseData, KnowledgeBasesReadKnowledgeBaseResponse, KnowledgeBasesUpdateKnowledgeBaseData, KnowledgeBasesUpdateKnowledgeBaseResponse, KnowledgeBasesDeleteKnowledgeBaseData, KnowledgeBasesDeleteKnowledgeBaseResponse, KnowledgeBasesCreateKnowledgeBaseTaskData, KnowledgeBasesCreateKnowledgeBaseTaskResponse, KnowledgeBasesGetKnowledgeBaseProgressData, KnowledgeBasesGetKnowledgeBaseProgressResponse, LlmModelsGetLlmModelsData, LlmModelsGetLlmModelsResponse, LlmModelsCreateLlmModelData, LlmModelsCreateLlmModelResponse, LlmModelsGetDefaultLlmModelResponse, LlmModelsDeleteLlmModelData, LlmModelsDeleteLlmModelResponse, LlmModelsValidateLlmModelData, LlmModelsValidateLlmModelResponse, LlmModelsSetDefaultLlmModelData, LlmModelsSetDefaultLlmModelResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MonitoringGetRateLimiterStatusResponse, MonitoringResetRateLimiterResponse, ReportgenieGenerateReportData, ReportgenieGenerateReportResponse, ReportgenieDeleteReportData, ReportgenieDeleteReportResponse, ReportgenieGetReportHistoryData, ReportgenieGetReportHistoryResponse, ReportgenieGetReportDetailData, ReportgenieGetReportDetailResponse, ReportgenieGetOutlinesResponse, ReportgenieCreateOutlineData, ReportgenieCreateOutlineResponse, ReportgenieGetOutlineData, ReportgenieGetOutlineResponse, ReportgenieUpdateOutlineData, ReportgenieUpdateOutlineResponse, ReportgenieDeleteOutlineData, ReportgenieDeleteOutlineResponse, ReportgenieGenerateOutlineJsonData, ReportgenieGenerateOutlineJsonResponse, ReportgenieGenerateOutlineData, ReportgenieGenerateOutlineResponse, ReportgenieOptimizeOutlineData, ReportgenieOptimizeOutlineResponse, ReportgenieGenerateOutlineOptimizationCsvData, ReportgenieGenerateOutlineOptimizationCsvResponse, ReportgenieGenerateDocxData, ReportgenieGenerateDocxResponse, ReportgenieGenerateCsvData, ReportgenieGenerateCsvResponse, TwincheckCompareDocumentsData, TwincheckCompareDocumentsResponse, TwincheckGetComparisonHistoryData, TwincheckGetComparisonHistoryResponse, TwincheckGetComparisonDetailData, TwincheckGetComparisonDetailResponse, TwincheckGetComparisonsResponse, TwincheckCreateComparisonData, TwincheckCreateComparisonResponse, TwincheckGetComparisonData, TwincheckGetComparisonResponse, TwincheckUpdateComparisonData, TwincheckUpdateComparisonResponse, TwincheckDeleteComparisonData, TwincheckDeleteComparisonResponse, TwincheckGenerateDocxData, TwincheckGenerateDocxResponse, TwincheckGenerateCsvData, TwincheckGenerateCsvResponse, TwincheckGenerateTopicsData, TwincheckGenerateTopicsResponse, TwincheckGenerateTopicsJsonData, TwincheckGenerateTopicsJsonResponse, UsageGetTokenUsageResponse, UsersGetSupportedLanguagesResponse, UsersUpdateLanguageData, UsersUpdateLanguageResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, UtilsGetSystemConfigResponse, VeradocProcessRagChecklistData, VeradocProcessRagChecklistResponse, VeradocGetChecklistsResponse, VeradocCreateChecklistData, VeradocCreateChecklistResponse, VeradocGetChecklistData, VeradocGetChecklistResponse, VeradocUpdateChecklistData, VeradocUpdateChecklistResponse, VeradocDeleteChecklistData, VeradocDeleteChecklistResponse, VeradocDeleteEvaluationData, VeradocDeleteEvaluationResponse, VeradocGetVeradocHistoryData, VeradocGetVeradocHistoryResponse, VeradocGetVeradocDetailData, VeradocGetVeradocDetailResponse, VeradocGetVeradocQaPairData, VeradocGetVeradocQaPairResponse, VeradocOptimizeChecklistData, VeradocOptimizeChecklistResponse, VeradocGenerateDocxData, VeradocGenerateDocxResponse, VeradocGenerateCsvData, VeradocGenerateCsvResponse, VeradocGenerateOptimizationCsvData, VeradocGenerateOptimizationCsvResponse, VeradocGenerateQuestionsWithFilesData, VeradocGenerateQuestionsWithFilesResponse, VeradocGenerateQuestionsData, VeradocGenerateQuestionsResponse } from './types.gen';
 
 export class ChatService {
     /**
@@ -391,14 +391,6 @@ export class FilesService {
             path: {
                 source_id: data.sourceId
             },
-            responseType: 'arraybuffer',
-            responseTransformer: async (data: any) => {
-                // Handle binary PDF response
-                if (data instanceof ArrayBuffer) {
-                    return new Blob([data], { type: 'application/pdf' });
-                }
-                return data;
-            },
             errors: {
                 422: 'Validation Error'
             }
@@ -421,14 +413,6 @@ export class FilesService {
             path: {
                 filename: data.filename
             },
-            responseType: 'arraybuffer',
-            responseTransformer: async (data: any) => {
-                // Handle binary PDF response
-                if (data instanceof ArrayBuffer) {
-                    return new Blob([data], { type: 'application/pdf' });
-                }
-                return data;
-            },
             errors: {
                 422: 'Validation Error'
             }
@@ -444,20 +428,12 @@ export class FilesService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static convertRtfToPdf(data: { sourceId: string }): CancelablePromise<unknown> {
+    public static convertRtfToPdf(data: FilesConvertRtfToPdfData): CancelablePromise<FilesConvertRtfToPdfResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/files/source/{source_id}/rtf-pdf',
             path: {
                 source_id: data.sourceId
-            },
-            responseType: 'arraybuffer',
-            responseTransformer: async (data: any) => {
-                // Handle binary PDF response
-                if (data instanceof ArrayBuffer) {
-                    return new Blob([data], { type: 'application/pdf' });
-                }
-                return data;
             },
             errors: {
                 422: 'Validation Error'
@@ -474,20 +450,12 @@ export class FilesService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static convertRtfToPdfByFilename(data: { filename: string }): CancelablePromise<unknown> {
+    public static convertRtfToPdfByFilename(data: FilesConvertRtfToPdfByFilenameData): CancelablePromise<FilesConvertRtfToPdfByFilenameResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/files/source/by-filename/{filename}/rtf-pdf',
             path: {
                 filename: data.filename
-            },
-            responseType: 'arraybuffer',
-            responseTransformer: async (data: any) => {
-                // Handle binary PDF response
-                if (data instanceof ArrayBuffer) {
-                    return new Blob([data], { type: 'application/pdf' });
-                }
-                return data;
             },
             errors: {
                 422: 'Validation Error'
@@ -522,11 +490,8 @@ export class FilesService {
 export class FormconnectService {
     /**
      * Process Form
-     * Process the uploaded files and fields.
-     *
-     * Handles two types of files:
-     * - digitized_files: Standard text extraction
-     * - handwritten_files: OCR-based extraction (placeholder)
+     * Process the uploaded files and fields with unified visual processing.
+     * All files now benefit from automatic visual enhancement for embedded images.
      * @param data The data for the request.
      * @param data.fields
      * @param data.searchMode
@@ -770,7 +735,6 @@ export class FormconnectService {
             url: '/api/v1/formconnect/generate/docx',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -791,7 +755,6 @@ export class FormconnectService {
             url: '/api/v1/formconnect/generate/csv',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -940,13 +903,15 @@ export class KnowledgeBasesService {
     
     /**
      * Create Knowledge Base
-     * Create new knowledge base with a compressed folder with the Chroma VectorDB.
+     * Create new knowledge base asynchronously with real-time progress tracking.
+     * Returns immediately with task_id for progress monitoring.
      * @param data The data for the request.
      * @param data.title
      * @param data.formData
+     * @param data.taskId
      * @param data.description
      * @param data.embeddingModelId
-     * @returns KnowledgeBasePublic Successful Response
+     * @returns KnowledgeBaseCreateResponse Successful Response
      * @throws ApiError
      */
     public static createKnowledgeBase(data: KnowledgeBasesCreateKnowledgeBaseData): CancelablePromise<KnowledgeBasesCreateKnowledgeBaseResponse> {
@@ -954,6 +919,7 @@ export class KnowledgeBasesService {
             method: 'POST',
             url: '/api/v1/knowledge-bases/',
             query: {
+                task_id: data.taskId,
                 title: data.title,
                 description: data.description,
                 embedding_model_id: data.embeddingModelId
@@ -1033,6 +999,53 @@ export class KnowledgeBasesService {
             url: '/api/v1/knowledge-bases/{id}',
             path: {
                 id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Knowledge Base Task
+     * Create a knowledge base task and return task_id immediately for progress tracking.
+     * This allows frontend to start progress polling before file upload begins.
+     * @param data The data for the request.
+     * @param data.title
+     * @param data.description
+     * @param data.embeddingModelId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static createKnowledgeBaseTask(data: KnowledgeBasesCreateKnowledgeBaseTaskData): CancelablePromise<KnowledgeBasesCreateKnowledgeBaseTaskResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/knowledge-bases/create-task',
+            query: {
+                title: data.title,
+                description: data.description,
+                embedding_model_id: data.embeddingModelId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Knowledge Base Progress
+     * Get progress information for a knowledge base creation task.
+     * @param data The data for the request.
+     * @param data.taskId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getKnowledgeBaseProgress(data: KnowledgeBasesGetKnowledgeBaseProgressData): CancelablePromise<KnowledgeBasesGetKnowledgeBaseProgressResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/knowledge-bases/progress/{task_id}',
+            path: {
+                task_id: data.taskId
             },
             errors: {
                 422: 'Validation Error'
@@ -1261,6 +1274,40 @@ export class LoginService {
     
 }
 
+export class MonitoringService {
+    /**
+     * Get Rate Limiter Status
+     * Get current rate limiter status and usage statistics.
+     *
+     * Returns:
+     * Dictionary with current rate limiter usage and capacity information
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getRateLimiterStatus(): CancelablePromise<MonitoringGetRateLimiterStatusResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/rate-limiter/status'
+        });
+    }
+    
+    /**
+     * Reset Rate Limiter
+     * Reset the rate limiter counters (admin function).
+     *
+     * Note: This should only be used in development or emergency situations.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static resetRateLimiter(): CancelablePromise<MonitoringResetRateLimiterResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/rate-limiter/reset'
+        });
+    }
+    
+}
+
 export class ReportgenieService {
     /**
      * Generate Report
@@ -1330,9 +1377,17 @@ export class ReportgenieService {
     
     /**
      * Get Report Detail
-     * Retrieve a specific ReportGenie report's full content by ID.
+     * Retrieve a specific ReportGenie report by ID.
+     *
+     * Args:
+     * report_id: The UUID of the report to retrieve
+     * include_sections: If False, excludes the heavy sections with citations (default: True)
+     *
+     * Returns summary (without detailed sections) when include_sections=False,
+     * or full detail (with sections and citations) when include_sections=True.
      * @param data The data for the request.
      * @param data.reportId
+     * @param data.includeSections If False, excludes the heavy sections with citations to improve performance
      * @returns unknown Successful Response
      * @throws ApiError
      */
@@ -1342,6 +1397,9 @@ export class ReportgenieService {
             url: '/api/v1/reportgenie/detail/{report_id}',
             path: {
                 report_id: data.reportId
+            },
+            query: {
+                include_sections: data.includeSections
             },
             errors: {
                 422: 'Validation Error'
@@ -1524,7 +1582,6 @@ export class ReportgenieService {
             url: '/api/v1/reportgenie/optimize-outline/csv',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -1545,7 +1602,6 @@ export class ReportgenieService {
             url: '/api/v1/reportgenie/generate/docx',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -1567,7 +1623,6 @@ export class ReportgenieService {
             url: '/api/v1/reportgenie/generate/csv',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -1761,7 +1816,6 @@ export class TwincheckService {
             url: '/api/v1/twincheck/generate/docx',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -1782,7 +1836,6 @@ export class TwincheckService {
             url: '/api/v1/twincheck/generate/csv',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -2312,10 +2365,18 @@ export class VeradocService {
     
     /**
      * Get Veradoc Detail
-     * Retrieve a specific VeraDoc evaluation's full content by ID.
+     * Retrieve a specific VeraDoc evaluation by ID.
+     *
+     * Args:
+     * report_id: The UUID of the report to retrieve
+     * include_qa_pairs: If False, excludes the heavy qa_pairs data (default: True)
+     *
+     * Returns summary (without qa_pairs) when include_qa_pairs=False,
+     * or full detail (with qa_pairs) when include_qa_pairs=True.
      * @param data The data for the request.
      * @param data.reportId
-     * @returns VeraDocDetailResponse Successful Response
+     * @param data.includeQaPairs If False, excludes the heavy qa_pairs data to improve performance
+     * @returns unknown Successful Response
      * @throws ApiError
      */
     public static getVeradocDetail(data: VeradocGetVeradocDetailData): CancelablePromise<VeradocGetVeradocDetailResponse> {
@@ -2324,6 +2385,40 @@ export class VeradocService {
             url: '/api/v1/veradoc/history/{report_id}',
             path: {
                 report_id: data.reportId
+            },
+            query: {
+                include_qa_pairs: data.includeQaPairs
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Veradoc Qa Pair
+     * Retrieve a specific QA pair from a VeraDoc evaluation by index.
+     *
+     * This enables lazy loading of individual QA pairs for better performance.
+     *
+     * Args:
+     * report_id: The UUID of the report
+     * qa_index: The zero-based index of the QA pair to retrieve
+     *
+     * Returns the QA pair with question, answer, context, and source_citations.
+     * @param data The data for the request.
+     * @param data.reportId
+     * @param data.qaIndex
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getVeradocQaPair(data: VeradocGetVeradocQaPairData): CancelablePromise<VeradocGetVeradocQaPairResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/veradoc/history/{report_id}/qa-pair/{qa_index}',
+            path: {
+                report_id: data.reportId,
+                qa_index: data.qaIndex
             },
             errors: {
                 422: 'Validation Error'
@@ -2378,7 +2473,6 @@ export class VeradocService {
             url: '/api/v1/veradoc/generate/docx',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -2400,7 +2494,6 @@ export class VeradocService {
             url: '/api/v1/veradoc/generate/csv',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
@@ -2422,7 +2515,6 @@ export class VeradocService {
             url: '/api/v1/veradoc/optimization/csv',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }

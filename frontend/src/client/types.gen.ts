@@ -69,6 +69,7 @@ export type Body_twincheck_generate_topics = {
     description: string;
     comparison_type?: string;
     num_topics?: (number | null);
+    knowledge_base_id?: (string | null);
     files?: Array<((Blob | File))>;
 };
 
@@ -85,7 +86,6 @@ export type Body_veradoc_optimize_checklist = {
 
 export type Body_veradoc_process_rag_checklist = {
     files?: Array<((Blob | File))>;
-    handwritten_files?: Array<((Blob | File))>;
 };
 
 /**
@@ -267,6 +267,11 @@ export type ItemsPublic = {
 export type ItemUpdate = {
     title?: (string | null);
     description?: (string | null);
+};
+
+export type KnowledgeBaseCreateResponse = {
+    knowledge_base: KnowledgeBasePublic;
+    task_id: string;
 };
 
 export type KnowledgeBasePublic = {
@@ -550,31 +555,6 @@ export type VeraDocChecklist = {
     date_modified?: string;
 };
 
-export type VeraDocDetailFeedback = {
-    feedback?: (string | null);
-    feedbackText?: (string | null);
-    feedbackDate?: (string | null);
-};
-
-export type VeraDocDetailResponse = {
-    id: string;
-    date_created: string;
-    document_name?: (string | null);
-    kb_name?: (string | null);
-    kb_id?: (string | null);
-    questions?: (string | null);
-    results: VeraDocDetailResults;
-    feedback: VeraDocDetailFeedback;
-};
-
-export type VeraDocDetailResults = {
-    final_evaluation: string;
-    qa_pairs?: Array<{
-        [key: string]: unknown;
-    }>;
-    interaction_id: string;
-};
-
 export type VeraDocResponse = {
     results: {
         [key: string]: unknown;
@@ -701,6 +681,18 @@ export type FilesConvertDocxToPdfByFilenameData = {
 };
 
 export type FilesConvertDocxToPdfByFilenameResponse = (unknown);
+
+export type FilesConvertRtfToPdfData = {
+    sourceId: string;
+};
+
+export type FilesConvertRtfToPdfResponse = (unknown);
+
+export type FilesConvertRtfToPdfByFilenameData = {
+    filename: string;
+};
+
+export type FilesConvertRtfToPdfByFilenameResponse = (unknown);
 
 export type FilesGetSourceContentByFilenameData = {
     filename: string;
@@ -833,10 +825,11 @@ export type KnowledgeBasesCreateKnowledgeBaseData = {
     description?: (string | null);
     embeddingModelId?: (string | null);
     formData: Body_knowledge_bases_create_knowledge_base;
+    taskId?: (string | null);
     title: string;
 };
 
-export type KnowledgeBasesCreateKnowledgeBaseResponse = (KnowledgeBasePublic);
+export type KnowledgeBasesCreateKnowledgeBaseResponse = (KnowledgeBaseCreateResponse);
 
 export type KnowledgeBasesReadKnowledgeBaseData = {
     id: string;
@@ -859,6 +852,22 @@ export type KnowledgeBasesDeleteKnowledgeBaseData = {
 };
 
 export type KnowledgeBasesDeleteKnowledgeBaseResponse = (Message);
+
+export type KnowledgeBasesCreateKnowledgeBaseTaskData = {
+    description?: (string | null);
+    embeddingModelId?: (string | null);
+    title: string;
+};
+
+export type KnowledgeBasesCreateKnowledgeBaseTaskResponse = ({
+    [key: string]: unknown;
+});
+
+export type KnowledgeBasesGetKnowledgeBaseProgressData = {
+    taskId: string;
+};
+
+export type KnowledgeBasesGetKnowledgeBaseProgressResponse = (unknown);
 
 export type LlmModelsGetLlmModelsData = {
     limit?: number;
@@ -919,6 +928,10 @@ export type LoginRecoverPasswordHtmlContentData = {
 
 export type LoginRecoverPasswordHtmlContentResponse = (string);
 
+export type MonitoringGetRateLimiterStatusResponse = (unknown);
+
+export type MonitoringResetRateLimiterResponse = (unknown);
+
 export type ReportgenieGenerateReportData = {
     formData: Body_reportgenie_generate_report;
 };
@@ -942,6 +955,10 @@ export type ReportgenieGetReportHistoryResponse = (Array<{
 }>);
 
 export type ReportgenieGetReportDetailData = {
+    /**
+     * If False, excludes the heavy sections with citations to improve performance
+     */
+    includeSections?: boolean;
     reportId: string;
 };
 
@@ -1217,10 +1234,25 @@ export type VeradocGetVeradocHistoryResponse = (Array<{
 }>);
 
 export type VeradocGetVeradocDetailData = {
+    /**
+     * If False, excludes the heavy qa_pairs data to improve performance
+     */
+    includeQaPairs?: boolean;
     reportId: string;
 };
 
-export type VeradocGetVeradocDetailResponse = (VeraDocDetailResponse);
+export type VeradocGetVeradocDetailResponse = ({
+    [key: string]: unknown;
+});
+
+export type VeradocGetVeradocQaPairData = {
+    qaIndex: number;
+    reportId: string;
+};
+
+export type VeradocGetVeradocQaPairResponse = ({
+    [key: string]: unknown;
+});
 
 export type VeradocOptimizeChecklistData = {
     customInstructions?: (string | null);
