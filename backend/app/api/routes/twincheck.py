@@ -40,6 +40,7 @@ from app.core.config import settings
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
 from app.services.translation import translate_text_if_needed
 from app.services.pdf_utils import load_pdf_with_pypdf
+from app.services.progress_tracker import progress_tracker
 
 # Async wrapper for invoke_llm that respects cancellation
 async def invoke_llm_async(llm, prompt, variables=None):
@@ -65,6 +66,26 @@ import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/twincheck", tags=["twincheck"])
+
+
+@router.post("/optimize-outline/task")
+async def create_optimize_outline_task():
+    """
+    Create a progress tracking task for TwinCheck comparison and return task_id immediately.
+    This allows the frontend to start polling twincheck progress before submitting documents.
+    """
+    task_id = progress_tracker.create_task(
+        "Comparing documents",
+        {
+            "setup": 0.2,
+            "comparing": 0.7,
+            "finalizing": 0.1,
+        },
+    )
+    progress_tracker.update_stage_progress(
+        task_id, "setup", 0, 1, "Initializing document comparison..."
+    )
+    return {"task_id": task_id}
 
 
 def extract_text_from_file(file: UploadFile) -> str:
@@ -196,14 +217,18 @@ async def compare_documents(
     document1: UploadFile = File(...),
     document2: UploadFile = File(...),
     request: FastAPIRequest = None,
+    task_id: Optional[str] = Form(None),
 ):
     """
     Compare two documents based on the provided comparison topics.
     Supports PDF, DOCX, and plain text files.
+    
+    Args:
+        task_id: Optional task ID for progress tracking
     """
     # Generate unique operation ID for logging
     operation_id = str(uuid.uuid4())
-    print(f"Starting comparison operation {operation_id}")
+    print(f"Starting comparison operation {operation_id}, task_id={task_id}")
     
     try:
         # Reset file pointers (in case they were read elsewhere)
@@ -273,8 +298,27 @@ async def compare_documents(
 
         print(f"Split diff into {len(diff_chunks)} chunks")
 
+        # Update progress: setup complete, starting topic processing
+        if task_id:
+            progress_tracker.complete_stage(task_id, "setup", "Setup complete")
+            progress_tracker.update_stage_progress(
+                task_id, "comparing", 0, len(topic_list), 
+                f"Starting comparison of {len(topic_list)} topics..."
+            )
+            # Yield to event loop to allow progress API to respond
+            await asyncio.sleep(0.01)
+
         # Process each topic with the LLM
         for topic_idx, topic in enumerate(topic_list):
+            # Update progress for this topic
+            if task_id:
+                progress_tracker.update_stage_progress(
+                    task_id, "comparing", topic_idx, len(topic_list),
+                    f"Comparing topic {topic_idx + 1}/{len(topic_list)}: {topic[:50]}..."
+                )
+                # Yield to event loop to allow progress API to respond
+                await asyncio.sleep(0.01)
+            
             # Add delay between topic processing to prevent rate limit exhaustion
             if topic_idx > 0 and settings.TWINCHECK_ENABLE_PROCESSING_DELAYS:
                 import asyncio
@@ -683,17 +727,48 @@ async def compare_documents(
             },
         }
 
+        # Mark progress as complete
+        if task_id:
+            progress_tracker.complete_stage(task_id, "comparing", "Comparison complete")
+            progress_tracker.complete_task(task_id, "Document comparison completed successfully")
+
         return TwinCheckResponse(results=result)
 
     except asyncio.CancelledError:
         print(f"Comparison operation {operation_id} was cancelled")
+        if task_id:
+            progress_tracker.fail_task(task_id, "Operation cancelled")
         raise  # Re-raise to properly handle the cancellation
     except Exception as e:
         print(f"Error in comparison operation {operation_id}: {str(e)}")
         traceback.print_exc()
+        if task_id:
+            progress_tracker.fail_task(task_id, f"Error: {str(e)}")
         raise HTTPException(
             status_code=500, detail=f"Error comparing documents: {str(e)}"
         )
+
+
+
+@router.get("/progress/{task_id}")
+async def get_twincheck_progress(
+    task_id: str,
+    current_user: CurrentUser,
+) -> Any:
+    """
+    Get progress information for a twincheck task.
+    """
+    progress_data = progress_tracker.get_progress(task_id)
+    if not progress_data:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    print(f"🔍 TWINCHECK API RETURNING PROGRESS: task_id={task_id}")
+    print(f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}")
+    print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
+
+    await asyncio.sleep(0)
+
+    return progress_data
 
 
 
