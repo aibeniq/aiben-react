@@ -1,8 +1,9 @@
-import { type FormConnectForm, FormconnectService, ReportgenieService } from "@/client"
+import { type FormConnectForm, FormconnectService, OpenAPI } from "@/client"
+import { request as __request } from "@/client/core/request"
 import DownloadButton from "@/components/ui/download-button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { useOperationCancellation } from "@/hooks/useOperationCancellation"
-import { useReportGenieProgress } from "@/hooks/useReportGenieProgress"
+import { useFormconnectProgress } from "@/hooks/useFormconnectProgress"
 
 import { Box, Button, Container, HStack, Heading, Progress, Text, VStack } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
@@ -46,7 +47,7 @@ const FormConnect = () => {
 
   // Progress tracking
   const [taskId, setTaskId] = useState<string | null>(null)
-  const progress = useReportGenieProgress(taskId)
+  const progress = useFormconnectProgress(taskId)
   const hasHandledCompletionRef = useRef(false)
 
   // Copy and download states
@@ -280,45 +281,57 @@ const FormConnect = () => {
       console.log("🎯 Creating match task for progress tracking...")
       console.log(`Using search mode: ${data.search_mode}`)
 
-      // First, create a task to get the task_id for progress tracking
-      const taskResponse = await ReportgenieService.createOptimizeOutlineTask()
+      // First, create a FormConnect task to get the task_id for progress tracking
+      const taskData: any = await __request(OpenAPI, {
+        method: 'POST',
+        url: '/api/v1/formconnect/process/task',
+      })
 
-      const newTaskId = (taskResponse as any).task_id
-      console.log("📋 Generated match task_id:", newTaskId)
+      const newTaskId = taskData.task_id
+      console.log("📋 Generated FormConnect task_id:", newTaskId)
       setTaskId(newTaskId)
 
+      // Prepare files arrays
+      const digitizedFiles = data.digitized_files || []
+      const handwrittenFiles = data.handwritten_files || []
+
+      // Use the SDK's processForm method with task_id in formData
+      // This matches how TwinCheck handles progress tracking
       const promise = FormconnectService.processForm({
         fields: data.fields,
         searchMode: data.search_mode,
         formData: {
-          digitized_files: data.digitized_files,
-          handwritten_files: data.handwritten_files,
-        },
+          fields: data.fields,
+          search_mode: data.search_mode,
+          task_id: newTaskId,
+          digitized_files: digitizedFiles,
+          handwritten_files: handwrittenFiles,
+        } as any,
       })
 
       // Register the operation for automatic cancellation on navigation
       return registerOperation(promise)
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       console.log("Match Response data:", data)
-      console.log("Match interaction_id:", data.results.interaction_id)
+      console.log("Match interaction_id:", data.results?.interaction_id)
 
       // Check if the request was cancelled
-      if (data.results.status === "cancelled") {
+      if (data.results?.status === "cancelled") {
         console.log("Match operation was cancelled")
         showErrorToast("Request cancelled")
         return
       }
 
-      const interactionId = data.results.interaction_id
+      const interactionId = data.results?.interaction_id
       console.log("Match interactionId for feedback:", interactionId)
 
       // Handle both comparison and single file responses
       let results = ""
-      if (data.results.comparison) {
+      if (data.results?.comparison) {
         console.log("Comparison data:", data.results.comparison)
         results = data.results.comparison as string
-      } else if (data.results.message) {
+      } else if (data.results?.message) {
         results = `${data.results.message}\n\n${JSON.stringify(data.results.extracted_data, null, 2)}`
       } else {
         results = JSON.stringify(data.results, null, 2)

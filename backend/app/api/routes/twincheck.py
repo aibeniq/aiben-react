@@ -321,7 +321,6 @@ async def compare_documents(
             
             # Add delay between topic processing to prevent rate limit exhaustion
             if topic_idx > 0 and settings.TWINCHECK_ENABLE_PROCESSING_DELAYS:
-                import asyncio
                 await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_REQUESTS)
                 
             # CRITICAL: Check if client has disconnected before processing each topic
@@ -663,7 +662,7 @@ async def compare_documents(
             """
 
             try:
-                summary = await invoke_llm_async(llm, summary_prompt, {})
+                summary = invoke_llm(llm, summary_prompt, {})
 
                 # Translate the summary if needed
                 summary = await translate_text_if_needed(
@@ -1231,8 +1230,6 @@ async def generate_docx(
         )
 
     except Exception as e:
-        import traceback
-
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
 
@@ -1359,8 +1356,6 @@ async def generate_csv(
         )
 
     except Exception as e:
-        import traceback
-
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error generating CSV: {str(e)}")
 
@@ -1441,7 +1436,6 @@ async def generate_topics(
                 for i, chunk in enumerate(chunks):
                     # Add delay between chunk processing to prevent rate limit exhaustion
                     if i > 0 and settings.TWINCHECK_ENABLE_PROCESSING_DELAYS:
-                        import asyncio
                         await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
                         
                     print(f"Processing chunk {i+1}/{len(chunks)}")
@@ -1501,8 +1495,6 @@ async def generate_topics(
                             print(
                                 f"Error retrieving knowledge base content for chunk {i+1}: {e}"
                             )
-                            import traceback
-
                             traceback.print_exc()
 
                     try:
@@ -1689,8 +1681,6 @@ Return only the final selected topics, one per line, numbered."""
                 print(f"=== KNOWLEDGE BASE INTEGRATION END ===\n")
             except Exception as e:
                 print(f"❌ Error retrieving knowledge base content: {e}")
-                import traceback
-
                 traceback.print_exc()
                 print(f"=== KNOWLEDGE BASE INTEGRATION FAILED ===\n")
 
@@ -1704,7 +1694,7 @@ Return only the final selected topics, one per line, numbered."""
         print(f"Example Document Length: {len(prompt_variables['example_document'])}")
         print(f"=== CALLING LLM ===\n")
 
-        topics_response = await invoke_llm_async(
+        topics_response = invoke_llm(
             llm,
             settings.TWINCHECK_GENERATE_TOPICS_PROMPT_TEMPLATE,
             prompt_variables,
@@ -1854,7 +1844,7 @@ async def generate_topics_json(
                 pass
 
         # Generate topics using the LLM
-        topics_response = await invoke_llm_async(
+        topics_response = invoke_llm(
             llm,
             settings.TWINCHECK_GENERATE_TOPICS_PROMPT_TEMPLATE,
             prompt_variables,
