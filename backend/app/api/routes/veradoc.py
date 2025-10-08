@@ -310,7 +310,6 @@ async def prefetch_knowledge_base_context(
                             
                             # Add delay between chunks
                             if chunk_idx > 0 and settings.VERADOC_ENABLE_PROCESSING_DELAYS:
-                                import asyncio
                                 await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
                             
                             print(f"Processing context chunk {chunk_idx+1}/{len(context_chunks)}")

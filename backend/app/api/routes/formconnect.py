@@ -3,6 +3,10 @@ import json
 import csv
 import tempfile
 import os
+import asyncio
+import re
+import traceback
+import base64
 import markdown
 from pathlib import Path
 from io import BytesIO, StringIO
@@ -34,16 +38,11 @@ from app.services.llms import (
 from app.services.translation import translate_text_if_needed
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
+from app.services.progress_tracker import progress_tracker
 
 from sqlmodel import Session, select
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, Request as FastAPIRequest
-from typing import List, Dict, Any, Literal
-import re
-import json
-import os
-import tempfile
-import re
-import traceback
+from typing import List, Dict, Any, Literal, Optional
 
 from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
@@ -54,8 +53,6 @@ from app.services.embeddings import load_embeddings_model
 from app.services.knowledgebases import get_embedding_model
 from app.services.retrievers import create_ensemble_retriever
 from app.services.enhanced_retrieval import SmartRetrieverFactory
-
-import base64
 from tempfile import NamedTemporaryFile
 
 # import fitz  # PyMuPDF - Removed for commercial licensing
@@ -82,6 +79,52 @@ else:
     )
 
 router = APIRouter(prefix="/formconnect", tags=["formconnect"])
+
+
+@router.post("/process/task")
+async def create_process_task():
+    """
+    Create a new FormConnect processing task for progress tracking.
+    Returns a task_id that can be used to track progress.
+    """
+    # Define stages for FormConnect processing
+    # Format: Dict[stage_name, weight] where weights are relative
+    stages = {
+        "setup": 10,
+        "loading": 15,
+        "extracting": 60,
+        "comparing": 10,
+        "finalizing": 5
+    }
+    
+    # Initialize progress tracker with stages for FormConnect processing
+    task_id = progress_tracker.create_task(
+        operation="FormConnect Processing",
+        stages=stages
+    )
+    
+    print(f"📋 Created FormConnect task with ID: {task_id}")
+    return {"task_id": task_id}
+
+
+@router.get("/progress/{task_id}")
+async def get_formconnect_progress(
+    task_id: str,
+    current_user: CurrentUser,
+    request: FastAPIRequest = None,
+) -> Any:
+    """
+    Get the progress of a FormConnect processing task.
+    """
+    progress = progress_tracker.get_progress(task_id)
+    
+    if not progress:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    print(f"🔍 PROGRESS DATA: status={progress.get('status')}, percentage={progress.get('percentage')}, current_stage={progress.get('current_stage')}")
+    print(f"🔍 PROGRESS MESSAGE: {progress.get('message')}")
+    
+    return progress
 
 
 def generate_template(fields: List[str]) -> Dict[str, str]:
@@ -1118,18 +1161,23 @@ Format your response in markdown with clear tables and analysis."""
 async def process_form(
     session: SessionDep,
     current_user: CurrentUser,
-    fields: str,
-    search_mode: Literal["vector", "full_scan"] = "vector",
+    fields: str = Form(...),
+    search_mode: Literal["vector", "full_scan"] = Form("vector"),
     digitized_files: List[UploadFile] = File(None),
     handwritten_files: List[UploadFile] = File(None),
     request: FastAPIRequest = None,
+    task_id: Optional[str] = Form(None),
 ):
     """
     Process the uploaded files and fields with unified visual processing.
     All files now benefit from automatic visual enhancement for embedded images.
+    
+    Args:
+        task_id: Optional task ID for progress tracking
     """
     print("process_form function invoked!")
     print(f"Received search_mode: {search_mode}")
+    print(f"Received task_id: {task_id}")
     print(f"Request data: fields={fields[:50]}...")
 
     # Get the default LLM
@@ -1166,8 +1214,26 @@ async def process_form(
     if not field_list:
         raise HTTPException(status_code=400, detail="No fields provided.")
 
+    # Update progress: Setup complete
+    if task_id:
+        progress_tracker.complete_stage(task_id, "setup", "Setup complete")
+        progress_tracker.update_stage_progress(
+            task_id, "loading", 0, 1, 
+            f"Loading {total_files} document(s) and form template..."
+        )
+        await asyncio.sleep(0.01)  # Yield to event loop
+
     # Generate the JSON template
     template = generate_template(field_list)
+    
+    # Update progress: Loading complete
+    if task_id:
+        progress_tracker.complete_stage(task_id, "loading", "Loading complete")
+        progress_tracker.update_stage_progress(
+            task_id, "extracting", 0, total_files,
+            f"Starting extraction from {total_files} document(s)..."
+        )
+        await asyncio.sleep(0.01)  # Yield to event loop
 
     # Extract fields from all documents using unified visual processing
     extracted_results = []
@@ -1176,9 +1242,16 @@ async def process_form(
     # Process all files with unified visual enhancement
     if files:
         for i, file in enumerate(files):
+            # Update progress for this file
+            if task_id:
+                progress_tracker.update_stage_progress(
+                    task_id, "extracting", i, total_files,
+                    f"Extracting fields from document {i + 1}/{total_files}: {file.filename}..."
+                )
+                await asyncio.sleep(0.01)  # Yield to event loop
+            
             # Add delay between file processing to prevent rate limit exhaustion
             if i > 0:
-                import asyncio
                 await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_DOCUMENTS)
                 
             # CRITICAL: Check if client has disconnected before processing each file
@@ -1230,6 +1303,15 @@ async def process_form(
             # Reset file position for potential future reads
             await file.seek(0)
 
+    # Update progress: Extraction complete, starting comparison
+    if task_id:
+        progress_tracker.complete_stage(task_id, "extracting", "Field extraction complete")
+        progress_tracker.update_stage_progress(
+            task_id, "comparing", 0, 1,
+            "Comparing and formatting results..."
+        )
+        await asyncio.sleep(0.01)  # Yield to event loop
+
     # If there's only one file, format the results nicely instead of just showing raw data
     if total_files == 1:
         # Format the single document result for better presentation
@@ -1251,6 +1333,15 @@ async def process_form(
             "comparison": comparison_result,
             "extracted_data": extracted_results,
         }
+
+    # Update progress: Comparison complete, finalizing
+    if task_id:
+        progress_tracker.complete_stage(task_id, "comparing", "Comparison complete")
+        progress_tracker.update_stage_progress(
+            task_id, "finalizing", 0, 1,
+            "Finalizing results..."
+        )
+        await asyncio.sleep(0.01)  # Yield to event loop
 
     interaction_id = record_llm_interaction(
         session=session,
@@ -1279,6 +1370,13 @@ async def process_form(
     print(
         f"[DEBUG] FormConnect result with interaction_id: {result.get('interaction_id')}"
     )
+
+    # Update progress: Complete
+    if task_id:
+        progress_tracker.complete_stage(task_id, "finalizing", "Processing complete")
+        # Mark the entire task as complete using the ProgressTracker API
+        progress_tracker.complete_task(task_id, "Form processing completed successfully")
+        await asyncio.sleep(0.01)  # Yield to event loop
 
     # Return the comparison results as a dictionary
     return FormConnectResponse(results=result)
@@ -1792,7 +1890,6 @@ async def generate_form_fields_with_files(
         for i, file in enumerate(files):
             # Add delay between reference file processing to prevent rate limit exhaustion
             if i > 0:
-                import asyncio
                 await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_DOCUMENTS)
                 
             try:
