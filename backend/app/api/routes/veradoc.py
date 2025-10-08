@@ -29,7 +29,7 @@ from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
-from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
+from app.services.llms import get_default_llm, invoke_llm, invoke_llm_async, record_llm_interaction
 from app.services.translation import translate_text_if_needed
 from app.services.retrievers import (
     create_ensemble_retriever,
@@ -200,11 +200,19 @@ async def prefetch_knowledge_base_context(
                                 print(f"Analyzing chunk {doc_idx + 1}/{len(docs)} for relevance...")
                                 
                                 # Use LLM to determine if this chunk is relevant
-                                relevance_check = invoke_llm(
+                                relevance_check = await invoke_llm_async(
                                     llm,
                                     settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
                                     {"chunk": doc.page_content or "", "question": question_text},
                                 )
+                                
+                                # Check for cancellation after LLM call
+                                if request and await request.is_disconnected():
+                                    print(f"❌ CLIENT DISCONNECTED - Stopping after relevance check at chunk {doc_idx + 1}")
+                                    raise HTTPException(
+                                        status_code=408,
+                                        detail="Request cancelled during relevance filtering"
+                                    )
                                 
                                 # Yield again after LLM call to prevent connection timeout
                                 await asyncio.sleep(0.02)
@@ -313,11 +321,20 @@ async def prefetch_knowledge_base_context(
                                 await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
                             
                             print(f"Processing context chunk {chunk_idx+1}/{len(context_chunks)}")
-                            chunk_context = invoke_llm(
+                            chunk_context = await invoke_llm_async(
                                 llm,
                                 context_prompt_template,
                                 {"context": chunk, "question": question_text},
                             )
+                            
+                            # Check for cancellation after LLM call
+                            if request and await request.is_disconnected():
+                                print(f"❌ CLIENT DISCONNECTED - Stopping after context chunk processing at chunk {chunk_idx + 1}")
+                                raise HTTPException(
+                                    status_code=408,
+                                    detail="Request cancelled during context chunk processing"
+                                )
+                            
                             chunk_contexts.append(chunk_context)
                             
                         except Exception as chunk_error:
@@ -329,11 +346,19 @@ async def prefetch_knowledge_base_context(
                     
                 else:
                     # Context is small enough, process normally
-                    question_context = invoke_llm(
+                    question_context = await invoke_llm_async(
                         llm,
                         context_prompt_template,
                         {"context": context, "question": question_text},
                     )
+                    
+                    # Check for cancellation after LLM call
+                    if request and await request.is_disconnected():
+                        print(f"❌ CLIENT DISCONNECTED - Stopping after context generation")
+                        raise HTTPException(
+                            status_code=408,
+                            detail="Request cancelled during context generation"
+                        )
                     
                 print(f"Got context: {question_context[:100]}...")
                 
@@ -1223,9 +1248,18 @@ async def process_rag_checklist(
                                         context = "\n\n".join([doc.page_content for doc in docs if doc.page_content])
                                         source_citations = [{"content": doc.page_content or "", "metadata": doc.metadata or {}} for doc in docs]
                                     
-                                    question_context = invoke_llm(
+                                    question_context = await invoke_llm_async(
                                         llm, context_prompt_template, {"context": context, "question": question_text}
                                     )
+                                    
+                                    # Check for cancellation after LLM call
+                                    if request and await request.is_disconnected():
+                                        print(f"❌ CLIENT DISCONNECTED - Stopping after fallback context generation")
+                                        raise HTTPException(
+                                            status_code=408,
+                                            detail="Request cancelled during fallback context generation"
+                                        )
+                                    
                                     question_context = await translate_text_if_needed(question_context, session, current_user, llm)
                                 except Exception as fallback_error:
                                     print(f"Error in fallback context generation: {fallback_error}")
@@ -1266,7 +1300,7 @@ async def process_rag_checklist(
 
                         try:
                             # Generate text-based answer
-                            answer = invoke_llm(
+                            answer = await invoke_llm_async(
                                 llm,
                                 qa_prompt_template,
                                 {
@@ -1276,6 +1310,14 @@ async def process_rag_checklist(
                                     "custom_instructions_section": custom_instructions_section,
                                 },
                             )
+                            
+                            # Check for cancellation after LLM call
+                            if request and await request.is_disconnected():
+                                print(f"❌ CLIENT DISCONNECTED - Stopping after question answering")
+                                raise HTTPException(
+                                    status_code=408,
+                                    detail="Request cancelled during question answering"
+                                )
                             
                             # Yield after LLM call to prevent connection timeout
                             await asyncio.sleep(0.05)

@@ -3,7 +3,7 @@ Translation service for converting LLM outputs to user's preferred language.
 """
 
 from typing import Optional
-from app.services.llms import invoke_llm, get_default_llm
+from app.services.llms import invoke_llm, invoke_llm_async, get_default_llm
 from app.api.deps import SessionDep, CurrentUser
 from app.core.config import settings
 
@@ -63,7 +63,7 @@ async def translate_text_if_needed(
         translation_prompt = get_translation_prompt(text, user_language)
 
         # Invoke LLM for translation
-        translated_text = invoke_llm(llm, translation_prompt)
+        translated_text = await invoke_llm_async(llm, translation_prompt)
 
         # Extract content if it's a message object
         if hasattr(translated_text, "content"):
