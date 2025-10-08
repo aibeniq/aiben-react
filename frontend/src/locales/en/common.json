@@ -79,7 +79,20 @@
     "uploadDocuments": "Upload Documents",
     "reviewResults": "Review Results",
     "startReview": "Start Review",
-    "pleaseWait": "Please wait while we review your documents"
+    "pleaseWait": "Please wait while we review your documents",
+    "processingFile": "Processing document...",
+    "processingFiles": "Processing documents..."
+  },
+  "match": {
+    "title": "Form Connect",
+    "sourceDocument": "Source Document",
+    "pleaseSelect": "Please select a form template",
+    "processing": "Processing your documents...",
+    "pleaseWait": "Please wait while we process your documents"
+  },
+  "compare": {
+    "title": "Document Comparison",
+    "pleaseWait": "Please wait while we compare your documents"
   },
   "settings": {
     "title": "User Settings",

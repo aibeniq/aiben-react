@@ -79,7 +79,20 @@
     "uploadDocuments": "Subir Documentos",
     "reviewResults": "Resultados de Revisión",
     "startReview": "Iniciar Revisión",
-    "pleaseWait": "Por favor espere mientras revisamos sus documentos"
+    "pleaseWait": "Por favor espere mientras revisamos sus documentos",
+    "processingFile": "Procesando documento...",
+    "processingFiles": "Procesando documentos..."
+  },
+  "match": {
+    "title": "Conectar Formulario",
+    "sourceDocument": "Documento Fuente",
+    "pleaseSelect": "Por favor selecciona una plantilla de formulario",
+    "processing": "Procesando sus documentos...",
+    "pleaseWait": "Por favor espere mientras procesamos sus documentos"
+  },
+  "compare": {
+    "title": "Comparación de Documentos",
+    "pleaseWait": "Por favor espere mientras comparamos sus documentos"
   },
   "settings": {
     "title": "Configuración de Usuario",

@@ -1031,6 +1031,7 @@ const generateAllLanguageResources = () => {
         vectorSearch: "búsqueda vectorial",
         fullDocumentScan: "análisis completo del documento",
         editOutline: "Editar Esquema",
+        pleaseWait: "Por favor espera mientras revisamos tus documentos",
       },
       modelSelection: {
         llmManagement: "Gestión de LLM",
@@ -1240,6 +1241,7 @@ const generateAllLanguageResources = () => {
         supportedFormats: "Soporta PDF, TXT y DOCX",
         editTopicList: "Editar Lista de Temas",
         selectTopicListTitle: "Seleccionar Lista de Temas",
+        pleaseWait: "Por favor espera mientras comparamos tus documentos",
       },
       match: {
         title: "Coincidir Documentos",
@@ -1297,6 +1299,7 @@ const generateAllLanguageResources = () => {
         similarity: "Similitud",
         editFormTemplate: "Editar Plantilla de Formulario",
         selectFormTemplateTitle: "Seleccionar Plantilla de Formulario",
+        pleaseWait: "Por favor espera mientras coincidimos tus documentos",
       },
       editFormTemplateModal: {
         title: "Editar Plantilla de Formulario",
@@ -1723,6 +1726,7 @@ const generateAllLanguageResources = () => {
           "Trouve du contenu pertinent en utilisant la recherche de similarité IA (rapide, ciblé)",
         fullScanDescription:
           "Analyse tous les documents dans la base de connaissances (complet, approfondi)",
+        pleaseWait: "Veuillez patienter pendant que nous examinons vos documents",
       },
       generate: {
         pageDescription:
@@ -1980,6 +1984,7 @@ const generateAllLanguageResources = () => {
         supportedFormats: "Supporte PDF, TXT et DOCX",
         editTopicList: "Modifier la Liste des Sujets",
         selectTopicListTitle: "Sélectionner une Liste de Sujets",
+        pleaseWait: "Veuillez patienter pendant que nous comparons vos documents",
       },
       match: {
         title: "Correspondre les Documents",
@@ -2038,6 +2043,7 @@ const generateAllLanguageResources = () => {
         similarity: "Similitude",
         editFormTemplate: "Modifier le Modèle de Formulaire",
         selectFormTemplateTitle: "Sélectionner un Modèle de Formulaire",
+        pleaseWait: "Veuillez patienter pendant que nous correspondons vos documents",
       },
       editFormTemplateModal: {
         title: "Modifier le Modèle de Formulaire",
@@ -2461,6 +2467,7 @@ const generateAllLanguageResources = () => {
           "Findet relevanten Inhalt mit KI-Ähnlichkeitssuche (schnell, gezielt)",
         fullScanDescription:
           "Analysiert alle Dokumente in der Wissensbasis (umfassend, gründlich)",
+        pleaseWait: "Bitte warten Sie, während wir Ihre Dokumente überprüfen",
       },
       generate: {
         pageDescription:
@@ -2720,6 +2727,7 @@ const generateAllLanguageResources = () => {
         supportedFormats: "Unterstützt PDF, TXT und DOCX",
         editTopicList: "Themenliste Bearbeiten",
         selectTopicListTitle: "Themenliste Auswählen",
+        pleaseWait: "Bitte warten Sie, während wir Ihre Dokumente vergleichen",
       },
       match: {
         title: "Dokumente Abgleichen",
@@ -2777,6 +2785,7 @@ const generateAllLanguageResources = () => {
         similarity: "Ähnlichkeit",
         editFormTemplate: "Formular-Vorlage Bearbeiten",
         selectFormTemplateTitle: "Formular-Vorlage Auswählen",
+        pleaseWait: "Bitte warten Sie, während wir Ihre Dokumente abgleichen",
       },
       editFormTemplateModal: {
         title: "Formular-Vorlage Bearbeiten",
@@ -3173,6 +3182,7 @@ const generateAllLanguageResources = () => {
           "Trova contenuto rilevante usando la ricerca di similarità AI (veloce, mirato)",
         fullScanDescription:
           "Analizza tutti i documenti nella base di conoscenza (completo, approfondito)",
+        pleaseWait: "Attendere prego mentre revisioniamo i vostri documenti",
       },
       generate: {
         pageDescription:
@@ -3426,6 +3436,7 @@ const generateAllLanguageResources = () => {
         supportedFormats: "Supporta PDF, TXT e DOCX",
         editTopicList: "Modifica Lista Argomenti",
         selectTopicListTitle: "Seleziona Lista Argomenti",
+        pleaseWait: "Attendere prego mentre confrontiamo i vostri documenti",
       },
       match: {
         title: "Abbina Documenti",
@@ -3483,6 +3494,7 @@ const generateAllLanguageResources = () => {
         similarity: "Similarità",
         editFormTemplate: "Modifica Modello Modulo",
         selectFormTemplateTitle: "Seleziona Modello Modulo",
+        pleaseWait: "Attendere prego mentre abbiniamo i vostri documenti",
       },
       editFormTemplateModal: {
         title: "Modifica Modello Modulo",
@@ -3880,6 +3892,7 @@ const generateAllLanguageResources = () => {
           "Encontra conteúdo relevante usando pesquisa de similaridade IA (rápido, direcionado)",
         fullScanDescription:
           "Analisa todos os documentos na base de conhecimento (completo, minucioso)",
+        pleaseWait: "Por favor aguarde enquanto revisamos seus documentos",
       },
       modelSelection: {
         llmManagement: "Gestão de LLM",
@@ -4088,6 +4101,7 @@ const generateAllLanguageResources = () => {
         supportedFormats: "Suporta PDF, TXT e DOCX",
         editTopicList: "Editar Lista de Tópicos",
         selectTopicListTitle: "Selecionar Lista de Tópicos",
+        pleaseWait: "Por favor aguarde enquanto comparamos seus documentos",
       },
       match: {
         title: "Combinar Documentos",
@@ -4145,6 +4159,7 @@ const generateAllLanguageResources = () => {
         similarity: "Similaridade",
         editFormTemplate: "Editar Modelo de Formulário",
         selectFormTemplateTitle: "Selecionar Modelo de Formulário",
+        pleaseWait: "Por favor aguarde enquanto combinamos seus documentos",
       },
       editFormTemplateModal: {
         title: "Editar Modelo de Formulário",
@@ -4538,6 +4553,7 @@ const generateAllLanguageResources = () => {
           "Находит релевантный контент используя поиск подобия ИИ (быстро, целенаправленно)",
         fullScanDescription:
           "Анализирует все документы в базе знаний (полный, тщательный)",
+        pleaseWait: "Пожалуйста, подождите, пока мы проверяем ваши документы",
       },
       modelSelection: {
         llmManagement: "Управление LLM",
@@ -4634,6 +4650,7 @@ const generateAllLanguageResources = () => {
         supportedFormats: "Поддерживает PDF, TXT и DOCX",
         editTopicList: "Редактировать Список Тем",
         selectTopicListTitle: "Выбрать Список Тем",
+        pleaseWait: "Пожалуйста, подождите, пока мы сравниваем ваши документы",
       },
       match: {
         title: "Сопоставить Документы",
@@ -4653,6 +4670,7 @@ const generateAllLanguageResources = () => {
         similarity: "Схожесть",
         editFormTemplate: "Редактировать Шаблон Формы",
         selectFormTemplateTitle: "Выбрать Шаблон Формы",
+        pleaseWait: "Пожалуйста, подождите, пока мы сопоставляем ваши документы",
       },
       editFormTemplateModal: {
         title: "Редактировать Шаблон Формы",
@@ -5152,6 +5170,7 @@ const generateAllLanguageResources = () => {
         vectorSearchDescription:
           "使用AI相似性搜索查找相关内容（快速、有针对性）",
         fullScanDescription: "分析知识库中的所有文档（全面、彻底）",
+        pleaseWait: "请等待我们检查您的文档",
       },
       modelSelection: {
         llmManagement: "LLM管理",
@@ -5246,6 +5265,7 @@ const generateAllLanguageResources = () => {
         supportedFormats: "支持 PDF、TXT 和 DOCX",
         editTopicList: "编辑主题列表",
         selectTopicListTitle: "选择主题列表",
+        pleaseWait: "请等待我们比较您的文档",
       },
       match: {
         title: "匹配文档",
@@ -5264,6 +5284,7 @@ const generateAllLanguageResources = () => {
         similarity: "相似度",
         editFormTemplate: "编辑表单模板",
         selectFormTemplateTitle: "选择表单模板",
+        pleaseWait: "请等待我们匹配您的文档",
       },
       editFormTemplateModal: {
         title: "编辑表单模板",
@@ -5706,6 +5727,7 @@ const generateAllLanguageResources = () => {
           "AI類似性検索を使用して関連コンテンツを見つける（高速、的確）",
         fullScanDescription:
           "ナレッジベース内のすべてのドキュメントを分析する（包括的、徹底的）",
+        pleaseWait: "ドキュメントを確認するまでお待ちください",
       },
       compare: {
         title: "ドキュメント比較",
@@ -5725,6 +5747,7 @@ const generateAllLanguageResources = () => {
         supportedFormats: "PDF、TXT、DOCXをサポート",
         editTopicList: "トピックリストを編集",
         selectTopicListTitle: "トピックリストを選択",
+        pleaseWait: "ドキュメントを比較するまでお待ちください",
       },
       match: {
         title: "ドキュメントマッチング",
@@ -5744,6 +5767,7 @@ const generateAllLanguageResources = () => {
         similarity: "類似度",
         editFormTemplate: "フォームテンプレートを編集",
         selectFormTemplateTitle: "フォームテンプレートを選択",
+        pleaseWait: "ドキュメントをマッチングするまでお待ちください",
       },
       editFormTemplateModal: {
         title: "フォームテンプレートを編集",
@@ -7448,6 +7472,7 @@ const generateAllLanguageResources = () => {
         vectorSearchDescription:
           "AI 유사성 검색을 사용하여 관련 콘텐츠 찾기 (빠름, 대상 지향적)",
         fullScanDescription: "지식 베이스의 모든 문서 분석 (포괄적, 철저함)",
+        pleaseWait: "문서를 검토하는 동안 잠시 기다려 주세요",
       },
       generate: {
         pageDescription:
@@ -7560,6 +7585,7 @@ const generateAllLanguageResources = () => {
         supportedFormats: "PDF, TXT, DOCX 지원",
         editTopicList: "주제 목록 편집",
         selectTopicListTitle: "주제 목록 선택",
+        pleaseWait: "문서를 비교하는 동안 잠시 기다려 주세요",
       },
       match: {
         title: "문서 매칭",
@@ -7578,6 +7604,7 @@ const generateAllLanguageResources = () => {
         similarity: "유사도",
         editFormTemplate: "양식 템플릿 편집",
         selectFormTemplateTitle: "양식 템플릿 선택",
+        pleaseWait: "문서를 매칭하는 동안 잠시 기다려 주세요",
       },
       editFormTemplateModal: {
         title: "양식 템플릿 편집",
@@ -8038,6 +8065,7 @@ const generateAllLanguageResources = () => {
           "يجد المحتوى ذو الصلة باستخدام بحث التشابه بالذكاء الاصطناعي (سريع، مستهدف)",
         fullScanDescription:
           "يحلل جميع المستندات في قاعدة المعرفة (شامل، دقيق)",
+        pleaseWait: "يرجى الانتظار أثناء مراجعة مستنداتك",
       },
       editFormTemplateModal: {
         title: "تحرير قالب النموذج",
