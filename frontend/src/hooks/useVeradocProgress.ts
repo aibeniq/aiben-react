@@ -1,4 +1,5 @@
 import { VeradocService } from "@/client"
+import { OpenAPI } from "@/client/core/OpenAPI"
 import { useEffect, useRef, useState } from "react"
 
 export interface ProgressData {
@@ -29,9 +30,10 @@ export const useVeradocProgress = (taskId: string | null) => {
   const isActiveRef = useRef(false)
   const currentTaskIdRef = useRef<string | null>(null)
   const isPollingRef = useRef(false)
+  const consecutiveErrorCountRef = useRef(0)
 
   const MAX_POLLS = 3600
-  const MAX_TRANSIENT_ERRORS = 5
+  const MAX_TRANSIENT_ERRORS = 15 // Increased from 5 to allow more resilience to CORS issues
 
   useEffect(() => {
     if (!taskId) {
@@ -76,7 +78,7 @@ export const useVeradocProgress = (taskId: string | null) => {
     }
 
     isActiveRef.current = true
-    pollCountRef.current = 0
+    consecutiveErrorCountRef.current = 0
 
     let consecutiveErrorCount = 0
 
@@ -110,7 +112,7 @@ export const useVeradocProgress = (taskId: string | null) => {
               break
             } catch (err) {
               try {
-                const fallbackUrl = `${window.location.origin}/api/v1/veradoc/results/${taskId}`
+                const fallbackUrl = `${OpenAPI.BASE}/api/v1/veradoc/results/${taskId}`
                 const fr = await fetch(fallbackUrl, {
                   credentials: "same-origin",
                 })
@@ -148,14 +150,29 @@ export const useVeradocProgress = (taskId: string | null) => {
           const response = await VeradocService.getVeradocProgress({ taskId })
           status = await processProgressResponse(response)
           consecutiveErrorCount = 0
+
+          // Reset to normal polling interval on success
+          consecutiveErrorCountRef.current = 0
+          if (intervalIdRef.current) {
+            window.clearInterval(intervalIdRef.current)
+            intervalIdRef.current = window.setInterval(pollProgress, 1000)
+          }
         } catch (primaryErr) {
           try {
-            const fallbackUrl = `${window.location.origin}/api/v1/veradoc/progress/${taskId}`
+            // Use the configured API base URL for fallback instead of window.location.origin
+            const fallbackUrl = `${OpenAPI.BASE}/api/v1/veradoc/progress/${taskId}`
             const fr = await fetch(fallbackUrl, { credentials: "same-origin" })
             if (fr.ok) {
               const json = await fr.json()
               status = await processProgressResponse(json)
               consecutiveErrorCount = 0
+
+              // Reset to normal polling interval on success
+              consecutiveErrorCountRef.current = 0
+              if (intervalIdRef.current) {
+                window.clearInterval(intervalIdRef.current)
+                intervalIdRef.current = window.setInterval(pollProgress, 1000)
+              }
             } else {
               consecutiveErrorCount += 1
             }
@@ -176,6 +193,20 @@ export const useVeradocProgress = (taskId: string | null) => {
             }
             return
           }
+
+          // Store the consecutive error count for dynamic interval calculation
+          consecutiveErrorCountRef.current = consecutiveErrorCount
+
+          // Adjust polling interval based on error count - slow down when errors occur
+          const currentInterval = intervalIdRef.current
+          if (currentInterval) {
+            window.clearInterval(currentInterval)
+            intervalIdRef.current = null
+          }
+
+          // Exponential backoff: base 1000ms, double for each consecutive error, max 30000ms
+          const newInterval = Math.min(1000 * Math.pow(2, consecutiveErrorCount), 30000)
+          intervalIdRef.current = window.setInterval(pollProgress, newInterval)
         }
 
         if (

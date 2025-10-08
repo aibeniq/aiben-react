@@ -578,6 +578,138 @@ def invoke_llm(llm, prompt, variables=None):
             return _invoke_langchain_model()
 
 
+async def invoke_llm_async(llm, prompt, variables=None):
+    """
+    Async version of invoke_llm that doesn't block the event loop.
+    Unified function to invoke either a ReplicateWrapper or LangChain LLM.
+    - llm: The LLM instance.
+    - prompt: Either a string (for Replicate) or a LangChain ChatPromptTemplate.
+    - variables: dict of variables for the prompt (for LangChain).
+    Returns the response content as a string.
+    """
+    # ReplicateWrapper: expects a formatted string prompt
+    if hasattr(llm, "__class__") and "ReplicateWrapper" in llm.__class__.__name__:
+        if variables:
+            prompt_text = prompt.format(**variables)
+        else:
+            prompt_text = prompt
+        # Route through rate limiter for consistency
+        from app.services.universal_llm_wrapper import execute_llm_request_safely
+        result = await execute_llm_request_safely(llm, prompt_text, model_name="replicate")
+        return result
+
+    # BedrockWrapper: already has retry logic
+    elif hasattr(llm, "__class__") and "BedrockWrapper" in llm.__class__.__name__:
+        if variables:
+            prompt_text = (
+                prompt.format(**variables) if isinstance(prompt, str) else prompt
+            )
+        else:
+            prompt_text = prompt
+        # Route through rate limiter for consistency  
+        from app.services.universal_llm_wrapper import execute_llm_request_safely
+        result = await execute_llm_request_safely(llm, prompt_text, model_name="bedrock")
+        return result
+
+    else:
+        # LangChain models: add retry logic based on model type
+        if variables is None:
+            variables = {}
+
+        # Determine if this is an OpenAI model and add appropriate retry logic
+        model_class_name = llm.__class__.__name__
+
+        async def _invoke_langchain_model_async():
+            # Prepare the text content for token estimation
+            if hasattr(prompt, "from_template"):
+                formatted_text = prompt.template.format(**variables) if variables else prompt.template
+            elif hasattr(prompt, "format_prompt"):
+                # For ChatPromptTemplate, get the text content
+                formatted_text = str(prompt.format_prompt(**variables)) if variables else str(prompt)
+            elif isinstance(prompt, str):
+                formatted_text = prompt.format(**variables) if variables else prompt
+            else:
+                formatted_text = str(prompt)
+            
+            # For OpenAI models, apply global rate limiting
+            if "ChatOpenAI" in model_class_name or "OpenAI" in model_class_name:
+                # Estimate tokens needed for this request
+                estimated_tokens = estimate_tokens(formatted_text)
+                
+                # Wait for capacity if needed
+                from app.core.config import settings
+                if not global_rate_limiter.wait_for_capacity(estimated_tokens, max_wait_time=settings.OPENAI_RATE_LIMIT_MAX_WAIT):
+                    raise Exception("Global rate limiter: Maximum wait time exceeded for OpenAI request")
+                
+                logger.info(f"🚀 Proceeding with OpenAI request ({estimated_tokens} estimated tokens)")
+            
+            # Execute the actual LLM invocation
+            if hasattr(prompt, "from_template"):
+                # If prompt is a template, build the chain
+                section_prompt = prompt.from_template(prompt.template)
+                chain = section_prompt | llm
+                result = await chain.ainvoke(variables)
+            elif hasattr(prompt, "format_prompt"):
+                # If prompt is already a ChatPromptTemplate
+                chain = prompt | llm
+                result = await chain.ainvoke(variables)
+            elif isinstance(prompt, str):
+                # Create a proper chat message from the string
+                formatted_text = prompt.format(**variables)
+                try:
+                    from langchain_core.messages import HumanMessage
+                except ImportError:
+                    from langchain.schema import HumanMessage
+                # Route through rate limiter
+                from app.services.universal_llm_wrapper import execute_llm_request_safely
+                result = await execute_llm_request_safely(
+                    llm, 
+                    [HumanMessage(content=formatted_text)], 
+                    model_name=getattr(llm, 'model_name', 'gpt-4o')
+                )
+            else:
+                # If prompt is a plain string, just pass as-is
+                # For async, we need to run in executor
+                import asyncio
+                result = await asyncio.get_event_loop().run_in_executor(None, lambda: llm(prompt))
+            
+            # For OpenAI models, record actual token usage if available
+            if "ChatOpenAI" in model_class_name or "OpenAI" in model_class_name:
+                try:
+                    if hasattr(result, 'usage_metadata') and result.usage_metadata:
+                        actual_tokens = result.usage_metadata.get('total_tokens', estimated_tokens)
+                        global_rate_limiter.record_actual_usage(actual_tokens, estimated_tokens)
+                        logger.debug(f"📊 Recorded actual token usage: {actual_tokens}")
+                    elif hasattr(result, 'response_metadata') and result.response_metadata:
+                        # Try alternative metadata location
+                        usage = result.response_metadata.get('token_usage', {})
+                        actual_tokens = usage.get('total_tokens', estimated_tokens)
+                        global_rate_limiter.record_actual_usage(actual_tokens, estimated_tokens)
+                        logger.debug(f"📊 Recorded actual token usage: {actual_tokens}")
+                except Exception as e:
+                    logger.debug(f"Could not extract actual token usage: {e}")
+
+            # Extract content from message object if needed
+            if hasattr(result, "content"):
+                return result.content
+            return result
+
+        # Apply appropriate retry logic based on model type
+        if "ChatOpenAI" in model_class_name or "OpenAI" in model_class_name:
+            # Apply aggressive OpenAI retry logic with exponential backoff
+            return await retry_openai_api(min_wait=10, max_wait=300, max_attempts=7)(
+                _invoke_langchain_model_async
+            )()
+        elif "ChatBedrock" in model_class_name or "Bedrock" in model_class_name:
+            # Apply AWS retry logic
+            return await retry_aws_api(min_wait=1, max_wait=30, max_attempts=10)(
+                _invoke_langchain_model_async
+            )()
+        else:
+            # For other models (like Ollama), no retry logic needed
+            return await _invoke_langchain_model_async()
+
+
 def invoke_llm_with_image(
     llm, prompt, variables=None, image_file=None, image_base64=None, image_type="png"
 ):
@@ -656,8 +788,8 @@ def invoke_llm_with_image(
             print("Messages defined, proceeding to invoke LLM with image...")
 
             # Call the LLM with image capability through rate limiter
-            from app.services.universal_llm_wrapper import execute_llm_request_safely_sync
-            response = execute_llm_request_safely_sync(
+            from app.services.universal_llm_wrapper import execute_llm_request_safely
+            response = execute_llm_request_safely(
                 llm, 
                 messages, 
                 images=[image_base64] if image_base64 else None,
@@ -847,8 +979,8 @@ def invoke_llm_with_images(llm, prompt, variables=None, images_list=None):
             )
 
             # Call the LLM with image capability through rate limiter
-            from app.services.universal_llm_wrapper import execute_llm_request_safely_sync
-            response = execute_llm_request_safely_sync(
+            from app.services.universal_llm_wrapper import execute_llm_request_safely
+            response = execute_llm_request_safely(
                 llm, 
                 [message], 
                 images=images_list,
