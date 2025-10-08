@@ -42,16 +42,25 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
     let searchText = normalizeForSearch(originalSnippet)
     const minLength = Math.max(15, Math.min(50, searchText.length * 0.3)) // At least 15 chars or 30% of original
 
-    console.log("Starting progressive search with:", searchText.substring(0, 50))
+    console.log(
+      "Starting progressive search with:",
+      searchText.substring(0, 50),
+    )
     console.log("Minimum search length:", minLength)
 
     // Try progressively shorter versions of the text
     while (searchText.length >= minLength) {
-      console.log(`Trying search with length ${searchText.length}:`, searchText.substring(0, 30))
+      console.log(
+        `Trying search with length ${searchText.length}:`,
+        searchText.substring(0, 30),
+      )
 
       try {
         // Try exact match first
-        let regex = new RegExp(`(${searchText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi")
+        let regex = new RegExp(
+          `(${searchText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
+          "gi",
+        )
         let parts = normalizedText.split(regex)
 
         if (parts.length > 1) {
@@ -82,12 +91,20 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
           parts = normalizedText.split(regex)
 
           if (parts.length > 1) {
-            console.log("✅ Found word-boundary match at length:", searchText.length)
+            console.log(
+              "✅ Found word-boundary match at length:",
+              searchText.length,
+            )
             return { regex, parts, matchedText: searchText }
           }
         }
       } catch (error) {
-        console.warn("Error with regex at length", searchText.length, ":", error)
+        console.warn(
+          "Error with regex at length",
+          searchText.length,
+          ":",
+          error,
+        )
       }
 
       // Trim from the end - remove last word or last 10% of characters, whichever is smaller
@@ -98,7 +115,9 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
       } else {
         // Remove last 10% of characters, but at least 1 character
         const charsToRemove = Math.max(1, Math.floor(searchText.length * 0.1))
-        searchText = searchText.substring(0, searchText.length - charsToRemove).trim()
+        searchText = searchText
+          .substring(0, searchText.length - charsToRemove)
+          .trim()
       }
     }
 
@@ -121,16 +140,25 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
     const match = findBestMatch(text, snippet)
 
     if (!match) {
-      console.warn("❌ No matches found for any version of snippet:", snippet.substring(0, 50))
+      console.warn(
+        "❌ No matches found for any version of snippet:",
+        snippet.substring(0, 50),
+      )
       // Final fallback - try to match just the first few significant words
       const words = snippet.split(/\s+/).filter((word) => word.length > 3)
       if (words.length > 0) {
         const fallbackText = words.slice(0, 3).join(" ")
-        console.log("🔄 Trying fallback with first significant words:", fallbackText)
+        console.log(
+          "🔄 Trying fallback with first significant words:",
+          fallbackText,
+        )
         const fallbackMatch = findBestMatch(text, fallbackText)
         if (fallbackMatch) {
           console.log("✅ Fallback match found!")
-          return createHighlightedContent(fallbackMatch.parts, fallbackMatch.regex)
+          return createHighlightedContent(
+            fallbackMatch.parts,
+            fallbackMatch.regex,
+          )
         }
       }
       return text
@@ -146,7 +174,7 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
 
     return parts.map((part, index) => {
       // Check if this part matches our search term
-      if (part && part.trim() && regex.test(part)) {
+      if (part?.trim() && regex.test(part)) {
         const isFirstMatch = !firstHighlightFound
         if (isFirstMatch) {
           firstHighlightFound = true
@@ -182,7 +210,8 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
     // For text files, scroll to highlighted element
     if (textContentRef.current) {
       setTimeout(() => {
-        const firstHighlight = textContentRef.current?.querySelector("#first-highlight")
+        const firstHighlight =
+          textContentRef.current?.querySelector("#first-highlight")
         if (firstHighlight) {
           console.log("Found first highlight, scrolling to it")
           firstHighlight.scrollIntoView({
@@ -238,7 +267,10 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
   // Scroll to highlighted text when modal opens and file is loaded
   useEffect(() => {
     if (isOpen && file && highlightSnippet) {
-      console.log("Modal opened with highlight snippet:", highlightSnippet.substring(0, 50))
+      console.log(
+        "Modal opened with highlight snippet:",
+        highlightSnippet.substring(0, 50),
+      )
 
       // For text files, try scrolling multiple times to ensure it works
       if (file.content_type.startsWith("text/")) {
@@ -326,15 +358,18 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
                 console.log("PDF iframe loaded")
                 if (highlightSnippet) {
                   const searchText = createPdfSearchText(highlightSnippet)
-                  console.log("PDF loaded with optimized search snippet:", searchText)
+                  console.log(
+                    "PDF loaded with optimized search snippet:",
+                    searchText,
+                  )
 
                   // Try to send search command to PDF.js after load
                   setTimeout(() => {
                     try {
                       const iframe = document.querySelector(
-                        'iframe[title="' + file.name + '"]',
+                        `iframe[title="${file.name}"]`,
                       ) as HTMLIFrameElement
-                      if (iframe && iframe.contentWindow) {
+                      if (iframe?.contentWindow) {
                         // Attempt to trigger search in PDF.js with optimized text
                         iframe.contentWindow.postMessage(
                           {
@@ -346,7 +381,10 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
                         console.log("📤 Sent PDF search message:", searchText)
                       }
                     } catch (e) {
-                      console.log("Could not send search message to PDF iframe:", e)
+                      console.log(
+                        "Could not send search message to PDF iframe:",
+                        e,
+                      )
                     }
                   }, 1000)
                 }
@@ -367,7 +405,9 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
         file.content_type.includes("rtf") ||
         textContent.startsWith("{\\rtf")
 
-      const displayContent = isRtfFile ? cleanRTFFormatting(textContent) : textContent
+      const displayContent = isRtfFile
+        ? cleanRTFFormatting(textContent)
+        : textContent
 
       return (
         <Box
@@ -382,7 +422,9 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
           whiteSpace="pre-wrap"
           style={{ fontFamily: "monospace" }}
         >
-          {highlightSnippet ? highlightText(displayContent, highlightSnippet) : displayContent}
+          {highlightSnippet
+            ? highlightText(displayContent, highlightSnippet)
+            : displayContent}
         </Box>
       )
     }
@@ -390,7 +432,9 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
     // Default case
     return (
       <Box textAlign="center" py={8}>
-        <Text mb={4}>Preview not available for this file type ({file.content_type})</Text>
+        <Text mb={4}>
+          Preview not available for this file type ({file.content_type})
+        </Text>
         <Button onClick={downloadFile} colorPalette="blue">
           Download File
         </Button>
@@ -401,7 +445,11 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
   console.log("Modal rendering with isOpen:", isOpen)
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={({ open }) => !open && onClose()} size="xl">
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={({ open }) => !open && onClose()}
+      size="xl"
+    >
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
@@ -422,7 +470,11 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
               Close
             </Button>
             {file && (
-              <Button colorPalette="blue" onClick={downloadFile} disabled={!fileUrl}>
+              <Button
+                colorPalette="blue"
+                onClick={downloadFile}
+                disabled={!fileUrl}
+              >
                 Download
               </Button>
             )}

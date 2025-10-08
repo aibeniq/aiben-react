@@ -69,8 +69,10 @@ export const addNordicTranslations = (resources: any) => {
         searchMode: "Sökläge:",
         vectorSearch: "Vektorsökning",
         fullTextScan: "Fulltext-skanning",
-        searchModeDescription: "Vektorsökning ger snabba, riktade resultat. Fulltext-skanning granskar allt innehåll i kunskapsbasen.",
-        askMeAnything: "Fråga mig vad som helst! För kunskapsbasökning, välj först en kunskapsbas.",
+        searchModeDescription:
+          "Vektorsökning ger snabba, riktade resultat. Fulltext-skanning granskar allt innehåll i kunskapsbasen.",
+        askMeAnything:
+          "Fråga mig vad som helst! För kunskapsbasökning, välj först en kunskapsbas.",
         usingGeneralAI: "Använder allmän AI-assistent",
         usingKnowledgeBase: "Använder kunskapsbas:",
         usingDocuments: "Använder # dokument",
@@ -87,15 +89,19 @@ export const addNordicTranslations = (resources: any) => {
         knowledgeBaseTableSources: "Källor",
         knowledgeBaseTablePages: "Sidor",
         selectKnowledgeBasePlaceholder: "Välj en kunskapsbas...",
-        noKnowledgeBasesAvailable: "Inga kunskapsbaser tillgängliga. Skapa en först för att använda denna funktion.",
+        noKnowledgeBasesAvailable:
+          "Inga kunskapsbaser tillgängliga. Skapa en först för att använda denna funktion.",
         knowledgeBase: "Kunskapsbas",
         file: "Fil",
-        welcomeMessageWithSource: "Välj en kunskapsbas eller ladda upp filer, ställ sedan en fråga.",
-        welcomeMessageGeneral: "Fråga mig vad som helst! För kunskapsbasssökning, välj först en kunskapsbas.",
+        welcomeMessageWithSource:
+          "Välj en kunskapsbas eller ladda upp filer, ställ sedan en fråga.",
+        welcomeMessageGeneral:
+          "Fråga mig vad som helst! För kunskapsbasssökning, välj först en kunskapsbas.",
         errors: {
           generic: "Tyvärr, något gick fel. Försök igen.",
           timeout: "Begäran timade ut. Försök igen.",
-          largeFileTimeout: "Bearbetning av stora filer timade ut. Prova 'Fulltext-skanning'-läge för bättre prestanda med stora filer.",
+          largeFileTimeout:
+            "Bearbetning av stora filer timade ut. Prova 'Fulltext-skanning'-läge för bättre prestanda med stora filer.",
           fileSize: "Filen är för stor. Välj mindre filer.",
           serverError: "Ett serverfel inträffade. Försök igen senare.",
         },
@@ -125,39 +131,66 @@ export const addNordicTranslations = (resources: any) => {
         notFound: "Den begärda resursen hittades inte.",
       },
       help: {
-        dashboard: "Huvudöversiktsida som visar användningsstatistik och senaste aktivitet",
-        usageStats: "Visa din nuvarande API-tokenanvändning och kvotinformation för den aktuella faktureringsperioden",
-        review: "Analysera dokument mot kvalitetschecklistor för efterlevnad och noggrannhet",
-        generate: "Skapa strukturerade rapporter och dokument med AI baserat på ditt innehåll",
-        compare: "Jämför två dokument sida vid sida för att identifiera skillnader och likheter",
-        match: "Matcha dokumentinnehåll till formulärmallar för automatisk ifyllning av formulär",
-        modelSelection: "Konfigurera AI-modeller som används för bearbetning och analys",
+        dashboard:
+          "Huvudöversiktsida som visar användningsstatistik och senaste aktivitet",
+        usageStats:
+          "Visa din nuvarande API-tokenanvändning och kvotinformation för den aktuella faktureringsperioden",
+        review:
+          "Analysera dokument mot kvalitetschecklistor för efterlevnad och noggrannhet",
+        generate:
+          "Skapa strukturerade rapporter och dokument med AI baserat på ditt innehåll",
+        compare:
+          "Jämför två dokument sida vid sida för att identifiera skillnader och likheter",
+        match:
+          "Matcha dokumentinnehåll till formulärmallar för automatisk ifyllning av formulär",
+        modelSelection:
+          "Konfigurera AI-modeller som används för bearbetning och analys",
         knowledgeBases: "Hantera kunskapsbasbibliotek för dokumentbearbetning",
         archive: "Visa och hantera dina bearbetade dokument och analyshistorik",
-        settings: "Konfigurera dina kontoinställningar och applikationsinställningar",
+        settings:
+          "Konfigurera dina kontoinställningar och applikationsinställningar",
         admin: "Administrativa funktioner för användar- och systemhantering",
-        knowledgeBaseSelection: "Välj en kunskapsbas som innehåller referensdokumenten och standarderna för analys",
-        checklistSelection: "Välj en checklista med specifika frågor för att utvärdera dina dokument mot",
+        knowledgeBaseSelection:
+          "Välj en kunskapsbas som innehåller referensdokumenten och standarderna för analys",
+        checklistSelection:
+          "Välj en checklista med specifika frågor för att utvärdera dina dokument mot",
         fileUpload: "Ladda upp dokumenten du vill analysera och granska",
-        customInstructions: "Lägg till specifika instruktioner som kommer att beaktas när checklistfrågor besvaras",
-        searchMode: "Välj mellan snabb vektorsökning eller omfattande fullständig dokumentskanning",
-        topicList: "Välj eller skapa en lista med ämnen för att fokusera jämförelseanalysen",
+        customInstructions:
+          "Lägg till specifika instruktioner som kommer att beaktas när checklistfrågor besvaras",
+        searchMode:
+          "Välj mellan snabb vektorsökning eller omfattande fullständig dokumentskanning",
+        topicList:
+          "Välj eller skapa en lista med ämnen för att fokusera jämförelseanalysen",
         formTemplate: "Välj en formulärmall som dina dokument ska matchas mot",
-        documentOutline: "Välj en dispositionsstruktur för att generera din rapport",
-        allUsersToggle: "Växla mellan att visa endast din historik eller alla användares historik",
+        documentOutline:
+          "Välj en dispositionsstruktur för att generera din rapport",
+        allUsersToggle:
+          "Växla mellan att visa endast din historik eller alla användares historik",
 
-        createChecklist: "Skapa en ny checklista med anpassade frågor för att utvärdera dokument mot specifika kriterier",
-        createOutline: "Skapa en ny dispositionsstruktur för att vägleda genereringen av strukturerade rapporter",
-        createTopicList: "Skapa en ny ämneslista för att fokusera jämförelseanalys på specifika ämnen eller teman",
-        createFormTemplate: "Skapa en ny formulärmall för automatiserad dokumentinnehållsextraktion och matchning",
-        suggestChecklistQuestions: "Använd AI för att automatiskt generera relevanta checklistfrågor baserat på din beskrivning och referensdokument",
-        optimizeChecklistQuestions: "Förbättra och förfina befintliga checklistfrågor med den valda kunskapsbasen för bättre noggrannhet",
-        suggestOutlineSections: "Använd AI för att automatiskt generera dispositionsavsnitt baserat på din beskrivning och referensdokument",
-        optimizeOutlineSections: "Förbättra och förfina befintliga dispositionsavsnitt med den valda kunskapsbasen för bättre struktur",
-        suggestTopicListTopics: "Använd AI för att automatiskt generera relevanta jämförelseämnen baserat på din beskrivning och referensdokument",
-        suggestFormTemplateFields: "Använd AI för att automatiskt generera relevanta formulärfält baserat på din beskrivning och referensdokument",
-        referenceDocuments: "Ladda upp referensdokument eller välj en kunskapsbas för att hjälpa AI:n att föreslå innehåll baserat på din specifika kontext och krav",
-        referenceDocumentsFiles: "Tillhandahåll referensdokument för att hjälpa AI:n att generera mer exakta och kontextuellt relevanta förslag"
+        createChecklist:
+          "Skapa en ny checklista med anpassade frågor för att utvärdera dokument mot specifika kriterier",
+        createOutline:
+          "Skapa en ny dispositionsstruktur för att vägleda genereringen av strukturerade rapporter",
+        createTopicList:
+          "Skapa en ny ämneslista för att fokusera jämförelseanalys på specifika ämnen eller teman",
+        createFormTemplate:
+          "Skapa en ny formulärmall för automatiserad dokumentinnehållsextraktion och matchning",
+        suggestChecklistQuestions:
+          "Använd AI för att automatiskt generera relevanta checklistfrågor baserat på din beskrivning och referensdokument",
+        optimizeChecklistQuestions:
+          "Förbättra och förfina befintliga checklistfrågor med den valda kunskapsbasen för bättre noggrannhet",
+        suggestOutlineSections:
+          "Använd AI för att automatiskt generera dispositionsavsnitt baserat på din beskrivning och referensdokument",
+        optimizeOutlineSections:
+          "Förbättra och förfina befintliga dispositionsavsnitt med den valda kunskapsbasen för bättre struktur",
+        suggestTopicListTopics:
+          "Använd AI för att automatiskt generera relevanta jämförelseämnen baserat på din beskrivning och referensdokument",
+        suggestFormTemplateFields:
+          "Använd AI för att automatiskt generera relevanta formulärfält baserat på din beskrivning och referensdokument",
+        referenceDocuments:
+          "Ladda upp referensdokument eller välj en kunskapsbas för att hjälpa AI:n att föreslå innehåll baserat på din specifika kontext och krav",
+        referenceDocumentsFiles:
+          "Tillhandahåll referensdokument för att hjälpa AI:n att generera mer exakta och kontextuellt relevanta förslag",
       },
       common: {
         loading: "Laddar...",
@@ -186,21 +219,26 @@ export const addNordicTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Granska dokument",
-        pageDescription: "Granska ett dokument baserat på användardefinierad checklista och policydatabas.",
+        pageDescription:
+          "Granska ett dokument baserat på användardefinierad checklista och policydatabas.",
         knowledgeBaseTitle: "Kunskapsbas",
         knowledgeBaseDescription: "Klicka för att välja",
         checklistTitle: "Checklista",
         checklistDescription: "Klicka för att välja",
         customInstructionsTitle: "Anpassade instruktioner (valfritt)",
-        customInstructionsPlaceholder: "Ange ytterligare instruktioner som bör beaktas när checklistfrågor besvaras...",
-        customInstructionsHelp: "{{count}}/2000 tecken. Dessa instruktioner kommer att läggas till varje fråga under bearbetning.",
-        searchModeHelp: "Vektorsökning ger snabba, riktade resultat. Fullständig dokumentanalys undersöker allt innehåll i kunskapsbasen.",
+        customInstructionsPlaceholder:
+          "Ange ytterligare instruktioner som bör beaktas när checklistfrågor besvaras...",
+        customInstructionsHelp:
+          "{{count}}/2000 tecken. Dessa instruktioner kommer att läggas till varje fråga under bearbetning.",
+        searchModeHelp:
+          "Vektorsökning ger snabba, riktade resultat. Fullständig dokumentanalys undersöker allt innehåll i kunskapsbasen.",
         processingFile: "Bearbetar fil...",
         processingFiles: "Bearbetar filer...",
         selectKnowledgeBaseTitle: "Välj kunskapsbas",
         selectChecklistTitle: "Välj checklista",
         noResults: "Inga resultat ännu",
-        uploadDocuments: "Ladda upp ett eller flera dokument för att granska mot din valda checklista",
+        uploadDocuments:
+          "Ladda upp ett eller flera dokument för att granska mot din valda checklista",
         results: "Resultat",
         downloadReport: "Ladda ner rapport",
         downloadCsv: "Ladda ner CSV",
@@ -209,24 +247,28 @@ export const addNordicTranslations = (resources: any) => {
         reportCopied: "Rapport kopierad till urklipp!",
         reviewButton: "Granska",
         consultDocuments: "Konsultera dokument",
-        noChecklistsAvailable: "Inga checklistor tillgängliga. Skapa din första checklista för att komma igång.",
+        noChecklistsAvailable:
+          "Inga checklistor tillgängliga. Skapa din första checklista för att komma igång.",
         createChecklist: "Skapa checklista",
         editChecklist: "Redigera checklista",
         checklistName: "Checklistnamn",
         checklistNamePlaceholder: "Ange checklistnamn...",
         checklistDescriptionLabel: "Beskrivning",
-        checklistDescriptionPlaceholder: "Ange checklistbeskrivning för automatiska frågeförslag (minst 10 tecken)...",
+        checklistDescriptionPlaceholder:
+          "Ange checklistbeskrivning för automatiska frågeförslag (minst 10 tecken)...",
         questions: "Frågor",
         suggest: "Föreslå",
         suggesting: "Föreslår...",
         optimize: "Optimera",
-        optimizeTooltip: "En kunskapsbas måste väljas för att aktivera optimera-funktionen",
+        optimizeTooltip:
+          "En kunskapsbas måste väljas för att aktivera optimera-funktionen",
         optimizeTooltipEnabled: "Optimera frågor baserat på vald kunskapsbas",
         uploadFiles: "Ladda upp filer",
         knowledgeBase: "Kunskapsbas",
         referenceDocuments: "Referensdokument (valfritt)",
         selectKnowledgeBasePlaceholder: "Välj kunskapsbas...",
-        noKnowledgeBasesAvailable: "Ingen kunskapsbas tillgänglig. Skapa en först för att använda denna funktion.",
+        noKnowledgeBasesAvailable:
+          "Ingen kunskapsbas tillgänglig. Skapa en först för att använda denna funktion.",
         copyQuestions: "Kopiera frågor",
         questionsCopied: "Frågor kopierade till urklipp",
         noQuestionsToCopy: "Inga frågor att kopiera",
@@ -238,22 +280,28 @@ export const addNordicTranslations = (resources: any) => {
         uploadedFiles: "Uppladdade filer",
 
         removeFile: "Ta bort",
-        characterCount: "{{count}}/2000 tecken. Dessa instruktioner kommer att läggas till varje fråga under bearbetning.",
+        characterCount:
+          "{{count}}/2000 tecken. Dessa instruktioner kommer att läggas till varje fråga under bearbetning.",
         searchMode: "Sökläge",
         vectorSearch: "Vektorsökning",
         fullDocumentScan: "Fullständig dokumentanalys",
-        vectorSearchDescription: "Hitta relevant innehåll med AI-likhetsökning (snabb, riktad)",
-        fullScanDescription: "Analysera alla dokument i kunskapsbasen (omfattande, grundlig)"
+        vectorSearchDescription:
+          "Hitta relevant innehåll med AI-likhetsökning (snabb, riktad)",
+        fullScanDescription:
+          "Analysera alla dokument i kunskapsbasen (omfattande, grundlig)",
       },
       generate: {
-        pageDescription: "Generera ett dokument baserat på användardefinierad disposition och dokumentdatabas.",
+        pageDescription:
+          "Generera ett dokument baserat på användardefinierad disposition och dokumentdatabas.",
         generatingDocument: "Genererar dokument...",
         knowledgeBaseTitle: "Kunskapsbas",
         documentOutlineTitle: "Dokumentdisposition",
         clickToSelect: "Klicka för att välja",
         customInstructionsTitle: "Anpassade instruktioner (valfritt)",
-        customInstructionsPlaceholder: "Ange ytterligare instruktioner som bör beaktas när varje rapportavsnitt genereras...",
-        characterCount: "{{count}}/2000 tecken. Dessa instruktioner kommer att läggas till prompten när varje avsnitt genereras.",
+        customInstructionsPlaceholder:
+          "Ange ytterligare instruktioner som bör beaktas när varje rapportavsnitt genereras...",
+        characterCount:
+          "{{count}}/2000 tecken. Dessa instruktioner kommer att läggas till prompten när varje avsnitt genereras.",
         selectKnowledgeBaseTitle: "Välj kunskapsbas",
         selectDocumentOutlineTitle: "Välj dokumentdisposition",
         generateButton: "Generera",
@@ -263,7 +311,8 @@ export const addNordicTranslations = (resources: any) => {
         downloadDocx: "Ladda ner DOCX",
         downloadCsv: "Ladda ner CSV",
         clearReport: "Rensa rapport",
-        resultsPlaceholder: "Resultat kommer att visas här efter dokumentgenerering.",
+        resultsPlaceholder:
+          "Resultat kommer att visas här efter dokumentgenerering.",
         sectionsWithSources: "Avsnitt med källor",
         sectionNumber: "Avsnitt {number}: {title}",
         kbGenerated: "KB-genererat",
@@ -281,36 +330,39 @@ export const addNordicTranslations = (resources: any) => {
         generateSuccess: "Rapport genererad framgångsrikt med {method}!",
         generateError: "Misslyckades att generera dokument: {error}",
         vectorSearch: "vektorsökning",
-        fullDocumentScan: "fullständig dokumentskanning"
+        fullDocumentScan: "fullständig dokumentskanning",
       },
       modelSelection: {
         llmManagement: "LLM-hantering",
-        llmDescription: "Konfigurera och hantera LLM:er som används för att generera textsvar. Standardmodellen kommer att användas för alla operationer.",
+        llmDescription:
+          "Konfigurera och hantera LLM:er som används för att generera textsvar. Standardmodellen kommer att användas för alla operationer.",
         addNewLlm: "Lägg till ny LLM",
         noLlmsConfigured: "Inga LLM:er konfigurerade",
         addNewLlmToGetStarted: "Lägg till en ny LLM för att komma igång",
         embeddingModelManagement: "Inbäddningsmodell-hantering",
-        embeddingDescription: "Konfigurera och hantera inbäddningsmodeller som används för kunskapsbasindexering och hämtning. Standardmodellen kommer att användas när nya kunskapsbaser skapas, men varje kunskapsbas kommer att fortsätta använda sin ursprungliga inbäddningsmodell även om standarden ändras senare.",
+        embeddingDescription:
+          "Konfigurera och hantera inbäddningsmodeller som används för kunskapsbasindexering och hämtning. Standardmodellen kommer att användas när nya kunskapsbaser skapas, men varje kunskapsbas kommer att fortsätta använda sin ursprungliga inbäddningsmodell även om standarden ändras senare.",
         addEmbeddingModel: "Lägg till inbäddningsmodell",
         noEmbeddingModelsConfigured: "Inga inbäddningsmodeller konfigurerade",
-        addNewEmbeddingModelToGetStarted: "Lägg till en ny inbäddningsmodell för att komma igång",
+        addNewEmbeddingModelToGetStarted:
+          "Lägg till en ny inbäddningsmodell för att komma igång",
         tableHeaders: {
           name: "Namn",
           modelId: "Modell-ID",
           provider: "Leverantör",
           description: "Beskrivning",
           status: "Status",
-          actions: "Åtgärder"
+          actions: "Åtgärder",
         },
         status: {
           default: "Standard",
-          available: "Tillgänglig"
+          available: "Tillgänglig",
         },
         actions: {
           setAsDefault: "Ange som standard",
           delete: "Ta bort",
           validate: "Validera",
-          validating: "Validerar"
+          validating: "Validerar",
         },
         dialog: {
           addNewLlm: "Lägg till ny LLM",
@@ -320,20 +372,22 @@ export const addNordicTranslations = (resources: any) => {
           modelId: "Modell-ID",
           description: "Beskrivning",
           cancel: "Avbryt",
-          addModel: "Lägg till modell"
+          addModel: "Lägg till modell",
         },
         placeholders: {
           customModel: "t.ex., Min anpassade modell",
           embeddingModelId: "t.ex., sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "Beskriv modellen, dess egenskaper och när den ska användas"
+          describeModel:
+            "Beskriv modellen, dess egenskaper och när den ska användas",
         },
         validation: {
-          pleaseEnterModelId: "Vänligen ange ett modell-ID"
-        }
+          pleaseEnterModelId: "Vänligen ange ett modell-ID",
+        },
       },
       compare: {
         title: "Jämför dokument",
-        subtitle: "Jämför två dokument för att se hur de skiljer sig åt med avseende på en användardefinierad ämneslista.",
+        subtitle:
+          "Jämför två dokument för att se hur de skiljer sig åt med avseende på en användardefinierad ämneslista.",
         selectFirstDocument: "Välj första dokument",
         selectSecondDocument: "Välj andra dokument",
         pleaseSelect: "Vänligen välj...",
@@ -348,11 +402,12 @@ export const addNordicTranslations = (resources: any) => {
         clickToBrowse: "Klicka för att bläddra eller dra och släpp",
         supportedFormats: "PDF, TXT, DOCX stöds",
         editTopicList: "Redigera ämneslista",
-        selectTopicListTitle: "Välj ämneslista"
+        selectTopicListTitle: "Välj ämneslista",
       },
       match: {
         title: "Dokumentmatchning",
-        subtitle: "Säkerställ att fältposter matchar mellan dokument av olika format.",
+        subtitle:
+          "Säkerställ att fältposter matchar mellan dokument av olika format.",
         selectDocument: "Välj dokument att hitta matchningar för",
         pleaseSelect: "Vänligen välj dokument...",
         sourceDocument: "Källdokument",
@@ -366,14 +421,15 @@ export const addNordicTranslations = (resources: any) => {
         matchResults: "Matchresultat",
         similarity: "Likhet",
         editFormTemplate: "Redigera formulärmall",
-        selectFormTemplateTitle: "Välj formulärmall"
+        selectFormTemplateTitle: "Välj formulärmall",
       },
       editFormTemplateModal: {
         title: "Redigera formulärmall",
         formTemplateName: "Formulärmallnamn",
         formTemplateNamePlaceholder: "Ange formulärmallnamn",
         formTemplateDescription: "Formulärmallbeskrivning",
-        descriptionPlaceholder: "Ange formulärmallbeskrivning för automatisk fältförslag (minst 10 tecken)...",
+        descriptionPlaceholder:
+          "Ange formulärmallbeskrivning för automatisk fältförslag (minst 10 tecken)...",
         referenceDocuments: "Referensdokument (valfritt)",
         uploadFiles: "Ladda upp filer",
         knowledgeBase: "Kunskapsbas",
@@ -381,7 +437,7 @@ export const addNordicTranslations = (resources: any) => {
         suggest: "Föreslå",
         fieldPlaceholder: "Lägg till fältnamn...",
         cancel: "Avbryt",
-        updateFormTemplate: "Uppdatera formulärmall"
+        updateFormTemplate: "Uppdatera formulärmall",
       },
       editOutlineModal: {
         title: "Redigera disposition",
@@ -389,7 +445,8 @@ export const addNordicTranslations = (resources: any) => {
         outlineName: "Dispositionsnamn",
         outlineNamePlaceholder: "Ange dispositionsnamn",
         description: "Beskrivning",
-        descriptionPlaceholder: "Ange dispositionsbeskrivning för automatisk avsnittsförslag (minst 10 tecken)...",
+        descriptionPlaceholder:
+          "Ange dispositionsbeskrivning för automatisk avsnittsförslag (minst 10 tecken)...",
         referenceDocuments: "Referensdokument (valfritt)",
         uploadFiles: "Ladda upp filer",
         knowledgeBase: "Kunskapsbas",
@@ -399,7 +456,7 @@ export const addNordicTranslations = (resources: any) => {
         addSectionPlaceholder: "Lägg till avsnitt",
         cancel: "Avbryt",
         createOutline: "Skapa disposition",
-        updateOutline: "Uppdatera disposition"
+        updateOutline: "Uppdatera disposition",
       },
       editChecklistModal: {
         title: "Redigera checklista",
@@ -407,7 +464,8 @@ export const addNordicTranslations = (resources: any) => {
         checklistName: "Checklistnamn",
         checklistNamePlaceholder: "Ange checklistnamn",
         description: "Beskrivning",
-        descriptionPlaceholder: "Ange checklistbeskrivning för automatisk frågeförslag (minst 10 tecken)...",
+        descriptionPlaceholder:
+          "Ange checklistbeskrivning för automatisk frågeförslag (minst 10 tecken)...",
         referenceDocuments: "Referensdokument (valfritt)",
         uploadFiles: "Ladda upp filer",
         knowledgeBase: "Kunskapsbas",
@@ -418,7 +476,7 @@ export const addNordicTranslations = (resources: any) => {
         copyAllQuestions: "Kopiera alla frågor som text",
         cancel: "Avbryt",
         createChecklist: "Skapa checklista",
-        updateChecklist: "Uppdatera checklista"
+        updateChecklist: "Uppdatera checklista",
       },
       editTopicListModal: {
         title: "Redigera ämneslista",
@@ -426,7 +484,8 @@ export const addNordicTranslations = (resources: any) => {
         topicListName: "Ämneslistnamn",
         topicListNamePlaceholder: "Ange ämneslistnamn",
         description: "Ämneslistbeskrivning",
-        descriptionPlaceholder: "Ange ämneslistbeskrivning för automatisk ämnesförslag (minst 10 tecken)...",
+        descriptionPlaceholder:
+          "Ange ämneslistbeskrivning för automatisk ämnesförslag (minst 10 tecken)...",
         referenceDocuments: "Referensdokument (valfritt)",
         uploadFiles: "Ladda upp filer",
         knowledgeBase: "Kunskapsbas",
@@ -437,15 +496,17 @@ export const addNordicTranslations = (resources: any) => {
         copyAllTopics: "Kopiera alla ämnen som text",
         cancel: "Avbryt",
         createTopicList: "Skapa ämneslista",
-        updateTopicList: "Uppdatera ämneslista"
+        updateTopicList: "Uppdatera ämneslista",
       },
       optimizeChecklistModal: {
         title: "Optimera checklista",
         customInstructionsLabel: "Anpassade instruktioner (valfritt)",
-        customInstructionsHelperText: "Ange ytterligare instruktioner som bör beaktas när checklistfrågor besvaras",
+        customInstructionsHelperText:
+          "Ange ytterligare instruktioner som bör beaktas när checklistfrågor besvaras",
         analyzing: "Analyserar...",
         analyzeButton: "Analysera checklista",
-        analyzingMessage: "Analyserar din checklista för att hitta optimeringsmöjligheter...",
+        analyzingMessage:
+          "Analyserar din checklista för att hitta optimeringsmöjligheter...",
         cancelAnalysis: "Avbryt analys",
         downloading: "Laddar ner...",
         downloadCsv: "Ladda ner CSV",
@@ -461,17 +522,21 @@ export const addNordicTranslations = (resources: any) => {
         showMore: "Visa mer",
         optimizationsSelectedText: "{{s}} optimeringar valda för tillämpning",
         applying: "Tillämpar...",
-        applySelectedOptimizations: "Tillämpa valda optimeringar"
+        applySelectedOptimizations: "Tillämpa valda optimeringar",
       },
       optimizeOutlineModal: {
         title: "Optimera disposition",
-        description: "Ladda upp ett referensdokument som representerar ett högkvalitativt exempel på den typ av rapport du vill skapa. Systemet kommer att generera en rapport med din nuvarande disposition och kunskapsbas, jämföra den med referensen och föreslå förbättringar av dispositionsavsnitt.",
+        description:
+          "Ladda upp ett referensdokument som representerar ett högkvalitativt exempel på den typ av rapport du vill skapa. Systemet kommer att generera en rapport med din nuvarande disposition och kunskapsbas, jämföra den med referensen och föreslå förbättringar av dispositionsavsnitt.",
         groundTruthDocument: "Referensdokument",
         customInstructionsLabel: "Anpassade instruktioner (valfritt)",
-        customInstructionsHelperText: "Ge ytterligare vägledning för optimeringsprocessen",
-        customInstructionsPlaceholder: "t.ex. Fokusera på att förbättra teknisk djup, säkerställ överensstämmelse med specifika standarder, etc.",
+        customInstructionsHelperText:
+          "Ge ytterligare vägledning för optimeringsprocessen",
+        customInstructionsPlaceholder:
+          "t.ex. Fokusera på att förbättra teknisk djup, säkerställ överensstämmelse med specifika standarder, etc.",
         characters: "tecken",
-        analyzingOutline: "Analyserar disposition och genererar optimeringar...",
+        analyzingOutline:
+          "Analyserar disposition och genererar optimeringar...",
         cancelAnalysis: "Avbryt analys",
         optimizationResults: "Optimeringsresultat",
         sectionsNeedOptimization: "avsnitt behöver optimering",
@@ -489,13 +554,14 @@ export const addNordicTranslations = (resources: any) => {
         cancel: "Avbryt",
         optimizing: "Optimerar...",
         optimizeOutline: "Optimera disposition",
-        applyOptimizations: "Tillämpa {{count}} optimeringar"
+        applyOptimizations: "Tillämpa {{count}} optimeringar",
       },
       knowledgeBases: {
         title: "Kunskapsbashantering",
         addKnowledgeBase: "Lägg till kunskapsbas",
         emptyStateTitle: "Du har inga kunskapsbaser än",
-        emptyStateDescription: "Lägg till en ny kunskapsbas för att komma igång",
+        emptyStateDescription:
+          "Lägg till en ny kunskapsbas för att komma igång",
         tableHeaders: {
           title: "Titel",
           description: "Beskrivning",
@@ -503,11 +569,11 @@ export const addNordicTranslations = (resources: any) => {
           embeddingModel: "Inbäddningsmodell",
           dateCreated: "Skapad datum",
           dateModified: "Ändrad datum",
-          actions: "Åtgärder"
+          actions: "Åtgärder",
         },
         status: {
           default: "Standard",
-          na: "Ej tillämplig"
+          na: "Ej tillämplig",
         },
         modals: {
           add: {
@@ -521,7 +587,8 @@ export const addNordicTranslations = (resources: any) => {
               descriptionPlaceholder: "Beskrivning",
             },
             fileUpload: {
-              dragAndDrop: "Dra och släpp filer här eller klicka för att bläddra",
+              dragAndDrop:
+                "Dra och släpp filer här eller klicka för att bläddra",
               dropFiles: "Släpp filer här...",
               selectedFiles: "Valda filer:",
               removeFile: "Ta bort fil",
@@ -549,7 +616,8 @@ export const addNordicTranslations = (resources: any) => {
             },
             fileUpload: {
               currentFiles: "Nuvarande filer:",
-              dragAndDrop: "Dra och släpp filer här eller klicka för att bläddra",
+              dragAndDrop:
+                "Dra och släpp filer här eller klicka för att bläddra",
               dropFiles: "Släpp filer här...",
               selectedFiles: "Valda filer:",
               removeFile: "Ta bort fil",
@@ -564,28 +632,29 @@ export const addNordicTranslations = (resources: any) => {
           },
           messages: {
             processing: "Bearbetar...",
-            pleaseWait: "Vänta medan vi bearbetar dina filer..."
-          }
+            pleaseWait: "Vänta medan vi bearbetar dina filer...",
+          },
         },
       },
       archive: {
         title: "Arkiv",
         history: "Historik",
         allUsers: "Alla användare",
-        allUsersToggleTooltip: "Växla mellan att visa endast din historik eller alla användares historik",
+        allUsersToggleTooltip:
+          "Växla mellan att visa endast din historik eller alla användares historik",
         viewingAllUsers: "Visar alla användares historik",
         viewingMyHistory: "Visar endast min historik",
         tabs: {
           review: "Granska",
           generate: "Generera",
           compare: "Jämför",
-          match: "Matcha"
+          match: "Matcha",
         },
         emptyMessages: {
           review: "Inga tidigare utvärderingar",
           generate: "Inga tidigare rapporter",
           compare: "Inga tidigare jämförelser",
-          match: "Ingen tidigare formulärbehandling"
+          match: "Ingen tidigare formulärbehandling",
         },
         metadata: {
           question: "fråga",
@@ -597,17 +666,17 @@ export const addNordicTranslations = (resources: any) => {
           document: "dokument",
           documents: "dokument",
           digitized: "digitaliserad",
-
         },
         feedback: {
           positive: "Positiv feedback",
           negative: "Negativ feedback",
-          hasFeedback: "Har feedback"
+          hasFeedback: "Har feedback",
         },
-        deleteConfirmation: "Är du säker på att du vill ta bort detta objekt? Denna åtgärd kan inte ångras.",
+        deleteConfirmation:
+          "Är du säker på att du vill ta bort detta objekt? Denna åtgärd kan inte ångras.",
         unknownDate: "Okänt datum",
-        unnamedItem: "Namnlöst objekt"
-      }
+        unnamedItem: "Namnlöst objekt",
+      },
     },
   }
 
@@ -678,8 +747,10 @@ export const addNordicTranslations = (resources: any) => {
         searchMode: "Søkemodus:",
         vectorSearch: "Vektorsøk",
         fullTextScan: "Fulltekst-skanning",
-        searchModeDescription: "Vektorsøk gir raske, målrettede resultater. Fulltekst-skanning gjennomgår alt innhold i kunnskapsbasen.",
-        askMeAnything: "Spør meg om hva som helst! For kunnskapsbasesøk, velg først en kunnskapsbase.",
+        searchModeDescription:
+          "Vektorsøk gir raske, målrettede resultater. Fulltekst-skanning gjennomgår alt innhold i kunnskapsbasen.",
+        askMeAnything:
+          "Spør meg om hva som helst! For kunnskapsbasesøk, velg først en kunnskapsbase.",
         usingGeneralAI: "Bruker generell AI-assistent",
         usingKnowledgeBase: "Bruker kunnskapsbase:",
         usingDocuments: "Bruker # dokumenter",
@@ -696,15 +767,19 @@ export const addNordicTranslations = (resources: any) => {
         knowledgeBaseTableSources: "Kilder",
         knowledgeBaseTablePages: "Sider",
         selectKnowledgeBasePlaceholder: "Velg en kunnskapsbase...",
-        noKnowledgeBasesAvailable: "Ingen kunnskapsbaser tilgjengelig. Opprett en først for å bruke denne funksjonen.",
+        noKnowledgeBasesAvailable:
+          "Ingen kunnskapsbaser tilgjengelig. Opprett en først for å bruke denne funksjonen.",
         knowledgeBase: "Kunnskapsbase",
         file: "Fil",
-        welcomeMessageWithSource: "Velg en kunnskapsbase eller last opp filer, still deretter et spørsmål.",
-        welcomeMessageGeneral: "Spør meg om hva som helst! For kunnskapsbasesøk, velg først en kunnskapsbase.",
+        welcomeMessageWithSource:
+          "Velg en kunnskapsbase eller last opp filer, still deretter et spørsmål.",
+        welcomeMessageGeneral:
+          "Spør meg om hva som helst! For kunnskapsbasesøk, velg først en kunnskapsbase.",
         errors: {
           generic: "Beklager, noe gikk galt. Prøv igjen.",
           timeout: "Forespørsel tidsavbrudd. Prøv igjen.",
-          largeFileTimeout: "Behandling av store filer tidsavbrudd. Prøv 'Fulltekst-skanning'-modus for bedre ytelse med store filer.",
+          largeFileTimeout:
+            "Behandling av store filer tidsavbrudd. Prøv 'Fulltekst-skanning'-modus for bedre ytelse med store filer.",
           fileSize: "Filen er for stor. Velg mindre filer.",
           serverError: "En serverfeil oppstod. Prøv igjen senere.",
         },
@@ -734,39 +809,68 @@ export const addNordicTranslations = (resources: any) => {
         notFound: "Den forespurte ressursen ble ikke funnet.",
       },
       help: {
-        dashboard: "Hovedoversiktsside som viser bruksstatistikk og nylig aktivitet",
-        usageStats: "Vis din nåværende API-tokenbruk og kvoteinformasjon for gjeldende faktureringsperiode",
-        review: "Analyser dokumenter mot kvalitetssjekklister for etterlevelse og nøyaktighet",
-        generate: "Opprett strukturerte rapporter og dokumenter med AI basert på ditt innhold",
-        compare: "Sammenlign to dokumenter side ved side for å identifisere forskjeller og likheter",
-        match: "Match dokumentinnhold til skjemamaler for automatisk utfylling av skjemaer",
-        modelSelection: "Konfigurer AI-modeller som brukes til behandling og analyse",
-        knowledgeBases: "Administrer kunnskapsbasebiblioteker for dokumentbehandling",
-        archive: "Vis og administrer dine behandlede dokumenter og analysehistorikk",
-        settings: "Konfigurer dine kontopreferanser og applikasjonsinnstillinger",
+        dashboard:
+          "Hovedoversiktsside som viser bruksstatistikk og nylig aktivitet",
+        usageStats:
+          "Vis din nåværende API-tokenbruk og kvoteinformasjon for gjeldende faktureringsperiode",
+        review:
+          "Analyser dokumenter mot kvalitetssjekklister for etterlevelse og nøyaktighet",
+        generate:
+          "Opprett strukturerte rapporter og dokumenter med AI basert på ditt innhold",
+        compare:
+          "Sammenlign to dokumenter side ved side for å identifisere forskjeller og likheter",
+        match:
+          "Match dokumentinnhold til skjemamaler for automatisk utfylling av skjemaer",
+        modelSelection:
+          "Konfigurer AI-modeller som brukes til behandling og analyse",
+        knowledgeBases:
+          "Administrer kunnskapsbasebiblioteker for dokumentbehandling",
+        archive:
+          "Vis og administrer dine behandlede dokumenter og analysehistorikk",
+        settings:
+          "Konfigurer dine kontopreferanser og applikasjonsinnstillinger",
         admin: "Administrative funksjoner for bruker- og systemadministrasjon",
-        knowledgeBaseSelection: "Velg en kunnskapsbase som inneholder referansedokumentene og standardene for analyse",
-        checklistSelection: "Velg en sjekkliste med spesifikke spørsmål for å evaluere dokumentene dine mot",
+        knowledgeBaseSelection:
+          "Velg en kunnskapsbase som inneholder referansedokumentene og standardene for analyse",
+        checklistSelection:
+          "Velg en sjekkliste med spesifikke spørsmål for å evaluere dokumentene dine mot",
         fileUpload: "Last opp dokumentene du vil analysere og gjennomgå",
-        customInstructions: "Legg til spesifikke instruksjoner som vil bli vurdert når sjekklistespørsmål besvares",
-        searchMode: "Velg mellom raskt vektorsøk eller omfattende full dokumentskanning",
-        topicList: "Velg eller opprett en liste med emner for å fokusere sammenligningsanalysen",
+        customInstructions:
+          "Legg til spesifikke instruksjoner som vil bli vurdert når sjekklistespørsmål besvares",
+        searchMode:
+          "Velg mellom raskt vektorsøk eller omfattende full dokumentskanning",
+        topicList:
+          "Velg eller opprett en liste med emner for å fokusere sammenligningsanalysen",
         formTemplate: "Velg en skjemamal som dokumentene dine skal matches mot",
-        documentOutline: "Velg en disposisjonsstruktur for å generere rapporten din",
-        allUsersToggle: "Bytt mellom å vise kun din historikk eller alle brukeres historikk",
+        documentOutline:
+          "Velg en disposisjonsstruktur for å generere rapporten din",
+        allUsersToggle:
+          "Bytt mellom å vise kun din historikk eller alle brukeres historikk",
 
-        createChecklist: "Opprett en ny sjekkliste med tilpassede spørsmål for å evaluere dokumenter mot spesifikke kriterier",
-        createOutline: "Opprett en ny disposisjonsstruktur for å veilede genereringen av strukturerte rapporter",
-        createTopicList: "Opprett en ny emneliste for å fokusere sammenligningsanalyse på spesifikke emner eller temaer",
-        createFormTemplate: "Opprett en ny skjemamal for automatisert dokumentinnholdsutvinning og matching",
-        suggestChecklistQuestions: "Bruk AI for å automatisk generere relevante sjekklistespørsmål basert på beskrivelsen og referansedokumentene dine",
-        optimizeChecklistQuestions: "Forbedre og forfine eksisterende sjekklistespørsmål ved å bruke den valgte kunnskapsbasen for bedre nøyaktighet",
-        suggestOutlineSections: "Bruk AI for å automatisk generere disposisjonsseksjoner basert på beskrivelsen og referansedokumentene dine",
-        optimizeOutlineSections: "Forbedre og forfine eksisterende disposisjonsseksjoner ved å bruke den valgte kunnskapsbasen for bedre struktur",
-        suggestTopicListTopics: "Bruk AI for å automatisk generere relevante sammenligningsemner basert på beskrivelsen og referansedokumentene dine",
-        suggestFormTemplateFields: "Bruk AI for å automatisk generere relevante skjemafelt basert på beskrivelsen og referansedokumentene dine",
-        referenceDocuments: "Last opp referansedokumenter eller velg en kunnskapsbase for å hjelpe AI-en med å foreslå innhold basert på din spesifikke kontekst og krav",
-        referenceDocumentsFiles: "Gi referansedokumenter for å hjelpe AI-en med å generere mer nøyaktige og kontekstuelt relevante forslag"
+        createChecklist:
+          "Opprett en ny sjekkliste med tilpassede spørsmål for å evaluere dokumenter mot spesifikke kriterier",
+        createOutline:
+          "Opprett en ny disposisjonsstruktur for å veilede genereringen av strukturerte rapporter",
+        createTopicList:
+          "Opprett en ny emneliste for å fokusere sammenligningsanalyse på spesifikke emner eller temaer",
+        createFormTemplate:
+          "Opprett en ny skjemamal for automatisert dokumentinnholdsutvinning og matching",
+        suggestChecklistQuestions:
+          "Bruk AI for å automatisk generere relevante sjekklistespørsmål basert på beskrivelsen og referansedokumentene dine",
+        optimizeChecklistQuestions:
+          "Forbedre og forfine eksisterende sjekklistespørsmål ved å bruke den valgte kunnskapsbasen for bedre nøyaktighet",
+        suggestOutlineSections:
+          "Bruk AI for å automatisk generere disposisjonsseksjoner basert på beskrivelsen og referansedokumentene dine",
+        optimizeOutlineSections:
+          "Forbedre og forfine eksisterende disposisjonsseksjoner ved å bruke den valgte kunnskapsbasen for bedre struktur",
+        suggestTopicListTopics:
+          "Bruk AI for å automatisk generere relevante sammenligningsemner basert på beskrivelsen og referansedokumentene dine",
+        suggestFormTemplateFields:
+          "Bruk AI for å automatisk generere relevante skjemafelt basert på beskrivelsen og referansedokumentene dine",
+        referenceDocuments:
+          "Last opp referansedokumenter eller velg en kunnskapsbase for å hjelpe AI-en med å foreslå innhold basert på din spesifikke kontekst og krav",
+        referenceDocumentsFiles:
+          "Gi referansedokumenter for å hjelpe AI-en med å generere mer nøyaktige og kontekstuelt relevante forslag",
       },
       common: {
         loading: "Laster...",
@@ -795,21 +899,26 @@ export const addNordicTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Gjennomgå dokumenter",
-        pageDescription: "Gjennomgå et dokument basert på brukerdefinert sjekkliste og policydatabase.",
+        pageDescription:
+          "Gjennomgå et dokument basert på brukerdefinert sjekkliste og policydatabase.",
         knowledgeBaseTitle: "Kunnskapsbase",
         knowledgeBaseDescription: "Klikk for å velge",
         checklistTitle: "Sjekkliste",
         checklistDescription: "Klikk for å velge",
         customInstructionsTitle: "Tilpassede instruksjoner (valgfritt)",
-        customInstructionsPlaceholder: "Skriv inn tilleggsinstruksjoner som bør vurderes når sjekklistespørsmål besvares...",
-        customInstructionsHelp: "{{count}}/2000 tegn. Disse instruksjonene vil bli lagt til hvert spørsmål under behandling.",
-        searchModeHelp: "Vektorsøk gir raske, målrettede resultater. Full dokumentanalyse undersøker alt innhold i kunnskapsbasen.",
+        customInstructionsPlaceholder:
+          "Skriv inn tilleggsinstruksjoner som bør vurderes når sjekklistespørsmål besvares...",
+        customInstructionsHelp:
+          "{{count}}/2000 tegn. Disse instruksjonene vil bli lagt til hvert spørsmål under behandling.",
+        searchModeHelp:
+          "Vektorsøk gir raske, målrettede resultater. Full dokumentanalyse undersøker alt innhold i kunnskapsbasen.",
         processingFile: "Behandler fil...",
         processingFiles: "Behandler filer...",
         selectKnowledgeBaseTitle: "Velg kunnskapsbase",
         selectChecklistTitle: "Velg sjekkliste",
         noResults: "Ingen resultater ennå",
-        uploadDocuments: "Last opp ett eller flere dokumenter for å gjennomgå mot din valgte sjekkliste",
+        uploadDocuments:
+          "Last opp ett eller flere dokumenter for å gjennomgå mot din valgte sjekkliste",
         results: "Resultater",
         downloadReport: "Last ned rapport",
         downloadCsv: "Last ned CSV",
@@ -818,24 +927,29 @@ export const addNordicTranslations = (resources: any) => {
         reportCopied: "Rapport kopiert til utklippstavle!",
         reviewButton: "Gjennomgå",
         consultDocuments: "Konsulter dokumenter",
-        noChecklistsAvailable: "Ingen sjekklister tilgjengelig. Opprett din første sjekkliste for å komme i gang.",
+        noChecklistsAvailable:
+          "Ingen sjekklister tilgjengelig. Opprett din første sjekkliste for å komme i gang.",
         createChecklist: "Opprett sjekkliste",
         editChecklist: "Rediger sjekkliste",
         checklistName: "Sjekklistenavn",
         checklistNamePlaceholder: "Skriv inn sjekklistenavn...",
         checklistDescriptionLabel: "Beskrivelse",
-        checklistDescriptionPlaceholder: "Skriv inn sjekklistebeskrivelse for automatiske spørsmålsforslag (minimum 10 tegn)...",
+        checklistDescriptionPlaceholder:
+          "Skriv inn sjekklistebeskrivelse for automatiske spørsmålsforslag (minimum 10 tegn)...",
         questions: "Spørsmål",
         suggest: "Foreslå",
         suggesting: "Foreslår...",
         optimize: "Optimaliser",
-        optimizeTooltip: "En kunnskapsbase må velges for å aktivere optimaliser-funksjonen",
-        optimizeTooltipEnabled: "Optimaliser spørsmål basert på valgt kunnskapsbase",
+        optimizeTooltip:
+          "En kunnskapsbase må velges for å aktivere optimaliser-funksjonen",
+        optimizeTooltipEnabled:
+          "Optimaliser spørsmål basert på valgt kunnskapsbase",
         uploadFiles: "Last opp filer",
         knowledgeBase: "Kunnskapsbase",
         referenceDocuments: "Referansedokumenter (valgfritt)",
         selectKnowledgeBasePlaceholder: "Velg kunnskapsbase...",
-        noKnowledgeBasesAvailable: "Ingen kunnskapsbase tilgjengelig. Opprett en først for å bruke denne funksjonen.",
+        noKnowledgeBasesAvailable:
+          "Ingen kunnskapsbase tilgjengelig. Opprett en først for å bruke denne funksjonen.",
         copyQuestions: "Kopier spørsmål",
         questionsCopied: "Spørsmål kopiert til utklippstavle",
         noQuestionsToCopy: "Ingen spørsmål å kopiere",
@@ -847,22 +961,28 @@ export const addNordicTranslations = (resources: any) => {
         uploadedFiles: "Opplastede filer",
         handwritten: "Håndskrevet",
         removeFile: "Fjern",
-        characterCount: "{{count}}/2000 tegn. Disse instruksjonene vil bli lagt til hvert spørsmål under behandling.",
+        characterCount:
+          "{{count}}/2000 tegn. Disse instruksjonene vil bli lagt til hvert spørsmål under behandling.",
         searchMode: "Søkemodus",
         vectorSearch: "Vektorsøk",
         fullDocumentScan: "Full dokumentanalyse",
-        vectorSearchDescription: "Finn relevant innhold ved hjelp av AI-likhetssøk (rask, målrettet)",
-        fullScanDescription: "Analyser alle dokumenter i kunnskapsbasen (omfattende, grundig)"
+        vectorSearchDescription:
+          "Finn relevant innhold ved hjelp av AI-likhetssøk (rask, målrettet)",
+        fullScanDescription:
+          "Analyser alle dokumenter i kunnskapsbasen (omfattende, grundig)",
       },
       generate: {
-        pageDescription: "Generer et dokument basert på brukerdefinert disposisjon og dokumentdatabase.",
+        pageDescription:
+          "Generer et dokument basert på brukerdefinert disposisjon og dokumentdatabase.",
         generatingDocument: "Genererer dokument...",
         knowledgeBaseTitle: "Kunnskapsbase",
         documentOutlineTitle: "Dokumentdisposisjon",
         clickToSelect: "Klikk for å velge",
         customInstructionsTitle: "Tilpassede instruksjoner (valgfritt)",
-        customInstructionsPlaceholder: "Skriv inn tilleggsinstruksjoner som bør vurderes når hver rapportseksjon genereres...",
-        characterCount: "{{count}}/2000 tegn. Disse instruksjonene vil bli lagt til prompten når hver seksjon genereres.",
+        customInstructionsPlaceholder:
+          "Skriv inn tilleggsinstruksjoner som bør vurderes når hver rapportseksjon genereres...",
+        characterCount:
+          "{{count}}/2000 tegn. Disse instruksjonene vil bli lagt til prompten når hver seksjon genereres.",
         selectKnowledgeBaseTitle: "Velg kunnskapsbase",
         selectDocumentOutlineTitle: "Velg dokumentdisposisjon",
         generateButton: "Generer",
@@ -872,7 +992,8 @@ export const addNordicTranslations = (resources: any) => {
         downloadDocx: "Last ned DOCX",
         downloadCsv: "Last ned CSV",
         clearReport: "Fjern rapport",
-        resultsPlaceholder: "Resultater vil vises her etter dokumentgenerering.",
+        resultsPlaceholder:
+          "Resultater vil vises her etter dokumentgenerering.",
         sectionsWithSources: "Seksjoner med kilder",
         sectionNumber: "Seksjon {number}: {title}",
         kbGenerated: "KB-generert",
@@ -890,36 +1011,39 @@ export const addNordicTranslations = (resources: any) => {
         generateSuccess: "Rapport generert vellykket ved hjelp av {method}!",
         generateError: "Kunne ikke generere dokument: {error}",
         vectorSearch: "vektorsøk",
-        fullDocumentScan: "full dokumentskanning"
+        fullDocumentScan: "full dokumentskanning",
       },
       modelSelection: {
         llmManagement: "LLM-håndtering",
-        llmDescription: "Konfigurer og administrer LLM-er som brukes til å generere tekstsvar. Standardmodellen vil bli brukt for alle operasjoner.",
+        llmDescription:
+          "Konfigurer og administrer LLM-er som brukes til å generere tekstsvar. Standardmodellen vil bli brukt for alle operasjoner.",
         addNewLlm: "Legg til ny LLM",
         noLlmsConfigured: "Ingen LLM-er konfigurert",
         addNewLlmToGetStarted: "Legg til en ny LLM for å komme i gang",
         embeddingModelManagement: "Embedding-modellhåndtering",
-        embeddingDescription: "Konfigurer og administrer embedding-modeller som brukes til kunnskapsbaseindeksering og henting. Standardmodellen vil bli brukt når nye kunnskapsbaser opprettes, men hver kunnskapsbase vil fortsette å bruke sin opprinnelige embedding-modell selv om standarden endres senere.",
+        embeddingDescription:
+          "Konfigurer og administrer embedding-modeller som brukes til kunnskapsbaseindeksering og henting. Standardmodellen vil bli brukt når nye kunnskapsbaser opprettes, men hver kunnskapsbase vil fortsette å bruke sin opprinnelige embedding-modell selv om standarden endres senere.",
         addEmbeddingModel: "Legg til embedding-modell",
         noEmbeddingModelsConfigured: "Ingen embedding-modeller konfigurert",
-        addNewEmbeddingModelToGetStarted: "Legg til en ny embedding-modell for å komme i gang",
+        addNewEmbeddingModelToGetStarted:
+          "Legg til en ny embedding-modell for å komme i gang",
         tableHeaders: {
           name: "Navn",
           modelId: "Modell-ID",
           provider: "Leverandør",
           description: "Beskrivelse",
           status: "Status",
-          actions: "Handlinger"
+          actions: "Handlinger",
         },
         status: {
           default: "Standard",
-          available: "Tilgjengelig"
+          available: "Tilgjengelig",
         },
         actions: {
           setAsDefault: "Sett som standard",
           delete: "Slett",
           validate: "Valider",
-          validating: "Validerer"
+          validating: "Validerer",
         },
         dialog: {
           addNewLlm: "Legg til ny LLM",
@@ -929,20 +1053,22 @@ export const addNordicTranslations = (resources: any) => {
           modelId: "Modell-ID",
           description: "Beskrivelse",
           cancel: "Avbryt",
-          addModel: "Legg til modell"
+          addModel: "Legg til modell",
         },
         placeholders: {
           customModel: "f.eks., Min tilpassede modell",
           embeddingModelId: "f.eks., sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "Beskriv modellen, dens egenskaper og når den skal brukes"
+          describeModel:
+            "Beskriv modellen, dens egenskaper og når den skal brukes",
         },
         validation: {
-          pleaseEnterModelId: "Vennligst skriv inn en modell-ID"
-        }
+          pleaseEnterModelId: "Vennligst skriv inn en modell-ID",
+        },
       },
       compare: {
         title: "Sammenlign dokumenter",
-        subtitle: "Sammenlign to dokumenter for å se hvordan de skiller seg med hensyn til en brukerdefinert emneliste.",
+        subtitle:
+          "Sammenlign to dokumenter for å se hvordan de skiller seg med hensyn til en brukerdefinert emneliste.",
         selectFirstDocument: "Velg første dokument",
         selectSecondDocument: "Velg andre dokument",
         pleaseSelect: "Vennligst velg...",
@@ -957,11 +1083,12 @@ export const addNordicTranslations = (resources: any) => {
         clickToBrowse: "Klikk for å bla gjennom eller dra og slipp",
         supportedFormats: "PDF, TXT, DOCX støttes",
         editTopicList: "Rediger emneliste",
-        selectTopicListTitle: "Velg emneliste"
+        selectTopicListTitle: "Velg emneliste",
       },
       match: {
         title: "Dokumentmatching",
-        subtitle: "Sikre at feltoppføringer samsvarer på tvers av dokumenter av forskjellig format.",
+        subtitle:
+          "Sikre at feltoppføringer samsvarer på tvers av dokumenter av forskjellig format.",
         selectDocument: "Velg dokument å finne matcher for",
         pleaseSelect: "Vennligst velg dokument...",
         sourceDocument: "Kildedokument",
@@ -975,14 +1102,15 @@ export const addNordicTranslations = (resources: any) => {
         matchResults: "Matchresultater",
         similarity: "Likhet",
         editFormTemplate: "Rediger skjemamal",
-        selectFormTemplateTitle: "Velg skjemamal"
+        selectFormTemplateTitle: "Velg skjemamal",
       },
       editFormTemplateModal: {
         title: "Rediger skjemamal",
         formTemplateName: "Skjemamalsnavn",
         formTemplateNamePlaceholder: "Skriv inn skjemamalsnavn",
         formTemplateDescription: "Skjemamalsbeskrivelse",
-        descriptionPlaceholder: "Skriv inn skjemamalsbeskrivelse for automatiske feltforslag (minimum 10 tegn)...",
+        descriptionPlaceholder:
+          "Skriv inn skjemamalsbeskrivelse for automatiske feltforslag (minimum 10 tegn)...",
         referenceDocuments: "Referansedokumenter (valgfritt)",
         uploadFiles: "Last opp filer",
         knowledgeBase: "Kunnskapsbase",
@@ -990,7 +1118,7 @@ export const addNordicTranslations = (resources: any) => {
         suggest: "Foreslå",
         fieldPlaceholder: "Legg til feltnavn...",
         cancel: "Avbryt",
-        updateFormTemplate: "Oppdater skjemamal"
+        updateFormTemplate: "Oppdater skjemamal",
       },
       editOutlineModal: {
         title: "Rediger disposisjon",
@@ -998,7 +1126,8 @@ export const addNordicTranslations = (resources: any) => {
         outlineName: "Disposisjonsnavn",
         outlineNamePlaceholder: "Skriv inn disposisjonsnavn",
         description: "Beskrivelse",
-        descriptionPlaceholder: "Skriv inn disposisjonsbeskrivelse for automatiske seksjonsforslag (minimum 10 tegn)...",
+        descriptionPlaceholder:
+          "Skriv inn disposisjonsbeskrivelse for automatiske seksjonsforslag (minimum 10 tegn)...",
         referenceDocuments: "Referansedokumenter (valgfritt)",
         uploadFiles: "Last opp filer",
         knowledgeBase: "Kunnskapsbase",
@@ -1008,7 +1137,7 @@ export const addNordicTranslations = (resources: any) => {
         addSectionPlaceholder: "Legg til seksjon",
         cancel: "Avbryt",
         createOutline: "Opprett disposisjon",
-        updateOutline: "Oppdater disposisjon"
+        updateOutline: "Oppdater disposisjon",
       },
       editChecklistModal: {
         title: "Rediger sjekkliste",
@@ -1016,7 +1145,8 @@ export const addNordicTranslations = (resources: any) => {
         checklistName: "Sjekklistenavn",
         checklistNamePlaceholder: "Skriv inn sjekklistenavn",
         description: "Beskrivelse",
-        descriptionPlaceholder: "Skriv inn sjekklistebeskrivelse for automatiske spørsmålsforslag (minimum 10 tegn)...",
+        descriptionPlaceholder:
+          "Skriv inn sjekklistebeskrivelse for automatiske spørsmålsforslag (minimum 10 tegn)...",
         referenceDocuments: "Referansedokumenter (valgfritt)",
         uploadFiles: "Last opp filer",
         knowledgeBase: "Kunnskapsbase",
@@ -1027,7 +1157,7 @@ export const addNordicTranslations = (resources: any) => {
         copyAllQuestions: "Kopier alle spørsmål som tekst",
         cancel: "Avbryt",
         createChecklist: "Opprett sjekkliste",
-        updateChecklist: "Oppdater sjekkliste"
+        updateChecklist: "Oppdater sjekkliste",
       },
       editTopicListModal: {
         title: "Rediger emneliste",
@@ -1035,7 +1165,8 @@ export const addNordicTranslations = (resources: any) => {
         topicListName: "Emnelistenavn",
         topicListNamePlaceholder: "Skriv inn emnelistenavn",
         description: "Emnelistebeskrivelse",
-        descriptionPlaceholder: "Skriv inn emnelistebeskrivelse for automatiske emneforslag (minimum 10 tegn)...",
+        descriptionPlaceholder:
+          "Skriv inn emnelistebeskrivelse for automatiske emneforslag (minimum 10 tegn)...",
         referenceDocuments: "Referansedokumenter (valgfritt)",
         uploadFiles: "Last opp filer",
         knowledgeBase: "Kunnskapsbase",
@@ -1046,15 +1177,17 @@ export const addNordicTranslations = (resources: any) => {
         copyAllTopics: "Kopier alle emner som tekst",
         cancel: "Avbryt",
         createTopicList: "Opprett emneliste",
-        updateTopicList: "Oppdater emneliste"
+        updateTopicList: "Oppdater emneliste",
       },
       optimizeChecklistModal: {
         title: "Optimaliser sjekkliste",
         customInstructionsLabel: "Tilpassede instruksjoner (valgfritt)",
-        customInstructionsHelperText: "Skriv inn tilleggsinstruksjoner som bør vurderes når sjekklistespørsmål besvares",
+        customInstructionsHelperText:
+          "Skriv inn tilleggsinstruksjoner som bør vurderes når sjekklistespørsmål besvares",
         analyzing: "Analyserer...",
         analyzeButton: "Analyser sjekkliste",
-        analyzingMessage: "Analyserer sjekklisten din for å finne optimaliseringsmuligheter...",
+        analyzingMessage:
+          "Analyserer sjekklisten din for å finne optimaliseringsmuligheter...",
         cancelAnalysis: "Avbryt analyse",
         downloading: "Laster ned...",
         downloadCsv: "Last ned CSV",
@@ -1068,19 +1201,24 @@ export const addNordicTranslations = (resources: any) => {
         currentAnswer: "Nåværende svar",
         showLess: "Vis mindre",
         showMore: "Vis mer",
-        optimizationsSelectedText: "{{s}} optimaliseringer valgt for anvendelse",
+        optimizationsSelectedText:
+          "{{s}} optimaliseringer valgt for anvendelse",
         applying: "Anvender...",
-        applySelectedOptimizations: "Anvend valgte optimaliseringer"
+        applySelectedOptimizations: "Anvend valgte optimaliseringer",
       },
       optimizeOutlineModal: {
         title: "Optimaliser disposisjon",
-        description: "Last opp et referansedokument som representerer et høykvalitetseksempel på rapporttypen du ønsker å lage. Systemet vil generere en rapport med din nåværende disposisjon og kunnskapsbase, sammenligne den med referansen og foreslå forbedringer av disposisjonsseksjoner.",
+        description:
+          "Last opp et referansedokument som representerer et høykvalitetseksempel på rapporttypen du ønsker å lage. Systemet vil generere en rapport med din nåværende disposisjon og kunnskapsbase, sammenligne den med referansen og foreslå forbedringer av disposisjonsseksjoner.",
         groundTruthDocument: "Referansedokument",
         customInstructionsLabel: "Tilpassede instruksjoner (valgfritt)",
-        customInstructionsHelperText: "Gi ytterligere veiledning for optimaliseringsprosessen",
-        customInstructionsPlaceholder: "f.eks. Fokuser på å forbedre teknisk dybde, sikre overholdelse av spesifikke standarder, etc.",
+        customInstructionsHelperText:
+          "Gi ytterligere veiledning for optimaliseringsprosessen",
+        customInstructionsPlaceholder:
+          "f.eks. Fokuser på å forbedre teknisk dybde, sikre overholdelse av spesifikke standarder, etc.",
         characters: "tegn",
-        analyzingOutline: "Analyserer disposisjon og genererer optimaliseringer...",
+        analyzingOutline:
+          "Analyserer disposisjon og genererer optimaliseringer...",
         cancelAnalysis: "Avbryt analyse",
         optimizationResults: "Optimaliseringsresultater",
         sectionsNeedOptimization: "seksjoner trenger optimalisering",
@@ -1098,13 +1236,14 @@ export const addNordicTranslations = (resources: any) => {
         cancel: "Avbryt",
         optimizing: "Optimaliserer...",
         optimizeOutline: "Optimaliser disposisjon",
-        applyOptimizations: "Anvend {{count}} optimaliseringer"
+        applyOptimizations: "Anvend {{count}} optimaliseringer",
       },
       knowledgeBases: {
         title: "Kunnskapsbasehåndtering",
         addKnowledgeBase: "Legg til kunnskapsbase",
         emptyStateTitle: "Du har ingen kunnskapsbaser ennå",
-        emptyStateDescription: "Legg til en ny kunnskapsbase for å komme i gang",
+        emptyStateDescription:
+          "Legg til en ny kunnskapsbase for å komme i gang",
         tableHeaders: {
           title: "Tittel",
           description: "Beskrivelse",
@@ -1112,16 +1251,17 @@ export const addNordicTranslations = (resources: any) => {
           embeddingModel: "Embedding-modell",
           dateCreated: "Opprettet dato",
           dateModified: "Endret dato",
-          actions: "Handlinger"
+          actions: "Handlinger",
         },
         status: {
           default: "Standard",
-          na: "Ikke aktuelt"
+          na: "Ikke aktuelt",
         },
         modals: {
           add: {
             title: "Legg til kunnskapsbase",
-            description: "Skriv inn detaljer for å legge til en ny kunnskapsbase.",
+            description:
+              "Skriv inn detaljer for å legge til en ny kunnskapsbase.",
             fields: {
               title: "Tittel",
               titlePlaceholder: "Tittel",
@@ -1130,7 +1270,8 @@ export const addNordicTranslations = (resources: any) => {
               descriptionPlaceholder: "Beskrivelse",
             },
             fileUpload: {
-              dragAndDrop: "Dra og slipp filer her eller klikk for å bla gjennom",
+              dragAndDrop:
+                "Dra og slipp filer her eller klikk for å bla gjennom",
               dropFiles: "Slipp filer her...",
               selectedFiles: "Valgte filer:",
               removeFile: "Fjern fil",
@@ -1158,7 +1299,8 @@ export const addNordicTranslations = (resources: any) => {
             },
             fileUpload: {
               currentFiles: "Nåværende filer:",
-              dragAndDrop: "Dra og slipp filer her eller klikk for å bla gjennom",
+              dragAndDrop:
+                "Dra og slipp filer her eller klikk for å bla gjennom",
               dropFiles: "Slipp filer her...",
               selectedFiles: "Valgte filer:",
               removeFile: "Fjern fil",
@@ -1173,28 +1315,29 @@ export const addNordicTranslations = (resources: any) => {
           },
           messages: {
             processing: "Behandler...",
-            pleaseWait: "Vent mens vi behandler filene dine..."
-          }
+            pleaseWait: "Vent mens vi behandler filene dine...",
+          },
         },
       },
       archive: {
         title: "Arkiv",
         history: "Historie",
         allUsers: "Alle brukere",
-        allUsersToggleTooltip: "Bytt mellom å vise kun din historie eller alle brukeres historie",
+        allUsersToggleTooltip:
+          "Bytt mellom å vise kun din historie eller alle brukeres historie",
         viewingAllUsers: "Viser alle brukeres historie",
         viewingMyHistory: "Viser kun min historie",
         tabs: {
           review: "Gjennomgang",
           generate: "Generer",
           compare: "Sammenlign",
-          match: "Match"
+          match: "Match",
         },
         emptyMessages: {
           review: "Ingen tidligere evalueringer",
           generate: "Ingen tidligere rapporter",
           compare: "Ingen tidligere sammenligninger",
-          match: "Ingen tidligere skjemabehandling"
+          match: "Ingen tidligere skjemabehandling",
         },
         metadata: {
           question: "spørsmål",
@@ -1206,17 +1349,18 @@ export const addNordicTranslations = (resources: any) => {
           document: "dokument",
           documents: "dokumenter",
           digitized: "digitalisert",
-          handwritten: "håndskrevet"
+          handwritten: "håndskrevet",
         },
         feedback: {
           positive: "Positiv tilbakemelding",
           negative: "Negativ tilbakemelding",
-          hasFeedback: "Har tilbakemelding"
+          hasFeedback: "Har tilbakemelding",
         },
-        deleteConfirmation: "Er du sikker på at du vil slette dette elementet? Denne handlingen kan ikke angres.",
+        deleteConfirmation:
+          "Er du sikker på at du vil slette dette elementet? Denne handlingen kan ikke angres.",
         unknownDate: "Ukjent dato",
-        unnamedItem: "Navnløst element"
-      }
+        unnamedItem: "Navnløst element",
+      },
     },
   }
 
@@ -1287,8 +1431,10 @@ export const addNordicTranslations = (resources: any) => {
         searchMode: "Søgetilstand:",
         vectorSearch: "Vektorsøgning",
         fullTextScan: "Fuldtekst-scanning",
-        searchModeDescription: "Vektorsøgning giver hurtige, målrettede resultater. Fuldtekst-scanning gennemgår alt indhold i videnbasen.",
-        askMeAnything: "Spørg mig om hvad som helst! For videnbasesøgning, vælg først en videnbase.",
+        searchModeDescription:
+          "Vektorsøgning giver hurtige, målrettede resultater. Fuldtekst-scanning gennemgår alt indhold i videnbasen.",
+        askMeAnything:
+          "Spørg mig om hvad som helst! For videnbasesøgning, vælg først en videnbase.",
         usingGeneralAI: "Bruger generel AI-assistent",
         usingKnowledgeBase: "Bruger videnbase:",
         usingDocuments: "Bruger # dokumenter",
@@ -1305,15 +1451,19 @@ export const addNordicTranslations = (resources: any) => {
         knowledgeBaseTableSources: "Kilder",
         knowledgeBaseTablePages: "Sider",
         selectKnowledgeBasePlaceholder: "Vælg en videnbase...",
-        noKnowledgeBasesAvailable: "Ingen videnbaser tilgængelige. Opret en først for at bruge denne funktion.",
+        noKnowledgeBasesAvailable:
+          "Ingen videnbaser tilgængelige. Opret en først for at bruge denne funktion.",
         knowledgeBase: "Videnbase",
         file: "Fil",
-        welcomeMessageWithSource: "Vælg en videnbase eller upload filer, stil derefter et spørgsmål.",
-        welcomeMessageGeneral: "Spørg mig om hvad som helst! For videnbasesøgning, vælg først en videnbase.",
+        welcomeMessageWithSource:
+          "Vælg en videnbase eller upload filer, stil derefter et spørgsmål.",
+        welcomeMessageGeneral:
+          "Spørg mig om hvad som helst! For videnbasesøgning, vælg først en videnbase.",
         errors: {
           generic: "Beklager, noget gik galt. Prøv igen.",
           timeout: "Anmodning timeout. Prøv igen.",
-          largeFileTimeout: "Behandling af store filer timeout. Prøv 'Fuldtekst-scanning'-tilstand for bedre ydeevne med store filer.",
+          largeFileTimeout:
+            "Behandling af store filer timeout. Prøv 'Fuldtekst-scanning'-tilstand for bedre ydeevne med store filer.",
           fileSize: "Filen er for stor. Vælg mindre filer.",
           serverError: "En serverfejl opstod. Prøv igen senere.",
         },
@@ -1343,39 +1493,69 @@ export const addNordicTranslations = (resources: any) => {
         notFound: "Den anmodede ressource blev ikke fundet.",
       },
       help: {
-        dashboard: "Hovedoversigtsside, der viser brugsstatistikker og seneste aktivitet",
-        usageStats: "Se dit nuværende API-token-forbrug og kvoteoplysninger for den aktuelle faktureringsperiode",
-        review: "Analyser dokumenter mod kvalitetstjeklister for overholdelse og nøjagtighed",
-        generate: "Opret strukturerede rapporter og dokumenter ved hjælp af AI baseret på dit indhold",
-        compare: "Sammenlign to dokumenter side om side for at identificere forskelle og ligheder",
-        match: "Match dokumentindhold til formularskabeloner for automatisk formularudfyldning",
-        modelSelection: "Konfigurer AI-modeller, der bruges til behandling og analyse",
-        knowledgeBases: "Administrer videnbase-biblioteker til dokumentbehandling",
-        archive: "Se og administrer dine behandlede dokumenter og analysehistorik",
-        settings: "Konfigurer dine kontopræferencer og applikationsindstillinger",
+        dashboard:
+          "Hovedoversigtsside, der viser brugsstatistikker og seneste aktivitet",
+        usageStats:
+          "Se dit nuværende API-token-forbrug og kvoteoplysninger for den aktuelle faktureringsperiode",
+        review:
+          "Analyser dokumenter mod kvalitetstjeklister for overholdelse og nøjagtighed",
+        generate:
+          "Opret strukturerede rapporter og dokumenter ved hjælp af AI baseret på dit indhold",
+        compare:
+          "Sammenlign to dokumenter side om side for at identificere forskelle og ligheder",
+        match:
+          "Match dokumentindhold til formularskabeloner for automatisk formularudfyldning",
+        modelSelection:
+          "Konfigurer AI-modeller, der bruges til behandling og analyse",
+        knowledgeBases:
+          "Administrer videnbase-biblioteker til dokumentbehandling",
+        archive:
+          "Se og administrer dine behandlede dokumenter og analysehistorik",
+        settings:
+          "Konfigurer dine kontopræferencer og applikationsindstillinger",
         admin: "Administrative funktioner til bruger- og systemstyring",
-        knowledgeBaseSelection: "Vælg en videnbase, der indeholder referencedokumenterne og standarderne for analyse",
-        checklistSelection: "Vælg en tjekliste med specifikke spørgsmål til at evaluere dine dokumenter imod",
+        knowledgeBaseSelection:
+          "Vælg en videnbase, der indeholder referencedokumenterne og standarderne for analyse",
+        checklistSelection:
+          "Vælg en tjekliste med specifikke spørgsmål til at evaluere dine dokumenter imod",
         fileUpload: "Upload de dokumenter, du vil analysere og gennemgå",
-        customInstructions: "Tilføj specifikke instruktioner, der vil blive overvejet, når tjeklistespørgsmål besvares",
-        searchMode: "Vælg mellem hurtig vektorsøgning eller omfattende fuldstændig dokumentscanning",
-        topicList: "Vælg eller opret en liste over emner for at fokusere sammenligningsanalysen",
-        formTemplate: "Vælg en formularskabelon, som dine dokumenter skal matches imod",
-        documentOutline: "Vælg en dispositionsstruktur til at generere din rapport",
-        allUsersToggle: "Skift mellem kun at vise din historik eller alle brugeres historik",
+        customInstructions:
+          "Tilføj specifikke instruktioner, der vil blive overvejet, når tjeklistespørgsmål besvares",
+        searchMode:
+          "Vælg mellem hurtig vektorsøgning eller omfattende fuldstændig dokumentscanning",
+        topicList:
+          "Vælg eller opret en liste over emner for at fokusere sammenligningsanalysen",
+        formTemplate:
+          "Vælg en formularskabelon, som dine dokumenter skal matches imod",
+        documentOutline:
+          "Vælg en dispositionsstruktur til at generere din rapport",
+        allUsersToggle:
+          "Skift mellem kun at vise din historik eller alle brugeres historik",
 
-        createChecklist: "Opret en ny tjekliste med tilpassede spørgsmål til at evaluere dokumenter mod specifikke kriterier",
-        createOutline: "Opret en ny dispositionsstruktur til at guide genereringen af strukturerede rapporter",
-        createTopicList: "Opret en ny emneliste for at fokusere sammenligningsanalyse på specifikke emner eller temaer",
-        createFormTemplate: "Opret en ny formularskabelon til automatiseret dokumentindholdsudvinding og matching",
-        suggestChecklistQuestions: "Brug AI til automatisk at generere relevante tjeklistespørgsmål baseret på din beskrivelse og referencedokumenter",
-        optimizeChecklistQuestions: "Forbedr og forfin eksisterende tjeklistespørgsmål ved hjælp af den valgte videnbase for bedre nøjagtighed",
-        suggestOutlineSections: "Brug AI til automatisk at generere dispositionsafsnit baseret på din beskrivelse og referencedokumenter",
-        optimizeOutlineSections: "Forbedr og forfin eksisterende dispositionsafsnit ved hjælp af den valgte videnbase for bedre struktur",
-        suggestTopicListTopics: "Brug AI til automatisk at generere relevante sammenligningsemner baseret på din beskrivelse og referencedokumenter",
-        suggestFormTemplateFields: "Brug AI til automatisk at generere relevante formularfelter baseret på din beskrivelse og referencedokumenter",
-        referenceDocuments: "Upload referencedokumenter eller vælg en videnbase for at hjælpe AI'en med at foreslå indhold baseret på din specifikke kontekst og krav",
-        referenceDocumentsFiles: "Giv referencedokumenter for at hjælpe AI'en med at generere mere nøjagtige og kontekstuelt relevante forslag"
+        createChecklist:
+          "Opret en ny tjekliste med tilpassede spørgsmål til at evaluere dokumenter mod specifikke kriterier",
+        createOutline:
+          "Opret en ny dispositionsstruktur til at guide genereringen af strukturerede rapporter",
+        createTopicList:
+          "Opret en ny emneliste for at fokusere sammenligningsanalyse på specifikke emner eller temaer",
+        createFormTemplate:
+          "Opret en ny formularskabelon til automatiseret dokumentindholdsudvinding og matching",
+        suggestChecklistQuestions:
+          "Brug AI til automatisk at generere relevante tjeklistespørgsmål baseret på din beskrivelse og referencedokumenter",
+        optimizeChecklistQuestions:
+          "Forbedr og forfin eksisterende tjeklistespørgsmål ved hjælp af den valgte videnbase for bedre nøjagtighed",
+        suggestOutlineSections:
+          "Brug AI til automatisk at generere dispositionsafsnit baseret på din beskrivelse og referencedokumenter",
+        optimizeOutlineSections:
+          "Forbedr og forfin eksisterende dispositionsafsnit ved hjælp af den valgte videnbase for bedre struktur",
+        suggestTopicListTopics:
+          "Brug AI til automatisk at generere relevante sammenligningsemner baseret på din beskrivelse og referencedokumenter",
+        suggestFormTemplateFields:
+          "Brug AI til automatisk at generere relevante formularfelter baseret på din beskrivelse og referencedokumenter",
+        referenceDocuments:
+          "Upload referencedokumenter eller vælg en videnbase for at hjælpe AI'en med at foreslå indhold baseret på din specifikke kontekst og krav",
+        referenceDocumentsFiles:
+          "Giv referencedokumenter for at hjælpe AI'en med at generere mere nøjagtige og kontekstuelt relevante forslag",
       },
       common: {
         loading: "Indlæser...",
@@ -1404,21 +1584,26 @@ export const addNordicTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Gennemgå dokumenter",
-        pageDescription: "Gennemgå et dokument baseret på brugerdefineret tjekliste og politikdatabase.",
+        pageDescription:
+          "Gennemgå et dokument baseret på brugerdefineret tjekliste og politikdatabase.",
         knowledgeBaseTitle: "Videnbase",
         knowledgeBaseDescription: "Klik for at vælge",
         checklistTitle: "Tjekliste",
         checklistDescription: "Klik for at vælge",
         customInstructionsTitle: "Tilpassede instruktioner (valgfrit)",
-        customInstructionsPlaceholder: "Indtast yderligere instruktioner, der skal overvejes, når tjeklistespørgsmål besvares...",
-        customInstructionsHelp: "{{count}}/2000 tegn. Disse instruktioner vil blive tilføjet til hvert spørgsmål under behandling.",
-        searchModeHelp: "Vektorsøgning giver hurtige, målrettede resultater. Fuld dokumentanalyse undersøger alt indhold i videnbasen.",
+        customInstructionsPlaceholder:
+          "Indtast yderligere instruktioner, der skal overvejes, når tjeklistespørgsmål besvares...",
+        customInstructionsHelp:
+          "{{count}}/2000 tegn. Disse instruktioner vil blive tilføjet til hvert spørgsmål under behandling.",
+        searchModeHelp:
+          "Vektorsøgning giver hurtige, målrettede resultater. Fuld dokumentanalyse undersøger alt indhold i videnbasen.",
         processingFile: "Behandler fil...",
         processingFiles: "Behandler filer...",
         selectKnowledgeBaseTitle: "Vælg videnbase",
         selectChecklistTitle: "Vælg tjekliste",
         noResults: "Ingen resultater endnu",
-        uploadDocuments: "Upload et eller flere dokumenter til gennemgang mod din valgte tjekliste",
+        uploadDocuments:
+          "Upload et eller flere dokumenter til gennemgang mod din valgte tjekliste",
         results: "Resultater",
         downloadReport: "Download rapport",
         downloadCsv: "Download CSV",
@@ -1427,24 +1612,28 @@ export const addNordicTranslations = (resources: any) => {
         reportCopied: "Rapport kopieret til udklipsholder!",
         reviewButton: "Gennemgå",
         consultDocuments: "Konsulter dokumenter",
-        noChecklistsAvailable: "Ingen tjeklister tilgængelige. Opret din første tjekliste for at komme i gang.",
+        noChecklistsAvailable:
+          "Ingen tjeklister tilgængelige. Opret din første tjekliste for at komme i gang.",
         createChecklist: "Opret tjekliste",
         editChecklist: "Rediger tjekliste",
         checklistName: "Tjeklistenavn",
         checklistNamePlaceholder: "Indtast tjeklistenavn...",
         checklistDescriptionLabel: "Beskrivelse",
-        checklistDescriptionPlaceholder: "Indtast tjeklistebeskrivelse for automatiske spørgsmålsforslag (minimum 10 tegn)...",
+        checklistDescriptionPlaceholder:
+          "Indtast tjeklistebeskrivelse for automatiske spørgsmålsforslag (minimum 10 tegn)...",
         questions: "Spørgsmål",
         suggest: "Foreslå",
         suggesting: "Foreslår...",
         optimize: "Optimer",
-        optimizeTooltip: "En videnbase skal vælges for at aktivere optimer-funktionen",
+        optimizeTooltip:
+          "En videnbase skal vælges for at aktivere optimer-funktionen",
         optimizeTooltipEnabled: "Optimer spørgsmål baseret på valgt videnbase",
         uploadFiles: "Upload filer",
         knowledgeBase: "Videnbase",
         referenceDocuments: "Referencedokumenter (valgfrit)",
         selectKnowledgeBasePlaceholder: "Vælg videnbase...",
-        noKnowledgeBasesAvailable: "Ingen videnbase tilgængelig. Opret en først for at bruge denne funktion.",
+        noKnowledgeBasesAvailable:
+          "Ingen videnbase tilgængelig. Opret en først for at bruge denne funktion.",
         copyQuestions: "Kopier spørgsmål",
         questionsCopied: "Spørgsmål kopieret til udklipsholder",
         noQuestionsToCopy: "Ingen spørgsmål at kopiere",
@@ -1456,22 +1645,28 @@ export const addNordicTranslations = (resources: any) => {
         uploadedFiles: "Uploadede filer",
         handwritten: "Håndskrevet",
         removeFile: "Fjern",
-        characterCount: "{{count}}/2000 tegn. Disse instruktioner vil blive tilføjet til hvert spørgsmål under behandling.",
+        characterCount:
+          "{{count}}/2000 tegn. Disse instruktioner vil blive tilføjet til hvert spørgsmål under behandling.",
         searchMode: "Søgetilstand",
         vectorSearch: "Vektorsøgning",
         fullDocumentScan: "Fuld dokumentanalyse",
-        vectorSearchDescription: "Find relevant indhold ved hjælp af AI-lighedssøgning (hurtig, målrettet)",
-        fullScanDescription: "Analyser alle dokumenter i videnbasen (omfattende, grundig)"
+        vectorSearchDescription:
+          "Find relevant indhold ved hjælp af AI-lighedssøgning (hurtig, målrettet)",
+        fullScanDescription:
+          "Analyser alle dokumenter i videnbasen (omfattende, grundig)",
       },
       generate: {
-        pageDescription: "Generer et dokument baseret på brugerdefineret disposition og dokumentdatabase.",
+        pageDescription:
+          "Generer et dokument baseret på brugerdefineret disposition og dokumentdatabase.",
         generatingDocument: "Genererer dokument...",
         knowledgeBaseTitle: "Videnbase",
         documentOutlineTitle: "Dokumentdisposition",
         clickToSelect: "Klik for at vælge",
         customInstructionsTitle: "Tilpassede instruktioner (valgfrit)",
-        customInstructionsPlaceholder: "Indtast yderligere instruktioner, der skal overvejes, når hvert rapportafsnit genereres...",
-        characterCount: "{{count}}/2000 tegn. Disse instruktioner vil blive tilføjet til prompten, når hvert afsnit genereres.",
+        customInstructionsPlaceholder:
+          "Indtast yderligere instruktioner, der skal overvejes, når hvert rapportafsnit genereres...",
+        characterCount:
+          "{{count}}/2000 tegn. Disse instruktioner vil blive tilføjet til prompten, når hvert afsnit genereres.",
         selectKnowledgeBaseTitle: "Vælg videnbase",
         selectDocumentOutlineTitle: "Vælg dokumentdisposition",
         generateButton: "Generer",
@@ -1481,7 +1676,8 @@ export const addNordicTranslations = (resources: any) => {
         downloadDocx: "Download DOCX",
         downloadCsv: "Download CSV",
         clearReport: "Ryd rapport",
-        resultsPlaceholder: "Resultater vil blive vist her efter dokumentgenerering.",
+        resultsPlaceholder:
+          "Resultater vil blive vist her efter dokumentgenerering.",
         sectionsWithSources: "Afsnit med kilder",
         sectionNumber: "Afsnit {number}: {title}",
         kbGenerated: "KB-genereret",
@@ -1499,36 +1695,39 @@ export const addNordicTranslations = (resources: any) => {
         generateSuccess: "Rapport genereret succesfuldt ved hjælp af {method}!",
         generateError: "Kunne ikke generere dokument: {error}",
         vectorSearch: "vektorsøgning",
-        fullDocumentScan: "fuld dokumentscanning"
+        fullDocumentScan: "fuld dokumentscanning",
       },
       modelSelection: {
         llmManagement: "LLM-styring",
-        llmDescription: "Konfigurer og administrer LLM'er, der bruges til at generere tekstsvar. Standardmodellen vil blive brugt til alle operationer.",
+        llmDescription:
+          "Konfigurer og administrer LLM'er, der bruges til at generere tekstsvar. Standardmodellen vil blive brugt til alle operationer.",
         addNewLlm: "Tilføj ny LLM",
         noLlmsConfigured: "Ingen LLM'er konfigureret",
         addNewLlmToGetStarted: "Tilføj en ny LLM for at komme i gang",
         embeddingModelManagement: "Embedding-modelstyring",
-        embeddingDescription: "Konfigurer og administrer embedding-modeller, der bruges til videnbaseindeksering og hentning. Standardmodellen vil blive brugt, når nye videnbaser oprettes, men hver videnbase vil fortsætte med at bruge sin oprindelige embedding-model, selv om standarden ændres senere.",
+        embeddingDescription:
+          "Konfigurer og administrer embedding-modeller, der bruges til videnbaseindeksering og hentning. Standardmodellen vil blive brugt, når nye videnbaser oprettes, men hver videnbase vil fortsætte med at bruge sin oprindelige embedding-model, selv om standarden ændres senere.",
         addEmbeddingModel: "Tilføj embedding-model",
         noEmbeddingModelsConfigured: "Ingen embedding-modeller konfigureret",
-        addNewEmbeddingModelToGetStarted: "Tilføj en ny embedding-model for at komme i gang",
+        addNewEmbeddingModelToGetStarted:
+          "Tilføj en ny embedding-model for at komme i gang",
         tableHeaders: {
           name: "Navn",
           modelId: "Model-ID",
           provider: "Udbyder",
           description: "Beskrivelse",
           status: "Status",
-          actions: "Handlinger"
+          actions: "Handlinger",
         },
         status: {
           default: "Standard",
-          available: "Tilgængelig"
+          available: "Tilgængelig",
         },
         actions: {
           setAsDefault: "Indstil som standard",
           delete: "Slet",
           validate: "Valider",
-          validating: "Validerer"
+          validating: "Validerer",
         },
         dialog: {
           addNewLlm: "Tilføj ny LLM",
@@ -1538,20 +1737,22 @@ export const addNordicTranslations = (resources: any) => {
           modelId: "Model-ID",
           description: "Beskrivelse",
           cancel: "Annuller",
-          addModel: "Tilføj model"
+          addModel: "Tilføj model",
         },
         placeholders: {
           customModel: "f.eks., Min tilpassede model",
           embeddingModelId: "f.eks., sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "Beskriv modellen, dens karakteristika og hvornår den skal bruges"
+          describeModel:
+            "Beskriv modellen, dens karakteristika og hvornår den skal bruges",
         },
         validation: {
-          pleaseEnterModelId: "Indtast venligst et model-ID"
-        }
+          pleaseEnterModelId: "Indtast venligst et model-ID",
+        },
       },
       compare: {
         title: "Sammenlign dokumenter",
-        subtitle: "Sammenlign to dokumenter for at se, hvordan de adskiller sig med hensyn til en brugerdefineret emneliste.",
+        subtitle:
+          "Sammenlign to dokumenter for at se, hvordan de adskiller sig med hensyn til en brugerdefineret emneliste.",
         selectFirstDocument: "Vælg første dokument",
         selectSecondDocument: "Vælg andet dokument",
         pleaseSelect: "Vælg venligst...",
@@ -1566,11 +1767,12 @@ export const addNordicTranslations = (resources: any) => {
         clickToBrowse: "Klik for at gennemse eller træk og slip",
         supportedFormats: "PDF, TXT, DOCX understøttes",
         editTopicList: "Rediger emneliste",
-        selectTopicListTitle: "Vælg emneliste"
+        selectTopicListTitle: "Vælg emneliste",
       },
       match: {
         title: "Dokumentmatching",
-        subtitle: "Sikre at feltindtastninger matcher på tværs af dokumenter i forskellige formater.",
+        subtitle:
+          "Sikre at feltindtastninger matcher på tværs af dokumenter i forskellige formater.",
         selectDocument: "Vælg dokument at finde matches for",
         pleaseSelect: "Vælg venligst dokument...",
         sourceDocument: "Kildedokument",
@@ -1584,14 +1786,15 @@ export const addNordicTranslations = (resources: any) => {
         matchResults: "Matchresultater",
         similarity: "Lighed",
         editFormTemplate: "Rediger formularskabelon",
-        selectFormTemplateTitle: "Vælg formularskabelon"
+        selectFormTemplateTitle: "Vælg formularskabelon",
       },
       editFormTemplateModal: {
         title: "Rediger formularskabelon",
         formTemplateName: "Formularskabelonnavn",
         formTemplateNamePlaceholder: "Indtast formularskabelonnavn",
         formTemplateDescription: "Formularskabelonbeskrivelse",
-        descriptionPlaceholder: "Indtast formularskabelonbeskrivelse for automatiske feltforslag (minimum 10 tegn)...",
+        descriptionPlaceholder:
+          "Indtast formularskabelonbeskrivelse for automatiske feltforslag (minimum 10 tegn)...",
         referenceDocuments: "Referencedokumenter (valgfrit)",
         uploadFiles: "Upload filer",
         knowledgeBase: "Videnbase",
@@ -1599,7 +1802,7 @@ export const addNordicTranslations = (resources: any) => {
         suggest: "Foreslå",
         fieldPlaceholder: "Tilføj feltnavn...",
         cancel: "Annuller",
-        updateFormTemplate: "Opdater formularskabelon"
+        updateFormTemplate: "Opdater formularskabelon",
       },
       editOutlineModal: {
         title: "Rediger disposition",
@@ -1607,7 +1810,8 @@ export const addNordicTranslations = (resources: any) => {
         outlineName: "Dispositionsnavn",
         outlineNamePlaceholder: "Indtast dispositionsnavn",
         description: "Beskrivelse",
-        descriptionPlaceholder: "Indtast dispositionsbeskrivelse for automatiske afsnitsforslag (minimum 10 tegn)...",
+        descriptionPlaceholder:
+          "Indtast dispositionsbeskrivelse for automatiske afsnitsforslag (minimum 10 tegn)...",
         referenceDocuments: "Referencedokumenter (valgfrit)",
         uploadFiles: "Upload filer",
         knowledgeBase: "Videnbase",
@@ -1617,7 +1821,7 @@ export const addNordicTranslations = (resources: any) => {
         addSectionPlaceholder: "Tilføj afsnit",
         cancel: "Annuller",
         createOutline: "Opret disposition",
-        updateOutline: "Opdater disposition"
+        updateOutline: "Opdater disposition",
       },
       editChecklistModal: {
         title: "Rediger tjekliste",
@@ -1625,7 +1829,8 @@ export const addNordicTranslations = (resources: any) => {
         checklistName: "Tjeklistenavn",
         checklistNamePlaceholder: "Indtast tjeklistenavn",
         description: "Beskrivelse",
-        descriptionPlaceholder: "Indtast tjeklistebeskrivelse for automatiske spørgsmålsforslag (minimum 10 tegn)...",
+        descriptionPlaceholder:
+          "Indtast tjeklistebeskrivelse for automatiske spørgsmålsforslag (minimum 10 tegn)...",
         referenceDocuments: "Referencedokumenter (valgfrit)",
         uploadFiles: "Upload filer",
         knowledgeBase: "Videnbase",
@@ -1636,7 +1841,7 @@ export const addNordicTranslations = (resources: any) => {
         copyAllQuestions: "Kopier alle spørgsmål som tekst",
         cancel: "Annuller",
         createChecklist: "Opret tjekliste",
-        updateChecklist: "Opdater tjekliste"
+        updateChecklist: "Opdater tjekliste",
       },
       editTopicListModal: {
         title: "Rediger emneliste",
@@ -1644,7 +1849,8 @@ export const addNordicTranslations = (resources: any) => {
         topicListName: "Emnelistenavn",
         topicListNamePlaceholder: "Indtast emnelistenavn",
         description: "Emnelistebeskrivelse",
-        descriptionPlaceholder: "Indtast emnelistebeskrivelse for automatiske emneforslag (minimum 10 tegn)...",
+        descriptionPlaceholder:
+          "Indtast emnelistebeskrivelse for automatiske emneforslag (minimum 10 tegn)...",
         referenceDocuments: "Referencedokumenter (valgfrit)",
         uploadFiles: "Upload filer",
         knowledgeBase: "Videnbase",
@@ -1655,15 +1861,17 @@ export const addNordicTranslations = (resources: any) => {
         copyAllTopics: "Kopier alle emner som tekst",
         cancel: "Annuller",
         createTopicList: "Opret emneliste",
-        updateTopicList: "Opdater emneliste"
+        updateTopicList: "Opdater emneliste",
       },
       optimizeChecklistModal: {
         title: "Optimer tjekliste",
         customInstructionsLabel: "Tilpassede instruktioner (valgfrit)",
-        customInstructionsHelperText: "Indtast yderligere instruktioner, der skal overvejes, når tjeklistespørgsmål besvares",
+        customInstructionsHelperText:
+          "Indtast yderligere instruktioner, der skal overvejes, når tjeklistespørgsmål besvares",
         analyzing: "Analyserer...",
         analyzeButton: "Analyser tjekliste",
-        analyzingMessage: "Analyserer din tjekliste for at finde optimeringsmuligheder...",
+        analyzingMessage:
+          "Analyserer din tjekliste for at finde optimeringsmuligheder...",
         cancelAnalysis: "Annuller analyse",
         downloading: "Downloader...",
         downloadCsv: "Download CSV",
@@ -1679,15 +1887,18 @@ export const addNordicTranslations = (resources: any) => {
         showMore: "Vis mere",
         optimizationsSelectedText: "{{s}} optimeringer valgt til anvendelse",
         applying: "Anvender...",
-        applySelectedOptimizations: "Anvend valgte optimeringer"
+        applySelectedOptimizations: "Anvend valgte optimeringer",
       },
       optimizeOutlineModal: {
         title: "Optimer disposition",
-        description: "Upload et referencedokument, der repræsenterer et højkvalitetseksempel på den type rapport, du ønsker at oprette. Systemet vil generere en rapport med din nuværende disposition og videnbase, sammenligne den med referencen og foreslå forbedringer af dispositionsafsnit.",
+        description:
+          "Upload et referencedokument, der repræsenterer et højkvalitetseksempel på den type rapport, du ønsker at oprette. Systemet vil generere en rapport med din nuværende disposition og videnbase, sammenligne den med referencen og foreslå forbedringer af dispositionsafsnit.",
         groundTruthDocument: "Referencedokument",
         customInstructionsLabel: "Tilpassede instruktioner (valgfrit)",
-        customInstructionsHelperText: "Giv yderligere vejledning til optimeringsprocessen",
-        customInstructionsPlaceholder: "f.eks. Fokuser på at forbedre teknisk dybde, sikre overholdelse af specifikke standarder, etc.",
+        customInstructionsHelperText:
+          "Giv yderligere vejledning til optimeringsprocessen",
+        customInstructionsPlaceholder:
+          "f.eks. Fokuser på at forbedre teknisk dybde, sikre overholdelse af specifikke standarder, etc.",
         characters: "tegn",
         analyzingOutline: "Analyserer disposition og genererer optimeringer...",
         cancelAnalysis: "Annuller analyse",
@@ -1707,7 +1918,7 @@ export const addNordicTranslations = (resources: any) => {
         cancel: "Annuller",
         optimizing: "Optimerer...",
         optimizeOutline: "Optimer disposition",
-        applyOptimizations: "Anvend {{count}} optimeringer"
+        applyOptimizations: "Anvend {{count}} optimeringer",
       },
       knowledgeBases: {
         title: "Videnbasehåndtering",
@@ -1721,11 +1932,11 @@ export const addNordicTranslations = (resources: any) => {
           embeddingModel: "Embedding-model",
           dateCreated: "Oprettet dato",
           dateModified: "Ændret dato",
-          actions: "Handlinger"
+          actions: "Handlinger",
         },
         status: {
           default: "Standard",
-          na: "Ikke anvendelig"
+          na: "Ikke anvendelig",
         },
         modals: {
           add: {
@@ -1743,7 +1954,8 @@ export const addNordicTranslations = (resources: any) => {
               dropFiles: "Slip filer her...",
               selectedFiles: "Valgte filer:",
               removeFile: "Fjern fil",
-              supportedFormats: "Understøtter: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
+              supportedFormats:
+                "Understøtter: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "Annuller",
@@ -1771,7 +1983,8 @@ export const addNordicTranslations = (resources: any) => {
               dropFiles: "Slip filer her...",
               selectedFiles: "Valgte filer:",
               removeFile: "Fjern fil",
-              supportedFormats: "Understøtter: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
+              supportedFormats:
+                "Understøtter: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
             },
             buttons: {
               cancel: "Annuller",
@@ -1782,28 +1995,29 @@ export const addNordicTranslations = (resources: any) => {
           },
           messages: {
             processing: "Behandler...",
-            pleaseWait: "Vent venligst mens vi behandler dine filer..."
-          }
+            pleaseWait: "Vent venligst mens vi behandler dine filer...",
+          },
         },
       },
       archive: {
         title: "Arkiv",
         history: "Historie",
         allUsers: "Alle brugere",
-        allUsersToggleTooltip: "Skift mellem at vise kun din historie eller alle brugeres historie",
+        allUsersToggleTooltip:
+          "Skift mellem at vise kun din historie eller alle brugeres historie",
         viewingAllUsers: "Viser alle brugeres historie",
         viewingMyHistory: "Viser kun min historie",
         tabs: {
           review: "Gennemgang",
           generate: "Generer",
           compare: "Sammenlign",
-          match: "Match"
+          match: "Match",
         },
         emptyMessages: {
           review: "Ingen tidligere evalueringer",
           generate: "Ingen tidligere rapporter",
           compare: "Ingen tidligere sammenligninger",
-          match: "Ingen tidligere formularbehandling"
+          match: "Ingen tidligere formularbehandling",
         },
         metadata: {
           question: "spørgsmål",
@@ -1815,21 +2029,22 @@ export const addNordicTranslations = (resources: any) => {
           document: "dokument",
           documents: "dokumenter",
           digitized: "digitaliseret",
-          handwritten: "håndskrevet"
+          handwritten: "håndskrevet",
         },
         feedback: {
           positive: "Positiv feedback",
           negative: "Negativ feedback",
-          hasFeedback: "Har feedback"
+          hasFeedback: "Har feedback",
         },
-        deleteConfirmation: "Er du sikker på at du vil slette dette element? Denne handling kan ikke fortrydes.",
+        deleteConfirmation:
+          "Er du sikker på at du vil slette dette element? Denne handling kan ikke fortrydes.",
         unknownDate: "Ukendt dato",
-        unnamedItem: "Unavngivet element"
-      }
+        unnamedItem: "Unavngivet element",
+      },
     },
   }
 
-  // Finnish - Complete translation following Korean structure  
+  // Finnish - Complete translation following Korean structure
   resources.fi = {
     common: {
       navigation: {
@@ -1896,8 +2111,10 @@ export const addNordicTranslations = (resources: any) => {
         searchMode: "Hakutapa:",
         vectorSearch: "Vektorihaku",
         fullTextScan: "Koko tekstin skannaus",
-        searchModeDescription: "Vektorihaku tarjoaa nopeita, kohdennettuja tuloksia. Koko tekstin skannaus käy läpi kaiken sisällön tietokannassa.",
-        askMeAnything: "Kysy mitä tahansa! Tietokannan hakua varten valitse ensin tietokanta.",
+        searchModeDescription:
+          "Vektorihaku tarjoaa nopeita, kohdennettuja tuloksia. Koko tekstin skannaus käy läpi kaiken sisällön tietokannassa.",
+        askMeAnything:
+          "Kysy mitä tahansa! Tietokannan hakua varten valitse ensin tietokanta.",
         usingGeneralAI: "Käytetään yleistä tekoälyavustajaa",
         usingKnowledgeBase: "Käytetään tietokantaa:",
         usingDocuments: "Käytetään # asiakirja(a)",
@@ -1914,15 +2131,19 @@ export const addNordicTranslations = (resources: any) => {
         knowledgeBaseTableSources: "Lähteet",
         knowledgeBaseTablePages: "Sivut",
         selectKnowledgeBasePlaceholder: "Valitse tietokanta...",
-        noKnowledgeBasesAvailable: "Tietokantoja ei ole saatavilla. Luo ensin yksi käyttääksesi tätä ominaisuutta.",
+        noKnowledgeBasesAvailable:
+          "Tietokantoja ei ole saatavilla. Luo ensin yksi käyttääksesi tätä ominaisuutta.",
         knowledgeBase: "Tietokanta",
         file: "Tiedosto",
-        welcomeMessageWithSource: "Valitse tietokanta tai lataa tiedostoja, kysy sitten kysymys.",
-        welcomeMessageGeneral: "Kysy minulta mitä tahansa! Tietokannan hakua varten valitse ensin tietokanta.",
+        welcomeMessageWithSource:
+          "Valitse tietokanta tai lataa tiedostoja, kysy sitten kysymys.",
+        welcomeMessageGeneral:
+          "Kysy minulta mitä tahansa! Tietokannan hakua varten valitse ensin tietokanta.",
         errors: {
           generic: "Anteeksi, jotain meni pieleen. Yritä uudelleen.",
           timeout: "Pyyntö aikakatkaistiin. Yritä uudelleen.",
-          largeFileTimeout: "Suurten tiedostojen käsittely aikakatkaistiin. Kokeile 'Koko tekstin skannaus' -tilaa parempaa suorituskykyä varten suurille tiedostoille.",
+          largeFileTimeout:
+            "Suurten tiedostojen käsittely aikakatkaistiin. Kokeile 'Koko tekstin skannaus' -tilaa parempaa suorituskykyä varten suurille tiedostoille.",
           fileSize: "Tiedosto on liian suuri. Valitse pienempiä tiedostoja.",
           serverError: "Palvelinvirhe tapahtui. Yritä myöhemmin uudelleen.",
         },
@@ -1952,39 +2173,66 @@ export const addNordicTranslations = (resources: any) => {
         notFound: "Pyydettyä resurssia ei löytynyt.",
       },
       help: {
-        dashboard: "Pääyhteenvetosivu, joka näyttää käyttötilastot ja viimeisimmän toiminnan",
-        usageStats: "Näytä nykyinen API-token-käyttösi ja kiintiötiedot nykyiselle laskutuskaudelle",
-        review: "Analysoi asiakirjoja laatutarkistuslistoja vastaan vaatimustenmukaisuuden ja tarkkuuden varmistamiseksi",
-        generate: "Luo rakenteellisia raportteja ja asiakirjoja käyttäen tekoälyä sisältösi perusteella",
-        compare: "Vertaile kahta asiakirjaa rinnakkain erojen ja yhtäläisyyksien tunnistamiseksi",
-        match: "Sovita asiakirjan sisältö lomakemalleihin automatisoidun lomakkeiden täytön mahdollistamiseksi",
-        modelSelection: "Määritä käsittelyyn ja analyysiin käytettävät tekoälymallit",
-        knowledgeBases: "Hallinnoi tietokantakirjastoja asiakirjojen käsittelyä varten",
-        archive: "Näytä ja hallinnoi käsiteltyjä asiakirjojasi ja analyysihistoriaasi",
+        dashboard:
+          "Pääyhteenvetosivu, joka näyttää käyttötilastot ja viimeisimmän toiminnan",
+        usageStats:
+          "Näytä nykyinen API-token-käyttösi ja kiintiötiedot nykyiselle laskutuskaudelle",
+        review:
+          "Analysoi asiakirjoja laatutarkistuslistoja vastaan vaatimustenmukaisuuden ja tarkkuuden varmistamiseksi",
+        generate:
+          "Luo rakenteellisia raportteja ja asiakirjoja käyttäen tekoälyä sisältösi perusteella",
+        compare:
+          "Vertaile kahta asiakirjaa rinnakkain erojen ja yhtäläisyyksien tunnistamiseksi",
+        match:
+          "Sovita asiakirjan sisältö lomakemalleihin automatisoidun lomakkeiden täytön mahdollistamiseksi",
+        modelSelection:
+          "Määritä käsittelyyn ja analyysiin käytettävät tekoälymallit",
+        knowledgeBases:
+          "Hallinnoi tietokantakirjastoja asiakirjojen käsittelyä varten",
+        archive:
+          "Näytä ja hallinnoi käsiteltyjä asiakirjojasi ja analyysihistoriaasi",
         settings: "Määritä tiliasetuksesi ja sovelluksen asetukset",
         admin: "Hallinnolliset toiminnot käyttäjien ja järjestelmän hallintaan",
-        knowledgeBaseSelection: "Valitse tietokanta, joka sisältää viiteasiakirjat ja analyysistandardit",
-        checklistSelection: "Valitse tarkistuslista, jossa on erityisiä kysymyksiä asiakirjojesi arviointiin",
+        knowledgeBaseSelection:
+          "Valitse tietokanta, joka sisältää viiteasiakirjat ja analyysistandardit",
+        checklistSelection:
+          "Valitse tarkistuslista, jossa on erityisiä kysymyksiä asiakirjojesi arviointiin",
         fileUpload: "Lataa analysoimasi ja tarkistamasi asiakirjat",
-        customInstructions: "Lisää erityisiä ohjeita, jotka otetaan huomioon tarkistuslistakysymyksiin vastatessa",
-        searchMode: "Valitse nopean vektorihaun tai kattavan täydellisen asiakirjaskannauksen välillä",
-        topicList: "Valitse tai luo aiheluettelo vertailuanalyysin keskittämiseksi",
+        customInstructions:
+          "Lisää erityisiä ohjeita, jotka otetaan huomioon tarkistuslistakysymyksiin vastatessa",
+        searchMode:
+          "Valitse nopean vektorihaun tai kattavan täydellisen asiakirjaskannauksen välillä",
+        topicList:
+          "Valitse tai luo aiheluettelo vertailuanalyysin keskittämiseksi",
         formTemplate: "Valitse lomakemalli, johon asiakirjasi tulisi sovittaa",
         documentOutline: "Valitse jäsentelyn rakenne raporttisi luomiseen",
-        allUsersToggle: "Vaihda pelkän oman historiasi tai kaikkien käyttäjien historian näkymän välillä",
+        allUsersToggle:
+          "Vaihda pelkän oman historiasi tai kaikkien käyttäjien historian näkymän välillä",
 
-        createChecklist: "Luo uusi tarkistuslista mukautetuilla kysymyksillä asiakirjojen arviointiin tiettyjä kriteerejä vastaan",
-        createOutline: "Luo uusi jäsentelyn rakenne rakenteellisten raporttien luomisen ohjaamiseksi",
-        createTopicList: "Luo uusi aiheluettelo vertailuanalyysin keskittämiseksi tiettyihin aiheisiin tai teemoihin",
-        createFormTemplate: "Luo uusi lomakemalli automatisoidun asiakirjasisällön poimimisen ja sovittamisen mahdollistamiseksi",
-        suggestChecklistQuestions: "Käytä tekoälyä asiaankuuluvien tarkistuslistakysymysten automaattiseen luomiseen kuvauksen ja viiteasiakirjojen perusteella",
-        optimizeChecklistQuestions: "Paranna ja hioa olemassa olevia tarkistuslistakysymyksiä valitun tietokannan avulla paremman tarkkuuden saavuttamiseksi",
-        suggestOutlineSections: "Käytä tekoälyä jäsentelyn osioiden automaattiseen luomiseen kuvauksen ja viiteasiakirjojen perusteella",
-        optimizeOutlineSections: "Paranna ja hioa olemassa olevia jäsentelyn osioita valitun tietokannan avulla paremman rakenteen saavuttamiseksi",
-        suggestTopicListTopics: "Käytä tekoälyä asiaankuuluvien vertailuaiheiden automaattiseen luomiseen kuvauksen ja viiteasiakirjojen perusteella",
-        suggestFormTemplateFields: "Käytä tekoälyä asiaankuuluvien lomakekenttien automaattiseen luomiseen kuvauksen ja viiteasiakirjojen perusteella",
-        referenceDocuments: "Lataa viiteasiakirjoja tai valitse tietokanta auttaaksesi tekoälyä ehdottamaan sisältöä erityisen asiayhteyden ja vaatimusten perusteella",
-        referenceDocumentsFiles: "Anna viiteasiakirjoja auttaaksesi tekoälyä tuottamaan tarkempia ja asiayhteyteen sopivia ehdotuksia"
+        createChecklist:
+          "Luo uusi tarkistuslista mukautetuilla kysymyksillä asiakirjojen arviointiin tiettyjä kriteerejä vastaan",
+        createOutline:
+          "Luo uusi jäsentelyn rakenne rakenteellisten raporttien luomisen ohjaamiseksi",
+        createTopicList:
+          "Luo uusi aiheluettelo vertailuanalyysin keskittämiseksi tiettyihin aiheisiin tai teemoihin",
+        createFormTemplate:
+          "Luo uusi lomakemalli automatisoidun asiakirjasisällön poimimisen ja sovittamisen mahdollistamiseksi",
+        suggestChecklistQuestions:
+          "Käytä tekoälyä asiaankuuluvien tarkistuslistakysymysten automaattiseen luomiseen kuvauksen ja viiteasiakirjojen perusteella",
+        optimizeChecklistQuestions:
+          "Paranna ja hioa olemassa olevia tarkistuslistakysymyksiä valitun tietokannan avulla paremman tarkkuuden saavuttamiseksi",
+        suggestOutlineSections:
+          "Käytä tekoälyä jäsentelyn osioiden automaattiseen luomiseen kuvauksen ja viiteasiakirjojen perusteella",
+        optimizeOutlineSections:
+          "Paranna ja hioa olemassa olevia jäsentelyn osioita valitun tietokannan avulla paremman rakenteen saavuttamiseksi",
+        suggestTopicListTopics:
+          "Käytä tekoälyä asiaankuuluvien vertailuaiheiden automaattiseen luomiseen kuvauksen ja viiteasiakirjojen perusteella",
+        suggestFormTemplateFields:
+          "Käytä tekoälyä asiaankuuluvien lomakekenttien automaattiseen luomiseen kuvauksen ja viiteasiakirjojen perusteella",
+        referenceDocuments:
+          "Lataa viiteasiakirjoja tai valitse tietokanta auttaaksesi tekoälyä ehdottamaan sisältöä erityisen asiayhteyden ja vaatimusten perusteella",
+        referenceDocumentsFiles:
+          "Anna viiteasiakirjoja auttaaksesi tekoälyä tuottamaan tarkempia ja asiayhteyteen sopivia ehdotuksia",
       },
       common: {
         loading: "Ladataan...",
@@ -2013,21 +2261,26 @@ export const addNordicTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Arvioi asiakirjoja",
-        pageDescription: "Arvioi asiakirjaa käyttäjän määrittelemän checklistin ja politiikkatietokannan perusteella.",
+        pageDescription:
+          "Arvioi asiakirjaa käyttäjän määrittelemän checklistin ja politiikkatietokannan perusteella.",
         knowledgeBaseTitle: "Tietokanta",
         knowledgeBaseDescription: "Klikkaa valitaksesi",
         checklistTitle: "Checklist",
         checklistDescription: "Klikkaa valitaksesi",
         customInstructionsTitle: "Mukautetut ohjeet (valinnainen)",
-        customInstructionsPlaceholder: "Syötä lisäohjeita, jotka tulisi ottaa huomioon checklist-kysymyksiin vastattaessa...",
-        customInstructionsHelp: "{{count}}/2000 merkkiä. Nämä ohjeet lisätään jokaiseen kysymykseen käsittelyn aikana.",
-        searchModeHelp: "Vektorihaku tarjoaa nopeita ja kohdennettuja tuloksia. Koko asiakirjan analyysi tutkii kaiken sisällön tietokannassa.",
+        customInstructionsPlaceholder:
+          "Syötä lisäohjeita, jotka tulisi ottaa huomioon checklist-kysymyksiin vastattaessa...",
+        customInstructionsHelp:
+          "{{count}}/2000 merkkiä. Nämä ohjeet lisätään jokaiseen kysymykseen käsittelyn aikana.",
+        searchModeHelp:
+          "Vektorihaku tarjoaa nopeita ja kohdennettuja tuloksia. Koko asiakirjan analyysi tutkii kaiken sisällön tietokannassa.",
         processingFile: "Käsitellään tiedostoa...",
         processingFiles: "Käsitellään tiedostoja...",
         selectKnowledgeBaseTitle: "Valitse tietokanta",
         selectChecklistTitle: "Valitse checklist",
         noResults: "Ei tuloksia vielä",
-        uploadDocuments: "Lataa yksi tai useampi asiakirja arvioitavaksi valittua checklistiä vasten",
+        uploadDocuments:
+          "Lataa yksi tai useampi asiakirja arvioitavaksi valittua checklistiä vasten",
         results: "Tulokset",
         downloadReport: "Lataa raportti",
         downloadCsv: "Lataa CSV",
@@ -2036,24 +2289,29 @@ export const addNordicTranslations = (resources: any) => {
         reportCopied: "Raportti kopioitu leikepöydälle!",
         reviewButton: "Arvioi",
         consultDocuments: "Konsultoi asiakirjoja",
-        noChecklistsAvailable: "Ei checklistejä saatavilla. Luo ensimmäinen checklist aloittaaksesi.",
+        noChecklistsAvailable:
+          "Ei checklistejä saatavilla. Luo ensimmäinen checklist aloittaaksesi.",
         createChecklist: "Luo checklist",
         editChecklist: "Muokkaa checklistiä",
         checklistName: "Checklistin nimi",
         checklistNamePlaceholder: "Syötä checklistin nimi...",
         checklistDescriptionLabel: "Kuvaus",
-        checklistDescriptionPlaceholder: "Syötä checklistin kuvaus automaattisia kysymysehdotuksia varten (vähintään 10 merkkiä)...",
+        checklistDescriptionPlaceholder:
+          "Syötä checklistin kuvaus automaattisia kysymysehdotuksia varten (vähintään 10 merkkiä)...",
         questions: "Kysymykset",
         suggest: "Ehdota",
         suggesting: "Ehdotetaan...",
         optimize: "Optimoi",
-        optimizeTooltip: "Tietokannan valinta vaaditaan Optimoi-toiminnon käyttöönottamiseksi",
-        optimizeTooltipEnabled: "Optimoi kysymykset valitun tietokannan perusteella",
+        optimizeTooltip:
+          "Tietokannan valinta vaaditaan Optimoi-toiminnon käyttöönottamiseksi",
+        optimizeTooltipEnabled:
+          "Optimoi kysymykset valitun tietokannan perusteella",
         uploadFiles: "Lataa tiedostoja",
         knowledgeBase: "Tietokanta",
         referenceDocuments: "Viiteasiakirjat (valinnainen)",
         selectKnowledgeBasePlaceholder: "Valitse tietokanta...",
-        noKnowledgeBasesAvailable: "Ei tietokantoja saatavilla. Luo ensin yksi käyttääksesi tätä ominaisuutta.",
+        noKnowledgeBasesAvailable:
+          "Ei tietokantoja saatavilla. Luo ensin yksi käyttääksesi tätä ominaisuutta.",
         copyQuestions: "Kopioi kysymykset",
         questionsCopied: "Kysymykset kopioitu leikepöydälle",
         noQuestionsToCopy: "Ei kysymyksiä kopioitavaksi",
@@ -2065,22 +2323,28 @@ export const addNordicTranslations = (resources: any) => {
         uploadedFiles: "Ladatut tiedostot",
 
         removeFile: "Poista",
-        characterCount: "{{count}}/2000 merkkiä. Nämä ohjeet lisätään jokaiseen kysymykseen käsittelyn aikana.",
+        characterCount:
+          "{{count}}/2000 merkkiä. Nämä ohjeet lisätään jokaiseen kysymykseen käsittelyn aikana.",
         searchMode: "Hakutila",
         vectorSearch: "Vektorihaku",
         fullDocumentScan: "Koko asiakirjan analyysi",
-        vectorSearchDescription: "Löydä asiaankuuluvaa sisältöä käyttäen tekoälyn samankaltaisuushakua (nopea, kohdennettu)",
-        fullScanDescription: "Analysoi kaikki asiakirjat tietokannassa (täydellinen, perusteellinen)"
+        vectorSearchDescription:
+          "Löydä asiaankuuluvaa sisältöä käyttäen tekoälyn samankaltaisuushakua (nopea, kohdennettu)",
+        fullScanDescription:
+          "Analysoi kaikki asiakirjat tietokannassa (täydellinen, perusteellinen)",
       },
       generate: {
-        pageDescription: "Luo asiakirja käyttäjän määrittelemän jäsentelyn ja asiakirjatietokannan perusteella.",
+        pageDescription:
+          "Luo asiakirja käyttäjän määrittelemän jäsentelyn ja asiakirjatietokannan perusteella.",
         generatingDocument: "Luodaan asiakirjaa...",
         knowledgeBaseTitle: "Tietokanta",
         documentOutlineTitle: "Asiakirjan jäsentely",
         clickToSelect: "Klikkaa valitaksesi",
         customInstructionsTitle: "Mukautetut ohjeet (valinnainen)",
-        customInstructionsPlaceholder: "Syötä lisäohjeita, jotka tulisi ottaa huomioon jokaisen raportin osion luomisessa...",
-        characterCount: "{{count}}/2000 merkkiä. Nämä ohjeet lisätään kehotteeseen jokaisen osion luomisen aikana.",
+        customInstructionsPlaceholder:
+          "Syötä lisäohjeita, jotka tulisi ottaa huomioon jokaisen raportin osion luomisessa...",
+        characterCount:
+          "{{count}}/2000 merkkiä. Nämä ohjeet lisätään kehotteeseen jokaisen osion luomisen aikana.",
         selectKnowledgeBaseTitle: "Valitse tietokanta",
         selectDocumentOutlineTitle: "Valitse asiakirjan jäsentely",
         generateButton: "Luo",
@@ -2090,7 +2354,8 @@ export const addNordicTranslations = (resources: any) => {
         downloadDocx: "Lataa DOCX",
         downloadCsv: "Lataa CSV",
         clearReport: "Tyhjennä raportti",
-        resultsPlaceholder: "Tulokset näkyvät täällä asiakirjan luomisen jälkeen.",
+        resultsPlaceholder:
+          "Tulokset näkyvät täällä asiakirjan luomisen jälkeen.",
         sectionsWithSources: "Osiot lähteineen",
         sectionNumber: "Osio {number}: {title}",
         kbGenerated: "KB:stä luotu",
@@ -2108,36 +2373,39 @@ export const addNordicTranslations = (resources: any) => {
         generateSuccess: "Raportti luotu onnistuneesti käyttäen {method}!",
         generateError: "Virhe asiakirjan luomisessa: {error}",
         vectorSearch: "vektorihaku",
-        fullDocumentScan: "koko asiakirjan skannaus"
+        fullDocumentScan: "koko asiakirjan skannaus",
       },
       modelSelection: {
         llmManagement: "LLM-hallinta",
-        llmDescription: "Määritä ja hallinnoi LLM-malleja, joita käytetään tekstivastausten luomiseen. Oletusmallia käytetään kaikkiin toimintoihin.",
+        llmDescription:
+          "Määritä ja hallinnoi LLM-malleja, joita käytetään tekstivastausten luomiseen. Oletusmallia käytetään kaikkiin toimintoihin.",
         addNewLlm: "Lisää uusi LLM",
         noLlmsConfigured: "LLM-malleja ei ole määritetty",
         addNewLlmToGetStarted: "Lisää uusi LLM aloittaaksesi",
         embeddingModelManagement: "Upotusmallin hallinta",
-        embeddingDescription: "Määritä ja hallinnoi upotusmalleja, joita käytetään tietokantaindeksointiin ja hakuun. Oletusmallia käytetään uusia tietokantoja luotaessa, mutta jokainen tietokanta jatkaa alkuperäisen upotusmalllinsa käyttöä, vaikka oletus muuttuisi myöhemmin.",
+        embeddingDescription:
+          "Määritä ja hallinnoi upotusmalleja, joita käytetään tietokantaindeksointiin ja hakuun. Oletusmallia käytetään uusia tietokantoja luotaessa, mutta jokainen tietokanta jatkaa alkuperäisen upotusmalllinsa käyttöä, vaikka oletus muuttuisi myöhemmin.",
         addEmbeddingModel: "Lisää upotusmalli",
         noEmbeddingModelsConfigured: "Upotusmalleja ei ole määritetty",
-        addNewEmbeddingModelToGetStarted: "Lisää uusi upotusmalli aloittaaksesi",
+        addNewEmbeddingModelToGetStarted:
+          "Lisää uusi upotusmalli aloittaaksesi",
         tableHeaders: {
           name: "Nimi",
           modelId: "Mallin ID",
           provider: "Palveluntarjoaja",
           description: "Kuvaus",
           status: "Tila",
-          actions: "Toiminnot"
+          actions: "Toiminnot",
         },
         status: {
           default: "Oletus",
-          available: "Saatavilla"
+          available: "Saatavilla",
         },
         actions: {
           setAsDefault: "Aseta oletukseksi",
           delete: "Poista",
           validate: "Vahvista",
-          validating: "Vahvistetaan"
+          validating: "Vahvistetaan",
         },
         dialog: {
           addNewLlm: "Lisää uusi LLM",
@@ -2147,20 +2415,22 @@ export const addNordicTranslations = (resources: any) => {
           modelId: "Mallin ID",
           description: "Kuvaus",
           cancel: "Peruuta",
-          addModel: "Lisää malli"
+          addModel: "Lisää malli",
         },
         placeholders: {
           customModel: "esim., Oma mukautettu malli",
           embeddingModelId: "esim., sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "Kuvaile malli, sen ominaisuudet ja milloin sitä käytetään"
+          describeModel:
+            "Kuvaile malli, sen ominaisuudet ja milloin sitä käytetään",
         },
         validation: {
-          pleaseEnterModelId: "Syötä mallin ID"
-        }
+          pleaseEnterModelId: "Syötä mallin ID",
+        },
       },
       compare: {
         title: "Vertaile asiakirjoja",
-        subtitle: "Vertaile kahta asiakirjaa nähdäksesi, miten ne eroavat käyttäjän määrittämän aihealustan suhteen.",
+        subtitle:
+          "Vertaile kahta asiakirjaa nähdäksesi, miten ne eroavat käyttäjän määrittämän aihealustan suhteen.",
         selectFirstDocument: "Valitse ensimmäinen asiakirja",
         selectSecondDocument: "Valitse toinen asiakirja",
         pleaseSelect: "Valitse...",
@@ -2175,11 +2445,12 @@ export const addNordicTranslations = (resources: any) => {
         clickToBrowse: "Klikkaa selataksesi tai vedä ja pudota",
         supportedFormats: "PDF, TXT, DOCX tuettu",
         editTopicList: "Muokkaa aiheluetteloa",
-        selectTopicListTitle: "Valitse aiheluettelo"
+        selectTopicListTitle: "Valitse aiheluettelo",
       },
       match: {
         title: "Asiakirjan yhdistäminen",
-        subtitle: "Varmista, että kenttämerkinnät yhdistyvät eri muotoisten asiakirjojen välillä.",
+        subtitle:
+          "Varmista, että kenttämerkinnät yhdistyvät eri muotoisten asiakirjojen välillä.",
         selectDocument: "Valitse asiakirja, jolle etsitään yhdistelmiä",
         pleaseSelect: "Valitse asiakirja...",
         sourceDocument: "Lähdeasiakirja",
@@ -2193,14 +2464,15 @@ export const addNordicTranslations = (resources: any) => {
         matchResults: "Yhdistelmätulokset",
         similarity: "Samankaltaisuus",
         editFormTemplate: "Muokkaa lomakemallia",
-        selectFormTemplateTitle: "Valitse lomakemalli"
+        selectFormTemplateTitle: "Valitse lomakemalli",
       },
       editFormTemplateModal: {
         title: "Muokkaa lomakemallia",
         formTemplateName: "Lomakemallin nimi",
         formTemplateNamePlaceholder: "Syötä lomakemallin nimi",
         formTemplateDescription: "Lomakemallin kuvaus",
-        descriptionPlaceholder: "Syötä lomakemallin kuvaus kenttien automaattista ehdottamista varten (vähintään 10 merkkiä)...",
+        descriptionPlaceholder:
+          "Syötä lomakemallin kuvaus kenttien automaattista ehdottamista varten (vähintään 10 merkkiä)...",
         referenceDocuments: "Viiteasiakirjat (valinnainen)",
         uploadFiles: "Lataa tiedostoja",
         knowledgeBase: "Tietokanta",
@@ -2208,7 +2480,7 @@ export const addNordicTranslations = (resources: any) => {
         suggest: "Ehdota",
         fieldPlaceholder: "Lisää kentän nimi...",
         cancel: "Peruuta",
-        updateFormTemplate: "Päivitä lomakemalli"
+        updateFormTemplate: "Päivitä lomakemalli",
       },
       editOutlineModal: {
         title: "Muokkaa jäsentelyä",
@@ -2216,7 +2488,8 @@ export const addNordicTranslations = (resources: any) => {
         outlineName: "Jäsentelyn nimi",
         outlineNamePlaceholder: "Syötä jäsentelyn nimi",
         description: "Kuvaus",
-        descriptionPlaceholder: "Syötä jäsentelyn kuvaus osioiden automaattista ehdottamista varten (vähintään 10 merkkiä)...",
+        descriptionPlaceholder:
+          "Syötä jäsentelyn kuvaus osioiden automaattista ehdottamista varten (vähintään 10 merkkiä)...",
         referenceDocuments: "Viiteasiakirjat (valinnainen)",
         uploadFiles: "Lataa tiedostoja",
         knowledgeBase: "Tietokanta",
@@ -2226,7 +2499,7 @@ export const addNordicTranslations = (resources: any) => {
         addSectionPlaceholder: "Lisää osio",
         cancel: "Peruuta",
         createOutline: "Luo jäsentely",
-        updateOutline: "Päivitä jäsentely"
+        updateOutline: "Päivitä jäsentely",
       },
       editChecklistModal: {
         title: "Muokkaa checklistiä",
@@ -2234,7 +2507,8 @@ export const addNordicTranslations = (resources: any) => {
         checklistName: "Checklistin nimi",
         checklistNamePlaceholder: "Syötä checklistin nimi",
         description: "Kuvaus",
-        descriptionPlaceholder: "Syötä checklistin kuvaus kysymysten automaattista ehdottamista varten (vähintään 10 merkkiä)...",
+        descriptionPlaceholder:
+          "Syötä checklistin kuvaus kysymysten automaattista ehdottamista varten (vähintään 10 merkkiä)...",
         referenceDocuments: "Viiteasiakirjat (valinnainen)",
         uploadFiles: "Lataa tiedostoja",
         knowledgeBase: "Tietokanta",
@@ -2245,7 +2519,7 @@ export const addNordicTranslations = (resources: any) => {
         copyAllQuestions: "Kopioi kaikki kysymykset tekstinä",
         cancel: "Peruuta",
         createChecklist: "Luo checklist",
-        updateChecklist: "Päivitä checklist"
+        updateChecklist: "Päivitä checklist",
       },
       editTopicListModal: {
         title: "Muokkaa aiheluetteloa",
@@ -2253,7 +2527,8 @@ export const addNordicTranslations = (resources: any) => {
         topicListName: "Aiheluettelon nimi",
         topicListNamePlaceholder: "Syötä aiheluettelon nimi",
         description: "Aiheluettelon kuvaus",
-        descriptionPlaceholder: "Syötä aiheluettelon kuvaus aiheiden automaattista ehdottamista varten (vähintään 10 merkkiä)...",
+        descriptionPlaceholder:
+          "Syötä aiheluettelon kuvaus aiheiden automaattista ehdottamista varten (vähintään 10 merkkiä)...",
         referenceDocuments: "Viiteasiakirjat (valinnainen)",
         uploadFiles: "Lataa tiedostoja",
         knowledgeBase: "Tietokanta",
@@ -2264,15 +2539,17 @@ export const addNordicTranslations = (resources: any) => {
         copyAllTopics: "Kopioi kaikki aiheet tekstinä",
         cancel: "Peruuta",
         createTopicList: "Luo aiheluettelo",
-        updateTopicList: "Päivitä aiheluettelo"
+        updateTopicList: "Päivitä aiheluettelo",
       },
       optimizeChecklistModal: {
         title: "Optimoi checklist",
         customInstructionsLabel: "Mukautetut ohjeet (valinnainen)",
-        customInstructionsHelperText: "Syötä lisäohjeita, jotka tulisi ottaa huomioon checklist-kysymyksiin vastattaessa",
+        customInstructionsHelperText:
+          "Syötä lisäohjeita, jotka tulisi ottaa huomioon checklist-kysymyksiin vastattaessa",
         analyzing: "Analysoidaan...",
         analyzeButton: "Analysoi checklist",
-        analyzingMessage: "Analysoidaan checklistiäsi optimointimahdollisuuksien löytämiseksi...",
+        analyzingMessage:
+          "Analysoidaan checklistiäsi optimointimahdollisuuksien löytämiseksi...",
         cancelAnalysis: "Peruuta analyysi",
         downloading: "Ladataan...",
         downloadCsv: "Lataa CSV",
@@ -2288,15 +2565,17 @@ export const addNordicTranslations = (resources: any) => {
         showMore: "Näytä enemmän",
         optimizationsSelectedText: "{{s}} optimointia valittu sovellettavaksi",
         applying: "Sovelletaan...",
-        applySelectedOptimizations: "Sovella valitut optimoinnit"
+        applySelectedOptimizations: "Sovella valitut optimoinnit",
       },
       optimizeOutlineModal: {
         title: "Optimoi jäsentely",
-        description: "Lataa viiteasiakirja, joka edustaa korkealaatuista esimerkkiä raporttityypistä, jonka haluat luoda. Järjestelmä luo raportin nykyisellä jäsentelylläsi ja tietokannallasi, vertaa sitä viitteeseen ja ehdottaa parannuksia jäsentelyn osioihin.",
+        description:
+          "Lataa viiteasiakirja, joka edustaa korkealaatuista esimerkkiä raporttityypistä, jonka haluat luoda. Järjestelmä luo raportin nykyisellä jäsentelylläsi ja tietokannallasi, vertaa sitä viitteeseen ja ehdottaa parannuksia jäsentelyn osioihin.",
         groundTruthDocument: "Viiteasiakirja",
         customInstructionsLabel: "Mukautetut ohjeet (valinnainen)",
         customInstructionsHelperText: "Anna lisäohjausta optimointiprosessille",
-        customInstructionsPlaceholder: "esim. Keskity teknisen syvyyden parantamiseen, varmista tiettyjen standardien noudattaminen, jne.",
+        customInstructionsPlaceholder:
+          "esim. Keskity teknisen syvyyden parantamiseen, varmista tiettyjen standardien noudattaminen, jne.",
         characters: "merkkiä",
         analyzingOutline: "Analysoidaan jäsentelyä ja luodaan optimointeja...",
         cancelAnalysis: "Peruuta analyysi",
@@ -2316,7 +2595,7 @@ export const addNordicTranslations = (resources: any) => {
         cancel: "Peruuta",
         optimizing: "Optimoidaan...",
         optimizeOutline: "Optimoi jäsentely",
-        applyOptimizations: "Sovella {{count}} optimointia"
+        applyOptimizations: "Sovella {{count}} optimointia",
       },
       knowledgeBases: {
         title: "Tietokantojen hallinta",
@@ -2330,11 +2609,11 @@ export const addNordicTranslations = (resources: any) => {
           embeddingModel: "Upotusmalli",
           dateCreated: "Luontipäivä",
           dateModified: "Muokkauspäivä",
-          actions: "Toiminnot"
+          actions: "Toiminnot",
         },
         status: {
           default: "Oletus",
-          na: "Ei sovellettavissa"
+          na: "Ei sovellettavissa",
         },
         modals: {
           add: {
@@ -2348,7 +2627,8 @@ export const addNordicTranslations = (resources: any) => {
               descriptionPlaceholder: "Kuvaus",
             },
             fileUpload: {
-              dragAndDrop: "Vedä ja pudota tiedostoja tähän tai klikkaa selataksesi",
+              dragAndDrop:
+                "Vedä ja pudota tiedostoja tähän tai klikkaa selataksesi",
               dropFiles: "Pudota tiedostoja tähän...",
               selectedFiles: "Valitut tiedostot:",
               removeFile: "Poista tiedosto",
@@ -2376,7 +2656,8 @@ export const addNordicTranslations = (resources: any) => {
             },
             fileUpload: {
               currentFiles: "Nykyiset tiedostot:",
-              dragAndDrop: "Vedä ja pudota tiedostoja tähän tai klikkaa selataksesi",
+              dragAndDrop:
+                "Vedä ja pudota tiedostoja tähän tai klikkaa selataksesi",
               dropFiles: "Pudota tiedostoja tähän...",
               selectedFiles: "Valitut tiedostot:",
               removeFile: "Poista tiedosto",
@@ -2391,28 +2672,29 @@ export const addNordicTranslations = (resources: any) => {
           },
           messages: {
             processing: "Käsitellään...",
-            pleaseWait: "Odota, kun käsittelemme tiedostojasi..."
-          }
+            pleaseWait: "Odota, kun käsittelemme tiedostojasi...",
+          },
         },
       },
       archive: {
         title: "Arkisto",
         history: "Historia",
         allUsers: "Kaikki käyttäjät",
-        allUsersToggleTooltip: "Vaihda vain oman historiasi tai kaikkien käyttäjien historian näkymän välillä",
+        allUsersToggleTooltip:
+          "Vaihda vain oman historiasi tai kaikkien käyttäjien historian näkymän välillä",
         viewingAllUsers: "Näytetään kaikkien käyttäjien historia",
         viewingMyHistory: "Näytetään vain oma historia",
         tabs: {
           review: "Arvioi",
           generate: "Luo",
           compare: "Vertaile",
-          match: "Yhdistä"
+          match: "Yhdistä",
         },
         emptyMessages: {
           review: "Ei aikaisempia arvioita",
           generate: "Ei aikaisempia raportteja",
           compare: "Ei aikaisempia vertailuja",
-          match: "Ei aikaisempaa lomakkeiden käsittelyä"
+          match: "Ei aikaisempaa lomakkeiden käsittelyä",
         },
         metadata: {
           question: "kysymys",
@@ -2424,17 +2706,17 @@ export const addNordicTranslations = (resources: any) => {
           document: "asiakirja",
           documents: "asiakirjat",
           digitized: "digitoitu",
-
         },
         feedback: {
           positive: "Positiivinen palaute",
           negative: "Negatiivinen palaute",
-          hasFeedback: "Sisältää palautetta"
+          hasFeedback: "Sisältää palautetta",
         },
-        deleteConfirmation: "Oletko varma, että haluat poistaa tämän kohteen? Tätä toimintoa ei voi perua.",
+        deleteConfirmation:
+          "Oletko varma, että haluat poistaa tämän kohteen? Tätä toimintoa ei voi perua.",
         unknownDate: "Tuntematon päivämäärä",
-        unnamedItem: "Nimeämätön kohde"
-      }
+        unnamedItem: "Nimeämätön kohde",
+      },
     },
   }
 }

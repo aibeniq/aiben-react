@@ -14,8 +14,8 @@ import type React from "react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiFileText } from "react-icons/fi"
-import SourceLink from "../Common/SourceLink"
 import { cleanRTFFormatting } from "../../utils/rtfCleaner"
+import SourceLink from "../Common/SourceLink"
 
 interface ChatMessage {
   role: "user" | "assistant"
@@ -40,7 +40,9 @@ function getDisplayFileName(source: string): string {
   if (!source) return "Unknown"
   if (source.includes("/tmp/") || source.includes("\\tmp\\")) {
     const filename = source.split("/").pop() || source.split("\\").pop() || ""
-    return filename.includes("_") ? filename.substring(filename.indexOf("_") + 1) : filename
+    return filename.includes("_")
+      ? filename.substring(filename.indexOf("_") + 1)
+      : filename
   }
   return source
 }
@@ -63,10 +65,15 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
   const { t } = useTranslation()
 
   // State to track which citations are expanded - using object instead of Set
-  const [expandedCitations, setExpandedCitations] = useState<Record<string, boolean>>({})
+  const [expandedCitations, setExpandedCitations] = useState<
+    Record<string, boolean>
+  >({})
 
   // Function to toggle citation expansion
-  const toggleCitationExpansion = (messageIndex: number, sourceIndex: number) => {
+  const toggleCitationExpansion = (
+    messageIndex: number,
+    sourceIndex: number,
+  ) => {
     const citationKey = `${messageIndex}-${sourceIndex}`
     setExpandedCitations((prev) => ({
       ...prev,
@@ -115,7 +122,9 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                         <Box flex="1" textAlign="left" fontWeight="medium">
                           <HStack>
                             <Icon as={FiFileText} />
-                            <Text fontSize="xs">View Source Citations ({msg.sources.length})</Text>
+                            <Text fontSize="xs">
+                              View Source Citations ({msg.sources.length})
+                            </Text>
                           </HStack>
                         </Box>
                       </Accordion.ItemTrigger>
@@ -139,7 +148,11 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                             borderRadius="md"
                             bg="bg"
                           >
-                            <Text fontWeight="bold" fontSize="xs" color="gray.700">
+                            <Text
+                              fontWeight="bold"
+                              fontSize="xs"
+                              color="gray.700"
+                            >
                               Source {sIdx + 1}:
                               {source.metadata?.source &&
                                 (source.metadata.source_data_id ? (
@@ -157,7 +170,12 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                                   />
                                 ) : (
                                   // For temporary uploaded files without source_data_id, show as plain text
-                                  <Text as="span" ml={1} fontWeight="normal" color="gray.600">
+                                  <Text
+                                    as="span"
+                                    ml={1}
+                                    fontWeight="normal"
+                                    color="gray.600"
+                                  >
                                     {formatSourceWithPage(
                                       source.metadata.source,
                                       source.metadata.page,

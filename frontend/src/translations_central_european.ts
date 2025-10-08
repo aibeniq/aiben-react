@@ -58,8 +58,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "AI píše...",
         error: "Omlouváme se, něco se pokazilo. Zkuste to znovu.",
         welcome: "Ahoj! Jak vám dnes mohu pomoci?",
-        welcomeMessageWithSource: "Vyberte znalostní bázi nebo nahrajte soubory, poté položte otázku.",
-        welcomeMessageGeneral: "Zeptejte se mě na cokoliv! Pro vyhledávání ve znalostní bázi nejprve vyberte znalostní bázi.",
+        welcomeMessageWithSource:
+          "Vyberte znalostní bázi nebo nahrajte soubory, poté položte otázku.",
+        welcomeMessageGeneral:
+          "Zeptejte se mě na cokoliv! Pro vyhledávání ve znalostní bázi nejprve vyberte znalostní bázi.",
         knowledgeBaseTableName: "Název",
         knowledgeBaseTableDescription: "Popis",
         knowledgeBaseTableSources: "Zdroje",
@@ -111,21 +113,26 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Kontrolovat Dokumenty",
-        pageDescription: "Kontrolovat dokument na základě uživatelem definovaného kontrolního seznamu a databáze politik.",
+        pageDescription:
+          "Kontrolovat dokument na základě uživatelem definovaného kontrolního seznamu a databáze politik.",
         knowledgeBaseTitle: "Znalostní Báze",
         knowledgeBaseDescription: "Klikněte pro výběr",
         checklistTitle: "Kontrolní Seznam",
         checklistDescription: "Klikněte pro výběr",
         customInstructionsTitle: "Vlastní Pokyny (Volitelné)",
-        customInstructionsPlaceholder: "Zadejte další pokyny, které by měly být zváženy při odpovídání na otázky kontrolního seznamu...",
-        customInstructionsHelp: "{{count}}/2000 znaků. Tyto pokyny budou přidány ke každé otázce během zpracování.",
-        searchModeHelp: "Vektorové vyhledávání poskytuje rychlé, cílené výsledky. Úplná analýza dokumentu zkoumá veškerý obsah znalostní báze.",
+        customInstructionsPlaceholder:
+          "Zadejte další pokyny, které by měly být zváženy při odpovídání na otázky kontrolního seznamu...",
+        customInstructionsHelp:
+          "{{count}}/2000 znaků. Tyto pokyny budou přidány ke každé otázce během zpracování.",
+        searchModeHelp:
+          "Vektorové vyhledávání poskytuje rychlé, cílené výsledky. Úplná analýza dokumentu zkoumá veškerý obsah znalostní báze.",
         processingFile: "Zpracovávání souboru...",
         processingFiles: "Zpracovávání souborů...",
         selectKnowledgeBaseTitle: "Vybrat Znalostní Bázi",
         selectChecklistTitle: "Vybrat Kontrolní Seznam",
         noResults: "Zatím žádné výsledky",
-        uploadDocuments: "Nahrajte jeden nebo více dokumentů ke kontrole proti vašemu vybranému kontrolnímu seznamu",
+        uploadDocuments:
+          "Nahrajte jeden nebo více dokumentů ke kontrole proti vašemu vybranému kontrolnímu seznamu",
         results: "Výsledky",
         downloadReport: "Stáhnout Zprávu",
         downloadCsv: "Stáhnout CSV",
@@ -134,36 +141,43 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         reportCopied: "Zpráva zkopírována do schránky!",
         reviewButton: "Kontrolovat",
         consultDocuments: "Konzultovat dokumenty",
-        noChecklistsAvailable: "Žádné kontrolní seznamy nejsou k dispozici. Vytvořte svůj první kontrolní seznam pro začátek.",
+        noChecklistsAvailable:
+          "Žádné kontrolní seznamy nejsou k dispozici. Vytvořte svůj první kontrolní seznam pro začátek.",
         createChecklist: "Vytvořit Kontrolní Seznam",
         editChecklist: "Upravit Kontrolní Seznam",
         checklistName: "Název Kontrolního Seznamu",
         checklistNamePlaceholder: "Zadejte název kontrolního seznamu...",
         checklistDescriptionLabel: "Popis",
-        checklistDescriptionPlaceholder: "Zadejte popis kontrolního seznamu pro automatické návrhy otázek (minimálně 10 znaků)...",
+        checklistDescriptionPlaceholder:
+          "Zadejte popis kontrolního seznamu pro automatické návrhy otázek (minimálně 10 znaků)...",
         questions: "Otázky",
         suggest: "Navrhnout",
         suggesting: "Navrhování...",
         optimize: "Optimalizovat",
-        optimizeTooltip: "Znalostní Báze musí být vybrána pro aktivaci funkce Optimalizovat",
-        optimizeTooltipEnabled: "Optimalizovat otázky na základě vybrané Znalostní Báze",
-        allUsersToggleTooltip: "Přepínat mezi zobrazením pouze vaší historie nebo historie všech uživatelů",
+        optimizeTooltip:
+          "Znalostní Báze musí být vybrána pro aktivaci funkce Optimalizovat",
+        optimizeTooltipEnabled:
+          "Optimalizovat otázky na základě vybrané Znalostní Báze",
+        allUsersToggleTooltip:
+          "Přepínat mezi zobrazením pouze vaší historie nebo historie všech uživatelů",
         uploadFiles: "Nahrát Soubory",
         knowledgeBase: "Znalostní Báze",
         referenceDocuments: "Referenční Dokumenty (Volitelné)",
         selectKnowledgeBasePlaceholder: "Vybrat Znalostní Bázi...",
-        noKnowledgeBasesAvailable: "Žádná Znalostní Báze není k dispozici. Nejprve ji vytvořte pro použití této funkce.",
+        noKnowledgeBasesAvailable:
+          "Žádná Znalostní Báze není k dispozici. Nejprve ji vytvořte pro použití této funkce.",
         copyQuestions: "Kopírovat Otázky",
         questionsCopied: "Otázky zkopírovány do schránky",
         noQuestionsToCopy: "Žádné otázky ke kopírování",
         failedToCopyQuestions: "Nepodařilo se zkopírovat otázky do schránky",
         saveChecklist: "Uložit Kontrolní Seznam",
         cancel: "Zrušit",
-        deleteChecklist: "Smazat Kontrolní Seznam"
+        deleteChecklist: "Smazat Kontrolní Seznam",
       },
       compare: {
         title: "Porovnat dokumenty",
-        subtitle: "Porovnejte dva dokumenty, abyste viděli, jak se liší s ohledem na uživatelem definovaný seznam témat.",
+        subtitle:
+          "Porovnejte dva dokumenty, abyste viděli, jak se liší s ohledem na uživatelem definovaný seznam témat.",
         selectFirstDocument: "Vybrat první dokument",
         selectSecondDocument: "Vybrat druhý dokument",
         pleaseSelect: "Prosím vyberte...",
@@ -186,11 +200,12 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         moderate: "Střední",
         deep: "Hluboká",
         veryDeep: "Velmi hluboká",
-        editTopicList: "Upravit seznam témat"
+        editTopicList: "Upravit seznam témat",
       },
       match: {
         title: "Párování dokumentů",
-        subtitle: "Zajistit, aby se záznamy polí shodovaly napříč dokumenty různých formátů.",
+        subtitle:
+          "Zajistit, aby se záznamy polí shodovaly napříč dokumenty různých formátů.",
         selectDocument: "Vyberte dokument pro hledání shod",
         pleaseSelect: "Prosím vyberte dokument...",
         sourceDocument: "Zdrojový dokument",
@@ -211,7 +226,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         minimumSimilarity: "Minimální podobnost",
         searchDepth: "Hloubka vyhledávání",
         maxResults: "Maximální počet výsledků",
-        editFormTemplate: "Upravit šablonu formuláře"
+        editFormTemplate: "Upravit šablonu formuláře",
       },
       knowledgeBases: {
         title: "Správa znalostních bází",
@@ -225,31 +240,33 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           embeddingModel: "Model vkládání",
           dateCreated: "Datum vytvoření",
           dateModified: "Datum úpravy",
-          actions: "Akce"
+          actions: "Akce",
         },
         status: {
           default: "Výchozí",
-          na: "Není k dispozici"
+          na: "Není k dispozici",
         },
         actions: {
           view: "Zobrazit",
           edit: "Upravit",
           delete: "Smazat",
-          configure: "Konfigurovat"
+          configure: "Konfigurovat",
         },
         deleteModal: {
           title: "Smazat znalostní bázi",
           buttonText: "Smazat znalostní bázi",
-          description: "Tato znalostní báze bude trvale smazána. Jste si jisti? Tuto akci nebude možné vrátit zpět.",
+          description:
+            "Tato znalostní báze bude trvale smazána. Jste si jisti? Tuto akci nebude možné vrátit zpět.",
           confirmButton: "Smazat",
           cancelButton: "Zrušit",
           successMessage: "Znalostní báze byla úspěšně smazána",
-          errorMessage: "Při mazání znalostní báze došlo k chybě"
+          errorMessage: "Při mazání znalostní báze došlo k chybě",
         },
         modals: {
           add: {
             title: "Přidat znalostní bázi",
-            description: "Vytvořte novou znalostní bázi zadáním podrobností a nahráním dokumentů níže.",
+            description:
+              "Vytvořte novou znalostní bázi zadáním podrobností a nahráním dokumentů níže.",
             fields: {
               title: "Název",
               titlePlaceholder: "Název",
@@ -258,7 +275,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
               descriptionPlaceholder: "Popis",
             },
             fileUpload: {
-              dragAndDrop: "Přetáhněte soubory sem nebo klikněte pro procházení",
+              dragAndDrop:
+                "Přetáhněte soubory sem nebo klikněte pro procházení",
               dropFiles: "Přetáhněte soubory sem...",
               selectedFiles: "Vybrané soubory:",
               removeFile: "Odebrat soubor",
@@ -286,7 +304,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
             },
             fileUpload: {
               currentFiles: "Aktuální soubory:",
-              dragAndDrop: "Přetáhněte soubory sem nebo klikněte pro procházení",
+              dragAndDrop:
+                "Přetáhněte soubory sem nebo klikněte pro procházení",
               dropFiles: "Přetáhněte soubory sem...",
               selectedFiles: "Vybrané soubory:",
               removeFile: "Odebrat soubor",
@@ -301,8 +320,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           },
           messages: {
             processing: "Zpracování...",
-            pleaseWait: "Počkejte prosím, než zpracujeme vaše soubory..."
-          }
+            pleaseWait: "Počkejte prosím, než zpracujeme vaše soubory...",
+          },
         },
         editCustom: {
           title: "Upravit vlastní pokyny",
@@ -314,30 +333,34 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           title: "Upravit Šablonu Formuláře",
           formTemplateName: "Název Šablony Formuláře",
           formTemplateDescription: "Popis Šablony Formuláře",
-          descriptionPlaceholder: "Zadejte popis šablony formuláře pro automatické návrhy polí (minimálně 10 znaků)...",
+          descriptionPlaceholder:
+            "Zadejte popis šablony formuláře pro automatické návrhy polí (minimálně 10 znaků)...",
           referenceDocuments: "Referenční Dokumenty (Volitelné)",
           uploadFiles: "Nahrát Soubory",
           knowledgeBase: "Znalostní Báze",
           formFields: "Pole Formuláře",
           suggest: "Navrhnout",
-          fieldPlaceholder: "Přidejte název pole (např. Jméno, Adresa, Rodné číslo) nebo navrhněte z popisu",
+          fieldPlaceholder:
+            "Přidejte název pole (např. Jméno, Adresa, Rodné číslo) nebo navrhněte z popisu",
           cancel: "Zrušit",
-          updateFormTemplate: "Aktualizovat Šablonu Formuláře"
-        }
+          updateFormTemplate: "Aktualizovat Šablonu Formuláře",
+        },
       },
       dropdowns: {
         selectKnowledgeBase: "Vyberte znalostní bázi",
         selectFile: "Vyberte soubor",
         selectModel: "Vyberte model",
-        defaultOption: "Vyberte možnost"
+        defaultOption: "Vyberte možnost",
       },
       optimizeChecklistModal: {
         title: "Optimalizovat kontrolní seznam",
         customInstructionsLabel: "Vlastní instrukce (volitelné)",
-        customInstructionsHelperText: "Zadejte další instrukce, které je třeba zvážit při odpovídání na otázky kontrolního seznamu",
+        customInstructionsHelperText:
+          "Zadejte další instrukce, které je třeba zvážit při odpovídání na otázky kontrolního seznamu",
         analyzing: "Analyzování...",
         analyzeButton: "Analyzovat kontrolní seznam",
-        analyzingMessage: "Analyzujeme váš kontrolní seznam pro nalezení příležitostí k optimalizaci...",
+        analyzingMessage:
+          "Analyzujeme váš kontrolní seznam pro nalezení příležitostí k optimalizaci...",
         cancelAnalysis: "Zrušit analýzu",
         downloading: "Stahování...",
         downloadCsv: "Stáhnout CSV",
@@ -353,15 +376,18 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         showMore: "Zobrazit více",
         optimizationsSelectedText: "{{s}} optimalizací vybráno k aplikaci",
         applying: "Aplikování...",
-        applySelectedOptimizations: "Aplikovat vybrané optimalizace"
+        applySelectedOptimizations: "Aplikovat vybrané optimalizace",
       },
       optimizeOutlineModal: {
         title: "Optimalizovat osnovu",
-        description: "Nahrajte referenční dokument, který představuje vysoce kvalitní příklad typu zprávy, kterou chcete vytvořit. Systém vygeneruje zprávu s vaší současnou osnovou a znalostní bází, porovná ji s referencí a navrhne zlepšení oddílů osnovy.",
+        description:
+          "Nahrajte referenční dokument, který představuje vysoce kvalitní příklad typu zprávy, kterou chcete vytvořit. Systém vygeneruje zprávu s vaší současnou osnovou a znalostní bází, porovná ji s referencí a navrhne zlepšení oddílů osnovy.",
         groundTruthDocument: "Referenční dokument",
         customInstructionsLabel: "Vlastní instrukce (volitelné)",
-        customInstructionsHelperText: "Poskytnutí dalšího vedení pro proces optimalizace",
-        customInstructionsPlaceholder: "např. Zaměřte se na zlepšení technické hloubky, zajistěte dodržování specifických standardů atd.",
+        customInstructionsHelperText:
+          "Poskytnutí dalšího vedení pro proces optimalizace",
+        customInstructionsPlaceholder:
+          "např. Zaměřte se na zlepšení technické hloubky, zajistěte dodržování specifických standardů atd.",
         characters: "znaků",
         analyzingOutline: "Analyzování osnovy a generování optimalizací...",
         cancelAnalysis: "Zrušit analýzu",
@@ -381,8 +407,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         cancel: "Zrušit",
         optimizing: "Optimalizování...",
         optimizeOutline: "Optimalizovat osnovu",
-        applyOptimizations: "Aplikovat {{count}} optimalizací"
-      }
+        applyOptimizations: "Aplikovat {{count}} optimalizací",
+      },
     },
   }
 
@@ -442,8 +468,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "AI píše...",
         error: "Ospravedlňujeme sa, niečo sa pokazilo. Skúste to znovu.",
         welcome: "Ahoj! Ako vám dnes môžem pomôcť?",
-        welcomeMessageWithSource: "Vyberte znalostnej bázy alebo nahrajte súbory, potom položte otázku.",
-        welcomeMessageGeneral: "Opýtajte sa ma na čokoľvek! Pre vyhľadávanie v znalostnej báze najprv vyberte znalostnej bázy.",
+        welcomeMessageWithSource:
+          "Vyberte znalostnej bázy alebo nahrajte súbory, potom položte otázku.",
+        welcomeMessageGeneral:
+          "Opýtajte sa ma na čokoľvek! Pre vyhľadávanie v znalostnej báze najprv vyberte znalostnej bázy.",
         knowledgeBaseTableName: "Názov",
         knowledgeBaseTableDescription: "Popis",
         knowledgeBaseTableSources: "Zdroje",
@@ -495,21 +523,26 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Kontrolovať Dokumenty",
-        pageDescription: "Kontrolovať dokument na základe používateľom definovaného kontrolného zoznamu a databázy politík.",
+        pageDescription:
+          "Kontrolovať dokument na základe používateľom definovaného kontrolného zoznamu a databázy politík.",
         knowledgeBaseTitle: "Znalostná Báza",
         knowledgeBaseDescription: "Kliknite pre výber",
         checklistTitle: "Kontrolný Zoznam",
         checklistDescription: "Kliknite pre výber",
         customInstructionsTitle: "Vlastné Pokyny (Voliteľné)",
-        customInstructionsPlaceholder: "Zadajte ďalšie pokyny, ktoré by mali byť zvážené pri odpovedaní na otázky kontrolného zoznamu...",
-        customInstructionsHelp: "{{count}}/2000 znakov. Tieto pokyny budú pridané ku každej otázke počas spracovania.",
-        searchModeHelp: "Vektorové vyhľadávanie poskytuje rýchle, cielené výsledky. Úplná analýza dokumentu skúma všetok obsah znalostnej bázy.",
+        customInstructionsPlaceholder:
+          "Zadajte ďalšie pokyny, ktoré by mali byť zvážené pri odpovedaní na otázky kontrolného zoznamu...",
+        customInstructionsHelp:
+          "{{count}}/2000 znakov. Tieto pokyny budú pridané ku každej otázke počas spracovania.",
+        searchModeHelp:
+          "Vektorové vyhľadávanie poskytuje rýchle, cielené výsledky. Úplná analýza dokumentu skúma všetok obsah znalostnej bázy.",
         processingFile: "Spracovávanie súboru...",
         processingFiles: "Spracovávanie súborov...",
         selectKnowledgeBaseTitle: "Vybrať Znalostnú Bázu",
         selectChecklistTitle: "Vybrať Kontrolný Zoznam",
         noResults: "Zatiaľ žiadne výsledky",
-        uploadDocuments: "Nahrajte jeden alebo viac dokumentov na kontrolu proti vášmu vybranému kontrolnému zoznamu",
+        uploadDocuments:
+          "Nahrajte jeden alebo viac dokumentov na kontrolu proti vášmu vybranému kontrolnému zoznamu",
         results: "Výsledky",
         downloadReport: "Stiahnuť Správu",
         downloadCsv: "Stiahnuť CSV",
@@ -518,36 +551,43 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         reportCopied: "Správa skopírovaná do schránky!",
         reviewButton: "Kontrolovať",
         consultDocuments: "Konzultovať dokumenty",
-        noChecklistsAvailable: "Žiadne kontrolné zoznamy nie sú k dispozícii. Vytvorte svoj prvý kontrolný zoznam na začiatok.",
+        noChecklistsAvailable:
+          "Žiadne kontrolné zoznamy nie sú k dispozícii. Vytvorte svoj prvý kontrolný zoznam na začiatok.",
         createChecklist: "Vytvoriť Kontrolný Zoznam",
         editChecklist: "Upraviť Kontrolný Zoznam",
         checklistName: "Názov Kontrolného Zoznamu",
         checklistNamePlaceholder: "Zadajte názov kontrolného zoznamu...",
         checklistDescriptionLabel: "Popis",
-        checklistDescriptionPlaceholder: "Zadajte popis kontrolného zoznamu pre automatické návrhy otázok (minimálne 10 znakov)...",
+        checklistDescriptionPlaceholder:
+          "Zadajte popis kontrolného zoznamu pre automatické návrhy otázok (minimálne 10 znakov)...",
         questions: "Otázky",
         suggest: "Navrhnúť",
         suggesting: "Navrhovanie...",
         optimize: "Optimalizovať",
-        optimizeTooltip: "Znalostná Báza musí byť vybraná pre aktiváciu funkcie Optimalizovať",
-        optimizeTooltipEnabled: "Optimalizovať otázky na základe vybranej Znalostnej Bázy",
-        allUsersToggleTooltip: "Prepínať medzi zobrazením iba vašej histórie alebo histórie všetkých používateľov",
+        optimizeTooltip:
+          "Znalostná Báza musí byť vybraná pre aktiváciu funkcie Optimalizovať",
+        optimizeTooltipEnabled:
+          "Optimalizovať otázky na základe vybranej Znalostnej Bázy",
+        allUsersToggleTooltip:
+          "Prepínať medzi zobrazením iba vašej histórie alebo histórie všetkých používateľov",
         uploadFiles: "Nahrať Súbory",
         knowledgeBase: "Znalostná Báza",
         referenceDocuments: "Referenčné Dokumenty (Voliteľné)",
         selectKnowledgeBasePlaceholder: "Vybrať Znalostnú Bázu...",
-        noKnowledgeBasesAvailable: "Žiadna Znalostná Báza nie je k dispozícii. Najprv ju vytvorte pre použitie tejto funkcie.",
+        noKnowledgeBasesAvailable:
+          "Žiadna Znalostná Báza nie je k dispozícii. Najprv ju vytvorte pre použitie tejto funkcie.",
         copyQuestions: "Kopírovať Otázky",
         questionsCopied: "Otázky skopírované do schránky",
         noQuestionsToCopy: "Žiadne otázky na kopírovanie",
         failedToCopyQuestions: "Nepodarilo sa skopírovať otázky do schránky",
         saveChecklist: "Uložiť Kontrolný Zoznam",
         cancel: "Zrušiť",
-        deleteChecklist: "Zmazať Kontrolný Zoznam"
+        deleteChecklist: "Zmazať Kontrolný Zoznam",
       },
       compare: {
         title: "Porovnať dokumenty",
-        subtitle: "Porovnajte dva dokumenty, aby ste videli, ako sa líšia vzhľadom na používateľom definovaný zoznam tém.",
+        subtitle:
+          "Porovnajte dva dokumenty, aby ste videli, ako sa líšia vzhľadom na používateľom definovaný zoznam tém.",
         selectFirstDocument: "Vybrať prvý dokument",
         selectSecondDocument: "Vybrať druhý dokument",
         pleaseSelect: "Prosím vyberte...",
@@ -570,11 +610,12 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         moderate: "Stredná",
         deep: "Hlboká",
         veryDeep: "Veľmi hlboká",
-        editTopicList: "Upraviť zoznam tém"
+        editTopicList: "Upraviť zoznam tém",
       },
       match: {
         title: "Párovanie dokumentov",
-        subtitle: "Zabezpečiť, aby sa záznamy polí zhodovali naprieč dokumentmi rôznych formátov.",
+        subtitle:
+          "Zabezpečiť, aby sa záznamy polí zhodovali naprieč dokumentmi rôznych formátov.",
         selectDocument: "Vyberte dokument pre hľadanie zhôd",
         pleaseSelect: "Prosím vyberte dokument...",
         sourceDocument: "Zdrojový dokument",
@@ -595,7 +636,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         minimumSimilarity: "Minimálna podobnosť",
         searchDepth: "Hĺbka vyhľadávania",
         maxResults: "Maximálny počet výsledkov",
-        editFormTemplate: "Upraviť šablónu formulára"
+        editFormTemplate: "Upraviť šablónu formulára",
       },
       knowledgeBases: {
         title: "Správa znalostných bází",
@@ -609,31 +650,33 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           embeddingModel: "Model vkladania",
           dateCreated: "Dátum vytvorenia",
           dateModified: "Dátum úpravy",
-          actions: "Akcie"
+          actions: "Akcie",
         },
         status: {
           default: "Predvolené",
-          na: "Nie je k dispozícii"
+          na: "Nie je k dispozícii",
         },
         actions: {
           view: "Zobraziť",
           edit: "Upraviť",
           delete: "Zmazať",
-          configure: "Konfigurovať"
+          configure: "Konfigurovať",
         },
         deleteModal: {
           title: "Zmazať znalostnú bázu",
           buttonText: "Zmazať znalostnú bázu",
-          description: "Táto znalostná báza bude trvalo zmazaná. Ste si istí? Túto akciu nebude možné vrátiť späť.",
+          description:
+            "Táto znalostná báza bude trvalo zmazaná. Ste si istí? Túto akciu nebude možné vrátiť späť.",
           confirmButton: "Zmazať",
           cancelButton: "Zrušiť",
           successMessage: "Znalostná báza bola úspešne zmazaná",
-          errorMessage: "Pri mazaní znalostnej bázy došlo k chybe"
+          errorMessage: "Pri mazaní znalostnej bázy došlo k chybe",
         },
         modals: {
           add: {
             title: "Pridať znalostnú bázu",
-            description: "Vytvorte novú znalostnú bázu zadaním podrobností a nahraním dokumentov nižšie.",
+            description:
+              "Vytvorte novú znalostnú bázu zadaním podrobností a nahraním dokumentov nižšie.",
             fields: {
               title: "Názov",
               titlePlaceholder: "Názov",
@@ -642,7 +685,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
               descriptionPlaceholder: "Popis",
             },
             fileUpload: {
-              dragAndDrop: "Pretiahnite súbory sem alebo kliknite na prehliadanie",
+              dragAndDrop:
+                "Pretiahnite súbory sem alebo kliknite na prehliadanie",
               dropFiles: "Pretiahnite súbory sem...",
               selectedFiles: "Vybrané súbory:",
               removeFile: "Odobrať súbor",
@@ -670,7 +714,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
             },
             fileUpload: {
               currentFiles: "Aktuálne súbory:",
-              dragAndDrop: "Pretiahnite súbory sem alebo kliknite na prehliadanie",
+              dragAndDrop:
+                "Pretiahnite súbory sem alebo kliknite na prehliadanie",
               dropFiles: "Pretiahnite súbory sem...",
               selectedFiles: "Vybrané súbory:",
               removeFile: "Odobrať súbor",
@@ -685,8 +730,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           },
           messages: {
             processing: "Spracovanie...",
-            pleaseWait: "Prosím čakajte, kým spracujeme vaše súbory..."
-          }
+            pleaseWait: "Prosím čakajte, kým spracujeme vaše súbory...",
+          },
         },
         editCustom: {
           title: "Upraviť vlastné pokyny",
@@ -698,24 +743,28 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           title: "Upraviť Šablónu Formulára",
           formTemplateName: "Názov Šablóny Formulára",
           formTemplateDescription: "Popis Šablóny Formulára",
-          descriptionPlaceholder: "Zadajte popis šablóny formulára pre automatické návrhy polí (minimálne 10 znakov)...",
+          descriptionPlaceholder:
+            "Zadajte popis šablóny formulára pre automatické návrhy polí (minimálne 10 znakov)...",
           referenceDocuments: "Referenčné Dokumenty (Voliteľné)",
           uploadFiles: "Nahrať Súbory",
           knowledgeBase: "Znalostná Báza",
           formFields: "Polia Formulára",
           suggest: "Navrhnúť",
-          fieldPlaceholder: "Pridajte názov poľa (napr. Meno, Adresa, Rodné číslo) alebo navrhujte z popisu",
+          fieldPlaceholder:
+            "Pridajte názov poľa (napr. Meno, Adresa, Rodné číslo) alebo navrhujte z popisu",
           cancel: "Zrušiť",
-          updateFormTemplate: "Aktualizovať Šablónu Formulára"
-        }
+          updateFormTemplate: "Aktualizovať Šablónu Formulára",
+        },
       },
       optimizeChecklistModal: {
         title: "Optimalizovať kontrolný zoznam",
         customInstructionsLabel: "Vlastné pokyny (Voliteľné)",
-        customInstructionsHelperText: "Zadajte dodatočné pokyny, ktoré by mali byť zohľadnené pri odpovedaní na otázky kontrolného zoznamu",
+        customInstructionsHelperText:
+          "Zadajte dodatočné pokyny, ktoré by mali byť zohľadnené pri odpovedaní na otázky kontrolného zoznamu",
         analyzing: "Analyzuje sa...",
         analyzeButton: "Analyzovať kontrolný zoznam",
-        analyzingMessage: "Analyzuje sa váš kontrolný zoznam pre možnosti optimalizácie...",
+        analyzingMessage:
+          "Analyzuje sa váš kontrolný zoznam pre možnosti optimalizácie...",
         cancelAnalysis: "Zrušiť analýzu",
         downloading: "Sťahuje sa...",
         downloadCsv: "Stiahnuť CSV",
@@ -729,20 +778,27 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         currentAnswer: "Aktuálna odpoveď",
         showLess: "Zobraziť menej",
         showMore: "Zobraziť viac",
-        optimizationsSelectedText: "optimalizáci{{a|e|í}} vybraných na použitie",
+        optimizationsSelectedText:
+          "optimalizáci{{a|e|í}} vybraných na použitie",
         applying: "Aplikuje sa...",
         applySelectedOptimizations: "Aplikovať vybrané optimalizácie",
-        uploadDocumentsTitle: "Nahrať dokument(y), ktoré by mal kontrolný zoznam akceptovať *",
-        uploadDocumentsHelperText: "Nahrajte dokumenty, ktoré by mali spĺňať všetky požiadavky kontrolného zoznamu na pomoc identifikácie otázok, ktoré môžu byť príliš prísne",
-        customInstructionsPlaceholder: "napr., Zvážte, že ide o pediatrickú štúdiu pri hodnotení požiadaviek súvisiacich s vekom, Tento protokol je pre nízko-rizikový zásah, atď."
+        uploadDocumentsTitle:
+          "Nahrať dokument(y), ktoré by mal kontrolný zoznam akceptovať *",
+        uploadDocumentsHelperText:
+          "Nahrajte dokumenty, ktoré by mali spĺňať všetky požiadavky kontrolného zoznamu na pomoc identifikácie otázok, ktoré môžu byť príliš prísne",
+        customInstructionsPlaceholder:
+          "napr., Zvážte, že ide o pediatrickú štúdiu pri hodnotení požiadaviek súvisiacich s vekom, Tento protokol je pre nízko-rizikový zásah, atď.",
       },
       optimizeOutlineModal: {
         title: "Optimalizovať osnovu",
-        description: "Nahrajte referenčný dokument, ktorý predstavuje vysokokvalitný príklad typu správy, ktorú chcete generovať. Systém vygeneruje správu použijúc vašu aktuálnu osnovu a znalostnú bázu, porovná ju s referenciou a navrhne zlepšenia pre vaše sekcie osnovy.",
+        description:
+          "Nahrajte referenčný dokument, ktorý predstavuje vysokokvalitný príklad typu správy, ktorú chcete generovať. Systém vygeneruje správu použijúc vašu aktuálnu osnovu a znalostnú bázu, porovná ju s referenciou a navrhne zlepšenia pre vaše sekcie osnovy.",
         groundTruthDocument: "Referenčný dokument",
         customInstructionsLabel: "Vlastné pokyny (Voliteľné)",
-        customInstructionsHelperText: "Poskytnite dodatočné pokyny pre proces optimalizácie",
-        customInstructionsPlaceholder: "napr., Zamerajte sa na zlepšenie technickej hĺbky, zabezpečte súlad s konkrétnymi štandardmi, atď.",
+        customInstructionsHelperText:
+          "Poskytnite dodatočné pokyny pre proces optimalizácie",
+        customInstructionsPlaceholder:
+          "napr., Zamerajte sa na zlepšenie technickej hĺbky, zabezpečte súlad s konkrétnymi štandardmi, atď.",
         characters: "znakov",
         analyzingOutline: "Analyzuje sa osnova a generujú sa optimalizácie...",
         cancelAnalysis: "Zrušiť analýzu",
@@ -762,8 +818,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         cancel: "Zrušiť",
         optimizing: "Optimalizuje sa...",
         optimizeOutline: "Optimalizovať osnovu",
-        applyOptimizations: "Aplikovať {{count}} optimalizáci{{u|e|í}}"
-      }
+        applyOptimizations: "Aplikovať {{count}} optimalizáci{{u|e|í}}",
+      },
     },
   }
 
@@ -823,8 +879,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "Az AI gépel...",
         error: "Sajnáljuk, valami hiba történt. Próbálja újra.",
         welcome: "Üdvözöljük! Hogyan segíthetek ma?",
-        welcomeMessageWithSource: "Válasszon tudásbázist vagy töltsön fel fájlokat, majd tegyen fel kérdést.",
-        welcomeMessageGeneral: "Kérdezzen bármit! A tudásbázis kereséshez először válasszon tudásbázist.",
+        welcomeMessageWithSource:
+          "Válasszon tudásbázist vagy töltsön fel fájlokat, majd tegyen fel kérdést.",
+        welcomeMessageGeneral:
+          "Kérdezzen bármit! A tudásbázis kereséshez először válasszon tudásbázist.",
         knowledgeBaseTableName: "Név",
         knowledgeBaseTableDescription: "Leírás",
         knowledgeBaseTableSources: "Források",
@@ -876,21 +934,26 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Dokumentumok Áttekintése",
-        pageDescription: "Dokumentum áttekintése felhasználó által definiált ellenőrzőlista és szabályzat adatbázis alapján.",
+        pageDescription:
+          "Dokumentum áttekintése felhasználó által definiált ellenőrzőlista és szabályzat adatbázis alapján.",
         knowledgeBaseTitle: "Tudásbázis",
         knowledgeBaseDescription: "Kattintson a kiválasztáshoz",
         checklistTitle: "Ellenőrzőlista",
         checklistDescription: "Kattintson a kiválasztáshoz",
         customInstructionsTitle: "Egyéni Utasítások (Opcionális)",
-        customInstructionsPlaceholder: "Adjon meg további utasításokat, amelyeket figyelembe kell venni az ellenőrzőlista kérdéseinek megválaszolásakor...",
-        customInstructionsHelp: "{{count}}/2000 karakter. Ezek az utasítások minden kérdéshez hozzáadásra kerülnek a feldolgozás során.",
-        searchModeHelp: "A vektorkeresés gyors, célzott eredményeket biztosít. A teljes dokumentumelemzés a tudásbázis összes tartalmát megvizsgálja.",
+        customInstructionsPlaceholder:
+          "Adjon meg további utasításokat, amelyeket figyelembe kell venni az ellenőrzőlista kérdéseinek megválaszolásakor...",
+        customInstructionsHelp:
+          "{{count}}/2000 karakter. Ezek az utasítások minden kérdéshez hozzáadásra kerülnek a feldolgozás során.",
+        searchModeHelp:
+          "A vektorkeresés gyors, célzott eredményeket biztosít. A teljes dokumentumelemzés a tudásbázis összes tartalmát megvizsgálja.",
         processingFile: "Fájl feldolgozása...",
         processingFiles: "Fájlok feldolgozása...",
         selectKnowledgeBaseTitle: "Tudásbázis Kiválasztása",
         selectChecklistTitle: "Ellenőrzőlista Kiválasztása",
         noResults: "Még nincsenek eredmények",
-        uploadDocuments: "Töltsön fel egy vagy több dokumentumot a kiválasztott ellenőrzőlistával való áttekintéshez",
+        uploadDocuments:
+          "Töltsön fel egy vagy több dokumentumot a kiválasztott ellenőrzőlistával való áttekintéshez",
         results: "Eredmények",
         downloadReport: "Jelentés Letöltése",
         downloadCsv: "CSV Letöltése",
@@ -899,36 +962,43 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         reportCopied: "Jelentés vágólapra másolva!",
         reviewButton: "Áttekintés",
         consultDocuments: "Dokumentumok konzultálása",
-        noChecklistsAvailable: "Nincsenek elérhető ellenőrzőlisták. Hozza létre az első ellenőrzőlistáját a kezdéshez.",
+        noChecklistsAvailable:
+          "Nincsenek elérhető ellenőrzőlisták. Hozza létre az első ellenőrzőlistáját a kezdéshez.",
         createChecklist: "Ellenőrzőlista Létrehozása",
         editChecklist: "Ellenőrzőlista Szerkesztése",
         checklistName: "Ellenőrzőlista Neve",
         checklistNamePlaceholder: "Adja meg az ellenőrzőlista nevét...",
         checklistDescriptionLabel: "Leírás",
-        checklistDescriptionPlaceholder: "Adja meg az ellenőrzőlista leírását automatikus kérdésjavaslatokhoz (minimum 10 karakter)...",
+        checklistDescriptionPlaceholder:
+          "Adja meg az ellenőrzőlista leírását automatikus kérdésjavaslatokhoz (minimum 10 karakter)...",
         questions: "Kérdések",
         suggest: "Javaslat",
         suggesting: "Javasolás...",
         optimize: "Optimalizálás",
-        optimizeTooltip: "Tudásbázist kell kiválasztani az Optimalizálás funkció aktiválásához",
-        optimizeTooltipEnabled: "Kérdések optimalizálása a kiválasztott Tudásbázis alapján",
-        allUsersToggleTooltip: "Váltás a csak saját előzmények vagy az összes felhasználó előzményeinek megjelenítése között",
+        optimizeTooltip:
+          "Tudásbázist kell kiválasztani az Optimalizálás funkció aktiválásához",
+        optimizeTooltipEnabled:
+          "Kérdések optimalizálása a kiválasztott Tudásbázis alapján",
+        allUsersToggleTooltip:
+          "Váltás a csak saját előzmények vagy az összes felhasználó előzményeinek megjelenítése között",
         uploadFiles: "Fájlok Feltöltése",
         knowledgeBase: "Tudásbázis",
         referenceDocuments: "Referenciadokumentumok (Opcionális)",
         selectKnowledgeBasePlaceholder: "Tudásbázis kiválasztása...",
-        noKnowledgeBasesAvailable: "Nincs elérhető Tudásbázis. Először hozzon létre egyet a funkció használatához.",
+        noKnowledgeBasesAvailable:
+          "Nincs elérhető Tudásbázis. Először hozzon létre egyet a funkció használatához.",
         copyQuestions: "Kérdések Másolása",
         questionsCopied: "Kérdések vágólapra másolva",
         noQuestionsToCopy: "Nincsenek másolandó kérdések",
         failedToCopyQuestions: "Nem sikerült a kérdéseket vágólapra másolni",
         saveChecklist: "Ellenőrzőlista Mentése",
         cancel: "Mégse",
-        deleteChecklist: "Ellenőrzőlista Törlése"
+        deleteChecklist: "Ellenőrzőlista Törlése",
       },
       compare: {
         title: "Dokumentumok összehasonlítása",
-        subtitle: "Hasonlítson össze két dokumentumot, hogy lássa, miben térnek el egy felhasználó által meghatározott témalistával kapcsolatban.",
+        subtitle:
+          "Hasonlítson össze két dokumentumot, hogy lássa, miben térnek el egy felhasználó által meghatározott témalistával kapcsolatban.",
         selectFirstDocument: "Első dokumentum kiválasztása",
         selectSecondDocument: "Második dokumentum kiválasztása",
         pleaseSelect: "Kérjük válasszon...",
@@ -937,7 +1007,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         compareDocuments: "Dokumentumok összehasonlítása",
         comparison: "Összehasonlítás",
         noDocumentsFound: "Nem találhatók dokumentumok",
-        selectTwoDocuments: "Kérjük válasszon ki két dokumentumot az összehasonlításhoz",
+        selectTwoDocuments:
+          "Kérjük válasszon ki két dokumentumot az összehasonlításhoz",
         loadingComparison: "Összehasonlítás betöltése...",
         topicList: "Témák listája",
         clickToBrowse: "Kattintson a böngészéshez vagy húzza ide",
@@ -951,11 +1022,12 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         moderate: "Közepes",
         deep: "Mély",
         veryDeep: "Nagyon mély",
-        editTopicList: "Témalista szerkesztése"
+        editTopicList: "Témalista szerkesztése",
       },
       match: {
         title: "Dokumentumok párosítása",
-        subtitle: "Biztosítsa, hogy a mezőbejegyzések megegyezzenek a különböző formátumú dokumentumok között.",
+        subtitle:
+          "Biztosítsa, hogy a mezőbejegyzések megegyezzenek a különböző formátumú dokumentumok között.",
         selectDocument: "Válasszon dokumentumot a párosításhoz",
         pleaseSelect: "Kérjük válasszon dokumentumot...",
         sourceDocument: "Forrás dokumentum",
@@ -976,7 +1048,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         minimumSimilarity: "Minimális hasonlóság",
         searchDepth: "Keresési mélység",
         maxResults: "Maximális eredmények száma",
-        editFormTemplate: "Űrlapsablon szerkesztése"
+        editFormTemplate: "Űrlapsablon szerkesztése",
       },
       knowledgeBases: {
         title: "Tudásbázisok kezelése",
@@ -990,31 +1062,33 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           embeddingModel: "Beágyazási modell",
           dateCreated: "Létrehozás dátuma",
           dateModified: "Módosítás dátuma",
-          actions: "Műveletek"
+          actions: "Műveletek",
         },
         status: {
           default: "Alapértelmezett",
-          na: "Nem elérhető"
+          na: "Nem elérhető",
         },
         actions: {
           view: "Megtekintés",
           edit: "Szerkesztés",
           delete: "Törlés",
-          configure: "Konfigurálás"
+          configure: "Konfigurálás",
         },
         deleteModal: {
           title: "Tudásbázis törlése",
           buttonText: "Tudásbázis törlése",
-          description: "Ez a tudásbázis véglegesen törlésre kerül. Biztos benne? Ezt a műveletet nem lehet visszavonni.",
+          description:
+            "Ez a tudásbázis véglegesen törlésre kerül. Biztos benne? Ezt a műveletet nem lehet visszavonni.",
           confirmButton: "Törlés",
           cancelButton: "Mégse",
           successMessage: "A tudásbázis sikeresen törölve lett",
-          errorMessage: "Hiba történt a tudásbázis törlése során"
+          errorMessage: "Hiba történt a tudásbázis törlése során",
         },
         modals: {
           add: {
             title: "Tudásbázis hozzáadása",
-            description: "Hozzon létre egy új tudásbázist részletek megadásával és dokumentumok feltöltésével alább.",
+            description:
+              "Hozzon létre egy új tudásbázist részletek megadásával és dokumentumok feltöltésével alább.",
             fields: {
               title: "Cím",
               titlePlaceholder: "Cím",
@@ -1023,7 +1097,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
               descriptionPlaceholder: "Leírás",
             },
             fileUpload: {
-              dragAndDrop: "Húzza ide a fájlokat vagy kattintson a böngészéshez",
+              dragAndDrop:
+                "Húzza ide a fájlokat vagy kattintson a böngészéshez",
               dropFiles: "Húzza ide a fájlokat...",
               selectedFiles: "Kiválasztott fájlok:",
               removeFile: "Fájl eltávolítása",
@@ -1050,7 +1125,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
             },
             fileUpload: {
               currentFiles: "Jelenlegi fájlok:",
-              dragAndDrop: "Húzza ide a fájlokat vagy kattintson a böngészéshez",
+              dragAndDrop:
+                "Húzza ide a fájlokat vagy kattintson a böngészéshez",
               dropFiles: "Húzza ide a fájlokat...",
               selectedFiles: "Kiválasztott fájlok:",
               removeFile: "Fájl eltávolítása",
@@ -1064,8 +1140,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           },
           messages: {
             processing: "Feldolgozás...",
-            pleaseWait: "Kérjük várjon, amíg feldolgozzuk a fájljait..."
-          }
+            pleaseWait: "Kérjük várjon, amíg feldolgozzuk a fájljait...",
+          },
         },
         editCustom: {
           title: "Egyéni utasítások szerkesztése",
@@ -1077,24 +1153,28 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           title: "Űrlapsablon Szerkesztése",
           formTemplateName: "Űrlapsablon Neve",
           formTemplateDescription: "Űrlapsablon Leírása",
-          descriptionPlaceholder: "Adja meg az űrlapsablon leírását a mezők automatikus javaslásához (legalább 10 karakter)...",
+          descriptionPlaceholder:
+            "Adja meg az űrlapsablon leírását a mezők automatikus javaslásához (legalább 10 karakter)...",
           referenceDocuments: "Referenciadokumentumok (Opcionális)",
           uploadFiles: "Fájlok Feltöltése",
           knowledgeBase: "Tudásbázis",
           formFields: "Űrlapmezők",
           suggest: "Javaslat",
-          fieldPlaceholder: "Adjon hozzá egy mezőnevet (pl. Vezetéknév, Cím, Társadalombiztosítási szám) vagy javasoljon a leírásból",
+          fieldPlaceholder:
+            "Adjon hozzá egy mezőnevet (pl. Vezetéknév, Cím, Társadalombiztosítási szám) vagy javasoljon a leírásból",
           cancel: "Mégse",
-          updateFormTemplate: "Űrlapsablon Frissítése"
-        }
+          updateFormTemplate: "Űrlapsablon Frissítése",
+        },
       },
       optimizeChecklistModal: {
         title: "Ellenőrzőlista optimalizálása",
         customInstructionsLabel: "Egyéni utasítások (Opcionális)",
-        customInstructionsHelperText: "Adjon meg további utasításokat, amelyeket figyelembe kell venni az ellenőrzőlista kérdéseinek megválaszolásakor",
+        customInstructionsHelperText:
+          "Adjon meg további utasításokat, amelyeket figyelembe kell venni az ellenőrzőlista kérdéseinek megválaszolásakor",
         analyzing: "Elemzés...",
         analyzeButton: "Ellenőrzőlista elemzése",
-        analyzingMessage: "Az ellenőrzőlista elemzése optimalizálási lehetőségekért...",
+        analyzingMessage:
+          "Az ellenőrzőlista elemzése optimalizálási lehetőségekért...",
         cancelAnalysis: "Elemzés megszakítása",
         downloading: "Letöltés...",
         downloadCsv: "CSV letöltése",
@@ -1111,17 +1191,23 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         optimizationsSelectedText: "optimalizálás kiválasztva alkalmazásra",
         applying: "Alkalmazás...",
         applySelectedOptimizations: "Kiválasztott optimalizálások alkalmazása",
-        uploadDocumentsTitle: "Töltsön fel dokumentum(ok)at, amelyeket az ellenőrzőlistának el kell fogadnia *",
-        uploadDocumentsHelperText: "Töltsön fel olyan dokumentumokat, amelyeknek meg kell felelniük az összes ellenőrzőlista követelménynek, hogy segítsen azonosítani a túl szigorú kérdéseket",
-        customInstructionsPlaceholder: "pl., Vegye figyelembe, hogy ez egy gyermekgyógyászati tanulmány az életkorral kapcsolatos követelmények értékelésekor, Ez a protokoll alacsony kockázatú beavatkozásra vonatkozik, stb."
+        uploadDocumentsTitle:
+          "Töltsön fel dokumentum(ok)at, amelyeket az ellenőrzőlistának el kell fogadnia *",
+        uploadDocumentsHelperText:
+          "Töltsön fel olyan dokumentumokat, amelyeknek meg kell felelniük az összes ellenőrzőlista követelménynek, hogy segítsen azonosítani a túl szigorú kérdéseket",
+        customInstructionsPlaceholder:
+          "pl., Vegye figyelembe, hogy ez egy gyermekgyógyászati tanulmány az életkorral kapcsolatos követelmények értékelésekor, Ez a protokoll alacsony kockázatú beavatkozásra vonatkozik, stb.",
       },
       optimizeOutlineModal: {
         title: "Vázlat optimalizálása",
-        description: "Töltsön fel egy referencia dokumentumot, amely egy magas minőségű példát képvisel a generálni kívánt jelentés típusára. A rendszer jelentést generál a jelenlegi vázlata és tudásbázisa használatával, összehasonlítja a referenciával, és javaslatokat tesz a vázlat szakaszok javítására.",
+        description:
+          "Töltsön fel egy referencia dokumentumot, amely egy magas minőségű példát képvisel a generálni kívánt jelentés típusára. A rendszer jelentést generál a jelenlegi vázlata és tudásbázisa használatával, összehasonlítja a referenciával, és javaslatokat tesz a vázlat szakaszok javítására.",
         groundTruthDocument: "Referencia dokumentum",
         customInstructionsLabel: "Egyéni utasítások (Opcionális)",
-        customInstructionsHelperText: "Adjon meg további útmutatást az optimalizálási folyamathoz",
-        customInstructionsPlaceholder: "pl., Koncentráljon a technikai mélység javítására, biztosítsa a megfelelést az adott szabványokkal, stb.",
+        customInstructionsHelperText:
+          "Adjon meg további útmutatást az optimalizálási folyamathoz",
+        customInstructionsPlaceholder:
+          "pl., Koncentráljon a technikai mélység javítására, biztosítsa a megfelelést az adott szabványokkal, stb.",
         characters: "karakter",
         analyzingOutline: "Vázlat elemzése és optimalizálások generálása...",
         cancelAnalysis: "Elemzés megszakítása",
@@ -1141,8 +1227,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         cancel: "Megszakítás",
         optimizing: "Optimalizálás...",
         optimizeOutline: "Vázlat optimalizálása",
-        applyOptimizations: "{{count}} optimalizálás alkalmazása"
-      }
+        applyOptimizations: "{{count}} optimalizálás alkalmazása",
+      },
     },
   }
 
@@ -1202,8 +1288,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "AI scrie...",
         error: "Ne pare rău, ceva a mers prost. Încercați din nou.",
         welcome: "Salut! Cum vă pot ajuta astăzi?",
-        welcomeMessageWithSource: "Selectați o bază de cunoștințe sau încărcați fișiere, apoi puneți o întrebare.",
-        welcomeMessageGeneral: "Întrebați-mă orice! Pentru căutarea în baza de cunoștințe, selectați mai întâi o bază de cunoștințe.",
+        welcomeMessageWithSource:
+          "Selectați o bază de cunoștințe sau încărcați fișiere, apoi puneți o întrebare.",
+        welcomeMessageGeneral:
+          "Întrebați-mă orice! Pentru căutarea în baza de cunoștințe, selectați mai întâi o bază de cunoștințe.",
         knowledgeBaseTableName: "Nume",
         knowledgeBaseTableDescription: "Descriere",
         knowledgeBaseTableSources: "Surse",
@@ -1253,21 +1341,26 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Revizuire Documente",
-        pageDescription: "Revizuiți un document pe baza unei liste de verificare și baze de date de politici definite de utilizator.",
+        pageDescription:
+          "Revizuiți un document pe baza unei liste de verificare și baze de date de politici definite de utilizator.",
         knowledgeBaseTitle: "Baza de Cunoștințe",
         knowledgeBaseDescription: "Faceți clic pentru a selecta",
         checklistTitle: "Lista de Verificare",
         checklistDescription: "Faceți clic pentru a selecta",
         customInstructionsTitle: "Instrucțiuni Personalizate (Opțional)",
-        customInstructionsPlaceholder: "Introduceți instrucțiuni suplimentare care ar trebui luate în considerare la răspunsul la întrebările din lista de verificare...",
-        customInstructionsHelp: "{{count}}/2000 caractere. Aceste instrucțiuni vor fi adăugate la fiecare întrebare în timpul procesării.",
-        searchModeHelp: "Căutarea vectorială oferă rezultate rapide și țintite. Analiza completă a documentului examinează tot conținutul din baza de cunoștințe.",
+        customInstructionsPlaceholder:
+          "Introduceți instrucțiuni suplimentare care ar trebui luate în considerare la răspunsul la întrebările din lista de verificare...",
+        customInstructionsHelp:
+          "{{count}}/2000 caractere. Aceste instrucțiuni vor fi adăugate la fiecare întrebare în timpul procesării.",
+        searchModeHelp:
+          "Căutarea vectorială oferă rezultate rapide și țintite. Analiza completă a documentului examinează tot conținutul din baza de cunoștințe.",
         processingFile: "Se procesează fișierul...",
         processingFiles: "Se procesează fișierele...",
         selectKnowledgeBaseTitle: "Selectați Baza de Cunoștințe",
         selectChecklistTitle: "Selectați Lista de Verificare",
         noResults: "Încă nu există rezultate",
-        uploadDocuments: "Încărcați unul sau mai multe documente pentru revizuire împotriva listei dvs. de verificare selectate",
+        uploadDocuments:
+          "Încărcați unul sau mai multe documente pentru revizuire împotriva listei dvs. de verificare selectate",
         results: "Rezultate",
         downloadReport: "Descărcați Raportul",
         downloadCsv: "Descărcați CSV",
@@ -1276,36 +1369,43 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         reportCopied: "Raport copiat în clipboard!",
         reviewButton: "Revizuire",
         consultDocuments: "Consultați documentele",
-        noChecklistsAvailable: "Nu sunt disponibile liste de verificare. Creați prima listă de verificare pentru a începe.",
+        noChecklistsAvailable:
+          "Nu sunt disponibile liste de verificare. Creați prima listă de verificare pentru a începe.",
         createChecklist: "Creați Lista de Verificare",
         editChecklist: "Editați Lista de Verificare",
         checklistName: "Numele Listei de Verificare",
         checklistNamePlaceholder: "Introduceți numele listei de verificare...",
         checklistDescriptionLabel: "Descriere",
-        checklistDescriptionPlaceholder: "Introduceți descrierea listei de verificare pentru sugestii automate de întrebări (minimum 10 caractere)...",
+        checklistDescriptionPlaceholder:
+          "Introduceți descrierea listei de verificare pentru sugestii automate de întrebări (minimum 10 caractere)...",
         questions: "Întrebări",
         suggest: "Sugerați",
         suggesting: "Se sugerează...",
         optimize: "Optimizați",
-        optimizeTooltip: "O Bază de Cunoștințe trebuie selectată pentru a activa funcția Optimizare",
-        optimizeTooltipEnabled: "Optimizați întrebările pe baza Bazei de Cunoștințe selectate",
-        allUsersToggleTooltip: "Comutați între vizualizarea doar a istoricului dvs. sau a istoricului tuturor utilizatorilor",
+        optimizeTooltip:
+          "O Bază de Cunoștințe trebuie selectată pentru a activa funcția Optimizare",
+        optimizeTooltipEnabled:
+          "Optimizați întrebările pe baza Bazei de Cunoștințe selectate",
+        allUsersToggleTooltip:
+          "Comutați între vizualizarea doar a istoricului dvs. sau a istoricului tuturor utilizatorilor",
         uploadFiles: "Încărcați Fișiere",
         knowledgeBase: "Baza de Cunoștințe",
         referenceDocuments: "Documente de Referință (Opțional)",
         selectKnowledgeBasePlaceholder: "Selectați Baza de Cunoștințe...",
-        noKnowledgeBasesAvailable: "Nu este disponibilă nicio Bază de Cunoștințe. Creați mai întâi una pentru a utiliza această funcție.",
+        noKnowledgeBasesAvailable:
+          "Nu este disponibilă nicio Bază de Cunoștințe. Creați mai întâi una pentru a utiliza această funcție.",
         copyQuestions: "Copiați Întrebările",
         questionsCopied: "Întrebări copiate în clipboard",
         noQuestionsToCopy: "Nu sunt întrebări de copiat",
         failedToCopyQuestions: "Nu s-au putut copia întrebările în clipboard",
         saveChecklist: "Salvați Lista de Verificare",
         cancel: "Anulați",
-        deleteChecklist: "Ștergeți Lista de Verificare"
+        deleteChecklist: "Ștergeți Lista de Verificare",
       },
       compare: {
         title: "Compararea documentelor",
-        subtitle: "Comparați două documente pentru a vedea cum diferă în raport cu o listă de subiecte definită de utilizator.",
+        subtitle:
+          "Comparați două documente pentru a vedea cum diferă în raport cu o listă de subiecte definită de utilizator.",
         selectFirstDocument: "Selectați primul document",
         selectSecondDocument: "Selectați al doilea document",
         pleaseSelect: "Vă rugăm selectați...",
@@ -1314,7 +1414,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         compareDocuments: "Comparați documentele",
         comparison: "Comparație",
         noDocumentsFound: "Nu s-au găsit documente",
-        selectTwoDocuments: "Vă rugăm selectați două documente pentru comparare",
+        selectTwoDocuments:
+          "Vă rugăm selectați două documente pentru comparare",
         loadingComparison: "Se încarcă comparația...",
         topicList: "Lista subiectelor",
         clickToBrowse: "Faceți clic pentru a răsfoi sau trageți aici",
@@ -1328,11 +1429,12 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         moderate: "Moderat",
         deep: "Profund",
         veryDeep: "Foarte profund",
-        editTopicList: "Editați lista de subiecte"
+        editTopicList: "Editați lista de subiecte",
       },
       match: {
         title: "Potrivirea documentelor",
-        subtitle: "Asigurați-vă că intrările din câmpuri se potrivesc în documente de diferite formate.",
+        subtitle:
+          "Asigurați-vă că intrările din câmpuri se potrivesc în documente de diferite formate.",
         selectDocument: "Selectați documentul pentru găsirea potrivirilor",
         pleaseSelect: "Vă rugăm selectați un document...",
         sourceDocument: "Document sursă",
@@ -1340,7 +1442,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         findMatches: "Găsiți potriviri",
         similarityScore: "Scorul similarității",
         noDocumentsFound: "Nu s-au găsit documente",
-        selectDocumentToMatch: "Vă rugăm selectați un document pentru găsirea potrivirilor",
+        selectDocumentToMatch:
+          "Vă rugăm selectați un document pentru găsirea potrivirilor",
         loadingMatches: "Se caută potriviri...",
         noMatchesFound: "Nu s-au găsit documente similare",
         matchResults: "Rezultatele potrivirii",
@@ -1353,13 +1456,14 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         minimumSimilarity: "Similaritate minimă",
         searchDepth: "Profunzimea căutării",
         maxResults: "Numărul maxim de rezultate",
-        editFormTemplate: "Editați șablonul formularului"
+        editFormTemplate: "Editați șablonul formularului",
       },
       knowledgeBases: {
         title: "Gestionarea bazelor de cunoștințe",
         addKnowledgeBase: "Adăugați baza de cunoștințe",
         emptyStateTitle: "Nu aveți încă baze de cunoștințe",
-        emptyStateDescription: "Adăugați o nouă bază de cunoștințe pentru a începe",
+        emptyStateDescription:
+          "Adăugați o nouă bază de cunoștințe pentru a începe",
         tableHeaders: {
           title: "Titlu",
           description: "Descriere",
@@ -1367,31 +1471,33 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           embeddingModel: "Modelul de încorporare",
           dateCreated: "Data creării",
           dateModified: "Data modificării",
-          actions: "Acțiuni"
+          actions: "Acțiuni",
         },
         status: {
           default: "Implicit",
-          na: "Nu este disponibil"
+          na: "Nu este disponibil",
         },
         actions: {
           view: "Vizualizare",
           edit: "Editare",
           delete: "Ștergere",
-          configure: "Configurare"
+          configure: "Configurare",
         },
         deleteModal: {
           title: "Ștergeți baza de cunoștințe",
           buttonText: "Ștergeți baza de cunoștințe",
-          description: "Această bază de cunoștințe va fi ștearsă permanent. Sunteți sigur? Nu veți putea anula această acțiune.",
+          description:
+            "Această bază de cunoștințe va fi ștearsă permanent. Sunteți sigur? Nu veți putea anula această acțiune.",
           confirmButton: "Ștergere",
           cancelButton: "Anulare",
           successMessage: "Baza de cunoștințe a fost ștearsă cu succes",
-          errorMessage: "A apărut o eroare la ștergerea bazei de cunoștințe"
+          errorMessage: "A apărut o eroare la ștergerea bazei de cunoștințe",
         },
         modals: {
           add: {
             title: "Adăugați baza de cunoștințe",
-            description: "Creați o nouă bază de cunoștințe furnizând detalii și încărcând documente mai jos.",
+            description:
+              "Creați o nouă bază de cunoștințe furnizând detalii și încărcând documente mai jos.",
             fields: {
               title: "Titlu",
               titlePlaceholder: "Titlu",
@@ -1400,7 +1506,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
               descriptionPlaceholder: "Descriere",
             },
             fileUpload: {
-              dragAndDrop: "Trageți fișierele aici sau faceți clic pentru a răsfoi",
+              dragAndDrop:
+                "Trageți fișierele aici sau faceți clic pentru a răsfoi",
               dropFiles: "Plasați fișierele aici...",
               selectedFiles: "Fișiere selectate:",
               removeFile: "Eliminați fișierul",
@@ -1427,7 +1534,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
             },
             fileUpload: {
               currentFiles: "Fișiere curente:",
-              dragAndDrop: "Trageți fișierele aici sau faceți clic pentru a răsfoi",
+              dragAndDrop:
+                "Trageți fișierele aici sau faceți clic pentru a răsfoi",
               dropFiles: "Plasați fișierele aici...",
               selectedFiles: "Fișiere selectate:",
               removeFile: "Eliminați fișierul",
@@ -1441,8 +1549,9 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           },
           messages: {
             processing: "Procesare...",
-            pleaseWait: "Vă rugăm așteptați în timp ce procesăm fișierele dumneavoastră..."
-          }
+            pleaseWait:
+              "Vă rugăm așteptați în timp ce procesăm fișierele dumneavoastră...",
+          },
         },
         editCustom: {
           title: "Editați instrucțiunile personalizate",
@@ -1454,24 +1563,28 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           title: "Editați Șablonul de Formular",
           formTemplateName: "Numele Șablonului de Formular",
           formTemplateDescription: "Descrierea Șablonului de Formular",
-          descriptionPlaceholder: "Introduceți descrierea șablonului de formular pentru a sugera automat câmpurile (minimum 10 caractere)...",
+          descriptionPlaceholder:
+            "Introduceți descrierea șablonului de formular pentru a sugera automat câmpurile (minimum 10 caractere)...",
           referenceDocuments: "Documente de Referință (Opțional)",
           uploadFiles: "Încărcați Fișiere",
           knowledgeBase: "Baza de Cunoștințe",
           formFields: "Câmpurile Formularului",
           suggest: "Sugerează",
-          fieldPlaceholder: "Adăugați un nume de câmp (ex. Prenume, Adresă, CNP) sau sugerați din descriere",
+          fieldPlaceholder:
+            "Adăugați un nume de câmp (ex. Prenume, Adresă, CNP) sau sugerați din descriere",
           cancel: "Anulare",
-          updateFormTemplate: "Actualizați Șablonul de Formular"
-        }
+          updateFormTemplate: "Actualizați Șablonul de Formular",
+        },
       },
       optimizeChecklistModal: {
         title: "Optimizează Lista de Verificare",
         customInstructionsLabel: "Instrucțiuni Personalizate (Opțional)",
-        customInstructionsHelperText: "Introduceți instrucțiuni suplimentare care ar trebui luate în considerare la răspunsul la întrebările listei de verificare",
+        customInstructionsHelperText:
+          "Introduceți instrucțiuni suplimentare care ar trebui luate în considerare la răspunsul la întrebările listei de verificare",
         analyzing: "Se analizează...",
         analyzeButton: "Analizează Lista de Verificare",
-        analyzingMessage: "Se analizează lista dvs. de verificare pentru oportunități de optimizare...",
+        analyzingMessage:
+          "Se analizează lista dvs. de verificare pentru oportunități de optimizare...",
         cancelAnalysis: "Anulează Analiza",
         downloading: "Se descarcă...",
         downloadCsv: "Descarcă CSV",
@@ -1488,17 +1601,23 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         optimizationsSelectedText: "optimizări selectate pentru aplicare",
         applying: "Se aplică...",
         applySelectedOptimizations: "Aplică Optimizările Selectate",
-        uploadDocumentsTitle: "Încărcați document(e) care ar trebui acceptate de lista de verificare *",
-        uploadDocumentsHelperText: "Încărcați documente care ar trebui să îndeplinească toate cerințele listei de verificare pentru a ajuta la identificarea întrebărilor care pot fi prea stricte",
-        customInstructionsPlaceholder: "de ex., Luați în considerare că acesta este un studiu pediatric când evaluați cerințele legate de vârstă, Acest protocol este pentru o intervenție cu risc scăzut, etc."
+        uploadDocumentsTitle:
+          "Încărcați document(e) care ar trebui acceptate de lista de verificare *",
+        uploadDocumentsHelperText:
+          "Încărcați documente care ar trebui să îndeplinească toate cerințele listei de verificare pentru a ajuta la identificarea întrebărilor care pot fi prea stricte",
+        customInstructionsPlaceholder:
+          "de ex., Luați în considerare că acesta este un studiu pediatric când evaluați cerințele legate de vârstă, Acest protocol este pentru o intervenție cu risc scăzut, etc.",
       },
       optimizeOutlineModal: {
         title: "Optimizează Schița",
-        description: "Încărcați un document de referință care reprezintă un exemplu de înaltă calitate al tipului de raport pe care doriți să îl generați. Sistemul va genera un raport folosind schița și baza de cunoștințe actuală, îl va compara cu referința și va sugera îmbunătățiri pentru secțiunile schiței.",
+        description:
+          "Încărcați un document de referință care reprezintă un exemplu de înaltă calitate al tipului de raport pe care doriți să îl generați. Sistemul va genera un raport folosind schița și baza de cunoștințe actuală, îl va compara cu referința și va sugera îmbunătățiri pentru secțiunile schiței.",
         groundTruthDocument: "Document de Referință",
         customInstructionsLabel: "Instrucțiuni Personalizate (Opțional)",
-        customInstructionsHelperText: "Furnizați îndrumări suplimentare pentru procesul de optimizare",
-        customInstructionsPlaceholder: "de ex., Concentrați-vă pe îmbunătățirea profunzimii tehnice, asigurați conformitatea cu standarde specifice, etc.",
+        customInstructionsHelperText:
+          "Furnizați îndrumări suplimentare pentru procesul de optimizare",
+        customInstructionsPlaceholder:
+          "de ex., Concentrați-vă pe îmbunătățirea profunzimii tehnice, asigurați conformitatea cu standarde specifice, etc.",
         characters: "caractere",
         analyzingOutline: "Se analizează schița și se generează optimizări...",
         cancelAnalysis: "Anulează Analiza",
@@ -1518,8 +1637,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         cancel: "Anulează",
         optimizing: "Se optimizează...",
         optimizeOutline: "Optimizează Schița",
-        applyOptimizations: "Aplică {{count}} Optimizări"
-      }
+        applyOptimizations: "Aplică {{count}} Optimizări",
+      },
     },
   }
 
@@ -1579,8 +1698,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "ИИ пише...",
         error: "Съжаляваме, нещо се обърка. Опитайте отново.",
         welcome: "Здравейте! Как мога да ви помогна днес?",
-        welcomeMessageWithSource: "Изберете база от знания или качете файлове, след това задайте въпрос.",
-        welcomeMessageGeneral: "Попитайте ме каквото искате! За търсене в базата от знания първо изберете база от знания.",
+        welcomeMessageWithSource:
+          "Изберете база от знания или качете файлове, след това задайте въпрос.",
+        welcomeMessageGeneral:
+          "Попитайте ме каквото искате! За търсене в базата от знания първо изберете база от знания.",
         knowledgeBaseTableName: "Име",
         knowledgeBaseTableDescription: "Описание",
         knowledgeBaseTableSources: "Източници",
@@ -1630,21 +1751,26 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Преглед на документи",
-        pageDescription: "Прегледайте документ въз основа на дефиниран от потребителя списък за проверка и база данни с политики.",
+        pageDescription:
+          "Прегледайте документ въз основа на дефиниран от потребителя списък за проверка и база данни с политики.",
         knowledgeBaseTitle: "База знания",
         knowledgeBaseDescription: "Кликнете за избор",
         checklistTitle: "Списък за проверка",
         checklistDescription: "Кликнете за избор",
         customInstructionsTitle: "Персонализирани инструкции (по избор)",
-        customInstructionsPlaceholder: "Въведете допълнителни инструкции, които да бъдат взети предвид при отговарянето на въпросите от списъка за проверка...",
-        customInstructionsHelp: "{{count}}/2000 знака. Тези инструкции ще бъдат добавени към всеки въпрос по време на обработката.",
-        searchModeHelp: "Векторното търсене предоставя бързи, целенасочени резултати. Анализът на пълния документ изследва цялото съдържание на базата знания.",
+        customInstructionsPlaceholder:
+          "Въведете допълнителни инструкции, които да бъдат взети предвид при отговарянето на въпросите от списъка за проверка...",
+        customInstructionsHelp:
+          "{{count}}/2000 знака. Тези инструкции ще бъдат добавени към всеки въпрос по време на обработката.",
+        searchModeHelp:
+          "Векторното търсене предоставя бързи, целенасочени резултати. Анализът на пълния документ изследва цялото съдържание на базата знания.",
         processingFile: "Обработка на файл...",
         processingFiles: "Обработка на файлове...",
         selectKnowledgeBaseTitle: "Изберете база знания",
         selectChecklistTitle: "Изберете списък за проверка",
         noResults: "Все още няма резултати",
-        uploadDocuments: "Качете един или повече документи за преглед спрямо избрания списък за проверка",
+        uploadDocuments:
+          "Качете един или повече документи за преглед спрямо избрания списък за проверка",
         results: "Резултати",
         downloadReport: "Изтеглете отчет",
         downloadCsv: "Изтеглете CSV",
@@ -1653,36 +1779,43 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         reportCopied: "Отчетът е копиран в клипборда!",
         reviewButton: "Преглед",
         consultDocuments: "Консултирайте документи",
-        noChecklistsAvailable: "Няма налични списъци за проверка. Създайте първия си списък за проверка, за да започнете.",
+        noChecklistsAvailable:
+          "Няма налични списъци за проверка. Създайте първия си списък за проверка, за да започнете.",
         createChecklist: "Създайте списък за проверка",
         editChecklist: "Редактирайте списъка за проверка",
         checklistName: "Име на списъка за проверка",
         checklistNamePlaceholder: "Въведете име на списъка за проверка...",
         checklistDescriptionLabel: "Описание",
-        checklistDescriptionPlaceholder: "Въведете описание на списъка за проверка за автоматични предложения за въпроси (поне 10 знака)...",
+        checklistDescriptionPlaceholder:
+          "Въведете описание на списъка за проверка за автоматични предложения за въпроси (поне 10 знака)...",
         questions: "Въпроси",
         suggest: "Предложете",
         suggesting: "Предлагане...",
         optimize: "Оптимизирайте",
-        optimizeTooltip: "Трябва да бъде избрана база знания, за да се активира функцията за оптимизация",
-        optimizeTooltipEnabled: "Оптимизирайте въпросите въз основа на избраната база знания",
-        allUsersToggleTooltip: "Превключване между показване само на вашата история или историята на всички потребители",
+        optimizeTooltip:
+          "Трябва да бъде избрана база знания, за да се активира функцията за оптимизация",
+        optimizeTooltipEnabled:
+          "Оптимизирайте въпросите въз основа на избраната база знания",
+        allUsersToggleTooltip:
+          "Превключване между показване само на вашата история или историята на всички потребители",
         uploadFiles: "Качете файлове",
         knowledgeBase: "База знания",
         referenceDocuments: "Референтни документи (по избор)",
         selectKnowledgeBasePlaceholder: "Изберете база знания...",
-        noKnowledgeBasesAvailable: "Няма налични бази знания. Първо създайте такава, за да използвате тази функция.",
+        noKnowledgeBasesAvailable:
+          "Няма налични бази знания. Първо създайте такава, за да използвате тази функция.",
         copyQuestions: "Копирайте въпросите",
         questionsCopied: "Въпросите са копирани в клипборда",
         noQuestionsToCopy: "Няма въпроси за копиране",
         failedToCopyQuestions: "Неуспешно копиране на въпросите в клипборда",
         saveChecklist: "Запазете списъка за проверка",
         cancel: "Отказ",
-        deleteChecklist: "Изтрийте списъка за проверка"
+        deleteChecklist: "Изтрийте списъка за проверка",
       },
       compare: {
         title: "Сравняване на документи",
-        subtitle: "Сравнете два документа, за да видите как се различават по отношение на дефиниран от потребителя списък с теми.",
+        subtitle:
+          "Сравнете два документа, за да видите как се различават по отношение на дефиниран от потребителя списък с теми.",
         selectFirstDocument: "Изберете първия документ",
         selectSecondDocument: "Изберете втория документ",
         pleaseSelect: "Моля изберете...",
@@ -1705,11 +1838,12 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         moderate: "Умерено",
         deep: "Дълбоко",
         veryDeep: "Много дълбоко",
-        editTopicList: "Редактирайте списъка с теми"
+        editTopicList: "Редактирайте списъка с теми",
       },
       match: {
         title: "Съвпадение на документи",
-        subtitle: "Уверете се, че записите в полетата съвпадат между документи с различни формати.",
+        subtitle:
+          "Уверете се, че записите в полетата съвпадат между документи с различни формати.",
         selectDocument: "Изберете документ за намиране на съвпадения",
         pleaseSelect: "Моля изберете документ...",
         sourceDocument: "Изходен документ",
@@ -1717,7 +1851,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         findMatches: "Намерете съвпадения",
         similarityScore: "Резултат за сходство",
         noDocumentsFound: "Не са намерени документи",
-        selectDocumentToMatch: "Моля изберете документ за намиране на съвпадения",
+        selectDocumentToMatch:
+          "Моля изберете документ за намиране на съвпадения",
         loadingMatches: "Търсене на съвпадения...",
         noMatchesFound: "Не са намерени подобни документи",
         matchResults: "Резултати от съвпадението",
@@ -1730,7 +1865,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         minimumSimilarity: "Минимално сходство",
         searchDepth: "Дълбочина на търсенето",
         maxResults: "Максимален брой резултати",
-        editFormTemplate: "Редактирайте шаблона на формуляра"
+        editFormTemplate: "Редактирайте шаблона на формуляра",
       },
       knowledgeBases: {
         title: "Управление на бази знания",
@@ -1744,31 +1879,33 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           embeddingModel: "Модел за вграждане",
           dateCreated: "Дата на създаване",
           dateModified: "Дата на промяна",
-          actions: "Действия"
+          actions: "Действия",
         },
         status: {
           default: "По подразбиране",
-          na: "Не е налично"
+          na: "Не е налично",
         },
         actions: {
           view: "Преглед",
           edit: "Редактиране",
           delete: "Изтриване",
-          configure: "Конфигуриране"
+          configure: "Конфигуриране",
         },
         deleteModal: {
           title: "Изтриване на база знания",
           buttonText: "Изтриване на база знания",
-          description: "Тази база знания ще бъде изтрита завинаги. Сигурни ли сте? Няма да можете да отмените това действие.",
+          description:
+            "Тази база знания ще бъде изтрита завинаги. Сигурни ли сте? Няма да можете да отмените това действие.",
           confirmButton: "Изтриване",
           cancelButton: "Отказ",
           successMessage: "Базата знания беше успешно изтрита",
-          errorMessage: "Възникна грешка при изтриването на базата знания"
+          errorMessage: "Възникна грешка при изтриването на базата знания",
         },
         modals: {
           add: {
             title: "Добавяне на база знания",
-            description: "Създайте нова база знания като предоставите подробности и качите документи по-долу.",
+            description:
+              "Създайте нова база знания като предоставите подробности и качите документи по-долу.",
             fields: {
               title: "Заглавие",
               titlePlaceholder: "Заглавие",
@@ -1794,7 +1931,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           },
           edit: {
             title: "Редактиране на база знания",
-            description: "Актуализирайте подробностите за базата знания по-долу.",
+            description:
+              "Актуализирайте подробностите за базата знания по-долу.",
             fields: {
               title: "Заглавие",
               titlePlaceholder: "Заглавие",
@@ -1818,8 +1956,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           },
           messages: {
             processing: "Обработка...",
-            pleaseWait: "Моля изчакайте, докато обработваме вашите файлове..."
-          }
+            pleaseWait: "Моля изчакайте, докато обработваме вашите файлове...",
+          },
         },
         editCustom: {
           title: "Редактиране на персонализирани инструкции",
@@ -1831,24 +1969,28 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           title: "Редактиране на Шаблон на Формуляр",
           formTemplateName: "Име на Шаблона на Формуляра",
           formTemplateDescription: "Описание на Шаблона на Формуляра",
-          descriptionPlaceholder: "Въведете описание на шаблона на формуляра за автоматично предлагане на полета (минимум 10 знака)...",
+          descriptionPlaceholder:
+            "Въведете описание на шаблона на формуляра за автоматично предлагане на полета (минимум 10 знака)...",
           referenceDocuments: "Референтни Документи (Опционално)",
           uploadFiles: "Качване на Файлове",
           knowledgeBase: "База от Знания",
           formFields: "Полета на Формуляра",
           suggest: "Предложи",
-          fieldPlaceholder: "Добавете име на поле (напр. Име, Адрес, ЕГН) или предложете от описанието",
+          fieldPlaceholder:
+            "Добавете име на поле (напр. Име, Адрес, ЕГН) или предложете от описанието",
           cancel: "Отказ",
-          updateFormTemplate: "Актуализиране на Шаблона на Формуляра"
-        }
+          updateFormTemplate: "Актуализиране на Шаблона на Формуляра",
+        },
       },
       optimizeChecklistModal: {
         title: "Оптимизиране на Контролния Списък",
         customInstructionsLabel: "Персонализирани Инструкции (Незадължително)",
-        customInstructionsHelperText: "Въведете допълнителни инструкции, които трябва да бъдат взети предвид при отговарянето на въпросите от контролния списък",
+        customInstructionsHelperText:
+          "Въведете допълнителни инструкции, които трябва да бъдат взети предвид при отговарянето на въпросите от контролния списък",
         analyzing: "Анализира се...",
         analyzeButton: "Анализирай Контролния Списък",
-        analyzingMessage: "Анализира се вашият контролен списък за възможности за оптимизация...",
+        analyzingMessage:
+          "Анализира се вашият контролен списък за възможности за оптимизация...",
         cancelAnalysis: "Отмени Анализа",
         downloading: "Изтегля се...",
         downloadCsv: "Изтегли CSV",
@@ -1865,19 +2007,26 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         optimizationsSelectedText: "оптимизации избрани за прилагане",
         applying: "Прилага се...",
         applySelectedOptimizations: "Приложи Избраните Оптимизации",
-        uploadDocumentsTitle: "Качете документ(и), които трябва да бъдат приети от контролния списък *",
-        uploadDocumentsHelperText: "Качете документи, които трябва да отговарят на всички изисквания на контролния списък, за да помогнете за идентифициране на въпроси, които могат да бъдат твърде строги",
-        customInstructionsPlaceholder: "напр., Вземете предвид, че това е педиатрично изследване при оценяване на възрастови изисквания, Този протокол е за нискорискова интервенция, и т.н."
+        uploadDocumentsTitle:
+          "Качете документ(и), които трябва да бъдат приети от контролния списък *",
+        uploadDocumentsHelperText:
+          "Качете документи, които трябва да отговарят на всички изисквания на контролния списък, за да помогнете за идентифициране на въпроси, които могат да бъдат твърде строги",
+        customInstructionsPlaceholder:
+          "напр., Вземете предвид, че това е педиатрично изследване при оценяване на възрастови изисквания, Този протокол е за нискорискова интервенция, и т.н.",
       },
       optimizeOutlineModal: {
         title: "Оптимизиране на Структурата",
-        description: "Качете референтен документ, който представлява висококачествен пример от типа доклад, който искате да генерирате. Системата ще генерира доклад, използвайки вашата текуща структура и база знания, ще го сравни с референтния и ще предложи подобрения за секциите на структурата.",
+        description:
+          "Качете референтен документ, който представлява висококачествен пример от типа доклад, който искате да генерирате. Системата ще генерира доклад, използвайки вашата текуща структура и база знания, ще го сравни с референтния и ще предложи подобрения за секциите на структурата.",
         groundTruthDocument: "Референтен Документ",
         customInstructionsLabel: "Персонализирани Инструкции (Незадължително)",
-        customInstructionsHelperText: "Предоставете допълнително ръководство за процеса на оптимизация",
-        customInstructionsPlaceholder: "напр., Фокусирайте се върху подобряване на техническата дълбочина, осигурете съответствие с конкретни стандарти, и т.н.",
+        customInstructionsHelperText:
+          "Предоставете допълнително ръководство за процеса на оптимизация",
+        customInstructionsPlaceholder:
+          "напр., Фокусирайте се върху подобряване на техническата дълбочина, осигурете съответствие с конкретни стандарти, и т.н.",
         characters: "символа",
-        analyzingOutline: "Анализира се структурата и генерират се оптимизации...",
+        analyzingOutline:
+          "Анализира се структурата и генерират се оптимизации...",
         cancelAnalysis: "Отмени Анализа",
         optimizationResults: "Резултати от Оптимизацията",
         sectionsNeedOptimization: "секции се нуждаят от оптимизация",
@@ -1895,8 +2044,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         cancel: "Отмени",
         optimizing: "Оптимизира се...",
         optimizeOutline: "Оптимизирай Структурата",
-        applyOptimizations: "Приложи {{count}} Оптимизации"
-      }
+        applyOptimizations: "Приложи {{count}} Оптимизации",
+      },
     },
   }
 
@@ -1956,8 +2105,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "AI piše...",
         error: "Žao nam je, nešto je pošlo po zlu. Pokušajte ponovno.",
         welcome: "Pozdrav! Kako vam mogu pomoći danas?",
-        welcomeMessageWithSource: "Odaberite bazu znanja ili učitajte datoteke, zatim postavite pitanje.",
-        welcomeMessageGeneral: "Pitajte me što god želite! Za pretraživanje baze znanja prvo odaberite bazu znanja.",
+        welcomeMessageWithSource:
+          "Odaberite bazu znanja ili učitajte datoteke, zatim postavite pitanje.",
+        welcomeMessageGeneral:
+          "Pitajte me što god želite! Za pretraživanje baze znanja prvo odaberite bazu znanja.",
         knowledgeBaseTableName: "Naziv",
         knowledgeBaseTableDescription: "Opis",
         knowledgeBaseTableSources: "Izvori",
@@ -2007,21 +2158,26 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Pregled dokumenata",
-        pageDescription: "Pregledajte dokument na temelju korisničke liste provjere i baze podataka politika.",
+        pageDescription:
+          "Pregledajte dokument na temelju korisničke liste provjere i baze podataka politika.",
         knowledgeBaseTitle: "Baza znanja",
         knowledgeBaseDescription: "Kliknite za odabir",
         checklistTitle: "Lista provjere",
         checklistDescription: "Kliknite za odabir",
         customInstructionsTitle: "Prilagođene upute (neobavezno)",
-        customInstructionsPlaceholder: "Unesite dodatne upute koje treba razmotriti pri odgovaranju na pitanja liste provjere...",
-        customInstructionsHelp: "{{count}}/2000 znakova. Ove upute će se dodati svakom pitanju tijekom obrade.",
-        searchModeHelp: "Vektorska pretraga pruža brze, ciljane rezultate. Analiza cijelog dokumenta istražuje sav sadržaj baze znanja.",
+        customInstructionsPlaceholder:
+          "Unesite dodatne upute koje treba razmotriti pri odgovaranju na pitanja liste provjere...",
+        customInstructionsHelp:
+          "{{count}}/2000 znakova. Ove upute će se dodati svakom pitanju tijekom obrade.",
+        searchModeHelp:
+          "Vektorska pretraga pruža brze, ciljane rezultate. Analiza cijelog dokumenta istražuje sav sadržaj baze znanja.",
         processingFile: "Obrada datoteke...",
         processingFiles: "Obrada datoteka...",
         selectKnowledgeBaseTitle: "Odaberite bazu znanja",
         selectChecklistTitle: "Odaberite listu provjere",
         noResults: "Još nema rezultata",
-        uploadDocuments: "Prenesite jedan ili više dokumenata za pregled u odnosu na odabranu listu provjere",
+        uploadDocuments:
+          "Prenesite jedan ili više dokumenata za pregled u odnosu na odabranu listu provjere",
         results: "Rezultati",
         downloadReport: "Preuzmi izvještaj",
         downloadCsv: "Preuzmi CSV",
@@ -2030,36 +2186,43 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         reportCopied: "Izvještaj je kopiran u međuspremnik!",
         reviewButton: "Pregled",
         consultDocuments: "Konzultiraj dokumente",
-        noChecklistsAvailable: "Nema dostupnih lista provjere. Stvorite svoju prvu listu provjere za početak.",
+        noChecklistsAvailable:
+          "Nema dostupnih lista provjere. Stvorite svoju prvu listu provjere za početak.",
         createChecklist: "Stvori listu provjere",
         editChecklist: "Uredi listu provjere",
         checklistName: "Naziv liste provjere",
         checklistNamePlaceholder: "Unesite naziv liste provjere...",
         checklistDescriptionLabel: "Opis",
-        checklistDescriptionPlaceholder: "Unesite opis liste provjere za automatske prijedloge pitanja (najmanje 10 znakova)...",
+        checklistDescriptionPlaceholder:
+          "Unesite opis liste provjere za automatske prijedloge pitanja (najmanje 10 znakova)...",
         questions: "Pitanja",
         suggest: "Predloži",
         suggesting: "Predlažem...",
         optimize: "Optimiziraj",
-        optimizeTooltip: "Baza znanja mora biti odabrana da bi se omogućila funkcija optimizacije",
-        optimizeTooltipEnabled: "Optimiziraj pitanja na temelju odabrane baze znanja",
-        allUsersToggleTooltip: "Prebacuj između prikaza samo tvoje povijesti ili povijesti svih korisnika",
+        optimizeTooltip:
+          "Baza znanja mora biti odabrana da bi se omogućila funkcija optimizacije",
+        optimizeTooltipEnabled:
+          "Optimiziraj pitanja na temelju odabrane baze znanja",
+        allUsersToggleTooltip:
+          "Prebacuj između prikaza samo tvoje povijesti ili povijesti svih korisnika",
         uploadFiles: "Prenesi datoteke",
         knowledgeBase: "Baza znanja",
         referenceDocuments: "Referentni dokumenti (neobavezno)",
         selectKnowledgeBasePlaceholder: "Odaberite bazu znanja...",
-        noKnowledgeBasesAvailable: "Nema dostupnih baza znanja. Prvo stvorite jednu da biste koristili ovu funkciju.",
+        noKnowledgeBasesAvailable:
+          "Nema dostupnih baza znanja. Prvo stvorite jednu da biste koristili ovu funkciju.",
         copyQuestions: "Kopiraj pitanja",
         questionsCopied: "Pitanja su kopirana u međuspremnik",
         noQuestionsToCopy: "Nema pitanja za kopiranje",
         failedToCopyQuestions: "Neuspješno kopiranje pitanja u međuspremnik",
         saveChecklist: "Spremi listu provjere",
         cancel: "Odustani",
-        deleteChecklist: "Obriši listu provjere"
+        deleteChecklist: "Obriši listu provjere",
       },
       compare: {
         title: "Usporedi dokumente",
-        subtitle: "Usporedite dva dokumenta da vidite kako se razlikuju s obzirom na korisnički definirani popis tema.",
+        subtitle:
+          "Usporedite dva dokumenta da vidite kako se razlikuju s obzirom na korisnički definirani popis tema.",
         selectFirstDocument: "Odaberite prvi dokument",
         selectSecondDocument: "Odaberite drugi dokument",
         pleaseSelect: "Molimo odaberite...",
@@ -2082,11 +2245,12 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         moderate: "Umjerena",
         deep: "Duboka",
         veryDeep: "Vrlo duboka",
-        editTopicList: "Uredi listu tema"
+        editTopicList: "Uredi listu tema",
       },
       match: {
         title: "Podudarne dokumente",
-        subtitle: "Osigurajte da se unosi polja podudaraju između dokumenata različitih formata.",
+        subtitle:
+          "Osigurajte da se unosi polja podudaraju između dokumenata različitih formata.",
         selectDocument: "Odaberite dokument za pronalaženje podudaranja",
         pleaseSelect: "Molimo odaberite dokument...",
         sourceDocument: "Izvorni dokument",
@@ -2094,7 +2258,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         findMatches: "Pronađi podudaranja",
         similarityScore: "Rezultat sličnosti",
         noDocumentsFound: "Nisu pronađeni dokumenti",
-        selectDocumentToMatch: "Molimo odaberite dokument za pronalaženje podudaranja",
+        selectDocumentToMatch:
+          "Molimo odaberite dokument za pronalaženje podudaranja",
         loadingMatches: "Traženje podudaranja...",
         noMatchesFound: "Nisu pronađeni slični dokumenti",
         matchResults: "Rezultati podudaranja",
@@ -2107,7 +2272,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         minimumSimilarity: "Minimalna sličnost",
         searchDepth: "Dubina pretraživanja",
         maxResults: "Maksimalan broj rezultata",
-        editFormTemplate: "Uredi predložak obrasca"
+        editFormTemplate: "Uredi predložak obrasca",
       },
       knowledgeBases: {
         title: "Upravljanje bazama znanja",
@@ -2121,31 +2286,33 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           embeddingModel: "Model ugrađivanja",
           dateCreated: "Datum stvaranja",
           dateModified: "Datum izmjene",
-          actions: "Radnje"
+          actions: "Radnje",
         },
         status: {
           default: "Zadano",
-          na: "Nije dostupno"
+          na: "Nije dostupno",
         },
         actions: {
           view: "Pregled",
           edit: "Uredi",
           delete: "Obriši",
-          configure: "Konfiguriraj"
+          configure: "Konfiguriraj",
         },
         deleteModal: {
           title: "Obriši bazu znanja",
           buttonText: "Obriši bazu znanja",
-          description: "Ova baza znanja će biti trajno obrisana. Jeste li sigurni? Nećete moći poništiti ovu radnju.",
+          description:
+            "Ova baza znanja će biti trajno obrisana. Jeste li sigurni? Nećete moći poništiti ovu radnju.",
           confirmButton: "Obriši",
           cancelButton: "Odustani",
           successMessage: "Baza znanja je uspješno obrisana",
-          errorMessage: "Došlo je do greške prilikom brisanja baze znanja"
+          errorMessage: "Došlo je do greške prilikom brisanja baze znanja",
         },
         modals: {
           add: {
             title: "Dodaj bazu znanja",
-            description: "Stvorite novu bazu znanja pružanjem detalja i prenosom dokumenata u nastavku.",
+            description:
+              "Stvorite novu bazu znanja pružanjem detalja i prenosom dokumenata u nastavku.",
             fields: {
               title: "Naslov",
               titlePlaceholder: "Naslov",
@@ -2205,7 +2372,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
             suggest: "Predloži",
             fieldPlaceholder: "Dodaj naziv polja...",
             cancel: "Odustani",
-            updateFormTemplate: "Ažuriraj Predložak Obrasca"
+            updateFormTemplate: "Ažuriraj Predložak Obrasca",
           },
         },
         editCustom: {
@@ -2218,10 +2385,12 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       optimizeChecklistModal: {
         title: "Optimiziraj Kontrolnu Listu",
         customInstructionsLabel: "Prilagođene Upute (Neobavezno)",
-        customInstructionsHelperText: "Unesite dodatne upute koje treba uzeti u obzir pri odgovaranju na pitanja kontrolne liste",
+        customInstructionsHelperText:
+          "Unesite dodatne upute koje treba uzeti u obzir pri odgovaranju na pitanja kontrolne liste",
         analyzing: "Analizira se...",
         analyzeButton: "Analiziraj Kontrolnu Listu",
-        analyzingMessage: "Analizira se vaša kontrolna lista za mogućnosti optimizacije...",
+        analyzingMessage:
+          "Analizira se vaša kontrolna lista za mogućnosti optimizacije...",
         cancelAnalysis: "Otkaži Analizu",
         downloading: "Preuzima se...",
         downloadCsv: "Preuzmi CSV",
@@ -2238,17 +2407,23 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         optimizationsSelectedText: "optimizacija odabrano za primjenu",
         applying: "Primjenjuje se...",
         applySelectedOptimizations: "Primijeni Odabrane Optimizacije",
-        uploadDocumentsTitle: "Prenesite dokument(e) koje kontrolna lista treba prihvatiti *",
-        uploadDocumentsHelperText: "Prenesite dokumente koji trebaju zadovoljiti sve zahtjeve kontrolne liste kako biste pomogli identificirati pitanja koja mogu biti prestriga",
-        customInstructionsPlaceholder: "npr., Uzmite u obzir da je ovo pedijatrijska studija pri procjeni zahtjeva vezanih uz dob, Ovaj protokol je za intervenciju niskog rizika, itd."
+        uploadDocumentsTitle:
+          "Prenesite dokument(e) koje kontrolna lista treba prihvatiti *",
+        uploadDocumentsHelperText:
+          "Prenesite dokumente koji trebaju zadovoljiti sve zahtjeve kontrolne liste kako biste pomogli identificirati pitanja koja mogu biti prestriga",
+        customInstructionsPlaceholder:
+          "npr., Uzmite u obzir da je ovo pedijatrijska studija pri procjeni zahtjeva vezanih uz dob, Ovaj protokol je za intervenciju niskog rizika, itd.",
       },
       optimizeOutlineModal: {
         title: "Optimiziraj Nacrt",
-        description: "Prenesite referentni dokument koji predstavlja visokokvalitetan primjer vrste izvještaja koji želite generirati. Sustav će generirati izvještaj koristeći vaš trenutni nacrt i bazu znanja, usporediti ga s referentnim i predložiti poboljšanja za odjeljke nacrta.",
+        description:
+          "Prenesite referentni dokument koji predstavlja visokokvalitetan primjer vrste izvještaja koji želite generirati. Sustav će generirati izvještaj koristeći vaš trenutni nacrt i bazu znanja, usporediti ga s referentnim i predložiti poboljšanja za odjeljke nacrta.",
         groundTruthDocument: "Referentni Dokument",
         customInstructionsLabel: "Prilagođene Upute (Neobavezno)",
-        customInstructionsHelperText: "Pružite dodatne smjernice za proces optimizacije",
-        customInstructionsPlaceholder: "npr., Fokusirajte se na poboljšanje tehničke dubine, osigurajte usklađenost s određenim standardima, itd.",
+        customInstructionsHelperText:
+          "Pružite dodatne smjernice za proces optimizacije",
+        customInstructionsPlaceholder:
+          "npr., Fokusirajte se na poboljšanje tehničke dubine, osigurajte usklađenost s određenim standardima, itd.",
         characters: "znakova",
         analyzingOutline: "Analizira se nacrt i generiraju optimizacije...",
         cancelAnalysis: "Otkaži Analizu",
@@ -2268,8 +2443,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         cancel: "Otkaži",
         optimizing: "Optimizira se...",
         optimizeOutline: "Optimiziraj Nacrt",
-        applyOptimizations: "Primijeni {{count}} Optimizaciju/a"
-      }
+        applyOptimizations: "Primijeni {{count}} Optimizaciju/a",
+      },
     },
   }
 
@@ -2329,8 +2504,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "АИ куца...",
         error: "Жао нам је, нешто је пошло по злу. Покушајте поново.",
         welcome: "Здраво! Како могу да вам помогнем данас?",
-        welcomeMessageWithSource: "Изаберите базу знања или отпремите фајлове, затим поставите питање.",
-        welcomeMessageGeneral: "Питајте ме било шта! За претрагу базе знања прво изаберите базу знања.",
+        welcomeMessageWithSource:
+          "Изаберите базу знања или отпремите фајлове, затим поставите питање.",
+        welcomeMessageGeneral:
+          "Питајте ме било шта! За претрагу базе знања прво изаберите базу знања.",
         knowledgeBaseTableName: "Назив",
         knowledgeBaseTableDescription: "Опис",
         knowledgeBaseTableSources: "Извори",
@@ -2380,21 +2557,26 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Преглед докумената",
-        pageDescription: "Прегледајте документ на основу корисничке листе провере и базе података политика.",
+        pageDescription:
+          "Прегледајте документ на основу корисничке листе провере и базе података политика.",
         knowledgeBaseTitle: "База знања",
         knowledgeBaseDescription: "Кликните за избор",
         checklistTitle: "Листа провере",
         checklistDescription: "Кликните за избор",
         customInstructionsTitle: "Прилагођена упутства (необавезно)",
-        customInstructionsPlaceholder: "Унесите додатна упутства која треба размотрити при одговарању на питања листе провере...",
-        customInstructionsHelp: "{{count}}/2000 карактера. Ова упутства ће бити додата сваком питању током обраде.",
-        searchModeHelp: "Векторска претрага пружа брзе, циљане резултате. Анализа целог документа истражује сав садржај базе знања.",
+        customInstructionsPlaceholder:
+          "Унесите додатна упутства која треба размотрити при одговарању на питања листе провере...",
+        customInstructionsHelp:
+          "{{count}}/2000 карактера. Ова упутства ће бити додата сваком питању током обраде.",
+        searchModeHelp:
+          "Векторска претрага пружа брзе, циљане резултате. Анализа целог документа истражује сав садржај базе знања.",
         processingFile: "Обрада датотеке...",
         processingFiles: "Обрада датотека...",
         selectKnowledgeBaseTitle: "Изаберите базу знања",
         selectChecklistTitle: "Изаберите листу провере",
         noResults: "Још нема резултата",
-        uploadDocuments: "Отпремите један или више докумената за преглед у односу на изабрану листу провере",
+        uploadDocuments:
+          "Отпремите један или више докумената за преглед у односу на изабрану листу провере",
         results: "Резултати",
         downloadReport: "Преузми извештај",
         downloadCsv: "Преузми CSV",
@@ -2403,36 +2585,43 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         reportCopied: "Извештај је копиран у остављач!",
         reviewButton: "Преглед",
         consultDocuments: "Консултуј документе",
-        noChecklistsAvailable: "Нема доступних листа провере. Направите своју прву листу провере за почетак.",
+        noChecklistsAvailable:
+          "Нема доступних листа провере. Направите своју прву листу провере за почетак.",
         createChecklist: "Направи листу провере",
         editChecklist: "Уреди листу провере",
         checklistName: "Назив листе провере",
         checklistNamePlaceholder: "Унесите назив листе провере...",
         checklistDescriptionLabel: "Опис",
-        checklistDescriptionPlaceholder: "Унесите опис листе провере за аутоматске предлоге питања (најмање 10 карактера)...",
+        checklistDescriptionPlaceholder:
+          "Унесите опис листе провере за аутоматске предлоге питања (најмање 10 карактера)...",
         questions: "Питања",
         suggest: "Предложи",
         suggesting: "Предлажем...",
         optimize: "Оптимизуј",
-        optimizeTooltip: "База знања мора бити изабрана да би се омогућила функција оптимизације",
-        optimizeTooltipEnabled: "Оптимизуј питања на основу изабране базе знања",
-        allUsersToggleTooltip: "Пребацуј између приказа само твоје историје или историје свих корисника",
+        optimizeTooltip:
+          "База знања мора бити изабрана да би се омогућила функција оптимизације",
+        optimizeTooltipEnabled:
+          "Оптимизуј питања на основу изабране базе знања",
+        allUsersToggleTooltip:
+          "Пребацуј између приказа само твоје историје или историје свих корисника",
         uploadFiles: "Отпреми датотеке",
         knowledgeBase: "База знања",
         referenceDocuments: "Референтни документи (необавезно)",
         selectKnowledgeBasePlaceholder: "Изаберите базу знања...",
-        noKnowledgeBasesAvailable: "Нема доступних база знања. Прво направите једну да бисте користили ову функцију.",
+        noKnowledgeBasesAvailable:
+          "Нема доступних база знања. Прво направите једну да бисте користили ову функцију.",
         copyQuestions: "Копирај питања",
         questionsCopied: "Питања су копирана у остављач",
         noQuestionsToCopy: "Нема питања за копирање",
         failedToCopyQuestions: "Неуспешно копирање питања у остављач",
         saveChecklist: "Сачувај листу провере",
         cancel: "Откажи",
-        deleteChecklist: "Обриши листу провере"
+        deleteChecklist: "Обриши листу провере",
       },
       compare: {
         title: "Упореди документе",
-        subtitle: "Упоредите два документа да видите како се разликују у односу на корисничку листу тема.",
+        subtitle:
+          "Упоредите два документа да видите како се разликују у односу на корисничку листу тема.",
         selectFirstDocument: "Изаберите први документ",
         selectSecondDocument: "Изаберите други документ",
         pleaseSelect: "Молимо изаберите...",
@@ -2455,11 +2644,12 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         moderate: "Умерено",
         deep: "Дубоко",
         veryDeep: "Веома дубоко",
-        editTopicList: "Уреди листу тема"
+        editTopicList: "Уреди листу тема",
       },
       match: {
         title: "Подударање докумената",
-        subtitle: "Обезбедите да се уноси поља подударају између докумената различитих формата.",
+        subtitle:
+          "Обезбедите да се уноси поља подударају између докумената различитих формата.",
         selectDocument: "Изаберите документ за проналажење подударања",
         pleaseSelect: "Молимо изаберите документ...",
         sourceDocument: "Изворни документ",
@@ -2467,7 +2657,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         findMatches: "Пронађи подударања",
         similarityScore: "Резултат сличности",
         noDocumentsFound: "Нису пронађени документи",
-        selectDocumentToMatch: "Молимо изаберите документ за проналажење подударања",
+        selectDocumentToMatch:
+          "Молимо изаберите документ за проналажење подударања",
         loadingMatches: "Тражење подударања...",
         noMatchesFound: "Нису пронађени слични документи",
         matchResults: "Резултати подударања",
@@ -2480,7 +2671,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         minimumSimilarity: "Минимална сличност",
         searchDepth: "Дубина претраге",
         maxResults: "Максимални број резултата",
-        editFormTemplate: "Уреди шаблон обрасца"
+        editFormTemplate: "Уреди шаблон обрасца",
       },
       knowledgeBases: {
         title: "Управљање базама знања",
@@ -2494,31 +2685,33 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           embeddingModel: "Модел уграђивања",
           dateCreated: "Датум стварања",
           dateModified: "Датум измене",
-          actions: "Радње"
+          actions: "Радње",
         },
         status: {
           default: "Подразумевано",
-          na: "Није доступно"
+          na: "Није доступно",
         },
         actions: {
           view: "Преглед",
           edit: "Уреди",
           delete: "Обриши",
-          configure: "Конфигуриши"
+          configure: "Конфигуриши",
         },
         deleteModal: {
           title: "Обриши базу знања",
           buttonText: "Обриши базу знања",
-          description: "Ова база знања ће бити трајно обрисана. Да ли сте сигурни? Нећете моћи да поништите ову радњу.",
+          description:
+            "Ова база знања ће бити трајно обрисана. Да ли сте сигурни? Нећете моћи да поништите ову радњу.",
           confirmButton: "Обриши",
           cancelButton: "Откажи",
           successMessage: "База знања је успешно обрисана",
-          errorMessage: "Дошло је до грешке приликом брисања базе знања"
+          errorMessage: "Дошло је до грешке приликом брисања базе знања",
         },
         modals: {
           add: {
             title: "Додај базу знања",
-            description: "Направите нову базу знања пружањем детаља и отпремањем докумената испод.",
+            description:
+              "Направите нову базу знања пружањем детаља и отпремањем докумената испод.",
             fields: {
               title: "Наслов",
               titlePlaceholder: "Наслов",
@@ -2578,7 +2771,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
             suggest: "Предложи",
             fieldPlaceholder: "Додајте назив поља...",
             cancel: "Откажи",
-            updateFormTemplate: "Ажурирај Шаблон Форме"
+            updateFormTemplate: "Ажурирај Шаблон Форме",
           },
         },
         editCustom: {
@@ -2591,10 +2784,12 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       optimizeChecklistModal: {
         title: "Оптимизуј Контролну Листу",
         customInstructionsLabel: "Прилагођена Упутства (Опционо)",
-        customInstructionsHelperText: "Унесите додатна упутства која треба узети у обзир при одговарању на питања контролне листе",
+        customInstructionsHelperText:
+          "Унесите додатна упутства која треба узети у обзир при одговарању на питања контролне листе",
         analyzing: "Анализира се...",
         analyzeButton: "Анализирај Контролну Листу",
-        analyzingMessage: "Анализира се ваша контролна листа за могућности оптимизације...",
+        analyzingMessage:
+          "Анализира се ваша контролна листа за могућности оптимизације...",
         cancelAnalysis: "Откажи Анализу",
         downloading: "Преузима се...",
         downloadCsv: "Преузми CSV",
@@ -2611,17 +2806,23 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         optimizationsSelectedText: "оптимизација одабрано за примену",
         applying: "Примењује се...",
         applySelectedOptimizations: "Примени Одабране Оптимизације",
-        uploadDocumentsTitle: "Пренесите документ(е) које контролна листа треба да прихвати *",
-        uploadDocumentsHelperText: "Пренесите документе који треба да задовоље све захтеве контролне листе како бисте помогли идентификовању питања која могу бити престрога",
-        customInstructionsPlaceholder: "нпр., Узмите у обзир да је ово педијатријска студија при процени захтева везаних за узраст, Овај протокол је за интервенцију ниског ризика, итд."
+        uploadDocumentsTitle:
+          "Пренесите документ(е) које контролна листа треба да прихвати *",
+        uploadDocumentsHelperText:
+          "Пренесите документе који треба да задовоље све захтеве контролне листе како бисте помогли идентификовању питања која могу бити престрога",
+        customInstructionsPlaceholder:
+          "нпр., Узмите у обзир да је ово педијатријска студија при процени захтева везаних за узраст, Овај протокол је за интервенцију ниског ризика, итд.",
       },
       optimizeOutlineModal: {
         title: "Оптимизуј Нацрт",
-        description: "Пренесите референтни документ који представља висококвалитетан пример врсте извештаја који желите да генеришете. Систем ће генерисати извештај користећи ваш тренутни нацрт и базу знања, упоредити га са референтним и предложити побољшања за одељке нацрта.",
+        description:
+          "Пренесите референтни документ који представља висококвалитетан пример врсте извештаја који желите да генеришете. Систем ће генерисати извештај користећи ваш тренутни нацрт и базу знања, упоредити га са референтним и предложити побољшања за одељке нацрта.",
         groundTruthDocument: "Референтни Документ",
         customInstructionsLabel: "Прилагођена Упутства (Опционо)",
-        customInstructionsHelperText: "Пружите додатне смернице за процес оптимизације",
-        customInstructionsPlaceholder: "нпр., Фокусирајте се на побољшање техничке дубине, обезбедите усклађеност са одређеним стандардима, итд.",
+        customInstructionsHelperText:
+          "Пружите додатне смернице за процес оптимизације",
+        customInstructionsPlaceholder:
+          "нпр., Фокусирајте се на побољшање техничке дубине, обезбедите усклађеност са одређеним стандардима, итд.",
         characters: "карактера",
         analyzingOutline: "Анализира се нацрт и генеришу оптимизације...",
         cancelAnalysis: "Откажи Анализу",
@@ -2641,8 +2842,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         cancel: "Откажи",
         optimizing: "Оптимизује се...",
         optimizeOutline: "Оптимизуј Нацрт",
-        applyOptimizations: "Примени {{count}} Оптимизацију/а"
-      }
+        applyOptimizations: "Примени {{count}} Оптимизацију/а",
+      },
     },
   }
 
@@ -2702,8 +2903,10 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         typing: "AI tipka...",
         error: "Oprostite, nekaj je šlo narobe. Poskusite znova.",
         welcome: "Pozdravljeni! Kako vam lahko danes pomagam?",
-        welcomeMessageWithSource: "Izberite bazo znanja ali naložite datoteke, nato postavite vprašanje.",
-        welcomeMessageGeneral: "Vprašajte me karkoli! Za iskanje v bazi znanja najprej izberite bazo znanja.",
+        welcomeMessageWithSource:
+          "Izberite bazo znanja ali naložite datoteke, nato postavite vprašanje.",
+        welcomeMessageGeneral:
+          "Vprašajte me karkoli! Za iskanje v bazi znanja najprej izberite bazo znanja.",
         knowledgeBaseTableName: "Ime",
         knowledgeBaseTableDescription: "Opis",
         knowledgeBaseTableSources: "Viri",
@@ -2753,21 +2956,26 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Pregled dokumentov",
-        pageDescription: "Preglejte dokument na podlagi uporabniško definirane kontrolne liste in baze podatkov politik.",
+        pageDescription:
+          "Preglejte dokument na podlagi uporabniško definirane kontrolne liste in baze podatkov politik.",
         knowledgeBaseTitle: "Baza znanja",
         knowledgeBaseDescription: "Kliknite za izbiro",
         checklistTitle: "Kontrolna lista",
         checklistDescription: "Kliknite za izbiro",
         customInstructionsTitle: "Prilagojene navodila (neobvezno)",
-        customInstructionsPlaceholder: "Vnesite dodatna navodila, ki jih je treba upoštevati pri odgovarjanju na vprašanja kontrolne liste...",
-        customInstructionsHelp: "{{count}}/2000 znakov. Ta navodila bodo dodana vsakemu vprašanju med obdelavo.",
-        searchModeHelp: "Vektorsko iskanje zagotavlja hitre, ciljne rezultate. Analiza celotnega dokumenta raziskuje vso vsebino baze znanja.",
+        customInstructionsPlaceholder:
+          "Vnesite dodatna navodila, ki jih je treba upoštevati pri odgovarjanju na vprašanja kontrolne liste...",
+        customInstructionsHelp:
+          "{{count}}/2000 znakov. Ta navodila bodo dodana vsakemu vprašanju med obdelavo.",
+        searchModeHelp:
+          "Vektorsko iskanje zagotavlja hitre, ciljne rezultate. Analiza celotnega dokumenta raziskuje vso vsebino baze znanja.",
         processingFile: "Obdelava datoteke...",
         processingFiles: "Obdelava datotek...",
         selectKnowledgeBaseTitle: "Izberite bazo znanja",
         selectChecklistTitle: "Izberite kontrolno listo",
         noResults: "Še ni rezultatov",
-        uploadDocuments: "Naložite enega ali več dokumentov za pregled glede na izbrano kontrolno listo",
+        uploadDocuments:
+          "Naložite enega ali več dokumentov za pregled glede na izbrano kontrolno listo",
         results: "Rezultati",
         downloadReport: "Prenesi poročilo",
         downloadCsv: "Prenesi CSV",
@@ -2776,36 +2984,43 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         reportCopied: "Poročilo je kopirano v odložišče!",
         reviewButton: "Pregled",
         consultDocuments: "Posvetuj se z dokumenti",
-        noChecklistsAvailable: "Na voljo ni nobenih kontrolnih list. Ustvarite svojo prvo kontrolno listo za začetek.",
+        noChecklistsAvailable:
+          "Na voljo ni nobenih kontrolnih list. Ustvarite svojo prvo kontrolno listo za začetek.",
         createChecklist: "Ustvari kontrolno listo",
         editChecklist: "Uredi kontrolno listo",
         checklistName: "Ime kontrolne liste",
         checklistNamePlaceholder: "Vnesite ime kontrolne liste...",
         checklistDescriptionLabel: "Opis",
-        checklistDescriptionPlaceholder: "Vnesite opis kontrolne liste za samodejne predloge vprašanj (najmanj 10 znakov)...",
+        checklistDescriptionPlaceholder:
+          "Vnesite opis kontrolne liste za samodejne predloge vprašanj (najmanj 10 znakov)...",
         questions: "Vprašanja",
         suggest: "Predlagaj",
         suggesting: "Predlagam...",
         optimize: "Optimiziraj",
-        optimizeTooltip: "Baza znanja mora biti izbrana za omogočitev funkcije optimizacije",
-        optimizeTooltipEnabled: "Optimiziraj vprašanja na podlagi izbrane baze znanja",
-        allUsersToggleTooltip: "Preklapljaj med prikazom samo tvoje zgodovine ali zgodovine vseh uporabnikov",
+        optimizeTooltip:
+          "Baza znanja mora biti izbrana za omogočitev funkcije optimizacije",
+        optimizeTooltipEnabled:
+          "Optimiziraj vprašanja na podlagi izbrane baze znanja",
+        allUsersToggleTooltip:
+          "Preklapljaj med prikazom samo tvoje zgodovine ali zgodovine vseh uporabnikov",
         uploadFiles: "Naloži datoteke",
         knowledgeBase: "Baza znanja",
         referenceDocuments: "Referenčni dokumenti (neobvezno)",
         selectKnowledgeBasePlaceholder: "Izberite bazo znanja...",
-        noKnowledgeBasesAvailable: "Na voljo ni nobenih baz znanja. Najprej ustvarite eno za uporabo te funkcije.",
+        noKnowledgeBasesAvailable:
+          "Na voljo ni nobenih baz znanja. Najprej ustvarite eno za uporabo te funkcije.",
         copyQuestions: "Kopiraj vprašanja",
         questionsCopied: "Vprašanja so kopirana v odložišče",
         noQuestionsToCopy: "Ni vprašanj za kopiranje",
         failedToCopyQuestions: "Kopiranje vprašanj v odložišče ni uspelo",
         saveChecklist: "Shrani kontrolno listo",
         cancel: "Prekliči",
-        deleteChecklist: "Izbriši kontrolno listo"
+        deleteChecklist: "Izbriši kontrolno listo",
       },
       compare: {
         title: "Primerjaj dokumente",
-        subtitle: "Primerjajte dva dokumenta, da vidite, kako se razlikujeta glede na uporabniško določen seznam tem.",
+        subtitle:
+          "Primerjajte dva dokumenta, da vidite, kako se razlikujeta glede na uporabniško določen seznam tem.",
         selectFirstDocument: "Izberite prvi dokument",
         selectSecondDocument: "Izberite drugi dokument",
         pleaseSelect: "Prosimo izberite...",
@@ -2828,11 +3043,12 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         moderate: "Zmerna",
         deep: "Globoka",
         veryDeep: "Zelo globoka",
-        editTopicList: "Uredi seznam tem"
+        editTopicList: "Uredi seznam tem",
       },
       match: {
         title: "Ujemanje dokumentov",
-        subtitle: "Zagotovite, da se vnosi polj ujemajo med dokumenti različnih formatov.",
+        subtitle:
+          "Zagotovite, da se vnosi polj ujemajo med dokumenti različnih formatov.",
         selectDocument: "Izberite dokument za iskanje ujemanj",
         pleaseSelect: "Prosimo izberite dokument...",
         sourceDocument: "Izvorni dokument",
@@ -2853,7 +3069,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         minimumSimilarity: "Minimalna podobnost",
         searchDepth: "Globina iskanja",
         maxResults: "Največje število rezultatov",
-        editFormTemplate: "Uredi predlogo obrazca"
+        editFormTemplate: "Uredi predlogo obrazca",
       },
       knowledgeBases: {
         title: "Upravljanje baz znanja",
@@ -2867,31 +3083,33 @@ export const addCentralEuropeanTranslations = (resources: any) => {
           embeddingModel: "Model vgradnje",
           dateCreated: "Datum nastanka",
           dateModified: "Datum spremembe",
-          actions: "Dejanja"
+          actions: "Dejanja",
         },
         status: {
           default: "Privzeto",
-          na: "Ni na voljo"
+          na: "Ni na voljo",
         },
         actions: {
           view: "Pregled",
           edit: "Uredi",
           delete: "Izbriši",
-          configure: "Konfiguriraj"
+          configure: "Konfiguriraj",
         },
         deleteModal: {
           title: "Izbriši bazo znanja",
           buttonText: "Izbriši bazo znanja",
-          description: "Ta baza znanja bo trajno izbrisana. Ste prepričani? Tega dejanja ne boste mogli razveljaviti.",
+          description:
+            "Ta baza znanja bo trajno izbrisana. Ste prepričani? Tega dejanja ne boste mogli razveljaviti.",
           confirmButton: "Izbriši",
           cancelButton: "Prekliči",
           successMessage: "Baza znanja je bila uspešno izbrisana",
-          errorMessage: "Pri brisanju baze znanja je prišlo do napake"
+          errorMessage: "Pri brisanju baze znanja je prišlo do napake",
         },
         modals: {
           add: {
             title: "Dodaj bazo znanja",
-            description: "Ustvarite novo bazo znanja z zagotavljanjem podrobnosti in nalaganjem dokumentov spodaj.",
+            description:
+              "Ustvarite novo bazo znanja z zagotavljanjem podrobnosti in nalaganjem dokumentov spodaj.",
             fields: {
               title: "Naslov",
               titlePlaceholder: "Naslov",
@@ -2951,7 +3169,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
             suggest: "Predlagaj",
             fieldPlaceholder: "Dodajte ime polja...",
             cancel: "Prekliči",
-            updateFormTemplate: "Posodobi Predlogo Obrazca"
+            updateFormTemplate: "Posodobi Predlogo Obrazca",
           },
         },
         editCustom: {
@@ -2964,10 +3182,12 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       optimizeChecklistModal: {
         title: "Optimiziraj Kontrolni Seznam",
         customInstructionsLabel: "Prilagojeni Navodila (Neobvezno)",
-        customInstructionsHelperText: "Vnesite dodatna navodila, ki jih je treba upoštevati pri odgovarjanju na vprašanja kontrolnega seznama",
+        customInstructionsHelperText:
+          "Vnesite dodatna navodila, ki jih je treba upoštevati pri odgovarjanju na vprašanja kontrolnega seznama",
         analyzing: "Analiziranje...",
         analyzeButton: "Analiziraj Kontrolni Seznam",
-        analyzingMessage: "Analizira se vaš kontrolni seznam za možnosti optimizacije...",
+        analyzingMessage:
+          "Analizira se vaš kontrolni seznam za možnosti optimizacije...",
         cancelAnalysis: "Prekini Analizo",
         downloading: "Prenašanje...",
         downloadCsv: "Prenesi CSV",
@@ -2984,17 +3204,23 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         optimizationsSelectedText: "optimizacij izbranih za uporabo",
         applying: "Uveljavljanje...",
         applySelectedOptimizations: "Uveljavi Izbrane Optimizacije",
-        uploadDocumentsTitle: "Naložite dokument(e), ki jih mora kontrolni seznam sprejeti *",
-        uploadDocumentsHelperText: "Naložite dokumente, ki morajo izpolnjevati vse zahteve kontrolnega seznama, da pomagate identificirati vprašanja, ki so morda prestroga",
-        customInstructionsPlaceholder: "npr., Upoštevajte, da je to pediatrična študija pri ocenjevanju starostnih zahtev, Ta protokol je za nizko tvegano intervencijo, itd."
+        uploadDocumentsTitle:
+          "Naložite dokument(e), ki jih mora kontrolni seznam sprejeti *",
+        uploadDocumentsHelperText:
+          "Naložite dokumente, ki morajo izpolnjevati vse zahteve kontrolnega seznama, da pomagate identificirati vprašanja, ki so morda prestroga",
+        customInstructionsPlaceholder:
+          "npr., Upoštevajte, da je to pediatrična študija pri ocenjevanju starostnih zahtev, Ta protokol je za nizko tvegano intervencijo, itd.",
       },
       optimizeOutlineModal: {
         title: "Optimiziraj Oris",
-        description: "Naložite referenčni dokument, ki predstavlja visokokakovosten primer vrste poročila, ki ga želite ustvariti. Sistem bo ustvaril poročilo z uporabo vašega trenutnega orisa in baze znanja, ga primerjal z referenčnim in predlagal izboljšave za razdelke orisa.",
+        description:
+          "Naložite referenčni dokument, ki predstavlja visokokakovosten primer vrste poročila, ki ga želite ustvariti. Sistem bo ustvaril poročilo z uporabo vašega trenutnega orisa in baze znanja, ga primerjal z referenčnim in predlagal izboljšave za razdelke orisa.",
         groundTruthDocument: "Referenčni Dokument",
         customInstructionsLabel: "Prilagojeni Navodila (Neobvezno)",
-        customInstructionsHelperText: "Zagotovite dodatne smernice za proces optimizacije",
-        customInstructionsPlaceholder: "npr., Osredotočite se na izboljšanje tehnične globine, zagotovite skladnost s specifičnimi standardi, itd.",
+        customInstructionsHelperText:
+          "Zagotovite dodatne smernice za proces optimizacije",
+        customInstructionsPlaceholder:
+          "npr., Osredotočite se na izboljšanje tehnične globine, zagotovite skladnost s specifičnimi standardi, itd.",
         characters: "znakov",
         analyzingOutline: "Analiziranje orisa in ustvarjanje optimizacij...",
         cancelAnalysis: "Prekini Analizo",
@@ -3014,22 +3240,25 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         cancel: "Prekliči",
         optimizing: "Optimiziranje...",
         optimizeOutline: "Optimiziraj Oris",
-        applyOptimizations: "Uveljavi {{count}} Optimizacij"
-      }
+        applyOptimizations: "Uveljavi {{count}} Optimizacij",
+      },
     },
   }
 
   // Add Model Selection translations to Czech
   resources.cs.common.modelSelection = {
     llmManagement: "Správa LLM",
-    llmDescription: "Nakonfigurujte a spravujte LLM používané pro generování textových odpovědí. Výchozí model bude použit pro všechny operace.",
+    llmDescription:
+      "Nakonfigurujte a spravujte LLM používané pro generování textových odpovědí. Výchozí model bude použit pro všechny operace.",
     addNewLlm: "Přidat nový LLM",
     noLlmsConfigured: "Žádné LLM nejsou nakonfigurovány",
     addNewLlmToGetStarted: "Přidejte nový LLM a začněte",
     embeddingModelManagement: "Správa embedding modelů",
-    embeddingDescription: "Nakonfigurujte a spravujte embedding modely používané pro indexování a vyhledávání ve znalostních bázích. Výchozí model bude použit při vytváření nových znalostních bází, ale každá znalostní báze bude nadále používat svůj původní embedding model, i když se výchozí později změní.",
+    embeddingDescription:
+      "Nakonfigurujte a spravujte embedding modely používané pro indexování a vyhledávání ve znalostních bázích. Výchozí model bude použit při vytváření nových znalostních bází, ale každá znalostní báze bude nadále používat svůj původní embedding model, i když se výchozí později změní.",
     addEmbeddingModel: "Přidat embedding model",
-    noEmbeddingModelsConfigured: "Žádné embedding modely nejsou nakonfigurovány",
+    noEmbeddingModelsConfigured:
+      "Žádné embedding modely nejsou nakonfigurovány",
     addNewEmbeddingModelToGetStarted: "Přidejte nový embedding model a začněte",
     tableHeaders: {
       name: "Název",
@@ -3037,17 +3266,17 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       provider: "Poskytovatel",
       description: "Popis",
       status: "Stav",
-      actions: "Akce"
+      actions: "Akce",
     },
     status: {
       default: "Výchozí",
-      available: "Dostupný"
+      available: "Dostupný",
     },
     actions: {
       setAsDefault: "Nastavit jako výchozí",
       delete: "Smazat",
       validate: "Ověřit",
-      validating: "Ověřování"
+      validating: "Ověřování",
     },
     dialog: {
       addNewLlm: "Přidat nový LLM",
@@ -3057,29 +3286,32 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       modelId: "ID modelu",
       description: "Popis",
       cancel: "Zrušit",
-      addModel: "Přidat model"
+      addModel: "Přidat model",
     },
     placeholders: {
       customModel: "např., Můj vlastní model",
       embeddingModelId: "např., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Popište model, jeho charakteristiky a kdy jej použít"
+      describeModel: "Popište model, jeho charakteristiky a kdy jej použít",
     },
     validation: {
-      pleaseEnterModelId: "Zadejte prosím ID modelu"
-    }
+      pleaseEnterModelId: "Zadejte prosím ID modelu",
+    },
   }
 
   // Add Model Selection translations to Slovak
   resources.sk.common.modelSelection = {
     llmManagement: "Správa LLM",
-    llmDescription: "Nakonfigurujte a spravujte LLM používané na generovanie textových odpovedí. Predvolený model sa použije pre všetky operácie.",
+    llmDescription:
+      "Nakonfigurujte a spravujte LLM používané na generovanie textových odpovedí. Predvolený model sa použije pre všetky operácie.",
     addNewLlm: "Pridať nový LLM",
     noLlmsConfigured: "Žiadne LLM nie sú nakonfigurované",
     addNewLlmToGetStarted: "Pridajte nový LLM a začnite",
     embeddingModelManagement: "Správa embedding modelov",
-    embeddingDescription: "Nakonfigurujte a spravujte embedding modely používané na indexovanie a vyhľadávanie v znalostných bázach. Predvolený model sa použije pri vytváraní nových znalostných báz, ale každá znalostná báza bude naďalej používať svoj pôvodný embedding model, aj keď sa predvolený neskôr zmení.",
+    embeddingDescription:
+      "Nakonfigurujte a spravujte embedding modely používané na indexovanie a vyhľadávanie v znalostných bázach. Predvolený model sa použije pri vytváraní nových znalostných báz, ale každá znalostná báza bude naďalej používať svoj pôvodný embedding model, aj keď sa predvolený neskôr zmení.",
     addEmbeddingModel: "Pridať embedding model",
-    noEmbeddingModelsConfigured: "Žiadne embedding modely nie sú nakonfigurované",
+    noEmbeddingModelsConfigured:
+      "Žiadne embedding modely nie sú nakonfigurované",
     addNewEmbeddingModelToGetStarted: "Pridajte nový embedding model a začnite",
     tableHeaders: {
       name: "Názov",
@@ -3087,17 +3319,17 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       provider: "Poskytovateľ",
       description: "Popis",
       status: "Stav",
-      actions: "Akcie"
+      actions: "Akcie",
     },
     status: {
       default: "Predvolený",
-      available: "Dostupný"
+      available: "Dostupný",
     },
     actions: {
       setAsDefault: "Nastaviť ako predvolený",
       delete: "Odstrániť",
       validate: "Overiť",
-      validating: "Overovanie"
+      validating: "Overovanie",
     },
     dialog: {
       addNewLlm: "Pridať nový LLM",
@@ -3107,47 +3339,50 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       modelId: "ID modelu",
       description: "Popis",
       cancel: "Zrušiť",
-      addModel: "Pridať model"
+      addModel: "Pridať model",
     },
     placeholders: {
       customModel: "napr., Môj vlastný model",
       embeddingModelId: "napr., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Opíšte model, jeho charakteristiky a kedy ho použiť"
+      describeModel: "Opíšte model, jeho charakteristiky a kedy ho použiť",
     },
     validation: {
-      pleaseEnterModelId: "Zadajte prosím ID modelu"
-    }
+      pleaseEnterModelId: "Zadajte prosím ID modelu",
+    },
   }
 
   // Add Model Selection translations to Hungarian
   resources.hu.common.modelSelection = {
     llmManagement: "LLM Kezelés",
-    llmDescription: "Konfigurálja és kezelje a szövegválaszok generálásához használt LLM-eket. Az alapértelmezett modell minden művelethez használva lesz.",
+    llmDescription:
+      "Konfigurálja és kezelje a szövegválaszok generálásához használt LLM-eket. Az alapértelmezett modell minden művelethez használva lesz.",
     addNewLlm: "Új LLM hozzáadása",
     noLlmsConfigured: "Nincsenek konfigurált LLM-ek",
     addNewLlmToGetStarted: "Adjon hozzá egy új LLM-et a kezdéshez",
     embeddingModelManagement: "Beágyazási modell kezelés",
-    embeddingDescription: "Konfigurálja és kezelje a tudásbázis indexeléshez és lekérdezéshez használt beágyazási modelleket. Az alapértelmezett modell az új tudásbázisok létrehozásakor lesz használva, de minden tudásbázis továbbra is az eredeti beágyazási modelljét fogja használni, még akkor is, ha az alapértelmezett később megváltozik.",
+    embeddingDescription:
+      "Konfigurálja és kezelje a tudásbázis indexeléshez és lekérdezéshez használt beágyazási modelleket. Az alapértelmezett modell az új tudásbázisok létrehozásakor lesz használva, de minden tudásbázis továbbra is az eredeti beágyazási modelljét fogja használni, még akkor is, ha az alapértelmezett később megváltozik.",
     addEmbeddingModel: "Beágyazási modell hozzáadása",
     noEmbeddingModelsConfigured: "Nincsenek konfigurált beágyazási modellek",
-    addNewEmbeddingModelToGetStarted: "Adjon hozzá egy új beágyazási modellt a kezdéshez",
+    addNewEmbeddingModelToGetStarted:
+      "Adjon hozzá egy új beágyazási modellt a kezdéshez",
     tableHeaders: {
       name: "Név",
       modelId: "Modell ID",
       provider: "Szolgáltató",
       description: "Leírás",
       status: "Állapot",
-      actions: "Műveletek"
+      actions: "Műveletek",
     },
     status: {
       default: "Alapértelmezett",
-      available: "Elérhető"
+      available: "Elérhető",
     },
     actions: {
       setAsDefault: "Beállítás alapértelmezettként",
       delete: "Törlés",
       validate: "Validálás",
-      validating: "Validálás folyamatban"
+      validating: "Validálás folyamatban",
     },
     dialog: {
       addNewLlm: "Új LLM hozzáadása",
@@ -3157,47 +3392,50 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       modelId: "Modell ID",
       description: "Leírás",
       cancel: "Mégse",
-      addModel: "Modell hozzáadása"
+      addModel: "Modell hozzáadása",
     },
     placeholders: {
       customModel: "pl., Saját egyéni modell",
       embeddingModelId: "pl., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Írja le a modellt, jellemzőit és mikor használja"
+      describeModel: "Írja le a modellt, jellemzőit és mikor használja",
     },
     validation: {
-      pleaseEnterModelId: "Kérjük, adjon meg egy modell ID-t"
-    }
+      pleaseEnterModelId: "Kérjük, adjon meg egy modell ID-t",
+    },
   }
 
   // Add Model Selection translations to Romanian
   resources.ro.common.modelSelection = {
     llmManagement: "Gestionarea LLM",
-    llmDescription: "Configurați și gestionați LLM-urile folosite pentru generarea răspunsurilor text. Modelul implicit va fi folosit pentru toate operațiunile.",
+    llmDescription:
+      "Configurați și gestionați LLM-urile folosite pentru generarea răspunsurilor text. Modelul implicit va fi folosit pentru toate operațiunile.",
     addNewLlm: "Adăugați LLM nou",
     noLlmsConfigured: "Nu sunt configurate LLM-uri",
     addNewLlmToGetStarted: "Adăugați un LLM nou pentru a începe",
     embeddingModelManagement: "Gestionarea modelelor de încorporare",
-    embeddingDescription: "Configurați și gestionați modelele de încorporare folosite pentru indexarea și recuperarea bazelor de cunoștințe. Modelul implicit va fi folosit la crearea de noi baze de cunoștințe, dar fiecare bază de cunoștințe va continua să folosească modelul său original de încorporare chiar dacă implicit se schimbă mai târziu.",
+    embeddingDescription:
+      "Configurați și gestionați modelele de încorporare folosite pentru indexarea și recuperarea bazelor de cunoștințe. Modelul implicit va fi folosit la crearea de noi baze de cunoștințe, dar fiecare bază de cunoștințe va continua să folosească modelul său original de încorporare chiar dacă implicit se schimbă mai târziu.",
     addEmbeddingModel: "Adăugați model de încorporare",
     noEmbeddingModelsConfigured: "Nu sunt configurate modele de încorporare",
-    addNewEmbeddingModelToGetStarted: "Adăugați un model nou de încorporare pentru a începe",
+    addNewEmbeddingModelToGetStarted:
+      "Adăugați un model nou de încorporare pentru a începe",
     tableHeaders: {
       name: "Nume",
       modelId: "ID Model",
       provider: "Furnizor",
       description: "Descriere",
       status: "Stare",
-      actions: "Acțiuni"
+      actions: "Acțiuni",
     },
     status: {
       default: "Implicit",
-      available: "Disponibil"
+      available: "Disponibil",
     },
     actions: {
       setAsDefault: "Setează ca implicit",
       delete: "Șterge",
       validate: "Validează",
-      validating: "Se validează"
+      validating: "Se validează",
     },
     dialog: {
       addNewLlm: "Adăugați LLM nou",
@@ -3207,47 +3445,51 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       modelId: "ID Model",
       description: "Descriere",
       cancel: "Anulează",
-      addModel: "Adăugați model"
+      addModel: "Adăugați model",
     },
     placeholders: {
       customModel: "ex., Modelul meu personalizat",
       embeddingModelId: "ex., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Descrieți modelul, caracteristicile sale și când să îl folosiți"
+      describeModel:
+        "Descrieți modelul, caracteristicile sale și când să îl folosiți",
     },
     validation: {
-      pleaseEnterModelId: "Vă rugăm să introduceți un ID de model"
-    }
+      pleaseEnterModelId: "Vă rugăm să introduceți un ID de model",
+    },
   }
 
   // Add Model Selection translations to Bulgarian
   resources.bg.common.modelSelection = {
     llmManagement: "Управление на LLM",
-    llmDescription: "Конфигурирайте и управлявайте LLM, използвани за генериране на текстови отговори. Моделът по подразбиране ще се използва за всички операции.",
+    llmDescription:
+      "Конфигурирайте и управлявайте LLM, използвани за генериране на текстови отговори. Моделът по подразбиране ще се използва за всички операции.",
     addNewLlm: "Добавяне на нов LLM",
     noLlmsConfigured: "Няма конфигурирани LLM",
     addNewLlmToGetStarted: "Добавете нов LLM, за да започнете",
     embeddingModelManagement: "Управление на модели за вграждане",
-    embeddingDescription: "Конфигурирайте и управлявайте модели за вграждане, използвани за индексиране и извличане на бази от знания. Моделът по подразбиране ще се използва при създаване на нови бази от знания, но всяка база от знания ще продължи да използва своя оригинален модел за вграждане, дори ако по-късно се промени този по подразбиране.",
+    embeddingDescription:
+      "Конфигурирайте и управлявайте модели за вграждане, използвани за индексиране и извличане на бази от знания. Моделът по подразбиране ще се използва при създаване на нови бази от знания, но всяка база от знания ще продължи да използва своя оригинален модел за вграждане, дори ако по-късно се промени този по подразбиране.",
     addEmbeddingModel: "Добавяне на модел за вграждане",
     noEmbeddingModelsConfigured: "Няма конфигурирани модели за вграждане",
-    addNewEmbeddingModelToGetStarted: "Добавете нов модел за вграждане, за да започнете",
+    addNewEmbeddingModelToGetStarted:
+      "Добавете нов модел за вграждане, за да започнете",
     tableHeaders: {
       name: "Име",
       modelId: "ID на модел",
       provider: "Доставчик",
       description: "Описание",
       status: "Състояние",
-      actions: "Действия"
+      actions: "Действия",
     },
     status: {
       default: "По подразбиране",
-      available: "Достъпен"
+      available: "Достъпен",
     },
     actions: {
       setAsDefault: "Задай като по подразбиране",
       delete: "Изтрий",
       validate: "Валидирай",
-      validating: "Валидиране"
+      validating: "Валидиране",
     },
     dialog: {
       addNewLlm: "Добавяне на нов LLM",
@@ -3257,47 +3499,51 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       modelId: "ID на модел",
       description: "Описание",
       cancel: "Отказ",
-      addModel: "Добавяне на модел"
+      addModel: "Добавяне на модел",
     },
     placeholders: {
       customModel: "напр., Моят персонализиран модел",
       embeddingModelId: "напр., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Опишете модела, неговите характеристики и кога да го използвате"
+      describeModel:
+        "Опишете модела, неговите характеристики и кога да го използвате",
     },
     validation: {
-      pleaseEnterModelId: "Моля, въведете ID на модел"
-    }
+      pleaseEnterModelId: "Моля, въведете ID на модел",
+    },
   }
 
   // Add Model Selection translations to Croatian
   resources.hr.common.modelSelection = {
     llmManagement: "Upravljanje LLM-ovima",
-    llmDescription: "Konfigurirajte i upravljajte LLM-ovima koji se koriste za generiranje tekstualnih odgovora. Zadani model će se koristiti za sve operacije.",
+    llmDescription:
+      "Konfigurirajte i upravljajte LLM-ovima koji se koriste za generiranje tekstualnih odgovora. Zadani model će se koristiti za sve operacije.",
     addNewLlm: "Dodaj novi LLM",
     noLlmsConfigured: "Nema konfiguriranih LLM-ova",
     addNewLlmToGetStarted: "Dodajte novi LLM za početak",
     embeddingModelManagement: "Upravljanje modelima ugrađivanja",
-    embeddingDescription: "Konfigurirajte i upravljajte modelima ugrađivanja koji se koriste za indeksiranje i dohvaćanje baza znanja. Zadani model će se koristiti pri stvaranju novih baza znanja, ali svaka baza znanja će i dalje koristiti svoj izvorni model ugrađivanja čak i ako se zadani kasnije promijeni.",
+    embeddingDescription:
+      "Konfigurirajte i upravljajte modelima ugrađivanja koji se koriste za indeksiranje i dohvaćanje baza znanja. Zadani model će se koristiti pri stvaranju novih baza znanja, ali svaka baza znanja će i dalje koristiti svoj izvorni model ugrađivanja čak i ako se zadani kasnije promijeni.",
     addEmbeddingModel: "Dodaj model ugrađivanja",
     noEmbeddingModelsConfigured: "Nema konfiguriranih modela ugrađivanja",
-    addNewEmbeddingModelToGetStarted: "Dodajte novi model ugrađivanja za početak",
+    addNewEmbeddingModelToGetStarted:
+      "Dodajte novi model ugrađivanja za početak",
     tableHeaders: {
       name: "Ime",
       modelId: "ID modela",
       provider: "Pružatelj usluge",
       description: "Opis",
       status: "Status",
-      actions: "Radnje"
+      actions: "Radnje",
     },
     status: {
       default: "Zadani",
-      available: "Dostupan"
+      available: "Dostupan",
     },
     actions: {
       setAsDefault: "Postavi kao zadani",
       delete: "Obriši",
       validate: "Potvrdi",
-      validating: "Potvrđivanje"
+      validating: "Potvrđivanje",
     },
     dialog: {
       addNewLlm: "Dodaj novi LLM",
@@ -3307,47 +3553,51 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       modelId: "ID modela",
       description: "Opis",
       cancel: "Otkaži",
-      addModel: "Dodaj model"
+      addModel: "Dodaj model",
     },
     placeholders: {
       customModel: "npr., Moj prilagođeni model",
       embeddingModelId: "npr., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Opišite model, njegove karakteristike i kada ga koristiti"
+      describeModel:
+        "Opišite model, njegove karakteristike i kada ga koristiti",
     },
     validation: {
-      pleaseEnterModelId: "Molimo unesite ID modela"
-    }
+      pleaseEnterModelId: "Molimo unesite ID modela",
+    },
   }
 
   // Add Model Selection translations to Serbian
   resources.sr.common.modelSelection = {
     llmManagement: "Управљање LLM-овима",
-    llmDescription: "Конфигуришите и управљајте LLM-овима који се користе за генерисање текстуалних одговора. Подразумевани модел ће се користити за све операције.",
+    llmDescription:
+      "Конфигуришите и управљајте LLM-овима који се користе за генерисање текстуалних одговора. Подразумевани модел ће се користити за све операције.",
     addNewLlm: "Додај нови LLM",
     noLlmsConfigured: "Нема конфигурисаних LLM-ова",
     addNewLlmToGetStarted: "Додајте нови LLM за почетак",
     embeddingModelManagement: "Управљање моделима уграђивања",
-    embeddingDescription: "Конфигуришите и управљајте моделима уграђивања који се користе за индексирање и дохватање база знања. Подразумевани модел ће се користити при стварању нових база знања, али свака база знања ће и даље користити свој изворни модел уграђивања чак и ако се подразумевани касније промени.",
+    embeddingDescription:
+      "Конфигуришите и управљајте моделима уграђивања који се користе за индексирање и дохватање база знања. Подразумевани модел ће се користити при стварању нових база знања, али свака база знања ће и даље користити свој изворни модел уграђивања чак и ако се подразумевани касније промени.",
     addEmbeddingModel: "Додај модел уграђивања",
     noEmbeddingModelsConfigured: "Нема конфигурисаних модела уграђивања",
-    addNewEmbeddingModelToGetStarted: "Додајте нови модел уграђивања за почетак",
+    addNewEmbeddingModelToGetStarted:
+      "Додајте нови модел уграђивања за почетак",
     tableHeaders: {
       name: "Име",
       modelId: "ИД модела",
       provider: "Пружалац услуге",
       description: "Опис",
       status: "Статус",
-      actions: "Радње"
+      actions: "Радње",
     },
     status: {
       default: "Подразумевани",
-      available: "Доступан"
+      available: "Доступан",
     },
     actions: {
       setAsDefault: "Постави као подразумевани",
       delete: "Обриши",
       validate: "Потврди",
-      validating: "Потврђивање"
+      validating: "Потврђивање",
     },
     dialog: {
       addNewLlm: "Додај нови LLM",
@@ -3357,47 +3607,50 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       modelId: "ИД модела",
       description: "Опис",
       cancel: "Откажи",
-      addModel: "Додај модел"
+      addModel: "Додај модел",
     },
     placeholders: {
       customModel: "нпр., Мој прилагођени модел",
       embeddingModelId: "нпр., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Опишите модел, његове карактеристике и када га користити"
+      describeModel: "Опишите модел, његове карактеристике и када га користити",
     },
     validation: {
-      pleaseEnterModelId: "Молимо унесите ИД модела"
-    }
+      pleaseEnterModelId: "Молимо унесите ИД модела",
+    },
   }
 
   // Add Model Selection translations to Slovenian
   resources.sl.common.modelSelection = {
     llmManagement: "Upravljanje LLM",
-    llmDescription: "Konfigurirajte in upravljajte LLM, ki se uporabljajo za generiranje besedilnih odgovorov. Privzeti model bo uporabljen za vse operacije.",
+    llmDescription:
+      "Konfigurirajte in upravljajte LLM, ki se uporabljajo za generiranje besedilnih odgovorov. Privzeti model bo uporabljen za vse operacije.",
     addNewLlm: "Dodaj nov LLM",
     noLlmsConfigured: "Ni konfiguriranih LLM-jev",
     addNewLlmToGetStarted: "Dodajte nov LLM za začetek",
     embeddingModelManagement: "Upravljanje modelov vgrajevanja",
-    embeddingDescription: "Konfigurirajte in upravljajte modele vgrajevanja, ki se uporabljajo za indeksiranje in pridobivanje baz znanja. Privzeti model bo uporabljen pri ustvarjanju novih baz znanja, vendar bo vsaka baza znanja še naprej uporabljala svoj izvirni model vgrajevanja, tudi če se privzeti pozneje spremeni.",
+    embeddingDescription:
+      "Konfigurirajte in upravljajte modele vgrajevanja, ki se uporabljajo za indeksiranje in pridobivanje baz znanja. Privzeti model bo uporabljen pri ustvarjanju novih baz znanja, vendar bo vsaka baza znanja še naprej uporabljala svoj izvirni model vgrajevanja, tudi če se privzeti pozneje spremeni.",
     addEmbeddingModel: "Dodaj model vgrajevanja",
     noEmbeddingModelsConfigured: "Ni konfiguriranih modelov vgrajevanja",
-    addNewEmbeddingModelToGetStarted: "Dodajte nov model vgrajevanja za začetek",
+    addNewEmbeddingModelToGetStarted:
+      "Dodajte nov model vgrajevanja za začetek",
     tableHeaders: {
       name: "Ime",
       modelId: "ID modela",
       provider: "Ponudnik",
       description: "Opis",
       status: "Status",
-      actions: "Dejanja"
+      actions: "Dejanja",
     },
     status: {
       default: "Privzeti",
-      available: "Na voljo"
+      available: "Na voljo",
     },
     actions: {
       setAsDefault: "Nastavi kot privzeti",
       delete: "Izbriši",
       validate: "Potrdi",
-      validating: "Potrjevanje"
+      validating: "Potrjevanje",
     },
     dialog: {
       addNewLlm: "Dodaj nov LLM",
@@ -3407,16 +3660,16 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       modelId: "ID modela",
       description: "Opis",
       cancel: "Prekliči",
-      addModel: "Dodaj model"
+      addModel: "Dodaj model",
     },
     placeholders: {
       customModel: "npr., Moj prilagojen model",
       embeddingModelId: "npr., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Opišite model, njegove značilnosti in kdaj ga uporabiti"
+      describeModel: "Opišite model, njegove značilnosti in kdaj ga uporabiti",
     },
     validation: {
-      pleaseEnterModelId: "Prosimo, vnesite ID modela"
-    }
+      pleaseEnterModelId: "Prosimo, vnesite ID modela",
+    },
   }
 
   // Add Knowledge Bases translations for Central European languages
@@ -3426,7 +3679,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
     resources.cs.common.knowledgeBases = {
       title: "Znalostní báze",
       addKnowledgeBase: "Přidat znalostní bázi",
-      description: "Spravujte a organizujte své dokumenty do znalostních bází pro efektivní AI-podporované interakce.",
+      description:
+        "Spravujte a organizujte své dokumenty do znalostních bází pro efektivní AI-podporované interakce.",
       createNew: "Vytvořit novou znalostní bázi",
       noKnowledgeBases: "Zatím nebyla vytvořena žádná znalostní báze",
       getStarted: "Vytvořte svou první znalostní bázi a začněte",
@@ -3435,13 +3689,13 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Popis",
         documents: "Dokumenty",
         createdAt: "Vytvořeno",
-        actions: "Akce"
+        actions: "Akce",
       },
       actions: {
         view: "Zobrazit",
         edit: "Upravit",
         delete: "Smazat",
-        configure: "Konfigurovat"
+        configure: "Konfigurovat",
       },
       dialog: {
         createNew: "Vytvořit novou znalostní bázi",
@@ -3450,15 +3704,16 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Popis",
         cancel: "Zrušit",
         create: "Vytvořit",
-        save: "Uložit"
+        save: "Uložit",
       },
       placeholders: {
         knowledgeBaseName: "např., Firemní zásady",
-        knowledgeBaseDescription: "Popište, co tato znalostní báze obsahuje a její účel"
+        knowledgeBaseDescription:
+          "Popište, co tato znalostní báze obsahuje a její účel",
       },
       validation: {
-        pleaseEnterName: "Zadejte prosím název znalostní báze"
-      }
+        pleaseEnterName: "Zadejte prosím název znalostní báze",
+      },
     }
   }
 
@@ -3467,7 +3722,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
     resources.sk.common.knowledgeBases = {
       title: "Znalostné bázy",
       addKnowledgeBase: "Pridať znalostnú bázu",
-      description: "Spravujte a organizujte svoje dokumenty do znalostných báz pre efektívne AI-podporované interakcie.",
+      description:
+        "Spravujte a organizujte svoje dokumenty do znalostných báz pre efektívne AI-podporované interakcie.",
       createNew: "Vytvoriť novú znalostnú bázu",
       noKnowledgeBases: "Zatiaľ nebola vytvorená žiadna znalostná báza",
       getStarted: "Vytvorte svoju prvú znalostnú bázu a začnite",
@@ -3476,13 +3732,13 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Popis",
         documents: "Dokumenty",
         createdAt: "Vytvorené",
-        actions: "Akcie"
+        actions: "Akcie",
       },
       actions: {
         view: "Zobraziť",
         edit: "Upraviť",
         delete: "Zmazať",
-        configure: "Konfigurovať"
+        configure: "Konfigurovať",
       },
       dialog: {
         createNew: "Vytvoriť novú znalostnú bázu",
@@ -3491,15 +3747,16 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Popis",
         cancel: "Zrušiť",
         create: "Vytvoriť",
-        save: "Uložiť"
+        save: "Uložiť",
       },
       placeholders: {
         knowledgeBaseName: "napr., Firemné zásady",
-        knowledgeBaseDescription: "Opíšte, čo táto znalostná báza obsahuje a jej účel"
+        knowledgeBaseDescription:
+          "Opíšte, čo táto znalostná báza obsahuje a jej účel",
       },
       validation: {
-        pleaseEnterName: "Zadajte prosím názov znalostnej bázy"
-      }
+        pleaseEnterName: "Zadajte prosím názov znalostnej bázy",
+      },
     }
   }
 
@@ -3508,7 +3765,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
     resources.hu.common.knowledgeBases = {
       title: "Tudásbázisok",
       addKnowledgeBase: "Tudásbázis hozzáadása",
-      description: "Kezelje és rendezze dokumentumait tudásbázisokban a hatékony AI-támogatott interakciókhoz.",
+      description:
+        "Kezelje és rendezze dokumentumait tudásbázisokban a hatékony AI-támogatott interakciókhoz.",
       createNew: "Új tudásbázis létrehozása",
       noKnowledgeBases: "Még nem lett tudásbázis létrehozva",
       getStarted: "Hozza létre az első tudásbázisát a kezdéshez",
@@ -3517,13 +3775,13 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Leírás",
         documents: "Dokumentumok",
         createdAt: "Létrehozva",
-        actions: "Műveletek"
+        actions: "Műveletek",
       },
       actions: {
         view: "Megtekintés",
         edit: "Szerkesztés",
         delete: "Törlés",
-        configure: "Konfigurálás"
+        configure: "Konfigurálás",
       },
       dialog: {
         createNew: "Új tudásbázis létrehozása",
@@ -3532,15 +3790,16 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Leírás",
         cancel: "Mégse",
         create: "Létrehozás",
-        save: "Mentés"
+        save: "Mentés",
       },
       placeholders: {
         knowledgeBaseName: "pl., Vállalati irányelvek",
-        knowledgeBaseDescription: "Írja le, mit tartalmaz ez a tudásbázis és mi a célja"
+        knowledgeBaseDescription:
+          "Írja le, mit tartalmaz ez a tudásbázis és mi a célja",
       },
       validation: {
-        pleaseEnterName: "Kérjük, adjon meg egy nevet a tudásbázisnak"
-      }
+        pleaseEnterName: "Kérjük, adjon meg egy nevet a tudásbázisnak",
+      },
     }
   }
 
@@ -3549,7 +3808,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
     resources.ro.common.knowledgeBases = {
       title: "Baze de cunoștințe",
       addKnowledgeBase: "Adăugați bază de cunoștințe",
-      description: "Gestionați și organizați documentele dvs. în baze de cunoștințe pentru interacțiuni eficiente asistate de AI.",
+      description:
+        "Gestionați și organizați documentele dvs. în baze de cunoștințe pentru interacțiuni eficiente asistate de AI.",
       createNew: "Creați o nouă bază de cunoștințe",
       noKnowledgeBases: "Încă nu a fost creată nicio bază de cunoștințe",
       getStarted: "Creați prima dvs. bază de cunoștințe pentru a începe",
@@ -3558,13 +3818,13 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Descriere",
         documents: "Documente",
         createdAt: "Creat",
-        actions: "Acțiuni"
+        actions: "Acțiuni",
       },
       actions: {
         view: "Vizualizare",
         edit: "Editare",
         delete: "Ștergere",
-        configure: "Configurare"
+        configure: "Configurare",
       },
       dialog: {
         createNew: "Creați o nouă bază de cunoștințe",
@@ -3573,15 +3833,17 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Descriere",
         cancel: "Anulare",
         create: "Creare",
-        save: "Salvare"
+        save: "Salvare",
       },
       placeholders: {
         knowledgeBaseName: "ex., Politici companiei",
-        knowledgeBaseDescription: "Descrieți ce conține această bază de cunoștințe și scopul său"
+        knowledgeBaseDescription:
+          "Descrieți ce conține această bază de cunoștințe și scopul său",
       },
       validation: {
-        pleaseEnterName: "Vă rugăm să introduceți un nume pentru baza de cunoștințe"
-      }
+        pleaseEnterName:
+          "Vă rugăm să introduceți un nume pentru baza de cunoștințe",
+      },
     }
   }
 
@@ -3590,7 +3852,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
     resources.bg.common.knowledgeBases = {
       title: "Бази знания",
       addKnowledgeBase: "Добавете база знания",
-      description: "Управлявайте и организирайте документите си в бази знания за ефективни AI-подпомогнати взаимодействия.",
+      description:
+        "Управлявайте и организирайте документите си в бази знания за ефективни AI-подпомогнати взаимодействия.",
       createNew: "Създайте нова база знания",
       noKnowledgeBases: "Все още не са създадени бази знания",
       getStarted: "Създайте първата си база знания, за да започнете",
@@ -3599,13 +3862,13 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Описание",
         documents: "Документи",
         createdAt: "Създадено",
-        actions: "Действия"
+        actions: "Действия",
       },
       actions: {
         view: "Преглед",
         edit: "Редактиране",
         delete: "Изтриване",
-        configure: "Конфигуриране"
+        configure: "Конфигуриране",
       },
       dialog: {
         createNew: "Създайте нова база знания",
@@ -3614,15 +3877,16 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Описание",
         cancel: "Отказ",
         create: "Създаване",
-        save: "Запазване"
+        save: "Запазване",
       },
       placeholders: {
         knowledgeBaseName: "напр., Политики на компанията",
-        knowledgeBaseDescription: "Опишете какво съдържа тази база знания и нейната цел"
+        knowledgeBaseDescription:
+          "Опишете какво съдържа тази база знания и нейната цел",
       },
       validation: {
-        pleaseEnterName: "Моля, въведете име за базата знания"
-      }
+        pleaseEnterName: "Моля, въведете име за базата знания",
+      },
     }
   }
 
@@ -3631,7 +3895,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
     resources.hr.common.knowledgeBases = {
       title: "Baze znanja",
       addKnowledgeBase: "Dodajte bazu znanja",
-      description: "Upravljajte i organizirajte svoje dokumente u bazama znanja za učinkovite AI-podržane interakcije.",
+      description:
+        "Upravljajte i organizirajte svoje dokumente u bazama znanja za učinkovite AI-podržane interakcije.",
       createNew: "Stvorite novu bazu znanja",
       noKnowledgeBases: "Još nisu stvorene baze znanja",
       getStarted: "Stvorite svoju prvu bazu znanja za početak",
@@ -3640,13 +3905,13 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Opis",
         documents: "Dokumenti",
         createdAt: "Stvoreno",
-        actions: "Radnje"
+        actions: "Radnje",
       },
       actions: {
         view: "Prikaži",
         edit: "Uredi",
         delete: "Obriši",
-        configure: "Konfiguriraj"
+        configure: "Konfiguriraj",
       },
       dialog: {
         createNew: "Stvorite novu bazu znanja",
@@ -3655,15 +3920,16 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Opis",
         cancel: "Otkaži",
         create: "Stvori",
-        save: "Spremi"
+        save: "Spremi",
       },
       placeholders: {
         knowledgeBaseName: "npr., Pravila tvrtke",
-        knowledgeBaseDescription: "Opišite što sadrži ova baza znanja i njezinu svrhu"
+        knowledgeBaseDescription:
+          "Opišite što sadrži ova baza znanja i njezinu svrhu",
       },
       validation: {
-        pleaseEnterName: "Molimo unesite ime za bazu znanja"
-      }
+        pleaseEnterName: "Molimo unesite ime za bazu znanja",
+      },
     }
   }
 
@@ -3672,7 +3938,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
     resources.sr.common.knowledgeBases = {
       title: "Базе знања",
       addKnowledgeBase: "Додајте базу знања",
-      description: "Управљајте и организујте своје документе у базама знања за ефикасне АИ-подржане интеракције.",
+      description:
+        "Управљајте и организујте своје документе у базама знања за ефикасне АИ-подржане интеракције.",
       createNew: "Направите нову базу знања",
       noKnowledgeBases: "Још увек нису направљене базе знања",
       getStarted: "Направите своју прву базу знања да почнете",
@@ -3681,13 +3948,13 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Опис",
         documents: "Документи",
         createdAt: "Направљено",
-        actions: "Радње"
+        actions: "Радње",
       },
       actions: {
         view: "Прикажи",
         edit: "Уреди",
         delete: "Обриши",
-        configure: "Конфигуриши"
+        configure: "Конфигуриши",
       },
       dialog: {
         createNew: "Направите нову базу знања",
@@ -3696,15 +3963,16 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Опис",
         cancel: "Откажи",
         create: "Направи",
-        save: "Сачувај"
+        save: "Сачувај",
       },
       placeholders: {
         knowledgeBaseName: "нпр., Правила компаније",
-        knowledgeBaseDescription: "Опишите шта садржи ова база знања и њену сврху"
+        knowledgeBaseDescription:
+          "Опишите шта садржи ова база знања и њену сврху",
       },
       validation: {
-        pleaseEnterName: "Молимо унесите име за базу знања"
-      }
+        pleaseEnterName: "Молимо унесите име за базу знања",
+      },
     }
   }
 
@@ -3713,7 +3981,8 @@ export const addCentralEuropeanTranslations = (resources: any) => {
     resources.sl.common.knowledgeBases = {
       title: "Baze znanja",
       addKnowledgeBase: "Dodajte bazo znanja",
-      description: "Upravljajte in organizirajte svoje dokumente v bazah znanja za učinkovite AI-podprte interakcije.",
+      description:
+        "Upravljajte in organizirajte svoje dokumente v bazah znanja za učinkovite AI-podprte interakcije.",
       createNew: "Ustvarite novo bazo znanja",
       noKnowledgeBases: "Še niso bile ustvarjene baze znanja",
       getStarted: "Ustvarite svojo prvo bazo znanja za začetek",
@@ -3722,13 +3991,13 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Opis",
         documents: "Dokumenti",
         createdAt: "Ustvarjeno",
-        actions: "Dejanja"
+        actions: "Dejanja",
       },
       actions: {
         view: "Prikaži",
         edit: "Uredi",
         delete: "Izbriši",
-        configure: "Konfiguriraj"
+        configure: "Konfiguriraj",
       },
       dialog: {
         createNew: "Ustvarite novo bazo znanja",
@@ -3737,15 +4006,16 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         description: "Opis",
         cancel: "Prekliči",
         create: "Ustvari",
-        save: "Shrani"
+        save: "Shrani",
       },
       placeholders: {
         knowledgeBaseName: "npr., Pravila podjetja",
-        knowledgeBaseDescription: "Opišite, kaj vsebuje ta baza znanja in njen namen"
+        knowledgeBaseDescription:
+          "Opišite, kaj vsebuje ta baza znanja in njen namen",
       },
       validation: {
-        pleaseEnterName: "Prosimo, vnesite ime za bazo znanja"
-      }
+        pleaseEnterName: "Prosimo, vnesite ime za bazo znanja",
+      },
     }
   }
 
@@ -3756,7 +4026,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         review: "Überprüfen",
         generate: "Generieren",
         compare: "Vergleichen",
-        match: "Zuordnen"
+        match: "Zuordnen",
       },
       metadata: {
         questions: "Fragen",
@@ -3766,22 +4036,23 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         documents: "Dokumente",
         documents_one: "Dokument",
         digitized: "digitalisiert",
-        handwritten: "handgeschrieben"
+        handwritten: "handgeschrieben",
       },
       feedback: {
         positive: "Positives Feedback für dieses Ergebnis geben",
         negative: "Negatives Feedback für dieses Ergebnis geben",
-        hasFeedback: "Dieses Ergebnis hat Feedback"
+        hasFeedback: "Dieses Ergebnis hat Feedback",
       },
       emptyMessages: {
         review: "Noch keine Überprüfungshistorie",
         generate: "Noch keine Generierungshistorie",
         compare: "Noch keine Vergleichshistorie",
-        match: "Noch keine Zuordnungshistorie"
+        match: "Noch keine Zuordnungshistorie",
       },
-      deleteConfirmation: "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
+      deleteConfirmation:
+        "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
       history: "Historie",
-      allUsers: "Alle Benutzer"
+      allUsers: "Alle Benutzer",
     }
   }
 
@@ -3791,7 +4062,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         review: "Réviser",
         generate: "Générer",
         compare: "Comparer",
-        match: "Correspondre"
+        match: "Correspondre",
       },
       metadata: {
         questions: "questions",
@@ -3801,22 +4072,22 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         documents: "documents",
         documents_one: "document",
         digitized: "numérisé",
-        handwritten: "manuscrit"
+        handwritten: "manuscrit",
       },
       feedback: {
         positive: "Donner un retour positif pour ce résultat",
         negative: "Donner un retour négatif pour ce résultat",
-        hasFeedback: "Ce résultat a un retour"
+        hasFeedback: "Ce résultat a un retour",
       },
       emptyMessages: {
         review: "Aucun historique de révision encore",
         generate: "Aucun historique de génération encore",
         compare: "Aucun historique de comparaison encore",
-        match: "Aucun historique de correspondance encore"
+        match: "Aucun historique de correspondance encore",
       },
       deleteConfirmation: "Êtes-vous sûr de vouloir supprimer cet élément?",
       history: "Historique",
-      allUsers: "Tous les utilisateurs"
+      allUsers: "Tous les utilisateurs",
     }
   }
 
@@ -3826,7 +4097,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         review: "Rivedi",
         generate: "Genera",
         compare: "Confronta",
-        match: "Abbina"
+        match: "Abbina",
       },
       metadata: {
         questions: "domande",
@@ -3836,22 +4107,22 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         documents: "documenti",
         documents_one: "documento",
         digitized: "digitalizzato",
-        handwritten: "scritto a mano"
+        handwritten: "scritto a mano",
       },
       feedback: {
         positive: "Dai feedback positivo per questo risultato",
         negative: "Dai feedback negativo per questo risultato",
-        hasFeedback: "Questo risultato ha feedback"
+        hasFeedback: "Questo risultato ha feedback",
       },
       emptyMessages: {
         review: "Nessuna cronologia di revisione ancora",
         generate: "Nessuna cronologia di generazione ancora",
         compare: "Nessuna cronologia di confronto ancora",
-        match: "Nessuna cronologia di abbinamento ancora"
+        match: "Nessuna cronologia di abbinamento ancora",
       },
       deleteConfirmation: "Sei sicuro di voler eliminare questo elemento?",
       history: "Cronologia",
-      allUsers: "Tutti gli utenti"
+      allUsers: "Tutti gli utenti",
     }
   }
 
@@ -3861,7 +4132,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         review: "Revisar",
         generate: "Generar",
         compare: "Comparar",
-        match: "Coincidir"
+        match: "Coincidir",
       },
       metadata: {
         questions: "preguntas",
@@ -3871,22 +4142,23 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         documents: "documentos",
         documents_one: "documento",
         digitized: "digitalizado",
-        handwritten: "manuscrito"
+        handwritten: "manuscrito",
       },
       feedback: {
         positive: "Dar retroalimentación positiva para este resultado",
         negative: "Dar retroalimentación negativa para este resultado",
-        hasFeedback: "Este resultado tiene retroalimentación"
+        hasFeedback: "Este resultado tiene retroalimentación",
       },
       emptyMessages: {
         review: "Aún no hay historial de revisión",
         generate: "Aún no hay historial de generación",
         compare: "Aún no hay historial de comparación",
-        match: "Aún no hay historial de coincidencias"
+        match: "Aún no hay historial de coincidencias",
       },
-      deleteConfirmation: "¿Estás seguro de que quieres eliminar este elemento?",
+      deleteConfirmation:
+        "¿Estás seguro de que quieres eliminar este elemento?",
       history: "Historial",
-      allUsers: "Todos los usuarios"
+      allUsers: "Todos los usuarios",
     }
   }
 
@@ -3896,7 +4168,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         review: "Revisar",
         generate: "Gerar",
         compare: "Comparar",
-        match: "Corresponder"
+        match: "Corresponder",
       },
       metadata: {
         questions: "perguntas",
@@ -3906,22 +4178,22 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         documents: "documentos",
         documents_one: "documento",
         digitized: "digitalizado",
-        handwritten: "manuscrito"
+        handwritten: "manuscrito",
       },
       feedback: {
         positive: "Dar feedback positivo para este resultado",
         negative: "Dar feedback negativo para este resultado",
-        hasFeedback: "Este resultado tem feedback"
+        hasFeedback: "Este resultado tem feedback",
       },
       emptyMessages: {
         review: "Ainda não há histórico de revisão",
         generate: "Ainda não há histórico de geração",
         compare: "Ainda não há histórico de comparação",
-        match: "Ainda não há histórico de correspondência"
+        match: "Ainda não há histórico de correspondência",
       },
       deleteConfirmation: "Tem certeza de que deseja excluir este item?",
       history: "Histórico",
-      allUsers: "Todos os usuários"
+      allUsers: "Todos os usuários",
     }
   }
 
@@ -3931,7 +4203,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         review: "Beoordelen",
         generate: "Genereren",
         compare: "Vergelijken",
-        match: "Matchen"
+        match: "Matchen",
       },
       metadata: {
         questions: "vragen",
@@ -3941,22 +4213,22 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         documents: "documenten",
         documents_one: "document",
         digitized: "gedigitaliseerd",
-        handwritten: "handgeschreven"
+        handwritten: "handgeschreven",
       },
       feedback: {
         positive: "Geef positieve feedback voor dit resultaat",
         negative: "Geef negatieve feedback voor dit resultaat",
-        hasFeedback: "Dit resultaat heeft feedback"
+        hasFeedback: "Dit resultaat heeft feedback",
       },
       emptyMessages: {
         review: "Nog geen beoordelingsgeschiedenis",
         generate: "Nog geen genereringsgeschiedenis",
         compare: "Nog geen vergelijkingsgeschiedenis",
-        match: "Nog geen matchgeschiedenis"
+        match: "Nog geen matchgeschiedenis",
       },
       deleteConfirmation: "Weet je zeker dat je dit item wilt verwijderen?",
       history: "Geschiedenis",
-      allUsers: "Alle gebruikers"
+      allUsers: "Alle gebruikers",
     }
   }
 
@@ -3966,7 +4238,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         review: "Áttekintés",
         generate: "Generálás",
         compare: "Összehasonlítás",
-        match: "Egyeztetés"
+        match: "Egyeztetés",
       },
       metadata: {
         questions: "kérdések",
@@ -3976,22 +4248,22 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         documents: "dokumentumok",
         documents_one: "dokumentum",
         digitized: "digitalizált",
-        handwritten: "kézzel írt"
+        handwritten: "kézzel írt",
       },
       feedback: {
         positive: "Pozitív visszajelzés adása ehhez az eredményhez",
         negative: "Negatív visszajelzés adása ehhez az eredményhez",
-        hasFeedback: "Ennek az eredménynek van visszajelzése"
+        hasFeedback: "Ennek az eredménynek van visszajelzése",
       },
       emptyMessages: {
         review: "Még nincs áttekintési előzmény",
         generate: "Még nincs generálási előzmény",
         compare: "Még nincs összehasonlítási előzmény",
-        match: "Még nincs egyeztetési előzmény"
+        match: "Még nincs egyeztetési előzmény",
       },
       deleteConfirmation: "Biztosan törölni szeretné ezt az elemet?",
       history: "Előzmények",
-      allUsers: "Minden felhasználó"
+      allUsers: "Minden felhasználó",
     }
   }
 
@@ -4001,7 +4273,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         review: "Kontrola",
         generate: "Generování",
         compare: "Porovnání",
-        match: "Shoda"
+        match: "Shoda",
       },
       metadata: {
         questions: "otázky",
@@ -4011,22 +4283,22 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         documents: "dokumenty",
         documents_one: "dokument",
         digitized: "digitalizovaný",
-        handwritten: "ručně psaný"
+        handwritten: "ručně psaný",
       },
       feedback: {
         positive: "Poskytnout pozitivní zpětnou vazbu pro tento výsledek",
         negative: "Poskytnout negativní zpětnou vazbu pro tento výsledek",
-        hasFeedback: "Tento výsledek má zpětnou vazbu"
+        hasFeedback: "Tento výsledek má zpětnou vazbu",
       },
       emptyMessages: {
         review: "Zatím žádná historie kontroly",
         generate: "Zatím žádná historie generování",
         compare: "Zatím žádná historie porovnání",
-        match: "Zatím žádná historie shod"
+        match: "Zatím žádná historie shod",
       },
       deleteConfirmation: "Jste si jisti, že chcete smazat tuto položku?",
       history: "Historie",
-      allUsers: "Všichni uživatelé"
+      allUsers: "Všichni uživatelé",
     }
   }
 
@@ -4036,7 +4308,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         review: "Kontrola",
         generate: "Generovanie",
         compare: "Porovnanie",
-        match: "Zhoda"
+        match: "Zhoda",
       },
       metadata: {
         questions: "otázky",
@@ -4046,22 +4318,22 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         documents: "dokumenty",
         documents_one: "dokument",
         digitized: "digitalizovaný",
-        handwritten: "ručne písaný"
+        handwritten: "ručne písaný",
       },
       feedback: {
         positive: "Poskytnúť pozitívnu spätnú väzbu pre tento výsledok",
         negative: "Poskytnúť negatívnu spätnú väzbu pre tento výsledok",
-        hasFeedback: "Tento výsledok má spätnú väzbu"
+        hasFeedback: "Tento výsledok má spätnú väzbu",
       },
       emptyMessages: {
         review: "Zatiaľ žiadna história kontroly",
         generate: "Zatiaľ žiadna história generovania",
         compare: "Zatiaľ žiadna história porovnania",
-        match: "Zatiaľ žiadna história zhôd"
+        match: "Zatiaľ žiadna história zhôd",
       },
       deleteConfirmation: "Ste si istí, že chcete zmazať túto položku?",
       history: "História",
-      allUsers: "Všetci používatelia"
+      allUsers: "Všetci používatelia",
     }
   }
 
@@ -4071,7 +4343,7 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         review: "Pregled",
         generate: "Generiranje",
         compare: "Primerjava",
-        match: "Ujemanje"
+        match: "Ujemanje",
       },
       metadata: {
         questions: "vprašanja",
@@ -4081,22 +4353,22 @@ export const addCentralEuropeanTranslations = (resources: any) => {
         documents: "dokumenti",
         documents_one: "dokument",
         digitized: "digitalizirano",
-        handwritten: "ročno pisano"
+        handwritten: "ročno pisano",
       },
       feedback: {
         positive: "Podajte pozitivno povratno informacijo za ta rezultat",
         negative: "Podajte negativno povratno informacijo za ta rezultat",
-        hasFeedback: "Ta rezultat ima povratno informacijo"
+        hasFeedback: "Ta rezultat ima povratno informacijo",
       },
       emptyMessages: {
         review: "Še ni zgodovine pregledov",
         generate: "Še ni zgodovine generiranja",
         compare: "Še ni zgodovine primerjav",
-        match: "Še ni zgodovine ujemanj"
+        match: "Še ni zgodovine ujemanj",
       },
       deleteConfirmation: "Ali ste prepričani, da želite izbrisati ta element?",
       history: "Zgodovina",
-      allUsers: "Vsi uporabniki"
+      allUsers: "Vsi uporabniki",
     }
   }
 
@@ -4110,8 +4382,9 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       system: "System",
       lightMode: "Heller Modus",
       darkMode: "Dunkler Modus",
-      deleteAccountDescription: "Ihre Daten und alles, was mit Ihrem Konto verknüpft ist, dauerhaft löschen.",
-      delete: "Löschen"
+      deleteAccountDescription:
+        "Ihre Daten und alles, was mit Ihrem Konto verknüpft ist, dauerhaft löschen.",
+      delete: "Löschen",
     })
   }
 
@@ -4124,8 +4397,9 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       system: "Système",
       lightMode: "Mode Clair",
       darkMode: "Mode Sombre",
-      deleteAccountDescription: "Supprimer définitivement vos données et tout ce qui est associé à votre compte.",
-      delete: "Supprimer"
+      deleteAccountDescription:
+        "Supprimer définitivement vos données et tout ce qui est associé à votre compte.",
+      delete: "Supprimer",
     })
   }
 
@@ -4138,8 +4412,9 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       system: "Sistema",
       lightMode: "Modalità Chiara",
       darkMode: "Modalità Scura",
-      deleteAccountDescription: "Elimina permanentemente i tuoi dati e tutto ciò che è associato al tuo account.",
-      delete: "Elimina"
+      deleteAccountDescription:
+        "Elimina permanentemente i tuoi dati e tutto ciò che è associato al tuo account.",
+      delete: "Elimina",
     })
   }
 
@@ -4152,8 +4427,9 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       system: "Sistema",
       lightMode: "Modo Claro",
       darkMode: "Modo Oscuro",
-      deleteAccountDescription: "Eliminar permanentemente tus datos y todo lo asociado con tu cuenta.",
-      delete: "Eliminar"
+      deleteAccountDescription:
+        "Eliminar permanentemente tus datos y todo lo asociado con tu cuenta.",
+      delete: "Eliminar",
     })
   }
 
@@ -4166,8 +4442,9 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       system: "Sistema",
       lightMode: "Modo Claro",
       darkMode: "Modo Escuro",
-      deleteAccountDescription: "Excluir permanentemente seus dados e tudo associado à sua conta.",
-      delete: "Excluir"
+      deleteAccountDescription:
+        "Excluir permanentemente seus dados e tudo associado à sua conta.",
+      delete: "Excluir",
     })
   }
 
@@ -4180,8 +4457,9 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       system: "Systeem",
       lightMode: "Lichte Modus",
       darkMode: "Donkere Modus",
-      deleteAccountDescription: "Verwijder je gegevens en alles wat aan je account is gekoppeld permanent.",
-      delete: "Verwijderen"
+      deleteAccountDescription:
+        "Verwijder je gegevens en alles wat aan je account is gekoppeld permanent.",
+      delete: "Verwijderen",
     })
   }
 
@@ -4194,8 +4472,9 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       system: "Rendszer",
       lightMode: "Világos Mód",
       darkMode: "Sötét Mód",
-      deleteAccountDescription: "Véglegesen törölje adatait és mindent, ami a fiókjához kapcsolódik.",
-      delete: "Törlés"
+      deleteAccountDescription:
+        "Véglegesen törölje adatait és mindent, ami a fiókjához kapcsolódik.",
+      delete: "Törlés",
     })
   }
 
@@ -4208,8 +4487,9 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       system: "Systém",
       lightMode: "Světlý Režim",
       darkMode: "Tmavý Režim",
-      deleteAccountDescription: "Trvale smazat vaše data a vše, co je spojeno s vaším účtem.",
-      delete: "Smazat"
+      deleteAccountDescription:
+        "Trvale smazat vaše data a vše, co je spojeno s vaším účtem.",
+      delete: "Smazat",
     })
   }
 
@@ -4222,8 +4502,9 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       system: "Systém",
       lightMode: "Svetlý Režim",
       darkMode: "Tmavý Režim",
-      deleteAccountDescription: "Trvalo zmazať vaše údaje a všetko, čo je spojené s vaším účtom.",
-      delete: "Zmazať"
+      deleteAccountDescription:
+        "Trvalo zmazať vaše údaje a všetko, čo je spojené s vaším účtom.",
+      delete: "Zmazať",
     })
   }
 
@@ -4236,8 +4517,9 @@ export const addCentralEuropeanTranslations = (resources: any) => {
       system: "Sistem",
       lightMode: "Svetli Način",
       darkMode: "Temni Način",
-      deleteAccountDescription: "Trajno izbriši svoje podatke in vse, kar je povezano z vašim računom.",
-      delete: "Izbriši"
+      deleteAccountDescription:
+        "Trajno izbriši svoje podatke in vse, kar je povezano z vašim računom.",
+      delete: "Izbriši",
     })
   }
 }

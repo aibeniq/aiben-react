@@ -14,7 +14,11 @@ import {
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiCopy } from "react-icons/fi"
-import { type KnowledgeBasePublic, type TwinCheckTopicList, TwincheckService } from "../../client"
+import {
+  type KnowledgeBasePublic,
+  type TwinCheckTopicList,
+  TwincheckService,
+} from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import { useKnowledgeBases } from "../../hooks/useKnowledgeBases"
 import { copyToClipboard } from "../../utils/copyToClipboard"
@@ -64,7 +68,8 @@ const TopicListModal = ({
 }: TopicListModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { t } = useTranslation()
-  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases()
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers } =
+    useKnowledgeBases()
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -126,12 +131,14 @@ const TopicListModal = ({
 
   const [suggesting, setSuggesting] = useState(false)
   const [exampleFiles, setExampleFiles] = useState<FileItem[]>([])
-  const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
-  const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
-    null,
-  )
+  const [referenceMode, setReferenceMode] = useState<
+    "files" | "knowledge-base"
+  >("files")
+  const [referenceKnowledgeBase, setReferenceKnowledgeBase] =
+    useState<KnowledgeBasePublic | null>(null)
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
-  const [showReferenceKnowledgeBaseModal, setShowReferenceKnowledgeBaseModal] = useState(false)
+  const [showReferenceKnowledgeBaseModal, setShowReferenceKnowledgeBaseModal] =
+    useState(false)
 
   // Remove the knowledge base effect
   // useEffect(() => {
@@ -148,7 +155,9 @@ const TopicListModal = ({
 
     // Validate minimum length requirement
     if (topicListDescription.trim().length < 10) {
-      showErrorToast("Please enter a more detailed description (at least 10 characters)")
+      showErrorToast(
+        "Please enter a more detailed description (at least 10 characters)",
+      )
       return
     }
 
@@ -163,7 +172,9 @@ const TopicListModal = ({
         comparison_type: "general",
         search_mode: searchMode,
         knowledge_base_id:
-          referenceMode === "knowledge-base" ? referenceKnowledgeBase?.id : undefined,
+          referenceMode === "knowledge-base"
+            ? referenceKnowledgeBase?.id
+            : undefined,
       }
 
       // Debug logging
@@ -215,7 +226,9 @@ const TopicListModal = ({
 
         showSuccessToast(successMessage)
       } else {
-        showErrorToast("No topics were suggested. Please try with a more detailed description.")
+        showErrorToast(
+          "No topics were suggested. Please try with a more detailed description.",
+        )
       }
     } catch (error: any) {
       console.error("Error suggesting topics:", error)
@@ -236,11 +249,17 @@ const TopicListModal = ({
       } else if (error.status === 401) {
         showErrorToast("You need to be logged in to suggest topics.")
       } else if (error.status === 404) {
-        showErrorToast("Suggest topics feature is not available. Please contact support.")
+        showErrorToast(
+          "Suggest topics feature is not available. Please contact support.",
+        )
       } else if (error.status === 500) {
-        showErrorToast("Server error. Please try again later or contact support.")
+        showErrorToast(
+          "Server error. Please try again later or contact support.",
+        )
       } else {
-        showErrorToast(`Failed to suggest topics: ${error.message || "Unknown error"}`)
+        showErrorToast(
+          `Failed to suggest topics: ${error.message || "Unknown error"}`,
+        )
       }
     } finally {
       setSuggesting(false)
@@ -320,7 +339,9 @@ const TopicListModal = ({
                       <Input
                         value={topicListName}
                         onChange={(e) => handleNameChange(e.target.value)}
-                        placeholder={t("editTopicListModal.topicListNamePlaceholder")}
+                        placeholder={t(
+                          "editTopicListModal.topicListNamePlaceholder",
+                        )}
                       />
                     </Field>
 
@@ -331,26 +352,36 @@ const TopicListModal = ({
                     >
                       <Textarea
                         value={topicListDescription}
-                        onChange={(e) => handleDescriptionChange(e.target.value)}
-                        placeholder={t("editTopicListModal.descriptionPlaceholder")}
+                        onChange={(e) =>
+                          handleDescriptionChange(e.target.value)
+                        }
+                        placeholder={t(
+                          "editTopicListModal.descriptionPlaceholder",
+                        )}
                         resize="vertical"
                         rows={3}
                       />
                       {topicListDescription.trim().length > 0 &&
                         topicListDescription.trim().length < 10 && (
                           <Text fontSize="xs" color="orange.600">
-                            Description needs at least {10 - topicListDescription.trim().length}{" "}
-                            more characters to suggest topics
+                            Description needs at least{" "}
+                            {10 - topicListDescription.trim().length} more
+                            characters to suggest topics
                           </Text>
                         )}
                     </Field>
 
-                    <SearchModeToggle searchMode={searchMode} onSearchModeChange={setSearchMode} />
+                    <SearchModeToggle
+                      searchMode={searchMode}
+                      onSearchModeChange={setSearchMode}
+                    />
 
                     <Field
                       label={
                         <HStack align="center" gap={2}>
-                          <span>{t("editTopicListModal.referenceDocuments")}</span>
+                          <span>
+                            {t("editTopicListModal.referenceDocuments")}
+                          </span>
                           <HelpTooltip helpKey="referenceDocuments" />
                         </HStack>
                       }
@@ -360,15 +391,23 @@ const TopicListModal = ({
                         <HStack gap={2}>
                           <Button
                             size="sm"
-                            variant={referenceMode === "files" ? "solid" : "outline"}
+                            variant={
+                              referenceMode === "files" ? "solid" : "outline"
+                            }
                             onClick={() => handleReferenceModeChange("files")}
                           >
                             {t("editTopicListModal.uploadFiles")}
                           </Button>
                           <Button
                             size="sm"
-                            variant={referenceMode === "knowledge-base" ? "solid" : "outline"}
-                            onClick={() => handleReferenceModeChange("knowledge-base")}
+                            variant={
+                              referenceMode === "knowledge-base"
+                                ? "solid"
+                                : "outline"
+                            }
+                            onClick={() =>
+                              handleReferenceModeChange("knowledge-base")
+                            }
                           >
                             {t("editTopicListModal.knowledgeBase")}
                           </Button>
@@ -401,17 +440,25 @@ const TopicListModal = ({
                           <Box>
                             <Button
                               w="full"
-                              variant={referenceKnowledgeBase ? "solid" : "outline"}
-                              onClick={() => setShowReferenceKnowledgeBaseModal(true)}
+                              variant={
+                                referenceKnowledgeBase ? "solid" : "outline"
+                              }
+                              onClick={() =>
+                                setShowReferenceKnowledgeBaseModal(true)
+                              }
                               justifyContent="flex-start"
                               textAlign="left"
-                              color={referenceKnowledgeBase ? "white" : "gray.600"}
+                              color={
+                                referenceKnowledgeBase ? "white" : "gray.600"
+                              }
                             >
-                              {referenceKnowledgeBase?.title || t("dropdowns.selectKnowledgeBase")}
+                              {referenceKnowledgeBase?.title ||
+                                t("dropdowns.selectKnowledgeBase")}
                             </Button>
                             {!knowledgeBases || knowledgeBases.length === 0 ? (
                               <Text fontSize="sm" color="orange.600">
-                                No Knowledge Bases available. Create one first to use this feature.
+                                No Knowledge Bases available. Create one first
+                                to use this feature.
                               </Text>
                             ) : null}
                           </Box>
@@ -420,7 +467,8 @@ const TopicListModal = ({
                         {topicListDescription.trim().length < 10 &&
                           topicListDescription.trim().length > 0 && (
                             <Text fontSize="sm" color="gray.500">
-                              Description must be at least 10 characters to suggest topics
+                              Description must be at least 10 characters to
+                              suggest topics
                             </Text>
                           )}
                       </VStack>
@@ -449,7 +497,9 @@ const TopicListModal = ({
                                 : "Suggest topics based on the description"
                             }
                           >
-                            {suggesting ? "Suggesting..." : t("editTopicListModal.suggest")}
+                            {suggesting
+                              ? "Suggesting..."
+                              : t("editTopicListModal.suggest")}
                           </Button>
                           <HelpTooltip helpKey="suggestTopicListTopics" />
 
@@ -460,7 +510,8 @@ const TopicListModal = ({
                             aria-label="Copy topics as text"
                             title="Copy all topics as text"
                             disabled={
-                              topicsList.filter((topic) => topic.trim() !== "").length === 0
+                              topicsList.filter((topic) => topic.trim() !== "")
+                                .length === 0
                             }
                           >
                             <FiCopy size={12} />
@@ -488,7 +539,9 @@ const TopicListModal = ({
                           key={index}
                           index={index}
                           topic={topic}
-                          placeholder={t("editTopicListModal.addTopicPlaceholder")}
+                          placeholder={t(
+                            "editTopicListModal.addTopicPlaceholder",
+                          )}
                           onUpdate={(idx, value) => {
                             updateTopic(idx, value)
                             // Clear validation error when topics are modified
@@ -503,7 +556,10 @@ const TopicListModal = ({
                           onRemove={removeTopic}
                           onMoveUp={moveTopicUp}
                           onMoveDown={moveTopicDown}
-                          canRemove={topicsList.length > 1 && Boolean(topic && topic.trim() !== "")}
+                          canRemove={
+                            topicsList.length > 1 &&
+                            Boolean(topic && topic.trim() !== "")
+                          }
                           totalTopics={topicsList.length}
                         />
                       ))}

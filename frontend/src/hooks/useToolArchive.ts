@@ -26,7 +26,7 @@ interface UseToolArchiveReturn {
     { [key: string]: unknown },
     VeradocGetVeradocDetailResponse
   > &
-  ToolActions
+    ToolActions
   reportgenie: ToolState<{ [key: string]: unknown }, any> & ToolActions
   twincheck: ToolState<{ [key: string]: unknown }, any> & ToolActions
   formconnect: ToolState<{ [key: string]: unknown }, any> & ToolActions
@@ -268,10 +268,10 @@ export const useToolArchive = (): UseToolArchiveReturn => {
       // Load summary with question headers (expandable sections)
       const summary = await VeradocService.getVeradocDetail({
         reportId,
-        includeQaPairs: false,  // Fast: ~2KB, includes qa_pairs_summary with question headers
+        includeQaPairs: false, // Fast: ~2KB, includes qa_pairs_summary with question headers
       })
       setSelectedVeradocReport(summary)
-      setIsVeradocLoading(false)  // Show summary and question headers immediately
+      setIsVeradocLoading(false) // Show summary and question headers immediately
       showSuccessToast("Evaluation loaded successfully")
 
       // Note: Individual QA pairs will be loaded on-demand when user clicks to expand a question
@@ -293,7 +293,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
         // includeSections: false,  // Parameter not supported in current API
       })
       setSelectedReportgenieReport(summary)
-      setIsReportgenieLoading(false)  // Show summary immediately
+      setIsReportgenieLoading(false) // Show summary immediately
       showSuccessToast("Report loaded successfully")
 
       // Note: Sections should be loaded on-demand when user requests them

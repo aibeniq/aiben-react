@@ -122,15 +122,21 @@ export const useResults = () => {
   return context
 }
 
-export const ResultsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const ResultsProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   // Review state
   const [reviewResults, setReviewResults] = useState<ReviewResult[]>([])
   const [reviewActiveTab, setReviewActiveTab] = useState<number>(0)
   const [reviewInputs, setReviewInputs] = useState<ReviewInputs | null>(null)
 
   // Generate state
-  const [generateResult, setGenerateResult] = useState<GenerateResult | null>(null)
-  const [generateInputs, setGenerateInputs] = useState<GenerateInputs | null>(null)
+  const [generateResult, setGenerateResult] = useState<GenerateResult | null>(
+    null,
+  )
+  const [generateInputs, setGenerateInputs] = useState<GenerateInputs | null>(
+    null,
+  )
 
   // Compare state
   const [compareResult, setCompareResult] = useState<CompareResult | null>(null)

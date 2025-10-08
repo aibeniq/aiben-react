@@ -1,11 +1,22 @@
-import { Badge, Box, Container, EmptyState, Flex, Heading, HStack, Table, Text, VStack } from "@chakra-ui/react"
+import HelpTooltip from "@/components/ui/help-tooltip"
+import { Tooltip } from "@/components/ui/tooltip"
+import {
+  Badge,
+  Box,
+  Container,
+  EmptyState,
+  Flex,
+  HStack,
+  Heading,
+  Table,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
+import { Switch } from "@chakra-ui/react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { FiSearch } from "react-icons/fi"
 import { z } from "zod"
-import { Switch } from "@chakra-ui/react"
-import { Tooltip } from "@/components/ui/tooltip"
-import HelpTooltip from "@/components/ui/help-tooltip"
 
 import { KnowledgeBaseActionsMenu } from "@/components/Common/KnowledgeBaseActionsMenu"
 import AddKnowledgeBase from "@/components/KnowledgeBases/AddKnowledgeBase"
@@ -33,7 +44,8 @@ function KnowledgeBasesTable() {
   const { t } = useTranslation()
   const navigate = useNavigate({ from: Route.fullPath })
   const { page } = Route.useSearch()
-  const { knowledgeBases, isLoading, showAllUsers, toggleShowAllUsers } = useKnowledgeBases()
+  const { knowledgeBases, isLoading, showAllUsers, toggleShowAllUsers } =
+    useKnowledgeBases()
 
   // Use pagination on the client side since useKnowledgeBases fetches all data
   const setPage = (page: number) =>
@@ -53,7 +65,11 @@ function KnowledgeBasesTable() {
         {/* All Users Toggle - Always visible */}
         <HStack justifyContent="flex-end" mb={4}>
           <Tooltip
-            content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
+            content={
+              showAllUsers
+                ? t("archive.viewingAllUsers")
+                : t("archive.viewingMyHistory")
+            }
           >
             <HStack gap={2}>
               <HStack gap={1} align="center">
@@ -78,7 +94,9 @@ function KnowledgeBasesTable() {
                     if (toggleShowAllUsers) toggleShowAllUsers()
                   }}
                 />
-                <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
+                <Switch.Control
+                  data-state={showAllUsers ? "checked" : "unchecked"}
+                >
                   <Switch.Thumb />
                 </Switch.Control>
               </Switch.Root>
@@ -96,7 +114,11 @@ function KnowledgeBasesTable() {
         {/* All Users Toggle - Always visible */}
         <HStack justifyContent="flex-end" mb={4}>
           <Tooltip
-            content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
+            content={
+              showAllUsers
+                ? t("archive.viewingAllUsers")
+                : t("archive.viewingMyHistory")
+            }
           >
             <HStack gap={2}>
               <HStack gap={1} align="center">
@@ -121,7 +143,9 @@ function KnowledgeBasesTable() {
                     if (toggleShowAllUsers) toggleShowAllUsers()
                   }}
                 />
-                <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
+                <Switch.Control
+                  data-state={showAllUsers ? "checked" : "unchecked"}
+                >
                   <Switch.Thumb />
                 </Switch.Control>
               </Switch.Root>
@@ -134,7 +158,9 @@ function KnowledgeBasesTable() {
               <FiSearch />
             </EmptyState.Indicator>
             <VStack textAlign="center">
-              <EmptyState.Title>{t("knowledgeBases.emptyStateTitle")}</EmptyState.Title>
+              <EmptyState.Title>
+                {t("knowledgeBases.emptyStateTitle")}
+              </EmptyState.Title>
               <EmptyState.Description>
                 {t("knowledgeBases.emptyStateDescription")}
               </EmptyState.Description>
@@ -150,7 +176,11 @@ function KnowledgeBasesTable() {
       {/* All Users Toggle - Always visible */}
       <HStack justifyContent="flex-end" mb={4}>
         <Tooltip
-          content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
+          content={
+            showAllUsers
+              ? t("archive.viewingAllUsers")
+              : t("archive.viewingMyHistory")
+          }
         >
           <HStack gap={2}>
             <HStack gap={1} align="center">
@@ -175,7 +205,9 @@ function KnowledgeBasesTable() {
                   if (toggleShowAllUsers) toggleShowAllUsers()
                 }}
               />
-              <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
+              <Switch.Control
+                data-state={showAllUsers ? "checked" : "unchecked"}
+              >
                 <Switch.Thumb />
               </Switch.Control>
             </Switch.Root>
@@ -186,7 +218,9 @@ function KnowledgeBasesTable() {
       <Table.Root size={{ base: "sm", md: "md" }}>
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeader w="sm">{t("knowledgeBases.tableHeaders.title")}</Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">
+              {t("knowledgeBases.tableHeaders.title")}
+            </Table.ColumnHeader>
             <Table.ColumnHeader w="sm">
               {t("knowledgeBases.tableHeaders.description")}
             </Table.ColumnHeader>
@@ -279,7 +313,13 @@ function KnowledgeBases() {
           </Heading>
           <AddKnowledgeBase />
         </Box>
-        <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4} bg="bg">
+        <Box
+          border="1px solid"
+          borderColor="gray.200"
+          borderRadius="md"
+          p={4}
+          bg="bg"
+        >
           <KnowledgeBasesTable />
         </Box>
       </VStack>

@@ -13,11 +13,11 @@ import {
 } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { HiRefresh } from "react-icons/hi"
 import { useTranslation } from "react-i18next"
+import { HiRefresh } from "react-icons/hi"
 
-import useAuth from "@/hooks/useAuth"
 import { HelpTooltip } from "@/components/ui/help-tooltip"
+import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -63,7 +63,9 @@ function UsageStats() {
   const maxTokens = quotaPeriod?.max_tokens || 50_000_000
   const percentage = Math.min((totalTokens / maxTokens) * 100, 100)
 
-  const startDate = quotaPeriod?.start_date ? new Date(quotaPeriod.start_date) : null
+  const startDate = quotaPeriod?.start_date
+    ? new Date(quotaPeriod.start_date)
+    : null
   const endDate = quotaPeriod?.end_date ? new Date(quotaPeriod.end_date) : null
 
   return (
@@ -139,7 +141,9 @@ function Dashboard() {
       <Container maxW="full">
         <Box pt={12} m={4}>
           <Text fontSize="2xl" truncate maxW="sm">
-            {t("common.hiUser", { name: currentUser?.full_name || currentUser?.email })}
+            {t("common.hiUser", {
+              name: currentUser?.full_name || currentUser?.email,
+            })}
           </Text>
           <Text mb={8}>{t("common.welcomeBack")}</Text>
 

@@ -60,7 +60,9 @@ const InputArea: React.FC<InputAreaProps> = ({
       setUploadedFiles(files)
       // Clear knowledge base selection when files are uploaded
       setSelectedKbId(null)
-      showSuccessToast(`${files.length} file${files.length > 1 ? "s" : ""} selected successfully.`)
+      showSuccessToast(
+        `${files.length} file${files.length > 1 ? "s" : ""} selected successfully.`,
+      )
     }
   }
 

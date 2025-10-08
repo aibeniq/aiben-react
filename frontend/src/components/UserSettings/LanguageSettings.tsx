@@ -5,14 +5,18 @@ import { Box, Card, VStack } from "@chakra-ui/react"
 import React from "react"
 
 const LanguageSettings: React.FC = () => {
-  const { currentLanguage, availableLanguages, changeLanguage, isUpdating, t } = useLanguage()
-  const [selectedLanguage, setSelectedLanguage] = React.useState(currentLanguage)
+  const { currentLanguage, availableLanguages, changeLanguage, isUpdating, t } =
+    useLanguage()
+  const [selectedLanguage, setSelectedLanguage] =
+    React.useState(currentLanguage)
 
   const handleSave = () => {
     changeLanguage(selectedLanguage)
   }
 
-  const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleLanguageChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     setSelectedLanguage(event.target.value)
   }
 

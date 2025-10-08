@@ -1,6 +1,6 @@
 import { Flex } from "@chakra-ui/react"
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router"
-import { useEffect } from "react"
+import { Suspense, useEffect } from "react"
 
 import Navbar from "@/components/Common/Navbar"
 import Sidebar from "@/components/Common/Sidebar"
@@ -51,7 +51,9 @@ function Layout() {
             isolation: "isolate",
           }}
         >
-          <Outlet />
+          <Suspense fallback={<div>Loading...</div>}>
+            <Outlet />
+          </Suspense>
           <Chatbot />
         </Flex>
       </Flex>

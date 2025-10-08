@@ -78,11 +78,20 @@ const DeleteConfirmation = () => {
             <DialogFooter gap={2}>
               <ButtonGroup>
                 <DialogActionTrigger asChild>
-                  <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
+                  <Button
+                    variant="subtle"
+                    colorPalette="gray"
+                    disabled={isSubmitting}
+                  >
                     {t("settings.cancel")}
                   </Button>
                 </DialogActionTrigger>
-                <Button variant="solid" colorPalette="red" type="submit" loading={isSubmitting}>
+                <Button
+                  variant="solid"
+                  colorPalette="red"
+                  type="submit"
+                  loading={isSubmitting}
+                >
                   {t("settings.delete")}
                 </Button>
               </ButtonGroup>

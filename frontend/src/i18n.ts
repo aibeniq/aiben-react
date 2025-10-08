@@ -79,8 +79,10 @@ const generateAllLanguageResources = () => {
         searchMode: "Search Mode:",
         vectorSearch: "Vector Search",
         fullTextScan: "Full Text Scan",
-        searchModeDescription: "Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
-        askMeAnything: "Ask me anything! For knowledge base search, select a knowledge base first.",
+        searchModeDescription:
+          "Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
+        askMeAnything:
+          "Ask me anything! For knowledge base search, select a knowledge base first.",
         usingGeneralAI: "Using general AI assistant",
         usingKnowledgeBase: "Using knowledge base:",
         usingDocuments: "Using # document(s)",
@@ -97,15 +99,19 @@ const generateAllLanguageResources = () => {
         knowledgeBaseTableSources: "Sources",
         knowledgeBaseTablePages: "Pages",
         selectKnowledgeBasePlaceholder: "Select a Knowledge Base...",
-        noKnowledgeBasesAvailable: "No Knowledge Bases available. Create one first to use this feature.",
+        noKnowledgeBasesAvailable:
+          "No Knowledge Bases available. Create one first to use this feature.",
         knowledgeBase: "Knowledge Base",
         file: "File",
-        welcomeMessageWithSource: "Select a knowledge base or upload files, then ask a question.",
-        welcomeMessageGeneral: "Ask me anything! For knowledge base search, select a knowledge base first.",
+        welcomeMessageWithSource:
+          "Select a knowledge base or upload files, then ask a question.",
+        welcomeMessageGeneral:
+          "Ask me anything! For knowledge base search, select a knowledge base first.",
         errors: {
           generic: "Sorry, something went wrong. Please try again.",
           timeout: "Request timed out. Please try again.",
-          largeFileTimeout: "Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
+          largeFileTimeout:
+            "Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
           fileSize: "File is too large. Please choose smaller files.",
           serverError: "Server error occurred. Please try again later.",
         },
@@ -133,11 +139,13 @@ const generateAllLanguageResources = () => {
         lightMode: "Light Mode",
         darkMode: "Dark Mode",
         // Danger Zone section
-        deleteAccountDescription: "Permanently delete your data and everything associated with your account.",
+        deleteAccountDescription:
+          "Permanently delete your data and everything associated with your account.",
         delete: "Delete",
         confirmationRequired: "Confirmation Required",
-        deleteConfirmationText: "All your account data will be permanently deleted. If you are sure, please click \"Confirm\" to proceed. This action cannot be undone.",
-        cancel: "Cancel"
+        deleteConfirmationText:
+          'All your account data will be permanently deleted. If you are sure, please click "Confirm" to proceed. This action cannot be undone.',
+        cancel: "Cancel",
       },
       errors: {
         somethingWentWrong: "Something went wrong",
@@ -152,7 +160,8 @@ const generateAllLanguageResources = () => {
       help: {
         dashboard:
           "Main overview page showing usage statistics and recent activity",
-        usageStats: "View your current API token usage and quota information for the current billing period",
+        usageStats:
+          "View your current API token usage and quota information for the current billing period",
         review:
           "Analyze documents against quality checklists for compliance and accuracy",
         generate:
@@ -168,47 +177,73 @@ const generateAllLanguageResources = () => {
           "View and manage your processed documents and analysis history",
         settings: "Configure your account preferences and application settings",
         admin: "Administrative functions for user and system management",
-        knowledgeBaseSelection: "Choose a knowledge base that contains the reference documents and standards for analysis",
-        checklistSelection: "Select a checklist with specific questions to evaluate your documents against",
+        knowledgeBaseSelection:
+          "Choose a knowledge base that contains the reference documents and standards for analysis",
+        checklistSelection:
+          "Select a checklist with specific questions to evaluate your documents against",
         fileUpload: "Upload the documents you want to analyze and review",
-        customInstructions: "Add specific instructions that will be considered when answering checklist questions",
-        searchMode: "Choose between fast vector search or comprehensive full document scanning",
-        topicList: "Select or create a list of topics to focus the comparison analysis",
-        formTemplate: "Choose a form template that your documents should be matched against",
-        documentOutline: "Select an outline structure for generating your report",
-        allUsersToggle: "Toggle between viewing only your history or all users' history",
+        customInstructions:
+          "Add specific instructions that will be considered when answering checklist questions",
+        searchMode:
+          "Choose between fast vector search or comprehensive full document scanning",
+        topicList:
+          "Select or create a list of topics to focus the comparison analysis",
+        formTemplate:
+          "Choose a form template that your documents should be matched against",
+        documentOutline:
+          "Select an outline structure for generating your report",
+        allUsersToggle:
+          "Toggle between viewing only your history or all users' history",
 
-        createChecklist: "Create a new checklist with custom questions to evaluate documents against specific criteria",
-        createOutline: "Create a new outline structure to guide the generation of structured reports",
-        createTopicList: "Create a new topic list to focus comparison analysis on specific subjects or themes",
-        createFormTemplate: "Create a new form template for automated document content extraction and matching",
-        suggestChecklistQuestions: "Use AI to automatically generate relevant checklist questions based on your description and reference documents",
-        optimizeChecklistQuestions: "Improve and refine existing checklist questions using the selected knowledge base for better accuracy",
-        suggestOutlineSections: "Use AI to automatically generate outline sections based on your description and reference documents",
-        optimizeOutlineSections: "Improve and refine existing outline sections using the selected knowledge base for better structure",
-        suggestTopicListTopics: "Use AI to automatically generate relevant comparison topics based on your description and reference documents",
-        suggestFormTemplateFields: "Use AI to automatically generate relevant form fields based on your description and reference documents",
-        referenceDocuments: "Upload reference documents or select a Knowledge Base to help the AI suggest content based on your specific context and requirements",
-        referenceDocumentsFiles: "Provide reference documents to help the AI generate more accurate and contextually relevant suggestions",
-        minimumDescriptionLength: "Descriptions must be at least 10 characters long to provide sufficient context for AI suggestions"
+        createChecklist:
+          "Create a new checklist with custom questions to evaluate documents against specific criteria",
+        createOutline:
+          "Create a new outline structure to guide the generation of structured reports",
+        createTopicList:
+          "Create a new topic list to focus comparison analysis on specific subjects or themes",
+        createFormTemplate:
+          "Create a new form template for automated document content extraction and matching",
+        suggestChecklistQuestions:
+          "Use AI to automatically generate relevant checklist questions based on your description and reference documents",
+        optimizeChecklistQuestions:
+          "Improve and refine existing checklist questions using the selected knowledge base for better accuracy",
+        suggestOutlineSections:
+          "Use AI to automatically generate outline sections based on your description and reference documents",
+        optimizeOutlineSections:
+          "Improve and refine existing outline sections using the selected knowledge base for better structure",
+        suggestTopicListTopics:
+          "Use AI to automatically generate relevant comparison topics based on your description and reference documents",
+        suggestFormTemplateFields:
+          "Use AI to automatically generate relevant form fields based on your description and reference documents",
+        referenceDocuments:
+          "Upload reference documents or select a Knowledge Base to help the AI suggest content based on your specific context and requirements",
+        referenceDocumentsFiles:
+          "Provide reference documents to help the AI generate more accurate and contextually relevant suggestions",
+        minimumDescriptionLength:
+          "Descriptions must be at least 10 characters long to provide sufficient context for AI suggestions",
       },
       review: {
         pageTitle: "Review Documents",
-        pageDescription: "Review a document based on a user-defined checklist and policy database.",
+        pageDescription:
+          "Review a document based on a user-defined checklist and policy database.",
         knowledgeBaseTitle: "Knowledge Base",
         knowledgeBaseDescription: "Click to select",
         checklistTitle: "Checklist",
         checklistDescription: "Click to select",
         customInstructionsTitle: "Custom Instructions (Optional)",
-        customInstructionsPlaceholder: "Enter any additional instructions that should be considered when answering the checklist questions...",
-        customInstructionsHelp: "{{count}}/2000 characters. These instructions will be appended to each question when processing.",
-        searchModeHelp: "Vector search provides fast, targeted results. Full document scan reviews all content in the knowledge base.",
+        customInstructionsPlaceholder:
+          "Enter any additional instructions that should be considered when answering the checklist questions...",
+        customInstructionsHelp:
+          "{{count}}/2000 characters. These instructions will be appended to each question when processing.",
+        searchModeHelp:
+          "Vector search provides fast, targeted results. Full document scan reviews all content in the knowledge base.",
         processingFile: "Processing file...",
         processingFiles: "Processing files...",
         selectKnowledgeBaseTitle: "Select Knowledge Base",
         selectChecklistTitle: "Select Checklist",
         noResults: "No results yet",
-        uploadDocuments: "Upload one or more documents to review against your selected checklist",
+        uploadDocuments:
+          "Upload one or more documents to review against your selected checklist",
         results: "Results",
         downloadReport: "Download Report",
         downloadCsv: "Download CSV",
@@ -217,24 +252,29 @@ const generateAllLanguageResources = () => {
         reportCopied: "Report copied to clipboard!",
         reviewButton: "Review",
         consultDocuments: "Consult documents",
-        noChecklistsAvailable: "No checklists available. Create your first checklist to get started.",
+        noChecklistsAvailable:
+          "No checklists available. Create your first checklist to get started.",
         createChecklist: "Create Checklist",
         editChecklist: "Edit Checklist",
         checklistName: "Checklist Name",
         checklistNamePlaceholder: "Enter checklist name...",
         checklistDescriptionLabel: "Description",
-        checklistDescriptionPlaceholder: "Enter checklist description to auto-suggest questions (minimum 10 characters)...",
+        checklistDescriptionPlaceholder:
+          "Enter checklist description to auto-suggest questions (minimum 10 characters)...",
         questions: "Questions",
         suggest: "Suggest",
         suggesting: "Suggesting...",
         optimize: "Optimize",
-        optimizeTooltip: "Knowledge Base must be selected for Optimize function to be enabled",
-        optimizeTooltipEnabled: "Optimize questions based on the selected Knowledge Base",
+        optimizeTooltip:
+          "Knowledge Base must be selected for Optimize function to be enabled",
+        optimizeTooltipEnabled:
+          "Optimize questions based on the selected Knowledge Base",
         uploadFiles: "Upload Files",
         knowledgeBase: "Knowledge Base",
         referenceDocuments: "Reference Documents (Optional)",
         selectKnowledgeBasePlaceholder: "Select a Knowledge Base...",
-        noKnowledgeBasesAvailable: "No Knowledge Bases available. Create one first to use this feature.",
+        noKnowledgeBasesAvailable:
+          "No Knowledge Bases available. Create one first to use this feature.",
         copyQuestions: "Copy Questions",
         questionsCopied: "Questions copied to clipboard",
         noQuestionsToCopy: "No questions to copy",
@@ -246,22 +286,29 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "Uploaded Files",
 
         removeFile: "Remove",
-        characterCount: "{{count}}/2000 characters. These instructions will be appended to each question when processing.",
+        characterCount:
+          "{{count}}/2000 characters. These instructions will be appended to each question when processing.",
         searchMode: "Search Mode",
         vectorSearch: "Vector Search",
         fullDocumentScan: "Full Document Scan",
-        vectorSearchDescription: "Finds relevant content using AI similarity search (fast, targeted)",
-        fullScanDescription: "Analyzes all documents in the knowledge base (comprehensive, thorough)"
+        vectorSearchDescription:
+          "Finds relevant content using AI similarity search (fast, targeted)",
+        fullScanDescription:
+          "Analyzes all documents in the knowledge base (comprehensive, thorough)",
       },
       generate: {
-        pageDescription: "Generate a document based on a user-defined outline and document database.",
+        pageDescription:
+          "Generate a document based on a user-defined outline and document database.",
         generatingDocument: "Generating document...",
+        pleaseWait: "Please wait while we generate your report",
         knowledgeBaseTitle: "Knowledge Base",
         documentOutlineTitle: "Document Outline",
         clickToSelect: "Click to select",
         customInstructionsTitle: "Custom Instructions (Optional)",
-        customInstructionsPlaceholder: "Enter any additional instructions that should be considered when generating each section of the report...",
-        characterCount: "{{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
+        customInstructionsPlaceholder:
+          "Enter any additional instructions that should be considered when generating each section of the report...",
+        characterCount:
+          "{{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
         selectKnowledgeBaseTitle: "Select Knowledge Base",
         selectDocumentOutlineTitle: "Select Document Outline",
         generateButton: "Generate",
@@ -271,7 +318,8 @@ const generateAllLanguageResources = () => {
         downloadDocx: "Download DOCX",
         downloadCsv: "Download CSV",
         clearReport: "Clear Report",
-        resultsPlaceholder: "Results will appear here after generating a document.",
+        resultsPlaceholder:
+          "Results will appear here after generating a document.",
         sectionsWithSources: "Sections with Sources",
         sectionNumber: "Section {number}: {title}",
         kbGenerated: "KB Generated",
@@ -290,36 +338,39 @@ const generateAllLanguageResources = () => {
         generateError: "Failed to generate document: {error}",
         vectorSearch: "vector search",
         fullDocumentScan: "full document scan",
-        editOutline: "Edit Outline"
+        editOutline: "Edit Outline",
       },
       modelSelection: {
         llmManagement: "LLM Management",
-        llmDescription: "Configure and manage the LLMs used for generating text responses. The default model will be used for all operations.",
+        llmDescription:
+          "Configure and manage the LLMs used for generating text responses. The default model will be used for all operations.",
         addNewLlm: "Add New LLM",
         noLlmsConfigured: "No LLMs configured",
         addNewLlmToGetStarted: "Add a new LLM to get started",
         embeddingModelManagement: "Embedding Model Management",
-        embeddingDescription: "Configure and manage the embedding models used for knowledge base indexing and retrieval. The default model will be used when creating new knowledge bases, but each knowledge base will continue using its original embedding model even if the default changes later.",
+        embeddingDescription:
+          "Configure and manage the embedding models used for knowledge base indexing and retrieval. The default model will be used when creating new knowledge bases, but each knowledge base will continue using its original embedding model even if the default changes later.",
         addEmbeddingModel: "Add Embedding Model",
         noEmbeddingModelsConfigured: "No embedding models configured",
-        addNewEmbeddingModelToGetStarted: "Add a new embedding model to get started",
+        addNewEmbeddingModelToGetStarted:
+          "Add a new embedding model to get started",
         tableHeaders: {
           name: "Name",
           modelId: "Model ID",
           provider: "Provider",
           description: "Description",
           status: "Status",
-          actions: "Actions"
+          actions: "Actions",
         },
         status: {
           default: "Default",
-          available: "Available"
+          available: "Available",
         },
         actions: {
           setAsDefault: "Set as Default",
           delete: "Delete",
           validate: "Validate",
-          validating: "Validating"
+          validating: "Validating",
         },
         dialog: {
           addNewLlm: "Add New LLM",
@@ -329,16 +380,17 @@ const generateAllLanguageResources = () => {
           modelId: "Model ID",
           description: "Description",
           cancel: "Cancel",
-          addModel: "Add Model"
+          addModel: "Add Model",
         },
         placeholders: {
           customModel: "e.g., My Custom Model",
           embeddingModelId: "e.g., sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "Describe the model, its characteristics, and when to use it"
+          describeModel:
+            "Describe the model, its characteristics, and when to use it",
         },
         validation: {
-          pleaseEnterModelId: "Please enter a model ID"
-        }
+          pleaseEnterModelId: "Please enter a model ID",
+        },
       },
       knowledgeBases: {
         title: "Knowledge Base Management",
@@ -352,31 +404,33 @@ const generateAllLanguageResources = () => {
           embeddingModel: "Embedding Model",
           dateCreated: "Date Created",
           dateModified: "Date Modified",
-          actions: "Actions"
+          actions: "Actions",
         },
         status: {
           default: "Default",
-          na: "N/A"
+          na: "N/A",
         },
         actions: {
           view: "View",
           edit: "Edit",
           delete: "Delete",
-          configure: "Configure"
+          configure: "Configure",
         },
         deleteModal: {
           title: "Delete Knowledge Base",
           buttonText: "Delete Knowledge Base",
-          description: "This Knowledge Base will be permanently deleted. Are you sure? You will not be able to undo this action.",
+          description:
+            "This Knowledge Base will be permanently deleted. Are you sure? You will not be able to undo this action.",
           confirmButton: "Delete",
           cancelButton: "Cancel",
           successMessage: "The KnowledgeBase was deleted successfully",
-          errorMessage: "An error occurred while deleting the KnowledgeBase"
+          errorMessage: "An error occurred while deleting the KnowledgeBase",
         },
         modals: {
           add: {
             title: "Add Knowledge Base",
-            description: "Create a new knowledge base by providing details and uploading documents below.",
+            description:
+              "Create a new knowledge base by providing details and uploading documents below.",
           },
           edit: {
             title: "Edit Knowledge Base",
@@ -384,7 +438,7 @@ const generateAllLanguageResources = () => {
           },
           fields: {
             title: "Title",
-            description: "Description"
+            description: "Description",
           },
           fileUpload: {
             currentFiles: "Current Files",
@@ -400,10 +454,10 @@ const generateAllLanguageResources = () => {
             create: "Create",
             save: "Save",
             saving: "Saving...",
-            creating: "Creating..."
+            creating: "Creating...",
           },
           validation: {
-            titleRequired: "Title is required"
+            titleRequired: "Title is required",
           },
           messages: {
             createSuccess: "Knowledge Base created successfully.",
@@ -417,20 +471,21 @@ const generateAllLanguageResources = () => {
         title: "Archive",
         history: "History",
         allUsers: "All Users",
-        allUsersToggleTooltip: "Toggle between viewing only your history or all users' history",
+        allUsersToggleTooltip:
+          "Toggle between viewing only your history or all users' history",
         viewingAllUsers: "Viewing all users' history",
         viewingMyHistory: "Viewing only my history",
         tabs: {
           review: "Review",
           generate: "Generate",
           compare: "Compare",
-          match: "Match"
+          match: "Match",
         },
         emptyMessages: {
           review: "No previous evaluations",
           generate: "No previous reports",
           compare: "No previous comparisons",
-          match: "No previous form processing"
+          match: "No previous form processing",
         },
         metadata: {
           question: "question",
@@ -442,16 +497,16 @@ const generateAllLanguageResources = () => {
           document: "document",
           documents: "documents",
           digitized: "digitized",
-
         },
         feedback: {
           positive: "Positive feedback",
           negative: "Negative feedback",
-          hasFeedback: "Has feedback"
+          hasFeedback: "Has feedback",
         },
-        deleteConfirmation: "Are you sure you want to delete this item? This action cannot be undone.",
+        deleteConfirmation:
+          "Are you sure you want to delete this item? This action cannot be undone.",
         unknownDate: "Unknown date",
-        unnamedItem: "Unnamed item"
+        unnamedItem: "Unnamed item",
       },
       common: {
         loading: "Loading...",
@@ -480,7 +535,8 @@ const generateAllLanguageResources = () => {
       },
       compare: {
         title: "Compare Documents",
-        subtitle: "Compare two documents to see how they differ with respect to a user-defined topic list.",
+        subtitle:
+          "Compare two documents to see how they differ with respect to a user-defined topic list.",
         selectFirstDocument: "Select first document",
         selectSecondDocument: "Select second document",
         pleaseSelect: "Please select...",
@@ -491,15 +547,17 @@ const generateAllLanguageResources = () => {
         noDocumentsFound: "No documents found",
         selectTwoDocuments: "Please select two documents to compare",
         loadingComparison: "Loading comparison...",
+        pleaseWait: "Please wait while we compare your documents",
         topicList: "Topic List",
         clickToBrowse: "Click to browse or drag & drop",
         supportedFormats: "Supports PDF, TXT, and DOCX",
         editTopicList: "Edit Topic List",
-        selectTopicListTitle: "Select Topic List"
+        selectTopicListTitle: "Select Topic List",
       },
       match: {
         title: "Match Documents",
-        subtitle: "Ensure that field entries match across documents of different format.",
+        subtitle:
+          "Ensure that field entries match across documents of different format.",
         selectDocument: "Select a document to find matches",
         pleaseSelect: "Please select a document...",
         sourceDocument: "Form Template",
@@ -509,26 +567,29 @@ const generateAllLanguageResources = () => {
         noDocumentsFound: "No documents found",
         selectDocumentToMatch: "Please select a document to find matches",
         loadingMatches: "Finding matches...",
+        pleaseWait: "Please wait while we match your documents",
         noMatchesFound: "No similar documents found",
         matchResults: "Match Results",
         similarity: "Similarity",
         editFormTemplate: "Edit Form Template",
-        selectFormTemplateTitle: "Select Form Template"
+        selectFormTemplateTitle: "Select Form Template",
       },
       editFormTemplateModal: {
         title: "Edit Form Template",
         formTemplateName: "Form Template Name",
         formTemplateNamePlaceholder: "Enter form template name",
         formTemplateDescription: "Form Template Description",
-        descriptionPlaceholder: "Enter form template description to auto-suggest fields (minimum 10 characters)...",
+        descriptionPlaceholder:
+          "Enter form template description to auto-suggest fields (minimum 10 characters)...",
         referenceDocuments: "Reference Documents (Optional)",
         uploadFiles: "Upload Files",
+        pleaseWait: "Please wait while we review your documents",
         knowledgeBase: "Knowledge Base",
         formFields: "Form Fields",
         suggest: "Suggest",
         fieldPlaceholder: "Add a field name...",
         cancel: "Cancel",
-        updateFormTemplate: "Update Form Template"
+        updateFormTemplate: "Update Form Template",
       },
       editOutlineModal: {
         title: "Edit Outline",
@@ -536,7 +597,8 @@ const generateAllLanguageResources = () => {
         outlineName: "Outline Name",
         outlineNamePlaceholder: "Enter outline name",
         description: "Description",
-        descriptionPlaceholder: "Enter outline description to auto-suggest sections (minimum 10 characters)...",
+        descriptionPlaceholder:
+          "Enter outline description to auto-suggest sections (minimum 10 characters)...",
         referenceDocuments: "Reference Documents (Optional)",
         uploadFiles: "Upload Files",
         knowledgeBase: "Knowledge Base",
@@ -546,7 +608,7 @@ const generateAllLanguageResources = () => {
         addSectionPlaceholder: "Add section",
         cancel: "Cancel",
         createOutline: "Create Outline",
-        updateOutline: "Update Outline"
+        updateOutline: "Update Outline",
       },
       editChecklistModal: {
         title: "Edit Checklist",
@@ -554,7 +616,8 @@ const generateAllLanguageResources = () => {
         checklistName: "Checklist Name",
         checklistNamePlaceholder: "Enter checklist name",
         description: "Description",
-        descriptionPlaceholder: "Enter checklist description to auto-suggest questions (minimum 10 characters)...",
+        descriptionPlaceholder:
+          "Enter checklist description to auto-suggest questions (minimum 10 characters)...",
         referenceDocuments: "Reference Documents (Optional)",
         uploadFiles: "Upload Files",
         knowledgeBase: "Knowledge Base",
@@ -565,7 +628,7 @@ const generateAllLanguageResources = () => {
         copyAllQuestions: "Copy all questions as text",
         cancel: "Cancel",
         createChecklist: "Create Checklist",
-        updateChecklist: "Update Checklist"
+        updateChecklist: "Update Checklist",
       },
       editTopicListModal: {
         title: "Edit Topic List",
@@ -573,7 +636,8 @@ const generateAllLanguageResources = () => {
         topicListName: "Topic List Name",
         topicListNamePlaceholder: "Enter topic list name",
         description: "Topic List Description",
-        descriptionPlaceholder: "Enter topic list description to auto-suggest topics (minimum 10 characters)...",
+        descriptionPlaceholder:
+          "Enter topic list description to auto-suggest topics (minimum 10 characters)...",
         referenceDocuments: "Reference Documents (Optional)",
         uploadFiles: "Upload Files",
         knowledgeBase: "Knowledge Base",
@@ -584,15 +648,17 @@ const generateAllLanguageResources = () => {
         copyAllTopics: "Copy all topics as text",
         cancel: "Cancel",
         createTopicList: "Create Topic List",
-        updateTopicList: "Update Topic List"
+        updateTopicList: "Update Topic List",
       },
       optimizeChecklistModal: {
         title: "Optimize Checklist",
         customInstructionsLabel: "Custom Instructions (Optional)",
-        customInstructionsHelperText: "Enter any additional instructions that should be considered when answering the checklist questions",
+        customInstructionsHelperText:
+          "Enter any additional instructions that should be considered when answering the checklist questions",
         analyzing: "Analyzing...",
         analyzeButton: "Analyze Checklist",
-        analyzingMessage: "Analyzing your checklist for optimization opportunities...",
+        analyzingMessage:
+          "Analyzing your checklist for optimization opportunities...",
         cancelAnalysis: "Cancel Analysis",
         downloading: "Downloading...",
         downloadCsv: "Download CSV",
@@ -609,17 +675,23 @@ const generateAllLanguageResources = () => {
         optimizationsSelectedText: "optimization{{s}} selected for application",
         applying: "Applying...",
         applySelectedOptimizations: "Apply Selected Optimizations",
-        uploadDocumentsTitle: "Upload document(s) that should be accepted by checklist *",
-        uploadDocumentsHelperText: "Upload documents that should meet all checklist requirements to help identify questions that may be too strict",
-        customInstructionsPlaceholder: "e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
+        uploadDocumentsTitle:
+          "Upload document(s) that should be accepted by checklist *",
+        uploadDocumentsHelperText:
+          "Upload documents that should meet all checklist requirements to help identify questions that may be too strict",
+        customInstructionsPlaceholder:
+          "e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc.",
       },
       optimizeOutlineModal: {
         title: "Optimize Outline",
-        description: "Upload a ground-truth document that represents a high-quality example of the type of report you want to generate. The system will generate a report using your current outline and knowledge base, compare it to the ground-truth, and suggest improvements to your outline sections.",
+        description:
+          "Upload a ground-truth document that represents a high-quality example of the type of report you want to generate. The system will generate a report using your current outline and knowledge base, compare it to the ground-truth, and suggest improvements to your outline sections.",
         groundTruthDocument: "Ground-Truth Document",
         customInstructionsLabel: "Custom Instructions (Optional)",
-        customInstructionsHelperText: "Provide additional guidance for the optimization process",
-        customInstructionsPlaceholder: "e.g., Focus on improving technical depth, ensure compliance with specific standards, etc.",
+        customInstructionsHelperText:
+          "Provide additional guidance for the optimization process",
+        customInstructionsPlaceholder:
+          "e.g., Focus on improving technical depth, ensure compliance with specific standards, etc.",
         characters: "characters",
         analyzingOutline: "Analyzing outline and generating optimizations...",
         cancelAnalysis: "Cancel Analysis",
@@ -639,8 +711,8 @@ const generateAllLanguageResources = () => {
         cancel: "Cancel",
         optimizing: "Optimizing...",
         optimizeOutline: "Optimize Outline",
-        applyOptimizations: "Apply {{count}} Optimization{{s}}"
-      }
+        applyOptimizations: "Apply {{count}} Optimization{{s}}",
+      },
     },
   }
 
@@ -711,8 +783,10 @@ const generateAllLanguageResources = () => {
         searchMode: "Modo de Búsqueda:",
         vectorSearch: "Búsqueda Vectorial",
         fullTextScan: "Escaneo de Texto Completo",
-        searchModeDescription: "La búsqueda vectorial proporciona resultados rápidos y específicos. El escaneo de texto completo revisa todo el contenido en la base de conocimiento.",
-        askMeAnything: "¡Pregúntame cualquier cosa! Para buscar en la base de conocimiento, selecciona una base de conocimiento primero.",
+        searchModeDescription:
+          "La búsqueda vectorial proporciona resultados rápidos y específicos. El escaneo de texto completo revisa todo el contenido en la base de conocimiento.",
+        askMeAnything:
+          "¡Pregúntame cualquier cosa! Para buscar en la base de conocimiento, selecciona una base de conocimiento primero.",
         usingGeneralAI: "Usando asistente de IA general",
         usingKnowledgeBase: "Usando base de conocimiento:",
         usingDocuments: "Usando # documento(s)",
@@ -728,18 +802,25 @@ const generateAllLanguageResources = () => {
         knowledgeBaseTableDescription: "Descripción",
         knowledgeBaseTableSources: "Fuentes",
         knowledgeBaseTablePages: "Páginas",
-        selectKnowledgeBasePlaceholder: "Selecciona una Base de Conocimiento...",
-        noKnowledgeBasesAvailable: "No hay Bases de Conocimiento disponibles. Crea una primero para usar esta función.",
+        selectKnowledgeBasePlaceholder:
+          "Selecciona una Base de Conocimiento...",
+        noKnowledgeBasesAvailable:
+          "No hay Bases de Conocimiento disponibles. Crea una primero para usar esta función.",
         knowledgeBase: "Base de Conocimiento",
         file: "Archivo",
-        welcomeMessageWithSource: "Selecciona una base de conocimiento o sube archivos, luego haz una pregunta.",
-        welcomeMessageGeneral: "¡Pregúntame cualquier cosa! Para búsqueda en base de conocimiento, selecciona una base de conocimiento primero.",
+        welcomeMessageWithSource:
+          "Selecciona una base de conocimiento o sube archivos, luego haz una pregunta.",
+        welcomeMessageGeneral:
+          "¡Pregúntame cualquier cosa! Para búsqueda en base de conocimiento, selecciona una base de conocimiento primero.",
         errors: {
           generic: "Lo siento, algo salió mal. Inténtalo de nuevo.",
           timeout: "Se agotó el tiempo de espera. Inténtalo de nuevo.",
-          largeFileTimeout: "Se agotó el tiempo de procesamiento de archivos grandes. Prueba cambiar al modo 'Escaneo de Texto Completo' para mejor rendimiento con archivos grandes.",
-          fileSize: "El archivo es demasiado grande. Elige archivos más pequeños.",
-          serverError: "Ocurrió un error del servidor. Inténtalo de nuevo más tarde.",
+          largeFileTimeout:
+            "Se agotó el tiempo de procesamiento de archivos grandes. Prueba cambiar al modo 'Escaneo de Texto Completo' para mejor rendimiento con archivos grandes.",
+          fileSize:
+            "El archivo es demasiado grande. Elige archivos más pequeños.",
+          serverError:
+            "Ocurrió un error del servidor. Inténtalo de nuevo más tarde.",
         },
       },
       settings: {
@@ -765,11 +846,13 @@ const generateAllLanguageResources = () => {
         lightMode: "Modo Claro",
         darkMode: "Modo Oscuro",
         // Danger Zone section
-        deleteAccountDescription: "Eliminar permanentemente tus datos y todo lo asociado con tu cuenta.",
+        deleteAccountDescription:
+          "Eliminar permanentemente tus datos y todo lo asociado con tu cuenta.",
         delete: "Eliminar",
         confirmationRequired: "Se Requiere Confirmación",
-        deleteConfirmationText: "Todos los datos de tu cuenta serán eliminados permanentemente. Si estás seguro, por favor haz clic en \"Confirmar\" para proceder. Esta acción no se puede deshacer.",
-        cancel: "Cancelar"
+        deleteConfirmationText:
+          'Todos los datos de tu cuenta serán eliminados permanentemente. Si estás seguro, por favor haz clic en "Confirmar" para proceder. Esta acción no se puede deshacer.',
+        cancel: "Cancelar",
       },
       errors: {
         somethingWentWrong: "Algo salió mal",
@@ -784,7 +867,8 @@ const generateAllLanguageResources = () => {
       help: {
         dashboard:
           "Página principal con estadísticas de uso y actividad reciente",
-        usageStats: "Ver su uso actual de tokens de API e información de cuota para el período de facturación actual",
+        usageStats:
+          "Ver su uso actual de tokens de API e información de cuota para el período de facturación actual",
         review:
           "Analizar documentos contra listas de verificación de calidad para cumplimiento y precisión",
         generate:
@@ -802,38 +886,55 @@ const generateAllLanguageResources = () => {
         settings:
           "Configurar las preferencias de su cuenta y configuraciones de la aplicación",
         admin: "Funciones administrativas para gestión de usuarios y sistemas",
-        knowledgeBaseSelection: "Elegir una base de conocimiento que contenga los documentos de referencia y estándares para análisis",
-        checklistSelection: "Seleccionar una lista de verificación con preguntas específicas para evaluar sus documentos",
+        knowledgeBaseSelection:
+          "Elegir una base de conocimiento que contenga los documentos de referencia y estándares para análisis",
+        checklistSelection:
+          "Seleccionar una lista de verificación con preguntas específicas para evaluar sus documentos",
         fileUpload: "Subir los documentos que desea analizar y revisar",
-        customInstructions: "Agregar instrucciones específicas que se considerarán al responder las preguntas de la lista de verificación",
-        searchMode: "Elegir entre búsqueda vectorial rápida o escaneo completo de documentos",
-        topicList: "Seleccionar o crear una lista de temas para enfocar el análisis de comparación",
-        formTemplate: "Elegir una plantilla de formulario contra la cual sus documentos deben ser comparados",
-        documentOutline: "Seleccionar una estructura de esquema para generar su informe",
-        allUsersToggle: "Alternar entre ver solo su historial o el historial de todos los usuarios",
+        customInstructions:
+          "Agregar instrucciones específicas que se considerarán al responder las preguntas de la lista de verificación",
+        searchMode:
+          "Elegir entre búsqueda vectorial rápida o escaneo completo de documentos",
+        topicList:
+          "Seleccionar o crear una lista de temas para enfocar el análisis de comparación",
+        formTemplate:
+          "Elegir una plantilla de formulario contra la cual sus documentos deben ser comparados",
+        documentOutline:
+          "Seleccionar una estructura de esquema para generar su informe",
+        allUsersToggle:
+          "Alternar entre ver solo su historial o el historial de todos los usuarios",
 
-        createChecklist: "Crear una nueva lista de verificación con preguntas personalizadas para evaluar documentos contra criterios específicos",
-        createOutline: "Crear una nueva estructura de esquema para guiar la generación de informes estructurados",
-        createTopicList: "Crear una nueva lista de temas para enfocar el análisis de comparación en materias específicas",
-        createFormTemplate: "Crear una nueva plantilla de formulario para la extracción y coincidencia automatizada de contenido de documentos"
+        createChecklist:
+          "Crear una nueva lista de verificación con preguntas personalizadas para evaluar documentos contra criterios específicos",
+        createOutline:
+          "Crear una nueva estructura de esquema para guiar la generación de informes estructurados",
+        createTopicList:
+          "Crear una nueva lista de temas para enfocar el análisis de comparación en materias específicas",
+        createFormTemplate:
+          "Crear una nueva plantilla de formulario para la extracción y coincidencia automatizada de contenido de documentos",
       },
       review: {
         pageTitle: "Revisar Documentos",
-        pageDescription: "Revisar un documento basado en una lista de verificación y base de datos de políticas definida por el usuario.",
+        pageDescription:
+          "Revisar un documento basado en una lista de verificación y base de datos de políticas definida por el usuario.",
         knowledgeBaseTitle: "Base de Conocimiento",
         knowledgeBaseDescription: "Haz clic para seleccionar",
         checklistTitle: "Lista de Verificación",
         checklistDescription: "Haz clic para seleccionar",
         customInstructionsTitle: "Instrucciones Personalizadas (Opcional)",
-        customInstructionsPlaceholder: "Ingrese cualquier instrucción adicional que deba considerarse al responder las preguntas de la lista de verificación...",
-        customInstructionsHelp: "{{count}}/2000 caracteres. Estas instrucciones se agregarán a cada pregunta durante el procesamiento.",
-        searchModeHelp: "La búsqueda vectorial proporciona resultados rápidos y específicos. El escaneo completo del documento revisa todo el contenido en la base de conocimiento.",
+        customInstructionsPlaceholder:
+          "Ingrese cualquier instrucción adicional que deba considerarse al responder las preguntas de la lista de verificación...",
+        customInstructionsHelp:
+          "{{count}}/2000 caracteres. Estas instrucciones se agregarán a cada pregunta durante el procesamiento.",
+        searchModeHelp:
+          "La búsqueda vectorial proporciona resultados rápidos y específicos. El escaneo completo del documento revisa todo el contenido en la base de conocimiento.",
         processingFile: "Procesando archivo...",
         processingFiles: "Procesando archivos...",
         selectKnowledgeBaseTitle: "Seleccionar Base de Conocimiento",
         selectChecklistTitle: "Seleccionar Lista de Verificación",
         noResults: "Aún no hay resultados",
-        uploadDocuments: "Sube uno o más documentos para revisar contra tu lista de verificación seleccionada",
+        uploadDocuments:
+          "Sube uno o más documentos para revisar contra tu lista de verificación seleccionada",
         results: "Resultados",
         downloadReport: "Descargar Informe",
         downloadCsv: "Descargar CSV",
@@ -842,24 +943,31 @@ const generateAllLanguageResources = () => {
         reportCopied: "¡Informe copiado al portapapeles!",
         reviewButton: "Revisar",
         consultDocuments: "Consultar documentos",
-        noChecklistsAvailable: "No hay listas de verificación disponibles. Crea tu primera lista de verificación para comenzar.",
+        noChecklistsAvailable:
+          "No hay listas de verificación disponibles. Crea tu primera lista de verificación para comenzar.",
         createChecklist: "Crear Lista de Verificación",
         editChecklist: "Editar Lista de Verificación",
         checklistName: "Nombre de la Lista de Verificación",
-        checklistNamePlaceholder: "Ingrese el nombre de la lista de verificación...",
+        checklistNamePlaceholder:
+          "Ingrese el nombre de la lista de verificación...",
         checklistDescriptionLabel: "Descripción",
-        checklistDescriptionPlaceholder: "Ingrese la descripción de la lista de verificación para auto-sugerir preguntas (mínimo 10 caracteres)...",
+        checklistDescriptionPlaceholder:
+          "Ingrese la descripción de la lista de verificación para auto-sugerir preguntas (mínimo 10 caracteres)...",
         questions: "Preguntas",
         suggest: "Sugerir",
         suggesting: "Sugiriendo...",
         optimize: "Optimizar",
-        optimizeTooltip: "Debe seleccionarse una Base de Conocimiento para que la función Optimizar esté habilitada",
-        optimizeTooltipEnabled: "Optimizar preguntas basándose en la Base de Conocimiento seleccionada",
+        optimizeTooltip:
+          "Debe seleccionarse una Base de Conocimiento para que la función Optimizar esté habilitada",
+        optimizeTooltipEnabled:
+          "Optimizar preguntas basándose en la Base de Conocimiento seleccionada",
         uploadFiles: "Subir Archivos",
         knowledgeBase: "Base de Conocimiento",
         referenceDocuments: "Documentos de Referencia (Opcional)",
-        selectKnowledgeBasePlaceholder: "Seleccionar una Base de Conocimiento...",
-        noKnowledgeBasesAvailable: "No hay Bases de Conocimiento disponibles. Crea una primero para usar esta función.",
+        selectKnowledgeBasePlaceholder:
+          "Seleccionar una Base de Conocimiento...",
+        noKnowledgeBasesAvailable:
+          "No hay Bases de Conocimiento disponibles. Crea una primero para usar esta función.",
         copyQuestions: "Copiar Preguntas",
         questionsCopied: "Preguntas copiadas al portapapeles",
         noQuestionsToCopy: "No hay preguntas para copiar",
@@ -871,22 +979,28 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "Archivos Subidos",
         handwritten: "Manuscrito",
         removeFile: "Eliminar",
-        characterCount: "{{count}}/2000 caracteres. Estas instrucciones se agregarán a cada pregunta durante el procesamiento.",
+        characterCount:
+          "{{count}}/2000 caracteres. Estas instrucciones se agregarán a cada pregunta durante el procesamiento.",
         searchMode: "Modo de Búsqueda",
         vectorSearch: "Búsqueda Vectorial",
         fullDocumentScan: "Análisis Completo del Documento",
-        vectorSearchDescription: "Encuentra contenido relevante usando búsqueda de similitud IA (rápido, específico)",
-        fullScanDescription: "Analiza todos los documentos en la base de conocimiento (completo, exhaustivo)"
+        vectorSearchDescription:
+          "Encuentra contenido relevante usando búsqueda de similitud IA (rápido, específico)",
+        fullScanDescription:
+          "Analiza todos los documentos en la base de conocimiento (completo, exhaustivo)",
       },
       generate: {
-        pageDescription: "Generar un documento basado en una lista de verificación definida por el usuario y una base de datos de documentos.",
+        pageDescription:
+          "Generar un documento basado en una lista de verificación definida por el usuario y una base de datos de documentos.",
         generatingDocument: "Generando documento...",
         knowledgeBaseTitle: "Base de Conocimiento",
         documentOutlineTitle: "Esquema del Documento",
         clickToSelect: "Haz clic para seleccionar",
         customInstructionsTitle: "Instrucciones Personalizadas (Opcional)",
-        customInstructionsPlaceholder: "Ingresa cualquier instrucción adicional que deba considerarse al generar cada sección del informe...",
-        characterCount: "{{count}}/2000 caracteres. Estas instrucciones se agregarán al prompt al generar cada sección.",
+        customInstructionsPlaceholder:
+          "Ingresa cualquier instrucción adicional que deba considerarse al generar cada sección del informe...",
+        characterCount:
+          "{{count}}/2000 caracteres. Estas instrucciones se agregarán al prompt al generar cada sección.",
         selectKnowledgeBaseTitle: "Seleccionar Base de Conocimiento",
         selectDocumentOutlineTitle: "Seleccionar Esquema del Documento",
         generateButton: "Generar",
@@ -896,7 +1010,8 @@ const generateAllLanguageResources = () => {
         downloadDocx: "Descargar DOCX",
         downloadCsv: "Descargar CSV",
         clearReport: "Limpiar Informe",
-        resultsPlaceholder: "Los resultados aparecerán aquí después de generar un documento.",
+        resultsPlaceholder:
+          "Los resultados aparecerán aquí después de generar un documento.",
         sectionsWithSources: "Secciones con Fuentes",
         sectionNumber: "Sección {number}: {title}",
         kbGenerated: "Generado por KB",
@@ -915,36 +1030,39 @@ const generateAllLanguageResources = () => {
         generateError: "Error al generar documento: {error}",
         vectorSearch: "búsqueda vectorial",
         fullDocumentScan: "análisis completo del documento",
-        editOutline: "Editar Esquema"
+        editOutline: "Editar Esquema",
       },
       modelSelection: {
         llmManagement: "Gestión de LLM",
-        llmDescription: "Configurar y gestionar los LLM utilizados para generar respuestas de texto. El modelo predeterminado se utilizará para todas las operaciones.",
+        llmDescription:
+          "Configurar y gestionar los LLM utilizados para generar respuestas de texto. El modelo predeterminado se utilizará para todas las operaciones.",
         addNewLlm: "Agregar Nuevo LLM",
         noLlmsConfigured: "No hay LLM configurados",
         addNewLlmToGetStarted: "Agregar un nuevo LLM para comenzar",
         embeddingModelManagement: "Gestión de Modelos de Embedding",
-        embeddingDescription: "Configurar y gestionar los modelos de embedding utilizados para indexación y recuperación de bases de conocimiento. El modelo predeterminado se utilizará al crear nuevas bases de conocimiento, pero cada base de conocimiento continuará usando su modelo de embedding original incluso si el predeterminado cambia después.",
+        embeddingDescription:
+          "Configurar y gestionar los modelos de embedding utilizados para indexación y recuperación de bases de conocimiento. El modelo predeterminado se utilizará al crear nuevas bases de conocimiento, pero cada base de conocimiento continuará usando su modelo de embedding original incluso si el predeterminado cambia después.",
         addEmbeddingModel: "Agregar Modelo de Embedding",
         noEmbeddingModelsConfigured: "No hay modelos de embedding configurados",
-        addNewEmbeddingModelToGetStarted: "Agregar un nuevo modelo de embedding para comenzar",
+        addNewEmbeddingModelToGetStarted:
+          "Agregar un nuevo modelo de embedding para comenzar",
         tableHeaders: {
           name: "Nombre",
           modelId: "ID del Modelo",
           provider: "Proveedor",
           description: "Descripción",
           status: "Estado",
-          actions: "Acciones"
+          actions: "Acciones",
         },
         status: {
           default: "Predeterminado",
-          available: "Disponible"
+          available: "Disponible",
         },
         actions: {
           setAsDefault: "Establecer como Predeterminado",
           delete: "Eliminar",
           validate: "Validar",
-          validating: "Validando"
+          validating: "Validando",
         },
         dialog: {
           addNewLlm: "Agregar Nuevo LLM",
@@ -954,22 +1072,24 @@ const generateAllLanguageResources = () => {
           modelId: "ID del Modelo",
           description: "Descripción",
           cancel: "Cancelar",
-          addModel: "Agregar Modelo"
+          addModel: "Agregar Modelo",
         },
         placeholders: {
           customModel: "ej., Mi Modelo Personalizado",
           embeddingModelId: "ej., sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "Describir el modelo, sus características y cuándo usarlo"
+          describeModel:
+            "Describir el modelo, sus características y cuándo usarlo",
         },
         validation: {
-          pleaseEnterModelId: "Por favor, ingrese un ID de modelo"
-        }
+          pleaseEnterModelId: "Por favor, ingrese un ID de modelo",
+        },
       },
       knowledgeBases: {
         title: "Gestión de Bases de Conocimiento",
         addKnowledgeBase: "Agregar Base de Conocimiento",
         emptyStateTitle: "Aún no tienes ninguna Base de Conocimiento",
-        emptyStateDescription: "Agregar una nueva Base de Conocimiento para comenzar",
+        emptyStateDescription:
+          "Agregar una nueva Base de Conocimiento para comenzar",
         tableHeaders: {
           title: "Título",
           description: "Descripción",
@@ -977,45 +1097,49 @@ const generateAllLanguageResources = () => {
           embeddingModel: "Modelo de Embedding",
           dateCreated: "Fecha de Creación",
           dateModified: "Fecha de Modificación",
-          actions: "Acciones"
+          actions: "Acciones",
         },
         status: {
           default: "Predeterminado",
-          na: "N/D"
+          na: "N/D",
         },
         actions: {
           view: "Ver",
           edit: "Editar",
           delete: "Eliminar",
-          configure: "Configurar"
+          configure: "Configurar",
         },
         deleteModal: {
           title: "Eliminar Base de Conocimiento",
           buttonText: "Eliminar Base de Conocimiento",
-          description: "Esta Base de Conocimiento será eliminada permanentemente. ¿Estás seguro? No podrás deshacer esta acción.",
+          description:
+            "Esta Base de Conocimiento será eliminada permanentemente. ¿Estás seguro? No podrás deshacer esta acción.",
           confirmButton: "Eliminar",
           cancelButton: "Cancelar",
           successMessage: "La Base de Conocimiento fue eliminada exitosamente",
-          errorMessage: "Ocurrió un error al eliminar la Base de Conocimiento"
+          errorMessage: "Ocurrió un error al eliminar la Base de Conocimiento",
         },
         modals: {
           add: {
             title: "Agregar Base de Conocimiento",
-            description: "Crear una nueva base de conocimiento proporcionando detalles y cargando documentos a continuación.",
+            description:
+              "Crear una nueva base de conocimiento proporcionando detalles y cargando documentos a continuación.",
           },
           edit: {
             title: "Editar Base de Conocimiento",
-            description: "Actualizar los detalles de la Base de Conocimiento a continuación.",
+            description:
+              "Actualizar los detalles de la Base de Conocimiento a continuación.",
           },
           fields: {
             title: "Título",
-            description: "Descripción"
+            description: "Descripción",
           },
           fileUpload: {
             currentFiles: "Archivos Actuales",
             newFiles: "Nuevos Archivos",
             selectedFiles: "Archivos Seleccionados",
-            dragAndDrop: "Arrastra y suelta archivos aquí, o haz clic para explorar",
+            dragAndDrop:
+              "Arrastra y suelta archivos aquí, o haz clic para explorar",
             dropFiles: "Suelta los archivos aquí...",
             removeFile: "Eliminar archivo",
             supportedFormats: "Soporta: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
@@ -1025,17 +1149,17 @@ const generateAllLanguageResources = () => {
             create: "Crear",
             save: "Guardar",
             saving: "Guardando...",
-            creating: "Creando..."
+            creating: "Creando...",
           },
           validation: {
-            titleRequired: "El título es obligatorio"
+            titleRequired: "El título es obligatorio",
           },
           messages: {
             createSuccess: "Base de Conocimiento creada exitosamente.",
             updateSuccess: "Base de Conocimiento actualizada exitosamente.",
             processing: "Procesando...",
             pleaseWait: "Por favor espere mientras procesamos sus archivos...",
-          }
+          },
         },
       },
       common: {
@@ -1065,7 +1189,8 @@ const generateAllLanguageResources = () => {
       },
       compare: {
         title: "Comparar Documentos",
-        subtitle: "Compare y analice múltiples documentos para encontrar diferencias, similitudes y patrones",
+        subtitle:
+          "Compare y analice múltiples documentos para encontrar diferencias, similitudes y patrones",
         sourceSectionTitle: "Seleccionar Documentos Fuente",
         referenceSectionTitle: "Seleccionar Documentos de Referencia",
         sourcePlaceholder: "Seleccione documentos para el análisis fuente...",
@@ -1083,13 +1208,13 @@ const generateAllLanguageResources = () => {
           comprehensive: "Análisis Completo",
           structural: "Comparación Estructural",
           content: "Análisis de Contenido",
-          chronological: "Análisis Cronológico"
+          chronological: "Análisis Cronológico",
         },
         analysisDepth: "Profundidad del Análisis",
         analysisDepths: {
           surface: "Análisis Superficial",
           detailed: "Análisis Detallado",
-          comprehensive: "Análisis Completo"
+          comprehensive: "Análisis Completo",
         },
         generateReport: "Generar Informe de Comparación",
         comparing: "Comparando documentos...",
@@ -1114,15 +1239,18 @@ const generateAllLanguageResources = () => {
         clickToBrowse: "Haz clic para explorar o arrastra y suelta",
         supportedFormats: "Soporta PDF, TXT y DOCX",
         editTopicList: "Editar Lista de Temas",
-        selectTopicListTitle: "Seleccionar Lista de Temas"
+        selectTopicListTitle: "Seleccionar Lista de Temas",
       },
       match: {
         title: "Coincidir Documentos",
-        subtitle: "Encuentra documentos similares y analiza patrones de coincidencia en tu base de conocimiento",
+        subtitle:
+          "Encuentra documentos similares y analiza patrones de coincidencia en tu base de conocimiento",
         sourceSectionTitle: "Seleccionar Documento Fuente",
         searchInTitle: "Buscar En",
-        sourcePlaceholder: "Seleccione un documento como fuente de referencia...",
-        searchPlaceholder: "Seleccione documentos o base de conocimiento para buscar...",
+        sourcePlaceholder:
+          "Seleccione un documento como fuente de referencia...",
+        searchPlaceholder:
+          "Seleccione documentos o base de conocimiento para buscar...",
         findMatchesButton: "Encontrar Coincidencias",
         noSourceSelected: "No se ha seleccionado documento fuente",
         noSearchTargetSelected: "No se ha seleccionado objetivo de búsqueda",
@@ -1134,14 +1262,14 @@ const generateAllLanguageResources = () => {
           keyword: "Coincidencia de Palabras Clave",
           structural: "Similitud Estructural",
           content: "Análisis de Contenido",
-          contextual: "Coincidencia Contextual"
+          contextual: "Coincidencia Contextual",
         },
         threshold: "Umbral de Similitud",
         thresholds: {
           low: "Bajo (30%)",
           medium: "Medio (50%)",
           high: "Alto (70%)",
-          veryHigh: "Muy Alto (90%)"
+          veryHigh: "Muy Alto (90%)",
         },
         maxResults: "Máximo de Resultados",
         searching: "Buscando coincidencias...",
@@ -1161,28 +1289,32 @@ const generateAllLanguageResources = () => {
         findMatches: "Encontrar Coincidencias",
         similarityScore: "Puntuación de Similitud",
         noDocumentsFound: "No se encontraron documentos",
-        selectDocumentToMatch: "Por favor selecciona un documento para encontrar coincidencias",
+        selectDocumentToMatch:
+          "Por favor selecciona un documento para encontrar coincidencias",
         loadingMatches: "Buscando coincidencias...",
         noMatchesFound: "No se encontraron documentos similares",
         matchResults: "Resultados de Coincidencia",
         similarity: "Similitud",
         editFormTemplate: "Editar Plantilla de Formulario",
-        selectFormTemplateTitle: "Seleccionar Plantilla de Formulario"
+        selectFormTemplateTitle: "Seleccionar Plantilla de Formulario",
       },
       editFormTemplateModal: {
         title: "Editar Plantilla de Formulario",
         formTemplateName: "Nombre de la Plantilla de Formulario",
-        formTemplateNamePlaceholder: "Ingrese el nombre de la plantilla de formulario",
+        formTemplateNamePlaceholder:
+          "Ingrese el nombre de la plantilla de formulario",
         formTemplateDescription: "Descripción de la Plantilla de Formulario",
-        descriptionPlaceholder: "Ingrese la descripción de la plantilla de formulario para sugerir campos automáticamente (mínimo 10 caracteres)...",
+        descriptionPlaceholder:
+          "Ingrese la descripción de la plantilla de formulario para sugerir campos automáticamente (mínimo 10 caracteres)...",
         referenceDocuments: "Documentos de Referencia (Opcional)",
         uploadFiles: "Subir Archivos",
         knowledgeBase: "Base de Conocimiento",
         formFields: "Campos del Formulario",
         suggest: "Sugerir",
-        fieldPlaceholder: "Agregue un nombre de campo (ej., Nombre, Dirección, NSS) o sugiera desde la descripción",
+        fieldPlaceholder:
+          "Agregue un nombre de campo (ej., Nombre, Dirección, NSS) o sugiera desde la descripción",
         cancel: "Cancelar",
-        updateFormTemplate: "Actualizar Plantilla de Formulario"
+        updateFormTemplate: "Actualizar Plantilla de Formulario",
       },
       editOutlineModal: {
         title: "Editar Esquema",
@@ -1190,7 +1322,8 @@ const generateAllLanguageResources = () => {
         outlineName: "Nombre del Esquema",
         outlineNamePlaceholder: "Ingrese el nombre del esquema",
         description: "Descripción",
-        descriptionPlaceholder: "Ingrese la descripción del esquema para sugerir secciones automáticamente (mínimo 10 caracteres)...",
+        descriptionPlaceholder:
+          "Ingrese la descripción del esquema para sugerir secciones automáticamente (mínimo 10 caracteres)...",
         referenceDocuments: "Documentos de Referencia (Opcional)",
         uploadFiles: "Subir Archivos",
         knowledgeBase: "Base de Conocimiento",
@@ -1200,15 +1333,17 @@ const generateAllLanguageResources = () => {
         addSectionPlaceholder: "Agregar sección",
         cancel: "Cancelar",
         createOutline: "Crear Esquema",
-        updateOutline: "Actualizar Esquema"
+        updateOutline: "Actualizar Esquema",
       },
       editChecklistModal: {
         title: "Editar Lista de Verificación",
         createTitle: "Crear Nueva Lista de Verificación",
         checklistName: "Nombre de la Lista de Verificación",
-        checklistNamePlaceholder: "Ingrese el nombre de la lista de verificación",
+        checklistNamePlaceholder:
+          "Ingrese el nombre de la lista de verificación",
         description: "Descripción",
-        descriptionPlaceholder: "Ingrese la descripción de la lista de verificación para sugerir preguntas automáticamente (mínimo 10 caracteres)...",
+        descriptionPlaceholder:
+          "Ingrese la descripción de la lista de verificación para sugerir preguntas automáticamente (mínimo 10 caracteres)...",
         referenceDocuments: "Documentos de Referencia (Opcional)",
         uploadFiles: "Subir Archivos",
         knowledgeBase: "Base de Conocimiento",
@@ -1219,7 +1354,7 @@ const generateAllLanguageResources = () => {
         copyAllQuestions: "Copiar todas las preguntas como texto",
         cancel: "Cancelar",
         createChecklist: "Crear Lista de Verificación",
-        updateChecklist: "Actualizar Lista de Verificación"
+        updateChecklist: "Actualizar Lista de Verificación",
       },
       editTopicListModal: {
         title: "Editar Lista de Temas",
@@ -1227,7 +1362,8 @@ const generateAllLanguageResources = () => {
         topicListName: "Nombre de la Lista de Temas",
         topicListNamePlaceholder: "Ingrese el nombre de la lista de temas",
         description: "Descripción de la Lista de Temas",
-        descriptionPlaceholder: "Ingrese la descripción de la lista de temas para sugerir temas automáticamente (mínimo 10 caracteres)...",
+        descriptionPlaceholder:
+          "Ingrese la descripción de la lista de temas para sugerir temas automáticamente (mínimo 10 caracteres)...",
         referenceDocuments: "Documentos de Referencia (Opcional)",
         uploadFiles: "Subir Archivos",
         knowledgeBase: "Base de Conocimiento",
@@ -1238,7 +1374,7 @@ const generateAllLanguageResources = () => {
         copyAllTopics: "Copiar todos los temas como texto",
         cancel: "Cancelar",
         createTopicList: "Crear Lista de Temas",
-        updateTopicList: "Actualizar Lista de Temas"
+        updateTopicList: "Actualizar Lista de Temas",
       },
       editCustom: {
         title: "Editar Instrucciones Personalizadas",
@@ -1249,10 +1385,12 @@ const generateAllLanguageResources = () => {
       optimizeChecklistModal: {
         title: "Optimizar Lista de Verificación",
         customInstructionsLabel: "Instrucciones Personalizadas (Opcional)",
-        customInstructionsHelperText: "Ingrese cualquier instrucción adicional que deba considerarse al responder las preguntas de la lista de verificación",
+        customInstructionsHelperText:
+          "Ingrese cualquier instrucción adicional que deba considerarse al responder las preguntas de la lista de verificación",
         analyzing: "Analizando...",
         analyzeButton: "Analizar Lista de Verificación",
-        analyzingMessage: "Analizando su lista de verificación en busca de oportunidades de optimización...",
+        analyzingMessage:
+          "Analizando su lista de verificación en busca de oportunidades de optimización...",
         cancelAnalysis: "Cancelar Análisis",
         downloading: "Descargando...",
         downloadCsv: "Descargar CSV",
@@ -1266,20 +1404,27 @@ const generateAllLanguageResources = () => {
         currentAnswer: "Respuesta Actual",
         showLess: "Mostrar Menos",
         showMore: "Mostrar Más",
-        optimizationsSelectedText: "optimización{{s}} seleccionada{{s}} para aplicar",
+        optimizationsSelectedText:
+          "optimización{{s}} seleccionada{{s}} para aplicar",
         applying: "Aplicando...",
         applySelectedOptimizations: "Aplicar Optimizaciones Seleccionadas",
-        uploadDocumentsTitle: "Suba documento(s) que deberían ser aceptados por la lista de verificación *",
-        uploadDocumentsHelperText: "Suba documentos que deberían cumplir todos los requisitos de la lista de verificación para ayudar a identificar preguntas que pueden ser demasiado estrictas",
-        customInstructionsPlaceholder: "ej., Considere que este es un estudio pediátrico al evaluar requisitos relacionados con la edad, Este protocolo es para una intervención de bajo riesgo, etc."
+        uploadDocumentsTitle:
+          "Suba documento(s) que deberían ser aceptados por la lista de verificación *",
+        uploadDocumentsHelperText:
+          "Suba documentos que deberían cumplir todos los requisitos de la lista de verificación para ayudar a identificar preguntas que pueden ser demasiado estrictas",
+        customInstructionsPlaceholder:
+          "ej., Considere que este es un estudio pediátrico al evaluar requisitos relacionados con la edad, Este protocolo es para una intervención de bajo riesgo, etc.",
       },
       optimizeOutlineModal: {
         title: "Optimizar Esquema",
-        description: "Suba un documento de referencia que represente un ejemplo de alta calidad del tipo de informe que desea generar. El sistema generará un informe usando su esquema actual y base de conocimiento, lo comparará con la referencia y sugerirá mejoras a las secciones de su esquema.",
+        description:
+          "Suba un documento de referencia que represente un ejemplo de alta calidad del tipo de informe que desea generar. El sistema generará un informe usando su esquema actual y base de conocimiento, lo comparará con la referencia y sugerirá mejoras a las secciones de su esquema.",
         groundTruthDocument: "Documento de Referencia",
         customInstructionsLabel: "Instrucciones Personalizadas (Opcional)",
-        customInstructionsHelperText: "Proporcione orientación adicional para el proceso de optimización",
-        customInstructionsPlaceholder: "ej., Enfóquese en mejorar la profundidad técnica, asegure el cumplimiento de estándares específicos, etc.",
+        customInstructionsHelperText:
+          "Proporcione orientación adicional para el proceso de optimización",
+        customInstructionsPlaceholder:
+          "ej., Enfóquese en mejorar la profundidad técnica, asegure el cumplimiento de estándares específicos, etc.",
         characters: "caracteres",
         analyzingOutline: "Analizando esquema y generando optimizaciones...",
         cancelAnalysis: "Cancelar Análisis",
@@ -1299,8 +1444,8 @@ const generateAllLanguageResources = () => {
         cancel: "Cancelar",
         optimizing: "Optimizando...",
         optimizeOutline: "Optimizar Esquema",
-        applyOptimizations: "Aplicar {{count}} Optimización{{s}}"
-      }
+        applyOptimizations: "Aplicar {{count}} Optimización{{s}}",
+      },
     },
   }
 
@@ -1371,8 +1516,10 @@ const generateAllLanguageResources = () => {
         searchMode: "Mode de Recherche :",
         vectorSearch: "Recherche Vectorielle",
         fullTextScan: "Analyse Complète du Texte",
-        searchModeDescription: "La recherche vectorielle fournit des résultats rapides et ciblés. L'analyse complète du texte examine tout le contenu de la base de connaissances.",
-        askMeAnything: "Demandez-moi n'importe quoi ! Pour la recherche dans la base de connaissances, sélectionnez d'abord une base de connaissances.",
+        searchModeDescription:
+          "La recherche vectorielle fournit des résultats rapides et ciblés. L'analyse complète du texte examine tout le contenu de la base de connaissances.",
+        askMeAnything:
+          "Demandez-moi n'importe quoi ! Pour la recherche dans la base de connaissances, sélectionnez d'abord une base de connaissances.",
         usingGeneralAI: "Utilisation de l'assistant IA général",
         usingKnowledgeBase: "Utilisation de la base de connaissances :",
         usingDocuments: "Utilisation de # document(s)",
@@ -1388,18 +1535,25 @@ const generateAllLanguageResources = () => {
         knowledgeBaseTableDescription: "Description",
         knowledgeBaseTableSources: "Sources",
         knowledgeBaseTablePages: "Pages",
-        selectKnowledgeBasePlaceholder: "Sélectionnez une Base de Connaissances...",
-        noKnowledgeBasesAvailable: "Aucune Base de Connaissances disponible. Créez-en une d'abord pour utiliser cette fonctionnalité.",
+        selectKnowledgeBasePlaceholder:
+          "Sélectionnez une Base de Connaissances...",
+        noKnowledgeBasesAvailable:
+          "Aucune Base de Connaissances disponible. Créez-en une d'abord pour utiliser cette fonctionnalité.",
         knowledgeBase: "Base de Connaissances",
         file: "Fichier",
-        welcomeMessageWithSource: "Sélectionnez une base de connaissances ou téléchargez des fichiers, puis posez une question.",
-        welcomeMessageGeneral: "Demandez-moi n'importe quoi ! Pour une recherche dans la base de connaissances, sélectionnez d'abord une base de connaissances.",
+        welcomeMessageWithSource:
+          "Sélectionnez une base de connaissances ou téléchargez des fichiers, puis posez une question.",
+        welcomeMessageGeneral:
+          "Demandez-moi n'importe quoi ! Pour une recherche dans la base de connaissances, sélectionnez d'abord une base de connaissances.",
         errors: {
           generic: "Désolé, quelque chose s'est mal passé. Veuillez réessayer.",
           timeout: "Délai d'attente dépassé. Veuillez réessayer.",
-          largeFileTimeout: "Délai de traitement des gros fichiers dépassé. Essayez de passer au mode 'Analyse Complète du Texte' pour de meilleures performances avec les gros fichiers.",
-          fileSize: "Le fichier est trop volumineux. Veuillez choisir des fichiers plus petits.",
-          serverError: "Une erreur serveur s'est produite. Veuillez réessayer plus tard.",
+          largeFileTimeout:
+            "Délai de traitement des gros fichiers dépassé. Essayez de passer au mode 'Analyse Complète du Texte' pour de meilleures performances avec les gros fichiers.",
+          fileSize:
+            "Le fichier est trop volumineux. Veuillez choisir des fichiers plus petits.",
+          serverError:
+            "Une erreur serveur s'est produite. Veuillez réessayer plus tard.",
         },
       },
       settings: {
@@ -1425,11 +1579,13 @@ const generateAllLanguageResources = () => {
         lightMode: "Mode Clair",
         darkMode: "Mode Sombre",
         // Danger Zone section
-        deleteAccountDescription: "Supprimer définitivement vos données et tout ce qui est associé à votre compte.",
+        deleteAccountDescription:
+          "Supprimer définitivement vos données et tout ce qui est associé à votre compte.",
         delete: "Supprimer",
         confirmationRequired: "Confirmation Requise",
-        deleteConfirmationText: "Toutes vos données de compte seront supprimées définitivement. Si vous êtes sûr, veuillez cliquer sur \"Confirmer\" pour procéder. Cette action ne peut pas être annulée.",
-        cancel: "Annuler"
+        deleteConfirmationText:
+          'Toutes vos données de compte seront supprimées définitivement. Si vous êtes sûr, veuillez cliquer sur "Confirmer" pour procéder. Cette action ne peut pas être annulée.',
+        cancel: "Annuler",
       },
       errors: {
         somethingWentWrong: "Quelque chose s'est mal passé",
@@ -1444,7 +1600,8 @@ const generateAllLanguageResources = () => {
       help: {
         dashboard:
           "Page d'aperçu principal affichant les statistiques d'utilisation et l'activité récente",
-        usageStats: "Voir votre utilisation actuelle de jetons API et les informations de quota pour la période de facturation actuelle",
+        usageStats:
+          "Voir votre utilisation actuelle de jetons API et les informations de quota pour la période de facturation actuelle",
         review:
           "Analyser les documents contre les listes de contrôle qualité pour la conformité et la précision",
         generate:
@@ -1463,38 +1620,56 @@ const generateAllLanguageResources = () => {
           "Configurer les préférences de votre compte et les paramètres de l'application",
         admin:
           "Fonctions administratives pour la gestion des utilisateurs et du système",
-        knowledgeBaseSelection: "Choisir une base de connaissances qui contient les documents de référence et les normes pour l'analyse",
-        checklistSelection: "Sélectionner une liste de contrôle avec des questions spécifiques pour évaluer vos documents",
-        fileUpload: "Télécharger les documents que vous voulez analyser et réviser",
-        customInstructions: "Ajouter des instructions spécifiques qui seront considérées lors de la réponse aux questions de la liste de contrôle",
-        searchMode: "Choisir entre la recherche vectorielle rapide ou l'analyse complète des documents",
-        topicList: "Sélectionner ou créer une liste de sujets pour cibler l'analyse de comparaison",
-        formTemplate: "Choisir un modèle de formulaire contre lequel vos documents doivent être comparés",
-        documentOutline: "Sélectionner une structure de plan pour générer votre rapport",
-        allUsersToggle: "Basculer entre l'affichage de votre historique uniquement ou de l'historique de tous les utilisateurs",
+        knowledgeBaseSelection:
+          "Choisir une base de connaissances qui contient les documents de référence et les normes pour l'analyse",
+        checklistSelection:
+          "Sélectionner une liste de contrôle avec des questions spécifiques pour évaluer vos documents",
+        fileUpload:
+          "Télécharger les documents que vous voulez analyser et réviser",
+        customInstructions:
+          "Ajouter des instructions spécifiques qui seront considérées lors de la réponse aux questions de la liste de contrôle",
+        searchMode:
+          "Choisir entre la recherche vectorielle rapide ou l'analyse complète des documents",
+        topicList:
+          "Sélectionner ou créer une liste de sujets pour cibler l'analyse de comparaison",
+        formTemplate:
+          "Choisir un modèle de formulaire contre lequel vos documents doivent être comparés",
+        documentOutline:
+          "Sélectionner une structure de plan pour générer votre rapport",
+        allUsersToggle:
+          "Basculer entre l'affichage de votre historique uniquement ou de l'historique de tous les utilisateurs",
 
-        createChecklist: "Créer une nouvelle liste de contrôle avec des questions personnalisées pour évaluer les documents selon des critères spécifiques",
-        createOutline: "Créer une nouvelle structure de plan pour guider la génération de rapports structurés",
-        createTopicList: "Créer une nouvelle liste de sujets pour concentrer l'analyse de comparaison sur des thèmes spécifiques",
-        createFormTemplate: "Créer un nouveau modèle de formulaire pour l'extraction et la correspondance automatisées du contenu de documents"
+        createChecklist:
+          "Créer une nouvelle liste de contrôle avec des questions personnalisées pour évaluer les documents selon des critères spécifiques",
+        createOutline:
+          "Créer une nouvelle structure de plan pour guider la génération de rapports structurés",
+        createTopicList:
+          "Créer une nouvelle liste de sujets pour concentrer l'analyse de comparaison sur des thèmes spécifiques",
+        createFormTemplate:
+          "Créer un nouveau modèle de formulaire pour l'extraction et la correspondance automatisées du contenu de documents",
       },
       review: {
         pageTitle: "Réviser les Documents",
-        pageDescription: "Réviser un document basé sur une liste de contrôle et une base de données de politiques définies par l'utilisateur.",
+        pageDescription:
+          "Réviser un document basé sur une liste de contrôle et une base de données de politiques définies par l'utilisateur.",
         knowledgeBaseTitle: "Base de Connaissances",
         knowledgeBaseDescription: "Cliquer pour sélectionner",
         checklistTitle: "Liste de Contrôle",
         checklistDescription: "Cliquer pour sélectionner",
         customInstructionsTitle: "Instructions Personnalisées (Optionnel)",
-        customInstructionsPlaceholder: "Entrez toute instruction supplémentaire qui devrait être considérée lors de la réponse aux questions de la liste de contrôle...",
-        customInstructionsHelp: "{{count}}/2000 caractères. Ces instructions seront ajoutées à chaque question lors du traitement.",
-        searchModeHelp: "La recherche vectorielle fournit des résultats rapides et ciblés. L'analyse complète du document examine tout le contenu de la base de connaissances.",
+        customInstructionsPlaceholder:
+          "Entrez toute instruction supplémentaire qui devrait être considérée lors de la réponse aux questions de la liste de contrôle...",
+        customInstructionsHelp:
+          "{{count}}/2000 caractères. Ces instructions seront ajoutées à chaque question lors du traitement.",
+        searchModeHelp:
+          "La recherche vectorielle fournit des résultats rapides et ciblés. L'analyse complète du document examine tout le contenu de la base de connaissances.",
         processingFile: "Traitement du fichier...",
         processingFiles: "Traitement des fichiers...",
         selectKnowledgeBaseTitle: "Sélectionner une Base de Connaissances",
         selectChecklistTitle: "Sélectionner une Liste de Contrôle",
         noResults: "Aucun résultat pour le moment",
-        uploadDocuments: "Téléchargez un ou plusieurs documents à réviser contre votre liste de contrôle sélectionnée",
+        uploadDocuments:
+          "Téléchargez un ou plusieurs documents à réviser contre votre liste de contrôle sélectionnée",
         results: "Résultats",
         downloadReport: "Télécharger le Rapport",
         downloadCsv: "Télécharger CSV",
@@ -1503,28 +1678,35 @@ const generateAllLanguageResources = () => {
         reportCopied: "Rapport copié dans le presse-papiers !",
         reviewButton: "Réviser",
         consultDocuments: "Consulter les documents",
-        noChecklistsAvailable: "Aucune liste de contrôle disponible. Créez votre première liste de contrôle pour commencer.",
+        noChecklistsAvailable:
+          "Aucune liste de contrôle disponible. Créez votre première liste de contrôle pour commencer.",
         createChecklist: "Créer une Liste de Contrôle",
         editChecklist: "Modifier la Liste de Contrôle",
         checklistName: "Nom de la Liste de Contrôle",
         checklistNamePlaceholder: "Entrez le nom de la liste de contrôle...",
         checklistDescriptionLabel: "Description",
-        checklistDescriptionPlaceholder: "Entrez la description de la liste de contrôle pour auto-suggérer des questions (minimum 10 caractères)...",
+        checklistDescriptionPlaceholder:
+          "Entrez la description de la liste de contrôle pour auto-suggérer des questions (minimum 10 caractères)...",
         questions: "Questions",
         suggest: "Suggérer",
         suggesting: "Suggestion en cours...",
         optimize: "Optimiser",
-        optimizeTooltip: "Une Base de Connaissances doit être sélectionnée pour que la fonction Optimiser soit activée",
-        optimizeTooltipEnabled: "Optimiser les questions basées sur la Base de Connaissances sélectionnée",
+        optimizeTooltip:
+          "Une Base de Connaissances doit être sélectionnée pour que la fonction Optimiser soit activée",
+        optimizeTooltipEnabled:
+          "Optimiser les questions basées sur la Base de Connaissances sélectionnée",
         uploadFiles: "Télécharger des Fichiers",
         knowledgeBase: "Base de Connaissances",
         referenceDocuments: "Documents de Référence (Optionnel)",
-        selectKnowledgeBasePlaceholder: "Sélectionner une Base de Connaissances...",
-        noKnowledgeBasesAvailable: "Aucune Base de Connaissances disponible. Créez-en une d'abord pour utiliser cette fonction.",
+        selectKnowledgeBasePlaceholder:
+          "Sélectionner une Base de Connaissances...",
+        noKnowledgeBasesAvailable:
+          "Aucune Base de Connaissances disponible. Créez-en une d'abord pour utiliser cette fonction.",
         copyQuestions: "Copier les Questions",
         questionsCopied: "Questions copiées dans le presse-papiers",
         noQuestionsToCopy: "Aucune question à copier",
-        failedToCopyQuestions: "Échec de la copie des questions dans le presse-papiers",
+        failedToCopyQuestions:
+          "Échec de la copie des questions dans le presse-papiers",
         saveChecklist: "Sauvegarder la Liste de Contrôle",
         cancel: "Annuler",
         deleteChecklist: "Supprimer la Liste de Contrôle",
@@ -1532,22 +1714,28 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "Fichiers Téléchargés",
 
         removeFile: "Supprimer",
-        characterCount: "{{count}}/2000 caractères. Ces instructions seront ajoutées à chaque question lors du traitement.",
+        characterCount:
+          "{{count}}/2000 caractères. Ces instructions seront ajoutées à chaque question lors du traitement.",
         searchMode: "Mode de Recherche",
         vectorSearch: "Recherche Vectorielle",
         fullDocumentScan: "Analyse Complète du Document",
-        vectorSearchDescription: "Trouve du contenu pertinent en utilisant la recherche de similarité IA (rapide, ciblé)",
-        fullScanDescription: "Analyse tous les documents dans la base de connaissances (complet, approfondi)"
+        vectorSearchDescription:
+          "Trouve du contenu pertinent en utilisant la recherche de similarité IA (rapide, ciblé)",
+        fullScanDescription:
+          "Analyse tous les documents dans la base de connaissances (complet, approfondi)",
       },
       generate: {
-        pageDescription: "Générer un document basé sur une liste de contrôle définie par l'utilisateur et une base de données de documents.",
+        pageDescription:
+          "Générer un document basé sur une liste de contrôle définie par l'utilisateur et une base de données de documents.",
         generatingDocument: "Génération du document...",
         knowledgeBaseTitle: "Base de Connaissances",
         documentOutlineTitle: "Structure du Document",
         clickToSelect: "Cliquez pour sélectionner",
         customInstructionsTitle: "Instructions Personnalisées (Optionnel)",
-        customInstructionsPlaceholder: "Entrez toute instruction supplémentaire qui doit être prise en compte lors de la génération de chaque section du rapport...",
-        characterCount: "{{count}}/2000 caractères. Ces instructions seront ajoutées au prompt lors de la génération de chaque section.",
+        customInstructionsPlaceholder:
+          "Entrez toute instruction supplémentaire qui doit être prise en compte lors de la génération de chaque section du rapport...",
+        characterCount:
+          "{{count}}/2000 caractères. Ces instructions seront ajoutées au prompt lors de la génération de chaque section.",
         selectKnowledgeBaseTitle: "Sélectionner la Base de Connaissances",
         selectDocumentOutlineTitle: "Sélectionner la Structure du Document",
         generateButton: "Générer",
@@ -1557,14 +1745,16 @@ const generateAllLanguageResources = () => {
         downloadDocx: "Télécharger DOCX",
         downloadCsv: "Télécharger CSV",
         clearReport: "Effacer le Rapport",
-        resultsPlaceholder: "Les résultats apparaîtront ici après la génération d'un document.",
+        resultsPlaceholder:
+          "Les résultats apparaîtront ici après la génération d'un document.",
         sectionsWithSources: "Sections avec Sources",
         sectionNumber: "Section {number}: {title}",
         kbGenerated: "Généré par KB",
         rawText: "Texte Brut",
         viewSourceCitations: "Voir les Citations Sources ({count})",
         documentCopiedSuccess: "Document copié dans le presse-papiers",
-        documentCopiedError: "Échec de la copie du document dans le presse-papiers",
+        documentCopiedError:
+          "Échec de la copie du document dans le presse-papiers",
         documentDownloadSuccess: "Document téléchargé avec succès",
         documentDownloadError: "Échec du téléchargement du document : {error}",
         csvDownloadSuccess: "CSV téléchargé avec succès",
@@ -1576,36 +1766,39 @@ const generateAllLanguageResources = () => {
         generateError: "Échec de la génération du document : {error}",
         vectorSearch: "recherche vectorielle",
         fullDocumentScan: "analyse complète du document",
-        editOutline: "Modifier le Plan"
+        editOutline: "Modifier le Plan",
       },
       modelSelection: {
         llmManagement: "Gestion des LLM",
-        llmDescription: "Configurer et gérer les LLM utilisés pour générer des réponses textuelles. Le modèle par défaut sera utilisé pour toutes les opérations.",
+        llmDescription:
+          "Configurer et gérer les LLM utilisés pour générer des réponses textuelles. Le modèle par défaut sera utilisé pour toutes les opérations.",
         addNewLlm: "Ajouter un Nouveau LLM",
         noLlmsConfigured: "Aucun LLM configuré",
         addNewLlmToGetStarted: "Ajouter un nouveau LLM pour commencer",
         embeddingModelManagement: "Gestion des Modèles d'Embedding",
-        embeddingDescription: "Configurer et gérer les modèles d'embedding utilisés pour l'indexation et la récupération des bases de connaissances. Le modèle par défaut sera utilisé lors de la création de nouvelles bases de connaissances, mais chaque base de connaissances continuera d'utiliser son modèle d'embedding original même si le défaut change plus tard.",
+        embeddingDescription:
+          "Configurer et gérer les modèles d'embedding utilisés pour l'indexation et la récupération des bases de connaissances. Le modèle par défaut sera utilisé lors de la création de nouvelles bases de connaissances, mais chaque base de connaissances continuera d'utiliser son modèle d'embedding original même si le défaut change plus tard.",
         addEmbeddingModel: "Ajouter un Modèle d'Embedding",
         noEmbeddingModelsConfigured: "Aucun modèle d'embedding configuré",
-        addNewEmbeddingModelToGetStarted: "Ajouter un nouveau modèle d'embedding pour commencer",
+        addNewEmbeddingModelToGetStarted:
+          "Ajouter un nouveau modèle d'embedding pour commencer",
         tableHeaders: {
           name: "Nom",
           modelId: "ID du Modèle",
           provider: "Fournisseur",
           description: "Description",
           status: "Statut",
-          actions: "Actions"
+          actions: "Actions",
         },
         status: {
           default: "Par Défaut",
-          available: "Disponible"
+          available: "Disponible",
         },
         actions: {
           setAsDefault: "Définir par Défaut",
           delete: "Supprimer",
           validate: "Valider",
-          validating: "Validation en cours"
+          validating: "Validation en cours",
         },
         dialog: {
           addNewLlm: "Ajouter un Nouveau LLM",
@@ -1615,22 +1808,24 @@ const generateAllLanguageResources = () => {
           modelId: "ID du Modèle",
           description: "Description",
           cancel: "Annuler",
-          addModel: "Ajouter le Modèle"
+          addModel: "Ajouter le Modèle",
         },
         placeholders: {
           customModel: "ex., Mon Modèle Personnalisé",
           embeddingModelId: "ex., sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "Décrire le modèle, ses caractéristiques et quand l'utiliser"
+          describeModel:
+            "Décrire le modèle, ses caractéristiques et quand l'utiliser",
         },
         validation: {
-          pleaseEnterModelId: "Veuillez saisir un ID de modèle"
-        }
+          pleaseEnterModelId: "Veuillez saisir un ID de modèle",
+        },
       },
       knowledgeBases: {
         title: "Gestion des Bases de Connaissances",
         addKnowledgeBase: "Ajouter une Base de Connaissances",
         emptyStateTitle: "Vous n'avez encore aucune Base de Connaissances",
-        emptyStateDescription: "Ajouter une nouvelle Base de Connaissances pour commencer",
+        emptyStateDescription:
+          "Ajouter une nouvelle Base de Connaissances pour commencer",
         tableHeaders: {
           title: "Titre",
           description: "Description",
@@ -1638,45 +1833,51 @@ const generateAllLanguageResources = () => {
           embeddingModel: "Modèle d'Embedding",
           dateCreated: "Date de Création",
           dateModified: "Date de Modification",
-          actions: "Actions"
+          actions: "Actions",
         },
         status: {
           default: "Par Défaut",
-          na: "N/D"
+          na: "N/D",
         },
         actions: {
           view: "Voir",
           edit: "Modifier",
           delete: "Supprimer",
-          configure: "Configurer"
+          configure: "Configurer",
         },
         deleteModal: {
           title: "Supprimer la Base de Connaissances",
           buttonText: "Supprimer la Base de Connaissances",
-          description: "Cette Base de Connaissances sera supprimée définitivement. Êtes-vous sûr ? Vous ne pourrez pas annuler cette action.",
+          description:
+            "Cette Base de Connaissances sera supprimée définitivement. Êtes-vous sûr ? Vous ne pourrez pas annuler cette action.",
           confirmButton: "Supprimer",
           cancelButton: "Annuler",
-          successMessage: "La Base de Connaissances a été supprimée avec succès",
-          errorMessage: "Une erreur s'est produite lors de la suppression de la Base de Connaissances"
+          successMessage:
+            "La Base de Connaissances a été supprimée avec succès",
+          errorMessage:
+            "Une erreur s'est produite lors de la suppression de la Base de Connaissances",
         },
         modals: {
           add: {
             title: "Ajouter une Base de Connaissances",
-            description: "Créer une nouvelle base de connaissances en fournissant des détails et en téléchargeant des documents ci-dessous.",
+            description:
+              "Créer une nouvelle base de connaissances en fournissant des détails et en téléchargeant des documents ci-dessous.",
           },
           edit: {
             title: "Modifier la Base de Connaissances",
-            description: "Mettre à jour les détails de la Base de Connaissances ci-dessous.",
+            description:
+              "Mettre à jour les détails de la Base de Connaissances ci-dessous.",
           },
           fields: {
             title: "Titre",
-            description: "Description"
+            description: "Description",
           },
           fileUpload: {
             currentFiles: "Fichiers Actuels",
             newFiles: "Nouveaux Fichiers",
             selectedFiles: "Fichiers Sélectionnés",
-            dragAndDrop: "Glissez-déposez des fichiers ici, ou cliquez pour parcourir",
+            dragAndDrop:
+              "Glissez-déposez des fichiers ici, ou cliquez pour parcourir",
             dropFiles: "Déposez les fichiers ici...",
             removeFile: "Supprimer le fichier",
             supportedFormats: "Soutient: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
@@ -1686,16 +1887,17 @@ const generateAllLanguageResources = () => {
             create: "Créer",
             save: "Enregistrer",
             saving: "Enregistrement...",
-            creating: "Création..."
+            creating: "Création...",
           },
           validation: {
-            titleRequired: "Le titre est requis"
+            titleRequired: "Le titre est requis",
           },
           messages: {
             createSuccess: "Base de Connaissances créée avec succès.",
             updateSuccess: "Base de Connaissances mise à jour avec succès.",
             processing: "Traitement...",
-            pleaseWait: "Veuillez patienter pendant que nous traitons vos fichiers...",
+            pleaseWait:
+              "Veuillez patienter pendant que nous traitons vos fichiers...",
           },
         },
       },
@@ -1726,10 +1928,12 @@ const generateAllLanguageResources = () => {
       },
       compare: {
         title: "Comparer les Documents",
-        subtitle: "Comparez et analysez plusieurs documents pour trouver des différences, similitudes et modèles",
+        subtitle:
+          "Comparez et analysez plusieurs documents pour trouver des différences, similitudes et modèles",
         sourceSectionTitle: "Sélectionner les Documents Source",
         referenceSectionTitle: "Sélectionner les Documents de Référence",
-        sourcePlaceholder: "Sélectionnez des documents pour l'analyse source...",
+        sourcePlaceholder:
+          "Sélectionnez des documents pour l'analyse source...",
         referencePlaceholder: "Sélectionnez des documents à comparer contre...",
         compareButton: "Comparer les Documents",
         noSourceSelected: "Aucun document source sélectionné",
@@ -1744,13 +1948,13 @@ const generateAllLanguageResources = () => {
           comprehensive: "Analyse Complète",
           structural: "Comparaison Structurelle",
           content: "Analyse de Contenu",
-          chronological: "Analyse Chronologique"
+          chronological: "Analyse Chronologique",
         },
         analysisDepth: "Profondeur de l'Analyse",
         analysisDepths: {
           surface: "Analyse de Surface",
           detailed: "Analyse Détaillée",
-          comprehensive: "Analyse Complète"
+          comprehensive: "Analyse Complète",
         },
         generateReport: "Générer un Rapport de Comparaison",
         comparing: "Comparaison des documents...",
@@ -1775,15 +1979,18 @@ const generateAllLanguageResources = () => {
         clickToBrowse: "Cliquez pour parcourir ou glissez-déposez",
         supportedFormats: "Supporte PDF, TXT et DOCX",
         editTopicList: "Modifier la Liste des Sujets",
-        selectTopicListTitle: "Sélectionner une Liste de Sujets"
+        selectTopicListTitle: "Sélectionner une Liste de Sujets",
       },
       match: {
         title: "Correspondre les Documents",
-        subtitle: "Trouvez des documents similaires et analysez les modèles de correspondance dans votre base de connaissances",
+        subtitle:
+          "Trouvez des documents similaires et analysez les modèles de correspondance dans votre base de connaissances",
         sourceSectionTitle: "Sélectionner le Document Source",
         searchInTitle: "Rechercher Dans",
-        sourcePlaceholder: "Sélectionnez un document comme source de référence...",
-        searchPlaceholder: "Sélectionnez des documents ou une base de connaissances pour rechercher...",
+        sourcePlaceholder:
+          "Sélectionnez un document comme source de référence...",
+        searchPlaceholder:
+          "Sélectionnez des documents ou une base de connaissances pour rechercher...",
         findMatchesButton: "Trouver des Correspondances",
         noSourceSelected: "Aucun document source sélectionné",
         noSearchTargetSelected: "Aucune cible de recherche sélectionnée",
@@ -1795,14 +2002,14 @@ const generateAllLanguageResources = () => {
           keyword: "Correspondance de Mots-clés",
           structural: "Similitude Structurelle",
           content: "Analyse de Contenu",
-          contextual: "Correspondance Contextuelle"
+          contextual: "Correspondance Contextuelle",
         },
         threshold: "Seuil de Similitude",
         thresholds: {
           low: "Bas (30%)",
           medium: "Moyen (50%)",
           high: "Élevé (70%)",
-          veryHigh: "Très Élevé (90%)"
+          veryHigh: "Très Élevé (90%)",
         },
         maxResults: "Maximum de Résultats",
         searching: "Recherche de correspondances...",
@@ -1815,35 +2022,39 @@ const generateAllLanguageResources = () => {
         exportMatches: "Exporter les Correspondances",
         clearResults: "Effacer les Résultats",
         newMatch: "Nouvelle Correspondance",
-        selectDocument: "Sélectionnez un document pour trouver des correspondances",
+        selectDocument:
+          "Sélectionnez un document pour trouver des correspondances",
         pleaseSelect: "Veuillez sélectionner un document...",
         sourceDocument: "Document Source",
         matchingDocuments: "Documents Correspondants",
         findMatches: "Trouver des Correspondances",
         similarityScore: "Score de Similitude",
         noDocumentsFound: "Aucun document trouvé",
-        selectDocumentToMatch: "Veuillez sélectionner un document pour trouver des correspondances",
+        selectDocumentToMatch:
+          "Veuillez sélectionner un document pour trouver des correspondances",
         loadingMatches: "Recherche de correspondances...",
         noMatchesFound: "Aucun document similaire trouvé",
         matchResults: "Résultats de Correspondance",
         similarity: "Similitude",
         editFormTemplate: "Modifier le Modèle de Formulaire",
-        selectFormTemplateTitle: "Sélectionner un Modèle de Formulaire"
+        selectFormTemplateTitle: "Sélectionner un Modèle de Formulaire",
       },
       editFormTemplateModal: {
         title: "Modifier le Modèle de Formulaire",
         formTemplateName: "Nom du Modèle de Formulaire",
         formTemplateNamePlaceholder: "Entrez le nom du modèle de formulaire",
         formTemplateDescription: "Description du Modèle de Formulaire",
-        descriptionPlaceholder: "Entrez la description du modèle de formulaire pour suggérer automatiquement les champs (minimum 10 caractères)...",
+        descriptionPlaceholder:
+          "Entrez la description du modèle de formulaire pour suggérer automatiquement les champs (minimum 10 caractères)...",
         referenceDocuments: "Documents de Référence (Optionnel)",
         uploadFiles: "Télécharger des Fichiers",
         knowledgeBase: "Base de Connaissances",
         formFields: "Champs du Formulaire",
         suggest: "Suggérer",
-        fieldPlaceholder: "Ajoutez un nom de champ (ex., Prénom, Adresse, Numéro de Sécurité Sociale) ou suggérez à partir de la description",
+        fieldPlaceholder:
+          "Ajoutez un nom de champ (ex., Prénom, Adresse, Numéro de Sécurité Sociale) ou suggérez à partir de la description",
         cancel: "Annuler",
-        updateFormTemplate: "Mettre à Jour le Modèle de Formulaire"
+        updateFormTemplate: "Mettre à Jour le Modèle de Formulaire",
       },
       editOutlineModal: {
         title: "Modifier le Plan",
@@ -1851,7 +2062,8 @@ const generateAllLanguageResources = () => {
         outlineName: "Nom du Plan",
         outlineNamePlaceholder: "Entrez le nom du plan",
         description: "Description",
-        descriptionPlaceholder: "Entrez la description du plan pour suggérer automatiquement les sections (minimum 10 caractères)...",
+        descriptionPlaceholder:
+          "Entrez la description du plan pour suggérer automatiquement les sections (minimum 10 caractères)...",
         referenceDocuments: "Documents de Référence (Optionnel)",
         uploadFiles: "Télécharger des Fichiers",
         knowledgeBase: "Base de Connaissances",
@@ -1861,7 +2073,7 @@ const generateAllLanguageResources = () => {
         addSectionPlaceholder: "Ajouter une section",
         cancel: "Annuler",
         createOutline: "Créer un Plan",
-        updateOutline: "Mettre à Jour le Plan"
+        updateOutline: "Mettre à Jour le Plan",
       },
       editChecklistModal: {
         title: "Modifier la Liste de Contrôle",
@@ -1869,7 +2081,8 @@ const generateAllLanguageResources = () => {
         checklistName: "Nom de la Liste de Contrôle",
         checklistNamePlaceholder: "Entrez le nom de la liste de contrôle",
         description: "Description",
-        descriptionPlaceholder: "Entrez la description de la liste de contrôle pour suggérer automatiquement les questions (minimum 10 caractères)...",
+        descriptionPlaceholder:
+          "Entrez la description de la liste de contrôle pour suggérer automatiquement les questions (minimum 10 caractères)...",
         referenceDocuments: "Documents de Référence (Optionnel)",
         uploadFiles: "Télécharger des Fichiers",
         knowledgeBase: "Base de Connaissances",
@@ -1880,7 +2093,7 @@ const generateAllLanguageResources = () => {
         copyAllQuestions: "Copier toutes les questions en texte",
         cancel: "Annuler",
         createChecklist: "Créer une Liste de Contrôle",
-        updateChecklist: "Mettre à Jour la Liste de Contrôle"
+        updateChecklist: "Mettre à Jour la Liste de Contrôle",
       },
       editTopicListModal: {
         title: "Modifier la Liste de Sujets",
@@ -1888,7 +2101,8 @@ const generateAllLanguageResources = () => {
         topicListName: "Nom de la Liste de Sujets",
         topicListNamePlaceholder: "Entrez le nom de la liste de sujets",
         description: "Description de la Liste de Sujets",
-        descriptionPlaceholder: "Entrez la description de la liste de sujets pour suggérer automatiquement les sujets (minimum 10 caractères)...",
+        descriptionPlaceholder:
+          "Entrez la description de la liste de sujets pour suggérer automatiquement les sujets (minimum 10 caractères)...",
         referenceDocuments: "Documents de Référence (Optionnel)",
         uploadFiles: "Télécharger des Fichiers",
         knowledgeBase: "Base de Connaissances",
@@ -1899,7 +2113,7 @@ const generateAllLanguageResources = () => {
         copyAllTopics: "Copier tous les sujets en texte",
         cancel: "Annuler",
         createTopicList: "Créer une Liste de Sujets",
-        updateTopicList: "Mettre à Jour la Liste de Sujets"
+        updateTopicList: "Mettre à Jour la Liste de Sujets",
       },
       editCustom: {
         title: "Modifier les Instructions Personnalisées",
@@ -1910,10 +2124,12 @@ const generateAllLanguageResources = () => {
       optimizeChecklistModal: {
         title: "Optimiser la Liste de Contrôle",
         customInstructionsLabel: "Instructions Personnalisées (Optionnel)",
-        customInstructionsHelperText: "Entrez toute instruction supplémentaire qui devrait être considérée lors de la réponse aux questions de la liste de contrôle",
+        customInstructionsHelperText:
+          "Entrez toute instruction supplémentaire qui devrait être considérée lors de la réponse aux questions de la liste de contrôle",
         analyzing: "Analyse en cours...",
         analyzeButton: "Analyser la Liste de Contrôle",
-        analyzingMessage: "Analyse de votre liste de contrôle pour les opportunités d'optimisation...",
+        analyzingMessage:
+          "Analyse de votre liste de contrôle pour les opportunités d'optimisation...",
         cancelAnalysis: "Annuler l'Analyse",
         downloading: "Téléchargement...",
         downloadCsv: "Télécharger CSV",
@@ -1927,20 +2143,27 @@ const generateAllLanguageResources = () => {
         currentAnswer: "Réponse Actuelle",
         showLess: "Montrer Moins",
         showMore: "Montrer Plus",
-        optimizationsSelectedText: "optimisation{{s}} sélectionnée{{s}} pour application",
+        optimizationsSelectedText:
+          "optimisation{{s}} sélectionnée{{s}} pour application",
         applying: "Application...",
         applySelectedOptimizations: "Appliquer les Optimisations Sélectionnées",
-        uploadDocumentsTitle: "Téléchargez le(s) document(s) qui devrait être accepté par la liste de contrôle *",
-        uploadDocumentsHelperText: "Téléchargez des documents qui devraient répondre à toutes les exigences de la liste de contrôle pour aider à identifier les questions qui peuvent être trop strictes",
-        customInstructionsPlaceholder: "ex., Considérez qu'il s'agit d'une étude pédiatrique lors de l'évaluation des exigences liées à l'âge, Ce protocole est pour une intervention à faible risque, etc."
+        uploadDocumentsTitle:
+          "Téléchargez le(s) document(s) qui devrait être accepté par la liste de contrôle *",
+        uploadDocumentsHelperText:
+          "Téléchargez des documents qui devraient répondre à toutes les exigences de la liste de contrôle pour aider à identifier les questions qui peuvent être trop strictes",
+        customInstructionsPlaceholder:
+          "ex., Considérez qu'il s'agit d'une étude pédiatrique lors de l'évaluation des exigences liées à l'âge, Ce protocole est pour une intervention à faible risque, etc.",
       },
       optimizeOutlineModal: {
         title: "Optimiser le Plan",
-        description: "Téléchargez un document de référence qui représente un exemple de haute qualité du type de rapport que vous souhaitez générer. Le système générera un rapport en utilisant votre plan actuel et votre base de connaissances, le comparera à la référence et suggérera des améliorations aux sections de votre plan.",
+        description:
+          "Téléchargez un document de référence qui représente un exemple de haute qualité du type de rapport que vous souhaitez générer. Le système générera un rapport en utilisant votre plan actuel et votre base de connaissances, le comparera à la référence et suggérera des améliorations aux sections de votre plan.",
         groundTruthDocument: "Document de Référence",
         customInstructionsLabel: "Instructions Personnalisées (Optionnel)",
-        customInstructionsHelperText: "Fournissez des orientations supplémentaires pour le processus d'optimisation",
-        customInstructionsPlaceholder: "ex., Se concentrer sur l'amélioration de la profondeur technique, assurer la conformité aux normes spécifiques, etc.",
+        customInstructionsHelperText:
+          "Fournissez des orientations supplémentaires pour le processus d'optimisation",
+        customInstructionsPlaceholder:
+          "ex., Se concentrer sur l'amélioration de la profondeur technique, assurer la conformité aux normes spécifiques, etc.",
         characters: "caractères",
         analyzingOutline: "Analyse du plan et génération d'optimisations...",
         cancelAnalysis: "Annuler l'Analyse",
@@ -1960,8 +2183,8 @@ const generateAllLanguageResources = () => {
         cancel: "Annuler",
         optimizing: "Optimisation...",
         optimizeOutline: "Optimiser le Plan",
-        applyOptimizations: "Appliquer {{count}} Optimisation{{s}}"
-      }
+        applyOptimizations: "Appliquer {{count}} Optimisation{{s}}",
+      },
     },
   }
 
@@ -2029,8 +2252,10 @@ const generateAllLanguageResources = () => {
         searchMode: "Suchmodus:",
         vectorSearch: "Vektorsuche",
         fullTextScan: "Volltextsuche",
-        searchModeDescription: "Vektorsuche bietet schnelle, gezielte Ergebnisse. Volltextsuche überprüft alle Inhalte in der Wissensbasis.",
-        askMeAnything: "Fragen Sie mich alles! Für die Wissensbasis-Suche wählen Sie zuerst eine Wissensbasis aus.",
+        searchModeDescription:
+          "Vektorsuche bietet schnelle, gezielte Ergebnisse. Volltextsuche überprüft alle Inhalte in der Wissensbasis.",
+        askMeAnything:
+          "Fragen Sie mich alles! Für die Wissensbasis-Suche wählen Sie zuerst eine Wissensbasis aus.",
         usingGeneralAI: "Verwende allgemeine KI-Assistenz",
         usingKnowledgeBase: "Verwende Wissensbasis:",
         usingDocuments: "Verwende # Dokument(e)",
@@ -2047,21 +2272,28 @@ const generateAllLanguageResources = () => {
         knowledgeBaseTableSources: "Quellen",
         knowledgeBaseTablePages: "Seiten",
         selectKnowledgeBasePlaceholder: "Wählen Sie eine Wissensbasis...",
-        noKnowledgeBasesAvailable: "Keine Wissensbasis verfügbar. Erstellen Sie zuerst eine, um diese Funktion zu nutzen.",
+        noKnowledgeBasesAvailable:
+          "Keine Wissensbasis verfügbar. Erstellen Sie zuerst eine, um diese Funktion zu nutzen.",
         knowledgeBase: "Wissensbasis",
         file: "Datei",
-        welcomeMessageWithSource: "Wählen Sie eine Wissensbasis aus oder laden Sie Dateien hoch, dann stellen Sie eine Frage.",
-        welcomeMessageGeneral: "Fragen Sie mich alles! Für die Wissensbasis-Suche wählen Sie zuerst eine Wissensbasis aus.",
+        welcomeMessageWithSource:
+          "Wählen Sie eine Wissensbasis aus oder laden Sie Dateien hoch, dann stellen Sie eine Frage.",
+        welcomeMessageGeneral:
+          "Fragen Sie mich alles! Für die Wissensbasis-Suche wählen Sie zuerst eine Wissensbasis aus.",
         sourcePopover: {
           knowledgeBase: "Wissensbasis",
           file: "Datei",
         },
         errors: {
-          generic: "Entschuldigung, etwas ist schief gelaufen. Bitte versuchen Sie es erneut.",
-          timeout: "Zeitüberschreitung der Anfrage. Bitte versuchen Sie es erneut.",
-          largeFileTimeout: "Zeitüberschreitung bei der Verarbeitung großer Dateien. Versuchen Sie den 'Volltextsuche'-Modus für bessere Leistung mit großen Dateien.",
+          generic:
+            "Entschuldigung, etwas ist schief gelaufen. Bitte versuchen Sie es erneut.",
+          timeout:
+            "Zeitüberschreitung der Anfrage. Bitte versuchen Sie es erneut.",
+          largeFileTimeout:
+            "Zeitüberschreitung bei der Verarbeitung großer Dateien. Versuchen Sie den 'Volltextsuche'-Modus für bessere Leistung mit großen Dateien.",
           fileSize: "Datei ist zu groß. Bitte wählen Sie kleinere Dateien.",
-          serverError: "Server-Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+          serverError:
+            "Server-Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
         },
       },
       settings: {
@@ -2088,11 +2320,13 @@ const generateAllLanguageResources = () => {
         lightMode: "Heller Modus",
         darkMode: "Dunkler Modus",
         // Danger Zone section
-        deleteAccountDescription: "Ihre Daten und alles, was mit Ihrem Konto verknüpft ist, dauerhaft löschen.",
+        deleteAccountDescription:
+          "Ihre Daten und alles, was mit Ihrem Konto verknüpft ist, dauerhaft löschen.",
         delete: "Löschen",
         confirmationRequired: "Bestätigung Erforderlich",
-        deleteConfirmationText: "Alle Ihre Kontodaten werden dauerhaft gelöscht. Wenn Sie sicher sind, klicken Sie bitte auf \"Bestätigen\", um fortzufahren. Diese Aktion kann nicht rückgängig gemacht werden.",
-        cancel: "Abbrechen"
+        deleteConfirmationText:
+          'Alle Ihre Kontodaten werden dauerhaft gelöscht. Wenn Sie sicher sind, klicken Sie bitte auf "Bestätigen", um fortzufahren. Diese Aktion kann nicht rückgängig gemacht werden.',
+        cancel: "Abbrechen",
       },
       errors: {
         somethingWentWrong: "Etwas ist schief gelaufen",
@@ -2107,7 +2341,8 @@ const generateAllLanguageResources = () => {
       help: {
         dashboard:
           "Hauptübersichtsseite mit Nutzungsstatistiken und aktueller Aktivität",
-        usageStats: "Sehen Sie Ihre aktuelle API-Token-Nutzung und Quota-Informationen für den aktuellen Abrechnungszeitraum",
+        usageStats:
+          "Sehen Sie Ihre aktuelle API-Token-Nutzung und Quota-Informationen für den aktuellen Abrechnungszeitraum",
         review:
           "Dokumente gegen Qualitätschecklisten auf Compliance und Genauigkeit analysieren",
         generate:
@@ -2124,38 +2359,56 @@ const generateAllLanguageResources = () => {
         settings:
           "Ihre Kontoeinstellungen und Anwendungseinstellungen konfigurieren",
         admin: "Administrative Funktionen für Benutzer- und Systemverwaltung",
-        knowledgeBaseSelection: "Wählen Sie eine Wissensdatenbank, die die Referenzdokumente und Standards für die Analyse enthält",
-        checklistSelection: "Wählen Sie eine Checkliste mit spezifischen Fragen zur Bewertung Ihrer Dokumente",
-        fileUpload: "Laden Sie die Dokumente hoch, die Sie analysieren und überprüfen möchten",
-        customInstructions: "Fügen Sie spezifische Anweisungen hinzu, die bei der Beantwortung von Checklisten-Fragen berücksichtigt werden",
-        searchMode: "Wählen Sie zwischen schneller Vektorsuche oder umfassender Volldokument-Scan",
-        topicList: "Wählen oder erstellen Sie eine Themenliste, um die Vergleichsanalyse zu fokussieren",
-        formTemplate: "Wählen Sie eine Formularvorlage, gegen die Ihre Dokumente abgeglichen werden sollen",
-        documentOutline: "Wählen Sie eine Gliederungsstruktur für die Erstellung Ihres Berichts",
-        allUsersToggle: "Zwischen der Anzeige nur Ihrer Historie oder der Historie aller Benutzer wechseln",
+        knowledgeBaseSelection:
+          "Wählen Sie eine Wissensdatenbank, die die Referenzdokumente und Standards für die Analyse enthält",
+        checklistSelection:
+          "Wählen Sie eine Checkliste mit spezifischen Fragen zur Bewertung Ihrer Dokumente",
+        fileUpload:
+          "Laden Sie die Dokumente hoch, die Sie analysieren und überprüfen möchten",
+        customInstructions:
+          "Fügen Sie spezifische Anweisungen hinzu, die bei der Beantwortung von Checklisten-Fragen berücksichtigt werden",
+        searchMode:
+          "Wählen Sie zwischen schneller Vektorsuche oder umfassender Volldokument-Scan",
+        topicList:
+          "Wählen oder erstellen Sie eine Themenliste, um die Vergleichsanalyse zu fokussieren",
+        formTemplate:
+          "Wählen Sie eine Formularvorlage, gegen die Ihre Dokumente abgeglichen werden sollen",
+        documentOutline:
+          "Wählen Sie eine Gliederungsstruktur für die Erstellung Ihres Berichts",
+        allUsersToggle:
+          "Zwischen der Anzeige nur Ihrer Historie oder der Historie aller Benutzer wechseln",
 
-        createChecklist: "Erstellen Sie eine neue Checkliste mit benutzerdefinierten Fragen zur Bewertung von Dokumenten anhand spezifischer Kriterien",
-        createOutline: "Erstellen Sie eine neue Gliederungsstruktur zur Anleitung der Erstellung strukturierter Berichte",
-        createTopicList: "Erstellen Sie eine neue Themenliste, um die Vergleichsanalyse auf spezifische Themen zu fokussieren",
-        createFormTemplate: "Erstellen Sie eine neue Formularvorlage für die automatisierte Dokumenteninhaltsextraktion und -zuordnung"
+        createChecklist:
+          "Erstellen Sie eine neue Checkliste mit benutzerdefinierten Fragen zur Bewertung von Dokumenten anhand spezifischer Kriterien",
+        createOutline:
+          "Erstellen Sie eine neue Gliederungsstruktur zur Anleitung der Erstellung strukturierter Berichte",
+        createTopicList:
+          "Erstellen Sie eine neue Themenliste, um die Vergleichsanalyse auf spezifische Themen zu fokussieren",
+        createFormTemplate:
+          "Erstellen Sie eine neue Formularvorlage für die automatisierte Dokumenteninhaltsextraktion und -zuordnung",
       },
       review: {
         pageTitle: "Dokumente Überprüfen",
-        pageDescription: "Ein Dokument basierend auf einer benutzerdefinierten Checkliste und Richtliniendatenbank überprüfen.",
+        pageDescription:
+          "Ein Dokument basierend auf einer benutzerdefinierten Checkliste und Richtliniendatenbank überprüfen.",
         knowledgeBaseTitle: "Wissensbasis",
         knowledgeBaseDescription: "Zum Auswählen klicken",
         checklistTitle: "Checkliste",
         checklistDescription: "Zum Auswählen klicken",
         customInstructionsTitle: "Benutzerdefinierte Anweisungen (Optional)",
-        customInstructionsPlaceholder: "Geben Sie zusätzliche Anweisungen ein, die bei der Beantwortung der Checklisten-Fragen berücksichtigt werden sollen...",
-        customInstructionsHelp: "{{count}}/2000 Zeichen. Diese Anweisungen werden zu jeder Frage während der Verarbeitung hinzugefügt.",
-        searchModeHelp: "Die Vektorsuche liefert schnelle, gezielte Ergebnisse. Die vollständige Dokumentanalyse untersucht alle Inhalte der Wissensbasis.",
+        customInstructionsPlaceholder:
+          "Geben Sie zusätzliche Anweisungen ein, die bei der Beantwortung der Checklisten-Fragen berücksichtigt werden sollen...",
+        customInstructionsHelp:
+          "{{count}}/2000 Zeichen. Diese Anweisungen werden zu jeder Frage während der Verarbeitung hinzugefügt.",
+        searchModeHelp:
+          "Die Vektorsuche liefert schnelle, gezielte Ergebnisse. Die vollständige Dokumentanalyse untersucht alle Inhalte der Wissensbasis.",
         processingFile: "Datei wird verarbeitet...",
         processingFiles: "Dateien werden verarbeitet...",
         selectKnowledgeBaseTitle: "Wissensbasis auswählen",
         selectChecklistTitle: "Checkliste auswählen",
         noResults: "Noch keine Ergebnisse",
-        uploadDocuments: "Laden Sie ein oder mehrere Dokumente hoch, um sie gegen Ihre ausgewählte Checkliste zu überprüfen",
+        uploadDocuments:
+          "Laden Sie ein oder mehrere Dokumente hoch, um sie gegen Ihre ausgewählte Checkliste zu überprüfen",
         results: "Ergebnisse",
         downloadReport: "Bericht herunterladen",
         downloadCsv: "CSV herunterladen",
@@ -2164,28 +2417,34 @@ const generateAllLanguageResources = () => {
         reportCopied: "Bericht in die Zwischenablage kopiert!",
         reviewButton: "Überprüfen",
         consultDocuments: "Dokumente konsultieren",
-        noChecklistsAvailable: "Keine Checklisten verfügbar. Erstellen Sie Ihre erste Checkliste, um zu beginnen.",
+        noChecklistsAvailable:
+          "Keine Checklisten verfügbar. Erstellen Sie Ihre erste Checkliste, um zu beginnen.",
         createChecklist: "Checkliste erstellen",
         editChecklist: "Checkliste bearbeiten",
         checklistName: "Checklisten-Name",
         checklistNamePlaceholder: "Checklisten-Namen eingeben...",
         checklistDescriptionLabel: "Beschreibung",
-        checklistDescriptionPlaceholder: "Checklisten-Beschreibung für automatische Fragenvorschläge eingeben (mindestens 10 Zeichen)...",
+        checklistDescriptionPlaceholder:
+          "Checklisten-Beschreibung für automatische Fragenvorschläge eingeben (mindestens 10 Zeichen)...",
         questions: "Fragen",
         suggest: "Vorschlagen",
         suggesting: "Vorschläge werden erstellt...",
         optimize: "Optimieren",
-        optimizeTooltip: "Eine Wissensbasis muss ausgewählt werden, um die Optimieren-Funktion zu aktivieren",
-        optimizeTooltipEnabled: "Fragen basierend auf der ausgewählten Wissensbasis optimieren",
+        optimizeTooltip:
+          "Eine Wissensbasis muss ausgewählt werden, um die Optimieren-Funktion zu aktivieren",
+        optimizeTooltipEnabled:
+          "Fragen basierend auf der ausgewählten Wissensbasis optimieren",
         uploadFiles: "Dateien hochladen",
         knowledgeBase: "Wissensbasis",
         referenceDocuments: "Referenzdokumente (Optional)",
         selectKnowledgeBasePlaceholder: "Wissensbasis auswählen...",
-        noKnowledgeBasesAvailable: "Keine Wissensbasis verfügbar. Erstellen Sie zuerst eine, um diese Funktion zu nutzen.",
+        noKnowledgeBasesAvailable:
+          "Keine Wissensbasis verfügbar. Erstellen Sie zuerst eine, um diese Funktion zu nutzen.",
         copyQuestions: "Fragen kopieren",
         questionsCopied: "Fragen in die Zwischenablage kopiert",
         noQuestionsToCopy: "Keine Fragen zum Kopieren",
-        failedToCopyQuestions: "Fragen konnten nicht in die Zwischenablage kopiert werden",
+        failedToCopyQuestions:
+          "Fragen konnten nicht in die Zwischenablage kopiert werden",
         saveChecklist: "Checkliste speichern",
         cancel: "Abbrechen",
         deleteChecklist: "Checkliste löschen",
@@ -2193,22 +2452,28 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "Hochgeladene Dateien",
 
         removeFile: "Entfernen",
-        characterCount: "{{count}}/2000 Zeichen. Diese Anweisungen werden bei der Verarbeitung an jede Frage angehängt.",
+        characterCount:
+          "{{count}}/2000 Zeichen. Diese Anweisungen werden bei der Verarbeitung an jede Frage angehängt.",
         searchMode: "Suchmodus",
         vectorSearch: "Vektorsuche",
         fullDocumentScan: "Vollständige Dokumentanalyse",
-        vectorSearchDescription: "Findet relevanten Inhalt mit KI-Ähnlichkeitssuche (schnell, gezielt)",
-        fullScanDescription: "Analysiert alle Dokumente in der Wissensbasis (umfassend, gründlich)"
+        vectorSearchDescription:
+          "Findet relevanten Inhalt mit KI-Ähnlichkeitssuche (schnell, gezielt)",
+        fullScanDescription:
+          "Analysiert alle Dokumente in der Wissensbasis (umfassend, gründlich)",
       },
       generate: {
-        pageDescription: "Erstellen Sie ein Dokument basierend auf einer benutzerdefinierten Checkliste und Dokumentendatenbank.",
+        pageDescription:
+          "Erstellen Sie ein Dokument basierend auf einer benutzerdefinierten Checkliste und Dokumentendatenbank.",
         generatingDocument: "Dokument wird erstellt...",
         knowledgeBaseTitle: "Wissensbasis",
         documentOutlineTitle: "Dokumentstruktur",
         clickToSelect: "Klicken Sie zum Auswählen",
         customInstructionsTitle: "Benutzerdefinierte Anweisungen (Optional)",
-        customInstructionsPlaceholder: "Geben Sie zusätzliche Anweisungen ein, die bei der Erstellung jedes Berichtsabschnitts berücksichtigt werden sollen...",
-        characterCount: "{{count}}/2000 Zeichen. Diese Anweisungen werden beim Erstellen jedes Abschnitts zum Prompt hinzugefügt.",
+        customInstructionsPlaceholder:
+          "Geben Sie zusätzliche Anweisungen ein, die bei der Erstellung jedes Berichtsabschnitts berücksichtigt werden sollen...",
+        characterCount:
+          "{{count}}/2000 Zeichen. Diese Anweisungen werden beim Erstellen jedes Abschnitts zum Prompt hinzugefügt.",
         selectKnowledgeBaseTitle: "Wissensbasis Auswählen",
         selectDocumentOutlineTitle: "Dokumentstruktur Auswählen",
         generateButton: "Erstellen",
@@ -2218,55 +2483,62 @@ const generateAllLanguageResources = () => {
         downloadDocx: "DOCX Herunterladen",
         downloadCsv: "CSV Herunterladen",
         clearReport: "Bericht Löschen",
-        resultsPlaceholder: "Ergebnisse werden hier nach der Dokumenterstellung angezeigt.",
+        resultsPlaceholder:
+          "Ergebnisse werden hier nach der Dokumenterstellung angezeigt.",
         sectionsWithSources: "Abschnitte mit Quellen",
         sectionNumber: "Abschnitt {number}: {title}",
         kbGenerated: "KB Generiert",
         rawText: "Rohtext",
         viewSourceCitations: "Quellenzitate Anzeigen ({count})",
         documentCopiedSuccess: "Dokument in Zwischenablage kopiert",
-        documentCopiedError: "Fehler beim Kopieren des Dokuments in die Zwischenablage",
+        documentCopiedError:
+          "Fehler beim Kopieren des Dokuments in die Zwischenablage",
         documentDownloadSuccess: "Dokument erfolgreich heruntergeladen",
-        documentDownloadError: "Fehler beim Herunterladen des Dokuments: {error}",
+        documentDownloadError:
+          "Fehler beim Herunterladen des Dokuments: {error}",
         csvDownloadSuccess: "CSV erfolgreich heruntergeladen",
         csvDownloadError: "Fehler beim Herunterladen der CSV: {error}",
         reportClearedSuccess: "Generierter Bericht gelöscht",
-        enterAtLeastOneSection: "Bitte geben Sie mindestens einen Abschnitt ein",
+        enterAtLeastOneSection:
+          "Bitte geben Sie mindestens einen Abschnitt ein",
         selectKnowledgeBase: "Bitte wählen Sie eine Wissensbasis aus",
         generateSuccess: "Bericht erfolgreich erstellt mit {method}!",
         generateError: "Fehler beim Erstellen des Dokuments: {error}",
         vectorSearch: "Vektorsuche",
         fullDocumentScan: "vollständige Dokumentanalyse",
-        editOutline: "Gliederung Bearbeiten"
+        editOutline: "Gliederung Bearbeiten",
       },
       modelSelection: {
         llmManagement: "LLM-Verwaltung",
-        llmDescription: "Konfigurieren und verwalten Sie die LLMs, die zum Generieren von Textantworten verwendet werden. Das Standardmodell wird für alle Operationen verwendet.",
+        llmDescription:
+          "Konfigurieren und verwalten Sie die LLMs, die zum Generieren von Textantworten verwendet werden. Das Standardmodell wird für alle Operationen verwendet.",
         addNewLlm: "Neues LLM hinzufügen",
         noLlmsConfigured: "Keine LLMs konfiguriert",
         addNewLlmToGetStarted: "Fügen Sie ein neues LLM hinzu, um zu beginnen",
         embeddingModelManagement: "Embedding-Modell-Verwaltung",
-        embeddingDescription: "Konfigurieren und verwalten Sie die Embedding-Modelle, die für die Indexierung und den Abruf von Wissensbasen verwendet werden. Das Standardmodell wird beim Erstellen neuer Wissensbasen verwendet, aber jede Wissensbasis wird weiterhin ihr ursprüngliches Embedding-Modell verwenden, auch wenn sich der Standard später ändert.",
+        embeddingDescription:
+          "Konfigurieren und verwalten Sie die Embedding-Modelle, die für die Indexierung und den Abruf von Wissensbasen verwendet werden. Das Standardmodell wird beim Erstellen neuer Wissensbasen verwendet, aber jede Wissensbasis wird weiterhin ihr ursprüngliches Embedding-Modell verwenden, auch wenn sich der Standard später ändert.",
         addEmbeddingModel: "Embedding-Modell hinzufügen",
         noEmbeddingModelsConfigured: "Keine Embedding-Modelle konfiguriert",
-        addNewEmbeddingModelToGetStarted: "Fügen Sie ein neues Embedding-Modell hinzu, um zu beginnen",
+        addNewEmbeddingModelToGetStarted:
+          "Fügen Sie ein neues Embedding-Modell hinzu, um zu beginnen",
         tableHeaders: {
           name: "Name",
           modelId: "Modell-ID",
           provider: "Anbieter",
           description: "Beschreibung",
           status: "Status",
-          actions: "Aktionen"
+          actions: "Aktionen",
         },
         status: {
           default: "Standard",
-          available: "Verfügbar"
+          available: "Verfügbar",
         },
         actions: {
           setAsDefault: "Als Standard festlegen",
           delete: "Löschen",
           validate: "Validieren",
-          validating: "Validierung läuft"
+          validating: "Validierung läuft",
         },
         dialog: {
           addNewLlm: "Neues LLM hinzufügen",
@@ -2276,22 +2548,24 @@ const generateAllLanguageResources = () => {
           modelId: "Modell-ID",
           description: "Beschreibung",
           cancel: "Abbrechen",
-          addModel: "Modell hinzufügen"
+          addModel: "Modell hinzufügen",
         },
         placeholders: {
           customModel: "z.B., Mein benutzerdefiniertes Modell",
           embeddingModelId: "z.B., sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "Beschreiben Sie das Modell, seine Eigenschaften und wann es verwendet werden soll"
+          describeModel:
+            "Beschreiben Sie das Modell, seine Eigenschaften und wann es verwendet werden soll",
         },
         validation: {
-          pleaseEnterModelId: "Bitte geben Sie eine Modell-ID ein"
-        }
+          pleaseEnterModelId: "Bitte geben Sie eine Modell-ID ein",
+        },
       },
       knowledgeBases: {
         title: "Wissensbanken-Verwaltung",
         addKnowledgeBase: "Wissensbasis hinzufügen",
         emptyStateTitle: "Sie haben noch keine Wissensbanken",
-        emptyStateDescription: "Fügen Sie eine neue Wissensbasis hinzu, um zu beginnen",
+        emptyStateDescription:
+          "Fügen Sie eine neue Wissensbasis hinzu, um zu beginnen",
         tableHeaders: {
           title: "Titel",
           description: "Beschreibung",
@@ -2299,45 +2573,50 @@ const generateAllLanguageResources = () => {
           embeddingModel: "Embedding-Modell",
           dateCreated: "Erstellungsdatum",
           dateModified: "Änderungsdatum",
-          actions: "Aktionen"
+          actions: "Aktionen",
         },
         status: {
           default: "Standard",
-          na: "N/V"
+          na: "N/V",
         },
         actions: {
           view: "Anzeigen",
           edit: "Bearbeiten",
           delete: "Löschen",
-          configure: "Konfigurieren"
+          configure: "Konfigurieren",
         },
         deleteModal: {
           title: "Wissensbasis löschen",
           buttonText: "Wissensbasis löschen",
-          description: "Diese Wissensbasis wird dauerhaft gelöscht. Sind Sie sicher? Sie können diese Aktion nicht rückgängig machen.",
+          description:
+            "Diese Wissensbasis wird dauerhaft gelöscht. Sind Sie sicher? Sie können diese Aktion nicht rückgängig machen.",
           confirmButton: "Löschen",
           cancelButton: "Abbrechen",
           successMessage: "Die Wissensbasis wurde erfolgreich gelöscht",
-          errorMessage: "Beim Löschen der Wissensbasis ist ein Fehler aufgetreten"
+          errorMessage:
+            "Beim Löschen der Wissensbasis ist ein Fehler aufgetreten",
         },
         modals: {
           add: {
             title: "Wissensbasis hinzufügen",
-            description: "Erstellen Sie eine neue Wissensbasis, indem Sie Details eingeben und Dokumente unten hochladen.",
+            description:
+              "Erstellen Sie eine neue Wissensbasis, indem Sie Details eingeben und Dokumente unten hochladen.",
           },
           edit: {
             title: "Wissensbasis bearbeiten",
-            description: "Aktualisieren Sie die Details der Wissensbasis unten.",
+            description:
+              "Aktualisieren Sie die Details der Wissensbasis unten.",
           },
           fields: {
             title: "Titel",
-            description: "Beschreibung"
+            description: "Beschreibung",
           },
           fileUpload: {
             currentFiles: "Aktuelle Dateien",
             newFiles: "Neue Dateien",
             selectedFiles: "Ausgewählte Dateien",
-            dragAndDrop: "Dateien hierher ziehen und ablegen oder klicken zum Durchsuchen",
+            dragAndDrop:
+              "Dateien hierher ziehen und ablegen oder klicken zum Durchsuchen",
             dropFiles: "Dateien hier ablegen...",
             removeFile: "Datei entfernen",
             supportedFormats: "Unterstützt: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
@@ -2347,16 +2626,17 @@ const generateAllLanguageResources = () => {
             create: "Erstellen",
             save: "Speichern",
             saving: "Speichere...",
-            creating: "Erstelle..."
+            creating: "Erstelle...",
           },
           validation: {
-            titleRequired: "Titel ist erforderlich"
+            titleRequired: "Titel ist erforderlich",
           },
           messages: {
             createSuccess: "Wissensbasis erfolgreich erstellt.",
             updateSuccess: "Wissensbasis erfolgreich aktualisiert.",
             processing: "Verarbeitung...",
-            pleaseWait: "Bitte warten Sie, während wir Ihre Dateien verarbeiten...",
+            pleaseWait:
+              "Bitte warten Sie, während wir Ihre Dateien verarbeiten...",
           },
         },
       },
@@ -2387,7 +2667,8 @@ const generateAllLanguageResources = () => {
       },
       compare: {
         title: "Dokumente Vergleichen",
-        subtitle: "Vergleichen und analysieren Sie mehrere Dokumente, um Unterschiede, Ähnlichkeiten und Muster zu finden",
+        subtitle:
+          "Vergleichen und analysieren Sie mehrere Dokumente, um Unterschiede, Ähnlichkeiten und Muster zu finden",
         sourceSectionTitle: "Quelldokumente Auswählen",
         referenceSectionTitle: "Referenzdokumente Auswählen",
         sourcePlaceholder: "Wählen Sie Dokumente für die Quellanalyse...",
@@ -2395,7 +2676,8 @@ const generateAllLanguageResources = () => {
         compareButton: "Dokumente Vergleichen",
         noSourceSelected: "Keine Quelldokumente ausgewählt",
         noReferenceSelected: "Keine Referenzdokumente ausgewählt",
-        selectAtLeastTwo: "Wählen Sie mindestens zwei Dokumente zum Vergleichen",
+        selectAtLeastTwo:
+          "Wählen Sie mindestens zwei Dokumente zum Vergleichen",
         selectSources: "Quelldokumente auswählen",
         selectReferences: "Referenzdokumente auswählen",
         analysisType: "Analyseart",
@@ -2405,13 +2687,13 @@ const generateAllLanguageResources = () => {
           comprehensive: "Umfassende Analyse",
           structural: "Struktureller Vergleich",
           content: "Inhaltsanalyse",
-          chronological: "Chronologische Analyse"
+          chronological: "Chronologische Analyse",
         },
         analysisDepth: "Analysetiefe",
         analysisDepths: {
           surface: "Oberflächliche Analyse",
           detailed: "Detaillierte Analyse",
-          comprehensive: "Umfassende Analyse"
+          comprehensive: "Umfassende Analyse",
         },
         generateReport: "Vergleichsbericht Erstellen",
         comparing: "Dokumente werden verglichen...",
@@ -2433,18 +2715,21 @@ const generateAllLanguageResources = () => {
         selectTwoDocuments: "Bitte wählen Sie zwei Dokumente zum Vergleichen",
         loadingComparison: "Vergleich wird geladen...",
         topicList: "Themenliste",
-        clickToBrowse: "Klicken Sie zum Durchsuchen oder ziehen Sie per Drag & Drop",
+        clickToBrowse:
+          "Klicken Sie zum Durchsuchen oder ziehen Sie per Drag & Drop",
         supportedFormats: "Unterstützt PDF, TXT und DOCX",
         editTopicList: "Themenliste Bearbeiten",
-        selectTopicListTitle: "Themenliste Auswählen"
+        selectTopicListTitle: "Themenliste Auswählen",
       },
       match: {
         title: "Dokumente Abgleichen",
-        subtitle: "Finden Sie ähnliche Dokumente und analysieren Sie Übereinstimmungsmuster in Ihrer Wissensbasis",
+        subtitle:
+          "Finden Sie ähnliche Dokumente und analysieren Sie Übereinstimmungsmuster in Ihrer Wissensbasis",
         sourceSectionTitle: "Quelldokument Auswählen",
         searchInTitle: "Suchen In",
         sourcePlaceholder: "Wählen Sie ein Dokument als Referenzquelle...",
-        searchPlaceholder: "Wählen Sie Dokumente oder Wissensbasis zum Durchsuchen...",
+        searchPlaceholder:
+          "Wählen Sie Dokumente oder Wissensbasis zum Durchsuchen...",
         findMatchesButton: "Übereinstimmungen Finden",
         noSourceSelected: "Kein Quelldokument ausgewählt",
         noSearchTargetSelected: "Kein Suchziel ausgewählt",
@@ -2456,14 +2741,14 @@ const generateAllLanguageResources = () => {
           keyword: "Schlüsselwort-Übereinstimmung",
           structural: "Strukturelle Ähnlichkeit",
           content: "Inhaltsanalyse",
-          contextual: "Kontextuelle Übereinstimmung"
+          contextual: "Kontextuelle Übereinstimmung",
         },
         threshold: "Ähnlichkeitsschwellenwert",
         thresholds: {
           low: "Niedrig (30%)",
           medium: "Mittel (50%)",
           high: "Hoch (70%)",
-          veryHigh: "Sehr Hoch (90%)"
+          veryHigh: "Sehr Hoch (90%)",
         },
         maxResults: "Maximale Ergebnisse",
         searching: "Suche nach Übereinstimmungen...",
@@ -2476,35 +2761,40 @@ const generateAllLanguageResources = () => {
         exportMatches: "Übereinstimmungen Exportieren",
         clearResults: "Ergebnisse Löschen",
         newMatch: "Neue Übereinstimmung",
-        selectDocument: "Wählen Sie ein Dokument aus, um Übereinstimmungen zu finden",
+        selectDocument:
+          "Wählen Sie ein Dokument aus, um Übereinstimmungen zu finden",
         pleaseSelect: "Bitte wählen Sie ein Dokument aus...",
         sourceDocument: "Quelldokument",
         matchingDocuments: "Übereinstimmende Dokumente",
         findMatches: "Übereinstimmungen Finden",
         similarityScore: "Ähnlichkeitswert",
         noDocumentsFound: "Keine Dokumente gefunden",
-        selectDocumentToMatch: "Bitte wählen Sie ein Dokument aus, um Übereinstimmungen zu finden",
+        selectDocumentToMatch:
+          "Bitte wählen Sie ein Dokument aus, um Übereinstimmungen zu finden",
         loadingMatches: "Suche nach Übereinstimmungen...",
         noMatchesFound: "Keine ähnlichen Dokumente gefunden",
         matchResults: "Übereinstimmungsergebnisse",
         similarity: "Ähnlichkeit",
         editFormTemplate: "Formular-Vorlage Bearbeiten",
-        selectFormTemplateTitle: "Formular-Vorlage Auswählen"
+        selectFormTemplateTitle: "Formular-Vorlage Auswählen",
       },
       editFormTemplateModal: {
         title: "Formular-Vorlage Bearbeiten",
         formTemplateName: "Name der Formular-Vorlage",
-        formTemplateNamePlaceholder: "Geben Sie den Namen der Formular-Vorlage ein",
+        formTemplateNamePlaceholder:
+          "Geben Sie den Namen der Formular-Vorlage ein",
         formTemplateDescription: "Beschreibung der Formular-Vorlage",
-        descriptionPlaceholder: "Geben Sie die Beschreibung der Formular-Vorlage ein, um Felder automatisch vorzuschlagen (mindestens 10 Zeichen)...",
+        descriptionPlaceholder:
+          "Geben Sie die Beschreibung der Formular-Vorlage ein, um Felder automatisch vorzuschlagen (mindestens 10 Zeichen)...",
         referenceDocuments: "Referenzdokumente (Optional)",
         uploadFiles: "Dateien Hochladen",
         knowledgeBase: "Wissensbasis",
         formFields: "Formularfelder",
         suggest: "Vorschlagen",
-        fieldPlaceholder: "Fügen Sie einen Feldnamen hinzu (z.B. Vorname, Adresse, Sozialversicherungsnummer) oder schlagen Sie aus der Beschreibung vor",
+        fieldPlaceholder:
+          "Fügen Sie einen Feldnamen hinzu (z.B. Vorname, Adresse, Sozialversicherungsnummer) oder schlagen Sie aus der Beschreibung vor",
         cancel: "Abbrechen",
-        updateFormTemplate: "Formular-Vorlage Aktualisieren"
+        updateFormTemplate: "Formular-Vorlage Aktualisieren",
       },
       editCustom: {
         title: "Benutzerdefinierte Anweisungen Bearbeiten",
@@ -2518,7 +2808,8 @@ const generateAllLanguageResources = () => {
         outlineName: "Gliederungsname",
         outlineNamePlaceholder: "Geben Sie den Gliederungsnamen ein",
         description: "Beschreibung",
-        descriptionPlaceholder: "Geben Sie die Gliederungsbeschreibung ein, um Abschnitte automatisch vorzuschlagen (mindestens 10 Zeichen)...",
+        descriptionPlaceholder:
+          "Geben Sie die Gliederungsbeschreibung ein, um Abschnitte automatisch vorzuschlagen (mindestens 10 Zeichen)...",
         referenceDocuments: "Referenzdokumente (Optional)",
         uploadFiles: "Dateien Hochladen",
         knowledgeBase: "Wissensbasis",
@@ -2528,7 +2819,7 @@ const generateAllLanguageResources = () => {
         addSectionPlaceholder: "Abschnitt hinzufügen",
         cancel: "Abbrechen",
         createOutline: "Gliederung Erstellen",
-        updateOutline: "Gliederung Aktualisieren"
+        updateOutline: "Gliederung Aktualisieren",
       },
       editChecklistModal: {
         title: "Checkliste Bearbeiten",
@@ -2536,7 +2827,8 @@ const generateAllLanguageResources = () => {
         checklistName: "Checklistenname",
         checklistNamePlaceholder: "Geben Sie den Checklistennamen ein",
         description: "Beschreibung",
-        descriptionPlaceholder: "Geben Sie die Checklistenbeschreibung ein, um Fragen automatisch vorzuschlagen (mindestens 10 Zeichen)...",
+        descriptionPlaceholder:
+          "Geben Sie die Checklistenbeschreibung ein, um Fragen automatisch vorzuschlagen (mindestens 10 Zeichen)...",
         referenceDocuments: "Referenzdokumente (Optional)",
         uploadFiles: "Dateien Hochladen",
         knowledgeBase: "Wissensbasis",
@@ -2547,7 +2839,7 @@ const generateAllLanguageResources = () => {
         copyAllQuestions: "Alle Fragen als Text kopieren",
         cancel: "Abbrechen",
         createChecklist: "Checkliste Erstellen",
-        updateChecklist: "Checkliste Aktualisieren"
+        updateChecklist: "Checkliste Aktualisieren",
       },
       editTopicListModal: {
         title: "Themenliste Bearbeiten",
@@ -2555,7 +2847,8 @@ const generateAllLanguageResources = () => {
         topicListName: "Themenlistenname",
         topicListNamePlaceholder: "Geben Sie den Themenlistennamen ein",
         description: "Themenlistenbeschreibung",
-        descriptionPlaceholder: "Geben Sie die Themenlistenbeschreibung ein, um Themen automatisch vorzuschlagen (mindestens 10 Zeichen)...",
+        descriptionPlaceholder:
+          "Geben Sie die Themenlistenbeschreibung ein, um Themen automatisch vorzuschlagen (mindestens 10 Zeichen)...",
         referenceDocuments: "Referenzdokumente (Optional)",
         uploadFiles: "Dateien Hochladen",
         knowledgeBase: "Wissensbasis",
@@ -2566,15 +2859,17 @@ const generateAllLanguageResources = () => {
         copyAllTopics: "Alle Themen als Text kopieren",
         cancel: "Abbrechen",
         createTopicList: "Themenliste Erstellen",
-        updateTopicList: "Themenliste Aktualisieren"
+        updateTopicList: "Themenliste Aktualisieren",
       },
       optimizeChecklistModal: {
         title: "Checkliste Optimieren",
         customInstructionsLabel: "Benutzerdefinierte Anweisungen (Optional)",
-        customInstructionsHelperText: "Geben Sie zusätzliche Anweisungen ein, die bei der Beantwortung der Checklisten-Fragen berücksichtigt werden sollten",
+        customInstructionsHelperText:
+          "Geben Sie zusätzliche Anweisungen ein, die bei der Beantwortung der Checklisten-Fragen berücksichtigt werden sollten",
         analyzing: "Analysiere...",
         analyzeButton: "Checkliste Analysieren",
-        analyzingMessage: "Analysiere Ihre Checkliste für Optimierungsmöglichkeiten...",
+        analyzingMessage:
+          "Analysiere Ihre Checkliste für Optimierungsmöglichkeiten...",
         cancelAnalysis: "Analyse Abbrechen",
         downloading: "Lade herunter...",
         downloadCsv: "CSV Herunterladen",
@@ -2591,19 +2886,26 @@ const generateAllLanguageResources = () => {
         optimizationsSelectedText: "Optimierung{{s}} zur Anwendung ausgewählt",
         applying: "Wende an...",
         applySelectedOptimizations: "Ausgewählte Optimierungen Anwenden",
-        uploadDocumentsTitle: "Dokument(e) hochladen, die von der Checkliste akzeptiert werden sollten *",
-        uploadDocumentsHelperText: "Laden Sie Dokumente hoch, die alle Checklisten-Anforderungen erfüllen sollten, um Fragen zu identifizieren, die möglicherweise zu streng sind",
-        customInstructionsPlaceholder: "z.B. Berücksichtigen Sie, dass dies eine pädiatrische Studie ist, wenn altersbezogene Anforderungen bewertet werden, Dieses Protokoll ist für eine risikoarme Intervention, usw."
+        uploadDocumentsTitle:
+          "Dokument(e) hochladen, die von der Checkliste akzeptiert werden sollten *",
+        uploadDocumentsHelperText:
+          "Laden Sie Dokumente hoch, die alle Checklisten-Anforderungen erfüllen sollten, um Fragen zu identifizieren, die möglicherweise zu streng sind",
+        customInstructionsPlaceholder:
+          "z.B. Berücksichtigen Sie, dass dies eine pädiatrische Studie ist, wenn altersbezogene Anforderungen bewertet werden, Dieses Protokoll ist für eine risikoarme Intervention, usw.",
       },
       optimizeOutlineModal: {
         title: "Gliederung Optimieren",
-        description: "Laden Sie ein Referenzdokument hoch, das ein hochwertiges Beispiel des Berichtstyps darstellt, den Sie generieren möchten. Das System wird einen Bericht mit Ihrer aktuellen Gliederung und Wissensbasis erstellen, ihn mit der Referenz vergleichen und Verbesserungen für Ihre Gliederungsabschnitte vorschlagen.",
+        description:
+          "Laden Sie ein Referenzdokument hoch, das ein hochwertiges Beispiel des Berichtstyps darstellt, den Sie generieren möchten. Das System wird einen Bericht mit Ihrer aktuellen Gliederung und Wissensbasis erstellen, ihn mit der Referenz vergleichen und Verbesserungen für Ihre Gliederungsabschnitte vorschlagen.",
         groundTruthDocument: "Referenzdokument",
         customInstructionsLabel: "Benutzerdefinierte Anweisungen (Optional)",
-        customInstructionsHelperText: "Geben Sie zusätzliche Anleitung für den Optimierungsprozess",
-        customInstructionsPlaceholder: "z.B. Fokus auf Verbesserung der technischen Tiefe, Einhaltung spezifischer Standards sicherstellen, etc.",
+        customInstructionsHelperText:
+          "Geben Sie zusätzliche Anleitung für den Optimierungsprozess",
+        customInstructionsPlaceholder:
+          "z.B. Fokus auf Verbesserung der technischen Tiefe, Einhaltung spezifischer Standards sicherstellen, etc.",
         characters: "Zeichen",
-        analyzingOutline: "Analysiere Gliederung und generiere Optimierungen...",
+        analyzingOutline:
+          "Analysiere Gliederung und generiere Optimierungen...",
         cancelAnalysis: "Analyse Abbrechen",
         optimizationResults: "Optimierungsergebnisse",
         sectionsNeedOptimization: "Abschnitte benötigen Optimierung",
@@ -2621,8 +2923,8 @@ const generateAllLanguageResources = () => {
         cancel: "Abbrechen",
         optimizing: "Optimiere...",
         optimizeOutline: "Gliederung Optimieren",
-        applyOptimizations: "{{count}} Optimierung{{s}} Anwenden"
-      }
+        applyOptimizations: "{{count}} Optimierung{{s}} Anwenden",
+      },
     },
   }
 
@@ -2685,8 +2987,10 @@ const generateAllLanguageResources = () => {
         typing: "L'IA sta scrivendo...",
         error: "Spiacente, qualcosa è andato storto. Riprova.",
         welcome: "Ciao! Come posso aiutarti oggi?",
-        welcomeMessageWithSource: "Seleziona una base di conoscenza o carica file, poi fai una domanda.",
-        welcomeMessageGeneral: "Chiedi pure qualsiasi cosa! Per la ricerca nella base di conoscenza, seleziona prima una base di conoscenza.",
+        welcomeMessageWithSource:
+          "Seleziona una base di conoscenza o carica file, poi fai una domanda.",
+        welcomeMessageGeneral:
+          "Chiedi pure qualsiasi cosa! Per la ricerca nella base di conoscenza, seleziona prima una base di conoscenza.",
       },
       settings: {
         title: "Impostazioni",
@@ -2711,11 +3015,13 @@ const generateAllLanguageResources = () => {
         lightMode: "Modalità Chiara",
         darkMode: "Modalità Scura",
         // Danger Zone section
-        deleteAccountDescription: "Elimina permanentemente i tuoi dati e tutto ciò che è associato al tuo account.",
+        deleteAccountDescription:
+          "Elimina permanentemente i tuoi dati e tutto ciò che è associato al tuo account.",
         delete: "Elimina",
         confirmationRequired: "Conferma Richiesta",
-        deleteConfirmationText: "Tutti i dati del tuo account saranno eliminati permanentemente. Se sei sicuro, fai clic su \"Conferma\" per procedere. Questa azione non può essere annullata.",
-        cancel: "Annulla"
+        deleteConfirmationText:
+          'Tutti i dati del tuo account saranno eliminati permanentemente. Se sei sicuro, fai clic su "Conferma" per procedere. Questa azione non può essere annullata.',
+        cancel: "Annulla",
       },
       errors: {
         somethingWentWrong: "Qualcosa è andato storto",
@@ -2728,58 +3034,94 @@ const generateAllLanguageResources = () => {
         notFound: "La risorsa richiesta non è stata trovata.",
       },
       help: {
-        dashboard: "Pagina panoramica principale che mostra statistiche di utilizzo e attività recente",
-        usageStats: "Visualizza il tuo utilizzo attuale di token API e informazioni sulla quota per il periodo di fatturazione corrente",
-        review: "Analizza documenti contro checklist di qualità per conformità e accuratezza",
-        generate: "Crea report e documenti strutturati utilizzando l'IA basata sui tuoi contenuti",
-        compare: "Confronta due documenti affiancati per identificare differenze e somiglianze",
-        match: "Abbina il contenuto del documento a modelli di modulo per la compilazione automatica",
-        modelSelection: "Configura i modelli di IA utilizzati per l'elaborazione e l'analisi",
-        knowledgeBases: "Gestisci le librerie di basi di conoscenza per l'elaborazione dei documenti",
-        archive: "Visualizza e gestisci i tuoi documenti elaborati e la cronologia delle analisi",
-        settings: "Configura le preferenze del tuo account e le impostazioni dell'applicazione",
+        dashboard:
+          "Pagina panoramica principale che mostra statistiche di utilizzo e attività recente",
+        usageStats:
+          "Visualizza il tuo utilizzo attuale di token API e informazioni sulla quota per il periodo di fatturazione corrente",
+        review:
+          "Analizza documenti contro checklist di qualità per conformità e accuratezza",
+        generate:
+          "Crea report e documenti strutturati utilizzando l'IA basata sui tuoi contenuti",
+        compare:
+          "Confronta due documenti affiancati per identificare differenze e somiglianze",
+        match:
+          "Abbina il contenuto del documento a modelli di modulo per la compilazione automatica",
+        modelSelection:
+          "Configura i modelli di IA utilizzati per l'elaborazione e l'analisi",
+        knowledgeBases:
+          "Gestisci le librerie di basi di conoscenza per l'elaborazione dei documenti",
+        archive:
+          "Visualizza e gestisci i tuoi documenti elaborati e la cronologia delle analisi",
+        settings:
+          "Configura le preferenze del tuo account e le impostazioni dell'applicazione",
         admin: "Funzioni amministrative per la gestione di utenti e sistemi",
-        knowledgeBaseSelection: "Scegli una base di conoscenza che contiene i documenti di riferimento e gli standard per l'analisi",
-        checklistSelection: "Seleziona una checklist con domande specifiche per valutare i tuoi documenti",
+        knowledgeBaseSelection:
+          "Scegli una base di conoscenza che contiene i documenti di riferimento e gli standard per l'analisi",
+        checklistSelection:
+          "Seleziona una checklist con domande specifiche per valutare i tuoi documenti",
         fileUpload: "Carica i documenti che vuoi analizzare e rivedere",
-        customInstructions: "Aggiungi istruzioni specifiche che verranno considerate quando si risponde alle domande della checklist",
-        searchMode: "Scegli tra ricerca vettoriale veloce o scansione completa del documento",
-        topicList: "Seleziona o crea un elenco di argomenti per focalizzare l'analisi di confronto",
-        formTemplate: "Scegli un modello di modulo con cui i tuoi documenti dovrebbero essere abbinati",
-        documentOutline: "Seleziona una struttura di schema per generare il tuo report",
-        allUsersToggle: "Alterna tra visualizzare solo la tua cronologia o quella di tutti gli utenti",
+        customInstructions:
+          "Aggiungi istruzioni specifiche che verranno considerate quando si risponde alle domande della checklist",
+        searchMode:
+          "Scegli tra ricerca vettoriale veloce o scansione completa del documento",
+        topicList:
+          "Seleziona o crea un elenco di argomenti per focalizzare l'analisi di confronto",
+        formTemplate:
+          "Scegli un modello di modulo con cui i tuoi documenti dovrebbero essere abbinati",
+        documentOutline:
+          "Seleziona una struttura di schema per generare il tuo report",
+        allUsersToggle:
+          "Alterna tra visualizzare solo la tua cronologia o quella di tutti gli utenti",
 
-        createChecklist: "Crea una nuova checklist con domande personalizzate per valutare documenti contro criteri specifici",
-        createOutline: "Crea una nuova struttura di schema per guidare la generazione di report strutturati",
-        createTopicList: "Crea un nuovo elenco di argomenti per focalizzare l'analisi di confronto su soggetti o temi specifici",
-        createFormTemplate: "Crea un nuovo modello di modulo per l'estrazione e l'abbinamento automatico del contenuto dei documenti",
-        suggestChecklistQuestions: "Usa l'IA per generare automaticamente domande di checklist rilevanti basate sulla tua descrizione e documenti di riferimento",
-        optimizeChecklistQuestions: "Migliora e perfeziona le domande esistenti della checklist utilizzando la base di conoscenza selezionata per una migliore accuratezza",
-        suggestOutlineSections: "Usa l'IA per generare automaticamente sezioni di schema basate sulla tua descrizione e documenti di riferimento",
-        optimizeOutlineSections: "Migliora e perfeziona le sezioni esistenti dello schema utilizzando la base di conoscenza selezionata per una migliore struttura",
-        suggestTopicListTopics: "Usa l'IA per generare automaticamente argomenti di confronto rilevanti basati sulla tua descrizione e documenti di riferimento",
-        suggestFormTemplateFields: "Usa l'IA per generare automaticamente campi di modulo rilevanti basati sulla tua descrizione e documenti di riferimento",
-        referenceDocuments: "Carica documenti di riferimento o seleziona una Base di Conoscenza per aiutare l'IA a suggerire contenuti basati sul tuo contesto specifico e requisiti",
-        referenceDocumentsFiles: "Fornisci documenti di riferimento per aiutare l'IA a generare suggerimenti più accurati e contestualmente rilevanti",
-        minimumDescriptionLength: "Le descrizioni devono essere lunghe almeno 10 caratteri per fornire un contesto sufficiente per i suggerimenti dell'IA"
+        createChecklist:
+          "Crea una nuova checklist con domande personalizzate per valutare documenti contro criteri specifici",
+        createOutline:
+          "Crea una nuova struttura di schema per guidare la generazione di report strutturati",
+        createTopicList:
+          "Crea un nuovo elenco di argomenti per focalizzare l'analisi di confronto su soggetti o temi specifici",
+        createFormTemplate:
+          "Crea un nuovo modello di modulo per l'estrazione e l'abbinamento automatico del contenuto dei documenti",
+        suggestChecklistQuestions:
+          "Usa l'IA per generare automaticamente domande di checklist rilevanti basate sulla tua descrizione e documenti di riferimento",
+        optimizeChecklistQuestions:
+          "Migliora e perfeziona le domande esistenti della checklist utilizzando la base di conoscenza selezionata per una migliore accuratezza",
+        suggestOutlineSections:
+          "Usa l'IA per generare automaticamente sezioni di schema basate sulla tua descrizione e documenti di riferimento",
+        optimizeOutlineSections:
+          "Migliora e perfeziona le sezioni esistenti dello schema utilizzando la base di conoscenza selezionata per una migliore struttura",
+        suggestTopicListTopics:
+          "Usa l'IA per generare automaticamente argomenti di confronto rilevanti basati sulla tua descrizione e documenti di riferimento",
+        suggestFormTemplateFields:
+          "Usa l'IA per generare automaticamente campi di modulo rilevanti basati sulla tua descrizione e documenti di riferimento",
+        referenceDocuments:
+          "Carica documenti di riferimento o seleziona una Base di Conoscenza per aiutare l'IA a suggerire contenuti basati sul tuo contesto specifico e requisiti",
+        referenceDocumentsFiles:
+          "Fornisci documenti di riferimento per aiutare l'IA a generare suggerimenti più accurati e contestualmente rilevanti",
+        minimumDescriptionLength:
+          "Le descrizioni devono essere lunghe almeno 10 caratteri per fornire un contesto sufficiente per i suggerimenti dell'IA",
       },
       review: {
         pageTitle: "Revisiona Documenti",
-        pageDescription: "Rivedi un documento basato su una checklist e database di politiche definiti dall'utente.",
+        pageDescription:
+          "Rivedi un documento basato su una checklist e database di politiche definiti dall'utente.",
         knowledgeBaseTitle: "Base di Conoscenza",
         knowledgeBaseDescription: "Clicca per selezionare",
         checklistTitle: "Checklist",
         checklistDescription: "Clicca per selezionare",
         customInstructionsTitle: "Istruzioni Personalizzate (Opzionale)",
-        customInstructionsPlaceholder: "Inserisci istruzioni aggiuntive che dovrebbero essere considerate quando si risponde alle domande della checklist...",
-        customInstructionsHelp: "{{count}}/2000 caratteri. Queste istruzioni verranno aggiunte a ogni domanda durante l'elaborazione.",
-        searchModeHelp: "La ricerca vettoriale fornisce risultati rapidi e mirati. L'analisi completa del documento esamina tutto il contenuto della base di conoscenza.",
+        customInstructionsPlaceholder:
+          "Inserisci istruzioni aggiuntive che dovrebbero essere considerate quando si risponde alle domande della checklist...",
+        customInstructionsHelp:
+          "{{count}}/2000 caratteri. Queste istruzioni verranno aggiunte a ogni domanda durante l'elaborazione.",
+        searchModeHelp:
+          "La ricerca vettoriale fornisce risultati rapidi e mirati. L'analisi completa del documento esamina tutto il contenuto della base di conoscenza.",
         processingFile: "Elaborazione file in corso...",
         processingFiles: "Elaborazione file in corso...",
         selectKnowledgeBaseTitle: "Seleziona Base di Conoscenza",
         selectChecklistTitle: "Seleziona Checklist",
         noResults: "Nessun risultato ancora",
-        uploadDocuments: "Carica uno o più documenti da revisionare contro la tua checklist selezionata",
+        uploadDocuments:
+          "Carica uno o più documenti da revisionare contro la tua checklist selezionata",
         results: "Risultati",
         downloadReport: "Scarica Report",
         downloadCsv: "Scarica CSV",
@@ -2788,24 +3130,29 @@ const generateAllLanguageResources = () => {
         reportCopied: "Report copiato negli appunti!",
         reviewButton: "Revisiona",
         consultDocuments: "Consulta documenti",
-        noChecklistsAvailable: "Nessuna checklist disponibile. Crea la tua prima checklist per iniziare.",
+        noChecklistsAvailable:
+          "Nessuna checklist disponibile. Crea la tua prima checklist per iniziare.",
         createChecklist: "Crea Checklist",
         editChecklist: "Modifica Checklist",
         checklistName: "Nome Checklist",
         checklistNamePlaceholder: "Inserisci il nome della checklist...",
         checklistDescriptionLabel: "Descrizione",
-        checklistDescriptionPlaceholder: "Inserisci la descrizione della checklist per suggerimenti automatici delle domande (minimo 10 caratteri)...",
+        checklistDescriptionPlaceholder:
+          "Inserisci la descrizione della checklist per suggerimenti automatici delle domande (minimo 10 caratteri)...",
         questions: "Domande",
         suggest: "Suggerisci",
         suggesting: "Suggerimento in corso...",
         optimize: "Ottimizza",
-        optimizeTooltip: "Deve essere selezionata una Base di Conoscenza per abilitare la funzione Ottimizza",
-        optimizeTooltipEnabled: "Ottimizza le domande basate sulla Base di Conoscenza selezionata",
+        optimizeTooltip:
+          "Deve essere selezionata una Base di Conoscenza per abilitare la funzione Ottimizza",
+        optimizeTooltipEnabled:
+          "Ottimizza le domande basate sulla Base di Conoscenza selezionata",
         uploadFiles: "Carica File",
         knowledgeBase: "Base di Conoscenza",
         referenceDocuments: "Documenti di Riferimento (Opzionale)",
         selectKnowledgeBasePlaceholder: "Seleziona Base di Conoscenza...",
-        noKnowledgeBasesAvailable: "Nessuna Base di Conoscenza disponibile. Creane prima una per utilizzare questa funzione.",
+        noKnowledgeBasesAvailable:
+          "Nessuna Base di Conoscenza disponibile. Creane prima una per utilizzare questa funzione.",
         copyQuestions: "Copia Domande",
         questionsCopied: "Domande copiate negli appunti",
         noQuestionsToCopy: "Nessuna domanda da copiare",
@@ -2817,22 +3164,28 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "File Caricati",
 
         removeFile: "Rimuovi",
-        characterCount: "{{count}}/2000 caratteri. Queste istruzioni verranno aggiunte a ogni domanda durante l'elaborazione.",
+        characterCount:
+          "{{count}}/2000 caratteri. Queste istruzioni verranno aggiunte a ogni domanda durante l'elaborazione.",
         searchMode: "Modalità di Ricerca",
         vectorSearch: "Ricerca Vettoriale",
         fullDocumentScan: "Analisi Completa del Documento",
-        vectorSearchDescription: "Trova contenuto rilevante usando la ricerca di similarità AI (veloce, mirato)",
-        fullScanDescription: "Analizza tutti i documenti nella base di conoscenza (completo, approfondito)"
+        vectorSearchDescription:
+          "Trova contenuto rilevante usando la ricerca di similarità AI (veloce, mirato)",
+        fullScanDescription:
+          "Analizza tutti i documenti nella base di conoscenza (completo, approfondito)",
       },
       generate: {
-        pageDescription: "Genera un documento basato su una checklist definita dall'utente e un database di documenti.",
+        pageDescription:
+          "Genera un documento basato su una checklist definita dall'utente e un database di documenti.",
         generatingDocument: "Generazione documento...",
         knowledgeBaseTitle: "Base di Conoscenza",
         documentOutlineTitle: "Struttura del Documento",
         clickToSelect: "Clicca per selezionare",
         customInstructionsTitle: "Istruzioni Personalizzate (Opzionale)",
-        customInstructionsPlaceholder: "Inserisci eventuali istruzioni aggiuntive che devono essere considerate durante la generazione di ogni sezione del rapporto...",
-        characterCount: "{{count}}/2000 caratteri. Queste istruzioni verranno aggiunte al prompt durante la generazione di ogni sezione.",
+        customInstructionsPlaceholder:
+          "Inserisci eventuali istruzioni aggiuntive che devono essere considerate durante la generazione di ogni sezione del rapporto...",
+        characterCount:
+          "{{count}}/2000 caratteri. Queste istruzioni verranno aggiunte al prompt durante la generazione di ogni sezione.",
         selectKnowledgeBaseTitle: "Seleziona Base di Conoscenza",
         selectDocumentOutlineTitle: "Seleziona Struttura del Documento",
         generateButton: "Genera",
@@ -2842,7 +3195,8 @@ const generateAllLanguageResources = () => {
         downloadDocx: "Scarica DOCX",
         downloadCsv: "Scarica CSV",
         clearReport: "Cancella Rapporto",
-        resultsPlaceholder: "I risultati appariranno qui dopo aver generato un documento.",
+        resultsPlaceholder:
+          "I risultati appariranno qui dopo aver generato un documento.",
         sectionsWithSources: "Sezioni con Fonti",
         sectionNumber: "Sezione {number}: {title}",
         kbGenerated: "Generato da KB",
@@ -2860,36 +3214,39 @@ const generateAllLanguageResources = () => {
         generateSuccess: "Rapporto generato con successo usando {method}!",
         generateError: "Errore nella generazione del documento: {error}",
         vectorSearch: "ricerca vettoriale",
-        fullDocumentScan: "scansione completa del documento"
+        fullDocumentScan: "scansione completa del documento",
       },
       modelSelection: {
         llmManagement: "Gestione LLM",
-        llmDescription: "Configura e gestisci i LLM utilizzati per generare risposte testuali. Il modello predefinito verrà utilizzato per tutte le operazioni.",
+        llmDescription:
+          "Configura e gestisci i LLM utilizzati per generare risposte testuali. Il modello predefinito verrà utilizzato per tutte le operazioni.",
         addNewLlm: "Aggiungi Nuovo LLM",
         noLlmsConfigured: "Nessun LLM configurato",
         addNewLlmToGetStarted: "Aggiungi un nuovo LLM per iniziare",
         embeddingModelManagement: "Gestione Modelli di Embedding",
-        embeddingDescription: "Configura e gestisci i modelli di embedding utilizzati per l'indicizzazione e il recupero delle basi di conoscenza. Il modello predefinito verrà utilizzato durante la creazione di nuove basi di conoscenza, ma ogni base di conoscenza continuerà a utilizzare il suo modello di embedding originale anche se il predefinito cambia successivamente.",
+        embeddingDescription:
+          "Configura e gestisci i modelli di embedding utilizzati per l'indicizzazione e il recupero delle basi di conoscenza. Il modello predefinito verrà utilizzato durante la creazione di nuove basi di conoscenza, ma ogni base di conoscenza continuerà a utilizzare il suo modello di embedding originale anche se il predefinito cambia successivamente.",
         addEmbeddingModel: "Aggiungi Modello di Embedding",
         noEmbeddingModelsConfigured: "Nessun modello di embedding configurato",
-        addNewEmbeddingModelToGetStarted: "Aggiungi un nuovo modello di embedding per iniziare",
+        addNewEmbeddingModelToGetStarted:
+          "Aggiungi un nuovo modello di embedding per iniziare",
         tableHeaders: {
           name: "Nome",
           modelId: "ID Modello",
           provider: "Provider",
           description: "Descrizione",
           status: "Stato",
-          actions: "Azioni"
+          actions: "Azioni",
         },
         status: {
           default: "Predefinito",
-          available: "Disponibile"
+          available: "Disponibile",
         },
         actions: {
           setAsDefault: "Imposta come Predefinito",
           delete: "Elimina",
           validate: "Valida",
-          validating: "Validazione in corso"
+          validating: "Validazione in corso",
         },
         dialog: {
           addNewLlm: "Aggiungi Nuovo LLM",
@@ -2899,22 +3256,24 @@ const generateAllLanguageResources = () => {
           modelId: "ID Modello",
           description: "Descrizione",
           cancel: "Annulla",
-          addModel: "Aggiungi Modello"
+          addModel: "Aggiungi Modello",
         },
         placeholders: {
           customModel: "es., Il Mio Modello Personalizzato",
           embeddingModelId: "es., sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "Descrivi il modello, le sue caratteristiche e quando utilizzarlo"
+          describeModel:
+            "Descrivi il modello, le sue caratteristiche e quando utilizzarlo",
         },
         validation: {
-          pleaseEnterModelId: "Si prega di inserire un ID modello"
-        }
+          pleaseEnterModelId: "Si prega di inserire un ID modello",
+        },
       },
       knowledgeBases: {
         title: "Gestione Basi di Conoscenza",
         addKnowledgeBase: "Aggiungi Base di Conoscenza",
         emptyStateTitle: "Non hai ancora nessuna Base di Conoscenza",
-        emptyStateDescription: "Aggiungi una nuova Base di Conoscenza per iniziare",
+        emptyStateDescription:
+          "Aggiungi una nuova Base di Conoscenza per iniziare",
         tableHeaders: {
           title: "Titolo",
           description: "Descrizione",
@@ -2922,45 +3281,51 @@ const generateAllLanguageResources = () => {
           embeddingModel: "Modello di Embedding",
           dateCreated: "Data di Creazione",
           dateModified: "Data di Modifica",
-          actions: "Azioni"
+          actions: "Azioni",
         },
         status: {
           default: "Predefinito",
-          na: "N/D"
+          na: "N/D",
         },
         actions: {
           view: "Visualizza",
           edit: "Modifica",
           delete: "Elimina",
-          configure: "Configura"
+          configure: "Configura",
         },
         deleteModal: {
           title: "Elimina Base di Conoscenza",
           buttonText: "Elimina Base di Conoscenza",
-          description: "Questa Base di Conoscenza sarà eliminata permanentemente. Sei sicuro? Non potrai annullare questa azione.",
+          description:
+            "Questa Base di Conoscenza sarà eliminata permanentemente. Sei sicuro? Non potrai annullare questa azione.",
           confirmButton: "Elimina",
           cancelButton: "Annulla",
-          successMessage: "La Base di Conoscenza è stata eliminata con successo",
-          errorMessage: "Si è verificato un errore durante l'eliminazione della Base di Conoscenza"
+          successMessage:
+            "La Base di Conoscenza è stata eliminata con successo",
+          errorMessage:
+            "Si è verificato un errore durante l'eliminazione della Base di Conoscenza",
         },
         modals: {
           add: {
             title: "Aggiungi Base di Conoscenza",
-            description: "Crea una nuova base di conoscenza fornendo dettagli e caricando documenti qui sotto.",
+            description:
+              "Crea una nuova base di conoscenza fornendo dettagli e caricando documenti qui sotto.",
           },
           edit: {
             title: "Modifica Base di Conoscenza",
-            description: "Aggiorna i dettagli della Base di Conoscenza qui sotto.",
+            description:
+              "Aggiorna i dettagli della Base di Conoscenza qui sotto.",
           },
           fields: {
             title: "Titolo",
-            description: "Descrizione"
+            description: "Descrizione",
           },
           fileUpload: {
             currentFiles: "File Attuali",
             newFiles: "Nuovi File",
             selectedFiles: "File Selezionati",
-            dragAndDrop: "Trascina e rilascia i file qui, o clicca per sfogliare",
+            dragAndDrop:
+              "Trascina e rilascia i file qui, o clicca per sfogliare",
             dropFiles: "Rilascia i file qui...",
             removeFile: "Rimuovi file",
             supportedFormats: "Supporta: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
@@ -2970,10 +3335,10 @@ const generateAllLanguageResources = () => {
             create: "Crea",
             save: "Salva",
             saving: "Salvataggio...",
-            creating: "Creazione..."
+            creating: "Creazione...",
           },
           validation: {
-            titleRequired: "Il titolo è obbligatorio"
+            titleRequired: "Il titolo è obbligatorio",
           },
           messages: {
             createSuccess: "Base di Conoscenza creata con successo.",
@@ -3010,7 +3375,8 @@ const generateAllLanguageResources = () => {
       },
       compare: {
         title: "Confronta Documenti",
-        subtitle: "Confronta e analizza più documenti per trovare differenze, somiglianze e modelli",
+        subtitle:
+          "Confronta e analizza più documenti per trovare differenze, somiglianze e modelli",
         sourceSectionTitle: "Seleziona Documenti Sorgente",
         referenceSectionTitle: "Seleziona Documenti di Riferimento",
         sourcePlaceholder: "Seleziona documenti per l'analisi sorgente...",
@@ -3028,13 +3394,13 @@ const generateAllLanguageResources = () => {
           comprehensive: "Analisi Completa",
           structural: "Confronto Strutturale",
           content: "Analisi del Contenuto",
-          chronological: "Analisi Cronologica"
+          chronological: "Analisi Cronologica",
         },
         analysisDepth: "Profondità dell'Analisi",
         analysisDepths: {
           surface: "Analisi Superficiale",
           detailed: "Analisi Dettagliata",
-          comprehensive: "Analisi Completa"
+          comprehensive: "Analisi Completa",
         },
         generateReport: "Genera Report di Confronto",
         comparing: "Confronto documenti...",
@@ -3059,15 +3425,18 @@ const generateAllLanguageResources = () => {
         clickToBrowse: "Clicca per sfogliare o trascina e rilascia",
         supportedFormats: "Supporta PDF, TXT e DOCX",
         editTopicList: "Modifica Lista Argomenti",
-        selectTopicListTitle: "Seleziona Lista Argomenti"
+        selectTopicListTitle: "Seleziona Lista Argomenti",
       },
       match: {
         title: "Abbina Documenti",
-        subtitle: "Trova documenti simili e analizza modelli di corrispondenza nella tua base di conoscenza",
+        subtitle:
+          "Trova documenti simili e analizza modelli di corrispondenza nella tua base di conoscenza",
         sourceSectionTitle: "Seleziona Documento Sorgente",
         searchInTitle: "Cerca In",
-        sourcePlaceholder: "Seleziona un documento come sorgente di riferimento...",
-        searchPlaceholder: "Seleziona documenti o base di conoscenza per la ricerca...",
+        sourcePlaceholder:
+          "Seleziona un documento come sorgente di riferimento...",
+        searchPlaceholder:
+          "Seleziona documenti o base di conoscenza per la ricerca...",
         findMatchesButton: "Trova Corrispondenze",
         noSourceSelected: "Nessun documento sorgente selezionato",
         noSearchTargetSelected: "Nessun obiettivo di ricerca selezionato",
@@ -3079,14 +3448,14 @@ const generateAllLanguageResources = () => {
           keyword: "Corrispondenza di Parole Chiave",
           structural: "Similarità Strutturale",
           content: "Analisi del Contenuto",
-          contextual: "Corrispondenza Contestuale"
+          contextual: "Corrispondenza Contestuale",
         },
         threshold: "Soglia di Similarità",
         thresholds: {
           low: "Bassa (30%)",
           medium: "Media (50%)",
           high: "Alta (70%)",
-          veryHigh: "Molto Alta (90%)"
+          veryHigh: "Molto Alta (90%)",
         },
         maxResults: "Massimo Risultati",
         searching: "Ricerca corrispondenze...",
@@ -3106,28 +3475,31 @@ const generateAllLanguageResources = () => {
         findMatches: "Trova Corrispondenze",
         similarityScore: "Punteggio di Similarità",
         noDocumentsFound: "Nessun documento trovato",
-        selectDocumentToMatch: "Seleziona un documento per trovare corrispondenze",
+        selectDocumentToMatch:
+          "Seleziona un documento per trovare corrispondenze",
         loadingMatches: "Ricerca corrispondenze...",
         noMatchesFound: "Nessun documento simile trovato",
         matchResults: "Risultati Corrispondenze",
         similarity: "Similarità",
         editFormTemplate: "Modifica Modello Modulo",
-        selectFormTemplateTitle: "Seleziona Modello Modulo"
+        selectFormTemplateTitle: "Seleziona Modello Modulo",
       },
       editFormTemplateModal: {
         title: "Modifica Modello Modulo",
         formTemplateName: "Nome del Modello Modulo",
         formTemplateNamePlaceholder: "Inserisci il nome del modello modulo",
         formTemplateDescription: "Descrizione del Modello Modulo",
-        descriptionPlaceholder: "Inserisci la descrizione del modello modulo per suggerire automaticamente i campi (minimo 10 caratteri)...",
+        descriptionPlaceholder:
+          "Inserisci la descrizione del modello modulo per suggerire automaticamente i campi (minimo 10 caratteri)...",
         referenceDocuments: "Documenti di Riferimento (Opzionale)",
         uploadFiles: "Carica File",
         knowledgeBase: "Base di Conoscenza",
         formFields: "Campi del Modulo",
         suggest: "Suggerisci",
-        fieldPlaceholder: "Aggiungi un nome campo (es. Nome, Indirizzo, Codice Fiscale) o suggerisci dalla descrizione",
+        fieldPlaceholder:
+          "Aggiungi un nome campo (es. Nome, Indirizzo, Codice Fiscale) o suggerisci dalla descrizione",
         cancel: "Annulla",
-        updateFormTemplate: "Aggiorna Modello Modulo"
+        updateFormTemplate: "Aggiorna Modello Modulo",
       },
       editCustom: {
         title: "Modifica Istruzioni Personalizzate",
@@ -3141,7 +3513,8 @@ const generateAllLanguageResources = () => {
         outlineName: "Nome Schema",
         outlineNamePlaceholder: "Inserisci il nome dello schema",
         description: "Descrizione",
-        descriptionPlaceholder: "Inserisci la descrizione dello schema per suggerire automaticamente le sezioni (minimo 10 caratteri)...",
+        descriptionPlaceholder:
+          "Inserisci la descrizione dello schema per suggerire automaticamente le sezioni (minimo 10 caratteri)...",
         referenceDocuments: "Documenti di Riferimento (Opzionale)",
         uploadFiles: "Carica File",
         knowledgeBase: "Base di Conoscenza",
@@ -3151,7 +3524,7 @@ const generateAllLanguageResources = () => {
         addSectionPlaceholder: "Aggiungi una sezione",
         cancel: "Annulla",
         createOutline: "Crea Schema",
-        updateOutline: "Aggiorna Schema"
+        updateOutline: "Aggiorna Schema",
       },
       editChecklistModal: {
         title: "Modifica Lista di Controllo",
@@ -3159,7 +3532,8 @@ const generateAllLanguageResources = () => {
         checklistName: "Nome Lista di Controllo",
         checklistNamePlaceholder: "Inserisci il nome della lista di controllo",
         description: "Descrizione",
-        descriptionPlaceholder: "Inserisci la descrizione della lista di controllo per suggerire automaticamente le domande (minimo 10 caratteri)...",
+        descriptionPlaceholder:
+          "Inserisci la descrizione della lista di controllo per suggerire automaticamente le domande (minimo 10 caratteri)...",
         referenceDocuments: "Documenti di Riferimento (Opzionale)",
         uploadFiles: "Carica File",
         knowledgeBase: "Base di Conoscenza",
@@ -3170,7 +3544,7 @@ const generateAllLanguageResources = () => {
         copyAllQuestions: "Copia tutte le domande come testo",
         cancel: "Annulla",
         createChecklist: "Crea Lista di Controllo",
-        updateChecklist: "Aggiorna Lista di Controllo"
+        updateChecklist: "Aggiorna Lista di Controllo",
       },
       editTopicListModal: {
         title: "Modifica Lista Argomenti",
@@ -3178,7 +3552,8 @@ const generateAllLanguageResources = () => {
         topicListName: "Nome Lista Argomenti",
         topicListNamePlaceholder: "Inserisci il nome della lista argomenti",
         description: "Descrizione Lista Argomenti",
-        descriptionPlaceholder: "Inserisci la descrizione della lista argomenti per suggerire automaticamente gli argomenti (minimo 10 caratteri)...",
+        descriptionPlaceholder:
+          "Inserisci la descrizione della lista argomenti per suggerire automaticamente gli argomenti (minimo 10 caratteri)...",
         referenceDocuments: "Documenti di Riferimento (Opzionale)",
         uploadFiles: "Carica File",
         knowledgeBase: "Base di Conoscenza",
@@ -3189,15 +3564,17 @@ const generateAllLanguageResources = () => {
         copyAllTopics: "Copia tutti gli argomenti come testo",
         cancel: "Annulla",
         createTopicList: "Crea Lista Argomenti",
-        updateTopicList: "Aggiorna Lista Argomenti"
+        updateTopicList: "Aggiorna Lista Argomenti",
       },
       optimizeChecklistModal: {
         title: "Ottimizza Lista di Controllo",
         customInstructionsLabel: "Istruzioni Personalizzate (Opzionale)",
-        customInstructionsHelperText: "Inserisci qualsiasi istruzione aggiuntiva che dovrebbe essere considerata quando si risponde alle domande della lista di controllo",
+        customInstructionsHelperText:
+          "Inserisci qualsiasi istruzione aggiuntiva che dovrebbe essere considerata quando si risponde alle domande della lista di controllo",
         analyzing: "Analizzando...",
         analyzeButton: "Analizza Lista di Controllo",
-        analyzingMessage: "Analizzando la tua lista di controllo per opportunità di ottimizzazione...",
+        analyzingMessage:
+          "Analizzando la tua lista di controllo per opportunità di ottimizzazione...",
         cancelAnalysis: "Annulla Analisi",
         downloading: "Scaricando...",
         downloadCsv: "Scarica CSV",
@@ -3211,20 +3588,27 @@ const generateAllLanguageResources = () => {
         currentAnswer: "Risposta Attuale",
         showLess: "Mostra Meno",
         showMore: "Mostra Di Più",
-        optimizationsSelectedText: "ottimizzazione{{s}} selezionata{{s}} per l'applicazione",
+        optimizationsSelectedText:
+          "ottimizzazione{{s}} selezionata{{s}} per l'applicazione",
         applying: "Applicando...",
         applySelectedOptimizations: "Applica Ottimizzazioni Selezionate",
-        uploadDocumentsTitle: "Carica documento/i che dovrebbe essere accettato dalla lista di controllo *",
-        uploadDocumentsHelperText: "Carica documenti che dovrebbero soddisfare tutti i requisiti della lista di controllo per aiutare a identificare domande che potrebbero essere troppo rigide",
-        customInstructionsPlaceholder: "es., Considera che questo è uno studio pediatrico quando valuti i requisiti legati all'età, Questo protocollo è per un intervento a basso rischio, ecc."
+        uploadDocumentsTitle:
+          "Carica documento/i che dovrebbe essere accettato dalla lista di controllo *",
+        uploadDocumentsHelperText:
+          "Carica documenti che dovrebbero soddisfare tutti i requisiti della lista di controllo per aiutare a identificare domande che potrebbero essere troppo rigide",
+        customInstructionsPlaceholder:
+          "es., Considera che questo è uno studio pediatrico quando valuti i requisiti legati all'età, Questo protocollo è per un intervento a basso rischio, ecc.",
       },
       optimizeOutlineModal: {
         title: "Ottimizza Schema",
-        description: "Carica un documento di riferimento che rappresenti un esempio di alta qualità del tipo di rapporto che vuoi generare. Il sistema genererà un rapporto usando il tuo schema attuale e la base di conoscenza, lo confronterà con il riferimento e suggerirà miglioramenti alle sezioni del tuo schema.",
+        description:
+          "Carica un documento di riferimento che rappresenti un esempio di alta qualità del tipo di rapporto che vuoi generare. Il sistema genererà un rapporto usando il tuo schema attuale e la base di conoscenza, lo confronterà con il riferimento e suggerirà miglioramenti alle sezioni del tuo schema.",
         groundTruthDocument: "Documento di Riferimento",
         customInstructionsLabel: "Istruzioni Personalizzate (Opzionale)",
-        customInstructionsHelperText: "Fornisci orientamento aggiuntivo per il processo di ottimizzazione",
-        customInstructionsPlaceholder: "es., Concentrati sul miglioramento della profondità tecnica, assicura la conformità a standard specifici, ecc.",
+        customInstructionsHelperText:
+          "Fornisci orientamento aggiuntivo per il processo di ottimizzazione",
+        customInstructionsPlaceholder:
+          "es., Concentrati sul miglioramento della profondità tecnica, assicura la conformità a standard specifici, ecc.",
         characters: "caratteri",
         analyzingOutline: "Analizzando lo schema e generando ottimizzazioni...",
         cancelAnalysis: "Annulla Analisi",
@@ -3244,8 +3628,8 @@ const generateAllLanguageResources = () => {
         cancel: "Annulla",
         optimizing: "Ottimizzando...",
         optimizeOutline: "Ottimizza Schema",
-        applyOptimizations: "Applica {{count}} Ottimizzazione{{s}}"
-      }
+        applyOptimizations: "Applica {{count}} Ottimizzazione{{s}}",
+      },
     },
   }
 
@@ -3308,8 +3692,10 @@ const generateAllLanguageResources = () => {
         typing: "IA está digitando...",
         error: "Desculpe, algo deu errado. Tente novamente.",
         welcome: "Olá! Como posso ajudá-lo hoje?",
-        welcomeMessageWithSource: "Selecione uma base de conhecimento ou faça upload de arquivos, depois faça uma pergunta.",
-        welcomeMessageGeneral: "Pergunte-me qualquer coisa! Para pesquisa na base de conhecimento, selecione primeiro uma base de conhecimento.",
+        welcomeMessageWithSource:
+          "Selecione uma base de conhecimento ou faça upload de arquivos, depois faça uma pergunta.",
+        welcomeMessageGeneral:
+          "Pergunte-me qualquer coisa! Para pesquisa na base de conhecimento, selecione primeiro uma base de conhecimento.",
       },
       settings: {
         title: "Configurações",
@@ -3334,11 +3720,13 @@ const generateAllLanguageResources = () => {
         lightMode: "Modo Claro",
         darkMode: "Modo Escuro",
         // Danger Zone section
-        deleteAccountDescription: "Excluir permanentemente seus dados e tudo associado à sua conta.",
+        deleteAccountDescription:
+          "Excluir permanentemente seus dados e tudo associado à sua conta.",
         delete: "Excluir",
         confirmationRequired: "Confirmação Necessária",
-        deleteConfirmationText: "Todos os dados da sua conta serão excluídos permanentemente. Se você tem certeza, clique em \"Confirmar\" para prosseguir. Esta ação não pode ser desfeita.",
-        cancel: "Cancelar"
+        deleteConfirmationText:
+          'Todos os dados da sua conta serão excluídos permanentemente. Se você tem certeza, clique em "Confirmar" para prosseguir. Esta ação não pode ser desfeita.',
+        cancel: "Cancelar",
       },
       errors: {
         somethingWentWrong: "Algo deu errado",
@@ -3351,58 +3739,95 @@ const generateAllLanguageResources = () => {
         notFound: "O recurso solicitado não foi encontrado.",
       },
       help: {
-        dashboard: "Página principal de visão geral mostrando estatísticas de uso e atividade recente",
-        usageStats: "Visualize seu uso atual de tokens de API e informações de cota para o período de faturamento atual",
-        review: "Analisar documentos contra listas de verificação de qualidade para conformidade e precisão",
-        generate: "Criar relatórios e documentos estruturados usando IA baseada em seu conteúdo",
-        compare: "Comparar dois documentos lado a lado para identificar diferenças e semelhanças",
-        match: "Combinar conteúdo do documento com modelos de formulário para preenchimento automatizado",
-        modelSelection: "Configurar modelos de IA usados para processamento e análise",
-        knowledgeBases: "Gerenciar bibliotecas de base de conhecimento para processamento de documentos",
-        archive: "Visualizar e gerenciar seus documentos processados e histórico de análise",
-        settings: "Configurar suas preferências de conta e configurações da aplicação",
-        admin: "Funções administrativas para gerenciamento de usuários e sistemas",
-        knowledgeBaseSelection: "Escolha uma base de conhecimento que contenha os documentos de referência e padrões para análise",
-        checklistSelection: "Selecione uma lista de verificação com perguntas específicas para avaliar seus documentos",
+        dashboard:
+          "Página principal de visão geral mostrando estatísticas de uso e atividade recente",
+        usageStats:
+          "Visualize seu uso atual de tokens de API e informações de cota para o período de faturamento atual",
+        review:
+          "Analisar documentos contra listas de verificação de qualidade para conformidade e precisão",
+        generate:
+          "Criar relatórios e documentos estruturados usando IA baseada em seu conteúdo",
+        compare:
+          "Comparar dois documentos lado a lado para identificar diferenças e semelhanças",
+        match:
+          "Combinar conteúdo do documento com modelos de formulário para preenchimento automatizado",
+        modelSelection:
+          "Configurar modelos de IA usados para processamento e análise",
+        knowledgeBases:
+          "Gerenciar bibliotecas de base de conhecimento para processamento de documentos",
+        archive:
+          "Visualizar e gerenciar seus documentos processados e histórico de análise",
+        settings:
+          "Configurar suas preferências de conta e configurações da aplicação",
+        admin:
+          "Funções administrativas para gerenciamento de usuários e sistemas",
+        knowledgeBaseSelection:
+          "Escolha uma base de conhecimento que contenha os documentos de referência e padrões para análise",
+        checklistSelection:
+          "Selecione uma lista de verificação com perguntas específicas para avaliar seus documentos",
         fileUpload: "Carregue os documentos que você deseja analisar e revisar",
-        customInstructions: "Adicione instruções específicas que serão consideradas ao responder perguntas da lista de verificação",
-        searchMode: "Escolha entre busca vetorial rápida ou varredura completa do documento",
-        topicList: "Selecione ou crie uma lista de tópicos para focar a análise de comparação",
-        formTemplate: "Escolha um modelo de formulário com o qual seus documentos devem ser combinados",
-        documentOutline: "Selecione uma estrutura de esboço para gerar seu relatório",
-        allUsersToggle: "Alternar entre visualizar apenas seu histórico ou o histórico de todos os usuários",
+        customInstructions:
+          "Adicione instruções específicas que serão consideradas ao responder perguntas da lista de verificação",
+        searchMode:
+          "Escolha entre busca vetorial rápida ou varredura completa do documento",
+        topicList:
+          "Selecione ou crie uma lista de tópicos para focar a análise de comparação",
+        formTemplate:
+          "Escolha um modelo de formulário com o qual seus documentos devem ser combinados",
+        documentOutline:
+          "Selecione uma estrutura de esboço para gerar seu relatório",
+        allUsersToggle:
+          "Alternar entre visualizar apenas seu histórico ou o histórico de todos os usuários",
 
-        createChecklist: "Criar uma nova lista de verificação com perguntas personalizadas para avaliar documentos contra critérios específicos",
-        createOutline: "Criar uma nova estrutura de esboço para orientar a geração de relatórios estruturados",
-        createTopicList: "Criar uma nova lista de tópicos para focar a análise de comparação em assuntos ou temas específicos",
-        createFormTemplate: "Criar um novo modelo de formulário para extração e correspondência automatizada de conteúdo de documentos",
-        suggestChecklistQuestions: "Use IA para gerar automaticamente perguntas relevantes da lista de verificação com base em sua descrição e documentos de referência",
-        optimizeChecklistQuestions: "Melhorar e refinar perguntas existentes da lista de verificação usando a base de conhecimento selecionada para melhor precisão",
-        suggestOutlineSections: "Use IA para gerar automaticamente seções de esboço com base em sua descrição e documentos de referência",
-        optimizeOutlineSections: "Melhorar e refinar seções existentes do esboço usando a base de conhecimento selecionada para melhor estrutura",
-        suggestTopicListTopics: "Use IA para gerar automaticamente tópicos de comparação relevantes com base em sua descrição e documentos de referência",
-        suggestFormTemplateFields: "Use IA para gerar automaticamente campos de formulário relevantes com base em sua descrição e documentos de referência",
-        referenceDocuments: "Carregue documentos de referência ou selecione uma Base de Conhecimento para ajudar a IA a sugerir conteúdo baseado em seu contexto específico e requisitos",
-        referenceDocumentsFiles: "Forneça documentos de referência para ajudar a IA a gerar sugestões mais precisas e contextualmente relevantes",
-        minimumDescriptionLength: "As descrições devem ter pelo menos 10 caracteres para fornecer contexto suficiente para sugestões de IA"
+        createChecklist:
+          "Criar uma nova lista de verificação com perguntas personalizadas para avaliar documentos contra critérios específicos",
+        createOutline:
+          "Criar uma nova estrutura de esboço para orientar a geração de relatórios estruturados",
+        createTopicList:
+          "Criar uma nova lista de tópicos para focar a análise de comparação em assuntos ou temas específicos",
+        createFormTemplate:
+          "Criar um novo modelo de formulário para extração e correspondência automatizada de conteúdo de documentos",
+        suggestChecklistQuestions:
+          "Use IA para gerar automaticamente perguntas relevantes da lista de verificação com base em sua descrição e documentos de referência",
+        optimizeChecklistQuestions:
+          "Melhorar e refinar perguntas existentes da lista de verificação usando a base de conhecimento selecionada para melhor precisão",
+        suggestOutlineSections:
+          "Use IA para gerar automaticamente seções de esboço com base em sua descrição e documentos de referência",
+        optimizeOutlineSections:
+          "Melhorar e refinar seções existentes do esboço usando a base de conhecimento selecionada para melhor estrutura",
+        suggestTopicListTopics:
+          "Use IA para gerar automaticamente tópicos de comparação relevantes com base em sua descrição e documentos de referência",
+        suggestFormTemplateFields:
+          "Use IA para gerar automaticamente campos de formulário relevantes com base em sua descrição e documentos de referência",
+        referenceDocuments:
+          "Carregue documentos de referência ou selecione uma Base de Conhecimento para ajudar a IA a sugerir conteúdo baseado em seu contexto específico e requisitos",
+        referenceDocumentsFiles:
+          "Forneça documentos de referência para ajudar a IA a gerar sugestões mais precisas e contextualmente relevantes",
+        minimumDescriptionLength:
+          "As descrições devem ter pelo menos 10 caracteres para fornecer contexto suficiente para sugestões de IA",
       },
       review: {
         pageTitle: "Revisar Documentos",
-        pageDescription: "Revisar um documento baseado em uma lista de verificação e banco de dados de políticas definidos pelo usuário.",
+        pageDescription:
+          "Revisar um documento baseado em uma lista de verificação e banco de dados de políticas definidos pelo usuário.",
         knowledgeBaseTitle: "Base de Conhecimento",
         knowledgeBaseDescription: "Clique para selecionar",
         checklistTitle: "Lista de Verificação",
         checklistDescription: "Clique para selecionar",
         customInstructionsTitle: "Instruções Personalizadas (Opcional)",
-        customInstructionsPlaceholder: "Digite instruções adicionais que devem ser consideradas ao responder às perguntas da lista de verificação...",
-        customInstructionsHelp: "{{count}}/2000 caracteres. Essas instruções serão adicionadas a cada pergunta durante o processamento.",
-        searchModeHelp: "A busca vetorial fornece resultados rápidos e direcionados. A análise completa do documento examina todo o conteúdo da base de conhecimento.",
+        customInstructionsPlaceholder:
+          "Digite instruções adicionais que devem ser consideradas ao responder às perguntas da lista de verificação...",
+        customInstructionsHelp:
+          "{{count}}/2000 caracteres. Essas instruções serão adicionadas a cada pergunta durante o processamento.",
+        searchModeHelp:
+          "A busca vetorial fornece resultados rápidos e direcionados. A análise completa do documento examina todo o conteúdo da base de conhecimento.",
         processingFile: "Processando arquivo...",
         processingFiles: "Processando arquivos...",
         selectKnowledgeBaseTitle: "Selecionar Base de Conhecimento",
         selectChecklistTitle: "Selecionar Lista de Verificação",
         noResults: "Nenhum resultado ainda",
-        uploadDocuments: "Carregue um ou mais documentos para revisar contra sua lista de verificação selecionada",
+        uploadDocuments:
+          "Carregue um ou mais documentos para revisar contra sua lista de verificação selecionada",
         results: "Resultados",
         downloadReport: "Baixar Relatório",
         downloadCsv: "Baixar CSV",
@@ -3411,28 +3836,34 @@ const generateAllLanguageResources = () => {
         reportCopied: "Relatório copiado para a área de transferência!",
         reviewButton: "Revisar",
         consultDocuments: "Consultar documentos",
-        noChecklistsAvailable: "Nenhuma lista de verificação disponível. Crie sua primeira lista de verificação para começar.",
+        noChecklistsAvailable:
+          "Nenhuma lista de verificação disponível. Crie sua primeira lista de verificação para começar.",
         createChecklist: "Criar Lista de Verificação",
         editChecklist: "Editar Lista de Verificação",
         checklistName: "Nome da Lista de Verificação",
         checklistNamePlaceholder: "Digite o nome da lista de verificação...",
         checklistDescriptionLabel: "Descrição",
-        checklistDescriptionPlaceholder: "Digite a descrição da lista de verificação para sugestões automáticas de perguntas (mínimo 10 caracteres)...",
+        checklistDescriptionPlaceholder:
+          "Digite a descrição da lista de verificação para sugestões automáticas de perguntas (mínimo 10 caracteres)...",
         questions: "Perguntas",
         suggest: "Sugerir",
         suggesting: "Sugerindo...",
         optimize: "Otimizar",
-        optimizeTooltip: "Uma Base de Conhecimento deve ser selecionada para habilitar a função Otimizar",
-        optimizeTooltipEnabled: "Otimizar perguntas baseadas na Base de Conhecimento selecionada",
+        optimizeTooltip:
+          "Uma Base de Conhecimento deve ser selecionada para habilitar a função Otimizar",
+        optimizeTooltipEnabled:
+          "Otimizar perguntas baseadas na Base de Conhecimento selecionada",
         uploadFiles: "Carregar Arquivos",
         knowledgeBase: "Base de Conhecimento",
         referenceDocuments: "Documentos de Referência (Opcional)",
         selectKnowledgeBasePlaceholder: "Selecionar Base de Conhecimento...",
-        noKnowledgeBasesAvailable: "Nenhuma Base de Conhecimento disponível. Crie uma primeiro para usar esta função.",
+        noKnowledgeBasesAvailable:
+          "Nenhuma Base de Conhecimento disponível. Crie uma primeiro para usar esta função.",
         copyQuestions: "Copiar Perguntas",
         questionsCopied: "Perguntas copiadas para a área de transferência",
         noQuestionsToCopy: "Nenhuma pergunta para copiar",
-        failedToCopyQuestions: "Falha ao copiar perguntas para a área de transferência",
+        failedToCopyQuestions:
+          "Falha ao copiar perguntas para a área de transferência",
         saveChecklist: "Salvar Lista de Verificação",
         cancel: "Cancelar",
         deleteChecklist: "Excluir Lista de Verificação",
@@ -3440,41 +3871,47 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "Arquivos Enviados",
         handwritten: "Manuscrito",
         removeFile: "Remover",
-        characterCount: "{{count}}/2000 caracteres. Essas instruções serão anexadas a cada pergunta durante o processamento.",
+        characterCount:
+          "{{count}}/2000 caracteres. Essas instruções serão anexadas a cada pergunta durante o processamento.",
         searchMode: "Modo de Pesquisa",
         vectorSearch: "Pesquisa Vetorial",
         fullDocumentScan: "Análise Completa do Documento",
-        vectorSearchDescription: "Encontra conteúdo relevante usando pesquisa de similaridade IA (rápido, direcionado)",
-        fullScanDescription: "Analisa todos os documentos na base de conhecimento (completo, minucioso)"
+        vectorSearchDescription:
+          "Encontra conteúdo relevante usando pesquisa de similaridade IA (rápido, direcionado)",
+        fullScanDescription:
+          "Analisa todos os documentos na base de conhecimento (completo, minucioso)",
       },
       modelSelection: {
         llmManagement: "Gestão de LLM",
-        llmDescription: "Configure e gerencie os LLMs usados para gerar respostas de texto. O modelo padrão será usado para todas as operações.",
+        llmDescription:
+          "Configure e gerencie os LLMs usados para gerar respostas de texto. O modelo padrão será usado para todas as operações.",
         addNewLlm: "Adicionar Novo LLM",
         noLlmsConfigured: "Nenhum LLM configurado",
         addNewLlmToGetStarted: "Adicione um novo LLM para começar",
         embeddingModelManagement: "Gestão de Modelos de Embedding",
-        embeddingDescription: "Configure e gerencie os modelos de embedding usados para indexação e recuperação de bases de conhecimento. O modelo padrão será usado ao criar novas bases de conhecimento, mas cada base de conhecimento continuará usando seu modelo de embedding original mesmo se o padrão mudar posteriormente.",
+        embeddingDescription:
+          "Configure e gerencie os modelos de embedding usados para indexação e recuperação de bases de conhecimento. O modelo padrão será usado ao criar novas bases de conhecimento, mas cada base de conhecimento continuará usando seu modelo de embedding original mesmo se o padrão mudar posteriormente.",
         addEmbeddingModel: "Adicionar Modelo de Embedding",
         noEmbeddingModelsConfigured: "Nenhum modelo de embedding configurado",
-        addNewEmbeddingModelToGetStarted: "Adicione um novo modelo de embedding para começar",
+        addNewEmbeddingModelToGetStarted:
+          "Adicione um novo modelo de embedding para começar",
         tableHeaders: {
           name: "Nome",
           modelId: "ID do Modelo",
           provider: "Provedor",
           description: "Descrição",
           status: "Status",
-          actions: "Ações"
+          actions: "Ações",
         },
         status: {
           default: "Padrão",
-          available: "Disponível"
+          available: "Disponível",
         },
         actions: {
           setAsDefault: "Definir como Padrão",
           delete: "Excluir",
           validate: "Validar",
-          validating: "Validando"
+          validating: "Validando",
         },
         dialog: {
           addNewLlm: "Adicionar Novo LLM",
@@ -3484,22 +3921,24 @@ const generateAllLanguageResources = () => {
           modelId: "ID do Modelo",
           description: "Descrição",
           cancel: "Cancelar",
-          addModel: "Adicionar Modelo"
+          addModel: "Adicionar Modelo",
         },
         placeholders: {
           customModel: "ex., Meu Modelo Personalizado",
           embeddingModelId: "ex., sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "Descreva o modelo, suas características e quando usá-lo"
+          describeModel:
+            "Descreva o modelo, suas características e quando usá-lo",
         },
         validation: {
-          pleaseEnterModelId: "Por favor, insira um ID do modelo"
-        }
+          pleaseEnterModelId: "Por favor, insira um ID do modelo",
+        },
       },
       knowledgeBases: {
         title: "Gestão de Bases de Conhecimento",
         addKnowledgeBase: "Adicionar Base de Conhecimento",
         emptyStateTitle: "Você ainda não tem nenhuma Base de Conhecimento",
-        emptyStateDescription: "Adicione uma nova Base de Conhecimento para começar",
+        emptyStateDescription:
+          "Adicione uma nova Base de Conhecimento para começar",
         tableHeaders: {
           title: "Título",
           description: "Descrição",
@@ -3507,31 +3946,33 @@ const generateAllLanguageResources = () => {
           embeddingModel: "Modelo de Embedding",
           dateCreated: "Data de Criação",
           dateModified: "Data de Modificação",
-          actions: "Ações"
+          actions: "Ações",
         },
         status: {
           default: "Padrão",
-          na: "N/D"
+          na: "N/D",
         },
         actions: {
           view: "Visualizar",
           edit: "Editar",
           delete: "Excluir",
-          configure: "Configurar"
+          configure: "Configurar",
         },
         deleteModal: {
           title: "Excluir Base de Conhecimento",
           buttonText: "Excluir Base de Conhecimento",
-          description: "Esta Base de Conhecimento será excluída permanentemente. Tem certeza? Você não poderá desfazer esta ação.",
+          description:
+            "Esta Base de Conhecimento será excluída permanentemente. Tem certeza? Você não poderá desfazer esta ação.",
           confirmButton: "Excluir",
           cancelButton: "Cancelar",
           successMessage: "A Base de Conhecimento foi excluída com sucesso",
-          errorMessage: "Ocorreu um erro ao excluir a Base de Conhecimento"
+          errorMessage: "Ocorreu um erro ao excluir a Base de Conhecimento",
         },
         modals: {
           add: {
             title: "Adicionar Base de Conhecimento",
-            description: "Crie uma nova base de conhecimento fornecendo detalhes e carregando documentos abaixo.",
+            description:
+              "Crie uma nova base de conhecimento fornecendo detalhes e carregando documentos abaixo.",
           },
           edit: {
             title: "Editar Base de Conhecimento",
@@ -3539,13 +3980,14 @@ const generateAllLanguageResources = () => {
           },
           fields: {
             title: "Título",
-            description: "Descrição"
+            description: "Descrição",
           },
           fileUpload: {
             currentFiles: "Arquivos Atuais",
             newFiles: "Novos Arquivos",
             selectedFiles: "Arquivos Selecionados",
-            dragAndDrop: "Arraste e solte arquivos aqui, ou clique para navegar",
+            dragAndDrop:
+              "Arraste e solte arquivos aqui, ou clique para navegar",
             dropFiles: "Solte os arquivos aqui...",
             removeFile: "Remover arquivo",
             supportedFormats: "Suporta: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
@@ -3555,10 +3997,10 @@ const generateAllLanguageResources = () => {
             create: "Criar",
             save: "Salvar",
             saving: "Salvando...",
-            creating: "Criando..."
+            creating: "Criando...",
           },
           validation: {
-            titleRequired: "Título é obrigatório"
+            titleRequired: "Título é obrigatório",
           },
           messages: {
             createSuccess: "Base de Conhecimento criada com sucesso.",
@@ -3595,7 +4037,8 @@ const generateAllLanguageResources = () => {
       },
       compare: {
         title: "Comparar Documentos",
-        subtitle: "Compare e analise múltiplos documentos para encontrar diferenças, semelhanças e padrões",
+        subtitle:
+          "Compare e analise múltiplos documentos para encontrar diferenças, semelhanças e padrões",
         sourceSectionTitle: "Selecionar Documentos Fonte",
         referenceSectionTitle: "Selecionar Documentos de Referência",
         sourcePlaceholder: "Selecione documentos para análise fonte...",
@@ -3613,13 +4056,13 @@ const generateAllLanguageResources = () => {
           comprehensive: "Análise Abrangente",
           structural: "Comparação Estrutural",
           content: "Análise de Conteúdo",
-          chronological: "Análise Cronológica"
+          chronological: "Análise Cronológica",
         },
         analysisDepth: "Profundidade da Análise",
         analysisDepths: {
           surface: "Análise Superficial",
           detailed: "Análise Detalhada",
-          comprehensive: "Análise Abrangente"
+          comprehensive: "Análise Abrangente",
         },
         generateReport: "Gerar Relatório de Comparação",
         comparing: "Comparando documentos...",
@@ -3644,15 +4087,17 @@ const generateAllLanguageResources = () => {
         clickToBrowse: "Clique para navegar ou arraste e solte",
         supportedFormats: "Suporta PDF, TXT e DOCX",
         editTopicList: "Editar Lista de Tópicos",
-        selectTopicListTitle: "Selecionar Lista de Tópicos"
+        selectTopicListTitle: "Selecionar Lista de Tópicos",
       },
       match: {
         title: "Combinar Documentos",
-        subtitle: "Encontre documentos similares e analise padrões de correspondência em sua base de conhecimento",
+        subtitle:
+          "Encontre documentos similares e analise padrões de correspondência em sua base de conhecimento",
         sourceSectionTitle: "Selecionar Documento Fonte",
         searchInTitle: "Pesquisar Em",
         sourcePlaceholder: "Selecione um documento como fonte de referência...",
-        searchPlaceholder: "Selecione documentos ou base de conhecimento para pesquisar...",
+        searchPlaceholder:
+          "Selecione documentos ou base de conhecimento para pesquisar...",
         findMatchesButton: "Encontrar Correspondências",
         noSourceSelected: "Nenhum documento fonte selecionado",
         noSearchTargetSelected: "Nenhum alvo de pesquisa selecionado",
@@ -3664,14 +4109,14 @@ const generateAllLanguageResources = () => {
           keyword: "Correspondência de Palavras-chave",
           structural: "Similaridade Estrutural",
           content: "Análise de Conteúdo",
-          contextual: "Correspondência Contextual"
+          contextual: "Correspondência Contextual",
         },
         threshold: "Limite de Similaridade",
         thresholds: {
           low: "Baixo (30%)",
           medium: "Médio (50%)",
           high: "Alto (70%)",
-          veryHigh: "Muito Alto (90%)"
+          veryHigh: "Muito Alto (90%)",
         },
         maxResults: "Máximo de Resultados",
         searching: "Procurando correspondências...",
@@ -3684,35 +4129,39 @@ const generateAllLanguageResources = () => {
         exportMatches: "Exportar Correspondências",
         clearResults: "Limpar Resultados",
         newMatch: "Nova Correspondência",
-        selectDocument: "Selecione um documento para encontrar correspondências",
+        selectDocument:
+          "Selecione um documento para encontrar correspondências",
         pleaseSelect: "Por favor selecione um documento...",
         sourceDocument: "Documento Origem",
         matchingDocuments: "Documentos Correspondentes",
         findMatches: "Encontrar Correspondências",
         similarityScore: "Pontuação de Similaridade",
         noDocumentsFound: "Nenhum documento encontrado",
-        selectDocumentToMatch: "Por favor selecione um documento para encontrar correspondências",
+        selectDocumentToMatch:
+          "Por favor selecione um documento para encontrar correspondências",
         loadingMatches: "Procurando correspondências...",
         noMatchesFound: "Nenhum documento similar encontrado",
         matchResults: "Resultados de Correspondência",
         similarity: "Similaridade",
         editFormTemplate: "Editar Modelo de Formulário",
-        selectFormTemplateTitle: "Selecionar Modelo de Formulário"
+        selectFormTemplateTitle: "Selecionar Modelo de Formulário",
       },
       editFormTemplateModal: {
         title: "Editar Modelo de Formulário",
         formTemplateName: "Nome do Modelo de Formulário",
         formTemplateNamePlaceholder: "Digite o nome do modelo de formulário",
         formTemplateDescription: "Descrição do Modelo de Formulário",
-        descriptionPlaceholder: "Digite a descrição do modelo de formulário para sugerir campos automaticamente (mínimo 10 caracteres)...",
+        descriptionPlaceholder:
+          "Digite a descrição do modelo de formulário para sugerir campos automaticamente (mínimo 10 caracteres)...",
         referenceDocuments: "Documentos de Referência (Opcional)",
         uploadFiles: "Enviar Arquivos",
         knowledgeBase: "Base de Conhecimento",
         formFields: "Campos do Formulário",
         suggest: "Sugerir",
-        fieldPlaceholder: "Adicione um nome de campo (ex. Nome, Endereço, CPF) ou sugira da descrição",
+        fieldPlaceholder:
+          "Adicione um nome de campo (ex. Nome, Endereço, CPF) ou sugira da descrição",
         cancel: "Cancelar",
-        updateFormTemplate: "Atualizar Modelo de Formulário"
+        updateFormTemplate: "Atualizar Modelo de Formulário",
       },
       editCustom: {
         title: "Editar Instruções Personalizadas",
@@ -3726,7 +4175,8 @@ const generateAllLanguageResources = () => {
         outlineName: "Nome do Esquema",
         outlineNamePlaceholder: "Digite o nome do esquema",
         description: "Descrição",
-        descriptionPlaceholder: "Digite a descrição do esquema para sugerir seções automaticamente (mínimo 10 caracteres)...",
+        descriptionPlaceholder:
+          "Digite a descrição do esquema para sugerir seções automaticamente (mínimo 10 caracteres)...",
         referenceDocuments: "Documentos de Referência (Opcional)",
         uploadFiles: "Enviar Arquivos",
         knowledgeBase: "Base de Conhecimento",
@@ -3736,7 +4186,7 @@ const generateAllLanguageResources = () => {
         addSectionPlaceholder: "Adicionar uma seção",
         cancel: "Cancelar",
         createOutline: "Criar Esquema",
-        updateOutline: "Atualizar Esquema"
+        updateOutline: "Atualizar Esquema",
       },
       editChecklistModal: {
         title: "Editar Lista de Verificação",
@@ -3744,7 +4194,8 @@ const generateAllLanguageResources = () => {
         checklistName: "Nome da Lista de Verificação",
         checklistNamePlaceholder: "Digite o nome da lista de verificação",
         description: "Descrição",
-        descriptionPlaceholder: "Digite a descrição da lista de verificação para sugerir perguntas automaticamente (mínimo 10 caracteres)...",
+        descriptionPlaceholder:
+          "Digite a descrição da lista de verificação para sugerir perguntas automaticamente (mínimo 10 caracteres)...",
         referenceDocuments: "Documentos de Referência (Opcional)",
         uploadFiles: "Enviar Arquivos",
         knowledgeBase: "Base de Conhecimento",
@@ -3755,7 +4206,7 @@ const generateAllLanguageResources = () => {
         copyAllQuestions: "Copiar todas as perguntas como texto",
         cancel: "Cancelar",
         createChecklist: "Criar Lista de Verificação",
-        updateChecklist: "Atualizar Lista de Verificação"
+        updateChecklist: "Atualizar Lista de Verificação",
       },
       editTopicListModal: {
         title: "Editar Lista de Tópicos",
@@ -3763,7 +4214,8 @@ const generateAllLanguageResources = () => {
         topicListName: "Nome da Lista de Tópicos",
         topicListNamePlaceholder: "Digite o nome da lista de tópicos",
         description: "Descrição da Lista de Tópicos",
-        descriptionPlaceholder: "Digite a descrição da lista de tópicos para sugerir tópicos automaticamente (mínimo 10 caracteres)...",
+        descriptionPlaceholder:
+          "Digite a descrição da lista de tópicos para sugerir tópicos automaticamente (mínimo 10 caracteres)...",
         referenceDocuments: "Documentos de Referência (Opcional)",
         uploadFiles: "Enviar Arquivos",
         knowledgeBase: "Base de Conhecimento",
@@ -3774,15 +4226,17 @@ const generateAllLanguageResources = () => {
         copyAllTopics: "Copiar todos os tópicos como texto",
         cancel: "Cancelar",
         createTopicList: "Criar Lista de Tópicos",
-        updateTopicList: "Atualizar Lista de Tópicos"
+        updateTopicList: "Atualizar Lista de Tópicos",
       },
       optimizeChecklistModal: {
         title: "Otimizar Lista de Verificação",
         customInstructionsLabel: "Instruções Personalizadas (Opcional)",
-        customInstructionsHelperText: "Digite qualquer instrução adicional que deve ser considerada ao responder às perguntas da lista de verificação",
+        customInstructionsHelperText:
+          "Digite qualquer instrução adicional que deve ser considerada ao responder às perguntas da lista de verificação",
         analyzing: "Analisando...",
         analyzeButton: "Analisar Lista de Verificação",
-        analyzingMessage: "Analisando sua lista de verificação em busca de oportunidades de otimização...",
+        analyzingMessage:
+          "Analisando sua lista de verificação em busca de oportunidades de otimização...",
         cancelAnalysis: "Cancelar Análise",
         downloading: "Baixando...",
         downloadCsv: "Baixar CSV",
@@ -3796,20 +4250,27 @@ const generateAllLanguageResources = () => {
         currentAnswer: "Resposta Atual",
         showLess: "Mostrar Menos",
         showMore: "Mostrar Mais",
-        optimizationsSelectedText: "otimização{{s}} selecionada{{s}} para aplicação",
+        optimizationsSelectedText:
+          "otimização{{s}} selecionada{{s}} para aplicação",
         applying: "Aplicando...",
         applySelectedOptimizations: "Aplicar Otimizações Selecionadas",
-        uploadDocumentsTitle: "Carregue documento(s) que deveria ser aceito pela lista de verificação *",
-        uploadDocumentsHelperText: "Carregue documentos que devem atender a todos os requisitos da lista de verificação para ajudar a identificar perguntas que podem ser muito rígidas",
-        customInstructionsPlaceholder: "ex., Considere que este é um estudo pediátrico ao avaliar requisitos relacionados à idade, Este protocolo é para uma intervenção de baixo risco, etc."
+        uploadDocumentsTitle:
+          "Carregue documento(s) que deveria ser aceito pela lista de verificação *",
+        uploadDocumentsHelperText:
+          "Carregue documentos que devem atender a todos os requisitos da lista de verificação para ajudar a identificar perguntas que podem ser muito rígidas",
+        customInstructionsPlaceholder:
+          "ex., Considere que este é um estudo pediátrico ao avaliar requisitos relacionados à idade, Este protocolo é para uma intervenção de baixo risco, etc.",
       },
       optimizeOutlineModal: {
         title: "Otimizar Esquema",
-        description: "Carregue um documento de referência que represente um exemplo de alta qualidade do tipo de relatório que você deseja gerar. O sistema gerará um relatório usando seu esquema atual e base de conhecimento, comparará com a referência e sugerirá melhorias para as seções do seu esquema.",
+        description:
+          "Carregue um documento de referência que represente um exemplo de alta qualidade do tipo de relatório que você deseja gerar. O sistema gerará um relatório usando seu esquema atual e base de conhecimento, comparará com a referência e sugerirá melhorias para as seções do seu esquema.",
         groundTruthDocument: "Documento de Referência",
         customInstructionsLabel: "Instruções Personalizadas (Opcional)",
-        customInstructionsHelperText: "Forneça orientação adicional para o processo de otimização",
-        customInstructionsPlaceholder: "ex., Foque em melhorar a profundidade técnica, garanta conformidade com padrões específicos, etc.",
+        customInstructionsHelperText:
+          "Forneça orientação adicional para o processo de otimização",
+        customInstructionsPlaceholder:
+          "ex., Foque em melhorar a profundidade técnica, garanta conformidade com padrões específicos, etc.",
         characters: "caracteres",
         analyzingOutline: "Analisando esquema e gerando otimizações...",
         cancelAnalysis: "Cancelar Análise",
@@ -3829,8 +4290,8 @@ const generateAllLanguageResources = () => {
         cancel: "Cancelar",
         optimizing: "Otimizando...",
         optimizeOutline: "Otimizar Esquema",
-        applyOptimizations: "Aplicar {{count}} Otimização{{s}}"
-      }
+        applyOptimizations: "Aplicar {{count}} Otimização{{s}}",
+      },
     },
   }
 
@@ -3890,8 +4351,10 @@ const generateAllLanguageResources = () => {
         typing: "ИИ печатает...",
         error: "Извините, что-то пошло не так. Попробуйте еще раз.",
         welcome: "Привет! Как я могу помочь вам сегодня?",
-        welcomeMessageWithSource: "Выберите базу знаний или загрузите файлы, затем задайте вопрос.",
-        welcomeMessageGeneral: "Спрашивайте меня о чём угодно! Для поиска в базе знаний сначала выберите базу знаний.",
+        welcomeMessageWithSource:
+          "Выберите базу знаний или загрузите файлы, затем задайте вопрос.",
+        welcomeMessageGeneral:
+          "Спрашивайте меня о чём угодно! Для поиска в базе знаний сначала выберите базу знаний.",
       },
       settings: {
         title: "Настройки",
@@ -3916,11 +4379,13 @@ const generateAllLanguageResources = () => {
         lightMode: "Светлый режим",
         darkMode: "Тёмный режим",
         // Danger Zone section
-        deleteAccountDescription: "Навсегда удалить ваши данные и все, что связано с вашим аккаунтом.",
+        deleteAccountDescription:
+          "Навсегда удалить ваши данные и все, что связано с вашим аккаунтом.",
         delete: "Удалить",
         confirmationRequired: "Требуется Подтверждение",
-        deleteConfirmationText: "Все данные вашего аккаунта будут удалены навсегда. Если вы уверены, нажмите \"Подтвердить\" для продолжения. Это действие нельзя отменить.",
-        cancel: "Отменить"
+        deleteConfirmationText:
+          'Все данные вашего аккаунта будут удалены навсегда. Если вы уверены, нажмите "Подтвердить" для продолжения. Это действие нельзя отменить.',
+        cancel: "Отменить",
       },
       errors: {
         somethingWentWrong: "Что-то пошло не так",
@@ -3933,58 +4398,95 @@ const generateAllLanguageResources = () => {
         notFound: "Запрашиваемый ресурс не найден.",
       },
       help: {
-        dashboard: "Главная страница обзора, показывающая статистику использования и недавнюю активность",
-        usageStats: "Просмотрите текущее использование токенов API и информацию о квоте за текущий расчетный период",
-        review: "Анализировать документы против контрольных списков качества для соответствия и точности",
-        generate: "Создавать структурированные отчеты и документы с использованием ИИ на основе вашего контента",
-        compare: "Сравнить два документа рядом для выявления различий и сходств",
-        match: "Сопоставить содержимое документа с шаблонами форм для автоматического заполнения",
-        modelSelection: "Настроить модели ИИ, используемые для обработки и анализа",
-        knowledgeBases: "Управлять библиотеками баз знаний для обработки документов",
-        archive: "Просматривать и управлять обработанными документами и историей анализа",
-        settings: "Настроить предпочтения вашего аккаунта и настройки приложения",
-        admin: "Административные функции для управления пользователями и системой",
-        knowledgeBaseSelection: "Выберите базу знаний, которая содержит справочные документы и стандарты для анализа",
-        checklistSelection: "Выберите контрольный список с конкретными вопросами для оценки ваших документов",
-        fileUpload: "Загрузите документы, которые вы хотите проанализировать и просмотреть",
-        customInstructions: "Добавьте конкретные инструкции, которые будут учитываться при ответе на вопросы контрольного списка",
-        searchMode: "Выберите между быстрым векторным поиском или комплексным сканированием всего документа",
-        topicList: "Выберите или создайте список тем для фокусировки анализа сравнения",
-        formTemplate: "Выберите шаблон формы, с которым должны быть сопоставлены ваши документы",
+        dashboard:
+          "Главная страница обзора, показывающая статистику использования и недавнюю активность",
+        usageStats:
+          "Просмотрите текущее использование токенов API и информацию о квоте за текущий расчетный период",
+        review:
+          "Анализировать документы против контрольных списков качества для соответствия и точности",
+        generate:
+          "Создавать структурированные отчеты и документы с использованием ИИ на основе вашего контента",
+        compare:
+          "Сравнить два документа рядом для выявления различий и сходств",
+        match:
+          "Сопоставить содержимое документа с шаблонами форм для автоматического заполнения",
+        modelSelection:
+          "Настроить модели ИИ, используемые для обработки и анализа",
+        knowledgeBases:
+          "Управлять библиотеками баз знаний для обработки документов",
+        archive:
+          "Просматривать и управлять обработанными документами и историей анализа",
+        settings:
+          "Настроить предпочтения вашего аккаунта и настройки приложения",
+        admin:
+          "Административные функции для управления пользователями и системой",
+        knowledgeBaseSelection:
+          "Выберите базу знаний, которая содержит справочные документы и стандарты для анализа",
+        checklistSelection:
+          "Выберите контрольный список с конкретными вопросами для оценки ваших документов",
+        fileUpload:
+          "Загрузите документы, которые вы хотите проанализировать и просмотреть",
+        customInstructions:
+          "Добавьте конкретные инструкции, которые будут учитываться при ответе на вопросы контрольного списка",
+        searchMode:
+          "Выберите между быстрым векторным поиском или комплексным сканированием всего документа",
+        topicList:
+          "Выберите или создайте список тем для фокусировки анализа сравнения",
+        formTemplate:
+          "Выберите шаблон формы, с которым должны быть сопоставлены ваши документы",
         documentOutline: "Выберите структуру плана для генерации вашего отчета",
-        allUsersToggle: "Переключение между просмотром только вашей истории или истории всех пользователей",
+        allUsersToggle:
+          "Переключение между просмотром только вашей истории или истории всех пользователей",
 
-        createChecklist: "Создать новый контрольный список с пользовательскими вопросами для оценки документов против конкретных критериев",
-        createOutline: "Создать новую структуру плана для руководства генерацией структурированных отчетов",
-        createTopicList: "Создать новый список тем для фокусировки анализа сравнения на конкретных предметах или темах",
-        createFormTemplate: "Создать новый шаблон формы для автоматизированного извлечения и сопоставления содержимого документов",
-        suggestChecklistQuestions: "Используйте ИИ для автоматической генерации релевантных вопросов контрольного списка на основе вашего описания и справочных документов",
-        optimizeChecklistQuestions: "Улучшить и усовершенствовать существующие вопросы контрольного списка, используя выбранную базу знаний для лучшей точности",
-        suggestOutlineSections: "Используйте ИИ для автоматической генерации разделов плана на основе вашего описания и справочных документов",
-        optimizeOutlineSections: "Улучшить и усовершенствовать существующие разделы плана, используя выбранную базу знаний для лучшей структуры",
-        suggestTopicListTopics: "Используйте ИИ для автоматической генерации релевантных тем сравнения на основе вашего описания и справочных документов",
-        suggestFormTemplateFields: "Используйте ИИ для автоматической генерации релевантных полей формы на основе вашего описания и справочных документов",
-        referenceDocuments: "Загрузите справочные документы или выберите Базу знаний, чтобы помочь ИИ предложить контент на основе вашего конкретного контекста и требований",
-        referenceDocumentsFiles: "Предоставьте справочные документы, чтобы помочь ИИ генерировать более точные и контекстуально релевантные предложения",
-        minimumDescriptionLength: "Описания должны содержать не менее 10 символов для обеспечения достаточного контекста для предложений ИИ"
+        createChecklist:
+          "Создать новый контрольный список с пользовательскими вопросами для оценки документов против конкретных критериев",
+        createOutline:
+          "Создать новую структуру плана для руководства генерацией структурированных отчетов",
+        createTopicList:
+          "Создать новый список тем для фокусировки анализа сравнения на конкретных предметах или темах",
+        createFormTemplate:
+          "Создать новый шаблон формы для автоматизированного извлечения и сопоставления содержимого документов",
+        suggestChecklistQuestions:
+          "Используйте ИИ для автоматической генерации релевантных вопросов контрольного списка на основе вашего описания и справочных документов",
+        optimizeChecklistQuestions:
+          "Улучшить и усовершенствовать существующие вопросы контрольного списка, используя выбранную базу знаний для лучшей точности",
+        suggestOutlineSections:
+          "Используйте ИИ для автоматической генерации разделов плана на основе вашего описания и справочных документов",
+        optimizeOutlineSections:
+          "Улучшить и усовершенствовать существующие разделы плана, используя выбранную базу знаний для лучшей структуры",
+        suggestTopicListTopics:
+          "Используйте ИИ для автоматической генерации релевантных тем сравнения на основе вашего описания и справочных документов",
+        suggestFormTemplateFields:
+          "Используйте ИИ для автоматической генерации релевантных полей формы на основе вашего описания и справочных документов",
+        referenceDocuments:
+          "Загрузите справочные документы или выберите Базу знаний, чтобы помочь ИИ предложить контент на основе вашего конкретного контекста и требований",
+        referenceDocumentsFiles:
+          "Предоставьте справочные документы, чтобы помочь ИИ генерировать более точные и контекстуально релевантные предложения",
+        minimumDescriptionLength:
+          "Описания должны содержать не менее 10 символов для обеспечения достаточного контекста для предложений ИИ",
       },
       review: {
         pageTitle: "Проверить Документы",
-        pageDescription: "Проверить документ на основе пользовательского контрольного списка и базы данных политик.",
+        pageDescription:
+          "Проверить документ на основе пользовательского контрольного списка и базы данных политик.",
         knowledgeBaseTitle: "База Знаний",
         knowledgeBaseDescription: "Нажмите для выбора",
         checklistTitle: "Контрольный Список",
         checklistDescription: "Нажмите для выбора",
         customInstructionsTitle: "Пользовательские Инструкции (Необязательно)",
-        customInstructionsPlaceholder: "Введите дополнительные инструкции, которые следует учитывать при ответе на вопросы контрольного списка...",
-        customInstructionsHelp: "{{count}}/2000 символов. Эти инструкции будут добавлены к каждому вопросу во время обработки.",
-        searchModeHelp: "Векторный поиск предоставляет быстрые, целевые результаты. Полный анализ документа исследует все содержимое базы знаний.",
+        customInstructionsPlaceholder:
+          "Введите дополнительные инструкции, которые следует учитывать при ответе на вопросы контрольного списка...",
+        customInstructionsHelp:
+          "{{count}}/2000 символов. Эти инструкции будут добавлены к каждому вопросу во время обработки.",
+        searchModeHelp:
+          "Векторный поиск предоставляет быстрые, целевые результаты. Полный анализ документа исследует все содержимое базы знаний.",
         processingFile: "Обработка файла...",
         processingFiles: "Обработка файлов...",
         selectKnowledgeBaseTitle: "Выбрать Базу Знаний",
         selectChecklistTitle: "Выбрать Контрольный Список",
         noResults: "Пока нет результатов",
-        uploadDocuments: "Загрузите один или несколько документов для проверки по выбранному контрольному списку",
+        uploadDocuments:
+          "Загрузите один или несколько документов для проверки по выбранному контрольному списку",
         results: "Результаты",
         downloadReport: "Скачать Отчет",
         downloadCsv: "Скачать CSV",
@@ -3993,24 +4495,29 @@ const generateAllLanguageResources = () => {
         reportCopied: "Отчет скопирован в буфер обмена!",
         reviewButton: "Проверить",
         consultDocuments: "Консультировать документы",
-        noChecklistsAvailable: "Контрольные списки недоступны. Создайте свой первый контрольный список для начала.",
+        noChecklistsAvailable:
+          "Контрольные списки недоступны. Создайте свой первый контрольный список для начала.",
         createChecklist: "Создать Контрольный Список",
         editChecklist: "Редактировать Контрольный Список",
         checklistName: "Название Контрольного Списка",
         checklistNamePlaceholder: "Введите название контрольного списка...",
         checklistDescriptionLabel: "Описание",
-        checklistDescriptionPlaceholder: "Введите описание контрольного списка для автоматических предложений вопросов (минимум 10 символов)...",
+        checklistDescriptionPlaceholder:
+          "Введите описание контрольного списка для автоматических предложений вопросов (минимум 10 символов)...",
         questions: "Вопросы",
         suggest: "Предложить",
         suggesting: "Предложение...",
         optimize: "Оптимизировать",
-        optimizeTooltip: "Для включения функции Оптимизировать должна быть выбрана База Знаний",
-        optimizeTooltipEnabled: "Оптимизировать вопросы на основе выбранной Базы Знаний",
+        optimizeTooltip:
+          "Для включения функции Оптимизировать должна быть выбрана База Знаний",
+        optimizeTooltipEnabled:
+          "Оптимизировать вопросы на основе выбранной Базы Знаний",
         uploadFiles: "Загрузить Файлы",
         knowledgeBase: "База Знаний",
         referenceDocuments: "Справочные Документы (Необязательно)",
         selectKnowledgeBasePlaceholder: "Выбрать Базу Знаний...",
-        noKnowledgeBasesAvailable: "Базы Знаний недоступны. Создайте сначала одну для использования этой функции.",
+        noKnowledgeBasesAvailable:
+          "Базы Знаний недоступны. Создайте сначала одну для использования этой функции.",
         copyQuestions: "Копировать Вопросы",
         questionsCopied: "Вопросы скопированы в буфер обмена",
         noQuestionsToCopy: "Нет вопросов для копирования",
@@ -4022,41 +4529,47 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "Загруженные Файлы",
 
         removeFile: "Удалить",
-        characterCount: "{{count}}/2000 символов. Эти инструкции будут добавлены к каждому вопросу при обработке.",
+        characterCount:
+          "{{count}}/2000 символов. Эти инструкции будут добавлены к каждому вопросу при обработке.",
         searchMode: "Режим Поиска",
         vectorSearch: "Векторный Поиск",
         fullDocumentScan: "Полный Анализ Документа",
-        vectorSearchDescription: "Находит релевантный контент используя поиск подобия ИИ (быстро, целенаправленно)",
-        fullScanDescription: "Анализирует все документы в базе знаний (полный, тщательный)"
+        vectorSearchDescription:
+          "Находит релевантный контент используя поиск подобия ИИ (быстро, целенаправленно)",
+        fullScanDescription:
+          "Анализирует все документы в базе знаний (полный, тщательный)",
       },
       modelSelection: {
         llmManagement: "Управление LLM",
-        llmDescription: "Настройте и управляйте LLM, используемыми для генерации текстовых ответов. Модель по умолчанию будет использоваться для всех операций.",
+        llmDescription:
+          "Настройте и управляйте LLM, используемыми для генерации текстовых ответов. Модель по умолчанию будет использоваться для всех операций.",
         addNewLlm: "Добавить новую LLM",
         noLlmsConfigured: "LLM не настроены",
         addNewLlmToGetStarted: "Добавьте новую LLM для начала работы",
         embeddingModelManagement: "Управление моделями встраивания",
-        embeddingDescription: "Настройте и управляйте моделями встраивания, используемыми для индексации и извлечения баз знаний. Модель по умолчанию будет использоваться при создании новых баз знаний, но каждая база знаний будет продолжать использовать свою исходную модель встраивания, даже если значение по умолчанию изменится позже.",
+        embeddingDescription:
+          "Настройте и управляйте моделями встраивания, используемыми для индексации и извлечения баз знаний. Модель по умолчанию будет использоваться при создании новых баз знаний, но каждая база знаний будет продолжать использовать свою исходную модель встраивания, даже если значение по умолчанию изменится позже.",
         addEmbeddingModel: "Добавить модель встраивания",
         noEmbeddingModelsConfigured: "Модели встраивания не настроены",
-        addNewEmbeddingModelToGetStarted: "Добавьте новую модель встраивания для начала работы",
+        addNewEmbeddingModelToGetStarted:
+          "Добавьте новую модель встраивания для начала работы",
         tableHeaders: {
           name: "Имя",
           modelId: "ID модели",
           provider: "Поставщик",
           description: "Описание",
           status: "Статус",
-          actions: "Действия"
+          actions: "Действия",
         },
         status: {
           default: "По умолчанию",
-          available: "Доступно"
+          available: "Доступно",
         },
         actions: {
           setAsDefault: "Установить по умолчанию",
           delete: "Удалить",
           validate: "Проверить",
-          validating: "Проверка"
+          validating: "Проверка",
         },
         dialog: {
           addNewLlm: "Добавить новую LLM",
@@ -4066,16 +4579,17 @@ const generateAllLanguageResources = () => {
           modelId: "ID модели",
           description: "Описание",
           cancel: "Отмена",
-          addModel: "Добавить модель"
+          addModel: "Добавить модель",
         },
         placeholders: {
           customModel: "напр., Моя пользовательская модель",
           embeddingModelId: "напр., sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "Опишите модель, её характеристики и когда её использовать"
+          describeModel:
+            "Опишите модель, её характеристики и когда её использовать",
         },
         validation: {
-          pleaseEnterModelId: "Пожалуйста, введите ID модели"
-        }
+          pleaseEnterModelId: "Пожалуйста, введите ID модели",
+        },
       },
       common: {
         loading: "Загрузка...",
@@ -4119,7 +4633,7 @@ const generateAllLanguageResources = () => {
         clickToBrowse: "Нажмите для просмотра или перетащите",
         supportedFormats: "Поддерживает PDF, TXT и DOCX",
         editTopicList: "Редактировать Список Тем",
-        selectTopicListTitle: "Выбрать Список Тем"
+        selectTopicListTitle: "Выбрать Список Тем",
       },
       match: {
         title: "Сопоставить Документы",
@@ -4131,28 +4645,31 @@ const generateAllLanguageResources = () => {
         findMatches: "Найти Совпадения",
         similarityScore: "Оценка Схожести",
         noDocumentsFound: "Документы не найдены",
-        selectDocumentToMatch: "Пожалуйста, выберите документ для поиска совпадений",
+        selectDocumentToMatch:
+          "Пожалуйста, выберите документ для поиска совпадений",
         loadingMatches: "Поиск совпадений...",
         noMatchesFound: "Похожие документы не найдены",
         matchResults: "Результаты Совпадений",
         similarity: "Схожесть",
         editFormTemplate: "Редактировать Шаблон Формы",
-        selectFormTemplateTitle: "Выбрать Шаблон Формы"
+        selectFormTemplateTitle: "Выбрать Шаблон Формы",
       },
       editFormTemplateModal: {
         title: "Редактировать Шаблон Формы",
         formTemplateName: "Название Шаблона Формы",
         formTemplateNamePlaceholder: "Введите название шаблона формы",
         formTemplateDescription: "Описание Шаблона Формы",
-        descriptionPlaceholder: "Введите описание шаблона формы для автоматического предложения полей (минимум 10 символов)...",
+        descriptionPlaceholder:
+          "Введите описание шаблона формы для автоматического предложения полей (минимум 10 символов)...",
         referenceDocuments: "Справочные Документы (Необязательно)",
         uploadFiles: "Загрузить Файлы",
         knowledgeBase: "База Знаний",
         formFields: "Поля Формы",
         suggest: "Предложить",
-        fieldPlaceholder: "Добавьте название поля (например, Имя, Адрес, ИНН) или предложите из описания",
+        fieldPlaceholder:
+          "Добавьте название поля (например, Имя, Адрес, ИНН) или предложите из описания",
         cancel: "Отменить",
-        updateFormTemplate: "Обновить Шаблон Формы"
+        updateFormTemplate: "Обновить Шаблон Формы",
       },
       knowledgeBases: {
         title: "Управление базами знаний",
@@ -4166,31 +4683,33 @@ const generateAllLanguageResources = () => {
           embeddingModel: "Модель векторизации",
           dateCreated: "Дата создания",
           dateModified: "Дата изменения",
-          actions: "Действия"
+          actions: "Действия",
         },
         status: {
           default: "По умолчанию",
-          na: "Не применимо"
+          na: "Не применимо",
         },
         actions: {
           view: "Просмотр",
           edit: "Редактировать",
           delete: "Удалить",
-          configure: "Настроить"
+          configure: "Настроить",
         },
         deleteModal: {
           title: "Удалить базу знаний",
           buttonText: "Удалить базу знаний",
-          description: "Эта база знаний будет удалена навсегда. Вы уверены? Вы не сможете отменить это действие.",
+          description:
+            "Эта база знаний будет удалена навсегда. Вы уверены? Вы не сможете отменить это действие.",
           confirmButton: "Удалить",
           cancelButton: "Отмена",
           successMessage: "База знаний была успешно удалена",
-          errorMessage: "Произошла ошибка при удалении базы знаний"
+          errorMessage: "Произошла ошибка при удалении базы знаний",
         },
         modals: {
           add: {
             title: "Добавить базу знаний",
-            description: "Создайте новую базу знаний, предоставив детали и загрузив документы ниже.",
+            description:
+              "Создайте новую базу знаний, предоставив детали и загрузив документы ниже.",
           },
           edit: {
             title: "Редактировать базу знаний",
@@ -4198,7 +4717,7 @@ const generateAllLanguageResources = () => {
           },
           fields: {
             title: "Заголовок",
-            description: "Описание"
+            description: "Описание",
           },
           fileUpload: {
             currentFiles: "Текущие файлы",
@@ -4207,28 +4726,31 @@ const generateAllLanguageResources = () => {
             dragAndDrop: "Перетащите файлы сюда или нажмите для обзора",
             dropFiles: "Бросьте файлы сюда...",
             removeFile: "Удалить файл",
-            supportedFormats: "Поддерживает: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
+            supportedFormats:
+              "Поддерживает: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
           },
           buttons: {
             cancel: "Отмена",
             create: "Создать",
             save: "Сохранить",
             saving: "Сохранение...",
-            creating: "Создание..."
+            creating: "Создание...",
           },
           validation: {
-            titleRequired: "Заголовок обязателен"
+            titleRequired: "Заголовок обязателен",
           },
           messages: {
             createSuccess: "База знаний создана успешно.",
             updateSuccess: "База знаний обновлена успешно.",
             processing: "Обработка...",
-            pleaseWait: "Пожалуйста, подождите, пока мы обрабатываем ваши файлы...",
+            pleaseWait:
+              "Пожалуйста, подождите, пока мы обрабатываем ваши файлы...",
           },
         },
         compare: {
           title: "Сравнить документы",
-          subtitle: "Сравните и проанализируйте несколько документов для поиска различий, сходств и закономерностей",
+          subtitle:
+            "Сравните и проанализируйте несколько документов для поиска различий, сходств и закономерностей",
           sourceSectionTitle: "Выбрать исходные документы",
           referenceSectionTitle: "Выбрать эталонные документы",
           sourcePlaceholder: "Выберите документы для анализа источника...",
@@ -4246,13 +4768,13 @@ const generateAllLanguageResources = () => {
             comprehensive: "Комплексный анализ",
             structural: "Структурное сравнение",
             content: "Анализ содержания",
-            chronological: "Хронологический анализ"
+            chronological: "Хронологический анализ",
           },
           analysisDepth: "Глубина анализа",
           analysisDepths: {
             surface: "Поверхностный анализ",
             detailed: "Детальный анализ",
-            comprehensive: "Комплексный анализ"
+            comprehensive: "Комплексный анализ",
           },
           generateReport: "Создать отчет сравнения",
           comparing: "Сравнение документов...",
@@ -4262,11 +4784,12 @@ const generateAllLanguageResources = () => {
           downloadReport: "Скачать отчет",
           exportOptions: "Параметры экспорта",
           clearResults: "Очистить результаты",
-          newComparison: "Новое сравнение"
+          newComparison: "Новое сравнение",
         },
         match: {
           title: "Сопоставить документы",
-          subtitle: "Найдите похожие документы и проанализируйте закономерности соответствий в вашей базе знаний",
+          subtitle:
+            "Найдите похожие документы и проанализируйте закономерности соответствий в вашей базе знаний",
           sourceSectionTitle: "Выбрать исходный документ",
           searchInTitle: "Искать в",
           sourcePlaceholder: "Выберите документ как эталонный источник...",
@@ -4282,14 +4805,14 @@ const generateAllLanguageResources = () => {
             keyword: "Совпадение ключевых слов",
             structural: "Структурное сходство",
             content: "Анализ содержания",
-            contextual: "Контекстное соответствие"
+            contextual: "Контекстное соответствие",
           },
           threshold: "Порог сходства",
           thresholds: {
             low: "Низкий (30%)",
             medium: "Средний (50%)",
             high: "Высокий (70%)",
-            veryHigh: "Очень высокий (90%)"
+            veryHigh: "Очень высокий (90%)",
           },
           maxResults: "Максимум результатов",
           searching: "Поиск соответствий...",
@@ -4301,7 +4824,7 @@ const generateAllLanguageResources = () => {
           downloadResults: "Скачать результаты",
           exportMatches: "Экспортировать соответствия",
           clearResults: "Очистить результаты",
-          newMatch: "Новое соответствие"
+          newMatch: "Новое соответствие",
         },
         editCustom: {
           title: "Редактировать пользовательские инструкции",
@@ -4315,7 +4838,8 @@ const generateAllLanguageResources = () => {
           outlineName: "Название схемы",
           outlineNamePlaceholder: "Введите название схемы",
           description: "Описание",
-          descriptionPlaceholder: "Введите описание схемы для автоматического предложения разделов (минимум 10 символов)...",
+          descriptionPlaceholder:
+            "Введите описание схемы для автоматического предложения разделов (минимум 10 символов)...",
           referenceDocuments: "Справочные документы (необязательно)",
           uploadFiles: "Загрузить файлы",
           knowledgeBase: "База знаний",
@@ -4325,7 +4849,7 @@ const generateAllLanguageResources = () => {
           addSectionPlaceholder: "Добавить раздел",
           cancel: "Отмена",
           createOutline: "Создать схему",
-          updateOutline: "Обновить схему"
+          updateOutline: "Обновить схему",
         },
         editChecklistModal: {
           title: "Редактировать контрольный список",
@@ -4333,7 +4857,8 @@ const generateAllLanguageResources = () => {
           checklistName: "Название контрольного списка",
           checklistNamePlaceholder: "Введите название контрольного списка",
           description: "Описание",
-          descriptionPlaceholder: "Введите описание контрольного списка для автоматического предложения вопросов (минимум 10 символов)...",
+          descriptionPlaceholder:
+            "Введите описание контрольного списка для автоматического предложения вопросов (минимум 10 символов)...",
           referenceDocuments: "Справочные документы (необязательно)",
           uploadFiles: "Загрузить файлы",
           knowledgeBase: "База знаний",
@@ -4344,7 +4869,7 @@ const generateAllLanguageResources = () => {
           copyAllQuestions: "Скопировать все вопросы как текст",
           cancel: "Отмена",
           createChecklist: "Создать контрольный список",
-          updateChecklist: "Обновить контрольный список"
+          updateChecklist: "Обновить контрольный список",
         },
         editTopicListModal: {
           title: "Редактировать список тем",
@@ -4352,7 +4877,8 @@ const generateAllLanguageResources = () => {
           topicListName: "Название списка тем",
           topicListNamePlaceholder: "Введите название списка тем",
           description: "Описание списка тем",
-          descriptionPlaceholder: "Введите описание списка тем для автоматического предложения тем (минимум 10 символов)...",
+          descriptionPlaceholder:
+            "Введите описание списка тем для автоматического предложения тем (минимум 10 символов)...",
           referenceDocuments: "Справочные документы (необязательно)",
           uploadFiles: "Загрузить файлы",
           knowledgeBase: "База знаний",
@@ -4363,15 +4889,18 @@ const generateAllLanguageResources = () => {
           copyAllTopics: "Скопировать все темы как текст",
           cancel: "Отмена",
           createTopicList: "Создать список тем",
-          updateTopicList: "Обновить список тем"
+          updateTopicList: "Обновить список тем",
         },
         optimizeChecklistModal: {
           title: "Оптимизировать контрольный список",
-          customInstructionsLabel: "Пользовательские инструкции (необязательно)",
-          customInstructionsHelperText: "Введите любые дополнительные инструкции, которые должны учитываться при ответе на вопросы контрольного списка",
+          customInstructionsLabel:
+            "Пользовательские инструкции (необязательно)",
+          customInstructionsHelperText:
+            "Введите любые дополнительные инструкции, которые должны учитываться при ответе на вопросы контрольного списка",
           analyzing: "Анализ...",
           analyzeButton: "Анализировать контрольный список",
-          analyzingMessage: "Анализ вашего контрольного списка для поиска возможностей оптимизации...",
+          analyzingMessage:
+            "Анализ вашего контрольного списка для поиска возможностей оптимизации...",
           cancelAnalysis: "Отменить анализ",
           downloading: "Загрузка...",
           downloadCsv: "Скачать CSV",
@@ -4385,17 +4914,22 @@ const generateAllLanguageResources = () => {
           currentAnswer: "Текущий ответ",
           showLess: "Показать меньше",
           showMore: "Показать больше",
-          optimizationsSelectedText: "оптимизация{{s}} выбрана{{s}} для применения",
+          optimizationsSelectedText:
+            "оптимизация{{s}} выбрана{{s}} для применения",
           applying: "Применение...",
-          applySelectedOptimizations: "Применить выбранные оптимизации"
+          applySelectedOptimizations: "Применить выбранные оптимизации",
         },
         optimizeOutlineModal: {
           title: "Оптимизировать схему",
-          description: "Загрузите эталонный документ, который представляет высококачественный пример типа отчета, который вы хотите создать. Система создаст отчет, используя вашу текущую схему и базу знаний, сравнит его с эталоном и предложит улучшения для разделов вашей схемы.",
+          description:
+            "Загрузите эталонный документ, который представляет высококачественный пример типа отчета, который вы хотите создать. Система создаст отчет, используя вашу текущую схему и базу знаний, сравнит его с эталоном и предложит улучшения для разделов вашей схемы.",
           groundTruthDocument: "Эталонный документ",
-          customInstructionsLabel: "Пользовательские инструкции (необязательно)",
-          customInstructionsHelperText: "Предоставьте дополнительные указания для процесса оптимизации",
-          customInstructionsPlaceholder: "например, Сосредоточьтесь на улучшении технической глубины, обеспечьте соответствие конкретным стандартам и т.д.",
+          customInstructionsLabel:
+            "Пользовательские инструкции (необязательно)",
+          customInstructionsHelperText:
+            "Предоставьте дополнительные указания для процесса оптимизации",
+          customInstructionsPlaceholder:
+            "например, Сосредоточьтесь на улучшении технической глубины, обеспечьте соответствие конкретным стандартам и т.д.",
           characters: "символов",
           analyzingOutline: "Анализ схемы и создание оптимизаций...",
           cancelAnalysis: "Отменить анализ",
@@ -4415,9 +4949,9 @@ const generateAllLanguageResources = () => {
           cancel: "Отмена",
           optimizing: "Оптимизация...",
           optimizeOutline: "Оптимизировать схему",
-          applyOptimizations: "Применить {{count}} оптимизация{{s}}"
-        }
-      }
+          applyOptimizations: "Применить {{count}} оптимизация{{s}}",
+        },
+      },
     },
   }
 
@@ -4527,19 +5061,28 @@ const generateAllLanguageResources = () => {
         documentOutline: "选择用于生成报告的大纲结构",
         allUsersToggle: "在仅查看您的历史记录或所有用户的历史记录之间切换",
 
-        createChecklist: "创建新的检查清单，包含自定义问题以根据特定标准评估文档",
+        createChecklist:
+          "创建新的检查清单，包含自定义问题以根据特定标准评估文档",
         createOutline: "创建新的大纲结构以指导结构化报告的生成",
         createTopicList: "创建新的主题列表以将比较分析集中在特定主题或主题上",
         createFormTemplate: "创建新的表单模板以进行自动化文档内容提取和匹配",
-        suggestChecklistQuestions: "使用AI根据您的描述和参考文档自动生成相关的检查清单问题",
-        optimizeChecklistQuestions: "使用选定的知识库改进和完善现有的检查清单问题以获得更好的准确性",
+        suggestChecklistQuestions:
+          "使用AI根据您的描述和参考文档自动生成相关的检查清单问题",
+        optimizeChecklistQuestions:
+          "使用选定的知识库改进和完善现有的检查清单问题以获得更好的准确性",
         suggestOutlineSections: "使用AI根据您的描述和参考文档自动生成大纲部分",
-        optimizeOutlineSections: "使用选定的知识库改进和完善现有的大纲部分以获得更好的结构",
-        suggestTopicListTopics: "使用AI根据您的描述和参考文档自动生成相关的比较主题",
-        suggestFormTemplateFields: "使用AI根据您的描述和参考文档自动生成相关的表单字段",
-        referenceDocuments: "上传参考文档或选择知识库以帮助AI根据您的特定上下文和要求建议内容",
-        referenceDocumentsFiles: "提供参考文档以帮助AI生成更准确和上下文相关的建议",
-        minimumDescriptionLength: "描述必须至少包含10个字符以为AI建议提供足够的上下文"
+        optimizeOutlineSections:
+          "使用选定的知识库改进和完善现有的大纲部分以获得更好的结构",
+        suggestTopicListTopics:
+          "使用AI根据您的描述和参考文档自动生成相关的比较主题",
+        suggestFormTemplateFields:
+          "使用AI根据您的描述和参考文档自动生成相关的表单字段",
+        referenceDocuments:
+          "上传参考文档或选择知识库以帮助AI根据您的特定上下文和要求建议内容",
+        referenceDocumentsFiles:
+          "提供参考文档以帮助AI生成更准确和上下文相关的建议",
+        minimumDescriptionLength:
+          "描述必须至少包含10个字符以为AI建议提供足够的上下文",
       },
       review: {
         pageTitle: "审查文档",
@@ -4549,9 +5092,12 @@ const generateAllLanguageResources = () => {
         checklistTitle: "检查清单",
         checklistDescription: "点击选择",
         customInstructionsTitle: "自定义指令（可选）",
-        customInstructionsPlaceholder: "输入在回答检查清单问题时应考虑的附加指令...",
-        customInstructionsHelp: "{{count}}/2000 字符。这些指令将在处理过程中添加到每个问题中。",
-        searchModeHelp: "向量搜索提供快速、有针对性的结果。完整文档分析检查知识库的所有内容。",
+        customInstructionsPlaceholder:
+          "输入在回答检查清单问题时应考虑的附加指令...",
+        customInstructionsHelp:
+          "{{count}}/2000 字符。这些指令将在处理过程中添加到每个问题中。",
+        searchModeHelp:
+          "向量搜索提供快速、有针对性的结果。完整文档分析检查知识库的所有内容。",
         processingFile: "正在处理文件...",
         processingFiles: "正在处理文件...",
         selectKnowledgeBaseTitle: "选择知识库",
@@ -4566,13 +5112,15 @@ const generateAllLanguageResources = () => {
         reportCopied: "报告已复制到剪贴板！",
         reviewButton: "审查",
         consultDocuments: "咨询文档",
-        noChecklistsAvailable: "没有可用的检查清单。创建您的第一个检查清单以开始。",
+        noChecklistsAvailable:
+          "没有可用的检查清单。创建您的第一个检查清单以开始。",
         createChecklist: "创建检查清单",
         editChecklist: "编辑检查清单",
         checklistName: "检查清单名称",
         checklistNamePlaceholder: "输入检查清单名称...",
         checklistDescriptionLabel: "描述",
-        checklistDescriptionPlaceholder: "输入检查清单描述以获取自动问题建议（最少10个字符）...",
+        checklistDescriptionPlaceholder:
+          "输入检查清单描述以获取自动问题建议（最少10个字符）...",
         questions: "问题",
         suggest: "建议",
         suggesting: "正在建议...",
@@ -4583,7 +5131,8 @@ const generateAllLanguageResources = () => {
         knowledgeBase: "知识库",
         referenceDocuments: "参考文档（可选）",
         selectKnowledgeBasePlaceholder: "选择知识库...",
-        noKnowledgeBasesAvailable: "没有可用的知识库。请先创建一个以使用此功能。",
+        noKnowledgeBasesAvailable:
+          "没有可用的知识库。请先创建一个以使用此功能。",
         copyQuestions: "复制问题",
         questionsCopied: "问题已复制到剪贴板",
         noQuestionsToCopy: "没有问题可复制",
@@ -4595,21 +5144,25 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "已上传文件",
 
         removeFile: "删除",
-        characterCount: "{{count}}/2000个字符。这些说明将在处理时附加到每个问题。",
+        characterCount:
+          "{{count}}/2000个字符。这些说明将在处理时附加到每个问题。",
         searchMode: "搜索模式",
         vectorSearch: "向量搜索",
         fullDocumentScan: "完整文档分析",
-        vectorSearchDescription: "使用AI相似性搜索查找相关内容（快速、有针对性）",
-        fullScanDescription: "分析知识库中的所有文档（全面、彻底）"
+        vectorSearchDescription:
+          "使用AI相似性搜索查找相关内容（快速、有针对性）",
+        fullScanDescription: "分析知识库中的所有文档（全面、彻底）",
       },
       modelSelection: {
         llmManagement: "LLM管理",
-        llmDescription: "配置和管理用于生成文本响应的LLM。默认模型将用于所有操作。",
+        llmDescription:
+          "配置和管理用于生成文本响应的LLM。默认模型将用于所有操作。",
         addNewLlm: "添加新LLM",
         noLlmsConfigured: "未配置LLM",
         addNewLlmToGetStarted: "添加新的LLM以开始使用",
         embeddingModelManagement: "嵌入模型管理",
-        embeddingDescription: "配置和管理用于知识库索引和检索的嵌入模型。创建新知识库时将使用默认模型，但每个知识库将继续使用其原始嵌入模型，即使稍后更改默认值。",
+        embeddingDescription:
+          "配置和管理用于知识库索引和检索的嵌入模型。创建新知识库时将使用默认模型，但每个知识库将继续使用其原始嵌入模型，即使稍后更改默认值。",
         addEmbeddingModel: "添加嵌入模型",
         noEmbeddingModelsConfigured: "未配置嵌入模型",
         addNewEmbeddingModelToGetStarted: "添加新的嵌入模型以开始使用",
@@ -4619,17 +5172,17 @@ const generateAllLanguageResources = () => {
           provider: "提供商",
           description: "描述",
           status: "状态",
-          actions: "操作"
+          actions: "操作",
         },
         status: {
           default: "默认",
-          available: "可用"
+          available: "可用",
         },
         actions: {
           setAsDefault: "设为默认",
           delete: "删除",
           validate: "验证",
-          validating: "验证中"
+          validating: "验证中",
         },
         dialog: {
           addNewLlm: "添加新LLM",
@@ -4639,16 +5192,16 @@ const generateAllLanguageResources = () => {
           modelId: "模型ID",
           description: "描述",
           cancel: "取消",
-          addModel: "添加模型"
+          addModel: "添加模型",
         },
         placeholders: {
           customModel: "例如，我的自定义模型",
           embeddingModelId: "例如，sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "描述模型、其特性以及何时使用它"
+          describeModel: "描述模型、其特性以及何时使用它",
         },
         validation: {
-          pleaseEnterModelId: "请输入模型ID"
-        }
+          pleaseEnterModelId: "请输入模型ID",
+        },
       },
       common: {
         loading: "加载中...",
@@ -4692,7 +5245,7 @@ const generateAllLanguageResources = () => {
         clickToBrowse: "点击浏览或拖放",
         supportedFormats: "支持 PDF、TXT 和 DOCX",
         editTopicList: "编辑主题列表",
-        selectTopicListTitle: "选择主题列表"
+        selectTopicListTitle: "选择主题列表",
       },
       match: {
         title: "匹配文档",
@@ -4710,22 +5263,24 @@ const generateAllLanguageResources = () => {
         matchResults: "匹配结果",
         similarity: "相似度",
         editFormTemplate: "编辑表单模板",
-        selectFormTemplateTitle: "选择表单模板"
+        selectFormTemplateTitle: "选择表单模板",
       },
       editFormTemplateModal: {
         title: "编辑表单模板",
         formTemplateName: "表单模板名称",
         formTemplateNamePlaceholder: "输入表单模板名称",
         formTemplateDescription: "表单模板描述",
-        descriptionPlaceholder: "输入表单模板描述以自动建议字段（最少10个字符）...",
+        descriptionPlaceholder:
+          "输入表单模板描述以自动建议字段（最少10个字符）...",
         referenceDocuments: "参考文档（可选）",
         uploadFiles: "上传文件",
         knowledgeBase: "知识库",
         formFields: "表单字段",
         suggest: "建议",
-        fieldPlaceholder: "添加字段名称（例如，姓名、地址、身份证号）或从描述中建议",
+        fieldPlaceholder:
+          "添加字段名称（例如，姓名、地址、身份证号）或从描述中建议",
         cancel: "取消",
-        updateFormTemplate: "更新表单模板"
+        updateFormTemplate: "更新表单模板",
       },
       editOutlineModal: {
         title: "编辑大纲",
@@ -4743,7 +5298,7 @@ const generateAllLanguageResources = () => {
         addSectionPlaceholder: "添加章节",
         cancel: "取消",
         createOutline: "创建大纲",
-        updateOutline: "更新大纲"
+        updateOutline: "更新大纲",
       },
       editChecklistModal: {
         title: "编辑检查清单",
@@ -4751,7 +5306,8 @@ const generateAllLanguageResources = () => {
         checklistName: "检查清单名称",
         checklistNamePlaceholder: "输入检查清单名称",
         description: "描述",
-        descriptionPlaceholder: "输入检查清单描述以自动建议问题（最少10个字符）...",
+        descriptionPlaceholder:
+          "输入检查清单描述以自动建议问题（最少10个字符）...",
         referenceDocuments: "参考文档（可选）",
         uploadFiles: "上传文件",
         knowledgeBase: "知识库",
@@ -4762,7 +5318,7 @@ const generateAllLanguageResources = () => {
         copyAllQuestions: "复制所有问题为文本",
         cancel: "取消",
         createChecklist: "创建检查清单",
-        updateChecklist: "更新检查清单"
+        updateChecklist: "更新检查清单",
       },
       editTopicListModal: {
         title: "编辑主题列表",
@@ -4770,7 +5326,8 @@ const generateAllLanguageResources = () => {
         topicListName: "主题列表名称",
         topicListNamePlaceholder: "输入主题列表名称",
         description: "主题列表描述",
-        descriptionPlaceholder: "输入主题列表描述以自动建议主题（最少10个字符）...",
+        descriptionPlaceholder:
+          "输入主题列表描述以自动建议主题（最少10个字符）...",
         referenceDocuments: "参考文档（可选）",
         uploadFiles: "上传文件",
         knowledgeBase: "知识库",
@@ -4781,12 +5338,13 @@ const generateAllLanguageResources = () => {
         copyAllTopics: "复制所有主题为文本",
         cancel: "取消",
         createTopicList: "创建主题列表",
-        updateTopicList: "更新主题列表"
+        updateTopicList: "更新主题列表",
       },
       optimizeChecklistModal: {
         title: "优化检查清单",
         customInstructionsLabel: "自定义指示（可选）",
-        customInstructionsHelperText: "输入在回答检查清单问题时应考虑的任何其他指示",
+        customInstructionsHelperText:
+          "输入在回答检查清单问题时应考虑的任何其他指示",
         analyzing: "分析中...",
         analyzeButton: "分析检查清单",
         analyzingMessage: "正在分析您的检查清单以寻找优化机会...",
@@ -4805,15 +5363,17 @@ const generateAllLanguageResources = () => {
         showMore: "显示更多",
         optimizationsSelectedText: "{{s}}个优化已选择用于应用",
         applying: "应用中...",
-        applySelectedOptimizations: "应用选定的优化"
+        applySelectedOptimizations: "应用选定的优化",
       },
       optimizeOutlineModal: {
         title: "优化大纲",
-        description: "上传一个代表您想要生成的报告类型的高质量示例的参考文档。系统将使用您当前的大纲和知识库生成报告，将其与参考进行比较，并建议改进您的大纲部分。",
+        description:
+          "上传一个代表您想要生成的报告类型的高质量示例的参考文档。系统将使用您当前的大纲和知识库生成报告，将其与参考进行比较，并建议改进您的大纲部分。",
         groundTruthDocument: "参考文档",
         customInstructionsLabel: "自定义指示（可选）",
         customInstructionsHelperText: "为优化过程提供额外的指导",
-        customInstructionsPlaceholder: "例如，专注于提高技术深度，确保符合特定标准等。",
+        customInstructionsPlaceholder:
+          "例如，专注于提高技术深度，确保符合特定标准等。",
         characters: "字符",
         analyzingOutline: "正在分析大纲并生成优化...",
         cancelAnalysis: "取消分析",
@@ -4833,7 +5393,7 @@ const generateAllLanguageResources = () => {
         cancel: "取消",
         optimizing: "优化中...",
         optimizeOutline: "优化大纲",
-        applyOptimizations: "应用{{count}}个优化"
+        applyOptimizations: "应用{{count}}个优化",
       },
       knowledgeBases: {
         title: "知识库管理",
@@ -4847,17 +5407,17 @@ const generateAllLanguageResources = () => {
           embeddingModel: "嵌入模型",
           dateCreated: "创建日期",
           dateModified: "修改日期",
-          actions: "操作"
+          actions: "操作",
         },
         status: {
           default: "默认",
-          na: "不适用"
+          na: "不适用",
         },
         actions: {
           view: "查看",
           edit: "编辑",
           delete: "删除",
-          configure: "配置"
+          configure: "配置",
         },
         deleteModal: {
           title: "删除知识库",
@@ -4866,7 +5426,7 @@ const generateAllLanguageResources = () => {
           confirmButton: "删除",
           cancelButton: "取消",
           successMessage: "知识库已成功删除",
-          errorMessage: "删除知识库时发生错误"
+          errorMessage: "删除知识库时发生错误",
         },
         modals: {
           add: {
@@ -4879,7 +5439,7 @@ const generateAllLanguageResources = () => {
           },
           fields: {
             title: "标题",
-            description: "描述"
+            description: "描述",
           },
           fileUpload: {
             currentFiles: "当前文件",
@@ -4895,10 +5455,10 @@ const generateAllLanguageResources = () => {
             create: "创建",
             save: "保存",
             saving: "保存中...",
-            creating: "创建中..."
+            creating: "创建中...",
           },
           validation: {
-            titleRequired: "标题是必需的"
+            titleRequired: "标题是必需的",
           },
           messages: {
             createSuccess: "知识库创建成功。",
@@ -4907,7 +5467,7 @@ const generateAllLanguageResources = () => {
             pleaseWait: "请等待我们处理您的文件...",
           },
         },
-      }
+      },
     },
   }
 
@@ -4968,8 +5528,10 @@ const generateAllLanguageResources = () => {
         error:
           "申し訳ございませんが、エラーが発生しました。もう一度お試しください。",
         welcome: "こんにちは！今日はどのようにお手伝いできますか？",
-        welcomeMessageWithSource: "ナレッジベースを選択するか、ファイルをアップロードしてから質問してください。",
-        welcomeMessageGeneral: "何でもお聞きください！ナレッジベース検索には、最初にナレッジベースを選択してください。",
+        welcomeMessageWithSource:
+          "ナレッジベースを選択するか、ファイルをアップロードしてから質問してください。",
+        welcomeMessageGeneral:
+          "何でもお聞きください！ナレッジベース検索には、最初にナレッジベースを選択してください。",
       },
       settings: {
         title: "設定",
@@ -5022,32 +5584,35 @@ const generateAllLanguageResources = () => {
       },
       modelSelection: {
         llmManagement: "LLM管理",
-        llmDescription: "テキスト応答の生成に使用されるLLMを設定・管理します。デフォルトモデルがすべての操作に使用されます。",
+        llmDescription:
+          "テキスト応答の生成に使用されるLLMを設定・管理します。デフォルトモデルがすべての操作に使用されます。",
         addNewLlm: "新しいLLMを追加",
         noLlmsConfigured: "LLMが設定されていません",
         addNewLlmToGetStarted: "開始するには新しいLLMを追加してください",
         embeddingModelManagement: "埋め込みモデル管理",
-        embeddingDescription: "ナレッジベースのインデックス作成と検索に使用される埋め込みモデルを設定・管理します。新しいナレッジベースの作成時にはデフォルトモデルが使用されますが、各ナレッジベースは後でデフォルトが変更されても元の埋め込みモデルを使い続けます。",
+        embeddingDescription:
+          "ナレッジベースのインデックス作成と検索に使用される埋め込みモデルを設定・管理します。新しいナレッジベースの作成時にはデフォルトモデルが使用されますが、各ナレッジベースは後でデフォルトが変更されても元の埋め込みモデルを使い続けます。",
         addEmbeddingModel: "埋め込みモデルを追加",
         noEmbeddingModelsConfigured: "埋め込みモデルが設定されていません",
-        addNewEmbeddingModelToGetStarted: "開始するには新しい埋め込みモデルを追加してください",
+        addNewEmbeddingModelToGetStarted:
+          "開始するには新しい埋め込みモデルを追加してください",
         tableHeaders: {
           name: "名前",
           modelId: "モデルID",
           provider: "プロバイダー",
           description: "説明",
           status: "ステータス",
-          actions: "アクション"
+          actions: "アクション",
         },
         status: {
           default: "デフォルト",
-          available: "利用可能"
+          available: "利用可能",
         },
         actions: {
           setAsDefault: "デフォルトに設定",
           delete: "削除",
           validate: "検証",
-          validating: "検証中"
+          validating: "検証中",
         },
         dialog: {
           addNewLlm: "新しいLLMを追加",
@@ -5057,34 +5622,39 @@ const generateAllLanguageResources = () => {
           modelId: "モデルID",
           description: "説明",
           cancel: "キャンセル",
-          addModel: "モデルを追加"
+          addModel: "モデルを追加",
         },
         placeholders: {
           customModel: "例：マイカスタムモデル",
           embeddingModelId: "例：sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "モデル、その特性、いつ使用するかを説明してください"
+          describeModel: "モデル、その特性、いつ使用するかを説明してください",
         },
         validation: {
-          pleaseEnterModelId: "モデルIDを入力してください"
-        }
+          pleaseEnterModelId: "モデルIDを入力してください",
+        },
       },
       review: {
         pageTitle: "ドキュメントをレビュー",
-        pageDescription: "ユーザー定義のチェックリストとポリシーデータベースに基づいてドキュメントをレビューします。",
+        pageDescription:
+          "ユーザー定義のチェックリストとポリシーデータベースに基づいてドキュメントをレビューします。",
         knowledgeBaseTitle: "ナレッジベース",
         knowledgeBaseDescription: "クリックして選択",
         checklistTitle: "チェックリスト",
         checklistDescription: "クリックして選択",
         customInstructionsTitle: "カスタム指示（オプション）",
-        customInstructionsPlaceholder: "チェックリストの質問に答える際に考慮すべき追加の指示を入力してください...",
-        customInstructionsHelp: "{{count}}/2000文字。これらの指示は処理中に各質問に追加されます。",
-        searchModeHelp: "ベクター検索は迅速で的確な結果を提供します。完全なドキュメント分析はナレッジベースのすべてのコンテンツを調査します。",
+        customInstructionsPlaceholder:
+          "チェックリストの質問に答える際に考慮すべき追加の指示を入力してください...",
+        customInstructionsHelp:
+          "{{count}}/2000文字。これらの指示は処理中に各質問に追加されます。",
+        searchModeHelp:
+          "ベクター検索は迅速で的確な結果を提供します。完全なドキュメント分析はナレッジベースのすべてのコンテンツを調査します。",
         processingFile: "ファイルを処理中...",
         processingFiles: "ファイルを処理中...",
         selectKnowledgeBaseTitle: "ナレッジベースを選択",
         selectChecklistTitle: "チェックリストを選択",
         noResults: "まだ結果がありません",
-        uploadDocuments: "選択したチェックリストに対してレビューするために1つ以上のドキュメントをアップロードしてください",
+        uploadDocuments:
+          "選択したチェックリストに対してレビューするために1つ以上のドキュメントをアップロードしてください",
         results: "結果",
         downloadReport: "レポートをダウンロード",
         downloadCsv: "CSVをダウンロード",
@@ -5093,24 +5663,29 @@ const generateAllLanguageResources = () => {
         reportCopied: "レポートがクリップボードにコピーされました！",
         reviewButton: "レビュー",
         consultDocuments: "ドキュメントを参照",
-        noChecklistsAvailable: "利用可能なチェックリストがありません。開始するには最初のチェックリストを作成してください。",
+        noChecklistsAvailable:
+          "利用可能なチェックリストがありません。開始するには最初のチェックリストを作成してください。",
         createChecklist: "チェックリストを作成",
         editChecklist: "チェックリストを編集",
         checklistName: "チェックリスト名",
         checklistNamePlaceholder: "チェックリスト名を入力...",
         checklistDescriptionLabel: "説明",
-        checklistDescriptionPlaceholder: "自動質問提案のためのチェックリストの説明を入力してください（最低10文字）...",
+        checklistDescriptionPlaceholder:
+          "自動質問提案のためのチェックリストの説明を入力してください（最低10文字）...",
         questions: "質問",
         suggest: "提案",
         suggesting: "提案中...",
         optimize: "最適化",
-        optimizeTooltip: "最適化機能を有効にするにはナレッジベースを選択する必要があります",
-        optimizeTooltipEnabled: "選択されたナレッジベースに基づいて質問を最適化",
+        optimizeTooltip:
+          "最適化機能を有効にするにはナレッジベースを選択する必要があります",
+        optimizeTooltipEnabled:
+          "選択されたナレッジベースに基づいて質問を最適化",
         uploadFiles: "ファイルをアップロード",
         knowledgeBase: "ナレッジベース",
         referenceDocuments: "参考ドキュメント（オプション）",
         selectKnowledgeBasePlaceholder: "ナレッジベースを選択...",
-        noKnowledgeBasesAvailable: "利用可能なナレッジベースがありません。この機能を使用するには最初に作成してください。",
+        noKnowledgeBasesAvailable:
+          "利用可能なナレッジベースがありません。この機能を使用するには最初に作成してください。",
         copyQuestions: "質問をコピー",
         questionsCopied: "質問がクリップボードにコピーされました",
         noQuestionsToCopy: "コピーする質問がありません",
@@ -5122,12 +5697,15 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "アップロードされたファイル",
 
         removeFile: "削除",
-        characterCount: "{{count}}/2000文字。これらの指示は処理時に各質問に追加されます。",
+        characterCount:
+          "{{count}}/2000文字。これらの指示は処理時に各質問に追加されます。",
         searchMode: "検索モード",
         vectorSearch: "ベクター検索",
         fullDocumentScan: "完全なドキュメント分析",
-        vectorSearchDescription: "AI類似性検索を使用して関連コンテンツを見つける（高速、的確）",
-        fullScanDescription: "ナレッジベース内のすべてのドキュメントを分析する（包括的、徹底的）"
+        vectorSearchDescription:
+          "AI類似性検索を使用して関連コンテンツを見つける（高速、的確）",
+        fullScanDescription:
+          "ナレッジベース内のすべてのドキュメントを分析する（包括的、徹底的）",
       },
       compare: {
         title: "ドキュメント比較",
@@ -5146,7 +5724,7 @@ const generateAllLanguageResources = () => {
         clickToBrowse: "クリックして参照またはドラッグ＆ドロップ",
         supportedFormats: "PDF、TXT、DOCXをサポート",
         editTopicList: "トピックリストを編集",
-        selectTopicListTitle: "トピックリストを選択"
+        selectTopicListTitle: "トピックリストを選択",
       },
       match: {
         title: "ドキュメントマッチング",
@@ -5158,28 +5736,31 @@ const generateAllLanguageResources = () => {
         findMatches: "マッチングを検索",
         similarityScore: "類似度スコア",
         noDocumentsFound: "ドキュメントが見つかりません",
-        selectDocumentToMatch: "マッチングを検索するドキュメントを選択してください",
+        selectDocumentToMatch:
+          "マッチングを検索するドキュメントを選択してください",
         loadingMatches: "マッチングを検索中...",
         noMatchesFound: "類似ドキュメントが見つかりません",
         matchResults: "マッチング結果",
         similarity: "類似度",
         editFormTemplate: "フォームテンプレートを編集",
-        selectFormTemplateTitle: "フォームテンプレートを選択"
+        selectFormTemplateTitle: "フォームテンプレートを選択",
       },
       editFormTemplateModal: {
         title: "フォームテンプレートを編集",
         formTemplateName: "フォームテンプレート名",
         formTemplateNamePlaceholder: "フォームテンプレート名を入力してください",
         formTemplateDescription: "フォームテンプレートの説明",
-        descriptionPlaceholder: "フォームテンプレートの説明を入力して、フィールドを自動提案します（最低10文字）...",
+        descriptionPlaceholder:
+          "フォームテンプレートの説明を入力して、フィールドを自動提案します（最低10文字）...",
         referenceDocuments: "参考文書（オプション）",
         uploadFiles: "ファイルをアップロード",
         knowledgeBase: "ナレッジベース",
         formFields: "フォームフィールド",
         suggest: "提案",
-        fieldPlaceholder: "フィールド名を追加（例：氏名、住所、社会保障番号）または説明から提案",
+        fieldPlaceholder:
+          "フィールド名を追加（例：氏名、住所、社会保障番号）または説明から提案",
         cancel: "キャンセル",
-        updateFormTemplate: "フォームテンプレートを更新"
+        updateFormTemplate: "フォームテンプレートを更新",
       },
       editOutlineModal: {
         title: "アウトラインを編集",
@@ -5187,7 +5768,8 @@ const generateAllLanguageResources = () => {
         outlineName: "アウトライン名",
         outlineNamePlaceholder: "アウトライン名を入力してください",
         description: "説明",
-        descriptionPlaceholder: "アウトラインの説明を入力してセクションを自動提案（最低10文字）...",
+        descriptionPlaceholder:
+          "アウトラインの説明を入力してセクションを自動提案（最低10文字）...",
         referenceDocuments: "参考文書（オプション）",
         uploadFiles: "ファイルをアップロード",
         knowledgeBase: "ナレッジベース",
@@ -5197,7 +5779,7 @@ const generateAllLanguageResources = () => {
         addSectionPlaceholder: "セクションを追加",
         cancel: "キャンセル",
         createOutline: "アウトラインを作成",
-        updateOutline: "アウトラインを更新"
+        updateOutline: "アウトラインを更新",
       },
       editChecklistModal: {
         title: "チェックリストを編集",
@@ -5205,7 +5787,8 @@ const generateAllLanguageResources = () => {
         checklistName: "チェックリスト名",
         checklistNamePlaceholder: "チェックリスト名を入力してください",
         description: "説明",
-        descriptionPlaceholder: "チェックリストの説明を入力して質問を自動提案（最低10文字）...",
+        descriptionPlaceholder:
+          "チェックリストの説明を入力して質問を自動提案（最低10文字）...",
         referenceDocuments: "参考文書（オプション）",
         uploadFiles: "ファイルをアップロード",
         knowledgeBase: "ナレッジベース",
@@ -5216,7 +5799,7 @@ const generateAllLanguageResources = () => {
         copyAllQuestions: "すべての質問をテキストとしてコピー",
         cancel: "キャンセル",
         createChecklist: "チェックリストを作成",
-        updateChecklist: "チェックリストを更新"
+        updateChecklist: "チェックリストを更新",
       },
       editTopicListModal: {
         title: "トピックリストを編集",
@@ -5224,7 +5807,8 @@ const generateAllLanguageResources = () => {
         topicListName: "トピックリスト名",
         topicListNamePlaceholder: "トピックリスト名を入力してください",
         description: "トピックリストの説明",
-        descriptionPlaceholder: "トピックリストの説明を入力してトピックを自動提案（最低10文字）...",
+        descriptionPlaceholder:
+          "トピックリストの説明を入力してトピックを自動提案（最低10文字）...",
         referenceDocuments: "参考文書（オプション）",
         uploadFiles: "ファイルをアップロード",
         knowledgeBase: "ナレッジベース",
@@ -5235,12 +5819,13 @@ const generateAllLanguageResources = () => {
         copyAllTopics: "すべてのトピックをテキストとしてコピー",
         cancel: "キャンセル",
         createTopicList: "トピックリストを作成",
-        updateTopicList: "トピックリストを更新"
+        updateTopicList: "トピックリストを更新",
       },
       optimizeChecklistModal: {
         title: "チェックリストを最適化",
         customInstructionsLabel: "カスタム指示（オプション）",
-        customInstructionsHelperText: "チェックリストの質問に答える際に考慮すべき追加の指示を入力してください",
+        customInstructionsHelperText:
+          "チェックリストの質問に答える際に考慮すべき追加の指示を入力してください",
         analyzing: "分析中...",
         analyzeButton: "チェックリストを分析",
         analyzingMessage: "最適化の機会を求めてチェックリストを分析中...",
@@ -5257,17 +5842,20 @@ const generateAllLanguageResources = () => {
         currentAnswer: "現在の回答",
         showLess: "縮小表示",
         showMore: "詳細表示",
-        optimizationsSelectedText: "{{s}}個の最適化が適用対象として選択されました",
+        optimizationsSelectedText:
+          "{{s}}個の最適化が適用対象として選択されました",
         applying: "適用中...",
-        applySelectedOptimizations: "選択した最適化を適用"
+        applySelectedOptimizations: "選択した最適化を適用",
       },
       optimizeOutlineModal: {
         title: "アウトラインを最適化",
-        description: "生成したいレポートタイプの高品質な例となる参考文書をアップロードしてください。システムは現在のアウトラインとナレッジベースを使用してレポートを生成し、参考と比較してアウトラインセクションの改善を提案します。",
+        description:
+          "生成したいレポートタイプの高品質な例となる参考文書をアップロードしてください。システムは現在のアウトラインとナレッジベースを使用してレポートを生成し、参考と比較してアウトラインセクションの改善を提案します。",
         groundTruthDocument: "参考文書",
         customInstructionsLabel: "カスタム指示（オプション）",
         customInstructionsHelperText: "最適化プロセスに追加のガイダンスを提供",
-        customInstructionsPlaceholder: "例：技術的深度の向上に焦点を当て、特定の標準への準拠を確保するなど",
+        customInstructionsPlaceholder:
+          "例：技術的深度の向上に焦点を当て、特定の標準への準拠を確保するなど",
         characters: "文字",
         analyzingOutline: "アウトラインを分析し最適化を生成中...",
         cancelAnalysis: "分析をキャンセル",
@@ -5287,7 +5875,7 @@ const generateAllLanguageResources = () => {
         cancel: "キャンセル",
         optimizing: "最適化中...",
         optimizeOutline: "アウトラインを最適化",
-        applyOptimizations: "{{count}}個の最適化を適用"
+        applyOptimizations: "{{count}}個の最適化を適用",
       },
       knowledgeBases: {
         title: "ナレッジベース管理",
@@ -5301,22 +5889,22 @@ const generateAllLanguageResources = () => {
           embeddingModel: "埋め込みモデル",
           dateCreated: "作成日",
           dateModified: "更新日",
-          actions: "アクション"
+          actions: "アクション",
         },
         status: {
           default: "デフォルト",
-          na: "該当なし"
+          na: "該当なし",
         },
         modals: {
           fileUpload: {
-            supportedFormats: "対応形式：PDF、TXT、DOC/DOCX、RTF、CSV、XLSX"
+            supportedFormats: "対応形式：PDF、TXT、DOC/DOCX、RTF、CSV、XLSX",
           },
           messages: {
             processing: "処理中...",
-            pleaseWait: "ファイルを処理中です。しばらくお待ちください..."
-          }
-        }
-      }
+            pleaseWait: "ファイルを処理中です。しばらくお待ちください...",
+          },
+        },
+      },
     },
   }
 
@@ -5376,8 +5964,10 @@ const generateAllLanguageResources = () => {
         typing: "ШІ друкує...",
         error: "Вибачте, щось пішло не так. Спробуйте ще раз.",
         welcome: "Привіт! Як я можу допомогти вам сьогодні?",
-        welcomeMessageWithSource: "Оберіть базу знань або завантажте файли, потім поставте запитання.",
-        welcomeMessageGeneral: "Запитуйте мене про будь-що! Для пошуку в базі знань спочатку оберіть базу знань.",
+        welcomeMessageWithSource:
+          "Оберіть базу знань або завантажте файли, потім поставте запитання.",
+        welcomeMessageGeneral:
+          "Запитуйте мене про будь-що! Для пошуку в базі знань спочатку оберіть базу знань.",
       },
       settings: {
         title: "Налаштування",
@@ -5430,32 +6020,35 @@ const generateAllLanguageResources = () => {
       },
       modelSelection: {
         llmManagement: "Управління LLM",
-        llmDescription: "Налаштуйте та керуйте LLM, які використовуються для генерації текстових відповідей. Модель за замовчуванням буде використовуватися для всіх операцій.",
+        llmDescription:
+          "Налаштуйте та керуйте LLM, які використовуються для генерації текстових відповідей. Модель за замовчуванням буде використовуватися для всіх операцій.",
         addNewLlm: "Додати нову LLM",
         noLlmsConfigured: "LLM не налаштовані",
         addNewLlmToGetStarted: "Додайте нову LLM для початку роботи",
         embeddingModelManagement: "Управління моделями вбудовування",
-        embeddingDescription: "Налаштуйте та керуйте моделями вбудовування, які використовуються для індексації та пошуку баз знань. Модель за замовчуванням буде використовуватися при створенні нових баз знань, але кожна база знань продовжить використовувати свою початкову модель вбудовування, навіть якщо значення за замовчуванням зміниться пізніше.",
+        embeddingDescription:
+          "Налаштуйте та керуйте моделями вбудовування, які використовуються для індексації та пошуку баз знань. Модель за замовчуванням буде використовуватися при створенні нових баз знань, але кожна база знань продовжить використовувати свою початкову модель вбудовування, навіть якщо значення за замовчуванням зміниться пізніше.",
         addEmbeddingModel: "Додати модель вбудовування",
         noEmbeddingModelsConfigured: "Моделі вбудовування не налаштовані",
-        addNewEmbeddingModelToGetStarted: "Додайте нову модель вбудовування для початку роботи",
+        addNewEmbeddingModelToGetStarted:
+          "Додайте нову модель вбудовування для початку роботи",
         tableHeaders: {
           name: "Ім'я",
           modelId: "ID моделі",
           provider: "Постачальник",
           description: "Опис",
           status: "Статус",
-          actions: "Дії"
+          actions: "Дії",
         },
         status: {
           default: "За замовчуванням",
-          available: "Доступно"
+          available: "Доступно",
         },
         actions: {
           setAsDefault: "Встановити за замовчуванням",
           delete: "Видалити",
           validate: "Перевірити",
-          validating: "Перевірка"
+          validating: "Перевірка",
         },
         dialog: {
           addNewLlm: "Додати нову LLM",
@@ -5465,34 +6058,40 @@ const generateAllLanguageResources = () => {
           modelId: "ID моделі",
           description: "Опис",
           cancel: "Скасувати",
-          addModel: "Додати модель"
+          addModel: "Додати модель",
         },
         placeholders: {
           customModel: "напр., Моя користувацька модель",
           embeddingModelId: "напр., sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "Опишіть модель, її характеристики та коли її використовувати"
+          describeModel:
+            "Опишіть модель, її характеристики та коли її використовувати",
         },
         validation: {
-          pleaseEnterModelId: "Будь ласка, введіть ID моделі"
-        }
+          pleaseEnterModelId: "Будь ласка, введіть ID моделі",
+        },
       },
       review: {
         pageTitle: "Переглянути Документи",
-        pageDescription: "Переглянути документ на основі визначеного користувачем контрольного списку та бази даних політик.",
+        pageDescription:
+          "Переглянути документ на основі визначеного користувачем контрольного списку та бази даних політик.",
         knowledgeBaseTitle: "База Знань",
         knowledgeBaseDescription: "Натисніть для вибору",
         checklistTitle: "Контрольний Список",
         checklistDescription: "Натисніть для вибору",
         customInstructionsTitle: "Користувацькі Інструкції (Необов'язково)",
-        customInstructionsPlaceholder: "Введіть додаткові інструкції, які слід враховувати при відповіді на питання контрольного списку...",
-        customInstructionsHelp: "{{count}}/2000 символів. Ці інструкції будуть додані до кожного питання під час обробки.",
-        searchModeHelp: "Векторний пошук забезпечує швидкі, цільові результати. Повний аналіз документа досліджує весь вміст бази знань.",
+        customInstructionsPlaceholder:
+          "Введіть додаткові інструкції, які слід враховувати при відповіді на питання контрольного списку...",
+        customInstructionsHelp:
+          "{{count}}/2000 символів. Ці інструкції будуть додані до кожного питання під час обробки.",
+        searchModeHelp:
+          "Векторний пошук забезпечує швидкі, цільові результати. Повний аналіз документа досліджує весь вміст бази знань.",
         processingFile: "Обробка файлу...",
         processingFiles: "Обробка файлів...",
         selectKnowledgeBaseTitle: "Вибрати Базу Знань",
         selectChecklistTitle: "Вибрати Контрольний Список",
         noResults: "Поки що немає результатів",
-        uploadDocuments: "Завантажте один або кілька документів для перегляду проти вашого вибраного контрольного списку",
+        uploadDocuments:
+          "Завантажте один або кілька документів для перегляду проти вашого вибраного контрольного списку",
         results: "Результати",
         downloadReport: "Завантажити Звіт",
         downloadCsv: "Завантажити CSV",
@@ -5501,24 +6100,29 @@ const generateAllLanguageResources = () => {
         reportCopied: "Звіт скопійовано в буфер обміну!",
         reviewButton: "Переглянути",
         consultDocuments: "Консультувати документи",
-        noChecklistsAvailable: "Немає доступних контрольних списків. Створіть свій перший контрольний список для початку.",
+        noChecklistsAvailable:
+          "Немає доступних контрольних списків. Створіть свій перший контрольний список для початку.",
         createChecklist: "Створити Контрольний Список",
         editChecklist: "Редагувати Контрольний Список",
         checklistName: "Назва Контрольного Списку",
         checklistNamePlaceholder: "Введіть назву контрольного списку...",
         checklistDescriptionLabel: "Опис",
-        checklistDescriptionPlaceholder: "Введіть опис контрольного списку для автоматичних пропозицій питань (мінімум 10 символів)...",
+        checklistDescriptionPlaceholder:
+          "Введіть опис контрольного списку для автоматичних пропозицій питань (мінімум 10 символів)...",
         questions: "Питання",
         suggest: "Запропонувати",
         suggesting: "Пропонування...",
         optimize: "Оптимізувати",
-        optimizeTooltip: "Для увімкнення функції Оптимізувати повинна бути вибрана База Знань",
-        optimizeTooltipEnabled: "Оптимізувати питання на основі вибраної Бази Знань",
+        optimizeTooltip:
+          "Для увімкнення функції Оптимізувати повинна бути вибрана База Знань",
+        optimizeTooltipEnabled:
+          "Оптимізувати питання на основі вибраної Бази Знань",
         uploadFiles: "Завантажити Файли",
         knowledgeBase: "База Знань",
         referenceDocuments: "Довідкові Документи (Необов'язково)",
         selectKnowledgeBasePlaceholder: "Вибрати Базу Знань...",
-        noKnowledgeBasesAvailable: "Немає доступної Бази Знань. Створіть спочатку одну для використання цієї функції.",
+        noKnowledgeBasesAvailable:
+          "Немає доступної Бази Знань. Створіть спочатку одну для використання цієї функції.",
         copyQuestions: "Скопіювати Питання",
         questionsCopied: "Питання скопійовано в буфер обміну",
         noQuestionsToCopy: "Немає питань для копіювання",
@@ -5530,12 +6134,15 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "Завантажені Файли",
 
         removeFile: "Видалити",
-        characterCount: "{{count}}/2000 символів. Ці інструкції будуть додані до кожного питання під час обробки.",
+        characterCount:
+          "{{count}}/2000 символів. Ці інструкції будуть додані до кожного питання під час обробки.",
         searchMode: "Режим Пошуку",
         vectorSearch: "Векторний Пошук",
         fullDocumentScan: "Повний Аналіз Документа",
-        vectorSearchDescription: "Знаходить релевантний контент використовуючи пошук подібності ШІ (швидко, цілеспрямовано)",
-        fullScanDescription: "Аналізує всі документи в базі знань (повний, ретельний)"
+        vectorSearchDescription:
+          "Знаходить релевантний контент використовуючи пошук подібності ШІ (швидко, цілеспрямовано)",
+        fullScanDescription:
+          "Аналізує всі документи в базі знань (повний, ретельний)",
       },
       compare: {
         title: "Порівняти Документи",
@@ -5554,7 +6161,7 @@ const generateAllLanguageResources = () => {
         clickToBrowse: "Натисніть для перегляду або перетягніть",
         supportedFormats: "Підтримує PDF, TXT та DOCX",
         editTopicList: "Редагувати Список Тем",
-        selectTopicListTitle: "Вибрати Список Тем"
+        selectTopicListTitle: "Вибрати Список Тем",
       },
       match: {
         title: "Співставити Документи",
@@ -5566,28 +6173,31 @@ const generateAllLanguageResources = () => {
         findMatches: "Знайти Збіги",
         similarityScore: "Оцінка Схожості",
         noDocumentsFound: "Документи не знайдені",
-        selectDocumentToMatch: "Будь ласка, виберіть документ для пошуку збігів",
+        selectDocumentToMatch:
+          "Будь ласка, виберіть документ для пошуку збігів",
         loadingMatches: "Пошук збігів...",
         noMatchesFound: "Схожі документи не знайдені",
         matchResults: "Результати Збігів",
         similarity: "Схожість",
         editFormTemplate: "Редагувати Шаблон Форми",
-        selectFormTemplateTitle: "Вибрати Шаблон Форми"
+        selectFormTemplateTitle: "Вибрати Шаблон Форми",
       },
       editFormTemplateModal: {
         title: "Редагувати Шаблон Форми",
         formTemplateName: "Назва Шаблону Форми",
         formTemplateNamePlaceholder: "Введіть назву шаблону форми",
         formTemplateDescription: "Опис Шаблону Форми",
-        descriptionPlaceholder: "Введіть опис шаблону форми для автоматичного пропонування полів (мінімум 10 символів)...",
+        descriptionPlaceholder:
+          "Введіть опис шаблону форми для автоматичного пропонування полів (мінімум 10 символів)...",
         referenceDocuments: "Довідкові Документи (Необов'язково)",
         uploadFiles: "Завантажити Файли",
         knowledgeBase: "База Знань",
         formFields: "Поля Форми",
         suggest: "Запропонувати",
-        fieldPlaceholder: "Додайте назву поля (наприклад, Ім'я, Адреса, ІПН) або запропонуйте з опису",
+        fieldPlaceholder:
+          "Додайте назву поля (наприклад, Ім'я, Адреса, ІПН) або запропонуйте з опису",
         cancel: "Скасувати",
-        updateFormTemplate: "Оновити Шаблон Форми"
+        updateFormTemplate: "Оновити Шаблон Форми",
       },
       editOutlineModal: {
         title: "Редагувати Схему",
@@ -5595,7 +6205,8 @@ const generateAllLanguageResources = () => {
         outlineName: "Назва Схеми",
         outlineNamePlaceholder: "Введіть назву схеми",
         description: "Опис",
-        descriptionPlaceholder: "Введіть опис схеми для автоматичного пропонування розділів (мінімум 10 символів)...",
+        descriptionPlaceholder:
+          "Введіть опис схеми для автоматичного пропонування розділів (мінімум 10 символів)...",
         referenceDocuments: "Довідкові Документи (Необов'язково)",
         uploadFiles: "Завантажити Файли",
         knowledgeBase: "База Знань",
@@ -5605,7 +6216,7 @@ const generateAllLanguageResources = () => {
         addSectionPlaceholder: "Додати розділ",
         cancel: "Скасувати",
         createOutline: "Створити Схему",
-        updateOutline: "Оновити Схему"
+        updateOutline: "Оновити Схему",
       },
       editChecklistModal: {
         title: "Редагувати Контрольний Список",
@@ -5613,7 +6224,8 @@ const generateAllLanguageResources = () => {
         checklistName: "Назва Контрольного Списку",
         checklistNamePlaceholder: "Введіть назву контрольного списку",
         description: "Опис",
-        descriptionPlaceholder: "Введіть опис контрольного списку для автоматичного пропонування питань (мінімум 10 символів)...",
+        descriptionPlaceholder:
+          "Введіть опис контрольного списку для автоматичного пропонування питань (мінімум 10 символів)...",
         referenceDocuments: "Довідкові Документи (Необов'язково)",
         uploadFiles: "Завантажити Файли",
         knowledgeBase: "База Знань",
@@ -5624,7 +6236,7 @@ const generateAllLanguageResources = () => {
         copyAllQuestions: "Скопіювати всі питання як текст",
         cancel: "Скасувати",
         createChecklist: "Створити Контрольний Список",
-        updateChecklist: "Оновити Контрольний Список"
+        updateChecklist: "Оновити Контрольний Список",
       },
       editTopicListModal: {
         title: "Редагувати Список Тем",
@@ -5632,7 +6244,8 @@ const generateAllLanguageResources = () => {
         topicListName: "Назва Списку Тем",
         topicListNamePlaceholder: "Введіть назву списку тем",
         description: "Опис Списку Тем",
-        descriptionPlaceholder: "Введіть опис списку тем для автоматичного пропонування тем (мінімум 10 символів)...",
+        descriptionPlaceholder:
+          "Введіть опис списку тем для автоматичного пропонування тем (мінімум 10 символів)...",
         referenceDocuments: "Довідкові Документи (Необов'язково)",
         uploadFiles: "Завантажити Файли",
         knowledgeBase: "База Знань",
@@ -5643,15 +6256,17 @@ const generateAllLanguageResources = () => {
         copyAllTopics: "Скопіювати всі теми як текст",
         cancel: "Скасувати",
         createTopicList: "Створити Список Тем",
-        updateTopicList: "Оновити Список Тем"
+        updateTopicList: "Оновити Список Тем",
       },
       optimizeChecklistModal: {
         title: "Оптимізувати Чекліст",
         customInstructionsLabel: "Користувацькі Інструкції (Необов'язково)",
-        customInstructionsHelperText: "Введіть будь-які додаткові інструкції, які слід врахувати при відповіді на питання чекліста",
+        customInstructionsHelperText:
+          "Введіть будь-які додаткові інструкції, які слід врахувати при відповіді на питання чекліста",
         analyzing: "Аналізую...",
         analyzeButton: "Аналізувати Чекліст",
-        analyzingMessage: "Аналізую ваш чекліст для пошуку можливостей оптимізації...",
+        analyzingMessage:
+          "Аналізую ваш чекліст для пошуку можливостей оптимізації...",
         cancelAnalysis: "Скасувати Аналіз",
         downloading: "Завантажую...",
         downloadCsv: "Завантажити CSV",
@@ -5665,17 +6280,21 @@ const generateAllLanguageResources = () => {
         currentAnswer: "Поточна Відповідь",
         showLess: "Показати Менше",
         showMore: "Показати Більше",
-        optimizationsSelectedText: "оптимізація{{s}} вибрана{{s}} для застосування",
+        optimizationsSelectedText:
+          "оптимізація{{s}} вибрана{{s}} для застосування",
         applying: "Застосовую...",
-        applySelectedOptimizations: "Застосувати Вибрані Оптимізації"
+        applySelectedOptimizations: "Застосувати Вибрані Оптимізації",
       },
       optimizeOutlineModal: {
         title: "Оптимізувати Схему",
-        description: "Завантажте еталонний документ, який представляє високоякісний приклад типу звіту, який ви хочете створити. Система створить звіт, використовуючи вашу поточну схему та базу знань, порівняє його з еталоном і запропонує покращення для розділів вашої схеми.",
+        description:
+          "Завантажте еталонний документ, який представляє високоякісний приклад типу звіту, який ви хочете створити. Система створить звіт, використовуючи вашу поточну схему та базу знань, порівняє його з еталоном і запропонує покращення для розділів вашої схеми.",
         groundTruthDocument: "Еталонний Документ",
         customInstructionsLabel: "Користувацькі Інструкції (Необов'язково)",
-        customInstructionsHelperText: "Надайте додаткові вказівки для процесу оптимізації",
-        customInstructionsPlaceholder: "наприклад, Зосередьтеся на поліпшенні технічної глибини, забезпечте відповідність конкретним стандартам тощо",
+        customInstructionsHelperText:
+          "Надайте додаткові вказівки для процесу оптимізації",
+        customInstructionsPlaceholder:
+          "наприклад, Зосередьтеся на поліпшенні технічної глибини, забезпечте відповідність конкретним стандартам тощо",
         characters: "символів",
         analyzingOutline: "Аналізую схему та генерую оптимізації...",
         cancelAnalysis: "Скасувати Аналіз",
@@ -5695,7 +6314,7 @@ const generateAllLanguageResources = () => {
         cancel: "Скасувати",
         optimizing: "Оптимізую...",
         optimizeOutline: "Оптимізувати Схему",
-        applyOptimizations: "Застосувати {{count}} Оптимізація{{s}}"
+        applyOptimizations: "Застосувати {{count}} Оптимізація{{s}}",
       },
       knowledgeBases: {
         title: "Управління базами знань",
@@ -5709,22 +6328,23 @@ const generateAllLanguageResources = () => {
           embeddingModel: "Модель вбудовування",
           dateCreated: "Дата створення",
           dateModified: "Дата зміни",
-          actions: "Дії"
+          actions: "Дії",
         },
         status: {
           default: "За замовчуванням",
-          na: "Не застосовується"
+          na: "Не застосовується",
         },
         modals: {
           fileUpload: {
-            supportedFormats: "Підтримує: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+            supportedFormats: "Підтримує: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
           },
           messages: {
             processing: "Обробка...",
-            pleaseWait: "Будь ласка, зачекайте, поки ми обробляємо ваші файли..."
-          }
-        }
-      }
+            pleaseWait:
+              "Будь ласка, зачекайте, поки ми обробляємо ваші файли...",
+          },
+        },
+      },
     },
   }
 
@@ -5784,8 +6404,10 @@ const generateAllLanguageResources = () => {
         typing: "AI pisze...",
         error: "Przepraszamy, coś poszło nie tak. Spróbuj ponownie.",
         welcome: "Cześć! Jak mogę ci dzisiaj pomóc?",
-        welcomeMessageWithSource: "Wybierz bazę wiedzy lub wczytaj pliki, a następnie zadaj pytanie.",
-        welcomeMessageGeneral: "Zapytaj mnie o cokolwiek! Aby wyszukać w bazie wiedzy, najpierw wybierz bazę wiedzy.",
+        welcomeMessageWithSource:
+          "Wybierz bazę wiedzy lub wczytaj pliki, a następnie zadaj pytanie.",
+        welcomeMessageGeneral:
+          "Zapytaj mnie o cokolwiek! Aby wyszukać w bazie wiedzy, najpierw wybierz bazę wiedzy.",
       },
       settings: {
         title: "Ustawienia",
@@ -5838,21 +6460,26 @@ const generateAllLanguageResources = () => {
       },
       review: {
         pageTitle: "Przejrzyj Dokumenty",
-        pageDescription: "Przejrzyj dokument na podstawie zdefiniowanej przez użytkownika listy kontrolnej i bazy danych zasad.",
+        pageDescription:
+          "Przejrzyj dokument na podstawie zdefiniowanej przez użytkownika listy kontrolnej i bazy danych zasad.",
         knowledgeBaseTitle: "Baza Wiedzy",
         knowledgeBaseDescription: "Kliknij, aby wybrać",
         checklistTitle: "Lista Kontrolna",
         checklistDescription: "Kliknij, aby wybrać",
         customInstructionsTitle: "Instrukcje Niestandardowe (Opcjonalne)",
-        customInstructionsPlaceholder: "Wprowadź dodatkowe instrukcje, które powinny być uwzględnione podczas odpowiadania na pytania listy kontrolnej...",
-        customInstructionsHelp: "{{count}}/2000 znaków. Te instrukcje zostaną dodane do każdego pytania podczas przetwarzania.",
-        searchModeHelp: "Wyszukiwanie wektorowe zapewnia szybkie, celowe wyniki. Pełna analiza dokumentu bada całą zawartość bazy wiedzy.",
+        customInstructionsPlaceholder:
+          "Wprowadź dodatkowe instrukcje, które powinny być uwzględnione podczas odpowiadania na pytania listy kontrolnej...",
+        customInstructionsHelp:
+          "{{count}}/2000 znaków. Te instrukcje zostaną dodane do każdego pytania podczas przetwarzania.",
+        searchModeHelp:
+          "Wyszukiwanie wektorowe zapewnia szybkie, celowe wyniki. Pełna analiza dokumentu bada całą zawartość bazy wiedzy.",
         processingFile: "Przetwarzanie pliku...",
         processingFiles: "Przetwarzanie plików...",
         selectKnowledgeBaseTitle: "Wybierz Bazę Wiedzy",
         selectChecklistTitle: "Wybierz Listę Kontrolną",
         noResults: "Jeszcze brak wyników",
-        uploadDocuments: "Prześlij jeden lub więcej dokumentów do przejrzenia względem wybranej listy kontrolnej",
+        uploadDocuments:
+          "Prześlij jeden lub więcej dokumentów do przejrzenia względem wybranej listy kontrolnej",
         results: "Wyniki",
         downloadReport: "Pobierz Raport",
         downloadCsv: "Pobierz CSV",
@@ -5861,24 +6488,29 @@ const generateAllLanguageResources = () => {
         reportCopied: "Raport skopiowany do schowka!",
         reviewButton: "Przejrzyj",
         consultDocuments: "Skonsultuj dokumenty",
-        noChecklistsAvailable: "Brak dostępnych list kontrolnych. Utwórz swoją pierwszą listę kontrolną, aby rozpocząć.",
+        noChecklistsAvailable:
+          "Brak dostępnych list kontrolnych. Utwórz swoją pierwszą listę kontrolną, aby rozpocząć.",
         createChecklist: "Utwórz Listę Kontrolną",
         editChecklist: "Edytuj Listę Kontrolną",
         checklistName: "Nazwa Listy Kontrolnej",
         checklistNamePlaceholder: "Wprowadź nazwę listy kontrolnej...",
         checklistDescriptionLabel: "Opis",
-        checklistDescriptionPlaceholder: "Wprowadź opis listy kontrolnej dla automatycznych sugestii pytań (minimum 10 znaków)...",
+        checklistDescriptionPlaceholder:
+          "Wprowadź opis listy kontrolnej dla automatycznych sugestii pytań (minimum 10 znaków)...",
         questions: "Pytania",
         suggest: "Zasugeruj",
         suggesting: "Sugerowanie...",
         optimize: "Optymalizuj",
-        optimizeTooltip: "Baza Wiedzy musi być wybrana, aby włączyć funkcję Optymalizuj",
-        optimizeTooltipEnabled: "Optymalizuj pytania na podstawie wybranej Bazy Wiedzy",
+        optimizeTooltip:
+          "Baza Wiedzy musi być wybrana, aby włączyć funkcję Optymalizuj",
+        optimizeTooltipEnabled:
+          "Optymalizuj pytania na podstawie wybranej Bazy Wiedzy",
         uploadFiles: "Prześlij Pliki",
         knowledgeBase: "Baza Wiedzy",
         referenceDocuments: "Dokumenty Referencyjne (Opcjonalne)",
         selectKnowledgeBasePlaceholder: "Wybierz Bazę Wiedzy...",
-        noKnowledgeBasesAvailable: "Brak dostępnej Bazy Wiedzy. Utwórz najpierw jedną, aby korzystać z tej funkcji.",
+        noKnowledgeBasesAvailable:
+          "Brak dostępnej Bazy Wiedzy. Utwórz najpierw jedną, aby korzystać z tej funkcji.",
         copyQuestions: "Kopiuj Pytania",
         questionsCopied: "Pytania skopiowane do schowka",
         noQuestionsToCopy: "Brak pytań do skopiowania",
@@ -5890,41 +6522,47 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "Przesłane Pliki",
 
         removeFile: "Usuń",
-        characterCount: "{{count}}/2000 znaków. Te instrukcje będą dołączone do każdego pytania podczas przetwarzania.",
+        characterCount:
+          "{{count}}/2000 znaków. Te instrukcje będą dołączone do każdego pytania podczas przetwarzania.",
         searchMode: "Tryb Wyszukiwania",
         vectorSearch: "Wyszukiwanie Wektorowe",
         fullDocumentScan: "Pełna Analiza Dokumentu",
-        vectorSearchDescription: "Znajduje odpowiednią treść używając wyszukiwania podobieństwa AI (szybkie, celowe)",
-        fullScanDescription: "Analizuje wszystkie dokumenty w bazie wiedzy (kompleksowe, dokładne)"
+        vectorSearchDescription:
+          "Znajduje odpowiednią treść używając wyszukiwania podobieństwa AI (szybkie, celowe)",
+        fullScanDescription:
+          "Analizuje wszystkie dokumenty w bazie wiedzy (kompleksowe, dokładne)",
       },
       modelSelection: {
         llmManagement: "Zarządzanie LLM",
-        llmDescription: "Skonfiguruj i zarządzaj LLM używanymi do generowania odpowiedzi tekstowych. Model domyślny będzie używany do wszystkich operacji.",
+        llmDescription:
+          "Skonfiguruj i zarządzaj LLM używanymi do generowania odpowiedzi tekstowych. Model domyślny będzie używany do wszystkich operacji.",
         addNewLlm: "Dodaj nowy LLM",
         noLlmsConfigured: "Brak skonfigurowanych LLM",
         addNewLlmToGetStarted: "Dodaj nowy LLM, aby rozpocząć",
         embeddingModelManagement: "Zarządzanie modelami osadzania",
-        embeddingDescription: "Skonfiguruj i zarządzaj modelami osadzania używanymi do indeksowania i wyszukiwania baz wiedzy. Model domyślny będzie używany podczas tworzenia nowych baz wiedzy, ale każda baza wiedzy będzie nadal używać swojego oryginalnego modelu osadzania, nawet jeśli domyślny zmieni się później.",
+        embeddingDescription:
+          "Skonfiguruj i zarządzaj modelami osadzania używanymi do indeksowania i wyszukiwania baz wiedzy. Model domyślny będzie używany podczas tworzenia nowych baz wiedzy, ale każda baza wiedzy będzie nadal używać swojego oryginalnego modelu osadzania, nawet jeśli domyślny zmieni się później.",
         addEmbeddingModel: "Dodaj model osadzania",
         noEmbeddingModelsConfigured: "Brak skonfigurowanych modeli osadzania",
-        addNewEmbeddingModelToGetStarted: "Dodaj nowy model osadzania, aby rozpocząć",
+        addNewEmbeddingModelToGetStarted:
+          "Dodaj nowy model osadzania, aby rozpocząć",
         tableHeaders: {
           name: "Nazwa",
           modelId: "ID modelu",
           provider: "Dostawca",
           description: "Opis",
           status: "Status",
-          actions: "Akcje"
+          actions: "Akcje",
         },
         status: {
           default: "Domyślny",
-          available: "Dostępny"
+          available: "Dostępny",
         },
         actions: {
           setAsDefault: "Ustaw jako domyślny",
           delete: "Usuń",
           validate: "Zweryfikuj",
-          validating: "Weryfikowanie"
+          validating: "Weryfikowanie",
         },
         dialog: {
           addNewLlm: "Dodaj nowy LLM",
@@ -5934,16 +6572,16 @@ const generateAllLanguageResources = () => {
           modelId: "ID modelu",
           description: "Opis",
           cancel: "Anuluj",
-          addModel: "Dodaj model"
+          addModel: "Dodaj model",
         },
         placeholders: {
           customModel: "np. Mój niestandardowy model",
           embeddingModelId: "np. sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "Opisz model, jego charakterystyki i kiedy go używać"
+          describeModel: "Opisz model, jego charakterystyki i kiedy go używać",
         },
         validation: {
-          pleaseEnterModelId: "Proszę wprowadzić ID modelu"
-        }
+          pleaseEnterModelId: "Proszę wprowadzić ID modelu",
+        },
       },
       compare: {
         title: "Porównaj Dokumenty",
@@ -5962,7 +6600,7 @@ const generateAllLanguageResources = () => {
         clickToBrowse: "Kliknij aby przeglądać lub przeciągnij i upuść",
         supportedFormats: "Obsługuje PDF, TXT i DOCX",
         editTopicList: "Edytuj Listę Tematów",
-        selectTopicListTitle: "Wybierz Listę Tematów"
+        selectTopicListTitle: "Wybierz Listę Tematów",
       },
       match: {
         title: "Dopasuj Dokumenty",
@@ -5974,28 +6612,31 @@ const generateAllLanguageResources = () => {
         findMatches: "Znajdź Dopasowania",
         similarityScore: "Wynik Podobieństwa",
         noDocumentsFound: "Nie znaleziono dokumentów",
-        selectDocumentToMatch: "Proszę wybrać dokument, aby znaleźć dopasowania",
+        selectDocumentToMatch:
+          "Proszę wybrać dokument, aby znaleźć dopasowania",
         loadingMatches: "Szukanie dopasowań...",
         noMatchesFound: "Nie znaleziono podobnych dokumentów",
         matchResults: "Wyniki Dopasowań",
         similarity: "Podobieństwo",
         editFormTemplate: "Edytuj Szablon Formularza",
-        selectFormTemplateTitle: "Wybierz Szablon Formularza"
+        selectFormTemplateTitle: "Wybierz Szablon Formularza",
       },
       editFormTemplateModal: {
         title: "Edytuj Szablon Formularza",
         formTemplateName: "Nazwa Szablonu Formularza",
         formTemplateNamePlaceholder: "Wprowadź nazwę szablonu formularza",
         formTemplateDescription: "Opis Szablonu Formularza",
-        descriptionPlaceholder: "Wprowadź opis szablonu formularza, aby automatycznie sugerować pola (minimum 10 znaków)...",
+        descriptionPlaceholder:
+          "Wprowadź opis szablonu formularza, aby automatycznie sugerować pola (minimum 10 znaków)...",
         referenceDocuments: "Dokumenty Referencyjne (Opcjonalne)",
         uploadFiles: "Prześlij Pliki",
         knowledgeBase: "Baza Wiedzy",
         formFields: "Pola Formularza",
         suggest: "Sugeruj",
-        fieldPlaceholder: "Dodaj nazwę pola (np. Imię, Adres, PESEL) lub sugeruj z opisu",
+        fieldPlaceholder:
+          "Dodaj nazwę pola (np. Imię, Adres, PESEL) lub sugeruj z opisu",
         cancel: "Anuluj",
-        updateFormTemplate: "Aktualizuj Szablon Formularza"
+        updateFormTemplate: "Aktualizuj Szablon Formularza",
       },
       editOutlineModal: {
         title: "Edytuj Konspekt",
@@ -6003,7 +6644,8 @@ const generateAllLanguageResources = () => {
         outlineName: "Nazwa Konspektu",
         outlineNamePlaceholder: "Wprowadź nazwę konspektu",
         description: "Opis",
-        descriptionPlaceholder: "Wprowadź opis konspektu, aby automatycznie zasugerować sekcje (minimum 10 znaków)...",
+        descriptionPlaceholder:
+          "Wprowadź opis konspektu, aby automatycznie zasugerować sekcje (minimum 10 znaków)...",
         referenceDocuments: "Dokumenty Referencyjne (Opcjonalne)",
         uploadFiles: "Prześlij Pliki",
         knowledgeBase: "Baza Wiedzy",
@@ -6013,7 +6655,7 @@ const generateAllLanguageResources = () => {
         addSectionPlaceholder: "Dodaj sekcję",
         cancel: "Anuluj",
         createOutline: "Utwórz Konspekt",
-        updateOutline: "Aktualizuj Konspekt"
+        updateOutline: "Aktualizuj Konspekt",
       },
       editChecklistModal: {
         title: "Edytuj Listę Kontrolną",
@@ -6021,7 +6663,8 @@ const generateAllLanguageResources = () => {
         checklistName: "Nazwa Listy Kontrolnej",
         checklistNamePlaceholder: "Wprowadź nazwę listy kontrolnej",
         description: "Opis",
-        descriptionPlaceholder: "Wprowadź opis listy kontrolnej, aby automatycznie zasugerować pytania (minimum 10 znaków)...",
+        descriptionPlaceholder:
+          "Wprowadź opis listy kontrolnej, aby automatycznie zasugerować pytania (minimum 10 znaków)...",
         referenceDocuments: "Dokumenty Referencyjne (Opcjonalne)",
         uploadFiles: "Prześlij Pliki",
         knowledgeBase: "Baza Wiedzy",
@@ -6032,7 +6675,7 @@ const generateAllLanguageResources = () => {
         copyAllQuestions: "Skopiuj wszystkie pytania jako tekst",
         cancel: "Anuluj",
         createChecklist: "Utwórz Listę Kontrolną",
-        updateChecklist: "Aktualizuj Listę Kontrolną"
+        updateChecklist: "Aktualizuj Listę Kontrolną",
       },
       editTopicListModal: {
         title: "Edytuj Listę Tematów",
@@ -6040,7 +6683,8 @@ const generateAllLanguageResources = () => {
         topicListName: "Nazwa Listy Tematów",
         topicListNamePlaceholder: "Wprowadź nazwę listy tematów",
         description: "Opis Listy Tematów",
-        descriptionPlaceholder: "Wprowadź opis listy tematów, aby automatycznie zasugerować tematy (minimum 10 znaków)...",
+        descriptionPlaceholder:
+          "Wprowadź opis listy tematów, aby automatycznie zasugerować tematy (minimum 10 znaków)...",
         referenceDocuments: "Dokumenty Referencyjne (Opcjonalne)",
         uploadFiles: "Prześlij Pliki",
         knowledgeBase: "Baza Wiedzy",
@@ -6051,15 +6695,17 @@ const generateAllLanguageResources = () => {
         copyAllTopics: "Skopiuj wszystkie tematy jako tekst",
         cancel: "Anuluj",
         createTopicList: "Utwórz Listę Tematów",
-        updateTopicList: "Aktualizuj Listę Tematów"
+        updateTopicList: "Aktualizuj Listę Tematów",
       },
       optimizeChecklistModal: {
         title: "Optymalizuj Listę Kontrolną",
         customInstructionsLabel: "Niestandardowe Instrukcje (Opcjonalne)",
-        customInstructionsHelperText: "Wprowadź dodatkowe instrukcje, które powinny być uwzględnione przy odpowiadaniu na pytania z listy kontrolnej",
+        customInstructionsHelperText:
+          "Wprowadź dodatkowe instrukcje, które powinny być uwzględnione przy odpowiadaniu na pytania z listy kontrolnej",
         analyzing: "Analizowanie...",
         analyzeButton: "Analizuj Listę Kontrolną",
-        analyzingMessage: "Analizowanie twojej listy kontrolnej w poszukiwaniu możliwości optymalizacji...",
+        analyzingMessage:
+          "Analizowanie twojej listy kontrolnej w poszukiwaniu możliwości optymalizacji...",
         cancelAnalysis: "Anuluj Analizę",
         downloading: "Pobieranie...",
         downloadCsv: "Pobierz CSV",
@@ -6073,19 +6719,24 @@ const generateAllLanguageResources = () => {
         currentAnswer: "Aktualna Odpowiedź",
         showLess: "Pokaż Mniej",
         showMore: "Pokaż Więcej",
-        optimizationsSelectedText: "optymalizacja{{s}} wybrana{{s}} do zastosowania",
+        optimizationsSelectedText:
+          "optymalizacja{{s}} wybrana{{s}} do zastosowania",
         applying: "Stosowanie...",
-        applySelectedOptimizations: "Zastosuj Wybrane Optymalizacje"
+        applySelectedOptimizations: "Zastosuj Wybrane Optymalizacje",
       },
       optimizeOutlineModal: {
         title: "Optymalizuj Konspekt",
-        description: "Prześlij dokument referencyjny, który reprezentuje wysokiej jakości przykład typu raportu, który chcesz wygenerować. System wygeneruje raport używając twojego obecnego konspektu i bazy wiedzy, porówna go z referencją i zasugeruje ulepszenia dla sekcji twojego konspektu.",
+        description:
+          "Prześlij dokument referencyjny, który reprezentuje wysokiej jakości przykład typu raportu, który chcesz wygenerować. System wygeneruje raport używając twojego obecnego konspektu i bazy wiedzy, porówna go z referencją i zasugeruje ulepszenia dla sekcji twojego konspektu.",
         groundTruthDocument: "Dokument Referencyjny",
         customInstructionsLabel: "Niestandardowe Instrukcje (Opcjonalne)",
-        customInstructionsHelperText: "Podaj dodatkowe wskazówki dla procesu optymalizacji",
-        customInstructionsPlaceholder: "np. Skup się na poprawie głębokości technicznej, zapewnij zgodność z określonymi standardami itp.",
+        customInstructionsHelperText:
+          "Podaj dodatkowe wskazówki dla procesu optymalizacji",
+        customInstructionsPlaceholder:
+          "np. Skup się na poprawie głębokości technicznej, zapewnij zgodność z określonymi standardami itp.",
         characters: "znaków",
-        analyzingOutline: "Analizowanie konspektu i generowanie optymalizacji...",
+        analyzingOutline:
+          "Analizowanie konspektu i generowanie optymalizacji...",
         cancelAnalysis: "Anuluj Analizę",
         optimizationResults: "Wyniki Optymalizacji",
         sectionsNeedOptimization: "sekcji wymaga optymalizacji",
@@ -6103,7 +6754,7 @@ const generateAllLanguageResources = () => {
         cancel: "Anuluj",
         optimizing: "Optymalizowanie...",
         optimizeOutline: "Optymalizuj Konspekt",
-        applyOptimizations: "Zastosuj {{count}} Optymalizacja{{s}}"
+        applyOptimizations: "Zastosuj {{count}} Optymalizacja{{s}}",
       },
       knowledgeBases: {
         title: "Zarządzanie bazami wiedzy",
@@ -6117,22 +6768,23 @@ const generateAllLanguageResources = () => {
           embeddingModel: "Model osadzania",
           dateCreated: "Data utworzenia",
           dateModified: "Data modyfikacji",
-          actions: "Akcje"
+          actions: "Akcje",
         },
         status: {
           default: "Domyślny",
-          na: "Nie dotyczy"
+          na: "Nie dotyczy",
         },
         modals: {
           fileUpload: {
-            supportedFormats: "Obsługuje: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+            supportedFormats: "Obsługuje: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
           },
           messages: {
             processing: "Przetwarzanie...",
-            pleaseWait: "Proszę czekać, podczas gdy przetwarzamy Twoje pliki..."
-          }
-        }
-      }
+            pleaseWait:
+              "Proszę czekać, podczas gdy przetwarzamy Twoje pliki...",
+          },
+        },
+      },
     },
   }
 
@@ -6192,8 +6844,10 @@ const generateAllLanguageResources = () => {
         typing: "AI is aan het typen...",
         error: "Sorry, er is iets misgegaan. Probeer het opnieuw.",
         welcome: "Hallo! Hoe kan ik u vandaag helpen?",
-        welcomeMessageWithSource: "Selecteer een kennisbank of upload bestanden, stel dan een vraag.",
-        welcomeMessageGeneral: "Vraag me alles! Voor het zoeken in de kennisbank, selecteer eerst een kennisbank.",
+        welcomeMessageWithSource:
+          "Selecteer een kennisbank of upload bestanden, stel dan een vraag.",
+        welcomeMessageGeneral:
+          "Vraag me alles! Voor het zoeken in de kennisbank, selecteer eerst een kennisbank.",
       },
       settings: {
         title: "Instellingen",
@@ -6246,21 +6900,26 @@ const generateAllLanguageResources = () => {
       },
       review: {
         pageTitle: "Documenten Beoordelen",
-        pageDescription: "Beoordeel een document op basis van een door de gebruiker gedefinieerde checklist en beleidsdatabase.",
+        pageDescription:
+          "Beoordeel een document op basis van een door de gebruiker gedefinieerde checklist en beleidsdatabase.",
         knowledgeBaseTitle: "Kennisbank",
         knowledgeBaseDescription: "Klik om te selecteren",
         checklistTitle: "Checklist",
         checklistDescription: "Klik om te selecteren",
         customInstructionsTitle: "Aangepaste Instructies (Optioneel)",
-        customInstructionsPlaceholder: "Voer aanvullende instructies in die moeten worden overwogen bij het beantwoorden van checklistvragen...",
-        customInstructionsHelp: "{{count}}/2000 tekens. Deze instructies worden toegevoegd aan elke vraag tijdens de verwerking.",
-        searchModeHelp: "Vector zoeken biedt snelle, gerichte resultaten. Volledige documentanalyse onderzoekt alle inhoud van de kennisbank.",
+        customInstructionsPlaceholder:
+          "Voer aanvullende instructies in die moeten worden overwogen bij het beantwoorden van checklistvragen...",
+        customInstructionsHelp:
+          "{{count}}/2000 tekens. Deze instructies worden toegevoegd aan elke vraag tijdens de verwerking.",
+        searchModeHelp:
+          "Vector zoeken biedt snelle, gerichte resultaten. Volledige documentanalyse onderzoekt alle inhoud van de kennisbank.",
         processingFile: "Bestand verwerken...",
         processingFiles: "Bestanden verwerken...",
         selectKnowledgeBaseTitle: "Kennisbank Selecteren",
         selectChecklistTitle: "Checklist Selecteren",
         noResults: "Nog geen resultaten",
-        uploadDocuments: "Upload een of meer documenten om te beoordelen tegen uw geselecteerde checklist",
+        uploadDocuments:
+          "Upload een of meer documenten om te beoordelen tegen uw geselecteerde checklist",
         results: "Resultaten",
         downloadReport: "Rapport Downloaden",
         downloadCsv: "CSV Downloaden",
@@ -6269,24 +6928,29 @@ const generateAllLanguageResources = () => {
         reportCopied: "Rapport gekopieerd naar klembord!",
         reviewButton: "Beoordelen",
         consultDocuments: "Documenten raadplegen",
-        noChecklistsAvailable: "Geen checklists beschikbaar. Maak uw eerste checklist om te beginnen.",
+        noChecklistsAvailable:
+          "Geen checklists beschikbaar. Maak uw eerste checklist om te beginnen.",
         createChecklist: "Checklist Maken",
         editChecklist: "Checklist Bewerken",
         checklistName: "Checklist Naam",
         checklistNamePlaceholder: "Voer checklist naam in...",
         checklistDescriptionLabel: "Beschrijving",
-        checklistDescriptionPlaceholder: "Voer checklist beschrijving in voor automatische vraagvoorstellen (minimaal 10 tekens)...",
+        checklistDescriptionPlaceholder:
+          "Voer checklist beschrijving in voor automatische vraagvoorstellen (minimaal 10 tekens)...",
         questions: "Vragen",
         suggest: "Voorstellen",
         suggesting: "Voorstellen...",
         optimize: "Optimaliseren",
-        optimizeTooltip: "Een Kennisbank moet worden geselecteerd om de Optimaliseren functie in te schakelen",
-        optimizeTooltipEnabled: "Vragen optimaliseren op basis van geselecteerde Kennisbank",
+        optimizeTooltip:
+          "Een Kennisbank moet worden geselecteerd om de Optimaliseren functie in te schakelen",
+        optimizeTooltipEnabled:
+          "Vragen optimaliseren op basis van geselecteerde Kennisbank",
         uploadFiles: "Bestanden Uploaden",
         knowledgeBase: "Kennisbank",
         referenceDocuments: "Referentiedocumenten (Optioneel)",
         selectKnowledgeBasePlaceholder: "Kennisbank selecteren...",
-        noKnowledgeBasesAvailable: "Geen Kennisbank beschikbaar. Maak er eerst een om deze functie te gebruiken.",
+        noKnowledgeBasesAvailable:
+          "Geen Kennisbank beschikbaar. Maak er eerst een om deze functie te gebruiken.",
         copyQuestions: "Vragen Kopiëren",
         questionsCopied: "Vragen gekopieerd naar klembord",
         noQuestionsToCopy: "Geen vragen om te kopiëren",
@@ -6298,41 +6962,47 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "Geüploade Bestanden",
 
         removeFile: "Verwijder",
-        characterCount: "{{count}}/2000 tekens. Deze instructies worden toegevoegd aan elke vraag tijdens verwerking.",
+        characterCount:
+          "{{count}}/2000 tekens. Deze instructies worden toegevoegd aan elke vraag tijdens verwerking.",
         searchMode: "Zoek Modus",
         vectorSearch: "Vector Zoeken",
         fullDocumentScan: "Volledige Document Analyse",
-        vectorSearchDescription: "Vindt relevante inhoud met AI gelijkenis zoeken (snel, gericht)",
-        fullScanDescription: "Analyseert alle documenten in de kennisbank (uitgebreid, grondig)"
+        vectorSearchDescription:
+          "Vindt relevante inhoud met AI gelijkenis zoeken (snel, gericht)",
+        fullScanDescription:
+          "Analyseert alle documenten in de kennisbank (uitgebreid, grondig)",
       },
       modelSelection: {
         llmManagement: "LLM Beheer",
-        llmDescription: "Configureer en beheer LLM's die worden gebruikt voor het genereren van tekstantwoorden. Het standaardmodel wordt gebruikt voor alle bewerkingen.",
+        llmDescription:
+          "Configureer en beheer LLM's die worden gebruikt voor het genereren van tekstantwoorden. Het standaardmodel wordt gebruikt voor alle bewerkingen.",
         addNewLlm: "Nieuwe LLM toevoegen",
         noLlmsConfigured: "Geen LLM's geconfigureerd",
         addNewLlmToGetStarted: "Voeg een nieuwe LLM toe om te beginnen",
         embeddingModelManagement: "Inbeddingsmodel Beheer",
-        embeddingDescription: "Configureer en beheer inbeddingsmodellen die worden gebruikt voor kennisbank indexering en ophalen. Het standaardmodel wordt gebruikt bij het maken van nieuwe kennisbanken, maar elke kennisbank blijft zijn oorspronkelijke inbeddingsmodel gebruiken, zelfs als de standaard later verandert.",
+        embeddingDescription:
+          "Configureer en beheer inbeddingsmodellen die worden gebruikt voor kennisbank indexering en ophalen. Het standaardmodel wordt gebruikt bij het maken van nieuwe kennisbanken, maar elke kennisbank blijft zijn oorspronkelijke inbeddingsmodel gebruiken, zelfs als de standaard later verandert.",
         addEmbeddingModel: "Inbeddingsmodel toevoegen",
         noEmbeddingModelsConfigured: "Geen inbeddingsmodellen geconfigureerd",
-        addNewEmbeddingModelToGetStarted: "Voeg een nieuw inbeddingsmodel toe om te beginnen",
+        addNewEmbeddingModelToGetStarted:
+          "Voeg een nieuw inbeddingsmodel toe om te beginnen",
         tableHeaders: {
           name: "Naam",
           modelId: "Model ID",
           provider: "Aanbieder",
           description: "Beschrijving",
           status: "Status",
-          actions: "Acties"
+          actions: "Acties",
         },
         status: {
           default: "Standaard",
-          available: "Beschikbaar"
+          available: "Beschikbaar",
         },
         actions: {
           setAsDefault: "Instellen als standaard",
           delete: "Verwijderen",
           validate: "Valideren",
-          validating: "Valideren"
+          validating: "Valideren",
         },
         dialog: {
           addNewLlm: "Nieuwe LLM toevoegen",
@@ -6342,16 +7012,17 @@ const generateAllLanguageResources = () => {
           modelId: "Model ID",
           description: "Beschrijving",
           cancel: "Annuleren",
-          addModel: "Model toevoegen"
+          addModel: "Model toevoegen",
         },
         placeholders: {
           customModel: "bijv. Mijn aangepaste model",
           embeddingModelId: "bijv. sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "Beschrijf het model, zijn kenmerken en wanneer het te gebruiken"
+          describeModel:
+            "Beschrijf het model, zijn kenmerken en wanneer het te gebruiken",
         },
         validation: {
-          pleaseEnterModelId: "Voer een model ID in"
-        }
+          pleaseEnterModelId: "Voer een model ID in",
+        },
       },
       compare: {
         title: "Documenten Vergelijken",
@@ -6370,7 +7041,7 @@ const generateAllLanguageResources = () => {
         clickToBrowse: "Klik om te bladeren of sleep en zet neer",
         supportedFormats: "Ondersteunt PDF, TXT en DOCX",
         editTopicList: "Bewerk Onderwerpenlijst",
-        selectTopicListTitle: "Selecteer Onderwerpenlijst"
+        selectTopicListTitle: "Selecteer Onderwerpenlijst",
       },
       match: {
         title: "Documenten Matchen",
@@ -6388,22 +7059,25 @@ const generateAllLanguageResources = () => {
         matchResults: "Match Resultaten",
         similarity: "Gelijkenis",
         editFormTemplate: "Bewerk Formuliersjabloon",
-        selectFormTemplateTitle: "Selecteer Formuliersjabloon"
+        selectFormTemplateTitle: "Selecteer Formuliersjabloon",
       },
       editFormTemplateModal: {
         title: "Bewerk Formuliersjabloon",
         formTemplateName: "Naam Formuliersjabloon",
-        formTemplateNamePlaceholder: "Voer de naam van het formuliersjabloon in",
+        formTemplateNamePlaceholder:
+          "Voer de naam van het formuliersjabloon in",
         formTemplateDescription: "Beschrijving Formuliersjabloon",
-        descriptionPlaceholder: "Voer een beschrijving van het formuliersjabloon in om automatisch velden voor te stellen (minimaal 10 tekens)...",
+        descriptionPlaceholder:
+          "Voer een beschrijving van het formuliersjabloon in om automatisch velden voor te stellen (minimaal 10 tekens)...",
         referenceDocuments: "Referentiedocumenten (Optioneel)",
         uploadFiles: "Bestanden Uploaden",
         knowledgeBase: "Kennisbank",
         formFields: "Formuliervelden",
         suggest: "Voorstellen",
-        fieldPlaceholder: "Voeg een veldnaam toe (bijv. Voornaam, Adres, BSN) of stel voor uit beschrijving",
+        fieldPlaceholder:
+          "Voeg een veldnaam toe (bijv. Voornaam, Adres, BSN) of stel voor uit beschrijving",
         cancel: "Annuleren",
-        updateFormTemplate: "Formuliersjabloon Bijwerken"
+        updateFormTemplate: "Formuliersjabloon Bijwerken",
       },
       editOutlineModal: {
         title: "Overzicht Bewerken",
@@ -6411,7 +7085,8 @@ const generateAllLanguageResources = () => {
         outlineName: "Overzichtsnaam",
         outlineNamePlaceholder: "Voer de overzichtsnaam in",
         description: "Beschrijving",
-        descriptionPlaceholder: "Voer de overzichtsbeschrijving in om automatisch secties voor te stellen (minimaal 10 tekens)...",
+        descriptionPlaceholder:
+          "Voer de overzichtsbeschrijving in om automatisch secties voor te stellen (minimaal 10 tekens)...",
         referenceDocuments: "Referentiedocumenten (Optioneel)",
         uploadFiles: "Bestanden Uploaden",
         knowledgeBase: "Kennisbank",
@@ -6421,7 +7096,7 @@ const generateAllLanguageResources = () => {
         addSectionPlaceholder: "Sectie toevoegen",
         cancel: "Annuleren",
         createOutline: "Overzicht Aanmaken",
-        updateOutline: "Overzicht Bijwerken"
+        updateOutline: "Overzicht Bijwerken",
       },
       editChecklistModal: {
         title: "Checklist Bewerken",
@@ -6429,7 +7104,8 @@ const generateAllLanguageResources = () => {
         checklistName: "Checklistnaam",
         checklistNamePlaceholder: "Voer de checklistnaam in",
         description: "Beschrijving",
-        descriptionPlaceholder: "Voer de checklistbeschrijving in om automatisch vragen voor te stellen (minimaal 10 tekens)...",
+        descriptionPlaceholder:
+          "Voer de checklistbeschrijving in om automatisch vragen voor te stellen (minimaal 10 tekens)...",
         referenceDocuments: "Referentiedocumenten (Optioneel)",
         uploadFiles: "Bestanden Uploaden",
         knowledgeBase: "Kennisbank",
@@ -6440,7 +7116,7 @@ const generateAllLanguageResources = () => {
         copyAllQuestions: "Alle vragen als tekst kopiëren",
         cancel: "Annuleren",
         createChecklist: "Checklist Aanmaken",
-        updateChecklist: "Checklist Bijwerken"
+        updateChecklist: "Checklist Bijwerken",
       },
       editTopicListModal: {
         title: "Onderwerpenlijst Bewerken",
@@ -6448,7 +7124,8 @@ const generateAllLanguageResources = () => {
         topicListName: "Onderwerpenlijstnaam",
         topicListNamePlaceholder: "Voer de onderwerpenlijstnaam in",
         description: "Onderwerpenlijstbeschrijving",
-        descriptionPlaceholder: "Voer de onderwerpenlijstbeschrijving in om automatisch onderwerpen voor te stellen (minimaal 10 tekens)...",
+        descriptionPlaceholder:
+          "Voer de onderwerpenlijstbeschrijving in om automatisch onderwerpen voor te stellen (minimaal 10 tekens)...",
         referenceDocuments: "Referentiedocumenten (Optioneel)",
         uploadFiles: "Bestanden Uploaden",
         knowledgeBase: "Kennisbank",
@@ -6459,15 +7136,17 @@ const generateAllLanguageResources = () => {
         copyAllTopics: "Alle onderwerpen als tekst kopiëren",
         cancel: "Annuleren",
         createTopicList: "Onderwerpenlijst Aanmaken",
-        updateTopicList: "Onderwerpenlijst Bijwerken"
+        updateTopicList: "Onderwerpenlijst Bijwerken",
       },
       optimizeChecklistModal: {
         title: "Checklist Optimaliseren",
         customInstructionsLabel: "Aangepaste Instructies (Optioneel)",
-        customInstructionsHelperText: "Voer aanvullende instructies in die moeten worden overwogen bij het beantwoorden van checklistvragen",
+        customInstructionsHelperText:
+          "Voer aanvullende instructies in die moeten worden overwogen bij het beantwoorden van checklistvragen",
         analyzing: "Analyseren...",
         analyzeButton: "Checklist Analyseren",
-        analyzingMessage: "Uw checklist analyseren voor optimalisatiemogelijkheden...",
+        analyzingMessage:
+          "Uw checklist analyseren voor optimalisatiemogelijkheden...",
         cancelAnalysis: "Analyse Annuleren",
         downloading: "Downloaden...",
         downloadCsv: "CSV Downloaden",
@@ -6481,17 +7160,21 @@ const generateAllLanguageResources = () => {
         currentAnswer: "Huidig Antwoord",
         showLess: "Minder Tonen",
         showMore: "Meer Tonen",
-        optimizationsSelectedText: "optimalisatie{{s}} geselecteerd voor toepassing",
+        optimizationsSelectedText:
+          "optimalisatie{{s}} geselecteerd voor toepassing",
         applying: "Toepassen...",
-        applySelectedOptimizations: "Geselecteerde Optimalisaties Toepassen"
+        applySelectedOptimizations: "Geselecteerde Optimalisaties Toepassen",
       },
       optimizeOutlineModal: {
         title: "Overzicht Optimaliseren",
-        description: "Upload een referentiedocument dat een hoogwaardig voorbeeld vertegenwoordigt van het type rapport dat u wilt genereren. Het systeem zal een rapport genereren met uw huidige overzicht en kennisbank, het vergelijken met de referentie en verbeteringen voorstellen voor uw overzichtsecties.",
+        description:
+          "Upload een referentiedocument dat een hoogwaardig voorbeeld vertegenwoordigt van het type rapport dat u wilt genereren. Het systeem zal een rapport genereren met uw huidige overzicht en kennisbank, het vergelijken met de referentie en verbeteringen voorstellen voor uw overzichtsecties.",
         groundTruthDocument: "Referentiedocument",
         customInstructionsLabel: "Aangepaste Instructies (Optioneel)",
-        customInstructionsHelperText: "Geef aanvullende begeleiding voor het optimalisatieproces",
-        customInstructionsPlaceholder: "bijv. Focus op het verbeteren van technische diepte, zorg voor naleving van specifieke standaarden, enz.",
+        customInstructionsHelperText:
+          "Geef aanvullende begeleiding voor het optimalisatieproces",
+        customInstructionsPlaceholder:
+          "bijv. Focus op het verbeteren van technische diepte, zorg voor naleving van specifieke standaarden, enz.",
         characters: "tekens",
         analyzingOutline: "Overzicht analyseren en optimalisaties genereren...",
         cancelAnalysis: "Analyse Annuleren",
@@ -6511,7 +7194,7 @@ const generateAllLanguageResources = () => {
         cancel: "Annuleren",
         optimizing: "Optimaliseren...",
         optimizeOutline: "Overzicht Optimaliseren",
-        applyOptimizations: "{{count}} Optimalisatie{{s}} Toepassen"
+        applyOptimizations: "{{count}} Optimalisatie{{s}} Toepassen",
       },
       knowledgeBases: {
         title: "Kennisbank beheer",
@@ -6525,22 +7208,22 @@ const generateAllLanguageResources = () => {
           embeddingModel: "Inbeddingsmodel",
           dateCreated: "Aanmaakdatum",
           dateModified: "Wijzigingsdatum",
-          actions: "Acties"
+          actions: "Acties",
         },
         status: {
           default: "Standaard",
-          na: "Niet van toepassing"
+          na: "Niet van toepassing",
         },
         modals: {
           fileUpload: {
-            supportedFormats: "Ondersteunt: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+            supportedFormats: "Ondersteunt: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
           },
           messages: {
             processing: "Verwerken...",
-            pleaseWait: "Wacht even terwijl we uw bestanden verwerken..."
-          }
-        }
-      }
+            pleaseWait: "Wacht even terwijl we uw bestanden verwerken...",
+          },
+        },
+      },
     },
   }
 
@@ -6608,8 +7291,10 @@ const generateAllLanguageResources = () => {
         searchMode: "검색 모드:",
         vectorSearch: "벡터 검색",
         fullTextScan: "전체 텍스트 스캔",
-        searchModeDescription: "벡터 검색은 빠르고 타겟팅된 결과를 제공합니다. 전체 텍스트 스캔은 지식 베이스의 모든 콘텐츠를 검토합니다.",
-        askMeAnything: "무엇이든 물어보세요! 지식 베이스 검색을 위해서는 먼저 지식 베이스를 선택하세요.",
+        searchModeDescription:
+          "벡터 검색은 빠르고 타겟팅된 결과를 제공합니다. 전체 텍스트 스캔은 지식 베이스의 모든 콘텐츠를 검토합니다.",
+        askMeAnything:
+          "무엇이든 물어보세요! 지식 베이스 검색을 위해서는 먼저 지식 베이스를 선택하세요.",
         usingGeneralAI: "일반 AI 어시스턴트 사용 중",
         usingKnowledgeBase: "지식 베이스 사용 중:",
         usingDocuments: "# 개의 문서 사용 중",
@@ -6626,15 +7311,19 @@ const generateAllLanguageResources = () => {
         knowledgeBaseTableSources: "소스",
         knowledgeBaseTablePages: "페이지",
         selectKnowledgeBasePlaceholder: "지식 베이스를 선택하세요...",
-        noKnowledgeBasesAvailable: "사용 가능한 지식 베이스가 없습니다. 이 기능을 사용하려면 먼저 하나를 생성하세요.",
+        noKnowledgeBasesAvailable:
+          "사용 가능한 지식 베이스가 없습니다. 이 기능을 사용하려면 먼저 하나를 생성하세요.",
         knowledgeBase: "지식 베이스",
         file: "파일",
-        welcomeMessageWithSource: "지식 베이스를 선택하거나 파일을 업로드한 후 질문하세요.",
-        welcomeMessageGeneral: "무엇이든 물어보세요! 지식 베이스 검색을 위해서는 먼저 지식 베이스를 선택하세요.",
+        welcomeMessageWithSource:
+          "지식 베이스를 선택하거나 파일을 업로드한 후 질문하세요.",
+        welcomeMessageGeneral:
+          "무엇이든 물어보세요! 지식 베이스 검색을 위해서는 먼저 지식 베이스를 선택하세요.",
         errors: {
           generic: "죄송합니다. 문제가 발생했습니다. 다시 시도해 주세요.",
           timeout: "요청 시간이 초과되었습니다. 다시 시도해 주세요.",
-          largeFileTimeout: "대용량 파일 처리 시간이 초과되었습니다. 대용량 파일의 성능 향상을 위해 '전체 텍스트 스캔' 모드로 전환해 보세요.",
+          largeFileTimeout:
+            "대용량 파일 처리 시간이 초과되었습니다. 대용량 파일의 성능 향상을 위해 '전체 텍스트 스캔' 모드로 전환해 보세요.",
           fileSize: "파일이 너무 큽니다. 더 작은 파일을 선택해 주세요.",
           serverError: "서버 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
         },
@@ -6690,21 +7379,26 @@ const generateAllLanguageResources = () => {
       },
       review: {
         pageTitle: "문서 검토",
-        pageDescription: "사용자 정의 체크리스트와 정책 데이터베이스를 기반으로 문서를 검토합니다.",
+        pageDescription:
+          "사용자 정의 체크리스트와 정책 데이터베이스를 기반으로 문서를 검토합니다.",
         knowledgeBaseTitle: "지식 베이스",
         knowledgeBaseDescription: "선택하려면 클릭",
         checklistTitle: "체크리스트",
         checklistDescription: "선택하려면 클릭",
         customInstructionsTitle: "사용자 정의 지침 (선택사항)",
-        customInstructionsPlaceholder: "체크리스트 질문에 답할 때 고려해야 할 추가 지침을 입력하세요...",
-        customInstructionsHelp: "{{count}}/2000자. 이 지침은 처리 중 각 질문에 추가됩니다.",
-        searchModeHelp: "벡터 검색은 빠르고 대상이 명확한 결과를 제공합니다. 전체 문서 분석은 지식 베이스의 모든 콘텐츠를 조사합니다.",
+        customInstructionsPlaceholder:
+          "체크리스트 질문에 답할 때 고려해야 할 추가 지침을 입력하세요...",
+        customInstructionsHelp:
+          "{{count}}/2000자. 이 지침은 처리 중 각 질문에 추가됩니다.",
+        searchModeHelp:
+          "벡터 검색은 빠르고 대상이 명확한 결과를 제공합니다. 전체 문서 분석은 지식 베이스의 모든 콘텐츠를 조사합니다.",
         processingFile: "파일 처리 중...",
         processingFiles: "파일 처리 중...",
         selectKnowledgeBaseTitle: "지식 베이스 선택",
         selectChecklistTitle: "체크리스트 선택",
         noResults: "아직 결과가 없습니다",
-        uploadDocuments: "선택한 체크리스트에 대해 검토할 하나 이상의 문서를 업로드하세요",
+        uploadDocuments:
+          "선택한 체크리스트에 대해 검토할 하나 이상의 문서를 업로드하세요",
         results: "결과",
         downloadReport: "보고서 다운로드",
         downloadCsv: "CSV 다운로드",
@@ -6713,24 +7407,28 @@ const generateAllLanguageResources = () => {
         reportCopied: "보고서가 클립보드에 복사되었습니다!",
         reviewButton: "검토",
         consultDocuments: "문서 참조",
-        noChecklistsAvailable: "사용 가능한 체크리스트가 없습니다. 시작하려면 첫 번째 체크리스트를 만드세요.",
+        noChecklistsAvailable:
+          "사용 가능한 체크리스트가 없습니다. 시작하려면 첫 번째 체크리스트를 만드세요.",
         createChecklist: "체크리스트 만들기",
         editChecklist: "체크리스트 편집",
         checklistName: "체크리스트 이름",
         checklistNamePlaceholder: "체크리스트 이름을 입력하세요...",
         checklistDescriptionLabel: "설명",
-        checklistDescriptionPlaceholder: "자동 질문 제안을 위한 체크리스트 설명을 입력하세요 (최소 10자)...",
+        checklistDescriptionPlaceholder:
+          "자동 질문 제안을 위한 체크리스트 설명을 입력하세요 (최소 10자)...",
         questions: "질문",
         suggest: "제안",
         suggesting: "제안 중...",
         optimize: "최적화",
-        optimizeTooltip: "최적화 기능을 활성화하려면 지식 베이스를 선택해야 합니다",
+        optimizeTooltip:
+          "최적화 기능을 활성화하려면 지식 베이스를 선택해야 합니다",
         optimizeTooltipEnabled: "선택한 지식 베이스를 기반으로 질문 최적화",
         uploadFiles: "파일 업로드",
         knowledgeBase: "지식 베이스",
         referenceDocuments: "참조 문서 (선택사항)",
         selectKnowledgeBasePlaceholder: "지식 베이스 선택...",
-        noKnowledgeBasesAvailable: "사용 가능한 지식 베이스가 없습니다. 이 기능을 사용하려면 먼저 하나를 만드세요.",
+        noKnowledgeBasesAvailable:
+          "사용 가능한 지식 베이스가 없습니다. 이 기능을 사용하려면 먼저 하나를 만드세요.",
         copyQuestions: "질문 복사",
         questionsCopied: "질문이 클립보드에 복사됨",
         noQuestionsToCopy: "복사할 질문이 없습니다",
@@ -6742,22 +7440,27 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "업로드된 파일",
 
         removeFile: "제거",
-        characterCount: "{{count}}/2000자. 이 지시사항은 처리 시 각 질문에 추가됩니다.",
+        characterCount:
+          "{{count}}/2000자. 이 지시사항은 처리 시 각 질문에 추가됩니다.",
         searchMode: "검색 모드",
         vectorSearch: "벡터 검색",
         fullDocumentScan: "전체 문서 분석",
-        vectorSearchDescription: "AI 유사성 검색을 사용하여 관련 콘텐츠 찾기 (빠름, 대상 지향적)",
-        fullScanDescription: "지식 베이스의 모든 문서 분석 (포괄적, 철저함)"
+        vectorSearchDescription:
+          "AI 유사성 검색을 사용하여 관련 콘텐츠 찾기 (빠름, 대상 지향적)",
+        fullScanDescription: "지식 베이스의 모든 문서 분석 (포괄적, 철저함)",
       },
       generate: {
-        pageDescription: "사용자 정의 체크리스트와 문서 데이터베이스를 기반으로 문서를 생성합니다.",
+        pageDescription:
+          "사용자 정의 체크리스트와 문서 데이터베이스를 기반으로 문서를 생성합니다.",
         generatingDocument: "문서 생성 중...",
         knowledgeBaseTitle: "지식 베이스",
         documentOutlineTitle: "문서 개요",
         clickToSelect: "클릭하여 선택",
         customInstructionsTitle: "사용자 지정 지침 (선택사항)",
-        customInstructionsPlaceholder: "보고서의 각 섹션을 생성할 때 고려해야 할 추가 지침을 입력하세요...",
-        characterCount: "{{count}}/2000자. 이 지침은 각 섹션을 생성할 때 프롬프트에 추가됩니다.",
+        customInstructionsPlaceholder:
+          "보고서의 각 섹션을 생성할 때 고려해야 할 추가 지침을 입력하세요...",
+        characterCount:
+          "{{count}}/2000자. 이 지침은 각 섹션을 생성할 때 프롬프트에 추가됩니다.",
         selectKnowledgeBaseTitle: "지식 베이스 선택",
         selectDocumentOutlineTitle: "문서 개요 선택",
         generateButton: "생성",
@@ -6782,39 +7485,43 @@ const generateAllLanguageResources = () => {
         reportClearedSuccess: "생성된 보고서가 지워졌습니다",
         enterAtLeastOneSection: "최소 하나의 섹션을 입력하세요",
         selectKnowledgeBase: "지식 베이스를 선택하세요",
-        generateSuccess: "{method}을(를) 사용하여 보고서가 성공적으로 생성되었습니다!",
+        generateSuccess:
+          "{method}을(를) 사용하여 보고서가 성공적으로 생성되었습니다!",
         generateError: "문서 생성에 실패했습니다: {error}",
         vectorSearch: "벡터 검색",
-        fullDocumentScan: "전체 문서 스캔"
+        fullDocumentScan: "전체 문서 스캔",
       },
       modelSelection: {
         llmManagement: "LLM 관리",
-        llmDescription: "텍스트 응답 생성에 사용되는 LLM을 구성하고 관리합니다. 기본 모델이 모든 작업에 사용됩니다.",
+        llmDescription:
+          "텍스트 응답 생성에 사용되는 LLM을 구성하고 관리합니다. 기본 모델이 모든 작업에 사용됩니다.",
         addNewLlm: "새 LLM 추가",
         noLlmsConfigured: "구성된 LLM이 없습니다",
         addNewLlmToGetStarted: "시작하려면 새 LLM을 추가하세요",
         embeddingModelManagement: "임베딩 모델 관리",
-        embeddingDescription: "지식 베이스 인덱싱 및 검색에 사용되는 임베딩 모델을 구성하고 관리합니다. 새 지식 베이스를 만들 때 기본 모델이 사용되지만, 각 지식 베이스는 나중에 기본값이 변경되더라도 원래 임베딩 모델을 계속 사용합니다.",
+        embeddingDescription:
+          "지식 베이스 인덱싱 및 검색에 사용되는 임베딩 모델을 구성하고 관리합니다. 새 지식 베이스를 만들 때 기본 모델이 사용되지만, 각 지식 베이스는 나중에 기본값이 변경되더라도 원래 임베딩 모델을 계속 사용합니다.",
         addEmbeddingModel: "임베딩 모델 추가",
         noEmbeddingModelsConfigured: "구성된 임베딩 모델이 없습니다",
-        addNewEmbeddingModelToGetStarted: "시작하려면 새 임베딩 모델을 추가하세요",
+        addNewEmbeddingModelToGetStarted:
+          "시작하려면 새 임베딩 모델을 추가하세요",
         tableHeaders: {
           name: "이름",
           modelId: "모델 ID",
           provider: "제공업체",
           description: "설명",
           status: "상태",
-          actions: "작업"
+          actions: "작업",
         },
         status: {
           default: "기본",
-          available: "사용 가능"
+          available: "사용 가능",
         },
         actions: {
           setAsDefault: "기본값으로 설정",
           delete: "삭제",
           validate: "검증",
-          validating: "검증 중"
+          validating: "검증 중",
         },
         dialog: {
           addNewLlm: "새 LLM 추가",
@@ -6824,16 +7531,16 @@ const generateAllLanguageResources = () => {
           modelId: "모델 ID",
           description: "설명",
           cancel: "취소",
-          addModel: "모델 추가"
+          addModel: "모델 추가",
         },
         placeholders: {
           customModel: "예: 내 사용자 정의 모델",
           embeddingModelId: "예: sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "모델, 특성 및 사용 시기를 설명하세요"
+          describeModel: "모델, 특성 및 사용 시기를 설명하세요",
         },
         validation: {
-          pleaseEnterModelId: "모델 ID를 입력하세요"
-        }
+          pleaseEnterModelId: "모델 ID를 입력하세요",
+        },
       },
       compare: {
         title: "문서 비교",
@@ -6852,7 +7559,7 @@ const generateAllLanguageResources = () => {
         clickToBrowse: "클릭하여 찾아보기 또는 드래그 앤 드롭",
         supportedFormats: "PDF, TXT, DOCX 지원",
         editTopicList: "주제 목록 편집",
-        selectTopicListTitle: "주제 목록 선택"
+        selectTopicListTitle: "주제 목록 선택",
       },
       match: {
         title: "문서 매칭",
@@ -6870,14 +7577,15 @@ const generateAllLanguageResources = () => {
         matchResults: "매치 결과",
         similarity: "유사도",
         editFormTemplate: "양식 템플릿 편집",
-        selectFormTemplateTitle: "양식 템플릿 선택"
+        selectFormTemplateTitle: "양식 템플릿 선택",
       },
       editFormTemplateModal: {
         title: "양식 템플릿 편집",
         formTemplateName: "양식 템플릿 이름",
         formTemplateNamePlaceholder: "양식 템플릿 이름을 입력하세요",
         formTemplateDescription: "양식 템플릿 설명",
-        descriptionPlaceholder: "필드를 자동으로 제안하려면 양식 템플릿 설명을 입력하세요 (최소 10자)...",
+        descriptionPlaceholder:
+          "필드를 자동으로 제안하려면 양식 템플릿 설명을 입력하세요 (최소 10자)...",
         referenceDocuments: "참조 문서 (선택사항)",
         uploadFiles: "파일 업로드",
         knowledgeBase: "지식 베이스",
@@ -6885,7 +7593,7 @@ const generateAllLanguageResources = () => {
         suggest: "제안",
         fieldPlaceholder: "필드 이름 추가...",
         cancel: "취소",
-        updateFormTemplate: "양식 템플릿 업데이트"
+        updateFormTemplate: "양식 템플릿 업데이트",
       },
       editOutlineModal: {
         title: "개요 편집",
@@ -6893,7 +7601,8 @@ const generateAllLanguageResources = () => {
         outlineName: "개요 이름",
         outlineNamePlaceholder: "개요 이름을 입력하세요",
         description: "설명",
-        descriptionPlaceholder: "섹션을 자동으로 제안하려면 개요 설명을 입력하세요 (최소 10자)...",
+        descriptionPlaceholder:
+          "섹션을 자동으로 제안하려면 개요 설명을 입력하세요 (최소 10자)...",
         referenceDocuments: "참조 문서 (선택사항)",
         uploadFiles: "파일 업로드",
         knowledgeBase: "지식 베이스",
@@ -6903,7 +7612,7 @@ const generateAllLanguageResources = () => {
         addSectionPlaceholder: "섹션 추가",
         cancel: "취소",
         createOutline: "개요 만들기",
-        updateOutline: "개요 업데이트"
+        updateOutline: "개요 업데이트",
       },
       editChecklistModal: {
         title: "체크리스트 편집",
@@ -6911,7 +7620,8 @@ const generateAllLanguageResources = () => {
         checklistName: "체크리스트 이름",
         checklistNamePlaceholder: "체크리스트 이름을 입력하세요",
         description: "설명",
-        descriptionPlaceholder: "질문을 자동으로 제안하려면 체크리스트 설명을 입력하세요 (최소 10자)...",
+        descriptionPlaceholder:
+          "질문을 자동으로 제안하려면 체크리스트 설명을 입력하세요 (최소 10자)...",
         referenceDocuments: "참조 문서 (선택사항)",
         uploadFiles: "파일 업로드",
         knowledgeBase: "지식 베이스",
@@ -6922,7 +7632,7 @@ const generateAllLanguageResources = () => {
         copyAllQuestions: "모든 질문을 텍스트로 복사",
         cancel: "취소",
         createChecklist: "체크리스트 만들기",
-        updateChecklist: "체크리스트 업데이트"
+        updateChecklist: "체크리스트 업데이트",
       },
       editTopicListModal: {
         title: "주제 목록 편집",
@@ -6930,7 +7640,8 @@ const generateAllLanguageResources = () => {
         topicListName: "주제 목록 이름",
         topicListNamePlaceholder: "주제 목록 이름을 입력하세요",
         description: "주제 목록 설명",
-        descriptionPlaceholder: "주제를 자동으로 제안하려면 주제 목록 설명을 입력하세요 (최소 10자)...",
+        descriptionPlaceholder:
+          "주제를 자동으로 제안하려면 주제 목록 설명을 입력하세요 (최소 10자)...",
         referenceDocuments: "참조 문서 (선택사항)",
         uploadFiles: "파일 업로드",
         knowledgeBase: "지식 베이스",
@@ -6941,15 +7652,17 @@ const generateAllLanguageResources = () => {
         copyAllTopics: "모든 주제를 텍스트로 복사",
         cancel: "취소",
         createTopicList: "주제 목록 만들기",
-        updateTopicList: "주제 목록 업데이트"
+        updateTopicList: "주제 목록 업데이트",
       },
       optimizeChecklistModal: {
         title: "체크리스트 최적화",
         customInstructionsLabel: "사용자 정의 지침 (선택사항)",
-        customInstructionsHelperText: "체크리스트 질문에 답할 때 고려해야 할 추가 지침을 입력하세요",
+        customInstructionsHelperText:
+          "체크리스트 질문에 답할 때 고려해야 할 추가 지침을 입력하세요",
         analyzing: "분석 중...",
         analyzeButton: "체크리스트 분석",
-        analyzingMessage: "최적화 기회를 찾기 위해 체크리스트를 분석하고 있습니다...",
+        analyzingMessage:
+          "최적화 기회를 찾기 위해 체크리스트를 분석하고 있습니다...",
         cancelAnalysis: "분석 취소",
         downloading: "다운로드 중...",
         downloadCsv: "CSV 다운로드",
@@ -6963,17 +7676,21 @@ const generateAllLanguageResources = () => {
         currentAnswer: "현재 답변",
         showLess: "적게 보기",
         showMore: "더 보기",
-        optimizationsSelectedText: "{{s}}개의 최적화가 적용을 위해 선택되었습니다",
+        optimizationsSelectedText:
+          "{{s}}개의 최적화가 적용을 위해 선택되었습니다",
         applying: "적용 중...",
-        applySelectedOptimizations: "선택된 최적화 적용"
+        applySelectedOptimizations: "선택된 최적화 적용",
       },
       optimizeOutlineModal: {
         title: "개요 최적화",
-        description: "생성하고자 하는 보고서 유형의 고품질 예시를 나타내는 기준 문서를 업로드하세요. 시스템은 현재 개요와 지식 베이스를 사용하여 보고서를 생성하고, 기준과 비교하여 개요 섹션에 대한 개선사항을 제안합니다.",
+        description:
+          "생성하고자 하는 보고서 유형의 고품질 예시를 나타내는 기준 문서를 업로드하세요. 시스템은 현재 개요와 지식 베이스를 사용하여 보고서를 생성하고, 기준과 비교하여 개요 섹션에 대한 개선사항을 제안합니다.",
         groundTruthDocument: "기준 문서",
         customInstructionsLabel: "사용자 정의 지침 (선택사항)",
-        customInstructionsHelperText: "최적화 프로세스를 위한 추가 안내를 제공하세요",
-        customInstructionsPlaceholder: "예: 기술적 깊이 개선에 중점을 두고, 특정 표준 준수를 보장하는 등",
+        customInstructionsHelperText:
+          "최적화 프로세스를 위한 추가 안내를 제공하세요",
+        customInstructionsPlaceholder:
+          "예: 기술적 깊이 개선에 중점을 두고, 특정 표준 준수를 보장하는 등",
         characters: "글자",
         analyzingOutline: "개요를 분석하고 최적화를 생성하고 있습니다...",
         cancelAnalysis: "분석 취소",
@@ -6993,7 +7710,7 @@ const generateAllLanguageResources = () => {
         cancel: "취소",
         optimizing: "최적화 중...",
         optimizeOutline: "개요 최적화",
-        applyOptimizations: "{{count}}개 최적화 적용"
+        applyOptimizations: "{{count}}개 최적화 적용",
       },
       knowledgeBases: {
         title: "지식 베이스 관리",
@@ -7007,11 +7724,11 @@ const generateAllLanguageResources = () => {
           embeddingModel: "임베딩 모델",
           dateCreated: "생성일",
           dateModified: "수정일",
-          actions: "작업"
+          actions: "작업",
         },
         status: {
           default: "기본값",
-          na: "해당 없음"
+          na: "해당 없음",
         },
         modals: {
           add: {
@@ -7068,8 +7785,8 @@ const generateAllLanguageResources = () => {
           },
           messages: {
             processing: "처리 중...",
-            pleaseWait: "파일을 처리하는 동안 잠시 기다려 주세요..."
-          }
+            pleaseWait: "파일을 처리하는 동안 잠시 기다려 주세요...",
+          },
         },
         editCustom: {
           title: "사용자 정의 지침 편집",
@@ -7083,7 +7800,8 @@ const generateAllLanguageResources = () => {
           outlineName: "개요 이름",
           outlineNamePlaceholder: "개요 이름을 입력하세요",
           description: "설명",
-          descriptionPlaceholder: "개요 설명을 입력하여 섹션을 자동으로 제안받으세요 (최소 10글자)...",
+          descriptionPlaceholder:
+            "개요 설명을 입력하여 섹션을 자동으로 제안받으세요 (최소 10글자)...",
           referenceDocuments: "참조 문서 (선택사항)",
           uploadFiles: "파일 업로드",
           knowledgeBase: "지식 베이스",
@@ -7093,7 +7811,7 @@ const generateAllLanguageResources = () => {
           addSectionPlaceholder: "섹션 추가",
           cancel: "취소",
           createOutline: "개요 만들기",
-          updateOutline: "개요 업데이트"
+          updateOutline: "개요 업데이트",
         },
         editChecklistModal: {
           title: "체크리스트 편집",
@@ -7101,7 +7819,8 @@ const generateAllLanguageResources = () => {
           checklistName: "체크리스트 이름",
           checklistNamePlaceholder: "체크리스트 이름을 입력하세요",
           description: "설명",
-          descriptionPlaceholder: "체크리스트 설명을 입력하여 질문을 자동으로 제안받으세요 (최소 10글자)...",
+          descriptionPlaceholder:
+            "체크리스트 설명을 입력하여 질문을 자동으로 제안받으세요 (최소 10글자)...",
           referenceDocuments: "참조 문서 (선택사항)",
           uploadFiles: "파일 업로드",
           knowledgeBase: "지식 베이스",
@@ -7112,7 +7831,7 @@ const generateAllLanguageResources = () => {
           copyAllQuestions: "모든 질문을 텍스트로 복사",
           cancel: "취소",
           createChecklist: "체크리스트 만들기",
-          updateChecklist: "체크리스트 업데이트"
+          updateChecklist: "체크리스트 업데이트",
         },
         editTopicListModal: {
           title: "주제 목록 편집",
@@ -7120,7 +7839,8 @@ const generateAllLanguageResources = () => {
           topicListName: "주제 목록 이름",
           topicListNamePlaceholder: "주제 목록 이름을 입력하세요",
           description: "주제 목록 설명",
-          descriptionPlaceholder: "주제 목록 설명을 입력하여 주제를 자동으로 제안받으세요 (최소 10글자)...",
+          descriptionPlaceholder:
+            "주제 목록 설명을 입력하여 주제를 자동으로 제안받으세요 (최소 10글자)...",
           referenceDocuments: "참조 문서 (선택사항)",
           uploadFiles: "파일 업로드",
           knowledgeBase: "지식 베이스",
@@ -7131,9 +7851,9 @@ const generateAllLanguageResources = () => {
           copyAllTopics: "모든 주제를 텍스트로 복사",
           cancel: "취소",
           createTopicList: "주제 목록 만들기",
-          updateTopicList: "주제 목록 업데이트"
+          updateTopicList: "주제 목록 업데이트",
         },
-      }
+      },
     },
   }
 
@@ -7193,8 +7913,10 @@ const generateAllLanguageResources = () => {
         typing: "الذكاء الاصطناعي يكتب...",
         error: "عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.",
         welcome: "مرحباً! كيف يمكنني مساعدتك اليوم؟",
-        welcomeMessageWithSource: "اختر قاعدة معرفة أو ارفع ملفات، ثم اطرح سؤالاً.",
-        welcomeMessageGeneral: "اسألني أي شيء! للبحث في قاعدة المعرفة، اختر قاعدة معرفة أولاً.",
+        welcomeMessageWithSource:
+          "اختر قاعدة معرفة أو ارفع ملفات، ثم اطرح سؤالاً.",
+        welcomeMessageGeneral:
+          "اسألني أي شيء! للبحث في قاعدة المعرفة، اختر قاعدة معرفة أولاً.",
       },
       settings: {
         title: "الإعدادات",
@@ -7247,21 +7969,26 @@ const generateAllLanguageResources = () => {
       },
       review: {
         pageTitle: "مراجعة المستندات",
-        pageDescription: "مراجعة مستند بناءً على قائمة مراجعة محددة من قبل المستخدم وقاعدة بيانات السياسات.",
+        pageDescription:
+          "مراجعة مستند بناءً على قائمة مراجعة محددة من قبل المستخدم وقاعدة بيانات السياسات.",
         knowledgeBaseTitle: "قاعدة المعرفة",
         knowledgeBaseDescription: "انقر للتحديد",
         checklistTitle: "قائمة المراجعة",
         checklistDescription: "انقر للتحديد",
         customInstructionsTitle: "التعليمات المخصصة (اختياري)",
-        customInstructionsPlaceholder: "أدخل تعليمات إضافية يجب مراعاتها عند الإجابة على أسئلة قائمة المراجعة...",
-        customInstructionsHelp: "{{count}}/2000 حرف. ستتم إضافة هذه التعليمات إلى كل سؤال أثناء المعالجة.",
-        searchModeHelp: "البحث المتجه يوفر نتائج سريعة ومستهدفة. تحليل المستند الكامل يفحص كل محتوى قاعدة المعرفة.",
+        customInstructionsPlaceholder:
+          "أدخل تعليمات إضافية يجب مراعاتها عند الإجابة على أسئلة قائمة المراجعة...",
+        customInstructionsHelp:
+          "{{count}}/2000 حرف. ستتم إضافة هذه التعليمات إلى كل سؤال أثناء المعالجة.",
+        searchModeHelp:
+          "البحث المتجه يوفر نتائج سريعة ومستهدفة. تحليل المستند الكامل يفحص كل محتوى قاعدة المعرفة.",
         processingFile: "معالجة الملف...",
         processingFiles: "معالجة الملفات...",
         selectKnowledgeBaseTitle: "تحديد قاعدة المعرفة",
         selectChecklistTitle: "تحديد قائمة المراجعة",
         noResults: "لا توجد نتائج بعد",
-        uploadDocuments: "ارفع مستنداً واحداً أو أكثر لمراجعته مقابل قائمة المراجعة المحددة",
+        uploadDocuments:
+          "ارفع مستنداً واحداً أو أكثر لمراجعته مقابل قائمة المراجعة المحددة",
         results: "النتائج",
         downloadReport: "تحميل التقرير",
         downloadCsv: "تحميل CSV",
@@ -7270,13 +7997,15 @@ const generateAllLanguageResources = () => {
         reportCopied: "تم نسخ التقرير إلى الحافظة!",
         reviewButton: "مراجعة",
         consultDocuments: "استشارة المستندات",
-        noChecklistsAvailable: "لا توجد قوائم مراجعة متاحة. أنشئ قائمة المراجعة الأولى للبدء.",
+        noChecklistsAvailable:
+          "لا توجد قوائم مراجعة متاحة. أنشئ قائمة المراجعة الأولى للبدء.",
         createChecklist: "إنشاء قائمة مراجعة",
         editChecklist: "تعديل قائمة المراجعة",
         checklistName: "اسم قائمة المراجعة",
         checklistNamePlaceholder: "أدخل اسم قائمة المراجعة...",
         checklistDescriptionLabel: "الوصف",
-        checklistDescriptionPlaceholder: "أدخل وصف قائمة المراجعة لاقتراحات الأسئلة التلقائية (10 أحرف على الأقل)...",
+        checklistDescriptionPlaceholder:
+          "أدخل وصف قائمة المراجعة لاقتراحات الأسئلة التلقائية (10 أحرف على الأقل)...",
         questions: "الأسئلة",
         suggest: "اقتراح",
         suggesting: "جاري الاقتراح...",
@@ -7287,7 +8016,8 @@ const generateAllLanguageResources = () => {
         knowledgeBase: "قاعدة المعرفة",
         referenceDocuments: "المستندات المرجعية (اختياري)",
         selectKnowledgeBasePlaceholder: "تحديد قاعدة المعرفة...",
-        noKnowledgeBasesAvailable: "لا توجد قواعد معرفة متاحة. أنشئ واحدة أولاً لاستخدام هذه الميزة.",
+        noKnowledgeBasesAvailable:
+          "لا توجد قواعد معرفة متاحة. أنشئ واحدة أولاً لاستخدام هذه الميزة.",
         copyQuestions: "نسخ الأسئلة",
         questionsCopied: "تم نسخ الأسئلة إلى الحافظة",
         noQuestionsToCopy: "لا توجد أسئلة للنسخ",
@@ -7299,19 +8029,23 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "الملفات المرفوعة",
 
         removeFile: "إزالة",
-        characterCount: "{{count}}/2000 حرف. ستُضاف هذه التعليمات إلى كل سؤال أثناء المعالجة.",
+        characterCount:
+          "{{count}}/2000 حرف. ستُضاف هذه التعليمات إلى كل سؤال أثناء المعالجة.",
         searchMode: "وضع البحث",
         vectorSearch: "البحث المتجه",
         fullDocumentScan: "تحليل المستند الكامل",
-        vectorSearchDescription: "يجد المحتوى ذو الصلة باستخدام بحث التشابه بالذكاء الاصطناعي (سريع، مستهدف)",
-        fullScanDescription: "يحلل جميع المستندات في قاعدة المعرفة (شامل، دقيق)"
+        vectorSearchDescription:
+          "يجد المحتوى ذو الصلة باستخدام بحث التشابه بالذكاء الاصطناعي (سريع، مستهدف)",
+        fullScanDescription:
+          "يحلل جميع المستندات في قاعدة المعرفة (شامل، دقيق)",
       },
       editFormTemplateModal: {
         title: "تحرير قالب النموذج",
         formTemplateName: "اسم قالب النموذج",
         formTemplateNamePlaceholder: "أدخل اسم قالب النموذج",
         formTemplateDescription: "وصف قالب النموذج",
-        descriptionPlaceholder: "أدخل وصف قالب النموذج لاقتراح الحقول تلقائياً (10 أحرف على الأقل)...",
+        descriptionPlaceholder:
+          "أدخل وصف قالب النموذج لاقتراح الحقول تلقائياً (10 أحرف على الأقل)...",
         referenceDocuments: "المستندات المرجعية (اختياري)",
         uploadFiles: "رفع الملفات",
         knowledgeBase: "قاعدة المعرفة",
@@ -7319,7 +8053,7 @@ const generateAllLanguageResources = () => {
         suggest: "اقتراح",
         fieldPlaceholder: "أضف اسم حقل...",
         cancel: "إلغاء",
-        updateFormTemplate: "تحديث قالب النموذج"
+        updateFormTemplate: "تحديث قالب النموذج",
       },
       editOutlineModal: {
         title: "تحرير المخطط",
@@ -7327,7 +8061,8 @@ const generateAllLanguageResources = () => {
         outlineName: "اسم المخطط",
         outlineNamePlaceholder: "أدخل اسم المخطط",
         description: "الوصف",
-        descriptionPlaceholder: "أدخل وصف المخطط لاقتراح الأقسام تلقائياً (10 أحرف على الأقل)...",
+        descriptionPlaceholder:
+          "أدخل وصف المخطط لاقتراح الأقسام تلقائياً (10 أحرف على الأقل)...",
         referenceDocuments: "المستندات المرجعية (اختيارية)",
         uploadFiles: "رفع الملفات",
         knowledgeBase: "قاعدة المعرفة",
@@ -7337,7 +8072,7 @@ const generateAllLanguageResources = () => {
         addSectionPlaceholder: "إضافة قسم",
         cancel: "إلغاء",
         createOutline: "إنشاء المخطط",
-        updateOutline: "تحديث المخطط"
+        updateOutline: "تحديث المخطط",
       },
       editChecklistModal: {
         title: "تحرير قائمة المراجعة",
@@ -7345,7 +8080,8 @@ const generateAllLanguageResources = () => {
         checklistName: "اسم قائمة المراجعة",
         checklistNamePlaceholder: "أدخل اسم قائمة المراجعة",
         description: "الوصف",
-        descriptionPlaceholder: "أدخل وصف قائمة المراجعة لاقتراح الأسئلة تلقائياً (10 أحرف على الأقل)...",
+        descriptionPlaceholder:
+          "أدخل وصف قائمة المراجعة لاقتراح الأسئلة تلقائياً (10 أحرف على الأقل)...",
         referenceDocuments: "المستندات المرجعية (اختيارية)",
         uploadFiles: "رفع الملفات",
         knowledgeBase: "قاعدة المعرفة",
@@ -7356,7 +8092,7 @@ const generateAllLanguageResources = () => {
         copyAllQuestions: "نسخ جميع الأسئلة كنص",
         cancel: "إلغاء",
         createChecklist: "إنشاء قائمة المراجعة",
-        updateChecklist: "تحديث قائمة المراجعة"
+        updateChecklist: "تحديث قائمة المراجعة",
       },
       editTopicListModal: {
         title: "تحرير قائمة المواضيع",
@@ -7364,7 +8100,8 @@ const generateAllLanguageResources = () => {
         topicListName: "اسم قائمة المواضيع",
         topicListNamePlaceholder: "أدخل اسم قائمة المواضيع",
         description: "وصف قائمة المواضيع",
-        descriptionPlaceholder: "أدخل وصف قائمة المواضيع لاقتراح المواضيع تلقائياً (10 أحرف على الأقل)...",
+        descriptionPlaceholder:
+          "أدخل وصف قائمة المواضيع لاقتراح المواضيع تلقائياً (10 أحرف على الأقل)...",
         referenceDocuments: "المستندات المرجعية (اختيارية)",
         uploadFiles: "رفع الملفات",
         knowledgeBase: "قاعدة المعرفة",
@@ -7375,15 +8112,17 @@ const generateAllLanguageResources = () => {
         copyAllTopics: "نسخ جميع المواضيع كنص",
         cancel: "إلغاء",
         createTopicList: "إنشاء قائمة المواضيع",
-        updateTopicList: "تحديث قائمة المواضيع"
+        updateTopicList: "تحديث قائمة المواضيع",
       },
       optimizeChecklistModal: {
         title: "تحسين قائمة التحقق",
         customInstructionsLabel: "تعليمات مخصصة (اختياري)",
-        customInstructionsHelperText: "أدخل أي تعليمات إضافية يجب مراعاتها عند الإجابة على أسئلة قائمة التحقق",
+        customInstructionsHelperText:
+          "أدخل أي تعليمات إضافية يجب مراعاتها عند الإجابة على أسئلة قائمة التحقق",
         analyzing: "جاري التحليل...",
         analyzeButton: "تحليل قائمة التحقق",
-        analyzingMessage: "جاري تحليل قائمة التحقق الخاصة بك للبحث عن فرص التحسين...",
+        analyzingMessage:
+          "جاري تحليل قائمة التحقق الخاصة بك للبحث عن فرص التحسين...",
         cancelAnalysis: "إلغاء التحليل",
         downloading: "جاري التحميل...",
         downloadCsv: "تحميل CSV",
@@ -7399,15 +8138,17 @@ const generateAllLanguageResources = () => {
         showMore: "عرض المزيد",
         optimizationsSelectedText: "تم تحديد {{s}} تحسين للتطبيق",
         applying: "جاري التطبيق...",
-        applySelectedOptimizations: "تطبيق التحسينات المحددة"
+        applySelectedOptimizations: "تطبيق التحسينات المحددة",
       },
       optimizeOutlineModal: {
         title: "تحسين المخطط",
-        description: "قم بتحميل مستند مرجعي يمثل مثالاً عالي الجودة لنوع التقرير الذي تريد إنشاؤه. سيقوم النظام بإنشاء تقرير باستخدام مخططك الحالي وقاعدة المعرفة، ومقارنته بالمرجع واقتراح تحسينات لأقسام المخطط الخاص بك.",
+        description:
+          "قم بتحميل مستند مرجعي يمثل مثالاً عالي الجودة لنوع التقرير الذي تريد إنشاؤه. سيقوم النظام بإنشاء تقرير باستخدام مخططك الحالي وقاعدة المعرفة، ومقارنته بالمرجع واقتراح تحسينات لأقسام المخطط الخاص بك.",
         groundTruthDocument: "المستند المرجعي",
         customInstructionsLabel: "تعليمات مخصصة (اختياري)",
         customInstructionsHelperText: "قدم إرشادات إضافية لعملية التحسين",
-        customInstructionsPlaceholder: "مثل: التركيز على تحسين العمق التقني، وضمان الامتثال للمعايير المحددة، إلخ.",
+        customInstructionsPlaceholder:
+          "مثل: التركيز على تحسين العمق التقني، وضمان الامتثال للمعايير المحددة، إلخ.",
         characters: "أحرف",
         analyzingOutline: "جاري تحليل المخطط وإنشاء التحسينات...",
         cancelAnalysis: "إلغاء التحليل",
@@ -7427,16 +8168,18 @@ const generateAllLanguageResources = () => {
         cancel: "إلغاء",
         optimizing: "جاري التحسين...",
         optimizeOutline: "تحسين المخطط",
-        applyOptimizations: "تطبيق {{count}} تحسين"
+        applyOptimizations: "تطبيق {{count}} تحسين",
       },
       modelSelection: {
         llmManagement: "إدارة LLM",
-        llmDescription: "قم بتكوين وإدارة نماذج LLM المستخدمة لتوليد الاستجابات النصية. سيتم استخدام النموذج الافتراضي لجميع العمليات.",
+        llmDescription:
+          "قم بتكوين وإدارة نماذج LLM المستخدمة لتوليد الاستجابات النصية. سيتم استخدام النموذج الافتراضي لجميع العمليات.",
         addNewLlm: "إضافة LLM جديد",
         noLlmsConfigured: "لا توجد نماذج LLM مكونة",
         addNewLlmToGetStarted: "أضف نموذج LLM جديد للبدء",
         embeddingModelManagement: "إدارة نماذج التضمين",
-        embeddingDescription: "قم بتكوين وإدارة نماذج التضمين المستخدمة لفهرسة واسترجاع قواعد المعرفة. سيتم استخدام النموذج الافتراضي عند إنشاء قواعد معرفة جديدة، لكن كل قاعدة معرفة ستستمر في استخدام نموذج التضمين الأصلي الخاص بها حتى لو تغير الافتراضي لاحقاً.",
+        embeddingDescription:
+          "قم بتكوين وإدارة نماذج التضمين المستخدمة لفهرسة واسترجاع قواعد المعرفة. سيتم استخدام النموذج الافتراضي عند إنشاء قواعد معرفة جديدة، لكن كل قاعدة معرفة ستستمر في استخدام نموذج التضمين الأصلي الخاص بها حتى لو تغير الافتراضي لاحقاً.",
         addEmbeddingModel: "إضافة نموذج تضمين",
         noEmbeddingModelsConfigured: "لا توجد نماذج تضمين مكونة",
         addNewEmbeddingModelToGetStarted: "أضف نموذج تضمين جديد للبدء",
@@ -7446,17 +8189,17 @@ const generateAllLanguageResources = () => {
           provider: "المزود",
           description: "الوصف",
           status: "الحالة",
-          actions: "الإجراءات"
+          actions: "الإجراءات",
         },
         status: {
           default: "افتراضي",
-          available: "متاح"
+          available: "متاح",
         },
         actions: {
           setAsDefault: "تعيين كافتراضي",
           delete: "حذف",
           validate: "التحقق",
-          validating: "جارٍ التحقق"
+          validating: "جارٍ التحقق",
         },
         dialog: {
           addNewLlm: "إضافة LLM جديد",
@@ -7466,16 +8209,16 @@ const generateAllLanguageResources = () => {
           modelId: "معرف النموذج",
           description: "الوصف",
           cancel: "إلغاء",
-          addModel: "إضافة نموذج"
+          addModel: "إضافة نموذج",
         },
         placeholders: {
           customModel: "مثال: نموذجي المخصص",
           embeddingModelId: "مثال: sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "صف النموذج وخصائصه ومتى يُستخدم"
+          describeModel: "صف النموذج وخصائصه ومتى يُستخدم",
         },
         validation: {
-          pleaseEnterModelId: "يرجى إدخال معرف النموذج"
-        }
+          pleaseEnterModelId: "يرجى إدخال معرف النموذج",
+        },
       },
       knowledgeBases: {
         title: "إدارة قواعد المعرفة",
@@ -7489,22 +8232,22 @@ const generateAllLanguageResources = () => {
           embeddingModel: "نموذج التضمين",
           dateCreated: "تاريخ الإنشاء",
           dateModified: "تاريخ التعديل",
-          actions: "الإجراءات"
+          actions: "الإجراءات",
         },
         status: {
           default: "افتراضي",
-          na: "غير متاح"
+          na: "غير متاح",
         },
         modals: {
           fileUpload: {
-            supportedFormats: "يدعم: PDF، TXT، DOC/DOCX، RTF، CSV، XLSX"
+            supportedFormats: "يدعم: PDF، TXT، DOC/DOCX، RTF، CSV، XLSX",
           },
           messages: {
             processing: "جاري المعالجة...",
-            pleaseWait: "يرجى الانتظار بينما نعالج ملفاتك..."
-          }
-        }
-      }
+            pleaseWait: "يرجى الانتظار بينما نعالج ملفاتك...",
+          },
+        },
+      },
     },
   }
 
@@ -7564,8 +8307,10 @@ const generateAllLanguageResources = () => {
         typing: "AI टाइप कर रहा है...",
         error: "क्षमा करें, कुछ गलत हुआ। कृपया फिर से कोशिश करें।",
         welcome: "नमस्ते! आज मैं आपकी कैसे सहायता कर सकता हूँ?",
-        welcomeMessageWithSource: "एक नॉलेज बेस चुनें या फाइलें अपलोड करें, फिर प्रश्न पूछें।",
-        welcomeMessageGeneral: "मुझसे कुछ भी पूछें! नॉलेज बेस खोज के लिए, पहले एक नॉलेज बेस चुनें।",
+        welcomeMessageWithSource:
+          "एक नॉलेज बेस चुनें या फाइलें अपलोड करें, फिर प्रश्न पूछें।",
+        welcomeMessageGeneral:
+          "मुझसे कुछ भी पूछें! नॉलेज बेस खोज के लिए, पहले एक नॉलेज बेस चुनें।",
       },
       settings: {
         title: "सेटिंग्स",
@@ -7618,21 +8363,26 @@ const generateAllLanguageResources = () => {
       },
       review: {
         pageTitle: "दस्तावेज़ समीक्षा",
-        pageDescription: "उपयोगकर्ता-परिभाषित चेकलिस्ट और नीति डेटाबेस के आधार पर दस्तावेज़ की समीक्षा करें।",
+        pageDescription:
+          "उपयोगकर्ता-परिभाषित चेकलिस्ट और नीति डेटाबेस के आधार पर दस्तावेज़ की समीक्षा करें।",
         knowledgeBaseTitle: "ज्ञान आधार",
         knowledgeBaseDescription: "चयन करने के लिए क्लिक करें",
         checklistTitle: "चेकलिस्ट",
         checklistDescription: "चयन करने के लिए क्लिक करें",
         customInstructionsTitle: "कस्टम निर्देश (वैकल्पिक)",
-        customInstructionsPlaceholder: "चेकलिस्ट प्रश्नों का उत्तर देते समय विचार किए जाने वाले अतिरिक्त निर्देश दर्ज करें...",
-        customInstructionsHelp: "{{count}}/2000 वर्ण। ये निर्देश प्रसंस्करण के दौरान प्रत्येक प्रश्न में जोड़े जाएंगे।",
-        searchModeHelp: "वेक्टर खोज तेज़, लक्षित परिणाम प्रदान करती है। पूर्ण दस्तावेज़ विश्लेषण ज्ञान आधार की सभी सामग्री की जांच करता है।",
+        customInstructionsPlaceholder:
+          "चेकलिस्ट प्रश्नों का उत्तर देते समय विचार किए जाने वाले अतिरिक्त निर्देश दर्ज करें...",
+        customInstructionsHelp:
+          "{{count}}/2000 वर्ण। ये निर्देश प्रसंस्करण के दौरान प्रत्येक प्रश्न में जोड़े जाएंगे।",
+        searchModeHelp:
+          "वेक्टर खोज तेज़, लक्षित परिणाम प्रदान करती है। पूर्ण दस्तावेज़ विश्लेषण ज्ञान आधार की सभी सामग्री की जांच करता है।",
         processingFile: "फ़ाइल प्रसंस्करण...",
         processingFiles: "फ़ाइलें प्रसंस्करण...",
         selectKnowledgeBaseTitle: "ज्ञान आधार चुनें",
         selectChecklistTitle: "चेकलिस्ट चुनें",
         noResults: "अभी तक कोई परिणाम नहीं",
-        uploadDocuments: "अपनी चयनित चेकलिस्ट के विरुद्ध समीक्षा के लिए एक या अधिक दस्तावेज़ अपलोड करें",
+        uploadDocuments:
+          "अपनी चयनित चेकलिस्ट के विरुद्ध समीक्षा के लिए एक या अधिक दस्तावेज़ अपलोड करें",
         results: "परिणाम",
         downloadReport: "रिपोर्ट डाउनलोड करें",
         downloadCsv: "CSV डाउनलोड करें",
@@ -7641,24 +8391,28 @@ const generateAllLanguageResources = () => {
         reportCopied: "रिपोर्ट क्लिपबोर्ड में कॉपी की गई!",
         reviewButton: "समीक्षा करें",
         consultDocuments: "दस्तावेज़ों से सलाह लें",
-        noChecklistsAvailable: "कोई चेकलिस्ट उपलब्ध नहीं। शुरू करने के लिए अपनी पहली चेकलिस्ट बनाएं।",
+        noChecklistsAvailable:
+          "कोई चेकलिस्ट उपलब्ध नहीं। शुरू करने के लिए अपनी पहली चेकलिस्ट बनाएं।",
         createChecklist: "चेकलिस्ट बनाएं",
         editChecklist: "चेकलिस्ट संपादित करें",
         checklistName: "चेकलिस्ट नाम",
         checklistNamePlaceholder: "चेकलिस्ट नाम दर्ज करें...",
         checklistDescriptionLabel: "विवरण",
-        checklistDescriptionPlaceholder: "स्वचालित प्रश्न सुझावों के लिए चेकलिस्ट विवरण दर्ज करें (कम से कम 10 वर्ण)...",
+        checklistDescriptionPlaceholder:
+          "स्वचालित प्रश्न सुझावों के लिए चेकलिस्ट विवरण दर्ज करें (कम से कम 10 वर्ण)...",
         questions: "प्रश्न",
         suggest: "सुझाव दें",
         suggesting: "सुझाव दे रहे हैं...",
         optimize: "अनुकूलित करें",
-        optimizeTooltip: "अनुकूलन सुविधा सक्षम करने के लिए एक ज्ञान आधार का चयन किया जाना चाहिए",
+        optimizeTooltip:
+          "अनुकूलन सुविधा सक्षम करने के लिए एक ज्ञान आधार का चयन किया जाना चाहिए",
         optimizeTooltipEnabled: "चयनित ज्ञान आधार के आधार पर प्रश्नों को अनुकूलित करें",
         uploadFiles: "फ़ाइलें अपलोड करें",
         knowledgeBase: "ज्ञान आधार",
         referenceDocuments: "संदर्भ दस्तावेज़ (वैकल्पिक)",
         selectKnowledgeBasePlaceholder: "ज्ञान आधार चुनें...",
-        noKnowledgeBasesAvailable: "कोई ज्ञान आधार उपलब्ध नहीं। इस सुविधा का उपयोग करने के लिए पहले एक बनाएं।",
+        noKnowledgeBasesAvailable:
+          "कोई ज्ञान आधार उपलब्ध नहीं। इस सुविधा का उपयोग करने के लिए पहले एक बनाएं।",
         copyQuestions: "प्रश्न कॉपी करें",
         questionsCopied: "प्रश्न क्लिपबोर्ड में कॉपी किए गए",
         noQuestionsToCopy: "कॉपी करने के लिए कोई प्रश्न नहीं",
@@ -7670,19 +8424,23 @@ const generateAllLanguageResources = () => {
         uploadedFiles: "अपलोड की गई फाइलें",
 
         removeFile: "हटाएं",
-        characterCount: "{{count}}/2000 अक्षर। ये निर्देश प्रसंस्करण के दौरान प्रत्येक प्रश्न के साथ जोड़े जाएंगे।",
+        characterCount:
+          "{{count}}/2000 अक्षर। ये निर्देश प्रसंस्करण के दौरान प्रत्येक प्रश्न के साथ जोड़े जाएंगे।",
         searchMode: "खोज मोड",
         vectorSearch: "वेक्टर खोज",
         fullDocumentScan: "पूर्ण दस्तावेज़ विश्लेषण",
-        vectorSearchDescription: "AI समानता खोज का उपयोग करके प्रासंगिक सामग्री खोजता है (तेज़, लक्षित)",
-        fullScanDescription: "ज्ञान आधार में सभी दस्तावेज़ों का विश्लेषण करता है (व्यापक, गहन)"
+        vectorSearchDescription:
+          "AI समानता खोज का उपयोग करके प्रासंगिक सामग्री खोजता है (तेज़, लक्षित)",
+        fullScanDescription:
+          "ज्ञान आधार में सभी दस्तावेज़ों का विश्लेषण करता है (व्यापक, गहन)",
       },
       editFormTemplateModal: {
         title: "फॉर्म टेम्प्लेट संपादित करें",
         formTemplateName: "फॉर्म टेम्प्लेट नाम",
         formTemplateNamePlaceholder: "फॉर्म टेम्प्लेट नाम दर्ज करें",
         formTemplateDescription: "फॉर्म टेम्प्लेट विवरण",
-        descriptionPlaceholder: "फ़ील्ड का स्वचालित सुझाव के लिए फॉर्म टेम्प्लेट विवरण दर्ज करें (न्यूनतम 10 अक्षर)...",
+        descriptionPlaceholder:
+          "फ़ील्ड का स्वचालित सुझाव के लिए फॉर्म टेम्प्लेट विवरण दर्ज करें (न्यूनतम 10 अक्षर)...",
         referenceDocuments: "संदर्भ दस्तावेज़ (वैकल्पिक)",
         uploadFiles: "फ़ाइलें अपलोड करें",
         knowledgeBase: "ज्ञान आधार",
@@ -7690,16 +8448,18 @@ const generateAllLanguageResources = () => {
         suggest: "सुझाव दें",
         fieldPlaceholder: "फ़ील्ड नाम जोड़ें...",
         cancel: "रद्द करें",
-        updateFormTemplate: "फॉर्म टेम्प्लेट अपडेट करें"
+        updateFormTemplate: "फॉर्म टेम्प्लेट अपडेट करें",
       },
       modelSelection: {
         llmManagement: "LLM प्रबंधन",
-        llmDescription: "टेक्स्ट प्रतिक्रियाओं को उत्पन्न करने के लिए उपयोग किए जाने वाले LLM को कॉन्फ़िगर और प्रबंधित करें। डिफ़ॉल्ट मॉडल सभी संचालन के लिए उपयोग किया जाएगा।",
+        llmDescription:
+          "टेक्स्ट प्रतिक्रियाओं को उत्पन्न करने के लिए उपयोग किए जाने वाले LLM को कॉन्फ़िगर और प्रबंधित करें। डिफ़ॉल्ट मॉडल सभी संचालन के लिए उपयोग किया जाएगा।",
         addNewLlm: "नया LLM जोड़ें",
         noLlmsConfigured: "कोई LLM कॉन्फ़िगर नहीं किया गया",
         addNewLlmToGetStarted: "शुरू करने के लिए एक नया LLM जोड़ें",
         embeddingModelManagement: "एम्बेडिंग मॉडल प्रबंधन",
-        embeddingDescription: "नॉलेज बेस इंडेक्सिंग और पुनर्प्राप्ति के लिए उपयोग किए जाने वाले एम्बेडिंग मॉडल को कॉन्फ़िगर और प्रबंधित करें। नए नॉलेज बेस बनाते समय डिफ़ॉल्ट मॉडल का उपयोग किया जाएगा, लेकिन प्रत्येक नॉलेज बेस अपने मूल एम्बेडिंग मॉडल का उपयोग जारी रखेगा भले ही डिफ़ॉल्ट बाद में बदल जाए।",
+        embeddingDescription:
+          "नॉलेज बेस इंडेक्सिंग और पुनर्प्राप्ति के लिए उपयोग किए जाने वाले एम्बेडिंग मॉडल को कॉन्फ़िगर और प्रबंधित करें। नए नॉलेज बेस बनाते समय डिफ़ॉल्ट मॉडल का उपयोग किया जाएगा, लेकिन प्रत्येक नॉलेज बेस अपने मूल एम्बेडिंग मॉडल का उपयोग जारी रखेगा भले ही डिफ़ॉल्ट बाद में बदल जाए।",
         addEmbeddingModel: "एम्बेडिंग मॉडल जोड़ें",
         noEmbeddingModelsConfigured: "कोई एम्बेडिंग मॉडल कॉन्फ़िगर नहीं किया गया",
         addNewEmbeddingModelToGetStarted: "शुरू करने के लिए एक नया एम्बेडिंग मॉडल जोड़ें",
@@ -7709,17 +8469,17 @@ const generateAllLanguageResources = () => {
           provider: "प्रदाता",
           description: "विवरण",
           status: "स्थिति",
-          actions: "क्रियाएं"
+          actions: "क्रियाएं",
         },
         status: {
           default: "डिफ़ॉल्ट",
-          available: "उपलब्ध"
+          available: "उपलब्ध",
         },
         actions: {
           setAsDefault: "डिफ़ॉल्ट के रूप में सेट करें",
           delete: "हटाएं",
           validate: "सत्यापित करें",
-          validating: "सत्यापन हो रहा है"
+          validating: "सत्यापन हो रहा है",
         },
         dialog: {
           addNewLlm: "नया LLM जोड़ें",
@@ -7729,16 +8489,16 @@ const generateAllLanguageResources = () => {
           modelId: "मॉडल ID",
           description: "विवरण",
           cancel: "रद्द करें",
-          addModel: "मॉडल जोड़ें"
+          addModel: "मॉडल जोड़ें",
         },
         placeholders: {
           customModel: "उदा., मेरा कस्टम मॉडल",
           embeddingModelId: "उदा., sentence-transformers/all-MiniLM-L6-v2",
-          describeModel: "मॉडल, इसकी विशेषताओं और कब उपयोग करना है का वर्णन करें"
+          describeModel: "मॉडल, इसकी विशेषताओं और कब उपयोग करना है का वर्णन करें",
         },
         validation: {
-          pleaseEnterModelId: "कृपया मॉडल ID दर्ज करें"
-        }
+          pleaseEnterModelId: "कृपया मॉडल ID दर्ज करें",
+        },
       },
       knowledgeBases: {
         title: "नॉलेज बेस प्रबंधन",
@@ -7752,21 +8512,21 @@ const generateAllLanguageResources = () => {
           embeddingModel: "एम्बेडिंग मॉडल",
           dateCreated: "निर्माण तिथि",
           dateModified: "संशोधन तिथि",
-          actions: "क्रियाएं"
+          actions: "क्रियाएं",
         },
         status: {
           default: "डिफ़ॉल्ट",
-          na: "लागू नहीं"
+          na: "लागू नहीं",
         },
         modals: {
           fileUpload: {
-            supportedFormats: "समर्थित: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+            supportedFormats: "समर्थित: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
           },
           messages: {
             processing: "प्रोसेसिंग...",
-            pleaseWait: "कृपया प्रतीक्षा करें जब तक हम आपकी फाइलों को प्रोसेस करते हैं..."
-          }
-        }
+            pleaseWait: "कृपया प्रतीक्षा करें जब तक हम आपकी फाइलों को प्रोसेस करते हैं...",
+          },
+        },
       },
       editOutlineModal: {
         title: "रूपरेखा संपादित करें",
@@ -7774,7 +8534,8 @@ const generateAllLanguageResources = () => {
         outlineName: "रूपरेखा नाम",
         outlineNamePlaceholder: "रूपरेखा नाम दर्ज करें",
         description: "विवरण",
-        descriptionPlaceholder: "स्वचालित रूप से अनुभाग सुझाने के लिए रूपरेखा विवरण दर्ज करें (न्यूनतम 10 अक्षर)...",
+        descriptionPlaceholder:
+          "स्वचालित रूप से अनुभाग सुझाने के लिए रूपरेखा विवरण दर्ज करें (न्यूनतम 10 अक्षर)...",
         referenceDocuments: "संदर्भ दस्तावेज़ (वैकल्पिक)",
         uploadFiles: "फ़ाइलें अपलोड करें",
         knowledgeBase: "ज्ञान आधार",
@@ -7784,7 +8545,7 @@ const generateAllLanguageResources = () => {
         addSectionPlaceholder: "अनुभाग जोड़ें",
         cancel: "रद्द करें",
         createOutline: "रूपरेखा बनाएं",
-        updateOutline: "रूपरेखा अपडेट करें"
+        updateOutline: "रूपरेखा अपडेट करें",
       },
       editChecklistModal: {
         title: "चेकलिस्ट संपादित करें",
@@ -7792,7 +8553,8 @@ const generateAllLanguageResources = () => {
         checklistName: "चेकलिस्ट नाम",
         checklistNamePlaceholder: "चेकलिस्ट नाम दर्ज करें",
         description: "विवरण",
-        descriptionPlaceholder: "स्वचालित रूप से प्रश्न सुझाने के लिए चेकलिस्ट विवरण दर्ज करें (न्यूनतम 10 अक्षर)...",
+        descriptionPlaceholder:
+          "स्वचालित रूप से प्रश्न सुझाने के लिए चेकलिस्ट विवरण दर्ज करें (न्यूनतम 10 अक्षर)...",
         referenceDocuments: "संदर्भ दस्तावेज़ (वैकल्पिक)",
         uploadFiles: "फ़ाइलें अपलोड करें",
         knowledgeBase: "ज्ञान आधार",
@@ -7803,7 +8565,7 @@ const generateAllLanguageResources = () => {
         copyAllQuestions: "सभी प्रश्नों को टेक्स्ट के रूप में कॉपी करें",
         cancel: "रद्द करें",
         createChecklist: "चेकलिस्ट बनाएं",
-        updateChecklist: "चेकलिस्ट अपडेट करें"
+        updateChecklist: "चेकलिस्ट अपडेट करें",
       },
       editTopicListModal: {
         title: "विषय सूची संपादित करें",
@@ -7811,7 +8573,8 @@ const generateAllLanguageResources = () => {
         topicListName: "विषय सूची नाम",
         topicListNamePlaceholder: "विषय सूची नाम दर्ज करें",
         description: "विषय सूची विवरण",
-        descriptionPlaceholder: "स्वचालित रूप से विषय सुझाने के लिए विषय सूची विवरण दर्ज करें (न्यूनतम 10 अक्षर)...",
+        descriptionPlaceholder:
+          "स्वचालित रूप से विषय सुझाने के लिए विषय सूची विवरण दर्ज करें (न्यूनतम 10 अक्षर)...",
         referenceDocuments: "संदर्भ दस्तावेज़ (वैकल्पिक)",
         uploadFiles: "फ़ाइलें अपलोड करें",
         knowledgeBase: "ज्ञान आधार",
@@ -7822,12 +8585,13 @@ const generateAllLanguageResources = () => {
         copyAllTopics: "सभी विषयों को टेक्स्ट के रूप में कॉपी करें",
         cancel: "रद्द करें",
         createTopicList: "विषय सूची बनाएं",
-        updateTopicList: "विषय सूची अपडेट करें"
+        updateTopicList: "विषय सूची अपडेट करें",
       },
       optimizeChecklistModal: {
         title: "चेकलिस्ट अनुकूलित करें",
         customInstructionsLabel: "कस्टम निर्देश (वैकल्पिक)",
-        customInstructionsHelperText: "चेकलिस्ट प्रश्नों का उत्तर देते समय विचार किए जाने वाले कोई अतिरिक्त निर्देश दर्ज करें",
+        customInstructionsHelperText:
+          "चेकलिस्ट प्रश्नों का उत्तर देते समय विचार किए जाने वाले कोई अतिरिक्त निर्देश दर्ज करें",
         analyzing: "विश्लेषण कर रहे हैं...",
         analyzeButton: "चेकलिस्ट का विश्लेषण करें",
         analyzingMessage: "अनुकूलन अवसरों के लिए आपकी चेकलिस्ट का विश्लेषण कर रहे हैं...",
@@ -7846,15 +8610,18 @@ const generateAllLanguageResources = () => {
         showMore: "अधिक दिखाएं",
         optimizationsSelectedText: "{{s}} अनुकूलन आवेदन के लिए चुने गए",
         applying: "लागू कर रहे हैं...",
-        applySelectedOptimizations: "चुने गए अनुकूलन लागू करें"
+        applySelectedOptimizations: "चुने गए अनुकूलन लागू करें",
       },
       optimizeOutlineModal: {
         title: "रूपरेखा अनुकूलित करें",
-        description: "एक संदर्भ दस्तावेज़ अपलोड करें जो आपकी इच्छित रिपोर्ट प्रकार का उच्च-गुणवत्ता उदाहरण दर्शाता है। सिस्टम आपकी वर्तमान रूपरेखा और ज्ञान आधार का उपयोग करके एक रिपोर्ट तैयार करेगा, इसे संदर्भ से तुलना करेगा और आपकी रूपरेखा अनुभागों के लिए सुधार सुझाएगा।",
+        description:
+          "एक संदर्भ दस्तावेज़ अपलोड करें जो आपकी इच्छित रिपोर्ट प्रकार का उच्च-गुणवत्ता उदाहरण दर्शाता है। सिस्टम आपकी वर्तमान रूपरेखा और ज्ञान आधार का उपयोग करके एक रिपोर्ट तैयार करेगा, इसे संदर्भ से तुलना करेगा और आपकी रूपरेखा अनुभागों के लिए सुधार सुझाएगा।",
         groundTruthDocument: "संदर्भ दस्तावेज़",
         customInstructionsLabel: "कस्टम निर्देश (वैकल्पिक)",
-        customInstructionsHelperText: "अनुकूलन प्रक्रिया के लिए अतिरिक्त मार्गदर्शन प्रदान करें",
-        customInstructionsPlaceholder: "उदा. तकनीकी गहराई में सुधार पर ध्यान दें, विशिष्ट मानकों का अनुपालन सुनिश्चित करें, आदि।",
+        customInstructionsHelperText:
+          "अनुकूलन प्रक्रिया के लिए अतिरिक्त मार्गदर्शन प्रदान करें",
+        customInstructionsPlaceholder:
+          "उदा. तकनीकी गहराई में सुधार पर ध्यान दें, विशिष्ट मानकों का अनुपालन सुनिश्चित करें, आदि।",
         characters: "अक्षर",
         analyzingOutline: "रूपरेखा का विश्लेषण और अनुकूलन तैयार कर रहे हैं...",
         cancelAnalysis: "विश्लेषण रद्द करें",
@@ -7874,8 +8641,8 @@ const generateAllLanguageResources = () => {
         cancel: "रद्द करें",
         optimizing: "अनुकूलित कर रहे हैं...",
         optimizeOutline: "रूपरेखा अनुकूलित करें",
-        applyOptimizations: "{{count}} अनुकूलन लागू करें"
-      }
+        applyOptimizations: "{{count}} अनुकूलन लागू करें",
+      },
     },
   }
 
@@ -7962,7 +8729,7 @@ i18n
   .init({
     resources,
     fallbackLng: "en",
-    debug: false,
+    debug: true,
 
     // Language detection options
     detection: {

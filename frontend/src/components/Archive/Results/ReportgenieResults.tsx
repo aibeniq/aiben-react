@@ -12,9 +12,15 @@ interface ReportgenieResultsProps {
   components: any // Markdown components for table rendering
 }
 
-const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport, components }) => {
+const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({
+  selectedReport,
+  components,
+}) => {
   console.log("🔍 REPORTGENIE UI DEBUG: Full selectedReport:", selectedReport)
-  console.log("🔍 REPORTGENIE UI DEBUG: selectedReport.results:", selectedReport.results)
+  console.log(
+    "🔍 REPORTGENIE UI DEBUG: selectedReport.results:",
+    selectedReport.results,
+  )
   console.log(
     "🔍 REPORTGENIE UI DEBUG: selectedReport.results?.sections:",
     selectedReport.results?.sections,
@@ -37,13 +43,18 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
     if (!source) return "Unknown"
     if (source.includes("/tmp/") || source.includes("\\tmp\\")) {
       const filename = source.split("/").pop() || source.split("\\").pop() || ""
-      return filename.includes("_") ? filename.substring(filename.indexOf("_") + 1) : filename
+      return filename.includes("_")
+        ? filename.substring(filename.indexOf("_") + 1)
+        : filename
     }
     return source
   }
 
   // Helper function to format source display with page number
-  const formatSourceWithPage = (source: string, page?: number | string): string => {
+  const formatSourceWithPage = (
+    source: string,
+    page?: number | string,
+  ): string => {
     const fileName = getDisplayFileName(source)
     if (page && page !== "" && page !== 0) {
       return `${fileName} (Page ${page})`
@@ -56,11 +67,16 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
 
   // Filter for sections that have source citations to display them separately
   const sectionsWithSources = allSections.filter(
-    (section: any) => section.consult_documents !== false && section.source_citations?.length > 0,
+    (section: any) =>
+      section.consult_documents !== false &&
+      section.source_citations?.length > 0,
   )
 
   console.log("🔍 REPORTGENIE CITATIONS: Total sections:", allSections.length)
-  console.log("🔍 REPORTGENIE CITATIONS: Sections with sources:", sectionsWithSources.length)
+  console.log(
+    "🔍 REPORTGENIE CITATIONS: Sections with sources:",
+    sectionsWithSources.length,
+  )
   console.log("🔍 REPORTGENIE CITATIONS: Sample section data:", allSections[0])
 
   return (
@@ -76,11 +92,13 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
         <Box mt={8}>
           <Heading as="h3" size="md" mb={4}>
             Report Sections{" "}
-            {sectionsWithSources.length > 0 && `(${sectionsWithSources.length} with citations)`}
+            {sectionsWithSources.length > 0 &&
+              `(${sectionsWithSources.length} with citations)`}
           </Heading>
           {allSections.map((section: any, index: number) => {
             const hasCitations =
-              section.consult_documents !== false && section.source_citations?.length > 0
+              section.consult_documents !== false &&
+              section.source_citations?.length > 0
 
             return (
               <Box
@@ -116,7 +134,9 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
                   as="h4"
                   size="sm"
                   mb={3}
-                  onClick={() => setExpandedSection(expandedSection === index ? null : index)}
+                  onClick={() =>
+                    setExpandedSection(expandedSection === index ? null : index)
+                  }
                   cursor="pointer"
                   display="flex"
                   alignItems="center"
@@ -127,7 +147,11 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
                     <Box
                       as="span"
                       mr={2}
-                      transform={expandedSection === index ? "rotate(90deg)" : "rotate(0deg)"}
+                      transform={
+                        expandedSection === index
+                          ? "rotate(90deg)"
+                          : "rotate(0deg)"
+                      }
                       transition="transform 0.2s"
                     >
                       ▶
@@ -160,75 +184,95 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
                         <Heading as="h5" size="xs" mb={3} color="blue.700">
                           <HStack>
                             <FiFileText />
-                            <Text>Source Citations ({section.source_citations.length})</Text>
+                            <Text>
+                              Source Citations (
+                              {section.source_citations.length})
+                            </Text>
                           </HStack>
                         </Heading>
 
                         <Box maxH="300px" overflowY="auto">
-                          {section.source_citations.map((citation: any, cIndex: number) => (
-                            <Box
-                              key={cIndex}
-                              p={3}
-                              mb={3}
-                              borderWidth="1px"
-                              borderRadius="md"
-                              bg="white"
-                              borderColor="blue.100"
-                              _last={{ mb: 0 }}
-                            >
-                              <HStack mb={2} justify="space-between" align="start">
-                                {citation.metadata?.source_data_id ? (
-                                  <SourceLink
-                                    sourceId={citation.metadata.source_data_id}
-                                    fileName={formatSourceWithPage(
-                                      citation.metadata.source,
-                                      citation.metadata.page,
-                                    )}
-                                    fontWeight="medium"
-                                    color="blue.600"
-                                    useModal={true}
-                                    highlightSnippet={cleanRTFFormatting(citation.content)}
-                                  />
-                                ) : citation.metadata?.source &&
-                                  (citation.metadata.source.toLowerCase().endsWith(".pdf") ||
-                                    citation.metadata.source.toLowerCase().endsWith(".docx")) ? (
-                                  <SourceLink
-                                    sourceId={citation.metadata.source} // Use filename as fallback
-                                    fileName={formatSourceWithPage(
-                                      citation.metadata.source,
-                                      citation.metadata.page,
-                                    )}
-                                    fontWeight="medium"
-                                    color="blue.600"
-                                    useModal={true}
-                                    highlightSnippet={cleanRTFFormatting(citation.content)}
-                                  />
-                                ) : (
-                                  <Text fontWeight="medium" color="blue.600">
-                                    {formatSourceWithPage(
-                                      citation.metadata?.source || "Unknown Source",
-                                      citation.metadata?.page,
-                                    )}
-                                  </Text>
-                                )}
-                                <Text fontSize="xs" color="gray.500">
-                                  Citation {cIndex + 1}
-                                </Text>
-                              </HStack>
-
+                          {section.source_citations.map(
+                            (citation: any, cIndex: number) => (
                               <Box
+                                key={cIndex}
                                 p={3}
-                                bg="gray.50"
-                                borderRadius="sm"
-                                fontSize="sm"
-                                whiteSpace="pre-wrap"
-                                borderLeft="3px solid"
-                                borderColor="blue.200"
+                                mb={3}
+                                borderWidth="1px"
+                                borderRadius="md"
+                                bg="white"
+                                borderColor="blue.100"
+                                _last={{ mb: 0 }}
                               >
-                                {cleanRTFFormatting(citation.content)}
+                                <HStack
+                                  mb={2}
+                                  justify="space-between"
+                                  align="start"
+                                >
+                                  {citation.metadata?.source_data_id ? (
+                                    <SourceLink
+                                      sourceId={
+                                        citation.metadata.source_data_id
+                                      }
+                                      fileName={formatSourceWithPage(
+                                        citation.metadata.source,
+                                        citation.metadata.page,
+                                      )}
+                                      fontWeight="medium"
+                                      color="blue.600"
+                                      useModal={true}
+                                      highlightSnippet={cleanRTFFormatting(
+                                        citation.content,
+                                      )}
+                                    />
+                                  ) : citation.metadata?.source &&
+                                    (citation.metadata.source
+                                      .toLowerCase()
+                                      .endsWith(".pdf") ||
+                                      citation.metadata.source
+                                        .toLowerCase()
+                                        .endsWith(".docx")) ? (
+                                    <SourceLink
+                                      sourceId={citation.metadata.source} // Use filename as fallback
+                                      fileName={formatSourceWithPage(
+                                        citation.metadata.source,
+                                        citation.metadata.page,
+                                      )}
+                                      fontWeight="medium"
+                                      color="blue.600"
+                                      useModal={true}
+                                      highlightSnippet={cleanRTFFormatting(
+                                        citation.content,
+                                      )}
+                                    />
+                                  ) : (
+                                    <Text fontWeight="medium" color="blue.600">
+                                      {formatSourceWithPage(
+                                        citation.metadata?.source ||
+                                          "Unknown Source",
+                                        citation.metadata?.page,
+                                      )}
+                                    </Text>
+                                  )}
+                                  <Text fontSize="xs" color="gray.500">
+                                    Citation {cIndex + 1}
+                                  </Text>
+                                </HStack>
+
+                                <Box
+                                  p={3}
+                                  bg="gray.50"
+                                  borderRadius="sm"
+                                  fontSize="sm"
+                                  whiteSpace="pre-wrap"
+                                  borderLeft="3px solid"
+                                  borderColor="blue.200"
+                                >
+                                  {cleanRTFFormatting(citation.content)}
+                                </Box>
                               </Box>
-                            </Box>
-                          ))}
+                            ),
+                          )}
                         </Box>
                       </Box>
                     )}
@@ -251,7 +295,9 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({ selectedReport,
       {/* Show message if no sections found */}
       {allSections.length === 0 && (
         <Box mt={8} p={4} bg="gray.50" borderRadius="md" textAlign="center">
-          <Text color="gray.600">No detailed sections available for this report</Text>
+          <Text color="gray.600">
+            No detailed sections available for this report
+          </Text>
         </Box>
       )}
     </>

@@ -55,7 +55,10 @@ const SelectionCard = ({
             </VStack>
           </HStack>
 
-          <Box color={isSelected ? "rgba(0, 65, 72, 0.9)" : "gray.400"} ml="auto">
+          <Box
+            color={isSelected ? "rgba(0, 65, 72, 0.9)" : "gray.400"}
+            ml="auto"
+          >
             {isSelected ? <FiCheck size={16} /> : ""}
           </Box>
         </HStack>

@@ -2,8 +2,8 @@ import { Box, Button, Spinner, Text } from "@chakra-ui/react"
 import { useState } from "react"
 import type React from "react"
 import { VeradocService } from "../../../client"
-import QAPairDisplay from "../Utils/QAPairDisplay"
 import useCustomToast from "../../../hooks/useCustomToast"
+import QAPairDisplay from "../Utils/QAPairDisplay"
 
 interface QaPairSummary {
   index: number
