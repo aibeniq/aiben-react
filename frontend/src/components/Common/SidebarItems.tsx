@@ -142,7 +142,10 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
 
   // Save accordion state to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem("sidebar-accordion-state", JSON.stringify(expandedItems))
+    localStorage.setItem(
+      "sidebar-accordion-state",
+      JSON.stringify(expandedItems),
+    )
   }, [expandedItems])
 
   // Utility function to reset all accordions to open state (for debugging)
@@ -224,7 +227,11 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
               onValueChange={(details) => setExpandedItems(details.value)}
             >
               <Accordion.Item border="none" value={category.name.toLowerCase()}>
-                <Accordion.ItemTrigger px={4} py={2} _hover={{ bg: "gray.subtle" }}>
+                <Accordion.ItemTrigger
+                  px={4}
+                  py={2}
+                  _hover={{ bg: "gray.subtle" }}
+                >
                   <Box as="span" flex="1" textAlign="left">
                     <Flex alignItems="center">
                       {category.icon && <Icon as={category.icon} mr={2} />}
@@ -236,20 +243,34 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
                 </Accordion.ItemTrigger>
                 <Accordion.ItemContent p={0}>
                   {category.items.map((item: Item) => (
-                    <RouterLink key={item.title} to={item.path} onClick={onClose}>
+                    <RouterLink
+                      key={item.title}
+                      to={item.path}
+                      onClick={onClose}
+                    >
                       <Flex
                         gap={4}
                         pl={8} // Extra padding to indicate nesting
                         pr={4}
                         py={2}
-                        bg={isActiveItem(item.path) ? "gray.100" : "transparent"}
-                        color={isActiveItem(item.path) ? "rgba(0, 65, 72, 1.0)" : "inherit"}
+                        bg={
+                          isActiveItem(item.path) ? "gray.100" : "transparent"
+                        }
+                        color={
+                          isActiveItem(item.path)
+                            ? "rgba(0, 65, 72, 1.0)"
+                            : "inherit"
+                        }
                         _hover={{
-                          background: isActiveItem(item.path) ? "blue.subtle" : "gray.subtle",
+                          background: isActiveItem(item.path)
+                            ? "blue.subtle"
+                            : "gray.subtle",
                         }}
                         alignItems="center"
                         fontSize="sm"
-                        fontWeight={isActiveItem(item.path) ? "semibold" : "normal"}
+                        fontWeight={
+                          isActiveItem(item.path) ? "semibold" : "normal"
+                        }
                       >
                         <Icon as={item.icon} alignSelf="center" />
                         <Text ml={2}>{item.title}</Text>
@@ -277,7 +298,9 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
                     bg={isActiveItem(item.path) ? "blue.subtle" : "transparent"}
                     color={isActiveItem(item.path) ? "blue.fg" : "inherit"}
                     _hover={{
-                      background: isActiveItem(item.path) ? "blue.subtle" : "gray.subtle",
+                      background: isActiveItem(item.path)
+                        ? "blue.subtle"
+                        : "gray.subtle",
                     }}
                     alignItems="center"
                     fontSize="sm"

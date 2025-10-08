@@ -1,7 +1,7 @@
 import { HStack, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { Radio, RadioGroup } from "../ui/radio"
 import HelpTooltip from "../ui/help-tooltip"
+import { Radio, RadioGroup } from "../ui/radio"
 
 interface SearchModeToggleProps {
   searchMode: "vector" | "full_scan"
@@ -27,7 +27,9 @@ const SearchModeToggle = ({
         {helpKey && <HelpTooltip helpKey={helpKey} />}
       </HStack>
       <RadioGroup
-        onValueChange={(details) => onSearchModeChange(details.value as "vector" | "full_scan")}
+        onValueChange={(details) =>
+          onSearchModeChange(details.value as "vector" | "full_scan")
+        }
         value={searchMode}
         disabled={isDisabled}
       >

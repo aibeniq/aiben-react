@@ -1,4 +1,12 @@
-import { Box, HStack, IconButton, Input, Switch, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  HStack,
+  IconButton,
+  Input,
+  Switch,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useState } from "react"
 import { FiChevronDown, FiChevronUp, FiTrash2 } from "react-icons/fi"
 

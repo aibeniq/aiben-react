@@ -1,7 +1,7 @@
 import type { KnowledgeBasePublic } from "@/client"
 import { Checkbox, Table } from "@chakra-ui/react"
-import { FiCheck } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
+import { FiCheck } from "react-icons/fi"
 
 interface TableCardProps {
   knowledgeBases: KnowledgeBasePublic[]
@@ -31,16 +31,24 @@ const TableHeader = ({ hasSelection }: TableHeaderProps) => {
             {hasSelection ? <FiCheck /> : ""}
           </span>
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           {t("chatbot.knowledgeBaseTableName")}
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           {t("chatbot.knowledgeBaseTableDescription")}
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           {t("chatbot.knowledgeBaseTableSources")}
         </Table.ColumnHeader>
-        <Table.ColumnHeader style={{ fontSize: "0.875rem", fontWeight: "bold" }}>
+        <Table.ColumnHeader
+          style={{ fontSize: "0.875rem", fontWeight: "bold" }}
+        >
           {t("chatbot.knowledgeBaseTablePages")}
         </Table.ColumnHeader>
       </Table.Row>
@@ -48,9 +56,16 @@ const TableHeader = ({ hasSelection }: TableHeaderProps) => {
   )
 }
 
-const TableBody = ({ knowledgeBases, selectedId, onRowSelection }: TableBodyProps) => {
+const TableBody = ({
+  knowledgeBases,
+  selectedId,
+  onRowSelection,
+}: TableBodyProps) => {
   const rows = knowledgeBases.map((kb) => (
-    <Table.Row key={kb.id} data-selected={selectedId === kb.id ? "" : undefined}>
+    <Table.Row
+      key={kb.id}
+      data-selected={selectedId === kb.id ? "" : undefined}
+    >
       <Table.Cell>
         <Checkbox.Root
           size="sm"

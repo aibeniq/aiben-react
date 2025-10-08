@@ -75,7 +75,8 @@ function Archive() {
           ""
       } else if (activeTab === "compare" && twincheck.selectedReport) {
         fullText = `# Summary\n\n${twincheck.selectedReport.results?.summary || ""}\n\n# Topic Analysis\n\n`
-        const topicResults = twincheck.selectedReport.results?.topic_analysis || []
+        const topicResults =
+          twincheck.selectedReport.results?.topic_analysis || []
         topicResults.forEach((topic: any) => {
           fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
         })
@@ -132,7 +133,8 @@ function Archive() {
       } else if (activeTab === "compare" && twincheck.selectedReport) {
         // Prepare combined text with summary and all topic analyses
         fullText = `# Summary\n\n${twincheck.selectedReport.results?.summary || ""}\n\n# Topic Analysis\n\n`
-        const topicResults = twincheck.selectedReport.results?.topic_analysis || []
+        const topicResults =
+          twincheck.selectedReport.results?.topic_analysis || []
         topicResults.forEach((topic: any) => {
           fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
         })
@@ -157,7 +159,10 @@ function Archive() {
       console.log("Received DOCX response:", response)
       console.log("Response type:", typeof response)
       console.log("Response instanceof Blob:", response instanceof Blob)
-      console.log("Response instanceof ArrayBuffer:", response instanceof ArrayBuffer)
+      console.log(
+        "Response instanceof ArrayBuffer:",
+        response instanceof ArrayBuffer,
+      )
 
       // Handle the response blob
       let blob
@@ -301,7 +306,10 @@ function Archive() {
       console.log("Received CSV response:", response)
       console.log("Response type:", typeof response)
       console.log("Response instanceof Blob:", response instanceof Blob)
-      console.log("Response instanceof ArrayBuffer:", response instanceof ArrayBuffer)
+      console.log(
+        "Response instanceof ArrayBuffer:",
+        response instanceof ArrayBuffer,
+      )
 
       // Handle the response blob
       let blob
@@ -327,7 +335,9 @@ function Archive() {
       const a = document.createElement("a")
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
       const filename =
-        activeTab === "generate" ? `report_${timestamp}.csv` : `veradoc_review_${timestamp}.csv`
+        activeTab === "generate"
+          ? `report_${timestamp}.csv`
+          : `veradoc_review_${timestamp}.csv`
 
       a.href = url
       a.download = filename
@@ -399,26 +409,40 @@ function Archive() {
         {...props}
       />
     ),
-    td: (props: any) => <Box as="td" p={4} borderBottomWidth="1px" {...props} />,
+    td: (props: any) => (
+      <Box as="td" p={4} borderBottomWidth="1px" {...props} />
+    ),
   }
 
   const renderToolResults = () => {
     switch (activeTab) {
       case "review":
         return veradoc.selectedReport ? (
-          <VeradocResults selectedReport={veradoc.selectedReport} components={components} />
+          <VeradocResults
+            selectedReport={veradoc.selectedReport}
+            components={components}
+          />
         ) : null
       case "generate":
         return reportgenie.selectedReport ? (
-          <ReportgenieResults selectedReport={reportgenie.selectedReport} components={components} />
+          <ReportgenieResults
+            selectedReport={reportgenie.selectedReport}
+            components={components}
+          />
         ) : null
       case "compare":
         return twincheck.selectedReport ? (
-          <TwincheckResults selectedReport={twincheck.selectedReport} components={components} />
+          <TwincheckResults
+            selectedReport={twincheck.selectedReport}
+            components={components}
+          />
         ) : null
       case "match":
         return formconnect.selectedReport ? (
-          <FormconnectResults selectedReport={formconnect.selectedReport} components={components} />
+          <FormconnectResults
+            selectedReport={formconnect.selectedReport}
+            components={components}
+          />
         ) : null
       default:
         return null
@@ -445,7 +469,9 @@ function Archive() {
           activeTab === "match"
         }
         onFeedbackSubmitted={(type) => {
-          console.log("Feedback submitted for archive item, invalidating query cache")
+          console.log(
+            "Feedback submitted for archive item, invalidating query cache",
+          )
 
           // Invalidate the history queries to refresh the archive list
           if (activeTab === "review") {
@@ -519,12 +545,18 @@ function Archive() {
           <Tabs.Content value="generate">
             {(() => {
               console.log("🎯 GENERATE TAB: Rendering tab content")
-              console.log("📊 GENERATE TAB: reportgenie.history:", reportgenie.history)
+              console.log(
+                "📊 GENERATE TAB: reportgenie.history:",
+                reportgenie.history,
+              )
               console.log(
                 "📊 GENERATE TAB: reportgenie.history length:",
                 reportgenie.history?.length,
               )
-              console.log("📊 GENERATE TAB: reportgenie.isLoading:", reportgenie.isLoading)
+              console.log(
+                "📊 GENERATE TAB: reportgenie.isLoading:",
+                reportgenie.isLoading,
+              )
               console.log(
                 "📊 GENERATE TAB: reportgenie.selectedReport:",
                 reportgenie.selectedReport,

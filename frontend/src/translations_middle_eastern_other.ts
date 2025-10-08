@@ -62,7 +62,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         error: "סליחה, משהו השתבש. נסה שוב.",
         welcome: "שלום! איך אני יכול לעזור לך היום?",
         welcomeMessageWithSource: "בחר בסיס ידע או העלה קבצים, ואז שאל שאלה.",
-        welcomeMessageGeneral: "שאל אותי כל דבר! לחיפוש בבסיס ידע, בחר קודם בסיס ידע.",
+        welcomeMessageGeneral:
+          "שאל אותי כל דבר! לחיפוש בבסיס ידע, בחר קודם בסיס ידע.",
       },
       settings: {
         title: "הגדרות",
@@ -108,15 +109,19 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "בדיקת מסמכים",
-        pageDescription: "בדיקת מסמך על בסיס רשימת בדיקה ומאגר מדיניות שהוגדרו על ידי המשתמש.",
+        pageDescription:
+          "בדיקת מסמך על בסיס רשימת בדיקה ומאגר מדיניות שהוגדרו על ידי המשתמש.",
         knowledgeBaseTitle: "בסיס ידע",
         knowledgeBaseDescription: "לחץ לבחירה",
         checklistTitle: "רשימת בדיקה",
         checklistDescription: "לחץ לבחירה",
         customInstructionsTitle: "הוראות מותאמות אישית (אופציונלי)",
-        customInstructionsPlaceholder: "הזן הוראות נוספות שיש לקחת בחשבון בעת מענה על שאלות רשימת הבדיקה...",
-        customInstructionsHelp: "{{count}}/2000 תווים. הוראות אלה יתווספו לכל שאלה במהלך העיבוד.",
-        searchModeHelp: "חיפוש וקטור מספק תוצאות מהירות וממוקדות. ניתוח מסמך מלא בוחן את כל התוכן בבסיס הידע.",
+        customInstructionsPlaceholder:
+          "הזן הוראות נוספות שיש לקחת בחשבון בעת מענה על שאלות רשימת הבדיקה...",
+        customInstructionsHelp:
+          "{{count}}/2000 תווים. הוראות אלה יתווספו לכל שאלה במהלך העיבוד.",
+        searchModeHelp:
+          "חיפוש וקטור מספק תוצאות מהירות וממוקדות. ניתוח מסמך מלא בוחן את כל התוכן בבסיס הידע.",
         processingFile: "מעבד קובץ...",
         processingFiles: "מעבד קבצים...",
         selectKnowledgeBaseTitle: "בחר בסיס ידע",
@@ -131,32 +136,38 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         reportCopied: "הדוח הועתק ללוח!",
         reviewButton: "בדוק",
         consultDocuments: "התייעץ עם מסמכים",
-        noChecklistsAvailable: "אין רשימות בדיקה זמינות. צור את רשימת הבדיקה הראשונה שלך כדי להתחיל.",
+        noChecklistsAvailable:
+          "אין רשימות בדיקה זמינות. צור את רשימת הבדיקה הראשונה שלך כדי להתחיל.",
         createChecklist: "צור רשימת בדיקה",
         editChecklist: "ערוך רשימת בדיקה",
         checklistName: "שם רשימת הבדיקה",
         checklistNamePlaceholder: "הזן שם רשימת בדיקה...",
         checklistDescriptionLabel: "תיאור",
-        checklistDescriptionPlaceholder: "הזן תיאור רשימת בדיקה להצעות שאלות אוטומטיות (לפחות 10 תווים)...",
+        checklistDescriptionPlaceholder:
+          "הזן תיאור רשימת בדיקה להצעות שאלות אוטומטיות (לפחות 10 תווים)...",
         questions: "שאלות",
         suggest: "הצע",
         suggesting: "מציע...",
         optimize: "אופטימיזציה",
-        optimizeTooltip: "יש לבחור בסיס ידע כדי להפעיל את פונקציית האופטימיזציה",
-        optimizeTooltipEnabled: "בצע אופטימיזציה לשאלות על בסיס בסיס הידע שנבחר",
-        allUsersToggleTooltip: "החלף בין צפייה בהיסטוריה שלך בלבד או בהיסטוריה של כל המשתמשים",
+        optimizeTooltip:
+          "יש לבחור בסיס ידע כדי להפעיל את פונקציית האופטימיזציה",
+        optimizeTooltipEnabled:
+          "בצע אופטימיזציה לשאלות על בסיס בסיס הידע שנבחר",
+        allUsersToggleTooltip:
+          "החלף בין צפייה בהיסטוריה שלך בלבד או בהיסטוריה של כל המשתמשים",
         uploadFiles: "העלה קבצים",
         knowledgeBase: "בסיס ידע",
         referenceDocuments: "מסמכי עזר (אופציונלי)",
         selectKnowledgeBasePlaceholder: "בחר בסיס ידע...",
-        noKnowledgeBasesAvailable: "אין בסיס ידע זמין. צור קודם כדי להשתמש בפונקציה זו.",
+        noKnowledgeBasesAvailable:
+          "אין בסיס ידע זמין. צור קודם כדי להשתמש בפונקציה זו.",
         copyQuestions: "העתק שאלות",
         questionsCopied: "השאלות הועתקו ללוח",
         noQuestionsToCopy: "אין שאלות להעתקה",
         failedToCopyQuestions: "נכשל בהעתקת השאלות ללוח",
         saveChecklist: "שמור רשימת בדיקה",
         cancel: "ביטול",
-        deleteChecklist: "מחק רשימת בדיקה"
+        deleteChecklist: "מחק רשימת בדיקה",
       },
       compare: {
         title: "השווה מסמכים",
@@ -183,7 +194,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         moderate: "בינוני",
         deep: "עמוק",
         veryDeep: "עמוק מאוד",
-        editTopicList: "ערוך רשימת נושאים"
+        editTopicList: "ערוך רשימת נושאים",
       },
       match: {
         title: "התאמת מסמכים",
@@ -208,7 +219,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         minimumSimilarity: "דמיון מינימלי",
         searchDepth: "עומק חיפוש",
         maxResults: "תוצאות מקסימליות",
-        editFormTemplate: "ערוך תבנית טופס"
+        editFormTemplate: "ערוך תבנית טופס",
       },
       knowledgeBases: {
         title: "ניהול בסיסי ידע",
@@ -222,31 +233,33 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
           embeddingModel: "מודל הטמעה",
           dateCreated: "תאריך יצירה",
           dateModified: "תאריך שינוי",
-          actions: "פעולות"
+          actions: "פעולות",
         },
         status: {
           default: "ברירת מחדל",
-          na: "לא זמין"
+          na: "לא זמין",
         },
         actions: {
           view: "הצג",
           edit: "ערוך",
           delete: "מחק",
-          configure: "הגדר"
+          configure: "הגדר",
         },
         deleteModal: {
           title: "מחק בסיס ידע",
           buttonText: "מחק בסיס ידע",
-          description: "בסיס הידע הזה יימחק לצמיתות. האם אתה בטוח? לא תוכל לבטל פעולה זו.",
+          description:
+            "בסיס הידע הזה יימחק לצמיתות. האם אתה בטוח? לא תוכל לבטל פעולה זו.",
           confirmButton: "מחק",
           cancelButton: "בטל",
           successMessage: "בסיס הידע נמחק בהצלחה",
-          errorMessage: "אירעה שגיאה בעת מחיקת בסיס הידע"
+          errorMessage: "אירעה שגיאה בעת מחיקת בסיס הידע",
         },
         modals: {
           add: {
             title: "הוסף בסיס ידע",
-            description: "צור בסיס ידע חדש על ידי מתן פרטים והעלאת מסמכים למטה.",
+            description:
+              "צור בסיס ידע חדש על ידי מתן פרטים והעלאת מסמכים למטה.",
             fields: {
               title: "כותרת",
               titlePlaceholder: "כותרת",
@@ -306,7 +319,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
             suggest: "הצע",
             fieldPlaceholder: "הוסף שם שדה...",
             cancel: "בטל",
-            updateFormTemplate: "עדכן תבנית טופס"
+            updateFormTemplate: "עדכן תבנית טופס",
           },
         },
         editCustom: {
@@ -319,7 +332,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       optimizeChecklistModal: {
         title: "ייעול רשימת בדיקה",
         customInstructionsLabel: "הוראות מותאמות (אופציונלי)",
-        customInstructionsHelperText: "הזן הוראות נוספות שיש לקחת בחשבון בעת מענה על שאלות רשימת הבדיקה",
+        customInstructionsHelperText:
+          "הזן הוראות נוספות שיש לקחת בחשבון בעת מענה על שאלות רשימת הבדיקה",
         analyzing: "מנתח...",
         analyzeButton: "נתח רשימת בדיקה",
         analyzingMessage: "מנתח את רשימת הבדיקה שלך לאיתור הזדמנויות ייעול...",
@@ -340,16 +354,20 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         applying: "מיישם...",
         applySelectedOptimizations: "יישם ייעולים נבחרים",
         uploadDocumentsTitle: "העלה מסמכים שרשימת הבדיקה צריכה לקבל *",
-        uploadDocumentsHelperText: "העלה מסמכים שצריכים לעמוד בכל דרישות רשימת הבדיקה כדי לעזור לזהות שאלות שעלולות להיות קפדניות מדי",
-        customInstructionsPlaceholder: "לדוגמה, קח בחשבון שזהו מחקר ילדים בעת הערכת דרישות הקשורות לגיל, פרוטוקול זה מיועד להתערבות בסיכון נמוך, וכו'"
+        uploadDocumentsHelperText:
+          "העלה מסמכים שצריכים לעמוד בכל דרישות רשימת הבדיקה כדי לעזור לזהות שאלות שעלולות להיות קפדניות מדי",
+        customInstructionsPlaceholder:
+          "לדוגמה, קח בחשבון שזהו מחקר ילדים בעת הערכת דרישות הקשורות לגיל, פרוטוקול זה מיועד להתערבות בסיכון נמוך, וכו'",
       },
       optimizeOutlineModal: {
         title: "ייעול מתאר",
-        description: "העלה מסמך ייחוס המייצג דוגמה באיכות גבוהה לסוג הדוח שברצונך ליצור. המערכת תיצור דוח באמצעות המתאר ובסיס הידע הנוכחיים שלך, תשווה אותו לייחוס ותציע שיפורים לחלקי המתאר.",
+        description:
+          "העלה מסמך ייחוס המייצג דוגמה באיכות גבוהה לסוג הדוח שברצונך ליצור. המערכת תיצור דוח באמצעות המתאר ובסיס הידע הנוכחיים שלך, תשווה אותו לייחוס ותציע שיפורים לחלקי המתאר.",
         groundTruthDocument: "מסמך ייחוס",
         customInstructionsLabel: "הוראות מותאמות (אופציונלי)",
         customInstructionsHelperText: "ספק הנחיות נוספות לתהליך הייעול",
-        customInstructionsPlaceholder: "לדוגמה, התמקד בשיפור העומק הטכני, הבטח עמידה בתקנים ספציפיים, וכו'",
+        customInstructionsPlaceholder:
+          "לדוגמה, התמקד בשיפור העומק הטכני, הבטח עמידה בתקנים ספציפיים, וכו'",
         characters: "תווים",
         analyzingOutline: "מנתח מתאר ויוצר ייעולים...",
         cancelAnalysis: "בטל ניתוח",
@@ -369,8 +387,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         cancel: "בטל",
         optimizing: "מייעל...",
         optimizeOutline: "ייעל מתאר",
-        applyOptimizations: "יישם {{count}} ייעולים"
-      }
+        applyOptimizations: "יישם {{count}} ייעולים",
+      },
     },
   }
 
@@ -433,8 +451,10 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         typing: "هوش مصنوعی در حال نوشتن...",
         error: "متأسفیم، مشکلی پیش آمد. دوباره تلاش کنید.",
         welcome: "سلام! امروز چگونه می‌توانم کمکتان کنم؟",
-        welcomeMessageWithSource: "یک پایگاه دانش انتخاب کنید یا فایل‌ها را آپلود کنید، سپس سوال بپرسید.",
-        welcomeMessageGeneral: "هر چیزی از من بپرسید! برای جستجو در پایگاه دانش، ابتدا یک پایگاه دانش انتخاب کنید.",
+        welcomeMessageWithSource:
+          "یک پایگاه دانش انتخاب کنید یا فایل‌ها را آپلود کنید، سپس سوال بپرسید.",
+        welcomeMessageGeneral:
+          "هر چیزی از من بپرسید! برای جستجو در پایگاه دانش، ابتدا یک پایگاه دانش انتخاب کنید.",
       },
       settings: {
         title: "تنظیمات",
@@ -480,21 +500,26 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "بررسی اسناد",
-        pageDescription: "بررسی سند بر اساس چک‌لیست و پایگاه داده سیاست‌های تعریف شده توسط کاربر.",
+        pageDescription:
+          "بررسی سند بر اساس چک‌لیست و پایگاه داده سیاست‌های تعریف شده توسط کاربر.",
         knowledgeBaseTitle: "پایگاه دانش",
         knowledgeBaseDescription: "برای انتخاب کلیک کنید",
         checklistTitle: "چک‌لیست",
         checklistDescription: "برای انتخاب کلیک کنید",
         customInstructionsTitle: "دستورالعمل‌های سفارشی (اختیاری)",
-        customInstructionsPlaceholder: "دستورالعمل‌های اضافی که هنگام پاسخ به سوالات چک‌لیست باید در نظر گرفته شود را وارد کنید...",
-        customInstructionsHelp: "{{count}}/2000 کاراکتر. این دستورالعمل‌ها به هر سوال در طول پردازش اضافه خواهد شد.",
-        searchModeHelp: "جستجوی برداری نتایج سریع و هدفمند ارائه می‌دهد. تجزیه و تحلیل کامل سند تمام محتوای پایگاه دانش را بررسی می‌کند.",
+        customInstructionsPlaceholder:
+          "دستورالعمل‌های اضافی که هنگام پاسخ به سوالات چک‌لیست باید در نظر گرفته شود را وارد کنید...",
+        customInstructionsHelp:
+          "{{count}}/2000 کاراکتر. این دستورالعمل‌ها به هر سوال در طول پردازش اضافه خواهد شد.",
+        searchModeHelp:
+          "جستجوی برداری نتایج سریع و هدفمند ارائه می‌دهد. تجزیه و تحلیل کامل سند تمام محتوای پایگاه دانش را بررسی می‌کند.",
         processingFile: "در حال پردازش فایل...",
         processingFiles: "در حال پردازش فایل‌ها...",
         selectKnowledgeBaseTitle: "انتخاب پایگاه دانش",
         selectChecklistTitle: "انتخاب چک‌لیست",
         noResults: "هنوز نتیجه‌ای نیست",
-        uploadDocuments: "یک یا چند سند برای بررسی در برابر چک‌لیست انتخابی خود آپلود کنید",
+        uploadDocuments:
+          "یک یا چند سند برای بررسی در برابر چک‌لیست انتخابی خود آپلود کنید",
         results: "نتایج",
         downloadReport: "دانلود گزارش",
         downloadCsv: "دانلود CSV",
@@ -503,32 +528,38 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         reportCopied: "گزارش در کلیپ‌بورد کپی شد!",
         reviewButton: "بررسی",
         consultDocuments: "مشورت با اسناد",
-        noChecklistsAvailable: "هیچ چک‌لیستی موجود نیست. اولین چک‌لیست خود را برای شروع ایجاد کنید.",
+        noChecklistsAvailable:
+          "هیچ چک‌لیستی موجود نیست. اولین چک‌لیست خود را برای شروع ایجاد کنید.",
         createChecklist: "ایجاد چک‌لیست",
         editChecklist: "ویرایش چک‌لیست",
         checklistName: "نام چک‌لیست",
         checklistNamePlaceholder: "نام چک‌لیست را وارد کنید...",
         checklistDescriptionLabel: "توضیحات",
-        checklistDescriptionPlaceholder: "توضیحات چک‌لیست را برای پیشنهادات خودکار سوال وارد کنید (حداقل 10 کاراکتر)...",
+        checklistDescriptionPlaceholder:
+          "توضیحات چک‌لیست را برای پیشنهادات خودکار سوال وارد کنید (حداقل 10 کاراکتر)...",
         questions: "سوالات",
         suggest: "پیشنهاد",
         suggesting: "در حال پیشنهاد...",
         optimize: "بهینه‌سازی",
-        optimizeTooltip: "برای فعال کردن عملکرد بهینه‌سازی باید پایگاه دانش انتخاب شود",
-        optimizeTooltipEnabled: "بهینه‌سازی سوالات بر اساس پایگاه دانش انتخاب شده",
-        allUsersToggleTooltip: "تغییر بین مشاهده فقط تاریخچه شما یا تاریخچه همه کاربران",
+        optimizeTooltip:
+          "برای فعال کردن عملکرد بهینه‌سازی باید پایگاه دانش انتخاب شود",
+        optimizeTooltipEnabled:
+          "بهینه‌سازی سوالات بر اساس پایگاه دانش انتخاب شده",
+        allUsersToggleTooltip:
+          "تغییر بین مشاهده فقط تاریخچه شما یا تاریخچه همه کاربران",
         uploadFiles: "آپلود فایل‌ها",
         knowledgeBase: "پایگاه دانش",
         referenceDocuments: "اسناد مرجع (اختیاری)",
         selectKnowledgeBasePlaceholder: "انتخاب پایگاه دانش...",
-        noKnowledgeBasesAvailable: "هیچ پایگاه دانشی موجود نیست. ابتدا یکی ایجاد کنید تا از این عملکرد استفاده کنید.",
+        noKnowledgeBasesAvailable:
+          "هیچ پایگاه دانشی موجود نیست. ابتدا یکی ایجاد کنید تا از این عملکرد استفاده کنید.",
         copyQuestions: "کپی سوالات",
         questionsCopied: "سوالات در کلیپ‌بورد کپی شد",
         noQuestionsToCopy: "سوالی برای کپی کردن نیست",
         failedToCopyQuestions: "کپی کردن سوالات در کلیپ‌بورد ناموفق بود",
         saveChecklist: "ذخیره چک‌لیست",
         cancel: "لغو",
-        deleteChecklist: "حذف چک‌لیست"
+        deleteChecklist: "حذف چک‌لیست",
       },
       compare: {
         title: "مقایسه اسناد",
@@ -555,7 +586,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         moderate: "متوسط",
         deep: "عمیق",
         veryDeep: "بسیار عمیق",
-        editTopicList: "ویرایش فهرست موضوعات"
+        editTopicList: "ویرایش فهرست موضوعات",
       },
       match: {
         title: "تطبیق اسناد",
@@ -580,7 +611,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         minimumSimilarity: "حداقل شباهت",
         searchDepth: "عمق جستجو",
         maxResults: "حداکثر نتایج",
-        editFormTemplate: "ویرایش قالب فرم"
+        editFormTemplate: "ویرایش قالب فرم",
       },
       knowledgeBases: {
         title: "مدیریت پایگاه‌های دانش",
@@ -594,31 +625,33 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
           embeddingModel: "مدل جاسازی",
           dateCreated: "تاریخ ایجاد",
           dateModified: "تاریخ تغییر",
-          actions: "اقدامات"
+          actions: "اقدامات",
         },
         status: {
           default: "پیش‌فرض",
-          na: "موجود نیست"
+          na: "موجود نیست",
         },
         actions: {
           view: "نمایش",
           edit: "ویرایش",
           delete: "حذف",
-          configure: "پیکربندی"
+          configure: "پیکربندی",
         },
         deleteModal: {
           title: "حذف پایگاه دانش",
           buttonText: "حذف پایگاه دانش",
-          description: "این پایگاه دانش به طور دائم حذف خواهد شد. آیا مطمئن هستید؟ نمی‌توانید این عمل را لغو کنید.",
+          description:
+            "این پایگاه دانش به طور دائم حذف خواهد شد. آیا مطمئن هستید؟ نمی‌توانید این عمل را لغو کنید.",
           confirmButton: "حذف",
           cancelButton: "لغو",
           successMessage: "پایگاه دانش با موفقیت حذف شد",
-          errorMessage: "خطایی در حین حذف پایگاه دانش رخ داد"
+          errorMessage: "خطایی در حین حذف پایگاه دانش رخ داد",
         },
         modals: {
           add: {
             title: "افزودن پایگاه دانش",
-            description: "با ارائه جزئیات و آپلود اسناد در زیر، پایگاه دانش جدیدی ایجاد کنید.",
+            description:
+              "با ارائه جزئیات و آپلود اسناد در زیر، پایگاه دانش جدیدی ایجاد کنید.",
             fields: {
               title: "عنوان",
               titlePlaceholder: "عنوان",
@@ -678,7 +711,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
             suggest: "پیشنهاد",
             fieldPlaceholder: "نام فیلد اضافه کنید...",
             cancel: "لغو",
-            updateFormTemplate: "به‌روزرسانی قالب فرم"
+            updateFormTemplate: "به‌روزرسانی قالب فرم",
           },
         },
         editCustom: {
@@ -691,10 +724,12 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       optimizeChecklistModal: {
         title: "بهینه‌سازی فهرست بررسی",
         customInstructionsLabel: "دستورالعمل‌های سفارشی (اختیاری)",
-        customInstructionsHelperText: "دستورالعمل‌های اضافی که باید هنگام پاسخ به سوالات فهرست بررسی در نظر گرفته شود وارد کنید",
+        customInstructionsHelperText:
+          "دستورالعمل‌های اضافی که باید هنگام پاسخ به سوالات فهرست بررسی در نظر گرفته شود وارد کنید",
         analyzing: "در حال تحلیل...",
         analyzeButton: "تحلیل فهرست بررسی",
-        analyzingMessage: "فهرست بررسی شما برای فرصت‌های بهینه‌سازی تحلیل می‌شود...",
+        analyzingMessage:
+          "فهرست بررسی شما برای فرصت‌های بهینه‌سازی تحلیل می‌شود...",
         cancelAnalysis: "لغو تحلیل",
         downloading: "در حال دانلود...",
         downloadCsv: "دانلود CSV",
@@ -711,17 +746,23 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         optimizationsSelectedText: "بهینه‌سازی برای اعمال انتخاب شده",
         applying: "در حال اعمال...",
         applySelectedOptimizations: "اعمال بهینه‌سازی‌های انتخاب شده",
-        uploadDocumentsTitle: "اسناد که فهرست بررسی باید آن‌ها را بپذیرد آپلود کنید *",
-        uploadDocumentsHelperText: "اسنادی را آپلود کنید که باید تمام الزامات فهرست بررسی را برآورده کنند تا به شناسایی سوالاتی که ممکن است خیلی سخت‌گیرانه باشند کمک کند",
-        customInstructionsPlaceholder: "مثال: در نظر بگیرید که این یک مطالعه کودکان است هنگام ارزیابی الزامات مربوط به سن، این پروتکل برای مداخله کم‌خطر است و غیره"
+        uploadDocumentsTitle:
+          "اسناد که فهرست بررسی باید آن‌ها را بپذیرد آپلود کنید *",
+        uploadDocumentsHelperText:
+          "اسنادی را آپلود کنید که باید تمام الزامات فهرست بررسی را برآورده کنند تا به شناسایی سوالاتی که ممکن است خیلی سخت‌گیرانه باشند کمک کند",
+        customInstructionsPlaceholder:
+          "مثال: در نظر بگیرید که این یک مطالعه کودکان است هنگام ارزیابی الزامات مربوط به سن، این پروتکل برای مداخله کم‌خطر است و غیره",
       },
       optimizeOutlineModal: {
         title: "بهینه‌سازی طرح کلی",
-        description: "سند مرجعی که نمونه‌ای با کیفیت بالا از نوع گزارشی که می‌خواهید تولید کنید را نشان می‌دهد آپلود کنید. سیستم گزارشی با استفاده از طرح کلی و پایگاه دانش فعلی شما تولید می‌کند، آن را با مرجع مقایسه می‌کند و بهبودهایی برای بخش‌های طرح کلی پیشنهاد می‌دهد.",
+        description:
+          "سند مرجعی که نمونه‌ای با کیفیت بالا از نوع گزارشی که می‌خواهید تولید کنید را نشان می‌دهد آپلود کنید. سیستم گزارشی با استفاده از طرح کلی و پایگاه دانش فعلی شما تولید می‌کند، آن را با مرجع مقایسه می‌کند و بهبودهایی برای بخش‌های طرح کلی پیشنهاد می‌دهد.",
         groundTruthDocument: "سند مرجع",
         customInstructionsLabel: "دستورالعمل‌های سفارشی (اختیاری)",
-        customInstructionsHelperText: "راهنمایی اضافی برای فرآیند بهینه‌سازی ارائه دهید",
-        customInstructionsPlaceholder: "مثال: بر بهبود عمق فنی تمرکز کنید، انطباق با استانداردهای خاص را تضمین کنید و غیره",
+        customInstructionsHelperText:
+          "راهنمایی اضافی برای فرآیند بهینه‌سازی ارائه دهید",
+        customInstructionsPlaceholder:
+          "مثال: بر بهبود عمق فنی تمرکز کنید، انطباق با استانداردهای خاص را تضمین کنید و غیره",
         characters: "کاراکتر",
         analyzingOutline: "در حال تحلیل طرح کلی و تولید بهینه‌سازی‌ها...",
         cancelAnalysis: "لغو تحلیل",
@@ -741,8 +782,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         cancel: "لغو",
         optimizing: "در حال بهینه‌سازی...",
         optimizeOutline: "بهینه‌سازی طرح کلی",
-        applyOptimizations: "اعمال {{count}} بهینه‌سازی"
-      }
+        applyOptimizations: "اعمال {{count}} بهینه‌سازی",
+      },
     },
   }
 
@@ -805,8 +846,10 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         typing: "AI yazıyor...",
         error: "Üzgünüz, bir şeyler ters gitti. Tekrar deneyin.",
         welcome: "Merhaba! Bugün size nasıl yardımcı olabilirim?",
-        welcomeMessageWithSource: "Bir bilgi tabanı seçin veya dosyalar yükleyin, ardından soru sorun.",
-        welcomeMessageGeneral: "Bana her şeyi sorabilirsiniz! Bilgi tabanı aramak için önce bir bilgi tabanı seçin.",
+        welcomeMessageWithSource:
+          "Bir bilgi tabanı seçin veya dosyalar yükleyin, ardından soru sorun.",
+        welcomeMessageGeneral:
+          "Bana her şeyi sorabilirsiniz! Bilgi tabanı aramak için önce bir bilgi tabanı seçin.",
       },
       settings: {
         title: "Ayarlar",
@@ -852,21 +895,26 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Belgeleri İncele",
-        pageDescription: "Kullanıcı tanımlı kontrol listesi ve politika veritabanına dayalı olarak bir belgeyi inceleyin.",
+        pageDescription:
+          "Kullanıcı tanımlı kontrol listesi ve politika veritabanına dayalı olarak bir belgeyi inceleyin.",
         knowledgeBaseTitle: "Bilgi Tabanı",
         knowledgeBaseDescription: "Seçmek için tıklayın",
         checklistTitle: "Kontrol Listesi",
         checklistDescription: "Seçmek için tıklayın",
         customInstructionsTitle: "Özel Talimatlar (İsteğe Bağlı)",
-        customInstructionsPlaceholder: "Kontrol listesi sorularını yanıtlarken dikkate alınması gereken ek talimatları girin...",
-        customInstructionsHelp: "{{count}}/2000 karakter. Bu talimatlar işleme sırasında her soruya eklenecektir.",
-        searchModeHelp: "Vektör arama hızlı, hedefli sonuçlar sağlar. Tam belge analizi bilgi tabanının tüm içeriğini inceler.",
+        customInstructionsPlaceholder:
+          "Kontrol listesi sorularını yanıtlarken dikkate alınması gereken ek talimatları girin...",
+        customInstructionsHelp:
+          "{{count}}/2000 karakter. Bu talimatlar işleme sırasında her soruya eklenecektir.",
+        searchModeHelp:
+          "Vektör arama hızlı, hedefli sonuçlar sağlar. Tam belge analizi bilgi tabanının tüm içeriğini inceler.",
         processingFile: "Dosya işleniyor...",
         processingFiles: "Dosyalar işleniyor...",
         selectKnowledgeBaseTitle: "Bilgi Tabanı Seç",
         selectChecklistTitle: "Kontrol Listesi Seç",
         noResults: "Henüz sonuç yok",
-        uploadDocuments: "Seçili kontrol listenize karşı incelemek için bir veya daha fazla belge yükleyin",
+        uploadDocuments:
+          "Seçili kontrol listenize karşı incelemek için bir veya daha fazla belge yükleyin",
         results: "Sonuçlar",
         downloadReport: "Raporu İndir",
         downloadCsv: "CSV İndir",
@@ -875,32 +923,38 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         reportCopied: "Rapor panoya kopyalandı!",
         reviewButton: "İncele",
         consultDocuments: "Belgelere danış",
-        noChecklistsAvailable: "Mevcut kontrol listesi yok. Başlamak için ilk kontrol listenizi oluşturun.",
+        noChecklistsAvailable:
+          "Mevcut kontrol listesi yok. Başlamak için ilk kontrol listenizi oluşturun.",
         createChecklist: "Kontrol Listesi Oluştur",
         editChecklist: "Kontrol Listesini Düzenle",
         checklistName: "Kontrol Listesi Adı",
         checklistNamePlaceholder: "Kontrol listesi adını girin...",
         checklistDescriptionLabel: "Açıklama",
-        checklistDescriptionPlaceholder: "Otomatik soru önerileri için kontrol listesi açıklamasını girin (en az 10 karakter)...",
+        checklistDescriptionPlaceholder:
+          "Otomatik soru önerileri için kontrol listesi açıklamasını girin (en az 10 karakter)...",
         questions: "Sorular",
         suggest: "Öner",
         suggesting: "Öneriliyor...",
         optimize: "Optimize Et",
-        optimizeTooltip: "Optimize Et işlevini etkinleştirmek için bir Bilgi Tabanı seçilmelidir",
-        optimizeTooltipEnabled: "Seçili Bilgi Tabanına göre soruları optimize et",
-        allUsersToggleTooltip: "Sadece geçmişinizi görüntüleme ile tüm kullanıcıların geçmişini görüntüleme arasında geçiş yap",
+        optimizeTooltip:
+          "Optimize Et işlevini etkinleştirmek için bir Bilgi Tabanı seçilmelidir",
+        optimizeTooltipEnabled:
+          "Seçili Bilgi Tabanına göre soruları optimize et",
+        allUsersToggleTooltip:
+          "Sadece geçmişinizi görüntüleme ile tüm kullanıcıların geçmişini görüntüleme arasında geçiş yap",
         uploadFiles: "Dosyaları Yükle",
         knowledgeBase: "Bilgi Tabanı",
         referenceDocuments: "Referans Belgeler (İsteğe Bağlı)",
         selectKnowledgeBasePlaceholder: "Bilgi Tabanı Seç...",
-        noKnowledgeBasesAvailable: "Kullanılabilir Bilgi Tabanı yok. Bu işlevi kullanmak için önce bir tane oluşturun.",
+        noKnowledgeBasesAvailable:
+          "Kullanılabilir Bilgi Tabanı yok. Bu işlevi kullanmak için önce bir tane oluşturun.",
         copyQuestions: "Soruları Kopyala",
         questionsCopied: "Sorular panoya kopyalandı",
         noQuestionsToCopy: "Kopyalanacak soru yok",
         failedToCopyQuestions: "Sorular panoya kopyalanamadı",
         saveChecklist: "Kontrol Listesini Kaydet",
         cancel: "İptal",
-        deleteChecklist: "Kontrol Listesini Sil"
+        deleteChecklist: "Kontrol Listesini Sil",
       },
       compare: {
         title: "Belgeleri Karşılaştır",
@@ -927,7 +981,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         moderate: "Orta",
         deep: "Derin",
         veryDeep: "Çok Derin",
-        editTopicList: "Konu Listesini Düzenle"
+        editTopicList: "Konu Listesini Düzenle",
       },
       match: {
         title: "Belge Eşleştirme",
@@ -952,7 +1006,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         minimumSimilarity: "Minimum Benzerlik",
         searchDepth: "Arama Derinliği",
         maxResults: "Maksimum Sonuç",
-        editFormTemplate: "Form Şablonunu Düzenle"
+        editFormTemplate: "Form Şablonunu Düzenle",
       },
       knowledgeBases: {
         title: "Bilgi Tabanı Yönetimi",
@@ -966,31 +1020,33 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
           embeddingModel: "Gömme Modeli",
           dateCreated: "Oluşturulma Tarihi",
           dateModified: "Değiştirilme Tarihi",
-          actions: "İşlemler"
+          actions: "İşlemler",
         },
         status: {
           default: "Varsayılan",
-          na: "Mevcut Değil"
+          na: "Mevcut Değil",
         },
         actions: {
           view: "Görüntüle",
           edit: "Düzenle",
           delete: "Sil",
-          configure: "Yapılandır"
+          configure: "Yapılandır",
         },
         deleteModal: {
           title: "Bilgi Tabanını Sil",
           buttonText: "Bilgi Tabanını Sil",
-          description: "Bu bilgi tabanı kalıcı olarak silinecek. Emin misiniz? Bu işlemi geri alamazsınız.",
+          description:
+            "Bu bilgi tabanı kalıcı olarak silinecek. Emin misiniz? Bu işlemi geri alamazsınız.",
           confirmButton: "Sil",
           cancelButton: "İptal",
           successMessage: "Bilgi tabanı başarıyla silindi",
-          errorMessage: "Bilgi tabanı silinirken bir hata oluştu"
+          errorMessage: "Bilgi tabanı silinirken bir hata oluştu",
         },
         modals: {
           add: {
             title: "Bilgi Tabanı Ekle",
-            description: "Aşağıdaki ayrıntıları sağlayarak ve belgeler yükleyerek yeni bir bilgi tabanı oluşturun.",
+            description:
+              "Aşağıdaki ayrıntıları sağlayarak ve belgeler yükleyerek yeni bir bilgi tabanı oluşturun.",
             fields: {
               title: "Başlık",
               titlePlaceholder: "Başlık",
@@ -999,7 +1055,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
               descriptionPlaceholder: "Açıklama",
             },
             fileUpload: {
-              dragAndDrop: "Dosyaları buraya sürükleyin veya göz atmak için tıklayın",
+              dragAndDrop:
+                "Dosyaları buraya sürükleyin veya göz atmak için tıklayın",
               dropFiles: "Dosyaları buraya bırakın...",
               selectedFiles: "Seçilen Dosyalar:",
               removeFile: "Dosyayı Kaldır",
@@ -1026,7 +1083,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
             },
             fileUpload: {
               currentFiles: "Mevcut Dosyalar:",
-              dragAndDrop: "Dosyaları buraya sürükleyin veya göz atmak için tıklayın",
+              dragAndDrop:
+                "Dosyaları buraya sürükleyin veya göz atmak için tıklayın",
               dropFiles: "Dosyaları buraya bırakın...",
               selectedFiles: "Seçilen Dosyalar:",
               removeFile: "Dosyayı Kaldır",
@@ -1050,7 +1108,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
             suggest: "Öner",
             fieldPlaceholder: "Alan adı ekle...",
             cancel: "İptal",
-            updateFormTemplate: "Form Şablonunu Güncelle"
+            updateFormTemplate: "Form Şablonunu Güncelle",
           },
         },
         editCustom: {
@@ -1063,10 +1121,12 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       optimizeChecklistModal: {
         title: "Kontrol Listesini Optimize Et",
         customInstructionsLabel: "Özel Talimatlar (İsteğe Bağlı)",
-        customInstructionsHelperText: "Kontrol listesi sorularını yanıtlarken dikkate alınması gereken ek talimatları girin",
+        customInstructionsHelperText:
+          "Kontrol listesi sorularını yanıtlarken dikkate alınması gereken ek talimatları girin",
         analyzing: "Analiz ediliyor...",
         analyzeButton: "Kontrol Listesini Analiz Et",
-        analyzingMessage: "Optimizasyon fırsatları için kontrol listeniz analiz ediliyor...",
+        analyzingMessage:
+          "Optimizasyon fırsatları için kontrol listeniz analiz ediliyor...",
         cancelAnalysis: "Analizi İptal Et",
         downloading: "İndiriliyor...",
         downloadCsv: "CSV İndir",
@@ -1083,19 +1143,26 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         optimizationsSelectedText: "optimizasyon uygulanmak üzere seçildi",
         applying: "Uygulanıyor...",
         applySelectedOptimizations: "Seçili Optimizasyonları Uygula",
-        uploadDocumentsTitle: "Kontrol listesinin kabul etmesi gereken belgeleri yükleyin *",
-        uploadDocumentsHelperText: "Tüm kontrol listesi gereksinimlerini karşılaması gereken belgeleri yükleyerek çok katı olabilecek soruları belirlemeye yardımcı olun",
-        customInstructionsPlaceholder: "ör., Yaşla ilgili gereksinimleri değerlendirirken bunun bir pediatrik çalışma olduğunu dikkate alın, Bu protokol düşük riskli müdahale içindir, vb."
+        uploadDocumentsTitle:
+          "Kontrol listesinin kabul etmesi gereken belgeleri yükleyin *",
+        uploadDocumentsHelperText:
+          "Tüm kontrol listesi gereksinimlerini karşılaması gereken belgeleri yükleyerek çok katı olabilecek soruları belirlemeye yardımcı olun",
+        customInstructionsPlaceholder:
+          "ör., Yaşla ilgili gereksinimleri değerlendirirken bunun bir pediatrik çalışma olduğunu dikkate alın, Bu protokol düşük riskli müdahale içindir, vb.",
       },
       optimizeOutlineModal: {
         title: "Taslağı Optimize Et",
-        description: "Oluşturmak istediğiniz rapor türünün yüksek kaliteli bir örneğini temsil eden bir referans belgesi yükleyin. Sistem mevcut taslağınızı ve bilgi tabanınızı kullanarak bir rapor oluşturacak, bunu referansla karşılaştıracak ve taslak bölümleri için iyileştirmeler önerecektir.",
+        description:
+          "Oluşturmak istediğiniz rapor türünün yüksek kaliteli bir örneğini temsil eden bir referans belgesi yükleyin. Sistem mevcut taslağınızı ve bilgi tabanınızı kullanarak bir rapor oluşturacak, bunu referansla karşılaştıracak ve taslak bölümleri için iyileştirmeler önerecektir.",
         groundTruthDocument: "Referans Belgesi",
         customInstructionsLabel: "Özel Talimatlar (İsteğe Bağlı)",
-        customInstructionsHelperText: "Optimizasyon süreci için ek rehberlik sağlayın",
-        customInstructionsPlaceholder: "ör., Teknik derinliği artırmaya odaklanın, belirli standartlara uyumu sağlayın, vb.",
+        customInstructionsHelperText:
+          "Optimizasyon süreci için ek rehberlik sağlayın",
+        customInstructionsPlaceholder:
+          "ör., Teknik derinliği artırmaya odaklanın, belirli standartlara uyumu sağlayın, vb.",
         characters: "karakter",
-        analyzingOutline: "Taslak analiz ediliyor ve optimizasyonlar oluşturuluyor...",
+        analyzingOutline:
+          "Taslak analiz ediliyor ve optimizasyonlar oluşturuluyor...",
         cancelAnalysis: "Analizi İptal Et",
         optimizationResults: "Optimizasyon Sonuçları",
         sectionsNeedOptimization: "bölüm optimizasyona ihtiyaç duyuyor",
@@ -1113,8 +1180,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         cancel: "İptal",
         optimizing: "Optimize ediliyor...",
         optimizeOutline: "Taslağı Optimize Et",
-        applyOptimizations: "{{count}} Optimizasyonu Uygula"
-      }
+        applyOptimizations: "{{count}} Optimizasyonu Uygula",
+      },
     },
   }
 
@@ -1177,8 +1244,10 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         typing: "AI inaandika...",
         error: "Samahani, kuna hitilafu. Jaribu tena.",
         welcome: "Hujambo! Ninawezaje kukusaidia leo?",
-        welcomeMessageWithSource: "Chagua hifadhi ya maarifa au pakia faili, kisha uliza swali.",
-        welcomeMessageGeneral: "Niulize chochote! Kwa utafutaji wa hifadhi ya maarifa, chagua hifadhi ya maarifa kwanza.",
+        welcomeMessageWithSource:
+          "Chagua hifadhi ya maarifa au pakia faili, kisha uliza swali.",
+        welcomeMessageGeneral:
+          "Niulize chochote! Kwa utafutaji wa hifadhi ya maarifa, chagua hifadhi ya maarifa kwanza.",
       },
       settings: {
         title: "Mipangilio",
@@ -1224,21 +1293,26 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Ukaguzi wa Hati",
-        pageDescription: "Kagua hati kulingana na orodha ya ukaguzi iliyofafanuliwa na mtumiaji na hifadhidata ya sera.",
+        pageDescription:
+          "Kagua hati kulingana na orodha ya ukaguzi iliyofafanuliwa na mtumiaji na hifadhidata ya sera.",
         knowledgeBaseTitle: "Msingi wa Maarifa",
         knowledgeBaseDescription: "Bonyeza kuchagua",
         checklistTitle: "Orodha ya Ukaguzi",
         checklistDescription: "Bonyeza kuchagua",
         customInstructionsTitle: "Maelekezo Maalum (Hiari)",
-        customInstructionsPlaceholder: "Ingiza maelekezo ya ziada ambayo yanapaswa kuzingatiwa wakati wa kujibu maswali ya orodha ya ukaguzi...",
-        customInstructionsHelp: "Herufi {{count}}/2000. Maelekezo haya yataongezwa kwa kila swali wakati wa uchakataji.",
-        searchModeHelp: "Utafutaji wa vector hutoa matokeo ya haraka na yaliyolengwa. Uchambuzi kamili wa hati huchunguza maudhui yote ya msingi wa maarifa.",
+        customInstructionsPlaceholder:
+          "Ingiza maelekezo ya ziada ambayo yanapaswa kuzingatiwa wakati wa kujibu maswali ya orodha ya ukaguzi...",
+        customInstructionsHelp:
+          "Herufi {{count}}/2000. Maelekezo haya yataongezwa kwa kila swali wakati wa uchakataji.",
+        searchModeHelp:
+          "Utafutaji wa vector hutoa matokeo ya haraka na yaliyolengwa. Uchambuzi kamili wa hati huchunguza maudhui yote ya msingi wa maarifa.",
         processingFile: "Inachakata faili...",
         processingFiles: "Inachakata faili...",
         selectKnowledgeBaseTitle: "Chagua Msingi wa Maarifa",
         selectChecklistTitle: "Chagua Orodha ya Ukaguzi",
         noResults: "Hakuna matokeo bado",
-        uploadDocuments: "Pakia hati moja au zaidi za kukaaguliwa dhidi ya orodha ya ukaguzi uliyochaguliwa",
+        uploadDocuments:
+          "Pakia hati moja au zaidi za kukaaguliwa dhidi ya orodha ya ukaguzi uliyochaguliwa",
         results: "Matokeo",
         downloadReport: "Pakua Ripoti",
         downloadCsv: "Pakua CSV",
@@ -1247,32 +1321,39 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         reportCopied: "Ripoti imenakiliwa kwenye ubao wa kunakili!",
         reviewButton: "Ukaguzi",
         consultDocuments: "Shauriana na Hati",
-        noChecklistsAvailable: "Hakuna orodha za ukaguzi zinazopatikana. Tengeneza orodha yako ya kwanza ya ukaguzi ili uanze.",
+        noChecklistsAvailable:
+          "Hakuna orodha za ukaguzi zinazopatikana. Tengeneza orodha yako ya kwanza ya ukaguzi ili uanze.",
         createChecklist: "Tengeneza Orodha ya Ukaguzi",
         editChecklist: "Hariri Orodha ya Ukaguzi",
         checklistName: "Jina la Orodha ya Ukaguzi",
         checklistNamePlaceholder: "Ingiza jina la orodha ya ukaguzi...",
         checklistDescriptionLabel: "Maelezo",
-        checklistDescriptionPlaceholder: "Ingiza maelezo ya orodha ya ukaguzi kwa mapendekezo ya otomatiki ya maswali (angalau herufi 10)...",
+        checklistDescriptionPlaceholder:
+          "Ingiza maelezo ya orodha ya ukaguzi kwa mapendekezo ya otomatiki ya maswali (angalau herufi 10)...",
         questions: "Maswali",
         suggest: "Pendekeza",
         suggesting: "Inapendekeza...",
         optimize: "Boresha",
-        optimizeTooltip: "Msingi wa maarifa unapaswa kuchaguliwa ili kuwezesha kipengele cha kuboresha",
-        optimizeTooltipEnabled: "Boresha maswali kulingana na msingi wa maarifa uliyochaguliwa",
-        allUsersToggleTooltip: "Badilisha kati ya kuona historia yako tu au historia ya watumiaji wote",
+        optimizeTooltip:
+          "Msingi wa maarifa unapaswa kuchaguliwa ili kuwezesha kipengele cha kuboresha",
+        optimizeTooltipEnabled:
+          "Boresha maswali kulingana na msingi wa maarifa uliyochaguliwa",
+        allUsersToggleTooltip:
+          "Badilisha kati ya kuona historia yako tu au historia ya watumiaji wote",
         uploadFiles: "Pakia Faili",
         knowledgeBase: "Msingi wa Maarifa",
         referenceDocuments: "Hati za Kumbuka (Hiari)",
         selectKnowledgeBasePlaceholder: "Chagua msingi wa maarifa...",
-        noKnowledgeBasesAvailable: "Hakuna misingi ya maarifa inayopatikana. Tengeneza moja kwanza ili kutumia kipengele hiki.",
+        noKnowledgeBasesAvailable:
+          "Hakuna misingi ya maarifa inayopatikana. Tengeneza moja kwanza ili kutumia kipengele hiki.",
         copyQuestions: "Nakili Maswali",
         questionsCopied: "Maswali yamenakiliwa kwenye ubao wa kunakili",
         noQuestionsToCopy: "Hakuna maswali ya kunakili",
-        failedToCopyQuestions: "Imeshindwa kunakili maswali kwenye ubao wa kunakili",
+        failedToCopyQuestions:
+          "Imeshindwa kunakili maswali kwenye ubao wa kunakili",
         saveChecklist: "Hifadhi Orodha ya Ukaguzi",
         cancel: "Ghairi",
-        deleteChecklist: "Futa Orodha ya Ukaguzi"
+        deleteChecklist: "Futa Orodha ya Ukaguzi",
       },
       compare: {
         title: "Linganisha Hati",
@@ -1299,7 +1380,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         moderate: "Wastani",
         deep: "Kirefu",
         veryDeep: "Kirefu Sana",
-        editTopicList: "Hariri Orodha ya Mada"
+        editTopicList: "Hariri Orodha ya Mada",
       },
       match: {
         title: "Uoanishaji wa Hati",
@@ -1324,7 +1405,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         minimumSimilarity: "Kufanana Kidogo",
         searchDepth: "Kina cha Utafutaji",
         maxResults: "Matokeo ya Juu",
-        editFormTemplate: "Hariri Kiolezo cha Fomu"
+        editFormTemplate: "Hariri Kiolezo cha Fomu",
       },
       knowledgeBases: {
         title: "Usimamizi wa Misingi ya Maarifa",
@@ -1338,31 +1419,33 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
           embeddingModel: "Mfano wa Uingizaji",
           dateCreated: "Tarehe ya Kutengeneza",
           dateModified: "Tarehe ya Kubadilishwa",
-          actions: "Vitendo"
+          actions: "Vitendo",
         },
         status: {
           default: "Chaguo-msingi",
-          na: "Haipatikani"
+          na: "Haipatikani",
         },
         actions: {
           view: "Angalia",
           edit: "Hariri",
           delete: "Futa",
-          configure: "Sanidi"
+          configure: "Sanidi",
         },
         deleteModal: {
           title: "Futa Msingi wa Maarifa",
           buttonText: "Futa Msingi wa Maarifa",
-          description: "Msingi huu wa maarifa utafutwa kabisa. Una uhakika? Huwezi kutengua kitendo hiki.",
+          description:
+            "Msingi huu wa maarifa utafutwa kabisa. Una uhakika? Huwezi kutengua kitendo hiki.",
           confirmButton: "Futa",
           cancelButton: "Ghairi",
           successMessage: "Msingi wa maarifa umefutwa kwa mafanikio",
-          errorMessage: "Kosa limetokea wakati wa kufuta msingi wa maarifa"
+          errorMessage: "Kosa limetokea wakati wa kufuta msingi wa maarifa",
         },
         modals: {
           add: {
             title: "Ongeza Msingi wa Maarifa",
-            description: "Tengeneza msingi mpya wa maarifa kwa kutoa maelezo na kupakia hati hapo chini.",
+            description:
+              "Tengeneza msingi mpya wa maarifa kwa kutoa maelezo na kupakia hati hapo chini.",
             fields: {
               title: "Kichwa",
               titlePlaceholder: "Kichwa",
@@ -1422,7 +1505,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
             suggest: "Pendekeza",
             fieldPlaceholder: "Ongeza jina la sehemu...",
             cancel: "Ghairi",
-            updateFormTemplate: "Sasisha Kiolezo cha Fomu"
+            updateFormTemplate: "Sasisha Kiolezo cha Fomu",
           },
         },
         editCustom: {
@@ -1435,10 +1518,12 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       optimizeChecklistModal: {
         title: "Boresha Orodha ya Ukaguzi",
         customInstructionsLabel: "Maagizo ya Kawaida (Si Lazima)",
-        customInstructionsHelperText: "Ingiza maagizo ya ziada yanayopaswa kuzingatiwa wakati wa kujibu maswali ya orodha ya ukaguzi",
+        customInstructionsHelperText:
+          "Ingiza maagizo ya ziada yanayopaswa kuzingatiwa wakati wa kujibu maswali ya orodha ya ukaguzi",
         analyzing: "Inachambua...",
         analyzeButton: "Chambua Orodha ya Ukaguzi",
-        analyzingMessage: "Inachambua orodha yako ya ukaguzi kwa fursa za uboreshaji...",
+        analyzingMessage:
+          "Inachambua orodha yako ya ukaguzi kwa fursa za uboreshaji...",
         cancelAnalysis: "Ghairi Uchambuzi",
         downloading: "Inapakua...",
         downloadCsv: "Pakua CSV",
@@ -1455,17 +1540,23 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         optimizationsSelectedText: "maboresho yamechaguliwa kwa matumizi",
         applying: "Inatumia...",
         applySelectedOptimizations: "Tumia Maboresho Yaliyochaguliwa",
-        uploadDocumentsTitle: "Pakia hati ambazo orodha ya ukaguzi inapaswa kukubali *",
-        uploadDocumentsHelperText: "Pakia hati ambazo zinapaswa kutimiza mahitaji yote ya orodha ya ukaguzi ili kusaidia kutambua maswali ambayo yanaweza kuwa makali sana",
-        customInstructionsPlaceholder: "mfano, Zingatia hii ni utafiti wa watoto wakati wa kutathmini mahitaji yanayohusiana na umri, Itifaki hii ni kwa uingiliaji wa hatari ndogo, n.k."
+        uploadDocumentsTitle:
+          "Pakia hati ambazo orodha ya ukaguzi inapaswa kukubali *",
+        uploadDocumentsHelperText:
+          "Pakia hati ambazo zinapaswa kutimiza mahitaji yote ya orodha ya ukaguzi ili kusaidia kutambua maswali ambayo yanaweza kuwa makali sana",
+        customInstructionsPlaceholder:
+          "mfano, Zingatia hii ni utafiti wa watoto wakati wa kutathmini mahitaji yanayohusiana na umri, Itifaki hii ni kwa uingiliaji wa hatari ndogo, n.k.",
       },
       optimizeOutlineModal: {
         title: "Boresha Muhtasari",
-        description: "Pakia hati ya marejeleo inayowakilisha mfano wa ubora wa juu wa aina ya ripoti unayotaka kuunda. Mfumo utaunda ripoti kwa kutumia muhtasari wako wa sasa na msingi wa maarifa, utalinganisha na marejeleo na kupendekeza maboresho kwa sehemu za muhtasari.",
+        description:
+          "Pakia hati ya marejeleo inayowakilisha mfano wa ubora wa juu wa aina ya ripoti unayotaka kuunda. Mfumo utaunda ripoti kwa kutumia muhtasari wako wa sasa na msingi wa maarifa, utalinganisha na marejeleo na kupendekeza maboresho kwa sehemu za muhtasari.",
         groundTruthDocument: "Hati ya Marejeleo",
         customInstructionsLabel: "Maagizo ya Kawaida (Si Lazima)",
-        customInstructionsHelperText: "Toa mwongozo wa ziada kwa mchakato wa uboreshaji",
-        customInstructionsPlaceholder: "mfano, Zingatia kuimarisha kina cha kiufundi, hakikisha utii kwa viwango maalum, n.k.",
+        customInstructionsHelperText:
+          "Toa mwongozo wa ziada kwa mchakato wa uboreshaji",
+        customInstructionsPlaceholder:
+          "mfano, Zingatia kuimarisha kina cha kiufundi, hakikisha utii kwa viwango maalum, n.k.",
         characters: "herufi",
         analyzingOutline: "Inachambua muhtasari na kuunda maboresho...",
         cancelAnalysis: "Ghairi Uchambuzi",
@@ -1485,8 +1576,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         cancel: "Ghairi",
         optimizing: "Inaboresha...",
         optimizeOutline: "Boresha Muhtasari",
-        applyOptimizations: "Tumia Maboresho {{count}}"
-      }
+        applyOptimizations: "Tumia Maboresho {{count}}",
+      },
     },
   }
 
@@ -1549,8 +1640,10 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         typing: "IA está digitando...",
         error: "Desculpe, algo deu errado. Tente novamente.",
         welcome: "Olá! Como posso te ajudar hoje?",
-        welcomeMessageWithSource: "Selecione uma base de conhecimento ou carregue arquivos, depois faça uma pergunta.",
-        welcomeMessageGeneral: "Me pergunte qualquer coisa! Para busca na base de conhecimento, selecione primeiro uma base de conhecimento.",
+        welcomeMessageWithSource:
+          "Selecione uma base de conhecimento ou carregue arquivos, depois faça uma pergunta.",
+        welcomeMessageGeneral:
+          "Me pergunte qualquer coisa! Para busca na base de conhecimento, selecione primeiro uma base de conhecimento.",
       },
       settings: {
         title: "Configurações",
@@ -1596,21 +1689,26 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Revisão de Documentos",
-        pageDescription: "Revise documentos com base em uma lista de verificação definida pelo usuário e banco de dados de políticas.",
+        pageDescription:
+          "Revise documentos com base em uma lista de verificação definida pelo usuário e banco de dados de políticas.",
         knowledgeBaseTitle: "Base de Conhecimento",
         knowledgeBaseDescription: "Clique para selecionar",
         checklistTitle: "Lista de Verificação",
         checklistDescription: "Clique para selecionar",
         customInstructionsTitle: "Instruções Personalizadas (Opcional)",
-        customInstructionsPlaceholder: "Digite instruções adicionais que devem ser consideradas ao responder às perguntas da lista de verificação...",
-        customInstructionsHelp: "{{count}}/2000 caracteres. Essas instruções serão adicionadas a cada pergunta durante o processamento.",
-        searchModeHelp: "A busca vetorial fornece resultados rápidos e focados. A análise completa de documentos examina todo o conteúdo da base de conhecimento.",
+        customInstructionsPlaceholder:
+          "Digite instruções adicionais que devem ser consideradas ao responder às perguntas da lista de verificação...",
+        customInstructionsHelp:
+          "{{count}}/2000 caracteres. Essas instruções serão adicionadas a cada pergunta durante o processamento.",
+        searchModeHelp:
+          "A busca vetorial fornece resultados rápidos e focados. A análise completa de documentos examina todo o conteúdo da base de conhecimento.",
         processingFile: "Processando arquivo...",
         processingFiles: "Processando arquivos...",
         selectKnowledgeBaseTitle: "Selecionar Base de Conhecimento",
         selectChecklistTitle: "Selecionar Lista de Verificação",
         noResults: "Nenhum resultado ainda",
-        uploadDocuments: "Envie um ou mais documentos para revisão contra a lista de verificação selecionada",
+        uploadDocuments:
+          "Envie um ou mais documentos para revisão contra a lista de verificação selecionada",
         results: "Resultados",
         downloadReport: "Baixar Relatório",
         downloadCsv: "Baixar CSV",
@@ -1619,32 +1717,39 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         reportCopied: "Relatório copiado para a área de transferência!",
         reviewButton: "Revisão",
         consultDocuments: "Consultar Documentos",
-        noChecklistsAvailable: "Nenhuma lista de verificação disponível. Crie sua primeira lista de verificação para começar.",
+        noChecklistsAvailable:
+          "Nenhuma lista de verificação disponível. Crie sua primeira lista de verificação para começar.",
         createChecklist: "Criar Lista de Verificação",
         editChecklist: "Editar Lista de Verificação",
         checklistName: "Nome da Lista de Verificação",
         checklistNamePlaceholder: "Digite o nome da lista de verificação...",
         checklistDescriptionLabel: "Descrição",
-        checklistDescriptionPlaceholder: "Digite a descrição da lista de verificação para sugestões automáticas de perguntas (mínimo 10 caracteres)...",
+        checklistDescriptionPlaceholder:
+          "Digite a descrição da lista de verificação para sugestões automáticas de perguntas (mínimo 10 caracteres)...",
         questions: "Perguntas",
         suggest: "Sugerir",
         suggesting: "Sugerindo...",
         optimize: "Otimizar",
-        optimizeTooltip: "Uma Base de Conhecimento deve ser selecionada para habilitar o recurso de otimização",
-        optimizeTooltipEnabled: "Otimizar perguntas com base na Base de Conhecimento selecionada",
-        allUsersToggleTooltip: "Alternar entre visualizar apenas seu histórico ou o histórico de todos os usuários",
+        optimizeTooltip:
+          "Uma Base de Conhecimento deve ser selecionada para habilitar o recurso de otimização",
+        optimizeTooltipEnabled:
+          "Otimizar perguntas com base na Base de Conhecimento selecionada",
+        allUsersToggleTooltip:
+          "Alternar entre visualizar apenas seu histórico ou o histórico de todos os usuários",
         uploadFiles: "Enviar Arquivos",
         knowledgeBase: "Base de Conhecimento",
         referenceDocuments: "Documentos de Referência (Opcional)",
         selectKnowledgeBasePlaceholder: "Selecionar base de conhecimento...",
-        noKnowledgeBasesAvailable: "Nenhuma base de conhecimento disponível. Crie uma primeiro para usar este recurso.",
+        noKnowledgeBasesAvailable:
+          "Nenhuma base de conhecimento disponível. Crie uma primeiro para usar este recurso.",
         copyQuestions: "Copiar Perguntas",
         questionsCopied: "Perguntas copiadas para a área de transferência",
         noQuestionsToCopy: "Nenhuma pergunta para copiar",
-        failedToCopyQuestions: "Falha ao copiar perguntas para a área de transferência",
+        failedToCopyQuestions:
+          "Falha ao copiar perguntas para a área de transferência",
         saveChecklist: "Salvar Lista de Verificação",
         cancel: "Cancelar",
-        deleteChecklist: "Excluir Lista de Verificação"
+        deleteChecklist: "Excluir Lista de Verificação",
       },
       compare: {
         title: "Comparar Documentos",
@@ -1657,7 +1762,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         compareDocuments: "Comparar Documentos",
         comparison: "Comparação",
         noDocumentsFound: "Nenhum documento encontrado",
-        selectTwoDocuments: "Por favor, selecione dois documentos para comparar",
+        selectTwoDocuments:
+          "Por favor, selecione dois documentos para comparar",
         loadingComparison: "Carregando comparação...",
         topicList: "Lista de Tópicos",
         clickToBrowse: "Clique para navegar ou arraste aqui",
@@ -1671,19 +1777,21 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         moderate: "Moderado",
         deep: "Profundo",
         veryDeep: "Muito Profundo",
-        editTopicList: "Editar Lista de Tópicos"
+        editTopicList: "Editar Lista de Tópicos",
       },
       match: {
         title: "Correspondência de Documentos",
         subtitle: "Encontre documentos similares baseados no conteúdo",
-        selectDocument: "Selecione um documento para encontrar correspondências",
+        selectDocument:
+          "Selecione um documento para encontrar correspondências",
         pleaseSelect: "Por favor, selecione documento...",
         sourceDocument: "Documento Fonte",
         matchingDocuments: "Documentos Correspondentes",
         findMatches: "Encontrar Correspondências",
         similarityScore: "Pontuação de Similaridade",
         noDocumentsFound: "Nenhum documento encontrado",
-        selectDocumentToMatch: "Por favor, selecione um documento para encontrar correspondências",
+        selectDocumentToMatch:
+          "Por favor, selecione um documento para encontrar correspondências",
         loadingMatches: "Procurando correspondências...",
         noMatchesFound: "Nenhum documento similar encontrado",
         matchResults: "Resultados de Correspondência",
@@ -1696,13 +1804,14 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         minimumSimilarity: "Similaridade Mínima",
         searchDepth: "Profundidade da Busca",
         maxResults: "Resultados Máximos",
-        editFormTemplate: "Editar Modelo de Formulário"
+        editFormTemplate: "Editar Modelo de Formulário",
       },
       knowledgeBases: {
         title: "Gerenciamento de Bases de Conhecimento",
         addKnowledgeBase: "Adicionar Base de Conhecimento",
         emptyStateTitle: "Você ainda não tem bases de conhecimento",
-        emptyStateDescription: "Adicione uma nova base de conhecimento para começar",
+        emptyStateDescription:
+          "Adicione uma nova base de conhecimento para começar",
         tableHeaders: {
           title: "Título",
           description: "Descrição",
@@ -1710,31 +1819,33 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
           embeddingModel: "Modelo de Incorporação",
           dateCreated: "Data de Criação",
           dateModified: "Data de Modificação",
-          actions: "Ações"
+          actions: "Ações",
         },
         status: {
           default: "Padrão",
-          na: "Não Disponível"
+          na: "Não Disponível",
         },
         actions: {
           view: "Visualizar",
           edit: "Editar",
           delete: "Excluir",
-          configure: "Configurar"
+          configure: "Configurar",
         },
         deleteModal: {
           title: "Excluir Base de Conhecimento",
           buttonText: "Excluir Base de Conhecimento",
-          description: "Esta base de conhecimento será excluída permanentemente. Tem certeza? Você não poderá desfazer esta ação.",
+          description:
+            "Esta base de conhecimento será excluída permanentemente. Tem certeza? Você não poderá desfazer esta ação.",
           confirmButton: "Excluir",
           cancelButton: "Cancelar",
           successMessage: "Base de conhecimento excluída com sucesso",
-          errorMessage: "Ocorreu um erro ao excluir a base de conhecimento"
+          errorMessage: "Ocorreu um erro ao excluir a base de conhecimento",
         },
         modals: {
           add: {
             title: "Adicionar Base de Conhecimento",
-            description: "Crie uma nova base de conhecimento fornecendo detalhes e enviando documentos abaixo.",
+            description:
+              "Crie uma nova base de conhecimento fornecendo detalhes e enviando documentos abaixo.",
             fields: {
               title: "Título",
               titlePlaceholder: "Título",
@@ -1786,7 +1897,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
             title: "Editar Modelo de Formulário",
             formTemplateName: "Nome do Modelo de Formulário",
             formTemplateDescription: "Descrição do Modelo de Formulário",
-            descriptionPlaceholder: "Digite a descrição do modelo de formulário...",
+            descriptionPlaceholder:
+              "Digite a descrição do modelo de formulário...",
             referenceDocuments: "Documentos de Referência (Opcional)",
             uploadFiles: "Enviar Arquivos",
             knowledgeBase: "Base de Conhecimento",
@@ -1794,7 +1906,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
             suggest: "Sugerir",
             fieldPlaceholder: "Adicionar nome do campo...",
             cancel: "Cancelar",
-            updateFormTemplate: "Atualizar Modelo de Formulário"
+            updateFormTemplate: "Atualizar Modelo de Formulário",
           },
         },
         editCustom: {
@@ -1807,10 +1919,12 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       optimizeChecklistModal: {
         title: "Otimizar Lista de Verificação",
         customInstructionsLabel: "Instruções Personalizadas (Opcional)",
-        customInstructionsHelperText: "Insira instruções adicionais que devem ser consideradas ao responder às perguntas da lista de verificação",
+        customInstructionsHelperText:
+          "Insira instruções adicionais que devem ser consideradas ao responder às perguntas da lista de verificação",
         analyzing: "Analisando...",
         analyzeButton: "Analisar Lista de Verificação",
-        analyzingMessage: "Analisando sua lista de verificação para oportunidades de otimização...",
+        analyzingMessage:
+          "Analisando sua lista de verificação para oportunidades de otimização...",
         cancelAnalysis: "Cancelar Análise",
         downloading: "Baixando...",
         downloadCsv: "Baixar CSV",
@@ -1827,17 +1941,23 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         optimizationsSelectedText: "otimizações selecionadas para aplicação",
         applying: "Aplicando...",
         applySelectedOptimizations: "Aplicar Otimizações Selecionadas",
-        uploadDocumentsTitle: "Envie documento(s) que devem ser aceitos pela lista de verificação *",
-        uploadDocumentsHelperText: "Envie documentos que devem atender a todos os requisitos da lista de verificação para ajudar a identificar perguntas que podem ser muito rigorosas",
-        customInstructionsPlaceholder: "ex., Considere que este é um estudo pediátrico ao avaliar requisitos relacionados à idade, Este protocolo é para intervenção de baixo risco, etc."
+        uploadDocumentsTitle:
+          "Envie documento(s) que devem ser aceitos pela lista de verificação *",
+        uploadDocumentsHelperText:
+          "Envie documentos que devem atender a todos os requisitos da lista de verificação para ajudar a identificar perguntas que podem ser muito rigorosas",
+        customInstructionsPlaceholder:
+          "ex., Considere que este é um estudo pediátrico ao avaliar requisitos relacionados à idade, Este protocolo é para intervenção de baixo risco, etc.",
       },
       optimizeOutlineModal: {
         title: "Otimizar Esboço",
-        description: "Envie um documento de referência que represente um exemplo de alta qualidade do tipo de relatório que você deseja gerar. O sistema gerará um relatório usando seu esboço atual e base de conhecimento, comparará com a referência e sugerirá melhorias para as seções do esboço.",
+        description:
+          "Envie um documento de referência que represente um exemplo de alta qualidade do tipo de relatório que você deseja gerar. O sistema gerará um relatório usando seu esboço atual e base de conhecimento, comparará com a referência e sugerirá melhorias para as seções do esboço.",
         groundTruthDocument: "Documento de Referência",
         customInstructionsLabel: "Instruções Personalizadas (Opcional)",
-        customInstructionsHelperText: "Forneça orientações adicionais para o processo de otimização",
-        customInstructionsPlaceholder: "ex., Foque em melhorar a profundidade técnica, garanta conformidade com padrões específicos, etc.",
+        customInstructionsHelperText:
+          "Forneça orientações adicionais para o processo de otimização",
+        customInstructionsPlaceholder:
+          "ex., Foque em melhorar a profundidade técnica, garanta conformidade com padrões específicos, etc.",
         characters: "caracteres",
         analyzingOutline: "Analisando esboço e gerando otimizações...",
         cancelAnalysis: "Cancelar Análise",
@@ -1857,8 +1977,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         cancel: "Cancelar",
         optimizing: "Otimizando...",
         optimizeOutline: "Otimizar Esboço",
-        applyOptimizations: "Aplicar {{count}} Otimizações"
-      }
+        applyOptimizations: "Aplicar {{count}} Otimizações",
+      },
     },
   }
 
@@ -1921,8 +2041,10 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         typing: "IA está escribiendo...",
         error: "Lo sentimos, algo salió mal. Inténtalo de nuevo.",
         welcome: "¡Hola! ¿Cómo puedo ayudarte hoy?",
-        welcomeMessageWithSource: "Selecciona una base de conocimiento o sube archivos, luego haz una pregunta.",
-        welcomeMessageGeneral: "¡Pregúntame lo que quieras! Para búsqueda en la base de conocimiento, selecciona primero una base de conocimiento.",
+        welcomeMessageWithSource:
+          "Selecciona una base de conocimiento o sube archivos, luego haz una pregunta.",
+        welcomeMessageGeneral:
+          "¡Pregúntame lo que quieras! Para búsqueda en la base de conocimiento, selecciona primero una base de conocimiento.",
       },
       settings: {
         title: "Configuraciones",
@@ -1968,21 +2090,26 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Revisión de Documentos",
-        pageDescription: "Revise documentos basados en una lista de verificación definida por el usuario y base de datos de políticas.",
+        pageDescription:
+          "Revise documentos basados en una lista de verificación definida por el usuario y base de datos de políticas.",
         knowledgeBaseTitle: "Base de Conocimiento",
         knowledgeBaseDescription: "Haga clic para seleccionar",
         checklistTitle: "Lista de Verificación",
         checklistDescription: "Haga clic para seleccionar",
         customInstructionsTitle: "Instrucciones Personalizadas (Opcional)",
-        customInstructionsPlaceholder: "Ingrese instrucciones adicionales que deben considerarse al responder las preguntas de la lista de verificación...",
-        customInstructionsHelp: "{{count}}/2000 caracteres. Estas instrucciones se agregarán a cada pregunta durante el procesamiento.",
-        searchModeHelp: "La búsqueda vectorial proporciona resultados rápidos y enfocados. El análisis completo de documentos examina todo el contenido de la base de conocimiento.",
+        customInstructionsPlaceholder:
+          "Ingrese instrucciones adicionales que deben considerarse al responder las preguntas de la lista de verificación...",
+        customInstructionsHelp:
+          "{{count}}/2000 caracteres. Estas instrucciones se agregarán a cada pregunta durante el procesamiento.",
+        searchModeHelp:
+          "La búsqueda vectorial proporciona resultados rápidos y enfocados. El análisis completo de documentos examina todo el contenido de la base de conocimiento.",
         processingFile: "Procesando archivo...",
         processingFiles: "Procesando archivos...",
         selectKnowledgeBaseTitle: "Seleccionar Base de Conocimiento",
         selectChecklistTitle: "Seleccionar Lista de Verificación",
         noResults: "Aún no hay resultados",
-        uploadDocuments: "Suba uno o más documentos para revisión contra la lista de verificación seleccionada",
+        uploadDocuments:
+          "Suba uno o más documentos para revisión contra la lista de verificación seleccionada",
         results: "Resultados",
         downloadReport: "Descargar Informe",
         downloadCsv: "Descargar CSV",
@@ -1991,32 +2118,39 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         reportCopied: "¡Informe copiado al portapapeles!",
         reviewButton: "Revisión",
         consultDocuments: "Consultar Documentos",
-        noChecklistsAvailable: "No hay listas de verificación disponibles. Cree su primera lista de verificación para comenzar.",
+        noChecklistsAvailable:
+          "No hay listas de verificación disponibles. Cree su primera lista de verificación para comenzar.",
         createChecklist: "Crear Lista de Verificación",
         editChecklist: "Editar Lista de Verificación",
         checklistName: "Nombre de Lista de Verificación",
-        checklistNamePlaceholder: "Ingrese el nombre de la lista de verificación...",
+        checklistNamePlaceholder:
+          "Ingrese el nombre de la lista de verificación...",
         checklistDescriptionLabel: "Descripción",
-        checklistDescriptionPlaceholder: "Ingrese la descripción de la lista de verificación para sugerencias automáticas de preguntas (mínimo 10 caracteres)...",
+        checklistDescriptionPlaceholder:
+          "Ingrese la descripción de la lista de verificación para sugerencias automáticas de preguntas (mínimo 10 caracteres)...",
         questions: "Preguntas",
         suggest: "Sugerir",
         suggesting: "Sugiriendo...",
         optimize: "Optimizar",
-        optimizeTooltip: "Se debe seleccionar una Base de Conocimiento para habilitar la función de optimización",
-        optimizeTooltipEnabled: "Optimizar preguntas basadas en la Base de Conocimiento seleccionada",
-        allUsersToggleTooltip: "Alternar entre ver solo tu historial o el historial de todos los usuarios",
+        optimizeTooltip:
+          "Se debe seleccionar una Base de Conocimiento para habilitar la función de optimización",
+        optimizeTooltipEnabled:
+          "Optimizar preguntas basadas en la Base de Conocimiento seleccionada",
+        allUsersToggleTooltip:
+          "Alternar entre ver solo tu historial o el historial de todos los usuarios",
         uploadFiles: "Subir Archivos",
         knowledgeBase: "Base de Conocimiento",
         referenceDocuments: "Documentos de Referencia (Opcional)",
         selectKnowledgeBasePlaceholder: "Seleccionar base de conocimiento...",
-        noKnowledgeBasesAvailable: "No hay bases de conocimiento disponibles. Cree una primero para usar esta función.",
+        noKnowledgeBasesAvailable:
+          "No hay bases de conocimiento disponibles. Cree una primero para usar esta función.",
         copyQuestions: "Copiar Preguntas",
         questionsCopied: "Preguntas copiadas al portapapeles",
         noQuestionsToCopy: "No hay preguntas para copiar",
         failedToCopyQuestions: "Error al copiar preguntas al portapapeles",
         saveChecklist: "Guardar Lista de Verificación",
         cancel: "Cancelar",
-        deleteChecklist: "Eliminar Lista de Verificación"
+        deleteChecklist: "Eliminar Lista de Verificación",
       },
       compare: {
         title: "Comparar Documentos",
@@ -2043,7 +2177,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         moderate: "Moderado",
         deep: "Profundo",
         veryDeep: "Muy Profundo",
-        editTopicList: "Editar Lista de Temas"
+        editTopicList: "Editar Lista de Temas",
       },
       match: {
         title: "Coincidencia de Documentos",
@@ -2055,7 +2189,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         findMatches: "Encontrar Coincidencias",
         similarityScore: "Puntuación de Similitud",
         noDocumentsFound: "No se encontraron documentos",
-        selectDocumentToMatch: "Por favor seleccione un documento para encontrar coincidencias",
+        selectDocumentToMatch:
+          "Por favor seleccione un documento para encontrar coincidencias",
         loadingMatches: "Buscando coincidencias...",
         noMatchesFound: "No se encontraron documentos similares",
         matchResults: "Resultados de Coincidencia",
@@ -2068,13 +2203,14 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         minimumSimilarity: "Similitud Mínima",
         searchDepth: "Profundidad de Búsqueda",
         maxResults: "Resultados Máximos",
-        editFormTemplate: "Editar Plantilla de Formulario"
+        editFormTemplate: "Editar Plantilla de Formulario",
       },
       knowledgeBases: {
         title: "Gestión de Bases de Conocimiento",
         addKnowledgeBase: "Agregar Base de Conocimiento",
         emptyStateTitle: "Aún no tienes bases de conocimiento",
-        emptyStateDescription: "Agrega una nueva base de conocimiento para comenzar",
+        emptyStateDescription:
+          "Agrega una nueva base de conocimiento para comenzar",
         tableHeaders: {
           title: "Título",
           description: "Descripción",
@@ -2082,31 +2218,33 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
           embeddingModel: "Modelo de Incrustación",
           dateCreated: "Fecha de Creación",
           dateModified: "Fecha de Modificación",
-          actions: "Acciones"
+          actions: "Acciones",
         },
         status: {
           default: "Predeterminado",
-          na: "No Disponible"
+          na: "No Disponible",
         },
         actions: {
           view: "Ver",
           edit: "Editar",
           delete: "Eliminar",
-          configure: "Configurar"
+          configure: "Configurar",
         },
         deleteModal: {
           title: "Eliminar Base de Conocimiento",
           buttonText: "Eliminar Base de Conocimiento",
-          description: "Esta base de conocimiento será eliminada permanentemente. ¿Está seguro? No podrá deshacer esta acción.",
+          description:
+            "Esta base de conocimiento será eliminada permanentemente. ¿Está seguro? No podrá deshacer esta acción.",
           confirmButton: "Eliminar",
           cancelButton: "Cancelar",
           successMessage: "Base de conocimiento eliminada exitosamente",
-          errorMessage: "Ocurrió un error al eliminar la base de conocimiento"
+          errorMessage: "Ocurrió un error al eliminar la base de conocimiento",
         },
         modals: {
           add: {
             title: "Agregar Base de Conocimiento",
-            description: "Cree una nueva base de conocimiento proporcionando detalles y subiendo documentos a continuación.",
+            description:
+              "Cree una nueva base de conocimiento proporcionando detalles y subiendo documentos a continuación.",
             fields: {
               title: "Título",
               titlePlaceholder: "Título",
@@ -2132,7 +2270,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
           },
           edit: {
             title: "Editar Base de Conocimiento",
-            description: "Actualice los detalles de la base de conocimiento a continuación.",
+            description:
+              "Actualice los detalles de la base de conocimiento a continuación.",
             fields: {
               title: "Título",
               titlePlaceholder: "Título",
@@ -2157,8 +2296,10 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
           editFormTemplateModal: {
             title: "Editar Plantilla de Formulario",
             formTemplateName: "Nombre de la Plantilla de Formulario",
-            formTemplateDescription: "Descripción de la Plantilla de Formulario",
-            descriptionPlaceholder: "Ingrese la descripción de la plantilla de formulario...",
+            formTemplateDescription:
+              "Descripción de la Plantilla de Formulario",
+            descriptionPlaceholder:
+              "Ingrese la descripción de la plantilla de formulario...",
             referenceDocuments: "Documentos de Referencia (Opcional)",
             uploadFiles: "Subir Archivos",
             knowledgeBase: "Base de Conocimiento",
@@ -2166,7 +2307,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
             suggest: "Sugerir",
             fieldPlaceholder: "Agregar nombre del campo...",
             cancel: "Cancelar",
-            updateFormTemplate: "Actualizar Plantilla de Formulario"
+            updateFormTemplate: "Actualizar Plantilla de Formulario",
           },
         },
         editCustom: {
@@ -2179,10 +2320,12 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       optimizeChecklistModal: {
         title: "Optimizar Lista de Verificación",
         customInstructionsLabel: "Instrucciones Personalizadas (Opcional)",
-        customInstructionsHelperText: "Ingrese instrucciones adicionales que deben considerarse al responder las preguntas de la lista de verificación",
+        customInstructionsHelperText:
+          "Ingrese instrucciones adicionales que deben considerarse al responder las preguntas de la lista de verificación",
         analyzing: "Analizando...",
         analyzeButton: "Analizar Lista de Verificación",
-        analyzingMessage: "Analizando su lista de verificación para oportunidades de optimización...",
+        analyzingMessage:
+          "Analizando su lista de verificación para oportunidades de optimización...",
         cancelAnalysis: "Cancelar Análisis",
         downloading: "Descargando...",
         downloadCsv: "Descargar CSV",
@@ -2199,17 +2342,23 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         optimizationsSelectedText: "optimizaciones seleccionadas para aplicar",
         applying: "Aplicando...",
         applySelectedOptimizations: "Aplicar Optimizaciones Seleccionadas",
-        uploadDocumentsTitle: "Suba documento(s) que deben ser aceptados por la lista de verificación *",
-        uploadDocumentsHelperText: "Suba documentos que deben cumplir todos los requisitos de la lista de verificación para ayudar a identificar preguntas que pueden ser demasiado estrictas",
-        customInstructionsPlaceholder: "ej., Considere que este es un estudio pediátrico al evaluar requisitos relacionados con la edad, Este protocolo es para intervención de bajo riesgo, etc."
+        uploadDocumentsTitle:
+          "Suba documento(s) que deben ser aceptados por la lista de verificación *",
+        uploadDocumentsHelperText:
+          "Suba documentos que deben cumplir todos los requisitos de la lista de verificación para ayudar a identificar preguntas que pueden ser demasiado estrictas",
+        customInstructionsPlaceholder:
+          "ej., Considere que este es un estudio pediátrico al evaluar requisitos relacionados con la edad, Este protocolo es para intervención de bajo riesgo, etc.",
       },
       optimizeOutlineModal: {
         title: "Optimizar Esquema",
-        description: "Suba un documento de referencia que represente un ejemplo de alta calidad del tipo de informe que desea generar. El sistema generará un informe usando su esquema actual y base de conocimientos, lo comparará con la referencia y sugerirá mejoras para las secciones del esquema.",
+        description:
+          "Suba un documento de referencia que represente un ejemplo de alta calidad del tipo de informe que desea generar. El sistema generará un informe usando su esquema actual y base de conocimientos, lo comparará con la referencia y sugerirá mejoras para las secciones del esquema.",
         groundTruthDocument: "Documento de Referencia",
         customInstructionsLabel: "Instrucciones Personalizadas (Opcional)",
-        customInstructionsHelperText: "Proporcione orientación adicional para el proceso de optimización",
-        customInstructionsPlaceholder: "ej., Enfóquese en mejorar la profundidad técnica, asegure el cumplimiento con estándares específicos, etc.",
+        customInstructionsHelperText:
+          "Proporcione orientación adicional para el proceso de optimización",
+        customInstructionsPlaceholder:
+          "ej., Enfóquese en mejorar la profundidad técnica, asegure el cumplimiento con estándares específicos, etc.",
         characters: "caracteres",
         analyzingOutline: "Analizando esquema y generando optimizaciones...",
         cancelAnalysis: "Cancelar Análisis",
@@ -2229,20 +2378,22 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         cancel: "Cancelar",
         optimizing: "Optimizando...",
         optimizeOutline: "Optimizar Esquema",
-        applyOptimizations: "Aplicar {{count}} Optimizaciones"
-      }
+        applyOptimizations: "Aplicar {{count}} Optimizaciones",
+      },
     },
   }
 
   // Add Model Selection translations to Hebrew
   resources.he.common.modelSelection = {
     llmManagement: "ניהול LLM",
-    llmDescription: "קבע תצורה ונהל את מודלי ה-LLM המשמשים ליצירת תגובות טקסט. המודל הברירת מחדל ישמש לכל הפעולות.",
+    llmDescription:
+      "קבע תצורה ונהל את מודלי ה-LLM המשמשים ליצירת תגובות טקסט. המודל הברירת מחדל ישמש לכל הפעולות.",
     addNewLlm: "הוסף LLM חדש",
     noLlmsConfigured: "לא הוגדרו מודלי LLM",
     addNewLlmToGetStarted: "הוסף LLM חדש כדי להתחיל",
     embeddingModelManagement: "ניהול מודלי הטמעה",
-    embeddingDescription: "קבע תצורה ונהל מודלי הטמעה המשמשים לאינדוקס ואחזור של בסיסי ידע. המודל הברירת מחדל ישמש בעת יצירת בסיסי ידע חדשים, אך כל בסיס ידע ימשיך להשתמש במודל ההטמעה המקורי שלו גם אם ברירת המחדל תשתנה מאוחר יותר.",
+    embeddingDescription:
+      "קבע תצורה ונהל מודלי הטמעה המשמשים לאינדוקס ואחזור של בסיסי ידע. המודל הברירת מחדל ישמש בעת יצירת בסיסי ידע חדשים, אך כל בסיס ידע ימשיך להשתמש במודל ההטמעה המקורי שלו גם אם ברירת המחדל תשתנה מאוחר יותר.",
     addEmbeddingModel: "הוסף מודל הטמעה",
     noEmbeddingModelsConfigured: "לא הוגדרו מודלי הטמעה",
     addNewEmbeddingModelToGetStarted: "הוסף מודל הטמעה חדש כדי להתחיל",
@@ -2252,17 +2403,17 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       provider: "ספק",
       description: "תיאור",
       status: "סטטוס",
-      actions: "פעולות"
+      actions: "פעולות",
     },
     status: {
       default: "ברירת מחדל",
-      available: "זמין"
+      available: "זמין",
     },
     actions: {
       setAsDefault: "קבע כברירת מחדל",
       delete: "מחק",
       validate: "אמת",
-      validating: "מאמת"
+      validating: "מאמת",
     },
     dialog: {
       addNewLlm: "הוסף LLM חדש",
@@ -2272,27 +2423,29 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       modelId: "מזהה מודל",
       description: "תיאור",
       cancel: "ביטול",
-      addModel: "הוסף מודל"
+      addModel: "הוסף מודל",
     },
     placeholders: {
       customModel: "לדוגמה, המודל המותאם שלי",
       embeddingModelId: "לדוגמה, sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "תאר את המודל, את המאפיינים שלו ומתי להשתמש בו"
+      describeModel: "תאר את המודל, את המאפיינים שלו ומתי להשתמש בו",
     },
     validation: {
-      pleaseEnterModelId: "אנא הזן מזהה מודל"
-    }
+      pleaseEnterModelId: "אנא הזן מזהה מודל",
+    },
   }
 
   // Add Model Selection translations to Persian/Farsi
   resources.fa.common.modelSelection = {
     llmManagement: "مدیریت LLM",
-    llmDescription: "پیکربندی و مدیریت مدل‌های LLM که برای تولید پاسخ‌های متنی استفاده می‌شوند. مدل پیش‌فرض برای همه عملیات استفاده خواهد شد.",
+    llmDescription:
+      "پیکربندی و مدیریت مدل‌های LLM که برای تولید پاسخ‌های متنی استفاده می‌شوند. مدل پیش‌فرض برای همه عملیات استفاده خواهد شد.",
     addNewLlm: "افزودن LLM جدید",
     noLlmsConfigured: "هیچ LLM پیکربندی نشده است",
     addNewLlmToGetStarted: "برای شروع یک LLM جدید اضافه کنید",
     embeddingModelManagement: "مدیریت مدل‌های تعبیه",
-    embeddingDescription: "پیکربندی و مدیریت مدل‌های تعبیه که برای نمایه‌سازی و بازیابی پایگاه‌های دانش استفاده می‌شوند. مدل پیش‌فرض هنگام ایجاد پایگاه‌های دانش جدید استفاده خواهد شد، اما هر پایگاه دانش به استفاده از مدل تعبیه اصلی خود ادامه خواهد داد حتی اگر پیش‌فرض بعداً تغییر کند.",
+    embeddingDescription:
+      "پیکربندی و مدیریت مدل‌های تعبیه که برای نمایه‌سازی و بازیابی پایگاه‌های دانش استفاده می‌شوند. مدل پیش‌فرض هنگام ایجاد پایگاه‌های دانش جدید استفاده خواهد شد، اما هر پایگاه دانش به استفاده از مدل تعبیه اصلی خود ادامه خواهد داد حتی اگر پیش‌فرض بعداً تغییر کند.",
     addEmbeddingModel: "افزودن مدل تعبیه",
     noEmbeddingModelsConfigured: "هیچ مدل تعبیه پیکربندی نشده است",
     addNewEmbeddingModelToGetStarted: "برای شروع یک مدل تعبیه جدید اضافه کنید",
@@ -2302,17 +2455,17 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       provider: "ارائه‌دهنده",
       description: "توضیحات",
       status: "وضعیت",
-      actions: "اقدامات"
+      actions: "اقدامات",
     },
     status: {
       default: "پیش‌فرض",
-      available: "در دسترس"
+      available: "در دسترس",
     },
     actions: {
       setAsDefault: "تنظیم به عنوان پیش‌فرض",
       delete: "حذف",
       validate: "اعتبارسنجی",
-      validating: "در حال اعتبارسنجی"
+      validating: "در حال اعتبارسنجی",
     },
     dialog: {
       addNewLlm: "افزودن LLM جدید",
@@ -2322,47 +2475,50 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       modelId: "شناسه مدل",
       description: "توضیحات",
       cancel: "انصراف",
-      addModel: "افزودن مدل"
+      addModel: "افزودن مدل",
     },
     placeholders: {
       customModel: "مثال، مدل سفارشی من",
       embeddingModelId: "مثال، sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "مدل، ویژگی‌های آن و زمان استفاده از آن را توصیف کنید"
+      describeModel: "مدل، ویژگی‌های آن و زمان استفاده از آن را توصیف کنید",
     },
     validation: {
-      pleaseEnterModelId: "لطفاً شناسه مدل را وارد کنید"
-    }
+      pleaseEnterModelId: "لطفاً شناسه مدل را وارد کنید",
+    },
   }
 
   // Add Model Selection translations to Turkish
   resources.tr.common.modelSelection = {
     llmManagement: "LLM Yönetimi",
-    llmDescription: "Metin yanıtları oluşturmak için kullanılan LLM'leri yapılandırın ve yönetin. Varsayılan model tüm işlemler için kullanılacaktır.",
+    llmDescription:
+      "Metin yanıtları oluşturmak için kullanılan LLM'leri yapılandırın ve yönetin. Varsayılan model tüm işlemler için kullanılacaktır.",
     addNewLlm: "Yeni LLM Ekle",
     noLlmsConfigured: "Yapılandırılmış LLM yok",
     addNewLlmToGetStarted: "Başlamak için yeni bir LLM ekleyin",
     embeddingModelManagement: "Gömme Modeli Yönetimi",
-    embeddingDescription: "Bilgi tabanı indeksleme ve erişim için kullanılan gömme modellerini yapılandırın ve yönetin. Varsayılan model yeni bilgi tabanları oluştururken kullanılacaktır, ancak her bilgi tabanı varsayılan daha sonra değişse bile orijinal gömme modelini kullanmaya devam edecektir.",
+    embeddingDescription:
+      "Bilgi tabanı indeksleme ve erişim için kullanılan gömme modellerini yapılandırın ve yönetin. Varsayılan model yeni bilgi tabanları oluştururken kullanılacaktır, ancak her bilgi tabanı varsayılan daha sonra değişse bile orijinal gömme modelini kullanmaya devam edecektir.",
     addEmbeddingModel: "Gömme Modeli Ekle",
     noEmbeddingModelsConfigured: "Yapılandırılmış gömme modeli yok",
-    addNewEmbeddingModelToGetStarted: "Başlamak için yeni bir gömme modeli ekleyin",
+    addNewEmbeddingModelToGetStarted:
+      "Başlamak için yeni bir gömme modeli ekleyin",
     tableHeaders: {
       name: "Ad",
       modelId: "Model ID",
       provider: "Sağlayıcı",
       description: "Açıklama",
       status: "Durum",
-      actions: "İşlemler"
+      actions: "İşlemler",
     },
     status: {
       default: "Varsayılan",
-      available: "Mevcut"
+      available: "Mevcut",
     },
     actions: {
       setAsDefault: "Varsayılan olarak ayarla",
       delete: "Sil",
       validate: "Doğrula",
-      validating: "Doğrulanıyor"
+      validating: "Doğrulanıyor",
     },
     dialog: {
       addNewLlm: "Yeni LLM Ekle",
@@ -2372,27 +2528,30 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       modelId: "Model ID",
       description: "Açıklama",
       cancel: "İptal",
-      addModel: "Model Ekle"
+      addModel: "Model Ekle",
     },
     placeholders: {
       customModel: "örn., Özel Modelim",
       embeddingModelId: "örn., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Modeli, özelliklerini ve ne zaman kullanılacağını açıklayın"
+      describeModel:
+        "Modeli, özelliklerini ve ne zaman kullanılacağını açıklayın",
     },
     validation: {
-      pleaseEnterModelId: "Lütfen model ID girin"
-    }
+      pleaseEnterModelId: "Lütfen model ID girin",
+    },
   }
 
   // Add Model Selection translations to Swahili
   resources.sw.common.modelSelection = {
     llmManagement: "Usimamizi wa LLM",
-    llmDescription: "Sanidi na simamia LLM zinazotumika kuzalisha majibu ya maandishi. Mfano chaguo-msingi utatumika kwa shughuli zote.",
+    llmDescription:
+      "Sanidi na simamia LLM zinazotumika kuzalisha majibu ya maandishi. Mfano chaguo-msingi utatumika kwa shughuli zote.",
     addNewLlm: "Ongeza LLM Mpya",
     noLlmsConfigured: "Hakuna LLM zilizosanidiwa",
     addNewLlmToGetStarted: "Ongeza LLM mpya kuanza",
     embeddingModelManagement: "Usimamizi wa Mifano ya Kuingiza",
-    embeddingDescription: "Sanidi na simamia mifano ya kuingiza inayotumika kwa ufaharisaji na upatikanaji wa msingi wa maarifa. Mfano chaguo-msingi utatumika wakati wa kuunda misingi mipya ya maarifa, lakini kila msingi wa maarifa utaendelea kutumia mfano wake wa asili wa kuingiza hata kama chaguo-msingi litabadilika baadaye.",
+    embeddingDescription:
+      "Sanidi na simamia mifano ya kuingiza inayotumika kwa ufaharisaji na upatikanaji wa msingi wa maarifa. Mfano chaguo-msingi utatumika wakati wa kuunda misingi mipya ya maarifa, lakini kila msingi wa maarifa utaendelea kutumia mfano wake wa asili wa kuingiza hata kama chaguo-msingi litabadilika baadaye.",
     addEmbeddingModel: "Ongeza Mfano wa Kuingiza",
     noEmbeddingModelsConfigured: "Hakuna mifano ya kuingiza iliyosanidiwa",
     addNewEmbeddingModelToGetStarted: "Ongeza mfano mpya wa kuingiza kuanza",
@@ -2402,17 +2561,17 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       provider: "Mtoa Huduma",
       description: "Maelezo",
       status: "Hali",
-      actions: "Vitendo"
+      actions: "Vitendo",
     },
     status: {
       default: "Chaguo-msingi",
-      available: "Inapatikana"
+      available: "Inapatikana",
     },
     actions: {
       setAsDefault: "Weka kama Chaguo-msingi",
       delete: "Futa",
       validate: "Thibitisha",
-      validating: "Inakagua"
+      validating: "Inakagua",
     },
     dialog: {
       addNewLlm: "Ongeza LLM Mpya",
@@ -2422,47 +2581,50 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       modelId: "Kitambulisho cha Mfano",
       description: "Maelezo",
       cancel: "Ghairi",
-      addModel: "Ongeza Mfano"
+      addModel: "Ongeza Mfano",
     },
     placeholders: {
       customModel: "k.m., Mfano Wangu Maalum",
       embeddingModelId: "k.m., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Eleza mfano, sifa zake, na lini wa kutumia"
+      describeModel: "Eleza mfano, sifa zake, na lini wa kutumia",
     },
     validation: {
-      pleaseEnterModelId: "Tafadhali ingiza kitambulisho cha mfano"
-    }
+      pleaseEnterModelId: "Tafadhali ingiza kitambulisho cha mfano",
+    },
   }
 
   // Add Model Selection translations to Portuguese Brazilian
   resources["pt-BR"].common.modelSelection = {
     llmManagement: "Gerenciamento de LLM",
-    llmDescription: "Configure e gerencie os LLMs usados para gerar respostas de texto. O modelo padrão será usado para todas as operações.",
+    llmDescription:
+      "Configure e gerencie os LLMs usados para gerar respostas de texto. O modelo padrão será usado para todas as operações.",
     addNewLlm: "Adicionar Novo LLM",
     noLlmsConfigured: "Nenhum LLM configurado",
     addNewLlmToGetStarted: "Adicione um novo LLM para começar",
     embeddingModelManagement: "Gerenciamento de Modelos de Embedding",
-    embeddingDescription: "Configure e gerencie os modelos de embedding usados para indexação e recuperação de bases de conhecimento. O modelo padrão será usado ao criar novas bases de conhecimento, mas cada base de conhecimento continuará usando seu modelo de embedding original mesmo se o padrão mudar posteriormente.",
+    embeddingDescription:
+      "Configure e gerencie os modelos de embedding usados para indexação e recuperação de bases de conhecimento. O modelo padrão será usado ao criar novas bases de conhecimento, mas cada base de conhecimento continuará usando seu modelo de embedding original mesmo se o padrão mudar posteriormente.",
     addEmbeddingModel: "Adicionar Modelo de Embedding",
     noEmbeddingModelsConfigured: "Nenhum modelo de embedding configurado",
-    addNewEmbeddingModelToGetStarted: "Adicione um novo modelo de embedding para começar",
+    addNewEmbeddingModelToGetStarted:
+      "Adicione um novo modelo de embedding para começar",
     tableHeaders: {
       name: "Nome",
       modelId: "ID do Modelo",
       provider: "Provedor",
       description: "Descrição",
       status: "Status",
-      actions: "Ações"
+      actions: "Ações",
     },
     status: {
       default: "Padrão",
-      available: "Disponível"
+      available: "Disponível",
     },
     actions: {
       setAsDefault: "Definir como Padrão",
       delete: "Excluir",
       validate: "Validar",
-      validating: "Validando"
+      validating: "Validando",
     },
     dialog: {
       addNewLlm: "Adicionar Novo LLM",
@@ -2472,47 +2634,50 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       modelId: "ID do Modelo",
       description: "Descrição",
       cancel: "Cancelar",
-      addModel: "Adicionar Modelo"
+      addModel: "Adicionar Modelo",
     },
     placeholders: {
       customModel: "ex., Meu Modelo Personalizado",
       embeddingModelId: "ex., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Descreva o modelo, suas características e quando usá-lo"
+      describeModel: "Descreva o modelo, suas características e quando usá-lo",
     },
     validation: {
-      pleaseEnterModelId: "Por favor, insira um ID de modelo"
-    }
+      pleaseEnterModelId: "Por favor, insira um ID de modelo",
+    },
   }
 
   // Add Model Selection translations to Spanish Latin America
   resources["es-LATAM"].common.modelSelection = {
     llmManagement: "Gestión de LLM",
-    llmDescription: "Configure y gestione los LLM utilizados para generar respuestas de texto. El modelo predeterminado se usará para todas las operaciones.",
+    llmDescription:
+      "Configure y gestione los LLM utilizados para generar respuestas de texto. El modelo predeterminado se usará para todas las operaciones.",
     addNewLlm: "Agregar Nuevo LLM",
     noLlmsConfigured: "No hay LLM configurados",
     addNewLlmToGetStarted: "Agregue un nuevo LLM para comenzar",
     embeddingModelManagement: "Gestión de Modelos de Embedding",
-    embeddingDescription: "Configure y gestione los modelos de embedding utilizados para la indexación y recuperación de bases de conocimiento. El modelo predeterminado se usará al crear nuevas bases de conocimiento, pero cada base de conocimiento continuará usando su modelo de embedding original incluso si el predeterminado cambia posteriormente.",
+    embeddingDescription:
+      "Configure y gestione los modelos de embedding utilizados para la indexación y recuperación de bases de conocimiento. El modelo predeterminado se usará al crear nuevas bases de conocimiento, pero cada base de conocimiento continuará usando su modelo de embedding original incluso si el predeterminado cambia posteriormente.",
     addEmbeddingModel: "Agregar Modelo de Embedding",
     noEmbeddingModelsConfigured: "No hay modelos de embedding configurados",
-    addNewEmbeddingModelToGetStarted: "Agregue un nuevo modelo de embedding para comenzar",
+    addNewEmbeddingModelToGetStarted:
+      "Agregue un nuevo modelo de embedding para comenzar",
     tableHeaders: {
       name: "Nombre",
       modelId: "ID del Modelo",
       provider: "Proveedor",
       description: "Descripción",
       status: "Estado",
-      actions: "Acciones"
+      actions: "Acciones",
     },
     status: {
       default: "Predeterminado",
-      available: "Disponible"
+      available: "Disponible",
     },
     actions: {
       setAsDefault: "Establecer como Predeterminado",
       delete: "Eliminar",
       validate: "Validar",
-      validating: "Validando"
+      validating: "Validando",
     },
     dialog: {
       addNewLlm: "Agregar Nuevo LLM",
@@ -2522,16 +2687,16 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       modelId: "ID del Modelo",
       description: "Descripción",
       cancel: "Cancelar",
-      addModel: "Agregar Modelo"
+      addModel: "Agregar Modelo",
     },
     placeholders: {
       customModel: "ej., Mi Modelo Personalizado",
       embeddingModelId: "ej., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Describa el modelo, sus características y cuándo usarlo"
+      describeModel: "Describa el modelo, sus características y cuándo usarlo",
     },
     validation: {
-      pleaseEnterModelId: "Por favor ingrese un ID de modelo"
-    }
+      pleaseEnterModelId: "Por favor ingrese un ID de modelo",
+    },
   }
 
   // Add Knowledge Bases translations for Middle Eastern and Other languages
@@ -2541,7 +2706,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
     resources.he.common.knowledgeBases = {
       title: "בסיסי ידע",
       addKnowledgeBase: "הוסף בסיס ידע",
-      description: "נהל וארגן את המסמכים שלך בבסיסי ידע לאינטראקציות יעילות הנתמכות על ידי AI.",
+      description:
+        "נהל וארגן את המסמכים שלך בבסיסי ידע לאינטראקציות יעילות הנתמכות על ידי AI.",
       createNew: "צור בסיס ידע חדש",
       noKnowledgeBases: "עדיין לא נוצרו בסיסי ידע",
       getStarted: "צור את בסיס הידע הראשון שלך כדי להתחיל",
@@ -2550,13 +2716,13 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         description: "תיאור",
         documents: "מסמכים",
         createdAt: "נוצר",
-        actions: "פעולות"
+        actions: "פעולות",
       },
       actions: {
         view: "הצג",
         edit: "עריכה",
         delete: "מחיקה",
-        configure: "הגדרה"
+        configure: "הגדרה",
       },
       dialog: {
         createNew: "צור בסיס ידע חדש",
@@ -2565,15 +2731,15 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         description: "תיאור",
         cancel: "ביטול",
         create: "צור",
-        save: "שמור"
+        save: "שמור",
       },
       placeholders: {
         knowledgeBaseName: "למשל, מדיניות החברה",
-        knowledgeBaseDescription: "תאר מה מכיל בסיס הידע הזה ומה המטרה שלו"
+        knowledgeBaseDescription: "תאר מה מכיל בסיס הידע הזה ומה המטרה שלו",
       },
       validation: {
-        pleaseEnterName: "אנא הזן שם לבסיס הידע"
-      }
+        pleaseEnterName: "אנא הזן שם לבסיס הידע",
+      },
     }
   }
 
@@ -2582,7 +2748,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
     resources.fa.common.knowledgeBases = {
       title: "پایگاه‌های دانش",
       addKnowledgeBase: "افزودن پایگاه دانش",
-      description: "اسناد خود را در پایگاه‌های دانش مدیریت و سازماندهی کنید تا تعاملات کارآمد با پشتیبانی هوش مصنوعی داشته باشید.",
+      description:
+        "اسناد خود را در پایگاه‌های دانش مدیریت و سازماندهی کنید تا تعاملات کارآمد با پشتیبانی هوش مصنوعی داشته باشید.",
       createNew: "ایجاد پایگاه دانش جدید",
       noKnowledgeBases: "هنوز هیچ پایگاه دانشی ایجاد نشده است",
       getStarted: "اولین پایگاه دانش خود را برای شروع ایجاد کنید",
@@ -2591,13 +2758,13 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         description: "توضیحات",
         documents: "اسناد",
         createdAt: "ایجاد شده",
-        actions: "عملیات"
+        actions: "عملیات",
       },
       actions: {
         view: "مشاهده",
         edit: "ویرایش",
         delete: "حذف",
-        configure: "پیکربندی"
+        configure: "پیکربندی",
       },
       dialog: {
         createNew: "ایجاد پایگاه دانش جدید",
@@ -2606,15 +2773,16 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         description: "توضیحات",
         cancel: "لغو",
         create: "ایجاد",
-        save: "ذخیره"
+        save: "ذخیره",
       },
       placeholders: {
         knowledgeBaseName: "مثال: سیاست‌های شرکت",
-        knowledgeBaseDescription: "توضیح دهید که این پایگاه دانش چه چیزی را شامل می‌شود و هدف آن چیست"
+        knowledgeBaseDescription:
+          "توضیح دهید که این پایگاه دانش چه چیزی را شامل می‌شود و هدف آن چیست",
       },
       validation: {
-        pleaseEnterName: "لطفاً نامی برای پایگاه دانش وارد کنید"
-      }
+        pleaseEnterName: "لطفاً نامی برای پایگاه دانش وارد کنید",
+      },
     }
   }
 
@@ -2623,7 +2791,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
     resources.tr.common.knowledgeBases = {
       title: "Bilgi Tabanları",
       addKnowledgeBase: "Bilgi tabanı ekle",
-      description: "Belgelerinizi bilgi tabanlarında yönetin ve düzenleyin, AI destekli etkili etkileşimler için.",
+      description:
+        "Belgelerinizi bilgi tabanlarında yönetin ve düzenleyin, AI destekli etkili etkileşimler için.",
       createNew: "Yeni bilgi tabanı oluştur",
       noKnowledgeBases: "Henüz hiç bilgi tabanı oluşturulmamış",
       getStarted: "Başlamak için ilk bilgi tabanınızı oluşturun",
@@ -2632,13 +2801,13 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         description: "Açıklama",
         documents: "Belgeler",
         createdAt: "Oluşturuldu",
-        actions: "İşlemler"
+        actions: "İşlemler",
       },
       actions: {
         view: "Görüntüle",
         edit: "Düzenle",
         delete: "Sil",
-        configure: "Yapılandır"
+        configure: "Yapılandır",
       },
       dialog: {
         createNew: "Yeni bilgi tabanı oluştur",
@@ -2647,15 +2816,16 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         description: "Açıklama",
         cancel: "İptal",
         create: "Oluştur",
-        save: "Kaydet"
+        save: "Kaydet",
       },
       placeholders: {
         knowledgeBaseName: "örn., Şirket Politikaları",
-        knowledgeBaseDescription: "Bu bilgi tabanının ne içerdiğini ve amacını açıklayın"
+        knowledgeBaseDescription:
+          "Bu bilgi tabanının ne içerdiğini ve amacını açıklayın",
       },
       validation: {
-        pleaseEnterName: "Lütfen bilgi tabanı için bir ad girin"
-      }
+        pleaseEnterName: "Lütfen bilgi tabanı için bir ad girin",
+      },
     }
   }
 
@@ -2664,7 +2834,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
     resources.sw.common.knowledgeBases = {
       title: "Misingi ya Ujuzi",
       addKnowledgeBase: "Ongeza msingi wa ujuzi",
-      description: "Simamia na panga hati zako katika misingi ya ujuzi kwa ajili ya mwingiliano wa ufanisi unaotumia AI.",
+      description:
+        "Simamia na panga hati zako katika misingi ya ujuzi kwa ajili ya mwingiliano wa ufanisi unaotumia AI.",
       createNew: "Unda msingi mpya wa ujuzi",
       noKnowledgeBases: "Bado hakuna misingi ya ujuzi iliyoundwa",
       getStarted: "Unda msingi wako wa kwanza wa ujuzi ili uanze",
@@ -2673,13 +2844,13 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         description: "Maelezo",
         documents: "Hati",
         createdAt: "Iliundwa",
-        actions: "Vitendo"
+        actions: "Vitendo",
       },
       actions: {
         view: "Ona",
         edit: "Hariri",
         delete: "Futa",
-        configure: "Sanidi"
+        configure: "Sanidi",
       },
       dialog: {
         createNew: "Unda msingi mpya wa ujuzi",
@@ -2688,15 +2859,16 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         description: "Maelezo",
         cancel: "Ghairi",
         create: "Unda",
-        save: "Hifadhi"
+        save: "Hifadhi",
       },
       placeholders: {
         knowledgeBaseName: "mfano, Sera za Kampuni",
-        knowledgeBaseDescription: "Eleza kile msingi huu wa ujuzi unachohifadhi na lengo lake"
+        knowledgeBaseDescription:
+          "Eleza kile msingi huu wa ujuzi unachohifadhi na lengo lake",
       },
       validation: {
-        pleaseEnterName: "Tafadhali ingiza jina la msingi wa ujuzi"
-      }
+        pleaseEnterName: "Tafadhali ingiza jina la msingi wa ujuzi",
+      },
     }
   }
 
@@ -2705,7 +2877,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
     resources["pt-BR"].common.knowledgeBases = {
       title: "Bases de Conhecimento",
       addKnowledgeBase: "Adicionar base de conhecimento",
-      description: "Gerencie e organize seus documentos em bases de conhecimento para interações eficientes com suporte de IA.",
+      description:
+        "Gerencie e organize seus documentos em bases de conhecimento para interações eficientes com suporte de IA.",
       createNew: "Criar nova base de conhecimento",
       noKnowledgeBases: "Nenhuma base de conhecimento foi criada ainda",
       getStarted: "Crie sua primeira base de conhecimento para começar",
@@ -2714,13 +2887,13 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         description: "Descrição",
         documents: "Documentos",
         createdAt: "Criado",
-        actions: "Ações"
+        actions: "Ações",
       },
       actions: {
         view: "Visualizar",
         edit: "Editar",
         delete: "Excluir",
-        configure: "Configurar"
+        configure: "Configurar",
       },
       dialog: {
         createNew: "Criar nova base de conhecimento",
@@ -2729,15 +2902,17 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         description: "Descrição",
         cancel: "Cancelar",
         create: "Criar",
-        save: "Salvar"
+        save: "Salvar",
       },
       placeholders: {
         knowledgeBaseName: "ex., Políticas da Empresa",
-        knowledgeBaseDescription: "Descreva o que esta base de conhecimento contém e seu propósito"
+        knowledgeBaseDescription:
+          "Descreva o que esta base de conhecimento contém e seu propósito",
       },
       validation: {
-        pleaseEnterName: "Por favor, insira um nome para a base de conhecimento"
-      }
+        pleaseEnterName:
+          "Por favor, insira um nome para a base de conhecimento",
+      },
     }
   }
 
@@ -2746,7 +2921,8 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
     resources["es-LATAM"].common.knowledgeBases = {
       title: "Bases de Conocimiento",
       addKnowledgeBase: "Agregar base de conocimiento",
-      description: "Administra y organiza tus documentos en bases de conocimiento para interacciones eficientes con soporte de IA.",
+      description:
+        "Administra y organiza tus documentos en bases de conocimiento para interacciones eficientes con soporte de IA.",
       createNew: "Crear nueva base de conocimiento",
       noKnowledgeBases: "Aún no se han creado bases de conocimiento",
       getStarted: "Crea tu primera base de conocimiento para comenzar",
@@ -2755,13 +2931,13 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         description: "Descripción",
         documents: "Documentos",
         createdAt: "Creado",
-        actions: "Acciones"
+        actions: "Acciones",
       },
       actions: {
         view: "Ver",
         edit: "Editar",
         delete: "Eliminar",
-        configure: "Configurar"
+        configure: "Configurar",
       },
       dialog: {
         createNew: "Crear nueva base de conocimiento",
@@ -2770,15 +2946,17 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         description: "Descripción",
         cancel: "Cancelar",
         create: "Crear",
-        save: "Guardar"
+        save: "Guardar",
       },
       placeholders: {
         knowledgeBaseName: "ej., Políticas de la Empresa",
-        knowledgeBaseDescription: "Describe qué contiene esta base de conocimiento y su propósito"
+        knowledgeBaseDescription:
+          "Describe qué contiene esta base de conocimiento y su propósito",
       },
       validation: {
-        pleaseEnterName: "Por favor ingresa un nombre para la base de conocimiento"
-      }
+        pleaseEnterName:
+          "Por favor ingresa un nombre para la base de conocimiento",
+      },
     }
   }
 
@@ -2789,7 +2967,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         review: "סקירה",
         generate: "יצירה",
         compare: "השוואה",
-        match: "התאמה"
+        match: "התאמה",
       },
       metadata: {
         questions: "שאלות",
@@ -2799,22 +2977,22 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         documents: "מסמכים",
         documents_one: "מסמך",
         digitized: "דיגיטלי",
-        handwritten: "כתב יד"
+        handwritten: "כתב יד",
       },
       feedback: {
         positive: "תן משוב חיובי לתוצאה זו",
         negative: "תן משוב שלילי לתוצאה זו",
-        hasFeedback: "לתוצאה זו יש משוב"
+        hasFeedback: "לתוצאה זו יש משוב",
       },
       emptyMessages: {
         review: "אין עדיין היסטוריית סקירה",
         generate: "אין עדיין היסטוריית יצירה",
         compare: "אין עדיין היסטוריית השוואה",
-        match: "אין עדיין היסטוריית התאמה"
+        match: "אין עדיין היסטוריית התאמה",
       },
       deleteConfirmation: "האם אתה בטוח שברצונך למחוק פריט זה?",
       history: "היסטוריה",
-      allUsers: "כל המשתמשים"
+      allUsers: "כל המשתמשים",
     }
   }
 
@@ -2824,7 +3002,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         review: "بررسی",
         generate: "تولید",
         compare: "مقایسه",
-        match: "تطبیق"
+        match: "تطبیق",
       },
       metadata: {
         questions: "سوالات",
@@ -2834,22 +3012,22 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         documents: "اسناد",
         documents_one: "سند",
         digitized: "دیجیتالی شده",
-        handwritten: "دست نویس"
+        handwritten: "دست نویس",
       },
       feedback: {
         positive: "بازخورد مثبت برای این نتیجه ارائه دهید",
         negative: "بازخورد منفی برای این نتیجه ارائه دهید",
-        hasFeedback: "این نتیجه دارای بازخورد است"
+        hasFeedback: "این نتیجه دارای بازخورد است",
       },
       emptyMessages: {
         review: "هنوز سابقه بررسی وجود ندارد",
         generate: "هنوز سابقه تولید وجود ندارد",
         compare: "هنوز سابقه مقایسه وجود ندارد",
-        match: "هنوز سابقه تطبیق وجود ندارد"
+        match: "هنوز سابقه تطبیق وجود ندارد",
       },
       deleteConfirmation: "آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟",
       history: "تاریخچه",
-      allUsers: "همه کاربران"
+      allUsers: "همه کاربران",
     }
   }
 
@@ -2859,7 +3037,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         review: "Gözden Geçir",
         generate: "Oluştur",
         compare: "Karşılaştır",
-        match: "Eşleştir"
+        match: "Eşleştir",
       },
       metadata: {
         questions: "soru",
@@ -2869,22 +3047,22 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         documents: "belge",
         documents_one: "belge",
         digitized: "dijitalleştirilmiş",
-        handwritten: "el yazısı"
+        handwritten: "el yazısı",
       },
       feedback: {
         positive: "Bu sonuç için olumlu geri bildirim ver",
         negative: "Bu sonuç için olumsuz geri bildirim ver",
-        hasFeedback: "Bu sonucun geri bildirimi var"
+        hasFeedback: "Bu sonucun geri bildirimi var",
       },
       emptyMessages: {
         review: "Henüz gözden geçirme geçmişi yok",
         generate: "Henüz oluşturma geçmişi yok",
         compare: "Henüz karşılaştırma geçmişi yok",
-        match: "Henüz eşleştirme geçmişi yok"
+        match: "Henüz eşleştirme geçmişi yok",
       },
       deleteConfirmation: "Bu öğeyi silmek istediğinizden emin misiniz?",
       history: "Geçmiş",
-      allUsers: "Tüm kullanıcılar"
+      allUsers: "Tüm kullanıcılar",
     }
   }
 
@@ -2894,7 +3072,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         review: "Hakiki",
         generate: "Zalisha",
         compare: "Linganisha",
-        match: "Oanisha"
+        match: "Oanisha",
       },
       metadata: {
         questions: "maswali",
@@ -2904,22 +3082,22 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         documents: "nyaraka",
         documents_one: "nyaraka",
         digitized: "kimezalishwa kielektroniki",
-        handwritten: "kimeandikwa kwa mkono"
+        handwritten: "kimeandikwa kwa mkono",
       },
       feedback: {
         positive: "Toa maoni mazuri kuhusu matokeo haya",
         negative: "Toa maoni mabaya kuhusu matokeo haya",
-        hasFeedback: "Matokeo haya yana maoni"
+        hasFeedback: "Matokeo haya yana maoni",
       },
       emptyMessages: {
         review: "Bado hakuna historia ya uhakiki",
         generate: "Bado hakuna historia ya uzalishaji",
         compare: "Bado hakuna historia ya kulinganisha",
-        match: "Bado hakuna historia ya kuoanisha"
+        match: "Bado hakuna historia ya kuoanisha",
       },
       deleteConfirmation: "Je, una uhakika ungependa kufuta kipengee hiki?",
       history: "Historia",
-      allUsers: "Watumiaji wote"
+      allUsers: "Watumiaji wote",
     }
   }
 
@@ -2929,7 +3107,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         review: "Revisar",
         generate: "Gerar",
         compare: "Comparar",
-        match: "Corresponder"
+        match: "Corresponder",
       },
       metadata: {
         questions: "perguntas",
@@ -2939,22 +3117,22 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         documents: "documentos",
         documents_one: "documento",
         digitized: "digitalizado",
-        handwritten: "manuscrito"
+        handwritten: "manuscrito",
       },
       feedback: {
         positive: "Dar feedback positivo para este resultado",
         negative: "Dar feedback negativo para este resultado",
-        hasFeedback: "Este resultado tem feedback"
+        hasFeedback: "Este resultado tem feedback",
       },
       emptyMessages: {
         review: "Ainda não há histórico de revisão",
         generate: "Ainda não há histórico de geração",
         compare: "Ainda não há histórico de comparação",
-        match: "Ainda não há histórico de correspondência"
+        match: "Ainda não há histórico de correspondência",
       },
       deleteConfirmation: "Tem certeza de que deseja excluir este item?",
       history: "Histórico",
-      allUsers: "Todos os usuários"
+      allUsers: "Todos os usuários",
     }
   }
 
@@ -2964,7 +3142,7 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         review: "Revisar",
         generate: "Generar",
         compare: "Comparar",
-        match: "Coincidir"
+        match: "Coincidir",
       },
       metadata: {
         questions: "preguntas",
@@ -2974,22 +3152,23 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
         documents: "documentos",
         documents_one: "documento",
         digitized: "digitalizado",
-        handwritten: "manuscrito"
+        handwritten: "manuscrito",
       },
       feedback: {
         positive: "Dar retroalimentación positiva para este resultado",
         negative: "Dar retroalimentación negativa para este resultado",
-        hasFeedback: "Este resultado tiene retroalimentación"
+        hasFeedback: "Este resultado tiene retroalimentación",
       },
       emptyMessages: {
         review: "Aún no hay historial de revisión",
         generate: "Aún no hay historial de generación",
         compare: "Aún no hay historial de comparación",
-        match: "Aún no hay historial de coincidencias"
+        match: "Aún no hay historial de coincidencias",
       },
-      deleteConfirmation: "¿Estás seguro de que quieres eliminar este elemento?",
+      deleteConfirmation:
+        "¿Estás seguro de que quieres eliminar este elemento?",
       history: "Historial",
-      allUsers: "Todos los usuarios"
+      allUsers: "Todos los usuarios",
     }
   }
 
@@ -3003,8 +3182,9 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       system: "מערכת",
       lightMode: "מצב בהיר",
       darkMode: "מצב כהה",
-      deleteAccountDescription: "מחק לצמיתות את הנתונים שלך וכל מה שקשור לחשבון שלך.",
-      delete: "מחק"
+      deleteAccountDescription:
+        "מחק לצמיתות את הנתונים שלך וכל מה שקשור לחשבון שלך.",
+      delete: "מחק",
     })
   }
 
@@ -3017,8 +3197,9 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       system: "سیستم",
       lightMode: "حالت روشن",
       darkMode: "حالت تاریک",
-      deleteAccountDescription: "داده‌های خود و همه چیزهای مرتبط با حساب کاربری‌تان را برای همیشه حذف کنید.",
-      delete: "حذف"
+      deleteAccountDescription:
+        "داده‌های خود و همه چیزهای مرتبط با حساب کاربری‌تان را برای همیشه حذف کنید.",
+      delete: "حذف",
     })
   }
 
@@ -3031,8 +3212,9 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       system: "Sistem",
       lightMode: "Açık Mod",
       darkMode: "Koyu Mod",
-      deleteAccountDescription: "Verilerinizi ve hesabınızla ilişkili her şeyi kalıcı olarak silin.",
-      delete: "Sil"
+      deleteAccountDescription:
+        "Verilerinizi ve hesabınızla ilişkili her şeyi kalıcı olarak silin.",
+      delete: "Sil",
     })
   }
 
@@ -3045,8 +3227,9 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       system: "Mfumo",
       lightMode: "Hali ya Mwanga",
       darkMode: "Hali ya Giza",
-      deleteAccountDescription: "Futa data yako na kila kitu kinachohusiana na akaunti yako kabisa.",
-      delete: "Futa"
+      deleteAccountDescription:
+        "Futa data yako na kila kitu kinachohusiana na akaunti yako kabisa.",
+      delete: "Futa",
     })
   }
 
@@ -3059,8 +3242,9 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       system: "Sistema",
       lightMode: "Modo Claro",
       darkMode: "Modo Escuro",
-      deleteAccountDescription: "Excluir permanentemente seus dados e tudo associado à sua conta.",
-      delete: "Excluir"
+      deleteAccountDescription:
+        "Excluir permanentemente seus dados e tudo associado à sua conta.",
+      delete: "Excluir",
     })
   }
 
@@ -3073,8 +3257,9 @@ export const addMiddleEasternOtherTranslations = (resources: any) => {
       system: "Sistema",
       lightMode: "Modo Claro",
       darkMode: "Modo Oscuro",
-      deleteAccountDescription: "Eliminar permanentemente tus datos y todo lo asociado con tu cuenta.",
-      delete: "Eliminar"
+      deleteAccountDescription:
+        "Eliminar permanentemente tus datos y todo lo asociado con tu cuenta.",
+      delete: "Eliminar",
     })
   }
 }

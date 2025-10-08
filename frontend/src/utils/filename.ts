@@ -12,10 +12,10 @@
  */
 export const getCleanFileName = (source: string): string => {
   if (!source) return "Unknown"
-  
+
   // First get just the filename from any path
   let filename = source.split("/").pop() || source.split("\\").pop() || source
-  
+
   // Remove various types of prefixes that might be added during file processing
   if (filename.includes("_")) {
     const parts = filename.split("_")
@@ -24,7 +24,7 @@ export const getCleanFileName = (source: string): string => {
       // If first part is short and alphanumeric (likely a prefix), remove it
       // This catches patterns like:
       // - "b_dmyao_" (user prefix)
-      // - "tmp123456" (temp prefix) 
+      // - "tmp123456" (temp prefix)
       // - "uuid123" (short uuid)
       // But preserves legitimate underscores in filenames
       if (firstPart.length <= 10 && /^[a-zA-Z0-9]+$/.test(firstPart)) {

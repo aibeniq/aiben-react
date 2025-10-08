@@ -61,8 +61,10 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         typing: "AI kirjutab...",
         error: "Vabandust, midagi läks valesti. Proovi uuesti.",
         welcome: "Tere! Kuidas saan teid täna aidata?",
-        welcomeMessageWithSource: "Valige teadmusbaas või laadige üles failid, seejärel esitage küsimus.",
-        welcomeMessageGeneral: "Küsige mult mida tahes! Teadmusbaasi otsinguks valige esmalt teadmusbaas.",
+        welcomeMessageWithSource:
+          "Valige teadmusbaas või laadige üles failid, seejärel esitage küsimus.",
+        welcomeMessageGeneral:
+          "Küsige mult mida tahes! Teadmusbaasi otsinguks valige esmalt teadmusbaas.",
         knowledgeBaseTableName: "Nimi",
         knowledgeBaseTableDescription: "Kirjeldus",
         knowledgeBaseTableSources: "Allikad",
@@ -112,21 +114,26 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Dokumentide ülevaade",
-        pageDescription: "Vaadake üle dokument kasutaja määratletud kontrollnimekirja ja poliitika andmebaasi alusel.",
+        pageDescription:
+          "Vaadake üle dokument kasutaja määratletud kontrollnimekirja ja poliitika andmebaasi alusel.",
         knowledgeBaseTitle: "Teadmusbaas",
         knowledgeBaseDescription: "Klõpsake valimiseks",
         checklistTitle: "Kontrollnimekiri",
         checklistDescription: "Klõpsake valimiseks",
         customInstructionsTitle: "Kohandatud juhised (valikuline)",
-        customInstructionsPlaceholder: "Sisestage täiendavad juhised, mida tuleb arvestada kontrollnimekirja küsimustele vastamisel...",
-        customInstructionsHelp: "{{count}}/2000 märki. Need juhised lisatakse töötlemise ajal igale küsimusele.",
-        searchModeHelp: "Vektorotsing annab kiireid, sihipäraseid tulemusi. Täisdokumendi analüüs uurib kogu teadmusbaasi sisu.",
+        customInstructionsPlaceholder:
+          "Sisestage täiendavad juhised, mida tuleb arvestada kontrollnimekirja küsimustele vastamisel...",
+        customInstructionsHelp:
+          "{{count}}/2000 märki. Need juhised lisatakse töötlemise ajal igale küsimusele.",
+        searchModeHelp:
+          "Vektorotsing annab kiireid, sihipäraseid tulemusi. Täisdokumendi analüüs uurib kogu teadmusbaasi sisu.",
         processingFile: "Faili töötlemine...",
         processingFiles: "Failide töötlemine...",
         selectKnowledgeBaseTitle: "Valige teadmusbaas",
         selectChecklistTitle: "Valige kontrollnimekiri",
         noResults: "Tulemusi pole veel",
-        uploadDocuments: "Laadige üles üks või mitu dokumenti valitud kontrollnimekirja suhtes ülevaatamiseks",
+        uploadDocuments:
+          "Laadige üles üks või mitu dokumenti valitud kontrollnimekirja suhtes ülevaatamiseks",
         results: "Tulemused",
         downloadReport: "Laadi alla aruanne",
         downloadCsv: "Laadi alla CSV",
@@ -135,32 +142,38 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         reportCopied: "Aruanne kopeeriti lõikelauale!",
         reviewButton: "Ülevaade",
         consultDocuments: "Konsulteeri dokumentidega",
-        noChecklistsAvailable: "Kontrollnimekirju pole saadaval. Alustamiseks looge oma esimene kontrollnimekiri.",
+        noChecklistsAvailable:
+          "Kontrollnimekirju pole saadaval. Alustamiseks looge oma esimene kontrollnimekiri.",
         createChecklist: "Loo kontrollnimekiri",
         editChecklist: "Redigeeri kontrollnimekirja",
         checklistName: "Kontrollnimekirja nimi",
         checklistNamePlaceholder: "Sisestage kontrollnimekirja nimi...",
         checklistDescriptionLabel: "Kirjeldus",
-        checklistDescriptionPlaceholder: "Sisestage kontrollnimekirja kirjeldus automaatsete küsimuste soovituste jaoks (vähemalt 10 märki)...",
+        checklistDescriptionPlaceholder:
+          "Sisestage kontrollnimekirja kirjeldus automaatsete küsimuste soovituste jaoks (vähemalt 10 märki)...",
         questions: "Küsimused",
         suggest: "Soovita",
         suggesting: "Soovitan...",
         optimize: "Optimeeri",
-        optimizeTooltip: "Optimeerimisfunktsiooni lubamiseks peab olema valitud teadmusbaas",
-        optimizeTooltipEnabled: "Optimeeri küsimusi valitud teadmusbaasi põhjal",
-        allUsersToggleTooltip: "Lülita ainult oma ajaloo või kõigi kasutajate ajaloo vaatamise vahel",
+        optimizeTooltip:
+          "Optimeerimisfunktsiooni lubamiseks peab olema valitud teadmusbaas",
+        optimizeTooltipEnabled:
+          "Optimeeri küsimusi valitud teadmusbaasi põhjal",
+        allUsersToggleTooltip:
+          "Lülita ainult oma ajaloo või kõigi kasutajate ajaloo vaatamise vahel",
         uploadFiles: "Laadi üles failid",
         knowledgeBase: "Teadmusbaas",
         referenceDocuments: "Viitedokumendid (valikuline)",
         selectKnowledgeBasePlaceholder: "Valige teadmusbaas...",
-        noKnowledgeBasesAvailable: "Teadmusbaase pole saadaval. Selle funktsiooni kasutamiseks looge esmalt üks.",
+        noKnowledgeBasesAvailable:
+          "Teadmusbaase pole saadaval. Selle funktsiooni kasutamiseks looge esmalt üks.",
         copyQuestions: "Kopeeri küsimused",
         questionsCopied: "Küsimused kopeeriti lõikelauale",
         noQuestionsToCopy: "Kopeerimiseks küsimusi pole",
         failedToCopyQuestions: "Küsimuste lõikelauale kopeerimine ebaõnnestus",
         saveChecklist: "Salvesta kontrollnimekiri",
         cancel: "Tühista",
-        deleteChecklist: "Kustuta kontrollnimekiri"
+        deleteChecklist: "Kustuta kontrollnimekiri",
       },
       compare: {
         title: "Dokumentide võrdlus",
@@ -187,7 +200,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         moderate: "Mõõdukas",
         deep: "Sügav",
         veryDeep: "Väga sügav",
-        editTopicList: "Muuda teemade loendit"
+        editTopicList: "Muuda teemade loendit",
       },
       match: {
         title: "Dokumentide vastavus",
@@ -212,7 +225,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         minimumSimilarity: "Minimaalne sarnasus",
         searchDepth: "Otsingu sügavus",
         maxResults: "Maksimaalne tulemuste arv",
-        editFormTemplate: "Muuda vormi malli"
+        editFormTemplate: "Muuda vormi malli",
       },
       knowledgeBases: {
         title: "Teadmusbaaside haldamine",
@@ -226,31 +239,33 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
           embeddingModel: "Põimimismudel",
           dateCreated: "Loomise kuupäev",
           dateModified: "Muutmise kuupäev",
-          actions: "Tegevused"
+          actions: "Tegevused",
         },
         status: {
           default: "Vaikimisi",
-          na: "Pole saadaval"
+          na: "Pole saadaval",
         },
         actions: {
           view: "Vaata",
           edit: "Muuda",
           delete: "Kustuta",
-          configure: "Seadista"
+          configure: "Seadista",
         },
         deleteModal: {
           title: "Kustuta teadmusbaas",
           buttonText: "Kustuta teadmusbaas",
-          description: "See teadmusbaas kustutatakse jäädavalt. Kas olete kindel? Seda toimingut ei saa tagasi võtta.",
+          description:
+            "See teadmusbaas kustutatakse jäädavalt. Kas olete kindel? Seda toimingut ei saa tagasi võtta.",
           confirmButton: "Kustuta",
           cancelButton: "Tühista",
           successMessage: "Teadmusbaas kustutati edukalt",
-          errorMessage: "Teadmusbaasi kustutamisel tekkis viga"
+          errorMessage: "Teadmusbaasi kustutamisel tekkis viga",
         },
         modals: {
           add: {
             title: "Lisa teadmusbaas",
-            description: "Looge uus teadmusbaas, andes üksikasjad ja laadides dokumendid allpool üles.",
+            description:
+              "Looge uus teadmusbaas, andes üksikasjad ja laadides dokumendid allpool üles.",
             fields: {
               title: "Pealkiri",
               titlePlaceholder: "Pealkiri",
@@ -300,7 +315,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
           },
           messages: {
             processing: "Töötlemine...",
-            pleaseWait: "Palun oodake, kuni töötleme teie faile..."
+            pleaseWait: "Palun oodake, kuni töötleme teie faile...",
           },
           editFormTemplateModal: {
             title: "Muuda Vormi Malli",
@@ -314,7 +329,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
             suggest: "Soovita",
             fieldPlaceholder: "Lisa välja nimi...",
             cancel: "Tühista",
-            updateFormTemplate: "Värskenda Vormi Malli"
+            updateFormTemplate: "Värskenda Vormi Malli",
           },
         },
         editCustom: {
@@ -327,10 +342,12 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       optimizeChecklistModal: {
         title: "Optimeerige Kontroll-loend",
         customInstructionsLabel: "Kohandatud Juhised (Valikuline)",
-        customInstructionsHelperText: "Sisestage täiendavad juhised, mida tuleks kontroll-loendi küsimustele vastamisel arvesse võtta",
+        customInstructionsHelperText:
+          "Sisestage täiendavad juhised, mida tuleks kontroll-loendi küsimustele vastamisel arvesse võtta",
         analyzing: "Analüüsimine...",
         analyzeButton: "Analüüsi Kontroll-loend",
-        analyzingMessage: "Analüüsitakse teie kontroll-loendit optimeerimise võimaluste jaoks...",
+        analyzingMessage:
+          "Analüüsitakse teie kontroll-loendit optimeerimise võimaluste jaoks...",
         cancelAnalysis: "Tühista Analüüs",
         downloading: "Allalaadimine...",
         downloadCsv: "Laadi alla CSV",
@@ -347,19 +364,26 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         optimizationsSelectedText: "optimeerimist valitud rakendamiseks",
         applying: "Rakendamine...",
         applySelectedOptimizations: "Rakenda Valitud Optimeerimised",
-        uploadDocumentsTitle: "Laadige üles dokument(id), mida kontroll-loend peaks aktsepteerima *",
-        uploadDocumentsHelperText: "Laadige üles dokumendid, mis peaksid vastama kõigile kontroll-loendi nõuetele, et aidata tuvastada küsimusi, mis võivad olla liiga ranged",
-        customInstructionsPlaceholder: "nt, Arvestage, et see on lasteuuringu puhul vanusega seotud nõuete hindamisel, See protokoll on madala riskiga sekkumiseks, jne."
+        uploadDocumentsTitle:
+          "Laadige üles dokument(id), mida kontroll-loend peaks aktsepteerima *",
+        uploadDocumentsHelperText:
+          "Laadige üles dokumendid, mis peaksid vastama kõigile kontroll-loendi nõuetele, et aidata tuvastada küsimusi, mis võivad olla liiga ranged",
+        customInstructionsPlaceholder:
+          "nt, Arvestage, et see on lasteuuringu puhul vanusega seotud nõuete hindamisel, See protokoll on madala riskiga sekkumiseks, jne.",
       },
       optimizeOutlineModal: {
         title: "Optimeerige Ülevaade",
-        description: "Laadige üles referentsdokument, mis esindab kõrgekvaliteetset näidet aruande tüübist, mida soovite genereerida. Süsteem genereerib aruande, kasutades teie praegust ülevaadet ja teadmusbaasi, võrdleb seda referentsiga ja soovitab parandusi ülevaate jaotistele.",
+        description:
+          "Laadige üles referentsdokument, mis esindab kõrgekvaliteetset näidet aruande tüübist, mida soovite genereerida. Süsteem genereerib aruande, kasutades teie praegust ülevaadet ja teadmusbaasi, võrdleb seda referentsiga ja soovitab parandusi ülevaate jaotistele.",
         groundTruthDocument: "Referentsdokument",
         customInstructionsLabel: "Kohandatud Juhised (Valikuline)",
-        customInstructionsHelperText: "Andke täiendavad juhised optimeerimisprotsessiks",
-        customInstructionsPlaceholder: "nt, Keskenduge tehnilise sügavuse parandamisele, tagage vastavus konkreetsetele standarditele, jne.",
+        customInstructionsHelperText:
+          "Andke täiendavad juhised optimeerimisprotsessiks",
+        customInstructionsPlaceholder:
+          "nt, Keskenduge tehnilise sügavuse parandamisele, tagage vastavus konkreetsetele standarditele, jne.",
         characters: "tähemärki",
-        analyzingOutline: "Analüüsitakse ülevaadet ja genereeritakse optimeerimisi...",
+        analyzingOutline:
+          "Analüüsitakse ülevaadet ja genereeritakse optimeerimisi...",
         cancelAnalysis: "Tühista Analüüs",
         optimizationResults: "Optimeerimise Tulemused",
         sectionsNeedOptimization: "jaotist vajab optimeerimist",
@@ -377,8 +401,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         cancel: "Tühista",
         optimizing: "Optimeerimine...",
         optimizeOutline: "Optimeerige Ülevaade",
-        applyOptimizations: "Rakenda {{count}} Optimeerimist"
-      }
+        applyOptimizations: "Rakenda {{count}} Optimeerimist",
+      },
     },
   }
 
@@ -441,8 +465,10 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         typing: "AI raksta...",
         error: "Atvainojiet, kaut kas nogāja greizi. Mēģiniet vēlreiz.",
         welcome: "Sveiki! Kā es varu jums palīdzēt šodien?",
-        welcomeMessageWithSource: "Izvēlieties zināšanu bāzi vai augšupielādējiet failus, pēc tam uzdodiet jautājumu.",
-        welcomeMessageGeneral: "Jautājiet man jebko! Zināšanu bāzes meklēšanai vispirms izvēlieties zināšanu bāzi.",
+        welcomeMessageWithSource:
+          "Izvēlieties zināšanu bāzi vai augšupielādējiet failus, pēc tam uzdodiet jautājumu.",
+        welcomeMessageGeneral:
+          "Jautājiet man jebko! Zināšanu bāzes meklēšanai vispirms izvēlieties zināšanu bāzi.",
         knowledgeBaseTableName: "Nosaukums",
         knowledgeBaseTableDescription: "Apraksts",
         knowledgeBaseTableSources: "Avoti",
@@ -492,21 +518,26 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Dokumentu pārskats",
-        pageDescription: "Pārskatiet dokumentu, pamatojoties uz lietotāja definēto kontrolsarakstu un politikas datubāzi.",
+        pageDescription:
+          "Pārskatiet dokumentu, pamatojoties uz lietotāja definēto kontrolsarakstu un politikas datubāzi.",
         knowledgeBaseTitle: "Zināšanu bāze",
         knowledgeBaseDescription: "Noklikšķiniet, lai atlasītu",
         checklistTitle: "Kontrolsaraksts",
         checklistDescription: "Noklikšķiniet, lai atlasītu",
         customInstructionsTitle: "Pielāgotas instrukcijas (neobligāti)",
-        customInstructionsPlaceholder: "Ievadiet papildu instrukcijas, kas jāņem vērā, atbildot uz kontrolsaraksta jautājumiem...",
-        customInstructionsHelp: "{{count}}/2000 rakstzīmes. Šīs instrukcijas tiks pievienotas katram jautājumam apstrādes laikā.",
-        searchModeHelp: "Vektoru meklēšana nodrošina ātrus, mērķtiecīgus rezultātus. Pilna dokumenta analīze pēta visu zināšanu bāzes saturu.",
+        customInstructionsPlaceholder:
+          "Ievadiet papildu instrukcijas, kas jāņem vērā, atbildot uz kontrolsaraksta jautājumiem...",
+        customInstructionsHelp:
+          "{{count}}/2000 rakstzīmes. Šīs instrukcijas tiks pievienotas katram jautājumam apstrādes laikā.",
+        searchModeHelp:
+          "Vektoru meklēšana nodrošina ātrus, mērķtiecīgus rezultātus. Pilna dokumenta analīze pēta visu zināšanu bāzes saturu.",
         processingFile: "Apstrādā failu...",
         processingFiles: "Apstrādā failus...",
         selectKnowledgeBaseTitle: "Atlasiet zināšanu bāzi",
         selectChecklistTitle: "Atlasiet kontrolsarakstu",
         noResults: "Vēl nav rezultātu",
-        uploadDocuments: "Augšupielādējiet vienu vai vairākus dokumentus pārskatīšanai pret atlasīto kontrolsarakstu",
+        uploadDocuments:
+          "Augšupielādējiet vienu vai vairākus dokumentus pārskatīšanai pret atlasīto kontrolsarakstu",
         results: "Rezultāti",
         downloadReport: "Lejupielādēt pārskatu",
         downloadCsv: "Lejupielādēt CSV",
@@ -515,32 +546,38 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         reportCopied: "Pārskats nokopēts starpliktuvē!",
         reviewButton: "Pārskats",
         consultDocuments: "Konsultēties ar dokumentiem",
-        noChecklistsAvailable: "Nav pieejamu kontrolsarakstu. Izveidojiet savu pirmo kontrolsarakstu, lai sāktu.",
+        noChecklistsAvailable:
+          "Nav pieejamu kontrolsarakstu. Izveidojiet savu pirmo kontrolsarakstu, lai sāktu.",
         createChecklist: "Izveidot kontrolsarakstu",
         editChecklist: "Rediģēt kontrolsarakstu",
         checklistName: "Kontrolsaraksta nosaukums",
         checklistNamePlaceholder: "Ievadiet kontrolsaraksta nosaukumu...",
         checklistDescriptionLabel: "Apraksts",
-        checklistDescriptionPlaceholder: "Ievadiet kontrolsaraksta aprakstu automātiskajiem jautājumu ieteikumiem (vismaz 10 rakstzīmes)...",
+        checklistDescriptionPlaceholder:
+          "Ievadiet kontrolsaraksta aprakstu automātiskajiem jautājumu ieteikumiem (vismaz 10 rakstzīmes)...",
         questions: "Jautājumi",
         suggest: "Ieteikt",
         suggesting: "Ieteic...",
         optimize: "Optimizēt",
-        optimizeTooltip: "Lai iespējotu optimizācijas funkciju, jāatlasa zināšanu bāze",
-        optimizeTooltipEnabled: "Optimizēt jautājumus, pamatojoties uz atlasīto zināšanu bāzi",
-        allUsersToggleTooltip: "Pārslēgties starp tikai savas vēstures vai visu lietotāju vēstures skatīšanu",
+        optimizeTooltip:
+          "Lai iespējotu optimizācijas funkciju, jāatlasa zināšanu bāze",
+        optimizeTooltipEnabled:
+          "Optimizēt jautājumus, pamatojoties uz atlasīto zināšanu bāzi",
+        allUsersToggleTooltip:
+          "Pārslēgties starp tikai savas vēstures vai visu lietotāju vēstures skatīšanu",
         uploadFiles: "Augšupielādēt failus",
         knowledgeBase: "Zināšanu bāze",
         referenceDocuments: "Atsauces dokumenti (neobligāti)",
         selectKnowledgeBasePlaceholder: "Atlasiet zināšanu bāzi...",
-        noKnowledgeBasesAvailable: "Nav pieejamu zināšanu bāzu. Vispirms izveidojiet vienu, lai izmantotu šo funkciju.",
+        noKnowledgeBasesAvailable:
+          "Nav pieejamu zināšanu bāzu. Vispirms izveidojiet vienu, lai izmantotu šo funkciju.",
         copyQuestions: "Kopēt jautājumus",
         questionsCopied: "Jautājumi nokopēti starpliktuvē",
         noQuestionsToCopy: "Nav jautājumu, ko kopēt",
         failedToCopyQuestions: "Neizdevās nokopēt jautājumus starpliktuvē",
         saveChecklist: "Saglabāt kontrolsarakstu",
         cancel: "Atcelt",
-        deleteChecklist: "Dzēst kontrolsarakstu"
+        deleteChecklist: "Dzēst kontrolsarakstu",
       },
       compare: {
         title: "Salīdzināt dokumentus",
@@ -567,7 +604,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         moderate: "Mērens",
         deep: "Dziļš",
         veryDeep: "Ļoti dziļš",
-        editTopicList: "Rediģēt tēmu sarakstu"
+        editTopicList: "Rediģēt tēmu sarakstu",
       },
       match: {
         title: "Dokumentu atbilstība",
@@ -592,7 +629,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         minimumSimilarity: "Minimālā līdzība",
         searchDepth: "Meklēšanas dziļums",
         maxResults: "Maksimālais rezultātu skaits",
-        editFormTemplate: "Rediģēt formas veidni"
+        editFormTemplate: "Rediģēt formas veidni",
       },
       knowledgeBases: {
         title: "Zināšanu bāzu pārvaldība",
@@ -606,31 +643,33 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
           embeddingModel: "Iegulšanas modelis",
           dateCreated: "Izveides datums",
           dateModified: "Modificēšanas datums",
-          actions: "Darbības"
+          actions: "Darbības",
         },
         status: {
           default: "Noklusējuma",
-          na: "Nav pieejams"
+          na: "Nav pieejams",
         },
         actions: {
           view: "Skatīt",
           edit: "Rediģēt",
           delete: "Dzēst",
-          configure: "Konfigurēt"
+          configure: "Konfigurēt",
         },
         deleteModal: {
           title: "Dzēst zināšanu bāzi",
           buttonText: "Dzēst zināšanu bāzi",
-          description: "Šī zināšanu bāze tiks neatgriezeniski dzēsta. Vai esat pārliecināts? Jūs nevarēsiet atsaukt šo darbību.",
+          description:
+            "Šī zināšanu bāze tiks neatgriezeniski dzēsta. Vai esat pārliecināts? Jūs nevarēsiet atsaukt šo darbību.",
           confirmButton: "Dzēst",
           cancelButton: "Atcelt",
           successMessage: "Zināšanu bāze tika veiksmīgi dzēsta",
-          errorMessage: "Radās kļūda, dzēšot zināšanu bāzi"
+          errorMessage: "Radās kļūda, dzēšot zināšanu bāzi",
         },
         modals: {
           add: {
             title: "Pievienot zināšanu bāzi",
-            description: "Izveidojiet jaunu zināšanu bāzi, norādot detaļas un augšupielādējot dokumentus zemāk.",
+            description:
+              "Izveidojiet jaunu zināšanu bāzi, norādot detaļas un augšupielādējot dokumentus zemāk.",
             fields: {
               title: "Virsraksts",
               titlePlaceholder: "Virsraksts",
@@ -690,7 +729,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
             suggest: "Ieteikt",
             fieldPlaceholder: "Pievienot lauka nosaukumu...",
             cancel: "Atcelt",
-            updateFormTemplate: "Atjaunināt Formas Veidni"
+            updateFormTemplate: "Atjaunināt Formas Veidni",
           },
         },
         editCustom: {
@@ -703,14 +742,17 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       optimizeChecklistModal: {
         title: "Optimizēt Kontrolsarakstu",
         customInstructionsLabel: "Pielāgotas Instrukcijas (Neobligāti)",
-        customInstructionsHelperText: "Ievadiet papildu instrukcijas, kas jāņem vērā, atbildot uz kontrolsaraksta jautājumiem",
+        customInstructionsHelperText:
+          "Ievadiet papildu instrukcijas, kas jāņem vērā, atbildot uz kontrolsaraksta jautājumiem",
         analyzing: "Analizē...",
         analyzeButton: "Analizēt Kontrolsarakstu",
-        analyzingMessage: "Analizē jūsu kontrolsarakstu optimizācijas iespējām...",
+        analyzingMessage:
+          "Analizē jūsu kontrolsarakstu optimizācijas iespējām...",
         cancelAnalysis: "Atcelt Analīzi",
         downloading: "Lejupielādē...",
         downloadCsv: "Lejupielādēt CSV",
-        questionsNeedingOptimization: "Jautājumi, Kam Nepieciešama Optimizācija",
+        questionsNeedingOptimization:
+          "Jautājumi, Kam Nepieciešama Optimizācija",
         questionsAlreadyOptimized: "Jau Optimizēti Jautājumi",
         selected: "Atlasīts",
         select: "Atlasīt",
@@ -723,17 +765,23 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         optimizationsSelectedText: "optimizācijas atlasītas lietošanai",
         applying: "Piemēro...",
         applySelectedOptimizations: "Piemērot Atlasītās Optimizācijas",
-        uploadDocumentsTitle: "Augšupielādējiet dokumentu(s), ko kontrolsarakstam jāpieņem *",
-        uploadDocumentsHelperText: "Augšupielādējiet dokumentus, kam jāatbilst visām kontrolsaraksta prasībām, lai palīdzētu identificēt jautājumus, kas var būt pārāk stingri",
-        customInstructionsPlaceholder: "piem., Ņemiet vērā, ka šī ir pediatriska pētījuma gadījumā, novērtējot ar vecumu saistītās prasības, Šis protokols ir zema riska iejaukšanās gadījumam, utt."
+        uploadDocumentsTitle:
+          "Augšupielādējiet dokumentu(s), ko kontrolsarakstam jāpieņem *",
+        uploadDocumentsHelperText:
+          "Augšupielādējiet dokumentus, kam jāatbilst visām kontrolsaraksta prasībām, lai palīdzētu identificēt jautājumus, kas var būt pārāk stingri",
+        customInstructionsPlaceholder:
+          "piem., Ņemiet vērā, ka šī ir pediatriska pētījuma gadījumā, novērtējot ar vecumu saistītās prasības, Šis protokols ir zema riska iejaukšanās gadījumam, utt.",
       },
       optimizeOutlineModal: {
         title: "Optimizēt Apceri",
-        description: "Augšupielādējiet atsauces dokumentu, kas reprezentē augstas kvalitātes piemēru atskaites tipam, ko vēlaties ģenerēt. Sistēma ģenerēs atskaiti, izmantojot jūsu pašreizējo apceri un zināšanu bāzi, salīdzinās to ar atsauci un ieteiks uzlabojumus apceres sadaļām.",
+        description:
+          "Augšupielādējiet atsauces dokumentu, kas reprezentē augstas kvalitātes piemēru atskaites tipam, ko vēlaties ģenerēt. Sistēma ģenerēs atskaiti, izmantojot jūsu pašreizējo apceri un zināšanu bāzi, salīdzinās to ar atsauci un ieteiks uzlabojumus apceres sadaļām.",
         groundTruthDocument: "Atsauces Dokuments",
         customInstructionsLabel: "Pielāgotas Instrukcijas (Neobligāti)",
-        customInstructionsHelperText: "Sniedziet papildu norādījumus optimizācijas procesam",
-        customInstructionsPlaceholder: "piem., Koncentrējieties uz tehniskā dziļuma uzlabošanu, nodrošiniet atbilstību konkrētiem standartiem, utt.",
+        customInstructionsHelperText:
+          "Sniedziet papildu norādījumus optimizācijas procesam",
+        customInstructionsPlaceholder:
+          "piem., Koncentrējieties uz tehniskā dziļuma uzlabošanu, nodrošiniet atbilstību konkrētiem standartiem, utt.",
         characters: "rakstzīmes",
         analyzingOutline: "Analizē apceri un ģenerē optimizācijas...",
         cancelAnalysis: "Atcelt Analīzi",
@@ -753,8 +801,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         cancel: "Atcelt",
         optimizing: "Optimizē...",
         optimizeOutline: "Optimizēt Apceri",
-        applyOptimizations: "Piemērot {{count}} Optimizācijas"
-      }
+        applyOptimizations: "Piemērot {{count}} Optimizācijas",
+      },
     },
   }
 
@@ -817,8 +865,10 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         typing: "AI rašo...",
         error: "Atsiprašome, kažkas nutiko. Bandykite dar kartą.",
         welcome: "Sveiki! Kaip galiu jums šiandien padėti?",
-        welcomeMessageWithSource: "Pasirinkite žinių bazę arba įkelkite failus, tada užduokite klausimą.",
-        welcomeMessageGeneral: "Klausykite manęs bet ko! Žinių bazės paieškai pirmiausia pasirinkite žinių bazę.",
+        welcomeMessageWithSource:
+          "Pasirinkite žinių bazę arba įkelkite failus, tada užduokite klausimą.",
+        welcomeMessageGeneral:
+          "Klausykite manęs bet ko! Žinių bazės paieškai pirmiausia pasirinkite žinių bazę.",
         knowledgeBaseTableName: "Pavadinimas",
         knowledgeBaseTableDescription: "Aprašymas",
         knowledgeBaseTableSources: "Šaltiniai",
@@ -868,21 +918,26 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Dokumentų peržiūra",
-        pageDescription: "Peržiūrėkite dokumentą pagal vartotojo apibrėžtą kontrolinį sąrašą ir politikos duomenų bazę.",
+        pageDescription:
+          "Peržiūrėkite dokumentą pagal vartotojo apibrėžtą kontrolinį sąrašą ir politikos duomenų bazę.",
         knowledgeBaseTitle: "Žinių bazė",
         knowledgeBaseDescription: "Spustelėkite pasirinkimui",
         checklistTitle: "Kontrolinis sąrašas",
         checklistDescription: "Spustelėkite pasirinkimui",
         customInstructionsTitle: "Pasirinktinės instrukcijos (neprivaloma)",
-        customInstructionsPlaceholder: "Įveskite papildomas instrukcijas, kurias reikia atsižvelgti atsakant į kontrolinio sąrašo klausimus...",
-        customInstructionsHelp: "{{count}}/2000 simbolių. Šios instrukcijos bus pridėtos prie kiekvieno klausimo apdorojimo metu.",
-        searchModeHelp: "Vektorinė paieška pateikia greitus, tikslius rezultatus. Viso dokumento analizė tiria visą žinių bazės turinį.",
+        customInstructionsPlaceholder:
+          "Įveskite papildomas instrukcijas, kurias reikia atsižvelgti atsakant į kontrolinio sąrašo klausimus...",
+        customInstructionsHelp:
+          "{{count}}/2000 simbolių. Šios instrukcijos bus pridėtos prie kiekvieno klausimo apdorojimo metu.",
+        searchModeHelp:
+          "Vektorinė paieška pateikia greitus, tikslius rezultatus. Viso dokumento analizė tiria visą žinių bazės turinį.",
         processingFile: "Apdorojamas failas...",
         processingFiles: "Apdorojami failai...",
         selectKnowledgeBaseTitle: "Pasirinkite žinių bazę",
         selectChecklistTitle: "Pasirinkite kontrolinį sąrašą",
         noResults: "Dar nėra rezultatų",
-        uploadDocuments: "Įkelkite vieną ar daugiau dokumentų peržiūrai pagal pasirinktą kontrolinį sąrašą",
+        uploadDocuments:
+          "Įkelkite vieną ar daugiau dokumentų peržiūrai pagal pasirinktą kontrolinį sąrašą",
         results: "Rezultatai",
         downloadReport: "Atsisiųsti ataskaitą",
         downloadCsv: "Atsisiųsti CSV",
@@ -891,32 +946,38 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         reportCopied: "Ataskaita nukopijuota į iškarpinę!",
         reviewButton: "Peržiūra",
         consultDocuments: "Konsultuotis su dokumentais",
-        noChecklistsAvailable: "Nėra prieinamų kontrolinių sąrašų. Sukurkite savo pirmą kontrolinį sąrašą, kad pradėtumėte.",
+        noChecklistsAvailable:
+          "Nėra prieinamų kontrolinių sąrašų. Sukurkite savo pirmą kontrolinį sąrašą, kad pradėtumėte.",
         createChecklist: "Sukurti kontrolinį sąrašą",
         editChecklist: "Redaguoti kontrolinį sąrašą",
         checklistName: "Kontrolinio sąrašo pavadinimas",
         checklistNamePlaceholder: "Įveskite kontrolinio sąrašo pavadinimą...",
         checklistDescriptionLabel: "Aprašymas",
-        checklistDescriptionPlaceholder: "Įveskite kontrolinio sąrašo aprašymą automatiniams klausimų pasiūlymams (mažiausiai 10 simbolių)...",
+        checklistDescriptionPlaceholder:
+          "Įveskite kontrolinio sąrašo aprašymą automatiniams klausimų pasiūlymams (mažiausiai 10 simbolių)...",
         questions: "Klausimai",
         suggest: "Pasiūlyti",
         suggesting: "Siūloma...",
         optimize: "Optimizuoti",
-        optimizeTooltip: "Kad būtų įjungta optimizavimo funkcija, reikia pasirinkti žinių bazę",
-        optimizeTooltipEnabled: "Optimizuoti klausimus pagal pasirinktą žinių bazę",
-        allUsersToggleTooltip: "Perjungti tarp tik savo istorijos arba visų vartotojų istorijos peržiūros",
+        optimizeTooltip:
+          "Kad būtų įjungta optimizavimo funkcija, reikia pasirinkti žinių bazę",
+        optimizeTooltipEnabled:
+          "Optimizuoti klausimus pagal pasirinktą žinių bazę",
+        allUsersToggleTooltip:
+          "Perjungti tarp tik savo istorijos arba visų vartotojų istorijos peržiūros",
         uploadFiles: "Įkelti failus",
         knowledgeBase: "Žinių bazė",
         referenceDocuments: "Atskaitos dokumentai (neprivaloma)",
         selectKnowledgeBasePlaceholder: "Pasirinkite žinių bazę...",
-        noKnowledgeBasesAvailable: "Nėra prieinamų žinių bazių. Pirmiausia sukurkite vieną, kad galėtumėte naudoti šią funkciją.",
+        noKnowledgeBasesAvailable:
+          "Nėra prieinamų žinių bazių. Pirmiausia sukurkite vieną, kad galėtumėte naudoti šią funkciją.",
         copyQuestions: "Kopijuoti klausimus",
         questionsCopied: "Klausimai nukopijuoti į iškarpinę",
         noQuestionsToCopy: "Nėra klausimų kopijuoti",
         failedToCopyQuestions: "Nepavyko nukopijuoti klausimų į iškarpinę",
         saveChecklist: "Išsaugoti kontrolinį sąrašą",
         cancel: "Atšaukti",
-        deleteChecklist: "Ištrinti kontrolinį sąrašą"
+        deleteChecklist: "Ištrinti kontrolinį sąrašą",
       },
       compare: {
         title: "Palyginti dokumentus",
@@ -943,7 +1004,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         moderate: "Vidutinis",
         deep: "Gilus",
         veryDeep: "Labai gilus",
-        editTopicList: "Redaguoti temų sąrašą"
+        editTopicList: "Redaguoti temų sąrašą",
       },
       match: {
         title: "Dokumentų atitikimas",
@@ -955,7 +1016,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         findMatches: "Rasti atitikimus",
         similarityScore: "Panašumo balas",
         noDocumentsFound: "Dokumentų nerasta",
-        selectDocumentToMatch: "Prašome pasirinkti dokumentą atitikimų paieškai",
+        selectDocumentToMatch:
+          "Prašome pasirinkti dokumentą atitikimų paieškai",
         loadingMatches: "Atitikimų paieška...",
         noMatchesFound: "Panašių dokumentų nerasta",
         matchResults: "Atitikimų rezultatai",
@@ -968,7 +1030,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         minimumSimilarity: "Minimalus panašumas",
         searchDepth: "Paieškos gylis",
         maxResults: "Maksimalus rezultatų skaičius",
-        editFormTemplate: "Redaguoti formos šabloną"
+        editFormTemplate: "Redaguoti formos šabloną",
       },
       knowledgeBases: {
         title: "Žinių bazių valdymas",
@@ -982,31 +1044,33 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
           embeddingModel: "Įterpimo modelis",
           dateCreated: "Sukūrimo data",
           dateModified: "Modifikavimo data",
-          actions: "Veiksmai"
+          actions: "Veiksmai",
         },
         status: {
           default: "Numatytasis",
-          na: "Nepasiekiama"
+          na: "Nepasiekiama",
         },
         actions: {
           view: "Peržiūrėti",
           edit: "Redaguoti",
           delete: "Ištrinti",
-          configure: "Konfigūruoti"
+          configure: "Konfigūruoti",
         },
         deleteModal: {
           title: "Ištrinti žinių bazę",
           buttonText: "Ištrinti žinių bazę",
-          description: "Ši žinių bazė bus negrįžtamai ištrinta. Ar esate tikri? Šio veiksmo negalėsite atšaukti.",
+          description:
+            "Ši žinių bazė bus negrįžtamai ištrinta. Ar esate tikri? Šio veiksmo negalėsite atšaukti.",
           confirmButton: "Ištrinti",
           cancelButton: "Atšaukti",
           successMessage: "Žinių bazė sėkmingai ištrinta",
-          errorMessage: "Ištrynant žinių bazę įvyko klaida"
+          errorMessage: "Ištrynant žinių bazę įvyko klaida",
         },
         modals: {
           add: {
             title: "Pridėti žinių bazę",
-            description: "Sukurkite naują žinių bazę pateikdami išsamią informaciją ir įkeldami dokumentus žemiau.",
+            description:
+              "Sukurkite naują žinių bazę pateikdami išsamią informaciją ir įkeldami dokumentus žemiau.",
             fields: {
               title: "Pavadinimas",
               titlePlaceholder: "Pavadinimas",
@@ -1066,7 +1130,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
             suggest: "Siūlyti",
             fieldPlaceholder: "Pridėti lauko pavadinimą...",
             cancel: "Atšaukti",
-            updateFormTemplate: "Atnaujinti Formos Šabloną"
+            updateFormTemplate: "Atnaujinti Formos Šabloną",
           },
         },
         editCustom: {
@@ -1079,10 +1143,12 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       optimizeChecklistModal: {
         title: "Optimizuoti Kontrolės Sąrašą",
         customInstructionsLabel: "Pritaikyti Nurodymai (Neprivaloma)",
-        customInstructionsHelperText: "Įveskite papildomus nurodymus, kuriuos reikia atsižvelgti atsakant į kontrolės sąrašo klausimus",
+        customInstructionsHelperText:
+          "Įveskite papildomus nurodymus, kuriuos reikia atsižvelgti atsakant į kontrolės sąrašo klausimus",
         analyzing: "Analizuoja...",
         analyzeButton: "Analizuoti Kontrolės Sąrašą",
-        analyzingMessage: "Analizuojamas jūsų kontrolės sąrašas optimizavimo galimybėms...",
+        analyzingMessage:
+          "Analizuojamas jūsų kontrolės sąrašas optimizavimo galimybėms...",
         cancelAnalysis: "Atšaukti Analizę",
         downloading: "Atsisiųs...",
         downloadCsv: "Atsisiųsti CSV",
@@ -1099,19 +1165,26 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         optimizationsSelectedText: "optimizavimai pasirinkti taikymui",
         applying: "Taiko...",
         applySelectedOptimizations: "Taikyti Pasirinktus Optimizavimus",
-        uploadDocumentsTitle: "Įkelkite dokument(us), kuriuos kontrolės sąrašas turėtų priimti *",
-        uploadDocumentsHelperText: "Įkelkite dokumentus, kurie turėtų atitikti visus kontrolės sąrašo reikalavimus, kad padėtų nustatyti klausimus, kurie gali būti per griežti",
-        customInstructionsPlaceholder: "pvz., Atsižvelgkite, kad tai pediatrinis tyrimas vertinant su amžiumi susijusius reikalavimus, Šis protokolas skirtas mažo rizikos intervencijai ir t.t."
+        uploadDocumentsTitle:
+          "Įkelkite dokument(us), kuriuos kontrolės sąrašas turėtų priimti *",
+        uploadDocumentsHelperText:
+          "Įkelkite dokumentus, kurie turėtų atitikti visus kontrolės sąrašo reikalavimus, kad padėtų nustatyti klausimus, kurie gali būti per griežti",
+        customInstructionsPlaceholder:
+          "pvz., Atsižvelgkite, kad tai pediatrinis tyrimas vertinant su amžiumi susijusius reikalavimus, Šis protokolas skirtas mažo rizikos intervencijai ir t.t.",
       },
       optimizeOutlineModal: {
         title: "Optimizuoti Planą",
-        description: "Įkelkite etaloninį dokumentą, kuris reprezentuoja aukštos kokybės ataskaitos tipo, kurį norite generuoti, pavyzdį. Sistema generuos ataskaitą naudodama jūsų dabartinį planą ir žinių bazę, palygints ją su etalonu ir pasiūlys plano skyrių pagerinimus.",
+        description:
+          "Įkelkite etaloninį dokumentą, kuris reprezentuoja aukštos kokybės ataskaitos tipo, kurį norite generuoti, pavyzdį. Sistema generuos ataskaitą naudodama jūsų dabartinį planą ir žinių bazę, palygints ją su etalonu ir pasiūlys plano skyrių pagerinimus.",
         groundTruthDocument: "Etaloninis Dokumentas",
         customInstructionsLabel: "Pritaikyti Nurodymai (Neprivaloma)",
-        customInstructionsHelperText: "Pateikite papildomus nurodymus optimizavimo procesui",
-        customInstructionsPlaceholder: "pvz., Sutelkite dėmesį į techninio gylio pagerinimą, užtikrinkite atitiktį konkretiems standartams ir t.t.",
+        customInstructionsHelperText:
+          "Pateikite papildomus nurodymus optimizavimo procesui",
+        customInstructionsPlaceholder:
+          "pvz., Sutelkite dėmesį į techninio gylio pagerinimą, užtikrinkite atitiktį konkretiems standartams ir t.t.",
         characters: "simbolių",
-        analyzingOutline: "Analizuojamas planas ir generuojami optimizavimai...",
+        analyzingOutline:
+          "Analizuojamas planas ir generuojami optimizavimai...",
         cancelAnalysis: "Atšaukti Analizę",
         optimizationResults: "Optimizavimo Rezultatai",
         sectionsNeedOptimization: "skyrių reikia optimizavimo",
@@ -1129,8 +1202,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         cancel: "Atšaukti",
         optimizing: "Optimizuoja...",
         optimizeOutline: "Optimizuoti Planą",
-        applyOptimizations: "Taikyti {{count}} Optimizavimą/ų"
-      }
+        applyOptimizations: "Taikyti {{count}} Optimizavimą/ų",
+      },
     },
   }
 
@@ -1193,8 +1266,10 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         typing: "Το AI γράφει...",
         error: "Συγγνώμη, κάτι πήγε στραβά. Δοκιμάστε ξανά.",
         welcome: "Γεια σας! Πώς μπορώ να σας βοηθήσω σήμερα;",
-        welcomeMessageWithSource: "Επιλέξτε μια βάση γνώσεων ή ανεβάστε αρχεία, στη συνέχεια κάντε μια ερώτηση.",
-        welcomeMessageGeneral: "Ρωτήστε με οτιδήποτε! Για αναζήτηση στη βάση γνώσεων, επιλέξτε πρώτα μια βάση γνώσεων.",
+        welcomeMessageWithSource:
+          "Επιλέξτε μια βάση γνώσεων ή ανεβάστε αρχεία, στη συνέχεια κάντε μια ερώτηση.",
+        welcomeMessageGeneral:
+          "Ρωτήστε με οτιδήποτε! Για αναζήτηση στη βάση γνώσεων, επιλέξτε πρώτα μια βάση γνώσεων.",
         knowledgeBaseTableName: "Όνομα",
         knowledgeBaseTableDescription: "Περιγραφή",
         knowledgeBaseTableSources: "Πηγές",
@@ -1244,21 +1319,26 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       },
       review: {
         pageTitle: "Επισκόπηση εγγράφων",
-        pageDescription: "Επισκοπήστε ένα έγγραφο βάσει μιας λίστας ελέγχου που ορίζεται από τον χρήστη και μιας βάσης δεδομένων πολιτικής.",
+        pageDescription:
+          "Επισκοπήστε ένα έγγραφο βάσει μιας λίστας ελέγχου που ορίζεται από τον χρήστη και μιας βάσης δεδομένων πολιτικής.",
         knowledgeBaseTitle: "Βάση γνώσης",
         knowledgeBaseDescription: "Κάντε κλικ για επιλογή",
         checklistTitle: "Λίστα ελέγχου",
         checklistDescription: "Κάντε κλικ για επιλογή",
         customInstructionsTitle: "Προσαρμοσμένες οδηγίες (προαιρετικό)",
-        customInstructionsPlaceholder: "Εισάγετε πρόσθετες οδηγίες που πρέπει να λαμβάνονται υπόψη κατά την απάντηση στις ερωτήσεις της λίστας ελέγχου...",
-        customInstructionsHelp: "{{count}}/2000 χαρακτήρες. Αυτές οι οδηγίες θα προστεθούν σε κάθε ερώτηση κατά την επεξεργασία.",
-        searchModeHelp: "Η διανυσματική αναζήτηση παρέχει γρήγορα, στοχευμένα αποτελέσματα. Η ανάλυση πλήρους εγγράφου εξετάζει όλο το περιεχόμενο της βάσης γνώσης.",
+        customInstructionsPlaceholder:
+          "Εισάγετε πρόσθετες οδηγίες που πρέπει να λαμβάνονται υπόψη κατά την απάντηση στις ερωτήσεις της λίστας ελέγχου...",
+        customInstructionsHelp:
+          "{{count}}/2000 χαρακτήρες. Αυτές οι οδηγίες θα προστεθούν σε κάθε ερώτηση κατά την επεξεργασία.",
+        searchModeHelp:
+          "Η διανυσματική αναζήτηση παρέχει γρήγορα, στοχευμένα αποτελέσματα. Η ανάλυση πλήρους εγγράφου εξετάζει όλο το περιεχόμενο της βάσης γνώσης.",
         processingFile: "Επεξεργασία αρχείου...",
         processingFiles: "Επεξεργασία αρχείων...",
         selectKnowledgeBaseTitle: "Επιλέξτε βάση γνώσης",
         selectChecklistTitle: "Επιλέξτε λίστα ελέγχου",
         noResults: "Δεν υπάρχουν ακόμα αποτελέσματα",
-        uploadDocuments: "Ανεβάστε ένα ή περισσότερα έγγραφα για επισκόπηση έναντι της επιλεγμένης λίστας ελέγχου",
+        uploadDocuments:
+          "Ανεβάστε ένα ή περισσότερα έγγραφα για επισκόπηση έναντι της επιλεγμένης λίστας ελέγχου",
         results: "Αποτελέσματα",
         downloadReport: "Λήψη αναφοράς",
         downloadCsv: "Λήψη CSV",
@@ -1267,32 +1347,38 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         reportCopied: "Η αναφορά αντιγράφηκε στο πρόχειρο!",
         reviewButton: "Επισκόπηση",
         consultDocuments: "Συμβουλευτείτε έγγραφα",
-        noChecklistsAvailable: "Δεν υπάρχουν διαθέσιμες λίστες ελέγχου. Δημιουργήστε την πρώτη σας λίστα ελέγχου για να ξεκινήσετε.",
+        noChecklistsAvailable:
+          "Δεν υπάρχουν διαθέσιμες λίστες ελέγχου. Δημιουργήστε την πρώτη σας λίστα ελέγχου για να ξεκινήσετε.",
         createChecklist: "Δημιουργία λίστας ελέγχου",
         editChecklist: "Επεξεργασία λίστας ελέγχου",
         checklistName: "Όνομα λίστας ελέγχου",
         checklistNamePlaceholder: "Εισάγετε όνομα λίστας ελέγχου...",
         checklistDescriptionLabel: "Περιγραφή",
-        checklistDescriptionPlaceholder: "Εισάγετε περιγραφή λίστας ελέγχου για αυτόματες προτάσεις ερωτήσεων (τουλάχιστον 10 χαρακτήρες)...",
+        checklistDescriptionPlaceholder:
+          "Εισάγετε περιγραφή λίστας ελέγχου για αυτόματες προτάσεις ερωτήσεων (τουλάχιστον 10 χαρακτήρες)...",
         questions: "Ερωτήσεις",
         suggest: "Πρότεινε",
         suggesting: "Προτείνω...",
         optimize: "Βελτιστοποίηση",
-        optimizeTooltip: "Πρέπει να επιλεγεί μια βάση γνώσης για να ενεργοποιηθεί η λειτουργία βελτιστοποίησης",
-        optimizeTooltipEnabled: "Βελτιστοποίηση ερωτήσεων βάσει της επιλεγμένης βάσης γνώσης",
-        allUsersToggleTooltip: "Εναλλαγή μεταξύ προβολής μόνο του ιστορικού σας ή του ιστορικού όλων των χρηστών",
+        optimizeTooltip:
+          "Πρέπει να επιλεγεί μια βάση γνώσης για να ενεργοποιηθεί η λειτουργία βελτιστοποίησης",
+        optimizeTooltipEnabled:
+          "Βελτιστοποίηση ερωτήσεων βάσει της επιλεγμένης βάσης γνώσης",
+        allUsersToggleTooltip:
+          "Εναλλαγή μεταξύ προβολής μόνο του ιστορικού σας ή του ιστορικού όλων των χρηστών",
         uploadFiles: "Ανέβασμα αρχείων",
         knowledgeBase: "Βάση γνώσης",
         referenceDocuments: "Έγγραφα αναφοράς (προαιρετικό)",
         selectKnowledgeBasePlaceholder: "Επιλέξτε βάση γνώσης...",
-        noKnowledgeBasesAvailable: "Δεν υπάρχουν διαθέσιμες βάσεις γνώσης. Δημιουργήστε πρώτα μία για να χρησιμοποιήσετε αυτή τη λειτουργία.",
+        noKnowledgeBasesAvailable:
+          "Δεν υπάρχουν διαθέσιμες βάσεις γνώσης. Δημιουργήστε πρώτα μία για να χρησιμοποιήσετε αυτή τη λειτουργία.",
         copyQuestions: "Αντιγραφή ερωτήσεων",
         questionsCopied: "Οι ερωτήσεις αντιγράφηκαν στο πρόχειρο",
         noQuestionsToCopy: "Δεν υπάρχουν ερωτήσεις για αντιγραφή",
         failedToCopyQuestions: "Αποτυχία αντιγραφής ερωτήσεων στο πρόχειρο",
         saveChecklist: "Αποθήκευση λίστας ελέγχου",
         cancel: "Ακύρωση",
-        deleteChecklist: "Διαγραφή λίστας ελέγχου"
+        deleteChecklist: "Διαγραφή λίστας ελέγχου",
       },
       compare: {
         title: "Σύγκριση εγγράφων",
@@ -1319,7 +1405,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         moderate: "Μέτριο",
         deep: "Βαθύ",
         veryDeep: "Πολύ βαθύ",
-        editTopicList: "Επεξεργασία λίστας θεμάτων"
+        editTopicList: "Επεξεργασία λίστας θεμάτων",
       },
       match: {
         title: "Αντιστοίχιση εγγράφων",
@@ -1331,7 +1417,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         findMatches: "Εύρεση αντιστοιχιών",
         similarityScore: "Βαθμολογία ομοιότητας",
         noDocumentsFound: "Δεν βρέθηκαν έγγραφα",
-        selectDocumentToMatch: "Παρακαλώ επιλέξτε έγγραφο για εύρεση αντιστοιχιών",
+        selectDocumentToMatch:
+          "Παρακαλώ επιλέξτε έγγραφο για εύρεση αντιστοιχιών",
         loadingMatches: "Αναζήτηση αντιστοιχιών...",
         noMatchesFound: "Δεν βρέθηκαν παρόμοια έγγραφα",
         matchResults: "Αποτελέσματα αντιστοίχισης",
@@ -1344,13 +1431,14 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         minimumSimilarity: "Ελάχιστη ομοιότητα",
         searchDepth: "Βάθος αναζήτησης",
         maxResults: "Μέγιστος αριθμός αποτελεσμάτων",
-        editFormTemplate: "Επεξεργασία προτύπου φόρμας"
+        editFormTemplate: "Επεξεργασία προτύπου φόρμας",
       },
       knowledgeBases: {
         title: "Διαχείριση βάσεων γνώσης",
         addKnowledgeBase: "Προσθήκη βάσης γνώσης",
         emptyStateTitle: "Δεν έχετε ακόμη βάσεις γνώσης",
-        emptyStateDescription: "Προσθέστε μια νέα βάση γνώσης για να ξεκινήσετε",
+        emptyStateDescription:
+          "Προσθέστε μια νέα βάση γνώσης για να ξεκινήσετε",
         tableHeaders: {
           title: "Τίτλος",
           description: "Περιγραφή",
@@ -1358,31 +1446,34 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
           embeddingModel: "Μοντέλο ενσωμάτωσης",
           dateCreated: "Ημερομηνία δημιουργίας",
           dateModified: "Ημερομηνία τροποποίησης",
-          actions: "Ενέργειες"
+          actions: "Ενέργειες",
         },
         status: {
           default: "Προεπιλογή",
-          na: "Μη διαθέσιμο"
+          na: "Μη διαθέσιμο",
         },
         actions: {
           view: "Προβολή",
           edit: "Επεξεργασία",
           delete: "Διαγραφή",
-          configure: "Διαμόρφωση"
+          configure: "Διαμόρφωση",
         },
         deleteModal: {
           title: "Διαγραφή βάσης γνώσης",
           buttonText: "Διαγραφή βάσης γνώσης",
-          description: "Αυτή η βάση γνώσης θα διαγραφεί μόνιμα. Είστε σίγουροι; Δεν θα μπορείτε να αναιρέσετε αυτή την ενέργεια.",
+          description:
+            "Αυτή η βάση γνώσης θα διαγραφεί μόνιμα. Είστε σίγουροι; Δεν θα μπορείτε να αναιρέσετε αυτή την ενέργεια.",
           confirmButton: "Διαγραφή",
           cancelButton: "Ακύρωση",
           successMessage: "Η βάση γνώσης διαγράφηκε επιτυχώς",
-          errorMessage: "Παρουσιάστηκε σφάλμα κατά τη διαγραφή της βάσης γνώσης"
+          errorMessage:
+            "Παρουσιάστηκε σφάλμα κατά τη διαγραφή της βάσης γνώσης",
         },
         modals: {
           add: {
             title: "Προσθήκη βάσης γνώσης",
-            description: "Δημιουργήστε μια νέα βάση γνώσης παρέχοντας λεπτομέρειες και ανεβάζοντας έγγραφα παρακάτω.",
+            description:
+              "Δημιουργήστε μια νέα βάση γνώσης παρέχοντας λεπτομέρειες και ανεβάζοντας έγγραφα παρακάτω.",
             fields: {
               title: "Τίτλος",
               titlePlaceholder: "Τίτλος",
@@ -1408,7 +1499,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
           },
           edit: {
             title: "Επεξεργασία βάσης γνώσης",
-            description: "Ενημερώστε τις λεπτομέρειες της βάσης γνώσης παρακάτω.",
+            description:
+              "Ενημερώστε τις λεπτομέρειες της βάσης γνώσης παρακάτω.",
             fields: {
               title: "Τίτλος",
               titlePlaceholder: "Τίτλος",
@@ -1442,7 +1534,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
             suggest: "Πρόταση",
             fieldPlaceholder: "Προσθήκη ονόματος πεδίου...",
             cancel: "Ακύρωση",
-            updateFormTemplate: "Ενημέρωση Προτύπου Φόρμας"
+            updateFormTemplate: "Ενημέρωση Προτύπου Φόρμας",
           },
         },
         editCustom: {
@@ -1455,14 +1547,17 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       optimizeChecklistModal: {
         title: "Βελτιστοποίηση Λίστας Ελέγχου",
         customInstructionsLabel: "Προσαρμοσμένες Οδηγίες (Προαιρετικό)",
-        customInstructionsHelperText: "Εισάγετε πρόσθετες οδηγίες που πρέπει να ληφθούν υπόψη κατά την απάντηση στις ερωτήσεις της λίστας ελέγχου",
+        customInstructionsHelperText:
+          "Εισάγετε πρόσθετες οδηγίες που πρέπει να ληφθούν υπόψη κατά την απάντηση στις ερωτήσεις της λίστας ελέγχου",
         analyzing: "Ανάλυση...",
         analyzeButton: "Ανάλυση Λίστας Ελέγχου",
-        analyzingMessage: "Ανάλυση της λίστας ελέγχου σας για ευκαιρίες βελτιστοποίησης...",
+        analyzingMessage:
+          "Ανάλυση της λίστας ελέγχου σας για ευκαιρίες βελτιστοποίησης...",
         cancelAnalysis: "Ακύρωση Ανάλυσης",
         downloading: "Λήψη...",
         downloadCsv: "Λήψη CSV",
-        questionsNeedingOptimization: "Ερωτήσεις που Χρειάζονται Βελτιστοποίηση",
+        questionsNeedingOptimization:
+          "Ερωτήσεις που Χρειάζονται Βελτιστοποίηση",
         questionsAlreadyOptimized: "Ήδη Βελτιστοποιημένες Ερωτήσεις",
         selected: "Επιλεγμένο",
         select: "Επιλογή",
@@ -1475,19 +1570,26 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         optimizationsSelectedText: "βελτιστοποιήσεις επιλέχθηκαν για εφαρμογή",
         applying: "Εφαρμογή...",
         applySelectedOptimizations: "Εφαρμογή Επιλεγμένων Βελτιστοποιήσεων",
-        uploadDocumentsTitle: "Ανεβάστε έγγραφο/α που πρέπει να γίνουν δεκτά από τη λίστα ελέγχου *",
-        uploadDocumentsHelperText: "Ανεβάστε έγγραφα που πρέπει να πληρούν όλες τις απαιτήσεις της λίστας ελέγχου για να βοηθήσουν στην αναγνώριση ερωτήσεων που μπορεί να είναι πολύ αυστηρές",
-        customInstructionsPlaceholder: "π.χ., Λάβετε υπόψη ότι αυτή είναι μια παιδιατρική μελέτη κατά την αξιολόγηση των απαιτήσεων που σχετίζονται με την ηλικία, Αυτό το πρωτόκολλο είναι για παρέμβαση χαμηλού κινδύνου, κ.λπ."
+        uploadDocumentsTitle:
+          "Ανεβάστε έγγραφο/α που πρέπει να γίνουν δεκτά από τη λίστα ελέγχου *",
+        uploadDocumentsHelperText:
+          "Ανεβάστε έγγραφα που πρέπει να πληρούν όλες τις απαιτήσεις της λίστας ελέγχου για να βοηθήσουν στην αναγνώριση ερωτήσεων που μπορεί να είναι πολύ αυστηρές",
+        customInstructionsPlaceholder:
+          "π.χ., Λάβετε υπόψη ότι αυτή είναι μια παιδιατρική μελέτη κατά την αξιολόγηση των απαιτήσεων που σχετίζονται με την ηλικία, Αυτό το πρωτόκολλο είναι για παρέμβαση χαμηλού κινδύνου, κ.λπ.",
       },
       optimizeOutlineModal: {
         title: "Βελτιστοποίηση Περιγράμματος",
-        description: "Ανεβάστε ένα έγγραφο αναφοράς που αντιπροσωπεύει ένα υψηλής ποιότητας παράδειγμα του τύπου αναφοράς που θέλετε να δημιουργήσετε. Το σύστημα θα δημιουργήσει μια αναφορά χρησιμοποιώντας το τρέχον περίγραμμα και τη βάση γνώσεων σας, θα το συγκρίνει με την αναφορά και θα προτείνει βελτιώσεις για τις ενότητες του περιγράμματος.",
+        description:
+          "Ανεβάστε ένα έγγραφο αναφοράς που αντιπροσωπεύει ένα υψηλής ποιότητας παράδειγμα του τύπου αναφοράς που θέλετε να δημιουργήσετε. Το σύστημα θα δημιουργήσει μια αναφορά χρησιμοποιώντας το τρέχον περίγραμμα και τη βάση γνώσεων σας, θα το συγκρίνει με την αναφορά και θα προτείνει βελτιώσεις για τις ενότητες του περιγράμματος.",
         groundTruthDocument: "Έγγραφο Αναφοράς",
         customInstructionsLabel: "Προσαρμοσμένες Οδηγίες (Προαιρετικό)",
-        customInstructionsHelperText: "Παρέχετε πρόσθετες οδηγίες για τη διαδικασία βελτιστοποίησης",
-        customInstructionsPlaceholder: "π.χ., Επικεντρωθείτε στη βελτίωση του τεχνικού βάθους, εξασφαλίστε συμμόρφωση με συγκεκριμένα πρότυπα, κ.λπ.",
+        customInstructionsHelperText:
+          "Παρέχετε πρόσθετες οδηγίες για τη διαδικασία βελτιστοποίησης",
+        customInstructionsPlaceholder:
+          "π.χ., Επικεντρωθείτε στη βελτίωση του τεχνικού βάθους, εξασφαλίστε συμμόρφωση με συγκεκριμένα πρότυπα, κ.λπ.",
         characters: "χαρακτήρες",
-        analyzingOutline: "Ανάλυση περιγράμματος και δημιουργία βελτιστοποιήσεων...",
+        analyzingOutline:
+          "Ανάλυση περιγράμματος και δημιουργία βελτιστοποιήσεων...",
         cancelAnalysis: "Ακύρωση Ανάλυσης",
         optimizationResults: "Αποτελέσματα Βελτιστοποίησης",
         sectionsNeedOptimization: "ενότητες χρειάζονται βελτιστοποίηση",
@@ -1497,7 +1599,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         accept: "Αποδοχή",
         originalSectionDescription: "Πρωτότυπη Περιγραφή Ενότητας",
         suggestedSectionDescription: "Προτεινόμενη Περιγραφή Ενότητας",
-        generatedContent: "Δημιουργημένο Περιεχόμενο (με την τρέχουσα περιγραφή)",
+        generatedContent:
+          "Δημιουργημένο Περιεχόμενο (με την τρέχουσα περιγραφή)",
         groundTruthReference: "Αναφορά Αναφοράς",
         showLess: "Εμφάνιση Λιγότερων",
         showMore: "Εμφάνιση Περισσότερων",
@@ -1505,20 +1608,22 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         cancel: "Ακύρωση",
         optimizing: "Βελτιστοποίηση...",
         optimizeOutline: "Βελτιστοποίηση Περιγράμματος",
-        applyOptimizations: "Εφαρμογή {{count}} Βελτιστοποιήσεων"
-      }
+        applyOptimizations: "Εφαρμογή {{count}} Βελτιστοποιήσεων",
+      },
     },
   }
 
   // Add Model Selection translations to Estonian
   resources.et.common.modelSelection = {
     llmManagement: "LLM haldamine",
-    llmDescription: "Konfigureerige ja hallake tekstivastuste genereerimiseks kasutatavaid LLM-e. Vaikemudel kasutatakse kõigi operatsioonide jaoks.",
+    llmDescription:
+      "Konfigureerige ja hallake tekstivastuste genereerimiseks kasutatavaid LLM-e. Vaikemudel kasutatakse kõigi operatsioonide jaoks.",
     addNewLlm: "Lisa uus LLM",
     noLlmsConfigured: "LLM-e pole konfigureeritud",
     addNewLlmToGetStarted: "Alustamiseks lisage uus LLM",
     embeddingModelManagement: "Sisestusmudelite haldamine",
-    embeddingDescription: "Konfigureerige ja hallake teadmisbaaside indekseerimiseks ja otsingeks kasutatavaid sisestusmudeleid. Vaikemudel kasutatakse uute teadmisbaaside loomisel, kuid iga teadmusbaas jätkab oma algse sisestusmudeli kasutamist isegi siis, kui vaikemudel hiljem muutub.",
+    embeddingDescription:
+      "Konfigureerige ja hallake teadmisbaaside indekseerimiseks ja otsingeks kasutatavaid sisestusmudeleid. Vaikemudel kasutatakse uute teadmisbaaside loomisel, kuid iga teadmusbaas jätkab oma algse sisestusmudeli kasutamist isegi siis, kui vaikemudel hiljem muutub.",
     addEmbeddingModel: "Lisa sisestusmudel",
     noEmbeddingModelsConfigured: "Sisestusmudeleid pole konfigureeritud",
     addNewEmbeddingModelToGetStarted: "Alustamiseks lisage uus sisestusmudel",
@@ -1528,17 +1633,17 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       provider: "Pakkuja",
       description: "Kirjeldus",
       status: "Olek",
-      actions: "Tegevused"
+      actions: "Tegevused",
     },
     status: {
       default: "Vaikimisi",
-      available: "Saadaval"
+      available: "Saadaval",
     },
     actions: {
       setAsDefault: "Määra vaikimisiks",
       delete: "Kustuta",
       validate: "Kinnita",
-      validating: "Kinnitamine"
+      validating: "Kinnitamine",
     },
     dialog: {
       addNewLlm: "Lisa uus LLM",
@@ -1548,47 +1653,51 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       modelId: "Mudeli ID",
       description: "Kirjeldus",
       cancel: "Tühista",
-      addModel: "Lisa mudel"
+      addModel: "Lisa mudel",
     },
     placeholders: {
       customModel: "nt, Minu kohandatud mudel",
       embeddingModelId: "nt, sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Kirjeldage mudelit, selle omadusi ja millal seda kasutada"
+      describeModel:
+        "Kirjeldage mudelit, selle omadusi ja millal seda kasutada",
     },
     validation: {
-      pleaseEnterModelId: "Palun sisestage mudeli ID"
-    }
+      pleaseEnterModelId: "Palun sisestage mudeli ID",
+    },
   }
 
   // Add Model Selection translations to Latvian
   resources.lv.common.modelSelection = {
     llmManagement: "LLM pārvaldība",
-    llmDescription: "Konfigurējiet un pārvaldiet LLM, kas tiek izmantoti teksta atbilžu ģenerēšanai. Noklusējuma modelis tiks izmantots visām operācijām.",
+    llmDescription:
+      "Konfigurējiet un pārvaldiet LLM, kas tiek izmantoti teksta atbilžu ģenerēšanai. Noklusējuma modelis tiks izmantots visām operācijām.",
     addNewLlm: "Pievienot jaunu LLM",
     noLlmsConfigured: "Nav konfigurēti LLM",
     addNewLlmToGetStarted: "Pievienojiet jaunu LLM, lai sāktu",
     embeddingModelManagement: "Iegulšanas modeļu pārvaldība",
-    embeddingDescription: "Konfigurējiet un pārvaldiet iegulšanas modeļus, kas tiek izmantoti zināšanu bāzu indeksēšanai un meklēšanai. Noklusējuma modelis tiks izmantots, veidojot jaunas zināšanu bāzes, bet katra zināšanu bāze turpinās izmantot savu sākotnējo iegulšanas modeli pat tad, ja noklusējuma modelis vēlāk mainās.",
+    embeddingDescription:
+      "Konfigurējiet un pārvaldiet iegulšanas modeļus, kas tiek izmantoti zināšanu bāzu indeksēšanai un meklēšanai. Noklusējuma modelis tiks izmantots, veidojot jaunas zināšanu bāzes, bet katra zināšanu bāze turpinās izmantot savu sākotnējo iegulšanas modeli pat tad, ja noklusējuma modelis vēlāk mainās.",
     addEmbeddingModel: "Pievienot iegulšanas modeli",
     noEmbeddingModelsConfigured: "Nav konfigurēti iegulšanas modeļi",
-    addNewEmbeddingModelToGetStarted: "Pievienojiet jaunu iegulšanas modeli, lai sāktu",
+    addNewEmbeddingModelToGetStarted:
+      "Pievienojiet jaunu iegulšanas modeli, lai sāktu",
     tableHeaders: {
       name: "Nosaukums",
       modelId: "Modeļa ID",
       provider: "Pakalpojumu sniedzējs",
       description: "Apraksts",
       status: "Statuss",
-      actions: "Darbības"
+      actions: "Darbības",
     },
     status: {
       default: "Noklusējuma",
-      available: "Pieejams"
+      available: "Pieejams",
     },
     actions: {
       setAsDefault: "Iestatīt kā noklusējuma",
       delete: "Dzēst",
       validate: "Apstiprināt",
-      validating: "Apstiprina"
+      validating: "Apstiprina",
     },
     dialog: {
       addNewLlm: "Pievienot jaunu LLM",
@@ -1598,47 +1707,50 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       modelId: "Modeļa ID",
       description: "Apraksts",
       cancel: "Atcelt",
-      addModel: "Pievienot modeli"
+      addModel: "Pievienot modeli",
     },
     placeholders: {
       customModel: "piem., Mans pielāgotais modelis",
       embeddingModelId: "piem., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Aprakstiet modeli, tā raksturlielumus un kad to izmantot"
+      describeModel: "Aprakstiet modeli, tā raksturlielumus un kad to izmantot",
     },
     validation: {
-      pleaseEnterModelId: "Lūdzu, ievadiet modeļa ID"
-    }
+      pleaseEnterModelId: "Lūdzu, ievadiet modeļa ID",
+    },
   }
 
   // Add Model Selection translations to Lithuanian
   resources.lt.common.modelSelection = {
     llmManagement: "LLM valdymas",
-    llmDescription: "Sukonfigūruokite ir valdykite LLM, naudojamus teksto atsakymų generavimui. Numatytasis modelis bus naudojamas visoms operacijoms.",
+    llmDescription:
+      "Sukonfigūruokite ir valdykite LLM, naudojamus teksto atsakymų generavimui. Numatytasis modelis bus naudojamas visoms operacijoms.",
     addNewLlm: "Pridėti naują LLM",
     noLlmsConfigured: "Nesukonfigūruota LLM",
     addNewLlmToGetStarted: "Pridėkite naują LLM, kad pradėtumėte",
     embeddingModelManagement: "Įterpimo modelių valdymas",
-    embeddingDescription: "Sukonfigūruokite ir valdykite įterpimo modelius, naudojamus žinių bazių indeksavimui ir paieškai. Numatytasis modelis bus naudojamas kuriant naujas žinių bazes, tačiau kiekviena žinių bazė ir toliau naudos savo pradinį įterpimo modelį, net jei numatytasis vėliau pasikeis.",
+    embeddingDescription:
+      "Sukonfigūruokite ir valdykite įterpimo modelius, naudojamus žinių bazių indeksavimui ir paieškai. Numatytasis modelis bus naudojamas kuriant naujas žinių bazes, tačiau kiekviena žinių bazė ir toliau naudos savo pradinį įterpimo modelį, net jei numatytasis vėliau pasikeis.",
     addEmbeddingModel: "Pridėti įterpimo modelį",
     noEmbeddingModelsConfigured: "Nesukonfigūruota įterpimo modelių",
-    addNewEmbeddingModelToGetStarted: "Pridėkite naują įterpimo modelį, kad pradėtumėte",
+    addNewEmbeddingModelToGetStarted:
+      "Pridėkite naują įterpimo modelį, kad pradėtumėte",
     tableHeaders: {
       name: "Pavadinimas",
       modelId: "Modelio ID",
       provider: "Teikėjas",
       description: "Aprašymas",
       status: "Būsena",
-      actions: "Veiksmai"
+      actions: "Veiksmai",
     },
     status: {
       default: "Numatytasis",
-      available: "Prieinamas"
+      available: "Prieinamas",
     },
     actions: {
       setAsDefault: "Nustatyti kaip numatytąjį",
       delete: "Ištrinti",
       validate: "Patvirtinti",
-      validating: "Patvirtinama"
+      validating: "Patvirtinama",
     },
     dialog: {
       addNewLlm: "Pridėti naują LLM",
@@ -1648,47 +1760,51 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       modelId: "Modelio ID",
       description: "Aprašymas",
       cancel: "Atšaukti",
-      addModel: "Pridėti modelį"
+      addModel: "Pridėti modelį",
     },
     placeholders: {
       customModel: "pvz., Mano pritaikytas modelis",
       embeddingModelId: "pvz., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Aprašykite modelį, jo charakteristikas ir kada jį naudoti"
+      describeModel:
+        "Aprašykite modelį, jo charakteristikas ir kada jį naudoti",
     },
     validation: {
-      pleaseEnterModelId: "Prašome įvesti modelio ID"
-    }
+      pleaseEnterModelId: "Prašome įvesti modelio ID",
+    },
   }
 
   // Add Model Selection translations to Greek
   resources.el.common.modelSelection = {
     llmManagement: "Διαχείριση LLM",
-    llmDescription: "Διαμορφώστε και διαχειριστείτε τα LLM που χρησιμοποιούνται για τη δημιουργία κειμενικών απαντήσεων. Το προεπιλεγμένο μοντέλο θα χρησιμοποιηθεί για όλες τις λειτουργίες.",
+    llmDescription:
+      "Διαμορφώστε και διαχειριστείτε τα LLM που χρησιμοποιούνται για τη δημιουργία κειμενικών απαντήσεων. Το προεπιλεγμένο μοντέλο θα χρησιμοποιηθεί για όλες τις λειτουργίες.",
     addNewLlm: "Προσθήκη νέου LLM",
     noLlmsConfigured: "Δεν έχουν διαμορφωθεί LLM",
     addNewLlmToGetStarted: "Προσθέστε ένα νέο LLM για να ξεκινήσετε",
     embeddingModelManagement: "Διαχείριση μοντέλων ενσωμάτωσης",
-    embeddingDescription: "Διαμορφώστε και διαχειριστείτε τα μοντέλα ενσωμάτωσης που χρησιμοποιούνται για την ευρετηρίαση και ανάκτηση βάσεων γνώσης. Το προεπιλεγμένο μοντέλο θα χρησιμοποιηθεί κατά τη δημιουργία νέων βάσεων γνώσης, αλλά κάθε βάση γνώσης θα συνεχίσει να χρησιμοποιεί το αρχικό της μοντέλο ενσωμάτωσης ακόμη και αν το προεπιλεγμένο αλλάξει αργότερα.",
+    embeddingDescription:
+      "Διαμορφώστε και διαχειριστείτε τα μοντέλα ενσωμάτωσης που χρησιμοποιούνται για την ευρετηρίαση και ανάκτηση βάσεων γνώσης. Το προεπιλεγμένο μοντέλο θα χρησιμοποιηθεί κατά τη δημιουργία νέων βάσεων γνώσης, αλλά κάθε βάση γνώσης θα συνεχίσει να χρησιμοποιεί το αρχικό της μοντέλο ενσωμάτωσης ακόμη και αν το προεπιλεγμένο αλλάξει αργότερα.",
     addEmbeddingModel: "Προσθήκη μοντέλου ενσωμάτωσης",
     noEmbeddingModelsConfigured: "Δεν έχουν διαμορφωθεί μοντέλα ενσωμάτωσης",
-    addNewEmbeddingModelToGetStarted: "Προσθέστε ένα νέο μοντέλο ενσωμάτωσης για να ξεκινήσετε",
+    addNewEmbeddingModelToGetStarted:
+      "Προσθέστε ένα νέο μοντέλο ενσωμάτωσης για να ξεκινήσετε",
     tableHeaders: {
       name: "Όνομα",
       modelId: "ID μοντέλου",
       provider: "Πάροχος",
       description: "Περιγραφή",
       status: "Κατάσταση",
-      actions: "Ενέργειες"
+      actions: "Ενέργειες",
     },
     status: {
       default: "Προεπιλογή",
-      available: "Διαθέσιμο"
+      available: "Διαθέσιμο",
     },
     actions: {
       setAsDefault: "Ορισμός ως προεπιλογή",
       delete: "Διαγραφή",
       validate: "Επικύρωση",
-      validating: "Επικυρώνεται"
+      validating: "Επικυρώνεται",
     },
     dialog: {
       addNewLlm: "Προσθήκη νέου LLM",
@@ -1698,16 +1814,17 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       modelId: "ID μοντέλου",
       description: "Περιγραφή",
       cancel: "Ακύρωση",
-      addModel: "Προσθήκη μοντέλου"
+      addModel: "Προσθήκη μοντέλου",
     },
     placeholders: {
       customModel: "π.χ., Το προσαρμοσμένο μου μοντέλο",
       embeddingModelId: "π.χ., sentence-transformers/all-MiniLM-L6-v2",
-      describeModel: "Περιγράψτε το μοντέλο, τα χαρακτηριστικά του και πότε να το χρησιμοποιήσετε"
+      describeModel:
+        "Περιγράψτε το μοντέλο, τα χαρακτηριστικά του και πότε να το χρησιμοποιήσετε",
     },
     validation: {
-      pleaseEnterModelId: "Παρακαλώ εισαγάγετε ένα ID μοντέλου"
-    }
+      pleaseEnterModelId: "Παρακαλώ εισαγάγετε ένα ID μοντέλου",
+    },
   }
 
   // Add Knowledge Bases translations for Baltic and Eastern European languages
@@ -1717,7 +1834,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
     resources.et.common.knowledgeBases = {
       title: "Teadmusbaasid",
       addKnowledgeBase: "Lisa teadmusbaas",
-      description: "Hallake ja korraldage oma dokumente teadmusbaasides tõhusate AI-toetatud interaktsioonide jaoks.",
+      description:
+        "Hallake ja korraldage oma dokumente teadmusbaasides tõhusate AI-toetatud interaktsioonide jaoks.",
       createNew: "Loo uus teadmusbaas",
       noKnowledgeBases: "Teadmusbaase pole veel loodud",
       getStarted: "Alustamiseks looge oma esimene teadmusbaas",
@@ -1726,13 +1844,13 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         description: "Kirjeldus",
         documents: "Dokumendid",
         createdAt: "Loodud",
-        actions: "Tegevused"
+        actions: "Tegevused",
       },
       actions: {
         view: "Vaata",
         edit: "Muuda",
         delete: "Kustuta",
-        configure: "Konfigureeri"
+        configure: "Konfigureeri",
       },
       dialog: {
         createNew: "Loo uus teadmusbaas",
@@ -1741,15 +1859,16 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         description: "Kirjeldus",
         cancel: "Tühista",
         create: "Loo",
-        save: "Salvesta"
+        save: "Salvesta",
       },
       placeholders: {
         knowledgeBaseName: "nt, Ettevõtte poliitikad",
-        knowledgeBaseDescription: "Kirjeldage, mida see teadmusbaas sisaldab ja mis on selle eesmärk"
+        knowledgeBaseDescription:
+          "Kirjeldage, mida see teadmusbaas sisaldab ja mis on selle eesmärk",
       },
       validation: {
-        pleaseEnterName: "Palun sisestage teadmusbaasi nimi"
-      }
+        pleaseEnterName: "Palun sisestage teadmusbaasi nimi",
+      },
     }
   }
 
@@ -1758,7 +1877,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
     resources.lv.common.knowledgeBases = {
       title: "Zināšanu bāzes",
       addKnowledgeBase: "Pievienot zināšanu bāzi",
-      description: "Pārvaldiet un organizējiet savus dokumentus zināšanu bāzēs efektīvām AI atbalstītām mijiedarbībām.",
+      description:
+        "Pārvaldiet un organizējiet savus dokumentus zināšanu bāzēs efektīvām AI atbalstītām mijiedarbībām.",
       createNew: "Izveidot jaunu zināšanu bāzi",
       noKnowledgeBases: "Zināšanu bāzes vēl nav izveidotas",
       getStarted: "Izveidojiet savu pirmo zināšanu bāzi, lai sāktu",
@@ -1767,13 +1887,13 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         description: "Apraksts",
         documents: "Dokumenti",
         createdAt: "Izveidots",
-        actions: "Darbības"
+        actions: "Darbības",
       },
       actions: {
         view: "Skatīt",
         edit: "Rediģēt",
         delete: "Dzēst",
-        configure: "Konfigurēt"
+        configure: "Konfigurēt",
       },
       dialog: {
         createNew: "Izveidot jaunu zināšanu bāzi",
@@ -1782,15 +1902,16 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         description: "Apraksts",
         cancel: "Atcelt",
         create: "Izveidot",
-        save: "Saglabāt"
+        save: "Saglabāt",
       },
       placeholders: {
         knowledgeBaseName: "piemēram, Uzņēmuma politikas",
-        knowledgeBaseDescription: "Aprakstiet, ko satur šī zināšanu bāze un tās mērķi"
+        knowledgeBaseDescription:
+          "Aprakstiet, ko satur šī zināšanu bāze un tās mērķi",
       },
       validation: {
-        pleaseEnterName: "Lūdzu, ievadiet zināšanu bāzes nosaukumu"
-      }
+        pleaseEnterName: "Lūdzu, ievadiet zināšanu bāzes nosaukumu",
+      },
     }
   }
 
@@ -1799,7 +1920,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
     resources.lt.common.knowledgeBases = {
       title: "Žinių bazės",
       addKnowledgeBase: "Pridėti žinių bazę",
-      description: "Tvarkykite ir organizuokite savo dokumentus žinių bazėse efektyviems AI palaikomiems sąveikoms.",
+      description:
+        "Tvarkykite ir organizuokite savo dokumentus žinių bazėse efektyviems AI palaikomiems sąveikoms.",
       createNew: "Sukurti naują žinių bazę",
       noKnowledgeBases: "Žinių bazės dar nesukurtos",
       getStarted: "Sukurkite savo pirmą žinių bazę, kad pradėtumėte",
@@ -1808,13 +1930,13 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         description: "Aprašymas",
         documents: "Dokumentai",
         createdAt: "Sukurta",
-        actions: "Veiksmai"
+        actions: "Veiksmai",
       },
       actions: {
         view: "Žiūrėti",
         edit: "Redaguoti",
         delete: "Ištrinti",
-        configure: "Konfigūruoti"
+        configure: "Konfigūruoti",
       },
       dialog: {
         createNew: "Sukurti naują žinių bazę",
@@ -1823,15 +1945,16 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         description: "Aprašymas",
         cancel: "Atšaukti",
         create: "Sukurti",
-        save: "Išsaugoti"
+        save: "Išsaugoti",
       },
       placeholders: {
         knowledgeBaseName: "pvz., Įmonės politikos",
-        knowledgeBaseDescription: "Aprašykite, ką šioje žinių bazėje yra ir jos tikslą"
+        knowledgeBaseDescription:
+          "Aprašykite, ką šioje žinių bazėje yra ir jos tikslą",
       },
       validation: {
-        pleaseEnterName: "Prašome įvesti žinių bazės pavadinimą"
-      }
+        pleaseEnterName: "Prašome įvesti žinių bazės pavadinimą",
+      },
     }
   }
 
@@ -1840,7 +1963,8 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
     resources.el.common.knowledgeBases = {
       title: "Βάσεις γνώσης",
       addKnowledgeBase: "Προσθήκη βάσης γνώσης",
-      description: "Διαχειριστείτε και οργανώστε τα έγγραφά σας σε βάσεις γνώσης για αποτελεσματικές αλληλεπιδράσεις με υποστήριξη AI.",
+      description:
+        "Διαχειριστείτε και οργανώστε τα έγγραφά σας σε βάσεις γνώσης για αποτελεσματικές αλληλεπιδράσεις με υποστήριξη AI.",
       createNew: "Δημιουργήστε νέα βάση γνώσης",
       noKnowledgeBases: "Δεν έχουν δημιουργηθεί ακόμη βάσεις γνώσης",
       getStarted: "Δημιουργήστε την πρώτη σας βάση γνώσης για να ξεκινήσετε",
@@ -1849,13 +1973,13 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         description: "Περιγραφή",
         documents: "Έγγραφα",
         createdAt: "Δημιουργήθηκε",
-        actions: "Ενέργειες"
+        actions: "Ενέργειες",
       },
       actions: {
         view: "Προβολή",
         edit: "Επεξεργασία",
         delete: "Διαγραφή",
-        configure: "Διαμόρφωση"
+        configure: "Διαμόρφωση",
       },
       dialog: {
         createNew: "Δημιουργήστε νέα βάση γνώσης",
@@ -1864,15 +1988,16 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         description: "Περιγραφή",
         cancel: "Ακύρωση",
         create: "Δημιουργία",
-        save: "Αποθήκευση"
+        save: "Αποθήκευση",
       },
       placeholders: {
         knowledgeBaseName: "π.χ., Πολιτικές εταιρείας",
-        knowledgeBaseDescription: "Περιγράψτε τι περιέχει αυτή η βάση γνώσης και τον σκοπό της"
+        knowledgeBaseDescription:
+          "Περιγράψτε τι περιέχει αυτή η βάση γνώσης και τον σκοπό της",
       },
       validation: {
-        pleaseEnterName: "Παρακαλώ εισαγάγετε ένα όνομα για τη βάση γνώσης"
-      }
+        pleaseEnterName: "Παρακαλώ εισαγάγετε ένα όνομα για τη βάση γνώσης",
+      },
     }
   }
 
@@ -1883,7 +2008,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         review: "Ülevaatus",
         generate: "Genereeri",
         compare: "Võrdle",
-        match: "Sobita"
+        match: "Sobita",
       },
       metadata: {
         questions: "küsimust",
@@ -1893,22 +2018,23 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         documents: "dokumenti",
         documents_one: "dokument",
         digitized: "digiteeritud",
-        handwritten: "käsitsi kirjutatud"
+        handwritten: "käsitsi kirjutatud",
       },
       feedback: {
         positive: "Anna positiivset tagasisidet selle tulemuse kohta",
         negative: "Anna negatiivset tagasisidet selle tulemuse kohta",
-        hasFeedback: "Sellel tulemusel on tagasiside"
+        hasFeedback: "Sellel tulemusel on tagasiside",
       },
       emptyMessages: {
         review: "Ülevaatuse ajalugu puudub",
         generate: "Genereerimise ajalugu puudub",
         compare: "Võrdluse ajalugu puudub",
-        match: "Sobitamise ajalugu puudub"
+        match: "Sobitamise ajalugu puudub",
       },
-      deleteConfirmation: "Kas olete kindel, et soovite selle üksuse kustutada?",
+      deleteConfirmation:
+        "Kas olete kindel, et soovite selle üksuse kustutada?",
       history: "Ajalugu",
-      allUsers: "Kõik kasutajad"
+      allUsers: "Kõik kasutajad",
     }
   }
 
@@ -1918,7 +2044,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         review: "Pārskats",
         generate: "Ģenerēt",
         compare: "Salīdzināt",
-        match: "Saskaņot"
+        match: "Saskaņot",
       },
       metadata: {
         questions: "jautājumi",
@@ -1928,22 +2054,23 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         documents: "dokumenti",
         documents_one: "dokuments",
         digitized: "digitalizēts",
-        handwritten: "rokraksts"
+        handwritten: "rokraksts",
       },
       feedback: {
         positive: "Dot pozitīvu atgriezenisko saiti par šo rezultātu",
         negative: "Dot negatīvu atgriezenisko saiti par šo rezultātu",
-        hasFeedback: "Šim rezultātam ir atgriezeniskā saite"
+        hasFeedback: "Šim rezultātam ir atgriezeniskā saite",
       },
       emptyMessages: {
         review: "Nav pārskata vēstures",
         generate: "Nav ģenerēšanas vēstures",
         compare: "Nav salīdzināšanas vēstures",
-        match: "Nav saskaņošanas vēstures"
+        match: "Nav saskaņošanas vēstures",
       },
-      deleteConfirmation: "Vai esat pārliecināts, ka vēlaties dzēst šo vienumu?",
+      deleteConfirmation:
+        "Vai esat pārliecināts, ka vēlaties dzēst šo vienumu?",
       history: "Vēsture",
-      allUsers: "Visi lietotāji"
+      allUsers: "Visi lietotāji",
     }
   }
 
@@ -1953,7 +2080,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         review: "Peržiūra",
         generate: "Generuoti",
         compare: "Palyginti",
-        match: "Suderinti"
+        match: "Suderinti",
       },
       metadata: {
         questions: "klausimai",
@@ -1963,22 +2090,22 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         documents: "dokumentai",
         documents_one: "dokumentas",
         digitized: "skaitmenizuotas",
-        handwritten: "rašytas ranka"
+        handwritten: "rašytas ranka",
       },
       feedback: {
         positive: "Pateikti teigiamą atsiliepimą apie šį rezultatą",
         negative: "Pateikti neigiamą atsiliepimą apie šį rezultatą",
-        hasFeedback: "Šis rezultatas turi atsiliepimą"
+        hasFeedback: "Šis rezultatas turi atsiliepimą",
       },
       emptyMessages: {
         review: "Kol kas nėra peržiūros istorijos",
         generate: "Kol kas nėra generavimo istorijos",
         compare: "Kol kas nėra palyginimo istorijos",
-        match: "Kol kas nėra suderinimo istorijos"
+        match: "Kol kas nėra suderinimo istorijos",
       },
       deleteConfirmation: "Ar tikrai norite ištrinti šį elementą?",
       history: "Istorija",
-      allUsers: "Visi vartotojai"
+      allUsers: "Visi vartotojai",
     }
   }
 
@@ -1988,7 +2115,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         review: "Przegląd",
         generate: "Generuj",
         compare: "Porównaj",
-        match: "Dopasuj"
+        match: "Dopasuj",
       },
       metadata: {
         questions: "pytania",
@@ -1998,22 +2125,22 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         documents: "dokumenty",
         documents_one: "dokument",
         digitized: "zdigitalizowany",
-        handwritten: "odręczny"
+        handwritten: "odręczny",
       },
       feedback: {
         positive: "Przekaż pozytywną opinię o tym wyniku",
         negative: "Przekaż negatywną opinię o tym wyniku",
-        hasFeedback: "Ten wynik ma opinię"
+        hasFeedback: "Ten wynik ma opinię",
       },
       emptyMessages: {
         review: "Brak historii przeglądów",
         generate: "Brak historii generowania",
         compare: "Brak historii porównań",
-        match: "Brak historii dopasowań"
+        match: "Brak historii dopasowań",
       },
       deleteConfirmation: "Czy na pewno chcesz usunąć ten element?",
       history: "Historia",
-      allUsers: "Wszyscy użytkownicy"
+      allUsers: "Wszyscy użytkownicy",
     }
   }
 
@@ -2023,7 +2150,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         review: "Обзор",
         generate: "Генерировать",
         compare: "Сравнить",
-        match: "Сопоставить"
+        match: "Сопоставить",
       },
       metadata: {
         questions: "вопросов",
@@ -2033,22 +2160,22 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         documents: "документов",
         documents_one: "документ",
         digitized: "оцифрованный",
-        handwritten: "рукописный"
+        handwritten: "рукописный",
       },
       feedback: {
         positive: "Дать положительный отзыв об этом результате",
         negative: "Дать отрицательный отзыв об этом результате",
-        hasFeedback: "У этого результата есть отзыв"
+        hasFeedback: "У этого результата есть отзыв",
       },
       emptyMessages: {
         review: "Пока нет истории обзоров",
         generate: "Пока нет истории генерации",
         compare: "Пока нет истории сравнений",
-        match: "Пока нет истории сопоставлений"
+        match: "Пока нет истории сопоставлений",
       },
       deleteConfirmation: "Вы уверены, что хотите удалить этот элемент?",
       history: "История",
-      allUsers: "Все пользователи"
+      allUsers: "Все пользователи",
     }
   }
 
@@ -2058,7 +2185,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         review: "Огляд",
         generate: "Генерувати",
         compare: "Порівняти",
-        match: "Співставити"
+        match: "Співставити",
       },
       metadata: {
         questions: "питань",
@@ -2068,22 +2195,22 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         documents: "документів",
         documents_one: "документ",
         digitized: "оцифрований",
-        handwritten: "рукописний"
+        handwritten: "рукописний",
       },
       feedback: {
         positive: "Дати позитивний відгук про цей результат",
         negative: "Дати негативний відгук про цей результат",
-        hasFeedback: "Цей результат має відгук"
+        hasFeedback: "Цей результат має відгук",
       },
       emptyMessages: {
         review: "Поки немає історії оглядів",
         generate: "Поки немає історії генерації",
         compare: "Поки немає історії порівнянь",
-        match: "Поки немає історії співставлень"
+        match: "Поки немає історії співставлень",
       },
       deleteConfirmation: "Ви впевнені, що хочете видалити цей елемент?",
       history: "Історія",
-      allUsers: "Всі користувачі"
+      allUsers: "Всі користувачі",
     }
   }
 
@@ -2093,7 +2220,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         review: "Преглед",
         generate: "Генериране",
         compare: "Сравняване",
-        match: "Съпоставяне"
+        match: "Съпоставяне",
       },
       metadata: {
         questions: "въпроса",
@@ -2103,22 +2230,22 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         documents: "документа",
         documents_one: "документ",
         digitized: "дигитализиран",
-        handwritten: "ръкописен"
+        handwritten: "ръкописен",
       },
       feedback: {
         positive: "Дайте положителна обратна връзка за този резултат",
         negative: "Дайте отрицателна обратна връзка за този резултат",
-        hasFeedback: "Този резултат има обратна връзка"
+        hasFeedback: "Този резултат има обратна връзка",
       },
       emptyMessages: {
         review: "Все още няма история на прегледи",
         generate: "Все още няма история на генериране",
         compare: "Все още няма история на сравняване",
-        match: "Все още няма история на съпоставяне"
+        match: "Все още няма история на съпоставяне",
       },
       deleteConfirmation: "Сигурни ли сте, че искате да изтриете този елемент?",
       history: "История",
-      allUsers: "Всички потребители"
+      allUsers: "Всички потребители",
     }
   }
 
@@ -2128,7 +2255,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         review: "Revizuire",
         generate: "Generare",
         compare: "Comparare",
-        match: "Potrivire"
+        match: "Potrivire",
       },
       metadata: {
         questions: "întrebări",
@@ -2138,22 +2265,22 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         documents: "documente",
         documents_one: "document",
         digitized: "digitalizat",
-        handwritten: "scris de mână"
+        handwritten: "scris de mână",
       },
       feedback: {
         positive: "Oferă feedback pozitiv pentru acest rezultat",
         negative: "Oferă feedback negativ pentru acest rezultat",
-        hasFeedback: "Acest rezultat are feedback"
+        hasFeedback: "Acest rezultat are feedback",
       },
       emptyMessages: {
         review: "Încă nu există istoric de revizuiri",
         generate: "Încă nu există istoric de generare",
         compare: "Încă nu există istoric de comparare",
-        match: "Încă nu există istoric de potriviri"
+        match: "Încă nu există istoric de potriviri",
       },
       deleteConfirmation: "Ești sigur că vrei să ștergi acest element?",
       history: "Istoric",
-      allUsers: "Toți utilizatorii"
+      allUsers: "Toți utilizatorii",
     }
   }
 
@@ -2163,7 +2290,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         review: "Pregled",
         generate: "Generiraj",
         compare: "Usporedi",
-        match: "Uskladi"
+        match: "Uskladi",
       },
       metadata: {
         questions: "pitanja",
@@ -2173,22 +2300,22 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         documents: "dokumenti",
         documents_one: "dokument",
         digitized: "digitalizirano",
-        handwritten: "rukopisno"
+        handwritten: "rukopisno",
       },
       feedback: {
         positive: "Daj pozitivnu povratnu informaciju za ovaj rezultat",
         negative: "Daj negativnu povratnu informaciju za ovaj rezultat",
-        hasFeedback: "Ovaj rezultat ima povratnu informaciju"
+        hasFeedback: "Ovaj rezultat ima povratnu informaciju",
       },
       emptyMessages: {
         review: "Još nema povijesti pregleda",
         generate: "Još nema povijesti generiranja",
         compare: "Još nema povijesti usporedbe",
-        match: "Još nema povijesti usklađivanja"
+        match: "Još nema povijesti usklađivanja",
       },
       deleteConfirmation: "Jeste li sigurni da želite obrisati ovaj element?",
       history: "Povijest",
-      allUsers: "Svi korisnici"
+      allUsers: "Svi korisnici",
     }
   }
 
@@ -2198,7 +2325,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         review: "Преглед",
         generate: "Генериши",
         compare: "Упореди",
-        match: "Усклади"
+        match: "Усклади",
       },
       metadata: {
         questions: "питања",
@@ -2208,22 +2335,23 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         documents: "документи",
         documents_one: "документ",
         digitized: "дигитализовано",
-        handwritten: "рукописно"
+        handwritten: "рукописно",
       },
       feedback: {
         positive: "Дај позитивну повратну информацију за овај резултат",
         negative: "Дај негативну повратну информацију за овај резултат",
-        hasFeedback: "Овај резултат има повратну информацију"
+        hasFeedback: "Овај резултат има повратну информацију",
       },
       emptyMessages: {
         review: "Још нема историје прегледа",
         generate: "Још нема историје генерисања",
         compare: "Још нема историје поређења",
-        match: "Још нема историје усклађивања"
+        match: "Још нема историје усклађивања",
       },
-      deleteConfirmation: "Да ли сте сигурни да желите да обришете овај елемент?",
+      deleteConfirmation:
+        "Да ли сте сигурни да желите да обришете овај елемент?",
       history: "Историја",
-      allUsers: "Сви корисници"
+      allUsers: "Сви корисници",
     }
   }
 
@@ -2233,7 +2361,7 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         review: "Αναθεώρηση",
         generate: "Δημιουργία",
         compare: "Σύγκριση",
-        match: "Αντιστοίχιση"
+        match: "Αντιστοίχιση",
       },
       metadata: {
         questions: "ερωτήσεις",
@@ -2243,22 +2371,23 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
         documents: "έγγραφα",
         documents_one: "έγγραφο",
         digitized: "ψηφιοποιημένο",
-        handwritten: "χειρόγραφο"
+        handwritten: "χειρόγραφο",
       },
       feedback: {
         positive: "Δώστε θετική ανατροφοδότηση για αυτό το αποτέλεσμα",
         negative: "Δώστε αρνητική ανατροφοδότηση για αυτό το αποτέλεσμα",
-        hasFeedback: "Αυτό το αποτέλεσμα έχει ανατροφοδότηση"
+        hasFeedback: "Αυτό το αποτέλεσμα έχει ανατροφοδότηση",
       },
       emptyMessages: {
         review: "Δεν υπάρχει ιστορικό αναθεώρησης ακόμη",
         generate: "Δεν υπάρχει ιστορικό δημιουργίας ακόμη",
         compare: "Δεν υπάρχει ιστορικό σύγκρισης ακόμη",
-        match: "Δεν υπάρχει ιστορικό αντιστοίχισης ακόμη"
+        match: "Δεν υπάρχει ιστορικό αντιστοίχισης ακόμη",
       },
-      deleteConfirmation: "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το στοιχείο;",
+      deleteConfirmation:
+        "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το στοιχείο;",
       history: "Ιστορικό",
-      allUsers: "Όλοι οι χρήστες"
+      allUsers: "Όλοι οι χρήστες",
     }
   }
 
@@ -2272,8 +2401,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       system: "Süsteem",
       lightMode: "Hele Režiim",
       darkMode: "Tume Režiim",
-      deleteAccountDescription: "Kustuta oma andmed ja kõik, mis on seotud teie kontoga, jäädavalt.",
-      delete: "Kustuta"
+      deleteAccountDescription:
+        "Kustuta oma andmed ja kõik, mis on seotud teie kontoga, jäädavalt.",
+      delete: "Kustuta",
     })
   }
 
@@ -2286,8 +2416,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       system: "Sistēma",
       lightMode: "Gaišais Režīms",
       darkMode: "Tumšais Režīms",
-      deleteAccountDescription: "Neatgriezeniski dzēst jūsu datus un visu, kas saistīts ar jūsu kontu.",
-      delete: "Dzēst"
+      deleteAccountDescription:
+        "Neatgriezeniski dzēst jūsu datus un visu, kas saistīts ar jūsu kontu.",
+      delete: "Dzēst",
     })
   }
 
@@ -2300,8 +2431,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       system: "Sistema",
       lightMode: "Šviesus Režimas",
       darkMode: "Tamsus Režimas",
-      deleteAccountDescription: "Visam laikui ištrinti jūsų duomenis ir viską, kas susiję su jūsų paskyra.",
-      delete: "Ištrinti"
+      deleteAccountDescription:
+        "Visam laikui ištrinti jūsų duomenis ir viską, kas susiję su jūsų paskyra.",
+      delete: "Ištrinti",
     })
   }
 
@@ -2314,8 +2446,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       system: "System",
       lightMode: "Tryb Jasny",
       darkMode: "Tryb Ciemny",
-      deleteAccountDescription: "Trwale usuń swoje dane i wszystko, co jest związane z Twoim kontem.",
-      delete: "Usuń"
+      deleteAccountDescription:
+        "Trwale usuń swoje dane i wszystko, co jest związane z Twoim kontem.",
+      delete: "Usuń",
     })
   }
 
@@ -2328,8 +2461,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       system: "Система",
       lightMode: "Светлый режим",
       darkMode: "Тёмный режим",
-      deleteAccountDescription: "Навсегда удалить ваши данные и все, что связано с вашим аккаунтом.",
-      delete: "Удалить"
+      deleteAccountDescription:
+        "Навсегда удалить ваши данные и все, что связано с вашим аккаунтом.",
+      delete: "Удалить",
     })
   }
 
@@ -2342,8 +2476,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       system: "Система",
       lightMode: "Світлий режим",
       darkMode: "Темний режим",
-      deleteAccountDescription: "Назавжди видалити ваші дані та все, що пов'язано з вашим акаунтом.",
-      delete: "Видалити"
+      deleteAccountDescription:
+        "Назавжди видалити ваші дані та все, що пов'язано з вашим акаунтом.",
+      delete: "Видалити",
     })
   }
 
@@ -2356,8 +2491,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       system: "Система",
       lightMode: "Светъл режим",
       darkMode: "Тъмен режим",
-      deleteAccountDescription: "Завинаги изтрий данните си и всичко, което е свързано с акаунта ти.",
-      delete: "Изтрий"
+      deleteAccountDescription:
+        "Завинаги изтрий данните си и всичко, което е свързано с акаунта ти.",
+      delete: "Изтрий",
     })
   }
 
@@ -2370,8 +2506,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       system: "Sistem",
       lightMode: "Mod Luminos",
       darkMode: "Mod Întunecat",
-      deleteAccountDescription: "Șterge permanent datele tale și tot ce este asociat cu contul tău.",
-      delete: "Șterge"
+      deleteAccountDescription:
+        "Șterge permanent datele tale și tot ce este asociat cu contul tău.",
+      delete: "Șterge",
     })
   }
 
@@ -2384,8 +2521,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       system: "Sustav",
       lightMode: "Svijetli Način",
       darkMode: "Tamni Način",
-      deleteAccountDescription: "Trajno obriši svoje podatke i sve što je povezano s tvojim računom.",
-      delete: "Obriši"
+      deleteAccountDescription:
+        "Trajno obriši svoje podatke i sve što je povezano s tvojim računom.",
+      delete: "Obriši",
     })
   }
 
@@ -2398,8 +2536,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       system: "Систем",
       lightMode: "Светли Режим",
       darkMode: "Тамни Режим",
-      deleteAccountDescription: "Трајно обриши своје податке и све што је повезано са твојим налогом.",
-      delete: "Обриши"
+      deleteAccountDescription:
+        "Трајно обриши своје податке и све што је повезано са твојим налогом.",
+      delete: "Обриши",
     })
   }
 
@@ -2412,8 +2551,9 @@ export const addBalticEasternEuropeanTranslations = (resources: any) => {
       system: "Σύστημα",
       lightMode: "Φωτεινή Λειτουργία",
       darkMode: "Σκοτεινή Λειτουργία",
-      deleteAccountDescription: "Διαγραφή των δεδομένων σας και όλων όσων συνδέονται με τον λογαριασμό σας μόνιμα.",
-      delete: "Διαγραφή"
+      deleteAccountDescription:
+        "Διαγραφή των δεδομένων σας και όλων όσων συνδέονται με τον λογαριασμό σας μόνιμα.",
+      delete: "Διαγραφή",
     })
   }
 }

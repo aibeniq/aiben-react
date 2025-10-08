@@ -29,9 +29,14 @@ try {
     const envHost = envUrl.hostname
     const currentHost = window.location.hostname
     // If env points at production API but we're on localhost (or a different host), use same origin
-    if (envHost !== currentHost && (currentHost === "localhost" || currentHost === "127.0.0.1")) {
+    if (
+      envHost !== currentHost &&
+      (currentHost === "localhost" || currentHost === "127.0.0.1")
+    ) {
       computedBase = window.location.origin
-      console.log(`API URL override: running on ${currentHost}, overriding API base to ${computedBase}`)
+      console.log(
+        `API URL override: running on ${currentHost}, overriding API base to ${computedBase}`,
+      )
     }
   }
 } catch (e) {

@@ -1,8 +1,15 @@
-import { Card, CloseButton, HStack, Heading, Text, Switch } from "@chakra-ui/react"
+import {
+  Card,
+  CloseButton,
+  HStack,
+  Heading,
+  Switch,
+  Text,
+} from "@chakra-ui/react"
 import type React from "react"
 import ConfirmButton from "../ui/confirm-button"
-import { Tooltip } from "../ui/tooltip"
 import HelpTooltip from "../ui/help-tooltip"
+import { Tooltip } from "../ui/tooltip"
 
 interface SelectionModalProps {
   isOpen: boolean
@@ -78,7 +85,9 @@ const SelectionModal = ({
                       checked={toggleValue}
                       onChange={onToggleChange}
                     />
-                    <Switch.Control data-state={toggleValue ? "checked" : "unchecked"}>
+                    <Switch.Control
+                      data-state={toggleValue ? "checked" : "unchecked"}
+                    >
                       <Switch.Thumb />
                     </Switch.Control>
                   </Switch.Root>

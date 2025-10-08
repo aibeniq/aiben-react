@@ -1981,6 +1981,74 @@ async def optimize_outline(
                             all_source_text,
                             max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE,
                         )
+                        
+                        # LLM-based relevance filtering for ReportGenie full text scan
+                        # Filter chunks before analysis to avoid processing irrelevant content
+                        if text_chunks:
+                            print(f"🔍 Full Text Scan: Filtering {len(text_chunks)} chunks for relevance to section: {section_description[:50]}...")
+                            
+                            import asyncio
+                            
+                            # Batch / concurrency settings with sensible defaults
+                            BATCH_SIZE = getattr(settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 8)
+                            REQUEST_DELAY = getattr(settings, "PROCESSING_DELAY_BETWEEN_REQUESTS", 0.02)
+
+                            loop = asyncio.get_running_loop()
+                            filtered_chunks = []
+
+                            # Process chunks in batches to reduce total runtime while still being rate-limit friendly
+                            for start in range(0, len(text_chunks), BATCH_SIZE):
+                                batch = text_chunks[start : start + BATCH_SIZE]
+                                tasks = []
+
+                                # Create async tasks that run the blocking invoke_llm in executor
+                                for j, chunk in enumerate(batch):
+                                    chunk_idx = start + j
+
+                                    async def _check(chunk=chunk, chunk_idx=chunk_idx):
+                                        # run invoke_llm (sync) in a thread pool to allow concurrency
+                                        try:
+                                            relevance = await loop.run_in_executor(
+                                                None,
+                                                lambda: invoke_llm(
+                                                    llm,
+                                                    settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
+                                                    {"chunk": chunk, "question": section_description},
+                                                ),
+                                            )
+                                        except Exception as e:
+                                            # bubble up error to be handled by caller
+                                            raise e
+
+                                        return chunk_idx, chunk, relevance
+
+                                    tasks.append(asyncio.create_task(_check()))
+
+                                # Await this batch and handle results
+                                results = await asyncio.gather(*tasks, return_exceptions=True)
+
+                                for res in results:
+                                    if isinstance(res, Exception):
+                                        # On error, include the chunk to be safe (preserve previous behavior)
+                                        print(f"Warning: error during batch relevance check: {res}")
+                                        continue
+
+                                    chunk_idx, chunk, relevance_check = res
+                                    # Filter based on LLM response (same logic as before)
+                                    if "No relevant information found" not in (relevance_check or ""):
+                                        print(f"✅ Chunk {chunk_idx + 1} is relevant")
+                                        filtered_chunks.append(chunk)
+                                    else:
+                                        print(f"❌ Chunk {chunk_idx + 1} is not relevant - excluding from analysis")
+
+                                # Small sleep between batches to help with rate limits and to yield loop
+                                if REQUEST_DELAY:
+                                    await asyncio.sleep(REQUEST_DELAY)
+                            
+                            # Use filtered_chunks for analysis
+                            text_chunks = filtered_chunks
+                            print(f"📊 Relevance filtering: {len(filtered_chunks)}/{len(text_chunks)} chunks are relevant for analysis")
+                        
                         chunk_analyses = []
                         for chunk in text_chunks:
                             analysis = invoke_llm(
@@ -2019,6 +2087,74 @@ async def optimize_outline(
 
                         # Get relevant context for this section from knowledge base
                         docs = retriever.get_relevant_documents(section_description)
+                        
+                        # LLM-based relevance filtering for ReportGenie section generation (similar to VeraDoc full scan)
+                        # This prevents irrelevant chunks from being included in report sections
+                        if docs:
+                            print(f"🔍 Filtering {len(docs)} retrieved chunks for relevance to section: {section_description[:50]}...")
+                            
+                            import asyncio
+                            
+                            # Batch / concurrency settings with sensible defaults
+                            BATCH_SIZE = getattr(settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 8)
+                            REQUEST_DELAY = getattr(settings, "PROCESSING_DELAY_BETWEEN_REQUESTS", 0.02)
+
+                            loop = asyncio.get_running_loop()
+                            filtered_docs = []
+
+                            # Process docs in batches to reduce total runtime while still being rate-limit friendly
+                            for start in range(0, len(docs), BATCH_SIZE):
+                                batch = docs[start : start + BATCH_SIZE]
+                                tasks = []
+
+                                # Create async tasks that run the blocking invoke_llm in executor
+                                for j, doc in enumerate(batch):
+                                    doc_idx = start + j
+
+                                    async def _check(doc=doc, doc_idx=doc_idx):
+                                        # run invoke_llm (sync) in a thread pool to allow concurrency
+                                        try:
+                                            relevance = await loop.run_in_executor(
+                                                None,
+                                                lambda: invoke_llm(
+                                                    llm,
+                                                    settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
+                                                    {"chunk": doc.page_content or "", "question": section_description},
+                                                ),
+                                            )
+                                        except Exception as e:
+                                            # bubble up error to be handled by caller
+                                            raise e
+
+                                        return doc_idx, doc, relevance
+
+                                    tasks.append(asyncio.create_task(_check()))
+
+                                # Await this batch and handle results
+                                results = await asyncio.gather(*tasks, return_exceptions=True)
+
+                                for res in results:
+                                    if isinstance(res, Exception):
+                                        # On error, include the chunk to be safe (preserve previous behavior)
+                                        print(f"Warning: error during batch relevance check: {res}")
+                                        continue
+
+                                    doc_idx, doc, relevance_check = res
+                                    # Filter based on LLM response (same logic as before)
+                                    if "No relevant information found" not in (relevance_check or ""):
+                                        print(f"✅ Chunk {doc_idx + 1} is relevant")
+                                        filtered_docs.append(doc)
+                                    else:
+                                        print(f"❌ Chunk {doc_idx + 1} is not relevant - excluding from section")
+
+                                # Small sleep between batches to help with rate limits and to yield loop
+                                if REQUEST_DELAY:
+                                    await asyncio.sleep(REQUEST_DELAY)
+                            
+                            # Use filtered_docs for the rest of the flow
+                            docs = filtered_docs
+                            print(f"📊 Relevance filtering: {len(filtered_docs)}/{len(docs)} chunks are relevant for section")
+                        
                         context = "\n\n".join([doc.page_content for doc in docs])
 
                         # Build the report draft so far (all previous sections)

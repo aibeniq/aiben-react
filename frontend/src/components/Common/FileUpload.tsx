@@ -1,4 +1,12 @@
-import { Box, Button, Card, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Card,
+  HStack,
+  Heading,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useDropzone } from "react-dropzone"
 import { useTranslation } from "react-i18next"
 import { FiCheck, FiFile, FiUpload } from "react-icons/fi"
@@ -19,9 +27,13 @@ interface FileUploadProps {
 const defaultAcceptedTypes = {
   "application/pdf": [".pdf"],
   "text/plain": [".txt"],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+    ".docx",
+  ],
   "text/csv": [".csv"],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+    ".xlsx",
+  ],
   "application/vnd.ms-excel": [".xls"],
   "image/jpeg": [".jpg", ".jpeg"],
   "image/png": [".png"],
@@ -80,7 +92,13 @@ const FileUpload = ({
           borderColor: isDragActive ? "blue.500" : "gray.300",
           bg: isDragActive ? "blue.50" : "gray.subtle",
         }}
-        borderColor={isDragActive ? "blue.500" : hasFiles ? "rgba(0, 65, 72, 0.2)" : "gray.200"}
+        borderColor={
+          isDragActive
+            ? "blue.500"
+            : hasFiles
+              ? "rgba(0, 65, 72, 0.2)"
+              : "gray.200"
+        }
         bg={isDragActive ? "blue.50" : "surface"}
         {...getRootProps()}
       >
@@ -91,8 +109,16 @@ const FileUpload = ({
               <Box
                 p={3}
                 borderRadius="full"
-                bg={hasFiles ? "rgba(0, 65, 72, 0.9)" : isDragActive ? "blue.100" : "gray.100"}
-                color={hasFiles ? "white" : isDragActive ? "blue.600" : "gray.500"}
+                bg={
+                  hasFiles
+                    ? "rgba(0, 65, 72, 0.9)"
+                    : isDragActive
+                      ? "blue.100"
+                      : "gray.100"
+                }
+                color={
+                  hasFiles ? "white" : isDragActive ? "blue.600" : "gray.500"
+                }
               >
                 <FiUpload size={24} />
               </Box>
@@ -106,12 +132,17 @@ const FileUpload = ({
                   {helpKey && !hasFiles && <HelpTooltip helpKey={helpKey} />}
                 </HStack>
                 <Text fontSize="sm" color="gray.600">
-                  {isDragActive ? t("review.dropFilesHere") : t("review.uploadDocuments")}
+                  {isDragActive
+                    ? t("review.dropFilesHere")
+                    : t("review.uploadDocuments")}
                 </Text>
               </VStack>
             </HStack>
 
-            <Box color={hasFiles ? "rgba(0, 65, 72, 0.9)" : "gray.400"} ml="auto">
+            <Box
+              color={hasFiles ? "rgba(0, 65, 72, 0.9)" : "gray.400"}
+              ml="auto"
+            >
               {hasFiles ? <FiCheck size={16} /> : ""}
             </Box>
           </HStack>

@@ -2,17 +2,26 @@ import { type FormConnectForm, FormconnectService, OpenAPI } from "@/client"
 import { request as __request } from "@/client/core/request"
 import DownloadButton from "@/components/ui/download-button"
 import useCustomToast from "@/hooks/useCustomToast"
-import { useOperationCancellation } from "@/hooks/useOperationCancellation"
 import { useFormconnectProgress } from "@/hooks/useFormconnectProgress"
+import { useOperationCancellation } from "@/hooks/useOperationCancellation"
 
-import { Box, Button, Container, HStack, Heading, Progress, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Container,
+  HStack,
+  Heading,
+  Progress,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FiCheck, FiCopy, FiFileText, FiTrash2 } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { useTranslation } from "react-i18next"
 import FileUpload, { type FileItem } from "../../components/Common/FileUpload"
 import SearchModeToggle from "../../components/Common/SearchModeToggle"
 import SelectionCard from "../../components/Common/SelectionCard"
@@ -23,14 +32,21 @@ import { useResults } from "../../contexts/ResultsContext"
 import { copyToClipboard } from "../../utils/copyToClipboard"
 
 const FormConnect = () => {
-  const { t } = useTranslation()
+  const { t, ready } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { registerOperation } = useOperationCancellation()
-  const { matchResult, setMatchResult, matchInputs, setMatchInputs, clearMatchResult } =
-    useResults()
+  const {
+    matchResult,
+    setMatchResult,
+    matchInputs,
+    setMatchInputs,
+    clearMatchResult,
+  } = useResults()
 
   // Initialize form state from persisted inputs or defaults
-  const [fileItems, setFileItems] = useState<FileItem[]>(matchInputs?.fileItems || [])
+  const [fileItems, setFileItems] = useState<FileItem[]>(
+    matchInputs?.fileItems || [],
+  )
   const [forms, setForms] = useState<FormConnectForm[]>([])
   const [selectedForm, setSelectedForm] = useState<FormConnectForm | null>(
     matchInputs?.selectedForm || null,
@@ -63,10 +79,15 @@ const FormConnect = () => {
 
   // Handle progress completion
   useEffect(() => {
-    if (taskId && progress.completed && !hasHandledCompletionRef.current && progress.percentage >= 95) {
+    if (
+      taskId &&
+      progress.completed &&
+      !hasHandledCompletionRef.current &&
+      progress.percentage >= 95
+    ) {
       console.log("✅ Match task completed, clearing taskId")
       hasHandledCompletionRef.current = true
-      
+
       setTimeout(() => {
         setTaskId(null)
         hasHandledCompletionRef.current = false
@@ -173,7 +194,10 @@ const FormConnect = () => {
       a.href = url
       a.download = `FormConnect_Results_${timestamp}.docx`
 
-      console.log("DOCX download filename:", `FormConnect_Results_${timestamp}.docx`)
+      console.log(
+        "DOCX download filename:",
+        `FormConnect_Results_${timestamp}.docx`,
+      )
       console.log("About to trigger DOCX download...")
 
       document.body.appendChild(a)
@@ -191,7 +215,9 @@ const FormConnect = () => {
         name: err instanceof Error ? err.name : undefined,
       })
 
-      showSuccessToast(`Failed to download results: ${err.message || "Unknown error"}`)
+      showSuccessToast(
+        `Failed to download results: ${err.message || "Unknown error"}`,
+      )
     } finally {
       console.log("DOCX download process completed")
       setLoadingDownload(false)
@@ -233,7 +259,10 @@ const FormConnect = () => {
       a.href = url
       a.download = `FormConnect_Results_${timestamp}.csv`
 
-      console.log("CSV download filename:", `FormConnect_Results_${timestamp}.csv`)
+      console.log(
+        "CSV download filename:",
+        `FormConnect_Results_${timestamp}.csv`,
+      )
       console.log("About to trigger CSV download...")
 
       document.body.appendChild(a)
@@ -251,7 +280,9 @@ const FormConnect = () => {
         name: err instanceof Error ? err.name : undefined,
       })
 
-      showSuccessToast(`Failed to download CSV: ${err.message || "Unknown error"}`)
+      showSuccessToast(
+        `Failed to download CSV: ${err.message || "Unknown error"}`,
+      )
     } finally {
       console.log("CSV download process completed")
       setLoadingCsvDownload(false)
@@ -283,8 +314,8 @@ const FormConnect = () => {
 
       // First, create a FormConnect task to get the task_id for progress tracking
       const taskData: any = await __request(OpenAPI, {
-        method: 'POST',
-        url: '/api/v1/formconnect/process/task',
+        method: "POST",
+        url: "/api/v1/formconnect/process/task",
       })
 
       const newTaskId = taskData.task_id
@@ -343,7 +374,8 @@ const FormConnect = () => {
         interactionId: interactionId as string,
       })
 
-      const searchMethod = searchMode === "vector" ? "vector search" : "full document scan"
+      const searchMethod =
+        searchMode === "vector" ? "vector search" : "full document scan"
       showSuccessToast(`Form processing completed using ${searchMethod}!`)
     },
     onError: (error: any) => {
@@ -385,7 +417,13 @@ const FormConnect = () => {
   return (
     <Container maxW="container.xl" py={8}>
       {/* Tab description */}
-      <Text fontSize="sm" color="gray.500" textAlign="center" mb={4} fontStyle="italic">
+      <Text
+        fontSize="sm"
+        color="gray.500"
+        textAlign="center"
+        mb={4}
+        fontStyle="italic"
+      >
         {t("match.subtitle")}
       </Text>
 
@@ -407,11 +445,20 @@ const FormConnect = () => {
           p={6}
         >
           <VStack gap={4} width="80%" maxWidth="400px">
-            <Text color="white" fontSize="lg" fontWeight="medium" textAlign="center">
+            <Text
+              color="white"
+              fontSize="lg"
+              fontWeight="medium"
+              textAlign="center"
+            >
               {progress.message || t("match.processing")}
             </Text>
             <Box width="100%">
-              <Progress.Root value={progress.percentage} size="lg" colorPalette="blue">
+              <Progress.Root
+                value={progress.percentage}
+                size="lg"
+                colorPalette="blue"
+              >
                 <Progress.Track>
                   <Progress.Range />
                 </Progress.Track>
@@ -421,7 +468,9 @@ const FormConnect = () => {
               </Text>
             </Box>
             <Text color="gray.300" fontSize="sm" textAlign="center">
-              {t("match.pleaseWait")}
+              {ready
+                ? t("match.pleaseWait")
+                : "Please wait while we process your documents"}
             </Text>
           </VStack>
         </Box>
@@ -432,14 +481,20 @@ const FormConnect = () => {
           <VStack gap={4} align="stretch" flex={1}>
             <SelectionCard
               title={t("match.sourceDocument")}
-              description={selectedForm ? selectedForm.name : t("match.pleaseSelect")}
+              description={
+                selectedForm ? selectedForm.name : t("match.pleaseSelect")
+              }
               icon={<FiFileText size={24} />}
               isSelected={!!selectedForm}
               onClick={() => setShowFormModal(true)}
               helpKey="formTemplate"
             />
 
-            <FileUpload files={fileItems} onFilesChange={setFileItems} helpKey="fileUpload" />
+            <FileUpload
+              files={fileItems}
+              onFilesChange={setFileItems}
+              helpKey="fileUpload"
+            />
 
             <SearchModeToggle
               searchMode={searchMode}
@@ -505,7 +560,10 @@ const FormConnect = () => {
             flexDirection={{ base: "column", md: "row" }}
             gap={4}
           >
-            <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
+            <Box
+              flex="1"
+              width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}
+            >
               <Heading size="md" mb={4}>
                 Results
               </Heading>
@@ -565,7 +623,9 @@ const FormConnect = () => {
                       </Button>
                     </HStack>
 
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{matchResult.results}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {matchResult.results}
+                    </ReactMarkdown>
 
                     {/* Add feedback buttons for the match result */}
                     {matchResult.interactionId && (
@@ -587,7 +647,9 @@ const FormConnect = () => {
                     )}
                   </>
                 ) : (
-                  <Text color="gray.500">{t("match.selectDocumentToMatch")}</Text>
+                  <Text color="gray.500">
+                    {t("match.selectDocumentToMatch")}
+                  </Text>
                 )}
               </Box>
             </Box>

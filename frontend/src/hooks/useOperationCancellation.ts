@@ -1,13 +1,13 @@
-import { useEffect, useRef } from 'react'
-import type { CancelablePromise } from '@/client/core/CancelablePromise'
+import type { CancelablePromise } from "@/client/core/CancelablePromise"
+import { useEffect, useRef } from "react"
 
 /**
  * Hook for managing cancellation of long-running operations when user navigates to different parts of the app.
- * 
+ *
  * This hook tracks active cancelable operations and automatically cancels them when the user navigates
- * to a different route. This prevents operations like Veradoc/Review, Reportgenie/Generate, 
+ * to a different route. This prevents operations like Veradoc/Review, Reportgenie/Generate,
  * Compare/Twincheck, and Match/Formconnect from continuing to run in the background.
- * 
+ *
  * @returns Object with methods to register and manually cancel operations
  */
 export function useOperationCancellation() {
@@ -16,33 +16,39 @@ export function useOperationCancellation() {
 
   // Cancel all active operations
   const cancelAllOperations = () => {
-    console.log(`🚫 Cancelling ${activeOperations.current.size} active operations`)
-    
+    console.log(
+      `🚫 Cancelling ${activeOperations.current.size} active operations`,
+    )
+
     activeOperations.current.forEach((operation) => {
       try {
         if (!operation.isCancelled) {
           operation.cancel()
-          console.log('✅ Operation cancelled successfully')
+          console.log("✅ Operation cancelled successfully")
         }
       } catch (error) {
-        console.warn('⚠️ Error cancelling operation:', error)
+        console.warn("⚠️ Error cancelling operation:", error)
       }
     })
-    
+
     activeOperations.current.clear()
   }
 
   // Register a new cancelable operation
-  const registerOperation = <T>(operation: CancelablePromise<T>): CancelablePromise<T> => {
-    console.log('📝 Registering new cancelable operation')
+  const registerOperation = <T>(
+    operation: CancelablePromise<T>,
+  ): CancelablePromise<T> => {
+    console.log("📝 Registering new cancelable operation")
     activeOperations.current.add(operation)
-    
+
     // Auto-remove from set when operation completes or is cancelled
     operation.finally(() => {
       activeOperations.current.delete(operation)
-      console.log(`🧹 Operation removed from tracking (${activeOperations.current.size} remaining)`)
+      console.log(
+        `🧹 Operation removed from tracking (${activeOperations.current.size} remaining)`,
+      )
     })
-    
+
     return operation
   }
 
@@ -51,14 +57,16 @@ export function useOperationCancellation() {
     const handleLocationChange = () => {
       const newPath = window.location.pathname
       const previousPath = currentPath.current
-      
+
       // If the path has changed and we have active operations, cancel them
       if (newPath !== previousPath && activeOperations.current.size > 0) {
         console.log(`🛤️ Route changed from ${previousPath} to ${newPath}`)
-        console.log(`📊 Found ${activeOperations.current.size} active operations to cancel`)
+        console.log(
+          `📊 Found ${activeOperations.current.size} active operations to cancel`,
+        )
         cancelAllOperations()
       }
-      
+
       currentPath.current = newPath
     }
 
@@ -67,25 +75,25 @@ export function useOperationCancellation() {
     const originalReplaceState = window.history.replaceState
 
     // Override pushState to detect programmatic navigation
-    window.history.pushState = function(...args) {
+    window.history.pushState = (...args) => {
       originalPushState.apply(window.history, args)
       handleLocationChange()
     }
 
     // Override replaceState to detect programmatic navigation
-    window.history.replaceState = function(...args) {
+    window.history.replaceState = (...args) => {
       originalReplaceState.apply(window.history, args)
       handleLocationChange()
     }
 
     // Listen for browser back/forward buttons
-    window.addEventListener('popstate', handleLocationChange)
+    window.addEventListener("popstate", handleLocationChange)
 
     return () => {
       // Restore original methods
       window.history.pushState = originalPushState
       window.history.replaceState = originalReplaceState
-      window.removeEventListener('popstate', handleLocationChange)
+      window.removeEventListener("popstate", handleLocationChange)
     }
   }, [])
 
@@ -93,7 +101,7 @@ export function useOperationCancellation() {
   useEffect(() => {
     return () => {
       if (activeOperations.current.size > 0) {
-        console.log('🧹 Component unmounting, cancelling remaining operations')
+        console.log("🧹 Component unmounting, cancelling remaining operations")
         cancelAllOperations()
       }
     }
@@ -102,6 +110,6 @@ export function useOperationCancellation() {
   return {
     registerOperation,
     cancelAllOperations,
-    activeOperationsCount: activeOperations.current.size
+    activeOperationsCount: activeOperations.current.size,
   }
 }
