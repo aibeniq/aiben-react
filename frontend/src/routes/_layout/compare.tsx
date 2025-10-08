@@ -8,7 +8,7 @@ import remarkGfm from "remark-gfm"
 import { useTranslation } from "react-i18next"
 import { useMutation } from "@tanstack/react-query"
 
-import { type TwinCheckTopicList, TwincheckService, ReportgenieService } from "@/client"
+import { type TwinCheckTopicList, TwincheckService } from "@/client"
 import SelectionCard from "@/components/Common/SelectionCard"
 import SelectionModal from "@/components/Common/SelectionModal"
 import TopicListTable from "@/components/Compare/TopicListTable"
@@ -16,7 +16,7 @@ import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
 import DownloadButton from "@/components/ui/download-button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { useOperationCancellation } from "@/hooks/useOperationCancellation"
-import { useReportGenieProgress } from "@/hooks/useReportGenieProgress"
+import { useTwincheckProgress } from "@/hooks/useTwincheckProgress"
 
 import { useResults } from "@/contexts/ResultsContext"
 import { copyToClipboard } from "@/utils/copyToClipboard"
@@ -52,7 +52,8 @@ const TwinCheck = () => {
 
   // Progress tracking
   const [taskId, setTaskId] = useState<string | null>(null)
-  const progress = useReportGenieProgress(taskId)
+  // Use a TwinCheck-specific progress hook so progress maps to twincheck backend keys
+  const progress = useTwincheckProgress(taskId)
   const hasHandledCompletionRef = useRef(false)
 
   // Handle feedback submission
@@ -309,10 +310,31 @@ const TwinCheck = () => {
     mutationFn: async (data: { comparison_topics: string; document1: File; document2: File }) => {
       console.log("🎯 Creating compare task for progress tracking...")
 
-      // First, create a task to get the task_id for progress tracking
-      const taskResponse = await ReportgenieService.createOptimizeOutlineTask()
+      // First, create a task to get the task_id for progress tracking (TwinCheck-specific)
+      // The SDK does not always include a generated Twincheck createOptimizeOutlineTask; use authenticated request helper
+      const taskResponse = await (async () => {
+        try {
+          // Prefer generated SDK method if available
+          // @ts-ignore
+          if (typeof (TwincheckService as any).createOptimizeOutlineTask === "function") {
+            // @ts-ignore
+            return await (TwincheckService as any).createOptimizeOutlineTask()
+          }
+        } catch (err) {
+          // ignore and fallback to direct authenticated request
+          console.warn("TwincheckService.createOptimizeOutlineTask not available or failed:", err)
+        }
 
-      const newTaskId = (taskResponse as any).task_id
+        // Fallback: call the backend using the generated request helper with auth
+        const { request: __request } = await import("@/client/core/request")
+        const { OpenAPI } = await import("@/client/core/OpenAPI")
+        return await __request(OpenAPI, {
+          method: "POST",
+          url: "/api/v1/twincheck/optimize-outline/task",
+        })
+      })()
+
+      const newTaskId = (taskResponse as any).task_id || (taskResponse as any).taskId || (taskResponse as any).id
       console.log("📋 Generated compare task_id:", newTaskId)
       setTaskId(newTaskId)
 
@@ -322,7 +344,8 @@ const TwinCheck = () => {
         formData: {
           document1: data.document1,
           document2: data.document2,
-        },
+          task_id: newTaskId,  // Pass task_id for progress tracking
+        } as any,  // Type assertion - SDK will be regenerated later
       })
 
       // Register the operation for automatic cancellation on navigation
