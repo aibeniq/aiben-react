@@ -1990,7 +1990,7 @@ async def optimize_outline(
                             import asyncio
                             
                             # Batch / concurrency settings with sensible defaults
-                            BATCH_SIZE = getattr(settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 8)
+                            BATCH_SIZE = getattr(settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 10)
                             REQUEST_DELAY = getattr(settings, "PROCESSING_DELAY_BETWEEN_REQUESTS", 0.02)
 
                             loop = asyncio.get_running_loop()
@@ -2096,7 +2096,7 @@ async def optimize_outline(
                             import asyncio
                             
                             # Batch / concurrency settings with sensible defaults
-                            BATCH_SIZE = getattr(settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 8)
+                            BATCH_SIZE = getattr(settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 10)
                             REQUEST_DELAY = getattr(settings, "PROCESSING_DELAY_BETWEEN_REQUESTS", 0.02)
 
                             loop = asyncio.get_running_loop()
