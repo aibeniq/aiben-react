@@ -160,75 +160,111 @@ async def prefetch_knowledge_base_context(
                 else:
                     print(f"Retrieved {len(docs)} documents for question: {question_text[:50]}...")
                     
-                    # Check if this is a Full Document Scan (retriever returns ALL docs)
-                    # We detect this by checking if we got more than RAG_NUM_CHUNKS documents
-                    is_full_scan = len(docs) > settings.RAG_NUM_CHUNKS
-                    
-                    if is_full_scan:
-                        print(f"🔍 Full Document Scan detected: Filtering {len(docs)} chunks for relevance...")
+                    # LLM-based relevance filtering for VeraDoc (similar to ReportGenie)
+                    # This prevents irrelevant chunks from being included as citations
+                    if docs:
+                        print(f"🔍 Filtering {len(docs)} retrieved chunks for relevance to question: {question_text[:50]}...")
                         
-                        # LLM-based relevance filtering for Full Document Scan
-                        # This prevents the entire KB from being included as citations
+                        # Check if this is a Full Document Scan (retriever returns ALL docs)
+                        # We detect this by checking if we got more than RAG_NUM_CHUNKS documents
+                        is_full_scan = len(docs) > settings.RAG_NUM_CHUNKS
+                        if is_full_scan:
+                            print("Full document scan detected - using batch processing for performance")
+                        
+                        # Batch / concurrency settings with sensible defaults
+                        BATCH_SIZE = getattr(settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 10)
+                        REQUEST_DELAY = getattr(settings, "PROCESSING_DELAY_BETWEEN_REQUESTS", 0.02)
+
+                        loop = asyncio.get_running_loop()
                         filtered_docs = []
-                        
-                        for doc_idx, doc in enumerate(docs):
-                            try:
-                                # Yield to event loop more frequently for long-running Full Document Scan
-                                # This prevents connection timeouts and allows progress polling to work
-                                await asyncio.sleep(0.05)  # Increased from 0.01 to ensure event loop processing
-                                
-                                # Update progress during relevance filtering (crucial for Full Document Scan)
-                                if task_id:
-                                    # Show detailed progress: question X, analyzing chunk Y/Z
-                                    progress_tracker.update_stage_progress(
-                                        task_id, "fetching_context", i, len(question_list),
-                                        f"Question {i+1}/{len(question_list)}: Analyzing chunk {doc_idx + 1}/{len(docs)} for relevance..."
-                                    )
-                                
-                                # Add delay between chunk analyses to prevent rate limits
-                                if doc_idx > 0 and settings.VERADOC_ENABLE_PROCESSING_DELAYS:
-                                    await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
-                                
-                                # Check for cancellation during filtering
-                                if request and await request.is_disconnected():
-                                    print(f"❌ CLIENT DISCONNECTED - Stopping relevance filtering at chunk {doc_idx + 1}")
-                                    raise HTTPException(
-                                        status_code=408,
-                                        detail="Request cancelled during relevance filtering"
-                                    )
-                                
-                                print(f"Analyzing chunk {doc_idx + 1}/{len(docs)} for relevance...")
-                                
-                                # Use LLM to determine if this chunk is relevant
-                                relevance_check = await invoke_llm_async(
-                                    llm,
-                                    settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
-                                    {"chunk": doc.page_content or "", "question": question_text},
-                                )
-                                
-                                # Check for cancellation after LLM call
-                                if request and await request.is_disconnected():
-                                    print(f"❌ CLIENT DISCONNECTED - Stopping after relevance check at chunk {doc_idx + 1}")
-                                    raise HTTPException(
-                                        status_code=408,
-                                        detail="Request cancelled during relevance filtering"
-                                    )
-                                
-                                # Yield again after LLM call to prevent connection timeout
-                                await asyncio.sleep(0.02)
-                                
-                                # Filter based on LLM response (similar to chatbot)
-                                if "No relevant information found" not in relevance_check:
+                        print(f"Starting batch processing with batch size {BATCH_SIZE} for {len(docs)} documents")
+
+                        # Process docs in batches to reduce total runtime while still being rate-limit friendly
+                        for start in range(0, len(docs), BATCH_SIZE):
+                            batch = docs[start : start + BATCH_SIZE]
+                            tasks = []
+
+                            # Create async tasks that run the blocking invoke_llm_async in executor
+                            for j, doc in enumerate(batch):
+                                doc_idx = start + j
+
+                                async def _check(doc=doc, doc_idx=doc_idx):
+                                    try:
+                                        # Yield to event loop more frequently for long-running operations
+                                        # This prevents connection timeouts and allows progress polling to work
+                                        await asyncio.sleep(0.05)
+                                        
+                                        # Update progress during relevance filtering (crucial for long operations)
+                                        if task_id:
+                                            # Show detailed progress: question X, analyzing chunk Y/Z
+                                            progress_tracker.update_stage_progress(
+                                                task_id, "fetching_context", i, len(question_list),
+                                                f"Question {i+1}/{len(question_list)}: Analyzing chunk {doc_idx + 1}/{len(docs)} for relevance..."
+                                            )
+                                        
+                                        # Check for cancellation during filtering
+                                        if request and await request.is_disconnected():
+                                            print(f"❌ CLIENT DISCONNECTED - Stopping relevance filtering at chunk {doc_idx + 1}")
+                                            raise HTTPException(
+                                                status_code=408,
+                                                detail="Request cancelled during relevance filtering"
+                                            )
+                                        
+                                        print(f"Analyzing chunk {doc_idx + 1}/{len(docs)} for relevance...")
+                                        
+                                        # Use LLM to determine if this chunk is relevant
+                                        # Use run_in_executor to run the sync invoke_llm in a thread pool
+                                        relevance_check = await loop.run_in_executor(
+                                            None,
+                                            lambda: invoke_llm(
+                                                llm,
+                                                settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
+                                                {"chunk": doc.page_content or "", "question": question_text},
+                                            ),
+                                        )
+                                        
+                                        # Check for cancellation after LLM call
+                                        if request and await request.is_disconnected():
+                                            print(f"❌ CLIENT DISCONNECTED - Stopping after relevance check at chunk {doc_idx + 1}")
+                                            raise HTTPException(
+                                                status_code=408,
+                                                detail="Request cancelled during relevance filtering"
+                                            )
+                                        
+                                        # Yield again after LLM call to prevent connection timeout
+                                        await asyncio.sleep(0.02)
+                                        
+                                        return doc_idx, doc, relevance_check
+                                        
+                                    except Exception as filter_error:
+                                        print(f"Error filtering chunk {doc_idx + 1}: {filter_error}")
+                                        # On error, include the chunk to be safe
+                                        return doc_idx, doc, None
+
+                                tasks.append(asyncio.create_task(_check()))
+
+                            # Await this batch and handle results
+                            print(f"Awaiting batch {start // BATCH_SIZE + 1} with {len(tasks)} tasks")
+                            results = await asyncio.gather(*tasks, return_exceptions=True)
+                            print(f"Batch completed, got {len(results)} results")
+
+                            for res in results:
+                                if isinstance(res, Exception):
+                                    # On error, include the chunk to be safe (preserve previous behavior)
+                                    print(f"Warning: error during batch relevance check: {res}")
+                                    continue
+
+                                doc_idx, doc, relevance_check = res
+                                # Filter based on LLM response (same logic as before)
+                                if relevance_check and "No relevant information found" not in relevance_check:
                                     print(f"✅ Chunk {doc_idx + 1} is relevant")
                                     filtered_docs.append(doc)
                                 else:
                                     print(f"❌ Chunk {doc_idx + 1} is not relevant - excluding from citations")
-                                    
-                            except Exception as filter_error:
-                                print(f"Error filtering chunk {doc_idx + 1}: {filter_error}")
-                                # On error, include the chunk to be safe
-                                filtered_docs.append(doc)
-                                await asyncio.sleep(0.01)  # Yield even on error
+
+                            # Small sleep between batches to help with rate limits and to yield loop
+                            if REQUEST_DELAY:
+                                await asyncio.sleep(REQUEST_DELAY)
                         
                         print(f"📊 Relevance filtering: {len(filtered_docs)}/{len(docs)} chunks are relevant")
                         docs = filtered_docs
