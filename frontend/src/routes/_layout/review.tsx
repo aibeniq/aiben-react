@@ -199,12 +199,8 @@ const VeraDoc = () => {
           `🚀 Optimization applied: ${data.results.optimization_applied}`,
         )
 
-        const searchMethod =
-          data.results.search_mode === "vector"
-            ? "vector search"
-            : "full document scan"
         showSuccessToast(
-          `🚀 ${reviewData.length} files processed with optimized context sharing! (${searchMethod})`,
+          t("review.reviewSuccessMultiple", { count: reviewData.length }),
         )
       } else {
         // Fallback to single file format for backward compatibility
@@ -224,7 +220,7 @@ const VeraDoc = () => {
           ? " (Optimized)"
           : ""
         showSuccessToast(
-          `Document review completed successfully!${optimizationNote}`,
+          t("review.reviewSuccess") + optimizationNote,
         )
       }
 

@@ -26,6 +26,10 @@ export const useLanguage = () => {
       // Always change UI language - i18n will handle missing translations
       await i18n.changeLanguage(language)
 
+      // Save to localStorage for persistence
+      localStorage.setItem("preferredLanguage", language)
+      localStorage.setItem("i18nextLng", language)
+
       // Always update backend preference (for AI output translation)
       return UsersService.updateLanguage({
         requestBody: { preferred_language: language },

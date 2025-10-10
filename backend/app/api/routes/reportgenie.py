@@ -41,7 +41,7 @@ from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
-from app.services.translation import translate_text_if_needed
+from app.services.translation import translate_text_if_needed, translate_progress_message
 from app.services.retrievers import (
     create_ensemble_retriever,
 )  # Import the ensemble retriever
@@ -327,7 +327,7 @@ async def generate_report(
             )
         
         progress_tracker.update_stage_progress(
-            task_id, "setup", 0, 1, "Initializing report generation..."
+            task_id, "setup", 0, 1, translate_progress_message("starting_generation", current_user.preferred_language or "en")
         )
 
         # Process each section
@@ -339,7 +339,7 @@ async def generate_report(
         
         progress_tracker.complete_stage(task_id, "setup", "Setup complete")
         progress_tracker.update_stage_progress(
-            task_id, "generating", 0, len(section_items), "Starting section generation..."
+            task_id, "generating", 0, len(section_items), translate_progress_message("starting_generation", current_user.preferred_language or "en")
         )
 
         try:
@@ -348,7 +348,7 @@ async def generate_report(
                 section_preview = section_item["text"][:50] + "..." if len(section_item["text"]) > 50 else section_item["text"]
                 progress_tracker.update_stage_progress(
                     task_id, "generating", idx, len(section_items),
-                    f"Processing section {idx + 1}/{len(section_items)}: {section_preview}"
+                    translate_progress_message("processing_section", current_user.preferred_language or "en", section_num=idx + 1, total_sections=len(section_items), section_preview=section_preview)
                 )
                 
                 await asyncio.sleep(0.01)  # Allow progress API to respond

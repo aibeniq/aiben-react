@@ -374,9 +374,7 @@ const FormConnect = () => {
         interactionId: interactionId as string,
       })
 
-      const searchMethod =
-        searchMode === "vector" ? "vector search" : "full document scan"
-      showSuccessToast(`Form processing completed using ${searchMethod}!`)
+      showSuccessToast("Form processing completed successfully!")
     },
     onError: (error: any) => {
       console.log("Mutation unsuccessful!")

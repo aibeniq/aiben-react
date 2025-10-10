@@ -30,7 +30,7 @@ from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, invoke_llm_async, record_llm_interaction
-from app.services.translation import translate_text_if_needed
+from app.services.translation import translate_text_if_needed, translate_progress_message
 from app.services.retrievers import (
     create_ensemble_retriever,
 )  # Import the ensemble retriever
@@ -105,6 +105,7 @@ async def prefetch_knowledge_base_context(
     current_user,
     request: FastAPIRequest = None,
     task_id: str = None,
+    user_language: str = "en",
 ) -> Dict[str, Dict[str, Any]]:
     """
     Pre-fetch knowledge base context for all questions to avoid redundant retrieval.
@@ -122,7 +123,7 @@ async def prefetch_knowledge_base_context(
         if task_id:
             progress_tracker.update_stage_progress(
                 task_id, "fetching_context", i, len(question_list),
-                f"Retrieving policy context for question {i+1}/{len(question_list)}..."
+                translate_progress_message("retrieving_policy_context", user_language, question_num=i+1, total_questions=len(question_list))
             )
         
         # Add delay between questions to prevent rate limit exhaustion
@@ -199,7 +200,9 @@ async def prefetch_knowledge_base_context(
                                             # Show detailed progress: question X, analyzing chunk Y/Z
                                             progress_tracker.update_stage_progress(
                                                 task_id, "fetching_context", i, len(question_list),
-                                                f"Question {i+1}/{len(question_list)}: Analyzing chunk {doc_idx + 1}/{len(docs)} for relevance..."
+                                                translate_progress_message("question_analyzing_chunk", user_language,
+                                                                         question_num=i+1, total_questions=len(question_list),
+                                                                         chunk_num=doc_idx + 1, total_chunks=len(docs))
                                             )
                                         
                                         # Check for cancellation during filtering
@@ -348,7 +351,9 @@ async def prefetch_knowledge_base_context(
                             if task_id:
                                 progress_tracker.update_stage_progress(
                                     task_id, "fetching_context", i, len(question_list),
-                                    f"Question {i+1}/{len(question_list)}: Processing context chunk {chunk_idx + 1}/{len(context_chunks)}..."
+                                    translate_progress_message("question_processing_context_chunk", user_language,
+                                                             question_num=i+1, total_questions=len(question_list),
+                                                             chunk_num=chunk_idx + 1, total_chunks=len(context_chunks))
                                 )
                                 await asyncio.sleep(0.01)  # Allow progress API to respond
                             
@@ -773,8 +778,11 @@ async def process_rag_checklist(
     request_data.search_mode = search_mode
     request_data.task_id = task_id
     
+    # Get user's preferred language for progress message translation
+    user_language = getattr(current_user, "preferred_language", "en") or "en"
+    
     progress_tracker.update_stage_progress(
-        task_id, "setup", 0, 1, "Initializing document review..."
+        task_id, "setup", 0, 1, translate_progress_message("initializing_document_review", user_language)
     )
 
     try:
@@ -785,11 +793,11 @@ async def process_rag_checklist(
         if not kb:
             raise HTTPException(status_code=404, detail="Knowledge base not found")
 
-        progress_tracker.complete_stage(task_id, "setup", "Setup complete")
+        progress_tracker.complete_stage(task_id, "setup", translate_progress_message("setup_complete", user_language))
         
         # Start fetching context stage
         progress_tracker.update_stage_progress(
-            task_id, "fetching_context", 0, 1, "Preparing to retrieve policy context..."
+            task_id, "fetching_context", 0, 1, translate_progress_message("preparing_retrieve_policy_context", user_language)
         )
         
         await asyncio.sleep(0.01)  # Allow progress API to respond
@@ -1091,7 +1099,8 @@ async def process_rag_checklist(
                     session=session,
                     current_user=current_user,
                     request=request,
-                    task_id=task_id
+                    task_id=task_id,
+                    user_language=user_language
                 )
                 print(f"✅ Pre-fetched context for {len(question_contexts)} questions")
             except HTTPException:
@@ -1103,12 +1112,12 @@ async def process_rag_checklist(
                 question_contexts = {}
             
             # Complete context fetching stage
-            progress_tracker.complete_stage(task_id, "fetching_context", "Policy context retrieved")
+            progress_tracker.complete_stage(task_id, "fetching_context", translate_progress_message("policy_context_retrieved", user_language))
             
             # Start reviewing documents stage
             progress_tracker.update_stage_progress(
                 task_id, "reviewing", 0, total_files,
-                "Beginning document review with policy context..."
+                translate_progress_message("beginning_document_review", user_language)
             )
             await asyncio.sleep(0.01)  # Allow progress API to respond
 
@@ -1226,7 +1235,10 @@ async def process_rag_checklist(
                     question_preview = question_item.get("text", "")[:50] + "..." if len(question_item.get("text", "")) > 50 else question_item.get("text", "")
                     progress_tracker.update_stage_progress(
                         task_id, "reviewing", questions_completed, total_questions,
-                        f"Answering question {i+1}/{len(question_list)} for file {file_index+1}/{len(files)}: {question_preview}"
+                        translate_progress_message("answering_question", user_language,
+                                                 question_num=i+1, total_questions=len(question_list),
+                                                 file_num=file_index+1, total_files=len(files),
+                                                 question_preview=question_preview)
                     )
                     
                     # Add delay between question processing to prevent rate limit exhaustion
@@ -1453,7 +1465,9 @@ async def process_rag_checklist(
                         print(f"📊 PROGRESS UPDATE: Completed {questions_completed}/{total_questions} questions")
                         progress_tracker.update_stage_progress(
                             task_id, "reviewing", questions_completed, total_questions,
-                            f"Completed question {i+1}/{len(question_list)} for file {file_index+1}/{len(files)}"
+                            translate_progress_message("completed_question", user_language,
+                                                     question_num=i+1, total_questions=len(question_list),
+                                                     file_num=file_index+1, total_files=len(files))
                         )
                         # Give MORE time for progress polling to see the update, especially for Full Document Scan
                         await asyncio.sleep(0.1)  # Increased from 0.01 to ensure progress is visible
@@ -1486,7 +1500,7 @@ async def process_rag_checklist(
                     progress_tracker.update_stage_progress(
                         task_id, "reviewing", file_index * len(question_list) + len(question_list), 
                         len(files) * len(question_list),
-                        f"Generating final evaluation for file {file_index+1}/{len(files)}: {file_preview}"
+                        translate_progress_message("generating_final_evaluation", user_language, file_num=file_index+1, total_files=len(files), file_preview=file_preview)
                     )
                     await asyncio.sleep(0.01)  # Allow progress API to respond
                     
@@ -1587,11 +1601,11 @@ async def process_rag_checklist(
             
             # Complete finalizing stage
             print(f"📊 COMPLETING FINALIZING STAGE for task {task_id}")
-            progress_tracker.complete_stage(task_id, "finalizing", "Review completed successfully")
+            progress_tracker.complete_stage(task_id, "finalizing", translate_progress_message("review_completed_successfully", user_language))
             await asyncio.sleep(0.1)  # Allow progress polling to see finalizing completion
             
             print(f"📊 COMPLETING TASK for task {task_id}")
-            progress_tracker.complete_task(task_id, "Review completed successfully")
+            progress_tracker.complete_task(task_id, translate_progress_message("review_completed_successfully", user_language))
             await asyncio.sleep(0.1)  # Allow progress polling to see task completion
             
             # Store results in task metadata for later retrieval

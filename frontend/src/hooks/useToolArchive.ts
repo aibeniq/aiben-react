@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import {
   FormconnectService,
   ReportgenieService,
@@ -26,7 +27,7 @@ interface UseToolArchiveReturn {
     { [key: string]: unknown },
     VeradocGetVeradocDetailResponse
   > &
-    ToolActions
+  ToolActions
   reportgenie: ToolState<{ [key: string]: unknown }, any> & ToolActions
   twincheck: ToolState<{ [key: string]: unknown }, any> & ToolActions
   formconnect: ToolState<{ [key: string]: unknown }, any> & ToolActions
@@ -41,6 +42,7 @@ interface UseToolArchiveReturn {
 }
 
 export const useToolArchive = (): UseToolArchiveReturn => {
+  const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // Veradoc (Review) state
@@ -272,7 +274,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
       })
       setSelectedVeradocReport(summary)
       setIsVeradocLoading(false) // Show summary and question headers immediately
-      showSuccessToast("Evaluation loaded successfully")
+      showSuccessToast(t("archive.successMessages.evaluationLoaded"))
 
       // Note: Individual QA pairs will be loaded on-demand when user clicks to expand a question
       // This provides true lazy loading - only fetch what the user actually wants to see
@@ -294,7 +296,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
       })
       setSelectedReportgenieReport(summary)
       setIsReportgenieLoading(false) // Show summary immediately
-      showSuccessToast("Report loaded successfully")
+      showSuccessToast(t("archive.successMessages.reportLoaded"))
 
       // Note: Sections should be loaded on-demand when user requests them
     } catch (error) {
@@ -311,7 +313,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
         comparisonId,
       })
       setSelectedTwincheckReport(report)
-      showSuccessToast("Comparison loaded successfully")
+      showSuccessToast(t("archive.successMessages.comparisonLoaded"))
     } catch (error) {
       console.error("Error loading comparison:", error)
       showErrorToast("Failed to load comparison")
@@ -325,7 +327,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
       setIsFormconnectLoading(true)
       const report = await FormconnectService.getFormDetail({ interactionId })
       setSelectedFormconnectReport(report)
-      showSuccessToast("Form processing loaded successfully")
+      showSuccessToast(t("archive.successMessages.formProcessingLoaded"))
     } catch (error) {
       console.error("Error loading form processing:", error)
       showErrorToast("Failed to load form processing")
@@ -338,7 +340,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const deleteVeradocReport = async (reportId: string) => {
     try {
       await VeradocService.deleteEvaluation({ evaluationId: reportId })
-      showSuccessToast("Evaluation deleted successfully")
+      showSuccessToast(t("archive.successMessages.evaluationDeleted"))
 
       // Clear selected report if it was the one being deleted
       if (selectedVeradocReport?.id === reportId) {
@@ -356,7 +358,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const deleteReportgenieReport = async (reportId: string) => {
     try {
       await ReportgenieService.deleteReport({ reportId })
-      showSuccessToast("Report deleted successfully")
+      showSuccessToast(t("archive.successMessages.reportDeleted"))
 
       // Clear selected report if it was the one being deleted
       if (selectedReportgenieReport?.id === reportId) {
@@ -374,7 +376,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const deleteTwincheckReport = async (comparisonId: string) => {
     try {
       await TwincheckService.deleteComparison({ comparisonId })
-      showSuccessToast("Comparison deleted successfully")
+      showSuccessToast(t("archive.successMessages.comparisonDeleted"))
 
       // Clear selected report if it was the one being deleted
       if (selectedTwincheckReport?.id === comparisonId) {
@@ -392,7 +394,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
   const deleteFormconnectReport = async (interactionId: string) => {
     try {
       await FormconnectService.deleteForm({ formId: interactionId })
-      showSuccessToast("Form processing deleted successfully")
+      showSuccessToast(t("archive.successMessages.formProcessingDeleted"))
 
       // Clear selected report if it was the one being deleted
       if (selectedFormconnectReport?.id === interactionId) {

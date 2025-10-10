@@ -35,7 +35,7 @@ from app.services.llms import (
     invoke_llm_with_image,
     record_llm_interaction,
 )
-from app.services.translation import translate_text_if_needed
+from app.services.translation import translate_text_if_needed, translate_progress_message
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 from app.services.progress_tracker import progress_tracker
@@ -1219,7 +1219,7 @@ async def process_form(
         progress_tracker.complete_stage(task_id, "setup", "Setup complete")
         progress_tracker.update_stage_progress(
             task_id, "loading", 0, 1, 
-            f"Loading {total_files} document(s) and form template..."
+            translate_progress_message("loading_documents_template", current_user.preferred_language or "en", document_count=total_files)
         )
         await asyncio.sleep(0.01)  # Yield to event loop
 
@@ -1246,7 +1246,7 @@ async def process_form(
             if task_id:
                 progress_tracker.update_stage_progress(
                     task_id, "extracting", i, total_files,
-                    f"Extracting fields from document {i + 1}/{total_files}: {file.filename}..."
+                    translate_progress_message("extracting_fields", current_user.preferred_language or "en", document_num=i + 1, total_documents=total_files, document_name=file.filename)
                 )
                 await asyncio.sleep(0.01)  # Yield to event loop
             
@@ -1308,7 +1308,7 @@ async def process_form(
         progress_tracker.complete_stage(task_id, "extracting", "Field extraction complete")
         progress_tracker.update_stage_progress(
             task_id, "comparing", 0, 1,
-            "Comparing and formatting results..."
+            f"Comparing and formatting results... {translate_progress_message('comparing_formatting_results', current_user.preferred_language or 'en')}"
         )
         await asyncio.sleep(0.01)  # Yield to event loop
 
@@ -1329,7 +1329,7 @@ async def process_form(
             extracted_results, file_names, llm, current_user, session
         )
         result = {
-            "message": "Documents compared successfully",
+            "message": translate_progress_message("match_completed_successfully", current_user.preferred_language or "en"),
             "comparison": comparison_result,
             "extracted_data": extracted_results,
         }

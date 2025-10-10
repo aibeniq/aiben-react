@@ -1,6 +1,7 @@
 import { OpenAPI } from "@/client/core/OpenAPI"
 import { request as __request } from "@/client/core/request"
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 interface ProgressData {
   status: "pending" | "in_progress" | "completed" | "failed"
@@ -13,10 +14,11 @@ interface ProgressData {
 }
 
 export function useFormconnectProgress(taskId: string | null) {
+  const { t } = useTranslation()
   const [progress, setProgress] = useState<ProgressData>({
     status: "pending",
     percentage: 0,
-    message: "Initializing...",
+    message: t("common.progress.initializing"),
     current_stage: "setup",
     completed: false,
     isActive: false,
@@ -31,7 +33,7 @@ export function useFormconnectProgress(taskId: string | null) {
       setProgress({
         status: "pending",
         percentage: 0,
-        message: "Initializing...",
+        message: t("common.progress.initializing"),
         current_stage: "setup",
         completed: false,
         isActive: false,

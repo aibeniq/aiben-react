@@ -17,6 +17,8 @@ const LanguageInitializer: React.FC<LanguageInitializerProps> = ({
       console.log(
         `🌐 Initializing UI language from localStorage: ${savedLanguage}`,
       )
+      // Also save to i18nextLng for consistency
+      localStorage.setItem("i18nextLng", savedLanguage)
       i18n.changeLanguage(savedLanguage)
     }
   }, [i18n])

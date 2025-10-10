@@ -197,6 +197,7 @@ export const addNordicTranslations = (resources: any) => {
         noData: "Ingen data tillgänglig",
         success: "Lyckades!",
         failed: "Misslyckades",
+        error: "Något gick fel!",
         welcome: "Välkommen",
         welcomeBack: "Välkommen tillbaka. Kul att se dig igen!",
         hiUser: "Hej, {{name}} 👋",
@@ -211,6 +212,10 @@ export const addNordicTranslations = (resources: any) => {
         copy: "Kopiera",
         paste: "Klistra in",
         cut: "Klipp ut",
+        progress: {
+          starting: "Startar...",
+          initializing: "Initierar...",
+        },
       },
       usage: {
         title: "Användning",
@@ -289,6 +294,9 @@ export const addNordicTranslations = (resources: any) => {
           "Hitta relevant innehåll med AI-likhetsökning (snabb, riktad)",
         fullScanDescription:
           "Analysera alla dokument i kunskapsbasen (omfattande, grundlig)",
+        pleaseWait: "Vänta medan vi granskar dina dokument",
+        reviewSuccess: "Dokumentgranskning slutförd framgångsrikt!",
+        reviewSuccessMultiple: "{{count}} filer bearbetade med optimerad kontextdelning!",
       },
       generate: {
         pageDescription:
@@ -327,7 +335,8 @@ export const addNordicTranslations = (resources: any) => {
         reportClearedSuccess: "Genererad rapport rensad",
         enterAtLeastOneSection: "Ange minst ett avsnitt",
         selectKnowledgeBase: "Välj en kunskapsbas",
-        generateSuccess: "Rapport genererad framgångsrikt med {method}!",
+        generateSuccess: "Rapport genererad framgångsrikt!",
+        matchSuccess: "Formulärbearbetning slutförd framgångsrikt!",
         generateError: "Misslyckades att generera dokument: {error}",
         vectorSearch: "vektorsökning",
         fullDocumentScan: "fullständig dokumentskanning",
@@ -667,15 +676,20 @@ export const addNordicTranslations = (resources: any) => {
           documents: "dokument",
           digitized: "digitaliserad",
         },
-        feedback: {
-          positive: "Positiv feedback",
-          negative: "Negativ feedback",
-          hasFeedback: "Har feedback",
-        },
         deleteConfirmation:
           "Är du säker på att du vill ta bort detta objekt? Denna åtgärd kan inte ångras.",
         unknownDate: "Okänt datum",
         unnamedItem: "Namnlöst objekt",
+        successMessages: {
+          evaluationLoaded: "Utvärdering laddad framgångsrikt",
+          reportLoaded: "Rapport laddad framgångsrikt",
+          comparisonLoaded: "Jämförelse laddad framgångsrikt",
+          formProcessingLoaded: "Formulärbearbetning laddad framgångsrikt",
+          evaluationDeleted: "Utvärdering raderad framgångsrikt",
+          reportDeleted: "Rapport raderad framgångsrikt",
+          comparisonDeleted: "Jämförelse raderad framgångsrikt",
+          formProcessingDeleted: "Formulärbearbetning raderad framgångsrikt",
+        },
       },
     },
   }
@@ -970,6 +984,9 @@ export const addNordicTranslations = (resources: any) => {
           "Finn relevant innhold ved hjelp av AI-likhetssøk (rask, målrettet)",
         fullScanDescription:
           "Analyser alle dokumenter i kunnskapsbasen (omfattende, grundig)",
+        pleaseWait: "Vennligst vent mens vi gjennomgår dokumentene dine",
+        reviewSuccess: "Dokumentgjennomgang fullført vellykket!",
+        reviewSuccessMultiple: "{{count}} filer behandlet med optimalisert kontekstdeling!",
       },
       generate: {
         pageDescription:
@@ -1008,7 +1025,8 @@ export const addNordicTranslations = (resources: any) => {
         reportClearedSuccess: "Generert rapport fjernet",
         enterAtLeastOneSection: "Skriv inn minst en seksjon",
         selectKnowledgeBase: "Velg en kunnskapsbase",
-        generateSuccess: "Rapport generert vellykket ved hjelp av {method}!",
+        generateSuccess: "Rapport generert vellykket!",
+        matchSuccess: "Skjema behandling fullført vellykket!",
         generateError: "Kunne ikke generere dokument: {error}",
         vectorSearch: "vektorsøk",
         fullDocumentScan: "full dokumentskanning",
@@ -1351,15 +1369,20 @@ export const addNordicTranslations = (resources: any) => {
           digitized: "digitalisert",
           handwritten: "håndskrevet",
         },
-        feedback: {
-          positive: "Positiv tilbakemelding",
-          negative: "Negativ tilbakemelding",
-          hasFeedback: "Har tilbakemelding",
-        },
         deleteConfirmation:
           "Er du sikker på at du vil slette dette elementet? Denne handlingen kan ikke angres.",
         unknownDate: "Ukjent dato",
         unnamedItem: "Navnløst element",
+        successMessages: {
+          evaluationLoaded: "Evaluering lastet inn vellykket",
+          reportLoaded: "Rapport lastet inn vellykket",
+          comparisonLoaded: "Sammenligning lastet inn vellykket",
+          formProcessingLoaded: "Skjema behandling lastet inn vellykket",
+          evaluationDeleted: "Evaluering slettet vellykket",
+          reportDeleted: "Rapport slettet vellykket",
+          comparisonDeleted: "Sammenligning slettet vellykket",
+          formProcessingDeleted: "Skjema behandling slettet vellykket",
+        },
       },
     },
   }
@@ -1654,6 +1677,9 @@ export const addNordicTranslations = (resources: any) => {
           "Find relevant indhold ved hjælp af AI-lighedssøgning (hurtig, målrettet)",
         fullScanDescription:
           "Analyser alle dokumenter i videnbasen (omfattende, grundig)",
+        pleaseWait: "Vent venligst mens vi gennemgår dine dokumenter",
+        reviewSuccess: "Dokumentgennemgang fuldført succesfuldt!",
+        reviewSuccessMultiple: "{{count}} filer behandlet med optimeret kontekstdeling!",
       },
       generate: {
         pageDescription:
@@ -1692,7 +1718,8 @@ export const addNordicTranslations = (resources: any) => {
         reportClearedSuccess: "Genereret rapport ryddet",
         enterAtLeastOneSection: "Indtast mindst ét afsnit",
         selectKnowledgeBase: "Vælg en videnbase",
-        generateSuccess: "Rapport genereret succesfuldt ved hjælp af {method}!",
+        generateSuccess: "Rapport genereret succesfuldt!",
+        matchSuccess: "Formularbehandling gennemført succesfuldt!",
         generateError: "Kunne ikke generere dokument: {error}",
         vectorSearch: "vektorsøgning",
         fullDocumentScan: "fuld dokumentscanning",
@@ -2031,15 +2058,20 @@ export const addNordicTranslations = (resources: any) => {
           digitized: "digitaliseret",
           handwritten: "håndskrevet",
         },
-        feedback: {
-          positive: "Positiv feedback",
-          negative: "Negativ feedback",
-          hasFeedback: "Har feedback",
-        },
         deleteConfirmation:
           "Er du sikker på at du vil slette dette element? Denne handling kan ikke fortrydes.",
         unknownDate: "Ukendt dato",
         unnamedItem: "Unavngivet element",
+        successMessages: {
+          evaluationLoaded: "Evaluering indlæst succesfuldt",
+          reportLoaded: "Rapport indlæst succesfuldt",
+          comparisonLoaded: "Sammenligning indlæst succesfuldt",
+          formProcessingLoaded: "Formular behandling indlæst succesfuldt",
+          evaluationDeleted: "Evaluering slettet succesfuldt",
+          reportDeleted: "Rapport slettet succesfuldt",
+          comparisonDeleted: "Sammenligning slettet succesfuldt",
+          formProcessingDeleted: "Formular behandling slettet succesfuldt",
+        },
       },
     },
   }
@@ -2332,6 +2364,9 @@ export const addNordicTranslations = (resources: any) => {
           "Löydä asiaankuuluvaa sisältöä käyttäen tekoälyn samankaltaisuushakua (nopea, kohdennettu)",
         fullScanDescription:
           "Analysoi kaikki asiakirjat tietokannassa (täydellinen, perusteellinen)",
+        pleaseWait: "Odota, kun tarkistamme asiakirjasi",
+        reviewSuccess: "Asiakirjan tarkistus suoritettu onnistuneesti!",
+        reviewSuccessMultiple: "{{count}} tiedostoa käsitelty optimoitulla kontekstin jakamisella!",
       },
       generate: {
         pageDescription:
@@ -2370,7 +2405,8 @@ export const addNordicTranslations = (resources: any) => {
         reportClearedSuccess: "Luotu raportti tyhjennetty",
         enterAtLeastOneSection: "Syötä vähintään yksi osio",
         selectKnowledgeBase: "Valitse tietokanta",
-        generateSuccess: "Raportti luotu onnistuneesti käyttäen {method}!",
+        generateSuccess: "Raportti luotu onnistuneesti!",
+        matchSuccess: "Lomakkeen käsittely suoritettu onnistuneesti!",
         generateError: "Virhe asiakirjan luomisessa: {error}",
         vectorSearch: "vektorihaku",
         fullDocumentScan: "koko asiakirjan skannaus",
@@ -2707,16 +2743,105 @@ export const addNordicTranslations = (resources: any) => {
           documents: "asiakirjat",
           digitized: "digitoitu",
         },
-        feedback: {
-          positive: "Positiivinen palaute",
-          negative: "Negatiivinen palaute",
-          hasFeedback: "Sisältää palautetta",
-        },
         deleteConfirmation:
           "Oletko varma, että haluat poistaa tämän kohteen? Tätä toimintoa ei voi perua.",
         unknownDate: "Tuntematon päivämäärä",
         unnamedItem: "Nimeämätön kohde",
+        successMessages: {
+          evaluationLoaded: "Arviointi ladattu onnistuneesti",
+          reportLoaded: "Raportti ladattu onnistuneesti",
+          comparisonLoaded: "Vertailu ladattu onnistuneesti",
+          formProcessingLoaded: "Lomakkeen käsittely ladattu onnistuneesti",
+          evaluationDeleted: "Arviointi poistettu onnistuneesti",
+          reportDeleted: "Raportti poistettu onnistuneesti",
+          comparisonDeleted: "Vertailu poistettu onnistuneesti",
+          formProcessingDeleted: "Lomakkeen käsittely poistettu onnistuneesti",
+        },
       },
     },
+  }
+
+  // Add feedback translations to Swedish
+  if (!resources.sv.common.feedback) {
+    resources.sv.common.feedback = {
+      modalTitlePositive: "Vad var hjälpsamt?",
+      modalTitleNegative: "Vad kan förbättras?",
+      descriptionPositive: "Berätta vad du gillade med detta svar.",
+      descriptionNegative: "Berätta hur vi kan förbättra detta svar.",
+      placeholder: "Dina kommentarer (valfritt)",
+      cancel: "Avbryt",
+      updateFeedback: "Uppdatera feedback",
+      submit: "Skicka",
+      tooltipEditPositive: "Redigera din hjälpsamma feedback",
+      tooltipMarkPositive: "Markera som hjälpsam",
+      tooltipEditNegative: "Redigera din feedback för förbättringar",
+      tooltipMarkNegative: "Markera som inte hjälpsam",
+      feedbackSaved: "Feedback sparad",
+      thankYouMessage: "Tack för din feedback!",
+      submitErrorMessage: "Misslyckades att skicka feedback. Försök igen.",
+    }
+  }
+
+  // Add feedback translations to Norwegian
+  if (!resources.no.common.feedback) {
+    resources.no.common.feedback = {
+      modalTitlePositive: "Hva var nyttig?",
+      modalTitleNegative: "Hva kan forbedres?",
+      descriptionPositive: "Fortell oss hva du likte med dette svaret.",
+      descriptionNegative: "Fortell oss hvordan vi kan forbedre dette svaret.",
+      placeholder: "Dine kommentarer (valgfritt)",
+      cancel: "Avbryt",
+      updateFeedback: "Oppdater tilbakemelding",
+      submit: "Send",
+      tooltipEditPositive: "Rediger din nyttige tilbakemelding",
+      tooltipMarkPositive: "Merk som nyttig",
+      tooltipEditNegative: "Rediger din tilbakemelding for forbedringer",
+      tooltipMarkNegative: "Merk som ikke nyttig",
+      feedbackSaved: "Tilbakemelding lagret",
+      thankYouMessage: "Takk for din tilbakemelding!",
+      submitErrorMessage: "Kunne ikke sende tilbakemelding. Prøv igjen.",
+    }
+  }
+
+  // Add feedback translations to Danish
+  if (!resources.da.common.feedback) {
+    resources.da.common.feedback = {
+      modalTitlePositive: "Hvad var nyttigt?",
+      modalTitleNegative: "Hvad kan forbedres?",
+      descriptionPositive: "Fortæl os, hvad du kunne lide ved dette svar.",
+      descriptionNegative: "Fortæl os, hvordan vi kan forbedre dette svar.",
+      placeholder: "Dine kommentarer (valgfrit)",
+      cancel: "Annuller",
+      updateFeedback: "Opdater feedback",
+      submit: "Indsend",
+      tooltipEditPositive: "Rediger din nyttige feedback",
+      tooltipMarkPositive: "Markér som nyttig",
+      tooltipEditNegative: "Rediger din feedback til forbedringer",
+      tooltipMarkNegative: "Markér som ikke nyttig",
+      feedbackSaved: "Feedback gemt",
+      thankYouMessage: "Tak for din feedback!",
+      submitErrorMessage: "Kunne ikke sende feedback. Prøv igen.",
+    }
+  }
+
+  // Add feedback translations to Finnish
+  if (!resources.fi.common.feedback) {
+    resources.fi.common.feedback = {
+      modalTitlePositive: "Mikä oli hyödyllistä?",
+      modalTitleNegative: "Mitä voidaan parantaa?",
+      descriptionPositive: "Kerro meille, mitä pidit tästä vastauksesta.",
+      descriptionNegative: "Kerro meille, miten voimme parantaa tätä vastausta.",
+      placeholder: "Kommenttisi (valinnainen)",
+      cancel: "Peruuta",
+      updateFeedback: "Päivitä palaute",
+      submit: "Lähetä",
+      tooltipEditPositive: "Muokkaa hyödyllistä palautettasi",
+      tooltipMarkPositive: "Merkitse hyödylliseksi",
+      tooltipEditNegative: "Muokkaa palautettasi parannuksia varten",
+      tooltipMarkNegative: "Merkitse hyödyttömäksi",
+      feedbackSaved: "Palaute tallennettu",
+      thankYouMessage: "Kiitos palautteestasi!",
+      submitErrorMessage: "Palautteen lähettäminen epäonnistui. Yritä uudelleen.",
+    }
   }
 }
