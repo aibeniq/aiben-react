@@ -449,7 +449,12 @@ class ProgressTracker:
                     # Reconstruct ProgressStage objects from dicts
                     stages = {}
                     for name, stage_dict in progress_dict.get("stages", {}).items():
-                        stages[name] = ProgressStage(**stage_dict)
+                        if isinstance(stage_dict, ProgressStage):
+                            # Already a ProgressStage object
+                            stages[name] = stage_dict
+                        else:
+                            # Convert from dict
+                            stages[name] = ProgressStage(**stage_dict)
                     progress_dict["stages"] = stages
                     return ProgressData(**progress_dict)
                 return None
@@ -463,7 +468,12 @@ class ProgressTracker:
                 # Reconstruct ProgressStage objects from dicts
                 stages = {}
                 for name, stage_dict in data.get("stages", {}).items():
-                    stages[name] = ProgressStage(**stage_dict)
+                    if isinstance(stage_dict, ProgressStage):
+                        # Already a ProgressStage object
+                        stages[name] = stage_dict
+                    else:
+                        # Convert from dict
+                        stages[name] = ProgressStage(**stage_dict)
                 data["stages"] = stages
                 return ProgressData(**data)
             return None

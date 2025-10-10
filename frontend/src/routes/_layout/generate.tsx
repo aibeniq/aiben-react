@@ -439,11 +439,7 @@ const ReportGenie = () => {
         interactionId: interactionId,
       })
 
-      const searchMethod =
-        searchMode === "vector"
-          ? t("generate.vectorSearch")
-          : t("generate.fullDocumentScan")
-      showSuccessToast(t("generate.generateSuccess", { method: searchMethod }))
+      showSuccessToast(t("generate.generateSuccess"))
     },
     onError: (error: any) => {
       console.log("Generate onError triggered:", error)

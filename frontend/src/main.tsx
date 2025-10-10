@@ -5,7 +5,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query"
 import { RouterProvider, createRouter } from "@tanstack/react-router"
-import React, { StrictMode } from "react"
+import React, { StrictMode, Suspense } from "react"
 import ReactDOM from "react-dom/client"
 import { routeTree } from "./routeTree.gen"
 
@@ -74,7 +74,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <CustomProvider>
     <QueryClientProvider client={queryClient}>
       <ResultsProvider>
-        <RouterProvider router={router} />
+        <Suspense fallback={<div>Loading translations...</div>}>
+          <RouterProvider router={router} />
+        </Suspense>
       </ResultsProvider>
     </QueryClientProvider>
   </CustomProvider>,

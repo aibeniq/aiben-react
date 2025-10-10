@@ -11,6 +11,7 @@ import {
   Textarea,
 } from "@chakra-ui/react"
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FiThumbsDown, FiThumbsUp } from "react-icons/fi"
 
 interface FeedbackButtonsProps {
@@ -28,7 +29,7 @@ const FeedbackButtons = ({
   onFeedbackSubmitted,
   existingFeedback,
 }: FeedbackButtonsProps) => {
-  // Replace useDisclosure with a simple useState
+  const { t } = useTranslation()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [feedbackType, setFeedbackType] = useState<
     "correct" | "incorrect" | null
@@ -40,6 +41,24 @@ const FeedbackButtons = ({
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  // Helper function for safer translation retrieval
+  const getTranslation = (key: string, fallback: string) => {
+    try {
+      // Try to get the translation
+      const translated = t(key)
+      
+      // If the translation doesn't exist or is the same as the key, use fallback
+      if (!translated || translated === key || translated.startsWith('[missing key]')) {
+        return fallback
+      } else {
+        return translated
+      }
+    } catch (error) {
+      console.error(`Translation error for "${key}":`, error)
+      return fallback
+    }
+  }
+
   // Effect to update state when existingFeedback changes
   useEffect(() => {
     if (existingFeedback) {
@@ -50,8 +69,6 @@ const FeedbackButtons = ({
 
   // Open the modal and set the feedback type
   const handleFeedbackClick = (type: "correct" | "incorrect") => {
-    console.log("Feedback button clicked:", type)
-
     // If this type is already selected and there's existing feedback,
     // we're editing the current feedback
     const isEditing = existingFeedback?.feedback === type
@@ -64,7 +81,6 @@ const FeedbackButtons = ({
     }
 
     setIsModalOpen(true)
-    console.log("Modal should open now for type:", type)
   }
 
   // Focus the textarea when modal opens
@@ -83,8 +99,6 @@ const FeedbackButtons = ({
 
   // Submit feedback
   const handleSubmitFeedback = async () => {
-    console.log("Submitting feedback:", feedbackType, feedbackText)
-
     if (!feedbackType) return
 
     setIsSubmitting(true)
@@ -95,18 +109,14 @@ const FeedbackButtons = ({
         feedbackText: feedbackText.trim() || undefined,
       })
 
-      console.log(
-        "Feedback submitted successfully, calling onFeedbackSubmitted callback",
-      )
-      showSuccessToast("Thank you for your feedback!")
+      showSuccessToast(getTranslation("feedback.thankYouMessage", "Thank you for your feedback!"))
       setIsModalOpen(false)
       if (onFeedbackSubmitted) {
         onFeedbackSubmitted(feedbackType)
-        console.log("onFeedbackSubmitted callback completed")
       }
     } catch (error) {
       console.error("Failed to submit feedback:", error)
-      showErrorToast("Failed to submit feedback. Please try again.")
+      showErrorToast(getTranslation("feedback.submitErrorMessage", "Failed to submit feedback. Please try again."))
     } finally {
       setIsSubmitting(false)
     }
@@ -127,8 +137,8 @@ const FeedbackButtons = ({
         <Tooltip
           content={
             existingFeedback?.feedback === "correct"
-              ? "Edit your helpful feedback"
-              : "Mark as helpful"
+              ? getTranslation("feedback.tooltipEditPositive", "Edit your helpful feedback")
+              : getTranslation("feedback.tooltipMarkPositive", "Mark as helpful")
           }
           showArrow
         >
@@ -149,8 +159,8 @@ const FeedbackButtons = ({
         <Tooltip
           content={
             existingFeedback?.feedback === "incorrect"
-              ? "Edit your feedback for improvements"
-              : "Mark as not helpful"
+              ? getTranslation("feedback.tooltipEditNegative", "Edit your feedback for improvements")
+              : getTranslation("feedback.tooltipMarkNegative", "Mark as not helpful")
           }
           showArrow
         >
@@ -174,7 +184,7 @@ const FeedbackButtons = ({
             showArrow
           >
             <Text fontSize="xs" color="gray.500" ml={1}>
-              Feedback saved
+              {getTranslation("feedback.feedbackSaved", "Feedback saved")}
             </Text>
           </Tooltip>
         )}
@@ -207,21 +217,21 @@ const FeedbackButtons = ({
             >
               <Text fontWeight="semibold" fontSize="lg" mb={3}>
                 {feedbackType === "correct"
-                  ? "What was helpful?"
-                  : "What could be improved?"}
+                  ? getTranslation("feedback.modalTitlePositive", "What was helpful?")
+                  : getTranslation("feedback.modalTitleNegative", "What could be improved?")}
               </Text>
 
               <Text fontSize="sm" mb={2}>
                 {feedbackType === "correct"
-                  ? "Tell us what you liked about this response."
-                  : "Tell us how we can improve this response."}
+                  ? getTranslation("feedback.descriptionPositive", "Tell us what you liked about this response.")
+                  : getTranslation("feedback.descriptionNegative", "Tell us how we can improve this response.")}
               </Text>
 
               <Textarea
                 ref={textareaRef}
                 value={feedbackText}
                 onChange={(e) => setFeedbackText(e.target.value)}
-                placeholder="Your comments (optional)"
+                placeholder={getTranslation("feedback.placeholder", "Your comments (optional)")}
                 size="md"
                 resize="vertical"
                 rows={4}
@@ -230,7 +240,7 @@ const FeedbackButtons = ({
 
               <HStack justifyContent="flex-end" gap={3}>
                 <Button size="sm" variant="outline" onClick={handleClose}>
-                  Cancel
+                  {getTranslation("feedback.cancel", "Cancel")}
                 </Button>
                 <Button
                   size="sm"
@@ -238,7 +248,7 @@ const FeedbackButtons = ({
                   onClick={handleSubmitFeedback}
                   loading={isSubmitting}
                 >
-                  {existingFeedback?.feedback ? "Update Feedback" : "Submit"}
+                  {existingFeedback?.feedback ? getTranslation("feedback.updateFeedback", "Update Feedback") : getTranslation("feedback.submit", "Submit")}
                 </Button>
               </HStack>
             </Box>

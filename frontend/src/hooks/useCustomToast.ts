@@ -1,11 +1,13 @@
 "use client"
 
 import { toaster } from "@/components/ui/toaster"
+import { useTranslation } from "react-i18next"
 
 const useCustomToast = () => {
+  const { t } = useTranslation()
   const showSuccessToast = (description: string) => {
     toaster.create({
-      title: "Success!",
+      title: t("common.success"),
       description,
       type: "success",
     })
@@ -13,7 +15,7 @@ const useCustomToast = () => {
 
   const showErrorToast = (description: string) => {
     toaster.create({
-      title: "Something went wrong!",
+      title: t("common.error"),
       description,
       type: "error",
     })

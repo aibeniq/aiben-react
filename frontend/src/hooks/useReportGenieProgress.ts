@@ -1,6 +1,7 @@
+import { useTranslation } from "react-i18next"
+import { useEffect, useState } from "react"
 import { OpenAPI } from "@/client/core/OpenAPI"
 import { request as __request } from "@/client/core/request"
-import { useEffect, useState } from "react"
 
 interface ProgressData {
   percentage: number
@@ -11,6 +12,7 @@ interface ProgressData {
 }
 
 export const useReportGenieProgress = (taskId: string | null) => {
+  const { t } = useTranslation()
   console.warn(
     "🔄 REPORTGENIE PROGRESS HOOK CALLED:",
     new Date().toISOString(),
@@ -57,7 +59,7 @@ export const useReportGenieProgress = (taskId: string | null) => {
     )
     setProgress({
       percentage: 0,
-      message: "Starting...",
+      message: t("common.progress.starting"),
       isActive: true,
       completed: false,
       error: undefined,
