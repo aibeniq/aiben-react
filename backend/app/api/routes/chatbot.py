@@ -20,9 +20,6 @@ from app.services.knowledgebases import get_embedding_model
 from app.services.retrievers import (
     create_ensemble_retriever,
 )
-from app.services.enhanced_retrieval import (
-    SmartRetrieverFactory,
-)  # Import the ensemble retriever
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
     KnowledgeBase,
@@ -763,13 +760,8 @@ async def query_knowledge_base(
                             persist_directory=temp_dir, embedding_function=embeddings
                         )
 
-                        # Rebuild enhanced retriever with content filtering
-                        retriever = (
-                            SmartRetrieverFactory.create_general_document_retriever(
-                                chroma_db=chroma_db,
-                                search_kwargs={"k": settings.RAG_NUM_CHUNKS},
-                            )
-                        )
+                        # Rebuild basic retriever without enhanced filtering
+                        retriever = chroma_db.as_retriever(search_kwargs={"k": settings.RAG_NUM_CHUNKS})
                         print("Successfully rebuilt retriever")
 
                     # Rebuild LLM if needed
@@ -887,10 +879,8 @@ async def query_knowledge_base(
                 persist_directory=temp_dir, embedding_function=embeddings
             )
 
-            # Create an enhanced retriever that filters bibliography content
-            retriever = SmartRetrieverFactory.create_general_document_retriever(
-                chroma_db=chroma_db, search_kwargs={"k": settings.RAG_NUM_CHUNKS}
-            )
+            # Create a basic retriever without enhanced filtering to avoid async issues
+            retriever = chroma_db.as_retriever(search_kwargs={"k": settings.RAG_NUM_CHUNKS})
 
             # 4. Get the LLM
             if use_default_models:
@@ -927,74 +917,6 @@ async def query_knowledge_base(
 
         # 5. Retrieve relevant context for the question
         docs = retriever.get_relevant_documents(rephrased_question)
-        
-        # LLM-based relevance filtering for chatbot queries (similar to VeraDoc full scan)
-        # This prevents irrelevant chunks from being included in chatbot responses
-        if docs:
-            print(f"🔍 Filtering {len(docs)} retrieved chunks for relevance to question...")
-            
-            import asyncio
-            
-            # Batch / concurrency settings with sensible defaults
-            BATCH_SIZE = getattr(settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 8)
-            REQUEST_DELAY = getattr(settings, "PROCESSING_DELAY_BETWEEN_REQUESTS", 0.02)
-
-            loop = asyncio.get_running_loop()
-            filtered_docs = []
-
-            # Process docs in batches to reduce total runtime while still being rate-limit friendly
-            for start in range(0, len(docs), BATCH_SIZE):
-                batch = docs[start : start + BATCH_SIZE]
-                tasks = []
-
-                # Create async tasks that run the blocking invoke_llm in executor
-                for j, doc in enumerate(batch):
-                    doc_idx = start + j
-
-                    async def _check(doc=doc, doc_idx=doc_idx):
-                        # run invoke_llm (sync) in a thread pool to allow concurrency
-                        try:
-                            relevance = await loop.run_in_executor(
-                                None,
-                                lambda: invoke_llm(
-                                    llm,
-                                    settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
-                                    {"chunk": doc.page_content or "", "question": rephrased_question},
-                                ),
-                            )
-                        except Exception as e:
-                            # bubble up error to be handled by caller
-                            raise e
-
-                        return doc_idx, doc, relevance
-
-                    tasks.append(asyncio.create_task(_check()))
-
-                # Await this batch and handle results
-                results = await asyncio.gather(*tasks, return_exceptions=True)
-
-                for res in results:
-                    if isinstance(res, Exception):
-                        # On error, include the chunk to be safe (preserve previous behavior)
-                        print(f"Warning: error during batch relevance check: {res}")
-                        continue
-
-                    doc_idx, doc, relevance_check = res
-                    # Filter based on LLM response (same logic as before)
-                    if "No relevant information found" not in (relevance_check or ""):
-                        print(f"✅ Chunk {doc_idx + 1} is relevant")
-                        filtered_docs.append(doc)
-                    else:
-                        print(f"❌ Chunk {doc_idx + 1} is not relevant - excluding from response")
-
-                # Small sleep between batches to help with rate limits and to yield loop
-                if REQUEST_DELAY:
-                    await asyncio.sleep(REQUEST_DELAY)
-            
-            # Use filtered_docs for the rest of the flow
-            docs = filtered_docs
-            print(f"📊 Relevance filtering: {len(filtered_docs)}/{len(docs)} chunks are relevant")
-        
         context = "\n\n".join([doc.page_content for doc in docs])
         print("Retrieved context:", context)
 
@@ -1247,13 +1169,8 @@ async def query_document(
                                 embedding_function=embeddings,
                             )
 
-                            # Rebuild enhanced retriever with content filtering
-                            retriever = (
-                                SmartRetrieverFactory.create_academic_paper_retriever(
-                                    chroma_db=vector_store,
-                                    search_kwargs={"k": settings.RAG_NUM_CHUNKS},
-                                )
-                            )
+                            # Rebuild basic retriever without enhanced filtering
+                            retriever = vector_store.as_retriever(search_kwargs={"k": settings.RAG_NUM_CHUNKS})
                             print("Successfully rebuilt retriever")
 
                         except Exception as e:
@@ -1409,10 +1326,8 @@ async def query_document(
             vector_store = Chroma.from_documents(
                 documents=chunks, embedding=embeddings, persist_directory=vector_dir
             )
-            # Create an enhanced retriever that filters bibliography content for documents
-            retriever = SmartRetrieverFactory.create_academic_paper_retriever(
-                chroma_db=vector_store, search_kwargs={"k": settings.RAG_NUM_CHUNKS}
-            )
+            # Create a basic retriever without enhanced filtering to avoid async issues
+            retriever = vector_store.as_retriever(search_kwargs={"k": settings.RAG_NUM_CHUNKS})
 
             # Create LLM
             llm = create_llm(
@@ -1453,74 +1368,6 @@ async def query_document(
 
         # Retrieve relevant context
         docs = retriever.get_relevant_documents(rephrased_question)
-        
-        # LLM-based relevance filtering for chatbot document queries (similar to VeraDoc full scan)
-        # This prevents irrelevant chunks from being included in chatbot responses
-        if docs:
-            print(f"🔍 Filtering {len(docs)} retrieved chunks for relevance to question...")
-            
-            import asyncio
-            
-            # Batch / concurrency settings with sensible defaults
-            BATCH_SIZE = getattr(settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 8)
-            REQUEST_DELAY = getattr(settings, "PROCESSING_DELAY_BETWEEN_REQUESTS", 0.02)
-
-            loop = asyncio.get_running_loop()
-            filtered_docs = []
-
-            # Process docs in batches to reduce total runtime while still being rate-limit friendly
-            for start in range(0, len(docs), BATCH_SIZE):
-                batch = docs[start : start + BATCH_SIZE]
-                tasks = []
-
-                # Create async tasks that run the blocking invoke_llm in executor
-                for j, doc in enumerate(batch):
-                    doc_idx = start + j
-
-                    async def _check(doc=doc, doc_idx=doc_idx):
-                        # run invoke_llm (sync) in a thread pool to allow concurrency
-                        try:
-                            relevance = await loop.run_in_executor(
-                                None,
-                                lambda: invoke_llm(
-                                    llm,
-                                    settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
-                                    {"chunk": doc.page_content or "", "question": rephrased_question},
-                                ),
-                            )
-                        except Exception as e:
-                            # bubble up error to be handled by caller
-                            raise e
-
-                        return doc_idx, doc, relevance
-
-                    tasks.append(asyncio.create_task(_check()))
-
-                # Await this batch and handle results
-                results = await asyncio.gather(*tasks, return_exceptions=True)
-
-                for res in results:
-                    if isinstance(res, Exception):
-                        # On error, include the chunk to be safe (preserve previous behavior)
-                        print(f"Warning: error during batch relevance check: {res}")
-                        continue
-
-                    doc_idx, doc, relevance_check = res
-                    # Filter based on LLM response (same logic as before)
-                    if "No relevant information found" not in (relevance_check or ""):
-                        print(f"✅ Chunk {doc_idx + 1} is relevant")
-                        filtered_docs.append(doc)
-                    else:
-                        print(f"❌ Chunk {doc_idx + 1} is not relevant - excluding from response")
-
-                # Small sleep between batches to help with rate limits and to yield loop
-                if REQUEST_DELAY:
-                    await asyncio.sleep(REQUEST_DELAY)
-            
-            # Use filtered_docs for the rest of the flow
-            docs = filtered_docs
-            print(f"📊 Relevance filtering: {len(filtered_docs)}/{len(docs)} chunks are relevant")
-        
         context = "\n\n".join([doc.page_content for doc in docs])
 
         # Check if we need vision analysis for image-only fallback documents
