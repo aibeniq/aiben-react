@@ -8,7 +8,7 @@ let sdkContent = fs.readFileSync(sdkPath, "utf8")
 // Define endpoints that need blob response
 const blobEndpoints = [
   "/api/v1/reportgenie/generate/docx",
-  "/api/v1/reportgenie/generate/csv", 
+  "/api/v1/reportgenie/generate/csv",
   "/api/v1/twincheck/generate/docx",
   "/api/v1/twincheck/generate/csv",
   "/api/v1/veradoc/generate/docx",
@@ -24,41 +24,54 @@ const blobEndpoints = [
 ]// For each endpoint, find and patch it
 blobEndpoints.forEach(endpoint => {
   const escapedEndpoint = endpoint.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  
+
   // Find the function containing this URL and add responseType if not present
   // Pattern 1: Standard pattern with body parameter
   const pattern = new RegExp(
     `(url: '${escapedEndpoint}',\\s*\\n\\s*body:[\\s\\S]*?mediaType: 'application/json',\\s*\\n)(\\s*)(errors: \\{)`,
     'g'
   )
-  
+
   sdkContent = sdkContent.replace(pattern, (match, beforeErrors, whitespace, errorsStart) => {
     if (match.includes("responseType:")) {
       return match // Already patched
     }
     return beforeErrors + whitespace + "responseType: 'blob',\n" + whitespace + errorsStart
   })
-  
+
   // Pattern 2: Alternative pattern with simple body reference
   const pattern2 = new RegExp(
     `(url: "${escapedEndpoint}",\\s*\\n\\s*body: data\\.requestBody,\\s*\\n\\s*mediaType: "application/json",\\s*\\n)(\\s*)(errors: \\{)`,
     'g'
   )
-  
+
   sdkContent = sdkContent.replace(pattern2, (match, beforeErrors, whitespace, errorsStart) => {
     if (match.includes("responseType:")) {
       return match // Already patched
     }
     return beforeErrors + whitespace + "responseType: 'blob',\n" + whitespace + errorsStart
   })
-  
+
   // Also try pattern with double quotes for URL
   const patternDoubleQuotes = new RegExp(
     `(url: "${escapedEndpoint}",\\s*\\n\\s*body:[\\s\\S]*?mediaType: 'application/json',\\s*\\n)(\\s*)(errors: \\{)`,
     'g'
   )
-  
+
   sdkContent = sdkContent.replace(patternDoubleQuotes, (match, beforeErrors, whitespace, errorsStart) => {
+    if (match.includes("responseType:")) {
+      return match // Already patched
+    }
+    return beforeErrors + whitespace + "responseType: 'blob',\n" + whitespace + errorsStart
+  })
+
+  // Pattern 3: GET requests without body (for file downloads)
+  const patternGet = new RegExp(
+    `(url: ['"]${escapedEndpoint}['"],\\s*\\n\\s*path:\\s*\\{[^}]*\\},\\s*\\n)(\\s*)(errors: \\{)`,
+    'g'
+  )
+
+  sdkContent = sdkContent.replace(patternGet, (match, beforeErrors, whitespace, errorsStart) => {
     if (match.includes("responseType:")) {
       return match // Already patched
     }
