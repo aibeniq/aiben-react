@@ -47,7 +47,7 @@ import { copyToClipboard } from "../../utils/copyToClipboard"
 import { cleanRTFFormatting } from "../../utils/rtfCleaner"
 
 const ReportGenie = () => {
-  const { t, ready } = useTranslation()
+  const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const {
     generateResult,
@@ -578,9 +578,7 @@ const ReportGenie = () => {
               </Text>
             </Box>
             <Text color="gray.300" fontSize="sm" textAlign="center">
-              {ready
-                ? t("generate.pleaseWait")
-                : "Please wait while we generate your report"}
+              {t("generate.pleaseWait")}
             </Text>
           </VStack>
         </Box>

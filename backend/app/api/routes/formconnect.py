@@ -35,7 +35,7 @@ from app.services.llms import (
     invoke_llm_with_image,
     record_llm_interaction,
 )
-from app.services.translation import translate_text_if_needed, translate_progress_message
+from app.services.translation import translate_text_if_needed
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 from app.services.progress_tracker import progress_tracker
@@ -1216,10 +1216,10 @@ async def process_form(
 
     # Update progress: Setup complete
     if task_id:
-        progress_tracker.complete_stage(task_id, "setup", "Setup complete")
+        progress_tracker.complete_stage(task_id, "setup", message_key="common.progress.initializing")
         progress_tracker.update_stage_progress(
             task_id, "loading", 0, 1, 
-            translate_progress_message("loading_documents_template", current_user.preferred_language or "en", document_count=total_files)
+            message_key="common.progress.processing"
         )
         await asyncio.sleep(0.01)  # Yield to event loop
 
@@ -1228,10 +1228,10 @@ async def process_form(
     
     # Update progress: Loading complete
     if task_id:
-        progress_tracker.complete_stage(task_id, "loading", "Loading complete")
+        progress_tracker.complete_stage(task_id, "loading", message_key="common.progress.processing")
         progress_tracker.update_stage_progress(
             task_id, "extracting", 0, total_files,
-            f"Starting extraction from {total_files} document(s)..."
+            message_key="common.progress.extracting"
         )
         await asyncio.sleep(0.01)  # Yield to event loop
 
@@ -1246,7 +1246,7 @@ async def process_form(
             if task_id:
                 progress_tracker.update_stage_progress(
                     task_id, "extracting", i, total_files,
-                    translate_progress_message("extracting_fields", current_user.preferred_language or "en", document_num=i + 1, total_documents=total_files, document_name=file.filename)
+                    message_key="common.progress.extracting"
                 )
                 await asyncio.sleep(0.01)  # Yield to event loop
             
@@ -1305,10 +1305,10 @@ async def process_form(
 
     # Update progress: Extraction complete, starting comparison
     if task_id:
-        progress_tracker.complete_stage(task_id, "extracting", "Field extraction complete")
+        progress_tracker.complete_stage(task_id, "extracting", message_key="common.progress.extracting")
         progress_tracker.update_stage_progress(
             task_id, "comparing", 0, 1,
-            f"Comparing and formatting results... {translate_progress_message('comparing_formatting_results', current_user.preferred_language or 'en')}"
+            message_key="match.progress.formatting"
         )
         await asyncio.sleep(0.01)  # Yield to event loop
 
@@ -1319,7 +1319,7 @@ async def process_form(
             extracted_results[0], file_names[0], llm
         )
         result = {
-            "message": "Field values extracted from single document.",
+            "message_key": "match.singleDocumentSuccess",
             "comparison": formatted_result,
             "extracted_data": extracted_results[0],
         }
@@ -1329,17 +1329,17 @@ async def process_form(
             extracted_results, file_names, llm, current_user, session
         )
         result = {
-            "message": translate_progress_message("match_completed_successfully", current_user.preferred_language or "en"),
+            "message_key": "match.matchSuccess",
             "comparison": comparison_result,
             "extracted_data": extracted_results,
         }
 
     # Update progress: Comparison complete, finalizing
     if task_id:
-        progress_tracker.complete_stage(task_id, "comparing", "Comparison complete")
+        progress_tracker.complete_stage(task_id, "comparing", message_key="match.progress.formatting")
         progress_tracker.update_stage_progress(
             task_id, "finalizing", 0, 1,
-            "Finalizing results..."
+            message_key="common.progress.processing"
         )
         await asyncio.sleep(0.01)  # Yield to event loop
 

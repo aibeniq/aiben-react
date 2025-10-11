@@ -19,6 +19,7 @@ class ProgressStage:
     current: int = 0
     total: int = 1
     message: str = ""
+    message_key: Optional[str] = None  # i18n translation key for frontend
     completed: bool = False
 
     @property
@@ -36,8 +37,9 @@ class ProgressData:
     percentage: float
     status: str  # 'started', 'in_progress', 'completed', 'failed'
     message: str
-    created_at: str
-    updated_at: str
+    message_key: Optional[str] = None  # i18n translation key for frontend
+    created_at: str = ""
+    updated_at: str = ""
     error_message: Optional[str] = None
 
     def calculate_overall_percentage(self) -> float:
@@ -151,7 +153,7 @@ class ProgressTracker:
         print(f"✅ Created progress task with provided ID: {task_id}")
         return task_id
     
-    def update_stage_progress(self, task_id: str, stage_name: str, current: int, total: int = None, message: str = "") -> bool:
+    def update_stage_progress(self, task_id: str, stage_name: str, current: int, total: int = None, message: str = "", message_key: str = None) -> bool:
         """
         Update progress for a specific stage of a task.
         
@@ -160,7 +162,8 @@ class ProgressTracker:
             stage_name: Name of the stage to update
             current: Current number of items processed in this stage
             total: Total number of items in this stage (if different from current)
-            message: Optional status message for this stage
+            message: Optional status message for this stage (fallback for non-i18n)
+            message_key: Optional i18n translation key (e.g., "common.progress.starting")
             
         Returns:
             Success status
@@ -177,7 +180,11 @@ class ProgressTracker:
         if total is not None:
             stage.total = total
         
-        if message:
+        if message_key:
+            stage.message_key = message_key
+            # Keep message as fallback for non-i18n clients
+            stage.message = message if message else message_key
+        elif message:
             stage.message = message
         
         # Mark stage as completed if current >= total
@@ -193,10 +200,14 @@ class ProgressTracker:
         all_completed = all(stage.completed for stage in progress.stages.values())
         progress.status = "completed" if all_completed else "in_progress"
         
-        # Update overall message
-        if message:
+        # Update overall message and message_key
+        if message_key:
+            progress.message_key = message_key
+            progress.message = message if message else message_key  # Fallback
+        elif message:
             progress.message = message
         elif all_completed:
+            progress.message_key = None  # Clear key for generic completion
             progress.message = f"{progress.operation} completed successfully"
         else:
             # Use the stage's custom message if available, otherwise show clean progress
@@ -211,14 +222,15 @@ class ProgressTracker:
         
         return self._save_progress(task_id, progress)
 
-    def complete_stage(self, task_id: str, stage_name: str, message: str = "") -> bool:
+    def complete_stage(self, task_id: str, stage_name: str, message: str = "", message_key: str = None) -> bool:
         """
         Mark a stage as completed.
         
         Args:
             task_id: The task identifier
             stage_name: Name of the stage to complete
-            message: Optional completion message
+            message: Optional completion message (fallback for non-i18n)
+            message_key: Optional i18n translation key
             
         Returns:
             Success status
@@ -230,7 +242,10 @@ class ProgressTracker:
         stage = progress.stages[stage_name]
         stage.current = stage.total
         stage.completed = True
-        if message:
+        if message_key:
+            stage.message_key = message_key
+            stage.message = message if message else message_key
+        elif message:
             stage.message = message
         else:
             stage.message = f"{stage_name.title()} completed"
@@ -243,10 +258,13 @@ class ProgressTracker:
         # Debug logging for completion status
         if all_completed:
             print(f"🎉 All stages completed for task {task_id}! Setting status to 'completed'")
+            progress.message_key = None
             progress.message = f"{progress.operation} completed successfully"
         else:
             incomplete_stages = [name for name, stage in progress.stages.items() if not stage.completed]
             print(f"📊 Task {task_id}: Completed stage '{stage_name}', but still incomplete: {incomplete_stages}")
+            if message_key:
+                progress.message_key = message_key
             progress.message = stage.message
         
         progress.updated_at = datetime.now().isoformat()
@@ -311,13 +329,14 @@ class ProgressTracker:
         }
         return result
     
-    def complete_task(self, task_id: str, message: str = "") -> bool:
+    def complete_task(self, task_id: str, message: str = "", message_key: str = None) -> bool:
         """
         Mark all stages as completed and set task status to completed.
         
         Args:
             task_id: The task identifier  
-            message: Optional completion message
+            message: Optional completion message (fallback for non-i18n)
+            message_key: Optional i18n translation key
             
         Returns:
             Success status
@@ -333,7 +352,11 @@ class ProgressTracker:
         
         progress.status = "completed"
         progress.percentage = 100.0
-        progress.message = message or f"{progress.operation} completed successfully"
+        if message_key:
+            progress.message_key = message_key
+            progress.message = message if message else message_key
+        else:
+            progress.message = message or f"{progress.operation} completed successfully"
         progress.updated_at = datetime.now().isoformat()
         
         return self._save_progress(task_id, progress)

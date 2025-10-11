@@ -38,7 +38,7 @@ from app.models import (
 )
 from app.core.config import settings
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
-from app.services.translation import translate_text_if_needed, translate_progress_message
+from app.services.translation import translate_text_if_needed
 from app.services.pdf_utils import load_pdf_with_pypdf
 from app.services.progress_tracker import progress_tracker
 
@@ -83,7 +83,7 @@ async def create_optimize_outline_task():
         },
     )
     progress_tracker.update_stage_progress(
-        task_id, "setup", 0, 1, translate_progress_message("starting_comparison", "en")
+        task_id, "setup", 0, 1, message_key="compare.progress.starting"
     )
     return {"task_id": task_id}
 
@@ -300,10 +300,10 @@ async def compare_documents(
 
         # Update progress: setup complete, starting topic processing
         if task_id:
-            progress_tracker.complete_stage(task_id, "setup", "Setup complete")
+            progress_tracker.complete_stage(task_id, "setup", message_key="compare.progress.initializing")
             progress_tracker.update_stage_progress(
                 task_id, "comparing", 0, len(topic_list), 
-                translate_progress_message("starting_topic_comparison", current_user.preferred_language or "en", topic_count=len(topic_list))
+                message_key="compare.progress.comparing"
             )
             # Yield to event loop to allow progress API to respond
             await asyncio.sleep(0.01)
@@ -314,7 +314,7 @@ async def compare_documents(
             if task_id:
                 progress_tracker.update_stage_progress(
                     task_id, "comparing", topic_idx, len(topic_list),
-                    translate_progress_message("comparing_topic", current_user.preferred_language or "en", topic_num=topic_idx + 1, total_topics=len(topic_list), topic_preview=topic[:50])
+                    message_key="compare.progress.comparing"
                 )
                 # Yield to event loop to allow progress API to respond
                 await asyncio.sleep(0.01)
@@ -728,8 +728,8 @@ async def compare_documents(
 
         # Mark progress as complete
         if task_id:
-            progress_tracker.complete_stage(task_id, "comparing", "Comparison complete")
-            progress_tracker.complete_task(task_id, translate_progress_message("documents_compared_successfully", current_user.preferred_language or "en"))
+            progress_tracker.complete_stage(task_id, "comparing", message_key="compare.progress.comparing")
+            progress_tracker.complete_task(task_id, message_key="compare.compareSuccess")
 
         return TwinCheckResponse(results=result)
 

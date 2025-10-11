@@ -374,7 +374,7 @@ const FormConnect = () => {
         interactionId: interactionId as string,
       })
 
-      showSuccessToast("Form processing completed successfully!")
+      showSuccessToast(t("match.matchSuccess"))
     },
     onError: (error: any) => {
       console.log("Mutation unsuccessful!")
@@ -563,7 +563,7 @@ const FormConnect = () => {
               width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}
             >
               <Heading size="md" mb={4}>
-                Results
+                {t("ui.results")}
               </Heading>
 
               <Box
@@ -588,7 +588,7 @@ const FormConnect = () => {
                         colorScheme={copySuccess ? "green" : "gray"}
                       >
                         {copySuccess ? <FiCheck color="green" /> : <FiCopy />}
-                        {copySuccess ? "Copied!" : "Copy Text"}
+                        {copySuccess ? t("ui.copied") : t("ui.copyText")}
                       </Button>
 
                       <DownloadButton
@@ -596,7 +596,7 @@ const FormConnect = () => {
                         onClick={handleDownloadDocx}
                         loading={loadingDownload}
                       >
-                        Download DOCX
+                        {t("ui.downloadDocx")}
                       </DownloadButton>
 
                       <DownloadButton
@@ -604,7 +604,7 @@ const FormConnect = () => {
                         onClick={handleDownloadCsv}
                         loading={loadingCsvDownload}
                       >
-                        Download CSV
+                        {t("ui.downloadCsv")}
                       </DownloadButton>
 
                       <Button
@@ -613,11 +613,11 @@ const FormConnect = () => {
                         colorPalette="red"
                         onClick={() => {
                           handleClearResults()
-                          showSuccessToast("Match results cleared")
+                          showSuccessToast(t("ui.clearResults"))
                         }}
                       >
                         <FiTrash2 />
-                        Clear Results
+                        {t("ui.clearResults")}
                       </Button>
                     </HStack>
 

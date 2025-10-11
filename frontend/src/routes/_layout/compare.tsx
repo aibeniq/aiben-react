@@ -38,7 +38,7 @@ import { useResults } from "@/contexts/ResultsContext"
 import { copyToClipboard } from "@/utils/copyToClipboard"
 
 const TwinCheck = () => {
-  const { t, ready } = useTranslation()
+  const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { registerOperation } = useOperationCancellation()
   const {
@@ -425,7 +425,7 @@ const TwinCheck = () => {
         interactionId: interactionId,
       })
 
-      showSuccessToast("Documents compared successfully!")
+      showSuccessToast(t("compare.compareSuccess"))
     },
     onError: (error: any) => {
       console.log("Comparison failed!")
@@ -547,9 +547,7 @@ const TwinCheck = () => {
               </Text>
             </Box>
             <Text color="gray.300" fontSize="sm" textAlign="center">
-              {ready
-                ? t("compare.pleaseWait")
-                : "Please wait while we compare your documents"}
+              {t("compare.pleaseWait")}
             </Text>
           </VStack>
         </Box>
@@ -679,7 +677,7 @@ const TwinCheck = () => {
                       colorPalette={copySuccess ? "green" : "blue"}
                     >
                       {copySuccess ? <FiCheck color="green" /> : <FiCopy />}
-                      {copySuccess ? "Copied!" : "Copy Text"}
+                      {copySuccess ? t("ui.copied") : t("ui.copyText")}
                     </Button>
 
                     <DownloadButton
@@ -687,7 +685,7 @@ const TwinCheck = () => {
                       onClick={handleDownloadReport}
                       loading={loadingDownload}
                     >
-                      Download DOCX
+                      {t("ui.downloadDocx")}
                     </DownloadButton>
 
                     <DownloadButton
@@ -695,7 +693,7 @@ const TwinCheck = () => {
                       onClick={handleDownloadCsv}
                       loading={loadingCsvDownload}
                     >
-                      Download CSV
+                      {t("ui.downloadCsv")}
                     </DownloadButton>
 
                     <Button
@@ -704,11 +702,11 @@ const TwinCheck = () => {
                       colorPalette="red"
                       onClick={() => {
                         handleClearResults()
-                        showSuccessToast("Comparison results cleared")
+                        showSuccessToast(t("ui.clearResults"))
                       }}
                     >
                       <FiTrash2 />
-                      Clear Results
+                      {t("ui.clearResults")}
                     </Button>
                   </HStack>
                 )}

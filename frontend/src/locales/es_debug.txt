@@ -1,0 +1,754 @@
+{
+    "common": {
+      "navigation": {
+        "dashboard": "Panel de Control",
+        "review": "Revisar",
+        "generate": "Generar",
+        "compare": "Comparar",
+        "match": "Coincidir",
+        "modelSelection": "Selección de Modelo",
+        "knowledgeBases": "Bases de Conocimiento",
+        "archive": "Archivo",
+        "settings": "Configuración",
+        "admin": "Administrador",
+        "menu": "Menú",
+        "tools": "Herramientas",
+        "configurations": "Configuraciones",
+        "myProfile": "Mi Perfil",
+        "logout": "Cerrar Sesión",
+        "loggedInAs": "Conectado como: {{email}}"
+      },
+      "buttons": {
+        "upload": "Subir",
+        "download": "Descargar",
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "submit": "Enviar",
+        "close": "Cerrar",
+        "next": "Siguiente",
+        "previous": "Anterior",
+        "confirm": "Confirmar",
+        "back": "Atrás"
+      },
+      "forms": {
+        "firstName": "Nombre",
+        "lastName": "Apellido",
+        "email": "Correo Electrónico",
+        "password": "Contraseña",
+        "confirmPassword": "Confirmar Contraseña",
+        "currentPassword": "Contraseña Actual",
+        "newPassword": "Nueva Contraseña",
+        "required": "Requerido",
+        "optional": "Opcional",
+        "emailPlaceholder": "Ingresa tu dirección de correo",
+        "passwordPlaceholder": "Ingresa tu contraseña"
+      },
+      "dropdowns": {
+        "selectKnowledgeBase": "Seleccione una Base de Conocimiento..."
+      },
+      "chatbot": {
+        "title": "Chat",
+        "placeholder": "Haz una pregunta...",
+        "sourcePopover": {
+          "knowledgeBase": "Base de Conocimiento",
+          "file": "Archivo"
+        },
+        "send": "Enviar",
+        "newChat": "Nuevo Chat",
+        "clearHistory": "Limpiar Historial",
+        "typing": "La IA está escribiendo...",
+        "error": "Lo siento, algo salió mal. Inténtalo de nuevo.",
+        "welcome": "¡Hola! ¿Cómo puedo ayudarte hoy?",
+        "searchMode": "Modo de Búsqueda:",
+        "vectorSearch": "Búsqueda Vectorial",
+        "fullTextScan": "Escaneo de Texto Completo",
+        "searchModeDescription":
+          "La búsqueda vectorial proporciona resultados rápidos y específicos. El escaneo de texto completo revisa todo el contenido en la base de conocimiento.",
+        "askMeAnything":
+          "¡Pregúntame cualquier cosa! Para buscar en la base de conocimiento, selecciona una base de conocimiento primero.",
+        "usingGeneralAI": "Usando asistente de IA general",
+        "usingKnowledgeBase": "Usando base de conocimiento:",
+        "usingDocuments": "Usando # documento(s)",
+        "usingFiles": "Usando {{count}} documento{{plural}}:",
+        "remove": "Quitar",
+        "selectKnowledgeBase": "Seleccionar Base de Conocimiento",
+        "knowledgeBaseTable": {
+          "name": "Nombre",
+          "description": "Descripción",
+          "sources": "Fuentes"
+        },
+        "knowledgeBaseTableName": "Nombre",
+        "knowledgeBaseTableDescription": "Descripción",
+        "knowledgeBaseTableSources": "Fuentes",
+        "knowledgeBaseTablePages": "Páginas",
+        "selectKnowledgeBasePlaceholder":
+          "Selecciona una Base de Conocimiento...",
+        "noKnowledgeBasesAvailable":
+          "No hay Bases de Conocimiento disponibles. Crea una primero para usar esta función.",
+        "knowledgeBase": "Base de Conocimiento",
+        "file": "Archivo",
+        "welcomeMessageWithSource":
+          "Selecciona una base de conocimiento o sube archivos, luego haz una pregunta.",
+        "welcomeMessageGeneral":
+          "¡Pregúntame cualquier cosa! Para búsqueda en base de conocimiento, selecciona una base de conocimiento primero.",
+        "errors": {
+          "generic": "Lo siento, algo salió mal. Inténtalo de nuevo.",
+          "timeout": "Se agotó el tiempo de espera. Inténtalo de nuevo.",
+          "largeFileTimeout":
+            "Se agotó el tiempo de procesamiento de archivos grandes. Prueba cambiar al modo 'Escaneo de Texto Completo' para mejor rendimiento con archivos grandes.",
+          "fileSize":
+            "El archivo es demasiado grande. Elige archivos más pequeños.",
+          "serverError":
+            "Ocurrió un error del servidor. Inténtalo de nuevo más tarde."
+        }
+      },
+      "settings": {
+        "title": "Configuración",
+        "account": "Cuenta",
+        "language": "Idioma",
+        "dangerZone": "Zona de Peligro",
+        "preferredLanguage": "Idioma Preferido",
+        "saveLanguagePreference": "Guardar Preferencia de Idioma",
+        "deleteAccount": "Eliminar Cuenta",
+        "deleteAccountWarning": "Esta acción no se puede deshacer.",
+        "profile": "Perfil",
+        "security": "Seguridad",
+        "changePassword": "Cambiar Contraseña",
+        "appearance": "Apariencia",
+        
+        "currentPassword": "Contraseña Actual",
+        "newPassword": "Nueva Contraseña",
+        "confirmPassword": "Confirmar Contraseña",
+        "save": "Guardar",
+        
+        "system": "Sistema",
+        "lightMode": "Modo Claro",
+        "darkMode": "Modo Oscuro",
+        
+        "deleteAccountDescription":
+          "Eliminar permanentemente tus datos y todo lo asociado con tu cuenta.",
+        "delete": "Eliminar",
+        "confirmationRequired": "Se Requiere Confirmación",
+        "deleteConfirmationText":
+          'Todos los datos de tu cuenta serán eliminados permanentemente. Si estás seguro, por favor haz clic en "Confirmar" para proceder. Esta acción no se puede deshacer.',
+        "cancel": "Cancelar"
+      },
+      "errors": {
+        "somethingWentWrong": "Algo salió mal",
+        "tryAgain": "Por favor, inténtalo de nuevo",
+        "invalidEmail": "Dirección de correo inválida",
+        "passwordTooShort": "La contraseña es muy corta",
+        "passwordsDoNotMatch": "Las contraseñas no coinciden",
+        "networkError": "Error de red. Verifica tu conexión.",
+        "unauthorized": "No tienes autorización para realizar esta acción.",
+        "notFound": "El recurso solicitado no fue encontrado."
+      },
+      "help": {
+        "dashboard":
+          "Página principal con estadísticas de uso y actividad reciente",
+        "usageStats":
+          "Ver su uso actual de tokens de API e información de cuota para el período de facturación actual",
+        "review":
+          "Analizar documentos contra listas de verificación de calidad para cumplimiento y precisión",
+        "generate":
+          "Crear informes y documentos estructurados usando IA basada en su contenido",
+        "compare":
+          "Comparar dos documentos lado a lado para identificar diferencias y similitudes",
+        "match":
+          "Hacer coincidir contenido de documentos con plantillas de formularios para llenado automatizado",
+        "modelSelection":
+          "Configurar modelos de IA utilizados para procesamiento y análisis",
+        "knowledgeBases":
+          "Gestionar bibliotecas de bases de conocimiento para procesamiento de documentos",
+        "archive":
+          "Ver y gestionar sus documentos procesados e historial de análisis",
+        "settings":
+          "Configurar las preferencias de su cuenta y configuraciones de la aplicación",
+        "admin": "Funciones administrativas para gestión de usuarios y sistemas",
+        "knowledgeBaseSelection":
+          "Elegir una base de conocimiento que contenga los documentos de referencia y estándares para análisis",
+        "checklistSelection":
+          "Seleccionar una lista de verificación con preguntas específicas para evaluar sus documentos",
+        "fileUpload": "Subir los documentos que desea analizar y revisar",
+        "customInstructions":
+          "Agregar instrucciones específicas que se considerarán al responder las preguntas de la lista de verificación",
+        "searchMode":
+          "Elegir entre búsqueda vectorial rápida o escaneo completo de documentos",
+        "topicList":
+          "Seleccionar o crear una lista de temas para enfocar el análisis de comparación",
+        "formTemplate":
+          "Elegir una plantilla de formulario contra la cual sus documentos deben ser comparados",
+        "documentOutline":
+          "Seleccionar una estructura de esquema para generar su informe",
+        "allUsersToggle":
+          "Alternar entre ver solo su historial o el historial de todos los usuarios",
+
+        "createChecklist":
+          "Crear una nueva lista de verificación con preguntas personalizadas para evaluar documentos contra criterios específicos",
+        "createOutline":
+          "Crear una nueva estructura de esquema para guiar la generación de informes estructurados",
+        "createTopicList":
+          "Crear una nueva lista de temas para enfocar el análisis de comparación en materias específicas",
+        "createFormTemplate":
+          "Crear una nueva plantilla de formulario para la extracción y coincidencia automatizada de contenido de documentos"
+      },
+      "review": {
+        "pageTitle": "Revisar Documentos",
+        "pageDescription":
+          "Revisar un documento basado en una lista de verificación y base de datos de políticas definida por el usuario.",
+        "knowledgeBaseTitle": "Base de Conocimiento",
+        "knowledgeBaseDescription": "Haz clic para seleccionar",
+        "checklistTitle": "Lista de Verificación",
+        "checklistDescription": "Haz clic para seleccionar",
+        "customInstructionsTitle": "Instrucciones Personalizadas (Opcional)",
+        "customInstructionsPlaceholder":
+          "Ingrese cualquier instrucción adicional que deba considerarse al responder las preguntas de la lista de verificación...",
+        "customInstructionsHelp":
+          "{{count}}/2000 caracteres. Estas instrucciones se agregarán a cada pregunta durante el procesamiento.",
+        "searchModeHelp":
+          "La búsqueda vectorial proporciona resultados rápidos y específicos. El escaneo completo del documento revisa todo el contenido en la base de conocimiento.",
+        "processingFile": "Procesando archivo...",
+        "processingFiles": "Procesando archivos...",
+        "selectKnowledgeBaseTitle": "Seleccionar Base de Conocimiento",
+        "selectChecklistTitle": "Seleccionar Lista de Verificación",
+        "noResults": "Aún no hay resultados",
+        "uploadDocuments":
+          "Sube uno o más documentos para revisar contra tu lista de verificación seleccionada",
+        "results": "Resultados",
+        "downloadReport": "Descargar Informe",
+        "downloadCsv": "Descargar CSV",
+        "clearResults": "Limpiar Resultados",
+        "copyReport": "Copiar Informe",
+        "reportCopied": "¡Informe copiado al portapapeles!",
+        "reviewButton": "Revisar",
+        "consultDocuments": "Consultar documentos",
+        "noChecklistsAvailable":
+          "No hay listas de verificación disponibles. Crea tu primera lista de verificación para comenzar.",
+        "createChecklist": "Crear Lista de Verificación",
+        "editChecklist": "Editar Lista de Verificación",
+        "checklistName": "Nombre de la Lista de Verificación",
+        "checklistNamePlaceholder":
+          "Ingrese el nombre de la lista de verificación...",
+        "checklistDescriptionLabel": "Descripción",
+        "checklistDescriptionPlaceholder":
+          "Ingrese la descripción de la lista de verificación para auto-sugerir preguntas (mínimo 10 caracteres)...",
+        "questions": "Preguntas",
+        "suggest": "Sugerir",
+        "suggesting": "Sugiriendo...",
+        "optimize": "Optimizar",
+        "optimizeTooltip":
+          "Debe seleccionarse una Base de Conocimiento para que la función Optimizar esté habilitada",
+        "optimizeTooltipEnabled":
+          "Optimizar preguntas basándose en la Base de Conocimiento seleccionada",
+        "uploadFiles": "Subir Archivos",
+        "knowledgeBase": "Base de Conocimiento",
+        "referenceDocuments": "Documentos de Referencia (Opcional)",
+        "selectKnowledgeBasePlaceholder":
+          "Seleccionar una Base de Conocimiento...",
+        "noKnowledgeBasesAvailable":
+          "No hay Bases de Conocimiento disponibles. Crea una primero para usar esta función.",
+        "copyQuestions": "Copiar Preguntas",
+        "questionsCopied": "Preguntas copiadas al portapapeles",
+        "noQuestionsToCopy": "No hay preguntas para copiar",
+        "failedToCopyQuestions": "Error al copiar preguntas al portapapeles",
+        "saveChecklist": "Guardar Lista de Verificación",
+        "cancel": "Cancelar",
+        "deleteChecklist": "Eliminar Lista de Verificación",
+        "dropFilesHere": "Suelta los archivos aquí",
+        "uploadedFiles": "Archivos Subidos",
+        "handwritten": "Manuscrito",
+        "removeFile": "Eliminar",
+        "characterCount":
+          "{{count}}/2000 caracteres. Estas instrucciones se agregarán a cada pregunta durante el procesamiento.",
+        "searchMode": "Modo de Búsqueda",
+        "vectorSearch": "Búsqueda Vectorial",
+        "fullDocumentScan": "Análisis Completo del Documento",
+        "vectorSearchDescription":
+          "Encuentra contenido relevante usando búsqueda de similitud IA (rápido, específico)",
+        "fullScanDescription":
+          "Analiza todos los documentos en la base de conocimiento (completo, exhaustivo)",
+        "reviewSuccess": "¡Revisión de documento completada exitosamente!",
+        "reviewSuccessMultiple": "¡{{count}} archivos procesados con intercambio de contexto optimizado!"
+      },
+      "generate": {
+        "pageDescription":
+          "Generar un documento basado en una lista de verificación definida por el usuario y una base de datos de documentos.",
+        "generatingDocument": "Generando documento...",
+        "knowledgeBaseTitle": "Base de Conocimiento",
+        "documentOutlineTitle": "Esquema del Documento",
+        "clickToSelect": "Haz clic para seleccionar",
+        "customInstructionsTitle": "Instrucciones Personalizadas (Opcional)",
+        "customInstructionsPlaceholder":
+          "Ingresa cualquier instrucción adicional que deba considerarse al generar cada sección del informe...",
+        "characterCount":
+          "{{count}}/2000 caracteres. Estas instrucciones se agregarán al prompt al generar cada sección.",
+        "selectKnowledgeBaseTitle": "Seleccionar Base de Conocimiento",
+        "selectDocumentOutlineTitle": "Seleccionar Esquema del Documento",
+        "generateButton": "Generar",
+        "results": "Resultados",
+        "copyText": "Copiar Texto",
+        "copied": "¡Copiado!",
+        "downloadDocx": "Descargar DOCX",
+        "downloadCsv": "Descargar CSV",
+        "clearReport": "Limpiar Informe",
+        "resultsPlaceholder":
+          "Los resultados aparecerán aquí después de generar un documento.",
+        "sectionsWithSources": "Secciones con Fuentes",
+        "sectionNumber": "Sección {number}: {title}",
+        "kbGenerated": "Generado por KB",
+        "rawText": "Texto Sin Procesar",
+        "viewSourceCitations": "Ver Citas de Fuentes ({count})",
+        "documentCopiedSuccess": "Documento copiado al portapapeles",
+        "documentCopiedError": "Error al copiar documento al portapapeles",
+        "documentDownloadSuccess": "Documento descargado exitosamente",
+        "documentDownloadError": "Error al descargar documento: {error}",
+        "csvDownloadSuccess": "CSV descargado exitosamente",
+        "csvDownloadError": "Error al descargar CSV: {error}",
+        "reportClearedSuccess": "Informe generado limpiado",
+        "enterAtLeastOneSection": "Por favor ingresa al menos una sección",
+        "selectKnowledgeBase": "Por favor selecciona una base de conocimiento",
+        "generateSuccess": "¡Informe generado exitosamente!",
+        "generateError": "Error al generar documento: {error}",
+        "vectorSearch": "búsqueda vectorial",
+        "fullDocumentScan": "análisis completo del documento",
+        "editOutline": "Editar Esquema",
+        "pleaseWait": "Por favor espera mientras revisamos tus documentos"
+      },
+      "modelSelection": {
+        "llmManagement": "Gestión de LLM",
+        "llmDescription":
+          "Configurar y gestionar los LLM utilizados para generar respuestas de texto. El modelo predeterminado se utilizará para todas las operaciones.",
+        "addNewLlm": "Agregar Nuevo LLM",
+        "noLlmsConfigured": "No hay LLM configurados",
+        "addNewLlmToGetStarted": "Agregar un nuevo LLM para comenzar",
+        "embeddingModelManagement": "Gestión de Modelos de Embedding",
+        "embeddingDescription":
+          "Configurar y gestionar los modelos de embedding utilizados para indexación y recuperación de bases de conocimiento. El modelo predeterminado se utilizará al crear nuevas bases de conocimiento, pero cada base de conocimiento continuará usando su modelo de embedding original incluso si el predeterminado cambia después.",
+        "addEmbeddingModel": "Agregar Modelo de Embedding",
+        "noEmbeddingModelsConfigured": "No hay modelos de embedding configurados",
+        "addNewEmbeddingModelToGetStarted":
+          "Agregar un nuevo modelo de embedding para comenzar",
+        "tableHeaders": {
+          "name": "Nombre",
+          "modelId": "ID del Modelo",
+          "provider": "Proveedor",
+          "description": "Descripción",
+          "status": "Estado",
+          "actions": "Acciones"
+        },
+        "status": {
+          "default": "Predeterminado",
+          "available": "Disponible"
+        },
+        "actions": {
+          "setAsDefault": "Establecer como Predeterminado",
+          "delete": "Eliminar",
+          "validate": "Validar",
+          "validating": "Validando"
+        },
+        "dialog": {
+          "addNewLlm": "Agregar Nuevo LLM",
+          "addEmbeddingModel": "Agregar Modelo de Embedding",
+          "displayName": "Nombre de Visualización",
+          "provider": "Proveedor",
+          "modelId": "ID del Modelo",
+          "description": "Descripción",
+          "cancel": "Cancelar",
+          "addModel": "Agregar Modelo"
+        },
+        "placeholders": {
+          "customModel": "ej., Mi Modelo Personalizado",
+          "embeddingModelId": "ej., sentence-transformers/all-MiniLM-L6-v2",
+          "describeModel":
+            "Describir el modelo, sus características y cuándo usarlo"
+        },
+        "validation": {
+          "pleaseEnterModelId": "Por favor, ingrese un ID de modelo"
+        }
+      },
+      "knowledgeBases": {
+        "title": "Gestión de Bases de Conocimiento",
+        "addKnowledgeBase": "Agregar Base de Conocimiento",
+        "emptyStateTitle": "Aún no tienes ninguna Base de Conocimiento",
+        "emptyStateDescription":
+          "Agregar una nueva Base de Conocimiento para comenzar",
+        "tableHeaders": {
+          "title": "Título",
+          "description": "Descripción",
+          "numberOfSources": "Número de Fuentes",
+          "embeddingModel": "Modelo de Embedding",
+          "dateCreated": "Fecha de Creación",
+          "dateModified": "Fecha de Modificación",
+          "actions": "Acciones"
+        },
+        "status": {
+          "default": "Predeterminado",
+          "na": "N/D"
+        },
+        "actions": {
+          "view": "Ver",
+          "edit": "Editar",
+          "delete": "Eliminar",
+          "configure": "Configurar"
+        },
+        "deleteModal": {
+          "title": "Eliminar Base de Conocimiento",
+          "buttonText": "Eliminar Base de Conocimiento",
+          "description":
+            "Esta Base de Conocimiento será eliminada permanentemente. ¿Estás seguro? No podrás deshacer esta acción.",
+          "confirmButton": "Eliminar",
+          "cancelButton": "Cancelar",
+          "successMessage": "La Base de Conocimiento fue eliminada exitosamente",
+          "errorMessage": "Ocurrió un error al eliminar la Base de Conocimiento"
+        },
+        "modals": {
+          "add": {
+            "title": "Agregar Base de Conocimiento",
+            "description":
+              "Crear una nueva base de conocimiento proporcionando detalles y cargando documentos a continuación."
+          },
+          "edit": {
+            "title": "Editar Base de Conocimiento",
+            "description":
+              "Actualizar los detalles de la Base de Conocimiento a continuación."
+          },
+          "fields": {
+            "title": "Título",
+            "description": "Descripción"
+          },
+          "fileUpload": {
+            "currentFiles": "Archivos Actuales",
+            "newFiles": "Nuevos Archivos",
+            "selectedFiles": "Archivos Seleccionados",
+            "dragAndDrop":
+              "Arrastra y suelta archivos aquí, o haz clic para explorar",
+            "dropFiles": "Suelta los archivos aquí...",
+            "removeFile": "Eliminar archivo",
+            "supportedFormats": "Soporta: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+          },
+          "buttons": {
+            "cancel": "Cancelar",
+            "create": "Crear",
+            "save": "Guardar",
+            "saving": "Guardando...",
+            "creating": "Creando..."
+          },
+          "validation": {
+            "titleRequired": "El título es obligatorio"
+          },
+          "messages": {
+            "createSuccess": "Base de Conocimiento creada exitosamente.",
+            "updateSuccess": "Base de Conocimiento actualizada exitosamente.",
+            "processing": "Procesando...",
+            "pleaseWait": "Por favor espere mientras procesamos sus archivos..."
+          }
+        }
+      },
+      "common": {
+        "loading": "Cargando...",
+        "noData": "No hay datos disponibles",
+        "success": "¡Éxito!",
+        "failed": "Falló",
+        "welcome": "Bienvenido",
+        "welcomeBack": "Bienvenido de vuelta, ¡qué bueno verte de nuevo!",
+        "hiUser": "Hola, {{name}} 👋",
+        "goodbye": "Adiós",
+        "yes": "Sí",
+        "no": "No",
+        "ok": "OK",
+        "search": "Buscar",
+        "filter": "Filtrar",
+        "sort": "Ordenar",
+        "view": "Ver",
+        "copy": "Copiar",
+        "paste": "Pegar",
+        "cut": "Cortar"
+      },
+      "usage": {
+        "title": "Uso",
+        "currentPeriod": "Período actual:",
+        "usedOfQuota": "usado de tu cuota mensual"
+      },
+      "compare": {
+        "title": "Comparar Documentos",
+        "subtitle":
+          "Compare y analice múltiples documentos para encontrar diferencias, similitudes y patrones",
+        "sourceSectionTitle": "Seleccionar Documentos Fuente",
+        "referenceSectionTitle": "Seleccionar Documentos de Referencia",
+        "sourcePlaceholder": "Seleccione documentos para el análisis fuente...",
+        "referencePlaceholder": "Seleccione documentos para comparar contra...",
+        "compareButton": "Comparar Documentos",
+        "noSourceSelected": "No se han seleccionado documentos fuente",
+        "noReferenceSelected": "No se han seleccionado documentos de referencia",
+        "selectAtLeastTwo": "Seleccione al menos dos documentos para comparar",
+        "selectSources": "Seleccione documentos fuente",
+        "selectReferences": "Seleccione documentos de referencia",
+        "analysisType": "Tipo de Análisis",
+        "analysisTypes": {
+          "differences": "Identificar Diferencias",
+          "similarities": "Encontrar Similitudes",
+          "comprehensive": "Análisis Completo",
+          "structural": "Comparación Estructural",
+          "content": "Análisis de Contenido",
+          "chronological": "Análisis Cronológico"
+        },
+        "analysisDepth": "Profundidad del Análisis",
+        "analysisDepths": {
+          "surface": "Análisis Superficial",
+          "detailed": "Análisis Detallado",
+          "comprehensive": "Análisis Completo"
+        },
+        "generateReport": "Generar Informe de Comparación",
+        "comparing": "Comparando documentos...",
+        "comparisonComplete": "Comparación completada",
+        "comparisonError": "Error durante la comparación",
+        "resultsSection": "Resultados de la Comparación",
+        "downloadReport": "Descargar Informe",
+        "exportOptions": "Opciones de Exportación",
+        "clearResults": "Limpiar Resultados",
+        "newComparison": "Nueva Comparación",
+        "selectFirstDocument": "Seleccionar primer documento",
+        "selectSecondDocument": "Seleccionar segundo documento",
+        "pleaseSelect": "Por favor selecciona...",
+        "documentA": "Documento A",
+        "documentB": "Documento B",
+        "compareDocuments": "Comparar Documentos",
+        "comparison": "Comparación",
+        "noDocumentsFound": "No se encontraron documentos",
+        "selectTwoDocuments": "Por favor selecciona dos documentos para comparar",
+        "loadingComparison": "Cargando comparación...",
+        "topicList": "Lista de Temas",
+        "clickToBrowse": "Haz clic para explorar o arrastra y suelta",
+        "supportedFormats": "Soporta PDF, TXT y DOCX",
+        "editTopicList": "Editar Lista de Temas",
+        "selectTopicListTitle": "Seleccionar Lista de Temas",
+        "pleaseWait": "Por favor espera mientras comparamos tus documentos"
+      },
+      "match": {
+        "title": "Coincidir Documentos",
+        "subtitle":
+          "Encuentra documentos similares y analiza patrones de coincidencia en tu base de conocimiento",
+        "sourceSectionTitle": "Seleccionar Documento Fuente",
+        "searchInTitle": "Buscar En",
+        "sourcePlaceholder":
+          "Seleccione un documento como fuente de referencia...",
+        "searchPlaceholder":
+          "Seleccione documentos o base de conocimiento para buscar...",
+        "findMatchesButton": "Encontrar Coincidencias",
+        "noSourceSelected": "No se ha seleccionado documento fuente",
+        "noSearchTargetSelected": "No se ha seleccionado objetivo de búsqueda",
+        "selectSource": "Seleccione un documento fuente",
+        "selectSearchTarget": "Seleccione objetivo de búsqueda",
+        "matchingCriteria": "Criterios de Coincidencia",
+        "criteriaTypes": {
+          "semantic": "Similitud Semántica",
+          "keyword": "Coincidencia de Palabras Clave",
+          "structural": "Similitud Estructural",
+          "content": "Análisis de Contenido",
+          "contextual": "Coincidencia Contextual"
+        },
+        "threshold": "Umbral de Similitud",
+        "thresholds": {
+          "low": "Bajo (30%)",
+          "medium": "Medio (50%)",
+          "high": "Alto (70%)",
+          "veryHigh": "Muy Alto (90%)"
+        },
+        "maxResults": "Máximo de Resultados",
+        "searching": "Buscando coincidencias...",
+        "searchComplete": "Búsqueda completada",
+        "searchError": "Error durante la búsqueda",
+        "resultsSection": "Resultados de Coincidencia",
+        "matchScore": "Puntuación de Coincidencia",
+        "confidence": "Confianza",
+        "downloadResults": "Descargar Resultados",
+        "exportMatches": "Exportar Coincidencias",
+        "clearResults": "Limpiar Resultados",
+        "newMatch": "Nueva Coincidencia",
+        "selectDocument": "Selecciona un documento para encontrar coincidencias",
+        "pleaseSelect": "Por favor selecciona un documento...",
+        "sourceDocument": "Documento Fuente",
+        "matchingDocuments": "Documentos Coincidentes",
+        "findMatches": "Encontrar Coincidencias",
+        "similarityScore": "Puntuación de Similitud",
+        "noDocumentsFound": "No se encontraron documentos",
+        "selectDocumentToMatch":
+          "Por favor selecciona un documento para encontrar coincidencias",
+        "loadingMatches": "Buscando coincidencias...",
+        "noMatchesFound": "No se encontraron documentos similares",
+        "matchResults": "Resultados de Coincidencia",
+        "similarity": "Similitud",
+        "editFormTemplate": "Editar Plantilla de Formulario",
+        "selectFormTemplateTitle": "Seleccionar Plantilla de Formulario",
+        "pleaseWait": "Por favor espera mientras coincidimos tus documentos",
+        "matchSuccess": "¡Procesamiento de formulario completado exitosamente!"
+      },
+      "editFormTemplateModal": {
+        "title": "Editar Plantilla de Formulario",
+        "formTemplateName": "Nombre de la Plantilla de Formulario",
+        "formTemplateNamePlaceholder":
+          "Ingrese el nombre de la plantilla de formulario",
+        "formTemplateDescription": "Descripción de la Plantilla de Formulario",
+        "descriptionPlaceholder":
+          "Ingrese la descripción de la plantilla de formulario para sugerir campos automáticamente (mínimo 10 caracteres)...",
+        "referenceDocuments": "Documentos de Referencia (Opcional)",
+        "uploadFiles": "Subir Archivos",
+        "knowledgeBase": "Base de Conocimiento",
+        "formFields": "Campos del Formulario",
+        "suggest": "Sugerir",
+        "fieldPlaceholder":
+          "Agregue un nombre de campo (ej., Nombre, Dirección, NSS) o sugiera desde la descripción",
+        "cancel": "Cancelar",
+        "updateFormTemplate": "Actualizar Plantilla de Formulario"
+      },
+      "editOutlineModal": {
+        "title": "Editar Esquema",
+        "createTitle": "Crear Nuevo Esquema",
+        "outlineName": "Nombre del Esquema",
+        "outlineNamePlaceholder": "Ingrese el nombre del esquema",
+        "description": "Descripción",
+        "descriptionPlaceholder":
+          "Ingrese la descripción del esquema para sugerir secciones automáticamente (mínimo 10 caracteres)...",
+        "referenceDocuments": "Documentos de Referencia (Opcional)",
+        "uploadFiles": "Subir Archivos",
+        "knowledgeBase": "Base de Conocimiento",
+        "sections": "Secciones",
+        "suggest": "Sugerir",
+        "optimize": "Optimizar",
+        "addSectionPlaceholder": "Agregar sección",
+        "cancel": "Cancelar",
+        "createOutline": "Crear Esquema",
+        "updateOutline": "Actualizar Esquema"
+      },
+      "editChecklistModal": {
+        "title": "Editar Lista de Verificación",
+        "createTitle": "Crear Nueva Lista de Verificación",
+        "checklistName": "Nombre de la Lista de Verificación",
+        "checklistNamePlaceholder":
+          "Ingrese el nombre de la lista de verificación",
+        "description": "Descripción",
+        "descriptionPlaceholder":
+          "Ingrese la descripción de la lista de verificación para sugerir preguntas automáticamente (mínimo 10 caracteres)...",
+        "referenceDocuments": "Documentos de Referencia (Opcional)",
+        "uploadFiles": "Subir Archivos",
+        "knowledgeBase": "Base de Conocimiento",
+        "questions": "Preguntas",
+        "suggest": "Sugerir",
+        "optimize": "Optimizar",
+        "addQuestionPlaceholder": "Agregar pregunta",
+        "copyAllQuestions": "Copiar todas las preguntas como texto",
+        "cancel": "Cancelar",
+        "createChecklist": "Crear Lista de Verificación",
+        "updateChecklist": "Actualizar Lista de Verificación"
+      },
+      "editTopicListModal": {
+        "title": "Editar Lista de Temas",
+        "createTitle": "Crear Nueva Lista de Temas",
+        "topicListName": "Nombre de la Lista de Temas",
+        "topicListNamePlaceholder": "Ingrese el nombre de la lista de temas",
+        "description": "Descripción de la Lista de Temas",
+        "descriptionPlaceholder":
+          "Ingrese la descripción de la lista de temas para sugerir temas automáticamente (mínimo 10 caracteres)...",
+        "referenceDocuments": "Documentos de Referencia (Opcional)",
+        "uploadFiles": "Subir Archivos",
+        "knowledgeBase": "Base de Conocimiento",
+        "comparisonTopics": "Temas de Comparación",
+        "topics": "Temas",
+        "suggest": "Sugerir",
+        "addTopicPlaceholder": "Agregar tema de comparación",
+        "copyAllTopics": "Copiar todos los temas como texto",
+        "cancel": "Cancelar",
+        "createTopicList": "Crear Lista de Temas",
+        "updateTopicList": "Actualizar Lista de Temas"
+      },
+      "editCustom": {
+        "title": "Editar Instrucciones Personalizadas",
+        "currentInstructions": "Instrucciones Actuales:",
+        "save": "Guardar",
+        "cancel": "Cancelar"
+      },
+      "optimizeChecklistModal": {
+        "title": "Optimizar Lista de Verificación",
+        "customInstructionsLabel": "Instrucciones Personalizadas (Opcional)",
+        "customInstructionsHelperText":
+          "Ingrese cualquier instrucción adicional que deba considerarse al responder las preguntas de la lista de verificación",
+        "analyzing": "Analizando...",
+        "analyzeButton": "Analizar Lista de Verificación",
+        "analyzingMessage":
+          "Analizando su lista de verificación en busca de oportunidades de optimización...",
+        "cancelAnalysis": "Cancelar Análisis",
+        "downloading": "Descargando...",
+        "downloadCsv": "Descargar CSV",
+        "questionsNeedingOptimization": "Preguntas que Necesitan Optimización",
+        "questionsAlreadyOptimized": "Preguntas Ya Optimizadas",
+        "selected": "Seleccionado",
+        "select": "Seleccionar",
+        "original": "Original",
+        "suggestedImprovement": "Mejora Sugerida",
+        "policyContext": "Contexto de Política",
+        "currentAnswer": "Respuesta Actual",
+        "showLess": "Mostrar Menos",
+        "showMore": "Mostrar Más",
+        "optimizationsSelectedText":
+          "optimización{{s}} seleccionada{{s}} para aplicar",
+        "applying": "Aplicando...",
+        "applySelectedOptimizations": "Aplicar Optimizaciones Seleccionadas",
+        "uploadDocumentsTitle":
+          "Suba documento(s) que deberían ser aceptados por la lista de verificación *",
+        "uploadDocumentsHelperText":
+          "Suba documentos que deberían cumplir todos los requisitos de la lista de verificación para ayudar a identificar preguntas que pueden ser demasiado estrictas",
+        "customInstructionsPlaceholder":
+          "ej., Considere que este es un estudio pediátrico al evaluar requisitos relacionados con la edad, Este protocolo es para una intervención de bajo riesgo, etc."
+      },
+      "optimizeOutlineModal": {
+        "title": "Optimizar Esquema",
+        "description":
+          "Suba un documento de referencia que represente un ejemplo de alta calidad del tipo de informe que desea generar. El sistema generará un informe usando su esquema actual y base de conocimiento, lo comparará con la referencia y sugerirá mejoras a las secciones de su esquema.",
+        "groundTruthDocument": "Documento de Referencia",
+        "customInstructionsLabel": "Instrucciones Personalizadas (Opcional)",
+        "customInstructionsHelperText":
+          "Proporcione orientación adicional para el proceso de optimización",
+        "customInstructionsPlaceholder":
+          "ej., Enfóquese en mejorar la profundidad técnica, asegure el cumplimiento de estándares específicos, etc.",
+        "characters": "caracteres",
+        "analyzingOutline": "Analizando esquema y generando optimizaciones...",
+        "cancelAnalysis": "Cancelar Análisis",
+        "optimizationResults": "Resultados de Optimización",
+        "sectionsNeedOptimization": "secciones necesitan optimización",
+        "downloadCsv": "Descargar CSV",
+        "section": "Sección",
+        "accepted": "Aceptado",
+        "accept": "Aceptar",
+        "originalSectionDescription": "Descripción Original de la Sección",
+        "suggestedSectionDescription": "Descripción Sugerida de la Sección",
+        "generatedContent": "Contenido Generado (con descripción actual)",
+        "groundTruthReference": "Referencia de Verdad de Base",
+        "showLess": "Mostrar Menos",
+        "showMore": "Mostrar Más",
+        "close": "Cerrar",
+        "cancel": "Cancelar",
+        "optimizing": "Optimizando...",
+        "optimizeOutline": "Optimizar Esquema",
+        "applyOptimizations": "Aplicar {{count}} Optimización{{s}}"
+      },
+      "feedback": {
+        "modalTitlePositive": "¿Qué fue útil?",
+        "modalTitleNegative": "¿Qué se podría mejorar?",
+        "descriptionPositive": "Cuéntanos qué te gustó de esta respuesta.",
+        "descriptionNegative": "Cuéntanos cómo podemos mejorar esta respuesta.",
+        "placeholder": "Tus comentarios (opcional)",
+        "cancel": "Cancelar",
+        "updateFeedback": "Actualizar Comentarios",
+        "submit": "Enviar",
+        "tooltipEditPositive": "Editar tus comentarios positivos",
+        "tooltipMarkPositive": "Marcar como útil",
+        "tooltipEditNegative": "Editar tus comentarios de mejora",
+        "tooltipMarkNegative": "Marcar como no útil",
+        "feedbackSaved": "Comentarios guardados",
+        "thankYouMessage": "¡Gracias por tus comentarios!",
+        "submitErrorMessage": "Error al enviar comentarios. Por favor intenta nuevamente."
+      }
+    }
+  }
