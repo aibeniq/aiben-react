@@ -1,0 +1,759 @@
+{
+    "common": {
+      "navigation": {
+        "dashboard": "Dashboard",
+        "review": "Überprüfen",
+        "generate": "Generieren",
+        "compare": "Vergleichen",
+        "match": "Übereinstimmen",
+        "modelSelection": "Modellauswahl",
+        "knowledgeBases": "Wissensbasis",
+        "archive": "Archiv",
+        "settings": "Einstellungen",
+        "admin": "Administrator",
+        "menu": "Menü",
+        "tools": "Werkzeuge",
+        "configurations": "Konfigurationen",
+        "myProfile": "Mein Profil",
+        "logout": "Abmelden",
+        "loggedInAs": "Angemeldet als: {{email}}"
+      },
+      "buttons": {
+        "upload": "Hochladen",
+        "download": "Herunterladen",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "delete": "Löschen",
+        "edit": "Bearbeiten",
+        "submit": "Einreichen",
+        "close": "Schließen",
+        "next": "Weiter",
+        "previous": "Zurück",
+        "confirm": "Bestätigen",
+        "back": "Zurück"
+      },
+      "forms": {
+        "firstName": "Vorname",
+        "lastName": "Nachname",
+        "email": "E-Mail",
+        "password": "Passwort",
+        "confirmPassword": "Passwort bestätigen",
+        "currentPassword": "Aktuelles Passwort",
+        "newPassword": "Neues Passwort",
+        "required": "Erforderlich",
+        "optional": "Optional",
+        "emailPlaceholder": "Geben Sie Ihre E-Mail-Adresse ein",
+        "passwordPlaceholder": "Geben Sie Ihr Passwort ein"
+      },
+      "dropdowns": {
+        "selectKnowledgeBase": "Wissensbasis auswählen..."
+      },
+      "chatbot": {
+        "title": "Chat",
+        "placeholder": "Stellen Sie eine Frage...",
+        "send": "Senden",
+        "newChat": "Neuer Chat",
+        "clearHistory": "Verlauf löschen",
+        "typing": "KI tippt...",
+        "error":
+          "Entschuldigung, etwas ist schief gelaufen. Bitte versuchen Sie es erneut.",
+        "welcome": "Hallo! Wie kann ich Ihnen heute helfen?",
+        "searchMode": "Suchmodus:",
+        "vectorSearch": "Vektorsuche",
+        "fullTextScan": "Volltextsuche",
+        "searchModeDescription":
+          "Vektorsuche bietet schnelle, gezielte Ergebnisse. Volltextsuche überprüft alle Inhalte in der Wissensbasis.",
+        "askMeAnything":
+          "Fragen Sie mich alles! Für die Wissensbasis-Suche wählen Sie zuerst eine Wissensbasis aus.",
+        "usingGeneralAI": "Verwende allgemeine KI-Assistenz",
+        "usingKnowledgeBase": "Verwende Wissensbasis:",
+        "usingDocuments": "Verwende # Dokument(e)",
+        "usingFiles": "Verwende {{count}} Dokument{{plural}}:",
+        "remove": "Entfernen",
+        "selectKnowledgeBase": "Wissensbasis auswählen",
+        "knowledgeBaseTable": {
+          "name": "Name",
+          "description": "Beschreibung",
+          "sources": "Quellen"
+        },
+        "knowledgeBaseTableName": "Name",
+        "knowledgeBaseTableDescription": "Beschreibung",
+        "knowledgeBaseTableSources": "Quellen",
+        "knowledgeBaseTablePages": "Seiten",
+        "selectKnowledgeBasePlaceholder": "Wählen Sie eine Wissensbasis...",
+        "noKnowledgeBasesAvailable":
+          "Keine Wissensbasis verfügbar. Erstellen Sie zuerst eine, um diese Funktion zu nutzen.",
+        "knowledgeBase": "Wissensbasis",
+        "file": "Datei",
+        "welcomeMessageWithSource":
+          "Wählen Sie eine Wissensbasis aus oder laden Sie Dateien hoch, dann stellen Sie eine Frage.",
+        "welcomeMessageGeneral":
+          "Fragen Sie mich alles! Für die Wissensbasis-Suche wählen Sie zuerst eine Wissensbasis aus.",
+        "sourcePopover": {
+          "knowledgeBase": "Wissensbasis",
+          "file": "Datei"
+        },
+        "errors": {
+          "generic":
+            "Entschuldigung, etwas ist schief gelaufen. Bitte versuchen Sie es erneut.",
+          "timeout":
+            "Zeitüberschreitung der Anfrage. Bitte versuchen Sie es erneut.",
+          "largeFileTimeout":
+            "Zeitüberschreitung bei der Verarbeitung großer Dateien. Versuchen Sie den 'Volltextsuche'-Modus für bessere Leistung mit großen Dateien.",
+          "fileSize": "Datei ist zu groß. Bitte wählen Sie kleinere Dateien.",
+          "serverError":
+            "Server-Fehler aufgetreten. Bitte versuchen Sie es später erneut."
+        }
+      },
+      "settings": {
+        "title": "Einstellungen",
+        "account": "Konto",
+        "language": "Sprache",
+        "dangerZone": "Gefahrenbereich",
+        "preferredLanguage": "Bevorzugte Sprache",
+        "saveLanguagePreference": "Spracheinstellung speichern",
+        "deleteAccount": "Konto löschen",
+        "deleteAccountWarning":
+          "Diese Aktion kann nicht rückgängig gemacht werden.",
+        "profile": "Profil",
+        "security": "Sicherheit",
+        "changePassword": "Passwort ändern",
+        "appearance": "Darstellung",
+        
+        "currentPassword": "Aktuelles Passwort",
+        "newPassword": "Neues Passwort",
+        "confirmPassword": "Passwort bestätigen",
+        "save": "Speichern",
+        
+        "system": "System",
+        "lightMode": "Heller Modus",
+        "darkMode": "Dunkler Modus",
+        
+        "deleteAccountDescription":
+          "Ihre Daten und alles, was mit Ihrem Konto verknüpft ist, dauerhaft löschen.",
+        "delete": "Löschen",
+        "confirmationRequired": "Bestätigung Erforderlich",
+        "deleteConfirmationText":
+          'Alle Ihre Kontodaten werden dauerhaft gelöscht. Wenn Sie sicher sind, klicken Sie bitte auf "Bestätigen", um fortzufahren. Diese Aktion kann nicht rückgängig gemacht werden.',
+        "cancel": "Abbrechen"
+      },
+      "errors": {
+        "somethingWentWrong": "Etwas ist schief gelaufen",
+        "tryAgain": "Bitte versuchen Sie es erneut",
+        "invalidEmail": "Ungültige E-Mail-Adresse",
+        "passwordTooShort": "Passwort ist zu kurz",
+        "passwordsDoNotMatch": "Passwörter stimmen nicht überein",
+        "networkError": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.",
+        "unauthorized": "Sie sind nicht berechtigt, diese Aktion durchzuführen.",
+        "notFound": "Die angeforderte Ressource wurde nicht gefunden."
+      },
+      "help": {
+        "dashboard":
+          "Hauptübersichtsseite mit Nutzungsstatistiken und aktueller Aktivität",
+        "usageStats":
+          "Sehen Sie Ihre aktuelle API-Token-Nutzung und Quota-Informationen für den aktuellen Abrechnungszeitraum",
+        "review":
+          "Dokumente gegen Qualitätschecklisten auf Compliance und Genauigkeit analysieren",
+        "generate":
+          "Strukturierte Berichte und Dokumente mit KI basierend auf Ihren Inhalten erstellen",
+        "compare":
+          "Zwei Dokumente nebeneinander vergleichen, um Unterschiede und Ähnlichkeiten zu identifizieren",
+        "match":
+          "Dokumentinhalte mit Formularvorlagen für automatisches Ausfüllen abgleichen",
+        "modelSelection": "KI-Modelle für Verarbeitung und Analyse konfigurieren",
+        "knowledgeBases":
+          "Wissensdatenbank-Bibliotheken für Dokumentverarbeitung verwalten",
+        "archive":
+          "Ihre verarbeiteten Dokumente und Analysehistorie anzeigen und verwalten",
+        "settings":
+          "Ihre Kontoeinstellungen und Anwendungseinstellungen konfigurieren",
+        "admin": "Administrative Funktionen für Benutzer- und Systemverwaltung",
+        "knowledgeBaseSelection":
+          "Wählen Sie eine Wissensdatenbank, die die Referenzdokumente und Standards für die Analyse enthält",
+        "checklistSelection":
+          "Wählen Sie eine Checkliste mit spezifischen Fragen zur Bewertung Ihrer Dokumente",
+        "fileUpload":
+          "Laden Sie die Dokumente hoch, die Sie analysieren und überprüfen möchten",
+        "customInstructions":
+          "Fügen Sie spezifische Anweisungen hinzu, die bei der Beantwortung von Checklisten-Fragen berücksichtigt werden",
+        "searchMode":
+          "Wählen Sie zwischen schneller Vektorsuche oder umfassender Volldokument-Scan",
+        "topicList":
+          "Wählen oder erstellen Sie eine Themenliste, um die Vergleichsanalyse zu fokussieren",
+        "formTemplate":
+          "Wählen Sie eine Formularvorlage, gegen die Ihre Dokumente abgeglichen werden sollen",
+        "documentOutline":
+          "Wählen Sie eine Gliederungsstruktur für die Erstellung Ihres Berichts",
+        "allUsersToggle":
+          "Zwischen der Anzeige nur Ihrer Historie oder der Historie aller Benutzer wechseln",
+
+        "createChecklist":
+          "Erstellen Sie eine neue Checkliste mit benutzerdefinierten Fragen zur Bewertung von Dokumenten anhand spezifischer Kriterien",
+        "createOutline":
+          "Erstellen Sie eine neue Gliederungsstruktur zur Anleitung der Erstellung strukturierter Berichte",
+        "createTopicList":
+          "Erstellen Sie eine neue Themenliste, um die Vergleichsanalyse auf spezifische Themen zu fokussieren",
+        "createFormTemplate":
+          "Erstellen Sie eine neue Formularvorlage für die automatisierte Dokumenteninhaltsextraktion und -zuordnung"
+      },
+      "review": {
+        "pageTitle": "Dokumente Überprüfen",
+        "pageDescription":
+          "Ein Dokument basierend auf einer benutzerdefinierten Checkliste und Richtliniendatenbank überprüfen.",
+        "knowledgeBaseTitle": "Wissensbasis",
+        "knowledgeBaseDescription": "Zum Auswählen klicken",
+        "checklistTitle": "Checkliste",
+        "checklistDescription": "Zum Auswählen klicken",
+        "customInstructionsTitle": "Benutzerdefinierte Anweisungen (Optional)",
+        "customInstructionsPlaceholder":
+          "Geben Sie zusätzliche Anweisungen ein, die bei der Beantwortung der Checklisten-Fragen berücksichtigt werden sollen...",
+        "customInstructionsHelp":
+          "{{count}}/2000 Zeichen. Diese Anweisungen werden zu jeder Frage während der Verarbeitung hinzugefügt.",
+        "searchModeHelp":
+          "Die Vektorsuche liefert schnelle, gezielte Ergebnisse. Die vollständige Dokumentanalyse untersucht alle Inhalte der Wissensbasis.",
+        "processingFile": "Datei wird verarbeitet...",
+        "processingFiles": "Dateien werden verarbeitet...",
+        "selectKnowledgeBaseTitle": "Wissensbasis auswählen",
+        "selectChecklistTitle": "Checkliste auswählen",
+        "noResults": "Noch keine Ergebnisse",
+        "uploadDocuments":
+          "Laden Sie ein oder mehrere Dokumente hoch, um sie gegen Ihre ausgewählte Checkliste zu überprüfen",
+        "results": "Ergebnisse",
+        "downloadReport": "Bericht herunterladen",
+        "downloadCsv": "CSV herunterladen",
+        "clearResults": "Ergebnisse löschen",
+        "copyReport": "Bericht kopieren",
+        "reportCopied": "Bericht in die Zwischenablage kopiert!",
+        "reviewButton": "Überprüfen",
+        "consultDocuments": "Dokumente konsultieren",
+        "noChecklistsAvailable":
+          "Keine Checklisten verfügbar. Erstellen Sie Ihre erste Checkliste, um zu beginnen.",
+        "createChecklist": "Checkliste erstellen",
+        "editChecklist": "Checkliste bearbeiten",
+        "checklistName": "Checklisten-Name",
+        "checklistNamePlaceholder": "Checklisten-Namen eingeben...",
+        "checklistDescriptionLabel": "Beschreibung",
+        "checklistDescriptionPlaceholder":
+          "Checklisten-Beschreibung für automatische Fragenvorschläge eingeben (mindestens 10 Zeichen)...",
+        "questions": "Fragen",
+        "suggest": "Vorschlagen",
+        "suggesting": "Vorschläge werden erstellt...",
+        "optimize": "Optimieren",
+        "optimizeTooltip":
+          "Eine Wissensbasis muss ausgewählt werden, um die Optimieren-Funktion zu aktivieren",
+        "optimizeTooltipEnabled":
+          "Fragen basierend auf der ausgewählten Wissensbasis optimieren",
+        "uploadFiles": "Dateien hochladen",
+        "knowledgeBase": "Wissensbasis",
+        "referenceDocuments": "Referenzdokumente (Optional)",
+        "selectKnowledgeBasePlaceholder": "Wissensbasis auswählen...",
+        "noKnowledgeBasesAvailable":
+          "Keine Wissensbasis verfügbar. Erstellen Sie zuerst eine, um diese Funktion zu nutzen.",
+        "copyQuestions": "Fragen kopieren",
+        "questionsCopied": "Fragen in die Zwischenablage kopiert",
+        "noQuestionsToCopy": "Keine Fragen zum Kopieren",
+        "failedToCopyQuestions":
+          "Fragen konnten nicht in die Zwischenablage kopiert werden",
+        "saveChecklist": "Checkliste speichern",
+        "cancel": "Abbrechen",
+        "deleteChecklist": "Checkliste löschen",
+        "dropFilesHere": "Dateien hier ablegen",
+        "uploadedFiles": "Hochgeladene Dateien",
+
+        "removeFile": "Entfernen",
+        "characterCount":
+          "{{count}}/2000 Zeichen. Diese Anweisungen werden bei der Verarbeitung an jede Frage angehängt.",
+        "searchMode": "Suchmodus",
+        "vectorSearch": "Vektorsuche",
+        "fullDocumentScan": "Vollständige Dokumentanalyse",
+        "vectorSearchDescription":
+          "Findet relevanten Inhalt mit KI-Ähnlichkeitssuche (schnell, gezielt)",
+        "fullScanDescription":
+          "Analysiert alle Dokumente in der Wissensbasis (umfassend, gründlich)",
+        "pleaseWait": "Bitte warten Sie, während wir Ihre Dokumente überprüfen"
+      },
+      "generate": {
+        "pageDescription":
+          "Erstellen Sie ein Dokument basierend auf einer benutzerdefinierten Checkliste und Dokumentendatenbank.",
+        "generatingDocument": "Dokument wird erstellt...",
+        "knowledgeBaseTitle": "Wissensbasis",
+        "documentOutlineTitle": "Dokumentstruktur",
+        "clickToSelect": "Klicken Sie zum Auswählen",
+        "customInstructionsTitle": "Benutzerdefinierte Anweisungen (Optional)",
+        "customInstructionsPlaceholder":
+          "Geben Sie zusätzliche Anweisungen ein, die bei der Erstellung jedes Berichtsabschnitts berücksichtigt werden sollen...",
+        "characterCount":
+          "{{count}}/2000 Zeichen. Diese Anweisungen werden beim Erstellen jedes Abschnitts zum Prompt hinzugefügt.",
+        "selectKnowledgeBaseTitle": "Wissensbasis Auswählen",
+        "selectDocumentOutlineTitle": "Dokumentstruktur Auswählen",
+        "generateButton": "Erstellen",
+        "results": "Ergebnisse",
+        "copyText": "Text Kopieren",
+        "copied": "Kopiert!",
+        "downloadDocx": "DOCX Herunterladen",
+        "downloadCsv": "CSV Herunterladen",
+        "clearReport": "Bericht Löschen",
+        "resultsPlaceholder":
+          "Ergebnisse werden hier nach der Dokumenterstellung angezeigt.",
+        "sectionsWithSources": "Abschnitte mit Quellen",
+        "sectionNumber": "Abschnitt {number}: {title}",
+        "kbGenerated": "KB Generiert",
+        "rawText": "Rohtext",
+        "viewSourceCitations": "Quellenzitate Anzeigen ({count})",
+        "documentCopiedSuccess": "Dokument in Zwischenablage kopiert",
+        "documentCopiedError":
+          "Fehler beim Kopieren des Dokuments in die Zwischenablage",
+        "documentDownloadSuccess": "Dokument erfolgreich heruntergeladen",
+        "documentDownloadError":
+          "Fehler beim Herunterladen des Dokuments: {error}",
+        "csvDownloadSuccess": "CSV erfolgreich heruntergeladen",
+        "csvDownloadError": "Fehler beim Herunterladen der CSV: {error}",
+        "reportClearedSuccess": "Generierter Bericht gelöscht",
+        "enterAtLeastOneSection":
+          "Bitte geben Sie mindestens einen Abschnitt ein",
+        "selectKnowledgeBase": "Bitte wählen Sie eine Wissensbasis aus",
+        "generateSuccess": "Bericht erfolgreich erstellt!",
+        "generateError": "Fehler beim Erstellen des Dokuments: {error}",
+        "vectorSearch": "Vektorsuche",
+        "fullDocumentScan": "vollständige Dokumentanalyse",
+        "editOutline": "Gliederung Bearbeiten"
+      },
+      "modelSelection": {
+        "llmManagement": "LLM-Verwaltung",
+        "llmDescription":
+          "Konfigurieren und verwalten Sie die LLMs, die zum Generieren von Textantworten verwendet werden. Das Standardmodell wird für alle Operationen verwendet.",
+        "addNewLlm": "Neues LLM hinzufügen",
+        "noLlmsConfigured": "Keine LLMs konfiguriert",
+        "addNewLlmToGetStarted": "Fügen Sie ein neues LLM hinzu, um zu beginnen",
+        "embeddingModelManagement": "Embedding-Modell-Verwaltung",
+        "embeddingDescription":
+          "Konfigurieren und verwalten Sie die Embedding-Modelle, die für die Indexierung und den Abruf von Wissensbasen verwendet werden. Das Standardmodell wird beim Erstellen neuer Wissensbasen verwendet, aber jede Wissensbasis wird weiterhin ihr ursprüngliches Embedding-Modell verwenden, auch wenn sich der Standard später ändert.",
+        "addEmbeddingModel": "Embedding-Modell hinzufügen",
+        "noEmbeddingModelsConfigured": "Keine Embedding-Modelle konfiguriert",
+        "addNewEmbeddingModelToGetStarted":
+          "Fügen Sie ein neues Embedding-Modell hinzu, um zu beginnen",
+        "tableHeaders": {
+          "name": "Name",
+          "modelId": "Modell-ID",
+          "provider": "Anbieter",
+          "description": "Beschreibung",
+          "status": "Status",
+          "actions": "Aktionen"
+        },
+        "status": {
+          "default": "Standard",
+          "available": "Verfügbar"
+        },
+        "actions": {
+          "setAsDefault": "Als Standard festlegen",
+          "delete": "Löschen",
+          "validate": "Validieren",
+          "validating": "Validierung läuft"
+        },
+        "dialog": {
+          "addNewLlm": "Neues LLM hinzufügen",
+          "addEmbeddingModel": "Embedding-Modell hinzufügen",
+          "displayName": "Anzeigename",
+          "provider": "Anbieter",
+          "modelId": "Modell-ID",
+          "description": "Beschreibung",
+          "cancel": "Abbrechen",
+          "addModel": "Modell hinzufügen"
+        },
+        "placeholders": {
+          "customModel": "z.B., Mein benutzerdefiniertes Modell",
+          "embeddingModelId": "z.B., sentence-transformers/all-MiniLM-L6-v2",
+          "describeModel":
+            "Beschreiben Sie das Modell, seine Eigenschaften und wann es verwendet werden soll"
+        },
+        "validation": {
+          "pleaseEnterModelId": "Bitte geben Sie eine Modell-ID ein"
+        }
+      },
+      "knowledgeBases": {
+        "title": "Wissensbanken-Verwaltung",
+        "addKnowledgeBase": "Wissensbasis hinzufügen",
+        "emptyStateTitle": "Sie haben noch keine Wissensbanken",
+        "emptyStateDescription":
+          "Fügen Sie eine neue Wissensbasis hinzu, um zu beginnen",
+        "tableHeaders": {
+          "title": "Titel",
+          "description": "Beschreibung",
+          "numberOfSources": "Anzahl der Quellen",
+          "embeddingModel": "Embedding-Modell",
+          "dateCreated": "Erstellungsdatum",
+          "dateModified": "Änderungsdatum",
+          "actions": "Aktionen"
+        },
+        "status": {
+          "default": "Standard",
+          "na": "N/V"
+        },
+        "actions": {
+          "view": "Anzeigen",
+          "edit": "Bearbeiten",
+          "delete": "Löschen",
+          "configure": "Konfigurieren"
+        },
+        "deleteModal": {
+          "title": "Wissensbasis löschen",
+          "buttonText": "Wissensbasis löschen",
+          "description":
+            "Diese Wissensbasis wird dauerhaft gelöscht. Sind Sie sicher? Sie können diese Aktion nicht rückgängig machen.",
+          "confirmButton": "Löschen",
+          "cancelButton": "Abbrechen",
+          "successMessage": "Die Wissensbasis wurde erfolgreich gelöscht",
+          "errorMessage":
+            "Beim Löschen der Wissensbasis ist ein Fehler aufgetreten"
+        },
+        "modals": {
+          "add": {
+            "title": "Wissensbasis hinzufügen",
+            "description":
+              "Erstellen Sie eine neue Wissensbasis, indem Sie Details eingeben und Dokumente unten hochladen."
+          },
+          "edit": {
+            "title": "Wissensbasis bearbeiten",
+            "description":
+              "Aktualisieren Sie die Details der Wissensbasis unten."
+          },
+          "fields": {
+            "title": "Titel",
+            "description": "Beschreibung"
+          },
+          "fileUpload": {
+            "currentFiles": "Aktuelle Dateien",
+            "newFiles": "Neue Dateien",
+            "selectedFiles": "Ausgewählte Dateien",
+            "dragAndDrop":
+              "Dateien hierher ziehen und ablegen oder klicken zum Durchsuchen",
+            "dropFiles": "Dateien hier ablegen...",
+            "removeFile": "Datei entfernen",
+            "supportedFormats": "Unterstützt: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+          },
+          "buttons": {
+            "cancel": "Abbrechen",
+            "create": "Erstellen",
+            "save": "Speichern",
+            "saving": "Speichere...",
+            "creating": "Erstelle..."
+          },
+          "validation": {
+            "titleRequired": "Titel ist erforderlich"
+          },
+          "messages": {
+            "createSuccess": "Wissensbasis erfolgreich erstellt.",
+            "updateSuccess": "Wissensbasis erfolgreich aktualisiert.",
+            "processing": "Verarbeitung...",
+            "pleaseWait":
+              "Bitte warten Sie, während wir Ihre Dateien verarbeiten..."
+          }
+        }
+      },
+      "common": {
+        "loading": "Laden...",
+        "noData": "Keine Daten verfügbar",
+        "success": "Erfolg!",
+        "failed": "Fehlgeschlagen",
+        "welcome": "Willkommen",
+        "welcomeBack": "Willkommen zurück, schön dich wiederzusehen!",
+        "hiUser": "Hallo, {{name}} 👋",
+        "goodbye": "Auf Wiedersehen",
+        "yes": "Ja",
+        "no": "Nein",
+        "ok": "OK",
+        "search": "Suchen",
+        "filter": "Filter",
+        "sort": "Sortieren",
+        "view": "Ansicht",
+        "copy": "Kopieren",
+        "paste": "Einfügen",
+        "cut": "Ausschneiden"
+      },
+      "usage": {
+        "title": "Nutzung",
+        "currentPeriod": "Aktueller Zeitraum:",
+        "usedOfQuota": "von Ihrem monatlichen Kontingent verbraucht"
+      },
+      "compare": {
+        "title": "Dokumente Vergleichen",
+        "subtitle":
+          "Vergleichen und analysieren Sie mehrere Dokumente, um Unterschiede, Ähnlichkeiten und Muster zu finden",
+        "sourceSectionTitle": "Quelldokumente Auswählen",
+        "referenceSectionTitle": "Referenzdokumente Auswählen",
+        "sourcePlaceholder": "Wählen Sie Dokumente für die Quellanalyse...",
+        "referencePlaceholder": "Wählen Sie Dokumente zum Vergleichen...",
+        "compareButton": "Dokumente Vergleichen",
+        "noSourceSelected": "Keine Quelldokumente ausgewählt",
+        "noReferenceSelected": "Keine Referenzdokumente ausgewählt",
+        "selectAtLeastTwo":
+          "Wählen Sie mindestens zwei Dokumente zum Vergleichen",
+        "selectSources": "Quelldokumente auswählen",
+        "selectReferences": "Referenzdokumente auswählen",
+        "analysisType": "Analyseart",
+        "analysisTypes": {
+          "differences": "Unterschiede Identifizieren",
+          "similarities": "Ähnlichkeiten Finden",
+          "comprehensive": "Umfassende Analyse",
+          "structural": "Struktureller Vergleich",
+          "content": "Inhaltsanalyse",
+          "chronological": "Chronologische Analyse"
+        },
+        "analysisDepth": "Analysetiefe",
+        "analysisDepths": {
+          "surface": "Oberflächliche Analyse",
+          "detailed": "Detaillierte Analyse",
+          "comprehensive": "Umfassende Analyse"
+        },
+        "generateReport": "Vergleichsbericht Erstellen",
+        "comparing": "Dokumente werden verglichen...",
+        "comparisonComplete": "Vergleich abgeschlossen",
+        "comparisonError": "Fehler beim Vergleich",
+        "resultsSection": "Vergleichsergebnisse",
+        "downloadReport": "Bericht Herunterladen",
+        "exportOptions": "Exportoptionen",
+        "clearResults": "Ergebnisse Löschen",
+        "newComparison": "Neuer Vergleich",
+        "selectFirstDocument": "Erstes Dokument auswählen",
+        "selectSecondDocument": "Zweites Dokument auswählen",
+        "pleaseSelect": "Bitte auswählen...",
+        "documentA": "Dokument A",
+        "documentB": "Dokument B",
+        "compareDocuments": "Dokumente Vergleichen",
+        "comparison": "Vergleich",
+        "noDocumentsFound": "Keine Dokumente gefunden",
+        "selectTwoDocuments": "Bitte wählen Sie zwei Dokumente zum Vergleichen",
+        "loadingComparison": "Vergleich wird geladen...",
+        "topicList": "Themenliste",
+        "clickToBrowse":
+          "Klicken Sie zum Durchsuchen oder ziehen Sie per Drag & Drop",
+        "supportedFormats": "Unterstützt PDF, TXT und DOCX",
+        "editTopicList": "Themenliste Bearbeiten",
+        "selectTopicListTitle": "Themenliste Auswählen",
+        "pleaseWait": "Bitte warten Sie, während wir Ihre Dokumente vergleichen"
+      },
+      "match": {
+        "title": "Dokumente Abgleichen",
+        "subtitle":
+          "Finden Sie ähnliche Dokumente und analysieren Sie Übereinstimmungsmuster in Ihrer Wissensbasis",
+        "sourceSectionTitle": "Quelldokument Auswählen",
+        "searchInTitle": "Suchen In",
+        "sourcePlaceholder": "Wählen Sie ein Dokument als Referenzquelle...",
+        "searchPlaceholder":
+          "Wählen Sie Dokumente oder Wissensbasis zum Durchsuchen...",
+        "findMatchesButton": "Übereinstimmungen Finden",
+        "noSourceSelected": "Kein Quelldokument ausgewählt",
+        "noSearchTargetSelected": "Kein Suchziel ausgewählt",
+        "selectSource": "Quelldokument auswählen",
+        "selectSearchTarget": "Suchziel auswählen",
+        "matchingCriteria": "Übereinstimmungskriterien",
+        "criteriaTypes": {
+          "semantic": "Semantische Ähnlichkeit",
+          "keyword": "Schlüsselwort-Übereinstimmung",
+          "structural": "Strukturelle Ähnlichkeit",
+          "content": "Inhaltsanalyse",
+          "contextual": "Kontextuelle Übereinstimmung"
+        },
+        "threshold": "Ähnlichkeitsschwellenwert",
+        "thresholds": {
+          "low": "Niedrig (30%)",
+          "medium": "Mittel (50%)",
+          "high": "Hoch (70%)",
+          "veryHigh": "Sehr Hoch (90%)"
+        },
+        "maxResults": "Maximale Ergebnisse",
+        "searching": "Suche nach Übereinstimmungen...",
+        "searchComplete": "Suche abgeschlossen",
+        "searchError": "Fehler bei der Suche",
+        "resultsSection": "Übereinstimmungsergebnisse",
+        "matchScore": "Übereinstimmungswert",
+        "confidence": "Vertrauen",
+        "downloadResults": "Ergebnisse Herunterladen",
+        "exportMatches": "Übereinstimmungen Exportieren",
+        "clearResults": "Ergebnisse Löschen",
+        "newMatch": "Neue Übereinstimmung",
+        "selectDocument":
+          "Wählen Sie ein Dokument aus, um Übereinstimmungen zu finden",
+        "pleaseSelect": "Bitte wählen Sie ein Dokument aus...",
+        "sourceDocument": "Quelldokument",
+        "matchingDocuments": "Übereinstimmende Dokumente",
+        "findMatches": "Übereinstimmungen Finden",
+        "similarityScore": "Ähnlichkeitswert",
+        "noDocumentsFound": "Keine Dokumente gefunden",
+        "selectDocumentToMatch":
+          "Bitte wählen Sie ein Dokument aus, um Übereinstimmungen zu finden",
+        "loadingMatches": "Suche nach Übereinstimmungen...",
+        "noMatchesFound": "Keine ähnlichen Dokumente gefunden",
+        "matchResults": "Übereinstimmungsergebnisse",
+        "similarity": "Ähnlichkeit",
+        "editFormTemplate": "Formular-Vorlage Bearbeiten",
+        "selectFormTemplateTitle": "Formular-Vorlage Auswählen",
+        "pleaseWait": "Bitte warten Sie, während wir Ihre Dokumente abgleichen",
+        "matchSuccess": "Formularverarbeitung erfolgreich abgeschlossen!"
+      },
+      "editFormTemplateModal": {
+        "title": "Formular-Vorlage Bearbeiten",
+        "formTemplateName": "Name der Formular-Vorlage",
+        "formTemplateNamePlaceholder":
+          "Geben Sie den Namen der Formular-Vorlage ein",
+        "formTemplateDescription": "Beschreibung der Formular-Vorlage",
+        "descriptionPlaceholder":
+          "Geben Sie die Beschreibung der Formular-Vorlage ein, um Felder automatisch vorzuschlagen (mindestens 10 Zeichen)...",
+        "referenceDocuments": "Referenzdokumente (Optional)",
+        "uploadFiles": "Dateien Hochladen",
+        "knowledgeBase": "Wissensbasis",
+        "formFields": "Formularfelder",
+        "suggest": "Vorschlagen",
+        "fieldPlaceholder":
+          "Fügen Sie einen Feldnamen hinzu (z.B. Vorname, Adresse, Sozialversicherungsnummer) oder schlagen Sie aus der Beschreibung vor",
+        "cancel": "Abbrechen",
+        "updateFormTemplate": "Formular-Vorlage Aktualisieren"
+      },
+      "editCustom": {
+        "title": "Benutzerdefinierte Anweisungen Bearbeiten",
+        "currentInstructions": "Aktuelle Anweisungen:",
+        "save": "Speichern",
+        "cancel": "Abbrechen"
+      },
+      "editOutlineModal": {
+        "title": "Gliederung Bearbeiten",
+        "createTitle": "Neue Gliederung Erstellen",
+        "outlineName": "Gliederungsname",
+        "outlineNamePlaceholder": "Geben Sie den Gliederungsnamen ein",
+        "description": "Beschreibung",
+        "descriptionPlaceholder":
+          "Geben Sie die Gliederungsbeschreibung ein, um Abschnitte automatisch vorzuschlagen (mindestens 10 Zeichen)...",
+        "referenceDocuments": "Referenzdokumente (Optional)",
+        "uploadFiles": "Dateien Hochladen",
+        "knowledgeBase": "Wissensbasis",
+        "sections": "Abschnitte",
+        "suggest": "Vorschlagen",
+        "optimize": "Optimieren",
+        "addSectionPlaceholder": "Abschnitt hinzufügen",
+        "cancel": "Abbrechen",
+        "createOutline": "Gliederung Erstellen",
+        "updateOutline": "Gliederung Aktualisieren"
+      },
+      "editChecklistModal": {
+        "title": "Checkliste Bearbeiten",
+        "createTitle": "Neue Checkliste Erstellen",
+        "checklistName": "Checklistenname",
+        "checklistNamePlaceholder": "Geben Sie den Checklistennamen ein",
+        "description": "Beschreibung",
+        "descriptionPlaceholder":
+          "Geben Sie die Checklistenbeschreibung ein, um Fragen automatisch vorzuschlagen (mindestens 10 Zeichen)...",
+        "referenceDocuments": "Referenzdokumente (Optional)",
+        "uploadFiles": "Dateien Hochladen",
+        "knowledgeBase": "Wissensbasis",
+        "questions": "Fragen",
+        "suggest": "Vorschlagen",
+        "optimize": "Optimieren",
+        "addQuestionPlaceholder": "Frage hinzufügen",
+        "copyAllQuestions": "Alle Fragen als Text kopieren",
+        "cancel": "Abbrechen",
+        "createChecklist": "Checkliste Erstellen",
+        "updateChecklist": "Checkliste Aktualisieren"
+      },
+      "editTopicListModal": {
+        "title": "Themenliste Bearbeiten",
+        "createTitle": "Neue Themenliste Erstellen",
+        "topicListName": "Themenlistenname",
+        "topicListNamePlaceholder": "Geben Sie den Themenlistennamen ein",
+        "description": "Themenlistenbeschreibung",
+        "descriptionPlaceholder":
+          "Geben Sie die Themenlistenbeschreibung ein, um Themen automatisch vorzuschlagen (mindestens 10 Zeichen)...",
+        "referenceDocuments": "Referenzdokumente (Optional)",
+        "uploadFiles": "Dateien Hochladen",
+        "knowledgeBase": "Wissensbasis",
+        "comparisonTopics": "Vergleichsthemen",
+        "topics": "Themen",
+        "suggest": "Vorschlagen",
+        "addTopicPlaceholder": "Vergleichsthema hinzufügen",
+        "copyAllTopics": "Alle Themen als Text kopieren",
+        "cancel": "Abbrechen",
+        "createTopicList": "Themenliste Erstellen",
+        "updateTopicList": "Themenliste Aktualisieren"
+      },
+      "optimizeChecklistModal": {
+        "title": "Checkliste Optimieren",
+        "customInstructionsLabel": "Benutzerdefinierte Anweisungen (Optional)",
+        "customInstructionsHelperText":
+          "Geben Sie zusätzliche Anweisungen ein, die bei der Beantwortung der Checklisten-Fragen berücksichtigt werden sollten",
+        "analyzing": "Analysiere...",
+        "analyzeButton": "Checkliste Analysieren",
+        "analyzingMessage":
+          "Analysiere Ihre Checkliste für Optimierungsmöglichkeiten...",
+        "cancelAnalysis": "Analyse Abbrechen",
+        "downloading": "Lade herunter...",
+        "downloadCsv": "CSV Herunterladen",
+        "questionsNeedingOptimization": "Fragen, die Optimierung Benötigen",
+        "questionsAlreadyOptimized": "Bereits Optimierte Fragen",
+        "selected": "Ausgewählt",
+        "select": "Auswählen",
+        "original": "Original",
+        "suggestedImprovement": "Vorgeschlagene Verbesserung",
+        "policyContext": "Richtlinienkontext",
+        "currentAnswer": "Aktuelle Antwort",
+        "showLess": "Weniger Anzeigen",
+        "showMore": "Mehr Anzeigen",
+        "optimizationsSelectedText": "Optimierung{{s}} zur Anwendung ausgewählt",
+        "applying": "Wende an...",
+        "applySelectedOptimizations": "Ausgewählte Optimierungen Anwenden",
+        "uploadDocumentsTitle":
+          "Dokument(e) hochladen, die von der Checkliste akzeptiert werden sollten *",
+        "uploadDocumentsHelperText":
+          "Laden Sie Dokumente hoch, die alle Checklisten-Anforderungen erfüllen sollten, um Fragen zu identifizieren, die möglicherweise zu streng sind",
+        "customInstructionsPlaceholder":
+          "z.B. Berücksichtigen Sie, dass dies eine pädiatrische Studie ist, wenn altersbezogene Anforderungen bewertet werden, Dieses Protokoll ist für eine risikoarme Intervention, usw."
+      },
+      "optimizeOutlineModal": {
+        "title": "Gliederung Optimieren",
+        "description":
+          "Laden Sie ein Referenzdokument hoch, das ein hochwertiges Beispiel des Berichtstyps darstellt, den Sie generieren möchten. Das System wird einen Bericht mit Ihrer aktuellen Gliederung und Wissensbasis erstellen, ihn mit der Referenz vergleichen und Verbesserungen für Ihre Gliederungsabschnitte vorschlagen.",
+        "groundTruthDocument": "Referenzdokument",
+        "customInstructionsLabel": "Benutzerdefinierte Anweisungen (Optional)",
+        "customInstructionsHelperText":
+          "Geben Sie zusätzliche Anleitung für den Optimierungsprozess",
+        "customInstructionsPlaceholder":
+          "z.B. Fokus auf Verbesserung der technischen Tiefe, Einhaltung spezifischer Standards sicherstellen, etc.",
+        "characters": "Zeichen",
+        "analyzingOutline":
+          "Analysiere Gliederung und generiere Optimierungen...",
+        "cancelAnalysis": "Analyse Abbrechen",
+        "optimizationResults": "Optimierungsergebnisse",
+        "sectionsNeedOptimization": "Abschnitte benötigen Optimierung",
+        "downloadCsv": "CSV Herunterladen",
+        "section": "Abschnitt",
+        "accepted": "Akzeptiert",
+        "accept": "Akzeptieren",
+        "originalSectionDescription": "Ursprüngliche Abschnittsbeschreibung",
+        "suggestedSectionDescription": "Vorgeschlagene Abschnittsbeschreibung",
+        "generatedContent": "Generierter Inhalt (mit aktueller Beschreibung)",
+        "groundTruthReference": "Referenz-Grundwahrheit",
+        "showLess": "Weniger Anzeigen",
+        "showMore": "Mehr Anzeigen",
+        "close": "Schließen",
+        "cancel": "Abbrechen",
+        "optimizing": "Optimiere...",
+        "optimizeOutline": "Gliederung Optimieren",
+        "applyOptimizations": "{{count}} Optimierung{{s}} Anwenden"
+      },
+      "feedback": {
+        "modalTitlePositive": "Was war hilfreich?",
+        "modalTitleNegative": "Was könnte verbessert werden?",
+        "descriptionPositive": "Sagen Sie uns, was Ihnen an dieser Antwort gefallen hat.",
+        "descriptionNegative": "Sagen Sie uns, wie wir diese Antwort verbessern können.",
+        "placeholder": "Ihre Kommentare (optional)",
+        "cancel": "Abbrechen",
+        "updateFeedback": "Feedback Aktualisieren",
+        "submit": "Senden",
+        "tooltipEditPositive": "Ihr positives Feedback bearbeiten",
+        "tooltipMarkPositive": "Als hilfreich markieren",
+        "tooltipEditNegative": "Ihr Verbesserungsfeedback bearbeiten",
+        "tooltipMarkNegative": "Als nicht hilfreich markieren",
+        "feedbackSaved": "Feedback gespeichert",
+        "thankYouMessage": "Vielen Dank für Ihr Feedback!",
+        "submitErrorMessage": "Feedback konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
+      }
+    }
+  }

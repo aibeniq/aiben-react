@@ -18,7 +18,9 @@ const blobEndpoints = [
   "/api/v1/formconnect/generate/docx",
   "/api/v1/formconnect/generate/csv",
   "/api/v1/files/source/{source_id}/pdf",
-  "/api/v1/files/source/by-filename/{filename}/pdf"
+  "/api/v1/files/source/by-filename/{filename}/pdf",
+  "/api/v1/files/source/{source_id}/rtf-pdf",
+  "/api/v1/files/source/by-filename/{filename}/rtf-pdf"
 ]// For each endpoint, find and patch it
 blobEndpoints.forEach(endpoint => {
   const escapedEndpoint = endpoint.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')

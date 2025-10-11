@@ -52,13 +52,20 @@ export function useFormconnectProgress(taskId: string | null) {
 
         console.log("📊 FormConnect progress update:", data)
 
+        // Determine the display message:
+        // 1. If message_key exists, use it for translation
+        // 2. Otherwise, fall back to the message field (for backwards compatibility)
+        const displayMessage = data.message_key
+          ? t(data.message_key)
+          : data.message
+
         // Only update if percentage actually changed (prevents unnecessary re-renders)
         if (data.percentage !== lastPercentageRef.current) {
           lastPercentageRef.current = data.percentage
           setProgress({
             status: data.status,
             percentage: data.percentage,
-            message: data.message,
+            message: displayMessage,
             current_stage: data.current_stage,
             completed: data.status === "completed",
             isActive:

@@ -1,6 +1,7 @@
 import { Button, HStack, Heading } from "@chakra-ui/react"
 import type React from "react"
 import { FiCheck, FiCopy } from "react-icons/fi"
+import { useTranslation } from "react-i18next"
 import DownloadButton from "../../ui/download-button"
 
 interface ResultsHeaderProps {
@@ -22,9 +23,11 @@ const ResultsHeader: React.FC<ResultsHeaderProps> = ({
   onDownloadCsv,
   showCsvDownload,
 }) => {
+  const { t } = useTranslation()
+  
   return (
     <HStack justify="space-between" align="center" width="100%">
-      <Heading size="md">Results</Heading>
+      <Heading size="md">{t("ui.results")}</Heading>
       <HStack gap={2} justifyContent="flex-end">
         <Button
           size="sm"
@@ -33,14 +36,14 @@ const ResultsHeader: React.FC<ResultsHeaderProps> = ({
           colorPalette={copySuccess ? "green" : "blue"}
         >
           {copySuccess ? <FiCheck color="green" /> : <FiCopy />}
-          {copySuccess ? "Copied!" : "Copy Text"}
+          {copySuccess ? t("ui.copied") : t("ui.copyText")}
         </Button>
         <DownloadButton
           size="sm"
           onClick={onDownloadReport}
           loading={loadingDownload}
         >
-          Download DOCX
+          {t("ui.downloadDocx")}
         </DownloadButton>
         {showCsvDownload && onDownloadCsv && (
           <DownloadButton
@@ -48,7 +51,7 @@ const ResultsHeader: React.FC<ResultsHeaderProps> = ({
             onClick={onDownloadCsv}
             loading={loadingCsvDownload}
           >
-            Download CSV
+            {t("ui.downloadCsv")}
           </DownloadButton>
         )}
       </HStack>

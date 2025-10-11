@@ -101,15 +101,23 @@ export const useReportGenieProgress = (taskId: string | null) => {
         console.log("📊 REPORTGENIE FRONTEND RECEIVED PROGRESS:", {
           percentage: (data as any).percentage,
           message: (data as any).message,
+          message_key: (data as any).message_key,
           status: (data as any).status,
           current_stage: (data as any).current_stage,
           taskId: taskId,
           pollCount: pollCount,
         })
 
+        // Determine the display message:
+        // 1. If message_key exists, use it for translation
+        // 2. Otherwise, fall back to the message field (for backwards compatibility)
+        const displayMessage = (data as any).message_key
+          ? t((data as any).message_key)
+          : (data as any).message || "Processing..."
+
         const newProgress: ProgressData = {
           percentage: Math.round((data as any).percentage || 0),
-          message: (data as any).message || "Processing...",
+          message: displayMessage,
           isActive:
             (data as any).status === "in_progress" ||
             (data as any).status === "started",
