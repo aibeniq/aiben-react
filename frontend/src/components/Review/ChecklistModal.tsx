@@ -255,13 +255,9 @@ const ChecklistModal = ({
           formData.append("files", item.file)
         })
 
-        // Use direct fetch for file upload
-        const token = localStorage.getItem("access_token")
+        // Use direct fetch for file upload - now using HTTP-only cookies
         const headers: any = {}
-
-        if (token) {
-          headers.Authorization = `Bearer ${token}`
-        }
+        // No need for Authorization header - cookies are sent automatically
 
         const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
         const apiUrl = `${baseUrl}/api/v1/veradoc/generate-questions-with-files`
@@ -271,6 +267,7 @@ const ChecklistModal = ({
         const apiResponse = await fetch(apiUrl, {
           method: "POST",
           headers,
+          credentials: "include", // Include HTTP-only cookies
           body: formData,
         })
 

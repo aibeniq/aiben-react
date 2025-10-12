@@ -4,7 +4,7 @@ import { Suspense, useEffect } from "react"
 
 import Navbar from "@/components/Common/Navbar"
 import Sidebar from "@/components/Common/Sidebar"
-import { isLoggedIn } from "@/hooks/useAuth"
+import { UsersService } from "@/client"
 import { addEmergencyEscapeHandlers } from "../utils/overlay-debugger"
 
 import Chatbot from "@/components/Chatbot/ChatbotMain"
@@ -12,7 +12,12 @@ import Chatbot from "@/components/Chatbot/ChatbotMain"
 export const Route = createFileRoute("/_layout")({
   component: Layout,
   beforeLoad: async () => {
-    if (!isLoggedIn()) {
+    // Check authentication by making an API call with HTTP-only cookies
+    try {
+      await UsersService.readUserMe()
+      // If the call succeeds, user is authenticated
+    } catch (error) {
+      // If the call fails, redirect to login
       throw redirect({
         to: "/login",
       })

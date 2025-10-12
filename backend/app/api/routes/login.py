@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -21,12 +21,15 @@ from app.utils.email_utils import (
 router = APIRouter(tags=["login"])
 
 
-@router.post("/login/access-token", response_model=Token)
+@router.post("/login/access-token")
 def login_access_token(
-    session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-) -> Token:
+    session: SessionDep, 
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    response: Response
+) -> dict:
     """
-    OAuth2 compatible token login, get an access token for future requests
+    OAuth2 compatible token login, get an access token for future requests.
+    Sets HTTP-only cookie for secure token storage.
     """
     user = crud.authenticate(
         session=session, email=form_data.username, password=form_data.password
@@ -35,12 +38,38 @@ def login_access_token(
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+    
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    return Token(
-        access_token=security.create_access_token(
-            user.id, expires_delta=access_token_expires
-        )
+    access_token = security.create_access_token(
+        user.id, expires_delta=access_token_expires
     )
+    
+    # Set HTTP-only cookie instead of returning token in response
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,  # Prevents JavaScript access
+        secure=settings.ENVIRONMENT != "local",  # HTTPS only in production
+        samesite="strict",  # CSRF protection
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        path="/",  # Available for all paths
+    )
+    
+    return {"message": "Login successful", "user": {"id": str(user.id), "email": user.email}}
+
+
+@router.post("/logout")
+def logout(response: Response) -> dict:
+    """
+    Logout user by clearing the HTTP-only cookie
+    """
+    response.delete_cookie(
+        key="access_token",
+        path="/",
+        secure=settings.ENVIRONMENT != "local",
+        samesite="strict"
+    )
+    return {"message": "Successfully logged out"}
 
 
 @router.post("/login/test-token", response_model=UserPublic)

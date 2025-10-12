@@ -42,14 +42,14 @@ export type OpenAPIConfig = {
 
 export const OpenAPI: OpenAPIConfig = {
   BASE: "",
-  CREDENTIALS: "include",
+  CREDENTIALS: "include", // This ensures cookies are sent with requests
   ENCODE_PATH: undefined,
   HEADERS: undefined,
   PASSWORD: undefined,
   TOKEN: undefined,
   USERNAME: undefined,
   VERSION: "0.1.0",
-  WITH_CREDENTIALS: false,
+  WITH_CREDENTIALS: true, // This ensures cookies are sent with axios requests
   interceptors: {
     request: new Interceptors(),
     response: new Interceptors(),
