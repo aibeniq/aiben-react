@@ -2,7 +2,7 @@ from collections.abc import Generator
 from typing import Annotated
 
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
@@ -14,7 +14,8 @@ from app.core.db import engine
 from app.models import TokenPayload, User
 
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/login/access-token"
+    tokenUrl=f"{settings.API_V1_STR}/login/access-token",
+    auto_error=False  # Don't auto-error, we'll handle cookies
 )
 
 
@@ -24,7 +25,29 @@ def get_db() -> Generator[Session, None, None]:
 
 
 SessionDep = Annotated[Session, Depends(get_db)]
-TokenDep = Annotated[str, Depends(reusable_oauth2)]
+
+
+def get_token_from_cookie_or_header(request: Request, token: str = Depends(reusable_oauth2)) -> str:
+    """
+    Get token from HTTP-only cookie first, fallback to Authorization header for backward compatibility
+    """
+    # Try to get token from HTTP-only cookie first
+    cookie_token = request.cookies.get("access_token")
+    if cookie_token:
+        return cookie_token
+    
+    # Fallback to Authorization header (for API clients or during migration)
+    if token:
+        return token
+    
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Not authenticated",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+TokenDep = Annotated[str, Depends(get_token_from_cookie_or_header)]
 
 
 def get_current_user(session: SessionDep, token: TokenDep) -> User:

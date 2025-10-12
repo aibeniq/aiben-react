@@ -12,17 +12,23 @@ import { Button } from "@/components/ui/button"
 import { Field } from "@/components/ui/field"
 import { InputGroup } from "@/components/ui/input-group"
 import { PasswordInput } from "@/components/ui/password-input"
-import useAuth, { isLoggedIn } from "@/hooks/useAuth"
+import useAuth from "@/hooks/useAuth"
+import { UsersService } from "@/client"
 import Logo from "/assets/images/aibeniq-logo-center.png"
 import { emailPattern, passwordRules } from "../utils"
 
 export const Route = createFileRoute("/login")({
   component: Login,
   beforeLoad: async () => {
-    if (isLoggedIn()) {
+    // Check if user is already authenticated
+    try {
+      await UsersService.readUserMe()
+      // If successful, user is already logged in, redirect to home
       throw redirect({
         to: "/",
       })
+    } catch (error) {
+      // User is not authenticated, allow access to login page
     }
   },
 })

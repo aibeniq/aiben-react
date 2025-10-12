@@ -157,8 +157,7 @@ const FormTemplateModal = ({
     try {
       let response
 
-      // Get auth token for API calls
-      const token = localStorage.getItem("access_token")
+      // Get auth token for API calls - now using HTTP-only cookies
       const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
       if (referenceMode === "files" && exampleFiles.length > 0) {
@@ -175,14 +174,10 @@ const FormTemplateModal = ({
           formData.append("files", item.file)
         })
 
-        const headers: Record<string, string> = {}
-        if (token) {
-          headers.Authorization = `Bearer ${token}`
-        }
-
+        // No need for Authorization header - cookies are sent automatically
         response = await fetch(apiUrl, {
           method: "POST",
-          headers,
+          credentials: "include", // Include HTTP-only cookies
           body: formData,
         })
       } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
@@ -199,13 +194,12 @@ const FormTemplateModal = ({
         const headers: Record<string, string> = {
           "Content-Type": "application/json",
         }
-        if (token) {
-          headers.Authorization = `Bearer ${token}`
-        }
+        // No need for Authorization header - cookies are sent automatically
 
         response = await fetch(apiUrl, {
           method: "POST",
           headers,
+          credentials: "include", // Include HTTP-only cookies
           body: JSON.stringify(requestData),
         })
       } else {
@@ -221,13 +215,12 @@ const FormTemplateModal = ({
         const headers: Record<string, string> = {
           "Content-Type": "application/json",
         }
-        if (token) {
-          headers.Authorization = `Bearer ${token}`
-        }
+        // No need for Authorization header - cookies are sent automatically
 
         response = await fetch(apiUrl, {
           method: "POST",
           headers,
+          credentials: "include", // Include HTTP-only cookies
           body: JSON.stringify(requestData),
         })
       }

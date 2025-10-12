@@ -44,14 +44,23 @@ try {
 }
 
 OpenAPI.BASE = computedBase
-OpenAPI.TOKEN = async () => {
-  return localStorage.getItem("access_token") || ""
-}
+OpenAPI.WITH_CREDENTIALS = true  // Enable sending cookies with requests
+// Remove TOKEN since we'll use HTTP-only cookies
+// OpenAPI.TOKEN is no longer needed as authentication is handled via cookies
 
 const handleApiError = (error: Error) => {
   if (error instanceof ApiError && [401, 403].includes(error.status)) {
-    localStorage.removeItem("access_token")
-    window.location.href = "/login"
+    // Don't redirect if we're already on an auth page to prevent loops
+    const currentPath = window.location.pathname
+    const isAuthPage = ['/login', '/signup', '/reset-password', '/recover-password'].some(path => 
+      currentPath.startsWith(path)
+    )
+    
+    if (!isAuthPage) {
+      // No need to remove localStorage since we're using HTTP-only cookies
+      // The server will handle cookie clearing on logout
+      window.location.href = "/login"
+    }
   }
 }
 const queryClient = new QueryClient({
