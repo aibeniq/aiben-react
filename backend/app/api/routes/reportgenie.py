@@ -58,6 +58,7 @@ from fastapi import (
     File,
     Form,
     Request as FastAPIRequest,
+    Query,
 )
 from typing import List, Dict, Any, Optional
 
@@ -761,9 +762,9 @@ def delete_report(report_id: uuid.UUID, session: SessionDep, current_user: Curre
 async def get_report_history(
     session: SessionDep,
     current_user: CurrentUser,
-    skip: int = 0,
-    limit: int = 20,
-    show_all: bool = False,
+    skip: int = Query(0, ge=0, le=10000),
+    limit: int = Query(20, ge=1, le=100),
+    show_all: bool = Query(False),
 ):
     """Retrieve past ReportGenie generation history for the current user or all users."""
     print("Retrieving ReportGenie history. Show all:", show_all)

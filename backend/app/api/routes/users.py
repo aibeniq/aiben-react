@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import col, delete, func, select
 
 from app import crud
@@ -66,7 +66,7 @@ def update_language(
     dependencies=[Depends(get_current_active_superuser)],
     response_model=UsersPublic,
 )
-def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
+def read_users(session: SessionDep, skip: int = Query(0, ge=0, le=10000), limit: int = Query(100, ge=1, le=1000)) -> Any:
     """
     Retrieve users.
     """

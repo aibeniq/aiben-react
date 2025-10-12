@@ -5,7 +5,7 @@ from typing import Any, List, Optional
 import boto3
 import traceback
 
-from fastapi import APIRouter, HTTPException, Depends, Body
+from fastapi import APIRouter, HTTPException, Depends, Body, Query
 from sqlmodel import select, func
 
 from langchain_aws import ChatBedrock
@@ -41,7 +41,7 @@ router = APIRouter(prefix="/llm-models", tags=["llm-models"])
 
 @router.get("/", response_model=LlmModelsPublic)
 def get_llm_models(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep, current_user: CurrentUser, skip: int = Query(0, ge=0, le=10000), limit: int = Query(100, ge=1, le=1000)
 ) -> LlmModelsPublic:
     """
     Get all LLMs.

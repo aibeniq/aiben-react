@@ -8,7 +8,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, BackgroundTasks
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, BackgroundTasks, Query
 from sqlmodel import func, select, delete
 
 import zipfile
@@ -771,9 +771,9 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
 def read_knowledge_bases(
     session: SessionDep,
     current_user: CurrentUser,
-    skip: int = 0,
-    limit: int = 100,
-    show_all: bool = False,
+    skip: int = Query(0, ge=0, le=10000),
+    limit: int = Query(100, ge=1, le=1000),
+    show_all: bool = Query(False),
 ) -> Any:
     """
     Retrieve knowledge bases with additional metadata: Number of Sources, Date Created, and Date Modified.
