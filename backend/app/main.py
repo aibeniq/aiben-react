@@ -1,12 +1,14 @@
 import sentry_sdk
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.api.main import api_router
 from app.core.config import settings
 from app.core.logging_config import setup_logging
 from app.middleware.upload_middleware import UploadProgressMiddleware
+from app.middleware.https_redirect import HTTPSRedirectMiddleware
 
 
 # Initialize logging configuration early
@@ -38,16 +40,38 @@ app = FastAPI(
 
 print("DEBUG: After FastAPI creation", flush=True)
 
+# NOTE: HTTPS redirect is disabled when using a reverse proxy (Traefik, nginx)
+# The proxy should handle HTTPS redirection instead
+# Uncomment below if running without a reverse proxy:
+# if settings.ENVIRONMENT != "local":
+#     app.add_middleware(HTTPSRedirectMiddleware)
+#     print("DEBUG: Added HTTPS redirect middleware", flush=True)
+
+# Add trusted host middleware for production
+if settings.ENVIRONMENT == "production":
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=["aiben.io", "*.aiben.io", "demo.aiben.io"]
+    )
+    print("DEBUG: Added TrustedHost middleware", flush=True)
+
 # Set all CORS enabled origins
 if settings.all_cors_origins:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.all_cors_origins,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-        expose_headers=["*"],  # Expose all headers to the client
-        max_age=3600,  # Cache preflight requests for 1 hour
+        allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],  # Explicit methods
+        allow_headers=[
+            "Content-Type",
+            "Authorization",
+            "Accept",
+            "Accept-Language",
+            "X-Request-ID",
+            "X-Upload-ID",
+        ],  # Specific headers only
+        expose_headers=["Content-Range", "X-Total-Count", "X-Upload-Progress"],  # Only needed headers
+        max_age=600,  # Reduce cache time from 3600 to 600 seconds
     )
 
 print("DEBUG: After CORS middleware", flush=True)
@@ -56,6 +80,34 @@ print("DEBUG: After CORS middleware", flush=True)
 app.add_middleware(UploadProgressMiddleware)
 
 print("DEBUG: After upload middleware", flush=True)
+
+# Add security headers middleware for production
+if settings.ENVIRONMENT != "local":
+    @app.middleware("http")
+    async def add_security_headers(request: Request, call_next):
+        response = await call_next(request)
+        
+        # HSTS - Force HTTPS for 1 year
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        
+        # Prevent MIME type sniffing
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        
+        # Prevent clickjacking
+        response.headers["X-Frame-Options"] = "DENY"
+        
+        # XSS protection (legacy but still useful)
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        
+        # Referrer policy
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        
+        # Permissions policy - disable unnecessary browser features
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        
+        return response
+    
+    print("DEBUG: Added security headers middleware", flush=True)
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
