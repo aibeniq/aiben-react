@@ -10,6 +10,8 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, Optional
 
+from app.core.config import settings
+
 
 class SessionManager:
     """
@@ -22,12 +24,15 @@ class SessionManager:
     def __init__(self):
         self.default_ttl = 3600  # 60 minutes
         
-        # Try to connect to Redis
-        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+        # Try to connect to Redis using the configured REDIS_URL from settings
+        # This URL will include authentication if REDIS_PASSWORD is set
+        redis_url = settings.REDIS_URL
         try:
             self.redis_client = redis.from_url(redis_url, decode_responses=True)
             self.redis_client.ping()
-            print(f"SessionManager: Connected to Redis at {redis_url}")
+            # Don't log the full URL as it may contain the password
+            redis_host = redis_url.split("@")[-1] if "@" in redis_url else redis_url
+            print(f"SessionManager: Connected to Redis at {redis_host}")
             self.use_redis = True
         except Exception as e:
             print(f"SessionManager: Failed to connect to Redis ({e}), using in-memory fallback")
