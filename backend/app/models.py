@@ -71,6 +71,10 @@ class User(UserBase, table=True):
     )
     # user's preferred language for UI and LLM templates
     preferred_language: str = Field(default="en", max_length=10)
+    
+    # Account lockout fields for security
+    failed_login_attempts: int = Field(default=0)
+    locked_until: Optional[datetime] = Field(default=None)
 
 
 # Properties to return via API, id is always required
