@@ -204,7 +204,7 @@ services:
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.entrypoints=https
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.tls=true
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.tls.certresolver=le
-      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.middlewares=${STACK_NAME?Variable not set}-auth@file,auth-ratelimit@file,security-headers@file
+      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.middlewares=${STACK_NAME?Variable not set}-auth,auth-ratelimit@file,security-headers@file
 
       # HTTP route (redirect to HTTPS)
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.rule=Host(`alaco.${DOMAIN?Variable not set}`)
