@@ -9,6 +9,7 @@ import tempfile
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, BackgroundTasks, Query
+from app.utils.file_validator import FileValidator, sanitize_filename
 from sqlmodel import func, select, delete
 
 import zipfile
@@ -1004,13 +1005,23 @@ async def create_knowledge_base(
     # Note: Upload stage progress is handled by the upload middleware
     # The upload middleware will automatically complete the upload stage when HTTP upload finishes
     
-    # Read file data immediately since UploadFile objects can't be passed to background tasks
+
+    # Strict file validation and filename sanitization
     file_data = []
     total_size = 0
     for i, file in enumerate(files):
+        is_valid, reason = FileValidator.validate_upload(file)
+        if not is_valid:
+            progress_tracker.fail_task(
+                task_id,
+                f"File '{file.filename}' rejected: {reason}"
+            )
+            raise HTTPException(status_code=400, detail=f"File '{file.filename}' rejected: {reason}")
+
         content = await file.read()
+        safe_filename = sanitize_filename(file.filename)
         file_info = {
-            "filename": file.filename,
+            "filename": safe_filename,
             "content": content,
             "content_type": file.content_type,
             "size": len(content)
@@ -1018,8 +1029,8 @@ async def create_knowledge_base(
         file_data.append(file_info)
         total_size += len(content)
         await file.seek(0)  # Reset file pointer
-    
-    print(f"📊 Read {len(files)} files totaling {total_size / (1024*1024):.1f}MB")
+
+    print(f"📊 Read {len(files)} files totaling {total_size / (1024*1024):.1f}MB (all validated and sanitized)")
 
     # Schedule background processing - this is the key change!
     background_tasks.add_task(

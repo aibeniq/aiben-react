@@ -5,6 +5,11 @@ ENV PYTHONPATH=/app
 
 WORKDIR /app/
 
+# Install system dependencies for python-magic
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libmagic1 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install uv
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
 COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /uvx /bin/
@@ -47,6 +52,11 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 
 WORKDIR /app/
+
+# Install system dependencies for python-magic in production stage
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libmagic1 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy uv binary from builder stage
 COPY --from=builder /bin/uv /bin/uv
