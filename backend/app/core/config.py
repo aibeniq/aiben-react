@@ -109,10 +109,41 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
+    POSTGRES_SSL_MODE: str = "prefer"  # Options: disable, allow, prefer, require, verify-ca, verify-full
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+        """
+        Build PostgreSQL connection URI with SSL configuration.
+        
+        SSL modes are environment-aware:
+        - local: typically 'disable' (same Docker network, no encryption needed)
+        - staging/production: 'prefer' or 'require' for external databases
+        
+        SSL Mode options:
+        - disable: No SSL
+        - allow: Try non-SSL first, then SSL
+        - prefer: Try SSL first, then non-SSL (default)
+        - require: Require SSL, but don't verify certificate
+        - verify-ca: Require SSL and verify certificate authority
+        - verify-full: Require SSL and verify hostname matches certificate
+        """
+        # Determine SSL mode based on environment and server location
+        ssl_mode = self.POSTGRES_SSL_MODE
+        
+        # Auto-detect local Docker environment (db service name or localhost)
+        is_local_docker = self.POSTGRES_SERVER in ["db", "localhost", "127.0.0.1"]
+        
+        # If in local environment and using Docker db service, disable SSL for performance
+        if self.ENVIRONMENT == "local" and is_local_docker and ssl_mode == "prefer":
+            ssl_mode = "disable"
+        
+        # Build query parameters
+        query_params = None
+        if ssl_mode and ssl_mode != "disable":
+            query_params = f"sslmode={ssl_mode}"
+        
         return MultiHostUrl.build(
             scheme="postgresql+psycopg",
             username=self.POSTGRES_USER,
@@ -120,6 +151,7 @@ class Settings(BaseSettings):
             host=self.POSTGRES_SERVER,
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
+            query=query_params,
         )
 
     # Redis Configuration
