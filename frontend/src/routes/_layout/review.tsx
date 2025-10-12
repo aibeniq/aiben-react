@@ -216,11 +216,8 @@ const VeraDoc = () => {
           },
         ]
 
-        const optimizationNote = data.results.optimization_applied
-          ? " (Optimized)"
-          : ""
         showSuccessToast(
-          t("review.reviewSuccess") + optimizationNote,
+          t("review.reviewSuccess"),
         )
       }
 
