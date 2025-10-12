@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -10,7 +10,14 @@ from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
+from app.middleware.rate_limit import get_client_ip, rate_limiter
 from app.models import Message, NewPassword, Token, UserPublic
+from app.utils.account_lockout import (
+    check_account_lockout,
+    get_lockout_remaining_time,
+    record_failed_login,
+    reset_failed_login_attempts,
+)
 from app.utils.email_utils import (
     generate_password_reset_token,
     generate_reset_password_email,
@@ -22,7 +29,8 @@ router = APIRouter(tags=["login"])
 
 
 @router.post("/login/access-token")
-def login_access_token(
+async def login_access_token(
+    request: Request,
     session: SessionDep, 
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     response: Response
@@ -30,14 +38,44 @@ def login_access_token(
     """
     OAuth2 compatible token login, get an access token for future requests.
     Sets HTTP-only cookie for secure token storage.
+    Protected by rate limiting to prevent brute force attacks.
     """
+    # Get client IP for rate limiting
+    client_ip = get_client_ip(request)
+    
+    # Rate limit by IP address
+    await rate_limiter.check_rate_limit(f"ip:{client_ip}")
+    
+    # Rate limit by username (email)
+    await rate_limiter.check_rate_limit(f"user:{form_data.username}")
+    
+    # Authenticate user
     user = crud.authenticate(
         session=session, email=form_data.username, password=form_data.password
     )
+    
     if not user:
+        # Record failed attempt if user exists
+        existing_user = crud.get_user_by_email(session=session, email=form_data.username)
+        if existing_user:
+            record_failed_login(session, existing_user)
         raise HTTPException(status_code=400, detail="Incorrect email or password")
-    elif not user.is_active:
+    
+    # Check if account is locked due to too many failed attempts
+    if check_account_lockout(user):
+        remaining_time = get_lockout_remaining_time(user)
+        raise HTTPException(
+            status_code=423,  # 423 Locked
+            detail=f"Account is locked due to too many failed login attempts. Try again in {remaining_time} seconds."
+        )
+    
+    if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+    
+    # Successful login - reset failed attempts counter and clear rate limits
+    reset_failed_login_attempts(session, user)
+    rate_limiter.clear_attempts(f"ip:{client_ip}")
+    rate_limiter.clear_attempts(f"user:{form_data.username}")
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
