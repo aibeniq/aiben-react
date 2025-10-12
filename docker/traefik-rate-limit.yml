@@ -1,0 +1,49 @@
+# Traefik Rate Limiting Configuration
+# This file adds rate limiting middleware to protect HTTP Basic Auth
+
+# Rate limit configuration for Traefik
+http:
+  middlewares:
+    # Rate limiter for HTTP Basic Auth - strict limits
+    auth-ratelimit:
+      rateLimit:
+        average: 10      # Average requests per second
+        period: 1m       # Time period
+        burst: 20        # Allow burst of requests
+        sourceCriterion:
+          ipStrategy:
+            depth: 1     # Consider first IP in X-Forwarded-For
+    
+    # Rate limiter for general traffic - more permissive
+    general-ratelimit:
+      rateLimit:
+        average: 100     # 100 requests per second average
+        period: 1s
+        burst: 200
+        sourceCriterion:
+          ipStrategy:
+            depth: 1
+    
+    # IP Whitelist for trusted sources (optional)
+    ip-whitelist:
+      ipWhiteList:
+        sourceRange:
+          - "127.0.0.1/32"
+          - "10.0.0.0/8"
+          - "172.16.0.0/12"
+          - "192.168.0.0/16"
+    
+    # Security headers
+    security-headers:
+      headers:
+        customResponseHeaders:
+          X-Robots-Tag: "noindex, nofollow"
+        sslRedirect: true
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        forceSTSHeader: true
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "strict-origin-when-cross-origin"
