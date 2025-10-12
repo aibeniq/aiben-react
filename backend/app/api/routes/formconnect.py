@@ -41,7 +41,7 @@ from app.core.config import settings
 from app.services.progress_tracker import progress_tracker
 
 from sqlmodel import Session, select
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, Request as FastAPIRequest
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, Request as FastAPIRequest, Query
 from typing import List, Dict, Any, Literal, Optional
 
 from langchain.prompts import ChatPromptTemplate
@@ -1564,9 +1564,9 @@ async def get_form_detail(
 async def get_form_history(
     session: SessionDep,
     current_user: CurrentUser,
-    skip: int = 0,
-    limit: int = 20,
-    show_all: bool = False,
+    skip: int = Query(0, ge=0, le=10000),
+    limit: int = Query(20, ge=1, le=100),
+    show_all: bool = Query(False),
 ):
     """Retrieve past form processing history for the current user or all users."""
     print("Retrieving FormConnect history. Show all:", show_all)

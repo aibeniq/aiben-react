@@ -1769,9 +1769,9 @@ def delete_evaluation(
 async def get_veradoc_history(
     session: SessionDep,
     current_user: CurrentUser,
-    skip: int = 0,
-    limit: int = 20,
-    show_all: bool = False,
+    skip: int = Query(0, ge=0, le=10000),
+    limit: int = Query(20, ge=1, le=100),
+    show_all: bool = Query(False),
 ):
     """Retrieve past VeraDoc evaluation history for the current user or all users."""
     print("Retrieving VeraDoc history. Show all:", show_all)

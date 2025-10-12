@@ -4,7 +4,7 @@ from typing import List, Dict
 import replicate
 import boto3
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import select, func
 
 from app.api.deps import CurrentUser, SessionDep
@@ -127,7 +127,7 @@ def initialize_default_models(session: SessionDep):
 
 @router.get("/", response_model=EmbeddingModelsPublic)
 def get_embedding_models(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep, current_user: CurrentUser, skip: int = Query(0, ge=0, le=10000), limit: int = Query(100, ge=1, le=1000)
 ) -> EmbeddingModelsPublic:
     """
     Get all embedding models.

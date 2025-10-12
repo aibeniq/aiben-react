@@ -1,11 +1,9 @@
-FROM python:3.10
+FROM python:3.10-slim AS builder
 
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
 
 WORKDIR /app/
-
-#argument for whether to install huggingface
-ARG INSTALL_HUGGINGFACE=false
 
 # Install uv
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
@@ -25,16 +23,8 @@ ENV UV_LINK_MODE=copy
 
 # Install dependencies
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
-RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    if [ "$INSTALL_HUGGINGFACE" = "true" ]; then \
-      uv sync --extra huggingface --frozen --no-install-project; \
-    else \
-      uv sync --frozen --no-install-project; \
-    fi
-
-ENV PYTHONPATH=/app
+COPY uv.lock pyproject.toml ./
+RUN TMPDIR=/tmp uv sync --frozen --no-install-project
 
 COPY ./scripts /app/scripts
 
@@ -44,8 +34,34 @@ COPY ./app /app/app
 
 # Sync the project
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync
+RUN TMPDIR=/tmp uv sync
+
+# Sync the project
+# Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
+RUN TMPDIR=/tmp uv sync
+
+# Production stage
+FROM python:3.10-slim
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+WORKDIR /app/
+
+# Copy uv binary from builder stage
+COPY --from=builder /bin/uv /bin/uv
+
+# Copy virtual environment from builder stage
+COPY --from=builder /app/.venv /app/.venv
+
+# Place executables in the environment at the front of the path
+ENV PATH="/app/.venv/bin:$PATH"
+
+COPY ./scripts /app/scripts
+
+COPY ./pyproject.toml ./uv.lock ./alembic.ini /app/
+
+COPY ./app /app/app
 
 EXPOSE 8000
-CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--timeout-keep-alive", "600"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--timeout-keep-alive", "600"]
