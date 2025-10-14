@@ -154,7 +154,16 @@
     "createChecklist": "Crear una nueva lista de verificación con preguntas personalizadas para evaluar documentos contra criterios específicos",
     "createOutline": "Crear una nueva estructura de esquema para guiar la generación de informes estructurados",
     "createTopicList": "Crear una nueva lista de temas para enfocar el análisis de comparación en materias específicas",
-    "createFormTemplate": "Crear una nueva plantilla de formulario para la extracción y coincidencia automatizada de contenido de documentos"
+    "createFormTemplate": "Crear una nueva plantilla de formulario para la extracción y coincidencia automatizadas del contenido de documentos",
+    "suggestChecklistQuestions": "Usa IA para generar automáticamente preguntas relevantes de lista de verificación basadas en tu descripción y documentos de referencia",
+    "optimizeChecklistQuestions": "Mejora y refina las preguntas existentes de lista de verificación utilizando la base de conocimientos seleccionada para una mejor precisión",
+    "suggestOutlineSections": "Usa IA para generar automáticamente secciones de esquema basadas en tu descripción y documentos de referencia",
+    "optimizeOutlineSections": "Mejora y refina las secciones existentes de esquema utilizando la base de conocimientos seleccionada para una mejor estructura",
+    "suggestTopicListTopics": "Usa IA para generar automáticamente temas de comparación relevantes basados en tu descripción y documentos de referencia",
+    "suggestFormTemplateFields": "Usa IA para generar automáticamente campos de formulario relevantes basados en tu descripción y documentos de referencia",
+    "referenceDocuments": "Sube documentos de referencia o selecciona una Base de Conocimientos para ayudar a la IA a sugerir contenido basado en tu contexto y requisitos específicos",
+    "referenceDocumentsFiles": "Proporciona documentos de referencia para ayudar a la IA a generar sugerencias más precisas y contextualmente relevantes",
+    "minimumDescriptionLength": "Las descripciones deben tener al menos 10 caracteres para proporcionar contexto suficiente para las sugerencias de IA"
   },
   "review": {
     "pageTitle": "Revisar Documentos",

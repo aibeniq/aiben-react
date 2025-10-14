@@ -154,7 +154,16 @@
     "createChecklist": "Créer une nouvelle liste de contrôle avec des questions personnalisées pour évaluer les documents selon des critères spécifiques",
     "createOutline": "Créer une nouvelle structure de plan pour guider la génération de rapports structurés",
     "createTopicList": "Créer une nouvelle liste de sujets pour concentrer l'analyse de comparaison sur des thèmes spécifiques",
-    "createFormTemplate": "Créer un nouveau modèle de formulaire pour l'extraction et la correspondance automatisées du contenu de documents"
+    "createFormTemplate": "Créer un nouveau modèle de formulaire pour l'extraction et la correspondance automatisées du contenu de documents",
+    "suggestChecklistQuestions": "Utilisez l'IA pour générer automatiquement des questions de liste de contrôle pertinentes basées sur votre description et vos documents de référence",
+    "optimizeChecklistQuestions": "Améliorez et affinez les questions de liste de contrôle existantes en utilisant la base de connaissances sélectionnée pour une meilleure précision",
+    "suggestOutlineSections": "Utilisez l'IA pour générer automatiquement des sections de plan basées sur votre description et vos documents de référence",
+    "optimizeOutlineSections": "Améliorez et affinez les sections de plan existantes en utilisant la base de connaissances sélectionnée pour une meilleure structure",
+    "suggestTopicListTopics": "Utilisez l'IA pour générer automatiquement des sujets de comparaison pertinents basés sur votre description et vos documents de référence",
+    "suggestFormTemplateFields": "Utilisez l'IA pour générer automatiquement des champs de formulaire pertinents basés sur votre description et vos documents de référence",
+    "referenceDocuments": "Téléchargez des documents de référence ou sélectionnez une Base de Connaissances pour aider l'IA à suggérer du contenu basé sur votre contexte et vos exigences spécifiques",
+    "referenceDocumentsFiles": "Fournissez des documents de référence pour aider l'IA à générer des suggestions plus précises et contextuellement pertinentes",
+    "minimumDescriptionLength": "Les descriptions doivent contenir au moins 10 caractères pour fournir un contexte suffisant pour les suggestions de l'IA"
   },
   "review": {
     "pageTitle": "Réviser les Documents",

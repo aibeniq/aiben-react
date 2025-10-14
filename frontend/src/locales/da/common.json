@@ -150,7 +150,8 @@
     "suggestTopicListTopics": "Brug AI til automatisk at generere relevante sammenligningsemner baseret på din beskrivelse og referencedokumenter",
     "suggestFormTemplateFields": "Brug AI til automatisk at generere relevante formularfelter baseret på din beskrivelse og referencedokumenter",
     "referenceDocuments": "Upload referencedokumenter eller vælg en videnbase for at hjælpe AI'en med at foreslå indhold baseret på din specifikke kontekst og krav",
-    "referenceDocumentsFiles": "Giv referencedokumenter for at hjælpe AI'en med at generere mere nøjagtige og kontekstuelt relevante forslag"
+    "referenceDocumentsFiles": "Giv referencedokumenter for at hjælpe AI'en med at generere mere nøjagtige og kontekstuelt relevante forslag",
+    "minimumDescriptionLength": "Beskrivelser skal være mindst 10 tegn lange for at give tilstrækkelig kontekst for AI-forslag"
   },
   "common": {
     "loading": "Indlæser...",
