@@ -41,6 +41,20 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
     }
 
     let searchText = normalizeForSearch(originalSnippet)
+    
+    // Limit search text length to prevent regex recursion issues (similar to PDF limit)
+    const maxTextSearchLength = 1000  // Reasonable limit for text files (adjust as needed)
+    if (searchText.length > maxTextSearchLength) {
+      // Trim to word boundary
+      const trimmed = searchText.substring(0, maxTextSearchLength)
+      const lastSpace = trimmed.lastIndexOf(" ")
+      if (lastSpace > maxTextSearchLength * 0.7) {
+        searchText = trimmed.substring(0, lastSpace)
+      } else {
+        searchText = trimmed
+      }
+    }
+
     const minLength = Math.max(15, Math.min(50, searchText.length * 0.3)) // At least 15 chars or 30% of original
 
     console.log(
@@ -69,10 +83,10 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
           return { regex, parts, matchedText: searchText }
         }
 
-        // Try fuzzy match - replace spaces with flexible whitespace pattern
+        // Try fuzzy match - use more restrictive whitespace pattern to avoid backtracking
         const fuzzyPattern = searchText
           .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-          .replace(/\s+/g, "\\s*") // Allow any amount of whitespace
+          .replace(/\s+/g, "\\s{0,3}") // Limit to 0-3 spaces instead of unlimited
 
         regex = new RegExp(`(${fuzzyPattern})`, "gi")
         parts = normalizedText.split(regex)
