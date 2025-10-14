@@ -333,6 +333,22 @@
       "currentInstructions": "הוראות נוכחיות:",
       "save": "שמור",
       "cancel": "בטל"
+    },
+    "progress": {
+      "uploading": "מעלה {{current}} MB/{{total}} MB...",
+      "processingFile": "מעבד קובץ {{current}}/{{total}}: {{filename}}",
+      "chunking": "מפצל מסמך {{current}}/{{total}}...",
+      "embedding": "יוצר הטמעות {{current}}/{{total}}...",
+      "storing": "שומר נתונים {{current}}/{{total}}...",
+      "finalizing": "משלים יצירה {{current}}/{{total}}...",
+      "saving_file": "שמירת קובץ {{current}}/{{total}}: {{filename}}",
+      "processing_file": "עיבוד קובץ {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "{{chunks}} קטעים מ-{{current}}/{{total}} קבצים עובדו",
+      "processed_all_chunks": "כל {{chunks}} הקטעים מ-{{current}} קבצים עובדו",
+      "chunking_complete": "פיצול הושלם: נוצרו {{chunks}} קטעים",
+      "embedding_complete": "נוצרו הטמעות עבור {{current}} קטעים",
+      "storing_complete": "בסיס נתונים וקטורי נשמר עם {{current}} הטמעות",
+      "kb_creation_complete": "יצירת בסיס הידע הושלמה בהצלחה"
     }
   },
   "optimizeChecklistModal": {

@@ -338,6 +338,22 @@
       "fieldPlaceholder": "Adăugați un nume de câmp (ex. Prenume, Adresă, CNP) sau sugerați din descriere",
       "cancel": "Anulare",
       "updateFormTemplate": "Actualizați Șablonul de Formular"
+    },
+    "progress": {
+      "uploading": "Se încarcă {{current}} MB/{{total}} MB...",
+      "processingFile": "Se procesează fișierul {{current}}/{{total}}: {{filename}}",
+      "chunking": "Se împarte documentul {{current}}/{{total}}...",
+      "embedding": "Se creează încorporări {{current}}/{{total}}...",
+      "storing": "Se stochează datele {{current}}/{{total}}...",
+      "finalizing": "Se finalizează crearea {{current}}/{{total}}...",
+      "saving_file": "Se salvează fișierul {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Se procesează fișierul {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Procesate {{chunks}} bucățile din {{current}}/{{total}} fișiere",
+      "processed_all_chunks": "Procesate toate {{chunks}} bucățile din {{current}} fișiere",
+      "chunking_complete": "Împărțirea finalizată: {{chunks}} bucăți create",
+      "embedding_complete": "Încorporări create pentru {{current}} bucăți",
+      "storing_complete": "Bază de date vectorială stocată cu {{current}} încorporări",
+      "kb_creation_complete": "Crearea bazei de cunoștințe finalizată cu succes"
     }
   },
   "optimizeChecklistModal": {

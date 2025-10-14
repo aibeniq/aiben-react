@@ -333,6 +333,22 @@
       "currentInstructions": "دستورالعمل‌های فعلی:",
       "save": "ذخیره",
       "cancel": "لغو"
+    },
+    "progress": {
+      "uploading": "بارگذاری {{current}} مگابایت/{{total}} مگابایت...",
+      "processingFile": "پردازش فایل {{current}}/{{total}}: {{filename}}",
+      "chunking": "تقسیم سند {{current}}/{{total}}...",
+      "embedding": "ایجاد embeddings {{current}}/{{total}}...",
+      "storing": "ذخیره داده‌ها {{current}}/{{total}}...",
+      "finalizing": "تکمیل ایجاد {{current}}/{{total}}...",
+      "saving_file": "ذخیره فایل {{current}}/{{total}}: {{filename}}",
+      "processing_file": "پردازش فایل {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "{{chunks}} قطعه از {{current}}/{{total}} فایل پردازش شد",
+      "processed_all_chunks": "همه {{chunks}} قطعه از {{current}} فایل پردازش شد",
+      "chunking_complete": "تقسیم‌بندی کامل شد: {{chunks}} قطعه ایجاد شد",
+      "embedding_complete": "جاسازی‌ها برای {{current}} قطعه ایجاد شد",
+      "storing_complete": "پایگاه داده برداری با {{current}} جاسازی ذخیره شد",
+      "kb_creation_complete": "ایجاد پایگاه دانش با موفقیت تکمیل شد"
     }
   },
   "optimizeChecklistModal": {

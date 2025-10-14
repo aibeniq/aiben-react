@@ -100,6 +100,13 @@ export const createKnowledgeBaseWithTimeout = async (
       }
     }
 
+    // Add metadata to form data
+    formData.append("title", data.title || "")
+    formData.append("description", data.description || "")
+    if (data.embeddingModelId) {
+      formData.append("embedding_model_id", data.embeddingModelId)
+    }
+
     // Log the exact timeout being used
     console.log(
       "🔧 Using dynamic timeout:",
@@ -108,15 +115,15 @@ export const createKnowledgeBaseWithTimeout = async (
     )
 
     // Make the request with our custom axios client
+    const requestStartTime = Date.now()
+    console.log("🌐 MAKING HTTP REQUEST to /api/v1/knowledge-bases/ with task_id:", data.taskId)
+
     const response = await knowledgeBaseAxiosClient.post(
       "/api/v1/knowledge-bases/",
       formData,
       {
         params: {
-          title: data.title,
-          description: data.description,
-          embedding_model_id: data.embeddingModelId,
-          task_id: data.taskId, // Add task_id if provided
+          task_id: data.taskId, // Only task_id as query parameter
         },
         headers: {
           "Content-Type": "multipart/form-data",
@@ -126,6 +133,9 @@ export const createKnowledgeBaseWithTimeout = async (
         maxBodyLength: Number.POSITIVE_INFINITY,
       },
     )
+
+    const requestDuration = Date.now() - requestStartTime
+    console.log("✅ HTTP REQUEST COMPLETED in", requestDuration, "ms")
 
     console.log("✅ Knowledge base upload completed successfully")
     return response.data

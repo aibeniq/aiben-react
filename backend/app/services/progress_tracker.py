@@ -20,6 +20,7 @@ class ProgressStage:
     total: int = 1
     message: str = ""
     message_key: Optional[str] = None  # i18n translation key for frontend
+    message_params: Optional[dict] = None  # i18n translation params
     completed: bool = False
 
     @property
@@ -38,6 +39,7 @@ class ProgressData:
     status: str  # 'started', 'in_progress', 'completed', 'failed'
     message: str
     message_key: Optional[str] = None  # i18n translation key for frontend
+    message_params: Optional[dict] = None  # i18n translation params
     created_at: str = ""
     updated_at: str = ""
     error_message: Optional[str] = None
@@ -84,6 +86,8 @@ class ProgressTracker:
         task_id = str(uuid.uuid4())
         now = datetime.now().isoformat()
         
+        print(f"🎯 CREATING TASK: {task_id} for operation '{operation}' with stages: {list(stages.keys())}")
+        
         # Create ProgressStage objects for each stage
         progress_stages = {}
         for stage_name, weight in stages.items():
@@ -107,7 +111,9 @@ class ProgressTracker:
             updated_at=now
         )
         
-        self._save_progress(task_id, progress)
+        print(f"📊 CREATED PROGRESS OBJECT: task_id={task_id}, status={progress.status}, stages={list(progress.stages.keys())}")
+        success = self._save_progress(task_id, progress)
+        print(f"🎯 TASK CREATION RESULT: {task_id} saved successfully: {success}")
         return task_id
     
     def create_task_with_id(self, task_id: str, operation: str, stages: Dict[str, float]) -> str:
@@ -153,10 +159,10 @@ class ProgressTracker:
         print(f"✅ Created progress task with provided ID: {task_id}")
         return task_id
     
-    def update_stage_progress(self, task_id: str, stage_name: str, current: int, total: int = None, message: str = "", message_key: str = None) -> bool:
+    def update_stage_progress(self, task_id: str, stage_name: str, current: int, total: int = None, message: str = "", message_key: str = None, message_params: dict = None) -> bool:
         """
         Update progress for a specific stage of a task.
-        
+
         Args:
             task_id: The task identifier
             stage_name: Name of the stage to update
@@ -164,45 +170,48 @@ class ProgressTracker:
             total: Total number of items in this stage (if different from current)
             message: Optional status message for this stage (fallback for non-i18n)
             message_key: Optional i18n translation key (e.g., "common.progress.starting")
-            
+            message_params: Optional parameters for the translation key
+
         Returns:
             Success status
         """
         progress = self._load_progress(task_id)
         if not progress:
             return False
-        
+
         if stage_name not in progress.stages:
             return False
-        
+
         stage = progress.stages[stage_name]
         stage.current = current
         if total is not None:
             stage.total = total
-        
+
         if message_key:
             stage.message_key = message_key
+            stage.message_params = message_params  # Store params for i18n
             # Keep message as fallback for non-i18n clients
             stage.message = message if message else message_key
         elif message:
             stage.message = message
-        
+
         # Mark stage as completed if current >= total
         stage.completed = stage.current >= stage.total
-        
+
         # Update current stage
         progress.current_stage = stage_name
-        
+
         # Recalculate overall percentage
         progress.percentage = progress.calculate_overall_percentage()
-        
+
         # Update overall status
         all_completed = all(stage.completed for stage in progress.stages.values())
         progress.status = "completed" if all_completed else "in_progress"
-        
+
         # Update overall message and message_key
         if message_key:
             progress.message_key = message_key
+            progress.message_params = message_params  # Store params for i18n
             progress.message = message if message else message_key  # Fallback
         elif message:
             progress.message = message
@@ -217,12 +226,11 @@ class ProgressTracker:
             else:
                 stage_percentage = (current_stage_obj.current / current_stage_obj.total * 100) if current_stage_obj and current_stage_obj.total > 0 else 0
                 progress.message = f"{stage_name}: {stage_percentage:.1f}% complete"
-        
-        progress.updated_at = datetime.now().isoformat()
-        
-        return self._save_progress(task_id, progress)
 
-    def complete_stage(self, task_id: str, stage_name: str, message: str = "", message_key: str = None) -> bool:
+        self._save_progress(task_id, progress)
+        return True
+
+    def complete_stage(self, task_id: str, stage_name: str, message: str = "", message_key: str = None, message_params: dict = None) -> bool:
         """
         Mark a stage as completed.
         
@@ -231,6 +239,7 @@ class ProgressTracker:
             stage_name: Name of the stage to complete
             message: Optional completion message (fallback for non-i18n)
             message_key: Optional i18n translation key
+            message_params: Optional parameters for the translation key
             
         Returns:
             Success status
@@ -244,6 +253,7 @@ class ProgressTracker:
         stage.completed = True
         if message_key:
             stage.message_key = message_key
+            stage.message_params = message_params
             stage.message = message if message else message_key
         elif message:
             stage.message = message
@@ -265,6 +275,7 @@ class ProgressTracker:
             print(f"📊 Task {task_id}: Completed stage '{stage_name}', but still incomplete: {incomplete_stages}")
             if message_key:
                 progress.message_key = message_key
+                progress.message_params = message_params
             progress.message = stage.message
         
         progress.updated_at = datetime.now().isoformat()
@@ -464,9 +475,11 @@ class ProgressTracker:
     
     def _load_progress(self, task_id: str) -> Optional[ProgressData]:
         """Load progress data from storage"""
+        print(f"🔍 LOADING PROGRESS for task {task_id}")
         if self.session_manager.use_redis:
             try:
                 data = self.session_manager.redis_client.get(f"{self.prefix}{task_id}")
+                print(f"🔍 REDIS GET result for {task_id}: {'found' if data else 'NOT FOUND'}")
                 if data:
                     progress_dict = json.loads(data)
                     # Reconstruct ProgressStage objects from dicts
@@ -479,14 +492,18 @@ class ProgressTracker:
                             # Convert from dict
                             stages[name] = ProgressStage(**stage_dict)
                     progress_dict["stages"] = stages
-                    return ProgressData(**progress_dict)
+                    progress_obj = ProgressData(**progress_dict)
+                    print(f"✅ LOADED PROGRESS for task {task_id}: status={progress_obj.status}, percentage={progress_obj.percentage}")
+                    return progress_obj
+                print(f"❌ NO PROGRESS DATA found for task {task_id}")
                 return None
             except Exception as e:
-                print(f"ProgressTracker Redis load error: {e}")
+                print(f"❌ ProgressTracker Redis load error for task {task_id}: {e}")
                 return None
         else:
             # Use session manager's in-memory fallback
             data = self.session_manager.get_session(f"{self.prefix}{task_id}")
+            print(f"🔍 IN-MEMORY GET result for {task_id}: {'found' if data else 'NOT FOUND'}")
             if data:
                 # Reconstruct ProgressStage objects from dicts
                 stages = {}
@@ -498,7 +515,10 @@ class ProgressTracker:
                         # Convert from dict
                         stages[name] = ProgressStage(**stage_dict)
                 data["stages"] = stages
-                return ProgressData(**data)
+                progress_obj = ProgressData(**data)
+                print(f"✅ LOADED PROGRESS (in-memory) for task {task_id}: status={progress_obj.status}, percentage={progress_obj.percentage}")
+                return progress_obj
+            print(f"❌ NO PROGRESS DATA found (in-memory) for task {task_id}")
             return None
 
 

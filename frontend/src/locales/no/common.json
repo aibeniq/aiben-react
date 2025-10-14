@@ -287,7 +287,7 @@
     "enterAtLeastOneSection": "Skriv inn minst en seksjon",
     "selectKnowledgeBase": "Velg en kunnskapsbase",
     "generateSuccess": "Rapport generert vellykket!",
-    "matchSuccess": "Skjema behandling fullført vellykket!",
+    "matchSuccess": "Skjemabehandling fullført vellykket!",
     "generateError": "Kunne ikke generere dokument: {error}",
     "vectorSearch": "vektorsøk",
     "fullDocumentScan": "full dokumentskanning",
@@ -299,7 +299,6 @@
     },
     "pleaseWait": "Vennligst vent mens vi genererer rapporten din",
     "compareSuccess": "Dokumenter sammenlignet vellykket!",
-    "matchSuccess": "Skjemabehandling fullført vellykket!",
     "singleDocumentSuccess": "Feltverdier hentet fra enkelt dokument."
   },
   "modelSelection": {
@@ -601,6 +600,22 @@
         "processing": "Behandler...",
         "pleaseWait": "Vent mens vi behandler filene dine..."
       }
+    },
+    "progress": {
+      "uploading": "Laster opp {{current}} MB/{{total}} MB...",
+      "processingFile": "Behandler fil {{current}}/{{total}}: {{filename}}",
+      "chunking": "Deler opp dokument {{current}}/{{total}}...",
+      "embedding": "Oppretter embeddings {{current}}/{{total}}...",
+      "storing": "Lagrer data {{current}}/{{total}}...",
+      "finalizing": "Fullfører opprettelse {{current}}/{{total}}...",
+      "saving_file": "Lagrer fil {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Behandler fil {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Behandlet {{chunks}} biter fra {{current}}/{{total}} filer",
+      "processed_all_chunks": "Behandlet alle {{chunks}} biter fra {{current}} filer",
+      "chunking_complete": "Oppdeling fullført: {{chunks}} biter opprettet",
+      "embedding_complete": "Opprettet innbygginger for {{current}} biter",
+      "storing_complete": "Lagret vektordatabase med {{current}} innbygginger",
+      "kb_creation_complete": "Opprettelse av kunnskapsbase fullført med suksess"
     }
   },
   "archive": {

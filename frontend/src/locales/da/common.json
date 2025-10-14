@@ -592,6 +592,22 @@
         "processing": "Behandler...",
         "pleaseWait": "Vent venligst mens vi behandler dine filer..."
       }
+    },
+    "progress": {
+      "uploading": "Uploader {{current}} MB/{{total}} MB...",
+      "processingFile": "Behandler fil {{current}}/{{total}}: {{filename}}",
+      "chunking": "Opdeler dokument {{current}}/{{total}}...",
+      "embedding": "Opretter indlejringer {{current}}/{{total}}...",
+      "storing": "Gemmer data {{current}}/{{total}}...",
+      "finalizing": "Afslutter oprettelse {{current}}/{{total}}...",
+      "saving_file": "Gemmer fil {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Behandler fil {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Behandlet {{chunks}} bidder fra {{current}}/{{total}} filer",
+      "processed_all_chunks": "Behandlet alle {{chunks}} bidder fra {{current}} filer",
+      "chunking_complete": "Opdeling fuldført: {{chunks}} bidder oprettet",
+      "embedding_complete": "Oprettet indlejringer for {{current}} bidder",
+      "storing_complete": "Gemt vektordatabase med {{current}} indlejringer",
+      "kb_creation_complete": "Oprettelse af vidensbase fuldført med succes"
     }
   },
   "archive": {

@@ -354,6 +354,22 @@
         "processing": "Elaborazione...",
         "pleaseWait": "Attendere mentre elaboriamo i vostri file..."
       }
+    },
+    "progress": {
+      "uploading": "Caricamento {{current}} MB/{{total}} MB...",
+      "processingFile": "Elaborazione file {{current}}/{{total}}: {{filename}}",
+      "chunking": "Suddivisione documento {{current}}/{{total}}...",
+      "embedding": "Creazione embeddings {{current}}/{{total}}...",
+      "storing": "Archiviazione dati {{current}}/{{total}}...",
+      "finalizing": "Finalizzazione creazione {{current}}/{{total}}...",
+      "saving_file": "Salvataggio file {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Elaborazione file {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Elaborati {{chunks}} frammenti da {{current}}/{{total}} file",
+      "processed_all_chunks": "Elaborati tutti i {{chunks}} frammenti da {{current}} file",
+      "chunking_complete": "Suddivisione completata: creati {{chunks}} blocchi",
+      "embedding_complete": "Embedding creati per {{current}} blocchi",
+      "storing_complete": "Database vettoriale memorizzato con {{current}} embedding",
+      "kb_creation_complete": "Creazione della base di conoscenza completata con successo"
     }
   },
   "common": {

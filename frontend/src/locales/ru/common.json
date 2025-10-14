@@ -613,6 +613,22 @@
       "feedbackSaved": "Отзыв сохранен",
       "thankYouMessage": "Спасибо за ваш отзыв!",
       "submitErrorMessage": "Не удалось отправить отзыв. Пожалуйста, попробуйте снова."
+    },
+    "progress": {
+      "uploading": "Загрузка {{current}} MB/{{total}} MB...",
+      "processingFile": "Обработка файла {{current}}/{{total}}: {{filename}}",
+      "chunking": "Разделение документа {{current}}/{{total}}...",
+      "embedding": "Создание вложений {{current}}/{{total}}...",
+      "storing": "Сохранение данных {{current}}/{{total}}...",
+      "finalizing": "Завершение создания {{current}}/{{total}}...",
+      "saving_file": "Сохранение файла {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Обработка файла {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Обработаны {{chunks}} фрагментов из {{current}}/{{total}} файлов",
+      "processed_all_chunks": "Обработаны все {{chunks}} фрагментов из {{current}} файлов",
+      "chunking_complete": "Разделение завершено: создано {{chunks}} фрагментов",
+      "embedding_complete": "Созданные вложения для {{current}} фрагментов",
+      "storing_complete": "Сохраненная векторная база данных с {{current}} вложениями",
+      "kb_creation_complete": "Создание базы знаний завершено успешно"
     }
   },
   "generate": {

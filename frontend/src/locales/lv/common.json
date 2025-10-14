@@ -346,6 +346,22 @@
       "currentInstructions": "Pašreizējās instrukcijas:",
       "save": "Saglabāt",
       "cancel": "Atcelt"
+    },
+    "progress": {
+      "uploading": "Augšupielādē {{current}} MB/{{total}} MB...",
+      "processingFile": "Apstrādā fails {{current}}/{{total}}: {{filename}}",
+      "chunking": "Sadalīts dokuments {{current}}/{{total}}...",
+      "embedding": "Izveido iegulējumus {{current}}/{{total}}...",
+      "storing": "Saglabā datus {{current}}/{{total}}...",
+      "finalizing": "Pabeidz izveidi {{current}}/{{total}}...",
+      "saving_file": "Saglabā failu {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Apstrādā failu {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Apstrādāti {{chunks}} gabali no {{current}}/{{total}} failiem",
+      "processed_all_chunks": "Apstrādāti visi {{chunks}} gabali no {{current}} failiem",
+      "chunking_complete": "Sadalīšana pabeigta: izveidoti {{chunks}} gabali",
+      "embedding_complete": "Izveidoti iegulījumi {{current}} gabaliem",
+      "storing_complete": "Saglabāta vektoru datubāze ar {{current}} iegulījumiem",
+      "kb_creation_complete": "Zināšanu bāzes izveide veiksmīgi pabeigta"
     }
   },
   "optimizeChecklistModal": {

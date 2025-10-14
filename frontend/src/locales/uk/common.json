@@ -469,6 +469,22 @@
         "processing": "Обробка...",
         "pleaseWait": "Будь ласка, зачекайте, поки ми обробляємо ваші файли..."
       }
+    },
+    "progress": {
+      "uploading": "Завантаження {{current}} MB/{{total}} MB...",
+      "processingFile": "Обробка файлу {{current}}/{{total}}: {{filename}}",
+      "chunking": "Розбиття документа {{current}}/{{total}}...",
+      "embedding": "Створення вкладень {{current}}/{{total}}...",
+      "storing": "Збереження даних {{current}}/{{total}}...",
+      "finalizing": "Завершення створення {{current}}/{{total}}...",
+      "saving_file": "Збереження файлу {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Обробка файлу {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Оброблено {{chunks}} фрагменти з {{current}}/{{total}} файлів",
+      "processed_all_chunks": "Оброблено всі {{chunks}} фрагменти з {{current}} файлів",
+      "chunking_complete": "Розбиття завершено: створено {{chunks}} фрагментів",
+      "embedding_complete": "Створені вбудови для {{current}} фрагментів",
+      "storing_complete": "Збережена векторна база даних з {{current}} вбудовами",
+      "kb_creation_complete": "Створення бази знань успішно завершено"
     }
   },
   "feedback": {

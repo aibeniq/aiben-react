@@ -343,6 +343,22 @@
       "fieldPlaceholder": "Přidejte název pole (např. Jméno, Adresa, Rodné číslo) nebo navrhněte z popisu",
       "cancel": "Zrušit",
       "updateFormTemplate": "Aktualizovat Šablonu Formuláře"
+    },
+    "progress": {
+      "uploading": "Nahrávání {{current}} MB/{{total}} MB...",
+      "processingFile": "Zpracovávání souboru {{current}}/{{total}}: {{filename}}",
+      "chunking": "Dělení dokumentu {{current}}/{{total}}...",
+      "embedding": "Vytváření vkládání {{current}}/{{total}}...",
+      "storing": "Ukládání dat {{current}}/{{total}}...",
+      "finalizing": "Dokončování vytváření {{current}}/{{total}}...",
+      "saving_file": "Ukládání souboru {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Zpracovávání souboru {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Zpracováno {{chunks}} bloků z {{current}}/{{total}} souborů",
+      "processed_all_chunks": "Zpracováno všech {{chunks}} bloků z {{current}} souborů",
+      "chunking_complete": "Dělení dokončeno: vytvořeno {{chunks}} bloků",
+      "embedding_complete": "Vytvořena vložení pro {{current}} bloků",
+      "storing_complete": "Uložena vektorová databáze s {{current}} vloženími",
+      "kb_creation_complete": "Vytvoření znalostní báze dokončeno úspěšně"
     }
   },
   "dropdowns": {

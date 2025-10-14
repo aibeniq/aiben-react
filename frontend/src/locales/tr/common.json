@@ -333,6 +333,22 @@
       "currentInstructions": "Mevcut Talimatlar:",
       "save": "Kaydet",
       "cancel": "İptal"
+    },
+    "progress": {
+      "uploading": "Yükleniyor {{current}} MB/{{total}} MB...",
+      "processingFile": "Dosya işleniyor {{current}}/{{total}}: {{filename}}",
+      "chunking": "Belge parçalanıyor {{current}}/{{total}}...",
+      "embedding": "Gömülü öğeler oluşturuluyor {{current}}/{{total}}...",
+      "storing": "Veriler depolanıyor {{current}}/{{total}}...",
+      "finalizing": "Oluşturma tamamlanıyor {{current}}/{{total}}...",
+      "saving_file": "Dosya kaydediliyor {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Dosya işleniyor {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "{{chunks}} parçalar {{current}}/{{total}} dosyalardan işlendi",
+      "processed_all_chunks": "Tüm {{chunks}} parçalar {{current}} dosyalardan işlendi",
+      "chunking_complete": "Parçalama tamamlandı: {{chunks}} parça oluşturuldu",
+      "embedding_complete": "{{current}} parça için gömülmeler oluşturuldu",
+      "storing_complete": "{{current}} gömülme ile vektör veritabanı depolandı",
+      "kb_creation_complete": "Bilgi tabanı oluşturma başarıyla tamamlandı"
     }
   },
   "optimizeChecklistModal": {

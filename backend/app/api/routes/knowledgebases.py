@@ -1,16 +1,12 @@
-import uuid
-from typing import Any, List, Optional
-import asyncio
-import gc
-import logging
-import psutil
-import os
-import tempfile
-from pathlib import Path
+from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, BackgroundTasks, Query
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, BackgroundTasks, Query, Form
 from app.utils.file_validator import FileValidator, sanitize_filename
 from sqlmodel import func, select, delete
+from typing import List, Optional, Any
+import uuid
+import os
+import psutil
 
 import zipfile
 import io
@@ -59,6 +55,7 @@ import asyncio
 import mmap
 from app.services.smart_chunking import create_smart_text_splitter
 from app.services.content_filtering import content_filter
+import logging
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
 
@@ -842,6 +839,40 @@ def read_knowledge_bases(
     return KnowledgeBasesPublic(data=knowledge_bases, count=count)
 
 
+@router.get("/progress/{task_id}")
+async def get_knowledge_base_progress(
+    task_id: str,
+    current_user: CurrentUser,
+) -> Any:
+    """
+    Get progress information for a knowledge base creation task.
+    """
+    # Make this async to prevent blocking during intensive operations
+    print(f"🔍 PROGRESS API: Getting progress for task_id: {task_id}")
+    progress_data = progress_tracker.get_progress(task_id)
+    print(f"🔍 PROGRESS API: Retrieved progress_data: {progress_data}")
+    if not progress_data:
+        print(f"❌ PROGRESS API: No progress data found for task {task_id}")
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    # Debug logging to see what's actually being returned
+    print(f"🔍 API RETURNING PROGRESS: task_id={task_id}")
+    print(f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}")
+    print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
+    print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
+    
+    # Check each stage completion status
+    stages = progress_data.get('stages', {})
+    for stage_name, stage_data in stages.items():
+        completed = stage_data.get('completed', False) if isinstance(stage_data, dict) else False
+        print(f"🔍 STAGE {stage_name}: completed={completed}")
+
+    # Yield control to allow other async operations (like this API call) to run
+    await asyncio.sleep(0)
+
+    return progress_data
+
+
 @router.get("/{id}", response_model=KnowledgeBasePublic)
 def read_knowledge_base(
     session: SessionDep, current_user: CurrentUser, id: uuid.UUID
@@ -889,14 +920,26 @@ async def create_knowledge_base_task(
     *,
     session: SessionDep,
     current_user: CurrentUser,
-    knowledge_base_in: KnowledgeBaseCreate = Depends(),
+    title: str = Query(...),
+    description: str = Query(""),
+    embedding_model_id: Optional[uuid.UUID] = Query(None),
 ) -> Any:
     """
     Create a knowledge base task and return task_id immediately for progress tracking.
     This allows frontend to start progress polling before file upload begins.
     """
     
-    print(f"🎯 IMMEDIATE TASK CREATION: Creating task for '{knowledge_base_in.title}'")
+    print(f"🎯 IMMEDIATE TASK CREATION: Creating task for '{title}'")
+    
+    # Get user language for progress translations
+    user_language = getattr(current_user, "preferred_language", "en") or "en"
+    
+    # Create KnowledgeBaseCreate object from query parameters
+    knowledge_base_in = KnowledgeBaseCreate(
+        title=title,
+        description=description,
+        embedding_model_id=embedding_model_id,
+    )
     
     # Quick validation check before committing to processing
     existing_kb = session.exec(
@@ -927,7 +970,11 @@ async def create_knowledge_base_task(
     print(f"📊 Created task: {task_id}")
     
     # Initialize the upload stage
-    progress_tracker.update_stage_progress(task_id, "upload", 0, 1, "Preparing for file upload...")
+    progress_tracker.update_stage_progress(
+        task_id, "upload", 0, 1,
+        message_key="knowledgeBases.progress.uploading",
+        message_params={"current": "0", "total": "0"}
+    )
     
     return {"task_id": task_id}
 
@@ -935,12 +982,14 @@ async def create_knowledge_base_task(
 @router.post("/", response_model=KnowledgeBaseCreateResponse)
 async def create_knowledge_base(
     *,
-    background_tasks: BackgroundTasks,
     session: SessionDep,
     current_user: CurrentUser,
-    knowledge_base_in: KnowledgeBaseCreate = Depends(),
+    background_tasks: BackgroundTasks,
+    title: str = Form(...),
+    description: Optional[str] = Form(None),
+    embedding_model_id: Optional[str] = Form(None),
     files: List[UploadFile] = File(...),
-    task_id: Optional[str] = None,  # Optional task_id from the separate endpoint
+    task_id: Optional[str] = Query(None),  # Optional task_id from the separate endpoint
 ) -> Any:
     """
     Create new knowledge base asynchronously with real-time progress tracking.
@@ -948,6 +997,22 @@ async def create_knowledge_base(
     """
 
     print(f"🚀 MAIN ENDPOINT: Creating knowledge base with {len(files)} files")
+    
+    # Parse and validate the embedding_model_id
+    parsed_embedding_model_id = None
+    if embedding_model_id:
+        try:
+            parsed_embedding_model_id = uuid.UUID(embedding_model_id)
+        except ValueError:
+            raise HTTPException(status_code=422, detail="Invalid embedding_model_id format")
+    
+    # Create KnowledgeBaseCreate object from form data
+    knowledge_base_in = KnowledgeBaseCreate(
+        title=title,
+        description=description,
+        embedding_model_id=parsed_embedding_model_id,
+    )
+    
     print("Received the following metadata for the knowledge base:")
     print(knowledge_base_in)
 
@@ -1032,14 +1097,20 @@ async def create_knowledge_base(
 
     print(f"📊 Read {len(files)} files totaling {total_size / (1024*1024):.1f}MB (all validated and sanitized)")
 
-    # Schedule background processing - this is the key change!
+    # Get user language for progress translations
+    user_language = getattr(current_user, "preferred_language", "en") or "en"
+
+    # Schedule background processing using FastAPI's BackgroundTasks
+    print(f"🎯 SCHEDULING BACKGROUND TASK for KB {knowledge_base.id} with task {task_id}")
     background_tasks.add_task(
         process_knowledge_base_background,
         knowledge_base_id=knowledge_base.id,
         task_id=task_id,
         file_data=file_data,
         current_user_id=current_user.id,
+        user_language=user_language,
     )
+    print(f"✅ BACKGROUND TASK SUBMITTED for task {task_id}")
     
     print(f"🚀 IMMEDIATE RETURN: Returning task_id {task_id} to frontend")
     
@@ -1055,14 +1126,10 @@ async def process_knowledge_base_background(
     task_id: str,
     file_data: List[dict],
     current_user_id: uuid.UUID,
+    user_language: str = "en",
 ) -> None:
-    """
-    Background task to process knowledge base creation with real-time progress updates.
-    """
-    temp_dir = None
+    """Background processing for knowledge base creation"""
     try:
-        print(f"🔄 Background processing started for KB {knowledge_base_id} with task {task_id}")
-        
         # Get a new database session for background processing
         from app.core.db import engine
         from sqlmodel import Session
@@ -1086,7 +1153,12 @@ async def process_knowledge_base_background(
                 # Update processing progress for file saving (step 1 of 2 per file)
                 progress_tracker.update_stage_progress(
                     task_id, "processing", i, total_processing_steps,
-                    f"Saving file {i + 1}/{len(file_data)}: {file_info['filename']}"
+                    message_key="knowledgeBases.progress.saving_file",
+                    message_params={
+                        "current": str(i + 1),
+                        "total": str(len(file_data)),
+                        "filename": file_info['filename']
+                    }
                 )
                 
                 # Create safe filename
@@ -1120,6 +1192,7 @@ async def process_knowledge_base_background(
                 temp_dir=temp_dir,
                 user_id=current_user_id,
                 embedding_model_id=knowledge_base.embedding_model_id,
+                user_language=user_language,
             )
             
     except Exception as e:
@@ -1143,6 +1216,7 @@ async def process_knowledge_base_creation(
     temp_dir: str,
     user_id: uuid.UUID,
     embedding_model_id: uuid.UUID,
+    user_language: str = "en",
 ):
     """
     Background task to process knowledge base creation with progress tracking.
@@ -1175,10 +1249,15 @@ async def process_knowledge_base_creation(
                 max_retries = 10  # Wait up to 10 seconds for upload completion
                 for retry in range(max_retries):
                     progress = progress_tracker.get_progress(task_id)
-                    if progress and progress.get("stages", {}).get("upload", {}).get("completed", False):
-                        upload_completed = True
-                        print(f"✅ Upload stage already completed by middleware")
-                        break
+                    print(f"🔍 CHECKING UPLOAD STATUS: progress exists={progress is not None}")
+                    if progress:
+                        upload_stage = progress.get("stages", {}).get("upload", {})
+                        completed = upload_stage.get("completed", False)
+                        print(f"🔍 UPLOAD STAGE: completed={completed}, stage_data={upload_stage}")
+                        if completed:
+                            upload_completed = True
+                            print(f"✅ Upload stage already completed by middleware")
+                            break
                     if retry < max_retries - 1:  # Don't sleep on last iteration
                         print(f"⏳ Waiting for upload completion... (retry {retry + 1}/{max_retries})")
                         await asyncio.sleep(1)
@@ -1195,7 +1274,8 @@ async def process_knowledge_base_creation(
                 # Initialize processing stage
                 progress_tracker.update_stage_progress(
                     task_id, "processing", 0, total_files,
-                    f"Starting processing of {total_files} files"
+                    message_key="knowledgeBases.progress.processingFile",
+                    message_params={"current": "0", "total": str(total_files), "filename": ""}
                 )
 
                 # Process each file from the stored paths
@@ -1205,7 +1285,8 @@ async def process_knowledge_base_creation(
                         # Update processing progress for current file
                         progress_tracker.update_stage_progress(
                             task_id, "processing", i, total_files,
-                            f"Processing file {i + 1}/{total_files}: {file_info['original_filename']}"
+                            message_key="knowledgeBases.progress.processingFile",
+                            message_params={"current": str(i + 1), "total": str(total_files), "filename": file_info['original_filename']}
                         )
 
                         filename = file_info["original_filename"]
@@ -1255,7 +1336,8 @@ async def process_knowledge_base_creation(
                             # Show real-time document processing progress
                             progress_tracker.update_stage_progress(
                                 task_id, "processing", i + 1, total_files,
-                                f"Processed {processed_documents_count} chunks from {i + 1}/{total_files} files"
+                                message_key="knowledgeBases.progress.processed_chunks",
+                                message_params={"chunks": str(processed_documents_count), "current": file_index, "total": len(file_paths)}
                             )
                             
                             print(
@@ -1277,7 +1359,11 @@ async def process_knowledge_base_creation(
                 # Complete processing stage with total document count
                 progress_tracker.complete_stage(
                     task_id, "processing", 
-                    f"Processed {processed_documents_count} chunks from {total_files} files successfully"
+                    message_key="knowledgeBases.progress.processed_all_chunks",
+                    message_params={
+                        "chunks": str(processed_documents_count),
+                        "files": str(total_files)
+                    }
                 )
 
             if failed_files:
@@ -1302,7 +1388,8 @@ async def process_knowledge_base_creation(
                 total_documents = len(all_documents)
                 progress_tracker.update_stage_progress(
                     task_id, "chunking", 0, total_documents, 
-                    f"Starting document splitting and chunking for {total_documents} documents..."
+                    message_key="knowledgeBases.progress.chunking",
+                    message_params={"current": "0", "total": str(total_documents)}
                 )
                 print("Splitting documents with smart chunking...")
                 
@@ -1319,7 +1406,8 @@ async def process_knowledge_base_creation(
                     # Update progress for current document being chunked
                     progress_tracker.update_stage_progress(
                         task_id, "chunking", i, total_documents,
-                        f"Chunking text {i + 1}/{total_documents}: {doc.metadata.get('source', 'Unknown')}"
+                        message_key="knowledgeBases.progress.chunking",
+                        message_params={"current": str(i + 1), "total": str(total_documents)}
                     )
                     
                     # Split this individual document
@@ -1336,7 +1424,8 @@ async def process_knowledge_base_creation(
                 print(f"Applying content filtering to {len(all_chunks)} chunks...")
                 progress_tracker.update_stage_progress(
                     task_id, "chunking", total_documents, total_documents,
-                    f"Filtering {len(all_chunks)} chunks for quality..."
+                    message_key="knowledgeBases.progress.chunking",
+                    message_params={"current": str(total_documents), "total": str(total_documents)}
                 )
                 
                 scored_chunks = content_filter.filter_and_score_documents(all_chunks)
@@ -1363,7 +1452,11 @@ async def process_knowledge_base_creation(
                 # Complete chunking stage with detailed information
                 progress_tracker.complete_stage(
                     task_id, "chunking", 
-                    f"Split {len(all_documents)} documents into {len(splits)} chunks"
+                    message_key="knowledgeBases.progress.chunking_complete",
+                    message_params={
+                        "documents": str(len(all_documents)),
+                        "chunks": str(len(splits))
+                    }
                 )
 
             with error_recovery_context("embedding initialization"):
@@ -1396,7 +1489,11 @@ async def process_knowledge_base_creation(
 
             with error_recovery_context("vector database creation"):
                 # Initialize embedding stage
-                progress_tracker.update_stage_progress(task_id, "embedding", 0, len(document_chunks), "Starting embedding creation...")
+                progress_tracker.update_stage_progress(
+                    task_id, "embedding", 0, len(document_chunks),
+                    message_key="knowledgeBases.progress.embedding",
+                    message_params={"current": "0", "total": str(len(document_chunks))}
+                )
                 
                 try:
                     # Process each chunk separately to avoid token limits
@@ -1404,7 +1501,8 @@ async def process_knowledge_base_creation(
                         # Update embedding progress for each chunk
                         progress_tracker.update_stage_progress(
                             task_id, "embedding", i, len(document_chunks),
-                            f"Creating embeddings for chunk {i + 1}/{len(document_chunks)} ({len(chunk)} text chunks)"
+                            message_key="knowledgeBases.progress.embedding",
+                            message_params={"current": str(i + 1), "total": str(len(document_chunks))}
                         )
 
                         print(
@@ -1520,7 +1618,10 @@ async def process_knowledge_base_creation(
                     )
                     
                     # Complete embedding stage
-                    progress_tracker.complete_stage(task_id, "embedding", "Vector database created successfully")
+                    progress_tracker.complete_stage(
+                        task_id, "embedding",
+                        message_key="knowledgeBases.progress.embedding_complete"
+                    )
 
                 except Exception as e:
                     print(f"Error creating Chroma VectorDB: {str(e)}")
@@ -1537,7 +1638,11 @@ async def process_knowledge_base_creation(
             try:
                 with error_recovery_context("database compression"):
                     # Initialize storing stage
-                    progress_tracker.update_stage_progress(task_id, "storing", 0, 3, "Starting database compression...")
+                    progress_tracker.update_stage_progress(
+                        task_id, "storing", 0, 3,
+                        message_key="knowledgeBases.progress.storing",
+                        message_params={"current": "0", "total": "3"}
+                    )
                     
                     # CRITICAL: Yield control to allow progress API to respond
                     await asyncio.sleep(0.01)
@@ -1551,7 +1656,11 @@ async def process_knowledge_base_creation(
                     temp_zip_fd, temp_zip_path = tempfile.mkstemp(suffix=".zip")
                     os.close(temp_zip_fd)  # Close file descriptor, but keep path
                     
-                    progress_tracker.update_stage_progress(task_id, "storing", 1, 3, "Compressing vector database...")
+                    progress_tracker.update_stage_progress(
+                        task_id, "storing", 1, 3,
+                        message_key="knowledgeBases.progress.storing",
+                        message_params={"current": "1", "total": "3"}
+                    )
                     
                     # CRITICAL: Yield control before the blocking compression operation
                     await asyncio.sleep(0.01)
@@ -1565,7 +1674,11 @@ async def process_knowledge_base_creation(
                     await asyncio.sleep(0.01)
 
                     log_memory_usage("after compression")
-                    progress_tracker.update_stage_progress(task_id, "storing", 2, 3, "Database compressed, preparing storage...")
+                    progress_tracker.update_stage_progress(
+                        task_id, "storing", 2, 3,
+                        message_key="knowledgeBases.progress.storing",
+                        message_params={"current": "2", "total": "3"}
+                    )
                     
                     # CRITICAL: Yield control before cleanup
                     await asyncio.sleep(0.01)
@@ -1653,7 +1766,10 @@ async def process_knowledge_base_creation(
                     await asyncio.sleep(0.01)
                     
                     # Complete storing stage
-                    progress_tracker.complete_stage(task_id, "storing", "Database stored successfully")
+                    progress_tracker.complete_stage(
+                        task_id, "storing",
+                        message_key="knowledgeBases.progress.storing_complete"
+                    )
 
             except Exception as e:
                 # Clean up temporary ZIP file on error (only if not moved to persistent storage)
@@ -1673,7 +1789,11 @@ async def process_knowledge_base_creation(
 
             with error_recovery_context("source entries creation"):
                 # Initialize finalizing stage  
-                progress_tracker.update_stage_progress(task_id, "finalizing", 0, total_files, "Creating source entries...")
+                progress_tracker.update_stage_progress(
+                    task_id, "finalizing", 0, total_files,
+                    message_key="knowledgeBases.progress.finalizing",
+                    message_params={"current": "0", "total": str(total_files)}
+                )
                 print("Creating source entries...")
                 
                 # Process each file to create source entries
@@ -1681,7 +1801,8 @@ async def process_knowledge_base_creation(
                     # Update finalizing progress for each source entry
                     progress_tracker.update_stage_progress(
                         task_id, "finalizing", i, total_files,
-                        f"Creating source entry {i + 1}/{total_files}: {file_info['original_filename']}"
+                        message_key="knowledgeBases.progress.finalizing",
+                        message_params={"current": str(i + 1), "total": str(total_files)}
                     )
                     
                     # CRITICAL: Yield control for each source entry to allow progress updates
@@ -1726,7 +1847,10 @@ async def process_knowledge_base_creation(
 
             # Complete finalizing stage and mark entire task as completed
             logger.info(f"📊 FINAL PROGRESS: Completing finalizing stage for task {task_id}")
-            completion_success = progress_tracker.complete_stage(task_id, "finalizing", "Knowledge base created successfully")
+            completion_success = progress_tracker.complete_stage(
+                task_id, "finalizing",
+                message_key="knowledgeBases.progress.kb_creation_complete"
+            )
             logger.info(f"📊 FINAL PROGRESS: Stage completion result: {completion_success}")
             logger.info(f"📊 FINAL PROGRESS: Task {task_id} should now be 100% complete")
 
@@ -2014,37 +2138,6 @@ async def update_knowledge_base(
     session.commit()
     session.refresh(knowledge_base)
     return knowledge_base
-
-
-@router.get("/progress/{task_id}")
-async def get_knowledge_base_progress(
-    task_id: str,
-    current_user: CurrentUser,
-) -> Any:
-    """
-    Get progress information for a knowledge base creation task.
-    """
-    # Make this async to prevent blocking during intensive operations
-    progress_data = progress_tracker.get_progress(task_id)
-    if not progress_data:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    # Debug logging to see what's actually being returned
-    print(f"🔍 API RETURNING PROGRESS: task_id={task_id}")
-    print(f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}")
-    print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
-    print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
-    
-    # Check each stage completion status
-    stages = progress_data.get('stages', {})
-    for stage_name, stage_data in stages.items():
-        completed = stage_data.get('completed', False) if isinstance(stage_data, dict) else False
-        print(f"🔍 STAGE {stage_name}: completed={completed}")
-
-    # Yield control to allow other async operations (like this API call) to run
-    await asyncio.sleep(0)
-
-    return progress_data
 
 
 @router.delete("/{id}", response_model=Message)

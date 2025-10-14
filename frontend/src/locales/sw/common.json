@@ -333,6 +333,22 @@
       "currentInstructions": "Maagizo ya Sasa:",
       "save": "Hifadhi",
       "cancel": "Ghairi"
+    },
+    "progress": {
+      "uploading": "Inapakia {{current}} MB/{{total}} MB...",
+      "processingFile": "Inachakata faili {{current}}/{{total}}: {{filename}}",
+      "chunking": "Inagawanya hati ya nyaraka {{current}}/{{total}}...",
+      "embedding": "Inaunda embeddings {{current}}/{{total}}...",
+      "storing": "Inahifadhi data {{current}}/{{total}}...",
+      "finalizing": "Inamalizia uundaji {{current}}/{{total}}...",
+      "saving_file": "Inahifadhi faili {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Inachakata faili {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Imesindika vipande {{chunks}} kutoka faili {{current}}/{{total}}",
+      "processed_all_chunks": "Imesindika vipande vyote {{chunks}} kutoka faili {{current}}",
+      "chunking_complete": "Kugawanya kumekamilika: {{chunks}} vipande vimeundwa",
+      "embedding_complete": "Viingizo vilivyoundwa kwa {{current}} vipande",
+      "storing_complete": "Hifadhidata ya vekta iliyohifadhiwa na {{current}} viingizo",
+      "kb_creation_complete": "Uundaji wa msingi wa maarifa umekamilika kwa mafanikio"
     }
   },
   "optimizeChecklistModal": {

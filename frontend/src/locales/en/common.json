@@ -393,6 +393,21 @@
         "processing": "Processing...",
         "pleaseWait": "Please wait while we process your files..."
       }
+    },
+    "progress": {
+      "uploading": "Uploading {{current}} MB of {{total}} MB...",
+      "saving_file": "Saving file {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Processing file {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Processed {{chunks}} chunks from {{current}}/{{total}} files",
+      "processed_all_chunks": "Processed all {{chunks}} chunks from {{current}} files",
+      "chunking": "Chunking document {{current}}/{{total}}...",
+      "chunking_complete": "Completed chunking {{current}} documents into {{chunks}} chunks",
+      "embedding": "Creating embeddings {{current}}/{{total}}...",
+      "embedding_complete": "Created embeddings for {{current}} chunks",
+      "storing": "Storing data {{current}}/{{total}}...",
+      "storing_complete": "Stored vector database with {{current}} embeddings",
+      "finalizing": "Finalizing creation {{current}}/{{total}}...",
+      "kb_creation_complete": "Knowledge base creation completed successfully"
     }
   },
   "archive": {

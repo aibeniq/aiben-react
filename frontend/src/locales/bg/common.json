@@ -338,6 +338,22 @@
       "fieldPlaceholder": "Добавете име на поле (напр. Име, Адрес, ЕГН) или предложете от описанието",
       "cancel": "Отказ",
       "updateFormTemplate": "Актуализиране на Шаблона на Формуляра"
+    },
+    "progress": {
+      "uploading": "Качване {{current}} MB/{{total}} MB...",
+      "processingFile": "Обработка на файл {{current}}/{{total}}: {{filename}}",
+      "chunking": "Разделяне на документ {{current}}/{{total}}...",
+      "embedding": "Създаване на вграждания {{current}}/{{total}}...",
+      "storing": "Съхраняване на данни {{current}}/{{total}}...",
+      "finalizing": "Завършване на създаването {{current}}/{{total}}...",
+      "saving_file": "Запазване на файл {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Обработка на файл {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Обработени {{chunks}} парчета от {{current}}/{{total}} файла",
+      "processed_all_chunks": "Обработени всички {{chunks}} парчета от {{current}} файла",
+      "chunking_complete": "Разделянето завършено: създадени {{chunks}} парчета",
+      "embedding_complete": "Създадени са вграждания за {{current}} парчета",
+      "storing_complete": "Запазена векторна база данни с {{current}} вграждания",
+      "kb_creation_complete": "Създаването на базата знания завърши успешно"
     }
   },
   "optimizeChecklistModal": {

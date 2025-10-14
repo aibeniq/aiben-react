@@ -382,6 +382,22 @@
         "processing": "Verarbeitung...",
         "pleaseWait": "Bitte warten Sie, während wir Ihre Dateien verarbeiten..."
       }
+    },
+    "progress": {
+      "uploading": "Hochladen {{current}} MB/{{total}} MB...",
+      "processingFile": "Verarbeite Datei {{current}}/{{total}}: {{filename}}",
+      "chunking": "Dokument wird in Abschnitte unterteilt {{current}}/{{total}}...",
+      "embedding": "Erstelle Embeddings {{current}}/{{total}}...",
+      "storing": "Speichere Daten {{current}}/{{total}}...",
+      "finalizing": "Finalisiere Erstellung {{current}}/{{total}}...",
+      "saving_file": "Datei speichern {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Datei verarbeiten {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Verarbeitete {{chunks}} Blöcke aus {{current}}/{{total}} Dateien",
+      "processed_all_chunks": "Alle {{chunks}} Blöcke aus {{current}} Dateien verarbeitet",
+      "chunking_complete": "Chunking abgeschlossen: {{chunks}} Chunks erstellt",
+      "embedding_complete": "Embeddings für {{current}} Chunks erstellt",
+      "storing_complete": "Vektordatenbank mit {{current}} Embeddings gespeichert",
+      "kb_creation_complete": "Erstellung der Wissensdatenbank erfolgreich abgeschlossen"
     }
   },
   "common": {

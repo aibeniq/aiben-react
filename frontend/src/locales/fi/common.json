@@ -592,6 +592,22 @@
         "processing": "Käsitellään...",
         "pleaseWait": "Odota, kun käsittelemme tiedostojasi..."
       }
+    },
+    "progress": {
+      "uploading": "Ladataan {{current}} MB/{{total}} MB...",
+      "processingFile": "Käsitellään tiedostoa {{current}}/{{total}}: {{filename}}",
+      "chunking": "Jaetaan asiakirja {{current}}/{{total}}...",
+      "embedding": "Luodaan upotuksia {{current}}/{{total}}...",
+      "storing": "Tallennetaan tietoja {{current}}/{{total}}...",
+      "finalizing": "Viimeistellään luonti {{current}}/{{total}}...",
+      "saving_file": "Tallennetaan tiedostoa {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Käsitellään tiedostoa {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Käsitelty {{chunks}} lohkoa {{current}}/{{total}} tiedostosta",
+      "processed_all_chunks": "Käsitelty kaikki {{chunks}} lohkoa {{current}} tiedostosta",
+      "chunking_complete": "Jaettu {{current}} asiakirja {{chunks}} lohkoon",
+      "embedding_complete": "Luotu upotukset {{current}} lohkolle",
+      "storing_complete": "Tallennettu vektorikanta {{current}} upotuksella",
+      "kb_creation_complete": "Tietokannan luonti suoritettu onnistuneesti"
     }
   },
   "archive": {

@@ -15,7 +15,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
+import { useTranslation, Trans } from "react-i18next"
 import { FaPlus, FaTrash } from "react-icons/fa"
 
 import { EmbeddingModelsService } from "@/client"
@@ -311,19 +311,21 @@ const AddKnowledgeBase = () => {
             data.task_id,
             "- progress polling should now be active",
           )
-        }, 100)
+        }, 1000) // Increased delay
 
         // Step 2: Start the actual file upload in the background
         console.log("🚀 Step 2: Starting file upload in background...")
 
         // CRITICAL FIX: Use setTimeout to ensure the upload starts after the component re-render
         // This prevents the mutation completion from interfering with progress polling
+        console.log("🔄 SETTING UP UPLOAD TIMEOUT for task:", data.task_id)
         setTimeout(async () => {
+          console.log("🚀 UPLOAD TIMEOUT TRIGGERED - about to start upload for task:", data.task_id)
           try {
             const { createKnowledgeBaseWithTimeout } = await import(
               "@/client/knowledgeBaseClient"
             )
-            console.log("📤 Starting file upload with task_id:", data.task_id)
+            console.log("📤 Starting file upload with task_id:", data.task_id, "files:", variables.files.length)
 
             const uploadResult = await createKnowledgeBaseWithTimeout({
               title: variables.title,
@@ -356,7 +358,7 @@ const AddKnowledgeBase = () => {
             console.error("❌ File upload failed:", err)
             // Error will be shown via progress tracker
           }
-        }, 100) // Small delay to let the component re-render complete
+        }, 2000) // 2 second delay
       } else {
         console.error(
           "❌ No task_id in response. Response keys:",
@@ -538,8 +540,20 @@ const AddKnowledgeBase = () => {
                   fontWeight="medium"
                   textAlign="center"
                 >
-                  {progress.message ||
-                    t("knowledgeBases.modals.messages.processing")}
+                  {(() => {
+                    if (progress.message_key && typeof progress.message_key === 'string') {
+                      const params = progress.message_params || {};
+                      // Use Trans component to avoid type issues with t function
+                      return (
+                        <Trans
+                          i18nKey={progress.message_key}
+                          values={params}
+                          components={{}}
+                        />
+                      );
+                    }
+                    return progress.message || t("knowledgeBases.modals.messages.processing");
+                  })()}
                 </Text>
                 <Box width="100%">
                   <Progress.Root
