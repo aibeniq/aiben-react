@@ -108,9 +108,26 @@ function Archive() {
       let fullText = ""
 
       if (activeTab === "review" && veradoc.selectedReport) {
+        // Check if full qa_pairs are loaded; if not, fetch them
+        let qaPairs = (veradoc.selectedReport.results as any)?.qa_pairs || []
+        if (qaPairs.length === 0) {
+          console.log("QA pairs not loaded; fetching full report for DOCX download...")
+          try {
+            const fullReport = await VeradocService.getVeradocDetail({
+              reportId: String(veradoc.selectedReport.id),
+              includeQaPairs: true,  // Force load full QA pairs
+            })
+            qaPairs = (fullReport.results as any)?.qa_pairs || []
+            console.log(`Fetched ${qaPairs.length} QA pairs for download`)
+          } catch (error) {
+            console.error("Failed to fetch full QA pairs for DOCX:", error)
+            showErrorToast("Failed to load complete data for download")
+            return
+          }
+        }
+
         // Prepare combined text with evaluation summary and QA pairs
         fullText = `# Evaluation Summary\n\n${(veradoc.selectedReport.results as any)?.final_evaluation || ""}\n\n# Question-Answer Details\n\n`
-        const qaPairs = (veradoc.selectedReport.results as any)?.qa_pairs || []
         qaPairs.forEach((pair: any, index: number) => {
           fullText += `## Question ${index + 1}: ${pair.question}\n\n`
           fullText += `### Answer\n${pair.answer}\n\n`
