@@ -386,6 +386,66 @@
       "kb_creation_complete": "Bilgi tabanı oluşturma başarıyla tamamlandı"
     }
   },
+  "archive": {
+    "title": "Arşiv",
+    "history": "Geçmiş",
+    "allUsers": "Tüm Kullanıcılar",
+    "allUsersToggleTooltip": "Sadece kendi geçmişinizi mi yoksa tüm kullanıcıların geçmişini mi görüntülemek istediğinizi seçin",
+    "viewingAllUsers": "Tüm kullanıcıların geçmişi görüntüleniyor",
+    "viewingMyHistory": "Sadece kendi geçmişim görüntüleniyor",
+    "tabs": {
+      "review": "İncele",
+      "generate": "Oluştur",
+      "compare": "Karşılaştır",
+      "match": "Eşleştir"
+    },
+    "emptyMessages": {
+      "review": "Önceki değerlendirme yok",
+      "generate": "Önceki rapor yok",
+      "compare": "Önceki karşılaştırma yok",
+      "match": "Önceki form işleme yok"
+    },
+    "metadata": {
+      "question": "soru",
+      "question_one": "soru",
+      "questions": "sorular",
+      "topic": "konu",
+      "topic_one": "konu",
+      "topics": "konular",
+      "field": "alan",
+      "field_one": "alan",
+      "fields": "alanlar",
+      "document": "belge",
+      "document_one": "belge",
+      "documents": "belgeler",
+      "digitized": "dijitalleştirilmiş",
+      "handwritten": "el yazısı"
+    },
+    "feedback": {
+      "positive": "Olumlu geri bildirim",
+      "negative": "Olumsuz geri bildirim",
+      "hasFeedback": "Geri bildirimi var"
+    },
+    "deleteConfirmation": "Bu öğeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    "unknownDate": "Bilinmeyen tarih",
+    "unnamedItem": "İsimsiz öğe",
+    "successMessages": {
+      "evaluationLoaded": "Değerlendirme başarıyla yüklendi",
+      "reportLoaded": "Rapor başarıyla yüklendi",
+      "comparisonLoaded": "Karşılaştırma başarıyla yüklendi",
+      "formProcessingLoaded": "Form işleme başarıyla yüklendi",
+      "evaluationDeleted": "Değerlendirme başarıyla silindi",
+      "reportDeleted": "Rapor başarıyla silindi",
+      "comparisonDeleted": "Karşılaştırma başarıyla silindi",
+      "formProcessingDeleted": "Form işleme başarıyla silindi"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Değerlendirme Özeti",
+      "questionAnswerDetails": "Soru-Cevap Detayları",
+      "summary": "Özet",
+      "topicAnalysis": "Konu Analizi"
+    }
+  },
   "optimizeChecklistModal": {
     "title": "Kontrol Listesini Optimize Et",
     "customInstructionsLabel": "Özel Talimatlar (İsteğe Bağlı)",

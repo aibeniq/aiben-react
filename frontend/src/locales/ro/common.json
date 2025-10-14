@@ -391,6 +391,66 @@
       "kb_creation_complete": "Crearea bazei de cunoștințe finalizată cu succes"
     }
   },
+  "archive": {
+    "title": "Arhivă",
+    "history": "Istoric",
+    "allUsers": "Toți utilizatorii",
+    "allUsersToggleTooltip": "Comută între vizualizarea doar a istoricului tău sau a istoricului tuturor utilizatorilor",
+    "viewingAllUsers": "Vizualizarea istoricului tuturor utilizatorilor",
+    "viewingMyHistory": "Vizualizarea doar a istoricului meu",
+    "tabs": {
+      "review": "Revizuire",
+      "generate": "Generare",
+      "compare": "Comparare",
+      "match": "Potrivire"
+    },
+    "emptyMessages": {
+      "review": "Nu există evaluări anterioare",
+      "generate": "Nu există rapoarte anterioare",
+      "compare": "Nu există comparații anterioare",
+      "match": "Nu există procesare anterioară a formularelor"
+    },
+    "metadata": {
+      "question": "întrebare",
+      "question_one": "întrebare",
+      "questions": "întrebări",
+      "topic": "subiect",
+      "topic_one": "subiect",
+      "topics": "subiecte",
+      "field": "câmp",
+      "field_one": "câmp",
+      "fields": "câmpuri",
+      "document": "document",
+      "document_one": "document",
+      "documents": "documente",
+      "digitized": "digitizat",
+      "handwritten": "scris de mână"
+    },
+    "feedback": {
+      "positive": "Feedback pozitiv",
+      "negative": "Feedback negativ",
+      "hasFeedback": "Are feedback"
+    },
+    "deleteConfirmation": "Ești sigur că vrei să ștergi acest element? Această acțiune nu poate fi anulată.",
+    "unknownDate": "Dată necunoscută",
+    "unnamedItem": "Element nedenumit",
+    "successMessages": {
+      "evaluationLoaded": "Evaluarea încărcată cu succes",
+      "reportLoaded": "Raportul încărcat cu succes",
+      "comparisonLoaded": "Comparația încărcată cu succes",
+      "formProcessingLoaded": "Procesarea formularului încărcată cu succes",
+      "evaluationDeleted": "Evaluarea ștearsă cu succes",
+      "reportDeleted": "Raportul șters cu succes",
+      "comparisonDeleted": "Comparația ștearsă cu succes",
+      "formProcessingDeleted": "Procesarea formularului ștearsă cu succes"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Rezumat evaluare",
+      "questionAnswerDetails": "Detalii întrebare-răspuns",
+      "summary": "Rezumat",
+      "topicAnalysis": "Analiză subiect"
+    }
+  },
   "optimizeChecklistModal": {
     "title": "Optimizează Lista de Verificare",
     "customInstructionsLabel": "Instrucțiuni Personalizate (Opțional)",

@@ -395,6 +395,66 @@
       "kb_creation_complete": "Vytvorenie znalostnej bázy dokončené úspešne"
     }
   },
+  "archive": {
+    "title": "Archív",
+    "history": "História",
+    "allUsers": "Všetci používatelia",
+    "allUsersToggleTooltip": "Prepnúť medzi zobrazením iba vašej histórie alebo histórie všetkých používateľov",
+    "viewingAllUsers": "Zobrazenie histórie všetkých používateľov",
+    "viewingMyHistory": "Zobrazenie iba mojej histórie",
+    "tabs": {
+      "review": "Kontrola",
+      "generate": "Generovať",
+      "compare": "Porovnať",
+      "match": "Párovanie"
+    },
+    "emptyMessages": {
+      "review": "Žiadne predchádzajúce hodnotenia",
+      "generate": "Žiadne predchádzajúce správy",
+      "compare": "Žiadne predchádzajúce porovnania",
+      "match": "Žiadne predchádzajúce spracovanie formulárov"
+    },
+    "metadata": {
+      "question": "otázka",
+      "question_one": "otázka",
+      "questions": "otázky",
+      "topic": "téma",
+      "topic_one": "téma",
+      "topics": "témy",
+      "field": "pole",
+      "field_one": "pole",
+      "fields": "polia",
+      "document": "dokument",
+      "document_one": "dokument",
+      "documents": "dokumenty",
+      "digitized": "digitalizovaný",
+      "handwritten": "rukou písaný"
+    },
+    "feedback": {
+      "positive": "Pozitívna spätná väzba",
+      "negative": "Negatívna spätná väzba",
+      "hasFeedback": "Má spätnú väzbu"
+    },
+    "deleteConfirmation": "Ste si istí, že chcete odstrániť túto položku? Túto akciu nie je možné vrátiť späť.",
+    "unknownDate": "Neznámy dátum",
+    "unnamedItem": "Nepomenovaná položka",
+    "successMessages": {
+      "evaluationLoaded": "Hodnotenie bolo úspešne načítané",
+      "reportLoaded": "Správa bola úspešne načítaná",
+      "comparisonLoaded": "Porovnanie bolo úspešne načítané",
+      "formProcessingLoaded": "Spracovanie formulára bolo úspešne načítané",
+      "evaluationDeleted": "Hodnotenie bolo úspešne odstránené",
+      "reportDeleted": "Správa bola úspešne odstránené",
+      "comparisonDeleted": "Porovnanie bolo úspešne odstránené",
+      "formProcessingDeleted": "Spracovanie formulára bolo úspešne odstránené"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Súhrn hodnotenia",
+      "questionAnswerDetails": "Podrobnosti otázka-odpoveď",
+      "summary": "Súhrn",
+      "topicAnalysis": "Analýza témy"
+    }
+  },
   "optimizeChecklistModal": {
     "title": "Optimalizovať kontrolný zoznam",
     "customInstructionsLabel": "Vlastné pokyny (Voliteľné)",

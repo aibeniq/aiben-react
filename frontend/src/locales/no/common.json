@@ -640,12 +640,16 @@
     },
     "metadata": {
       "question": "spørsmål",
+      "question_one": "spørsmål",
       "questions": "spørsmål",
       "topic": "emne",
+      "topic_one": "emne",
       "topics": "emner",
       "field": "felt",
+      "field_one": "felt",
       "fields": "felter",
       "document": "dokument",
+      "document_one": "dokument",
       "documents": "dokumenter",
       "digitized": "digitalisert",
       "handwritten": "håndskrevet"
@@ -662,6 +666,12 @@
       "reportDeleted": "Rapport slettet vellykket",
       "comparisonDeleted": "Sammenligning slettet vellykket",
       "formProcessingDeleted": "Skjema behandling slettet vellykket"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Evalueringssammendrag",
+      "questionAnswerDetails": "Spørsmål-Svar Detaljer",
+      "summary": "Sammendrag",
+      "topicAnalysis": "Emneanalyse"
     }
   },
   "feedback": {

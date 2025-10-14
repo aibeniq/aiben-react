@@ -328,6 +328,65 @@
       "kb_creation_complete": "Criação da base de conhecimento concluída com sucesso"
     }
   },
+  "archive": {
+    "title": "Arquivo",
+    "history": "Histórico",
+    "allUsers": "Todos os Usuários",
+    "allUsersToggleTooltip": "Alternar entre visualizar apenas seu histórico ou o histórico de todos os usuários",
+    "viewingAllUsers": "Visualizando o histórico de todos os usuários",
+    "viewingMyHistory": "Visualizando apenas meu histórico",
+    "tabs": {
+      "review": "Revisar",
+      "generate": "Gerar",
+      "compare": "Comparar",
+      "match": "Corresponder"
+    },
+    "emptyMessages": {
+      "review": "Nenhuma avaliação anterior",
+      "generate": "Nenhum relatório anterior",
+      "compare": "Nenhuma comparação anterior",
+      "match": "Nenhum processamento de formulário anterior"
+    },
+    "metadata": {
+      "question": "question",
+      "question_one": "question",
+      "questions": "questions",
+      "topic": "topic",
+      "topic_one": "topic",
+      "topics": "topics",
+      "field": "field",
+      "field_one": "field",
+      "fields": "fields",
+      "document": "document",
+      "document_one": "document",
+      "documents": "documents",
+      "digitized": "digitized"
+    },
+    "feedback": {
+      "positive": "Comentários positivos",
+      "negative": "Comentários negativos",
+      "hasFeedback": "Tem comentários"
+    },
+    "deleteConfirmation": "Tem certeza de que deseja excluir este item? Esta ação não pode ser desfeita.",
+    "unknownDate": "Data desconhecida",
+    "unnamedItem": "Item sem nome",
+    "successMessages": {
+      "evaluationLoaded": "Avaliação carregada com sucesso",
+      "reportLoaded": "Relatório carregado com sucesso",
+      "comparisonLoaded": "Comparação carregada com sucesso",
+      "formProcessingLoaded": "Processamento de formulário carregado com sucesso",
+      "evaluationDeleted": "Avaliação excluída com sucesso",
+      "reportDeleted": "Relatório excluído com sucesso",
+      "comparisonDeleted": "Comparação excluída com sucesso",
+      "formProcessingDeleted": "Processamento de formulário excluído com sucesso"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Resumo da Avaliação",
+      "questionAnswerDetails": "Detalhes de Pergunta-Resposta",
+      "summary": "Resumo",
+      "topicAnalysis": "Análise de Tópico"
+    }
+  },
   "common": {
     "loading": "Carregando...",
     "noData": "Nenhum dado disponível",

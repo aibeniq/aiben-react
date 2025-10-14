@@ -474,6 +474,50 @@
       "kb_creation_complete": "ナレッジベースの作成が正常に完了しました"
     }
   },
+  "archive": {
+    "title": "アーカイブ",
+    "history": "履歴",
+    "allUsers": "すべてのユーザー",
+    "allUsersToggleTooltip": "自分の履歴のみを表示するか、すべてのユーザーの履歴を表示するかを切り替えます",
+    "viewingAllUsers": "すべてのユーザーの履歴を表示",
+    "viewingMyHistory": "自分の履歴のみを表示",
+    "tabs": {
+      "review": "レビュー",
+      "generate": "生成",
+      "compare": "比較",
+      "match": "一致"
+    },
+    "emptyMessages": {
+      "review": "以前の評価はありません",
+      "generate": "以前のレポートはありません",
+      "compare": "以前の比較はありません",
+      "match": "以前のフォーム処理はありません"
+    },
+    "feedback": {
+      "positive": "ポジティブなフィードバック",
+      "negative": "ネガティブなフィードバック",
+      "hasFeedback": "フィードバックがあります"
+    },
+    "deleteConfirmation": "このアイテムを削除してもよろしいですか？この操作は元に戻すことができません。",
+    "unknownDate": "不明な日付",
+    "unnamedItem": "名前のないアイテム",
+    "successMessages": {
+      "evaluationLoaded": "評価が正常に読み込まれました",
+      "reportLoaded": "レポートが正常に読み込まれました",
+      "comparisonLoaded": "比較が正常に読み込まれました",
+      "formProcessingLoaded": "フォーム処理が正常に読み込まれました",
+      "evaluationDeleted": "評価が正常に削除されました",
+      "reportDeleted": "レポートが正常に削除されました",
+      "comparisonDeleted": "比較が正常に削除されました",
+      "formProcessingDeleted": "フォーム処理が正常に削除されました"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "評価サマリー",
+      "questionAnswerDetails": "質問-回答の詳細",
+      "summary": "サマリー",
+      "topicAnalysis": "トピック分析"
+    }
+  },
   "feedback": {
     "modalTitlePositive": "役に立った点は？",
     "modalTitleNegative": "改善できる点は？",

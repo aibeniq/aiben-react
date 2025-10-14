@@ -60,7 +60,7 @@ function Archive() {
       let fullText = ""
 
       if (activeTab === "review" && veradoc.selectedReport) {
-        fullText = `# Evaluation Summary\n\n${(veradoc.selectedReport.results as any)?.final_evaluation || ""}\n\n# Question-Answer Details\n\n`
+        fullText = `# ${t("archive.docxHeaders.evaluationSummary")}\n\n${(veradoc.selectedReport.results as any)?.final_evaluation || ""}\n\n# ${t("archive.docxHeaders.questionAnswerDetails")}\n\n`
         const qaPairs = (veradoc.selectedReport.results as any)?.qa_pairs || []
         qaPairs.forEach((pair: any, index: number) => {
           fullText += `## Question ${index + 1}: ${pair.question}\n\n`
@@ -74,7 +74,7 @@ function Archive() {
           reportgenie.selectedReport.content ||
           ""
       } else if (activeTab === "compare" && twincheck.selectedReport) {
-        fullText = `# Summary\n\n${twincheck.selectedReport.results?.summary || ""}\n\n# Topic Analysis\n\n`
+        fullText = `# ${t("archive.docxHeaders.summary")}\n\n${twincheck.selectedReport.results?.summary || ""}\n\n# ${t("archive.docxHeaders.topicAnalysis")}\n\n`
         const topicResults =
           twincheck.selectedReport.results?.topic_analysis || []
         topicResults.forEach((topic: any) => {
@@ -127,7 +127,7 @@ function Archive() {
         }
 
         // Prepare combined text with evaluation summary and QA pairs
-        fullText = `# Evaluation Summary\n\n${(veradoc.selectedReport.results as any)?.final_evaluation || ""}\n\n# Question-Answer Details\n\n`
+        fullText = `# ${t("archive.docxHeaders.evaluationSummary")}\n\n${(veradoc.selectedReport.results as any)?.final_evaluation || ""}\n\n# ${t("archive.docxHeaders.questionAnswerDetails")}\n\n`
         qaPairs.forEach((pair: any, index: number) => {
           fullText += `## Question ${index + 1}: ${pair.question}\n\n`
           fullText += `### Answer\n${pair.answer}\n\n`
@@ -149,7 +149,7 @@ function Archive() {
         })
       } else if (activeTab === "compare" && twincheck.selectedReport) {
         // Prepare combined text with summary and all topic analyses
-        fullText = `# Summary\n\n${twincheck.selectedReport.results?.summary || ""}\n\n# Topic Analysis\n\n`
+        fullText = `# ${t("archive.docxHeaders.summary")}\n\n${twincheck.selectedReport.results?.summary || ""}\n\n# ${t("archive.docxHeaders.topicAnalysis")}\n\n`
         const topicResults =
           twincheck.selectedReport.results?.topic_analysis || []
         topicResults.forEach((topic: any) => {

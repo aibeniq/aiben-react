@@ -111,26 +111,16 @@ const HistoryPanel = ({
   const getMetadata = (item: any) => {
     // Show relevant metadata for each tool type
     if (item?.qa_count > 0) {
-      return item.qa_count === 1
-        ? `1 ${t("archive.metadata.question")}`
-        : `${item.qa_count} ${t("archive.metadata.questions")}`
+      return t("archive.metadata.questions", { count: item.qa_count })
     }
     if (item?.topic_count > 0) {
-      return item.topic_count === 1
-        ? `1 ${t("archive.metadata.topic")}`
-        : `${item.topic_count} ${t("archive.metadata.topics")}`
+      return t("archive.metadata.topics", { count: item.topic_count })
     }
     if (item?.field_count > 0) {
-      const fieldText =
-        item.field_count === 1
-          ? `1 ${t("archive.metadata.field")}`
-          : `${item.field_count} ${t("archive.metadata.fields")}`
+      const fieldText = t("archive.metadata.fields", { count: item.field_count })
       // For FormConnect, also show document count if available
       if (item?.document_count > 0) {
-        const docText =
-          item.document_count === 1
-            ? `1 ${t("archive.metadata.document")}`
-            : `${item.document_count} ${t("archive.metadata.documents")}`
+        const docText = t("archive.metadata.documents", { count: item.document_count })
         return `${fieldText}, ${docText}`
       }
       return fieldText

@@ -522,6 +522,66 @@
       "kb_creation_complete": "Створення бази знань успішно завершено"
     }
   },
+  "archive": {
+    "title": "Архів",
+    "history": "Історія",
+    "allUsers": "Всі користувачі",
+    "allUsersToggleTooltip": "Перемикатися між переглядом лише вашої історії або історії всіх користувачів",
+    "viewingAllUsers": "Перегляд історії всіх користувачів",
+    "viewingMyHistory": "Перегляд лише моєї історії",
+    "tabs": {
+      "review": "Переглянути",
+      "generate": "Створити",
+      "compare": "Порівняти",
+      "match": "Зіставити"
+    },
+    "emptyMessages": {
+      "review": "Немає попередніх оцінок",
+      "generate": "Немає попередніх звітів",
+      "compare": "Немає попередніх порівнянь",
+      "match": "Немає попередньої обробки форм"
+    },
+    "metadata": {
+      "question": "питання",
+      "question_one": "питання",
+      "questions": "питання",
+      "topic": "тема",
+      "topic_one": "тема",
+      "topics": "теми",
+      "field": "поле",
+      "field_one": "поле",
+      "fields": "поля",
+      "document": "документ",
+      "document_one": "документ",
+      "documents": "документи",
+      "digitized": "оцифрований",
+      "handwritten": "рукописний"
+    },
+    "feedback": {
+      "positive": "Позитивний відгук",
+      "negative": "Негативний відгук",
+      "hasFeedback": "Має відгук"
+    },
+    "deleteConfirmation": "Ви впевнені, що хочете видалити цей елемент? Цю дію неможливо скасувати.",
+    "unknownDate": "Невідома дата",
+    "unnamedItem": "Безіменний елемент",
+    "successMessages": {
+      "evaluationLoaded": "Оцінку успішно завантажено",
+      "reportLoaded": "Звіт успішно завантажено",
+      "comparisonLoaded": "Порівняння успішно завантажено",
+      "formProcessingLoaded": "Обробку форми успішно завантажено",
+      "evaluationDeleted": "Оцінку успішно видалено",
+      "reportDeleted": "Звіт успішно видалено",
+      "comparisonDeleted": "Порівняння успішно видалено",
+      "formProcessingDeleted": "Обробку форми успішно видалено"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Підсумок оцінки",
+      "questionAnswerDetails": "Деталі питання-відповіді",
+      "summary": "Підсумок",
+      "topicAnalysis": "Аналіз теми"
+    }
+  },
   "feedback": {
     "modalTitlePositive": "Що було корисним?",
     "modalTitleNegative": "Що можна покращити?",

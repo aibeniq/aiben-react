@@ -386,6 +386,66 @@
       "kb_creation_complete": "Uundaji wa msingi wa maarifa umekamilika kwa mafanikio"
     }
   },
+  "archive": {
+    "title": "Archive",
+    "history": "History",
+    "allUsers": "All Users",
+    "allUsersToggleTooltip": "Toggle between viewing only your history or all users' history",
+    "viewingAllUsers": "Viewing all users' history",
+    "viewingMyHistory": "Viewing only my history",
+    "tabs": {
+      "review": "Review",
+      "generate": "Generate",
+      "compare": "Compare",
+      "match": "Match"
+    },
+    "emptyMessages": {
+      "review": "No previous evaluations",
+      "generate": "No previous reports",
+      "compare": "No previous comparisons",
+      "match": "No previous form processing"
+    },
+    "metadata": {
+      "question": "question",
+      "question_one": "question",
+      "questions": "questions",
+      "topic": "topic",
+      "topic_one": "topic",
+      "topics": "topics",
+      "field": "field",
+      "field_one": "field",
+      "fields": "fields",
+      "document": "document",
+      "document_one": "document",
+      "documents": "documents",
+      "digitized": "digitized",
+      "handwritten": "handwritten"
+    },
+    "feedback": {
+      "positive": "Positive feedback",
+      "negative": "Negative feedback",
+      "hasFeedback": "Has feedback"
+    },
+    "deleteConfirmation": "Are you sure you want to delete this item? This action cannot be undone.",
+    "unknownDate": "Unknown date",
+    "unnamedItem": "Unnamed item",
+    "successMessages": {
+      "evaluationLoaded": "Evaluation loaded successfully",
+      "reportLoaded": "Report loaded successfully",
+      "comparisonLoaded": "Comparison loaded successfully",
+      "formProcessingLoaded": "Form processing loaded successfully",
+      "evaluationDeleted": "Evaluation deleted successfully",
+      "reportDeleted": "Report deleted successfully",
+      "comparisonDeleted": "Comparison deleted successfully",
+      "formProcessingDeleted": "Form processing deleted successfully"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Evaluation Summary",
+      "questionAnswerDetails": "Question-Answer Details",
+      "summary": "Summary",
+      "topicAnalysis": "Topic Analysis"
+    }
+  },
   "optimizeChecklistModal": {
     "title": "Boresha Orodha ya Ukaguzi",
     "customInstructionsLabel": "Maagizo ya Kawaida (Si Lazima)",

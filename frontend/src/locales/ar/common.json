@@ -467,6 +467,66 @@
       "kb_creation_complete": "تم إنشاء قاعدة المعرفة بنجاح"
     }
   },
+  "archive": {
+    "title": "الأرشيف",
+    "history": "التاريخ",
+    "allUsers": "جميع المستخدمين",
+    "allUsersToggleTooltip": "التبديل بين عرض تاريخك فقط أو تاريخ جميع المستخدمين",
+    "viewingAllUsers": "عرض تاريخ جميع المستخدمين",
+    "viewingMyHistory": "عرض تاريخي فقط",
+    "tabs": {
+      "review": "مراجعة",
+      "generate": "إنشاء",
+      "compare": "مقارنة",
+      "match": "مطابقة"
+    },
+    "emptyMessages": {
+      "review": "لا توجد تقييمات سابقة",
+      "generate": "لا توجد تقارير سابقة",
+      "compare": "لا توجد مقارنات سابقة",
+      "match": "لا يوجد معالجة نماذج سابقة"
+    },
+    "metadata": {
+      "question": "سؤال",
+      "question_one": "سؤال",
+      "questions": "أسئلة",
+      "topic": "موضوع",
+      "topic_one": "موضوع",
+      "topics": "مواضيع",
+      "field": "حقل",
+      "field_one": "حقل",
+      "fields": "حقول",
+      "document": "وثيقة",
+      "document_one": "وثيقة",
+      "documents": "وثائق",
+      "digitized": "رقمي",
+      "handwritten": "مكتوب بخط اليد"
+    },
+    "feedback": {
+      "positive": "تعليقات إيجابية",
+      "negative": "تعليقات سلبية",
+      "hasFeedback": "لديه تعليقات"
+    },
+    "deleteConfirmation": "هل أنت متأكد من أنك تريد حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.",
+    "unknownDate": "تاريخ غير معروف",
+    "unnamedItem": "عنصر غير مسمى",
+    "successMessages": {
+      "evaluationLoaded": "تم تحميل التقييم بنجاح",
+      "reportLoaded": "تم تحميل التقرير بنجاح",
+      "comparisonLoaded": "تم تحميل المقارنة بنجاح",
+      "formProcessingLoaded": "تم تحميل معالجة النموذج بنجاح",
+      "evaluationDeleted": "تم حذف التقييم بنجاح",
+      "reportDeleted": "تم حذف التقرير بنجاح",
+      "comparisonDeleted": "تم حذف المقارنة بنجاح",
+      "formProcessingDeleted": "تم حذف معالجة النموذج بنجاح"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "ملخص التقييم",
+      "questionAnswerDetails": "تفاصيل السؤال والإجابة",
+      "summary": "ملخص",
+      "topicAnalysis": "تحليل الموضوع"
+    }
+  },
   "feedback": {
     "modalTitlePositive": "ما الذي كان مفيداً؟",
     "modalTitleNegative": "ما الذي يمكن تحسينه؟",

@@ -431,14 +431,19 @@
     },
     "metadata": {
       "question": "question",
+      "question_one": "question",
       "questions": "questions",
       "topic": "topic",
+      "topic_one": "topic",
       "topics": "topics",
       "field": "field",
+      "field_one": "field",
       "fields": "fields",
       "document": "document",
+      "document_one": "document",
       "documents": "documents",
-      "digitized": "digitized"
+      "digitized": "digitized",
+      "handwritten": "handwritten"
     },
     "feedback": {
       "positive": "Positive feedback",
@@ -457,6 +462,12 @@
       "reportDeleted": "Report deleted successfully",
       "comparisonDeleted": "Comparison deleted successfully",
       "formProcessingDeleted": "Form processing deleted successfully"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Evaluation Summary",
+      "questionAnswerDetails": "Question-Answer Details",
+      "summary": "Summary",
+      "topicAnalysis": "Topic Analysis"
     }
   },
   "common": {

@@ -390,6 +390,66 @@
       "kb_creation_complete": "Tạo cơ sở kiến thức đã hoàn thành thành công"
     }
   },
+  "archive": {
+    "title": "Lưu trữ",
+    "history": "Lịch sử",
+    "allUsers": "Tất cả Người dùng",
+    "allUsersToggleTooltip": "Chuyển đổi giữa xem chỉ lịch sử của bạn hoặc lịch sử của tất cả người dùng",
+    "viewingAllUsers": "Đang xem lịch sử của tất cả người dùng",
+    "viewingMyHistory": "Chỉ xem lịch sử của tôi",
+    "tabs": {
+      "review": "Xem xét",
+      "generate": "Tạo",
+      "compare": "So sánh",
+      "match": "Khớp"
+    },
+    "emptyMessages": {
+      "review": "Không có đánh giá trước đó",
+      "generate": "Không có báo cáo trước đó",
+      "compare": "Không có so sánh trước đó",
+      "match": "Không có xử lý biểu mẫu trước đó"
+    },
+    "metadata": {
+      "question": "câu hỏi",
+      "question_one": "câu hỏi",
+      "questions": "câu hỏi",
+      "topic": "chủ đề",
+      "topic_one": "chủ đề",
+      "topics": "chủ đề",
+      "field": "trường",
+      "field_one": "trường",
+      "fields": "trường",
+      "document": "tài liệu",
+      "document_one": "tài liệu",
+      "documents": "tài liệu",
+      "digitized": "số hóa",
+      "handwritten": "viết tay"
+    },
+    "feedback": {
+      "positive": "Phản hồi tích cực",
+      "negative": "Phản hồi tiêu cực",
+      "hasFeedback": "Có phản hồi"
+    },
+    "deleteConfirmation": "Bạn có chắc chắn muốn xóa mục này? Hành động này không thể hoàn tác.",
+    "unknownDate": "Ngày không xác định",
+    "unnamedItem": "Mục không tên",
+    "successMessages": {
+      "evaluationLoaded": "Đánh giá đã tải thành công",
+      "reportLoaded": "Báo cáo đã tải thành công",
+      "comparisonLoaded": "So sánh đã tải thành công",
+      "formProcessingLoaded": "Xử lý biểu mẫu đã tải thành công",
+      "evaluationDeleted": "Đánh giá đã xóa thành công",
+      "reportDeleted": "Báo cáo đã xóa thành công",
+      "comparisonDeleted": "So sánh đã xóa thành công",
+      "formProcessingDeleted": "Xử lý biểu mẫu đã xóa thành công"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Tóm tắt Đánh giá",
+      "questionAnswerDetails": "Chi tiết Câu hỏi-Trả lời",
+      "summary": "Tóm tắt",
+      "topicAnalysis": "Phân tích Chủ đề"
+    }
+  },
   "optimizeChecklistModal": {
     "title": "Tối ưu hóa Danh sách Kiểm tra",
     "customInstructionsLabel": "Hướng dẫn Tùy chỉnh (Tùy chọn)",

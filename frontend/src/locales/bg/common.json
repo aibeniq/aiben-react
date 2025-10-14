@@ -391,6 +391,66 @@
       "kb_creation_complete": "Създаването на базата знания завърши успешно"
     }
   },
+  "archive": {
+    "title": "Архив",
+    "history": "История",
+    "allUsers": "Всички потребители",
+    "allUsersToggleTooltip": "Превключване между показване само на вашата история или историята на всички потребители",
+    "viewingAllUsers": "Показване на историята на всички потребители",
+    "viewingMyHistory": "Показване само на моята история",
+    "tabs": {
+      "review": "Преглед",
+      "generate": "Генериране",
+      "compare": "Сравнение",
+      "match": "Съвпадение"
+    },
+    "emptyMessages": {
+      "review": "Няма предишни оценки",
+      "generate": "Няма предишни отчети",
+      "compare": "Няма предишни сравнения",
+      "match": "Няма предишна обработка на формуляри"
+    },
+    "metadata": {
+      "question": "въпрос",
+      "question_one": "въпрос",
+      "questions": "въпроси",
+      "topic": "тема",
+      "topic_one": "тема",
+      "topics": "теми",
+      "field": "поле",
+      "field_one": "поле",
+      "fields": "полета",
+      "document": "документ",
+      "document_one": "документ",
+      "documents": "документи",
+      "digitized": "дигитализиран",
+      "handwritten": "ръкописен"
+    },
+    "feedback": {
+      "positive": "Положителна обратна връзка",
+      "negative": "Отрицателна обратна връзка",
+      "hasFeedback": "Има обратна връзка"
+    },
+    "deleteConfirmation": "Сигурни ли сте, че искате да изтриете този елемент? Това действие не може да бъде отменено.",
+    "unknownDate": "Неизвестна дата",
+    "unnamedItem": "Неименуван елемент",
+    "successMessages": {
+      "evaluationLoaded": "Оценката е заредена успешно",
+      "reportLoaded": "Отчетът е зареден успешно",
+      "comparisonLoaded": "Сравнението е заредено успешно",
+      "formProcessingLoaded": "Обработката на формуляра е заредена успешно",
+      "evaluationDeleted": "Оценката е изтрита успешно",
+      "reportDeleted": "Отчетът е изтрит успешно",
+      "comparisonDeleted": "Сравнението е изтрито успешно",
+      "formProcessingDeleted": "Обработката на формуляра е изтрита успешно"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Резюме на оценката",
+      "questionAnswerDetails": "Детайли въпрос-отговор",
+      "summary": "Резюме",
+      "topicAnalysis": "Анализ на темата"
+    }
+  },
   "optimizeChecklistModal": {
     "title": "Оптимизиране на Контролния Списък",
     "customInstructionsLabel": "Персонализирани Инструкции (Незадължително)",

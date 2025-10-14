@@ -361,6 +361,66 @@
       "kb_creation_complete": "ज्ञान आधार निर्माण सफलतापूर्वक पूरा हुआ"
     }
   },
+  "archive": {
+    "title": "आर्काइव",
+    "history": "इतिहास",
+    "allUsers": "सभी उपयोगकर्ता",
+    "allUsersToggleTooltip": "केवल अपनी इतिहास या सभी उपयोगकर्ताओं की इतिहास देखने के बीच टॉगल करें",
+    "viewingAllUsers": "सभी उपयोगकर्ताओं की इतिहास देख रहे हैं",
+    "viewingMyHistory": "केवल अपनी इतिहास देख रहे हैं",
+    "tabs": {
+      "review": "समीक्षा",
+      "generate": "उत्पन्न करें",
+      "compare": "तुलना करें",
+      "match": "मिलान"
+    },
+    "emptyMessages": {
+      "review": "कोई पिछली मूल्यांकन नहीं",
+      "generate": "कोई पिछली रिपोर्ट नहीं",
+      "compare": "कोई पिछली तुलना नहीं",
+      "match": "कोई पिछली फॉर्म प्रोसेसिंग नहीं"
+    },
+    "metadata": {
+      "question": "प्रश्न",
+      "question_one": "प्रश्न",
+      "questions": "प्रश्न",
+      "topic": "विषय",
+      "topic_one": "विषय",
+      "topics": "विषय",
+      "field": "क्षेत्र",
+      "field_one": "क्षेत्र",
+      "fields": "क्षेत्र",
+      "document": "दस्तावेज़",
+      "document_one": "दस्तावेज़",
+      "documents": "दस्तावेज़",
+      "digitized": "डिजिटल",
+      "handwritten": "हस्तलिखित"
+    },
+    "feedback": {
+      "positive": "सकारात्मक प्रतिक्रिया",
+      "negative": "नकारात्मक प्रतिक्रिया",
+      "hasFeedback": "प्रतिक्रिया है"
+    },
+    "deleteConfirmation": "क्या आप वाकई इस आइटम को हटाना चाहते हैं? इस क्रिया को वापस नहीं किया जा सकता।",
+    "unknownDate": "अज्ञात तारीख",
+    "unnamedItem": "अनाम आइटम",
+    "successMessages": {
+      "evaluationLoaded": "मूल्यांकन सफलतापूर्वक लोड हुआ",
+      "reportLoaded": "रिपोर्ट सफलतापूर्वक लोड हुई",
+      "comparisonLoaded": "तुलना सफलतापूर्वक लोड हुई",
+      "formProcessingLoaded": "फॉर्म प्रोसेसिंग सफलतापूर्वक लोड हुई",
+      "evaluationDeleted": "मूल्यांकन सफलतापूर्वक हटाया गया",
+      "reportDeleted": "रिपोर्ट सफलतापूर्वक हटाई गई",
+      "comparisonDeleted": "तुलना सफलतापूर्वक हटाई गई",
+      "formProcessingDeleted": "फॉर्म प्रोसेसिंग सफलतापूर्वक हटाई गई"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "मूल्यांकन सारांश",
+      "questionAnswerDetails": "प्रश्न-उत्तर विवरण",
+      "summary": "सारांश",
+      "topicAnalysis": "विषय विश्लेषण"
+    }
+  },
   "editOutlineModal": {
     "title": "रूपरेखा संपादित करें",
     "createTitle": "नई रूपरेखा बनाएं",

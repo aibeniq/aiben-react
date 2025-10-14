@@ -520,6 +520,50 @@
       "kb_creation_complete": "Tworzenie bazy wiedzy zakończone pomyślnie"
     }
   },
+  "archive": {
+    "title": "Archiwum",
+    "history": "Historia",
+    "allUsers": "Wszyscy Użytkownicy",
+    "allUsersToggleTooltip": "Przełącz między wyświetlaniem tylko swojej historii lub historii wszystkich użytkowników",
+    "viewingAllUsers": "Wyświetlanie historii wszystkich użytkowników",
+    "viewingMyHistory": "Wyświetlanie tylko mojej historii",
+    "tabs": {
+      "review": "Przejrzyj",
+      "generate": "Generuj",
+      "compare": "Porównaj",
+      "match": "Dopasuj"
+    },
+    "emptyMessages": {
+      "review": "Brak poprzednich ocen",
+      "generate": "Brak poprzednich raportów",
+      "compare": "Brak poprzednich porównań",
+      "match": "Brak poprzedniego przetwarzania formularzy"
+    },
+    "feedback": {
+      "positive": "Pozytywna opinia",
+      "negative": "Negatywna opinia",
+      "hasFeedback": "Ma opinię"
+    },
+    "deleteConfirmation": "Czy na pewno chcesz usunąć ten element? Tej akcji nie można cofnąć.",
+    "unknownDate": "Nieznana data",
+    "unnamedItem": "Nienazwany element",
+    "successMessages": {
+      "evaluationLoaded": "Ocena została pomyślnie załadowana",
+      "reportLoaded": "Raport został pomyślnie załadowany",
+      "comparisonLoaded": "Porównanie zostało pomyślnie załadowane",
+      "formProcessingLoaded": "Przetwarzanie formularza zostało pomyślnie załadowane",
+      "evaluationDeleted": "Ocena została pomyślnie usunięta",
+      "reportDeleted": "Raport został pomyślnie usunięty",
+      "comparisonDeleted": "Porównanie zostało pomyślnie usunięte",
+      "formProcessingDeleted": "Przetwarzanie formularza zostało pomyślnie usunięte"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Podsumowanie Oceny",
+      "questionAnswerDetails": "Szczegóły Pytanie-Odpowiedź",
+      "summary": "Podsumowanie",
+      "topicAnalysis": "Analiza Tematu"
+    }
+  },
   "feedback": {
     "modalTitlePositive": "Co było pomocne?",
     "modalTitleNegative": "Co można poprawić?",
