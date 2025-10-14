@@ -150,7 +150,8 @@
     "suggestTopicListTopics": "Käytä tekoälyä asiaankuuluvien vertailuaiheiden automaattiseen luomiseen kuvauksen ja viiteasiakirjojen perusteella",
     "suggestFormTemplateFields": "Käytä tekoälyä asiaankuuluvien lomakekenttien automaattiseen luomiseen kuvauksen ja viiteasiakirjojen perusteella",
     "referenceDocuments": "Lataa viiteasiakirjoja tai valitse tietokanta auttaaksesi tekoälyä ehdottamaan sisältöä erityisen asiayhteyden ja vaatimusten perusteella",
-    "referenceDocumentsFiles": "Anna viiteasiakirjoja auttaaksesi tekoälyä tuottamaan tarkempia ja asiayhteyteen sopivia ehdotuksia"
+    "referenceDocumentsFiles": "Anna viiteasiakirjoja auttaaksesi tekoälyä tuottamaan tarkempia ja asiayhteyteen sopivia ehdotuksia",
+    "minimumDescriptionLength": "Kuvausten on oltava vähintään 10 merkkiä pitkä, jotta AI-ehdotuksille saadaan riittävä konteksti"
   },
   "common": {
     "loading": "Ladataan...",

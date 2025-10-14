@@ -154,7 +154,16 @@
     "createChecklist": "Erstellen Sie eine neue Checkliste mit benutzerdefinierten Fragen zur Bewertung von Dokumenten anhand spezifischer Kriterien",
     "createOutline": "Erstellen Sie eine neue Gliederungsstruktur zur Anleitung der Erstellung strukturierter Berichte",
     "createTopicList": "Erstellen Sie eine neue Themenliste, um die Vergleichsanalyse auf spezifische Themen zu fokussieren",
-    "createFormTemplate": "Erstellen Sie eine neue Formularvorlage für die automatisierte Dokumenteninhaltsextraktion und -zuordnung"
+    "createFormTemplate": "Erstellen Sie eine neue Formularvorlage für die automatisierte Dokumenteninhaltsextraktion und -zuordnung",
+    "suggestChecklistQuestions": "Verwenden Sie KI, um automatisch relevante Checklist-Fragen basierend auf Ihrer Beschreibung und Referenzdokumenten zu generieren",
+    "optimizeChecklistQuestions": "Verbessern und verfeinern Sie bestehende Checklist-Fragen mithilfe der ausgewählten Wissensdatenbank für bessere Genauigkeit",
+    "suggestOutlineSections": "Verwenden Sie KI, um automatisch Gliederungsabschnitte basierend auf Ihrer Beschreibung und Referenzdokumenten zu generieren",
+    "optimizeOutlineSections": "Verbessern und verfeinern Sie bestehende Gliederungsabschnitte mithilfe der ausgewählten Wissensdatenbank für bessere Struktur",
+    "suggestTopicListTopics": "Verwenden Sie KI, um automatisch relevante Vergleichsthemen basierend auf Ihrer Beschreibung und Referenzdokumenten zu generieren",
+    "suggestFormTemplateFields": "Verwenden Sie KI, um automatisch relevante Formularfelder basierend auf Ihrer Beschreibung und Referenzdokumenten zu generieren",
+    "referenceDocuments": "Laden Sie Referenzdokumente hoch oder wählen Sie eine Wissensdatenbank aus, um die KI bei der Vorschlagung von Inhalten basierend auf Ihrem spezifischen Kontext und Ihren Anforderungen zu unterstützen",
+    "referenceDocumentsFiles": "Stellen Sie Referenzdokumente zur Verfügung, um die KI bei der Generierung präziserer und kontextuell relevanter Vorschläge zu unterstützen",
+    "minimumDescriptionLength": "Beschreibungen müssen mindestens 10 Zeichen lang sein, um ausreichenden Kontext für KI-Vorschläge zu bieten"
   },
   "review": {
     "pageTitle": "Dokumente Überprüfen",
