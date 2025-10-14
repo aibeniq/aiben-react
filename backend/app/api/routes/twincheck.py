@@ -381,6 +381,18 @@ async def compare_documents(
                             settings.TWINCHECK_ANALYSIS_PROMPT_TEMPLATE,
                             prompt_variables,
                         )
+
+                        # Translate each chunk result into the user's preferred language
+                        # so later synthesis and final topic outputs are consistent.
+                        try:
+                            # small sleep to allow cancellation to be observed
+                            await asyncio.sleep(0.01)
+                            chunk_result = await translate_text_if_needed(
+                                chunk_result, session, current_user, llm
+                            )
+                        except Exception as _translate_exc:
+                            # If translation fails, keep original chunk_result
+                            print(f"Warning: chunk translation failed: {_translate_exc}")
                         
                         # CRITICAL: Check if client disconnected after LLM call
                         try:
@@ -480,7 +492,7 @@ async def compare_documents(
                             print(
                                 f"Vision analysis error for chunked topic {topic}: {vision_error}"
                             )
-                            # Fall back to text-only analysis
+                            # Fall back to text-only analysis (synthesized_result was translated earlier)
                             topic_analysis.append(
                                 {
                                     "topic": topic,
@@ -578,6 +590,15 @@ async def compare_documents(
                                 )
                             )
 
+                            # Ensure combined analysis is translated for user's language as well
+                            try:
+                                await asyncio.sleep(0.01)
+                                combined_analysis = await translate_text_if_needed(
+                                    combined_analysis, session, current_user, llm
+                                )
+                            except Exception as _comb_translate_exc:
+                                print(f"Warning: combined analysis translation failed: {_comb_translate_exc}")
+
                             topic_analysis.append(
                                 {
                                     "topic": topic,
@@ -595,11 +616,20 @@ async def compare_documents(
                             print(
                                 f"Vision analysis error for topic {topic}: {vision_error}"
                             )
-                            # Fall back to text-only analysis
+                            # Fall back to text-only analysis - translate topic_result before appending
+                            try:
+                                await asyncio.sleep(0.01)
+                                translated_topic_result = await translate_text_if_needed(
+                                    topic_result, session, current_user, llm
+                                )
+                            except Exception as _t_exc:
+                                print(f"Warning: topic_result translation failed in vision fallback: {_t_exc}")
+                                translated_topic_result = topic_result
+
                             topic_analysis.append(
                                 {
                                     "topic": topic,
-                                    "analysis": topic_result,
+                                    "analysis": translated_topic_result,
                                     "vision_error": str(vision_error),
                                     "source_citations": source_citations,
                                 }
@@ -1307,12 +1337,21 @@ async def generate_csv(
 
         # Write topic analysis rows
         for topic_result in topic_results:
+            # Translate stored topic results into the user's preferred language when exporting
             if isinstance(topic_result, dict):
                 topic = topic_result.get("topic", "Unknown Topic")
                 analysis = topic_result.get("analysis", "No analysis available")
             else:
                 topic = str(topic_result)
                 analysis = "No analysis available"
+
+            try:
+                # Attempt to translate both topic title and analysis for CSV consumers
+                await asyncio.sleep(0.01)
+                topic = await translate_text_if_needed(topic, session, current_user)
+                analysis = await translate_text_if_needed(analysis, session, current_user)
+            except Exception as _csv_trans_exc:
+                print(f"Warning: translation failed while generating CSV: {_csv_trans_exc}")
 
             # Clean analysis text for CSV
             cleaned_analysis = (
