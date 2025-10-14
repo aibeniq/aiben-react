@@ -41,7 +41,7 @@ from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
 from app.services.llms import get_default_llm, invoke_llm, record_llm_interaction
-from app.services.translation import translate_text_if_needed
+from app.services.translation import translate_text_if_needed, translate
 from app.services.retrievers import (
     create_ensemble_retriever,
 )  # Import the ensemble retriever
@@ -3259,23 +3259,30 @@ async def generate_docx(
         doc = Document()
 
         print("Adding title and date to the document...")
+        # Determine language
+        language = request.language or getattr(current_user, 'preferred_language', 'en') or 'en'
+
         # Add a title - hard-coding it for ReportGenie because it's using the service for Compare functionality with 'Document Comparison' as title
         title_text = (
-            # request.title
-            # if hasattr(request, "title") and request.title
-            # else "Generated Document"
-            "Generated Document"
+            request.title
+            if request.title
+            else translate('generated_document', language)
         )
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-        # Add date
-        date_paragraph = doc.add_paragraph()
-        date_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        date_run = date_paragraph.add_run(
-            f"Generated on: {datetime.now().strftime('%B %d, %Y')}"
+        # Add translated subtitle with metadata
+        date_str = datetime.now().strftime('%B %d, %Y at %H:%M')
+        subtitle_template = translate('generated_on', language)
+        subtitle = subtitle_template.format(
+            date=date_str,
+            name=current_user.full_name or current_user.email,
+            email=current_user.email
         )
-        date_run.italic = True
+        subtitle_paragraph = doc.add_paragraph()
+        subtitle_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        subtitle_run = subtitle_paragraph.add_run(subtitle)
+        subtitle_run.italic = True
 
         # Add a separator
         doc.add_paragraph("─" * 50)

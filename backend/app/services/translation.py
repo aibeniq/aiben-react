@@ -150,6 +150,11 @@ PROGRESS_TRANSLATIONS = {
         "storing_complete": "Stored vector database with {current} embeddings",
         "finalizing": "Finalizing creation {current}/{total}...",
         "kb_creation_complete": "Knowledge base creation completed successfully",
+        "generated_on": "Generated on: {date} by user {name} - email: {email}",
+        "document_comparison": "Document Comparison",
+        "generated_document": "Generated Document",
+        "matching_results": "Matching Results",
+        "document_evaluation": "Document Evaluation",
     },
     "es": {
         "initializing_document_review": "Inicializando revisión de documentos...",
@@ -198,6 +203,11 @@ PROGRESS_TRANSLATIONS = {
         "storing_complete": "Base de datos vectorial almacenada con {current} embeddings",
         "finalizing": "Finalizando creación {current}/{total}...",
         "kb_creation_complete": "Creación de base de conocimientos completada exitosamente",
+        "generated_on": "Generado el: {date} por usuario {name} - email: {email}",
+        "document_comparison": "Comparación de Documentos",
+        "generated_document": "Documento Generado",
+        "matching_results": "Resultados de Coincidencia",
+        "document_evaluation": "Evaluación de Documentos",
     },
     "fr": {
         "initializing_document_review": "Initialisation de la révision des documents...",
@@ -246,6 +256,11 @@ PROGRESS_TRANSLATIONS = {
         "storing_complete": "Base de données vectorielle stockée avec {current} embeddings",
         "finalizing": "Finalisation de la création {current}/{total}...",
         "kb_creation_complete": "Création de la base de connaissances terminée avec succès",
+        "generated_on": "Généré le: {date} par utilisateur {name} - email: {email}",
+        "document_comparison": "Comparaison de Documents",
+        "generated_document": "Document Généré",
+        "matching_results": "Résultats de Correspondance",
+        "document_evaluation": "Évaluation de Document",
     },
     "de": {
         "initializing_document_review": "Dokumentenüberprüfung wird initialisiert...",
@@ -294,6 +309,11 @@ PROGRESS_TRANSLATIONS = {
         "storing_complete": "Vektordatenbank mit {current} Embeddings gespeichert",
         "finalizing": "Abschluss der Erstellung {current}/{total}...",
         "kb_creation_complete": "Wissensdatenbank-Erstellung erfolgreich abgeschlossen",
+        "generated_on": "Generiert am: {date} von Benutzer {name} - E-Mail: {email}",
+        "document_comparison": "Dokumentenvergleich",
+        "generated_document": "Generiertes Dokument",
+        "matching_results": "Übereinstimmende Ergebnisse",
+        "document_evaluation": "Dokumentenbewertung",
     },
     "it": {
         "initializing_document_review": "Inizializzazione della revisione dei documenti...",
@@ -342,6 +362,11 @@ PROGRESS_TRANSLATIONS = {
         "storing_complete": "Database vettoriale memorizzato con {current} embeddings",
         "finalizing": "Finalizzazione creazione {current}/{total}...",
         "kb_creation_complete": "Creazione base di conoscenza completata con successo",
+        "generated_on": "Generato il: {date} dall'utente {name} - email: {email}",
+        "document_comparison": "Confronto Documenti",
+        "generated_document": "Documento Generato",
+        "matching_results": "Risultati Corrispondenti",
+        "document_evaluation": "Valutazione Documento",
     },
     "pt": {
         "initializing_document_review": "Inicializando revisão de documentos...",
@@ -458,6 +483,11 @@ PROGRESS_TRANSLATIONS = {
         "storing_complete": "已存储包含 {current} 个嵌入的向量数据库",
         "finalizing": "正在完成创建 {current}/{total}...",
         "kb_creation_complete": "知识库创建成功完成",
+        "generated_on": "生成于: {date} 用户 {name} - 邮箱: {email}",
+        "document_comparison": "文档比较",
+        "generated_document": "生成的文档",
+        "matching_results": "匹配结果",
+        "document_evaluation": "文档评估",
     },
     "ja": {
         "initializing_document_review": "ドキュメントレビューの初期化中...",
@@ -1655,6 +1685,32 @@ PROGRESS_TRANSLATIONS = {
 def translate_progress_message(key: str, language: str = "en", **kwargs) -> str:
     """
     Translate a progress message key to the specified language with parameter substitution.
+
+    Args:
+        key: The translation key
+        language: The target language code
+        **kwargs: Parameters to substitute in the message
+
+    Returns:
+        Translated message with parameters substituted
+    """
+    # Get translations for the requested language, fallback to English
+    translations = PROGRESS_TRANSLATIONS.get(language, PROGRESS_TRANSLATIONS.get("en", {}))
+
+    # Get the message template
+    template = translations.get(key, PROGRESS_TRANSLATIONS["en"].get(key, key))
+
+    # Substitute parameters
+    try:
+        return template.format(**kwargs)
+    except (KeyError, ValueError):
+        # If parameter substitution fails, return the template as-is
+        return template
+
+
+def translate(key: str, language: str = "en", **kwargs) -> str:
+    """
+    Translate a general key to the specified language with parameter substitution.
 
     Args:
         key: The translation key

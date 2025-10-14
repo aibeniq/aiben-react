@@ -592,6 +592,8 @@ class ReportGenieDetailResponse(SQLModel):
 
 class DocxRequest(SQLModel):
     content: str
+    title: Optional[str] = None
+    language: Optional[str] = 'en'
 
 
 class LlmInteraction(SQLModel, table=True):
