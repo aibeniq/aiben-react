@@ -372,6 +372,65 @@
       "kb_creation_complete": "Creazione della base di conoscenza completata con successo"
     }
   },
+  "archive": {
+    "title": "Archivio",
+    "history": "Cronologia",
+    "allUsers": "Tutti gli Utenti",
+    "allUsersToggleTooltip": "Alterna tra visualizzare solo la tua cronologia o la cronologia di tutti gli utenti",
+    "viewingAllUsers": "Visualizzazione della cronologia di tutti gli utenti",
+    "viewingMyHistory": "Visualizzazione solo della mia cronologia",
+    "tabs": {
+      "review": "Revisione",
+      "generate": "Genera",
+      "compare": "Confronta",
+      "match": "Abbina"
+    },
+    "emptyMessages": {
+      "review": "Nessuna valutazione precedente",
+      "generate": "Nessun rapporto precedente",
+      "compare": "Nessun confronto precedente",
+      "match": "Nessuna elaborazione modulo precedente"
+    },
+    "metadata": {
+      "question": "question",
+      "question_one": "question",
+      "questions": "questions",
+      "topic": "topic",
+      "topic_one": "topic",
+      "topics": "topics",
+      "field": "field",
+      "field_one": "field",
+      "fields": "fields",
+      "document": "document",
+      "document_one": "document",
+      "documents": "documents",
+      "digitized": "digitized"
+    },
+    "feedback": {
+      "positive": "Feedback positivo",
+      "negative": "Feedback negativo",
+      "hasFeedback": "Ha feedback"
+    },
+    "deleteConfirmation": "Sei sicuro di voler eliminare questo elemento? Questa azione non può essere annullata.",
+    "unknownDate": "Data sconosciuta",
+    "unnamedItem": "Elemento senza nome",
+    "successMessages": {
+      "evaluationLoaded": "Valutazione caricata con successo",
+      "reportLoaded": "Rapporto caricato con successo",
+      "comparisonLoaded": "Confronto caricato con successo",
+      "formProcessingLoaded": "Elaborazione modulo caricata con successo",
+      "evaluationDeleted": "Valutazione eliminata con successo",
+      "reportDeleted": "Rapporto eliminata con successo",
+      "comparisonDeleted": "Confronto eliminata con successo",
+      "formProcessingDeleted": "Elaborazione modulo eliminata con successo"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Riepilogo Valutazione",
+      "questionAnswerDetails": "Dettagli Domanda-Risposta",
+      "summary": "Riepilogo",
+      "topicAnalysis": "Analisi Argomento"
+    }
+  },
   "common": {
     "loading": "Caricamento...",
     "noData": "Nessun dato disponibile",

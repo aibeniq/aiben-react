@@ -386,6 +386,66 @@
       "kb_creation_complete": "יצירת בסיס הידע הושלמה בהצלחה"
     }
   },
+  "archive": {
+    "title": "ארכיון",
+    "history": "היסטוריה",
+    "allUsers": "כל המשתמשים",
+    "allUsersToggleTooltip": "החלף בין צפייה בהיסטוריה שלך בלבד או בהיסטוריה של כל המשתמשים",
+    "viewingAllUsers": "צופה בהיסטוריה של כל המשתמשים",
+    "viewingMyHistory": "צופה בהיסטוריה שלי בלבד",
+    "tabs": {
+      "review": "סקור",
+      "generate": "צור",
+      "compare": "השווה",
+      "match": "התאם"
+    },
+    "emptyMessages": {
+      "review": "אין הערכות קודמות",
+      "generate": "אין דוחות קודמים",
+      "compare": "אין השוואות קודמות",
+      "match": "אין עיבוד טפסים קודם"
+    },
+    "metadata": {
+      "question": "שאלה",
+      "question_one": "שאלה",
+      "questions": "שאלות",
+      "topic": "נושא",
+      "topic_one": "נושא",
+      "topics": "נושאים",
+      "field": "שדה",
+      "field_one": "שדה",
+      "fields": "שדות",
+      "document": "מסמך",
+      "document_one": "מסמך",
+      "documents": "מסמכים",
+      "digitized": "מספרי",
+      "handwritten": "כתוב בכתב יד"
+    },
+    "feedback": {
+      "positive": "משוב חיובי",
+      "negative": "משוב שלילי",
+      "hasFeedback": "יש משוב"
+    },
+    "deleteConfirmation": "האם אתה בטוח שברצונך למחוק פריט זה? פעולה זו לא ניתנת לביטול.",
+    "unknownDate": "תאריך לא ידוע",
+    "unnamedItem": "פריט ללא שם",
+    "successMessages": {
+      "evaluationLoaded": "ההערכה נטענה בהצלחה",
+      "reportLoaded": "הדוח נטען בהצלחה",
+      "comparisonLoaded": "ההשוואה נטענה בהצלחה",
+      "formProcessingLoaded": "עיבוד הטופס נטען בהצלחה",
+      "evaluationDeleted": "ההערכה נמחקה בהצלחה",
+      "reportDeleted": "הדוח נמחק בהצלחה",
+      "comparisonDeleted": "ההשוואה נמחקה בהצלחה",
+      "formProcessingDeleted": "עיבוד הטופס נמחק בהצלחה"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "סיכום הערכה",
+      "questionAnswerDetails": "פרטי שאלה-תשובה",
+      "summary": "סיכום",
+      "topicAnalysis": "ניתוח נושא"
+    }
+  },
   "optimizeChecklistModal": {
     "title": "ייעול רשימת בדיקה",
     "customInstructionsLabel": "הוראות מותאמות (אופציונלי)",

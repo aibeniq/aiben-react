@@ -522,6 +522,50 @@
       "kb_creation_complete": "Aanmaak van kennisbank succesvol voltooid"
     }
   },
+  "archive": {
+    "title": "Archief",
+    "history": "Geschiedenis",
+    "allUsers": "Alle Gebruikers",
+    "allUsersToggleTooltip": "Schakel tussen het bekijken van alleen uw geschiedenis of de geschiedenis van alle gebruikers",
+    "viewingAllUsers": "Geschiedenis van alle gebruikers bekijken",
+    "viewingMyHistory": "Alleen mijn geschiedenis bekijken",
+    "tabs": {
+      "review": "Beoordelen",
+      "generate": "Genereren",
+      "compare": "Vergelijken",
+      "match": "Overeenkomen"
+    },
+    "emptyMessages": {
+      "review": "Geen vorige evaluaties",
+      "generate": "Geen vorige rapporten",
+      "compare": "Geen vorige vergelijkingen",
+      "match": "Geen vorige formulierverwerking"
+    },
+    "feedback": {
+      "positive": "Positieve feedback",
+      "negative": "Negatieve feedback",
+      "hasFeedback": "Heeft feedback"
+    },
+    "deleteConfirmation": "Weet u zeker dat u dit item wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+    "unknownDate": "Onbekende datum",
+    "unnamedItem": "Naamloos item",
+    "successMessages": {
+      "evaluationLoaded": "Evaluatie succesvol geladen",
+      "reportLoaded": "Rapport succesvol geladen",
+      "comparisonLoaded": "Vergelijking succesvol geladen",
+      "formProcessingLoaded": "Formulierverwerking succesvol geladen",
+      "evaluationDeleted": "Evaluatie succesvol verwijderd",
+      "reportDeleted": "Rapport succesvol verwijderd",
+      "comparisonDeleted": "Vergelijking succesvol verwijderd",
+      "formProcessingDeleted": "Formulierverwerking succesvol verwijderd"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Evaluatie Samenvatting",
+      "questionAnswerDetails": "Vraag-Antwoord Details",
+      "summary": "Samenvatting",
+      "topicAnalysis": "Onderwerp Analyse"
+    }
+  },
   "feedback": {
     "modalTitlePositive": "Wat was nuttig?",
     "modalTitleNegative": "Wat kan worden verbeterd?",

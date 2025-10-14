@@ -517,6 +517,50 @@
       "kb_creation_complete": "知识库创建成功完成"
     }
   },
+  "archive": {
+    "title": "档案",
+    "history": "历史",
+    "allUsers": "所有用户",
+    "allUsersToggleTooltip": "在仅查看您的历史记录或所有用户的历史记录之间切换",
+    "viewingAllUsers": "查看所有用户的历史记录",
+    "viewingMyHistory": "仅查看我的历史记录",
+    "tabs": {
+      "review": "审查",
+      "generate": "生成",
+      "compare": "比较",
+      "match": "匹配"
+    },
+    "emptyMessages": {
+      "review": "没有以前的评估",
+      "generate": "没有以前的报告",
+      "compare": "没有以前的比较",
+      "match": "没有以前的表单处理"
+    },
+    "feedback": {
+      "positive": "积极反馈",
+      "negative": "消极反馈",
+      "hasFeedback": "有反馈"
+    },
+    "deleteConfirmation": "您确定要删除此项目吗？此操作无法撤销。",
+    "unknownDate": "未知日期",
+    "unnamedItem": "未命名项目",
+    "successMessages": {
+      "evaluationLoaded": "评估已成功加载",
+      "reportLoaded": "报告已成功加载",
+      "comparisonLoaded": "比较已成功加载",
+      "formProcessingLoaded": "表单处理已成功加载",
+      "evaluationDeleted": "评估已成功删除",
+      "reportDeleted": "报告已成功删除",
+      "comparisonDeleted": "比较已成功删除",
+      "formProcessingDeleted": "表单处理已成功删除"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "评估摘要",
+      "questionAnswerDetails": "问题-答案详情",
+      "summary": "摘要",
+      "topicAnalysis": "主题分析"
+    }
+  },
   "feedback": {
     "modalTitlePositive": "什么是有用的？",
     "modalTitleNegative": "什么可以改进？",

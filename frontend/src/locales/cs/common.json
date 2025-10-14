@@ -396,6 +396,65 @@
       "kb_creation_complete": "Vytvoření znalostní báze dokončeno úspěšně"
     }
   },
+  "archive": {
+    "title": "Archiv",
+    "history": "Historie",
+    "allUsers": "Všichni Uživatelé",
+    "allUsersToggleTooltip": "Přepínat mezi zobrazením pouze vaší historie nebo historie všech uživatelů",
+    "viewingAllUsers": "Zobrazení historie všech uživatelů",
+    "viewingMyHistory": "Zobrazení pouze mé historie",
+    "tabs": {
+      "review": "Kontrola",
+      "generate": "Generovat",
+      "compare": "Porovnat",
+      "match": "Párovat"
+    },
+    "emptyMessages": {
+      "review": "Žádné předchozí hodnocení",
+      "generate": "Žádné předchozí zprávy",
+      "compare": "Žádná předchozí porovnání",
+      "match": "Žádné předchozí zpracování formulářů"
+    },
+    "metadata": {
+      "question": "question",
+      "question_one": "question",
+      "questions": "questions",
+      "topic": "topic",
+      "topic_one": "topic",
+      "topics": "topics",
+      "field": "field",
+      "field_one": "field",
+      "fields": "fields",
+      "document": "document",
+      "document_one": "document",
+      "documents": "documents",
+      "digitized": "digitized"
+    },
+    "feedback": {
+      "positive": "Pozitivní zpětná vazba",
+      "negative": "Negativní zpětná vazba",
+      "hasFeedback": "Má zpětnou vazbu"
+    },
+    "deleteConfirmation": "Jste si jisti, že chcete tuto položku smazat? Tuto akci nelze vrátit zpět.",
+    "unknownDate": "Neznámé datum",
+    "unnamedItem": "Nepojmenovaná položka",
+    "successMessages": {
+      "evaluationLoaded": "Hodnocení bylo úspěšně načteno",
+      "reportLoaded": "Zpráva byla úspěšně načtena",
+      "comparisonLoaded": "Porovnání bylo úspěšně načteno",
+      "formProcessingLoaded": "Zpracování formuláře bylo úspěšně načteno",
+      "evaluationDeleted": "Hodnocení bylo úspěšně smazáno",
+      "reportDeleted": "Zpráva byla úspěšně smazána",
+      "comparisonDeleted": "Porovnání bylo úspěšně smazáno",
+      "formProcessingDeleted": "Zpracování formuláře bylo úspěšně smazáno"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Souhrn Hodnocení",
+      "questionAnswerDetails": "Detaily Otázka-Odpověď",
+      "summary": "Souhrn",
+      "topicAnalysis": "Analýza Tématu"
+    }
+  },
   "dropdowns": {
     "selectKnowledgeBase": "Vyberte znalostní bázi",
     "selectFile": "Vyberte soubor",

@@ -615,33 +615,43 @@
     "title": "Arkisto",
     "history": "Historia",
     "allUsers": "Kaikki käyttäjät",
-    "allUsersToggleTooltip": "Vaihda vain oman historiasi tai kaikkien käyttäjien historian näkymän välillä",
-    "viewingAllUsers": "Näytetään kaikkien käyttäjien historia",
-    "viewingMyHistory": "Näytetään vain oma historia",
+    "allUsersToggleTooltip": "Vaihda vain oman historian tai kaikkien käyttäjien historian näyttämisen välillä",
+    "viewingAllUsers": "Kaikkien käyttäjien historian näyttäminen",
+    "viewingMyHistory": "Vain oman historian näyttäminen",
     "tabs": {
-      "review": "Arvioi",
+      "review": "Tarkista",
       "generate": "Luo",
       "compare": "Vertaile",
-      "match": "Yhdistä"
+      "match": "Täsmää"
     },
     "emptyMessages": {
-      "review": "Ei aikaisempia arvioita",
-      "generate": "Ei aikaisempia raportteja",
-      "compare": "Ei aikaisempia vertailuja",
-      "match": "Ei aikaisempaa lomakkeiden käsittelyä"
+      "review": "Ei aiempia arviointeja",
+      "generate": "Ei aiempia raportteja",
+      "compare": "Ei aiempia vertailuja",
+      "match": "Ei aiempaa lomakkeen käsittelyä"
     },
     "metadata": {
       "question": "kysymys",
+      "question_one": "kysymys",
       "questions": "kysymykset",
       "topic": "aihe",
+      "topic_one": "aihe",
       "topics": "aiheet",
       "field": "kenttä",
+      "field_one": "kenttä",
       "fields": "kentät",
       "document": "asiakirja",
+      "document_one": "asiakirja",
       "documents": "asiakirjat",
-      "digitized": "digitoitu"
+      "digitized": "digitoitu",
+      "handwritten": "käsikirjoitettu"
     },
-    "deleteConfirmation": "Oletko varma, että haluat poistaa tämän kohteen? Tätä toimintoa ei voi perua.",
+    "feedback": {
+      "positive": "Positiivinen palaute",
+      "negative": "Negatiivinen palaute",
+      "hasFeedback": "On palautetta"
+    },
+    "deleteConfirmation": "Oletko varma, että haluat poistaa tämän kohteen? Tätä toimintoa ei voi peruuttaa.",
     "unknownDate": "Tuntematon päivämäärä",
     "unnamedItem": "Nimeämätön kohde",
     "successMessages": {
@@ -653,6 +663,12 @@
       "reportDeleted": "Raportti poistettu onnistuneesti",
       "comparisonDeleted": "Vertailu poistettu onnistuneesti",
       "formProcessingDeleted": "Lomakkeen käsittely poistettu onnistuneesti"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Arvioinnin yhteenveto",
+      "questionAnswerDetails": "Kysymys-vastaus yksityiskohdat",
+      "summary": "Yhteenveto",
+      "topicAnalysis": "Aiheanalyysi"
     }
   },
   "feedback": {

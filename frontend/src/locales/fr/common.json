@@ -408,6 +408,66 @@
       "kb_creation_complete": "Création de la base de connaissances terminée avec succès"
     }
   },
+  "archive": {
+    "title": "Archive",
+    "history": "Historique",
+    "allUsers": "Tous les utilisateurs",
+    "allUsersToggleTooltip": "Basculer entre l'affichage de votre historique uniquement ou de l'historique de tous les utilisateurs",
+    "viewingAllUsers": "Affichage de l'historique de tous les utilisateurs",
+    "viewingMyHistory": "Affichage de mon historique uniquement",
+    "tabs": {
+      "review": "Examiner",
+      "generate": "Générer",
+      "compare": "Comparer",
+      "match": "Faire correspondre"
+    },
+    "emptyMessages": {
+      "review": "Aucune évaluation précédente",
+      "generate": "Aucun rapport précédent",
+      "compare": "Aucune comparaison précédente",
+      "match": "Aucun traitement de formulaire précédent"
+    },
+    "metadata": {
+      "question": "question",
+      "question_one": "question",
+      "questions": "questions",
+      "topic": "sujet",
+      "topic_one": "sujet",
+      "topics": "sujets",
+      "field": "champ",
+      "field_one": "champ",
+      "fields": "champs",
+      "document": "document",
+      "document_one": "document",
+      "documents": "documents",
+      "digitized": "numérisé",
+      "handwritten": "manuscrit"
+    },
+    "feedback": {
+      "positive": "Commentaires positifs",
+      "negative": "Commentaires négatifs",
+      "hasFeedback": "A des commentaires"
+    },
+    "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer cet élément ? Cette action ne peut pas être annulée.",
+    "unknownDate": "Date inconnue",
+    "unnamedItem": "Élément sans nom",
+    "successMessages": {
+      "evaluationLoaded": "Évaluation chargée avec succès",
+      "reportLoaded": "Rapport chargé avec succès",
+      "comparisonLoaded": "Comparaison chargée avec succès",
+      "formProcessingLoaded": "Traitement du formulaire chargé avec succès",
+      "evaluationDeleted": "Évaluation supprimée avec succès",
+      "reportDeleted": "Rapport supprimé avec succès",
+      "comparisonDeleted": "Comparaison supprimée avec succès",
+      "formProcessingDeleted": "Traitement du formulaire supprimé avec succès"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Résumé de l'évaluation",
+      "questionAnswerDetails": "Détails question-réponse",
+      "summary": "Résumé",
+      "topicAnalysis": "Analyse thématique"
+    }
+  },
   "common": {
     "loading": "Chargement...",
     "noData": "Aucune donnée disponible",

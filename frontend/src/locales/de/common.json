@@ -409,6 +409,65 @@
       "kb_creation_complete": "Erstellung der Wissensdatenbank erfolgreich abgeschlossen"
     }
   },
+  "archive": {
+    "title": "Archiv",
+    "history": "Verlauf",
+    "allUsers": "Alle Benutzer",
+    "allUsersToggleTooltip": "Zwischen der Anzeige Ihres Verlaufs oder des Verlaufs aller Benutzer wechseln",
+    "viewingAllUsers": "Verlauf aller Benutzer anzeigen",
+    "viewingMyHistory": "Nur meinen Verlauf anzeigen",
+    "tabs": {
+      "review": "Überprüfen",
+      "generate": "Generieren",
+      "compare": "Vergleichen",
+      "match": "Abgleichen"
+    },
+    "emptyMessages": {
+      "review": "Keine vorherigen Bewertungen",
+      "generate": "Keine vorherigen Berichte",
+      "compare": "Keine vorherigen Vergleiche",
+      "match": "Keine vorherigen Formularverarbeitungen"
+    },
+    "metadata": {
+      "question": "question",
+      "question_one": "question",
+      "questions": "questions",
+      "topic": "topic",
+      "topic_one": "topic",
+      "topics": "topics",
+      "field": "field",
+      "field_one": "field",
+      "fields": "fields",
+      "document": "document",
+      "document_one": "document",
+      "documents": "documents",
+      "digitized": "digitized"
+    },
+    "feedback": {
+      "positive": "Positives Feedback",
+      "negative": "Negatives Feedback",
+      "hasFeedback": "Hat Feedback"
+    },
+    "deleteConfirmation": "Sind Sie sicher, dass Sie dieses Element löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "unknownDate": "Unbekanntes Datum",
+    "unnamedItem": "Unbenanntes Element",
+    "successMessages": {
+      "evaluationLoaded": "Bewertung erfolgreich geladen",
+      "reportLoaded": "Bericht erfolgreich geladen",
+      "comparisonLoaded": "Vergleich erfolgreich geladen",
+      "formProcessingLoaded": "Formularverarbeitung erfolgreich geladen",
+      "evaluationDeleted": "Bewertung erfolgreich gelöscht",
+      "reportDeleted": "Bericht erfolgreich gelöscht",
+      "comparisonDeleted": "Vergleich erfolgreich gelöscht",
+      "formProcessingDeleted": "Formularverarbeitung erfolgreich gelöscht"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Bewertungszusammenfassung",
+      "questionAnswerDetails": "Frage-Antwort-Details",
+      "summary": "Zusammenfassung",
+      "topicAnalysis": "Themenanalyse"
+    }
+  },
   "common": {
     "loading": "Laden...",
     "noData": "Keine Daten verfügbar",

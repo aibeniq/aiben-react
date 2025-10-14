@@ -650,14 +650,19 @@
     },
     "metadata": {
       "question": "fråga",
+      "question_one": "fråga",
       "questions": "frågor",
       "topic": "ämne",
+      "topic_one": "ämne",
       "topics": "ämnen",
       "field": "fält",
+      "field_one": "fält",
       "fields": "fält",
       "document": "dokument",
+      "document_one": "dokument",
       "documents": "dokument",
-      "digitized": "digitaliserad"
+      "digitized": "digitaliserad",
+      "handwritten": "handskriven"
     },
     "deleteConfirmation": "Är du säker på att du vill ta bort detta objekt? Denna åtgärd kan inte ångras.",
     "unknownDate": "Okänt datum",
@@ -671,6 +676,12 @@
       "reportDeleted": "Rapport raderad framgångsrikt",
       "comparisonDeleted": "Jämförelse raderad framgångsrikt",
       "formProcessingDeleted": "Formulärbearbetning raderad framgångsrikt"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Utvärderingssammandrag",
+      "questionAnswerDetails": "Fråga-Svar Detaljer",
+      "summary": "Sammandrag",
+      "topicAnalysis": "Ämnesanalys"
     }
   },
   "feedback": {

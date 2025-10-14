@@ -631,6 +631,50 @@
       "kb_creation_complete": "Создание базы знаний завершено успешно"
     }
   },
+  "archive": {
+    "title": "Архив",
+    "history": "История",
+    "allUsers": "Все Пользователи",
+    "allUsersToggleTooltip": "Переключение между просмотром только вашей истории или истории всех пользователей",
+    "viewingAllUsers": "Просмотр истории всех пользователей",
+    "viewingMyHistory": "Просмотр только моей истории",
+    "tabs": {
+      "review": "Проверить",
+      "generate": "Создать",
+      "compare": "Сравнить",
+      "match": "Сопоставить"
+    },
+    "emptyMessages": {
+      "review": "Нет предыдущих оценок",
+      "generate": "Нет предыдущих отчетов",
+      "compare": "Нет предыдущих сравнений",
+      "match": "Нет предыдущей обработки форм"
+    },
+    "feedback": {
+      "positive": "Положительная обратная связь",
+      "negative": "Отрицательная обратная связь",
+      "hasFeedback": "Есть обратная связь"
+    },
+    "deleteConfirmation": "Вы уверены, что хотите удалить этот элемент? Это действие нельзя отменить.",
+    "unknownDate": "Неизвестная дата",
+    "unnamedItem": "Безымянный элемент",
+    "successMessages": {
+      "evaluationLoaded": "Оценка успешно загружена",
+      "reportLoaded": "Отчет успешно загружен",
+      "comparisonLoaded": "Сравнение успешно загружено",
+      "formProcessingLoaded": "Обработка формы успешно загружена",
+      "evaluationDeleted": "Оценка успешно удалена",
+      "reportDeleted": "Отчет успешно удален",
+      "comparisonDeleted": "Сравнение успешно удалено",
+      "formProcessingDeleted": "Обработка формы успешно удалена"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Сводка Оценки",
+      "questionAnswerDetails": "Детали Вопрос-Ответ",
+      "summary": "Сводка",
+      "topicAnalysis": "Анализ Темы"
+    }
+  },
   "generate": {
     "progress": {
       "starting": "Запуск...",

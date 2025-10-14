@@ -390,6 +390,66 @@
       "kb_creation_complete": "Pembuatan basis pengetahuan selesai dengan sukses"
     }
   },
+  "archive": {
+      "title": "Arsip",
+      "history": "Riwayat",
+      "allUsers": "Semua Pengguna",
+      "allUsersToggleTooltip": "Beralih antara melihat hanya riwayat Anda atau riwayat semua pengguna",
+      "viewingAllUsers": "Melihat riwayat semua pengguna",
+      "viewingMyHistory": "Melihat hanya riwayat saya",
+      "tabs": {
+        "review": "Tinjau",
+        "generate": "Hasilkan",
+        "compare": "Bandingkan",
+        "match": "Cocokkan"
+      },
+      "emptyMessages": {
+        "review": "Tidak ada evaluasi sebelumnya",
+        "generate": "Tidak ada laporan sebelumnya",
+        "compare": "Tidak ada perbandingan sebelumnya",
+        "match": "Tidak ada pemrosesan formulir sebelumnya"
+      },
+      "metadata": {
+        "question": "pertanyaan",
+        "question_one": "pertanyaan",
+        "questions": "pertanyaan",
+        "topic": "topik",
+        "topic_one": "topik",
+        "topics": "topik",
+        "field": "bidang",
+        "field_one": "bidang",
+        "fields": "bidang",
+        "document": "dokumen",
+        "document_one": "dokumen",
+        "documents": "dokumen",
+        "digitized": "terdigitalkan",
+        "handwritten": "tulisan tangan"
+      },
+      "feedback": {
+        "positive": "Umpan balik positif",
+        "negative": "Umpan balik negatif",
+        "hasFeedback": "Memiliki umpan balik"
+      },
+      "deleteConfirmation": "Apakah Anda yakin ingin menghapus item ini? Tindakan ini tidak dapat dibatalkan.",
+      "unknownDate": "Tanggal tidak diketahui",
+      "unnamedItem": "Item tanpa nama",
+      "successMessages": {
+        "evaluationLoaded": "Evaluasi berhasil dimuat",
+        "reportLoaded": "Laporan berhasil dimuat",
+        "comparisonLoaded": "Perbandingan berhasil dimuat",
+        "formProcessingLoaded": "Pemrosesan formulir berhasil dimuat",
+        "evaluationDeleted": "Evaluasi berhasil dihapus",
+        "reportDeleted": "Laporan berhasil dihapus",
+        "comparisonDeleted": "Perbandingan berhasil dihapus",
+        "formProcessingDeleted": "Pemrosesan formulir berhasil dihapus"
+      },
+      "docxHeaders": {
+        "evaluationSummary": "Ringkasan Evaluasi",
+        "questionAnswerDetails": "Detail Pertanyaan-Jawaban",
+        "summary": "Ringkasan",
+        "topicAnalysis": "Analisis Topik"
+      }
+    },
   "optimizeChecklistModal": {
     "title": "Optimalkan Daftar Periksa",
     "customInstructionsLabel": "Instruksi Kustom (Opsional)",

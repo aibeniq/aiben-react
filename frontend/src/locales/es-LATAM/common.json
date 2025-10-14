@@ -436,6 +436,66 @@
       "kb_creation_complete": "Creación de la base de conocimientos completada exitosamente"
     }
   },
+  "archive": {
+    "title": "Archivo",
+    "history": "Historial",
+    "allUsers": "Todos los Usuarios",
+    "allUsersToggleTooltip": "Alternar entre ver solo su historial o el historial de todos los usuarios",
+    "viewingAllUsers": "Viendo el historial de todos los usuarios",
+    "viewingMyHistory": "Viendo solo mi historial",
+    "tabs": {
+      "review": "Revisar",
+      "generate": "Generar",
+      "compare": "Comparar",
+      "match": "Coincidir"
+    },
+    "emptyMessages": {
+      "review": "No hay evaluaciones anteriores",
+      "generate": "No hay informes anteriores",
+      "compare": "No hay comparaciones anteriores",
+      "match": "No hay procesamiento de formularios anterior"
+    },
+    "metadata": {
+      "question": "pregunta",
+      "question_one": "pregunta",
+      "questions": "preguntas",
+      "topic": "tema",
+      "topic_one": "tema",
+      "topics": "temas",
+      "field": "campo",
+      "field_one": "campo",
+      "fields": "campos",
+      "document": "documento",
+      "document_one": "documento",
+      "documents": "documentos",
+      "digitized": "digitalizado",
+      "handwritten": "manuscrito"
+    },
+    "feedback": {
+      "positive": "Comentarios positivos",
+      "negative": "Comentarios negativos",
+      "hasFeedback": "Tiene comentarios"
+    },
+    "deleteConfirmation": "¿Está seguro de que desea eliminar este elemento? Esta acción no se puede deshacer.",
+    "unknownDate": "Fecha desconocida",
+    "unnamedItem": "Elemento sin nombre",
+    "successMessages": {
+      "evaluationLoaded": "Evaluación cargada exitosamente",
+      "reportLoaded": "Informe cargado exitosamente",
+      "comparisonLoaded": "Comparación cargada exitosamente",
+      "formProcessingLoaded": "Procesamiento de formulario cargado exitosamente",
+      "evaluationDeleted": "Evaluación eliminada exitosamente",
+      "reportDeleted": "Informe eliminado exitosamente",
+      "comparisonDeleted": "Comparación eliminada exitosamente",
+      "formProcessingDeleted": "Procesamiento de formulario eliminado exitosamente"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "Resumen de Evaluación",
+      "questionAnswerDetails": "Detalles de Pregunta-Respuesta",
+      "summary": "Resumen",
+      "topicAnalysis": "Análisis de Tema"
+    }
+  },
   "optimizeChecklistModal": {
     "title": "Optimizar Lista de Verificación",
     "customInstructionsLabel": "Instrucciones Personalizadas (Opcional)",
