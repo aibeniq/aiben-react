@@ -1337,7 +1337,7 @@ async def generate_csv(
             writer.writerow(
                 [
                     "Overall Summary",
-                    summary.replace("\n", " ").replace("\r", "").replace('"', '""'),
+                    re.sub(r'[\ud800-\udfff]', '', summary).replace("\n", " ").replace("\r", "").replace('"', '""'),
                     doc1_name,
                     doc2_name,
                 ]
@@ -1363,7 +1363,7 @@ async def generate_csv(
 
             # Clean analysis text for CSV
             cleaned_analysis = (
-                analysis.replace("\n", " ").replace("\r", "").replace('"', '""')
+                re.sub(r'[\ud800-\udfff]', '', analysis).replace("\n", " ").replace("\r", "").replace('"', '""')
             )
 
             writer.writerow([topic, cleaned_analysis, doc1_name, doc2_name])

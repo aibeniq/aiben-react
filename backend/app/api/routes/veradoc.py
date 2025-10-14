@@ -1175,6 +1175,8 @@ async def process_rag_checklist(
                     document_text = await extract_text_from_file_async(
                         content, file.filename
                     )
+                    # Clean surrogates from document_text to prevent encoding issues
+                    document_text = re.sub(r'[\ud800-\udfff]', '', document_text)
 
                     # Extract images if vision is enabled
                     document_images = []
@@ -1259,7 +1261,7 @@ async def process_rag_checklist(
                         except Exception as e:
                             print(f"Warning: Could not check disconnect status: {e}")
                         
-                        question_text = question_item.get("text", "").strip()
+                        question_text = re.sub(r'[\ud800-\udfff]', '', question_item.get("text", "")).strip()
                         
                         if not question_text:
                             print(f"Skipping empty question at index {i}")
@@ -1278,6 +1280,8 @@ async def process_rag_checklist(
                             # Use pre-fetched context and citations
                             cached_context = question_contexts[question_text]
                             question_context = cached_context["context"]
+                            # Clean surrogates from question_context
+                            question_context = re.sub(r'[\ud800-\udfff]', '', question_context)
                             source_citations = cached_context["source_citations"]
                             consult_documents = cached_context["consult_documents"]
                             print(f"✅ Using pre-fetched context for question: {question_text[:30]}...")
@@ -1309,6 +1313,8 @@ async def process_rag_checklist(
                                         )
                                     
                                     question_context = await translate_text_if_needed(question_context, session, current_user, llm)
+                                    # Clean surrogates from question_context
+                                    question_context = re.sub(r'[\ud800-\udfff]', '', question_context)
                                 except Exception as fallback_error:
                                     print(f"Error in fallback context generation: {fallback_error}")
                                     question_context = f"Error generating context: {str(fallback_error)}"
@@ -1316,6 +1322,8 @@ async def process_rag_checklist(
                             else:
                                 question_context = "No policy context consultation requested for this question."
                                 question_context = await translate_text_if_needed(question_context, session, current_user, llm)
+                                # Clean surrogates from question_context
+                                question_context = re.sub(r'[\ud800-\udfff]', '', question_context)
                                 source_citations = []
 
                         print("Generating answer based on document and context...")
@@ -1338,10 +1346,12 @@ async def process_rag_checklist(
                             )
                         except Exception as e:
                             rendered_prompt = f"[ERROR rendering prompt: {e}]"
+                        # Clean surrogates from rendered_prompt before printing to avoid UnicodeEncodeError
+                        clean_prompt = re.sub(r'[\ud800-\udfff]', '', rendered_prompt)
                         print(
                             "\n===== VERADOC_QA_PROMPT_TEMPLATE PROMPT SENT TO LLM =====\n"
                         )
-                        print(rendered_prompt)
+                        print(clean_prompt)
                         print(
                             "\n========================================================\n"
                         )
@@ -1444,6 +1454,8 @@ async def process_rag_checklist(
                             answer = await translate_text_if_needed(
                                 answer, session, current_user, llm
                             )
+                            # Clean surrogates from answer
+                            answer = re.sub(r'[\ud800-\udfff]', '', answer)
 
                         except Exception as answer_error:
                             print(f"Error generating answer for question: {answer_error}")
@@ -2555,7 +2567,7 @@ async def generate_csv(
                                     # This prevents removing legitimate parts of the filename
 
                         citation_text = (
-                            citation.get("content", "")
+                            re.sub(r'[\ud800-\udfff]', '', citation.get("content", ""))
                             .replace("\n", " ")
                             .replace("\r", " ")
                         )
@@ -2564,13 +2576,13 @@ async def generate_csv(
                 citations_text = " | ".join(citations) if citations else "No citations"
 
                 # Clean up text fields
-                question_clean = question.replace("\n", " ").replace("\r", " ")
-                answer_clean = answer.replace("\n", " ").replace("\r", " ")
-                context_clean = context.replace("\n", " ").replace("\r", " ")
+                question_clean = re.sub(r'[\ud800-\udfff]', '', question).replace("\n", " ").replace("\r", " ")
+                answer_clean = re.sub(r'[\ud800-\udfff]', '', answer).replace("\n", " ").replace("\r", " ")
+                context_clean = re.sub(r'[\ud800-\udfff]', '', context).replace("\n", " ").replace("\r", " ")
 
                 # For the final evaluation, we'll include it for each row
                 # (since it's a summary of all QA pairs)
-                final_eval_clean = final_evaluation.replace("\n", " ").replace(
+                final_eval_clean = re.sub(r'[\ud800-\udfff]', '', final_evaluation).replace("\n", " ").replace(
                     "\r", " "
                 )
 
