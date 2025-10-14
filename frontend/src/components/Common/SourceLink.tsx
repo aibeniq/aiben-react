@@ -13,6 +13,7 @@ interface SourceLinkProps extends LinkProps {
   truncateText?: boolean
   maxLength?: number
   highlightSnippet?: string // Text snippet to search for and highlight in the file
+  file?: File // Optional File object for uploaded files
 }
 
 const SourceLink: React.FC<SourceLinkProps> = ({
@@ -22,6 +23,7 @@ const SourceLink: React.FC<SourceLinkProps> = ({
   truncateText = false,
   maxLength = 60,
   highlightSnippet,
+  file, // New optional prop
   ...rest
 }) => {
   // In Chakra UI v3, we need to manually manage this state
@@ -36,7 +38,24 @@ const SourceLink: React.FC<SourceLinkProps> = ({
   const handleClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
 
-    console.log("SourceLink clicked:", { sourceId, fileName, useModal })
+    console.log("SourceLink clicked:", { sourceId, fileName, useModal, hasFile: !!file })
+
+    // If we have a direct File object (for uploaded files), open modal directly
+    if (file) {
+      if (useModal) {
+        setConvertedPdfFile(file as any) // Cast to match the expected type
+        setIsModalOpen(true)
+        console.log("Opened uploaded file in modal directly")
+      } else {
+        // Create a blob URL and open in new tab
+        const blobUrl = URL.createObjectURL(file)
+        window.open(blobUrl, "_blank")
+        console.log("Opened uploaded file in new tab")
+      }
+      return
+    }
+
+    // Existing logic for knowledge base files
     console.log("File extension check:", {
       fileName,
       toLowerCase: fileName.toLowerCase(),
@@ -309,8 +328,8 @@ const SourceLink: React.FC<SourceLinkProps> = ({
     return `${text.substring(0, maxLength)}...`
   }
 
-  // Determine which file to show in modal - converted PDF takes precedence
-  const fileToShow = convertedPdfFile || currentFile
+  // Determine which file to show in modal - direct file takes precedence, then converted PDF, then current file
+  const fileToShow = file || convertedPdfFile || currentFile
   const displayName = isLoadingFile ? "Loading..." : truncateFileName(fileName)
   const needsTooltip = truncateText && fileName.length > maxLength
 

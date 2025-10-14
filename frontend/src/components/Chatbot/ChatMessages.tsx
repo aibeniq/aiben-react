@@ -64,6 +64,11 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 }) => {
   const { t } = useTranslation()
 
+  // Helper function to find matching uploaded file by name
+  const findUploadedFile = (fileName: string): File | undefined => {
+    return uploadedFiles.find((file) => file.name === fileName)
+  }
+
   // State to track which citations are expanded - using object instead of Set
   const [expandedCitations, setExpandedCitations] = useState<
     Record<string, boolean>
@@ -169,18 +174,38 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                                     highlightSnippet={citationText}
                                   />
                                 ) : (
-                                  // For temporary uploaded files without source_data_id, show as plain text
-                                  <Text
-                                    as="span"
-                                    ml={1}
-                                    fontWeight="normal"
-                                    color="gray.600"
-                                  >
-                                    {formatSourceWithPage(
-                                      source.metadata.source,
-                                      source.metadata.page,
-                                    )}
-                                  </Text>
+                                  // For uploaded files without source_data_id, find matching File object and use SourceLink
+                                  (() => {
+                                    const matchingFile = findUploadedFile(source.metadata.source)
+                                    return matchingFile ? (
+                                      <SourceLink
+                                        sourceId="" // Empty since we're using file prop
+                                        fileName={formatSourceWithPage(
+                                          source.metadata.source,
+                                          source.metadata.page,
+                                        )}
+                                        file={matchingFile}
+                                        ml={1}
+                                        fontWeight="normal"
+                                        color="blue.600"
+                                        useModal={true}
+                                        highlightSnippet={citationText}
+                                      />
+                                    ) : (
+                                      // Fallback to plain text if no matching file found
+                                      <Text
+                                        as="span"
+                                        ml={1}
+                                        fontWeight="normal"
+                                        color="gray.600"
+                                      >
+                                        {formatSourceWithPage(
+                                          source.metadata.source,
+                                          source.metadata.page,
+                                        )}
+                                      </Text>
+                                    )
+                                  })()
                                 ))}
                             </Text>
                             <Box

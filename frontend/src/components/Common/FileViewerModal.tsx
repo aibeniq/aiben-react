@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { cleanRTFFormatting } from "../../utils/rtfCleaner"
 
 interface FileViewerModalProps {
-  file: FilesGetSourceContentResponse | null
+  file: FilesGetSourceContentResponse | File | null
   isOpen: boolean
   isLoading: boolean
   onClose: () => void
@@ -19,6 +19,7 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
   highlightSnippet,
 }) => {
   const [fileUrl, setFileUrl] = useState<string | null>(null)
+  const [textContent, setTextContent] = useState<string | null>(null)
   const textContentRef = useRef<HTMLDivElement>(null)
 
   // Helper function to progressively search for text with resilient matching
@@ -203,6 +204,16 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
     })
   }
 
+  // Helper function to get content type from either file type
+  const getContentType = (file: FilesGetSourceContentResponse | File): string => {
+    return file instanceof File ? file.type : file.content_type
+  }
+
+  // Helper function to get file name from either file type
+  const getFileName = (file: FilesGetSourceContentResponse | File): string => {
+    return file instanceof File ? file.name : file.name
+  }
+
   // Function to scroll to the first highlighted text
   const scrollToHighlight = () => {
     if (!highlightSnippet) return
@@ -235,33 +246,60 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
   useEffect(() => {
     if (!file) {
       setFileUrl(null)
+      setTextContent(null)
       return
     }
 
     // Create a blob URL for the file
-    try {
-      const byteCharacters = atob(file.data_base64)
-      const byteNumbers = new Array(byteCharacters.length)
+    const createBlobUrl = async () => {
+      try {
+        let byteArray: Uint8Array
+        let contentType: string
 
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i)
+        if (file instanceof File) {
+          // Handle direct File object (for uploaded files)
+          const arrayBuffer = await file.arrayBuffer()
+          byteArray = new Uint8Array(arrayBuffer)
+          contentType = file.type
+
+          // For text files, also store the text content
+          if (contentType.startsWith("text/")) {
+            const text = await file.text()
+            setTextContent(text)
+          }
+        } else {
+          // Existing logic for FilesGetSourceContentResponse (knowledge base files)
+          const byteCharacters = atob(file.data_base64)
+          const byteNumbers = new Array(byteCharacters.length)
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i)
+          }
+          byteArray = new Uint8Array(byteNumbers)
+          contentType = getContentType(file)
+
+          // For text files, also store the text content
+          if (contentType.startsWith("text/")) {
+            setTextContent(atob(file.data_base64))
+          }
+        }
+
+        const blob = new Blob([byteArray as any], { type: contentType })
+        const url = URL.createObjectURL(blob)
+        setFileUrl(url)
+        console.log("Created file URL:", url)
+
+        // Clean up when component unmounts
+        return () => {
+          if (url) URL.revokeObjectURL(url)
+        }
+      } catch (error) {
+        console.error("Error creating blob URL:", error)
+        setFileUrl(null)
+        setTextContent(null)
       }
-
-      const byteArray = new Uint8Array(byteNumbers)
-      const blob = new Blob([byteArray], { type: file.content_type })
-      const url = URL.createObjectURL(blob)
-
-      setFileUrl(url)
-      console.log("Created file URL:", url)
-
-      // Clean up when component unmounts
-      return () => {
-        if (url) URL.revokeObjectURL(url)
-      }
-    } catch (error) {
-      console.error("Error creating blob URL:", error)
-      setFileUrl(null)
     }
+
+    createBlobUrl()
   }, [file])
 
   // Scroll to highlighted text when modal opens and file is loaded
@@ -273,7 +311,7 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
       )
 
       // For text files, try scrolling multiple times to ensure it works
-      if (file.content_type.startsWith("text/")) {
+      if (getContentType(file).startsWith("text/")) {
         scrollToHighlight()
         // Try again after a longer delay in case the content takes time to render
         setTimeout(scrollToHighlight, 500)
@@ -326,12 +364,12 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
     if (!fileUrl || !file) return null
 
     // Images
-    if (file.content_type.startsWith("image/")) {
+    if (getContentType(file).startsWith("image/")) {
       return <Image src={fileUrl} alt={file.name} maxH="70vh" />
     }
 
     // PDF
-    if (file.content_type === "application/pdf") {
+    if (getContentType(file) === "application/pdf") {
       // For PDFs, we'll use progressive search strategy
       let pdfUrl = fileUrl
 
@@ -396,18 +434,19 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
     }
 
     // Plain text
-    if (file.content_type.startsWith("text/")) {
-      const textContent = atob(file.data_base64)
+    if (getContentType(file).startsWith("text/")) {
+      // Use the text content loaded in useEffect
+      const displayTextContent = textContent || ""
 
       // Check if this is an RTF file and clean the formatting
       const isRtfFile =
-        file.name.toLowerCase().endsWith(".rtf") ||
-        file.content_type.includes("rtf") ||
-        textContent.startsWith("{\\rtf")
+        getFileName(file).toLowerCase().endsWith(".rtf") ||
+        getContentType(file).includes("rtf") ||
+        displayTextContent.startsWith("{\\rtf")
 
       const displayContent = isRtfFile
-        ? cleanRTFFormatting(textContent)
-        : textContent
+        ? cleanRTFFormatting(displayTextContent)
+        : displayTextContent
 
       return (
         <Box
@@ -433,7 +472,7 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
     return (
       <Box textAlign="center" py={8}>
         <Text mb={4}>
-          Preview not available for this file type ({file.content_type})
+          Preview not available for this file type ({getContentType(file)})
         </Text>
         <Button onClick={downloadFile} colorPalette="blue">
           Download File
