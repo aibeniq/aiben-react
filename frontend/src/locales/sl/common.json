@@ -334,6 +334,22 @@
       "currentInstructions": "Trenutna navodila:",
       "save": "Shrani",
       "cancel": "Prekliči"
+    },
+    "progress": {
+      "uploading": "Nalaganje {{current}} MB/{{total}} MB...",
+      "processingFile": "Obdelava datoteke {{current}}/{{total}}: {{filename}}",
+      "chunking": "Drobljenje dokumenta {{current}}/{{total}}...",
+      "embedding": "Ustvarjanje vstavkov {{current}}/{{total}}...",
+      "storing": "Shranjevanje podatkov {{current}}/{{total}}...",
+      "finalizing": "Zaključevanje ustvarjanja {{current}}/{{total}}...",
+      "saving_file": "Shranjevanje datoteke {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Obdelava datoteke {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Obdelani {{chunks}} kosov iz {{current}}/{{total}} datotek",
+      "processed_all_chunks": "Obdelani vsi {{chunks}} kosov iz {{current}} datotek",
+      "chunking_complete": "Razdeljevanje dokončano: ustvarjenih {{chunks}} kosov",
+      "embedding_complete": "Ustvarjene vdelave za {{current}} kosov",
+      "storing_complete": "Shranjena vektorska baza podatkov z {{current}} vdelavami",
+      "kb_creation_complete": "Ustvarjanje baze znanja uspešno dokončano"
     }
   },
   "optimizeChecklistModal": {

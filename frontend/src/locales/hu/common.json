@@ -340,6 +340,22 @@
       "fieldPlaceholder": "Adjon hozzá egy mezőnevet (pl. Vezetéknév, Cím, Társadalombiztosítási szám) vagy javasoljon a leírásból",
       "cancel": "Mégse",
       "updateFormTemplate": "Űrlapsablon Frissítése"
+    },
+    "progress": {
+      "uploading": "Feltöltés {{current}} MB/{{total}} MB...",
+      "processingFile": "Fájl feldolgozása {{current}}/{{total}}: {{filename}}",
+      "chunking": "Dokumentum darabolása {{current}}/{{total}}...",
+      "embedding": "Beágyazások létrehozása {{current}}/{{total}}...",
+      "storing": "Adatok tárolása {{current}}/{{total}}...",
+      "finalizing": "Létrehozás befejezése {{current}}/{{total}}...",
+      "saving_file": "Fájl mentése {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Fájl feldolgozása {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Feldolgozva {{chunks}} darab {{current}}/{{total}} fájlból",
+      "processed_all_chunks": "Feldolgozva az összes {{chunks}} darab {{current}} fájlból",
+      "chunking_complete": "Darabolás befejezve: {{chunks}} darab létrehozva",
+      "embedding_complete": "Beágyazások létrehozva {{current}} darabhoz",
+      "storing_complete": "Vektoros adatbázis tárolva {{current}} beágyazással",
+      "kb_creation_complete": "Tudásbázis létrehozása sikeresen befejeződött"
     }
   },
   "optimizeChecklistModal": {

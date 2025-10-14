@@ -337,6 +337,22 @@
       "currentInstructions": "Instruksi Saat Ini:",
       "save": "Simpan",
       "cancel": "Batal"
+    },
+    "progress": {
+      "uploading": "Mengunggah {{current}} MB/{{total}} MB...",
+      "processingFile": "Memproses file {{current}}/{{total}}: {{filename}}",
+      "chunking": "Memecah dokumen {{current}}/{{total}}...",
+      "embedding": "Membuat embedding {{current}}/{{total}}...",
+      "storing": "Menyimpan data {{current}}/{{total}}...",
+      "finalizing": "Menyelesaikan pembuatan {{current}}/{{total}}...",
+      "saving_file": "Menyimpan file {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Memproses file {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Memproses {{chunks}} potongan dari {{current}}/{{total}} file",
+      "processed_all_chunks": "Memproses semua {{chunks}} potongan dari {{current}} file",
+      "chunking_complete": "Pemisahan selesai: {{chunks}} bagian dibuat",
+      "embedding_complete": "Embedding dibuat untuk {{current}} bagian",
+      "storing_complete": "Database vektor disimpan dengan {{current}} embedding",
+      "kb_creation_complete": "Pembuatan basis pengetahuan selesai dengan sukses"
     }
   },
   "optimizeChecklistModal": {

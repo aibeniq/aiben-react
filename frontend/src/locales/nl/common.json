@@ -469,6 +469,22 @@
         "processing": "Verwerken...",
         "pleaseWait": "Wacht even terwijl we uw bestanden verwerken..."
       }
+    },
+    "progress": {
+      "uploading": "Uploaden {{current}} MB/{{total}} MB...",
+      "processingFile": "Bestand verwerken {{current}}/{{total}}: {{filename}}",
+      "chunking": "Document opdelen {{current}}/{{total}}...",
+      "embedding": "Embeddings maken {{current}}/{{total}}...",
+      "storing": "Gegevens opslaan {{current}}/{{total}}...",
+      "finalizing": "Aanmaak voltooien {{current}}/{{total}}...",
+      "saving_file": "Bestand opslaan {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Bestand verwerken {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "{{chunks}} brokken uit {{current}}/{{total}} bestanden verwerkt",
+      "processed_all_chunks": "Alle {{chunks}} brokken uit {{current}} bestanden verwerkt",
+      "chunking_complete": "Opsplitsing voltooid: {{chunks}} brokken gemaakt",
+      "embedding_complete": "Embeddings gemaakt voor {{current}} brokken",
+      "storing_complete": "Vector database opgeslagen met {{current}} embeddings",
+      "kb_creation_complete": "Aanmaak van kennisbank succesvol voltooid"
     }
   },
   "feedback": {

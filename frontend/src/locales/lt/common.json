@@ -346,6 +346,22 @@
       "currentInstructions": "Dabartinės instrukcijos:",
       "save": "Išsaugoti",
       "cancel": "Atšaukti"
+    },
+    "progress": {
+      "uploading": "Įkeliama {{current}} MB/{{total}} MB...",
+      "processingFile": "Apdorojamas failas {{current}}/{{total}}: {{filename}}",
+      "chunking": "Skirstomas dokumentas {{current}}/{{total}}...",
+      "embedding": "Kuriami įterpimai {{current}}/{{total}}...",
+      "storing": "Saugomi duomenys {{current}}/{{total}}...",
+      "finalizing": "Užbaigiamas kūrimas {{current}}/{{total}}...",
+      "saving_file": "Išsaugomas failas {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Apdorojamas failas {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Apdoroti {{chunks}} gabalai iš {{current}}/{{total}} failų",
+      "processed_all_chunks": "Apdoroti visi {{chunks}} gabalai iš {{current}} failų",
+      "chunking_complete": "Dalijimas baigtas: sukurta {{chunks}} dalių",
+      "embedding_complete": "Sukurti įterpimai {{current}} dalims",
+      "storing_complete": "Išsaugota vektorinė duomenų bazė su {{current}} įterpimais",
+      "kb_creation_complete": "Žinių bazės kūrimas sėkmingai užbaigtas"
     }
   },
   "optimizeChecklistModal": {

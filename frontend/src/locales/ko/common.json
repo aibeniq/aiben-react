@@ -613,6 +613,22 @@
       "cancel": "취소",
       "createTopicList": "주제 목록 만들기",
       "updateTopicList": "주제 목록 업데이트"
+    },
+    "progress": {
+      "uploading": "업로드 중 {{current}} MB/{{total}} MB...",
+      "processingFile": "파일 처리 중 {{current}}/{{total}}: {{filename}}",
+      "chunking": "문서 청킹 중 {{current}}/{{total}}...",
+      "embedding": "임베딩 생성 중 {{current}}/{{total}}...",
+      "storing": "데이터 저장 중 {{current}}/{{total}}...",
+      "finalizing": "생성 완료 중 {{current}}/{{total}}...",
+      "saving_file": "파일 저장 중 {{current}}/{{total}}: {{filename}}",
+      "processing_file": "파일 처리 중 {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "{{current}}/{{total}} 파일에서 {{chunks}} 청크 처리됨",
+      "processed_all_chunks": "{{current}} 파일에서 모든 {{chunks}} 청크 처리됨",
+      "chunking_complete": "청킹 완료: {{chunks}} 청크 생성됨",
+      "embedding_complete": "{{current}} 청크에 대한 임베딩 생성됨",
+      "storing_complete": "{{current}} 임베딩으로 벡터 데이터베이스 저장됨",
+      "kb_creation_complete": "지식 베이스 생성이 성공적으로 완료되었습니다"
     }
   },
   "feedback": {

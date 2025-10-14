@@ -308,6 +308,22 @@
         "processing": "प्रोसेसिंग...",
         "pleaseWait": "कृपया प्रतीक्षा करें जब तक हम आपकी फाइलों को प्रोसेस करते हैं..."
       }
+    },
+    "progress": {
+      "uploading": "अपलोड हो रहा है {{current}} MB/{{total}} MB...",
+      "processingFile": "फ़ाइल संसाधित हो रही है {{current}}/{{total}}: {{filename}}",
+      "chunking": "दस्तावेज़ को टुकड़ों में बांट रहा है {{current}}/{{total}}...",
+      "embedding": "एम्बेडिंग बना रहा है {{current}}/{{total}}...",
+      "storing": "डेटा संग्रहीत कर रहा है {{current}}/{{total}}...",
+      "finalizing": "निर्माण पूरा कर रहा है {{current}}/{{total}}...",
+      "saving_file": "फ़ाइल सहेज रहा है {{current}}/{{total}}: {{filename}}",
+      "processing_file": "फ़ाइल संसाधित कर रहा है {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "{{current}}/{{total}} फ़ाइलों से {{chunks}} टुकड़े संसाधित किए गए",
+      "processed_all_chunks": "{{current}} फ़ाइलों से सभी {{chunks}} टुकड़े संसाधित किए गए",
+      "chunking_complete": "चंकिंग पूरा हुआ: {{chunks}} चंक बनाए गए",
+      "embedding_complete": "{{current}} चंक के लिए एम्बेडिंग बनाए गए",
+      "storing_complete": "{{current}} एम्बेडिंग के साथ वेक्टर डेटाबेस संग्रहीत किया गया",
+      "kb_creation_complete": "ज्ञान आधार निर्माण सफलतापूर्वक पूरा हुआ"
     }
   },
   "editOutlineModal": {

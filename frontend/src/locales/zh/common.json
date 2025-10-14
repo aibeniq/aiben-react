@@ -499,6 +499,22 @@
         "processing": "处理中...",
         "pleaseWait": "请等待我们处理您的文件..."
       }
+    },
+    "progress": {
+      "uploading": "上传中 {{current}} MB/{{total}} MB...",
+      "processingFile": "处理文件 {{current}}/{{total}}: {{filename}}",
+      "chunking": "分割文档 {{current}}/{{total}}...",
+      "embedding": "创建嵌入 {{current}}/{{total}}...",
+      "storing": "存储数据 {{current}}/{{total}}...",
+      "finalizing": "完成创建 {{current}}/{{total}}...",
+      "saving_file": "正在保存文件 {{current}}/{{total}}: {{filename}}",
+      "processing_file": "正在处理文件 {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "已处理来自 {{current}}/{{total}} 个文件的 {{chunks}} 个块",
+      "processed_all_chunks": "已处理来自 {{current}} 个文件的所有 {{chunks}} 个块",
+      "chunking_complete": "分块完成：已创建 {{chunks}} 个块",
+      "embedding_complete": "已为 {{current}} 个块创建嵌入",
+      "storing_complete": "已存储包含 {{current}} 个嵌入的向量数据库",
+      "kb_creation_complete": "知识库创建成功完成"
     }
   },
   "feedback": {

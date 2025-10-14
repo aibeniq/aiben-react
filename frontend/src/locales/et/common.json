@@ -351,6 +351,22 @@
       "currentInstructions": "Praegused juhised:",
       "save": "Salvesta",
       "cancel": "Tühista"
+    },
+    "progress": {
+      "uploading": "Üleslaadimine {{current}} MB/{{total}} MB...",
+      "processingFile": "Faili töötlemine {{current}}/{{total}}: {{filename}}",
+      "chunking": "Dokumendi tükeldamine {{current}}/{{total}}...",
+      "embedding": "Manuste loomine {{current}}/{{total}}...",
+      "storing": "Andmete salvestamine {{current}}/{{total}}...",
+      "finalizing": "Loomise lõpetamine {{current}}/{{total}}...",
+      "saving_file": "Faili salvestamine {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Faili töötlemine {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Töödeldud {{chunks}} tükid {{current}}/{{total}} failist",
+      "processed_all_chunks": "Töödeldud kõik {{chunks}} tükid {{current}} failist",
+      "chunking_complete": "Tükeldamine lõpetatud: loodud {{chunks}} tükki",
+      "embedding_complete": "Loodud manused {{current}} tükile",
+      "storing_complete": "Salvestatud vektorbasis andmetega {{current}} manust",
+      "kb_creation_complete": "Teadmistebaasi loomine õnnestus edukalt"
     }
   },
   "optimizeChecklistModal": {

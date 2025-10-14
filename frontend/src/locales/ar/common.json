@@ -414,6 +414,22 @@
         "processing": "جاري المعالجة...",
         "pleaseWait": "يرجى الانتظار بينما نعالج ملفاتك..."
       }
+    },
+    "progress": {
+      "uploading": "جاري التحميل {{current}} ميغابايت/{{total}} ميغابايت...",
+      "processingFile": "معالجة الملف {{current}}/{{total}}: {{filename}}",
+      "chunking": "تقسيم المستند {{current}}/{{total}}...",
+      "embedding": "إنشاء التضمينات {{current}}/{{total}}...",
+      "storing": "تخزين البيانات {{current}}/{{total}}...",
+      "finalizing": "إنهاء الإنشاء {{current}}/{{total}}...",
+      "saving_file": "حفظ الملف {{current}}/{{total}}: {{filename}}",
+      "processing_file": "معالجة الملف {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "تم معالجة {{chunks}} أجزاء من {{current}}/{{total}} ملفات",
+      "processed_all_chunks": "تم معالجة جميع {{chunks}} أجزاء من {{current}} ملفات",
+      "chunking_complete": "اكتمل التقسيم: تم إنشاء {{chunks}} قطعة",
+      "embedding_complete": "تم إنشاء تضمينات لـ {{current}} قطعة",
+      "storing_complete": "تم تخزين قاعدة البيانات المتجهة مع {{current}} تضمين",
+      "kb_creation_complete": "تم إنشاء قاعدة المعرفة بنجاح"
     }
   },
   "feedback": {

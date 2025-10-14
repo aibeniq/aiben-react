@@ -337,6 +337,22 @@
       "currentInstructions": "Hướng dẫn hiện tại:",
       "save": "Lưu",
       "cancel": "Hủy"
+    },
+    "progress": {
+      "uploading": "Đang tải lên {{current}} MB/{{total}} MB...",
+      "processingFile": "Đang xử lý tệp {{current}}/{{total}}: {{filename}}",
+      "chunking": "Đang chia tài liệu {{current}}/{{total}}...",
+      "embedding": "Đang tạo embeddings {{current}}/{{total}}...",
+      "storing": "Đang lưu trữ dữ liệu {{current}}/{{total}}...",
+      "finalizing": "Đang hoàn tất tạo {{current}}/{{total}}...",
+      "saving_file": "Đang lưu tệp {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Đang xử lý tệp {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Đã xử lý {{chunks}} khối từ {{current}}/{{total}} tệp",
+      "processed_all_chunks": "Đã xử lý tất cả {{chunks}} khối từ {{current}} tệp",
+      "chunking_complete": "Hoàn thành chia nhỏ: đã tạo {{chunks}} phần",
+      "embedding_complete": "Đã tạo embedding cho {{current}} phần",
+      "storing_complete": "Đã lưu cơ sở dữ liệu vector với {{current}} embedding",
+      "kb_creation_complete": "Tạo cơ sở kiến thức đã hoàn thành thành công"
     }
   },
   "optimizeChecklistModal": {

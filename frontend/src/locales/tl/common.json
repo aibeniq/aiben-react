@@ -337,6 +337,22 @@
       "currentInstructions": "Kasalukuyang mga Tagubilin:",
       "save": "I-save",
       "cancel": "Kanselahin"
+    },
+    "progress": {
+      "uploading": "Nag-a-upload {{current}} MB/{{total}} MB...",
+      "processingFile": "Pinoproseso ang file {{current}}/{{total}}: {{filename}}",
+      "chunking": "Pinaghihiwa-hiwalay ang dokumento {{current}}/{{total}}...",
+      "embedding": "Lumilikha ng embeddings {{current}}/{{total}}...",
+      "storing": "Nag-iimbak ng data {{current}}/{{total}}...",
+      "finalizing": "Tinatapos ang paglikha {{current}}/{{total}}...",
+      "saving_file": "Nagse-save ng file {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Pinoproseso ang file {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Naproseso ang {{chunks}} chunks mula sa {{current}}/{{total}} files",
+      "processed_all_chunks": "Naproseso ang lahat ng {{chunks}} chunks mula sa {{current}} files",
+      "chunking_complete": "Nakumpleto ang paghahati: {{chunks}} na bahagi ang ginawa",
+      "embedding_complete": "Nilikha ang mga embedding para sa {{current}} bahagi",
+      "storing_complete": "Naimbak na vector database na may {{current}} embeddings",
+      "kb_creation_complete": "Matagumpay na nakumpleto ang paglikha ng knowledge base"
     }
   },
   "optimizeChecklistModal": {

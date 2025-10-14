@@ -382,6 +382,21 @@
         "processing": "Traitement...",
         "pleaseWait": "Veuillez patienter pendant que nous traitons vos fichiers..."
       }
+    },
+    "progress": {
+      "uploading": "Téléchargement {{current}} Mo sur {{total}} Mo...",
+      "saving_file": "Sauvegarde du fichier {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Traitement du fichier {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Traité {{chunks}} chunks de {{current}}/{{total}} fichiers",
+      "processed_all_chunks": "Traité tous les {{chunks}} chunks de {{current}} fichiers",
+      "chunking": "Découpage du document {{current}}/{{total}}...",
+      "chunking_complete": "Découpage terminé: {{current}} documents en {{chunks}} chunks",
+      "embedding": "Création des embeddings {{current}}/{{total}}...",
+      "embedding_complete": "Embeddings créés pour {{current}} chunks",
+      "storing": "Stockage des données {{current}}/{{total}}...",
+      "storing_complete": "Base de données vectorielle stockée avec {{current}} embeddings",
+      "finalizing": "Finalisation de la création {{current}}/{{total}}...",
+      "kb_creation_complete": "Création de la base de connaissances terminée avec succès"
     }
   },
   "common": {

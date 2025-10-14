@@ -342,6 +342,22 @@
       "fieldPlaceholder": "Pridajte názov poľa (napr. Meno, Adresa, Rodné číslo) alebo navrhujte z popisu",
       "cancel": "Zrušiť",
       "updateFormTemplate": "Aktualizovať Šablónu Formulára"
+    },
+    "progress": {
+      "uploading": "Nahrávanie {{current}} MB/{{total}} MB...",
+      "processingFile": "Spracovávanie súboru {{current}}/{{total}}: {{filename}}",
+      "chunking": "Delenie dokumentu {{current}}/{{total}}...",
+      "embedding": "Vytváranie vložení {{current}}/{{total}}...",
+      "storing": "Ukladanie údajov {{current}}/{{total}}...",
+      "finalizing": "Dokončovanie vytvárania {{current}}/{{total}}...",
+      "saving_file": "Ukladanie súboru {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Spracovanie súboru {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Spracované {{chunks}} časti z {{current}}/{{total}} súborov",
+      "processed_all_chunks": "Spracované všetky {{chunks}} časti z {{current}} súborov",
+      "chunking_complete": "Rozdelenie dokončené: vytvorených {{chunks}} blokov",
+      "embedding_complete": "Vytvorené vloženia pre {{current}} blokov",
+      "storing_complete": "Uložená vektorová databáza s {{current}} vloženia",
+      "kb_creation_complete": "Vytvorenie znalostnej bázy dokončené úspešne"
     }
   },
   "optimizeChecklistModal": {

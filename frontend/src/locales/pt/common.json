@@ -310,6 +310,22 @@
         "processing": "Processando...",
         "pleaseWait": "Aguarde enquanto processamos seus arquivos..."
       }
+    },
+    "progress": {
+      "uploading": "Enviando {{current}} MB/{{total}} MB...",
+      "processingFile": "Processando arquivo {{current}}/{{total}}: {{filename}}",
+      "chunking": "Dividindo documento {{current}}/{{total}}...",
+      "embedding": "Criando embeddings {{current}}/{{total}}...",
+      "storing": "Armazenando dados {{current}}/{{total}}...",
+      "finalizing": "Finalizando criação {{current}}/{{total}}...",
+      "saving_file": "Salvando arquivo {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Processando arquivo {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Processados {{chunks}} pedaços de {{current}}/{{total}} arquivos",
+      "processed_all_chunks": "Processados todos os {{chunks}} pedaços de {{current}} arquivos",
+      "chunking_complete": "Fragmentação concluída: {{chunks}} fragmentos criados",
+      "embedding_complete": "Embeddings criados para {{current}} fragmentos",
+      "storing_complete": "Base de dados vetorial armazenada com {{current}} embeddings",
+      "kb_creation_complete": "Criação da base de conhecimento concluída com sucesso"
     }
   },
   "common": {

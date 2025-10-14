@@ -421,6 +421,22 @@
         "processing": "処理中...",
         "pleaseWait": "ファイルを処理中です。しばらくお待ちください..."
       }
+    },
+    "progress": {
+      "uploading": "アップロード中 {{current}} MB/{{total}} MB...",
+      "processingFile": "ファイル処理中 {{current}}/{{total}}: {{filename}}",
+      "chunking": "ドキュメントをチャンク化中 {{current}}/{{total}}...",
+      "embedding": "埋め込み作成中 {{current}}/{{total}}...",
+      "storing": "データ保存中 {{current}}/{{total}}...",
+      "finalizing": "作成完了処理中 {{current}}/{{total}}...",
+      "saving_file": "ファイルを保存中 {{current}}/{{total}}: {{filename}}",
+      "processing_file": "ファイルを処理中 {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "{{current}}/{{total}}ファイルから{{chunks}}チャンクを処理しました",
+      "processed_all_chunks": "{{current}}ファイルからすべての{{chunks}}チャンクを処理しました",
+      "chunking_complete": "チャンキング完了: {{chunks}} 個のチャンクが作成されました",
+      "embedding_complete": "{{current}} 個のチャンクの埋め込みが作成されました",
+      "storing_complete": "{{current}} 個の埋め込みでベクトルデータベースが保存されました",
+      "kb_creation_complete": "ナレッジベースの作成が正常に完了しました"
     }
   },
   "feedback": {

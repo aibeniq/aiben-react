@@ -32,10 +32,13 @@ if settings.SENTRY_DSN and settings.ENVIRONMENT != "local":
 
 print("DEBUG: After sentry init", flush=True)
 
+# Create FastAPI app
+print("DEBUG: About to create FastAPI app", flush=True)
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    generate_unique_id_function=custom_generate_unique_id,
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 print("DEBUG: After FastAPI creation", flush=True)
@@ -77,9 +80,35 @@ if settings.all_cors_origins:
 print("DEBUG: After CORS middleware", flush=True)
 
 # Add upload progress middleware for multipart form monitoring
+print("DEBUG: About to add upload middleware", flush=True)
 app.add_middleware(UploadProgressMiddleware)
-
 print("DEBUG: After upload middleware", flush=True)
+
+print("DEBUG: After test middleware", flush=True)
+
+# Add error handlers to ensure CORS headers on all responses
+@app.exception_handler(413)
+async def payload_too_large_handler(request: Request, exc):
+    """Handle 413 Payload Too Large errors with CORS headers"""
+    from fastapi.responses import JSONResponse
+    
+    response = JSONResponse(
+        status_code=413,
+        content={
+            "detail": "File size too large. Maximum upload size is 1GB.",
+            "error": "PAYLOAD_TOO_LARGE"
+        }
+    )
+    
+    # Add CORS headers manually to error response
+    origin = request.headers.get("origin")
+    if origin and origin in settings.all_cors_origins:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Accept-Language, X-Request-ID, X-Upload-ID"
+    
+    return response
 
 # Add security headers middleware for production
 if settings.ENVIRONMENT != "local":

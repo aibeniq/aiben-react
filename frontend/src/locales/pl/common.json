@@ -467,6 +467,22 @@
         "processing": "Przetwarzanie...",
         "pleaseWait": "Proszę czekać, podczas gdy przetwarzamy Twoje pliki..."
       }
+    },
+    "progress": {
+      "uploading": "Przesyłanie {{current}} MB/{{total}} MB...",
+      "processingFile": "Przetwarzanie pliku {{current}}/{{total}}: {{filename}}",
+      "chunking": "Dzielenie dokumentu {{current}}/{{total}}...",
+      "embedding": "Tworzenie osadzeń {{current}}/{{total}}...",
+      "storing": "Przechowywanie danych {{current}}/{{total}}...",
+      "finalizing": "Kończenie tworzenia {{current}}/{{total}}...",
+      "saving_file": "Zapisywanie pliku {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Przetwarzanie pliku {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Przetworzono {{chunks}} fragmenty z {{current}}/{{total}} plików",
+      "processed_all_chunks": "Przetworzono wszystkie {{chunks}} fragmenty z {{current}} plików",
+      "chunking_complete": "Dzielenie zakończone: utworzono {{chunks}} fragmentów",
+      "embedding_complete": "Utworzone osadzenia dla {{current}} fragmentów",
+      "storing_complete": "Przechowana baza danych wektorów z {{current}} osadzeniami",
+      "kb_creation_complete": "Tworzenie bazy wiedzy zakończone pomyślnie"
     }
   },
   "feedback": {

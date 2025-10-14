@@ -334,6 +334,22 @@
       "currentInstructions": "Тренутна упутства:",
       "save": "Сачувај",
       "cancel": "Откажи"
+    },
+    "progress": {
+      "uploading": "Отпремање {{current}} MB/{{total}} MB...",
+      "processingFile": "Обрада датотеке {{current}}/{{total}}: {{filename}}",
+      "chunking": "Дељење документа {{current}}/{{total}}...",
+      "embedding": "Креирање уграђивања {{current}}/{{total}}...",
+      "storing": "Чување података {{current}}/{{total}}...",
+      "finalizing": "Завршавање креирања {{current}}/{{total}}...",
+      "saving_file": "Чување датотеке {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Обрада датотеке {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Обрађени {{chunks}} делови из {{current}}/{{total}} датотека",
+      "processed_all_chunks": "Обрађени сви {{chunks}} делови из {{current}} датотека",
+      "chunking_complete": "Дељење завршено: креирано {{chunks}} делова",
+      "embedding_complete": "Креирана уграђивања за {{current}} делова",
+      "storing_complete": "Сачувана векторска база података са {{current}} уграђивањима",
+      "kb_creation_complete": "Креирање базе знања успешно завршено"
     }
   },
   "optimizeChecklistModal": {

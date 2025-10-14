@@ -337,6 +337,22 @@
       "currentInstructions": "คำแนะนำปัจจุบัน:",
       "save": "บันทึก",
       "cancel": "ยกเลิก"
+    },
+    "progress": {
+      "uploading": "กำลังอัปโหลด {{current}} MB/{{total}} MB...",
+      "processingFile": "กำลังประมวลผลไฟล์ {{current}}/{{total}}: {{filename}}",
+      "chunking": "กำลังแบ่งเอกสาร {{current}}/{{total}}...",
+      "embedding": "กำลังสร้าง embeddings {{current}}/{{total}}...",
+      "storing": "กำลังจัดเก็บข้อมูล {{current}}/{{total}}...",
+      "finalizing": "กำลังเสร็จสิ้นการสร้าง {{current}}/{{total}}...",
+      "saving_file": "กำลังบันทึกไฟล์ {{current}}/{{total}}: {{filename}}",
+      "processing_file": "กำลังประมวลผลไฟล์ {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "ประมวลผลชิ้นส่วน {{chunks}} จากไฟล์ {{current}}/{{total}} แล้ว",
+      "processed_all_chunks": "ประมวลผลชิ้นส่วนทั้งหมด {{chunks}} จากไฟล์ {{current}} แล้ว",
+      "chunking_complete": "การแบ่งส่วนเสร็จสิ้น: สร้าง {{chunks}} ส่วนแล้ว",
+      "embedding_complete": "สร้างการฝังสำหรับ {{current}} ส่วนแล้ว",
+      "storing_complete": "จัดเก็บฐานข้อมูลเวกเตอร์ด้วยการฝัง {{current}} แล้ว",
+      "kb_creation_complete": "การสร้างฐานความรู้เสร็จสิ้นเรียบร้อยแล้ว"
     }
   },
   "optimizeChecklistModal": {

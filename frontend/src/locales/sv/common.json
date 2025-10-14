@@ -610,6 +610,22 @@
         "processing": "Bearbetar...",
         "pleaseWait": "Vänta medan vi bearbetar dina filer..."
       }
+    },
+    "progress": {
+      "uploading": "Laddar upp {{current}} MB/{{total}} MB...",
+      "processingFile": "Bearbetar fil {{current}}/{{total}}: {{filename}}",
+      "chunking": "Delar upp dokument {{current}}/{{total}}...",
+      "embedding": "Skapar inbäddningar {{current}}/{{total}}...",
+      "storing": "Lagrar data {{current}}/{{total}}...",
+      "finalizing": "Slutför skapande {{current}}/{{total}}...",
+      "saving_file": "Sparar fil {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Bearbetar fil {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Bearbetade {{chunks}} delar från {{current}}/{{total}} filer",
+      "processed_all_chunks": "Bearbetade alla {{chunks}} delar från {{current}} filer",
+      "chunking_complete": "Uppdelning klar: {{chunks}} delar skapade",
+      "embedding_complete": "Inbäddningar skapade för {{current}} delar",
+      "storing_complete": "Vektordatabas sparad med {{current}} inbäddningar",
+      "kb_creation_complete": "Skapande av kunskapsbas slutfört framgångsrikt"
     }
   },
   "archive": {

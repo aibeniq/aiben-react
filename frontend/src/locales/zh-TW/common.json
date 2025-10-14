@@ -338,6 +338,22 @@
       "currentInstructions": "目前指示：",
       "save": "儲存",
       "cancel": "取消"
+    },
+    "progress": {
+      "uploading": "上傳中 {{current}} MB/{{total}} MB...",
+      "processingFile": "處理檔案 {{current}}/{{total}}: {{filename}}",
+      "chunking": "分割文件 {{current}}/{{total}}...",
+      "embedding": "建立嵌入 {{current}}/{{total}}...",
+      "storing": "儲存資料 {{current}}/{{total}}...",
+      "finalizing": "完成建立 {{current}}/{{total}}...",
+      "saving_file": "正在儲存檔案 {{current}}/{{total}}: {{filename}}",
+      "processing_file": "正在處理檔案 {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "已處理來自 {{current}}/{{total}} 個文件的 {{chunks}} 個區塊",
+      "processed_all_chunks": "已處理來自 {{current}} 個文件的所有 {{chunks}} 個區塊",
+      "chunking_complete": "分塊完成：已建立 {{chunks}} 個區塊",
+      "embedding_complete": "已為 {{current}} 個區塊建立嵌入",
+      "storing_complete": "已儲存包含 {{current}} 個嵌入的向量資料庫",
+      "kb_creation_complete": "知識庫建立成功完成"
     }
   },
   "optimizeChecklistModal": {

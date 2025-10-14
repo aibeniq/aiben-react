@@ -346,6 +346,22 @@
       "currentInstructions": "Τρέχουσες οδηγίες:",
       "save": "Αποθήκευση",
       "cancel": "Ακύρωση"
+    },
+    "progress": {
+      "uploading": "Μεταφόρτωση {{current}} MB/{{total}} MB...",
+      "processingFile": "Επεξεργασία αρχείου {{current}}/{{total}}: {{filename}}",
+      "chunking": "Τεμαχισμός εγγράφου {{current}}/{{total}}...",
+      "embedding": "Δημιουργία ενσωματώσεων {{current}}/{{total}}...",
+      "storing": "Αποθήκευση δεδομένων {{current}}/{{total}}...",
+      "finalizing": "Ολοκλήρωση δημιουργίας {{current}}/{{total}}...",
+      "saving_file": "Αποθήκευση αρχείου {{current}}/{{total}}: {{filename}}",
+      "processing_file": "Επεξεργασία αρχείου {{current}}/{{total}}: {{filename}}",
+      "processed_chunks": "Επεξεργάστηκαν {{chunks}} κομμάτια από {{current}}/{{total}} αρχεία",
+      "processed_all_chunks": "Επεξεργάστηκαν όλα τα {{chunks}} κομμάτια από {{current}} αρχεία",
+      "chunking_complete": "Ο διαμερισμός ολοκληρώθηκε: δημιουργήθηκαν {{chunks}} κομμάτια",
+      "embedding_complete": "Δημιουργήθηκαν ενσωματώσεις για {{current}} κομμάτια",
+      "storing_complete": "Αποθηκευμένη βάση δεδομένων διανυσμάτων με {{current}} ενσωματώσεις",
+      "kb_creation_complete": "Η δημιουργία της βάσης γνώσεων ολοκληρώθηκε με επιτυχία"
     }
   },
   "optimizeChecklistModal": {
