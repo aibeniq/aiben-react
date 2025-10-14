@@ -3176,7 +3176,7 @@ async def generate_outline_optimization_csv(
                 suggested_section_clean = suggested_section.replace("\n", " ").replace(
                     "\r", " "
                 )
-                reason_clean = reason.replace("\n", " ").replace("\r", " ")
+                reason_clean = re.sub(r'[\ud800-\udfff]', '', reason).replace("\n", " ").replace("\r", " ")
                 current_output_clean = current_output.replace("\n", " ").replace(
                     "\r", " "
                 )
@@ -3436,13 +3436,13 @@ async def generate_csv(
 
                 # Clean up text fields (remove newlines and carriage returns for CSV)
                 title_clean = (
-                    title.replace("\n", " ").replace("\r", " ").replace('"', '""')
+                    re.sub(r'[\ud800-\udfff]', '', title).replace("\n", " ").replace("\r", " ").replace('"', '""')
                 )
                 content_clean = (
-                    content.replace("\n", " ").replace("\r", " ").replace('"', '""')
+                    re.sub(r'[\ud800-\udfff]', '', content).replace("\n", " ").replace("\r", " ").replace('"', '""')
                 )
                 citations_clean = (
-                    citations_formatted.replace("\n", " ")
+                    re.sub(r'[\ud800-\udfff]', '', citations_formatted).replace("\n", " ")
                     .replace("\r", " ")
                     .replace('"', '""')
                 )
