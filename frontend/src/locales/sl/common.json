@@ -174,7 +174,7 @@
     "checklistNamePlaceholder": "Vnesite ime kontrolne liste...",
     "checklistDescriptionLabel": "Opis",
     "checklistDescriptionPlaceholder": "Vnesite opis kontrolne liste za samodejne predloge vprašanj (najmanj 10 znakov)...",
-    "questions": "Vprašanja",
+    "questions": "{{count}} questions",
     "suggest": "Predlagaj",
     "suggesting": "Predlagam...",
     "optimize": "Optimiziraj",
@@ -388,63 +388,78 @@
     }
   },
   "archive": {
-    "title": "Archive",
-    "history": "History",
-    "allUsers": "All Users",
-    "allUsersToggleTooltip": "Toggle between viewing only your history or all users' history",
-    "viewingAllUsers": "Viewing all users' history",
-    "viewingMyHistory": "Viewing only my history",
+    "title": "Arhiv",
+    "history": "Zgodovina",
+    "allUsers": "Vsi uporabniki",
+    "allUsersToggleTooltip": "Preklopi med ogledom samo vaše zgodovine ali zgodovine vseh uporabnikov",
+    "viewingAllUsers": "Ogled zgodovine vseh uporabnikov",
+    "viewingMyHistory": "Ogled samo moje zgodovine",
     "tabs": {
-      "review": "Review",
-      "generate": "Generate",
-      "compare": "Compare",
-      "match": "Match"
+      "review": "Pregled",
+      "generate": "Generiraj",
+      "compare": "Primerjaj",
+      "match": "Ujemanje"
     },
     "emptyMessages": {
-      "review": "No previous evaluations",
-      "generate": "No previous reports",
-      "compare": "No previous comparisons",
-      "match": "No previous form processing"
+      "review": "Ni prejšnjih ocen",
+      "generate": "Ni prejšnjih poročil",
+      "compare": "Ni prejšnjih primerjav",
+      "match": "Ni prejšnje obdelave obrazcev"
     },
     "metadata": {
-      "question": "question",
-      "question_one": "question",
-      "questions": "questions",
-      "topic": "topic",
-      "topic_one": "topic",
-      "topics": "topics",
-      "field": "field",
-      "field_one": "field",
-      "fields": "fields",
-      "document": "document",
-      "document_one": "document",
-      "documents": "documents",
-      "digitized": "digitized",
-      "handwritten": "handwritten"
+      "question": "{{count}} vprašanje",
+      "question_one": "{{count}} vprašanje",
+      "questions": "{{count}} vprašanje",
+      "topic": "{{count}} tema",
+      "topic_one": "{{count}} tema",
+      "topics": "{{count}} tema",
+      "section": "{{count}} razdelek",
+      "section_one": "{{count}} razdelek",
+      "sections": "{{count}} razdelek",
+      "field": "{{count}} polje",
+      "field_one": "{{count}} polje",
+      "fields": "{{count}} polje",
+      "document": "{{count}} dokument",
+      "document_one": "{{count}} dokument",
+      "documents": "{{count}} dokument",
+      "digitized": "digitaliziran",
+      "handwritten": "ročno napisan"
     },
     "feedback": {
-      "positive": "Positive feedback",
-      "negative": "Negative feedback",
-      "hasFeedback": "Has feedback"
+      "positive": "Pozitivna povratna informacija",
+      "negative": "Negativna povratna informacija",
+      "hasFeedback": "Ima povratno informacijo"
     },
-    "deleteConfirmation": "Are you sure you want to delete this item? This action cannot be undone.",
-    "unknownDate": "Unknown date",
-    "unnamedItem": "Unnamed item",
+    "deleteConfirmation": "Ali ste prepričani, da želite izbrisati ta element? Tega dejanja ni mogoče razveljaviti.",
+    "unknownDate": "Neznan datum",
+    "unnamedItem": "Neimenovan element",
     "successMessages": {
-      "evaluationLoaded": "Evaluation loaded successfully",
-      "reportLoaded": "Report loaded successfully",
-      "comparisonLoaded": "Comparison loaded successfully",
-      "formProcessingLoaded": "Form processing loaded successfully",
-      "evaluationDeleted": "Evaluation deleted successfully",
-      "reportDeleted": "Report deleted successfully",
-      "comparisonDeleted": "Comparison deleted successfully",
-      "formProcessingDeleted": "Form processing deleted successfully"
+      "evaluationLoaded": "Ocena uspešno naložena",
+      "reportLoaded": "Poročilo uspešno naloženo",
+      "comparisonLoaded": "Primerjava uspešno naložena",
+      "formProcessingLoaded": "Obdelava obrazca uspešno naložena",
+      "evaluationDeleted": "Ocena uspešno izbrisana",
+      "reportDeleted": "Poročilo uspešno izbrisano",
+      "comparisonDeleted": "Primerjava uspešno izbrisana",
+      "formProcessingDeleted": "Obdelava obrazca uspešno izbrisana"
     },
     "docxHeaders": {
-      "evaluationSummary": "Evaluation Summary",
-      "questionAnswerDetails": "Question-Answer Details",
-      "summary": "Summary",
-      "topicAnalysis": "Topic Analysis"
+      "evaluationSummary": "Povzetek ocene",
+      "questionAnswerDetails": "Podrobnosti vprašanje-odgovor",
+      "summary": "Povzetek",
+      "topicAnalysis": "Analiza teme",
+      "documentEvaluation": "Ocena dokumenta",
+      "generatedDocument": "Generiran dokument",
+      "documentComparison": "Primerjava dokumentov",
+      "matchingResults": "Ujemajoči se rezultati"
+    },
+    "labels": {
+      "questionsAndAnswers": "Vprašanja in odgovori",
+      "reportSections": "Razdelki poročila",
+      "questionNumber": "Vprašanje",
+      "topicLabel": "Tema",
+      "withCitations": "s citati",
+      "sources": "viri"
     }
   },
   "optimizeChecklistModal": {

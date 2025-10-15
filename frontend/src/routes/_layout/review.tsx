@@ -531,7 +531,14 @@ const VeraDoc = () => {
 
       // STEP 1: Create a task to get the task_id for progress tracking (backend creates it in Redis immediately)
       console.log("🎯 Creating review task for progress tracking...")
-      const taskResponse = await VeradocService.createReviewTask()
+      
+      // Use direct HTTP request since the SDK method may not be generated
+      const { request: __request } = await import("@/client/core/request")
+      const { OpenAPI } = await import("@/client/core/OpenAPI")
+      const taskResponse = await __request(OpenAPI, {
+        method: "POST",
+        url: "/api/v1/veradoc/review/task",
+      })
 
       const newTaskId = (taskResponse as any).task_id
       console.log("📋 Review task_id created by backend:", newTaskId)

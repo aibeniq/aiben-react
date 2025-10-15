@@ -176,7 +176,7 @@
     "checklistNamePlaceholder": "Adja meg az ellenőrzőlista nevét...",
     "checklistDescriptionLabel": "Leírás",
     "checklistDescriptionPlaceholder": "Adja meg az ellenőrzőlista leírását automatikus kérdésjavaslatokhoz (minimum 10 karakter)...",
-    "questions": "Kérdések",
+    "questions": "{{count}} questions",
     "suggest": "Javaslat",
     "suggesting": "Javasolás...",
     "optimize": "Optimalizálás",
@@ -394,63 +394,78 @@
     }
   },
   "archive": {
-    "title": "Archive",
-    "history": "History",
-    "allUsers": "All Users",
-    "allUsersToggleTooltip": "Toggle between viewing only your history or all users' history",
-    "viewingAllUsers": "Viewing all users' history",
-    "viewingMyHistory": "Viewing only my history",
+    "title": "Archívum",
+    "history": "Előzmények",
+    "allUsers": "Összes felhasználó",
+    "allUsersToggleTooltip": "Váltás a csak saját előzmények vagy az összes felhasználó előzményeinek megtekintése között",
+    "viewingAllUsers": "Az összes felhasználó előzményeinek megtekintése",
+    "viewingMyHistory": "Csak a saját előzményeim megtekintése",
     "tabs": {
-      "review": "Review",
-      "generate": "Generate",
-      "compare": "Compare",
-      "match": "Match"
+      "review": "Áttekintés",
+      "generate": "Generálás",
+      "compare": "Összehasonlítás",
+      "match": "Egyezés"
     },
     "emptyMessages": {
-      "review": "No previous evaluations",
-      "generate": "No previous reports",
-      "compare": "No previous comparisons",
-      "match": "No previous form processing"
+      "review": "Nincsenek korábbi értékelések",
+      "generate": "Nincsenek korábbi jelentések",
+      "compare": "Nincsenek korábbi összehasonlítások",
+      "match": "Nincs korábbi űrlap feldolgozás"
     },
     "metadata": {
-      "question": "question",
-      "question_one": "question",
-      "questions": "questions",
-      "topic": "topic",
-      "topic_one": "topic",
-      "topics": "topics",
-      "field": "field",
-      "field_one": "field",
-      "fields": "fields",
-      "document": "document",
-      "document_one": "document",
-      "documents": "documents",
-      "digitized": "digitized",
-      "handwritten": "handwritten"
+      "question": "{{count}} kérdés",
+      "question_one": "{{count}} kérdés",
+      "questions": "{{count}} kérdés",
+      "topic": "{{count}} téma",
+      "topic_one": "{{count}} téma",
+      "topics": "{{count}} téma",
+      "section": "{{count}} szakasz",
+      "section_one": "{{count}} szakasz",
+      "sections": "{{count}} szakasz",
+      "field": "{{count}} mező",
+      "field_one": "{{count}} mező",
+      "fields": "{{count}} mező",
+      "document": "{{count}} dokumentum",
+      "document_one": "{{count}} dokumentum",
+      "documents": "{{count}} dokumentum",
+      "digitized": "digitalizált",
+      "handwritten": "kézzel írott"
     },
     "feedback": {
-      "positive": "Positive feedback",
-      "negative": "Negative feedback",
-      "hasFeedback": "Has feedback"
+      "positive": "Pozitív visszajelzés",
+      "negative": "Negatív visszajelzés",
+      "hasFeedback": "Van visszajelzése"
     },
-    "deleteConfirmation": "Are you sure you want to delete this item? This action cannot be undone.",
-    "unknownDate": "Unknown date",
-    "unnamedItem": "Unnamed item",
+    "deleteConfirmation": "Biztosan törölni szeretné ezt az elemet? Ez a művelet nem vonható vissza.",
+    "unknownDate": "Ismeretlen dátum",
+    "unnamedItem": "Névtelen elem",
     "successMessages": {
-      "evaluationLoaded": "Evaluation loaded successfully",
-      "reportLoaded": "Report loaded successfully",
-      "comparisonLoaded": "Comparison loaded successfully",
-      "formProcessingLoaded": "Form processing loaded successfully",
-      "evaluationDeleted": "Evaluation deleted successfully",
-      "reportDeleted": "Report deleted successfully",
-      "comparisonDeleted": "Comparison deleted successfully",
-      "formProcessingDeleted": "Form processing deleted successfully"
+      "evaluationLoaded": "Értékelés sikeresen betöltve",
+      "reportLoaded": "Jelentés sikeresen betöltve",
+      "comparisonLoaded": "Összehasonlítás sikeresen betöltve",
+      "formProcessingLoaded": "Űrlap feldolgozás sikeresen betöltve",
+      "evaluationDeleted": "Értékelés sikeresen törölve",
+      "reportDeleted": "Jelentés sikeresen törölve",
+      "comparisonDeleted": "Összehasonlítás sikeresen törölve",
+      "formProcessingDeleted": "Űrlap feldolgozás sikeresen törölve"
     },
     "docxHeaders": {
-      "evaluationSummary": "Evaluation Summary",
-      "questionAnswerDetails": "Question-Answer Details",
-      "summary": "Summary",
-      "topicAnalysis": "Topic Analysis"
+      "evaluationSummary": "Értékelés összefoglalója",
+      "questionAnswerDetails": "Kérdés-válasz részletek",
+      "summary": "Összefoglaló",
+      "topicAnalysis": "Téma elemzés",
+      "documentEvaluation": "Dokumentum értékelés",
+      "generatedDocument": "Generált dokumentum",
+      "documentComparison": "Dokumentum összehasonlítás",
+      "matchingResults": "Egyező eredmények"
+    },
+    "labels": {
+      "questionsAndAnswers": "Kérdések és válaszok",
+      "reportSections": "Jelentés szakaszok",
+      "questionNumber": "Kérdés",
+      "topicLabel": "Téma",
+      "withCitations": "hivatkozásokkal",
+      "sources": "források"
     }
   },
   "optimizeChecklistModal": {

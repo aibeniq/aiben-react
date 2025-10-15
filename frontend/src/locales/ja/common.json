@@ -225,7 +225,7 @@
     "checklistNamePlaceholder": "チェックリスト名を入力...",
     "checklistDescriptionLabel": "説明",
     "checklistDescriptionPlaceholder": "自動質問提案のためのチェックリストの説明を入力してください（最低10文字）...",
-    "questions": "質問",
+    "questions": "{{count}} questions",
     "suggest": "提案",
     "suggesting": "提案中...",
     "optimize": "最適化",
@@ -350,7 +350,7 @@
     "referenceDocuments": "参考文書（オプション）",
     "uploadFiles": "ファイルをアップロード",
     "knowledgeBase": "ナレッジベース",
-    "questions": "質問",
+    "questions": "{{count}} questions",
     "suggest": "提案",
     "optimize": "最適化",
     "addQuestionPlaceholder": "質問を追加",
@@ -370,7 +370,10 @@
     "uploadFiles": "ファイルをアップロード",
     "knowledgeBase": "ナレッジベース",
     "comparisonTopics": "比較トピック",
-    "topics": "トピック",
+    "topics": "{{count}} topics",
+    "section": "{{count}} section",
+    "section_one": "{{count}} section",
+    "sections": "{{count}} sections",
     "suggest": "提案",
     "addTopicPlaceholder": "比較トピックを追加",
     "copyAllTopics": "すべてのトピックをテキストとしてコピー",
@@ -493,6 +496,25 @@
       "compare": "以前の比較はありません",
       "match": "以前のフォーム処理はありません"
     },
+    "metadata": {
+      "question": "{{count}} 質問",
+      "question_one": "{{count}} 質問",
+      "questions": "{{count}} 質問",
+      "topic": "{{count}} トピック",
+      "topic_one": "{{count}} トピック",
+      "topics": "{{count}} トピック",
+      "section": "{{count}} セクション",
+      "section_one": "{{count}} セクション",
+      "sections": "{{count}} セクション",
+      "field": "{{count}} フィールド",
+      "field_one": "{{count}} フィールド",
+      "fields": "{{count}} フィールド",
+      "document": "{{count}} ドキュメント",
+      "document_one": "{{count}} ドキュメント",
+      "documents": "{{count}} ドキュメント",
+      "digitized": "デジタル化",
+      "handwritten": "手書き"
+    },
     "feedback": {
       "positive": "ポジティブなフィードバック",
       "negative": "ネガティブなフィードバック",
@@ -515,7 +537,19 @@
       "evaluationSummary": "評価サマリー",
       "questionAnswerDetails": "質問-回答の詳細",
       "summary": "サマリー",
-      "topicAnalysis": "トピック分析"
+      "topicAnalysis": "トピック分析",
+      "documentEvaluation": "ドキュメント評価",
+      "generatedDocument": "生成されたドキュメント",
+      "documentComparison": "ドキュメント比較",
+      "matchingResults": "一致結果"
+    },
+    "labels": {
+      "questionsAndAnswers": "質問と回答",
+      "reportSections": "レポートセクション",
+      "questionNumber": "質問",
+      "topicLabel": "トピック",
+      "withCitations": "引用付き",
+      "sources": "ソース"
     }
   },
   "feedback": {

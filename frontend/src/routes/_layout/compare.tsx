@@ -350,6 +350,7 @@ const TwinCheck = () => {
   const mutation = useMutation({
     mutationFn: async (data: {
       comparison_topics: string
+      topic_list_name?: string
       document1: File
       document2: File
     }) => {
@@ -394,11 +395,12 @@ const TwinCheck = () => {
 
       // Simplified API call without knowledge base parameters
       const promise = TwincheckService.compareDocuments({
-        comparisonTopics: data.comparison_topics,
         formData: {
           document1: data.document1,
           document2: data.document2,
           task_id: newTaskId, // Pass task_id for progress tracking
+          comparison_topics: data.comparison_topics,
+          topic_list_name: data.topic_list_name,
         } as any, // Type assertion - SDK will be regenerated later
       })
 
@@ -455,6 +457,7 @@ const TwinCheck = () => {
     // Simplified request data without knowledge base
     const requestData = {
       comparison_topics: topics,
+      topic_list_name: selectedComparison?.name,
       document1: document1,
       document2: document2,
     }

@@ -1,5 +1,6 @@
 import { Box, Text, VStack } from "@chakra-ui/react"
 import type React from "react"
+import { useTranslation } from "react-i18next"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import type { VeradocGetVeradocDetailResponse } from "../../../client"
@@ -15,6 +16,7 @@ const VeradocResults: React.FC<VeradocResultsProps> = ({
   selectedReport,
   components,
 }) => {
+  const { t } = useTranslation()
   const results = (selectedReport.results as any)?.final_evaluation || ""
   const qaPairs = (selectedReport.results as any)?.qa_pairs || []
   const qaPairsSummary = (selectedReport.results as any)?.qa_pairs_summary || []
@@ -31,7 +33,7 @@ const VeradocResults: React.FC<VeradocResultsProps> = ({
       {qaPairsSummary.length > 0 ? (
         <VStack mt={4} gap={3} align="stretch">
           <Text fontSize="lg" fontWeight="bold">
-            Questions & Answers ({qaPairsSummary.length})
+            {t("archive.labels.questionsAndAnswers")} ({qaPairsSummary.length})
           </Text>
           {qaPairsSummary.map((summary: any) => (
             <LazyQAPairDisplay

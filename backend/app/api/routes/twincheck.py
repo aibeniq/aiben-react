@@ -213,7 +213,8 @@ def create_synthesis_prompt(
 async def compare_documents(
     session: SessionDep,
     current_user: CurrentUser,
-    request_data: TwinCheckRequest = Depends(),
+    comparison_topics: str = Form(...),
+    topic_list_name: Optional[str] = Form(None),
     document1: UploadFile = File(...),
     document2: UploadFile = File(...),
     request: FastAPIRequest = None,
@@ -289,7 +290,7 @@ async def compare_documents(
         print(f"Generated diff text with {estimate_tokens(diff_text)} estimated tokens")
 
         # Parse comparison topics
-        topic_list = request_data.comparison_topics.strip().split("\n")
+        topic_list = comparison_topics.strip().split("\n")
         topic_analysis = []
 
         # Check if we need to chunk the diff text
@@ -711,7 +712,7 @@ async def compare_documents(
                     "diff_text": diff_text,
                     "doc1_name": document1.filename,
                     "doc2_name": document2.filename,
-                    "topics": request_data.comparison_topics,
+                    "topics": comparison_topics,
                 },
             )
 
@@ -726,7 +727,8 @@ async def compare_documents(
             user_id=current_user.id,
             functionality="twincheck",
             input_data={
-                "comparison_topics": request_data.comparison_topics,
+                "comparison_topics": comparison_topics,
+                "topic_list_name": topic_list_name,
                 "document1_name": document1.filename,
                 "document2_name": document2.filename,
             },
@@ -839,6 +841,24 @@ async def get_comparison_history(
                 )
 
                 # Create result item
+                comparison_topics = input_data.get("comparison_topics", "")
+                topic_list_name = input_data.get("topic_list_name")
+                
+                # Use topic_list_name if available, otherwise create name from topics
+                if topic_list_name:
+                    display_name = topic_list_name
+                else:
+                    # Fallback: Use first topic as display name, or truncate if too long
+                    if comparison_topics.strip():
+                        first_topic = comparison_topics.strip().split('\n')[0].strip()
+                        if first_topic:
+                            # Truncate if too long
+                            display_name = first_topic[:50] + ("..." if len(first_topic) > 50 else "")
+                        else:
+                            display_name = "Custom Topic List"
+                    else:
+                        display_name = "Unnamed Topic List"
+                
                 result_item = {
                     "id": str(comparison.id),
                     "date_created": comparison.date_created,
@@ -848,7 +868,8 @@ async def get_comparison_history(
                     "document2_name": input_data.get(
                         "document2_name", "Unknown Document 2"
                     ),
-                    "comparison_topics": input_data.get("comparison_topics", ""),
+                    "comparison_topics": comparison_topics,
+                    "topic_list_name": display_name,
                     "topic_count": output_data.get("topic_count", 0),
                     "has_feedback": comparison.feedback is not None,
                 }

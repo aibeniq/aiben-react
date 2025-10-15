@@ -174,7 +174,7 @@
     "checklistNamePlaceholder": "Ingrese el nombre de la lista de verificación...",
     "checklistDescriptionLabel": "Descripción",
     "checklistDescriptionPlaceholder": "Ingrese la descripción de la lista de verificación para sugerencias automáticas de preguntas (mínimo 10 caracteres)...",
-    "questions": "Preguntas",
+    "questions": "{{count}} questions",
     "suggest": "Sugerir",
     "suggesting": "Sugiriendo...",
     "optimize": "Optimizar",
@@ -456,18 +456,21 @@
       "match": "No hay procesamiento de formularios anterior"
     },
     "metadata": {
-      "question": "pregunta",
-      "question_one": "pregunta",
-      "questions": "preguntas",
-      "topic": "tema",
-      "topic_one": "tema",
-      "topics": "temas",
-      "field": "campo",
-      "field_one": "campo",
-      "fields": "campos",
-      "document": "documento",
-      "document_one": "documento",
-      "documents": "documentos",
+      "question": "{{count}} pregunta",
+      "question_one": "{{count}} pregunta",
+      "questions": "{{count}} preguntas",
+      "topic": "{{count}} tema",
+      "topic_one": "{{count}} tema",
+      "topics": "{{count}} temas",
+      "section": "{{count}} sección",
+      "section_one": "{{count}} sección",
+      "sections": "{{count}} secciones",
+      "field": "{{count}} campo",
+      "field_one": "{{count}} campo",
+      "fields": "{{count}} campos",
+      "document": "{{count}} documento",
+      "document_one": "{{count}} documento",
+      "documents": "{{count}} documentos",
       "digitized": "digitalizado",
       "handwritten": "manuscrito"
     },
@@ -493,7 +496,19 @@
       "evaluationSummary": "Resumen de Evaluación",
       "questionAnswerDetails": "Detalles de Pregunta-Respuesta",
       "summary": "Resumen",
-      "topicAnalysis": "Análisis de Tema"
+      "topicAnalysis": "Análisis de Tema",
+      "documentEvaluation": "Evaluación de Documento",
+      "generatedDocument": "Documento Generado",
+      "documentComparison": "Comparación de Documento",
+      "matchingResults": "Resultados de Coincidencia"
+    },
+    "labels": {
+      "questionsAndAnswers": "Preguntas y Respuestas",
+      "reportSections": "Secciones del Informe",
+      "questionNumber": "Pregunta",
+      "topicLabel": "Tema",
+      "withCitations": "con citas",
+      "sources": "fuentes"
     }
   },
   "optimizeChecklistModal": {

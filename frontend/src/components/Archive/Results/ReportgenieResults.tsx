@@ -2,6 +2,7 @@ import SourceLink from "@/components/Common/SourceLink"
 import { Box, HStack, Heading, Text } from "@chakra-ui/react"
 import type React from "react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FiFileText } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
@@ -16,6 +17,7 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({
   selectedReport,
   components,
 }) => {
+  const { t } = useTranslation()
   console.log("🔍 REPORTGENIE UI DEBUG: Full selectedReport:", selectedReport)
   console.log(
     "🔍 REPORTGENIE UI DEBUG: selectedReport.results:",
@@ -91,9 +93,9 @@ const ReportgenieResults: React.FC<ReportgenieResultsProps> = ({
       {allSections.length > 0 && (
         <Box mt={8}>
           <Heading as="h3" size="md" mb={4}>
-            Report Sections{" "}
+            {t("archive.labels.reportSections")}{" "}
             {sectionsWithSources.length > 0 &&
-              `(${sectionsWithSources.length} with citations)`}
+              `(${sectionsWithSources.length} ${t("archive.labels.withCitations")})`}
           </Heading>
           {allSections.map((section: any, index: number) => {
             const hasCitations =

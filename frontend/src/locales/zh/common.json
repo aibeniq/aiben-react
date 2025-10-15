@@ -144,7 +144,7 @@
     "checklistNamePlaceholder": "输入检查清单名称...",
     "checklistDescriptionLabel": "描述",
     "checklistDescriptionPlaceholder": "输入检查清单描述以获取自动问题建议（最少10个字符）...",
-    "questions": "问题",
+    "questions": "{{count}} questions",
     "suggest": "建议",
     "suggesting": "正在建议...",
     "optimize": "优化",
@@ -348,7 +348,7 @@
     "referenceDocuments": "参考文档（可选）",
     "uploadFiles": "上传文件",
     "knowledgeBase": "知识库",
-    "questions": "问题",
+    "questions": "{{count}} questions",
     "suggest": "建议",
     "optimize": "优化",
     "addQuestionPlaceholder": "添加问题",
@@ -368,7 +368,10 @@
     "uploadFiles": "上传文件",
     "knowledgeBase": "知识库",
     "comparisonTopics": "比较主题",
-    "topics": "主题",
+    "topics": "{{count}} topics",
+    "section": "{{count}} section",
+    "section_one": "{{count}} section",
+    "sections": "{{count}} sections",
     "suggest": "建议",
     "addTopicPlaceholder": "添加比较主题",
     "copyAllTopics": "复制所有主题为文本",
@@ -536,6 +539,25 @@
       "compare": "没有以前的比较",
       "match": "没有以前的表单处理"
     },
+    "metadata": {
+      "question": "{{count}} 问题",
+      "question_one": "{{count}} 问题",
+      "questions": "{{count}} 问题",
+      "topic": "{{count}} 主题",
+      "topic_one": "{{count}} 主题",
+      "topics": "{{count}} 主题",
+      "section": "{{count}} 部分",
+      "section_one": "{{count}} 部分",
+      "sections": "{{count}} 部分",
+      "field": "{{count}} 字段",
+      "field_one": "{{count}} 字段",
+      "fields": "{{count}} 字段",
+      "document": "{{count}} 文档",
+      "document_one": "{{count}} 文档",
+      "documents": "{{count}} 文档",
+      "digitized": "数字化",
+      "handwritten": "手写"
+    },
     "feedback": {
       "positive": "积极反馈",
       "negative": "消极反馈",
@@ -558,7 +580,19 @@
       "evaluationSummary": "评估摘要",
       "questionAnswerDetails": "问题-答案详情",
       "summary": "摘要",
-      "topicAnalysis": "主题分析"
+      "topicAnalysis": "主题分析",
+      "documentEvaluation": "文档评估",
+      "generatedDocument": "生成的文档",
+      "documentComparison": "文档比较",
+      "matchingResults": "匹配结果"
+    },
+    "labels": {
+      "questionsAndAnswers": "问题与答案",
+      "reportSections": "报告部分",
+      "questionNumber": "问题",
+      "topicLabel": "主题",
+      "withCitations": "带引用",
+      "sources": "来源"
     }
   },
   "feedback": {

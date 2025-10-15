@@ -174,7 +174,7 @@
     "checklistNamePlaceholder": "Въведете име на списъка за проверка...",
     "checklistDescriptionLabel": "Описание",
     "checklistDescriptionPlaceholder": "Въведете описание на списъка за проверка за автоматични предложения за въпроси (поне 10 знака)...",
-    "questions": "Въпроси",
+    "questions": "{{count}} questions",
     "suggest": "Предложете",
     "suggesting": "Предлагане...",
     "optimize": "Оптимизирайте",
@@ -411,18 +411,21 @@
       "match": "Няма предишна обработка на формуляри"
     },
     "metadata": {
-      "question": "въпрос",
-      "question_one": "въпрос",
-      "questions": "въпроси",
-      "topic": "тема",
-      "topic_one": "тема",
-      "topics": "теми",
-      "field": "поле",
-      "field_one": "поле",
-      "fields": "полета",
-      "document": "документ",
-      "document_one": "документ",
-      "documents": "документи",
+      "question": "{{count}} въпрос",
+      "question_one": "{{count}} въпрос",
+      "questions": "{{count}} въпрос",
+      "topic": "{{count}} тема",
+      "topic_one": "{{count}} тема",
+      "topics": "{{count}} тема",
+      "section": "{{count}} раздел",
+      "section_one": "{{count}} раздел",
+      "sections": "{{count}} раздел",
+      "field": "{{count}} поле",
+      "field_one": "{{count}} поле",
+      "fields": "{{count}} поле",
+      "document": "{{count}} документ",
+      "document_one": "{{count}} документ",
+      "documents": "{{count}} документ",
       "digitized": "дигитализиран",
       "handwritten": "ръкописен"
     },
@@ -448,7 +451,19 @@
       "evaluationSummary": "Резюме на оценката",
       "questionAnswerDetails": "Детайли въпрос-отговор",
       "summary": "Резюме",
-      "topicAnalysis": "Анализ на темата"
+      "topicAnalysis": "Анализ на темата",
+      "documentEvaluation": "Оценка на документа",
+      "generatedDocument": "Генериран документ",
+      "documentComparison": "Сравнение на документи",
+      "matchingResults": "Съвпадащи резултати"
+    },
+    "labels": {
+      "questionsAndAnswers": "Въпроси и отговори",
+      "reportSections": "Раздели на отчета",
+      "questionNumber": "Въпрос",
+      "topicLabel": "Тема",
+      "withCitations": "с цитати",
+      "sources": "източници"
     }
   },
   "optimizeChecklistModal": {

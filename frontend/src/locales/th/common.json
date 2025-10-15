@@ -177,7 +177,7 @@
     "checklistNamePlaceholder": "ใส่ชื่อรายการตรวจสอบ...",
     "checklistDescriptionLabel": "คำอธิบาย",
     "checklistDescriptionPlaceholder": "ใส่คำอธิบายรายการตรวจสอบสำหรับข้อเสนอแนะคำถามอัตโนมัติ (อย่างน้อย 10 ตัวอักษร)...",
-    "questions": "คำถาม",
+    "questions": "{{count}} questions",
     "suggest": "แนะนำ",
     "suggesting": "กำลังแนะนำ...",
     "optimize": "ปรับให้เหมาะสม",
@@ -391,65 +391,80 @@
     }
   },
   "archive": {
-      "title": "คลังเอกสาร",
-      "history": "ประวัติ",
-      "allUsers": "ผู้ใช้ทั้งหมด",
-      "allUsersToggleTooltip": "สลับระหว่างการดูประวัติของคุณเท่านั้นหรือประวัติของผู้ใช้ทั้งหมด",
-      "viewingAllUsers": "กำลังดูประวัติของผู้ใช้ทั้งหมด",
-      "viewingMyHistory": "กำลังดูประวัติของฉันเท่านั้น",
-      "tabs": {
-        "review": "ตรวจสอบ",
-        "generate": "สร้าง",
-        "compare": "เปรียบเทียบ",
-        "match": "จับคู่"
-      },
-      "emptyMessages": {
-        "review": "ไม่มีผลการประเมินก่อนหน้า",
-        "generate": "ไม่มีรายงานก่อนหน้า",
-        "compare": "ไม่มีผลการเปรียบเทียบก่อนหน้า",
-        "match": "ไม่มีผลการประมวลผลแบบฟอร์มก่อนหน้า"
-      },
-      "metadata": {
-        "question": "คำถาม",
-        "question_one": "คำถาม",
-        "questions": "คำถาม",
-        "topic": "หัวข้อ",
-        "topic_one": "หัวข้อ",
-        "topics": "หัวข้อ",
-        "field": "ฟิลด์",
-        "field_one": "ฟิลด์",
-        "fields": "ฟิลด์",
-        "document": "เอกสาร",
-        "document_one": "เอกสาร",
-        "documents": "เอกสาร",
-        "digitized": "ดิจิทัล",
-        "handwritten": "ลายมือ"
-      },
-      "feedback": {
-        "positive": "ข้อเสนอแนะเชิงบวก",
-        "negative": "ข้อเสนอแนะเชิงลบ",
-        "hasFeedback": "มีข้อเสนอแนะ"
-      },
-      "deleteConfirmation": "คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้? การดำเนินการนี้ไม่สามารถยกเลิกได้",
-      "unknownDate": "วันที่ไม่รู้จัก",
-      "unnamedItem": "รายการที่ไม่มีชื่อ",
-      "successMessages": {
-        "evaluationLoaded": "โหลดผลการประเมินสำเร็จ",
-        "reportLoaded": "โหลดรายงานสำเร็จ",
-        "comparisonLoaded": "โหลดผลการเปรียบเทียบสำเร็จ",
-        "formProcessingLoaded": "โหลดผลการประมวลผลแบบฟอร์มสำเร็จ",
-        "evaluationDeleted": "ลบผลการประเมินสำเร็จ",
-        "reportDeleted": "ลบรายงานสำเร็จ",
-        "comparisonDeleted": "ลบผลการเปรียบเทียบสำเร็จ",
-        "formProcessingDeleted": "ลบผลการประมวลผลแบบฟอร์มสำเร็จ"
-      },
-      "docxHeaders": {
-        "evaluationSummary": "สรุปผลการประเมิน",
-        "questionAnswerDetails": "รายละเอียดคำถาม-คำตอบ",
-        "summary": "สรุป",
-        "topicAnalysis": "การวิเคราะห์หัวข้อ"
-      }
+    "title": "คลังเอกสาร",
+    "history": "ประวัติ",
+    "allUsers": "ผู้ใช้ทั้งหมด",
+    "allUsersToggleTooltip": "สลับระหว่างการดูประวัติของคุณเท่านั้นหรือประวัติของผู้ใช้ทั้งหมด",
+    "viewingAllUsers": "กำลังดูประวัติของผู้ใช้ทั้งหมด",
+    "viewingMyHistory": "กำลังดูประวัติของฉันเท่านั้น",
+    "tabs": {
+      "review": "ตรวจสอบ",
+      "generate": "สร้าง",
+      "compare": "เปรียบเทียบ",
+      "match": "จับคู่"
     },
+    "emptyMessages": {
+      "review": "ไม่มีผลการประเมินก่อนหน้า",
+      "generate": "ไม่มีรายงานก่อนหน้า",
+      "compare": "ไม่มีผลการเปรียบเทียบก่อนหน้า",
+      "match": "ไม่มีผลการประมวลผลแบบฟอร์มก่อนหน้า"
+    },
+    "metadata": {
+      "question": "{{count}} คำถาม",
+      "question_one": "{{count}} คำถาม",
+      "questions": "{{count}} คำถาม",
+      "topic": "{{count}} หัวข้อ",
+      "topic_one": "{{count}} หัวข้อ",
+      "topics": "{{count}} หัวข้อ",
+      "section": "{{count}} ส่วน",
+      "section_one": "{{count}} ส่วน",
+      "sections": "{{count}} ส่วน",
+      "field": "{{count}} ฟิลด์",
+      "field_one": "{{count}} ฟิลด์",
+      "fields": "{{count}} ฟิลด์",
+      "document": "{{count}} เอกสาร",
+      "document_one": "{{count}} เอกสาร",
+      "documents": "{{count}} เอกสาร",
+      "digitized": "ดิจิทัล",
+      "handwritten": "ลายมือ"
+    },
+    "feedback": {
+      "positive": "ข้อเสนอแนะเชิงบวก",
+      "negative": "ข้อเสนอแนะเชิงลบ",
+      "hasFeedback": "มีข้อเสนอแนะ"
+    },
+    "deleteConfirmation": "คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้? การดำเนินการนี้ไม่สามารถยกเลิกได้",
+    "unknownDate": "วันที่ไม่รู้จัก",
+    "unnamedItem": "รายการที่ไม่มีชื่อ",
+    "successMessages": {
+      "evaluationLoaded": "โหลดผลการประเมินสำเร็จ",
+      "reportLoaded": "โหลดรายงานสำเร็จ",
+      "comparisonLoaded": "โหลดผลการเปรียบเทียบสำเร็จ",
+      "formProcessingLoaded": "โหลดผลการประมวลผลแบบฟอร์มสำเร็จ",
+      "evaluationDeleted": "ลบผลการประเมินสำเร็จ",
+      "reportDeleted": "ลบรายงานสำเร็จ",
+      "comparisonDeleted": "ลบผลการเปรียบเทียบสำเร็จ",
+      "formProcessingDeleted": "ลบผลการประมวลผลแบบฟอร์มสำเร็จ"
+    },
+    "docxHeaders": {
+      "evaluationSummary": "สรุปผลการประเมิน",
+      "questionAnswerDetails": "รายละเอียดคำถาม-คำตอบ",
+      "summary": "สรุป",
+      "topicAnalysis": "การวิเคราะห์หัวข้อ",
+      "documentEvaluation": "การประเมินเอกสาร",
+      "generatedDocument": "เอกสารที่สร้างขึ้น",
+      "documentComparison": "การเปรียบเทียบเอกสาร",
+      "matchingResults": "ผลการจับคู่"
+    },
+    "labels": {
+      "questionsAndAnswers": "คำถามและคำตอบ",
+      "reportSections": "ส่วนของรายงาน",
+      "questionNumber": "คำถาม",
+      "topicLabel": "หัวข้อ",
+      "withCitations": "ด้วยการอ้างอิง",
+      "sources": "แหล่งที่มา"
+    }
+  },
   "optimizeChecklistModal": {
     "title": "ปรับปรุงรายการตรวจสอบ",
     "customInstructionsLabel": "คำแนะนำที่กำหนดเอง (ไม่บังคับ)",

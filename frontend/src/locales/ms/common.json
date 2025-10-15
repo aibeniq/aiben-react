@@ -177,7 +177,7 @@
     "checklistNamePlaceholder": "Masukkan nama senarai semak...",
     "checklistDescriptionLabel": "Penerangan",
     "checklistDescriptionPlaceholder": "Masukkan penerangan senarai semak untuk cadangan soalan automatik (sekurang-kurangnya 10 aksara)...",
-    "questions": "Soalan",
+    "questions": "{{count}} questions",
     "suggest": "Cadangkan",
     "suggesting": "Mencadangkan...",
     "optimize": "Optimumkan",
@@ -391,63 +391,78 @@
     }
   },
   "archive": {
-    "title": "Archive",
-    "history": "History",
-    "allUsers": "All Users",
-    "allUsersToggleTooltip": "Toggle between viewing only your history or all users' history",
-    "viewingAllUsers": "Viewing all users' history",
-    "viewingMyHistory": "Viewing only my history",
+    "title": "Arkib",
+    "history": "Sejarah",
+    "allUsers": "Semua Pengguna",
+    "allUsersToggleTooltip": "Togol antara melihat hanya sejarah anda atau sejarah semua pengguna",
+    "viewingAllUsers": "Melihat sejarah semua pengguna",
+    "viewingMyHistory": "Melihat hanya sejarah saya",
     "tabs": {
-      "review": "Review",
-      "generate": "Generate",
-      "compare": "Compare",
-      "match": "Match"
+      "review": "Semak",
+      "generate": "Jana",
+      "compare": "Banding",
+      "match": "Padan"
     },
     "emptyMessages": {
-      "review": "No previous evaluations",
-      "generate": "No previous reports",
-      "compare": "No previous comparisons",
-      "match": "No previous form processing"
+      "review": "Tiada penilaian sebelumnya",
+      "generate": "Tiada laporan sebelumnya",
+      "compare": "Tiada perbandingan sebelumnya",
+      "match": "Tiada pemprosesan borang sebelumnya"
     },
     "metadata": {
-      "question": "question",
-      "question_one": "question",
-      "questions": "questions",
-      "topic": "topic",
-      "topic_one": "topic",
-      "topics": "topics",
-      "field": "field",
-      "field_one": "field",
-      "fields": "fields",
-      "document": "document",
-      "document_one": "document",
-      "documents": "documents",
-      "digitized": "digitized",
-      "handwritten": "handwritten"
+      "question": "{{count}} soalan",
+      "question_one": "{{count}} soalan",
+      "questions": "{{count}} soalan",
+      "topic": "{{count}} topik",
+      "topic_one": "{{count}} topik",
+      "topics": "{{count}} topik",
+      "section": "{{count}} bahagian",
+      "section_one": "{{count}} bahagian",
+      "sections": "{{count}} bahagian",
+      "field": "{{count}} medan",
+      "field_one": "{{count}} medan",
+      "fields": "{{count}} medan",
+      "document": "{{count}} dokumen",
+      "document_one": "{{count}} dokumen",
+      "documents": "{{count}} dokumen",
+      "digitized": "digital",
+      "handwritten": "tulisan tangan"
     },
     "feedback": {
-      "positive": "Positive feedback",
-      "negative": "Negative feedback",
-      "hasFeedback": "Has feedback"
+      "positive": "Maklum balas positif",
+      "negative": "Maklum balas negatif",
+      "hasFeedback": "Ada maklum balas"
     },
-    "deleteConfirmation": "Are you sure you want to delete this item? This action cannot be undone.",
-    "unknownDate": "Unknown date",
-    "unnamedItem": "Unnamed item",
+    "deleteConfirmation": "Adakah anda pasti mahu memadam item ini? Tindakan ini tidak boleh dibuat asal.",
+    "unknownDate": "Tarikh tidak diketahui",
+    "unnamedItem": "Item tanpa nama",
     "successMessages": {
-      "evaluationLoaded": "Evaluation loaded successfully",
-      "reportLoaded": "Report loaded successfully",
-      "comparisonLoaded": "Comparison loaded successfully",
-      "formProcessingLoaded": "Form processing loaded successfully",
-      "evaluationDeleted": "Evaluation deleted successfully",
-      "reportDeleted": "Report deleted successfully",
-      "comparisonDeleted": "Comparison deleted successfully",
-      "formProcessingDeleted": "Form processing deleted successfully"
+      "evaluationLoaded": "Penilaian dimuatkan dengan jayanya",
+      "reportLoaded": "Laporan dimuatkan dengan jayanya",
+      "comparisonLoaded": "Perbandingan dimuatkan dengan jayanya",
+      "formProcessingLoaded": "Pemprosesan borang dimuatkan dengan jayanya",
+      "evaluationDeleted": "Penilaian dipadamkan dengan jayanya",
+      "reportDeleted": "Laporan dipadamkan dengan jayanya",
+      "comparisonDeleted": "Perbandingan dipadamkan dengan jayanya",
+      "formProcessingDeleted": "Pemprosesan borang dipadamkan dengan jayanya"
     },
     "docxHeaders": {
-      "evaluationSummary": "Evaluation Summary",
-      "questionAnswerDetails": "Question-Answer Details",
-      "summary": "Summary",
-      "topicAnalysis": "Topic Analysis"
+      "evaluationSummary": "Ringkasan Penilaian",
+      "questionAnswerDetails": "Butiran Soalan-Jawapan",
+      "summary": "Ringkasan",
+      "topicAnalysis": "Analisis Topik",
+      "documentEvaluation": "Penilaian Dokumen",
+      "generatedDocument": "Dokumen Dijana",
+      "documentComparison": "Perbandingan Dokumen",
+      "matchingResults": "Keputusan Padanan"
+    },
+    "labels": {
+      "questionsAndAnswers": "Soalan dan Jawapan",
+      "reportSections": "Bahagian Laporan",
+      "questionNumber": "Soalan",
+      "topicLabel": "Topik",
+      "withCitations": "dengan sitasi",
+      "sources": "sumber"
     }
   },
   "optimizeChecklistModal": {

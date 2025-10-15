@@ -35,6 +35,7 @@ import hashlib
 
 from app.services.knowledgebases import KnowledgeBaseService
 from app.utils.memory_manager import MemoryManager
+from app.utils.streaming_file_handler import StreamingFileHandler
 
 from sqlalchemy.sql import func
 
@@ -1073,43 +1074,115 @@ async def create_knowledge_base(
 
     # Strict file validation and filename sanitization
     file_data = []
+    temp_dir = None
+    file_paths = []
     total_size = 0
-    for i, file in enumerate(files):
-        is_valid, reason = FileValidator.validate_upload(file)
-        if not is_valid:
-            progress_tracker.fail_task(
-                task_id,
-                f"File '{file.filename}' rejected: {reason}"
+    
+    if settings.STREAMING_UPLOAD_ENABLED:
+        # Streaming mode: Stream files directly to temp storage
+        print("🎯 Using STREAMING upload mode")
+        
+        # Create temp directory for streaming files
+        temp_dir = tempfile.mkdtemp(prefix=f"kb_stream_{task_id}_")
+        
+        for i, file in enumerate(files):
+            # Validate file headers first (streaming validation)
+            is_valid, reason = await FileValidator.validate_upload_headers(file)
+            if not is_valid:
+                progress_tracker.fail_task(
+                    task_id,
+                    f"File '{file.filename}' rejected: {reason}"
+                )
+                raise HTTPException(status_code=400, detail=f"File '{file.filename}' rejected: {reason}")
+
+            # Stream file to temporary storage
+            safe_filename = sanitize_filename(file.filename)
+            temp_path = await StreamingFileHandler.stream_to_temp_storage(
+                upload_file=file,
+                temp_dir=temp_dir,
+                filename=safe_filename
             )
-            raise HTTPException(status_code=400, detail=f"File '{file.filename}' rejected: {reason}")
+            
+            # Validate the streamed file
+            is_valid, reason = FileValidator.validate_temp_file(temp_path, safe_filename)
+            if not is_valid:
+                # Clean up failed file
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+                progress_tracker.fail_task(
+                    task_id,
+                    f"File '{safe_filename}' validation failed: {reason}"
+                )
+                raise HTTPException(status_code=400, detail=f"File '{safe_filename}' validation failed: {reason}")
 
-        content = await file.read()
-        safe_filename = sanitize_filename(file.filename)
-        file_info = {
-            "filename": safe_filename,
-            "content": content,
-            "content_type": file.content_type,
-            "size": len(content)
-        }
-        file_data.append(file_info)
-        total_size += len(content)
-        await file.seek(0)  # Reset file pointer
+            # Get file size
+            file_size = os.path.getsize(temp_path)
+            total_size += file_size
+            
+            file_paths.append({
+                "original_filename": safe_filename,
+                "temp_path": temp_path,
+                "content_type": file.content_type,
+                "size": file_size
+            })
+            
+            print(f"✅ Streamed {safe_filename} ({file_size / (1024*1024):.1f}MB)")
+            
+    else:
+        # Legacy mode: Load all files into memory
+        print("📚 Using LEGACY upload mode (loading files into memory)")
+        
+        for i, file in enumerate(files):
+            is_valid, reason = FileValidator.validate_upload(file)
+            if not is_valid:
+                progress_tracker.fail_task(
+                    task_id,
+                    f"File '{file.filename}' rejected: {reason}"
+                )
+                raise HTTPException(status_code=400, detail=f"File '{file.filename}' rejected: {reason}")
 
-    print(f"📊 Read {len(files)} files totaling {total_size / (1024*1024):.1f}MB (all validated and sanitized)")
+            content = await file.read()
+            safe_filename = sanitize_filename(file.filename)
+            file_info = {
+                "filename": safe_filename,
+                "content": content,
+                "content_type": file.content_type,
+                "size": len(content)
+            }
+            file_data.append(file_info)
+            total_size += len(content)
+            await file.seek(0)  # Reset file pointer
+
+    print(f"📊 Processed {len(files)} files totaling {total_size / (1024*1024):.1f}MB (validated and sanitized)")
 
     # Get user language for progress translations
     user_language = getattr(current_user, "preferred_language", "en") or "en"
 
     # Schedule background processing using FastAPI's BackgroundTasks
     print(f"🎯 SCHEDULING BACKGROUND TASK for KB {knowledge_base.id} with task {task_id}")
-    background_tasks.add_task(
-        process_knowledge_base_background,
-        knowledge_base_id=knowledge_base.id,
-        task_id=task_id,
-        file_data=file_data,
-        current_user_id=current_user.id,
-        user_language=user_language,
-    )
+    
+    if settings.STREAMING_UPLOAD_ENABLED:
+        # Streaming mode: Pass file paths and temp directory
+        background_tasks.add_task(
+            process_knowledge_base_background_streaming,
+            knowledge_base_id=knowledge_base.id,
+            task_id=task_id,
+            file_paths=file_paths,
+            temp_dir=temp_dir,
+            current_user_id=current_user.id,
+            user_language=user_language,
+        )
+    else:
+        # Legacy mode: Pass file data in memory
+        background_tasks.add_task(
+            process_knowledge_base_background,
+            knowledge_base_id=knowledge_base.id,
+            task_id=task_id,
+            file_data=file_data,
+            current_user_id=current_user.id,
+            user_language=user_language,
+        )
+    
     print(f"✅ BACKGROUND TASK SUBMITTED for task {task_id}")
     
     print(f"🚀 IMMEDIATE RETURN: Returning task_id {task_id} to frontend")
@@ -1207,6 +1280,56 @@ async def process_knowledge_base_background(
 
 # Remove the old synchronous processing code that was moved to background
 # The endpoint now returns immediately after creating the task
+
+
+async def process_knowledge_base_background_streaming(
+    knowledge_base_id: uuid.UUID,
+    task_id: str,
+    file_paths: List[dict],
+    temp_dir: str,
+    current_user_id: uuid.UUID,
+    user_language: str = "en",
+) -> None:
+    """Background processing for knowledge base creation using streaming uploads"""
+    try:
+        # Get a new database session for background processing
+        from app.core.db import engine
+        from sqlmodel import Session
+        
+        with Session(engine) as session:
+            # Retrieve the knowledge base
+            knowledge_base = session.get(KnowledgeBase, knowledge_base_id)
+            if not knowledge_base:
+                progress_tracker.fail_task(task_id, "Knowledge base not found")
+                return
+            
+            print(f"🎯 STREAMING: Processing {len(file_paths)} files from temp storage")
+            
+            # Files are already streamed to temp storage, no need to save again
+            # Just validate temp directory exists
+            if not os.path.exists(temp_dir):
+                progress_tracker.fail_task(task_id, f"Temp directory not found: {temp_dir}")
+                return
+            
+            # Continue with existing processing logic
+            await process_knowledge_base_creation(
+                task_id=task_id,
+                knowledge_base_id=knowledge_base_id,
+                file_paths=file_paths,
+                temp_dir=temp_dir,
+                user_id=current_user_id,
+                embedding_model_id=knowledge_base.embedding_model_id,
+                user_language=user_language,
+            )
+            
+    except Exception as e:
+        # Clean up temp directory on error
+        if temp_dir and os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir, ignore_errors=True)
+        
+        # Mark task as failed
+        progress_tracker.fail_task(task_id, f"Streaming background processing error: {str(e)}")
+        logger.error(f"Streaming background processing error for KB {knowledge_base_id}: {str(e)}")
 
 
 async def process_knowledge_base_creation(

@@ -177,7 +177,7 @@
     "checklistNamePlaceholder": "Εισάγετε όνομα λίστας ελέγχου...",
     "checklistDescriptionLabel": "Περιγραφή",
     "checklistDescriptionPlaceholder": "Εισάγετε περιγραφή λίστας ελέγχου για αυτόματες προτάσεις ερωτήσεων (τουλάχιστον 10 χαρακτήρες)...",
-    "questions": "Ερωτήσεις",
+    "questions": "{{count}} ερωτήσεις",
     "suggest": "Πρότεινε",
     "suggesting": "Προτείνω...",
     "optimize": "Βελτιστοποίηση",
@@ -400,89 +400,108 @@
     }
   },
   "archive": {
-    "title": "Archive",
-    "history": "History",
-    "allUsers": "All Users",
-    "allUsersToggleTooltip": "Toggle between viewing only your history or all users' history",
-    "viewingAllUsers": "Viewing all users' history",
-    "viewingMyHistory": "Viewing only my history",
+    "title": "Αρχείο",
+    "history": "Ιστορικό",
+    "allUsers": "Όλοι οι χρήστες",
+    "allUsersToggleTooltip": "Εναλλαγή μεταξύ προβολής μόνο του ιστορικού σας ή του ιστορικού όλων των χρηστών",
+    "viewingAllUsers": "Προβολή ιστορικού όλων των χρηστών",
+    "viewingMyHistory": "Προβολή μόνο του ιστορικού μου",
     "tabs": {
-      "review": "Review",
-      "generate": "Generate",
-      "compare": "Compare",
-      "match": "Match"
+      "review": "Αξιολόγηση",
+      "generate": "Δημιουργία",
+      "compare": "Σύγκριση",
+      "match": "Αντιστοίχιση"
     },
     "emptyMessages": {
-      "review": "No previous evaluations",
-      "generate": "No previous reports",
-      "compare": "No previous comparisons",
-      "match": "No previous form processing"
+      "review": "Δεν υπάρχουν προηγούμενες αξιολογήσεις",
+      "generate": "Δεν υπάρχουν προηγούμενες αναφορές",
+      "compare": "Δεν υπάρχουν προηγούμενες συγκρίσεις",
+      "match": "Δεν υπάρχει προηγούμενη επεξεργασία φόρμας"
     },
     "metadata": {
-      "question": "question",
-      "question_one": "question",
-      "questions": "questions",
-      "topic": "topic",
-      "topic_one": "topic",
-      "topics": "topics",
-      "field": "field",
-      "field_one": "field",
-      "fields": "fields",
-      "document": "document",
-      "document_one": "document",
-      "documents": "documents",
-      "digitized": "digitized",
-      "handwritten": "handwritten"
+      "question": "{{count}} ερώτηση",
+      "question_one": "{{count}} ερώτηση",
+      "questions": "{{count}} ερωτήσεις",
+      "topic": "{{count}} θέμα",
+      "topic_one": "{{count}} θέμα",
+      "topics": "{{count}} θέματα",
+      "section": "{{count}} ενότητα",
+      "section_one": "{{count}} ενότητα",
+      "sections": "{{count}} ενότητες",
+      "field": "{{count}} πεδίο",
+      "field_one": "{{count}} πεδίο",
+      "fields": "{{count}} πεδία",
+      "document": "{{count}} έγγραφο",
+      "document_one": "{{count}} έγγραφο",
+      "documents": "{{count}} έγγραφα",
+      "digitized": "ψηφιοποιημένο",
+      "handwritten": "χειρόγραφο"
     },
     "feedback": {
-      "positive": "Positive feedback",
-      "negative": "Negative feedback",
-      "hasFeedback": "Has feedback"
+      "positive": "Θετική ανατροφοδότηση",
+      "negative": "Αρνητική ανατροφοδότηση",
+      "hasFeedback": "Έχει ανατροφοδότηση"
     },
-    "deleteConfirmation": "Are you sure you want to delete this item? This action cannot be undone.",
-    "unknownDate": "Unknown date",
-    "unnamedItem": "Unnamed item",
+    "deleteConfirmation": "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το στοιχείο; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.",
+    "unknownDate": "Άγνωστη ημερομηνία",
+    "unnamedItem": "Ανώνυμο στοιχείο",
     "successMessages": {
-      "evaluationLoaded": "Evaluation loaded successfully",
-      "reportLoaded": "Report loaded successfully",
-      "comparisonLoaded": "Comparison loaded successfully",
-      "formProcessingLoaded": "Form processing loaded successfully",
-      "evaluationDeleted": "Evaluation deleted successfully",
-      "reportDeleted": "Report deleted successfully",
-      "comparisonDeleted": "Comparison deleted successfully",
-      "formProcessingDeleted": "Form processing deleted successfully"
+      "evaluationLoaded": "Η αξιολόγηση φορτώθηκε επιτυχώς",
+      "reportLoaded": "Η αναφορά φορτώθηκε επιτυχώς",
+      "comparisonLoaded": "Η σύγκριση φορτώθηκε επιτυχώς",
+      "formProcessingLoaded": "Η επεξεργασία φόρμας φορτώθηκε επιτυχώς",
+      "evaluationDeleted": "Η αξιολόγηση διαγράφηκε επιτυχώς",
+      "reportDeleted": "Η αναφορά διαγράφηκε επιτυχώς",
+      "comparisonDeleted": "Η σύγκριση διαγράφηκε επιτυχώς",
+      "formProcessingDeleted": "Η επεξεργασία φόρμας διαγράφηκε επιτυχώς"
     },
     "docxHeaders": {
-      "evaluationSummary": "Evaluation Summary",
-      "questionAnswerDetails": "Question-Answer Details",
-      "summary": "Summary",
-      "topicAnalysis": "Topic Analysis"
+      "evaluationSummary": "Περίληψη Αξιολόγησης",
+      "questionAnswerDetails": "Λεπτομέρειες Ερώτηση-Απάντηση",
+      "summary": "Περίληψη",
+      "topicAnalysis": "Ανάλυση Θέματος",
+      "documentEvaluation": "Αξιολόγηση Εγγράφου",
+      "generatedDocument": "Δημιουργημένο Έγγραφο",
+      "documentComparison": "Σύγκριση Εγγράφων",
+      "matchingResults": "Αποτελέσματα Αντιστοίχισης"
+    },
+    "labels": {
+      "questionsAndAnswers": "Ερωτήσεις & Απαντήσεις",
+      "reportSections": "Ενότητες Αναφοράς",
+      "questionNumber": "Ερώτηση",
+      "topicLabel": "Θέμα",
+      "withCitations": "με παραπομπές",
+      "sources": "πηγές"
     }
   },
   "optimizeChecklistModal": {
     "feedback": {
-      "positive": "Positive feedback",
-      "negative": "Negative feedback",
-      "hasFeedback": "Has feedback"
+      "positive": "Θετική ανατροφοδότηση",
+      "negative": "Αρνητική ανατροφοδότηση",
+      "hasFeedback": "Έχει ανατροφοδότηση"
     },
-    "deleteConfirmation": "Are you sure you want to delete this item? This action cannot be undone.",
-    "unknownDate": "Unknown date",
-    "unnamedItem": "Unnamed item",
+    "deleteConfirmation": "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το στοιχείο; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.",
+    "unknownDate": "Άγνωστη ημερομηνία",
+    "unnamedItem": "Ανώνυμο στοιχείο",
     "successMessages": {
-      "evaluationLoaded": "Evaluation loaded successfully",
-      "reportLoaded": "Report loaded successfully",
-      "comparisonLoaded": "Comparison loaded successfully",
-      "formProcessingLoaded": "Form processing loaded successfully",
-      "evaluationDeleted": "Evaluation deleted successfully",
-      "reportDeleted": "Report deleted successfully",
-      "comparisonDeleted": "Comparison deleted successfully",
-      "formProcessingDeleted": "Form processing deleted successfully"
+      "evaluationLoaded": "Η αξιολόγηση φορτώθηκε επιτυχώς",
+      "reportLoaded": "Η αναφορά φορτώθηκε επιτυχώς",
+      "comparisonLoaded": "Η σύγκριση φορτώθηκε επιτυχώς",
+      "formProcessingLoaded": "Η επεξεργασία φόρμας φορτώθηκε επιτυχώς",
+      "evaluationDeleted": "Η αξιολόγηση διαγράφηκε επιτυχώς",
+      "reportDeleted": "Η αναφορά διαγράφηκε επιτυχώς",
+      "comparisonDeleted": "Η σύγκριση διαγράφηκε επιτυχώς",
+      "formProcessingDeleted": "Η επεξεργασία φόρμας διαγράφηκε επιτυχώς"
     },
     "docxHeaders": {
-      "evaluationSummary": "Evaluation Summary",
-      "questionAnswerDetails": "Question-Answer Details",
-      "summary": "Summary",
-      "topicAnalysis": "Topic Analysis"
+      "evaluationSummary": "Περίληψη Αξιολόγησης",
+      "questionAnswerDetails": "Λεπτομέρειες Ερώτηση-Απάντηση",
+      "summary": "Περίληψη",
+      "topicAnalysis": "Ανάλυση Θέματος",
+      "documentEvaluation": "Αξιολόγηση Εγγράφου",
+      "generatedDocument": "Δημιουργημένο Έγγραφο",
+      "documentComparison": "Σύγκριση Εγγράφων",
+      "matchingResults": "Αποτελέσματα Αντιστοίχισης"
     }
   },
   "optimizeOutlineModal": {
