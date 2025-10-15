@@ -18,13 +18,14 @@ import {
 } from "@/components/ui/dialog"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"
+import { useHandleError } from "@/utils"
 
 const DeleteConfirmation = () => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
   const { t } = useTranslation()
+  const handleError = useHandleError()
   const {
     handleSubmit,
     formState: { isSubmitting },
@@ -78,20 +79,11 @@ const DeleteConfirmation = () => {
             <DialogFooter gap={2}>
               <ButtonGroup>
                 <DialogActionTrigger asChild>
-                  <Button
-                    variant="subtle"
-                    colorPalette="gray"
-                    disabled={isSubmitting}
-                  >
+                  <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
                     {t("settings.cancel")}
                   </Button>
                 </DialogActionTrigger>
-                <Button
-                  variant="solid"
-                  colorPalette="red"
-                  type="submit"
-                  loading={isSubmitting}
-                >
+                <Button variant="solid" colorPalette="red" type="submit" loading={isSubmitting}>
                   {t("settings.delete")}
                 </Button>
               </ButtonGroup>

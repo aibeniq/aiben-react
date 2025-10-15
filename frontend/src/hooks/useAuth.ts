@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate, useRouterState } from "@tanstack/react-router"
-import { useState } from "react"
 
 import {
   type Body_login_login_access_token as AccessToken,
@@ -10,7 +9,7 @@ import {
   type UserRegister,
   UsersService,
 } from "@/client"
-import { handleError } from "@/utils"
+import { useHandleError } from "@/utils"
 
 // Check if user is logged in by checking if we can fetch current user data
 // This will work with HTTP-only cookies since the API call will include them
@@ -21,10 +20,10 @@ const isLoggedIn = () => {
 }
 
 const useAuth = () => {
-  const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
   const routerState = useRouterState()
   const queryClient = useQueryClient()
+  const handleError = useHandleError()
 
   // Don't run the user query on authentication pages to prevent infinite loops
   const isAuthPage = ['/login', '/signup', '/reset-password', '/recover-password'].some(path =>
@@ -106,8 +105,6 @@ const useAuth = () => {
     user,
     isLoading,
     isError,
-    error,
-    resetError: () => setError(null),
   }
 }
 

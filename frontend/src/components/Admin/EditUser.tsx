@@ -17,7 +17,7 @@ import { FaExchangeAlt } from "react-icons/fa"
 import { type UserPublic, type UserUpdate, UsersService } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
-import { emailPattern, handleError } from "@/utils"
+import { emailPattern, useHandleError } from "@/utils"
 import { Checkbox } from "../ui/checkbox"
 import {
   DialogBody,
@@ -41,6 +41,7 @@ const EditUser = ({ user }: EditUserProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
+  const handleError = useHandleError()
   const {
     control,
     register,
@@ -120,12 +121,7 @@ const EditUser = ({ user }: EditUserProps) => {
                 errorText={errors.full_name?.message}
                 label="Full Name"
               >
-                <Input
-                  id="name"
-                  {...register("full_name")}
-                  placeholder="Full name"
-                  type="text"
-                />
+                <Input id="name" {...register("full_name")} placeholder="Full name" type="text" />
               </Field>
 
               <Field
@@ -155,8 +151,7 @@ const EditUser = ({ user }: EditUserProps) => {
                   id="confirm_password"
                   {...register("confirm_password", {
                     validate: (value) =>
-                      value === getValues().password ||
-                      "The passwords do not match",
+                      value === getValues().password || "The passwords do not match",
                   })}
                   placeholder="Password"
                   type="password"
@@ -198,11 +193,7 @@ const EditUser = ({ user }: EditUserProps) => {
 
           <DialogFooter gap={2}>
             <DialogActionTrigger asChild>
-              <Button
-                variant="subtle"
-                colorPalette="gray"
-                disabled={isSubmitting}
-              >
+              <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
                 Cancel
               </Button>
             </DialogActionTrigger>

@@ -272,7 +272,8 @@ class ProgressTracker:
             progress.message = f"{progress.operation} completed successfully"
         else:
             incomplete_stages = [name for name, stage in progress.stages.items() if not stage.completed]
-            print(f"📊 Task {task_id}: Completed stage '{stage_name}', but still incomplete: {incomplete_stages}")
+            # Reduced logging - don't log every stage completion during uploads
+            # print(f"📊 Task {task_id}: Completed stage '{stage_name}', but still incomplete: {incomplete_stages}")
             if message_key:
                 progress.message_key = message_key
                 progress.message_params = message_params
@@ -452,14 +453,15 @@ class ProgressTracker:
                     name: asdict(stage) for name, stage in progress.stages.items()
                 }
                 
-                print(f"💾 SAVING PROGRESS for task {task_id}: status={progress.status}, percentage={progress.percentage}, message={progress.message}")
+                # Reduced logging - only log errors, not every save
+                # print(f"💾 SAVING PROGRESS for task {task_id}: status={progress.status}, percentage={progress.percentage}, message={progress.message}")
                 
                 self.session_manager.redis_client.setex(
                     f"{self.prefix}{task_id}",
                     self.default_ttl,
                     json.dumps(progress_dict)
                 )
-                print(f"✅ PROGRESS SAVED SUCCESSFULLY for task {task_id}")
+                # print(f"✅ PROGRESS SAVED SUCCESSFULLY for task {task_id}")
                 return True
             except Exception as e:
                 print(f"❌ ProgressTracker Redis save error for task {task_id}: {e}")
@@ -470,16 +472,18 @@ class ProgressTracker:
             progress_dict["stages"] = {
                 name: asdict(stage) for name, stage in progress.stages.items()
             }
-            print(f"💾 SAVING PROGRESS (in-memory) for task {task_id}: status={progress.status}, percentage={progress.percentage}")
+            # Reduced logging for in-memory saves too
+            # print(f"💾 SAVING PROGRESS (in-memory) for task {task_id}: status={progress.status}, percentage={progress.percentage}")
             return self.session_manager.set_session(f"{self.prefix}{task_id}", progress_dict)
     
     def _load_progress(self, task_id: str) -> Optional[ProgressData]:
         """Load progress data from storage"""
-        print(f"🔍 LOADING PROGRESS for task {task_id}")
+        # Reduced logging - only log errors, not every load
+        # print(f"🔍 LOADING PROGRESS for task {task_id}")
         if self.session_manager.use_redis:
             try:
                 data = self.session_manager.redis_client.get(f"{self.prefix}{task_id}")
-                print(f"🔍 REDIS GET result for {task_id}: {'found' if data else 'NOT FOUND'}")
+                # print(f"🔍 REDIS GET result for {task_id}: {'found' if data else 'NOT FOUND'}")
                 if data:
                     progress_dict = json.loads(data)
                     # Reconstruct ProgressStage objects from dicts
@@ -493,9 +497,9 @@ class ProgressTracker:
                             stages[name] = ProgressStage(**stage_dict)
                     progress_dict["stages"] = stages
                     progress_obj = ProgressData(**progress_dict)
-                    print(f"✅ LOADED PROGRESS for task {task_id}: status={progress_obj.status}, percentage={progress_obj.percentage}")
+                    # print(f"✅ LOADED PROGRESS for task {task_id}: status={progress_obj.status}, percentage={progress_obj.percentage}")
                     return progress_obj
-                print(f"❌ NO PROGRESS DATA found for task {task_id}")
+                # print(f"❌ NO PROGRESS DATA found for task {task_id}")
                 return None
             except Exception as e:
                 print(f"❌ ProgressTracker Redis load error for task {task_id}: {e}")
@@ -503,7 +507,7 @@ class ProgressTracker:
         else:
             # Use session manager's in-memory fallback
             data = self.session_manager.get_session(f"{self.prefix}{task_id}")
-            print(f"🔍 IN-MEMORY GET result for {task_id}: {'found' if data else 'NOT FOUND'}")
+            # print(f"🔍 IN-MEMORY GET result for {task_id}: {'found' if data else 'NOT FOUND'}")
             if data:
                 # Reconstruct ProgressStage objects from dicts
                 stages = {}
@@ -516,9 +520,9 @@ class ProgressTracker:
                         stages[name] = ProgressStage(**stage_dict)
                 data["stages"] = stages
                 progress_obj = ProgressData(**data)
-                print(f"✅ LOADED PROGRESS (in-memory) for task {task_id}: status={progress_obj.status}, percentage={progress_obj.percentage}")
+                # print(f"✅ LOADED PROGRESS (in-memory) for task {task_id}: status={progress_obj.status}, percentage={progress_obj.percentage}")
                 return progress_obj
-            print(f"❌ NO PROGRESS DATA found (in-memory) for task {task_id}")
+            # print(f"❌ NO PROGRESS DATA found (in-memory) for task {task_id}")
             return None
 
 
