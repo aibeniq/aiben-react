@@ -6,7 +6,7 @@ import { FiLock } from "react-icons/fi"
 
 import { type ApiError, type UpdatePassword, UsersService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
-import { confirmPasswordRules, handleError, passwordRules } from "@/utils"
+import { confirmPasswordRules, passwordRules, useHandleError } from "@/utils"
 import { PasswordInput } from "../ui/password-input"
 
 interface UpdatePasswordForm extends UpdatePassword {
@@ -16,6 +16,7 @@ interface UpdatePasswordForm extends UpdatePassword {
 const ChangePassword = () => {
   const { t } = useTranslation()
   const { showSuccessToast } = useCustomToast()
+  const handleError = useHandleError()
   const {
     register,
     handleSubmit,
@@ -28,8 +29,7 @@ const ChangePassword = () => {
   })
 
   const mutation = useMutation({
-    mutationFn: (data: UpdatePassword) =>
-      UsersService.updatePasswordMe({ requestBody: data }),
+    mutationFn: (data: UpdatePassword) => UsersService.updatePasswordMe({ requestBody: data }),
     onSuccess: () => {
       showSuccessToast("Password updated successfully.")
       reset()

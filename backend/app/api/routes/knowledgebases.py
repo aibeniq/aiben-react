@@ -13,6 +13,7 @@ import io
 import shutil
 from io import BytesIO
 from contextlib import contextmanager
+import gc
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
@@ -35,7 +36,6 @@ import hashlib
 
 from app.services.knowledgebases import KnowledgeBaseService
 from app.utils.memory_manager import MemoryManager
-from app.utils.streaming_file_handler import StreamingFileHandler
 
 from sqlalchemy.sql import func
 
@@ -1369,7 +1369,7 @@ async def process_knowledge_base_creation(
                 # Wait for upload stage to be completed by middleware (if not already)
                 # and then transition to processing stage
                 upload_completed = False
-                max_retries = 10  # Wait up to 10 seconds for upload completion
+                max_retries = 300  # Wait up to 5 minutes for upload completion
                 for retry in range(max_retries):
                     progress = progress_tracker.get_progress(task_id)
                     print(f"🔍 CHECKING UPLOAD STATUS: progress exists={progress is not None}")

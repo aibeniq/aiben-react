@@ -1,11 +1,4 @@
-import {
-  Button,
-  ButtonGroup,
-  DialogActionTrigger,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, ButtonGroup, DialogActionTrigger, Input, Text, VStack } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
@@ -13,7 +6,7 @@ import { FaExchangeAlt } from "react-icons/fa"
 
 import { type ApiError, type ItemPublic, ItemsService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"
+import { useHandleError } from "@/utils"
 import {
   DialogBody,
   DialogCloseTrigger,
@@ -39,6 +32,7 @@ const EditItem = ({ item }: EditItemProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
+  const handleError = useHandleError()
   const {
     register,
     handleSubmit,
@@ -128,11 +122,7 @@ const EditItem = ({ item }: EditItemProps) => {
           <DialogFooter gap={2}>
             <ButtonGroup>
               <DialogActionTrigger asChild>
-                <Button
-                  variant="subtle"
-                  colorPalette="gray"
-                  disabled={isSubmitting}
-                >
+                <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
                   Cancel
                 </Button>
               </DialogActionTrigger>

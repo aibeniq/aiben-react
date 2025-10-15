@@ -8,7 +8,7 @@ import { type ApiError, LoginService, type NewPassword, UsersService } from "@/c
 import { Button } from "@/components/ui/button"
 import { PasswordInput } from "@/components/ui/password-input"
 import useCustomToast from "@/hooks/useCustomToast"
-import { confirmPasswordRules, handleError, passwordRules } from "@/utils"
+import { confirmPasswordRules, passwordRules, useHandleError } from "@/utils"
 
 interface NewPasswordForm extends NewPassword {
   confirm_password: string
@@ -46,6 +46,7 @@ function ResetPassword() {
   })
   const { showSuccessToast } = useCustomToast()
   const navigate = useNavigate()
+  const handleError = useHandleError()
 
   const resetPassword = async (data: NewPassword) => {
     const token = new URLSearchParams(window.location.search).get("token")

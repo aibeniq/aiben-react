@@ -17,13 +17,9 @@ import { type SubmitHandler, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { FaExchangeAlt, FaTrash } from "react-icons/fa"
 
-import {
-  type ApiError,
-  type KnowledgeBasePublic,
-  KnowledgeBasesService,
-} from "@/client"
+import { type ApiError, type KnowledgeBasePublic, KnowledgeBasesService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"
+import { useHandleError } from "@/utils"
 import SourceLink from "../Common/SourceLink"
 import {
   DialogBody,
@@ -64,6 +60,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
   const [removedFileIds, setRemovedFileIds] = useState<string[]>([])
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const handleError = useHandleError()
 
   const { data: knowledgeBase } = useQuery({
     queryKey: ["knowledge-base", item.id],
@@ -84,8 +81,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
     const hasTitleValue = !!knowledgeBase?.title
     const hasExistingFiles =
       knowledgeBase?.files &&
-      knowledgeBase.files.filter((f: any) => !removedFileIds.includes(f.id))
-        .length > 0
+      knowledgeBase.files.filter((f: any) => !removedFileIds.includes(f.id)).length > 0
     const hasNewFiles = selectedFiles.length > 0
     const hasFiles = hasExistingFiles || hasNewFiles
 
@@ -127,8 +123,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
         description: data.description,
         id: item.id,
         // Preserve the existing embedding model ID
-        embeddingModelId:
-          knowledgeBase?.embedding_model_id || item.embedding_model_id,
+        embeddingModelId: knowledgeBase?.embedding_model_id || item.embedding_model_id,
         formData: {
           files: data.files,
           ...(data.removedFileIds && data.removedFileIds.length > 0
@@ -137,10 +132,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
         },
       }
 
-      console.log(
-        "Payload being sent to KnowledgeBasesService.updateKnowledgeBase:",
-        payload,
-      )
+      console.log("Payload being sent to KnowledgeBasesService.updateKnowledgeBase:", payload)
       console.log("Preserving embedding_model_id:", payload.embeddingModelId)
 
       return KnowledgeBasesService.updateKnowledgeBase(payload)
@@ -172,8 +164,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
 
     const hasExistingFiles =
       knowledgeBase?.files &&
-      knowledgeBase.files.filter((f: any) => !removedFileIds.includes(f.id))
-        .length > 0
+      knowledgeBase.files.filter((f: any) => !removedFileIds.includes(f.id)).length > 0
     const hasNewFiles = selectedFiles.length > 0
 
     if (!hasExistingFiles && !hasNewFiles) {
@@ -206,13 +197,10 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
       "text/plain": [".txt"],
       "application/pdf": [".pdf"],
       "application/msword": [".doc"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        [".docx"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
       "application/rtf": [".rtf"],
       "text/csv": [".csv"],
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
-        ".xlsx",
-      ],
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
       "application/vnd.ms-excel": [".xls"],
     },
     multiple: true,
@@ -278,9 +266,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                   <Input
                     id="title"
                     {...register("title", {
-                      required: t(
-                        "knowledgeBases.modals.validation.titleRequired",
-                      ),
+                      required: t("knowledgeBases.modals.validation.titleRequired"),
                     })}
                     placeholder={t("knowledgeBases.modals.fields.title")}
                     type="text"
@@ -303,20 +289,12 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                 {/* Existing Files */}
                 {knowledgeBase?.files && knowledgeBase.files.length > 0 && (
                   <Box w="full">
-                    <Text mb={2}>
-                      {t("knowledgeBases.modals.fileUpload.currentFiles")}:
-                    </Text>
+                    <Text mb={2}>{t("knowledgeBases.modals.fileUpload.currentFiles")}:</Text>
                     <VStack align="start" gap={2}>
                       {knowledgeBase.files
-                        .filter(
-                          (file: any) => !removedFileIds.includes(file.id),
-                        )
+                        .filter((file: any) => !removedFileIds.includes(file.id))
                         .map((file: any) => (
-                          <HStack
-                            key={file.id}
-                            w="full"
-                            justify="space-between"
-                          >
+                          <HStack key={file.id} w="full" justify="space-between">
                             {/* Use SourceLink component for on-demand loading */}
                             <SourceLink
                               sourceId={file.id}
@@ -327,9 +305,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                             />
                             <Box
                               as="button"
-                              aria-label={t(
-                                "knowledgeBases.modals.fileUpload.removeFile",
-                              )}
+                              aria-label={t("knowledgeBases.modals.fileUpload.removeFile")}
                               onClick={() => handleRemoveExistingFile(file.id)}
                               _hover={{ color: "red.500" }}
                             >
@@ -363,21 +339,14 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                 {/* New Selected Files */}
                 {selectedFiles.length > 0 && (
                   <Box w="full">
-                    <Text mb={2}>
-                      {t("knowledgeBases.modals.fileUpload.newFiles")}:
-                    </Text>
+                    <Text mb={2}>{t("knowledgeBases.modals.fileUpload.newFiles")}:</Text>
                     <VStack align="start" gap={2}>
                       {selectedFiles.map((file, index) => {
                         const truncatedName = truncateText(file.name)
                         const needsTooltip = file.name.length > 60
 
                         return (
-                          <HStack
-                            key={index}
-                            w="full"
-                            justify="space-between"
-                            minW="0"
-                          >
+                          <HStack key={index} w="full" justify="space-between" minW="0">
                             <Box flex="1" minW="0">
                               {needsTooltip ? (
                                 <Tooltip content={file.name} showArrow>
@@ -405,9 +374,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
                             </Box>
                             <Box
                               as="button"
-                              aria-label={t(
-                                "knowledgeBases.modals.fileUpload.removeFile",
-                              )}
+                              aria-label={t("knowledgeBases.modals.fileUpload.removeFile")}
                               onClick={() => handleRemoveNewFile(index)}
                               _hover={{ color: "red.500" }}
                               flexShrink={0}
@@ -426,11 +393,7 @@ const EditKnowledgeBase = ({ item }: EditKnowledgeBaseProps) => {
             <DialogFooter gap={2}>
               <ButtonGroup>
                 <DialogActionTrigger asChild>
-                  <Button
-                    variant="subtle"
-                    colorPalette="gray"
-                    disabled={isSubmitting}
-                  >
+                  <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
                     {t("knowledgeBases.modals.buttons.cancel")}
                   </Button>
                 </DialogActionTrigger>

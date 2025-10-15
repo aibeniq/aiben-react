@@ -1,9 +1,5 @@
 import { Box, Container, HStack, Image, Input, Text } from "@chakra-ui/react"
-import {
-  Link as RouterLink,
-  createFileRoute,
-  redirect,
-} from "@tanstack/react-router"
+import { Link as RouterLink, createFileRoute, redirect } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { FiLock, FiMail } from "react-icons/fi"
 
@@ -34,11 +30,11 @@ export const Route = createFileRoute("/login")({
 })
 
 function Login() {
-  const { loginMutation, error, resetError } = useAuth()
+  const { loginMutation } = useAuth()
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<AccessToken>({
     mode: "onBlur",
     criteriaMode: "all",
@@ -49,16 +45,10 @@ function Login() {
   })
 
   const onSubmit: SubmitHandler<AccessToken> = async (data) => {
-    if (isSubmitting) return
+    if (loginMutation.isPending) return
 
-    resetError()
-
-    try {
-      console.log(data)
-      await loginMutation.mutateAsync(data)
-    } catch {
-      // error is handled by useAuth hook
-    }
+    console.log(data)
+    await loginMutation.mutateAsync(data)
   }
 
   return (
@@ -73,17 +63,8 @@ function Login() {
         gap={4}
         centerContent
       >
-        <Image
-          src={Logo}
-          alt="FastAPI logo"
-          height="auto"
-          maxW="2xs"
-          alignSelf="center"
-        />
-        <Field
-          invalid={!!errors.username}
-          errorText={errors.username?.message || !!error}
-        >
+        <Image src={Logo} alt="FastAPI logo" height="auto" maxW="2xs" alignSelf="center" />
+        <Field invalid={!!errors.username} errorText={errors.username?.message}>
           <InputGroup w="100%" startElement={<FiMail />}>
             <Input
               id="username"
@@ -103,11 +84,7 @@ function Login() {
           placeholder="Password"
           errors={errors}
         />
-        <RouterLink
-          to="/recover-password"
-          className="main-link"
-          style={{ width: "fit-content" }}
-        >
+        <RouterLink to="/recover-password" className="main-link" style={{ width: "fit-content" }}>
           <Text
             color="rgba(0, 65, 72, 0.8)"
             fontSize="sm"
@@ -121,7 +98,7 @@ function Login() {
         <Button
           variant="solid"
           type="submit"
-          loading={isSubmitting}
+          loading={loginMutation.isPending}
           size="md"
           bg="rgba(0, 65, 72, 0.9)"
           _hover={{ bg: "rgba(0, 65, 72, 0.8)" }}
@@ -131,11 +108,7 @@ function Login() {
         <HStack gap={1}>
           <Text>Don't have an account? </Text>
           <Box>
-            <RouterLink
-              to="/signup"
-              className="main-link"
-              style={{ width: "fit-content" }}
-            >
+            <RouterLink to="/signup" className="main-link" style={{ width: "fit-content" }}>
               <Text
                 color="rgba(0, 65, 72, 0.8)"
                 fontSize="sm"

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Field } from "@/components/ui/field"
 import { InputGroup } from "@/components/ui/input-group"
 import useCustomToast from "@/hooks/useCustomToast"
-import { emailPattern, handleError } from "@/utils"
+import { emailPattern, useHandleError } from "@/utils"
 
 interface FormData {
   email: string
@@ -39,6 +39,7 @@ function RecoverPassword() {
     formState: { errors, isSubmitting },
   } = useForm<FormData>()
   const { showSuccessToast } = useCustomToast()
+  const handleError = useHandleError()
 
   const recoverPassword = async (data: FormData) => {
     await LoginService.recoverPassword({

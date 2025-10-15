@@ -4,7 +4,7 @@ import { Controller, type SubmitHandler, useForm } from "react-hook-form"
 import { type UserCreate, UsersService } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
-import { emailPattern, handleError } from "@/utils"
+import { emailPattern, useHandleError } from "@/utils"
 import {
   Button,
   DialogActionTrigger,
@@ -36,6 +36,7 @@ const AddUser = () => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
+  const handleError = useHandleError()
   const {
     control,
     register,
@@ -57,8 +58,7 @@ const AddUser = () => {
   })
 
   const mutation = useMutation({
-    mutationFn: (data: UserCreate) =>
-      UsersService.createUser({ requestBody: data }),
+    mutationFn: (data: UserCreate) => UsersService.createUser({ requestBody: data }),
     onSuccess: () => {
       showSuccessToast("User created successfully.")
       reset()
@@ -95,9 +95,7 @@ const AddUser = () => {
             <DialogTitle>Add User</DialogTitle>
           </DialogHeader>
           <DialogBody>
-            <Text mb={4}>
-              Fill in the form below to add a new user to the system.
-            </Text>
+            <Text mb={4}>Fill in the form below to add a new user to the system.</Text>
             <VStack gap={4}>
               <Field
                 required
@@ -121,12 +119,7 @@ const AddUser = () => {
                 errorText={errors.full_name?.message}
                 label="Full Name"
               >
-                <Input
-                  id="name"
-                  {...register("full_name")}
-                  placeholder="Full name"
-                  type="text"
-                />
+                <Input id="name" {...register("full_name")} placeholder="Full name" type="text" />
               </Field>
 
               <Field
@@ -160,8 +153,7 @@ const AddUser = () => {
                   {...register("confirm_password", {
                     required: "Please confirm your password",
                     validate: (value) =>
-                      value === getValues().password ||
-                      "The passwords do not match",
+                      value === getValues().password || "The passwords do not match",
                   })}
                   placeholder="Password"
                   type="password"
@@ -203,20 +195,11 @@ const AddUser = () => {
 
           <DialogFooter gap={2}>
             <DialogActionTrigger asChild>
-              <Button
-                variant="subtle"
-                colorPalette="gray"
-                disabled={isSubmitting}
-              >
+              <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
                 Cancel
               </Button>
             </DialogActionTrigger>
-            <Button
-              variant="solid"
-              type="submit"
-              disabled={!isValid}
-              loading={isSubmitting}
-            >
+            <Button variant="solid" type="submit" disabled={!isValid} loading={isSubmitting}>
               Save
             </Button>
           </DialogFooter>
