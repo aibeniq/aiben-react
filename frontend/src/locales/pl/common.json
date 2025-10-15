@@ -177,7 +177,7 @@
     "checklistNamePlaceholder": "Wprowadź nazwę listy kontrolnej...",
     "checklistDescriptionLabel": "Opis",
     "checklistDescriptionPlaceholder": "Wprowadź opis listy kontrolnej dla automatycznych sugestii pytań (minimum 10 znaków)...",
-    "questions": "Pytania",
+    "questions": "{{count}} questions",
     "suggest": "Zasugeruj",
     "suggesting": "Sugerowanie...",
     "optimize": "Optymalizuj",
@@ -396,7 +396,7 @@
     "referenceDocuments": "Dokumenty Referencyjne (Opcjonalne)",
     "uploadFiles": "Prześlij Pliki",
     "knowledgeBase": "Baza Wiedzy",
-    "questions": "Pytania",
+    "questions": "{{count}} questions",
     "suggest": "Sugeruj",
     "optimize": "Optymalizuj",
     "addQuestionPlaceholder": "Dodaj pytanie",
@@ -416,7 +416,10 @@
     "uploadFiles": "Prześlij Pliki",
     "knowledgeBase": "Baza Wiedzy",
     "comparisonTopics": "Tematy Porównawcze",
-    "topics": "Tematy",
+    "topics": "{{count}} topics",
+    "section": "{{count}} section",
+    "section_one": "{{count}} section",
+    "sections": "{{count}} sections",
     "suggest": "Sugeruj",
     "addTopicPlaceholder": "Dodaj temat porównawczy",
     "copyAllTopics": "Skopiuj wszystkie tematy jako tekst",
@@ -539,6 +542,25 @@
       "compare": "Brak poprzednich porównań",
       "match": "Brak poprzedniego przetwarzania formularzy"
     },
+    "metadata": {
+      "question": "{{count}} pytanie",
+      "question_one": "{{count}} pytanie",
+      "questions": "{{count}} pytań",
+      "topic": "{{count}} temat",
+      "topic_one": "{{count}} temat",
+      "topics": "{{count}} tematów",
+      "section": "{{count}} sekcja",
+      "section_one": "{{count}} sekcja",
+      "sections": "{{count}} sekcji",
+      "field": "{{count}} pole",
+      "field_one": "{{count}} pole",
+      "fields": "{{count}} pól",
+      "document": "{{count}} dokument",
+      "document_one": "{{count}} dokument",
+      "documents": "{{count}} dokumentów",
+      "digitized": "cyfrowy",
+      "handwritten": "rękopis"
+    },
     "feedback": {
       "positive": "Pozytywna opinia",
       "negative": "Negatywna opinia",
@@ -561,7 +583,19 @@
       "evaluationSummary": "Podsumowanie Oceny",
       "questionAnswerDetails": "Szczegóły Pytanie-Odpowiedź",
       "summary": "Podsumowanie",
-      "topicAnalysis": "Analiza Tematu"
+      "topicAnalysis": "Analiza Tematu",
+      "documentEvaluation": "Ocena Dokumentu",
+      "generatedDocument": "Wygenerowany Dokument",
+      "documentComparison": "Porównanie Dokumentów",
+      "matchingResults": "Wyniki Dopasowania"
+    },
+    "labels": {
+      "questionsAndAnswers": "Pytania i Odpowiedzi",
+      "reportSections": "Sekcje Raportu",
+      "questionNumber": "Pytanie",
+      "topicLabel": "Temat",
+      "withCitations": "z cytatami",
+      "sources": "źródła"
     }
   },
   "feedback": {

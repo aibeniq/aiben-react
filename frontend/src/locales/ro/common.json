@@ -174,7 +174,7 @@
     "checklistNamePlaceholder": "Introduceți numele listei de verificare...",
     "checklistDescriptionLabel": "Descriere",
     "checklistDescriptionPlaceholder": "Introduceți descrierea listei de verificare pentru sugestii automate de întrebări (minimum 10 caractere)...",
-    "questions": "Întrebări",
+    "questions": "{{count}} questions",
     "suggest": "Sugerați",
     "suggesting": "Se sugerează...",
     "optimize": "Optimizați",
@@ -411,18 +411,21 @@
       "match": "Nu există procesare anterioară a formularelor"
     },
     "metadata": {
-      "question": "întrebare",
-      "question_one": "întrebare",
-      "questions": "întrebări",
-      "topic": "subiect",
-      "topic_one": "subiect",
-      "topics": "subiecte",
-      "field": "câmp",
-      "field_one": "câmp",
-      "fields": "câmpuri",
-      "document": "document",
-      "document_one": "document",
-      "documents": "documente",
+      "question": "{{count}} întrebare",
+      "question_one": "{{count}} întrebare",
+      "questions": "{{count}} întrebare",
+      "topic": "{{count}} subiect",
+      "topic_one": "{{count}} subiect",
+      "topics": "{{count}} subiect",
+      "section": "{{count}} secțiune",
+      "section_one": "{{count}} secțiune",
+      "sections": "{{count}} secțiune",
+      "field": "{{count}} câmp",
+      "field_one": "{{count}} câmp",
+      "fields": "{{count}} câmp",
+      "document": "{{count}} document",
+      "document_one": "{{count}} document",
+      "documents": "{{count}} document",
       "digitized": "digitizat",
       "handwritten": "scris de mână"
     },
@@ -448,7 +451,19 @@
       "evaluationSummary": "Rezumat evaluare",
       "questionAnswerDetails": "Detalii întrebare-răspuns",
       "summary": "Rezumat",
-      "topicAnalysis": "Analiză subiect"
+      "topicAnalysis": "Analiză subiect",
+      "documentEvaluation": "Evaluare document",
+      "generatedDocument": "Document generat",
+      "documentComparison": "Comparare document",
+      "matchingResults": "Rezultate potrivite"
+    },
+    "labels": {
+      "questionsAndAnswers": "Întrebări și răspunsuri",
+      "reportSections": "Secțiuni raport",
+      "questionNumber": "Întrebare",
+      "topicLabel": "Subiect",
+      "withCitations": "cu citări",
+      "sources": "surse"
     }
   },
   "optimizeChecklistModal": {

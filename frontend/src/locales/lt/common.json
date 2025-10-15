@@ -177,7 +177,7 @@
     "checklistNamePlaceholder": "Įveskite kontrolinio sąrašo pavadinimą...",
     "checklistDescriptionLabel": "Aprašymas",
     "checklistDescriptionPlaceholder": "Įveskite kontrolinio sąrašo aprašymą automatiniams klausimų pasiūlymams (mažiausiai 10 simbolių)...",
-    "questions": "Klausimai",
+    "questions": "{{count}} questions",
     "suggest": "Pasiūlyti",
     "suggesting": "Siūloma...",
     "optimize": "Optimizuoti",
@@ -400,63 +400,78 @@
     }
   },
   "archive": {
-    "title": "Archive",
-    "history": "History",
-    "allUsers": "All Users",
-    "allUsersToggleTooltip": "Toggle between viewing only your history or all users' history",
-    "viewingAllUsers": "Viewing all users' history",
-    "viewingMyHistory": "Viewing only my history",
+    "title": "Archyvas",
+    "history": "Istorija",
+    "allUsers": "Visi naudotojai",
+    "allUsersToggleTooltip": "Perjungti tarp peržiūros tik savo istorijos arba visų naudotojų istorijos",
+    "viewingAllUsers": "Peržiūrima visų naudotojų istorija",
+    "viewingMyHistory": "Peržiūrima tik mano istorija",
     "tabs": {
-      "review": "Review",
-      "generate": "Generate",
-      "compare": "Compare",
-      "match": "Match"
+      "review": "Peržiūra",
+      "generate": "Generuoti",
+      "compare": "Palyginti",
+      "match": "Atitikti"
     },
     "emptyMessages": {
-      "review": "No previous evaluations",
-      "generate": "No previous reports",
-      "compare": "No previous comparisons",
-      "match": "No previous form processing"
+      "review": "Nėra ankstesnių vertinimų",
+      "generate": "Nėra ankstesnių ataskaitų",
+      "compare": "Nėra ankstesnių palyginimų",
+      "match": "Nėra ankstesnio formų apdorojimo"
     },
     "metadata": {
-      "question": "question",
-      "question_one": "question",
-      "questions": "questions",
-      "topic": "topic",
-      "topic_one": "topic",
-      "topics": "topics",
-      "field": "field",
-      "field_one": "field",
-      "fields": "fields",
-      "document": "document",
-      "document_one": "document",
-      "documents": "documents",
-      "digitized": "digitized",
-      "handwritten": "handwritten"
+      "question": "{{count}} klausimas",
+      "question_one": "{{count}} klausimas",
+      "questions": "{{count}} klausimas",
+      "topic": "{{count}} tema",
+      "topic_one": "{{count}} tema",
+      "topics": "{{count}} tema",
+      "section": "{{count}} skyrius",
+      "section_one": "{{count}} skyrius",
+      "sections": "{{count}} skyrius",
+      "field": "{{count}} laukas",
+      "field_one": "{{count}} laukas",
+      "fields": "{{count}} laukas",
+      "document": "{{count}} dokumentas",
+      "document_one": "{{count}} dokumentas",
+      "documents": "{{count}} dokumentas",
+      "digitized": "skaitmeninis",
+      "handwritten": "ranka rašytas"
     },
     "feedback": {
-      "positive": "Positive feedback",
-      "negative": "Negative feedback",
-      "hasFeedback": "Has feedback"
+      "positive": "Teigiamas atsiliepimas",
+      "negative": "Neigiamas atsiliepimas",
+      "hasFeedback": "Turi atsiliepimą"
     },
-    "deleteConfirmation": "Are you sure you want to delete this item? This action cannot be undone.",
-    "unknownDate": "Unknown date",
-    "unnamedItem": "Unnamed item",
+    "deleteConfirmation": "Ar tikrai norite ištrinti šį elementą? Šio veiksmo negalima atšaukti.",
+    "unknownDate": "Nežinoma data",
+    "unnamedItem": "Nepavadintas elementas",
     "successMessages": {
-      "evaluationLoaded": "Evaluation loaded successfully",
-      "reportLoaded": "Report loaded successfully",
-      "comparisonLoaded": "Comparison loaded successfully",
-      "formProcessingLoaded": "Form processing loaded successfully",
-      "evaluationDeleted": "Evaluation deleted successfully",
-      "reportDeleted": "Report deleted successfully",
-      "comparisonDeleted": "Comparison deleted successfully",
-      "formProcessingDeleted": "Form processing deleted successfully"
+      "evaluationLoaded": "Vertinimas sėkmingai įkeltas",
+      "reportLoaded": "Ataskaita sėkmingai įkelta",
+      "comparisonLoaded": "Palyginimas sėkmingai įkeltas",
+      "formProcessingLoaded": "Formų apdorojimas sėkmingai įkeltas",
+      "evaluationDeleted": "Vertinimas sėkmingai ištrintas",
+      "reportDeleted": "Ataskaita sėkmingai ištrinta",
+      "comparisonDeleted": "Palyginimas sėkmingai ištrintas",
+      "formProcessingDeleted": "Formų apdorojimas sėkmingai ištrintas"
     },
     "docxHeaders": {
-      "evaluationSummary": "Evaluation Summary",
-      "questionAnswerDetails": "Question-Answer Details",
-      "summary": "Summary",
-      "topicAnalysis": "Topic Analysis"
+      "evaluationSummary": "Vertinimo santrauka",
+      "questionAnswerDetails": "Klausimų-atsakymų detalės",
+      "summary": "Santrauka",
+      "topicAnalysis": "Temos analizė",
+      "documentEvaluation": "Dokumento vertinimas",
+      "generatedDocument": "Sugeneruotas dokumentas",
+      "documentComparison": "Dokumentų palyginimas",
+      "matchingResults": "Atitinkantys rezultatai"
+    },
+    "labels": {
+      "questionsAndAnswers": "Klausimai ir atsakymai",
+      "reportSections": "Ataskaitos skyriai",
+      "questionNumber": "Klausimas",
+      "topicLabel": "Tema",
+      "withCitations": "su citatomis",
+      "sources": "šaltiniai"
     }
   },
   "optimizeChecklistModal": {

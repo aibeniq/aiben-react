@@ -173,7 +173,7 @@
     "checklistNamePlaceholder": "نام چک‌لیست را وارد کنید...",
     "checklistDescriptionLabel": "توضیحات",
     "checklistDescriptionPlaceholder": "توضیحات چک‌لیست را برای پیشنهادات خودکار سوال وارد کنید (حداقل 10 کاراکتر)...",
-    "questions": "سوالات",
+    "questions": "{{count}} questions",
     "suggest": "پیشنهاد",
     "suggesting": "در حال پیشنهاد...",
     "optimize": "بهینه‌سازی",
@@ -387,63 +387,78 @@
     }
   },
   "archive": {
-    "title": "Archive",
-    "history": "History",
-    "allUsers": "All Users",
-    "allUsersToggleTooltip": "Toggle between viewing only your history or all users' history",
-    "viewingAllUsers": "Viewing all users' history",
-    "viewingMyHistory": "Viewing only my history",
+    "title": "آرشیو",
+    "history": "تاریخچه",
+    "allUsers": "همه کاربران",
+    "allUsersToggleTooltip": "بین مشاهده فقط تاریخچه خود یا تاریخچه همه کاربران جابجا شوید",
+    "viewingAllUsers": "مشاهده تاریخچه همه کاربران",
+    "viewingMyHistory": "مشاهده فقط تاریخچه من",
     "tabs": {
-      "review": "Review",
-      "generate": "Generate",
-      "compare": "Compare",
-      "match": "Match"
+      "review": "بررسی",
+      "generate": "تولید",
+      "compare": "مقایسه",
+      "match": "تطبیق"
     },
     "emptyMessages": {
-      "review": "No previous evaluations",
-      "generate": "No previous reports",
-      "compare": "No previous comparisons",
-      "match": "No previous form processing"
+      "review": "هیچ ارزیابی قبلی وجود ندارد",
+      "generate": "هیچ گزارش قبلی وجود ندارد",
+      "compare": "هیچ مقایسه قبلی وجود ندارد",
+      "match": "هیچ پردازش فرم قبلی وجود ندارد"
     },
     "metadata": {
-      "question": "question",
-      "question_one": "question",
-      "questions": "questions",
-      "topic": "topic",
-      "topic_one": "topic",
-      "topics": "topics",
-      "field": "field",
-      "field_one": "field",
-      "fields": "fields",
-      "document": "document",
-      "document_one": "document",
-      "documents": "documents",
-      "digitized": "digitized",
-      "handwritten": "handwritten"
+      "question": "{{count}} سوال",
+      "question_one": "{{count}} سوال",
+      "questions": "{{count}} سوال",
+      "topic": "{{count}} موضوع",
+      "topic_one": "{{count}} موضوع",
+      "topics": "{{count}} موضوع",
+      "section": "{{count}} بخش",
+      "section_one": "{{count}} بخش",
+      "sections": "{{count}} بخش",
+      "field": "{{count}} فیلد",
+      "field_one": "{{count}} فیلد",
+      "fields": "{{count}} فیلد",
+      "document": "{{count}} سند",
+      "document_one": "{{count}} سند",
+      "documents": "{{count}} سند",
+      "digitized": "دیجیتال",
+      "handwritten": "دست‌نویس"
     },
     "feedback": {
-      "positive": "Positive feedback",
-      "negative": "Negative feedback",
-      "hasFeedback": "Has feedback"
+      "positive": "بازخورد مثبت",
+      "negative": "بازخورد منفی",
+      "hasFeedback": "دارای بازخورد"
     },
-    "deleteConfirmation": "Are you sure you want to delete this item? This action cannot be undone.",
-    "unknownDate": "Unknown date",
-    "unnamedItem": "Unnamed item",
+    "deleteConfirmation": "آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟ این عمل قابل برگرداندن نیست.",
+    "unknownDate": "تاریخ نامشخص",
+    "unnamedItem": "مورد بدون نام",
     "successMessages": {
-      "evaluationLoaded": "Evaluation loaded successfully",
-      "reportLoaded": "Report loaded successfully",
-      "comparisonLoaded": "Comparison loaded successfully",
-      "formProcessingLoaded": "Form processing loaded successfully",
-      "evaluationDeleted": "Evaluation deleted successfully",
-      "reportDeleted": "Report deleted successfully",
-      "comparisonDeleted": "Comparison deleted successfully",
-      "formProcessingDeleted": "Form processing deleted successfully"
+      "evaluationLoaded": "ارزیابی با موفقیت بارگذاری شد",
+      "reportLoaded": "گزارش با موفقیت بارگذاری شد",
+      "comparisonLoaded": "مقایسه با موفقیت بارگذاری شد",
+      "formProcessingLoaded": "پردازش فرم با موفقیت بارگذاری شد",
+      "evaluationDeleted": "ارزیابی با موفقیت حذف شد",
+      "reportDeleted": "گزارش با موفقیت حذف شد",
+      "comparisonDeleted": "مقایسه با موفقیت حذف شد",
+      "formProcessingDeleted": "پردازش فرم با موفقیت حذف شد"
     },
     "docxHeaders": {
-      "evaluationSummary": "Evaluation Summary",
-      "questionAnswerDetails": "Question-Answer Details",
-      "summary": "Summary",
-      "topicAnalysis": "Topic Analysis"
+      "evaluationSummary": "خلاصه ارزیابی",
+      "questionAnswerDetails": "جزئیات سوال-پاسخ",
+      "summary": "خلاصه",
+      "topicAnalysis": "تحلیل موضوع",
+      "documentEvaluation": "ارزیابی سند",
+      "generatedDocument": "سند تولید شده",
+      "documentComparison": "مقایسه سند",
+      "matchingResults": "نتایج تطبیق"
+    },
+    "labels": {
+      "questionsAndAnswers": "سوالات و پاسخ‌ها",
+      "reportSections": "بخش‌های گزارش",
+      "questionNumber": "سوال",
+      "topicLabel": "موضوع",
+      "withCitations": "با ارجاعات",
+      "sources": "منابع"
     }
   },
   "optimizeChecklistModal": {

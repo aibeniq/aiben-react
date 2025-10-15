@@ -256,6 +256,7 @@ class SourceContentResponse(SQLModel):
 class FormConnectRequest(SQLModel):
     fields: str
     search_mode: Literal["vector", "full_scan"] = Field(default="vector")
+    form_name: Optional[str] = None
 
 
 # Response model for FormConnect
@@ -622,6 +623,7 @@ class LlmInteraction(SQLModel, table=True):
 # Request model for TwinCheck
 class TwinCheckRequest(SQLModel):
     comparison_topics: str
+    topic_list_name: Optional[str] = None
 
 
 # Response model for TwinCheck

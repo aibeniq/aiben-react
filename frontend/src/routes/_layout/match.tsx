@@ -308,6 +308,7 @@ const FormConnect = () => {
       digitized_files: File[]
       handwritten_files: File[]
       search_mode: "vector" | "full_scan"
+      form_name?: string
     }) => {
       console.log("🎯 Creating match task for progress tracking...")
       console.log(`Using search mode: ${data.search_mode}`)
@@ -334,6 +335,7 @@ const FormConnect = () => {
         formData: {
           fields: data.fields,
           search_mode: data.search_mode,
+          form_name: data.form_name,
           task_id: newTaskId,
           digitized_files: digitizedFiles,
           handwritten_files: handwrittenFiles,
@@ -402,6 +404,7 @@ const FormConnect = () => {
       digitized_files: files, // Temporarily use digitized_files until API types are regenerated
       handwritten_files: [], // Empty array for now
       search_mode: searchMode,
+      form_name: selectedForm?.name,
     }
 
     setLoading(true) // Set loading to true

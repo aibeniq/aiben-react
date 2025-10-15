@@ -177,7 +177,7 @@
     "checklistNamePlaceholder": "Zadejte název kontrolního seznamu...",
     "checklistDescriptionLabel": "Popis",
     "checklistDescriptionPlaceholder": "Zadejte popis kontrolního seznamu pro automatické návrhy otázek (minimálně 10 znaků)...",
-    "questions": "Otázky",
+    "questions": "{{count}} questions",
     "suggest": "Navrhnout",
     "suggesting": "Navrhování...",
     "optimize": "Optimalizovat",
@@ -416,19 +416,23 @@
       "match": "Žádné předchozí zpracování formulářů"
     },
     "metadata": {
-      "question": "question",
-      "question_one": "question",
-      "questions": "questions",
-      "topic": "topic",
-      "topic_one": "topic",
-      "topics": "topics",
-      "field": "field",
-      "field_one": "field",
-      "fields": "fields",
-      "document": "document",
-      "document_one": "document",
-      "documents": "documents",
-      "digitized": "digitized"
+      "question": "{{count}} otázka",
+      "question_one": "{{count}} otázka",
+      "questions": "{{count}} otázky",
+      "topic": "{{count}} téma",
+      "topic_one": "{{count}} téma",
+      "topics": "{{count}} témata",
+      "section": "{{count}} sekce",
+      "section_one": "{{count}} sekce",
+      "sections": "{{count}} sekce",
+      "field": "{{count}} pole",
+      "field_one": "{{count}} pole",
+      "fields": "{{count}} pole",
+      "document": "{{count}} dokument",
+      "document_one": "{{count}} dokument",
+      "documents": "{{count}} dokumenty",
+      "digitized": "digitalizovaný",
+      "handwritten": "ručně psaný"
     },
     "feedback": {
       "positive": "Pozitivní zpětná vazba",
@@ -452,7 +456,19 @@
       "evaluationSummary": "Souhrn Hodnocení",
       "questionAnswerDetails": "Detaily Otázka-Odpověď",
       "summary": "Souhrn",
-      "topicAnalysis": "Analýza Tématu"
+      "topicAnalysis": "Analýza Tématu",
+      "documentEvaluation": "Hodnocení Dokumentu",
+      "generatedDocument": "Vygenerovaný Dokument",
+      "documentComparison": "Porovnání Dokumentů",
+      "matchingResults": "Výsledky Shody"
+    },
+    "labels": {
+      "questionsAndAnswers": "Otázky a Odpovědi",
+      "reportSections": "Sekce Zprávy",
+      "questionNumber": "Otázka",
+      "topicLabel": "Téma",
+      "withCitations": "s citacemi",
+      "sources": "zdroje"
     }
   },
   "dropdowns": {

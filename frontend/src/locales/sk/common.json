@@ -176,7 +176,7 @@
     "checklistNamePlaceholder": "Zadajte názov kontrolného zoznamu...",
     "checklistDescriptionLabel": "Popis",
     "checklistDescriptionPlaceholder": "Zadajte popis kontrolného zoznamu pre automatické návrhy otázok (minimálne 10 znakov)...",
-    "questions": "Otázky",
+    "questions": "{{count}} questions",
     "suggest": "Navrhnúť",
     "suggesting": "Navrhovanie...",
     "optimize": "Optimalizovať",
@@ -415,18 +415,21 @@
       "match": "Žiadne predchádzajúce spracovanie formulárov"
     },
     "metadata": {
-      "question": "otázka",
-      "question_one": "otázka",
-      "questions": "otázky",
-      "topic": "téma",
-      "topic_one": "téma",
-      "topics": "témy",
-      "field": "pole",
-      "field_one": "pole",
-      "fields": "polia",
-      "document": "dokument",
-      "document_one": "dokument",
-      "documents": "dokumenty",
+      "question": "{{count}} otázka",
+      "question_one": "{{count}} otázka",
+      "questions": "{{count}} otázka",
+      "topic": "{{count}} téma",
+      "topic_one": "{{count}} téma",
+      "topics": "{{count}} téma",
+      "section": "{{count}} sekcia",
+      "section_one": "{{count}} sekcia",
+      "sections": "{{count}} sekcia",
+      "field": "{{count}} pole",
+      "field_one": "{{count}} pole",
+      "fields": "{{count}} pole",
+      "document": "{{count}} dokument",
+      "document_one": "{{count}} dokument",
+      "documents": "{{count}} dokument",
       "digitized": "digitalizovaný",
       "handwritten": "rukou písaný"
     },
@@ -452,7 +455,19 @@
       "evaluationSummary": "Súhrn hodnotenia",
       "questionAnswerDetails": "Podrobnosti otázka-odpoveď",
       "summary": "Súhrn",
-      "topicAnalysis": "Analýza témy"
+      "topicAnalysis": "Analýza témy",
+      "documentEvaluation": "Hodnotenie dokumentu",
+      "generatedDocument": "Vygenerovaný dokument",
+      "documentComparison": "Porovnanie dokumentov",
+      "matchingResults": "Zodpovedajúce výsledky"
+    },
+    "labels": {
+      "questionsAndAnswers": "Otázky a odpovede",
+      "reportSections": "Sekcie správy",
+      "questionNumber": "Otázka",
+      "topicLabel": "Téma",
+      "withCitations": "s citáciami",
+      "sources": "zdroje"
     }
   },
   "optimizeChecklistModal": {

@@ -178,7 +178,7 @@
     "checklistNamePlaceholder": "Sisestage kontrollnimekirja nimi...",
     "checklistDescriptionLabel": "Kirjeldus",
     "checklistDescriptionPlaceholder": "Sisestage kontrollnimekirja kirjeldus automaatsete küsimuste soovituste jaoks (vähemalt 10 märki)...",
-    "questions": "Küsimused",
+    "questions": "{{count}} questions",
     "suggest": "Soovita",
     "suggesting": "Soovitan...",
     "optimize": "Optimeeri",
@@ -405,63 +405,78 @@
     }
   },
   "archive": {
-    "title": "Archive",
-    "history": "History",
-    "allUsers": "All Users",
-    "allUsersToggleTooltip": "Toggle between viewing only your history or all users' history",
-    "viewingAllUsers": "Viewing all users' history",
-    "viewingMyHistory": "Viewing only my history",
+    "title": "Arhiiv",
+    "history": "Ajalugu",
+    "allUsers": "Kõik kasutajad",
+    "allUsersToggleTooltip": "Lülita ainult oma ajaloo või kõigi kasutajate ajaloo vaatamise vahel",
+    "viewingAllUsers": "Kõigi kasutajate ajaloo vaatamine",
+    "viewingMyHistory": "Ainult oma ajaloo vaatamine",
     "tabs": {
-      "review": "Review",
-      "generate": "Generate",
-      "compare": "Compare",
-      "match": "Match"
+      "review": "Ülevaade",
+      "generate": "Genereeri",
+      "compare": "Võrdle",
+      "match": "Sobita"
     },
     "emptyMessages": {
-      "review": "No previous evaluations",
-      "generate": "No previous reports",
-      "compare": "No previous comparisons",
-      "match": "No previous form processing"
+      "review": "Eelnevad hindamised puuduvad",
+      "generate": "Eelnevad aruanded puuduvad",
+      "compare": "Eelnevad võrdlused puuduvad",
+      "match": "Eelnev vormitöötlus puudub"
     },
     "metadata": {
-      "question": "question",
-      "question_one": "question",
-      "questions": "questions",
-      "topic": "topic",
-      "topic_one": "topic",
-      "topics": "topics",
-      "field": "field",
-      "field_one": "field",
-      "fields": "fields",
-      "document": "document",
-      "document_one": "document",
-      "documents": "documents",
-      "digitized": "digitized",
-      "handwritten": "handwritten"
+      "question": "{{count}} küsimus",
+      "question_one": "{{count}} küsimus",
+      "questions": "{{count}} küsimus",
+      "topic": "{{count}} teema",
+      "topic_one": "{{count}} teema",
+      "topics": "{{count}} teema",
+      "section": "{{count}} osa",
+      "section_one": "{{count}} osa",
+      "sections": "{{count}} osa",
+      "field": "{{count}} väli",
+      "field_one": "{{count}} väli",
+      "fields": "{{count}} väli",
+      "document": "{{count}} dokument",
+      "document_one": "{{count}} dokument",
+      "documents": "{{count}} dokument",
+      "digitized": "digiteeritud",
+      "handwritten": "käsitsi kirjutatud"
     },
     "feedback": {
-      "positive": "Positive feedback",
-      "negative": "Negative feedback",
-      "hasFeedback": "Has feedback"
+      "positive": "Positiivne tagasiside",
+      "negative": "Negatiivne tagasiside",
+      "hasFeedback": "On tagasiside"
     },
-    "deleteConfirmation": "Are you sure you want to delete this item? This action cannot be undone.",
-    "unknownDate": "Unknown date",
-    "unnamedItem": "Unnamed item",
+    "deleteConfirmation": "Kas olete kindel, et soovite selle üksuse kustutada? Seda tegevust ei saa tagasi võtta.",
+    "unknownDate": "Tundmatu kuupäev",
+    "unnamedItem": "Nimetu üksus",
     "successMessages": {
-      "evaluationLoaded": "Evaluation loaded successfully",
-      "reportLoaded": "Report loaded successfully",
-      "comparisonLoaded": "Comparison loaded successfully",
-      "formProcessingLoaded": "Form processing loaded successfully",
-      "evaluationDeleted": "Evaluation deleted successfully",
-      "reportDeleted": "Report deleted successfully",
-      "comparisonDeleted": "Comparison deleted successfully",
-      "formProcessingDeleted": "Form processing deleted successfully"
+      "evaluationLoaded": "Hindamine laaditi edukalt",
+      "reportLoaded": "Aruanne laaditi edukalt",
+      "comparisonLoaded": "Võrdlus laaditi edukalt",
+      "formProcessingLoaded": "Vormitöötlus laaditi edukalt",
+      "evaluationDeleted": "Hindamine kustutati edukalt",
+      "reportDeleted": "Aruanne kustutati edukalt",
+      "comparisonDeleted": "Võrdlus kustutati edukalt",
+      "formProcessingDeleted": "Vormitöötlus kustutati edukalt"
     },
     "docxHeaders": {
-      "evaluationSummary": "Evaluation Summary",
-      "questionAnswerDetails": "Question-Answer Details",
-      "summary": "Summary",
-      "topicAnalysis": "Topic Analysis"
+      "evaluationSummary": "Hindamise kokkuvõte",
+      "questionAnswerDetails": "Küsimus-vastus detailid",
+      "summary": "Kokkuvõte",
+      "topicAnalysis": "Teema analüüs",
+      "documentEvaluation": "Dokumendi hindamine",
+      "generatedDocument": "Genereeritud dokument",
+      "documentComparison": "Dokumendi võrdlus",
+      "matchingResults": "Sobivad tulemused"
+    },
+    "labels": {
+      "questionsAndAnswers": "Küsimused ja vastused",
+      "reportSections": "Aruande osad",
+      "questionNumber": "Küsimus",
+      "topicLabel": "Teema",
+      "withCitations": "tsitaatidega",
+      "sources": "allikad"
     }
   },
   "optimizeChecklistModal": {

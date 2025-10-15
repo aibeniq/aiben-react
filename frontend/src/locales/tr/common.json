@@ -173,7 +173,7 @@
     "checklistNamePlaceholder": "Kontrol listesi adını girin...",
     "checklistDescriptionLabel": "Açıklama",
     "checklistDescriptionPlaceholder": "Otomatik soru önerileri için kontrol listesi açıklamasını girin (en az 10 karakter)...",
-    "questions": "Sorular",
+    "questions": "{{count}} questions",
     "suggest": "Öner",
     "suggesting": "Öneriliyor...",
     "optimize": "Optimize Et",
@@ -406,18 +406,21 @@
       "match": "Önceki form işleme yok"
     },
     "metadata": {
-      "question": "soru",
-      "question_one": "soru",
-      "questions": "sorular",
-      "topic": "konu",
-      "topic_one": "konu",
-      "topics": "konular",
-      "field": "alan",
-      "field_one": "alan",
-      "fields": "alanlar",
-      "document": "belge",
-      "document_one": "belge",
-      "documents": "belgeler",
+      "question": "{{count}} soru",
+      "question_one": "{{count}} soru",
+      "questions": "{{count}} soru",
+      "topic": "{{count}} konu",
+      "topic_one": "{{count}} konu",
+      "topics": "{{count}} konu",
+      "section": "{{count}} bölüm",
+      "section_one": "{{count}} bölüm",
+      "sections": "{{count}} bölüm",
+      "field": "{{count}} alan",
+      "field_one": "{{count}} alan",
+      "fields": "{{count}} alan",
+      "document": "{{count}} belge",
+      "document_one": "{{count}} belge",
+      "documents": "{{count}} belge",
       "digitized": "dijitalleştirilmiş",
       "handwritten": "el yazısı"
     },
@@ -443,7 +446,19 @@
       "evaluationSummary": "Değerlendirme Özeti",
       "questionAnswerDetails": "Soru-Cevap Detayları",
       "summary": "Özet",
-      "topicAnalysis": "Konu Analizi"
+      "topicAnalysis": "Konu Analizi",
+      "documentEvaluation": "Belge Değerlendirmesi",
+      "generatedDocument": "Oluşturulan Belge",
+      "documentComparison": "Belge Karşılaştırması",
+      "matchingResults": "Eşleşen Sonuçlar"
+    },
+    "labels": {
+      "questionsAndAnswers": "Sorular ve Cevaplar",
+      "reportSections": "Rapor Bölümleri",
+      "questionNumber": "Soru",
+      "topicLabel": "Konu",
+      "withCitations": "alıntılarla",
+      "sources": "kaynaklar"
     }
   },
   "optimizeChecklistModal": {

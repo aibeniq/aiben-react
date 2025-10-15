@@ -177,7 +177,7 @@
     "checklistNamePlaceholder": "Ievadiet kontrolsaraksta nosaukumu...",
     "checklistDescriptionLabel": "Apraksts",
     "checklistDescriptionPlaceholder": "Ievadiet kontrolsaraksta aprakstu automātiskajiem jautājumu ieteikumiem (vismaz 10 rakstzīmes)...",
-    "questions": "Jautājumi",
+    "questions": "{{count}} questions",
     "suggest": "Ieteikt",
     "suggesting": "Ieteic...",
     "optimize": "Optimizēt",
@@ -400,63 +400,78 @@
     }
   },
   "archive": {
-    "title": "Archive",
-    "history": "History",
-    "allUsers": "All Users",
-    "allUsersToggleTooltip": "Toggle between viewing only your history or all users' history",
-    "viewingAllUsers": "Viewing all users' history",
-    "viewingMyHistory": "Viewing only my history",
+    "title": "Arhīvs",
+    "history": "Vēsture",
+    "allUsers": "Visi lietotāji",
+    "allUsersToggleTooltip": "Pārslēgt starp tikai savas vēstures skatīšanu vai visu lietotāju vēsturi",
+    "viewingAllUsers": "Skatīt visu lietotāju vēsturi",
+    "viewingMyHistory": "Skatīt tikai manu vēsturi",
     "tabs": {
-      "review": "Review",
-      "generate": "Generate",
-      "compare": "Compare",
-      "match": "Match"
+      "review": "Pārskatīt",
+      "generate": "Ģenerēt",
+      "compare": "Salīdzināt",
+      "match": "Saskaitīt"
     },
     "emptyMessages": {
-      "review": "No previous evaluations",
-      "generate": "No previous reports",
-      "compare": "No previous comparisons",
-      "match": "No previous form processing"
+      "review": "Nav iepriekšējo novērtējumu",
+      "generate": "Nav iepriekšējo ziņojumu",
+      "compare": "Nav iepriekšējo salīdzinājumu",
+      "match": "Nav iepriekšējās formas apstrādes"
     },
     "metadata": {
-      "question": "question",
-      "question_one": "question",
-      "questions": "questions",
-      "topic": "topic",
-      "topic_one": "topic",
-      "topics": "topics",
-      "field": "field",
-      "field_one": "field",
-      "fields": "fields",
-      "document": "document",
-      "document_one": "document",
-      "documents": "documents",
-      "digitized": "digitized",
-      "handwritten": "handwritten"
+      "question": "{{count}} jautājums",
+      "question_one": "{{count}} jautājums",
+      "questions": "{{count}} jautājums",
+      "topic": "{{count}} tēma",
+      "topic_one": "{{count}} tēma",
+      "topics": "{{count}} tēma",
+      "section": "{{count}} sadaļa",
+      "section_one": "{{count}} sadaļa",
+      "sections": "{{count}} sadaļa",
+      "field": "{{count}} lauks",
+      "field_one": "{{count}} lauks",
+      "fields": "{{count}} lauks",
+      "document": "{{count}} dokuments",
+      "document_one": "{{count}} dokuments",
+      "documents": "{{count}} dokuments",
+      "digitized": "digitalizēts",
+      "handwritten": "ar roku rakstīts"
     },
     "feedback": {
-      "positive": "Positive feedback",
-      "negative": "Negative feedback",
-      "hasFeedback": "Has feedback"
+      "positive": "Pozitīva atgriezeniskā saite",
+      "negative": "Negatīva atgriezeniskā saite",
+      "hasFeedback": "Ir atgriezeniskā saite"
     },
-    "deleteConfirmation": "Are you sure you want to delete this item? This action cannot be undone.",
-    "unknownDate": "Unknown date",
-    "unnamedItem": "Unnamed item",
+    "deleteConfirmation": "Vai tiešām vēlaties dzēst šo vienumu? Šo darbību nevar atcelt.",
+    "unknownDate": "Nezināms datums",
+    "unnamedItem": "Nenosaukts vienums",
     "successMessages": {
-      "evaluationLoaded": "Evaluation loaded successfully",
-      "reportLoaded": "Report loaded successfully",
-      "comparisonLoaded": "Comparison loaded successfully",
-      "formProcessingLoaded": "Form processing loaded successfully",
-      "evaluationDeleted": "Evaluation deleted successfully",
-      "reportDeleted": "Report deleted successfully",
-      "comparisonDeleted": "Comparison deleted successfully",
-      "formProcessingDeleted": "Form processing deleted successfully"
+      "evaluationLoaded": "Novērtējums veiksmīgi ielādēts",
+      "reportLoaded": "Ziņojums veiksmīgi ielādēts",
+      "comparisonLoaded": "Salīdzinājums veiksmīgi ielādēts",
+      "formProcessingLoaded": "Formas apstrāde veiksmīgi ielādēta",
+      "evaluationDeleted": "Novērtējums veiksmīgi dzēsts",
+      "reportDeleted": "Ziņojums veiksmīgi dzēsts",
+      "comparisonDeleted": "Salīdzinājums veiksmīgi dzēsts",
+      "formProcessingDeleted": "Formas apstrāde veiksmīgi dzēsta"
     },
     "docxHeaders": {
-      "evaluationSummary": "Evaluation Summary",
-      "questionAnswerDetails": "Question-Answer Details",
-      "summary": "Summary",
-      "topicAnalysis": "Topic Analysis"
+      "evaluationSummary": "Novērtējuma kopsavilkums",
+      "questionAnswerDetails": "Jautājumu-atbilžu detaļas",
+      "summary": "Kopsavilkums",
+      "topicAnalysis": "Tēmas analīze",
+      "documentEvaluation": "Dokumenta novērtējums",
+      "generatedDocument": "Ģenerēts dokuments",
+      "documentComparison": "Dokumentu salīdzinājums",
+      "matchingResults": "Saskaitīšanas rezultāti"
+    },
+    "labels": {
+      "questionsAndAnswers": "Jautājumi un atbildes",
+      "reportSections": "Ziņojuma sadaļas",
+      "questionNumber": "Jautājums",
+      "topicLabel": "Tēma",
+      "withCitations": "ar citātiem",
+      "sources": "avoti"
     }
   },
   "optimizeChecklistModal": {

@@ -63,7 +63,7 @@ function Archive() {
         fullText = `# ${t("archive.docxHeaders.evaluationSummary")}\n\n${(veradoc.selectedReport.results as any)?.final_evaluation || ""}\n\n# ${t("archive.docxHeaders.questionAnswerDetails")}\n\n`
         const qaPairs = (veradoc.selectedReport.results as any)?.qa_pairs || []
         qaPairs.forEach((pair: any, index: number) => {
-          fullText += `## Question ${index + 1}: ${pair.question}\n\n`
+          fullText += `## ${t("archive.labels.questionNumber")} ${index + 1}: ${pair.question}\n\n`
           fullText += `### Answer\n${pair.answer}\n\n`
           fullText += `### Relevant Policy Context\n${pair.context}\n\n`
         })
@@ -78,7 +78,7 @@ function Archive() {
         const topicResults =
           twincheck.selectedReport.results?.topic_analysis || []
         topicResults.forEach((topic: any) => {
-          fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
+          fullText += `## ${t("archive.labels.topicLabel")}: ${topic.topic}\n\n${topic.analysis}\n\n`
         })
       } else if (activeTab === "match" && formconnect.selectedReport) {
         fullText =
@@ -129,7 +129,7 @@ function Archive() {
         // Prepare combined text with evaluation summary and QA pairs
         fullText = `# ${t("archive.docxHeaders.evaluationSummary")}\n\n${(veradoc.selectedReport.results as any)?.final_evaluation || ""}\n\n# ${t("archive.docxHeaders.questionAnswerDetails")}\n\n`
         qaPairs.forEach((pair: any, index: number) => {
-          fullText += `## Question ${index + 1}: ${pair.question}\n\n`
+          fullText += `## ${t("archive.labels.questionNumber")} ${index + 1}: ${pair.question}\n\n`
           fullText += `### Answer\n${pair.answer}\n\n`
           fullText += `### Relevant Policy Context\n${pair.context}\n\n`
         })
@@ -153,7 +153,7 @@ function Archive() {
         const topicResults =
           twincheck.selectedReport.results?.topic_analysis || []
         topicResults.forEach((topic: any) => {
-          fullText += `## Topic: ${topic.topic}\n\n${topic.analysis}\n\n`
+          fullText += `## ${t("archive.labels.topicLabel")}: ${topic.topic}\n\n${topic.analysis}\n\n`
         })
 
         response = await TwincheckService.generateDocx({

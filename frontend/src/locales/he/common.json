@@ -173,7 +173,7 @@
     "checklistNamePlaceholder": "הזן שם רשימת בדיקה...",
     "checklistDescriptionLabel": "תיאור",
     "checklistDescriptionPlaceholder": "הזן תיאור רשימת בדיקה להצעות שאלות אוטומטיות (לפחות 10 תווים)...",
-    "questions": "שאלות",
+    "questions": "{{count}} questions",
     "suggest": "הצע",
     "suggesting": "מציע...",
     "optimize": "אופטימיזציה",
@@ -406,18 +406,21 @@
       "match": "אין עיבוד טפסים קודם"
     },
     "metadata": {
-      "question": "שאלה",
-      "question_one": "שאלה",
-      "questions": "שאלות",
-      "topic": "נושא",
-      "topic_one": "נושא",
-      "topics": "נושאים",
-      "field": "שדה",
-      "field_one": "שדה",
-      "fields": "שדות",
-      "document": "מסמך",
-      "document_one": "מסמך",
-      "documents": "מסמכים",
+      "question": "{{count}} שאלה",
+      "question_one": "{{count}} שאלה",
+      "questions": "{{count}} שאלות",
+      "topic": "{{count}} נושא",
+      "topic_one": "{{count}} נושא",
+      "topics": "{{count}} נושאים",
+      "section": "{{count}} חלק",
+      "section_one": "{{count}} חלק",
+      "sections": "{{count}} חלקים",
+      "field": "{{count}} שדה",
+      "field_one": "{{count}} שדה",
+      "fields": "{{count}} שדות",
+      "document": "{{count}} מסמך",
+      "document_one": "{{count}} מסמך",
+      "documents": "{{count}} מסמכים",
       "digitized": "מספרי",
       "handwritten": "כתוב בכתב יד"
     },
@@ -443,7 +446,19 @@
       "evaluationSummary": "סיכום הערכה",
       "questionAnswerDetails": "פרטי שאלה-תשובה",
       "summary": "סיכום",
-      "topicAnalysis": "ניתוח נושא"
+      "topicAnalysis": "ניתוח נושא",
+      "documentEvaluation": "הערכת מסמך",
+      "generatedDocument": "מסמך שנוצר",
+      "documentComparison": "השוואת מסמכים",
+      "matchingResults": "תוצאות התאמה"
+    },
+    "labels": {
+      "questionsAndAnswers": "שאלות ותשובות",
+      "reportSections": "חלקי דוח",
+      "questionNumber": "שאלה",
+      "topicLabel": "נושא",
+      "withCitations": "עם ציטוטים",
+      "sources": "מקורות"
     }
   },
   "optimizeChecklistModal": {

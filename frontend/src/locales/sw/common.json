@@ -173,7 +173,7 @@
     "checklistNamePlaceholder": "Ingiza jina la orodha ya ukaguzi...",
     "checklistDescriptionLabel": "Maelezo",
     "checklistDescriptionPlaceholder": "Ingiza maelezo ya orodha ya ukaguzi kwa mapendekezo ya otomatiki ya maswali (angalau herufi 10)...",
-    "questions": "Maswali",
+    "questions": "{{count}} questions",
     "suggest": "Pendekeza",
     "suggesting": "Inapendekeza...",
     "optimize": "Boresha",
@@ -387,63 +387,78 @@
     }
   },
   "archive": {
-    "title": "Archive",
-    "history": "History",
-    "allUsers": "All Users",
-    "allUsersToggleTooltip": "Toggle between viewing only your history or all users' history",
-    "viewingAllUsers": "Viewing all users' history",
-    "viewingMyHistory": "Viewing only my history",
+    "title": "Kumbukumbu",
+    "history": "Historia",
+    "allUsers": "Watumiaji Wote",
+    "allUsersToggleTooltip": "Badilisha kati ya kuona historia yako tu au historia ya watumiaji wote",
+    "viewingAllUsers": "Kuona historia ya watumiaji wote",
+    "viewingMyHistory": "Kuona historia yangu tu",
     "tabs": {
-      "review": "Review",
-      "generate": "Generate",
-      "compare": "Compare",
-      "match": "Match"
+      "review": "Hakiki",
+      "generate": "Tengeneza",
+      "compare": "Linganisha",
+      "match": "Linganisha"
     },
     "emptyMessages": {
-      "review": "No previous evaluations",
-      "generate": "No previous reports",
-      "compare": "No previous comparisons",
-      "match": "No previous form processing"
+      "review": "Hakuna tathmini za awali",
+      "generate": "Hakuna ripoti za awali",
+      "compare": "Hakuna ulinganishi wa awali",
+      "match": "Hakuna usindikaji wa fomu wa awali"
     },
     "metadata": {
-      "question": "question",
-      "question_one": "question",
-      "questions": "questions",
-      "topic": "topic",
-      "topic_one": "topic",
-      "topics": "topics",
-      "field": "field",
-      "field_one": "field",
-      "fields": "fields",
-      "document": "document",
-      "document_one": "document",
-      "documents": "documents",
-      "digitized": "digitized",
-      "handwritten": "handwritten"
+      "question": "{{count}} swali",
+      "question_one": "{{count}} swali",
+      "questions": "{{count}} swali",
+      "topic": "{{count}} mada",
+      "topic_one": "{{count}} mada",
+      "topics": "{{count}} mada",
+      "section": "{{count}} sehemu",
+      "section_one": "{{count}} sehemu",
+      "sections": "{{count}} sehemu",
+      "field": "{{count}} uwanja",
+      "field_one": "{{count}} uwanja",
+      "fields": "{{count}} uwanja",
+      "document": "{{count}} hati",
+      "document_one": "{{count}} hati",
+      "documents": "{{count}} hati",
+      "digitized": "umewekwa kidijitali",
+      "handwritten": "iliyoandikwa kwa mkono"
     },
     "feedback": {
-      "positive": "Positive feedback",
-      "negative": "Negative feedback",
-      "hasFeedback": "Has feedback"
+      "positive": "Maoni mazuri",
+      "negative": "Maoni mabaya",
+      "hasFeedback": "Ina maoni"
     },
-    "deleteConfirmation": "Are you sure you want to delete this item? This action cannot be undone.",
-    "unknownDate": "Unknown date",
-    "unnamedItem": "Unnamed item",
+    "deleteConfirmation": "Je, una uhakika unataka kufuta kipengee hiki? Kitendo hiki hakiwezi kutenduliwa.",
+    "unknownDate": "Tarehe isiyojulikana",
+    "unnamedItem": "Kipengee kisicho na jina",
     "successMessages": {
-      "evaluationLoaded": "Evaluation loaded successfully",
-      "reportLoaded": "Report loaded successfully",
-      "comparisonLoaded": "Comparison loaded successfully",
-      "formProcessingLoaded": "Form processing loaded successfully",
-      "evaluationDeleted": "Evaluation deleted successfully",
-      "reportDeleted": "Report deleted successfully",
-      "comparisonDeleted": "Comparison deleted successfully",
-      "formProcessingDeleted": "Form processing deleted successfully"
+      "evaluationLoaded": "Tathmini ilipakiwa kwa mafanikio",
+      "reportLoaded": "Ripoti ilipakiwa kwa mafanikio",
+      "comparisonLoaded": "Ulinganishi ulipakiwa kwa mafanikio",
+      "formProcessingLoaded": "Usindikaji wa fomu ulipakiwa kwa mafanikio",
+      "evaluationDeleted": "Tathmini ilifutwa kwa mafanikio",
+      "reportDeleted": "Ripoti ilifutwa kwa mafanikio",
+      "comparisonDeleted": "Ulinganishi ulifutwa kwa mafanikio",
+      "formProcessingDeleted": "Usindikaji wa fomu ulifutwa kwa mafanikio"
     },
     "docxHeaders": {
-      "evaluationSummary": "Evaluation Summary",
-      "questionAnswerDetails": "Question-Answer Details",
-      "summary": "Summary",
-      "topicAnalysis": "Topic Analysis"
+      "evaluationSummary": "Muhtasari wa Tathmini",
+      "questionAnswerDetails": "Maelezo ya Swali-Jibu",
+      "summary": "Muhtasari",
+      "topicAnalysis": "Uchambuzi wa Mada",
+      "documentEvaluation": "Tathmini ya Hati",
+      "generatedDocument": "Hati Iliyotengenezwa",
+      "documentComparison": "Ulinganishi wa Hati",
+      "matchingResults": "Matokeo Yanayolingana"
+    },
+    "labels": {
+      "questionsAndAnswers": "Maswali na Majibu",
+      "reportSections": "Sehemu za Ripoti",
+      "questionNumber": "Swali",
+      "topicLabel": "Mada",
+      "withCitations": "na marejeleo",
+      "sources": "vyanzo"
     }
   },
   "optimizeChecklistModal": {

@@ -178,7 +178,7 @@
     "checklistNamePlaceholder": "輸入檢查清單名稱...",
     "checklistDescriptionLabel": "描述",
     "checklistDescriptionPlaceholder": "輸入檢查清單描述以獲取自動問題建議（最少10個字符）...",
-    "questions": "問題",
+    "questions": "{{count}} questions",
     "suggest": "建議",
     "suggesting": "正在建議...",
     "optimize": "最佳化",
@@ -392,63 +392,78 @@
     }
   },
   "archive": {
-    "title": "Archive",
-    "history": "History",
-    "allUsers": "All Users",
-    "allUsersToggleTooltip": "Toggle between viewing only your history or all users' history",
-    "viewingAllUsers": "Viewing all users' history",
-    "viewingMyHistory": "Viewing only my history",
+    "title": "檔案庫",
+    "history": "歷史",
+    "allUsers": "所有用戶",
+    "allUsersToggleTooltip": "在僅查看您的歷史或所有用戶的歷史之間切換",
+    "viewingAllUsers": "查看所有用戶的歷史",
+    "viewingMyHistory": "僅查看我的歷史",
     "tabs": {
-      "review": "Review",
-      "generate": "Generate",
-      "compare": "Compare",
-      "match": "Match"
+      "review": "檢閱",
+      "generate": "生成",
+      "compare": "比較",
+      "match": "匹配"
     },
     "emptyMessages": {
-      "review": "No previous evaluations",
-      "generate": "No previous reports",
-      "compare": "No previous comparisons",
-      "match": "No previous form processing"
+      "review": "沒有之前的評估",
+      "generate": "沒有之前的報告",
+      "compare": "沒有之前的比較",
+      "match": "沒有之前的表單處理"
     },
     "metadata": {
-      "question": "question",
-      "question_one": "question",
-      "questions": "questions",
-      "topic": "topic",
-      "topic_one": "topic",
-      "topics": "topics",
-      "field": "field",
-      "field_one": "field",
-      "fields": "fields",
-      "document": "document",
-      "document_one": "document",
-      "documents": "documents",
-      "digitized": "digitized",
-      "handwritten": "handwritten"
+      "question": "{{count}} 問題",
+      "question_one": "{{count}} 問題",
+      "questions": "{{count}} 問題",
+      "topic": "{{count}} 主題",
+      "topic_one": "{{count}} 主題",
+      "topics": "{{count}} 主題",
+      "section": "{{count}} 區段",
+      "section_one": "{{count}} 區段",
+      "sections": "{{count}} 區段",
+      "field": "{{count}} 欄位",
+      "field_one": "{{count}} 欄位",
+      "fields": "{{count}} 欄位",
+      "document": "{{count}} 文件",
+      "document_one": "{{count}} 文件",
+      "documents": "{{count}} 文件",
+      "digitized": "數位化",
+      "handwritten": "手寫"
     },
     "feedback": {
-      "positive": "Positive feedback",
-      "negative": "Negative feedback",
-      "hasFeedback": "Has feedback"
+      "positive": "正面回饋",
+      "negative": "負面回饋",
+      "hasFeedback": "有回饋"
     },
-    "deleteConfirmation": "Are you sure you want to delete this item? This action cannot be undone.",
-    "unknownDate": "Unknown date",
-    "unnamedItem": "Unnamed item",
+    "deleteConfirmation": "您確定要刪除此項目嗎？此操作無法撤銷。",
+    "unknownDate": "未知日期",
+    "unnamedItem": "未命名項目",
     "successMessages": {
-      "evaluationLoaded": "Evaluation loaded successfully",
-      "reportLoaded": "Report loaded successfully",
-      "comparisonLoaded": "Comparison loaded successfully",
-      "formProcessingLoaded": "Form processing loaded successfully",
-      "evaluationDeleted": "Evaluation deleted successfully",
-      "reportDeleted": "Report deleted successfully",
-      "comparisonDeleted": "Comparison deleted successfully",
-      "formProcessingDeleted": "Form processing deleted successfully"
+      "evaluationLoaded": "評估載入成功",
+      "reportLoaded": "報告載入成功",
+      "comparisonLoaded": "比較載入成功",
+      "formProcessingLoaded": "表單處理載入成功",
+      "evaluationDeleted": "評估刪除成功",
+      "reportDeleted": "報告刪除成功",
+      "comparisonDeleted": "比較刪除成功",
+      "formProcessingDeleted": "表單處理刪除成功"
     },
     "docxHeaders": {
-      "evaluationSummary": "Evaluation Summary",
-      "questionAnswerDetails": "Question-Answer Details",
-      "summary": "Summary",
-      "topicAnalysis": "Topic Analysis"
+      "evaluationSummary": "評估摘要",
+      "questionAnswerDetails": "問題-答案詳情",
+      "summary": "摘要",
+      "topicAnalysis": "主題分析",
+      "documentEvaluation": "文件評估",
+      "generatedDocument": "生成的文件",
+      "documentComparison": "文件比較",
+      "matchingResults": "匹配結果"
+    },
+    "labels": {
+      "questionsAndAnswers": "問題與答案",
+      "reportSections": "報告區段",
+      "questionNumber": "問題",
+      "topicLabel": "主題",
+      "withCitations": "附引用",
+      "sources": "來源"
     }
   },
   "optimizeChecklistModal": {

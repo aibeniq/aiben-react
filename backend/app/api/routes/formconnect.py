@@ -1163,6 +1163,7 @@ async def process_form(
     current_user: CurrentUser,
     fields: str = Form(...),
     search_mode: Literal["vector", "full_scan"] = Form("vector"),
+    form_name: Optional[str] = Form(None),
     digitized_files: List[UploadFile] = File(None),
     handwritten_files: List[UploadFile] = File(None),
     request: FastAPIRequest = None,
@@ -1347,7 +1348,7 @@ async def process_form(
         session=session,
         user_id=current_user.id,
         functionality="formconnect",
-        input_data={"fields": fields, "files": file_names, "search_mode": search_mode},
+        input_data={"fields": fields, "files": file_names, "search_mode": search_mode, "form_name": form_name},
         output_data=result,
         metadata={
             "file_count": total_files,
@@ -1605,6 +1606,21 @@ async def get_form_history(
                 fields = input_data.get("fields", "").split("\n")
                 field_count = len([f for f in fields if f.strip()])
 
+                # Use stored form_name if available, otherwise create from first field
+                stored_form_name = input_data.get("form_name")
+                if stored_form_name:
+                    form_name = stored_form_name
+                else:
+                    # Fallback: Create a display name from the first field
+                    form_name = "Unnamed Form"
+                    if fields and len(fields) > 0:
+                        first_field = fields[0].strip()
+                        if first_field:
+                            # Truncate if too long
+                            form_name = first_field[:50] + ("..." if len(first_field) > 50 else "")
+                        else:
+                            form_name = "Custom Form"
+
                 # Create result item
                 result_item = {
                     "id": str(interaction.id),
@@ -1613,6 +1629,7 @@ async def get_form_history(
                     "file_count": file_count,
                     "field_count": field_count,
                     "fields": fields,
+                    "form_name": form_name,
                     "has_feedback": interaction.feedback is not None,
                     # Add metadata information for enhanced display
                     "metadata": metadata,

@@ -158,7 +158,7 @@
     "checklistNamePlaceholder": "Введите название контрольного списка...",
     "checklistDescriptionLabel": "Описание",
     "checklistDescriptionPlaceholder": "Введите описание контрольного списка для автоматических предложений вопросов (минимум 10 символов)...",
-    "questions": "Вопросы",
+    "questions": "{{count}} questions",
     "suggest": "Предложить",
     "suggesting": "Предложение...",
     "optimize": "Оптимизировать",
@@ -517,7 +517,7 @@
       "referenceDocuments": "Справочные документы (необязательно)",
       "uploadFiles": "Загрузить файлы",
       "knowledgeBase": "База знаний",
-      "questions": "Вопросы",
+      "questions": "{{count}} questions",
       "suggest": "Предложить",
       "optimize": "Оптимизировать",
       "addQuestionPlaceholder": "Добавить вопрос",
@@ -537,7 +537,10 @@
       "uploadFiles": "Загрузить файлы",
       "knowledgeBase": "База знаний",
       "comparisonTopics": "Темы для сравнения",
-      "topics": "Темы",
+      "topics": "{{count}} topics",
+      "section": "{{count}} section",
+      "section_one": "{{count}} section",
+      "sections": "{{count}} sections",
       "suggest": "Предложить",
       "addTopicPlaceholder": "Добавить тему для сравнения",
       "copyAllTopics": "Скопировать все темы как текст",
@@ -650,6 +653,25 @@
       "compare": "Нет предыдущих сравнений",
       "match": "Нет предыдущей обработки форм"
     },
+    "metadata": {
+      "question": "{{count}} вопрос",
+      "question_one": "{{count}} вопрос",
+      "questions": "{{count}} вопросов",
+      "topic": "{{count}} тема",
+      "topic_one": "{{count}} тема",
+      "topics": "{{count}} тем",
+      "section": "{{count}} раздел",
+      "section_one": "{{count}} раздел",
+      "sections": "{{count}} разделов",
+      "field": "{{count}} поле",
+      "field_one": "{{count}} поле",
+      "fields": "{{count}} полей",
+      "document": "{{count}} документ",
+      "document_one": "{{count}} документ",
+      "documents": "{{count}} документов",
+      "digitized": "оцифрованный",
+      "handwritten": "рукописный"
+    },
     "feedback": {
       "positive": "Положительная обратная связь",
       "negative": "Отрицательная обратная связь",
@@ -672,7 +694,19 @@
       "evaluationSummary": "Сводка Оценки",
       "questionAnswerDetails": "Детали Вопрос-Ответ",
       "summary": "Сводка",
-      "topicAnalysis": "Анализ Темы"
+      "topicAnalysis": "Анализ Темы",
+      "documentEvaluation": "Оценка Документа",
+      "generatedDocument": "Созданный Документ",
+      "documentComparison": "Сравнение Документов",
+      "matchingResults": "Результаты Сопоставления"
+    },
+    "labels": {
+      "questionsAndAnswers": "Вопросы и Ответы",
+      "reportSections": "Разделы Отчета",
+      "questionNumber": "Вопрос",
+      "topicLabel": "Тема",
+      "withCitations": "с цитатами",
+      "sources": "источники"
     }
   },
   "generate": {

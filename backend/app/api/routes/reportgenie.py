@@ -817,21 +817,21 @@ async def get_report_history(
                         output_data = {}
 
                 # Parse metadata safely with enhanced error handling
-                if interaction.metadata:
-                    if isinstance(interaction.metadata, str):
-                        metadata = json.loads(interaction.metadata)
-                    elif isinstance(interaction.metadata, dict):
-                        metadata = interaction.metadata
+                if interaction.extra_data:
+                    if isinstance(interaction.extra_data, str):
+                        metadata = json.loads(interaction.extra_data)
+                    elif isinstance(interaction.extra_data, dict):
+                        metadata = interaction.extra_data
                     else:
                         # Handle the MetaData object case
-                        print(f"Metadata is of type: {type(interaction.metadata)}")
-                        if hasattr(interaction.metadata, "__dict__"):
+                        print(f"Metadata is of type: {type(interaction.extra_data)}")
+                        if hasattr(interaction.extra_data, "__dict__"):
                             # Convert object to dict if possible
-                            metadata = interaction.metadata.__dict__
+                            metadata = interaction.extra_data.__dict__
                         else:
                             # Try to serialize it as string and then parse
                             try:
-                                metadata_str = str(interaction.metadata)
+                                metadata_str = str(interaction.extra_data)
                                 if metadata_str.startswith(
                                     "{"
                                 ) and metadata_str.endswith("}"):
@@ -840,7 +840,7 @@ async def get_report_history(
                                     metadata = {}
                             except:
                                 print(
-                                    f"Failed to parse metadata: {interaction.metadata}"
+                                    f"Failed to parse metadata: {interaction.extra_data}"
                                 )
                                 metadata = {}
 
@@ -848,6 +848,18 @@ async def get_report_history(
                 sections_data = input_data.get("sections", "")
                 if not isinstance(sections_data, str):
                     sections_data = json.dumps(sections_data) if sections_data else ""
+
+                # Lookup outline name if outline_id is provided
+                outline_name = "Unnamed Outline"
+                outline_id = input_data.get("outline_id", "")
+                if outline_id:
+                    try:
+                        outline = session.get(ReportGenieOutline, outline_id)
+                        if outline:
+                            outline_name = outline.name
+                    except Exception as e:
+                        print(f"Error looking up outline {outline_id}: {e}")
+                        outline_name = f"Outline {outline_id[:8]}..."
 
                 # Create result item with proper field names for archive display
                 result_item = {
@@ -858,12 +870,13 @@ async def get_report_history(
                     "kb_name": metadata.get(
                         "kb_name", input_data.get("kb_name", "Unknown")
                     ),
-                    "outline_id": input_data.get("outline_id", ""),
+                    "outline_id": outline_id,
+                    "outline_name": outline_name,
                     "search_mode": input_data.get("search_mode", "vector"),
                     "full_report": metadata.get(
                         "full_report", output_data.get("full_report", "")
                     ),
-                    "section_count": output_data.get("section_count", 0),
+                    "section_count": metadata.get("section_count", output_data.get("section_count", 0)),
                     "total_length": output_data.get("total_length", 0),
                     "has_feedback": interaction.feedback is not None,
                 }
@@ -980,27 +993,27 @@ async def get_report_detail(
                 output_data = {}
 
         # Parse metadata safely with enhanced error handling
-        if interaction.metadata:
-            if isinstance(interaction.metadata, str):
-                metadata = json.loads(interaction.metadata)
-            elif isinstance(interaction.metadata, dict):
-                metadata = interaction.metadata
+        if interaction.extra_data:
+            if isinstance(interaction.extra_data, str):
+                metadata = json.loads(interaction.extra_data)
+            elif isinstance(interaction.extra_data, dict):
+                metadata = interaction.extra_data
             else:
                 # Handle the MetaData object case
-                print(f"Metadata is of type: {type(interaction.metadata)}")
-                if hasattr(interaction.metadata, "__dict__"):
+                print(f"Metadata is of type: {type(interaction.extra_data)}")
+                if hasattr(interaction.extra_data, "__dict__"):
                     # Convert object to dict if possible
-                    metadata = interaction.metadata.__dict__
+                    metadata = interaction.extra_data.__dict__
                 else:
                     # Try to serialize it as string and then parse
                     try:
-                        metadata_str = str(interaction.metadata)
+                        metadata_str = str(interaction.extra_data)
                         if metadata_str.startswith("{") and metadata_str.endswith("}"):
                             metadata = json.loads(metadata_str)
                         else:
                             metadata = {}
                     except:
-                        print(f"Failed to parse metadata: {interaction.metadata}")
+                        print(f"Failed to parse metadata: {interaction.extra_data}")
                         metadata = {}
 
         # Handle sections data - ensure it's always a string for API response

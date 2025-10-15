@@ -281,6 +281,7 @@ class Settings(BaseSettings):
     VERADOC_CIRCUIT_BREAKER_FAILURE_THRESHOLD: int = 3  # Failures before opening circuit
     VERADOC_CIRCUIT_BREAKER_RESET_TIME: int = 300       # 5 minutes before retry
     VERADOC_FULL_SCAN_FILTER_BATCH_SIZE: int = 10  # Batch size for concurrent relevance filtering in full document scans
+    STREAMING_UPLOAD_ENABLED: bool = False  # Enable streaming file uploads to reduce memory usage
     TWINCHECK_ENABLE_PROCESSING_DELAYS: bool = True
     REPORTGENIE_ENABLE_PROCESSING_DELAYS: bool = True
 

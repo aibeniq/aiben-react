@@ -51,6 +51,8 @@ const HistoryPanel = ({
       item?.document_name ||
       item?.title ||
       item?.name ||
+      item?.outline_name ||
+      item?.topic_list_name ||
       item?.comparison_name ||
       item?.form_name ||
       t("archive.unnamedItem")
@@ -115,6 +117,9 @@ const HistoryPanel = ({
     }
     if (item?.topic_count > 0) {
       return t("archive.metadata.topics", { count: item.topic_count })
+    }
+    if (item?.section_count > 0) {
+      return t("archive.metadata.sections", { count: item.section_count })
     }
     if (item?.field_count > 0) {
       const fieldText = t("archive.metadata.fields", { count: item.field_count })

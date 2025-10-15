@@ -174,7 +174,7 @@
     "checklistNamePlaceholder": "Digite o nome da lista de verificação...",
     "checklistDescriptionLabel": "Descrição",
     "checklistDescriptionPlaceholder": "Digite a descrição da lista de verificação para sugestões automáticas de perguntas (mínimo 10 caracteres)...",
-    "questions": "Perguntas",
+    "questions": "{{count}} questions",
     "suggest": "Sugerir",
     "suggesting": "Sugerindo...",
     "optimize": "Otimizar",
@@ -407,18 +407,21 @@
       "match": "Nenhum processamento de formulário anterior"
     },
     "metadata": {
-      "question": "pergunta",
-      "question_one": "pergunta",
-      "questions": "perguntas",
-      "topic": "tópico",
-      "topic_one": "tópico",
-      "topics": "tópicos",
-      "field": "campo",
-      "field_one": "campo",
-      "fields": "campos",
-      "document": "documento",
-      "document_one": "documento",
-      "documents": "documentos",
+      "question": "{{count}} pergunta",
+      "question_one": "{{count}} pergunta",
+      "questions": "{{count}} perguntas",
+      "topic": "{{count}} tópico",
+      "topic_one": "{{count}} tópico",
+      "topics": "{{count}} tópicos",
+      "section": "{{count}} seção",
+      "section_one": "{{count}} seção",
+      "sections": "{{count}} seções",
+      "field": "{{count}} campo",
+      "field_one": "{{count}} campo",
+      "fields": "{{count}} campos",
+      "document": "{{count}} documento",
+      "document_one": "{{count}} documento",
+      "documents": "{{count}} documentos",
       "digitized": "digitalizado",
       "handwritten": "manuscrito"
     },
@@ -444,7 +447,19 @@
       "evaluationSummary": "Resumo da Avaliação",
       "questionAnswerDetails": "Detalhes de Pergunta-Resposta",
       "summary": "Resumo",
-      "topicAnalysis": "Análise de Tópicos"
+      "topicAnalysis": "Análise de Tópicos",
+      "documentEvaluation": "Avaliação de Documento",
+      "generatedDocument": "Documento Gerado",
+      "documentComparison": "Comparação de Documento",
+      "matchingResults": "Resultados de Correspondência"
+    },
+    "labels": {
+      "questionsAndAnswers": "Perguntas e Respostas",
+      "reportSections": "Seções do Relatório",
+      "questionNumber": "Pergunta",
+      "topicLabel": "Tópico",
+      "withCitations": "com citações",
+      "sources": "fontes"
     }
   },
   "optimizeChecklistModal": {
