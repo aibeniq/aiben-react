@@ -13,6 +13,7 @@ import io
 import shutil
 from io import BytesIO
 from contextlib import contextmanager
+import gc
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
@@ -35,7 +36,6 @@ import hashlib
 
 from app.services.knowledgebases import KnowledgeBaseService
 from app.utils.memory_manager import MemoryManager
-from app.utils.streaming_file_handler import StreamingFileHandler
 
 from sqlalchemy.sql import func
 
