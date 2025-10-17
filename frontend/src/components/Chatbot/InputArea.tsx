@@ -48,7 +48,7 @@ const InputArea: React.FC<InputAreaProps> = ({
     const oversizedFiles = files.filter((file) => file.size > maxSize)
 
     if (oversizedFiles.length > 0) {
-      showErrorToast("Some files are too large. Maximum size is 10MB per file.")
+      showErrorToast(t("toast.filesTooLarge"))
       return
     }
 
@@ -60,9 +60,7 @@ const InputArea: React.FC<InputAreaProps> = ({
       setUploadedFiles(files)
       // Clear knowledge base selection when files are uploaded
       setSelectedKbId(null)
-      showSuccessToast(
-        `${files.length} file${files.length > 1 ? "s" : ""} selected successfully.`,
-      )
+      showSuccessToast(`${files.length} file${files.length > 1 ? "s" : ""} selected successfully.`)
     }
   }
 

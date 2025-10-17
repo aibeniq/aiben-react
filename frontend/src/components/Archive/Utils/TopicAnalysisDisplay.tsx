@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Badge, Box, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import type React from "react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FiChevronDown, FiChevronUp, FiExternalLink } from "react-icons/fi"
 import { cleanRTFFormatting } from "../../../utils/rtfCleaner"
 
@@ -27,9 +28,8 @@ interface TopicAnalysisDisplayProps {
   topicAnalysis: TopicAnalysis[]
 }
 
-const TopicAnalysisDisplay: React.FC<TopicAnalysisDisplayProps> = ({
-  topicAnalysis,
-}) => {
+const TopicAnalysisDisplay: React.FC<TopicAnalysisDisplayProps> = ({ topicAnalysis }) => {
+  const { t } = useTranslation()
   const [expandedCitations, setExpandedCitations] = useState<{
     [key: number]: boolean
   }>({})
@@ -46,16 +46,9 @@ const TopicAnalysisDisplay: React.FC<TopicAnalysisDisplayProps> = ({
   return (
     <Box mt={4}>
       {topicAnalysis.map((topic: TopicAnalysis, index: number) => (
-        <Box
-          key={index}
-          mb={4}
-          p={4}
-          borderWidth="1px"
-          borderRadius="md"
-          bg="bg"
-        >
+        <Box key={index} mb={4} p={4} borderWidth="1px" borderRadius="md" bg="bg">
           <Heading as="h3" size="md" mb={2}>
-            Topic: {topic.topic}
+            {t("common.topicLabel")} {topic.topic}
           </Heading>
           <Text mb={3}>{topic.analysis}</Text>
 
@@ -64,75 +57,57 @@ const TopicAnalysisDisplay: React.FC<TopicAnalysisDisplayProps> = ({
             <VStack align="stretch" mt={4} gap={3}>
               <HStack justify="space-between" align="center">
                 <Badge colorScheme="blue" variant="subtle">
-                  {topic.source_citations.length} Knowledge Base Reference
-                  {topic.source_citations.length !== 1 ? "s" : ""}
+                  {topic.source_citations.length}{" "}
+                  {topic.source_citations.length === 1
+                    ? t("common.knowledgeBaseReference")
+                    : t("common.knowledgeBaseReferences")}
                 </Badge>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => toggleCitations(index)}
-                >
-                  {expandedCitations[index] ? (
-                    <FiChevronUp />
-                  ) : (
-                    <FiChevronDown />
-                  )}
-                  {expandedCitations[index] ? " Hide" : " Show"} References
+                <Button size="sm" variant="ghost" onClick={() => toggleCitations(index)}>
+                  {expandedCitations[index] ? <FiChevronUp /> : <FiChevronDown />}
+                  {expandedCitations[index]
+                    ? t("common.hideReferences")
+                    : t("common.showReferences")}
                 </Button>
               </HStack>
 
               {expandedCitations[index] && (
                 <VStack align="stretch" gap={3} mt={2}>
-                  {topic.source_citations.map(
-                    (citation: SourceCitation, citationIndex: number) => (
-                      <Box
-                        key={citationIndex}
-                        p={3}
-                        bg="gray.50"
-                        borderRadius="md"
-                        borderLeft="4px solid"
-                        borderLeftColor="blue.400"
-                        _dark={{
-                          bg: "gray.700",
-                          borderLeftColor: "blue.300",
-                        }}
-                      >
-                        <HStack
-                          justify="space-between"
-                          align="flex-start"
-                          mb={2}
-                        >
-                          <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color="blue.600"
-                            _dark={{ color: "blue.300" }}
-                          >
-                            <FiExternalLink
-                              style={{ display: "inline", marginRight: "4px" }}
-                            />
-                            Reference {citationIndex + 1}
-                            {citation.metadata.source &&
-                              ` - ${citation.metadata.source}`}
-                            {citation.metadata.page &&
-                              ` (Page ${citation.metadata.page})`}
-                          </Text>
-                        </HStack>
+                  {topic.source_citations.map((citation: SourceCitation, citationIndex: number) => (
+                    <Box
+                      key={citationIndex}
+                      p={3}
+                      bg="gray.50"
+                      borderRadius="md"
+                      borderLeft="4px solid"
+                      borderLeftColor="blue.400"
+                      _dark={{
+                        bg: "gray.700",
+                        borderLeftColor: "blue.300",
+                      }}
+                    >
+                      <HStack justify="space-between" align="flex-start" mb={2}>
                         <Text
                           fontSize="sm"
-                          color="gray.700"
-                          _dark={{ color: "gray.300" }}
+                          fontWeight="semibold"
+                          color="blue.600"
+                          _dark={{ color: "blue.300" }}
                         >
-                          {cleanRTFFormatting(citation.content)}
+                          <FiExternalLink style={{ display: "inline", marginRight: "4px" }} />
+                          {t("common.referenceNumber", { number: citationIndex + 1 })}
+                          {citation.metadata.source && ` - ${citation.metadata.source}`}
+                          {citation.metadata.page && ` (Page ${citation.metadata.page})`}
                         </Text>
-                        {citation.metadata.chunk_index !== undefined && (
-                          <Badge size="sm" variant="outline" mt={2}>
-                            Chunk {citation.metadata.chunk_index}
-                          </Badge>
-                        )}
-                      </Box>
-                    ),
-                  )}
+                      </HStack>
+                      <Text fontSize="sm" color="gray.700" _dark={{ color: "gray.300" }}>
+                        {cleanRTFFormatting(citation.content)}
+                      </Text>
+                      {citation.metadata.chunk_index !== undefined && (
+                        <Badge size="sm" variant="outline" mt={2}>
+                          Chunk {citation.metadata.chunk_index}
+                        </Badge>
+                      )}
+                    </Box>
+                  ))}
                 </VStack>
               )}
             </VStack>
@@ -141,20 +116,14 @@ const TopicAnalysisDisplay: React.FC<TopicAnalysisDisplayProps> = ({
           {/* Display additional metadata if available */}
           {topic.chunk_count && topic.chunk_count > 1 && (
             <Badge variant="outline" mt={2}>
-              Processed in {topic.chunk_count} chunks
+              {t("common.processedInChunks", { count: topic.chunk_count })}
             </Badge>
           )}
 
           {topic.synthesis_error && (
-            <Box
-              mt={2}
-              p={2}
-              bg="red.50"
-              borderRadius="md"
-              borderLeft="4px solid red.400"
-            >
+            <Box mt={2} p={2} bg="red.50" borderRadius="md" borderLeft="4px solid red.400">
               <Text fontSize="sm" color="red.600">
-                Note: Synthesis error occurred - showing combined chunk results
+                {t("common.synthesisErrorNote")}
               </Text>
             </Box>
           )}

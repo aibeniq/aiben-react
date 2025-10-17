@@ -1,26 +1,10 @@
 import HelpTooltip from "@/components/ui/help-tooltip"
 import { Tooltip } from "@/components/ui/tooltip"
-import {
-  Box,
-  Card,
-  HStack,
-  Heading,
-  IconButton,
-  Spinner,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Card, HStack, Heading, IconButton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { Switch } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { useTranslation } from "react-i18next"
-import {
-  FiDatabase,
-  FiFileText,
-  FiThumbsDown,
-  FiThumbsUp,
-  FiTrash2,
-  FiUsers,
-} from "react-icons/fi"
+import { FiDatabase, FiFileText, FiThumbsDown, FiThumbsUp, FiTrash2, FiUsers } from "react-icons/fi"
 
 interface HistoryPanelProps {
   reportHistory: any[]
@@ -72,10 +56,7 @@ const HistoryPanel = ({
     }
 
     // Enhanced FormConnect display with actual filenames
-    if (
-      item?.digitized_files?.length > 0 ||
-      item?.handwritten_files?.length > 0
-    ) {
+    if (item?.digitized_files?.length > 0 || item?.handwritten_files?.length > 0) {
       const digitized = item.digitized_files || []
       const handwritten = item.handwritten_files || []
       const allFiles = [...digitized, ...handwritten]
@@ -100,8 +81,7 @@ const HistoryPanel = ({
       const digitizedCount = item.metadata.digitized_files?.length || 0
       const handwrittenCount = item.metadata.handwritten_files?.length || 0
       const parts = []
-      if (digitizedCount > 0)
-        parts.push(`${digitizedCount} ${t("archive.metadata.digitized")}`)
+      if (digitizedCount > 0) parts.push(`${digitizedCount} ${t("archive.metadata.digitized")}`)
       if (handwrittenCount > 0)
         parts.push(`${handwrittenCount} ${t("archive.metadata.handwritten")}`)
       return parts.join(", ")
@@ -140,11 +120,7 @@ const HistoryPanel = ({
           <Heading size="md">{t("archive.history")}</Heading>
           {onToggleShowAllUsers && (
             <Tooltip
-              content={
-                showAllUsers
-                  ? t("archive.viewingAllUsers")
-                  : t("archive.viewingMyHistory")
-              }
+              content={showAllUsers ? t("archive.viewingAllUsers") : t("archive.viewingMyHistory")}
             >
               <HStack gap={2}>
                 <HStack gap={1} align="center">
@@ -170,9 +146,7 @@ const HistoryPanel = ({
                       if (onToggleShowAllUsers) onToggleShowAllUsers()
                     }}
                   />
-                  <Switch.Control
-                    data-state={showAllUsers ? "checked" : "unchecked"}
-                  >
+                  <Switch.Control data-state={showAllUsers ? "checked" : "unchecked"}>
                     <Switch.Thumb />
                   </Switch.Control>
                 </Switch.Root>
@@ -197,21 +171,11 @@ const HistoryPanel = ({
                 borderWidth="2px"
                 borderRadius="md"
                 cursor="pointer"
-                bg={
-                  selectedHistoryReport?.id === item?.id ? "blue.50" : "surface"
-                }
-                borderColor={
-                  selectedHistoryReport?.id === item?.id ? "blue.300" : "border"
-                }
+                bg={selectedHistoryReport?.id === item?.id ? "blue.50" : "surface"}
+                borderColor={selectedHistoryReport?.id === item?.id ? "blue.300" : "border"}
                 _hover={{
-                  bg:
-                    selectedHistoryReport?.id === item?.id
-                      ? "blue.100"
-                      : "accent.subtle",
-                  borderColor:
-                    selectedHistoryReport?.id === item?.id
-                      ? "blue.400"
-                      : "border",
+                  bg: selectedHistoryReport?.id === item?.id ? "blue.100" : "accent.subtle",
+                  borderColor: selectedHistoryReport?.id === item?.id ? "blue.400" : "border",
                 }}
                 onClick={() => item?.id && onLoadReport(item.id)}
                 flexShrink={0}
@@ -241,13 +205,10 @@ const HistoryPanel = ({
                 )}
 
                 <VStack align="start" gap={1} width="100%">
-                  <HStack gap={1} width="100%" justify="space-between">
+                  <HStack gap={1} width="100%" justify="space-between" pr={6}>
                     <Text fontSize="xs" color="gray.500">
                       {item?.date_created
-                        ? format(
-                            new Date(item.date_created as string),
-                            "dd/MM/yyyy HH:mm",
-                          )
+                        ? format(new Date(item.date_created as string), "dd/MM/yyyy HH:mm")
                         : t("archive.unknownDate")}
                     </Text>
                     {getMetadata(item) && (
@@ -259,7 +220,7 @@ const HistoryPanel = ({
 
                   {/* Show user info when viewing all users */}
                   {showAllUsers && item?.user_name && (
-                    <HStack gap={1} width="100%">
+                    <HStack gap={1} width="100%" pl={8}>
                       <FiUsers size={12} />
                       <Text fontSize="xs" color="gray.500">
                         {item.user_name}
@@ -279,17 +240,14 @@ const HistoryPanel = ({
                     {item?.has_feedback && (
                       <Tooltip
                         content={
-                          typeof item.feedback === "object" &&
-                          item.feedback?.feedback === "correct"
+                          typeof item.feedback === "object" && item.feedback?.feedback === "correct"
                             ? t("archive.feedback.positive")
                             : typeof item.feedback === "object" &&
                                 item.feedback?.feedback === "incorrect"
                               ? t("archive.feedback.negative")
-                              : item.feedback === "correct" ||
-                                  item.feedback === "positive"
+                              : item.feedback === "correct" || item.feedback === "positive"
                                 ? t("archive.feedback.positive")
-                                : item.feedback === "incorrect" ||
-                                    item.feedback === "negative"
+                                : item.feedback === "incorrect" || item.feedback === "negative"
                                   ? t("archive.feedback.negative")
                                   : t("archive.feedback.hasFeedback")
                         }
@@ -300,11 +258,9 @@ const HistoryPanel = ({
                         ) : typeof item.feedback === "object" &&
                           item.feedback?.feedback === "incorrect" ? (
                           <FiThumbsDown size={14} color="red" />
-                        ) : item.feedback === "correct" ||
-                          item.feedback === "positive" ? (
+                        ) : item.feedback === "correct" || item.feedback === "positive" ? (
                           <FiThumbsUp size={14} color="green" />
-                        ) : item.feedback === "incorrect" ||
-                          item.feedback === "negative" ? (
+                        ) : item.feedback === "incorrect" || item.feedback === "negative" ? (
                           <FiThumbsDown size={14} color="red" />
                         ) : (
                           <FiThumbsUp size={14} color="green" opacity={0.7} />
@@ -317,14 +273,11 @@ const HistoryPanel = ({
                     <HStack gap={1} width="100%">
                       <FiDatabase size={12} color="gray" />
                       {/* Add tooltip for FormConnect files when there are many */}
-                      {item?.digitized_files?.length > 0 ||
-                      item?.handwritten_files?.length > 0 ? (
+                      {item?.digitized_files?.length > 0 || item?.handwritten_files?.length > 0 ? (
                         <Tooltip
                           content={
-                            [
-                              ...(item.digitized_files || []),
-                              ...(item.handwritten_files || []),
-                            ].length > 4
+                            [...(item.digitized_files || []), ...(item.handwritten_files || [])]
+                              .length > 4
                               ? [
                                   ...(item.digitized_files || []),
                                   ...(item.handwritten_files || []),

@@ -1,8 +1,4 @@
-import {
-  type KnowledgeBasePublic,
-  type ReportGenieOutline,
-  ReportgenieService,
-} from "@/client"
+import { type KnowledgeBasePublic, type ReportGenieOutline, ReportgenieService } from "@/client"
 import SearchModeToggle from "@/components/Common/SearchModeToggle"
 import SourceLink from "@/components/Common/SourceLink"
 import FeedbackButtons from "@/components/Feedback/FeedbackButtons"
@@ -29,13 +25,7 @@ import { useMutation } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import {
-  FiCheck,
-  FiCopy,
-  FiDatabase,
-  FiFileText,
-  FiTrash2,
-} from "react-icons/fi"
+import { FiCheck, FiCopy, FiDatabase, FiFileText, FiTrash2 } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import KnowledgeBaseSelectionModal from "../../components/Common/KnowledgeBaseSelectionModal"
@@ -71,19 +61,18 @@ const ReportGenie = () => {
   const hasHandledCompletionRef = useRef(false)
 
   // Initialize form state from persisted inputs or defaults
-  const [selectedKnowledgeBase, setSelectedKnowledgeBase] =
-    useState<KnowledgeBasePublic | null>(
-      generateInputs?.selectedKnowledgeBase || null,
-    )
-  const { knowledgeBases, showAllUsers, toggleShowAllUsers } =
-    useKnowledgeBases() // Respect All Users toggle state
+  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBasePublic | null>(
+    generateInputs?.selectedKnowledgeBase || null,
+  )
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases() // Respect All Users toggle state
   const { registerOperation } = useOperationCancellation()
 
   // Outline content state
   const [sections, setSections] = useState(generateInputs?.sections || "")
   const [outlines, setOutlines] = useState<ReportGenieOutline[]>([])
-  const [selectedOutline, setSelectedOutline] =
-    useState<ReportGenieOutline | null>(generateInputs?.selectedOutline || null)
+  const [selectedOutline, setSelectedOutline] = useState<ReportGenieOutline | null>(
+    generateInputs?.selectedOutline || null,
+  )
 
   // Loading state
   const [loading, setLoading] = useState(false)
@@ -100,15 +89,10 @@ const ReportGenie = () => {
   )
 
   // State to track which citations are expanded - using object instead of Set
-  const [expandedCitations, setExpandedCitations] = useState<
-    Record<string, boolean>
-  >({})
+  const [expandedCitations, setExpandedCitations] = useState<Record<string, boolean>>({})
 
   // Function to toggle citation expansion
-  const toggleCitationExpansion = (
-    sectionIndex: number,
-    citationIndex: number,
-  ) => {
+  const toggleCitationExpansion = (sectionIndex: number, citationIndex: number) => {
     const citationKey = `${sectionIndex}-${citationIndex}`
     setExpandedCitations((prev) => ({
       ...prev,
@@ -125,7 +109,7 @@ const ReportGenie = () => {
   // Handle feedback submission
   const handleFeedbackSubmitted = (type: string) => {
     console.log("Feedback submitted for generate result:", type)
-    showSuccessToast(`Thank you for marking this response as ${type}!`)
+    showSuccessToast(t("toast.feedbackMarked", { type }))
   }
 
   // Handle progress completion
@@ -229,10 +213,7 @@ const ReportGenie = () => {
       console.log("Received DOCX response:", response)
       console.log("Response type:", typeof response)
       console.log("Response instanceof Blob:", response instanceof Blob)
-      console.log(
-        "Response instanceof ArrayBuffer:",
-        response instanceof ArrayBuffer,
-      )
+      console.log("Response instanceof ArrayBuffer:", response instanceof ArrayBuffer)
 
       let blob
       if (response instanceof Blob) {
@@ -346,7 +327,7 @@ const ReportGenie = () => {
       setOutlines(data || [])
     } catch (error) {
       console.error("Error fetching outlines:", error)
-      showErrorToast("Failed to fetch outlines")
+      showErrorToast(t("toast.fetchOutlinesFailed"))
     }
   }
 
@@ -356,19 +337,14 @@ const ReportGenie = () => {
 
     if (source.includes("/tmp/") || source.includes("\\tmp\\")) {
       const filename = source.split("/").pop() || source.split("\\").pop() || ""
-      return filename.includes("_")
-        ? filename.substring(filename.indexOf("_") + 1)
-        : filename
+      return filename.includes("_") ? filename.substring(filename.indexOf("_") + 1) : filename
     }
 
     return source
   }
 
   // Helper function to format source display with page number
-  const formatSourceWithPage = (
-    source: string,
-    page?: number | string,
-  ): string => {
+  const formatSourceWithPage = (source: string, page?: number | string): string => {
     const fileName = getDisplayFileName(source)
     if (page && page !== "" && page !== 0) {
       return `${fileName} (Page ${page})`
@@ -403,10 +379,7 @@ const ReportGenie = () => {
         knowledge_base_id: data.knowledgeBaseId,
         sections: data.sections,
         outline_id: data.outlineId || "",
-        search_mode:
-          data.searchMode === "full_scan"
-            ? "full_text"
-            : data.searchMode || "vector",
+        search_mode: data.searchMode === "full_scan" ? "full_text" : data.searchMode || "vector",
         custom_instructions: data.customInstructions || undefined,
         task_id: newTaskId,
       }
@@ -510,30 +483,15 @@ const ReportGenie = () => {
     tbody: (props: any) => <Box as="tbody" {...props} />,
     tr: (props: any) => <Box as="tr" {...props} />,
     th: (props: any) => (
-      <Box
-        as="th"
-        p={4}
-        textAlign="left"
-        fontWeight="bold"
-        borderBottomWidth="1px"
-        {...props}
-      />
+      <Box as="th" p={4} textAlign="left" fontWeight="bold" borderBottomWidth="1px" {...props} />
     ),
-    td: (props: any) => (
-      <Box as="td" p={4} borderBottomWidth="1px" {...props} />
-    ),
+    td: (props: any) => <Box as="td" p={4} borderBottomWidth="1px" {...props} />,
   }
 
   return (
     <Container maxW="container.xl" py={8}>
       {/* Tab description */}
-      <Text
-        fontSize="sm"
-        color="gray.500"
-        textAlign="center"
-        mb={4}
-        fontStyle="italic"
-      >
+      <Text fontSize="sm" color="gray.500" textAlign="center" mb={4} fontStyle="italic">
         {t("generate.pageDescription")}
       </Text>
 
@@ -555,20 +513,11 @@ const ReportGenie = () => {
           p={6}
         >
           <VStack gap={4} width="80%" maxWidth="400px">
-            <Text
-              color="white"
-              fontSize="lg"
-              fontWeight="medium"
-              textAlign="center"
-            >
+            <Text color="white" fontSize="lg" fontWeight="medium" textAlign="center">
               {progress.message || t("generate.generatingDocument")}
             </Text>
             <Box width="100%">
-              <Progress.Root
-                value={progress.percentage}
-                size="lg"
-                colorPalette="blue"
-              >
+              <Progress.Root value={progress.percentage} size="lg" colorPalette="blue">
                 <Progress.Track>
                   <Progress.Range />
                 </Progress.Track>
@@ -602,11 +551,7 @@ const ReportGenie = () => {
 
             <SelectionCard
               title={t("generate.documentOutlineTitle")}
-              description={
-                selectedOutline
-                  ? selectedOutline.name
-                  : t("generate.clickToSelect")
-              }
+              description={selectedOutline ? selectedOutline.name : t("generate.clickToSelect")}
               icon={<FiFileText size={24} />}
               isSelected={!!selectedOutline}
               onClick={() => setShowOutlineModal(true)}
@@ -682,15 +627,9 @@ const ReportGenie = () => {
         <VStack
           align="stretch"
           mb={4}
-          opacity={
-            (!selectedKnowledgeBase || !selectedOutline) && !generateResult
-              ? 0.3
-              : 1
-          }
+          opacity={(!selectedKnowledgeBase || !selectedOutline) && !generateResult ? 0.3 : 1}
           pointerEvents={
-            (!selectedKnowledgeBase || !selectedOutline) && !generateResult
-              ? "none"
-              : "auto"
+            (!selectedKnowledgeBase || !selectedOutline) && !generateResult ? "none" : "auto"
           }
         >
           <HStack gap={4} justify="center">
@@ -720,10 +659,7 @@ const ReportGenie = () => {
             flexDirection={{ base: "column", md: "row" }}
             gap={4}
           >
-            <Box
-              flex="1"
-              width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}
-            >
+            <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
               <HStack justify="space-between" align="center" mb={4}>
                 <Heading size="md">{t("generate.results")}</Heading>
 
@@ -736,9 +672,7 @@ const ReportGenie = () => {
                       colorPalette={copySuccess ? "green" : "blue"}
                     >
                       {copySuccess ? <FiCheck color="green" /> : <FiCopy />}
-                      {copySuccess
-                        ? t("generate.copied")
-                        : t("generate.copyText")}
+                      {copySuccess ? t("generate.copied") : t("generate.copyText")}
                     </Button>
 
                     <DownloadButton
@@ -798,10 +732,7 @@ const ReportGenie = () => {
                 )}
                 {generateResult ? (
                   <>
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={components}
-                    >
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
                       {generateResult.full_report}
                     </ReactMarkdown>
 
@@ -827,9 +758,7 @@ const ReportGenie = () => {
                               size="sm"
                               mb={3}
                               onClick={() =>
-                                setExpandedSection(
-                                  expandedSection === index ? null : index,
-                                )
+                                setExpandedSection(expandedSection === index ? null : index)
                               }
                               cursor="pointer"
                               display="flex"
@@ -841,9 +770,7 @@ const ReportGenie = () => {
                                   as="span"
                                   mr={2}
                                   transform={
-                                    expandedSection === index
-                                      ? "rotate(90deg)"
-                                      : "rotate(0deg)"
+                                    expandedSection === index ? "rotate(90deg)" : "rotate(0deg)"
                                   }
                                   transition="transform 0.2s"
                                 >
@@ -892,65 +819,39 @@ const ReportGenie = () => {
 
                             {expandedSection === index && (
                               <>
-                                <Box
-                                  mb={4}
-                                  p={3}
-                                  borderLeft="4px solid"
-                                  borderColor="blue.200"
-                                >
-                                  <Text whiteSpace="pre-wrap">
-                                    {section.content}
-                                  </Text>
+                                <Box mb={4} p={3} borderLeft="4px solid" borderColor="blue.200">
+                                  <Text whiteSpace="pre-wrap">{section.content}</Text>
                                 </Box>
 
                                 {section.source_citations &&
                                   section.source_citations.length > 0 &&
                                   section.consult_documents !== false && (
                                     <Accordion.Root multiple>
-                                      <Accordion.Item
-                                        value={`citations-${index}`}
-                                      >
+                                      <Accordion.Item value={`citations-${index}`}>
                                         <h2>
                                           <Accordion.ItemTrigger
                                             bg="surface"
                                             _hover={{ bg: "panel" }}
                                           >
-                                            <Box
-                                              flex="1"
-                                              textAlign="left"
-                                              fontWeight="medium"
-                                            >
+                                            <Box flex="1" textAlign="left" fontWeight="medium">
                                               <HStack>
                                                 <FiFileText />
                                                 <Text>
                                                   View Source Citations (
-                                                  {
-                                                    section.source_citations
-                                                      .length
-                                                  }
-                                                  )
+                                                  {section.source_citations.length})
                                                 </Text>
                                               </HStack>
                                             </Box>
                                           </Accordion.ItemTrigger>
                                         </h2>
-                                        <Accordion.ItemContent
-                                          pb={4}
-                                          bg="surface"
-                                        >
+                                        <Accordion.ItemContent pb={4} bg="surface">
                                           {section.source_citations.map(
                                             (citation: any, cIndex: number) => {
-                                              const isExpanded =
-                                                isCitationExpanded(
-                                                  index,
-                                                  cIndex,
-                                                )
-                                              const citationText =
-                                                cleanRTFFormatting(
-                                                  citation.content,
-                                                )
-                                              const shouldTruncate =
-                                                citationText.length > 300
+                                              const isExpanded = isCitationExpanded(index, cIndex)
+                                              const citationText = cleanRTFFormatting(
+                                                citation.content,
+                                              )
+                                              const shouldTruncate = citationText.length > 300
                                               const displayText =
                                                 shouldTruncate && !isExpanded
                                                   ? `${citationText.substring(0, 300)}...`
@@ -965,28 +866,20 @@ const ReportGenie = () => {
                                                   borderRadius="md"
                                                   bg="bg"
                                                 >
-                                                  {citation.metadata
-                                                    ?.source_data_id ? (
+                                                  {citation.metadata?.source_data_id ? (
                                                     <SourceLink
-                                                      sourceId={
-                                                        citation.metadata
-                                                          .source_data_id
-                                                      }
+                                                      sourceId={citation.metadata.source_data_id}
                                                       fileName={formatSourceWithPage(
-                                                        citation.metadata
-                                                          .source,
+                                                        citation.metadata.source,
                                                         citation.metadata.page,
                                                       )}
                                                       ml={1}
                                                       fontWeight="normal"
                                                       color="blue.600"
                                                       useModal={true}
-                                                      highlightSnippet={
-                                                        citationText
-                                                      }
+                                                      highlightSnippet={citationText}
                                                     />
-                                                  ) : citation.metadata
-                                                      ?.source &&
+                                                  ) : citation.metadata?.source &&
                                                     (citation.metadata.source
                                                       .toLowerCase()
                                                       .endsWith(".docx") ||
@@ -996,17 +889,14 @@ const ReportGenie = () => {
                                                     <SourceLink
                                                       sourceId="" // Empty sourceId, will be handled by filename fallback
                                                       fileName={formatSourceWithPage(
-                                                        citation.metadata
-                                                          .source,
+                                                        citation.metadata.source,
                                                         citation.metadata.page,
                                                       )}
                                                       ml={1}
                                                       fontWeight="normal"
                                                       color="blue.600"
                                                       useModal={true}
-                                                      highlightSnippet={
-                                                        citationText
-                                                      }
+                                                      highlightSnippet={citationText}
                                                     />
                                                   ) : (
                                                     <Text
@@ -1016,8 +906,7 @@ const ReportGenie = () => {
                                                       color="blue.600"
                                                     >
                                                       {formatSourceWithPage(
-                                                        citation.metadata
-                                                          ?.source || "Unknown",
+                                                        citation.metadata?.source || "Unknown",
                                                         citation.metadata?.page,
                                                       )}
                                                     </Text>
@@ -1038,16 +927,13 @@ const ReportGenie = () => {
                                                       variant="ghost"
                                                       mt={1}
                                                       onClick={() =>
-                                                        toggleCitationExpansion(
-                                                          index,
-                                                          cIndex,
-                                                        )
+                                                        toggleCitationExpansion(index, cIndex)
                                                       }
                                                       colorPalette="blue"
                                                     >
                                                       {isExpanded
-                                                        ? "Show Less"
-                                                        : "Read More"}
+                                                        ? t("common.showLess")
+                                                        : t("common.readMore")}
                                                     </Button>
                                                   )}
                                                 </Box>
@@ -1085,9 +971,7 @@ const ReportGenie = () => {
                     )}
                   </>
                 ) : (
-                  <Text color="gray.500">
-                    {t("generate.resultsPlaceholder")}
-                  </Text>
+                  <Text color="gray.500">{t("generate.resultsPlaceholder")}</Text>
                 )}
               </Box>
             </Box>

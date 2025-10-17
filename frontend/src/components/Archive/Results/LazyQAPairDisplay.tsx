@@ -1,6 +1,7 @@
 import { Box, Button, Spinner, Text } from "@chakra-ui/react"
 import { useState } from "react"
 import type React from "react"
+import { useTranslation } from "react-i18next"
 import { VeradocService } from "../../../client"
 import useCustomToast from "../../../hooks/useCustomToast"
 import QAPairDisplay from "../Utils/QAPairDisplay"
@@ -15,10 +16,8 @@ interface LazyQAPairDisplayProps {
   qaPairSummary: QaPairSummary
 }
 
-const LazyQAPairDisplay: React.FC<LazyQAPairDisplayProps> = ({
-  reportId,
-  qaPairSummary,
-}) => {
+const LazyQAPairDisplay: React.FC<LazyQAPairDisplayProps> = ({ reportId, qaPairSummary }) => {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [qaPairDetail, setQaPairDetail] = useState<any>(null)
@@ -67,7 +66,8 @@ const LazyQAPairDisplay: React.FC<LazyQAPairDisplayProps> = ({
       >
         <Box flex="1" textAlign="left">
           <Text>
-            Question {qaPairSummary.index + 1}: {qaPairSummary.question}
+            {t("common.questionNumber", { number: qaPairSummary.index + 1 })}{" "}
+            {qaPairSummary.question}
           </Text>
         </Box>
         {isLoading && <Spinner size="sm" ml={2} />}

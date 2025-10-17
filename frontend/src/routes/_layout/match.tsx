@@ -5,16 +5,7 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { useFormconnectProgress } from "@/hooks/useFormconnectProgress"
 import { useOperationCancellation } from "@/hooks/useOperationCancellation"
 
-import {
-  Box,
-  Button,
-  Container,
-  HStack,
-  Heading,
-  Progress,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Button, Container, HStack, Heading, Progress, Text, VStack } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
@@ -35,18 +26,11 @@ const FormConnect = () => {
   const { t, ready } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { registerOperation } = useOperationCancellation()
-  const {
-    matchResult,
-    setMatchResult,
-    matchInputs,
-    setMatchInputs,
-    clearMatchResult,
-  } = useResults()
+  const { matchResult, setMatchResult, matchInputs, setMatchInputs, clearMatchResult } =
+    useResults()
 
   // Initialize form state from persisted inputs or defaults
-  const [fileItems, setFileItems] = useState<FileItem[]>(
-    matchInputs?.fileItems || [],
-  )
+  const [fileItems, setFileItems] = useState<FileItem[]>(matchInputs?.fileItems || [])
   const [forms, setForms] = useState<FormConnectForm[]>([])
   const [selectedForm, setSelectedForm] = useState<FormConnectForm | null>(
     matchInputs?.selectedForm || null,
@@ -74,7 +58,7 @@ const FormConnect = () => {
   // Handle feedback submission
   const handleFeedbackSubmitted = (type: string) => {
     console.log("Feedback submitted for match result:", type)
-    showSuccessToast(`Thank you for marking this response as ${type}!`)
+    showSuccessToast(t("toast.feedbackMarked", { type }))
   }
 
   // Handle progress completion
@@ -148,10 +132,10 @@ const FormConnect = () => {
       setTimeout(() => {
         setCopySuccess(false)
       }, 2000)
-      showSuccessToast("Results copied to clipboard")
+      showSuccessToast(t("toast.resultsCopied"))
     } catch (err) {
       console.error("Failed to copy results:", err)
-      showSuccessToast("Failed to copy results to clipboard")
+      showErrorToast(t("toast.resultsCopyFailed"))
     }
   }
 
@@ -194,10 +178,7 @@ const FormConnect = () => {
       a.href = url
       a.download = `FormConnect_Results_${timestamp}.docx`
 
-      console.log(
-        "DOCX download filename:",
-        `FormConnect_Results_${timestamp}.docx`,
-      )
+      console.log("DOCX download filename:", `FormConnect_Results_${timestamp}.docx`)
       console.log("About to trigger DOCX download...")
 
       document.body.appendChild(a)
@@ -206,7 +187,7 @@ const FormConnect = () => {
       document.body.removeChild(a)
 
       console.log("DOCX download triggered successfully")
-      showSuccessToast("Results downloaded successfully")
+      showSuccessToast(t("toast.resultsDownloaded"))
     } catch (err: any) {
       console.error("Failed to download results:", err)
       console.error("Error details:", {
@@ -215,9 +196,7 @@ const FormConnect = () => {
         name: err instanceof Error ? err.name : undefined,
       })
 
-      showSuccessToast(
-        `Failed to download results: ${err.message || "Unknown error"}`,
-      )
+      showErrorToast(t("toast.resultsDownloadFailed", { error: err.message || "Unknown error" }))
     } finally {
       console.log("DOCX download process completed")
       setLoadingDownload(false)
@@ -259,10 +238,7 @@ const FormConnect = () => {
       a.href = url
       a.download = `FormConnect_Results_${timestamp}.csv`
 
-      console.log(
-        "CSV download filename:",
-        `FormConnect_Results_${timestamp}.csv`,
-      )
+      console.log("CSV download filename:", `FormConnect_Results_${timestamp}.csv`)
       console.log("About to trigger CSV download...")
 
       document.body.appendChild(a)
@@ -271,7 +247,7 @@ const FormConnect = () => {
       document.body.removeChild(a)
 
       console.log("CSV download triggered successfully")
-      showSuccessToast("CSV downloaded successfully")
+      showSuccessToast(t("toast.csvDownloaded"))
     } catch (err: any) {
       console.error("Failed to download CSV:", err)
       console.error("Error details:", {
@@ -280,9 +256,7 @@ const FormConnect = () => {
         name: err instanceof Error ? err.name : undefined,
       })
 
-      showSuccessToast(
-        `Failed to download CSV: ${err.message || "Unknown error"}`,
-      )
+      showSuccessToast(`Failed to download CSV: ${err.message || "Unknown error"}`)
     } finally {
       console.log("CSV download process completed")
       setLoadingCsvDownload(false)
@@ -352,7 +326,7 @@ const FormConnect = () => {
       // Check if the request was cancelled
       if (data.results?.status === "cancelled") {
         console.log("Match operation was cancelled")
-        showErrorToast("Request cancelled")
+        showErrorToast(t("toast.requestCancelled"))
         return
       }
 
@@ -418,13 +392,7 @@ const FormConnect = () => {
   return (
     <Container maxW="container.xl" py={8}>
       {/* Tab description */}
-      <Text
-        fontSize="sm"
-        color="gray.500"
-        textAlign="center"
-        mb={4}
-        fontStyle="italic"
-      >
+      <Text fontSize="sm" color="gray.500" textAlign="center" mb={4} fontStyle="italic">
         {t("match.subtitle")}
       </Text>
 
@@ -446,20 +414,11 @@ const FormConnect = () => {
           p={6}
         >
           <VStack gap={4} width="80%" maxWidth="400px">
-            <Text
-              color="white"
-              fontSize="lg"
-              fontWeight="medium"
-              textAlign="center"
-            >
+            <Text color="white" fontSize="lg" fontWeight="medium" textAlign="center">
               {progress.message || t("match.processing")}
             </Text>
             <Box width="100%">
-              <Progress.Root
-                value={progress.percentage}
-                size="lg"
-                colorPalette="blue"
-              >
+              <Progress.Root value={progress.percentage} size="lg" colorPalette="blue">
                 <Progress.Track>
                   <Progress.Range />
                 </Progress.Track>
@@ -469,9 +428,7 @@ const FormConnect = () => {
               </Text>
             </Box>
             <Text color="gray.300" fontSize="sm" textAlign="center">
-              {ready
-                ? t("match.pleaseWait")
-                : "Please wait while we process your documents"}
+              {ready ? t("match.pleaseWait") : "Please wait while we process your documents"}
             </Text>
           </VStack>
         </Box>
@@ -482,20 +439,14 @@ const FormConnect = () => {
           <VStack gap={4} align="stretch" flex={1}>
             <SelectionCard
               title={t("match.sourceDocument")}
-              description={
-                selectedForm ? selectedForm.name : t("match.pleaseSelect")
-              }
+              description={selectedForm ? selectedForm.name : t("match.pleaseSelect")}
               icon={<FiFileText size={24} />}
               isSelected={!!selectedForm}
               onClick={() => setShowFormModal(true)}
               helpKey="formTemplate"
             />
 
-            <FileUpload
-              files={fileItems}
-              onFilesChange={setFileItems}
-              helpKey="fileUpload"
-            />
+            <FileUpload files={fileItems} onFilesChange={setFileItems} helpKey="fileUpload" />
 
             <SearchModeToggle
               searchMode={searchMode}
@@ -561,10 +512,7 @@ const FormConnect = () => {
             flexDirection={{ base: "column", md: "row" }}
             gap={4}
           >
-            <Box
-              flex="1"
-              width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}
-            >
+            <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
               <Heading size="md" mb={4}>
                 {t("ui.results")}
               </Heading>
@@ -624,9 +572,7 @@ const FormConnect = () => {
                       </Button>
                     </HStack>
 
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {matchResult.results}
-                    </ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{matchResult.results}</ReactMarkdown>
 
                     {/* Add feedback buttons for the match result */}
                     {matchResult.interactionId && (
@@ -648,9 +594,7 @@ const FormConnect = () => {
                     )}
                   </>
                 ) : (
-                  <Text color="gray.500">
-                    {t("match.selectDocumentToMatch")}
-                  </Text>
+                  <Text color="gray.500">{t("match.selectDocumentToMatch")}</Text>
                 )}
               </Box>
             </Box>

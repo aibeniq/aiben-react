@@ -1,26 +1,10 @@
-import {
-  Box,
-  Button,
-  Container,
-  HStack,
-  Heading,
-  Progress,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Button, Container, HStack, Heading, Progress, Text, VStack } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 import { useDropzone } from "react-dropzone"
 import { useTranslation } from "react-i18next"
-import {
-  FiCheck,
-  FiCopy,
-  FiFile,
-  FiFileText,
-  FiTrash2,
-  FiUpload,
-} from "react-icons/fi"
+import { FiCheck, FiCopy, FiFile, FiFileText, FiTrash2, FiUpload } from "react-icons/fi"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
@@ -41,13 +25,8 @@ const TwinCheck = () => {
   const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { registerOperation } = useOperationCancellation()
-  const {
-    compareResult,
-    setCompareResult,
-    compareInputs,
-    setCompareInputs,
-    clearCompareResult,
-  } = useResults()
+  const { compareResult, setCompareResult, compareInputs, setCompareInputs, clearCompareResult } =
+    useResults()
 
   const [copySuccess, setCopySuccess] = useState(false)
   const [loadingDownload, setLoadingDownload] = useState(false)
@@ -57,20 +36,15 @@ const TwinCheck = () => {
   const [showTopicListModal, setShowTopicListModal] = useState(false)
 
   // Initialize form state from persisted inputs or defaults
-  const [document1, setDocument1] = useState<File | null>(
-    compareInputs?.document1 || null,
-  )
-  const [document2, setDocument2] = useState<File | null>(
-    compareInputs?.document2 || null,
-  )
+  const [document1, setDocument1] = useState<File | null>(compareInputs?.document1 || null)
+  const [document2, setDocument2] = useState<File | null>(compareInputs?.document2 || null)
 
   // Topics state
   const [topics, setTopics] = useState(compareInputs?.topics || "")
   const [comparisons, setComparisons] = useState<TwinCheckTopicList[]>([])
-  const [selectedComparison, setSelectedComparison] =
-    useState<TwinCheckTopicList | null>(
-      compareInputs?.selectedComparison || null,
-    )
+  const [selectedComparison, setSelectedComparison] = useState<TwinCheckTopicList | null>(
+    compareInputs?.selectedComparison || null,
+  )
 
   // Loading state
   const [loading, setLoading] = useState(false)
@@ -85,7 +59,7 @@ const TwinCheck = () => {
   // Handle feedback submission
   const handleFeedbackSubmitted = (type: string) => {
     console.log("Feedback submitted for compare result:", type)
-    showSuccessToast(`Thank you for marking this response as ${type}!`)
+    showSuccessToast(t("toast.feedbackMarked", { type }))
   }
 
   // Handle progress completion
@@ -171,10 +145,10 @@ const TwinCheck = () => {
         setCopySuccess(false)
       }, 2000)
 
-      showSuccessToast("Comparison results copied to clipboard")
+      showSuccessToast(t("toast.comparisonCopied"))
     } catch (err) {
       console.error("Failed to copy report:", err)
-      showErrorToast("Failed to copy report to clipboard")
+      showErrorToast(t("toast.copyFailed"))
     }
   }
 
@@ -198,10 +172,7 @@ const TwinCheck = () => {
       console.log("Received DOCX response:", response)
       console.log("Response type:", typeof response)
       console.log("Response instanceof Blob:", response instanceof Blob)
-      console.log(
-        "Response instanceof ArrayBuffer:",
-        response instanceof ArrayBuffer,
-      )
+      console.log("Response instanceof ArrayBuffer:", response instanceof ArrayBuffer)
 
       let blob
       if (response instanceof Blob) {
@@ -240,7 +211,7 @@ const TwinCheck = () => {
       document.body.removeChild(a)
 
       console.log("DOCX download triggered successfully")
-      showSuccessToast("Comparison downloaded successfully")
+      showSuccessToast(t("toast.comparisonDownloaded"))
     } catch (err: any) {
       console.error("Failed to download report:", err)
       console.error("Error details:", {
@@ -249,9 +220,7 @@ const TwinCheck = () => {
         name: err instanceof Error ? err.name : undefined,
       })
 
-      showErrorToast(
-        `Failed to download report: ${err.message || "Unknown error"}`,
-      )
+      showErrorToast(t("toast.comparisonDownloadFailed", { error: err.message || "Unknown error" }))
     } finally {
       console.log("DOCX download process completed")
       setLoadingDownload(false)
@@ -301,10 +270,7 @@ const TwinCheck = () => {
       a.href = url
       a.download = `TwinCheck_Comparison_${timestamp}.csv`
 
-      console.log(
-        "CSV download filename:",
-        `TwinCheck_Comparison_${timestamp}.csv`,
-      )
+      console.log("CSV download filename:", `TwinCheck_Comparison_${timestamp}.csv`)
       console.log("About to trigger CSV download...")
 
       document.body.appendChild(a)
@@ -313,7 +279,7 @@ const TwinCheck = () => {
       document.body.removeChild(a)
 
       console.log("CSV download triggered successfully")
-      showSuccessToast("CSV downloaded successfully")
+      showSuccessToast(t("toast.csvDownloaded"))
     } catch (err: any) {
       console.error("Failed to download CSV:", err)
       console.error("Error details:", {
@@ -322,9 +288,7 @@ const TwinCheck = () => {
         name: err instanceof Error ? err.name : undefined,
       })
 
-      showErrorToast(
-        `Failed to download CSV: ${err.message || "Unknown error"}`,
-      )
+      showErrorToast(t("toast.csvDownloadFailed", { error: err.message || "Unknown error" }))
     } finally {
       console.log("CSV download process completed")
       setLoadingCsvDownload(false)
@@ -338,7 +302,7 @@ const TwinCheck = () => {
       setComparisons(data || [])
     } catch (error) {
       console.error("Error fetching comparisons:", error)
-      showErrorToast("Failed to fetch topic lists")
+      showErrorToast(t("toast.fetchTopicListsFailed"))
     }
   }
 
@@ -362,19 +326,13 @@ const TwinCheck = () => {
         try {
           // Prefer generated SDK method if available
           // @ts-ignore
-          if (
-            typeof (TwincheckService as any).createOptimizeOutlineTask ===
-            "function"
-          ) {
+          if (typeof (TwincheckService as any).createOptimizeOutlineTask === "function") {
             // @ts-ignore
             return await (TwincheckService as any).createOptimizeOutlineTask()
           }
         } catch (err) {
           // ignore and fallback to direct authenticated request
-          console.warn(
-            "TwincheckService.createOptimizeOutlineTask not available or failed:",
-            err,
-          )
+          console.warn("TwincheckService.createOptimizeOutlineTask not available or failed:", err)
         }
 
         // Fallback: call the backend using the generated request helper with auth
@@ -387,9 +345,7 @@ const TwinCheck = () => {
       })()
 
       const newTaskId =
-        (taskResponse as any).task_id ||
-        (taskResponse as any).taskId ||
-        (taskResponse as any).id
+        (taskResponse as any).task_id || (taskResponse as any).taskId || (taskResponse as any).id
       console.log("📋 Generated compare task_id:", newTaskId)
       setTaskId(newTaskId)
 
@@ -413,7 +369,7 @@ const TwinCheck = () => {
       // Check if the request was cancelled
       if (data.results.status === "cancelled") {
         console.log("Compare operation was cancelled")
-        showErrorToast("Request cancelled")
+        showErrorToast(t("toast.requestCancelled"))
         return
       }
 
@@ -450,7 +406,7 @@ const TwinCheck = () => {
     }
 
     if (!topics.trim()) {
-      showErrorToast("Please enter at least one comparison topic")
+      showErrorToast(t("toast.enterComparisonTopic"))
       return
     }
 
@@ -482,30 +438,15 @@ const TwinCheck = () => {
     tbody: (props: any) => <Box as="tbody" {...props} />,
     tr: (props: any) => <Box as="tr" {...props} />,
     th: (props: any) => (
-      <Box
-        as="th"
-        p={4}
-        textAlign="left"
-        fontWeight="bold"
-        borderBottomWidth="1px"
-        {...props}
-      />
+      <Box as="th" p={4} textAlign="left" fontWeight="bold" borderBottomWidth="1px" {...props} />
     ),
-    td: (props: any) => (
-      <Box as="td" p={4} borderBottomWidth="1px" {...props} />
-    ),
+    td: (props: any) => <Box as="td" p={4} borderBottomWidth="1px" {...props} />,
   }
 
   return (
     <Container maxW="container.xl" py={8}>
       {/* Tab description */}
-      <Text
-        fontSize="sm"
-        color="gray.500"
-        textAlign="center"
-        mb={4}
-        fontStyle="italic"
-      >
+      <Text fontSize="sm" color="gray.500" textAlign="center" mb={4} fontStyle="italic">
         {t("compare.subtitle")}
       </Text>
 
@@ -527,20 +468,11 @@ const TwinCheck = () => {
           p={6}
         >
           <VStack gap={4} width="80%" maxWidth="400px">
-            <Text
-              color="white"
-              fontSize="lg"
-              fontWeight="medium"
-              textAlign="center"
-            >
+            <Text color="white" fontSize="lg" fontWeight="medium" textAlign="center">
               {progress.message || t("compare.loadingComparison")}
             </Text>
             <Box width="100%">
-              <Progress.Root
-                value={progress.percentage}
-                size="lg"
-                colorPalette="blue"
-              >
+              <Progress.Root value={progress.percentage} size="lg" colorPalette="blue">
                 <Progress.Track>
                   <Progress.Range />
                 </Progress.Track>
@@ -561,11 +493,7 @@ const TwinCheck = () => {
           <VStack gap={4} align="stretch" flex={1}>
             <SelectionCard
               title={t("compare.topicList")}
-              description={
-                selectedComparison
-                  ? selectedComparison.name
-                  : t("compare.pleaseSelect")
-              }
+              description={selectedComparison ? selectedComparison.name : t("compare.pleaseSelect")}
               icon={<FiFileText size={24} />}
               isSelected={!!selectedComparison}
               onClick={() => setShowTopicListModal(true)}
@@ -582,11 +510,13 @@ const TwinCheck = () => {
                     accept={{
                       "application/pdf": [".pdf"],
                       "text/plain": [".txt"],
-                      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                        [".docx"],
+                      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+                        ".docx",
+                      ],
                       "text/csv": [".csv"],
-                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                        [".xlsx"],
+                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+                        ".xlsx",
+                      ],
                       "application/vnd.ms-excel": [".xls"],
                     }}
                   />
@@ -600,11 +530,13 @@ const TwinCheck = () => {
                     accept={{
                       "application/pdf": [".pdf"],
                       "text/plain": [".txt"],
-                      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                        [".docx"],
+                      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+                        ".docx",
+                      ],
                       "text/csv": [".csv"],
-                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                        [".xlsx"],
+                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+                        ".xlsx",
+                      ],
                       "application/vnd.ms-excel": [".xls"],
                     }}
                   />
@@ -633,9 +565,7 @@ const TwinCheck = () => {
           align="stretch"
           mb={4}
           opacity={!selectedComparison && !compareResult ? 0.3 : 1}
-          pointerEvents={
-            !selectedComparison && !compareResult ? "none" : "auto"
-          }
+          pointerEvents={!selectedComparison && !compareResult ? "none" : "auto"}
         >
           <HStack gap={4} justify="center">
             <Button
@@ -664,10 +594,7 @@ const TwinCheck = () => {
             flexDirection={{ base: "column", md: "row" }}
             gap={4}
           >
-            <Box
-              flex="1"
-              width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}
-            >
+            <Box flex="1" width={{ base: "100%", md: "calc(100% - 300px - 1rem)" }}>
               <HStack justify="space-between" align="center" mb={4}>
                 <Heading size="md">{t("compare.comparison")}</Heading>
 
@@ -732,17 +659,8 @@ const TwinCheck = () => {
                     <Heading as="h3" size="md" mb={2}>
                       Summary
                     </Heading>
-                    <Box
-                      p={3}
-                      mb={4}
-                      borderWidth="1px"
-                      borderRadius="md"
-                      bg="bg"
-                    >
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        components={components}
-                      >
+                    <Box p={3} mb={4} borderWidth="1px" borderRadius="md" bg="bg">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
                         {compareResult.summary}
                       </ReactMarkdown>
                     </Box>
@@ -754,63 +672,49 @@ const TwinCheck = () => {
                           Topic Analysis
                         </Heading>
 
-                        {compareResult.topicResults.map(
-                          (topicResult, index) => (
-                            <Box
-                              key={index}
-                              mb={6}
-                              p={5}
-                              borderWidth="1px"
-                              borderRadius="md"
-                              bg={expandedTopic === index ? "surface" : "bg"}
-                              _hover={{ bg: "surface" }}
+                        {compareResult.topicResults.map((topicResult, index) => (
+                          <Box
+                            key={index}
+                            mb={6}
+                            p={5}
+                            borderWidth="1px"
+                            borderRadius="md"
+                            bg={expandedTopic === index ? "surface" : "bg"}
+                            _hover={{ bg: "surface" }}
+                          >
+                            <Heading
+                              as="h4"
+                              size="sm"
+                              mb={3}
+                              onClick={() =>
+                                setExpandedTopic(expandedTopic === index ? null : index)
+                              }
+                              cursor="pointer"
+                              display="flex"
+                              alignItems="center"
                             >
-                              <Heading
-                                as="h4"
-                                size="sm"
-                                mb={3}
-                                onClick={() =>
-                                  setExpandedTopic(
-                                    expandedTopic === index ? null : index,
-                                  )
+                              <Box
+                                as="span"
+                                mr={2}
+                                transform={
+                                  expandedTopic === index ? "rotate(90deg)" : "rotate(0deg)"
                                 }
-                                cursor="pointer"
-                                display="flex"
-                                alignItems="center"
+                                transition="transform 0.2s"
                               >
-                                <Box
-                                  as="span"
-                                  mr={2}
-                                  transform={
-                                    expandedTopic === index
-                                      ? "rotate(90deg)"
-                                      : "rotate(0deg)"
-                                  }
-                                  transition="transform 0.2s"
-                                >
-                                  ▶
-                                </Box>
-                                Topic: {topicResult.topic}
-                              </Heading>
+                                ▶
+                              </Box>
+                              Topic: {topicResult.topic}
+                            </Heading>
 
-                              {expandedTopic === index && (
-                                <Box
-                                  mb={4}
-                                  p={3}
-                                  borderLeft="4px solid"
-                                  borderColor="blue.200"
-                                >
-                                  <ReactMarkdown
-                                    remarkPlugins={[remarkGfm]}
-                                    components={components}
-                                  >
-                                    {topicResult.analysis}
-                                  </ReactMarkdown>
-                                </Box>
-                              )}
-                            </Box>
-                          ),
-                        )}
+                            {expandedTopic === index && (
+                              <Box mb={4} p={3} borderLeft="4px solid" borderColor="blue.200">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+                                  {topicResult.analysis}
+                                </ReactMarkdown>
+                              </Box>
+                            )}
+                          </Box>
+                        ))}
                       </Box>
                     )}
 
@@ -834,9 +738,7 @@ const TwinCheck = () => {
                     )}
                   </>
                 ) : (
-                  <Text color="gray.500">
-                    {t("compare.selectTwoDocuments")}
-                  </Text>
+                  <Text color="gray.500">{t("compare.selectTwoDocuments")}</Text>
                 )}
               </Box>
             </Box>

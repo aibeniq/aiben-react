@@ -29,8 +29,17 @@ from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 from app.services.knowledgebases import get_embedding_model
 from app.services.embeddings import load_embeddings_model
-from app.services.llms import get_default_llm, invoke_llm, invoke_llm_async, record_llm_interaction
-from app.services.translation import translate_text_if_needed, translate_progress_message, translate
+from app.services.llms import (
+    get_default_llm,
+    invoke_llm,
+    invoke_llm_async,
+    record_llm_interaction,
+)
+from app.services.translation import (
+    translate_text_if_needed,
+    translate_progress_message,
+    translate,
+)
 from app.services.retrievers import (
     create_ensemble_retriever,
 )  # Import the ensemble retriever
@@ -112,73 +121,99 @@ async def prefetch_knowledge_base_context(
     Returns a dictionary mapping question text to its context and source citations.
     """
     print(f"Pre-fetching knowledge base context for {len(question_list)} questions...")
-    
+
     question_contexts = {}
-    
+
     for i, question_item in enumerate(question_list):
         # Yield to event loop at start of each question iteration
         await asyncio.sleep(0.05)  # Prevent connection timeouts during long operations
-        
+
         # Update progress for context fetching
         if task_id:
             progress_tracker.update_stage_progress(
-                task_id, "fetching_context", i, len(question_list),
-                translate_progress_message("retrieving_policy_context", user_language, question_num=i+1, total_questions=len(question_list))
+                task_id,
+                "fetching_context",
+                i,
+                len(question_list),
+                translate_progress_message(
+                    "retrieving_policy_context",
+                    user_language,
+                    question_num=i + 1,
+                    total_questions=len(question_list),
+                ),
             )
-        
+
         # Add delay between questions to prevent rate limit exhaustion
         if i > 0 and settings.VERADOC_ENABLE_PROCESSING_DELAYS:
             await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_QUESTIONS)
-            
+
         # Check for cancellation during context pre-fetching
         try:
             if request and await request.is_disconnected():
-                print(f"❌ CLIENT DISCONNECTED - Stopping context prefetch at question {i + 1}")
+                print(
+                    f"❌ CLIENT DISCONNECTED - Stopping context prefetch at question {i + 1}"
+                )
                 raise HTTPException(
                     status_code=408,
-                    detail="Request cancelled - client disconnected during context prefetch"
+                    detail="Request cancelled - client disconnected during context prefetch",
                 )
         except Exception as e:
             print(f"Warning: Could not check disconnect status during prefetch: {e}")
-        
+
         question_text = question_item.get("text", "").strip()
         consult_documents = question_item.get("consultDocuments", True)
-        
+
         if not question_text:
             continue
-            
-        print(f"Pre-fetching context for question {i+1}/{len(question_list)}: {question_text[:50]}...")
-        
+
+        print(
+            f"Pre-fetching context for question {i+1}/{len(question_list)}: {question_text[:50]}..."
+        )
+
         if consult_documents:
             try:
                 # Step 1: Retrieve relevant context from the knowledge base
                 docs = retriever.get_relevant_documents(question_text)
-                
+
                 if not docs:
-                    print(f"No documents retrieved for question: {question_text[:50]}...")
+                    print(
+                        f"No documents retrieved for question: {question_text[:50]}..."
+                    )
                     context = "No relevant documents found in the knowledge base for this question."
                     source_citations = []
                 else:
-                    print(f"Retrieved {len(docs)} documents for question: {question_text[:50]}...")
-                    
+                    print(
+                        f"Retrieved {len(docs)} documents for question: {question_text[:50]}..."
+                    )
+
                     # LLM-based relevance filtering for VeraDoc (similar to ReportGenie)
                     # This prevents irrelevant chunks from being included as citations
                     if docs:
-                        print(f"🔍 Filtering {len(docs)} retrieved chunks for relevance to question: {question_text[:50]}...")
-                        
+                        print(
+                            f"🔍 Filtering {len(docs)} retrieved chunks for relevance to question: {question_text[:50]}..."
+                        )
+
                         # Check if this is a Full Document Scan (retriever returns ALL docs)
                         # We detect this by checking if we got more than RAG_NUM_CHUNKS documents
                         is_full_scan = len(docs) > settings.RAG_NUM_CHUNKS
                         if is_full_scan:
-                            print("Full document scan detected - using batch processing for performance")
-                        
+                            print(
+                                "Full document scan detected - using batch processing for performance"
+                            )
+
                         # Batch / concurrency settings with sensible defaults
-                        BATCH_SIZE = getattr(settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 10)
-                        REQUEST_DELAY = getattr(settings, "PROCESSING_DELAY_BETWEEN_REQUESTS", 0.02)
+                        BATCH_SIZE = getattr(
+                            settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 10
+                        )
+                        REQUEST_DELAY = getattr(
+                            settings, "PROCESSING_DELAY_BETWEEN_REQUESTS", 0.02
+                        )
 
                         loop = asyncio.get_running_loop()
                         filtered_docs = []
-                        print(f"Starting batch processing with batch size {BATCH_SIZE} for {len(docs)} documents")
+                        print(
+                            f"Starting batch processing with batch size {BATCH_SIZE} for {len(docs)} documents"
+                        )
 
                         # Process docs in batches to reduce total runtime while still being rate-limit friendly
                         for start in range(0, len(docs), BATCH_SIZE):
@@ -194,27 +229,39 @@ async def prefetch_knowledge_base_context(
                                         # Yield to event loop more frequently for long-running operations
                                         # This prevents connection timeouts and allows progress polling to work
                                         await asyncio.sleep(0.05)
-                                        
+
                                         # Update progress during relevance filtering (crucial for long operations)
                                         if task_id:
                                             # Show detailed progress: question X, analyzing chunk Y/Z
                                             progress_tracker.update_stage_progress(
-                                                task_id, "fetching_context", i, len(question_list),
-                                                translate_progress_message("question_analyzing_chunk", user_language,
-                                                                         question_num=i+1, total_questions=len(question_list),
-                                                                         chunk_num=doc_idx + 1, total_chunks=len(docs))
+                                                task_id,
+                                                "fetching_context",
+                                                i,
+                                                len(question_list),
+                                                translate_progress_message(
+                                                    "question_analyzing_chunk",
+                                                    user_language,
+                                                    question_num=i + 1,
+                                                    total_questions=len(question_list),
+                                                    chunk_num=doc_idx + 1,
+                                                    total_chunks=len(docs),
+                                                ),
                                             )
-                                        
+
                                         # Check for cancellation during filtering
                                         if request and await request.is_disconnected():
-                                            print(f"❌ CLIENT DISCONNECTED - Stopping relevance filtering at chunk {doc_idx + 1}")
+                                            print(
+                                                f"❌ CLIENT DISCONNECTED - Stopping relevance filtering at chunk {doc_idx + 1}"
+                                            )
                                             raise HTTPException(
                                                 status_code=408,
-                                                detail="Request cancelled during relevance filtering"
+                                                detail="Request cancelled during relevance filtering",
                                             )
-                                        
-                                        print(f"Analyzing chunk {doc_idx + 1}/{len(docs)} for relevance...")
-                                        
+
+                                        print(
+                                            f"Analyzing chunk {doc_idx + 1}/{len(docs)} for relevance..."
+                                        )
+
                                         # Use LLM to determine if this chunk is relevant
                                         # Use run_in_executor to run the sync invoke_llm in a thread pool
                                         relevance_check = await loop.run_in_executor(
@@ -222,62 +269,85 @@ async def prefetch_knowledge_base_context(
                                             lambda: invoke_llm(
                                                 llm,
                                                 settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
-                                                {"chunk": doc.page_content or "", "question": question_text},
+                                                {
+                                                    "chunk": doc.page_content or "",
+                                                    "question": question_text,
+                                                },
                                             ),
                                         )
-                                        
+
                                         # Check for cancellation after LLM call
                                         if request and await request.is_disconnected():
-                                            print(f"❌ CLIENT DISCONNECTED - Stopping after relevance check at chunk {doc_idx + 1}")
+                                            print(
+                                                f"❌ CLIENT DISCONNECTED - Stopping after relevance check at chunk {doc_idx + 1}"
+                                            )
                                             raise HTTPException(
                                                 status_code=408,
-                                                detail="Request cancelled during relevance filtering"
+                                                detail="Request cancelled during relevance filtering",
                                             )
-                                        
+
                                         # Yield again after LLM call to prevent connection timeout
                                         await asyncio.sleep(0.02)
-                                        
+
                                         return doc_idx, doc, relevance_check
-                                        
+
                                     except Exception as filter_error:
-                                        print(f"Error filtering chunk {doc_idx + 1}: {filter_error}")
+                                        print(
+                                            f"Error filtering chunk {doc_idx + 1}: {filter_error}"
+                                        )
                                         # On error, include the chunk to be safe
                                         return doc_idx, doc, None
 
                                 tasks.append(asyncio.create_task(_check()))
 
                             # Await this batch and handle results
-                            print(f"Awaiting batch {start // BATCH_SIZE + 1} with {len(tasks)} tasks")
-                            results = await asyncio.gather(*tasks, return_exceptions=True)
+                            print(
+                                f"Awaiting batch {start // BATCH_SIZE + 1} with {len(tasks)} tasks"
+                            )
+                            results = await asyncio.gather(
+                                *tasks, return_exceptions=True
+                            )
                             print(f"Batch completed, got {len(results)} results")
 
                             for res in results:
                                 if isinstance(res, Exception):
                                     # On error, include the chunk to be safe (preserve previous behavior)
-                                    print(f"Warning: error during batch relevance check: {res}")
+                                    print(
+                                        f"Warning: error during batch relevance check: {res}"
+                                    )
                                     continue
 
                                 doc_idx, doc, relevance_check = res
                                 # Filter based on LLM response (same logic as before)
-                                if relevance_check and "No relevant information found" not in relevance_check:
+                                if (
+                                    relevance_check
+                                    and "No relevant information found"
+                                    not in relevance_check
+                                ):
                                     print(f"✅ Chunk {doc_idx + 1} is relevant")
                                     filtered_docs.append(doc)
                                 else:
-                                    print(f"❌ Chunk {doc_idx + 1} is not relevant - excluding from citations")
+                                    print(
+                                        f"❌ Chunk {doc_idx + 1} is not relevant - excluding from citations"
+                                    )
 
                             # Small sleep between batches to help with rate limits and to yield loop
                             if REQUEST_DELAY:
                                 await asyncio.sleep(REQUEST_DELAY)
-                        
-                        print(f"📊 Relevance filtering: {len(filtered_docs)}/{len(docs)} chunks are relevant")
+
+                        print(
+                            f"📊 Relevance filtering: {len(filtered_docs)}/{len(docs)} chunks are relevant"
+                        )
                         docs = filtered_docs
-                    
+
                     # Build context from filtered documents
-                    context = "\n\n".join([
-                        doc.page_content for doc in docs if doc.page_content
-                    ])
-                    print(f"Final context length: {len(context)} characters from {len(docs)} documents")
-                    
+                    context = "\n\n".join(
+                        [doc.page_content for doc in docs if doc.page_content]
+                    )
+                    print(
+                        f"Final context length: {len(context)} characters from {len(docs)} documents"
+                    )
+
                     # Store source documents for citation (now filtered if Full Document Scan)
                     source_citations = []
                     for doc in docs:
@@ -288,33 +358,41 @@ async def prefetch_knowledge_base_context(
                                 if hasattr(doc, "metadata") and doc.metadata
                                 else {}
                             )
-                            
+
                             # Source lookup logic (same as original)
-                            if "source" in metadata and isinstance(metadata["source"], str):
+                            if "source" in metadata and isinstance(
+                                metadata["source"], str
+                            ):
                                 source_path = metadata["source"]
                                 raw_filename = Path(source_path).name
-                                
+
                                 match = re.search(r"^[^_]*_(.+)$", raw_filename)
                                 if match:
                                     filename = match.group(1)
                                 else:
                                     filename = raw_filename
-                                
+
                                 try:
                                     source_entry = session.exec(
                                         select(Source).where(Source.name == filename)
                                     ).first()
-                                    
+
                                     if not source_entry:
                                         source_entry = session.exec(
-                                            select(Source).where(Source.name == raw_filename)
+                                            select(Source).where(
+                                                Source.name == raw_filename
+                                            )
                                         ).first()
-                                    
+
                                     if source_entry:
-                                        metadata["source_data_id"] = str(source_entry.source_data_id)
+                                        metadata["source_data_id"] = str(
+                                            source_entry.source_data_id
+                                        )
                                 except Exception as source_lookup_error:
-                                    print(f"Error looking up source: {source_lookup_error}")
-                            
+                                    print(
+                                        f"Error looking up source: {source_lookup_error}"
+                                    )
+
                             source = {
                                 "content": doc.page_content or "",
                                 "metadata": metadata,
@@ -323,26 +401,33 @@ async def prefetch_knowledge_base_context(
                         except Exception as citation_error:
                             print(f"Error processing citation: {citation_error}")
                             continue
-                            
+
             except Exception as retrieval_error:
-                print(f"Error retrieving documents for question '{question_text[:50]}...': {retrieval_error}")
+                print(
+                    f"Error retrieving documents for question '{question_text[:50]}...': {retrieval_error}"
+                )
                 context = "Error occurred while retrieving relevant documents from the knowledge base."
                 source_citations = []
-            
+
             try:
                 # Step 2: Get the relevant policy context for this question with chunking for large contexts
                 print("Generating context for question...")
-                
+
                 # Check if context is too large and needs chunking
                 from app.services.text_processing import estimate_tokens, chunk_text
+
                 context_tokens = estimate_tokens(context)
-                
+
                 if context_tokens > settings.VERADOC_KB_CHUNK_SIZE_LIMIT:
-                    print(f"⚠️ Large context detected ({context_tokens} tokens). Chunking for processing...")
-                    
+                    print(
+                        f"⚠️ Large context detected ({context_tokens} tokens). Chunking for processing..."
+                    )
+
                     # Chunk the context to prevent rate limit issues
-                    context_chunks = chunk_text(context, max_tokens=settings.VERADOC_KB_CHUNK_SIZE_LIMIT)
-                    
+                    context_chunks = chunk_text(
+                        context, max_tokens=settings.VERADOC_KB_CHUNK_SIZE_LIMIT
+                    )
+
                     # Process chunks and synthesize context
                     chunk_contexts = []
                     for chunk_idx, chunk in enumerate(context_chunks):
@@ -350,41 +435,66 @@ async def prefetch_knowledge_base_context(
                             # Update progress during context chunk processing
                             if task_id:
                                 progress_tracker.update_stage_progress(
-                                    task_id, "fetching_context", i, len(question_list),
-                                    translate_progress_message("question_processing_context_chunk", user_language,
-                                                             question_num=i+1, total_questions=len(question_list),
-                                                             chunk_num=chunk_idx + 1, total_chunks=len(context_chunks))
+                                    task_id,
+                                    "fetching_context",
+                                    i,
+                                    len(question_list),
+                                    translate_progress_message(
+                                        "question_processing_context_chunk",
+                                        user_language,
+                                        question_num=i + 1,
+                                        total_questions=len(question_list),
+                                        chunk_num=chunk_idx + 1,
+                                        total_chunks=len(context_chunks),
+                                    ),
                                 )
-                                await asyncio.sleep(0.01)  # Allow progress API to respond
-                            
+                                await asyncio.sleep(
+                                    0.01
+                                )  # Allow progress API to respond
+
                             # Add delay between chunks
-                            if chunk_idx > 0 and settings.VERADOC_ENABLE_PROCESSING_DELAYS:
-                                await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
-                            
-                            print(f"Processing context chunk {chunk_idx+1}/{len(context_chunks)}")
+                            if (
+                                chunk_idx > 0
+                                and settings.VERADOC_ENABLE_PROCESSING_DELAYS
+                            ):
+                                await asyncio.sleep(
+                                    settings.PROCESSING_DELAY_BETWEEN_CHUNKS
+                                )
+
+                            print(
+                                f"Processing context chunk {chunk_idx+1}/{len(context_chunks)}"
+                            )
                             chunk_context = await invoke_llm_async(
                                 llm,
                                 context_prompt_template,
                                 {"context": chunk, "question": question_text},
                             )
-                            
+
                             # Check for cancellation after LLM call
                             if request and await request.is_disconnected():
-                                print(f"❌ CLIENT DISCONNECTED - Stopping after context chunk processing at chunk {chunk_idx + 1}")
+                                print(
+                                    f"❌ CLIENT DISCONNECTED - Stopping after context chunk processing at chunk {chunk_idx + 1}"
+                                )
                                 raise HTTPException(
                                     status_code=408,
-                                    detail="Request cancelled during context chunk processing"
+                                    detail="Request cancelled during context chunk processing",
                                 )
-                            
+
                             chunk_contexts.append(chunk_context)
-                            
+
                         except Exception as chunk_error:
-                            print(f"Error processing context chunk {chunk_idx+1}: {chunk_error}")
-                            chunk_contexts.append(f"Error processing part of context: {str(chunk_error)}")
-                    
+                            print(
+                                f"Error processing context chunk {chunk_idx+1}: {chunk_error}"
+                            )
+                            chunk_contexts.append(
+                                f"Error processing part of context: {str(chunk_error)}"
+                            )
+
                     # Combine chunk contexts
-                    question_context = "\n\n".join([ctx for ctx in chunk_contexts if ctx])
-                    
+                    question_context = "\n\n".join(
+                        [ctx for ctx in chunk_contexts if ctx]
+                    )
+
                 else:
                     # Context is small enough, process normally
                     question_context = await invoke_llm_async(
@@ -392,65 +502,78 @@ async def prefetch_knowledge_base_context(
                         context_prompt_template,
                         {"context": context, "question": question_text},
                     )
-                    
+
                     # Check for cancellation after LLM call
                     if request and await request.is_disconnected():
-                        print(f"❌ CLIENT DISCONNECTED - Stopping after context generation")
+                        print(
+                            f"❌ CLIENT DISCONNECTED - Stopping after context generation"
+                        )
                         raise HTTPException(
                             status_code=408,
-                            detail="Request cancelled during context generation"
+                            detail="Request cancelled during context generation",
                         )
-                    
+
                 print(f"Got context: {question_context[:100]}...")
-                
+
                 # Translate the question context if needed
                 question_context = await translate_text_if_needed(
                     question_context, session, current_user, llm
                 )
-                
+
             except Exception as context_error:
                 print(f"Error generating context for question: {context_error}")
-                
+
                 # Implement fallback strategy for rate limit errors
-                if "rate limiter" in str(context_error).lower() or "rate limit" in str(context_error).lower():
+                if (
+                    "rate limiter" in str(context_error).lower()
+                    or "rate limit" in str(context_error).lower()
+                ):
                     print("🚨 Rate limit detected. Using fallback context strategy...")
-                    
+
                     # Fallback 1: Use a simplified context from document titles/metadata
                     if source_citations:
-                        fallback_context = "Based on available documents: " + "; ".join([
-                            f"Document: {citation.get('metadata', {}).get('source', 'Unknown')}"
-                            for citation in source_citations[:5]  # Limit to first 5 documents
-                        ])
+                        fallback_context = "Based on available documents: " + "; ".join(
+                            [
+                                f"Document: {citation.get('metadata', {}).get('source', 'Unknown')}"
+                                for citation in source_citations[
+                                    :5
+                                ]  # Limit to first 5 documents
+                            ]
+                        )
                         question_context = f"Limited context due to processing constraints: {fallback_context}"
                     else:
                         # Fallback 2: Generic context about knowledge base availability
                         question_context = "Knowledge base documents are available but detailed context generation failed due to processing constraints. Please answer based on the question content."
-                    
+
                     print(f"Using fallback context: {question_context[:100]}...")
                 else:
                     # For other errors, use error message
                     question_context = f"Error generating context: {str(context_error)}"
-                
+
                 # Translate the fallback context if needed
                 question_context = await translate_text_if_needed(
                     question_context, session, current_user, llm
                 )
         else:
             # Skip knowledge base consultation
-            question_context = "No policy context consultation requested for this question."
+            question_context = (
+                "No policy context consultation requested for this question."
+            )
             question_context = await translate_text_if_needed(
                 question_context, session, current_user, llm
             )
             source_citations = []
-            print(f"Skipping document consultation for question: {question_text[:50]}...")
-        
+            print(
+                f"Skipping document consultation for question: {question_text[:50]}..."
+            )
+
         # Store the pre-fetched context and citations
         question_contexts[question_text] = {
             "context": question_context,
             "source_citations": source_citations,
-            "consult_documents": consult_documents
+            "consult_documents": consult_documents,
         }
-    
+
     print(f"✅ Pre-fetched context for {len(question_contexts)} questions")
     return question_contexts
 
@@ -497,9 +620,6 @@ async def extract_text_from_file_async(file_content: bytes, filename: str) -> st
 router = APIRouter(prefix="/veradoc", tags=["veradoc"])
 
 
-
-
-
 @router.get("/progress/{task_id}")
 async def get_veradoc_progress(
     task_id: str,
@@ -511,10 +631,16 @@ async def get_veradoc_progress(
     """
     # Log incoming request headers to help diagnose cross-host/CORS routing issues
     try:
-        client_addr = request.client.host if request and getattr(request, "client", None) else "unknown"
+        client_addr = (
+            request.client.host
+            if request and getattr(request, "client", None)
+            else "unknown"
+        )
         host_hdr = request.headers.get("host") if request else None
         origin_hdr = request.headers.get("origin") if request else None
-        print(f"🔗 VERADOC PROGRESS REQUEST: task_id={task_id}, client={client_addr}, host={host_hdr}, origin={origin_hdr}")
+        print(
+            f"🔗 VERADOC PROGRESS REQUEST: task_id={task_id}, client={client_addr}, host={host_hdr}, origin={origin_hdr}"
+        )
     except Exception as _:
         print("🔗 VERADOC PROGRESS: could not read request headers")
 
@@ -528,7 +654,9 @@ async def get_veradoc_progress(
         #
         # Instead, return a lightweight placeholder indicating the task is initializing.
         # The frontend will continue polling and pick up the real progress once available.
-        print(f"⚠️ VERADOC PROGRESS: No progress found for task {task_id} - returning initializing placeholder")
+        print(
+            f"⚠️ VERADOC PROGRESS: No progress found for task {task_id} - returning initializing placeholder"
+        )
         placeholder = {
             "task_id": task_id,
             "operation": "Reviewing documents",
@@ -536,7 +664,7 @@ async def get_veradoc_progress(
             "current_stage": "",
             "percentage": 0.0,
             "status": "pending",
-            "message": "Initializing task - progress not yet available. Polling will continue."
+            "message": "Initializing task - progress not yet available. Polling will continue.",
         }
         # Yield control back to the event loop before returning
         await asyncio.sleep(0)
@@ -544,14 +672,20 @@ async def get_veradoc_progress(
 
     # Debug logging to see what's actually being returned
     print(f"🔍 VERADOC API RETURNING PROGRESS: task_id={task_id}")
-    print(f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}")
+    print(
+        f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}"
+    )
     print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
     print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
-    
+
     # Check each stage completion status
-    stages = progress_data.get('stages', {})
+    stages = progress_data.get("stages", {})
     for stage_name, stage_data in stages.items():
-        completed = stage_data.get('completed', False) if isinstance(stage_data, dict) else False
+        completed = (
+            stage_data.get("completed", False)
+            if isinstance(stage_data, dict)
+            else False
+        )
         print(f"🔍 STAGE {stage_name}: completed={completed}")
 
     # Yield control to allow other async operations (like this API call) to run
@@ -572,10 +706,16 @@ async def get_veradoc_results(
     """
     # Log incoming request headers to help diagnose cross-host/CORS routing issues
     try:
-        client_addr = request.client.host if request and getattr(request, "client", None) else "unknown"
+        client_addr = (
+            request.client.host
+            if request and getattr(request, "client", None)
+            else "unknown"
+        )
         host_hdr = request.headers.get("host") if request else None
         origin_hdr = request.headers.get("origin") if request else None
-        print(f"🔗 VERADOC RESULTS REQUEST: task_id={task_id}, client={client_addr}, host={host_hdr}, origin={origin_hdr}")
+        print(
+            f"🔗 VERADOC RESULTS REQUEST: task_id={task_id}, client={client_addr}, host={host_hdr}, origin={origin_hdr}"
+        )
     except Exception:
         print("🔗 VERADOC RESULTS: could not read request headers")
 
@@ -583,7 +723,9 @@ async def get_veradoc_results(
     results = progress_tracker.get_task_metadata(task_id)
     if not results:
         # Don't return a hard 404 here; callers (browsers) may be hitting a different host or race with metadata
-        print(f"⚠️ VERADOC RESULTS: No metadata found for task {task_id} - returning placeholder to allow frontend to retry")
+        print(
+            f"⚠️ VERADOC RESULTS: No metadata found for task {task_id} - returning placeholder to allow frontend to retry"
+        )
         placeholder = {
             "task_id": task_id,
             "status": "pending",
@@ -607,8 +749,8 @@ async def create_review_task():
             "setup": 0.05,
             "fetching_context": 0.60,
             "reviewing": 0.30,
-            "finalizing": 0.05
-        }
+            "finalizing": 0.05,
+        },
     )
     progress_tracker.update_stage_progress(
         task_id, "setup", 0, 1, "Waiting to start document review..."
@@ -736,9 +878,7 @@ async def process_rag_checklist(
 
     # Validate search mode
     if search_mode not in ["vector", "full_scan"]:
-        print(
-            f"Warning: Invalid search mode '{search_mode}', defaulting to 'vector'"
-        )
+        print(f"Warning: Invalid search mode '{search_mode}', defaulting to 'vector'")
         search_mode = "vector"
 
     # Create or initialize progress tracking task
@@ -750,8 +890,8 @@ async def process_rag_checklist(
                 "setup": 0.05,
                 "fetching_context": 0.60,
                 "reviewing": 0.30,
-                "finalizing": 0.05
-            }
+                "finalizing": 0.05,
+            },
         )
         print(f"Created new task_id: {task_id}")
     else:
@@ -764,25 +904,30 @@ async def process_rag_checklist(
                 "setup": 0.05,
                 "fetching_context": 0.60,
                 "reviewing": 0.30,
-                "finalizing": 0.05
-            }
+                "finalizing": 0.05,
+            },
         )
-    
+
     # Create request_data object for backward compatibility with rest of the code
     class RequestData:
         pass
+
     request_data = RequestData()
     request_data.questions = questions
     request_data.knowledge_base_id = knowledge_base_id
     request_data.custom_instructions = custom_instructions
     request_data.search_mode = search_mode
     request_data.task_id = task_id
-    
+
     # Get user's preferred language for progress message translation
     user_language = getattr(current_user, "preferred_language", "en") or "en"
-    
+
     progress_tracker.update_stage_progress(
-        task_id, "setup", 0, 1, translate_progress_message("initializing_document_review", user_language)
+        task_id,
+        "setup",
+        0,
+        1,
+        translate_progress_message("initializing_document_review", user_language),
     )
 
     try:
@@ -793,13 +938,23 @@ async def process_rag_checklist(
         if not kb:
             raise HTTPException(status_code=404, detail="Knowledge base not found")
 
-        progress_tracker.complete_stage(task_id, "setup", translate_progress_message("setup_complete", user_language))
-        
+        progress_tracker.complete_stage(
+            task_id,
+            "setup",
+            translate_progress_message("setup_complete", user_language),
+        )
+
         # Start fetching context stage
         progress_tracker.update_stage_progress(
-            task_id, "fetching_context", 0, 1, translate_progress_message("preparing_retrieve_policy_context", user_language)
+            task_id,
+            "fetching_context",
+            0,
+            1,
+            translate_progress_message(
+                "preparing_retrieve_policy_context", user_language
+            ),
         )
-        
+
         await asyncio.sleep(0.01)  # Allow progress API to respond
 
         # 2. Create a temporary directory for ChromaDB
@@ -926,10 +1081,12 @@ async def process_rag_checklist(
                                 try:
                                     # Get all documents - no sampling to ensure nothing is missed
                                     all_data = self.chroma_db.get()
-                                    
+
                                     if all_data and "documents" in all_data:
-                                        print(f"📚 Full Document Scan: Processing ALL {len(all_data['documents'])} documents")
-                                        
+                                        print(
+                                            f"📚 Full Document Scan: Processing ALL {len(all_data['documents'])} documents"
+                                        )
+
                                 except Exception as get_error:
                                     print(
                                         f"Error getting documents from ChromaDB: {get_error}"
@@ -1089,7 +1246,9 @@ async def process_rag_checklist(
 
             # 7. PRE-FETCH KNOWLEDGE BASE CONTEXT (OPTIMIZATION)
             # This step is the same regardless of which document is being reviewed
-            print("🚀 OPTIMIZATION: Pre-fetching knowledge base context for all questions...")
+            print(
+                "🚀 OPTIMIZATION: Pre-fetching knowledge base context for all questions..."
+            )
             try:
                 question_contexts = await prefetch_knowledge_base_context(
                     retriever=retriever,
@@ -1100,7 +1259,7 @@ async def process_rag_checklist(
                     current_user=current_user,
                     request=request,
                     task_id=task_id,
-                    user_language=user_language
+                    user_language=user_language,
                 )
                 print(f"✅ Pre-fetched context for {len(question_contexts)} questions")
             except HTTPException:
@@ -1110,14 +1269,21 @@ async def process_rag_checklist(
                 print(f"Error during context pre-fetch: {prefetch_error}")
                 # Fall back to processing without pre-fetch
                 question_contexts = {}
-            
+
             # Complete context fetching stage
-            progress_tracker.complete_stage(task_id, "fetching_context", translate_progress_message("policy_context_retrieved", user_language))
-            
+            progress_tracker.complete_stage(
+                task_id,
+                "fetching_context",
+                translate_progress_message("policy_context_retrieved", user_language),
+            )
+
             # Start reviewing documents stage
             progress_tracker.update_stage_progress(
-                task_id, "reviewing", 0, total_files,
-                translate_progress_message("beginning_document_review", user_language)
+                task_id,
+                "reviewing",
+                0,
+                total_files,
+                translate_progress_message("beginning_document_review", user_language),
             )
             await asyncio.sleep(0.01)  # Allow progress API to respond
 
@@ -1126,39 +1292,48 @@ async def process_rag_checklist(
 
             # 8. Process each uploaded file using the pre-fetched context
             all_files_results = []
-            
+
             # Support multiple files - process each one
             for file_index, file in enumerate(files):
                 # Update progress for each file
-                file_preview = file.filename[:30] + "..." if file.filename and len(file.filename) > 30 else file.filename
-                progress_tracker.update_stage_progress(
-                    task_id, "reviewing", file_index, len(files),
-                    f"Reviewing file {file_index + 1}/{len(files)}: {file_preview}"
+                file_preview = (
+                    file.filename[:30] + "..."
+                    if file.filename and len(file.filename) > 30
+                    else file.filename
                 )
-                
+                progress_tracker.update_stage_progress(
+                    task_id,
+                    "reviewing",
+                    file_index,
+                    len(files),
+                    f"Reviewing file {file_index + 1}/{len(files)}: {file_preview}",
+                )
+
                 await asyncio.sleep(0.01)  # Allow progress API to respond
-                
+
                 if not file.filename:
                     print(f"Skipping file {file_index + 1}: No filename")
                     continue
-                    
+
                 print(f"Processing file {file_index + 1}/{len(files)}: {file.filename}")
-                
+
                 # Check for cancellation before processing each file
                 try:
                     if request and await request.is_disconnected():
-                        print(f"❌ CLIENT DISCONNECTED - Stopping at file {file_index + 1}")
+                        print(
+                            f"❌ CLIENT DISCONNECTED - Stopping at file {file_index + 1}"
+                        )
                         return VeraDocResponse(
                             results={
                                 "status": "cancelled",
-                                "message": "Request cancelled - client disconnected"
+                                "message": "Request cancelled - client disconnected",
                             }
                         )
                 except Exception as e:
                     print(f"Warning: Could not check disconnect status: {e}")
-                
+
                 qa_pairs = []
-                
+
                 try:
                     content = await file.read()
                     if not content:
@@ -1171,12 +1346,14 @@ async def process_rag_checklist(
                     needs_special_handling = is_large_file or is_docx_file
 
                     # Extract text using unified processing
-                    print(f"Processing file with unified text extraction: {file.filename}")
+                    print(
+                        f"Processing file with unified text extraction: {file.filename}"
+                    )
                     document_text = await extract_text_from_file_async(
                         content, file.filename
                     )
                     # Clean surrogates from document_text to prevent encoding issues
-                    document_text = re.sub(r'[\ud800-\udfff]', '', document_text)
+                    document_text = re.sub(r"[\ud800-\udfff]", "", document_text)
 
                     # Extract images if vision is enabled
                     document_images = []
@@ -1207,62 +1384,84 @@ async def process_rag_checklist(
                             )
                             document_text = f"This document ({file.filename}) contains images but no extractable text. Vision analysis will be used to answer questions about the visual content."
                         else:
-                            print(f"Could not extract text from {file.filename}, skipping")
+                            print(
+                                f"Could not extract text from {file.filename}, skipping"
+                            )
                             continue
 
-                    print(f"Extracted {len(document_text)} characters from {file.filename}")
+                    print(
+                        f"Extracted {len(document_text)} characters from {file.filename}"
+                    )
                     await file.seek(0)
 
                 except Exception as file_error:
                     print(f"Error processing file {file.filename}: {file_error}")
                     # Add error result for this file and continue with next file
-                    all_files_results.append({
-                        "filename": file.filename,
-                        "final_evaluation": f"Error processing file {file.filename}: {str(file_error)}",
-                        "qa_pairs": [],
-                        "interaction_id": None,
-                    })
+                    all_files_results.append(
+                        {
+                            "filename": file.filename,
+                            "final_evaluation": f"Error processing file {file.filename}: {str(file_error)}",
+                            "qa_pairs": [],
+                            "interaction_id": None,
+                        }
+                    )
                     continue
 
                 # 9. Process each question using the PRE-FETCHED context
                 for i, question_item in enumerate(question_list):
                     # Yield to event loop at start of each question
                     await asyncio.sleep(0.05)  # Prevent connection timeouts
-                    
+
                     # Update progress for answering questions
                     # Calculate overall progress: (files completed * questions per file + current question) / total work
                     total_questions = len(files) * len(question_list)
                     questions_completed = file_index * len(question_list) + i
-                    
-                    question_preview = question_item.get("text", "")[:50] + "..." if len(question_item.get("text", "")) > 50 else question_item.get("text", "")
-                    progress_tracker.update_stage_progress(
-                        task_id, "reviewing", questions_completed, total_questions,
-                        translate_progress_message("answering_question", user_language,
-                                                 question_num=i+1, total_questions=len(question_list),
-                                                 file_num=file_index+1, total_files=len(files),
-                                                 question_preview=question_preview)
+
+                    question_preview = (
+                        question_item.get("text", "")[:50] + "..."
+                        if len(question_item.get("text", "")) > 50
+                        else question_item.get("text", "")
                     )
-                    
+                    progress_tracker.update_stage_progress(
+                        task_id,
+                        "reviewing",
+                        questions_completed,
+                        total_questions,
+                        translate_progress_message(
+                            "answering_question",
+                            user_language,
+                            question_num=i + 1,
+                            total_questions=len(question_list),
+                            file_num=file_index + 1,
+                            total_files=len(files),
+                            question_preview=question_preview,
+                        ),
+                    )
+
                     # Add delay between question processing to prevent rate limit exhaustion
                     if i > 0 and settings.VERADOC_ENABLE_PROCESSING_DELAYS:
                         await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_REQUESTS)
-                        
+
                     try:
                         # Check if client has disconnected before processing each question
                         try:
                             if request and await request.is_disconnected():
-                                print(f"❌ CLIENT DISCONNECTED - Stopping at question {i + 1} for file {file.filename}")
+                                print(
+                                    f"❌ CLIENT DISCONNECTED - Stopping at question {i + 1} for file {file.filename}"
+                                )
                                 return VeraDocResponse(
                                     results={
                                         "status": "cancelled",
-                                        "message": "Request cancelled - client disconnected"
+                                        "message": "Request cancelled - client disconnected",
                                     }
                                 )
                         except Exception as e:
                             print(f"Warning: Could not check disconnect status: {e}")
-                        
-                        question_text = re.sub(r'[\ud800-\udfff]', '', question_item.get("text", "")).strip()
-                        
+
+                        question_text = re.sub(
+                            r"[\ud800-\udfff]", "", question_item.get("text", "")
+                        ).strip()
+
                         if not question_text:
                             print(f"Skipping empty question at index {i}")
                             continue
@@ -1273,57 +1472,97 @@ async def process_rag_checklist(
 
                         # 🚀 OPTIMIZATION: Use pre-fetched context instead of retrieving again
                         # Debug: Show what keys are available
-                        print(f"🔍 DEBUG: Looking for question key: '{question_text[:50]}'")
-                        print(f"🔍 DEBUG: Available keys in question_contexts: {[key[:50] for key in question_contexts.keys()]}")
-                        
+                        print(
+                            f"🔍 DEBUG: Looking for question key: '{question_text[:50]}'"
+                        )
+                        print(
+                            f"🔍 DEBUG: Available keys in question_contexts: {[key[:50] for key in question_contexts.keys()]}"
+                        )
+
                         if question_text in question_contexts:
                             # Use pre-fetched context and citations
                             cached_context = question_contexts[question_text]
                             question_context = cached_context["context"]
                             # Clean surrogates from question_context
-                            question_context = re.sub(r'[\ud800-\udfff]', '', question_context)
+                            question_context = re.sub(
+                                r"[\ud800-\udfff]", "", question_context
+                            )
                             source_citations = cached_context["source_citations"]
                             consult_documents = cached_context["consult_documents"]
-                            print(f"✅ Using pre-fetched context for question: {question_text[:30]}...")
+                            print(
+                                f"✅ Using pre-fetched context for question: {question_text[:30]}..."
+                            )
                         else:
                             # Fallback to original logic if pre-fetch failed for this question
-                            print(f"⚠️ No pre-fetched context found for question: {question_text[:30]}..., using fallback")
-                            consult_documents = question_item.get("consultDocuments", True)
-                            
+                            print(
+                                f"⚠️ No pre-fetched context found for question: {question_text[:30]}..., using fallback"
+                            )
+                            consult_documents = question_item.get(
+                                "consultDocuments", True
+                            )
+
                             if consult_documents:
                                 try:
-                                    docs = retriever.get_relevant_documents(question_text)
+                                    docs = retriever.get_relevant_documents(
+                                        question_text
+                                    )
                                     if not docs:
                                         context = "No relevant documents found in the knowledge base for this question."
                                         source_citations = []
                                     else:
-                                        context = "\n\n".join([doc.page_content for doc in docs if doc.page_content])
-                                        source_citations = [{"content": doc.page_content or "", "metadata": doc.metadata or {}} for doc in docs]
-                                    
+                                        context = "\n\n".join(
+                                            [
+                                                doc.page_content
+                                                for doc in docs
+                                                if doc.page_content
+                                            ]
+                                        )
+                                        source_citations = [
+                                            {
+                                                "content": doc.page_content or "",
+                                                "metadata": doc.metadata or {},
+                                            }
+                                            for doc in docs
+                                        ]
+
                                     question_context = await invoke_llm_async(
-                                        llm, context_prompt_template, {"context": context, "question": question_text}
+                                        llm,
+                                        context_prompt_template,
+                                        {"context": context, "question": question_text},
                                     )
-                                    
+
                                     # Check for cancellation after LLM call
                                     if request and await request.is_disconnected():
-                                        print(f"❌ CLIENT DISCONNECTED - Stopping after fallback context generation")
+                                        print(
+                                            f"❌ CLIENT DISCONNECTED - Stopping after fallback context generation"
+                                        )
                                         raise HTTPException(
                                             status_code=408,
-                                            detail="Request cancelled during fallback context generation"
+                                            detail="Request cancelled during fallback context generation",
                                         )
-                                    
-                                    question_context = await translate_text_if_needed(question_context, session, current_user, llm)
+
+                                    question_context = await translate_text_if_needed(
+                                        question_context, session, current_user, llm
+                                    )
                                     # Clean surrogates from question_context
-                                    question_context = re.sub(r'[\ud800-\udfff]', '', question_context)
+                                    question_context = re.sub(
+                                        r"[\ud800-\udfff]", "", question_context
+                                    )
                                 except Exception as fallback_error:
-                                    print(f"Error in fallback context generation: {fallback_error}")
+                                    print(
+                                        f"Error in fallback context generation: {fallback_error}"
+                                    )
                                     question_context = f"Error generating context: {str(fallback_error)}"
                                     source_citations = []
                             else:
                                 question_context = "No policy context consultation requested for this question."
-                                question_context = await translate_text_if_needed(question_context, session, current_user, llm)
+                                question_context = await translate_text_if_needed(
+                                    question_context, session, current_user, llm
+                                )
                                 # Clean surrogates from question_context
-                                question_context = re.sub(r'[\ud800-\udfff]', '', question_context)
+                                question_context = re.sub(
+                                    r"[\ud800-\udfff]", "", question_context
+                                )
                                 source_citations = []
 
                         print("Generating answer based on document and context...")
@@ -1347,7 +1586,7 @@ async def process_rag_checklist(
                         except Exception as e:
                             rendered_prompt = f"[ERROR rendering prompt: {e}]"
                         # Clean surrogates from rendered_prompt before printing to avoid UnicodeEncodeError
-                        clean_prompt = re.sub(r'[\ud800-\udfff]', '', rendered_prompt)
+                        clean_prompt = re.sub(r"[\ud800-\udfff]", "", rendered_prompt)
                         print(
                             "\n===== VERADOC_QA_PROMPT_TEMPLATE PROMPT SENT TO LLM =====\n"
                         )
@@ -1368,18 +1607,20 @@ async def process_rag_checklist(
                                     "custom_instructions_section": custom_instructions_section,
                                 },
                             )
-                            
+
                             # Check for cancellation after LLM call
                             if request and await request.is_disconnected():
-                                print(f"❌ CLIENT DISCONNECTED - Stopping after question answering")
+                                print(
+                                    f"❌ CLIENT DISCONNECTED - Stopping after question answering"
+                                )
                                 raise HTTPException(
                                     status_code=408,
-                                    detail="Request cancelled during question answering"
+                                    detail="Request cancelled during question answering",
                                 )
-                            
+
                             # Yield after LLM call to prevent connection timeout
                             await asyncio.sleep(0.05)
-                            
+
                             print(f"Got text answer: {answer[:100]}...")
 
                             # Add vision analysis if images exist and LLM supports it
@@ -1396,7 +1637,9 @@ async def process_rag_checklist(
                                             "image_data": img_b64,
                                             "source_file": file.filename,
                                             "image_index": idx,
-                                            "metadata": {"extracted_from": file.filename},
+                                            "metadata": {
+                                                "extracted_from": file.filename
+                                            },
                                         }
                                     )
 
@@ -1406,7 +1649,9 @@ async def process_rag_checklist(
                                         "filename": file.filename,
                                         "custom_instructions": (
                                             request_data.custom_instructions
-                                            if hasattr(request_data, "custom_instructions")
+                                            if hasattr(
+                                                request_data, "custom_instructions"
+                                            )
                                             else ""
                                         ),
                                     }
@@ -1433,10 +1678,8 @@ async def process_rag_checklist(
                                         combined_answer = f"## Visual Analysis\n{vision_analysis}\n\n## Document Note\nThis analysis is based on visual content as the document contains images but no extractable text."
                                     else:
                                         # Normal text + vision combination
-                                        combined_answer = (
-                                            VisionService.combine_text_and_vision_analysis(
-                                                answer, vision_analysis, "comprehensive"
-                                            )
+                                        combined_answer = VisionService.combine_text_and_vision_analysis(
+                                            answer, vision_analysis, "comprehensive"
                                         )
 
                                     answer = combined_answer
@@ -1455,13 +1698,17 @@ async def process_rag_checklist(
                                 answer, session, current_user, llm
                             )
                             # Clean surrogates from answer
-                            answer = re.sub(r'[\ud800-\udfff]', '', answer)
+                            answer = re.sub(r"[\ud800-\udfff]", "", answer)
 
                         except Exception as answer_error:
-                            print(f"Error generating answer for question: {answer_error}")
+                            print(
+                                f"Error generating answer for question: {answer_error}"
+                            )
                             answer = f"Error generating answer: {str(answer_error)}"
 
-                        print("Source citations for question:", question_text)                        # Store the question-answer pair with context
+                        print(
+                            "Source citations for question:", question_text
+                        )  # Store the question-answer pair with context
                         qa_pairs.append(
                             {
                                 "question": question_text,
@@ -1470,25 +1717,40 @@ async def process_rag_checklist(
                                 "source_citations": source_citations,
                             }
                         )
-                        
+
                         # Update progress AFTER question is completed
                         total_questions = len(files) * len(question_list)
-                        questions_completed = file_index * len(question_list) + (i + 1)  # +1 because we just completed this question
-                        print(f"📊 PROGRESS UPDATE: Completed {questions_completed}/{total_questions} questions")
+                        questions_completed = file_index * len(question_list) + (
+                            i + 1
+                        )  # +1 because we just completed this question
+                        print(
+                            f"📊 PROGRESS UPDATE: Completed {questions_completed}/{total_questions} questions"
+                        )
                         progress_tracker.update_stage_progress(
-                            task_id, "reviewing", questions_completed, total_questions,
-                            translate_progress_message("completed_question", user_language,
-                                                     question_num=i+1, total_questions=len(question_list),
-                                                     file_num=file_index+1, total_files=len(files))
+                            task_id,
+                            "reviewing",
+                            questions_completed,
+                            total_questions,
+                            translate_progress_message(
+                                "completed_question",
+                                user_language,
+                                question_num=i + 1,
+                                total_questions=len(question_list),
+                                file_num=file_index + 1,
+                                total_files=len(files),
+                            ),
                         )
                         # Give MORE time for progress polling to see the update, especially for Full Document Scan
-                        await asyncio.sleep(0.1)  # Increased from 0.01 to ensure progress is visible
+                        await asyncio.sleep(
+                            0.1
+                        )  # Increased from 0.01 to ensure progress is visible
 
                     except Exception as question_processing_error:
                         print(
                             f"Error processing question '{question_text[:50]}...': {question_processing_error}"
                         )
                         import traceback
+
                         traceback.print_exc()
                         # Add error result instead of failing completely
                         qa_pairs.append(
@@ -1499,7 +1761,7 @@ async def process_rag_checklist(
                                 "source_citations": [],
                             }
                         )
-                        continue                # Store file-specific QA pairs and final evaluation
+                        continue  # Store file-specific QA pairs and final evaluation
                 qa_pairs_text = ""
                 for i, qa in enumerate(qa_pairs):
                     qa_pairs_text += (
@@ -1510,12 +1772,20 @@ async def process_rag_checklist(
                 try:
                     # Update progress for final evaluation
                     progress_tracker.update_stage_progress(
-                        task_id, "reviewing", file_index * len(question_list) + len(question_list), 
+                        task_id,
+                        "reviewing",
+                        file_index * len(question_list) + len(question_list),
                         len(files) * len(question_list),
-                        translate_progress_message("generating_final_evaluation", user_language, file_num=file_index+1, total_files=len(files), file_preview=file_preview)
+                        translate_progress_message(
+                            "generating_final_evaluation",
+                            user_language,
+                            file_num=file_index + 1,
+                            total_files=len(files),
+                            file_preview=file_preview,
+                        ),
                     )
                     await asyncio.sleep(0.01)  # Allow progress API to respond
-                    
+
                     print(f"Generating final evaluation for {file.filename}...")
                     final_evaluation = invoke_llm(
                         llm, final_prompt_template, {"qa_pairs": qa_pairs_text}
@@ -1525,8 +1795,12 @@ async def process_rag_checklist(
                         final_evaluation, session, current_user, llm
                     )
                 except Exception as final_eval_error:
-                    print(f"Error generating final evaluation for {file.filename}: {final_eval_error}")
-                    final_evaluation = f"Error generating final evaluation: {str(final_eval_error)}"
+                    print(
+                        f"Error generating final evaluation for {file.filename}: {final_eval_error}"
+                    )
+                    final_evaluation = (
+                        f"Error generating final evaluation: {str(final_eval_error)}"
+                    )
 
                 # Record interaction for this file
                 try:
@@ -1548,12 +1822,12 @@ async def process_rag_checklist(
                             "final_evaluation": final_evaluation,
                             "qa_count": len(qa_pairs),
                         },
-                        metadata={
-                            "qa_pairs": qa_pairs
-                        },
+                        metadata={"qa_pairs": qa_pairs},
                     )
                 except Exception as interaction_error:
-                    print(f"Error recording interaction for {file.filename}: {interaction_error}")
+                    print(
+                        f"Error recording interaction for {file.filename}: {interaction_error}"
+                    )
                     interaction_id = None
 
                 # Store results for this file
@@ -1567,20 +1841,24 @@ async def process_rag_checklist(
 
             # 10. Return results based on number of files processed
             if len(all_files_results) == 0:
-                raise HTTPException(status_code=400, detail="No files were successfully processed")
-            
+                raise HTTPException(
+                    status_code=400, detail="No files were successfully processed"
+                )
+
             # Complete reviewing stage and start finalizing
             print(f"📊 COMPLETING REVIEWING STAGE for task {task_id}")
             progress_tracker.complete_stage(task_id, "reviewing", "Review complete")
-            await asyncio.sleep(0.1)  # Allow progress polling to see reviewing completion
-            
+            await asyncio.sleep(
+                0.1
+            )  # Allow progress polling to see reviewing completion
+
             print(f"📊 STARTING FINALIZING STAGE for task {task_id}")
             progress_tracker.update_stage_progress(
                 task_id, "finalizing", 0, 1, "Finalizing results..."
             )
-            
+
             await asyncio.sleep(0.1)  # Allow progress API to respond
-            
+
             # Return optimized multi-file response
             if len(all_files_results) > 1:
                 # Multiple files: return optimized format with all results
@@ -1610,24 +1888,38 @@ async def process_rag_checklist(
                         "search_mode": request_data.search_mode,
                     }
                 )
-            
+
             # Complete finalizing stage
             print(f"📊 COMPLETING FINALIZING STAGE for task {task_id}")
-            progress_tracker.complete_stage(task_id, "finalizing", translate_progress_message("review_completed_successfully", user_language))
-            await asyncio.sleep(0.1)  # Allow progress polling to see finalizing completion
-            
+            progress_tracker.complete_stage(
+                task_id,
+                "finalizing",
+                translate_progress_message(
+                    "review_completed_successfully", user_language
+                ),
+            )
+            await asyncio.sleep(
+                0.1
+            )  # Allow progress polling to see finalizing completion
+
             print(f"📊 COMPLETING TASK for task {task_id}")
-            progress_tracker.complete_task(task_id, translate_progress_message("review_completed_successfully", user_language))
+            progress_tracker.complete_task(
+                task_id,
+                translate_progress_message(
+                    "review_completed_successfully", user_language
+                ),
+            )
             await asyncio.sleep(0.1)  # Allow progress polling to see task completion
-            
+
             # Store results in task metadata for later retrieval
             print(f"📊 STORING RESULTS METADATA for task {task_id}")
             progress_tracker.update_task_metadata(task_id, result.results)
-            
+
             return result
 
     except Exception as e:
         import traceback
+
         print("Error processing RAG checklist:")
         print(str(e))
 
@@ -1888,16 +2180,16 @@ async def get_veradoc_detail(
     current_user: CurrentUser,
     include_qa_pairs: bool = Query(
         default=True,
-        description="If False, excludes the heavy qa_pairs data to improve performance"
+        description="If False, excludes the heavy qa_pairs data to improve performance",
     ),
 ):
     """
     Retrieve a specific VeraDoc evaluation by ID.
-    
+
     Args:
         report_id: The UUID of the report to retrieve
         include_qa_pairs: If False, excludes the heavy qa_pairs data (default: True)
-    
+
     Returns summary (without qa_pairs) when include_qa_pairs=False,
     or full detail (with qa_pairs) when include_qa_pairs=True.
     """
@@ -1933,7 +2225,7 @@ async def get_veradoc_detail(
                 kb_name = kb.title if kb else "Unknown Knowledge Base"
 
             qa_pairs = extra_data.get("qa_pairs", [])
-            
+
             # Create a response that matches the structure expected by the frontend
             result = {
                 "id": str(report.id),
@@ -1957,7 +2249,7 @@ async def get_veradoc_detail(
                     ),
                 },
             }
-            
+
             # Conditionally include qa_pairs based on parameter
             if include_qa_pairs:
                 result["results"]["qa_pairs"] = qa_pairs
@@ -1985,12 +2277,12 @@ async def get_veradoc_detail(
                     "interaction_id": str(report.id),
                 },
             }
-            
+
             if include_qa_pairs:
                 fallback["results"]["qa_pairs"] = []
             else:
                 fallback["results"]["qa_pairs_count"] = 0
-                
+
             return fallback
 
     except Exception as e:
@@ -2011,13 +2303,13 @@ async def get_veradoc_qa_pair(
 ):
     """
     Retrieve a specific QA pair from a VeraDoc evaluation by index.
-    
+
     This enables lazy loading of individual QA pairs for better performance.
-    
+
     Args:
         report_id: The UUID of the report
         qa_index: The zero-based index of the QA pair to retrieve
-    
+
     Returns the QA pair with question, answer, context, and source_citations.
     """
     try:
@@ -2033,15 +2325,15 @@ async def get_veradoc_qa_pair(
         try:
             extra_data = report.extra_data or {}
             qa_pairs = extra_data.get("qa_pairs", [])
-            
+
             if qa_index < 0 or qa_index >= len(qa_pairs):
                 raise HTTPException(
-                    status_code=404, 
-                    detail=f"QA pair index {qa_index} not found. Valid range: 0-{len(qa_pairs)-1}"
+                    status_code=404,
+                    detail=f"QA pair index {qa_index} not found. Valid range: 0-{len(qa_pairs)-1}",
                 )
-            
+
             qa_pair = qa_pairs[qa_index]
-            
+
             return {
                 "index": qa_index,
                 "question": qa_pair.get("question", ""),
@@ -2054,18 +2346,17 @@ async def get_veradoc_qa_pair(
             raise
         except Exception as e:
             raise HTTPException(
-                status_code=500,
-                detail=f"Error retrieving QA pair: {str(e)}"
+                status_code=500, detail=f"Error retrieving QA pair: {str(e)}"
             )
 
     except HTTPException:
         raise
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         raise HTTPException(
-            status_code=500,
-            detail=f"Error retrieving QA pair: {str(e)}"
+            status_code=500, detail=f"Error retrieving QA pair: {str(e)}"
         )
 
 
@@ -2146,10 +2437,12 @@ async def optimize_checklist(
                         try:
                             # Get all documents for full optimization scan
                             all_data = self.chroma_db.get()
-                            
+
                             if all_data and "documents" in all_data:
-                                print(f"📚 Full Optimization Scan: Processing ALL {len(all_data['documents'])} documents")
-                            
+                                print(
+                                    f"📚 Full Optimization Scan: Processing ALL {len(all_data['documents'])} documents"
+                                )
+
                             documents = []
 
                             if (
@@ -2206,9 +2499,7 @@ async def optimize_checklist(
                 print(
                     f"Large document detected ({file.filename}), disabling disconnect monitoring to prevent false positives"
                 )
-                if disconnect_monitor:
-                    disconnect_monitor.cancel()
-                    disconnect_monitor = None
+                # Disconnect monitoring disabled due to false positives
 
             # 4. Run the review process with current questions
             question_list = request_data.questions.strip().split("\n")
@@ -2300,17 +2591,39 @@ async def optimize_checklist(
                     suggestion = parse_optimization_response(suggestion_response, qa)
                     # Add policy context to the suggestion
                     suggestion.policy_context = qa["context"]
+
+                    # Translate current answer and analysis to user's language
+                    suggestion.current_answer = await translate_text_if_needed(
+                        suggestion.current_answer, session, current_user, llm
+                    )
+                    suggestion.reason = await translate_text_if_needed(
+                        suggestion.reason, session, current_user, llm
+                    )
+
                     suggestions.append(suggestion)
                 else:
                     # Question is already working well
+                    reason_text = "Question already generates positive responses"
+                    translated_reason = await translate_text_if_needed(
+                        reason_text, session, current_user, llm
+                    )
                     suggestion = ChecklistSuggestion(
                         original_question=qa["question"],
                         suggested_question=qa["question"],
-                        reason="Question already generates positive responses",
+                        reason=translated_reason,
                         current_answer=qa["answer"],
                         needs_revision=False,
                         policy_context=qa["context"],
                     )
+
+                    # Translate current answer and analysis to user's language
+                    suggestion.current_answer = await translate_text_if_needed(
+                        suggestion.current_answer, session, current_user, llm
+                    )
+                    suggestion.reason = await translate_text_if_needed(
+                        suggestion.reason, session, current_user, llm
+                    )
+
                     suggestions.append(suggestion)
 
             # 6. Compile results
@@ -2345,9 +2658,6 @@ The optimization process identified questions that resulted in negative response
         raise HTTPException(
             status_code=500, detail=f"Error optimizing checklist: {str(e)}"
         )
-    finally:
-        if disconnect_monitor:
-            disconnect_monitor.cancel()
 
 
 @router.post("/generate/docx", response_class=StreamingResponse)
@@ -2373,24 +2683,28 @@ async def generate_docx(
 
         print("Adding title and date to the document...")
         # Determine language
-        language = request.language or getattr(current_user, 'preferred_language', 'en') or 'en'
+        language = (
+            request.language
+            or getattr(current_user, "preferred_language", "en")
+            or "en"
+        )
 
         # Add a title
         title_text = (
             request.title
             if request.title
-            else translate('document_evaluation', language)
+            else translate("document_evaluation", language)
         )
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
         # Add translated subtitle with metadata
-        date_str = datetime.now().strftime('%B %d, %Y at %H:%M')
-        subtitle_template = translate('generated_on', language)
+        date_str = datetime.now().strftime("%B %d, %Y at %H:%M")
+        subtitle_template = translate("generated_on", language)
         subtitle = subtitle_template.format(
             date=date_str,
             name=current_user.full_name or current_user.email,
-            email=current_user.email
+            email=current_user.email,
         )
         subtitle_paragraph = doc.add_paragraph()
         subtitle_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
@@ -2567,7 +2881,7 @@ async def generate_csv(
                                     # This prevents removing legitimate parts of the filename
 
                         citation_text = (
-                            re.sub(r'[\ud800-\udfff]', '', citation.get("content", ""))
+                            re.sub(r"[\ud800-\udfff]", "", citation.get("content", ""))
                             .replace("\n", " ")
                             .replace("\r", " ")
                         )
@@ -2576,14 +2890,28 @@ async def generate_csv(
                 citations_text = " | ".join(citations) if citations else "No citations"
 
                 # Clean up text fields
-                question_clean = re.sub(r'[\ud800-\udfff]', '', question).replace("\n", " ").replace("\r", " ")
-                answer_clean = re.sub(r'[\ud800-\udfff]', '', answer).replace("\n", " ").replace("\r", " ")
-                context_clean = re.sub(r'[\ud800-\udfff]', '', context).replace("\n", " ").replace("\r", " ")
+                question_clean = (
+                    re.sub(r"[\ud800-\udfff]", "", question)
+                    .replace("\n", " ")
+                    .replace("\r", " ")
+                )
+                answer_clean = (
+                    re.sub(r"[\ud800-\udfff]", "", answer)
+                    .replace("\n", " ")
+                    .replace("\r", " ")
+                )
+                context_clean = (
+                    re.sub(r"[\ud800-\udfff]", "", context)
+                    .replace("\n", " ")
+                    .replace("\r", " ")
+                )
 
                 # For the final evaluation, we'll include it for each row
                 # (since it's a summary of all QA pairs)
-                final_eval_clean = re.sub(r'[\ud800-\udfff]', '', final_evaluation).replace("\n", " ").replace(
-                    "\r", " "
+                final_eval_clean = (
+                    re.sub(r"[\ud800-\udfff]", "", final_evaluation)
+                    .replace("\n", " ")
+                    .replace("\r", " ")
                 )
 
                 # Write row

@@ -10,6 +10,7 @@ import { Field } from "@/components/ui/field"
 import { InputGroup } from "@/components/ui/input-group"
 import useCustomToast from "@/hooks/useCustomToast"
 import { emailPattern, useHandleError } from "@/utils"
+import { useTranslation } from "react-i18next"
 
 interface FormData {
   email: string
@@ -40,6 +41,7 @@ function RecoverPassword() {
   } = useForm<FormData>()
   const { showSuccessToast } = useCustomToast()
   const handleError = useHandleError()
+  const { t } = useTranslation()
 
   const recoverPassword = async (data: FormData) => {
     await LoginService.recoverPassword({
@@ -50,7 +52,7 @@ function RecoverPassword() {
   const mutation = useMutation({
     mutationFn: recoverPassword,
     onSuccess: () => {
-      showSuccessToast("Password recovery email sent successfully.")
+      showSuccessToast(t("toast.passwordRecoveryEmailSent"))
       reset()
     },
     onError: (err: ApiError) => {

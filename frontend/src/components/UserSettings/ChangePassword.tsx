@@ -31,7 +31,7 @@ const ChangePassword = () => {
   const mutation = useMutation({
     mutationFn: (data: UpdatePassword) => UsersService.updatePasswordMe({ requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Password updated successfully.")
+      showSuccessToast(t("toast.passwordUpdated"))
       reset()
     },
     onError: (err: ApiError) => {
@@ -54,6 +54,7 @@ const ChangePassword = () => {
             {...register("current_password", passwordRules())}
             placeholder={t("settings.currentPassword")}
             errors={errors}
+            label={t("settings.currentPassword")}
           />
           <PasswordInput
             type="new_password"
@@ -61,6 +62,7 @@ const ChangePassword = () => {
             {...register("new_password", passwordRules())}
             placeholder={t("settings.newPassword")}
             errors={errors}
+            label={t("settings.newPassword")}
           />
           <PasswordInput
             type="confirm_password"
@@ -68,6 +70,7 @@ const ChangePassword = () => {
             {...register("confirm_password", confirmPasswordRules(getValues))}
             placeholder={t("settings.confirmPassword")}
             errors={errors}
+            label={t("settings.confirmPassword")}
           />
           <Button
             variant="solid"

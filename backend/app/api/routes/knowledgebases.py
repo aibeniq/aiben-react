@@ -986,9 +986,9 @@ async def create_knowledge_base(
     session: SessionDep,
     current_user: CurrentUser,
     background_tasks: BackgroundTasks,
-    title: str = Form(...),
-    description: Optional[str] = Form(None),
-    embedding_model_id: Optional[str] = Form(None),
+    title: str = Query(...),
+    description: Optional[str] = Query(None),
+    embedding_model_id: Optional[str] = Query(None),
     files: List[UploadFile] = File(...),
     task_id: Optional[str] = Query(None),  # Optional task_id from the separate endpoint
 ) -> Any:
