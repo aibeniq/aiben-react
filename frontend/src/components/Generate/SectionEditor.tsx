@@ -1,14 +1,7 @@
-import {
-  Box,
-  HStack,
-  IconButton,
-  Switch,
-  Text,
-  Textarea,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, HStack, IconButton, Switch, Text, Textarea, VStack } from "@chakra-ui/react"
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FiChevronDown, FiChevronUp, FiTrash2 } from "react-icons/fi"
 import { generateUUID } from "../../utils/uuid"
 
@@ -37,6 +30,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
   ])
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [isInitializing, setIsInitializing] = useState(false)
+  const { t } = useTranslation()
   const lastSectionsValueRef = useRef<string>("")
 
   const callbacks = useRef({ onSectionsChange, onStructuredSectionsChange })
@@ -61,28 +55,18 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
           if (Array.isArray(parsedSections)) {
             // More flexible validation - just check if it's an array of objects with text
             const items = parsedSections
-              .filter(
-                (item) =>
-                  item &&
-                  typeof item === "object" &&
-                  typeof item.text === "string",
-              )
+              .filter((item) => item && typeof item === "object" && typeof item.text === "string")
               .map((item) => ({
                 id: item.id || generateUUID(),
                 text: item.text,
                 consultDocuments:
-                  item.consultDocuments !== undefined
-                    ? item.consultDocuments
-                    : true,
+                  item.consultDocuments !== undefined ? item.consultDocuments : true,
               }))
 
             console.log("SectionEditor: Processed items:", items)
 
             // Ensure there's always an empty section at the end
-            if (
-              items.length === 0 ||
-              items[items.length - 1].text.trim() !== ""
-            ) {
+            if (items.length === 0 || items[items.length - 1].text.trim() !== "") {
               items.push({
                 id: generateUUID(),
                 text: "",
@@ -95,10 +79,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
           }
           throw new Error("Not an array")
         } catch (error) {
-          console.log(
-            "SectionEditor: JSON parse failed, trying newline split:",
-            error,
-          )
+          console.log("SectionEditor: JSON parse failed, trying newline split:", error)
           const items = sections
             .split("\n")
             .filter((line) => line.trim())
@@ -117,9 +98,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
 
       // Only run this if we didn't successfully parse above
       console.log("SectionEditor: No valid sections, creating empty section")
-      setSectionItems([
-        { id: generateUUID(), text: "", consultDocuments: true },
-      ])
+      setSectionItems([{ id: generateUUID(), text: "", consultDocuments: true }])
       lastSectionsValueRef.current = sections
 
       // DON'T set initialization to false here - do it in a separate useEffect that watches sectionItems
@@ -130,20 +109,12 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
   useEffect(() => {
     // Only complete initialization if we're currently initializing and sectionItems has been set
     if (isInitializing && sectionItems.length > 0) {
-      console.log(
-        "SectionEditor: Initialization complete with",
-        sectionItems.length,
-        "items",
-      )
+      console.log("SectionEditor: Initialization complete with", sectionItems.length, "items")
       setIsInitializing(false)
     }
   }, [sectionItems, isInitializing])
 
-  const handleSectionChange = (
-    id: string,
-    field: keyof SectionItem,
-    value: any,
-  ) => {
+  const handleSectionChange = (id: string, field: keyof SectionItem, value: any) => {
     setSectionItems((currentItems) => {
       const updatedItems = currentItems.map((item) =>
         item.id === id ? { ...item, [field]: value } : item,
@@ -170,10 +141,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
     setSectionItems((currentItems) => {
       const updated = currentItems.filter((item) => item.id !== id)
       // Ensure we always have at least one empty section
-      if (
-        updated.length === 0 ||
-        updated[updated.length - 1].text.trim() !== ""
-      ) {
+      if (updated.length === 0 || updated[updated.length - 1].text.trim() !== "") {
         updated.push({ id: generateUUID(), text: "", consultDocuments: true })
       }
       return updated
@@ -184,10 +152,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
     if (index === 0) return
     setSectionItems((currentItems) => {
       const newItems = [...currentItems]
-      ;[newItems[index - 1], newItems[index]] = [
-        newItems[index],
-        newItems[index - 1],
-      ]
+      ;[newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]]
       return newItems
     })
   }
@@ -196,10 +161,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
     setSectionItems((currentItems) => {
       if (index === currentItems.length - 1) return currentItems
       const newItems = [...currentItems]
-      ;[newItems[index], newItems[index + 1]] = [
-        newItems[index + 1],
-        newItems[index],
-      ]
+      ;[newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]]
       return newItems
     })
   }
@@ -207,9 +169,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
   useEffect(() => {
     // Don't notify parent during initial load/parsing
     if (isInitializing) {
-      console.log(
-        "SectionEditor: Skipping parent notification during initialization",
-      )
+      console.log("SectionEditor: Skipping parent notification during initialization")
       return
     }
 
@@ -218,14 +178,9 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
       return
     }
 
-    console.log(
-      "SectionEditor: sectionItems changed by user, notifying parent",
-      sectionItems,
-    )
+    console.log("SectionEditor: sectionItems changed by user, notifying parent", sectionItems)
     // Filter out empty sections for the parent (except keep one empty for editing)
-    const nonEmptySections = sectionItems.filter(
-      (item) => item.text.trim() !== "",
-    )
+    const nonEmptySections = sectionItems.filter((item) => item.text.trim() !== "")
 
     const structuredData = nonEmptySections.map((item) => ({
       id: item.id,
@@ -261,8 +216,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
         }}
       >
         {sectionItems.map((item, index) => {
-          const isLastEmptySection =
-            index === sectionItems.length - 1 && item.text.trim() === ""
+          const isLastEmptySection = index === sectionItems.length - 1 && item.text.trim() === ""
           const canRemove = sectionItems.length > 1 && item.text.trim() !== ""
 
           return (
@@ -289,11 +243,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
                     }}
                     checked={item.consultDocuments}
                     onCheckedChange={(details) => {
-                      handleSectionChange(
-                        item.id,
-                        "consultDocuments",
-                        details.checked,
-                      )
+                      handleSectionChange(item.id, "consultDocuments", details.checked)
                     }}
                     size="sm"
                     colorPalette="teal"
@@ -301,7 +251,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
                     <Switch.HiddenInput />
                     <Switch.Control />
                     <Switch.Label>
-                      <Text fontSize="xs">Consult docs</Text>
+                      <Text fontSize="xs">{t("editOutlineModal.consultDocs")}</Text>
                     </Switch.Label>
                   </Switch.Root>
                 )}
@@ -309,12 +259,8 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
                 <div style={{ flex: "1", width: "100%" }}>
                   <Textarea
                     value={item.text}
-                    onChange={(e) =>
-                      handleSectionChange(item.id, "text", e.target.value)
-                    }
-                    placeholder={
-                      isLastEmptySection ? placeholder : "Section description"
-                    }
+                    onChange={(e) => handleSectionChange(item.id, "text", e.target.value)}
+                    placeholder={isLastEmptySection ? placeholder : "Section description"}
                     size="sm"
                     borderTop="none"
                     borderLeft="none"
@@ -363,11 +309,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
                     variant="ghost"
                     onClick={() => moveSectionDown(index)}
                     disabled={index === sectionItems.length - 1}
-                    opacity={
-                      hoveredIndex === index && index < sectionItems.length - 1
-                        ? 1
-                        : 0
-                    }
+                    opacity={hoveredIndex === index && index < sectionItems.length - 1 ? 1 : 0}
                   >
                     <FiChevronDown size={12} />
                   </IconButton>

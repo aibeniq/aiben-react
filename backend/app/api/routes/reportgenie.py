@@ -78,8 +78,7 @@ async def create_generate_task():
     This allows frontend to start progress polling before form submission.
     """
     task_id = progress_tracker.create_task(
-        "Generating report",
-        {"setup": 0.1, "generating": 0.8, "finalizing": 0.1}
+        "Generating report", {"setup": 0.1, "generating": 0.8, "finalizing": 0.1}
     )
     progress_tracker.update_stage_progress(
         task_id, "setup", 0, 1, "Waiting to start report generation..."
@@ -95,7 +94,7 @@ async def create_generate_outline_task():
     """
     task_id = progress_tracker.create_task(
         "Generating outline",
-        {"processing_files": 0.2, "generating": 0.7, "finalizing": 0.1}
+        {"processing_files": 0.2, "generating": 0.7, "finalizing": 0.1},
     )
     progress_tracker.update_stage_progress(
         task_id, "processing_files", 0, 1, "Waiting to start outline generation..."
@@ -117,8 +116,8 @@ async def create_optimize_outline_task():
             "generating": 0.4,
             "matching": 0.2,
             "comparing": 0.15,
-            "finalizing": 0.05
-        }
+            "finalizing": 0.05,
+        },
     )
     progress_tracker.update_stage_progress(
         task_id, "setup", 0, 1, "Waiting to start outline optimization..."
@@ -141,21 +140,26 @@ async def get_reportgenie_progress(
 
     # Debug logging to see what's actually being returned
     print(f"🔍 REPORTGENIE API RETURNING PROGRESS: task_id={task_id}")
-    print(f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}")
+    print(
+        f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}"
+    )
     print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
     print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
-    
+
     # Check each stage completion status
-    stages = progress_data.get('stages', {})
+    stages = progress_data.get("stages", {})
     for stage_name, stage_data in stages.items():
-        completed = stage_data.get('completed', False) if isinstance(stage_data, dict) else False
+        completed = (
+            stage_data.get("completed", False)
+            if isinstance(stage_data, dict)
+            else False
+        )
         print(f"🔍 STAGE {stage_name}: completed={completed}")
 
     # Yield control to allow other async operations (like this API call) to run
     await asyncio.sleep(0)
 
     return progress_data
-
 
 
 class KnowledgeBaseCache:
@@ -324,9 +328,9 @@ async def generate_report(
         if not task_id:
             task_id = progress_tracker.create_task(
                 f"Generating report",
-                {"setup": 0.1, "generating": 0.8, "finalizing": 0.1}
+                {"setup": 0.1, "generating": 0.8, "finalizing": 0.1},
             )
-        
+
         progress_tracker.update_stage_progress(
             task_id, "setup", 0, 1, message_key="generate.progress.starting"
         )
@@ -337,20 +341,29 @@ async def generate_report(
 
         # Initialize knowledge base cache for this report generation
         kb_cache = KnowledgeBaseCache()
-        
-        progress_tracker.complete_stage(task_id, "setup", message_key="generate.progress.initializing")
+
+        progress_tracker.complete_stage(
+            task_id, "setup", message_key="generate.progress.initializing"
+        )
         progress_tracker.update_stage_progress(
-            task_id, "generating", 0, len(section_items), message_key="generate.progress.generating"
+            task_id,
+            "generating",
+            0,
+            len(section_items),
+            message_key="generate.progress.generating",
         )
 
         try:
             for idx, section_item in enumerate(section_items):
                 # Update progress for each section
                 progress_tracker.update_stage_progress(
-                    task_id, "generating", idx, len(section_items),
-                    message_key="generate.progress.generating"
+                    task_id,
+                    "generating",
+                    idx,
+                    len(section_items),
+                    message_key="generate.progress.generating",
                 )
-                
+
                 await asyncio.sleep(0.01)  # Allow progress API to respond
                 # CRITICAL: Check if client has disconnected before processing each section
                 try:
@@ -359,12 +372,12 @@ async def generate_report(
                         return ReportGenieResponse(
                             results={
                                 "status": "cancelled",
-                                "message": "Request cancelled - client disconnected"
+                                "message": "Request cancelled - client disconnected",
                             }
                         )
                 except Exception as e:
                     print(f"Warning: Could not check disconnect status: {e}")
-                
+
                 section_description = section_item["text"]
                 consult_documents = section_item.get("consultDocuments", True)
                 # Use search_mode from form parameter, not from section_item (which doesn't have searchType)
@@ -425,45 +438,55 @@ async def generate_report(
                         )
                         chunk_analyses = []
                         relevant_chunk_indices = []
-                        
+
                         for i, chunk in enumerate(text_chunks):
                             # Add delay between chunk processing to prevent rate limit exhaustion
                             if i > 0 and settings.REPORTGENIE_ENABLE_PROCESSING_DELAYS:
-                                await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
-                                
+                                await asyncio.sleep(
+                                    settings.PROCESSING_DELAY_BETWEEN_CHUNKS
+                                )
+
                             # CRITICAL: Check if client has disconnected before processing each chunk
                             try:
                                 if request and await request.is_disconnected():
-                                    print(f"❌ CLIENT DISCONNECTED - Stopping at chunk {i + 1}")
+                                    print(
+                                        f"❌ CLIENT DISCONNECTED - Stopping at chunk {i + 1}"
+                                    )
                                     return ReportGenieResponse(
                                         results={
                                             "status": "cancelled",
-                                            "message": "Request cancelled - client disconnected during chunk processing"
+                                            "message": "Request cancelled - client disconnected during chunk processing",
                                         }
                                     )
                             except Exception as e:
-                                print(f"Warning: Could not check disconnect status: {e}")
-                            
+                                print(
+                                    f"Warning: Could not check disconnect status: {e}"
+                                )
+
                             # Use relevance filter to check if chunk is relevant
                             analysis = invoke_llm(
                                 llm,
                                 settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
                                 {"chunk": chunk, "question": section_description},
                             )
-                            
+
                             # CRITICAL: Check if client disconnected after LLM call
                             try:
                                 if request and await request.is_disconnected():
-                                    print(f"❌ CLIENT DISCONNECTED - After LLM call for chunk {i + 1}")
+                                    print(
+                                        f"❌ CLIENT DISCONNECTED - After LLM call for chunk {i + 1}"
+                                    )
                                     return ReportGenieResponse(
                                         results={
                                             "status": "cancelled",
-                                            "message": "Request cancelled - client disconnected after LLM call"
+                                            "message": "Request cancelled - client disconnected after LLM call",
                                         }
                                     )
                             except Exception as e:
-                                print(f"Warning: Could not check disconnect status: {e}")
-                            
+                                print(
+                                    f"Warning: Could not check disconnect status: {e}"
+                                )
+
                             # Only include relevant chunks
                             if "No relevant information found" not in analysis:
                                 chunk_analyses.append(analysis)
@@ -493,20 +516,24 @@ async def generate_report(
                                         "question": section_description,
                                     },
                                 )
-                                
+
                                 # CRITICAL: Check if client disconnected after synthesis LLM call
                                 try:
                                     if request and await request.is_disconnected():
-                                        print(f"❌ CLIENT DISCONNECTED - After synthesis LLM call")
+                                        print(
+                                            f"❌ CLIENT DISCONNECTED - After synthesis LLM call"
+                                        )
                                         return ReportGenieResponse(
                                             results={
                                                 "status": "cancelled",
-                                                "message": "Request cancelled - client disconnected after synthesis"
+                                                "message": "Request cancelled - client disconnected after synthesis",
                                             }
                                         )
                                 except Exception as e:
-                                    print(f"Warning: Could not check disconnect status: {e}")
-                                
+                                    print(
+                                        f"Warning: Could not check disconnect status: {e}"
+                                    )
+
                                 # Translate the synthesized answer if needed
                                 section_content = await translate_text_if_needed(
                                     synthesized_answer, session, current_user, llm
@@ -517,8 +544,10 @@ async def generate_report(
                                 for idx in relevant_chunk_indices:
                                     chunk_content = text_chunks[idx]
                                     # Truncate to 500 chars for display
-                                    display_content = chunk_content[:500] + ("..." if len(chunk_content) > 500 else "")
-                                    
+                                    display_content = chunk_content[:500] + (
+                                        "..." if len(chunk_content) > 500 else ""
+                                    )
+
                                     source_citations.append(
                                         {
                                             "content": display_content,
@@ -572,11 +601,13 @@ async def generate_report(
                         # CRITICAL: Check if client disconnected after vector search LLM call
                         try:
                             if request and await request.is_disconnected():
-                                print(f"❌ CLIENT DISCONNECTED - After vector search LLM call")
+                                print(
+                                    f"❌ CLIENT DISCONNECTED - After vector search LLM call"
+                                )
                                 return ReportGenieResponse(
                                     results={
                                         "status": "cancelled",
-                                        "message": "Request cancelled - client disconnected after LLM call"
+                                        "message": "Request cancelled - client disconnected after LLM call",
                                     }
                                 )
                         except Exception as e:
@@ -630,11 +661,13 @@ async def generate_report(
                 draft_report += f"\n\n## {section_title}\n\n{section_content}"
 
             # 7. Compile the final report
-            progress_tracker.complete_stage(task_id, "generating", "All sections generated successfully")
+            progress_tracker.complete_stage(
+                task_id, "generating", "All sections generated successfully"
+            )
             progress_tracker.update_stage_progress(
                 task_id, "finalizing", 0, 1, "Compiling final report..."
             )
-            
+
             full_report = "\n\n\n\n".join(
                 [section["content"].strip() for section in sections]
             )
@@ -714,9 +747,11 @@ async def generate_report(
         print(
             f"[DEBUG] ReportGenie result with interaction_id: {result.get('interaction_id')}"
         )
-        
+
         # Complete the progress tracking
-        progress_tracker.complete_stage(task_id, "finalizing", "Report generation complete!")
+        progress_tracker.complete_stage(
+            task_id, "finalizing", "Report generation complete!"
+        )
 
         return ReportGenieResponse(results=result)
 
@@ -724,11 +759,11 @@ async def generate_report(
         import traceback
 
         traceback.print_exc()
-        
+
         # Mark progress as failed if task_id exists
-        if 'task_id' in locals() and task_id:
+        if "task_id" in locals() and task_id:
             progress_tracker.fail_task(task_id, f"Report generation failed: {str(e)}")
-        
+
         raise HTTPException(
             status_code=500, detail=f"Error generating report: {str(e)}"
         )
@@ -876,7 +911,9 @@ async def get_report_history(
                     "full_report": metadata.get(
                         "full_report", output_data.get("full_report", "")
                     ),
-                    "section_count": metadata.get("section_count", output_data.get("section_count", 0)),
+                    "section_count": metadata.get(
+                        "section_count", output_data.get("section_count", 0)
+                    ),
                     "total_length": output_data.get("total_length", 0),
                     "has_feedback": interaction.feedback is not None,
                 }
@@ -1370,13 +1407,13 @@ async def generate_outline(
         if not task_id:
             task_id = progress_tracker.create_task(
                 f"Generating outline",
-                {"processing_files": 0.2, "generating": 0.7, "finalizing": 0.1}
+                {"processing_files": 0.2, "generating": 0.7, "finalizing": 0.1},
             )
-        
+
         progress_tracker.update_stage_progress(
             task_id, "processing_files", 0, 1, "Initializing outline generation..."
         )
-        
+
         # Get the default LLM
         llm = get_default_llm(session, current_user)
 
@@ -1385,12 +1422,20 @@ async def generate_outline(
         if files:
             print(f"Processing {len(files)} uploaded files for outline generation")
             progress_tracker.update_stage_progress(
-                task_id, "processing_files", 0, len(files), f"Processing {len(files)} uploaded files..."
+                task_id,
+                "processing_files",
+                0,
+                len(files),
+                f"Processing {len(files)} uploaded files...",
             )
 
             for idx, file in enumerate(files):
                 progress_tracker.update_stage_progress(
-                    task_id, "processing_files", idx, len(files), f"Processing file {idx+1}/{len(files)}: {file.filename}..."
+                    task_id,
+                    "processing_files",
+                    idx,
+                    len(files),
+                    f"Processing file {idx+1}/{len(files)}: {file.filename}...",
                 )
                 if file.size > 0:
                     try:
@@ -1420,10 +1465,14 @@ async def generate_outline(
                         # Add the error info to the document content so user knows what happened
                         example_document_content += f"\n\n--- Error processing {file.filename} ---\nError: {str(e)}\n"
                         continue
-            
-            progress_tracker.complete_stage(task_id, "processing_files", f"Processed {len(files)} files")
+
+            progress_tracker.complete_stage(
+                task_id, "processing_files", f"Processed {len(files)} files"
+            )
         else:
-            progress_tracker.complete_stage(task_id, "processing_files", "No files to process")
+            progress_tracker.complete_stage(
+                task_id, "processing_files", "No files to process"
+            )
 
         # Check if content exceeds token limits and chunk if necessary
         if example_document_content:
@@ -1443,9 +1492,13 @@ async def generate_outline(
 
                 # Chunk the document content
                 chunks = chunk_text(example_document_content, max_tokens=max_chunk_size)
-                
+
                 progress_tracker.update_stage_progress(
-                    task_id, "generating", 0, len(chunks), f"Processing {len(chunks)} document chunks..."
+                    task_id,
+                    "generating",
+                    0,
+                    len(chunks),
+                    f"Processing {len(chunks)} document chunks...",
                 )
 
                 # Process each chunk to generate sections
@@ -1453,12 +1506,16 @@ async def generate_outline(
 
                 for i, chunk in enumerate(chunks):
                     progress_tracker.update_stage_progress(
-                        task_id, "generating", i, len(chunks), f"Analyzing chunk {i+1}/{len(chunks)}..."
+                        task_id,
+                        "generating",
+                        i,
+                        len(chunks),
+                        f"Analyzing chunk {i+1}/{len(chunks)}...",
                     )
                     # Add delay between chunk processing to prevent rate limit exhaustion
                     if i > 0 and settings.REPORTGENIE_ENABLE_PROCESSING_DELAYS:
                         await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
-                        
+
                     print(f"Processing chunk {i+1}/{len(chunks)}")
 
                     # Generate sections for this chunk
@@ -1620,7 +1677,7 @@ Return only the final selected sections, one per line, numbered."""
         print("=== OUTLINE GENERATION PROMPT SENT TO LLM ===")
         print(formatted_prompt)
         print("=== END OF PROMPT ===")
-        
+
         progress_tracker.update_stage_progress(
             task_id, "generating", 0, 1, "Generating outline sections with LLM..."
         )
@@ -1631,8 +1688,10 @@ Return only the final selected sections, one per line, numbered."""
             settings.REPORTGENIE_GENERATE_OUTLINE_PROMPT_TEMPLATE,
             prompt_variables,
         )
-        
-        progress_tracker.complete_stage(task_id, "generating", "Outline generated successfully")
+
+        progress_tracker.complete_stage(
+            task_id, "generating", "Outline generated successfully"
+        )
         progress_tracker.update_stage_progress(
             task_id, "finalizing", 0, 1, "Parsing and finalizing sections..."
         )
@@ -1710,19 +1769,23 @@ Return only the final selected sections, one per line, numbered."""
             },
             metadata={},
         )
-        
-        progress_tracker.complete_stage(task_id, "finalizing", "Outline generation complete!")
 
-        return GenerateOutlineResponse(sections=sections, description_analysis=analysis, task_id=task_id)
+        progress_tracker.complete_stage(
+            task_id, "finalizing", "Outline generation complete!"
+        )
+
+        return GenerateOutlineResponse(
+            sections=sections, description_analysis=analysis, task_id=task_id
+        )
 
     except Exception as e:
         print(f"Error generating outline: {e}")
         traceback.print_exc()
-        
+
         # Mark progress as failed if task_id exists
-        if 'task_id' in locals() and task_id:
+        if "task_id" in locals() and task_id:
             progress_tracker.fail_task(task_id, f"Outline generation failed: {str(e)}")
-        
+
         raise HTTPException(
             status_code=500, detail=f"Error generating outline: {str(e)}"
         )
@@ -1747,7 +1810,6 @@ async def optimize_outline(
     Includes real-time progress tracking.
     """
     print("optimize_outline function invoked!")
-    cancellation_requested = False
 
     try:
         # Create progress tracking task
@@ -1760,30 +1822,13 @@ async def optimize_outline(
                     "generating": 0.4,
                     "matching": 0.2,
                     "comparing": 0.15,
-                    "finalizing": 0.05
-                }
+                    "finalizing": 0.05,
+                },
             )
-        
+
         progress_tracker.update_stage_progress(
             task_id, "setup", 0, 1, "Initializing outline optimization..."
         )
-        
-        print("Setting up disconnect monitor for outline optimization...")
-        disconnect_monitor = None
-        if request:
-
-            async def monitor_client_disconnect():
-                nonlocal cancellation_requested
-                try:
-                    await request.is_disconnected()
-                    print("Client disconnected, canceling optimization...")
-                    cancellation_requested = True
-                except asyncio.CancelledError:
-                    print("Disconnect monitor cancelled because main task completed")
-                except Exception as e:
-                    print(f"Error in disconnect monitoring: {str(e)}")
-
-            disconnect_monitor = asyncio.create_task(monitor_client_disconnect())
 
         print("Starting outline optimization...")
 
@@ -1800,7 +1845,7 @@ async def optimize_outline(
         kb = session.get(KnowledgeBase, knowledge_base_id)
         if not kb:
             raise HTTPException(status_code=404, detail="Knowledge base not found")
-        
+
         progress_tracker.complete_stage(task_id, "setup", "Setup complete")
         progress_tracker.update_stage_progress(
             task_id, "processing_document", 0, 1, "Processing ground-truth document..."
@@ -1876,15 +1921,21 @@ async def optimize_outline(
             print(
                 f"Processing ground-truth document: {file.filename} ({len(ground_truth_text)} characters)"
             )
-            
-            progress_tracker.complete_stage(task_id, "processing_document", "Ground-truth document processed")
+
+            progress_tracker.complete_stage(
+                task_id, "processing_document", "Ground-truth document processed"
+            )
 
             # 4. Parse current outline sections
             current_sections = json.loads(sections)
             print(f"Optimizing {len(current_sections)} outline sections...")
-            
+
             progress_tracker.update_stage_progress(
-                task_id, "generating", 0, len(current_sections), "Starting section generation..."
+                task_id,
+                "generating",
+                0,
+                len(current_sections),
+                "Starting section generation...",
             )
 
             # Add limits to prevent oversized processing
@@ -1913,21 +1964,22 @@ async def optimize_outline(
 
             for i, section in enumerate(current_sections):
                 # Update progress for section generation
-                section_preview = section["text"][:40] + "..." if len(section["text"]) > 40 else section["text"]
-                progress_tracker.update_stage_progress(
-                    task_id, "generating", i, len(current_sections),
-                    f"Generating section {i + 1}/{len(current_sections)}: {section_preview}"
+                section_preview = (
+                    section["text"][:40] + "..."
+                    if len(section["text"]) > 40
+                    else section["text"]
                 )
-                
+                progress_tracker.update_stage_progress(
+                    task_id,
+                    "generating",
+                    i,
+                    len(current_sections),
+                    f"Generating section {i + 1}/{len(current_sections)}: {section_preview}",
+                )
+
                 # Add delay between section processing to prevent rate limit exhaustion
                 if i > 0 and settings.REPORTGENIE_ENABLE_PROCESSING_DELAYS:
                     await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_REQUESTS)
-                    
-                if cancellation_requested:
-                    print("Operation cancelled by client disconnect")
-                    raise HTTPException(
-                        status_code=408, detail="Operation cancelled by user"
-                    )
 
                 section_description = section["text"].strip()
                 consult_documents = section.get("consultDocuments", True)
@@ -1994,17 +2046,21 @@ async def optimize_outline(
                             all_source_text,
                             max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE,
                         )
-                        
+
                         # LLM-based relevance filtering for ReportGenie full text scan
                         # Filter chunks before analysis to avoid processing irrelevant content
                         if text_chunks:
-                            print(f"🔍 Full Text Scan: Filtering {len(text_chunks)} chunks for relevance to section: {section_description[:50]}...")
-                            
-                            import asyncio
-                            
+                            print(
+                                f"🔍 Full Text Scan: Filtering {len(text_chunks)} chunks for relevance to section: {section_description[:50]}..."
+                            )
+
                             # Batch / concurrency settings with sensible defaults
-                            BATCH_SIZE = getattr(settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 10)
-                            REQUEST_DELAY = getattr(settings, "PROCESSING_DELAY_BETWEEN_REQUESTS", 0.02)
+                            BATCH_SIZE = getattr(
+                                settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 10
+                            )
+                            REQUEST_DELAY = getattr(
+                                settings, "PROCESSING_DELAY_BETWEEN_REQUESTS", 0.02
+                            )
 
                             loop = asyncio.get_running_loop()
                             filtered_chunks = []
@@ -2026,7 +2082,10 @@ async def optimize_outline(
                                                 lambda: invoke_llm(
                                                     llm,
                                                     settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
-                                                    {"chunk": chunk, "question": section_description},
+                                                    {
+                                                        "chunk": chunk,
+                                                        "question": section_description,
+                                                    },
                                                 ),
                                             )
                                         except Exception as e:
@@ -2038,30 +2097,40 @@ async def optimize_outline(
                                     tasks.append(asyncio.create_task(_check()))
 
                                 # Await this batch and handle results
-                                results = await asyncio.gather(*tasks, return_exceptions=True)
+                                results = await asyncio.gather(
+                                    *tasks, return_exceptions=True
+                                )
 
                                 for res in results:
                                     if isinstance(res, Exception):
                                         # On error, include the chunk to be safe (preserve previous behavior)
-                                        print(f"Warning: error during batch relevance check: {res}")
+                                        print(
+                                            f"Warning: error during batch relevance check: {res}"
+                                        )
                                         continue
 
                                     chunk_idx, chunk, relevance_check = res
                                     # Filter based on LLM response (same logic as before)
-                                    if "No relevant information found" not in (relevance_check or ""):
+                                    if "No relevant information found" not in (
+                                        relevance_check or ""
+                                    ):
                                         print(f"✅ Chunk {chunk_idx + 1} is relevant")
                                         filtered_chunks.append(chunk)
                                     else:
-                                        print(f"❌ Chunk {chunk_idx + 1} is not relevant - excluding from analysis")
+                                        print(
+                                            f"❌ Chunk {chunk_idx + 1} is not relevant - excluding from analysis"
+                                        )
 
                                 # Small sleep between batches to help with rate limits and to yield loop
                                 if REQUEST_DELAY:
                                     await asyncio.sleep(REQUEST_DELAY)
-                            
+
                             # Use filtered_chunks for analysis
                             text_chunks = filtered_chunks
-                            print(f"📊 Relevance filtering: {len(filtered_chunks)}/{len(text_chunks)} chunks are relevant for analysis")
-                        
+                            print(
+                                f"📊 Relevance filtering: {len(filtered_chunks)}/{len(text_chunks)} chunks are relevant for analysis"
+                            )
+
                         chunk_analyses = []
                         for chunk in text_chunks:
                             analysis = invoke_llm(
@@ -2100,17 +2169,21 @@ async def optimize_outline(
 
                         # Get relevant context for this section from knowledge base
                         docs = retriever.get_relevant_documents(section_description)
-                        
+
                         # LLM-based relevance filtering for ReportGenie section generation (similar to VeraDoc full scan)
                         # This prevents irrelevant chunks from being included in report sections
                         if docs:
-                            print(f"🔍 Filtering {len(docs)} retrieved chunks for relevance to section: {section_description[:50]}...")
-                            
-                            import asyncio
-                            
+                            print(
+                                f"🔍 Filtering {len(docs)} retrieved chunks for relevance to section: {section_description[:50]}..."
+                            )
+
                             # Batch / concurrency settings with sensible defaults
-                            BATCH_SIZE = getattr(settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 10)
-                            REQUEST_DELAY = getattr(settings, "PROCESSING_DELAY_BETWEEN_REQUESTS", 0.02)
+                            BATCH_SIZE = getattr(
+                                settings, "VERADOC_FULL_SCAN_FILTER_BATCH_SIZE", 10
+                            )
+                            REQUEST_DELAY = getattr(
+                                settings, "PROCESSING_DELAY_BETWEEN_REQUESTS", 0.02
+                            )
 
                             loop = asyncio.get_running_loop()
                             filtered_docs = []
@@ -2132,7 +2205,10 @@ async def optimize_outline(
                                                 lambda: invoke_llm(
                                                     llm,
                                                     settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
-                                                    {"chunk": doc.page_content or "", "question": section_description},
+                                                    {
+                                                        "chunk": doc.page_content or "",
+                                                        "question": section_description,
+                                                    },
                                                 ),
                                             )
                                         except Exception as e:
@@ -2144,30 +2220,40 @@ async def optimize_outline(
                                     tasks.append(asyncio.create_task(_check()))
 
                                 # Await this batch and handle results
-                                results = await asyncio.gather(*tasks, return_exceptions=True)
+                                results = await asyncio.gather(
+                                    *tasks, return_exceptions=True
+                                )
 
                                 for res in results:
                                     if isinstance(res, Exception):
                                         # On error, include the chunk to be safe (preserve previous behavior)
-                                        print(f"Warning: error during batch relevance check: {res}")
+                                        print(
+                                            f"Warning: error during batch relevance check: {res}"
+                                        )
                                         continue
 
                                     doc_idx, doc, relevance_check = res
                                     # Filter based on LLM response (same logic as before)
-                                    if "No relevant information found" not in (relevance_check or ""):
+                                    if "No relevant information found" not in (
+                                        relevance_check or ""
+                                    ):
                                         print(f"✅ Chunk {doc_idx + 1} is relevant")
                                         filtered_docs.append(doc)
                                     else:
-                                        print(f"❌ Chunk {doc_idx + 1} is not relevant - excluding from section")
+                                        print(
+                                            f"❌ Chunk {doc_idx + 1} is not relevant - excluding from section"
+                                        )
 
                                 # Small sleep between batches to help with rate limits and to yield loop
                                 if REQUEST_DELAY:
                                     await asyncio.sleep(REQUEST_DELAY)
-                            
+
                             # Use filtered_docs for the rest of the flow
                             docs = filtered_docs
-                            print(f"📊 Relevance filtering: {len(filtered_docs)}/{len(docs)} chunks are relevant for section")
-                        
+                            print(
+                                f"📊 Relevance filtering: {len(filtered_docs)}/{len(docs)} chunks are relevant for section"
+                            )
+
                         context = "\n\n".join([doc.page_content for doc in docs])
 
                         # Build the report draft so far (all previous sections)
@@ -2303,11 +2389,17 @@ async def optimize_outline(
             print(
                 f"Split ground-truth into {len(ground_truth_chunks)} large chunks (avg {len(ground_truth_text)//len(ground_truth_chunks) if ground_truth_chunks else 0} chars per chunk)"
             )
-            
+
             # Complete generating stage and start matching stage
-            progress_tracker.complete_stage(task_id, "generating", "All sections generated")
+            progress_tracker.complete_stage(
+                task_id, "generating", "All sections generated"
+            )
             progress_tracker.update_stage_progress(
-                task_id, "matching", 0, len(ground_truth_chunks), "Starting document matching..."
+                task_id,
+                "matching",
+                0,
+                len(ground_truth_chunks),
+                "Starting document matching...",
             )
 
             # Map each chunk to the most appropriate section
@@ -2325,15 +2417,12 @@ async def optimize_outline(
             for chunk_idx, chunk in enumerate(ground_truth_chunks):
                 # Update matching progress
                 progress_tracker.update_stage_progress(
-                    task_id, "matching", chunk_idx, len(ground_truth_chunks),
-                    f"Matching chunk {chunk_idx + 1}/{len(ground_truth_chunks)}..."
+                    task_id,
+                    "matching",
+                    chunk_idx,
+                    len(ground_truth_chunks),
+                    f"Matching chunk {chunk_idx + 1}/{len(ground_truth_chunks)}...",
                 )
-                
-                if cancellation_requested:
-                    print("Operation cancelled by client disconnect")
-                    raise HTTPException(
-                        status_code=408, detail="Operation cancelled by user"
-                    )
 
                 print(
                     f"Mapping large chunk {chunk_idx + 1}/{len(ground_truth_chunks)} ({len(chunk)} chars)..."
@@ -2476,11 +2565,14 @@ IMPORTANT:
                 # Check for potential LLM issues before calling
                 try:
                     # Call LLM through rate limiter for proper token management
-                    from app.services.universal_llm_wrapper import execute_llm_request_safely_sync
+                    from app.services.universal_llm_wrapper import (
+                        execute_llm_request_safely_sync,
+                    )
+
                     mapping_response = execute_llm_request_safely_sync(
-                        llm, 
-                        mapping_prompt, 
-                        model_name=getattr(llm, 'model_name', 'gpt-4o')
+                        llm,
+                        mapping_prompt,
+                        model_name=getattr(llm, "model_name", "gpt-4o"),
                     ).content
                 except Exception as llm_error:
                     print(f"LLM ERROR: {str(llm_error)}")
@@ -2843,11 +2935,17 @@ Prompt size: {prompt_size} characters (~{estimated_tokens} tokens)
                 else:
                     print(f"    No content mapped to this section")
             print("END MAPPING RESULTS")
-            
+
             # Complete matching stage and start comparing stage
-            progress_tracker.complete_stage(task_id, "matching", "Document matching complete")
+            progress_tracker.complete_stage(
+                task_id, "matching", "Document matching complete"
+            )
             progress_tracker.update_stage_progress(
-                task_id, "comparing", 0, len(consulting_section_descriptions), "Starting section comparison..."
+                task_id,
+                "comparing",
+                0,
+                len(consulting_section_descriptions),
+                "Starting section comparison...",
             )
 
             # 7. Compare each section's generated content to its mapped ground-truth chunks
@@ -2856,18 +2954,17 @@ Prompt size: {prompt_size} characters (~{estimated_tokens} tokens)
             optimization_count = 0
 
             # Process only consulting sections to ensure consistent numbering
-            for opt_idx, section_description in enumerate(consulting_section_descriptions):
+            for opt_idx, section_description in enumerate(
+                consulting_section_descriptions
+            ):
                 # Update comparing progress
                 progress_tracker.update_stage_progress(
-                    task_id, "comparing", opt_idx, len(consulting_section_descriptions),
-                    f"Comparing section {opt_idx + 1}/{len(consulting_section_descriptions)}..."
+                    task_id,
+                    "comparing",
+                    opt_idx,
+                    len(consulting_section_descriptions),
+                    f"Comparing section {opt_idx + 1}/{len(consulting_section_descriptions)}...",
                 )
-                
-                if cancellation_requested:
-                    print("Operation cancelled by client disconnect")
-                    raise HTTPException(
-                        status_code=408, detail="Operation cancelled by user"
-                    )
 
                 # Get the generated content for this section
                 generated_content = generated_sections.get(section_description, "")
@@ -3019,17 +3116,24 @@ Prompt size: {prompt_size} characters (~{estimated_tokens} tokens)
                 if needs_revision:
                     optimization_count += 1
 
+                # Translate suggestion fields to user's language
+                translated_reason = await translate_text_if_needed(
+                    reason, session, current_user, llm
+                )
+                translated_current_output = await translate_text_if_needed(
+                    generated_content[:1000], session, current_user, llm
+                )
+                translated_ground_truth = await translate_text_if_needed(
+                    ground_truth_context[:1000], session, current_user, llm
+                )
+
                 suggestions.append(
                     OutlineSuggestion(
                         original_section=section_description,
                         suggested_section=suggested_section,
-                        reason=reason,
-                        current_output=generated_content[
-                            :1000
-                        ],  # Show first 1000 chars
-                        ground_truth_content=ground_truth_context[
-                            :1000
-                        ],  # Show first 1000 chars
+                        reason=translated_reason,
+                        current_output=translated_current_output,
+                        ground_truth_content=translated_ground_truth,
                         needs_revision=needs_revision,
                     )
                 )
@@ -3095,20 +3199,29 @@ Content Extraction:
             print(
                 f"Optimization complete: {sections_actually_optimized}/{sections_that_consult_docs} document-consulting sections optimized ({sections_that_dont_consult_docs} non-consulting sections excluded from results)"
             )
-            
+
             # Complete comparing stage and finalizing
-            progress_tracker.complete_stage(task_id, "comparing", "Section comparison complete")
+            progress_tracker.complete_stage(
+                task_id, "comparing", "Section comparison complete"
+            )
             progress_tracker.update_stage_progress(
                 task_id, "finalizing", 0, 1, "Finalizing optimization results..."
             )
-            
-            progress_tracker.complete_stage(task_id, "finalizing", "Optimization complete!")
+
+            progress_tracker.complete_stage(
+                task_id, "finalizing", "Optimization complete!"
+            )
+
+            # Translate the analysis summary to user's language
+            translated_analysis_summary = await translate_text_if_needed(
+                analysis_summary, session, current_user, llm
+            )
 
             return OptimizedOutlineResponse(
                 original_sections=consulting_section_descriptions,  # Only return consulting sections
                 suggestions=suggestions,  # Already filtered to only consulting sections
                 optimized_sections=optimized_sections,
-                analysis_summary=analysis_summary,
+                analysis_summary=translated_analysis_summary,
                 task_id=task_id,
             )
 
@@ -3116,17 +3229,14 @@ Content Extraction:
         print("Error in outline optimization:")
         print(str(e))
         traceback.print_exc()
-        
+
         # Mark progress as failed if task_id exists
-        if 'task_id' in locals() and task_id:
+        if "task_id" in locals() and task_id:
             progress_tracker.fail_task(task_id, f"Optimization failed: {str(e)}")
-        
+
         raise HTTPException(
             status_code=500, detail=f"Error optimizing outline: {str(e)}"
         )
-    finally:
-        if disconnect_monitor:
-            disconnect_monitor.cancel()
 
 
 @router.post("/optimize-outline/csv", response_class=StreamingResponse)
@@ -3189,7 +3299,11 @@ async def generate_outline_optimization_csv(
                 suggested_section_clean = suggested_section.replace("\n", " ").replace(
                     "\r", " "
                 )
-                reason_clean = re.sub(r'[\ud800-\udfff]', '', reason).replace("\n", " ").replace("\r", " ")
+                reason_clean = (
+                    re.sub(r"[\ud800-\udfff]", "", reason)
+                    .replace("\n", " ")
+                    .replace("\r", " ")
+                )
                 current_output_clean = current_output.replace("\n", " ").replace(
                     "\r", " "
                 )
@@ -3273,24 +3387,28 @@ async def generate_docx(
 
         print("Adding title and date to the document...")
         # Determine language
-        language = request.language or getattr(current_user, 'preferred_language', 'en') or 'en'
+        language = (
+            request.language
+            or getattr(current_user, "preferred_language", "en")
+            or "en"
+        )
 
         # Add a title - hard-coding it for ReportGenie because it's using the service for Compare functionality with 'Document Comparison' as title
         title_text = (
             request.title
             if request.title
-            else translate('generated_document', language)
+            else translate("generated_document", language)
         )
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
         # Add translated subtitle with metadata
-        date_str = datetime.now().strftime('%B %d, %Y at %H:%M')
-        subtitle_template = translate('generated_on', language)
+        date_str = datetime.now().strftime("%B %d, %Y at %H:%M")
+        subtitle_template = translate("generated_on", language)
         subtitle = subtitle_template.format(
             date=date_str,
             name=current_user.full_name or current_user.email,
-            email=current_user.email
+            email=current_user.email,
         )
         subtitle_paragraph = doc.add_paragraph()
         subtitle_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
@@ -3449,13 +3567,20 @@ async def generate_csv(
 
                 # Clean up text fields (remove newlines and carriage returns for CSV)
                 title_clean = (
-                    re.sub(r'[\ud800-\udfff]', '', title).replace("\n", " ").replace("\r", " ").replace('"', '""')
+                    re.sub(r"[\ud800-\udfff]", "", title)
+                    .replace("\n", " ")
+                    .replace("\r", " ")
+                    .replace('"', '""')
                 )
                 content_clean = (
-                    re.sub(r'[\ud800-\udfff]', '', content).replace("\n", " ").replace("\r", " ").replace('"', '""')
+                    re.sub(r"[\ud800-\udfff]", "", content)
+                    .replace("\n", " ")
+                    .replace("\r", " ")
+                    .replace('"', '""')
                 )
                 citations_clean = (
-                    re.sub(r'[\ud800-\udfff]', '', citations_formatted).replace("\n", " ")
+                    re.sub(r"[\ud800-\udfff]", "", citations_formatted)
+                    .replace("\n", " ")
                     .replace("\r", " ")
                     .replace('"', '""')
                 )

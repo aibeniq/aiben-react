@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { PasswordInput } from "@/components/ui/password-input"
 import useCustomToast from "@/hooks/useCustomToast"
 import { confirmPasswordRules, passwordRules, useHandleError } from "@/utils"
+import { useTranslation } from "react-i18next"
 
 interface NewPasswordForm extends NewPassword {
   confirm_password: string
@@ -47,6 +48,7 @@ function ResetPassword() {
   const { showSuccessToast } = useCustomToast()
   const navigate = useNavigate()
   const handleError = useHandleError()
+  const { t } = useTranslation()
 
   const resetPassword = async (data: NewPassword) => {
     const token = new URLSearchParams(window.location.search).get("token")
@@ -59,7 +61,7 @@ function ResetPassword() {
   const mutation = useMutation({
     mutationFn: resetPassword,
     onSuccess: () => {
-      showSuccessToast("Password updated successfully.")
+      showSuccessToast(t("toast.passwordUpdated"))
       reset()
       navigate({ to: "/login" })
     },

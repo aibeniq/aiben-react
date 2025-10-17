@@ -2,6 +2,7 @@ import { Button, DialogTitle, Text } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { FiTrash2 } from "react-icons/fi"
 
 import { KnowledgeBasesService } from "@/client"
@@ -21,6 +22,7 @@ const DeleteKnowledgeBase = ({ id }: { id: string }) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { t } = useTranslation()
   const {
     handleSubmit,
     formState: { isSubmitting },
@@ -65,7 +67,7 @@ const DeleteKnowledgeBase = ({ id }: { id: string }) => {
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm" colorPalette="red">
           <FiTrash2 fontSize="16px" />
-          Delete Knowledge Base
+          {t("knowledgeBases.deleteModal.buttonText")}
         </Button>
       </DialogTrigger>
 
@@ -73,32 +75,20 @@ const DeleteKnowledgeBase = ({ id }: { id: string }) => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogCloseTrigger />
           <DialogHeader>
-            <DialogTitle>Delete Knowledge Base</DialogTitle>
+            <DialogTitle>{t("knowledgeBases.deleteModal.title")}</DialogTitle>
           </DialogHeader>
           <DialogBody>
-            <Text mb={4}>
-              This Knowledge Base will be permanently deleted. Are you sure? You
-              will not be able to undo this action.
-            </Text>
+            <Text mb={4}>{t("knowledgeBases.deleteModal.description")}</Text>
           </DialogBody>
 
           <DialogFooter gap={2}>
             <DialogActionTrigger asChild>
-              <Button
-                variant="subtle"
-                colorPalette="gray"
-                disabled={isSubmitting}
-              >
-                Cancel
+              <Button variant="subtle" colorPalette="gray" disabled={isSubmitting}>
+                {t("knowledgeBases.deleteModal.cancelButton")}
               </Button>
             </DialogActionTrigger>
-            <Button
-              variant="solid"
-              colorPalette="red"
-              type="submit"
-              loading={isSubmitting}
-            >
-              Delete
+            <Button variant="solid" colorPalette="red" type="submit" loading={isSubmitting}>
+              {t("knowledgeBases.deleteModal.confirmButton")}
             </Button>
           </DialogFooter>
         </form>

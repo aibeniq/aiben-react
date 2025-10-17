@@ -280,7 +280,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
       // This provides true lazy loading - only fetch what the user actually wants to see
     } catch (error) {
       console.error("Error loading report:", error)
-      showErrorToast("Failed to load evaluation")
+      showErrorToast(t("toast.evaluationLoadFailed"))
       setIsVeradocLoading(false)
     }
   }
@@ -301,7 +301,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
       // Note: Sections should be loaded on-demand when user requests them
     } catch (error) {
       console.error("Error loading report:", error)
-      showErrorToast("Failed to load report")
+      showErrorToast(t("toast.reportLoadFailed"))
       setIsReportgenieLoading(false)
     }
   }
@@ -316,7 +316,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
       showSuccessToast(t("archive.successMessages.comparisonLoaded"))
     } catch (error) {
       console.error("Error loading comparison:", error)
-      showErrorToast("Failed to load comparison")
+      showErrorToast(t("toast.comparisonLoadFailed"))
     } finally {
       setIsTwincheckLoading(false)
     }
@@ -330,7 +330,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
       showSuccessToast(t("archive.successMessages.formProcessingLoaded"))
     } catch (error) {
       console.error("Error loading form processing:", error)
-      showErrorToast("Failed to load form processing")
+      showErrorToast(t("toast.formProcessingLoadFailed"))
     } finally {
       setIsFormconnectLoading(false)
     }
@@ -351,7 +351,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
       veradocHistoryQuery.refetch()
     } catch (error) {
       console.error("Error deleting evaluation:", error)
-      showErrorToast("Failed to delete evaluation")
+      showErrorToast(t("toast.evaluationDeleteFailed"))
     }
   }
 
@@ -369,7 +369,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
       reportgenieHistoryQuery.refetch()
     } catch (error) {
       console.error("Error deleting report:", error)
-      showErrorToast("Failed to delete report")
+      showErrorToast(t("toast.reportDeleteFailed"))
     }
   }
 
@@ -387,7 +387,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
       twincheckHistoryQuery.refetch()
     } catch (error) {
       console.error("Error deleting comparison:", error)
-      showErrorToast("Failed to delete comparison")
+      showErrorToast(t("toast.comparisonDeleteFailed"))
     }
   }
 
@@ -405,7 +405,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
       formconnectHistoryQuery.refetch()
     } catch (error) {
       console.error("Error deleting form processing:", error)
-      showErrorToast("Failed to delete form processing")
+      showErrorToast(t("toast.formProcessingDeleteFailed"))
     }
   }
 

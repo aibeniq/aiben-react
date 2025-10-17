@@ -1,19 +1,21 @@
 import { type FilesGetSourceContentResponse, FilesService } from "@/client"
 import { useState } from "react"
 import useCustomToast from "./useCustomToast"
+import { useTranslation } from "react-i18next"
 
 export const useFileViewer = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [currentFile, setCurrentFile] =
     useState<FilesGetSourceContentResponse | null>(null)
   const { showErrorToast } = useCustomToast()
+  const { t } = useTranslation()
 
   /**
    * Opens a file viewer for a source ID
    */
   const viewFile = async (sourceId: string) => {
     if (!sourceId) {
-      showErrorToast("Invalid source ID")
+      showErrorToast(t("toast.invalidSourceId"))
       return
     }
 
@@ -42,7 +44,7 @@ export const useFileViewer = () => {
       window.open(url, "_blank")
     } catch (error) {
       console.error("Error viewing file:", error)
-      showErrorToast("Failed to open file for viewing")
+      showErrorToast(t("toast.fileOpenFailed"))
     } finally {
       setIsLoading(false)
     }
@@ -54,7 +56,7 @@ export const useFileViewer = () => {
    */
   const viewFileInModal = async (sourceId: string) => {
     if (!sourceId) {
-      showErrorToast("Invalid source ID")
+      showErrorToast(t("toast.invalidSourceId"))
       return
     }
 
@@ -67,7 +69,7 @@ export const useFileViewer = () => {
       setCurrentFile(response)
     } catch (error) {
       console.error("Error viewing file:", error)
-      showErrorToast("Failed to open file for viewing")
+      showErrorToast(t("toast.fileOpenFailed"))
       setCurrentFile(null)
     } finally {
       setIsLoading(false)

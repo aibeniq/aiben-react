@@ -14,11 +14,7 @@ import {
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiCopy } from "react-icons/fi"
-import {
-  type KnowledgeBasePublic,
-  type VeraDocChecklist,
-  VeradocService,
-} from "../../client"
+import { type KnowledgeBasePublic, type VeraDocChecklist, VeradocService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import { useKnowledgeBases } from "../../hooks/useKnowledgeBases"
 import { copyToClipboard } from "../../utils/copyToClipboard"
@@ -86,8 +82,7 @@ const ChecklistModal = ({
 }: ChecklistModalProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { t } = useTranslation()
-  const { knowledgeBases, showAllUsers, toggleShowAllUsers } =
-    useKnowledgeBases()
+  const { knowledgeBases, showAllUsers, toggleShowAllUsers } = useKnowledgeBases()
 
   // Note: selectedKnowledgeBase now comes from parent props
   // Internal KB selection not needed since we use parent's selection
@@ -167,14 +162,12 @@ const ChecklistModal = ({
   const [suggesting, setSuggesting] = useState(false)
   const [questionsKey, setQuestionsKey] = useState(0)
   const [referenceFiles, setReferenceFiles] = useState<FileItem[]>([])
-  const [referenceKnowledgeBase, setReferenceKnowledgeBase] =
-    useState<KnowledgeBasePublic | null>(null)
-  const [referenceMode, setReferenceMode] = useState<
-    "files" | "knowledge-base"
-  >("files")
+  const [referenceKnowledgeBase, setReferenceKnowledgeBase] = useState<KnowledgeBasePublic | null>(
+    null,
+  )
+  const [referenceMode, setReferenceMode] = useState<"files" | "knowledge-base">("files")
   const [searchMode, setSearchMode] = useState<"vector" | "full_scan">("vector")
-  const [showReferenceKnowledgeBaseModal, setShowReferenceKnowledgeBaseModal] =
-    useState(false)
+  const [showReferenceKnowledgeBaseModal, setShowReferenceKnowledgeBaseModal] = useState(false)
 
   const handleCopyQuestions = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -200,16 +193,12 @@ const ChecklistModal = ({
 
   const handleOptimizeClick = () => {
     if (!selectedKnowledgeBase) {
-      showErrorToast(
-        "Please select a knowledge base first to optimize the checklist.",
-      )
+      showErrorToast("Please select a knowledge base first to optimize the checklist.")
       return
     }
 
     if (questionsList.length === 0 || questionsList.every((q) => !q.trim())) {
-      showErrorToast(
-        "Please add some questions to the checklist before optimizing.",
-      )
+      showErrorToast("Please add some questions to the checklist before optimizing.")
       return
     }
 
@@ -272,9 +261,7 @@ const ChecklistModal = ({
         })
 
         if (!apiResponse.ok) {
-          throw new Error(
-            `HTTP ${apiResponse.status}: ${apiResponse.statusText}`,
-          )
+          throw new Error(`HTTP ${apiResponse.status}: ${apiResponse.statusText}`)
         }
 
         response = await apiResponse.json()
@@ -319,24 +306,17 @@ const ChecklistModal = ({
         let successMessage = `Suggested ${suggestedQuestions.length} questions from description`
         if (referenceMode === "files" && referenceFiles.length > 0) {
           successMessage += ` and ${referenceFiles.length} reference file(s)`
-        } else if (
-          referenceMode === "knowledge-base" &&
-          referenceKnowledgeBase
-        ) {
+        } else if (referenceMode === "knowledge-base" && referenceKnowledgeBase) {
           successMessage += ` using Knowledge Base: ${referenceKnowledgeBase.title}`
         }
 
         showSuccessToast(successMessage)
       } else {
-        showErrorToast(
-          "No questions were suggested. Please try a different description.",
-        )
+        showErrorToast("No questions were suggested. Please try a different description.")
       }
     } catch (error: any) {
       console.error("Error suggesting questions:", error)
-      showErrorToast(
-        `Failed to suggest questions: ${error.message || "Unknown error"}`,
-      )
+      showErrorToast(`Failed to suggest questions: ${error.message || "Unknown error"}`)
     } finally {
       setSuggesting(false)
     }
@@ -397,9 +377,7 @@ const ChecklistModal = ({
                         <Input
                           value={checklistName}
                           onChange={(e) => handleNameChange(e.target.value)}
-                          placeholder={t(
-                            "editChecklistModal.checklistNamePlaceholder",
-                          )}
+                          placeholder={t("editChecklistModal.checklistNamePlaceholder")}
                         />
                       </Field>
 
@@ -415,12 +393,8 @@ const ChecklistModal = ({
                       >
                         <Textarea
                           value={checklistDescription}
-                          onChange={(e) =>
-                            handleDescriptionChange(e.target.value)
-                          }
-                          placeholder={t(
-                            "editChecklistModal.descriptionPlaceholder",
-                          )}
+                          onChange={(e) => handleDescriptionChange(e.target.value)}
+                          placeholder={t("editChecklistModal.descriptionPlaceholder")}
                           rows={4}
                         />
                       </Field>
@@ -433,9 +407,7 @@ const ChecklistModal = ({
                       <Field
                         label={
                           <HStack align="center" gap={2}>
-                            <span>
-                              {t("editChecklistModal.referenceDocuments")}
-                            </span>
+                            <span>{t("editChecklistModal.referenceDocuments")}</span>
                             <HelpTooltip helpKey="referenceDocuments" />
                           </HStack>
                         }
@@ -445,26 +417,16 @@ const ChecklistModal = ({
                           <HStack gap={2}>
                             <Button
                               size="sm"
-                              variant={
-                                referenceMode === "files" ? "solid" : "outline"
-                              }
+                              variant={referenceMode === "files" ? "solid" : "outline"}
                               onClick={() => handleReferenceModeChange("files")}
                             >
                               {t("editChecklistModal.uploadFiles")}
                             </Button>
                             <Button
                               size="sm"
-                              variant={
-                                referenceMode === "knowledge-base"
-                                  ? "solid"
-                                  : "outline"
-                              }
-                              onClick={() =>
-                                handleReferenceModeChange("knowledge-base")
-                              }
-                              disabled={
-                                !knowledgeBases || knowledgeBases.length === 0
-                              }
+                              variant={referenceMode === "knowledge-base" ? "solid" : "outline"}
+                              onClick={() => handleReferenceModeChange("knowledge-base")}
+                              disabled={!knowledgeBases || knowledgeBases.length === 0}
                             >
                               {t("editChecklistModal.knowledgeBase")}
                             </Button>
@@ -497,26 +459,19 @@ const ChecklistModal = ({
                             <Box>
                               <Button
                                 w="full"
-                                variant={
-                                  referenceKnowledgeBase ? "solid" : "outline"
-                                }
-                                onClick={() =>
-                                  setShowReferenceKnowledgeBaseModal(true)
-                                }
+                                variant={referenceKnowledgeBase ? "solid" : "outline"}
+                                onClick={() => setShowReferenceKnowledgeBaseModal(true)}
                                 justifyContent="flex-start"
                                 textAlign="left"
-                                color={
-                                  referenceKnowledgeBase ? "white" : "gray.600"
-                                }
+                                color={referenceKnowledgeBase ? "white" : "gray.600"}
                               >
                                 {referenceKnowledgeBase?.title ||
                                   t("dropdowns.selectKnowledgeBase")}
                               </Button>
-                              {!knowledgeBases ||
-                              knowledgeBases.length === 0 ? (
+                              {!knowledgeBases || knowledgeBases.length === 0 ? (
                                 <Text fontSize="sm" color="orange.600">
-                                  No Knowledge Bases available. Create one first
-                                  to use this feature.
+                                  No Knowledge Bases available. Create one first to use this
+                                  feature.
                                 </Text>
                               ) : null}
                             </Box>
@@ -530,22 +485,18 @@ const ChecklistModal = ({
                       {/* Suggest and Optimize buttons above questions */}
                       <HStack justify="space-between" align="center">
                         <Text fontSize="md" fontWeight="medium">
-                          {t("editChecklistModal.questions")}
+                          {t("editChecklistModal.questions", { count: questionsList.length })}
                         </Text>
                         <HStack gap={2}>
                           <Button
                             size="xs"
                             onClick={handleSuggestQuestions}
                             loading={suggesting}
-                            disabled={
-                              !checklistDescription.trim() || suggesting
-                            }
+                            disabled={!checklistDescription.trim() || suggesting}
                             variant="outline"
                             colorPalette="green"
                           >
-                            {suggesting
-                              ? "Suggesting..."
-                              : t("editChecklistModal.suggest")}
+                            {suggesting ? "Suggesting..." : t("editChecklistModal.suggest")}
                           </Button>
                           <HelpTooltip helpKey="suggestChecklistQuestions" />
                           {/* Always show optimization button with tooltip when disabled */}
@@ -561,9 +512,7 @@ const ChecklistModal = ({
                               onClick={handleOptimizeClick}
                               variant="outline"
                               colorPalette="blue"
-                              disabled={
-                                !knowledgeBases || !selectedKnowledgeBase
-                              }
+                              disabled={!knowledgeBases || !selectedKnowledgeBase}
                             >
                               {t("editChecklistModal.optimize")}
                             </Button>
@@ -588,38 +537,21 @@ const ChecklistModal = ({
                             {validationErrors.questions}
                           </Text>
                         )}
-                        <VStack
-                          gap={3}
-                          align="stretch"
-                          maxH="400px"
-                          overflow="auto"
-                        >
+                        <VStack gap={3} align="stretch" maxH="400px" overflow="auto">
                           {questionsList.map((question, index) => (
                             <QuestionItem
                               key={`${questionsKey}-${index}`}
-                              id={
-                                questionsData[index]?.id || `question-${index}`
-                              }
+                              id={questionsData[index]?.id || `question-${index}`}
                               index={index}
                               question={question}
-                              placeholder={t(
-                                "editChecklistModal.addQuestionPlaceholder",
-                              )}
-                              consultDocuments={
-                                questionsData[index]?.consultDocuments ?? true
-                              }
-                              onUpdate={(idx, value) =>
-                                updateQuestion(idx, value)
-                              }
-                              onBlur={(idx, value) =>
-                                handleQuestionBlur(idx, value)
-                              }
+                              placeholder={t("editChecklistModal.addQuestionPlaceholder")}
+                              consultDocuments={questionsData[index]?.consultDocuments ?? true}
+                              onUpdate={(idx, value) => updateQuestion(idx, value)}
+                              onBlur={(idx, value) => handleQuestionBlur(idx, value)}
                               onRemove={(idx) => removeQuestion(idx)}
                               onMoveUp={(idx) => moveQuestionUp(idx)}
                               onMoveDown={(idx) => moveQuestionDown(idx)}
-                              onConsultDocumentsChange={
-                                handleConsultDocumentsChange
-                              }
+                              onConsultDocumentsChange={handleConsultDocumentsChange}
                               canRemove={questionsList.length > 1}
                               totalQuestions={questionsList.length}
                             />

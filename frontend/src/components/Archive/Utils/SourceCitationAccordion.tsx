@@ -1,6 +1,7 @@
 import { Accordion, Box, Button, HStack, Text } from "@chakra-ui/react"
 import type React from "react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { FiFileText } from "react-icons/fi"
 import { getCleanFileName } from "../../../utils/filename"
 import { cleanRTFFormatting } from "../../../utils/rtfCleaner"
@@ -15,10 +16,9 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
   sourceCitations,
   accordionValue,
 }) => {
+  const { t } = useTranslation()
   // State to track which citations are expanded - using object instead of Set
-  const [expandedCitations, setExpandedCitations] = useState<
-    Record<number, boolean>
-  >({})
+  const [expandedCitations, setExpandedCitations] = useState<Record<number, boolean>>({})
 
   // Function to toggle citation expansion
   const toggleCitationExpansion = (citationIndex: number) => {
@@ -37,10 +37,7 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
   const getDisplayFileName = getCleanFileName
 
   // Helper function to format source display with page number
-  const formatSourceWithPage = (
-    source: string,
-    page?: number | string,
-  ): string => {
+  const formatSourceWithPage = (source: string, page?: number | string): string => {
     const fileName = getDisplayFileName(source)
     if (page && page !== "" && page !== 0) {
       return `${fileName} (Page ${page})`
@@ -56,7 +53,7 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
             <Box flex="1" textAlign="left" fontWeight="medium">
               <HStack>
                 <FiFileText />
-                <Text>View Source Citations ({sourceCitations.length})</Text>
+                <Text>{t("common.viewSourceCitations", { count: sourceCitations.length })}</Text>
               </HStack>
             </Box>
           </Accordion.ItemTrigger>
@@ -67,19 +64,10 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
             const citationText = cleanRTFFormatting(citation.content)
             const shouldTruncate = citationText.length > 300
             const displayText =
-              shouldTruncate && !isExpanded
-                ? `${citationText.substring(0, 300)}...`
-                : citationText
+              shouldTruncate && !isExpanded ? `${citationText.substring(0, 300)}...` : citationText
 
             return (
-              <Box
-                key={cIndex}
-                p={3}
-                mb={2}
-                borderWidth="1px"
-                borderRadius="md"
-                bg="bg"
-              >
+              <Box key={cIndex} p={3} mb={2} borderWidth="1px" borderRadius="md" bg="bg">
                 {citation.metadata.source_data_id ? (
                   <SourceLink
                     sourceId={citation.metadata.source_data_id}
@@ -93,9 +81,7 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
                     useModal={true}
                     highlightSnippet={citationText}
                   />
-                ) : citation.metadata.source
-                    ?.toLowerCase()
-                    .endsWith(".docx") ? (
+                ) : citation.metadata.source?.toLowerCase().endsWith(".docx") ? (
                   <SourceLink
                     sourceId="" // Empty sourceId, will be handled by filename fallback
                     fileName={formatSourceWithPage(
@@ -110,10 +96,7 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
                   />
                 ) : (
                   <Text as="span" ml={1} fontWeight="normal" color="blue.600">
-                    {formatSourceWithPage(
-                      citation.metadata.source,
-                      citation.metadata.page,
-                    )}
+                    {formatSourceWithPage(citation.metadata.source, citation.metadata.page)}
                   </Text>
                 )}
                 <Box
@@ -134,7 +117,7 @@ const SourceCitationAccordion: React.FC<SourceCitationAccordionProps> = ({
                     onClick={() => toggleCitationExpansion(cIndex)}
                     colorPalette="blue"
                   >
-                    {isExpanded ? "Show Less" : "Read More"}
+                    {isExpanded ? t("common.showLess") : t("common.readMore")}
                   </Button>
                 )}
               </Box>
