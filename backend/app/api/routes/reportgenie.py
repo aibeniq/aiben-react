@@ -139,12 +139,12 @@ async def get_reportgenie_progress(
         raise HTTPException(status_code=404, detail="Task not found")
 
     # Debug logging to see what's actually being returned
-    print(f"🔍 REPORTGENIE API RETURNING PROGRESS: task_id={task_id}")
-    print(
-        f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}"
-    )
-    print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
-    print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
+    # print(f"🔍 REPORTGENIE API RETURNING PROGRESS: task_id={task_id}")
+    # print(
+    #    f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}"
+    # )
+    # print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
+    # print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
 
     # Check each stage completion status
     stages = progress_data.get("stages", {})
