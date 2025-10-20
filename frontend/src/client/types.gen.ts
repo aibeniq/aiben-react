@@ -90,6 +90,11 @@ export type Body_veradoc_optimize_checklist = {
 };
 
 export type Body_veradoc_process_rag_checklist = {
+  questions?: string;
+  knowledge_base_id?: string;
+  custom_instructions?: (string | null);
+  search_mode?: 'vector' | 'full_scan';
+  task_id?: (string | null);
   files?: Array<((Blob | File))>;
 };
 
@@ -1205,12 +1210,7 @@ export type VeradocGetVeradocResultsData = {
 export type VeradocGetVeradocResultsResponse = (unknown);
 
 export type VeradocProcessRagChecklistData = {
-  customInstructions?: (string | null);
-  formData?: Body_veradoc_process_rag_checklist;
-  knowledgeBaseId: string;
-  questions: string;
-  searchMode?: 'vector' | 'full_scan';
-  taskId?: (string | null);
+  formData: Body_veradoc_process_rag_checklist;
 };
 
 export type VeradocProcessRagChecklistResponse = (VeraDocResponse);
