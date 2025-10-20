@@ -18,7 +18,16 @@ import markdown
 from bs4 import BeautifulSoup
 import tiktoken
 
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form, Request as FastAPIRequest, Query
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    UploadFile,
+    HTTPException,
+    Form,
+    Request as FastAPIRequest,
+    Query,
+)
 from fastapi.responses import StreamingResponse
 from sqlmodel import select
 import asyncio
@@ -42,6 +51,7 @@ from app.services.translation import translate_text_if_needed, translate
 from app.services.pdf_utils import load_pdf_with_pypdf
 from app.services.progress_tracker import progress_tracker
 
+
 # Async wrapper for invoke_llm that respects cancellation
 async def invoke_llm_async(llm, prompt, variables=None):
     """Async wrapper for invoke_llm that properly handles cancellation"""
@@ -55,6 +65,7 @@ async def invoke_llm_async(llm, prompt, variables=None):
     except Exception as e:
         print(f"Error in invoke_llm_async: {e}")
         raise
+
 
 # No longer using global cancellation tracking - relying on asyncio cancellation
 
@@ -223,14 +234,14 @@ async def compare_documents(
     """
     Compare two documents based on the provided comparison topics.
     Supports PDF, DOCX, and plain text files.
-    
+
     Args:
         task_id: Optional task ID for progress tracking
     """
     # Generate unique operation ID for logging
     operation_id = str(uuid.uuid4())
     print(f"Starting comparison operation {operation_id}, task_id={task_id}")
-    
+
     try:
         # Reset file pointers (in case they were read elsewhere)
         document1.file.seek(0)
@@ -301,10 +312,15 @@ async def compare_documents(
 
         # Update progress: setup complete, starting topic processing
         if task_id:
-            progress_tracker.complete_stage(task_id, "setup", message_key="compare.progress.initializing")
+            progress_tracker.complete_stage(
+                task_id, "setup", message_key="compare.progress.initializing"
+            )
             progress_tracker.update_stage_progress(
-                task_id, "comparing", 0, len(topic_list), 
-                message_key="compare.progress.comparing"
+                task_id,
+                "comparing",
+                0,
+                len(topic_list),
+                message_key="compare.progress.comparing",
             )
             # Yield to event loop to allow progress API to respond
             await asyncio.sleep(0.01)
@@ -314,16 +330,19 @@ async def compare_documents(
             # Update progress for this topic
             if task_id:
                 progress_tracker.update_stage_progress(
-                    task_id, "comparing", topic_idx, len(topic_list),
-                    message_key="compare.progress.comparing"
+                    task_id,
+                    "comparing",
+                    topic_idx,
+                    len(topic_list),
+                    message_key="compare.progress.comparing",
                 )
                 # Yield to event loop to allow progress API to respond
                 await asyncio.sleep(0.01)
-            
+
             # Add delay between topic processing to prevent rate limit exhaustion
             if topic_idx > 0 and settings.TWINCHECK_ENABLE_PROCESSING_DELAYS:
                 await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_REQUESTS)
-                
+
             # CRITICAL: Check if client has disconnected before processing each topic
             try:
                 if request and await request.is_disconnected():
@@ -331,12 +350,12 @@ async def compare_documents(
                     return TwinCheckResponse(
                         results={
                             "status": "cancelled",
-                            "message": "Request cancelled - client disconnected"
+                            "message": "Request cancelled - client disconnected",
                         }
                     )
             except Exception as e:
                 print(f"Warning: Could not check disconnect status: {e}")
-            
+
             if not topic.strip():
                 continue
 
@@ -357,12 +376,12 @@ async def compare_documents(
                             return TwinCheckResponse(
                                 results={
                                     "status": "cancelled",
-                                    "message": "Request cancelled - client disconnected during chunk processing"
+                                    "message": "Request cancelled - client disconnected during chunk processing",
                                 }
                             )
                     except Exception as e:
                         print(f"Warning: Could not check disconnect status: {e}")
-                    
+
                     print(
                         f"  Processing chunk {i+1}/{len(diff_chunks)} for topic: {topic}"
                     )
@@ -393,16 +412,20 @@ async def compare_documents(
                             )
                         except Exception as _translate_exc:
                             # If translation fails, keep original chunk_result
-                            print(f"Warning: chunk translation failed: {_translate_exc}")
-                        
+                            print(
+                                f"Warning: chunk translation failed: {_translate_exc}"
+                            )
+
                         # CRITICAL: Check if client disconnected after LLM call
                         try:
                             if request and await request.is_disconnected():
-                                print(f"❌ CLIENT DISCONNECTED - After LLM call for chunk {i + 1}")
+                                print(
+                                    f"❌ CLIENT DISCONNECTED - After LLM call for chunk {i + 1}"
+                                )
                                 return TwinCheckResponse(
                                     results={
                                         "status": "cancelled",
-                                        "message": "Request cancelled - client disconnected after LLM call"
+                                        "message": "Request cancelled - client disconnected after LLM call",
                                     }
                                 )
                         except Exception as e:
@@ -598,7 +621,9 @@ async def compare_documents(
                                     combined_analysis, session, current_user, llm
                                 )
                             except Exception as _comb_translate_exc:
-                                print(f"Warning: combined analysis translation failed: {_comb_translate_exc}")
+                                print(
+                                    f"Warning: combined analysis translation failed: {_comb_translate_exc}"
+                                )
 
                             topic_analysis.append(
                                 {
@@ -620,11 +645,15 @@ async def compare_documents(
                             # Fall back to text-only analysis - translate topic_result before appending
                             try:
                                 await asyncio.sleep(0.01)
-                                translated_topic_result = await translate_text_if_needed(
-                                    topic_result, session, current_user, llm
+                                translated_topic_result = (
+                                    await translate_text_if_needed(
+                                        topic_result, session, current_user, llm
+                                    )
                                 )
                             except Exception as _t_exc:
-                                print(f"Warning: topic_result translation failed in vision fallback: {_t_exc}")
+                                print(
+                                    f"Warning: topic_result translation failed in vision fallback: {_t_exc}"
+                                )
                                 translated_topic_result = topic_result
 
                             topic_analysis.append(
@@ -638,7 +667,9 @@ async def compare_documents(
                     else:
                         # Text-only analysis
                         # Translate the topic result if needed
-                        await asyncio.sleep(0.01)  # Allow cancellation during translation
+                        await asyncio.sleep(
+                            0.01
+                        )  # Allow cancellation during translation
                         topic_result = await translate_text_if_needed(
                             topic_result, session, current_user, llm
                         )
@@ -760,8 +791,12 @@ async def compare_documents(
 
         # Mark progress as complete
         if task_id:
-            progress_tracker.complete_stage(task_id, "comparing", message_key="compare.progress.comparing")
-            progress_tracker.complete_task(task_id, message_key="compare.compareSuccess")
+            progress_tracker.complete_stage(
+                task_id, "comparing", message_key="compare.progress.comparing"
+            )
+            progress_tracker.complete_task(
+                task_id, message_key="compare.compareSuccess"
+            )
 
         return TwinCheckResponse(results=result)
 
@@ -780,7 +815,6 @@ async def compare_documents(
         )
 
 
-
 @router.get("/progress/{task_id}")
 async def get_twincheck_progress(
     task_id: str,
@@ -793,14 +827,13 @@ async def get_twincheck_progress(
     if not progress_data:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    print(f"🔍 TWINCHECK API RETURNING PROGRESS: task_id={task_id}")
-    print(f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}")
-    print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
+    # print(f"🔍 TWINCHECK API RETURNING PROGRESS: task_id={task_id}")
+    # print(f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}")
+    # print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
 
     await asyncio.sleep(0)
 
     return progress_data
-
 
 
 # Get history of comparison operations
@@ -843,22 +876,24 @@ async def get_comparison_history(
                 # Create result item
                 comparison_topics = input_data.get("comparison_topics", "")
                 topic_list_name = input_data.get("topic_list_name")
-                
+
                 # Use topic_list_name if available, otherwise create name from topics
                 if topic_list_name:
                     display_name = topic_list_name
                 else:
                     # Fallback: Use first topic as display name, or truncate if too long
                     if comparison_topics.strip():
-                        first_topic = comparison_topics.strip().split('\n')[0].strip()
+                        first_topic = comparison_topics.strip().split("\n")[0].strip()
                         if first_topic:
                             # Truncate if too long
-                            display_name = first_topic[:50] + ("..." if len(first_topic) > 50 else "")
+                            display_name = first_topic[:50] + (
+                                "..." if len(first_topic) > 50 else ""
+                            )
                         else:
                             display_name = "Custom Topic List"
                     else:
                         display_name = "Unnamed Topic List"
-                
+
                 result_item = {
                     "id": str(comparison.id),
                     "date_created": comparison.date_created,
@@ -1167,24 +1202,28 @@ async def generate_docx(
 
         print("Adding title and date to the document...")
         # Determine language
-        language = request.language or getattr(current_user, 'preferred_language', 'en') or 'en'
+        language = (
+            request.language
+            or getattr(current_user, "preferred_language", "en")
+            or "en"
+        )
 
         # Add a title (translated if default)
         title_text = (
             request.title
             if request.title
-            else translate('document_comparison', language)
+            else translate("document_comparison", language)
         )
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
         # Add translated subtitle with metadata
-        date_str = datetime.now().strftime('%B %d, %Y at %H:%M')
-        subtitle_template = translate('generated_on', language)
+        date_str = datetime.now().strftime("%B %d, %Y at %H:%M")
+        subtitle_template = translate("generated_on", language)
         subtitle = subtitle_template.format(
             date=date_str,
             name=current_user.full_name or current_user.email,
-            email=current_user.email
+            email=current_user.email,
         )
         subtitle_paragraph = doc.add_paragraph()
         subtitle_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
@@ -1358,7 +1397,10 @@ async def generate_csv(
             writer.writerow(
                 [
                     "Overall Summary",
-                    re.sub(r'[\ud800-\udfff]', '', summary).replace("\n", " ").replace("\r", "").replace('"', '""'),
+                    re.sub(r"[\ud800-\udfff]", "", summary)
+                    .replace("\n", " ")
+                    .replace("\r", "")
+                    .replace('"', '""'),
                     doc1_name,
                     doc2_name,
                 ]
@@ -1378,13 +1420,20 @@ async def generate_csv(
                 # Attempt to translate both topic title and analysis for CSV consumers
                 await asyncio.sleep(0.01)
                 topic = await translate_text_if_needed(topic, session, current_user)
-                analysis = await translate_text_if_needed(analysis, session, current_user)
+                analysis = await translate_text_if_needed(
+                    analysis, session, current_user
+                )
             except Exception as _csv_trans_exc:
-                print(f"Warning: translation failed while generating CSV: {_csv_trans_exc}")
+                print(
+                    f"Warning: translation failed while generating CSV: {_csv_trans_exc}"
+                )
 
             # Clean analysis text for CSV
             cleaned_analysis = (
-                re.sub(r'[\ud800-\udfff]', '', analysis).replace("\n", " ").replace("\r", "").replace('"', '""')
+                re.sub(r"[\ud800-\udfff]", "", analysis)
+                .replace("\n", " ")
+                .replace("\r", "")
+                .replace('"', '""')
             )
 
             writer.writerow([topic, cleaned_analysis, doc1_name, doc2_name])
@@ -1505,7 +1554,7 @@ async def generate_topics(
                     # Add delay between chunk processing to prevent rate limit exhaustion
                     if i > 0 and settings.TWINCHECK_ENABLE_PROCESSING_DELAYS:
                         await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
-                        
+
                     print(f"Processing chunk {i+1}/{len(chunks)}")
 
                     # Generate topics for this chunk

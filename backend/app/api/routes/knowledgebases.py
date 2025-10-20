@@ -1,6 +1,15 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, BackgroundTasks, Query, Form
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    UploadFile,
+    File,
+    Depends,
+    BackgroundTasks,
+    Query,
+    Form,
+)
 from app.utils.file_validator import FileValidator, sanitize_filename
 from sqlmodel import func, select, delete
 from typing import List, Optional, Any
@@ -835,7 +844,9 @@ def read_knowledge_bases(
         )
         knowledge_bases.append(kb_public)
 
-    logger.info(f"Returning {len(knowledge_bases)} knowledge bases for user {current_user.id}")
+    logger.info(
+        f"Returning {len(knowledge_bases)} knowledge bases for user {current_user.id}"
+    )
 
     return KnowledgeBasesPublic(data=knowledge_bases, count=count)
 
@@ -849,23 +860,27 @@ async def get_knowledge_base_progress(
     Get progress information for a knowledge base creation task.
     """
     # Make this async to prevent blocking during intensive operations
-    print(f"🔍 PROGRESS API: Getting progress for task_id: {task_id}")
+    # print(f"🔍 PROGRESS API: Getting progress for task_id: {task_id}")
     progress_data = progress_tracker.get_progress(task_id)
-    print(f"🔍 PROGRESS API: Retrieved progress_data: {progress_data}")
+    # print(f"🔍 PROGRESS API: Retrieved progress_data: {progress_data}")
     if not progress_data:
         print(f"❌ PROGRESS API: No progress data found for task {task_id}")
         raise HTTPException(status_code=404, detail="Task not found")
 
     # Debug logging to see what's actually being returned
-    print(f"🔍 API RETURNING PROGRESS: task_id={task_id}")
-    print(f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}")
-    print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
-    print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
-    
+    # print(f"🔍 API RETURNING PROGRESS: task_id={task_id}")
+    # print(f"🔍 PROGRESS DATA: status={progress_data.get('status')}, percentage={progress_data.get('percentage')}, current_stage={progress_data.get('current_stage')}")
+    # print(f"🔍 PROGRESS MESSAGE: {progress_data.get('message')}")
+    # print(f"🔍 PROGRESS STAGES: {list(progress_data.get('stages', {}).keys())}")
+
     # Check each stage completion status
-    stages = progress_data.get('stages', {})
+    stages = progress_data.get("stages", {})
     for stage_name, stage_data in stages.items():
-        completed = stage_data.get('completed', False) if isinstance(stage_data, dict) else False
+        completed = (
+            stage_data.get("completed", False)
+            if isinstance(stage_data, dict)
+            else False
+        )
         print(f"🔍 STAGE {stage_name}: completed={completed}")
 
     # Yield control to allow other async operations (like this API call) to run
@@ -929,19 +944,19 @@ async def create_knowledge_base_task(
     Create a knowledge base task and return task_id immediately for progress tracking.
     This allows frontend to start progress polling before file upload begins.
     """
-    
+
     print(f"🎯 IMMEDIATE TASK CREATION: Creating task for '{title}'")
-    
+
     # Get user language for progress translations
     user_language = getattr(current_user, "preferred_language", "en") or "en"
-    
+
     # Create KnowledgeBaseCreate object from query parameters
     knowledge_base_in = KnowledgeBaseCreate(
         title=title,
         description=description,
         embedding_model_id=embedding_model_id,
     )
-    
+
     # Quick validation check before committing to processing
     existing_kb = session.exec(
         select(KnowledgeBase).where(
@@ -960,23 +975,26 @@ async def create_knowledge_base_task(
     task_id = progress_tracker.create_task(
         f"Creating knowledge base '{knowledge_base_in.title}'",
         {
-            "upload": 0.20,      # 20% - File upload and validation (0-20%)
+            "upload": 0.20,  # 20% - File upload and validation (0-20%)
             "processing": 0.20,  # 20% - File processing and text extraction (20-40%)
-            "chunking": 0.20,    # 20% - Document splitting and chunking (40-60%)
-            "embedding": 0.20,   # 20% - Creating embeddings (60-80%)
-            "storing": 0.17,     # 17% - Compressing and storing in database (80-97%)
-            "finalizing": 0.03   # 3% - Creating source entries and cleanup (97-100%)
-        }
+            "chunking": 0.20,  # 20% - Document splitting and chunking (40-60%)
+            "embedding": 0.20,  # 20% - Creating embeddings (60-80%)
+            "storing": 0.17,  # 17% - Compressing and storing in database (80-97%)
+            "finalizing": 0.03,  # 3% - Creating source entries and cleanup (97-100%)
+        },
     )
     print(f"📊 Created task: {task_id}")
-    
+
     # Initialize the upload stage
     progress_tracker.update_stage_progress(
-        task_id, "upload", 0, 1,
+        task_id,
+        "upload",
+        0,
+        1,
         message_key="knowledgeBases.progress.uploading",
-        message_params={"current": "0", "total": "0"}
+        message_params={"current": "0", "total": "0"},
     )
-    
+
     return {"task_id": task_id}
 
 
@@ -998,22 +1016,24 @@ async def create_knowledge_base(
     """
 
     print(f"🚀 MAIN ENDPOINT: Creating knowledge base with {len(files)} files")
-    
+
     # Parse and validate the embedding_model_id
     parsed_embedding_model_id = None
     if embedding_model_id:
         try:
             parsed_embedding_model_id = uuid.UUID(embedding_model_id)
         except ValueError:
-            raise HTTPException(status_code=422, detail="Invalid embedding_model_id format")
-    
+            raise HTTPException(
+                status_code=422, detail="Invalid embedding_model_id format"
+            )
+
     # Create KnowledgeBaseCreate object from form data
     knowledge_base_in = KnowledgeBaseCreate(
         title=title,
         description=description,
         embedding_model_id=parsed_embedding_model_id,
     )
-    
+
     print("Received the following metadata for the knowledge base:")
     print(knowledge_base_in)
 
@@ -1025,13 +1045,13 @@ async def create_knowledge_base(
         task_id = progress_tracker.create_task(
             f"Creating knowledge base '{knowledge_base_in.title}'",
             {
-                "upload": 0.20,      # 20% - File upload and validation (0-20%)
+                "upload": 0.20,  # 20% - File upload and validation (0-20%)
                 "processing": 0.20,  # 20% - File processing and text extraction (20-40%)
-                "chunking": 0.20,    # 20% - Document splitting and chunking (40-60%)
-                "embedding": 0.20,   # 20% - Creating embeddings (60-80%)
-                "storing": 0.17,     # 17% - Compressing and storing in database (80-97%)
-                "finalizing": 0.03   # 3% - Creating source entries and cleanup (97-100%)
-            }
+                "chunking": 0.20,  # 20% - Document splitting and chunking (40-60%)
+                "embedding": 0.20,  # 20% - Creating embeddings (60-80%)
+                "storing": 0.17,  # 17% - Compressing and storing in database (80-97%)
+                "finalizing": 0.03,  # 3% - Creating source entries and cleanup (97-100%)
+            },
         )
         print(f"📊 Created new task_id: {task_id}")
 
@@ -1067,79 +1087,84 @@ async def create_knowledge_base(
     session.refresh(knowledge_base)
 
     print(f"✅ Created placeholder knowledge base with ID: {knowledge_base.id}")
-    
+
     # Note: Upload stage progress is handled by the upload middleware
     # The upload middleware will automatically complete the upload stage when HTTP upload finishes
-    
 
     # Strict file validation and filename sanitization
     file_data = []
     temp_dir = None
     file_paths = []
     total_size = 0
-    
+
     if settings.STREAMING_UPLOAD_ENABLED:
         # Streaming mode: Stream files directly to temp storage
         print("🎯 Using STREAMING upload mode")
-        
+
         # Create temp directory for streaming files
         temp_dir = tempfile.mkdtemp(prefix=f"kb_stream_{task_id}_")
-        
+
         for i, file in enumerate(files):
             # Validate file headers first (streaming validation)
             is_valid, reason = await FileValidator.validate_upload_headers(file)
             if not is_valid:
                 progress_tracker.fail_task(
-                    task_id,
-                    f"File '{file.filename}' rejected: {reason}"
+                    task_id, f"File '{file.filename}' rejected: {reason}"
                 )
-                raise HTTPException(status_code=400, detail=f"File '{file.filename}' rejected: {reason}")
+                raise HTTPException(
+                    status_code=400, detail=f"File '{file.filename}' rejected: {reason}"
+                )
 
             # Stream file to temporary storage
             safe_filename = sanitize_filename(file.filename)
             temp_path = await StreamingFileHandler.stream_to_temp_storage(
-                upload_file=file,
-                temp_dir=temp_dir,
-                filename=safe_filename
+                upload_file=file, temp_dir=temp_dir, filename=safe_filename
             )
-            
+
             # Validate the streamed file
-            is_valid, reason = FileValidator.validate_temp_file(temp_path, safe_filename)
+            is_valid, reason = FileValidator.validate_temp_file(
+                temp_path, safe_filename
+            )
             if not is_valid:
                 # Clean up failed file
                 if os.path.exists(temp_path):
                     os.remove(temp_path)
                 progress_tracker.fail_task(
-                    task_id,
-                    f"File '{safe_filename}' validation failed: {reason}"
+                    task_id, f"File '{safe_filename}' validation failed: {reason}"
                 )
-                raise HTTPException(status_code=400, detail=f"File '{safe_filename}' validation failed: {reason}")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"File '{safe_filename}' validation failed: {reason}",
+                )
 
             # Get file size
             file_size = os.path.getsize(temp_path)
             total_size += file_size
-            
-            file_paths.append({
-                "original_filename": safe_filename,
-                "temp_path": temp_path,
-                "content_type": file.content_type,
-                "size": file_size
-            })
-            
+
+            file_paths.append(
+                {
+                    "original_filename": safe_filename,
+                    "temp_path": temp_path,
+                    "content_type": file.content_type,
+                    "size": file_size,
+                }
+            )
+
             print(f"✅ Streamed {safe_filename} ({file_size / (1024*1024):.1f}MB)")
-            
+
     else:
         # Legacy mode: Load all files into memory
         print("📚 Using LEGACY upload mode (loading files into memory)")
-        
+
         for i, file in enumerate(files):
             is_valid, reason = FileValidator.validate_upload(file)
             if not is_valid:
                 progress_tracker.fail_task(
-                    task_id,
-                    f"File '{file.filename}' rejected: {reason}"
+                    task_id, f"File '{file.filename}' rejected: {reason}"
                 )
-                raise HTTPException(status_code=400, detail=f"File '{file.filename}' rejected: {reason}")
+                raise HTTPException(
+                    status_code=400, detail=f"File '{file.filename}' rejected: {reason}"
+                )
 
             content = await file.read()
             safe_filename = sanitize_filename(file.filename)
@@ -1147,20 +1172,24 @@ async def create_knowledge_base(
                 "filename": safe_filename,
                 "content": content,
                 "content_type": file.content_type,
-                "size": len(content)
+                "size": len(content),
             }
             file_data.append(file_info)
             total_size += len(content)
             await file.seek(0)  # Reset file pointer
 
-    print(f"📊 Processed {len(files)} files totaling {total_size / (1024*1024):.1f}MB (validated and sanitized)")
+    print(
+        f"📊 Processed {len(files)} files totaling {total_size / (1024*1024):.1f}MB (validated and sanitized)"
+    )
 
     # Get user language for progress translations
     user_language = getattr(current_user, "preferred_language", "en") or "en"
 
     # Schedule background processing using FastAPI's BackgroundTasks
-    print(f"🎯 SCHEDULING BACKGROUND TASK for KB {knowledge_base.id} with task {task_id}")
-    
+    print(
+        f"🎯 SCHEDULING BACKGROUND TASK for KB {knowledge_base.id} with task {task_id}"
+    )
+
     if settings.STREAMING_UPLOAD_ENABLED:
         # Streaming mode: Pass file paths and temp directory
         background_tasks.add_task(
@@ -1182,17 +1211,17 @@ async def create_knowledge_base(
             current_user_id=current_user.id,
             user_language=user_language,
         )
-    
+
     print(f"✅ BACKGROUND TASK SUBMITTED for task {task_id}")
-    
+
     print(f"🚀 IMMEDIATE RETURN: Returning task_id {task_id} to frontend")
-    
+
     # Return immediately with task_id for progress tracking
     return KnowledgeBaseCreateResponse(
-        knowledge_base=KnowledgeBasePublic.model_validate(knowledge_base), 
-        task_id=task_id
+        knowledge_base=KnowledgeBasePublic.model_validate(knowledge_base),
+        task_id=task_id,
     )
-        
+
 
 async def process_knowledge_base_background(
     knowledge_base_id: uuid.UUID,
@@ -1206,49 +1235,56 @@ async def process_knowledge_base_background(
         # Get a new database session for background processing
         from app.core.db import engine
         from sqlmodel import Session
-        
+
         with Session(engine) as session:
             # Retrieve the knowledge base
             knowledge_base = session.get(KnowledgeBase, knowledge_base_id)
             if not knowledge_base:
                 progress_tracker.fail_task(task_id, "Knowledge base not found")
                 return
-            
+
             print(f"📊 Processing {len(file_data)} files in background")
 
             # For large uploads, save files to temporary storage
             temp_dir = tempfile.mkdtemp(prefix=f"kb_{knowledge_base_id}_")
             file_paths = []
-            
+
             # Save files to temporary directory with progress tracking
             total_processing_steps = len(file_data) * 2  # saving + text extraction
             for i, file_info in enumerate(file_data):
                 # Update processing progress for file saving (step 1 of 2 per file)
                 progress_tracker.update_stage_progress(
-                    task_id, "processing", i, total_processing_steps,
+                    task_id,
+                    "processing",
+                    i,
+                    total_processing_steps,
                     message_key="knowledgeBases.progress.saving_file",
                     message_params={
                         "current": str(i + 1),
                         "total": str(len(file_data)),
-                        "filename": file_info['filename']
-                    }
+                        "filename": file_info["filename"],
+                    },
                 )
-                
+
                 # Create safe filename
                 safe_filename = f"{i:06d}_{file_info['filename']}"
                 temp_file_path = os.path.join(temp_dir, safe_filename)
-                
+
                 # Save file content to disk
                 print(f"📄 Processing {file_info['filename']}...")
                 with open(temp_file_path, "wb") as temp_file:
-                    temp_file.write(file_info['content'])
-                    print(f"✅ Saved {file_info['filename']} ({file_info['size'] / (1024*1024):.1f}MB)")
-                
-                file_paths.append({
-                    "original_filename": file_info['filename'],
-                    "temp_path": temp_file_path,
-                    "content_type": file_info['content_type'],
-                })
+                    temp_file.write(file_info["content"])
+                    print(
+                        f"✅ Saved {file_info['filename']} ({file_info['size'] / (1024*1024):.1f}MB)"
+                    )
+
+                file_paths.append(
+                    {
+                        "original_filename": file_info["filename"],
+                        "temp_path": temp_file_path,
+                        "content_type": file_info["content_type"],
+                    }
+                )
 
                 # CRITICAL FIX: Yield control to allow progress API to respond
                 await asyncio.sleep(0.01)  # Small yield to prevent blocking
@@ -1267,15 +1303,17 @@ async def process_knowledge_base_background(
                 embedding_model_id=knowledge_base.embedding_model_id,
                 user_language=user_language,
             )
-            
+
     except Exception as e:
         # Clean up temp directory on error
         if temp_dir and os.path.exists(temp_dir):
             shutil.rmtree(temp_dir, ignore_errors=True)
-        
+
         # Mark task as failed
         progress_tracker.fail_task(task_id, f"Background processing error: {str(e)}")
-        logger.error(f"Background processing error for KB {knowledge_base_id}: {str(e)}")
+        logger.error(
+            f"Background processing error for KB {knowledge_base_id}: {str(e)}"
+        )
 
 
 # Remove the old synchronous processing code that was moved to background
@@ -1295,22 +1333,24 @@ async def process_knowledge_base_background_streaming(
         # Get a new database session for background processing
         from app.core.db import engine
         from sqlmodel import Session
-        
+
         with Session(engine) as session:
             # Retrieve the knowledge base
             knowledge_base = session.get(KnowledgeBase, knowledge_base_id)
             if not knowledge_base:
                 progress_tracker.fail_task(task_id, "Knowledge base not found")
                 return
-            
+
             print(f"🎯 STREAMING: Processing {len(file_paths)} files from temp storage")
-            
+
             # Files are already streamed to temp storage, no need to save again
             # Just validate temp directory exists
             if not os.path.exists(temp_dir):
-                progress_tracker.fail_task(task_id, f"Temp directory not found: {temp_dir}")
+                progress_tracker.fail_task(
+                    task_id, f"Temp directory not found: {temp_dir}"
+                )
                 return
-            
+
             # Continue with existing processing logic
             await process_knowledge_base_creation(
                 task_id=task_id,
@@ -1321,15 +1361,19 @@ async def process_knowledge_base_background_streaming(
                 embedding_model_id=knowledge_base.embedding_model_id,
                 user_language=user_language,
             )
-            
+
     except Exception as e:
         # Clean up temp directory on error
         if temp_dir and os.path.exists(temp_dir):
             shutil.rmtree(temp_dir, ignore_errors=True)
-        
+
         # Mark task as failed
-        progress_tracker.fail_task(task_id, f"Streaming background processing error: {str(e)}")
-        logger.error(f"Streaming background processing error for KB {knowledge_base_id}: {str(e)}")
+        progress_tracker.fail_task(
+            task_id, f"Streaming background processing error: {str(e)}"
+        )
+        logger.error(
+            f"Streaming background processing error for KB {knowledge_base_id}: {str(e)}"
+        )
 
 
 async def process_knowledge_base_creation(
@@ -1372,33 +1416,50 @@ async def process_knowledge_base_creation(
                 max_retries = 300  # Wait up to 5 minutes for upload completion
                 for retry in range(max_retries):
                     progress = progress_tracker.get_progress(task_id)
-                    print(f"🔍 CHECKING UPLOAD STATUS: progress exists={progress is not None}")
+                    print(
+                        f"🔍 CHECKING UPLOAD STATUS: progress exists={progress is not None}"
+                    )
                     if progress:
                         upload_stage = progress.get("stages", {}).get("upload", {})
                         completed = upload_stage.get("completed", False)
-                        print(f"🔍 UPLOAD STAGE: completed={completed}, stage_data={upload_stage}")
+                        print(
+                            f"🔍 UPLOAD STAGE: completed={completed}, stage_data={upload_stage}"
+                        )
                         if completed:
                             upload_completed = True
                             print(f"✅ Upload stage already completed by middleware")
                             break
                     if retry < max_retries - 1:  # Don't sleep on last iteration
-                        print(f"⏳ Waiting for upload completion... (retry {retry + 1}/{max_retries})")
+                        print(
+                            f"⏳ Waiting for upload completion... (retry {retry + 1}/{max_retries})"
+                        )
                         await asyncio.sleep(1)
-                
+
                 if not upload_completed:
                     # Fallback: complete upload stage ourselves
-                    print(f"⚠️ Upload stage not completed by middleware, completing it now")
-                    progress_tracker.complete_stage(task_id, "upload", "Files uploaded successfully")
-                
+                    print(
+                        f"⚠️ Upload stage not completed by middleware, completing it now"
+                    )
+                    progress_tracker.complete_stage(
+                        task_id, "upload", "Files uploaded successfully"
+                    )
+
                 # Start processing stage (file saving is complete, now extract text)
                 total_files = len(file_paths)
                 print(f"Processing {total_files} files from temporary storage")
-                
+
                 # Initialize processing stage
                 progress_tracker.update_stage_progress(
-                    task_id, "processing", 0, total_files,
+                    task_id,
+                    "processing",
+                    0,
+                    total_files,
                     message_key="knowledgeBases.progress.processingFile",
-                    message_params={"current": "0", "total": str(total_files), "filename": ""}
+                    message_params={
+                        "current": "0",
+                        "total": str(total_files),
+                        "filename": "",
+                    },
                 )
 
                 # Process each file from the stored paths
@@ -1407,9 +1468,16 @@ async def process_knowledge_base_creation(
                     try:
                         # Update processing progress for current file
                         progress_tracker.update_stage_progress(
-                            task_id, "processing", i, total_files,
+                            task_id,
+                            "processing",
+                            i,
+                            total_files,
                             message_key="knowledgeBases.progress.processingFile",
-                            message_params={"current": str(i + 1), "total": str(total_files), "filename": file_info['original_filename']}
+                            message_params={
+                                "current": str(i + 1),
+                                "total": str(total_files),
+                                "filename": file_info["original_filename"],
+                            },
                         )
 
                         filename = file_info["original_filename"]
@@ -1455,14 +1523,21 @@ async def process_knowledge_base_creation(
                             # Update document count and progress after successful processing
                             processed_documents_count += len(loaded_documents)
                             all_documents.extend(loaded_documents)
-                            
+
                             # Show real-time document processing progress
                             progress_tracker.update_stage_progress(
-                                task_id, "processing", i + 1, total_files,
+                                task_id,
+                                "processing",
+                                i + 1,
+                                total_files,
                                 message_key="knowledgeBases.progress.processed_chunks",
-                                message_params={"chunks": str(processed_documents_count), "current": file_index, "total": len(file_paths)}
+                                message_params={
+                                    "chunks": str(processed_documents_count),
+                                    "current": file_index,
+                                    "total": len(file_paths),
+                                },
                             )
-                            
+
                             print(
                                 f"✅ Processed {filename}: {len(loaded_documents)} chunks (total: {processed_documents_count})"
                             )
@@ -1481,12 +1556,13 @@ async def process_knowledge_base_creation(
 
                 # Complete processing stage with total document count
                 progress_tracker.complete_stage(
-                    task_id, "processing", 
+                    task_id,
+                    "processing",
                     message_key="knowledgeBases.progress.processed_all_chunks",
                     message_params={
                         "chunks": str(processed_documents_count),
-                        "files": str(total_files)
-                    }
+                        "files": str(total_files),
+                    },
                 )
 
             if failed_files:
@@ -1510,53 +1586,71 @@ async def process_knowledge_base_creation(
                 # Initialize chunking stage
                 total_documents = len(all_documents)
                 progress_tracker.update_stage_progress(
-                    task_id, "chunking", 0, total_documents, 
+                    task_id,
+                    "chunking",
+                    0,
+                    total_documents,
                     message_key="knowledgeBases.progress.chunking",
-                    message_params={"current": "0", "total": str(total_documents)}
+                    message_params={"current": "0", "total": str(total_documents)},
                 )
                 print("Splitting documents with smart chunking...")
-                
+
                 # Use smart text splitter that filters bibliography and low-quality content
                 smart_splitter = create_smart_text_splitter(
                     chunk_size=settings.RAG_DOCUMENT_CHUNK_SIZE,
                     chunk_overlap=settings.RAG_DOCUMENT_CHUNK_OVERLAP,
                     filter_bibliography=True,  # Filter out bibliography content
                 )
-                
+
                 # Process documents one by one to track chunking progress
                 all_chunks = []
                 for i, doc in enumerate(all_documents):
                     # Update progress for current document being chunked
                     progress_tracker.update_stage_progress(
-                        task_id, "chunking", i, total_documents,
+                        task_id,
+                        "chunking",
+                        i,
+                        total_documents,
                         message_key="knowledgeBases.progress.chunking",
-                        message_params={"current": str(i + 1), "total": str(total_documents)}
+                        message_params={
+                            "current": str(i + 1),
+                            "total": str(total_documents),
+                        },
                     )
-                    
+
                     # Split this individual document
                     doc_chunks = smart_splitter.splitter.split_with_structure_awareness(
                         doc.page_content, doc.metadata
                     )
                     all_chunks.extend(doc_chunks)
-                    print(f"📄 Chunked text {i + 1}/{total_documents}: {len(doc_chunks)} chunks")
-                    
+                    print(
+                        f"📄 Chunked text {i + 1}/{total_documents}: {len(doc_chunks)} chunks"
+                    )
+
                     # CRITICAL FIX: Yield control to allow progress API to respond
                     await asyncio.sleep(0.01)  # Small yield to prevent blocking
-                
+
                 # Apply content filtering to all chunks
                 print(f"Applying content filtering to {len(all_chunks)} chunks...")
                 progress_tracker.update_stage_progress(
-                    task_id, "chunking", total_documents, total_documents,
+                    task_id,
+                    "chunking",
+                    total_documents,
+                    total_documents,
                     message_key="knowledgeBases.progress.chunking",
-                    message_params={"current": str(total_documents), "total": str(total_documents)}
+                    message_params={
+                        "current": str(total_documents),
+                        "total": str(total_documents),
+                    },
                 )
-                
+
                 scored_chunks = content_filter.filter_and_score_documents(all_chunks)
                 splits = [
-                    doc for doc, score in scored_chunks 
+                    doc
+                    for doc, score in scored_chunks
                     if score >= 0.5  # Use default quality threshold
                 ]
-                
+
                 # Apply relaxed filtering if too few quality chunks
                 if len(splits) < 3 and len(scored_chunks) > 0:
                     logger.warning(
@@ -1564,22 +1658,26 @@ async def process_knowledge_base_creation(
                     )
                     relaxed_threshold = 0.5 * 0.7  # Relax threshold
                     splits = [
-                        doc for doc, score in scored_chunks 
+                        doc
+                        for doc, score in scored_chunks
                         if score >= relaxed_threshold
-                    ][:10]  # Limit to top 10
-                
+                    ][
+                        :10
+                    ]  # Limit to top 10
+
                 print(
                     f"Smart splitting: {len(all_documents)} documents -> {len(splits)} quality chunks"
                 )
-                
+
                 # Complete chunking stage with detailed information
                 progress_tracker.complete_stage(
-                    task_id, "chunking", 
+                    task_id,
+                    "chunking",
                     message_key="knowledgeBases.progress.chunking_complete",
                     message_params={
                         "documents": str(len(all_documents)),
-                        "chunks": str(len(splits))
-                    }
+                        "chunks": str(len(splits)),
+                    },
                 )
 
             with error_recovery_context("embedding initialization"):
@@ -1613,19 +1711,28 @@ async def process_knowledge_base_creation(
             with error_recovery_context("vector database creation"):
                 # Initialize embedding stage
                 progress_tracker.update_stage_progress(
-                    task_id, "embedding", 0, len(document_chunks),
+                    task_id,
+                    "embedding",
+                    0,
+                    len(document_chunks),
                     message_key="knowledgeBases.progress.embedding",
-                    message_params={"current": "0", "total": str(len(document_chunks))}
+                    message_params={"current": "0", "total": str(len(document_chunks))},
                 )
-                
+
                 try:
                     # Process each chunk separately to avoid token limits
                     for i, chunk in enumerate(document_chunks):
                         # Update embedding progress for each chunk
                         progress_tracker.update_stage_progress(
-                            task_id, "embedding", i, len(document_chunks),
+                            task_id,
+                            "embedding",
+                            i,
+                            len(document_chunks),
                             message_key="knowledgeBases.progress.embedding",
-                            message_params={"current": str(i + 1), "total": str(len(document_chunks))}
+                            message_params={
+                                "current": str(i + 1),
+                                "total": str(len(document_chunks)),
+                            },
                         )
 
                         print(
@@ -1656,19 +1763,23 @@ async def process_knowledge_base_creation(
 
                         if chroma_db is None:
                             # Initialize Chroma database with first chunk
-                            print(f"🧠 Creating initial vector database with {len(valid_documents)} documents...")
-                            
+                            print(
+                                f"🧠 Creating initial vector database with {len(valid_documents)} documents..."
+                            )
+
                             # CRITICAL: Yield control before the blocking embedding operation
                             await asyncio.sleep(0.01)
-                            
+
                             try:
                                 chroma_db = Chroma.from_documents(
                                     documents=valid_documents,
                                     embedding=embeddings,
                                     persist_directory=chroma_dir,
                                 )
-                                print(f"✅ Initial vector database created with {len(valid_documents)} documents")
-                                
+                                print(
+                                    f"✅ Initial vector database created with {len(valid_documents)} documents"
+                                )
+
                                 # CRITICAL: Yield control after the blocking embedding operation
                                 await asyncio.sleep(0.01)
                             except Exception as e:
@@ -1679,15 +1790,19 @@ async def process_knowledge_base_creation(
                                 )
                         else:
                             # Add subsequent chunks to existing database
-                            print(f"🧠 Adding {len(valid_documents)} documents to existing vector database...")
-                            
+                            print(
+                                f"🧠 Adding {len(valid_documents)} documents to existing vector database..."
+                            )
+
                             # CRITICAL: Yield control before the blocking embedding operation
                             await asyncio.sleep(0.01)
-                            
+
                             try:
                                 chroma_db.add_documents(documents=valid_documents)
-                                print(f"✅ Added {len(valid_documents)} documents to vector database")
-                                
+                                print(
+                                    f"✅ Added {len(valid_documents)} documents to vector database"
+                                )
+
                                 # CRITICAL: Yield control after the blocking embedding operation
                                 await asyncio.sleep(0.01)
                             except Exception as e:
@@ -1739,11 +1854,12 @@ async def process_knowledge_base_creation(
                     print(
                         "Successfully created vector database with adaptive processing"
                     )
-                    
+
                     # Complete embedding stage
                     progress_tracker.complete_stage(
-                        task_id, "embedding",
-                        message_key="knowledgeBases.progress.embedding_complete"
+                        task_id,
+                        "embedding",
+                        message_key="knowledgeBases.progress.embedding_complete",
                     )
 
                 except Exception as e:
@@ -1762,14 +1878,17 @@ async def process_knowledge_base_creation(
                 with error_recovery_context("database compression"):
                     # Initialize storing stage
                     progress_tracker.update_stage_progress(
-                        task_id, "storing", 0, 3,
+                        task_id,
+                        "storing",
+                        0,
+                        3,
                         message_key="knowledgeBases.progress.storing",
-                        message_params={"current": "0", "total": "3"}
+                        message_params={"current": "0", "total": "3"},
                     )
-                    
+
                     # CRITICAL: Yield control to allow progress API to respond
                     await asyncio.sleep(0.01)
-                    
+
                     # Check memory availability before compression
                     check_memory_availability()
                     log_memory_usage("before compression")
@@ -1778,13 +1897,16 @@ async def process_knowledge_base_creation(
                     # Create ZIP file directly on disk to avoid memory overflow
                     temp_zip_fd, temp_zip_path = tempfile.mkstemp(suffix=".zip")
                     os.close(temp_zip_fd)  # Close file descriptor, but keep path
-                    
+
                     progress_tracker.update_stage_progress(
-                        task_id, "storing", 1, 3,
+                        task_id,
+                        "storing",
+                        1,
+                        3,
                         message_key="knowledgeBases.progress.storing",
-                        message_params={"current": "1", "total": "3"}
+                        message_params={"current": "1", "total": "3"},
                     )
-                    
+
                     # CRITICAL: Yield control before the blocking compression operation
                     await asyncio.sleep(0.01)
 
@@ -1792,17 +1914,20 @@ async def process_knowledge_base_creation(
                         chroma_dir, temp_zip_path
                     )
                     print(f"Created ZIP file: {zip_size_mb:.1f}MB")
-                    
+
                     # CRITICAL: Yield control after compression
                     await asyncio.sleep(0.01)
 
                     log_memory_usage("after compression")
                     progress_tracker.update_stage_progress(
-                        task_id, "storing", 2, 3,
+                        task_id,
+                        "storing",
+                        2,
+                        3,
                         message_key="knowledgeBases.progress.storing",
-                        message_params={"current": "2", "total": "3"}
+                        message_params={"current": "2", "total": "3"},
                     )
-                    
+
                     # CRITICAL: Yield control before cleanup
                     await asyncio.sleep(0.01)
 
@@ -1884,14 +2009,15 @@ async def process_knowledge_base_creation(
 
                     session.add(knowledge_base)
                     session.flush()
-                    
+
                     # CRITICAL: Yield control after database operations
                     await asyncio.sleep(0.01)
-                    
+
                     # Complete storing stage
                     progress_tracker.complete_stage(
-                        task_id, "storing",
-                        message_key="knowledgeBases.progress.storing_complete"
+                        task_id,
+                        "storing",
+                        message_key="knowledgeBases.progress.storing_complete",
                     )
 
             except Exception as e:
@@ -1911,23 +2037,32 @@ async def process_knowledge_base_creation(
                     MemoryManager.cleanup_temp_file(temp_zip_path)
 
             with error_recovery_context("source entries creation"):
-                # Initialize finalizing stage  
+                # Initialize finalizing stage
                 progress_tracker.update_stage_progress(
-                    task_id, "finalizing", 0, total_files,
+                    task_id,
+                    "finalizing",
+                    0,
+                    total_files,
                     message_key="knowledgeBases.progress.finalizing",
-                    message_params={"current": "0", "total": str(total_files)}
+                    message_params={"current": "0", "total": str(total_files)},
                 )
                 print("Creating source entries...")
-                
+
                 # Process each file to create source entries
                 for i, file_info in enumerate(file_paths):
                     # Update finalizing progress for each source entry
                     progress_tracker.update_stage_progress(
-                        task_id, "finalizing", i, total_files,
+                        task_id,
+                        "finalizing",
+                        i,
+                        total_files,
                         message_key="knowledgeBases.progress.finalizing",
-                        message_params={"current": str(i + 1), "total": str(total_files)}
+                        message_params={
+                            "current": str(i + 1),
+                            "total": str(total_files),
+                        },
                     )
-                    
+
                     # CRITICAL: Yield control for each source entry to allow progress updates
                     await asyncio.sleep(0.01)
 
@@ -1969,17 +2104,26 @@ async def process_knowledge_base_creation(
                 )
 
             # Complete finalizing stage and mark entire task as completed
-            logger.info(f"📊 FINAL PROGRESS: Completing finalizing stage for task {task_id}")
-            completion_success = progress_tracker.complete_stage(
-                task_id, "finalizing",
-                message_key="knowledgeBases.progress.kb_creation_complete"
+            logger.info(
+                f"📊 FINAL PROGRESS: Completing finalizing stage for task {task_id}"
             )
-            logger.info(f"📊 FINAL PROGRESS: Stage completion result: {completion_success}")
-            logger.info(f"📊 FINAL PROGRESS: Task {task_id} should now be 100% complete")
+            completion_success = progress_tracker.complete_stage(
+                task_id,
+                "finalizing",
+                message_key="knowledgeBases.progress.kb_creation_complete",
+            )
+            logger.info(
+                f"📊 FINAL PROGRESS: Stage completion result: {completion_success}"
+            )
+            logger.info(
+                f"📊 FINAL PROGRESS: Task {task_id} should now be 100% complete"
+            )
 
         except HTTPException as http_ex:
             # Mark task as failed for HTTP exceptions
-            progress_tracker.fail_task(task_id, f"Knowledge base creation failed: {str(http_ex.detail)}")
+            progress_tracker.fail_task(
+                task_id, f"Knowledge base creation failed: {str(http_ex.detail)}"
+            )
             logger.error(f"HTTP error in background processing: {str(http_ex)}")
         except Exception as e:
             # Mark task as failed for unexpected errors
@@ -1992,7 +2136,9 @@ async def process_knowledge_base_creation(
                     shutil.rmtree(temp_dir, ignore_errors=True)
                     print(f"🧹 Cleaned up temporary directory: {temp_dir}")
             except Exception as cleanup_error:
-                logger.warning(f"Failed to cleanup temporary directory {temp_dir}: {cleanup_error}")
+                logger.warning(
+                    f"Failed to cleanup temporary directory {temp_dir}: {cleanup_error}"
+                )
 
 
 @router.put("/{id}", response_model=KnowledgeBasePublic)
