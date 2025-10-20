@@ -47,7 +47,6 @@ from langchain_community.vectorstores import Chroma
 import tempfile
 import os
 import zipfile
-import traceback
 from io import BytesIO
 import asyncio
 import uuid
@@ -143,6 +142,11 @@ async def _handle_full_text_kb_query(
     # Get LLM
     llm = get_default_llm(session, current_user)
 
+    # Check if LLM supports vision
+    from app.services.vision_service import VisionService
+
+    vision_enabled = VisionService.is_vision_enabled(llm)
+
     # Rephrase the question using chat history if available
     if chat_history:
         rephrased_question = rephrase_question_with_context(llm, chat_history, question)
@@ -162,6 +166,9 @@ async def _handle_full_text_kb_query(
     # Extract text from all files and process chunks
     all_chunk_analyses = []
     source_citations = []
+    processed_sources = (
+        []
+    )  # Track sources that were successfully processed for potential vision analysis
 
     print(f"Processing {len(sources)} sources from knowledge base {kb.title}")
 
@@ -237,6 +244,8 @@ async def _handle_full_text_kb_query(
             print(
                 f"Successfully extracted {len(file_content)} characters from {source.name}"
             )
+            # Track this source as successfully processed
+            processed_sources.append(source)
             # Chunk the text
             chunks = chunk_text(
                 file_content, max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE
@@ -250,7 +259,7 @@ async def _handle_full_text_kb_query(
                     # Add delay between chunks to prevent rate limit exhaustion
                     if i > 0 and settings.CHATBOT_ENABLE_CHUNK_DELAYS:
                         await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
-                        
+
                     chunk_analysis = invoke_llm(
                         llm,
                         settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
@@ -288,7 +297,17 @@ async def _handle_full_text_kb_query(
     )
 
     if not all_chunk_analyses:
-        final_answer = "I couldn't find relevant information to answer your question in the knowledge base."
+        # No relevant chunks found - still run synthesis template to get standardized insufficient context message
+        chunk_analyses_text = "No relevant information found in any chunks."
+        final_answer = invoke_llm(
+            llm,
+            settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+            {
+                "question": rephrased_question,
+                "chunk_analyses": chunk_analyses_text,
+                "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+            },
+        )
         sources = []
     else:
         # Synthesize all chunk analyses
@@ -302,27 +321,170 @@ async def _handle_full_text_kb_query(
         final_answer = invoke_llm(
             llm,
             settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
-            {"question": rephrased_question, "chunk_analyses": chunk_analyses_text},
+            {
+                "question": rephrased_question,
+                "chunk_analyses": chunk_analyses_text,
+                "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+            },
         )
 
-    # Record the interaction
-    record_llm_interaction(
-        session=session,
-        user_id=current_user.id,
-        functionality="chatbot_full_text",
-        input_data={
-            "question": question,
-            "rephrased_question": rephrased_question,
-            "kb_id": kb_id,
-            "search_mode": "full_text",
-        },
-        output_data=final_answer,
-        metadata={
-            "session_id": session_id,
-            "is_follow_up": is_follow_up,
-            "chunk_count": len(all_chunk_analyses),
-        },
+    # Check if the synthesized answer indicates information wasn't found (always check after synthesis)
+    text_analysis_insufficient = settings.LLM_INSUFFICIENT_INFO_PHRASE in final_answer
+
+    print(
+        f"Full text synthesis - Text analysis insufficient: {text_analysis_insufficient}"
     )
+
+    # Only perform vision analysis if (text analysis was insufficient OR no relevant chunks found) AND vision is available AND we have processed sources
+    vision_analysis_performed = False
+    should_attempt_vision = (
+        (text_analysis_insufficient or not all_chunk_analyses)
+        and vision_enabled
+        and processed_sources
+    )
+    if should_attempt_vision:
+        print(
+            f"Text analysis insufficient or no relevant chunks found, attempting vision analysis from {len(processed_sources)} processed source files"
+        )
+
+        # Extract images from all processed source files
+        all_images = []
+        for source in processed_sources:
+            try:
+                source_data = session.get(SourceData, source.source_data_id)
+                if source_data and source_data.data:
+                    # Extract the raw file content from the ZIP first
+                    try:
+                        zip_data = BytesIO(source_data.data)
+                        with zipfile.ZipFile(zip_data, "r") as zip_file:
+                            # Get the first file in the archive (there should only be one)
+                            file_info = zip_file.infolist()[0]
+                            raw_file_content = zip_file.read(file_info.filename)
+                            print(
+                                f"Extracted {len(raw_file_content)} bytes from ZIP for source {source.source_data_id}"
+                            )
+                    except zipfile.BadZipFile:
+                        # If it's not a ZIP file, use the data directly
+                        print(
+                            f"Source {source.source_data_id} is not a ZIP file, using data directly"
+                        )
+                        raw_file_content = source_data.data
+
+                    # Extract images from the raw file content using the actual filename
+                    from app.services.document_utils import (
+                        extract_documents_and_images_from_file_unified,
+                    )
+
+                    _, images = extract_documents_and_images_from_file_unified(
+                        raw_file_content,
+                        source.name,  # Use actual filename with extension
+                    )
+                    all_images.extend(images)
+                    print(
+                        f"Extracted {len(images)} images from source {source.source_data_id} ({source.name})"
+                    )
+            except Exception as e:
+                print(
+                    f"Error extracting images from source {source.source_data_id}: {e}"
+                )
+                continue
+
+        if all_images:
+            print(f"Total images extracted: {len(all_images)}")
+            try:
+                # Convert base64 images to the format expected by VisionService
+                vision_images = []
+                for img_b64 in all_images:
+                    vision_images.append(
+                        {
+                            "image_data": img_b64,
+                            "metadata": {"source": "knowledge_base_sources"},
+                        }
+                    )
+
+                vision_result = VisionService.safe_vision_analysis(
+                    llm=llm,
+                    prompt_template=settings.CHATBOT_VISION_PROMPT_TEMPLATE,
+                    variables={
+                        "image_count": len(all_images),
+                        "source_files": "knowledge_base_sources",
+                        "question": rephrased_question,
+                        "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                    },
+                    images=vision_images,
+                )
+
+                print("Vision analysis result:", vision_result[:200])
+
+                if all_chunk_analyses:
+                    # Combine text and vision analysis for full text scan
+                    # Use the chunk analyses as the base context and enhance with vision
+                    enhanced_chunk_analyses = (
+                        chunk_analyses_text
+                        + "\n\n"
+                        + f"Additional Vision Analysis: {vision_result}"
+                    )
+
+                    # Regenerate the final answer with vision-enhanced analysis
+                    final_answer = invoke_llm(
+                        llm,
+                        settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
+                        {
+                            "question": rephrased_question,
+                            "chunk_analyses": enhanced_chunk_analyses,
+                        },
+                    )
+                else:
+                    # No text chunks found, vision analysis is the only source of information
+                    # Extract the summary from the vision result JSON
+                    try:
+                        import json
+
+                        vision_data = json.loads(vision_result)
+                        if isinstance(vision_data, dict) and "summary" in vision_data:
+                            final_answer = vision_data["summary"]
+                        else:
+                            final_answer = vision_result  # Fallback to raw result
+                    except (json.JSONDecodeError, KeyError):
+                        final_answer = vision_result  # Fallback to raw result
+
+                vision_analysis_performed = True
+                print(
+                    f"Enhanced full text synthesis with vision analysis: {len(final_answer)} chars"
+                )
+
+            except Exception as vision_error:
+                print(f"Vision analysis failed: {vision_error}")
+                # Keep the original text-only answer
+        else:
+            print("No images found in processed source files")
+
+        # Replace the internal insufficient info phrase with a user-friendly message
+        if settings.LLM_INSUFFICIENT_INFO_PHRASE in final_answer:
+            final_answer = "I'm sorry, but I couldn't find enough information in the knowledge base to answer your question. The knowledge base may not contain the specific details you're looking for, or the question might be about content not present in the stored documents."
+
+        # Record the interaction
+        record_llm_interaction(
+            session=session,
+            user_id=current_user.id,
+            functionality="chatbot_full_text",
+            input_data={
+                "question": question,
+                "rephrased_question": rephrased_question,
+                "kb_id": kb_id,
+                "search_mode": "full_text",
+            },
+            output_data=final_answer,
+            metadata={
+                "session_id": session_id,
+                "is_follow_up": is_follow_up,
+                "chunk_count": len(all_chunk_analyses),
+                "vision_analysis_performed": vision_analysis_performed,
+                "text_analysis_insufficient": text_analysis_insufficient,
+                "no_relevant_chunks_found": len(all_chunk_analyses) == 0,
+                "processed_sources_count": len(processed_sources),
+            },
+        )
 
     return {
         "answer": final_answer,
@@ -412,8 +574,9 @@ async def _handle_full_text_document_query(
                 # Add delay between chunks to prevent rate limit exhaustion
                 if i > 0 and settings.CHATBOT_ENABLE_CHUNK_DELAYS:
                     import asyncio
+
                     await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
-                    
+
                 try:
                     chunk_analysis = invoke_llm(
                         llm,
@@ -437,7 +600,11 @@ async def _handle_full_text_document_query(
                     print(f"Error analyzing chunk {i} in file {file.filename}: {e}")
                     continue
 
-            # If we found relevant chunks in this file, create a document-level analysis
+            # Process analysis for this file (whether chunks were found or not)
+            vision_analysis_performed = False
+            text_analysis_insufficient = False
+            document_analysis = ""
+
             if file_chunk_analyses:
                 # Synthesize chunks for this specific document
                 file_chunk_analyses_text = "\n\n".join(
@@ -454,79 +621,127 @@ async def _handle_full_text_document_query(
                     {
                         "question": rephrased_question,
                         "chunk_analyses": file_chunk_analyses_text,
+                        "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
                     },
                 )
 
-                # Add vision analysis if images exist and LLM supports it
-                if vision_enabled and file_images:
-                    print(f"Adding vision analysis for {file.filename}")
+                # Check if the text analysis indicates information wasn't found
+                text_analysis_insufficient = (
+                    settings.LLM_INSUFFICIENT_INFO_PHRASE in document_analysis
+                )
 
-                    # Prepare images for processing
-                    image_data_list = []
-                    for idx, img_b64 in enumerate(file_images):
-                        image_data_list.append(
-                            {
-                                "image_data": img_b64,
-                                "source_file": file.filename,
-                                "image_index": idx,
-                                "metadata": {"extracted_from": file.filename},
-                            }
-                        )
+                print(
+                    f"Full text scan - Text analysis insufficient: {text_analysis_insufficient}"
+                )
+            else:
+                # No relevant chunks found - treat as insufficient text analysis
+                document_analysis = "No relevant information found in this document."
+                text_analysis_insufficient = True
+                print(
+                    "No relevant chunks found - will attempt vision analysis if available"
+                )
 
-                    try:
-                        vision_analysis = (
-                            await VisionService.process_images_with_prompt(
-                                llm=llm,
-                                images=image_data_list,
-                                prompt_template=settings.CHATBOT_VISION_PROMPT_TEMPLATE,
-                                variables={
-                                    "question": rephrased_question,
-                                    "context": chat_history or "",
-                                    "image_count": len(image_data_list),
-                                    "source_files": file.filename,
-                                },
-                            )
-                        )
+            # Perform vision analysis if text analysis was insufficient OR no chunks were found
+            if text_analysis_insufficient and vision_enabled and file_images:
+                print(
+                    f"Text analysis insufficient or no chunks found, performing vision analysis for {file.filename}"
+                )
 
-                        # Translate vision analysis if needed
-                        vision_analysis = await translate_text_if_needed(
-                            vision_analysis, session, current_user, llm
-                        )
+                # Prepare images for processing
+                image_data_list = []
+                for idx, img_b64 in enumerate(file_images):
+                    image_data_list.append(
+                        {
+                            "image_data": img_b64,
+                            "source_file": file.filename,
+                            "image_index": idx,
+                            "metadata": {"extracted_from": file.filename},
+                        }
+                    )
 
-                        # Combine text and vision analysis
-                        combined_analysis = (
+                try:
+                    vision_analysis = await VisionService.process_images_with_prompt(
+                        llm=llm,
+                        images=image_data_list,
+                        prompt_template=settings.CHATBOT_VISION_PROMPT_TEMPLATE,
+                        variables={
+                            "question": rephrased_question,
+                            "context": chat_history or "",
+                            "image_count": len(image_data_list),
+                            "source_files": file.filename,
+                            "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                        },
+                    )
+
+                    # Translate vision analysis if needed
+                    vision_analysis = await translate_text_if_needed(
+                        vision_analysis, session, current_user, llm
+                    )
+
+                    # When text analysis was insufficient, use vision analysis directly
+                    # instead of combining with formatted markers
+                    if (
+                        text_analysis_insufficient
+                        and not settings.LLM_INSUFFICIENT_INFO_PHRASE in vision_analysis
+                    ):
+                        # Vision analysis provided an answer, use it directly
+                        final_document_analysis = vision_analysis
+                    else:
+                        # Either text analysis was sufficient, or vision also insufficient
+                        # Combine them for completeness
+                        final_document_analysis = (
                             VisionService.combine_text_and_vision_analysis(
                                 document_analysis, vision_analysis, "integrated"
                             )
                         )
 
-                        # Store the combined analysis for this document
-                        all_document_analyses.append(
-                            {
-                                "filename": file.filename,
-                                "analysis": combined_analysis,
-                                "has_vision_analysis": True,
-                                "image_count": len(file_images),
-                            }
-                        )
-
-                    except Exception as vision_error:
-                        print(
-                            f"Vision analysis error for {file.filename}: {vision_error}"
-                        )
-                        # Fall back to text-only analysis
-                        all_document_analyses.append(
-                            {
-                                "filename": file.filename,
-                                "analysis": document_analysis,
-                                "vision_error": str(vision_error),
-                            }
-                        )
-                else:
-                    # Store the text-only analysis for this document
+                    # Store the final analysis for this document
                     all_document_analyses.append(
-                        {"filename": file.filename, "analysis": document_analysis}
+                        {
+                            "filename": file.filename,
+                            "analysis": final_document_analysis,
+                            "has_vision_analysis": True,
+                            "image_count": len(file_images),
+                            "vision_analysis_performed": True,
+                        }
                     )
+                    vision_analysis_performed = True
+
+                except Exception as vision_error:
+                    print(f"Vision analysis error for {file.filename}: {vision_error}")
+                    # Fall back to text-only analysis
+                    all_document_analyses.append(
+                        {
+                            "filename": file.filename,
+                            "analysis": document_analysis,
+                            "vision_error": str(vision_error),
+                        }
+                    )
+            else:
+                # No vision analysis needed or available
+                if text_analysis_insufficient and not vision_enabled:
+                    print(
+                        "Text analysis insufficient but vision not available, using text-only"
+                    )
+                elif text_analysis_insufficient and not file_images:
+                    print(
+                        "Text analysis insufficient but no images found, using text-only"
+                    )
+                elif not text_analysis_insufficient:
+                    print(
+                        "Text analysis appears sufficient, skipping vision analysis to save costs"
+                    )
+                else:
+                    print("Vision analysis not needed for this document")
+
+                # Store the text-only analysis for this document
+                all_document_analyses.append(
+                    {
+                        "filename": file.filename,
+                        "analysis": document_analysis,
+                        "vision_analysis_performed": False,
+                    }
+                )
 
                 # Add source citations for this file
                 all_source_citations.extend(file_source_citations)
@@ -551,13 +766,12 @@ async def _handle_full_text_document_query(
             # Create a final synthesis across all documents
             final_answer = invoke_llm(
                 llm,
-                f"""Based on the following analyses from multiple documents, provide a comprehensive answer to the question: {rephrased_question}
-
-Document Analyses:
-{{document_analyses}}
-
-Please synthesize the information from all documents into a coherent, comprehensive answer. If there are contradictions between documents, note them. If documents complement each other, combine the insights.""",
-                {"document_analyses": document_analyses_text},
+                settings.CHATBOT_MULTI_DOCUMENT_SYNTHESIS_PROMPT_TEMPLATE,
+                {
+                    "question": rephrased_question,
+                    "document_analyses": document_analyses_text,
+                    "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                },
             )
             sources = all_source_citations
 
@@ -565,6 +779,10 @@ Please synthesize the information from all documents into a coherent, comprehens
         final_answer = await translate_text_if_needed(
             final_answer, session, current_user, llm
         )
+
+        # Replace the internal insufficient info phrase with a user-friendly message
+        if settings.LLM_INSUFFICIENT_INFO_PHRASE in final_answer:
+            final_answer = "I'm sorry, but I couldn't find enough information in the provided documents to answer your question. The documents may not contain the specific details you're looking for, or the question might be about content not present in the uploaded files."
 
         # Record the interaction
         record_llm_interaction(
@@ -761,7 +979,9 @@ async def query_knowledge_base(
                         )
 
                         # Rebuild basic retriever without enhanced filtering
-                        retriever = chroma_db.as_retriever(search_kwargs={"k": settings.RAG_NUM_CHUNKS})
+                        retriever = chroma_db.as_retriever(
+                            search_kwargs={"k": settings.RAG_NUM_CHUNKS}
+                        )
                         print("Successfully rebuilt retriever")
 
                     # Rebuild LLM if needed
@@ -880,7 +1100,9 @@ async def query_knowledge_base(
             )
 
             # Create a basic retriever without enhanced filtering to avoid async issues
-            retriever = chroma_db.as_retriever(search_kwargs={"k": settings.RAG_NUM_CHUNKS})
+            retriever = chroma_db.as_retriever(
+                search_kwargs={"k": settings.RAG_NUM_CHUNKS}
+            )
 
             # 4. Get the LLM
             if use_default_models:
@@ -920,8 +1142,9 @@ async def query_knowledge_base(
         context = "\n\n".join([doc.page_content for doc in docs])
         print("Retrieved context:", context)
 
-        # Create a list of sources for citation
-        sources = []
+        # Extract unique source_data_ids from retrieved documents for potential image extraction
+        # This must happen BEFORE vision analysis but we need to look up source_data_ids by filename
+        relevant_sources = {}  # source_data_id -> filename mapping
         for doc in docs:
             # Ensure source_data_id is included in metadata if available
             metadata = doc.metadata.copy()  # Copy to avoid modifying the original
@@ -953,50 +1176,177 @@ async def query_knowledge_base(
 
                 # 🚨 NEW FALLBACK: If not found with truncated name, try the whole filename
                 if not source_entry:
-                    print(
-                        f"No source entry found for truncated filename: {truncated_filename}"
-                    )
-                    print(f"Trying with full filename: {raw_filename}")
-
                     source_entry = session.exec(
                         select(SourceORM).where(SourceORM.name == raw_filename)
                     ).first()
 
-                    if source_entry:
-                        print(
-                            f"✅ Found source entry with full filename: {raw_filename}"
-                        )
-                    else:
-                        print(
-                            f"❌ No source entry found for either truncated or full filename"
-                        )
-
                 if source_entry:
-                    print(f"Found source entry with ID: {source_entry.source_data_id}")
-                    metadata["source_data_id"] = str(source_entry.source_data_id)
-                else:
+                    source_data_id = str(source_entry.source_data_id)
+                    relevant_sources[source_data_id] = (
+                        source_entry.name
+                    )  # Store filename with source_id
+                    # Also update the doc metadata for later use
+                    doc.metadata["source_data_id"] = source_data_id
                     print(
-                        f"No source entry found for filename: {truncated_filename} or {raw_filename}"
+                        f"Found source entry with ID: {source_data_id}, filename: {source_entry.name}"
                     )
 
+        print(
+            f"Found {len(relevant_sources)} relevant source files for potential vision analysis"
+        )
+
+        # Create a list of sources for citation (now with source_data_id already in metadata)
+        sources = []
+        for doc in docs:
             source = {
                 "content": doc.page_content,  # Remove 300 character truncation
-                "metadata": metadata,
+                "metadata": doc.metadata,
             }
             sources.append(source)
 
         # 6. Define prompt for question answering
         qa_prompt_template = settings.CHATBOT_KB_QA_PROMPT_TEMPLATE
 
-        # 7. Generate the answer - with branching for different model types
+        # Check if LLM supports vision for potential vision analysis
+        from app.services.vision_service import VisionService
+
+        vision_enabled = VisionService.is_vision_enabled(llm)
+
+        # 7. Generate the answer - with potential vision analysis
         try:
-            print("Generating answer for knowledge base query...")
+            print("Generating initial answer for knowledge base query...")
             answer_content = invoke_llm(
                 llm,
                 qa_prompt_template,
-                {"context": context, "question": rephrased_question},
+                {
+                    "context": context,
+                    "question": rephrased_question,
+                    "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                },
             )
-            print(f"Got response: {answer_content[:100]}...")
+            print(f"Initial text-only response: {answer_content[:100]}...")
+
+            # Check if the text answer indicates information wasn't found
+            text_answer_insufficient = (
+                settings.LLM_INSUFFICIENT_INFO_PHRASE in answer_content
+            )
+
+            print(f"Text answer insufficient: {text_answer_insufficient}")
+
+            # Only perform vision analysis if text answer was insufficient AND vision is available AND we have relevant sources
+            vision_analysis_performed = False
+            if text_answer_insufficient and vision_enabled and relevant_sources:
+                print(
+                    f"Text analysis insufficient, attempting vision analysis from {len(relevant_sources)} source files"
+                )
+
+                # Extract images from relevant source files
+                all_images = []
+                for source_id, filename in relevant_sources.items():
+                    try:
+                        source_data = session.get(SourceData, source_id)
+                        if source_data and source_data.data:
+                            # Extract the raw file content from the ZIP first
+                            try:
+                                zip_data = BytesIO(source_data.data)
+                                with zipfile.ZipFile(zip_data, "r") as zip_file:
+                                    # Get the first file in the archive (there should only be one)
+                                    file_info = zip_file.infolist()[0]
+                                    raw_file_content = zip_file.read(file_info.filename)
+                                    print(
+                                        f"Extracted {len(raw_file_content)} bytes from ZIP for source {source_id}"
+                                    )
+                            except zipfile.BadZipFile:
+                                # If it's not a ZIP file, use the data directly
+                                print(
+                                    f"Source {source_id} is not a ZIP file, using data directly"
+                                )
+                                raw_file_content = source_data.data
+
+                            # Extract images from the raw file content using the actual filename
+                            from app.services.document_utils import (
+                                extract_documents_and_images_from_file_unified,
+                            )
+
+                            _, images = extract_documents_and_images_from_file_unified(
+                                raw_file_content,
+                                filename,  # Use actual filename with extension
+                            )
+                            all_images.extend(images)
+                            print(
+                                f"Extracted {len(images)} images from source {source_id} ({filename})"
+                            )
+                    except Exception as e:
+                        print(f"Error extracting images from source {source_id}: {e}")
+                        continue
+
+                if all_images:
+                    print(f"Total images extracted: {len(all_images)}")
+                    try:
+                        # Convert base64 images to the format expected by VisionService
+                        vision_images = []
+                        for img_b64 in all_images:
+                            vision_images.append(
+                                {
+                                    "image_data": img_b64,
+                                    "metadata": {"source": "knowledge_base_sources"},
+                                }
+                            )
+
+                        vision_result = VisionService.safe_vision_analysis(
+                            llm=llm,
+                            prompt_template=settings.CHATBOT_VISION_PROMPT_TEMPLATE,
+                            variables={
+                                "image_count": len(all_images),
+                                "source_files": "knowledge_base_sources",
+                                "question": rephrased_question,
+                                "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                            },
+                            images=vision_images,
+                        )
+
+                        print("Vision analysis result:", vision_result[:200])
+
+                        # Use combined analysis for knowledge base with vision content
+                        final_context = VisionService.combine_text_and_vision_analysis(
+                            text_analysis=context,
+                            vision_analysis=vision_result,
+                            combination_strategy="comprehensive",
+                        )
+                        context = final_context
+                        vision_analysis_performed = True
+                        print(
+                            f"Enhanced context with vision analysis: {len(context)} chars"
+                        )
+
+                        # Regenerate answer with vision-enhanced context
+                        answer_content = invoke_llm(
+                            llm,
+                            qa_prompt_template,
+                            {
+                                "context": context,
+                                "question": rephrased_question,
+                                "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                            },
+                        )
+                        print(
+                            f"Got vision-enhanced response: {answer_content[:100]}..."
+                        )
+
+                    except Exception as vision_error:
+                        print(f"Vision analysis failed: {vision_error}")
+                        # Keep the original text-only answer
+                else:
+                    print("No images found in relevant source files")
+            elif not text_answer_insufficient:
+                print(
+                    "Text analysis appears sufficient, skipping vision analysis to save costs"
+                )
+            else:
+                print(
+                    "Vision analysis not available or no relevant sources found, using text-only answer"
+                )
+
         except Exception as e:
             print(f"Error generating answer: {e}")
             raise HTTPException(
@@ -1018,8 +1368,14 @@ async def query_knowledge_base(
                 "session_id": session_id,
                 "is_follow_up": is_follow_up,
                 "sources": [s["metadata"] for s in sources],
+                "vision_analysis_performed": vision_analysis_performed,
+                "text_answer_insufficient": text_answer_insufficient,
             },
         )
+
+        # Replace the internal insufficient info phrase with a user-friendly message
+        if settings.LLM_INSUFFICIENT_INFO_PHRASE in answer_content:
+            answer_content = "I'm sorry, but I couldn't find enough information in the knowledge base to answer your question. The knowledge base may not contain the specific details you're looking for, or the question might be about content not present in the stored documents."
 
         return {
             "answer": answer_content,
@@ -1096,6 +1452,7 @@ async def query_document(
         retriever = None
         llm = None
         temp_paths = []
+        all_images = []  # Initialize here for both new and follow-up requests
 
         if is_follow_up and session_id:
             print("Using cached resources for follow-up question")
@@ -1170,7 +1527,9 @@ async def query_document(
                             )
 
                             # Rebuild basic retriever without enhanced filtering
-                            retriever = vector_store.as_retriever(search_kwargs={"k": settings.RAG_NUM_CHUNKS})
+                            retriever = vector_store.as_retriever(
+                                search_kwargs={"k": settings.RAG_NUM_CHUNKS}
+                            )
                             print("Successfully rebuilt retriever")
 
                         except Exception as e:
@@ -1327,7 +1686,9 @@ async def query_document(
                 documents=chunks, embedding=embeddings, persist_directory=vector_dir
             )
             # Create a basic retriever without enhanced filtering to avoid async issues
-            retriever = vector_store.as_retriever(search_kwargs={"k": settings.RAG_NUM_CHUNKS})
+            retriever = vector_store.as_retriever(
+                search_kwargs={"k": settings.RAG_NUM_CHUNKS}
+            )
 
             # Create LLM
             llm = create_llm(
@@ -1349,6 +1710,7 @@ async def query_document(
                     "vector_dir": vector_dir,
                     "temp_paths": temp_paths,
                     "file_names": [file.filename for file in files],  # Cache file names
+                    "images": all_images,  # Cache extracted images for follow-up vision analysis
                 },
             )
 
@@ -1362,15 +1724,76 @@ async def query_document(
             rephrased_question = question
 
         # Translate the rephrased question if needed for display purposes
-        translated_rephrased_question = await translate_text_if_needed(
-            rephrased_question, session, current_user, llm
-        )
+        try:
+            translated_rephrased_question = await translate_text_if_needed(
+                rephrased_question, session, current_user, llm
+            )
+        except Exception as e:
+            print(f"Translation of rephrased question failed: {e}")
+            translated_rephrased_question = rephrased_question  # Fallback to original
 
         # Retrieve relevant context
         docs = retriever.get_relevant_documents(rephrased_question)
         context = "\n\n".join([doc.page_content for doc in docs])
 
-        # Check if we need vision analysis for image-only fallback documents
+        # For follow-up questions, restore images from cached session data
+        if is_follow_up and not all_images:
+            print(
+                f"DEBUG: Follow-up question detected, all_images is empty (length: {len(all_images)}), checking cached images"
+            )
+            cached_data = session_manager.get_session(session_id)
+            print(f"DEBUG: Cached data retrieved: {bool(cached_data)}")
+            if cached_data:
+                cached_images = cached_data.get("images", [])
+                if cached_images:
+                    print(f"DEBUG: Found {len(cached_images)} cached images in session")
+                    all_images.extend(cached_images)
+                else:
+                    print(
+                        "DEBUG: No cached images found, attempting to re-extract from temp files"
+                    )
+                    # Fallback: try to re-extract from temp files if images weren't cached
+                    temp_paths = cached_data.get("temp_paths", [])
+                    print(f"DEBUG: Temp paths in cache: {temp_paths}")
+                    if temp_paths:
+                        print(
+                            "Re-extracting images from cached temp files for follow-up question"
+                        )
+                        for temp_path in temp_paths:
+                            print(f"DEBUG: Checking if temp file exists: {temp_path}")
+                            if os.path.exists(temp_path):
+                                try:
+                                    print(f"DEBUG: Reading temp file: {temp_path}")
+                                    with open(temp_path, "rb") as f:
+                                        file_content = f.read()
+                                    print(
+                                        f"DEBUG: File content length: {len(file_content)}"
+                                    )
+                                    _, images = (
+                                        extract_documents_and_images_from_file_unified(
+                                            file_content, os.path.basename(temp_path)
+                                        )
+                                    )
+                                    print(
+                                        f"DEBUG: Extracted {len(images)} images from {temp_path}"
+                                    )
+                                    all_images.extend(images)
+                                except Exception as e:
+                                    print(
+                                        f"Error re-extracting images from {temp_path}: {e}"
+                                    )
+                                    import traceback
+
+                                    traceback.print_exc()
+                            else:
+                                print(f"DEBUG: Temp file does not exist: {temp_path}")
+                    else:
+                        print("DEBUG: No temp_paths found in cached data")
+            else:
+                print("DEBUG: No cached data found for session")
+            print(f"Restored {len(all_images)} images for follow-up question")
+
+        # Decide whether to attempt vision analysis
         from app.services.vision_service import VisionService
 
         vision_enabled = VisionService.is_vision_enabled(llm)
@@ -1380,9 +1803,40 @@ async def query_document(
             doc.metadata.get("is_vision_fallback", False) for doc in docs
         )
 
-        # If we have vision fallbacks and images available, use vision analysis
-        if vision_enabled and has_vision_fallbacks and all_images:
-            print(f"Using vision analysis for {len(all_images)} images")
+        # Debug: surface the decision variables so logs show why vision may be skipped
+        print(
+            f"DEBUG: vision_enabled={vision_enabled}, has_vision_fallbacks={has_vision_fallbacks}, all_images_count={len(all_images)}"
+        )
+
+        # FIRST: Try to answer based on text analysis only
+        text_only_context = context  # Keep original text context
+        vision_analysis_performed = False
+
+        # Generate initial answer with text-only context
+        print("Generating initial answer with text-only context...")
+        initial_answer = invoke_llm(
+            llm,
+            settings.CHATBOT_KB_QA_PROMPT_TEMPLATE,
+            {
+                "context": text_only_context,
+                "question": rephrased_question,
+                "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+            },
+        )
+        print(f"Initial text-only answer: {initial_answer[:200]}...")
+
+        # Check if the text-only answer indicates information wasn't found
+        text_answer_insufficient = (
+            settings.LLM_INSUFFICIENT_INFO_PHRASE in initial_answer
+        )
+
+        print(f"Text answer insufficient: {text_answer_insufficient}")
+
+        # SECOND: Only run vision analysis if text answer seems insufficient AND vision is available
+        if text_answer_insufficient and vision_enabled and all_images:
+            print(
+                f"Text analysis insufficient, attempting vision analysis for {len(all_images)} images"
+            )
             try:
                 # Convert base64 images to the format expected by VisionService
                 vision_images = []
@@ -1401,22 +1855,35 @@ async def query_document(
                         "image_count": len(all_images),
                         "source_files": "uploaded_files",
                         "question": rephrased_question,
-                        "context": context,
+                        "context": text_only_context,
+                        "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
                     },
                     images=vision_images,
                 )
 
+                print("Vision analysis result:", vision_result[:200])
+
                 # Use combined analysis for documents with vision content
                 final_context = VisionService.combine_text_and_vision_analysis(
-                    text_analysis=context,
+                    text_analysis=text_only_context,
                     vision_analysis=vision_result,
                     combination_strategy="comprehensive",
                 )
                 context = final_context
+                vision_analysis_performed = True
                 print(f"Enhanced context with vision analysis: {len(context)} chars")
+                print(f"Enhanced context: {context}")
 
             except Exception as e:
                 print(f"Vision analysis failed, using text-only: {e}")
+        elif not text_answer_insufficient:
+            print(
+                "Text analysis appears sufficient, skipping vision analysis to save costs"
+            )
+        else:
+            print(
+                "Vision analysis not available or no images found, using text-only answer"
+            )
 
         # Create a list of sources for citation
         sources = []
@@ -1441,23 +1908,34 @@ async def query_document(
             }
             sources.append(source)
 
-        # Define prompt
-        qa_prompt_template = settings.CHATBOT_KB_QA_PROMPT_TEMPLATE
-
-        # Generate the answer - with branching for different model types
+        # Generate the final answer - use vision-enhanced context if available, otherwise use initial text answer
         try:
-            print("Generating answer for document query...")
-            answer_content = invoke_llm(
-                llm,
-                qa_prompt_template,
-                {"context": context, "question": rephrased_question},
-            )
-            print(f"Got response: {answer_content[:100]}...")
+            print("Generating final answer for document query...")
+            if vision_analysis_performed:
+                # Regenerate answer with vision-enhanced context
+                answer_content = invoke_llm(
+                    llm,
+                    settings.CHATBOT_KB_QA_PROMPT_TEMPLATE,
+                    {
+                        "context": context,
+                        "question": rephrased_question,
+                        "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                    },
+                )
+                print(f"Got vision-enhanced response: {answer_content[:100]}...")
+            else:
+                # Use the initial text-only answer
+                answer_content = initial_answer
+                print(f"Using text-only response: {answer_content[:100]}...")
 
             # Translate the answer if needed
-            answer_content = await translate_text_if_needed(
-                answer_content, session, current_user, llm
-            )
+            try:
+                answer_content = await translate_text_if_needed(
+                    answer_content, session, current_user, llm
+                )
+            except Exception as e:
+                print(f"Translation of answer failed: {e}")
+                # Keep original answer if translation fails
 
         except Exception as e:
             print(f"Error generating answer: {e}")
@@ -1477,6 +1955,25 @@ async def query_document(
             document_names = cached_data.get("file_names", []) if cached_data else []
 
         # After generating the answer and before returning:
+        # Ensure sources metadata is serializable
+        serializable_sources = []
+        for s in sources:
+            try:
+                # Try to serialize the metadata to ensure it's valid
+                json.dumps(s["metadata"])
+                serializable_sources.append(s["metadata"])
+            except (TypeError, ValueError) as e:
+                print(f"WARNING: Source metadata not serializable, skipping: {e}")
+                # Create a serializable version
+                serializable_metadata = {}
+                for key, value in s["metadata"].items():
+                    try:
+                        json.dumps(value)
+                        serializable_metadata[key] = value
+                    except (TypeError, ValueError):
+                        serializable_metadata[key] = str(value)
+                serializable_sources.append(serializable_metadata)
+
         record_llm_interaction(
             session=session,
             user_id=current_user.id,
@@ -1490,9 +1987,15 @@ async def query_document(
             metadata={
                 "session_id": session_id,
                 "is_follow_up": is_follow_up,
-                "sources": [s["metadata"] for s in sources],
+                "sources": serializable_sources,
+                "vision_analysis_performed": vision_analysis_performed,
+                "text_answer_insufficient": text_answer_insufficient,
             },
         )
+
+        # Replace the internal insufficient info phrase with a user-friendly message
+        if settings.LLM_INSUFFICIENT_INFO_PHRASE in answer_content:
+            answer_content = "I'm sorry, but I couldn't find enough information in the provided documents to answer your question. The documents may not contain the specific details you're looking for, or the question might be about content not present in the uploaded files."
 
         return {
             "answer": answer_content,
@@ -1608,8 +2111,6 @@ async def query_text(
         }
 
     except Exception as e:
-        import traceback
-
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error processing question: {str(e)}"

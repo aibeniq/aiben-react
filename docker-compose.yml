@@ -175,7 +175,7 @@ services:
       - traefik.http.services.${STACK_NAME?Variable not set}-backend.loadbalancer.responseForwarding.flushInterval=100ms
       - traefik.http.services.${STACK_NAME?Variable not set}-backend.loadbalancer.server.scheme=http
       - traefik.http.services.${STACK_NAME?Variable not set}-backend.loadbalancer.passhostheader=true
-      
+
       # Timeouts for long-running operations (Full Document Scan, etc.)
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.middlewares=backend-timeout,general-ratelimit@file,security-headers@file
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.middlewares=https-redirect,backend-timeout
@@ -184,7 +184,7 @@ services:
       - traefik.http.middlewares.backend-timeout.buffering.retryExpression=IsNetworkError() && Attempts() < 2
 
   frontend:
-    #profiles: ["frontend"]
+    profiles: ["frontend"]
     image: "${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}"
     restart: always
     networks:

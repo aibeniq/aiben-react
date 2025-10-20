@@ -109,18 +109,20 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
-    POSTGRES_SSL_MODE: str = "prefer"  # Options: disable, allow, prefer, require, verify-ca, verify-full
+    POSTGRES_SSL_MODE: str = (
+        "prefer"  # Options: disable, allow, prefer, require, verify-ca, verify-full
+    )
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
         """
         Build PostgreSQL connection URI with SSL configuration.
-        
+
         SSL modes are environment-aware:
         - local: typically 'disable' (same Docker network, no encryption needed)
         - staging/production: 'prefer' or 'require' for external databases
-        
+
         SSL Mode options:
         - disable: No SSL
         - allow: Try non-SSL first, then SSL
@@ -131,19 +133,19 @@ class Settings(BaseSettings):
         """
         # Determine SSL mode based on environment and server location
         ssl_mode = self.POSTGRES_SSL_MODE
-        
+
         # Auto-detect local Docker environment (db service name or localhost)
         is_local_docker = self.POSTGRES_SERVER in ["db", "localhost", "127.0.0.1"]
-        
+
         # If in local environment and using Docker db service, disable SSL for performance
         if self.ENVIRONMENT == "local" and is_local_docker and ssl_mode == "prefer":
             ssl_mode = "disable"
-        
+
         # Build query parameters
         query_params = None
         if ssl_mode and ssl_mode != "disable":
             query_params = f"sslmode={ssl_mode}"
-        
+
         return MultiHostUrl.build(
             scheme="postgresql+psycopg",
             username=self.POSTGRES_USER,
@@ -251,37 +253,55 @@ class Settings(BaseSettings):
 
     # OpenAI API Configuration
     OPENAI_TIMEOUT: int = 36000  # 600 minutes timeout for OpenAI API calls
-    
+
     # ========================================
     # CENTRALIZED RATE LIMITING CONFIGURATION
     # ========================================
-    
+
     # Global OpenAI Rate Limits (applied to all services)
     OPENAI_TOKENS_PER_MINUTE: int = 180000  # Token limit (90% of typical 200k limit)
-    OPENAI_REQUESTS_PER_MINUTE: int = 500   # Request limit (conservative but practical)
-    OPENAI_RATE_LIMIT_MAX_WAIT: int = 30000   # Max wait time for rate limiting (500 minutes)
-    
+    OPENAI_REQUESTS_PER_MINUTE: int = 500  # Request limit (conservative but practical)
+    OPENAI_RATE_LIMIT_MAX_WAIT: int = (
+        30000  # Max wait time for rate limiting (500 minutes)
+    )
+
     # Processing Delays (to prevent cascading rate limit failures)
-    PROCESSING_DELAY_BETWEEN_CHUNKS: float = 0.5    # Delay between processing chunks
-    PROCESSING_DELAY_BETWEEN_QUESTIONS: float = 2.0  # Delay between questions (VeraDoc, etc.)
+    PROCESSING_DELAY_BETWEEN_CHUNKS: float = 0.5  # Delay between processing chunks
+    PROCESSING_DELAY_BETWEEN_QUESTIONS: float = (
+        2.0  # Delay between questions (VeraDoc, etc.)
+    )
     PROCESSING_DELAY_BETWEEN_DOCUMENTS: float = 1.0  # Delay between document processing
-    PROCESSING_DELAY_BETWEEN_REQUESTS: float = 0.1   # Minimum delay between any LLM requests
-    
+    PROCESSING_DELAY_BETWEEN_REQUESTS: float = (
+        0.1  # Minimum delay between any LLM requests
+    )
+
     # Chunk Processing Settings
-    CHUNK_PROCESSING_PROMPT_RESERVE_SMALL: int = 5000   # Reserve tokens for smaller operations
-    CHUNK_PROCESSING_PROMPT_RESERVE_LARGE: int = 20000  # Reserve tokens for large operations
-    CHUNK_PROCESSING_SIZE_THRESHOLD: int = 50000        # Threshold for small vs large reserve
-    
+    CHUNK_PROCESSING_PROMPT_RESERVE_SMALL: int = (
+        5000  # Reserve tokens for smaller operations
+    )
+    CHUNK_PROCESSING_PROMPT_RESERVE_LARGE: int = (
+        20000  # Reserve tokens for large operations
+    )
+    CHUNK_PROCESSING_SIZE_THRESHOLD: int = 50000  # Threshold for small vs large reserve
+
     # Service-Specific Overrides (if needed)
     CHATBOT_ENABLE_CHUNK_DELAYS: bool = True
     VERADOC_ENABLE_PROCESSING_DELAYS: bool = True
-    VERADOC_KB_CHUNK_SIZE_LIMIT: int = 15000      # Smaller chunks for KB processing
-    VERADOC_KB_CONTEXT_TIMEOUT: int = 180         # 3 minute timeout for context generation
-    VERADOC_CIRCUIT_BREAKER_ENABLED: bool = True  # Enable circuit breaker for rate limits
-    VERADOC_CIRCUIT_BREAKER_FAILURE_THRESHOLD: int = 3  # Failures before opening circuit
-    VERADOC_CIRCUIT_BREAKER_RESET_TIME: int = 300       # 5 minutes before retry
-    VERADOC_FULL_SCAN_FILTER_BATCH_SIZE: int = 10  # Batch size for concurrent relevance filtering in full document scans
-    STREAMING_UPLOAD_ENABLED: bool = False  # Enable streaming file uploads to reduce memory usage
+    VERADOC_KB_CHUNK_SIZE_LIMIT: int = 15000  # Smaller chunks for KB processing
+    VERADOC_KB_CONTEXT_TIMEOUT: int = 180  # 3 minute timeout for context generation
+    VERADOC_CIRCUIT_BREAKER_ENABLED: bool = (
+        True  # Enable circuit breaker for rate limits
+    )
+    VERADOC_CIRCUIT_BREAKER_FAILURE_THRESHOLD: int = (
+        3  # Failures before opening circuit
+    )
+    VERADOC_CIRCUIT_BREAKER_RESET_TIME: int = 300  # 5 minutes before retry
+    VERADOC_FULL_SCAN_FILTER_BATCH_SIZE: int = (
+        10  # Batch size for concurrent relevance filtering in full document scans
+    )
+    STREAMING_UPLOAD_ENABLED: bool = (
+        False  # Enable streaming file uploads to reduce memory usage
+    )
     TWINCHECK_ENABLE_PROCESSING_DELAYS: bool = True
     REPORTGENIE_ENABLE_PROCESSING_DELAYS: bool = True
 
@@ -574,13 +594,19 @@ class Settings(BaseSettings):
     CONTEXT:
     {context}
     
+    NOTE: If present, there may be a visual evidence block delimited by the markers
+    ---VISUAL_ANALYSIS_START--- and ---VISUAL_ANALYSIS_END---. The content inside that
+    block is a compact JSON object with keys: observations (list), summary (string), confidence (high|medium|low).
+    Treat the VISUAL_ANALYSIS block as valid evidence and prefer it when it directly answers the question.
+    
     QUESTION: {question}
     
     INSTRUCTIONS:
-    1. Answer the question based ONLY on the information provided in the CONTEXT.
-    2. If the context doesn't contain enough information to answer the question, say "I don't have enough information to answer this question."
-    3. Be concise and to the point.
-    4. Don't make up information or use knowledge outside the provided context.
+    1. Use information from CONTEXT and the VISUAL_ANALYSIS block ONLY.
+    2. If VISUAL_ANALYSIS provides observations or a summary that directly answers the question, use that.
+    3. If the context doesn't contain enough information to answer the question, respond with exactly: {insufficient_info_phrase}
+    4. Be concise and to the point, and cite whether your answer used text or visual evidence in a single short sentence.
+    5. Don't make up information or use knowledge outside the provided context.
     
     ANSWER:
     """
@@ -713,15 +739,41 @@ class Settings(BaseSettings):
     ANALYSIS FROM TEXT CHUNKS:
     {chunk_analyses}
 
+    NOTE: If present in any chunk analysis, there may be a visual evidence block delimited by the markers
+    ---VISUAL_ANALYSIS_START--- and ---VISUAL_ANALYSIS_END---. The content inside that
+    block contains visual analysis information that should be treated as valid evidence.
+    Extract and use this visual information directly in your answer without including the markers.
+
     INSTRUCTIONS:
-    1. Review the analysis from all text chunks.
+    1. Review the analysis from all text chunks, including any visual analysis information.
     2. Combine the information to form a comprehensive and coherent answer to the original QUESTION.
     3. Only include information that is supported by the provided chunk analyses.
-    4. If the combined analysis does not provide sufficient information to answer the question, state that clearly.
+    4. If the combined analysis does not provide sufficient information to answer the question, respond with exactly: {insufficient_info_phrase}
     5. Synthesize the information, do not just list the findings from each chunk.
     6. Provide a well-structured, coherent response.
+    7. Be concise and to the point, and cite whether your answer used text or visual evidence in a single short sentence if applicable.
 
-    SYNTHESIZED ANSWER:
+    ANSWER:
+    """
+
+    CHATBOT_MULTI_DOCUMENT_SYNTHESIS_PROMPT_TEMPLATE: str = """
+    You are an AI assistant synthesizing analyses from multiple documents to answer a question.
+
+    QUESTION: {question}
+
+    DOCUMENT ANALYSES:
+    {document_analyses}
+
+    INSTRUCTIONS:
+    1. Review the analyses from all documents.
+    2. Combine the information to form a comprehensive and coherent answer to the original QUESTION.
+    3. Only include information that is supported by the provided document analyses.
+    4. If the combined analysis does not provide sufficient information to answer the question, respond with exactly: {insufficient_info_phrase}
+    5. If there are contradictions between documents, note them.
+    6. If documents complement each other, combine the insights.
+    7. Provide a well-structured, coherent response.
+
+    ANSWER:
     """
 
     VERADOC_GENERATE_QUESTIONS_PROMPT_TEMPLATE: str = """
@@ -900,8 +952,15 @@ QUALITY_GAP_SEVERITY: [none/minor/moderate/significant]
         "claude-3-5-sonnet",
     ]
 
-    MAX_IMAGES_PER_DOCUMENT: int = 50
-    MAX_IMAGE_SIZE_MB: int = 5
+    MAX_IMAGES_PER_DOCUMENT: int = 500
+    MAX_IMAGE_SIZE_MB: int = 20
+    # Batch size for vision image processing (split images into this many per LLM call)
+    VISION_IMAGES_BATCH_SIZE: int = 5
+    # Maximum dimension (width or height) for image downsampling before sending to LLM
+    VISION_IMAGE_MAX_DIMENSION: int = 512
+
+    # Specific phrase to use when LLM doesn't have enough information to answer
+    LLM_INSUFFICIENT_INFO_PHRASE: str = "[INSUFFICIENT_CONTEXT]"
 
     # Vision prompt templates for different functionalities
     CHATBOT_VISION_PROMPT_TEMPLATE: str = """
@@ -911,14 +970,14 @@ Images provided: {image_count} from files: {source_files}
 
 Question: {question}
 
-Context from previous conversation:
-{context}
-
 Analyze the visual elements in the images and provide a comprehensive answer based on what you can see. Focus on:
 1. Text content visible in images
 2. Charts, diagrams, and visual data
 3. Layout and formatting
 4. Any relevant visual information
+DO NOT ADD ANY INFORMATION THAT IS NOT ATTESTED IN THE IMAGES
+
+If the images do not have the answer to your question, respond with exactly: {insufficient_info_phrase}
 
 Answer:
 """
@@ -972,7 +1031,25 @@ Look for visual evidence that helps answer the question, including:
 4. Layout and formatting
 5. Visual indicators or symbols
 
-Provide a detailed answer based on the visual analysis:
+Provide a detailed answer based on the visual analysis. DO NOT ADD ANY INFORMATION THAT IS NOT ATTESTED IN THE IMAGES:
+"""
+
+    VISION_SUMMARIZATION_PROMPT_TEMPLATE: str = """
+You are an AI assistant tasked with providing a direct, concise answer to a question based on visual analysis of images.
+
+Question: {question}
+
+You have analyzed multiple sets of images and received the following analysis results:
+{vision_results}
+
+Your task is to:
+1. Provide a direct answer to the question based on the visual analysis
+2. If the images contain the information needed to answer the question, give the answer clearly and concisely
+3. If the images do NOT contain the information needed to answer the question, respond with exactly: {insufficient_info_phrase}
+4. DO NOT mention "batches", "analysis results", or processing details
+5. DO NOT ADD ANY INFORMATION THAT IS NOT ATTESTED IN THE PROVIDED ANALYSIS RESULTS
+
+Answer:
 """
 
 

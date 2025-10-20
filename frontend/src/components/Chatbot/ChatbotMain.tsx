@@ -100,10 +100,7 @@ const ChatbotMain = () => {
     // Check if sources have source_data_id
     if (response.sources && response.sources.length > 0) {
       console.log("First source metadata:", response.sources[0].metadata)
-      console.log(
-        "Source has ID:",
-        !!response.sources[0].metadata?.source_data_id,
-      )
+      console.log("Source has ID:", !!response.sources[0].metadata?.source_data_id)
     }
 
     // You can show the rephrased question if you want
@@ -122,8 +119,7 @@ const ChatbotMain = () => {
       ...prev,
       {
         role: "assistant",
-        content:
-          response.answer + (rephrasedInfo ? `\n\n${rephrasedInfo}` : ""),
+        content: response.answer + (rephrasedInfo ? `\n\n${rephrasedInfo}` : ""),
         sources: response.sources,
         rephrasedQuestion: response.rephrased_question,
         sessionId: response.session_id,
@@ -166,8 +162,7 @@ const ChatbotMain = () => {
       const isFollowUp =
         sessionId &&
         ((selectedKbId && selectedKbId === currentKbId) ||
-          (uploadedFiles.length > 0 &&
-            currentFileNames.sort().join(",") === currentFileNamesStr))
+          (uploadedFiles.length > 0 && currentFileNames.sort().join(",") === currentFileNamesStr))
       console.log("Formatted chat history:", formattedChatHistory)
       console.log("Is follow-up:", isFollowUp)
 
@@ -217,9 +212,7 @@ const ChatbotMain = () => {
         }
 
         // Check for large files and adjust timeout
-        const hasVeryLargeFile = uploadedFiles.some(
-          (file) => file.size > 50 * 1024 * 1024,
-        ) // > 50MB
+        const hasVeryLargeFile = uploadedFiles.some((file) => file.size > 50 * 1024 * 1024) // > 50MB
 
         if (hasVeryLargeFile && searchMode === "vector") {
           console.log("Large file detected, recommending full text mode")
@@ -249,9 +242,7 @@ const ChatbotMain = () => {
           sessionId: sessionId,
           isFollowUp: isFollowUp === true,
           formData:
-            searchMode === "full_text" || !isFollowUp
-              ? { files: uploadedFiles }
-              : undefined,
+            searchMode === "full_text" || !isFollowUp ? { files: uploadedFiles } : undefined,
           searchMode: searchMode, // Pass the search mode
         })
 
@@ -266,13 +257,15 @@ const ChatbotMain = () => {
 
       if (error && typeof error === "object") {
         const errorObj = error as any
+
+        // Check for session expiration errors
         if (
-          errorObj.code === "ERR_NETWORK" ||
-          errorObj.message?.includes("timeout")
+          errorObj.response?.data?.detail?.includes("Session expired") ||
+          errorObj.response?.data?.detail?.includes("session expired")
         ) {
-          const hasLargeFiles = uploadedFiles.some(
-            (file) => file.size > 10 * 1024 * 1024,
-          )
+          errorMessage = "Session expired. Please upload your documents again."
+        } else if (errorObj.code === "ERR_NETWORK" || errorObj.message?.includes("timeout")) {
+          const hasLargeFiles = uploadedFiles.some((file) => file.size > 10 * 1024 * 1024)
           if (hasLargeFiles) {
             errorMessage = t("chatbot.errors.largeFileTimeout")
           } else {
@@ -282,13 +275,13 @@ const ChatbotMain = () => {
           errorMessage = t("chatbot.errors.fileSize")
         } else if (errorObj.response?.status >= 500) {
           errorMessage = t("chatbot.errors.serverError")
+        } else if (errorObj.response?.data?.detail) {
+          // Use the specific error message from the backend if available
+          errorMessage = errorObj.response.data.detail
         }
       }
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: errorMessage },
-      ])
+      setMessages((prev) => [...prev, { role: "assistant", content: errorMessage }])
     } finally {
       setIsLoading(false)
     }
@@ -300,9 +293,7 @@ const ChatbotMain = () => {
 
     if (isOpen) {
       // Ensure drawer content is properly visible
-      const drawerContent = document.querySelector(
-        '[data-scope="drawer"][data-part="content"]',
-      )
+      const drawerContent = document.querySelector('[data-scope="drawer"][data-part="content"]')
       if (drawerContent) {
         const contentEl = drawerContent as HTMLElement
         contentEl.style.opacity = "1"
