@@ -557,18 +557,20 @@ def extract_images_from_pdf_bytes(file_content: bytes) -> List[str]:
 
         doc = fitz.open("pdf", file_content)
 
-        for page_num in range(min(doc.page_count, 10)):  # Limit pages
+        for page_num in range(doc.page_count):  # Limit pages
             page = doc[page_num]
 
+            # REMOVED FOR REDUNDANCY
             # Convert page to image for comprehensive analysis
-            pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))
-            img_data = pix.tobytes("png")
-            img_base64 = base64.b64encode(img_data).decode()
-            images.append(img_base64)
+            # pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))
+            # img_data = pix.tobytes("png")
+            # img_base64 = base64.b64encode(img_data).decode()
+            # images.append(img_base64)
 
             # Extract embedded images
             image_list = page.get_images()
-            for img_index, img in enumerate(image_list[:3]):  # Limit embedded images
+            # Extract all embedded images (remove arbitrary per-page cap)
+            for img_index, img in enumerate(image_list):
                 try:
                     xref = img[0]
                     base_image = doc.extract_image(xref)
@@ -587,7 +589,7 @@ def extract_images_from_pdf_bytes(file_content: bytes) -> List[str]:
             from pdf2image import convert_from_bytes
 
             pages = convert_from_bytes(file_content, dpi=150, fmt="PNG")
-            for page in pages[:5]:  # Limit to 5 pages
+            for page in pages:
                 import io
 
                 img_buffer = io.BytesIO()

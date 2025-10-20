@@ -1,6 +1,7 @@
 import replicate
 import os
 from io import BytesIO
+import base64
 from app.models import ModelProvider, LlmModel, User, LlmInteraction
 from langchain_openai import ChatOpenAI
 from langchain_aws import ChatBedrock
@@ -32,6 +33,73 @@ from app.services.openai_queue import openai_request_queue
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def downsample_image_base64(image_b64: str, max_dimension: int = None) -> str:
+    """
+    Downsample an image from base64 to ensure maximum dimension is max_dimension pixels.
+    Maintains aspect ratio.
+
+    Args:
+        image_b64: Base64 encoded image
+        max_dimension: Maximum width or height in pixels (uses config default if None)
+
+    Returns:
+        Base64 encoded downsampled image
+    """
+    if max_dimension is None:
+        from app.core.config import settings
+
+        max_dimension = getattr(settings, "VISION_IMAGE_MAX_DIMENSION", 512)
+    try:
+        from PIL import Image
+        import io
+
+        # Decode base64 to bytes
+        image_bytes = base64.b64decode(image_b64)
+
+        # Open image with PIL
+        image = Image.open(io.BytesIO(image_bytes))
+
+        # Check if downsampling is needed
+        width, height = image.size
+        if width <= max_dimension and height <= max_dimension:
+            # No downsampling needed
+            return image_b64
+
+        # Calculate new dimensions maintaining aspect ratio
+        if width > height:
+            new_width = max_dimension
+            new_height = int(height * max_dimension / width)
+        else:
+            new_height = max_dimension
+            new_width = int(width * max_dimension / height)
+
+        # Resize image
+        resized_image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+        # Convert back to bytes
+        output_buffer = io.BytesIO()
+        resized_image.save(output_buffer, format=image.format or "PNG")
+        resized_bytes = output_buffer.getvalue()
+
+        # Encode back to base64
+        resized_b64 = base64.b64encode(resized_bytes).decode()
+
+        logger.debug(
+            f"Downsampled image from {width}x{height} to {new_width}x{new_height}"
+        )
+
+        return resized_b64
+
+    except ImportError:
+        logger.warning(
+            "PIL/Pillow not available for image downsampling, using original image"
+        )
+        return image_b64
+    except Exception as e:
+        logger.warning(f"Error downsampling image: {e}, using original image")
+        return image_b64
 
 
 async def execute_openai_request_safely(
@@ -787,6 +855,21 @@ def invoke_llm_with_image(
     if variables is None:
         variables = {}
 
+    # Validate base64 image if provided
+    if image_base64:
+        logger.debug(
+            f"Starting base64 validation for single image in invoke_llm_with_image (length: {len(image_base64)})"
+        )
+        try:
+            base64.b64decode(image_base64, validate=True)
+        except Exception as e:
+            logger.warning(
+                f"BASE64 VALIDATION ERROR: Invalid base64 image data in invoke_llm_with_image. "
+                f"Error: {str(e)}. Image processing will be skipped. "
+                f"Image data length: {len(image_base64) if image_base64 else 0} characters."
+            )
+            image_base64 = None
+
     # Format the text content based on prompt type and variables
     if isinstance(prompt, str):
         text_content = prompt.format(**variables) if variables else prompt
@@ -1000,6 +1083,58 @@ def invoke_llm_with_images(llm, prompt, variables=None, images_list=None):
 
     if images_list is None:
         images_list = []
+
+    # Validate base64 images and filter out invalid ones
+    if images_list:
+        logger.debug(
+            f"Starting base64 validation for {len(images_list)} images in invoke_llm_with_images"
+        )
+
+    valid_images = []
+    invalid_count = 0
+    for i, image_b64 in enumerate(images_list):
+        try:
+            base64.b64decode(image_b64, validate=True)
+            valid_images.append(image_b64)
+        except Exception as e:
+            invalid_count += 1
+            logger.warning(
+                f"BASE64 VALIDATION ERROR: Invalid base64 image at index {i} in invoke_llm_with_images. "
+                f"Error: {str(e)}. This image will be skipped. "
+                f"Image data length: {len(image_b64) if image_b64 else 0} characters."
+            )
+
+    if invalid_count > 0:
+        logger.info(
+            f"BASE64 VALIDATION SUMMARY: Filtered out {invalid_count} invalid images. "
+            f"Processing {len(valid_images)} valid images out of {len(images_list)} total."
+        )
+
+    images_list = valid_images
+
+    # Downsample images to reduce token usage and processing time
+    if images_list:
+        logger.debug(f"Starting image downsampling for {len(images_list)} images")
+        downsampled_images = []
+        for i, image_b64 in enumerate(images_list):
+            try:
+                downsampled = downsample_image_base64(image_b64)
+                downsampled_images.append(downsampled)
+                # Log if image was actually downsampled (size difference indicates change)
+                if (
+                    len(downsampled) < len(image_b64) * 0.9
+                ):  # 10% size reduction threshold
+                    logger.debug(
+                        f"Image {i} was downsampled (size reduced from {len(image_b64)} to {len(downsampled)} chars)"
+                    )
+            except Exception as e:
+                logger.warning(f"Failed to downsample image {i}: {e}, using original")
+                downsampled_images.append(image_b64)
+
+        images_list = downsampled_images
+        logger.debug(
+            f"Completed image downsampling, processing {len(images_list)} images"
+        )
 
     # Format the text content based on prompt type and variables
     if isinstance(prompt, str):

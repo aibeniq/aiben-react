@@ -150,10 +150,37 @@ class VisionService:
                 }
             )
 
-            # Process with vision-enabled LLM
-            result = invoke_llm_with_images(
-                llm, prompt_template, variables, image_data_list
-            )
+            # Support batching: split images into batches configured by settings.VISION_IMAGES_BATCH_SIZE
+            batch_size = max(1, int(getattr(settings, "VISION_IMAGES_BATCH_SIZE", 10)))
+            partial_results: List[str] = []
+
+            for i in range(0, len(image_data_list), batch_size):
+                batch = image_data_list[i : i + batch_size]
+                try:
+                    part = invoke_llm_with_images(
+                        llm, prompt_template, variables, batch
+                    )
+
+                    # Log each raw batch response
+                    try:
+                        logger.debug(
+                            f"Raw vision batch response (process_images_with_prompt) [{i // batch_size}]: {repr(part)}"
+                        )
+                        print(
+                            f"RAW_VISION_BATCH_RESPONSE(process_images_with_prompt)[{i // batch_size}]: {repr(part)[:4000]}"
+                        )
+                    except Exception:
+                        pass
+
+                    if part:
+                        partial_results.append(str(part))
+                except Exception as e:
+                    logger.error(f"Vision batch {i // batch_size} failed: {e}")
+                    # continue to next batch
+                    continue
+
+            # Combine partial results
+            result = "\n\n".join(partial_results).strip()
 
             return result if result else "No analysis result returned"
 
@@ -179,15 +206,23 @@ class VisionService:
             str: The combined analysis
         """
 
+        # If there's no vision analysis, return text-only
         if not vision_analysis or vision_analysis.startswith("Vision analysis"):
             return text_analysis
+
+        # Wrap the vision analysis in explicit markers so downstream QA prompts can treat it as evidence
+        visual_block = (
+            "\n\n---VISUAL_ANALYSIS_START---\n"
+            + vision_analysis.strip()
+            + "\n---VISUAL_ANALYSIS_END---\n\n"
+        )
 
         if combination_strategy == "comprehensive":
             return f"""## Text Analysis
 {text_analysis}
 
 ## Visual Analysis
-{vision_analysis}
+{visual_block}
 
 ## Combined Insights
 The analysis above integrates both textual content and visual elements to provide a comprehensive assessment."""
@@ -197,12 +232,12 @@ The analysis above integrates both textual content and visual elements to provid
 {text_analysis}
 
 ### Visual Elements Detected:
-{vision_analysis}"""
+{visual_block}"""
 
         else:  # side-by-side
             return f"""**Text Analysis:** {text_analysis}
 
-**Visual Analysis:** {vision_analysis}"""
+**Visual Analysis:** {visual_block}"""
 
     @staticmethod
     def prepare_images_for_comparison(
@@ -286,12 +321,119 @@ The analysis above integrates both textual content and visual elements to provid
 
             from app.services.llms import invoke_llm_with_images
 
-            return invoke_llm_with_images(
-                llm,
-                prompt_template,
-                variables,
-                [img["image_data"] for img in limited_images],
-            )
+            # Batch images according to config
+            image_payloads = [img["image_data"] for img in limited_images]
+            batch_size = max(1, int(getattr(settings, "VISION_IMAGES_BATCH_SIZE", 10)))
+            partial_results: List[str] = []
+
+            for i in range(0, len(image_payloads), batch_size):
+                batch = image_payloads[i : i + batch_size]
+                try:
+                    part = invoke_llm_with_images(
+                        llm, prompt_template, variables, batch
+                    )
+
+                    try:
+                        logger.debug(
+                            f"Raw vision batch response (safe_vision_analysis) [{i // batch_size}]: {repr(part)}"
+                        )
+                        print(
+                            f"RAW_VISION_BATCH_RESPONSE(safe_vision_analysis)[{i // batch_size}]: {repr(part)[:4000]}"
+                        )
+                    except Exception:
+                        pass
+
+                    if part:
+                        partial_results.append(str(part))
+                except Exception as e:
+                    logger.error(f"Vision batch {i // batch_size} failed: {e}")
+                    continue
+
+            combined_result = "\n\n".join(partial_results).strip()
+
+            # If we have multiple batches, summarize them using LLM
+            if len(partial_results) > 1:
+                try:
+                    from app.services.llms import invoke_llm
+
+                    # Create numbered results for better summarization
+                    numbered_results = []
+                    for i, result in enumerate(partial_results, 1):
+                        numbered_results.append(f"Batch {i} Analysis:\n{result}")
+                    vision_results_text = "\n\n".join(numbered_results)
+
+                    # Use LLM to summarize all the vision results
+                    summary_result = invoke_llm(
+                        llm,
+                        settings.VISION_SUMMARIZATION_PROMPT_TEMPLATE,
+                        {
+                            "batch_count": len(partial_results),
+                            "question": variables.get(
+                                "question", "Analyze the visual content"
+                            ),
+                            "vision_results": vision_results_text,
+                            "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                        },
+                    )
+
+                    # Use the summarized result
+                    combined_result = summary_result.strip()
+
+                except Exception as summary_error:
+                    logger.warning(
+                        f"Vision summarization failed, using combined results: {summary_error}"
+                    )
+                    # Fall back to combined results if summarization fails
+
+            # Sanitize/normalize the vision output: prefer compact JSON with keys observations, summary, confidence
+            normalized = combined_result
+            try:
+                import json
+
+                # Try to parse if the model already returned JSON
+                parsed = json.loads(combined_result)
+                # If parsed is a dict and contains expected keys, accept as-is
+                if isinstance(parsed, dict) and (
+                    "observations" in parsed or "summary" in parsed
+                ):
+                    normalized = json.dumps(parsed)
+                else:
+                    # Not in expected shape -> wrap as summary
+                    normalized = json.dumps(
+                        {
+                            "observations": [],
+                            "summary": str(combined_result),
+                            "confidence": "medium",
+                        }
+                    )
+            except Exception:
+                # If the model returned a refusal or prose, normalize to a compact JSON fallback
+                low_conf_summary = combined_result.strip()
+                # Heuristic: if the response contains phrases like "unable to" or "cannot analyze", mark low confidence
+                lc = low_conf_summary.lower()
+                conf = (
+                    "low"
+                    if any(
+                        p in lc
+                        for p in ["unable to", "cannot", "refuse", "can't", "don't"]
+                    )
+                    else "medium"
+                )
+                try:
+                    import json
+
+                    normalized = json.dumps(
+                        {
+                            "observations": [],
+                            "summary": low_conf_summary,
+                            "confidence": conf,
+                        }
+                    )
+                except Exception:
+                    normalized = combined_result
+
+            # Return the normalized JSON string (or fallback to raw combined_result)
+            return normalized
 
         except Exception as e:
             logger.error(f"Vision analysis failed: {e}")

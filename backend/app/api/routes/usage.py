@@ -40,7 +40,7 @@ def calculate_quota_period() -> QuotaPeriod:
     current_year = today.year
 
     start_day = settings.QUOTA_PERIOD_START_DAY
-    
+
     # Debug information for quota period calculation
     logger.debug(f"Today (UTC): {today}")
     logger.debug(f"Current day: {current_day}, Start day setting: {start_day}")
@@ -72,12 +72,20 @@ def calculate_quota_period() -> QuotaPeriod:
             prev_month = current_month - 1
             prev_year = current_year
         start_date = datetime(prev_year, prev_month, start_day)
-        end_day = start_day - 1 if start_day > 1 else monthrange(current_year, current_month)[1]
+        end_day = (
+            start_day - 1
+            if start_day > 1
+            else monthrange(current_year, current_month)[1]
+        )
         end_date = datetime(current_year, current_month, end_day, 23, 59, 59)
 
     # Debug information for timestamps
-    logger.debug(f"Sending start_time: {int(start_date.timestamp())} ({start_date.isoformat()} UTC)")
-    logger.debug(f"Sending end_time: {int(end_date.timestamp())} ({end_date.isoformat()} UTC)")
+    logger.debug(
+        f"Sending start_time: {int(start_date.timestamp())} ({start_date.isoformat()} UTC)"
+    )
+    logger.debug(
+        f"Sending end_time: {int(end_date.timestamp())} ({end_date.isoformat()} UTC)"
+    )
 
     return {
         "start_time": int(start_date.timestamp()),
@@ -116,18 +124,21 @@ async def get_token_usage(
         ("start_time", quota_period["start_time"]),
         ("end_time", quota_period["end_time"]),
         ("bucket_width", "1d"),
-        ("api_key_ids", "key_BiGdXxRyZJgf1SWp"), #DAVID TODO - hardcoded in the key ID...
+        (
+            "api_key_ids",
+            "key_BiGdXxRyZJgf1SWp",
+        ),  # DAVID TODO - hardcoded in the key ID...
         ("group_by[]", "api_key_id"),
-        #("group_by[]", "model"),
-        #("group_by[]", "bucket"),
+        # ("group_by[]", "model"),
+        # ("group_by[]", "bucket"),
     ]
-    
+
     # Log calculated usage period
-    logger.info(f"=== USAGE PERIOD DEBUG ===")
-    logger.info(f"Quota period start: {quota_period['start_date']}")
-    logger.info(f"Quota period end: {quota_period['end_date']}")
-    logger.info(f"Max tokens for period: {quota_period['max_tokens']:,}")
-    logger.debug(f"Using API key: {openai_api_key[:10]}...{openai_api_key[-10:]}")
+    # logger.info(f"=== USAGE PERIOD DEBUG ===")
+    # logger.info(f"Quota period start: {quota_period['start_date']}")
+    # logger.info(f"Quota period end: {quota_period['end_date']}")
+    # logger.info(f"Max tokens for period: {quota_period['max_tokens']:,}")
+    # logger.debug(f"Using API key: {openai_api_key[:10]}...{openai_api_key[-10:]}")
 
     url = "https://api.openai.com/v1/organization/usage/completions"
     headers = {
@@ -140,77 +151,96 @@ async def get_token_usage(
             total_tokens: int = 0
             page_count = 0
             next_page = None
-            
+
             # Handle pagination to get all usage data
             while True:
                 page_count += 1
                 current_params = params.copy()
-                
+
                 # Add pagination parameter if we have a next page
                 if next_page:
                     current_params.append(("page", next_page))
-                
-                logger.info(f"Fetching page {page_count}...")
+
+                # logger.info(f"Fetching page {page_count}...")
                 response = await client.get(url, headers=headers, params=current_params)
 
                 if response.status_code == 200:
                     data = response.json()
 
                     # Log basic response info (reduced verbosity)
-                    logger.info(f"Page {page_count} - OpenAI API response status: {response.status_code}")
-                    logger.debug(f"Page {page_count} - Response data keys: {list(data.keys()) if data else 'None'}")
+                    # logger.info(
+                    #    f"Page {page_count} - OpenAI API response status: {response.status_code}"
+                    # )
+                    # logger.debug(
+                    #    f"Page {page_count} - Response data keys: {list(data.keys()) if data else 'None'}"
+                    # )
                     # Only log raw response in debug mode to avoid large log entries
-                    if logger.isEnabledFor(10):  # DEBUG level
-                        logger.debug(f"Page {page_count} - Raw response data truncated")
+                    # if logger.isEnabledFor(10):  # DEBUG level
+                    #    logger.debug(f"Page {page_count} - Raw response data truncated")
 
                     page_tokens = 0
                     if data and "data" in data and isinstance(data["data"], list):
-                        logger.info(f"Page {page_count} - Number of buckets: {len(data['data'])}")
+                        # logger.info(
+                        #    f"Page {page_count} - Number of buckets: {len(data['data'])}"
+                        # )
                         for i, bucket in enumerate(data["data"]):
-                            if "results" in bucket and isinstance(bucket["results"], list):
+                            if "results" in bucket and isinstance(
+                                bucket["results"], list
+                            ):
                                 bucket_tokens = 0
                                 for result in bucket["results"]:
                                     input_tokens = result.get("input_tokens", 0)
                                     output_tokens = result.get("output_tokens", 0)
                                     bucket_tokens += input_tokens + output_tokens
                                     page_tokens += input_tokens + output_tokens
-                                if bucket_tokens > 0:  # Only log non-zero buckets
-                                    logger.debug(f"Page {page_count}, Bucket {i}: {bucket_tokens:,} tokens")
-                    
+                                # if bucket_tokens > 0:  # Only log non-zero buckets
+                                #    logger.debug(
+                                #        f"Page {page_count}, Bucket {i}: {bucket_tokens:,} tokens"
+                                #    )
+
                     total_tokens += page_tokens
-                    logger.info(f"Page {page_count} total tokens: {page_tokens:,}")
-                    
+                    # logger.info(f"Page {page_count} total tokens: {page_tokens:,}")
+
                     # Check if there are more pages
                     has_more = data.get("has_more", False)
                     next_page = data.get("next_page")
-                    
+
                     if not has_more or not next_page:
-                        logger.info(f"No more pages. Total pages fetched: {page_count}")
+                        # logger.info(f"No more pages. Total pages fetched: {page_count}")
                         break
-                        
+
                 elif response.status_code == 401:
-                    logger.error(f"OpenAI API authentication failed: {response.status_code}")
+                    logger.error(
+                        f"OpenAI API authentication failed: {response.status_code}"
+                    )
                     raise HTTPException(
                         status_code=401,
                         detail="Invalid OpenAI admin credentials or insufficient permissions",
                     )
                 elif response.status_code == 429:
-                    logger.warning(f"OpenAI API rate limit exceeded: {response.status_code}")
+                    logger.warning(
+                        f"OpenAI API rate limit exceeded: {response.status_code}"
+                    )
                     raise HTTPException(
-                        status_code=429, detail="Rate limit exceeded for OpenAI Admin API"
+                        status_code=429,
+                        detail="Rate limit exceeded for OpenAI Admin API",
                     )
                 else:
-                    logger.error(f"OpenAI API error: {response.status_code} - {response.text}")
+                    logger.error(
+                        f"OpenAI API error: {response.status_code} - {response.text}"
+                    )
                     raise HTTPException(
                         status_code=response.status_code,
                         detail=f"OpenAI API returned status {response.status_code}",
                     )
 
             # Log final calculated usage
-            logger.info(f"=== FINAL USAGE CALCULATION ===")
-            logger.info(f"Total tokens retrieved: {total_tokens:,}")
-            logger.info(f"Usage percentage: {(total_tokens / quota_period['max_tokens'] * 100):.2f}%")
-            logger.info(f"=============================")
+            # logger.info(f"=== FINAL USAGE CALCULATION ===")
+            # logger.info(f"Total tokens retrieved: {total_tokens:,}")
+            # logger.info(
+            #    f"Usage percentage: {(total_tokens / quota_period['max_tokens'] * 100):.2f}%"
+            # )
+            # logger.info(f"=============================")
 
             return TokenUsageResponse(
                 total_tokens=total_tokens, quota_period=quota_period
