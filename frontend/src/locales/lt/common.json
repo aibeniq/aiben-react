@@ -70,14 +70,14 @@
     "searchMode": "Paieškos režimas:",
     "vectorSearch": "Vektorinė paieška",
     "fullTextScan": "Viso teksto nuskaitymas",
-    "searchModeDescription": "[AUTO-TRANSLATED lt] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
-    "askMeAnything": "[AUTO-TRANSLATED lt] Ask me anything! For knowledge base search, select a knowledge base first.",
-    "usingGeneralAI": "[AUTO-TRANSLATED lt] Using general AI assistant",
-    "usingKnowledgeBase": "[AUTO-TRANSLATED lt] Using knowledge base:",
-    "usingDocuments": "[AUTO-TRANSLATED lt] Using # document(s)",
-    "usingFiles": "[AUTO-TRANSLATED lt] Using {{count}} document{{plural}}:",
+    "searchModeDescription": "Vektorinė paieška suteikia greitus, tikslinius rezultatus. Viso teksto nuskaitymas peržiūri visą žinių bazės turinį.",
+    "askMeAnything": "Klauskite manęs bet ko! Žinių bazės paieškai pirmiausia pasirinkite žinių bazę.",
+    "usingGeneralAI": "Naudojamas bendrasis AI asistentas",
+    "usingKnowledgeBase": "Naudojama žinių bazė:",
+    "usingDocuments": "Naudojama # dokumentas(-ai)",
+    "usingFiles": "Naudojama {{count}} dokumentas{{plural}}:",
     "remove": "Pašalinti",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED lt] Select Knowledge Base",
+    "selectKnowledgeBase": "Pasirinkite žinių bazę",
     "knowledgeBaseTable": {
       "name": "Pavadinimas",
       "description": "Aprašymas",
@@ -91,11 +91,11 @@
     "knowledgeBase": "Žinių bazė",
     "file": "Failas",
     "errors": {
-      "generic": "[AUTO-TRANSLATED lt] Sorry, something went wrong. Please try again.",
-      "timeout": "[AUTO-TRANSLATED lt] Request timed out. Please try again.",
-      "largeFileTimeout": "[AUTO-TRANSLATED lt] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
-      "fileSize": "[AUTO-TRANSLATED lt] File is too large. Please choose smaller files.",
-      "serverError": "[AUTO-TRANSLATED lt] Server error occurred. Please try again later."
+      "generic": "Atsiprašome, kažkas nutiko. Bandykite dar kartą.",
+      "timeout": "Užklausa baigėsi laiku. Bandykite dar kartą.",
+      "largeFileTimeout": "Didelio failo apdorojimas baigėsi laiku. Bandykite perjungti į 'Viso teksto nuskaitymo' režimą geresniam našumui su dideliais failais.",
+      "fileSize": "Failas per didelis. Prašome pasirinkti mažesnius failus.",
+      "serverError": "Įvyko serverio klaida. Bandykite dar kartą vėliau."
     }
   },
   "settings": {
@@ -212,9 +212,9 @@
       "processing": "Apdorojama...",
       "extracting": "Turinio ištraukimas..."
     },
-    "error": "[AUTO-TRANSLATED lt] Something went wrong!",
-    "welcomeBack": "[AUTO-TRANSLATED lt] Welcome back, nice to see you again!",
-    "hiUser": "[AUTO-TRANSLATED lt] Hi, {{name}} 👋"
+    "error": "Kažkas nutiko!",
+    "welcomeBack": "Sveiki sugrįžę, malonu jus vėl matyti!",
+    "hiUser": "Sveiki, {{name}} 👋"
   },
   "usage": {
     "title": "Naudojimas",
@@ -366,7 +366,7 @@
     },
     "pleaseWait": "Prašome palaukti, kol palyginame jūsų dokumentus",
     "compareSuccess": "Dokumentai sėkmingai palyginti!",
-    "selectTopicListTitle": "[AUTO-TRANSLATED lt] Select Topic List"
+    "selectTopicListTitle": "Pasirinkite temų sąrašą"
   },
   "match": {
     "title": "Dokumentų atitikimas",
@@ -401,7 +401,7 @@
     "pleaseWait": "Prašome palaukti, kol suderinsime jūsų dokumentus",
     "matchSuccess": "Formos apdorojimas sėkmingai baigtas!",
     "singleDocumentSuccess": "Laukų reikšmės išgautos iš vieno dokumento.",
-    "selectFormTemplateTitle": "[AUTO-TRANSLATED lt] Select Form Template"
+    "selectFormTemplateTitle": "Pasirinkite formos šabloną"
   },
   "editFormTemplateModal": {
     "title": "Formos šablono redagavimas",
@@ -578,33 +578,33 @@
         "updateFormTemplate": "Atnaujinti Formos Šabloną"
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED lt] Title",
+        "title": "Pavadinimas",
         "description": "Aprašymas"
       },
       "fileUpload": {
-        "currentFiles": "[AUTO-TRANSLATED lt] Current Files",
-        "newFiles": "[AUTO-TRANSLATED lt] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED lt] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED lt] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED lt] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED lt] Remove file",
-        "supportedFormats": "[AUTO-TRANSLATED lt] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "currentFiles": "Dabartiniai failai",
+        "newFiles": "Nauji failai",
+        "selectedFiles": "Pasirinkti failai",
+        "dragAndDrop": "Nuvilkite failus čia arba spustelėkite naršymui",
+        "dropFiles": "Numeskite failus čia...",
+        "removeFile": "Pašalinti failą",
+        "supportedFormats": "Palaiko: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
       },
       "buttons": {
         "cancel": "Atšaukti",
         "create": "Sukurti",
         "save": "Išsaugoti",
-        "saving": "[AUTO-TRANSLATED lt] Saving...",
-        "creating": "[AUTO-TRANSLATED lt] Creating..."
+        "saving": "Išsaugoma...",
+        "creating": "Kuriama..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED lt] Title is required"
+        "titleRequired": "Pavadinimas yra privalomas"
       },
       "messages": {
-        "createSuccess": "[AUTO-TRANSLATED lt] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED lt] Knowledge Base updated successfully.",
-        "processing": "[AUTO-TRANSLATED lt] Processing...",
-        "pleaseWait": "[AUTO-TRANSLATED lt] Please wait while we process your files..."
+        "createSuccess": "Žinių bazė sėkmingai sukurta.",
+        "updateSuccess": "Žinių bazė sėkmingai atnaujinta.",
+        "processing": "Apdorojama...",
+        "pleaseWait": "Prašome palaukti, kol apdorosime jūsų failus..."
       }
     },
     "editCustom": {
@@ -768,43 +768,43 @@
       "processingSection": "Apdorojama sekcija {{sectionNum}} iš {{totalSections}}: {{sectionPreview}}"
     },
     "pleaseWait": "Prašome palaukti, kol sugeneruosime jūsų ataskaitą",
-    "pageDescription": "[AUTO-TRANSLATED lt] Generate a document based on a user-defined outline and document database.",
-    "generatingDocument": "[AUTO-TRANSLATED lt] Generating document...",
+    "pageDescription": "Generuokite dokumentą pagal vartotojo apibrėžtą kontūrą ir dokumentų duomenų bazę.",
+    "generatingDocument": "Generuojamas dokumentas...",
     "knowledgeBaseTitle": "Žinių bazė",
-    "documentOutlineTitle": "[AUTO-TRANSLATED lt] Document Outline",
-    "clickToSelect": "[AUTO-TRANSLATED lt] Click to select",
-    "customInstructionsTitle": "[AUTO-TRANSLATED lt] Custom Instructions (Optional)",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED lt] Enter any additional instructions that should be considered when generating each section of the report...",
-    "characterCount": "[AUTO-TRANSLATED lt] {{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
-    "selectKnowledgeBaseTitle": "[AUTO-TRANSLATED lt] Select Knowledge Base",
-    "selectDocumentOutlineTitle": "[AUTO-TRANSLATED lt] Select Document Outline",
-    "generateButton": "[AUTO-TRANSLATED lt] Generate",
-    "results": "[AUTO-TRANSLATED lt] Results",
-    "copyText": "[AUTO-TRANSLATED lt] Copy Text",
-    "copied": "[AUTO-TRANSLATED lt] Copied!",
-    "downloadDocx": "[AUTO-TRANSLATED lt] Download DOCX",
-    "downloadCsv": "[AUTO-TRANSLATED lt] Download CSV",
-    "clearReport": "[AUTO-TRANSLATED lt] Clear Report",
-    "resultsPlaceholder": "[AUTO-TRANSLATED lt] Results will appear here after generating a document.",
-    "sectionsWithSources": "[AUTO-TRANSLATED lt] Sections with Sources",
-    "sectionNumber": "[AUTO-TRANSLATED lt] Section {number}: {title}",
-    "kbGenerated": "[AUTO-TRANSLATED lt] KB Generated",
-    "rawText": "[AUTO-TRANSLATED lt] Raw Text",
-    "viewSourceCitations": "[AUTO-TRANSLATED lt] View Source Citations ({count})",
-    "documentCopiedSuccess": "[AUTO-TRANSLATED lt] Document copied to clipboard",
-    "documentCopiedError": "[AUTO-TRANSLATED lt] Failed to copy document to clipboard",
-    "documentDownloadSuccess": "[AUTO-TRANSLATED lt] Document downloaded successfully",
-    "documentDownloadError": "[AUTO-TRANSLATED lt] Failed to download document: {error}",
-    "csvDownloadSuccess": "[AUTO-TRANSLATED lt] CSV downloaded successfully",
-    "csvDownloadError": "[AUTO-TRANSLATED lt] Failed to download CSV: {error}",
-    "reportClearedSuccess": "[AUTO-TRANSLATED lt] Generated report cleared",
-    "enterAtLeastOneSection": "[AUTO-TRANSLATED lt] Please enter at least one section",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED lt] Please select a knowledge base",
-    "generateSuccess": "[AUTO-TRANSLATED lt] Report generated successfully!",
-    "generateError": "[AUTO-TRANSLATED lt] Failed to generate document: {error}",
-    "vectorSearch": "[AUTO-TRANSLATED lt] vector search",
-    "fullDocumentScan": "[AUTO-TRANSLATED lt] full document scan",
-    "editOutline": "[AUTO-TRANSLATED lt] Edit Outline"
+    "documentOutlineTitle": "Dokumento kontūra",
+    "clickToSelect": "Spustelėkite pasirinkimui",
+    "customInstructionsTitle": "Pritaikyti nurodymai (neprivaloma)",
+    "customInstructionsPlaceholder": "Įveskite bet kokius papildomus nurodymus, kuriuos reikia atsižvelgti generuojant kiekvieną ataskaitos skyrių...",
+    "characterCount": "{{count}}/2000 simbolių. Šie nurodymai bus pridėti prie užklausos generuojant kiekvieną skyrių.",
+    "selectKnowledgeBaseTitle": "Pasirinkite žinių bazę",
+    "selectDocumentOutlineTitle": "Pasirinkite dokumento kontūrą",
+    "generateButton": "Generuoti",
+    "results": "Rezultatai",
+    "copyText": "Kopijuoti tekstą",
+    "copied": "Nukopijuota!",
+    "downloadDocx": "Atsisiųsti DOCX",
+    "downloadCsv": "Atsisiųsti CSV",
+    "clearReport": "Išvalyti ataskaitą",
+    "resultsPlaceholder": "Rezultatai pasirodys čia po dokumento generavimo.",
+    "sectionsWithSources": "Skyriai su šaltiniais",
+    "sectionNumber": "Skyrius {number}: {title}",
+    "kbGenerated": "KB sugeneruota",
+    "rawText": "Neapdorotas tekstas",
+    "viewSourceCitations": "Žiūrėti šaltinių citatas ({count})",
+    "documentCopiedSuccess": "Dokumentas nukopijuotas į iškarpinę",
+    "documentCopiedError": "Nepavyko nukopijuoti dokumento į iškarpinę",
+    "documentDownloadSuccess": "Dokumentas sėkmingai atsisiųstas",
+    "documentDownloadError": "Nepavyko atsisiųsti dokumento: {error}",
+    "csvDownloadSuccess": "CSV sėkmingai atsisiųstas",
+    "csvDownloadError": "Nepavyko atsisiųsti CSV: {error}",
+    "reportClearedSuccess": "Sugeneruota ataskaita išvalyta",
+    "enterAtLeastOneSection": "Prašome įvesti bent vieną skyrių",
+    "selectKnowledgeBase": "Prašome pasirinkti žinių bazę",
+    "generateSuccess": "Ataskaita sėkmingai sugeneruota!",
+    "generateError": "Nepavyko sugeneruoti dokumento: {error}",
+    "vectorSearch": "vektorinė paieška",
+    "fullDocumentScan": "viso dokumento nuskaitymas",
+    "editOutline": "Redaguoti kontūrą"
   },
   "feedback": {
     "modalTitlePositive": "Kas buvo naudinga?",

@@ -70,14 +70,14 @@
     "searchMode": "Meklēšanas režīms:",
     "vectorSearch": "Vektoru meklēšana",
     "fullTextScan": "Pilna teksta skenēšana",
-    "searchModeDescription": "[AUTO-TRANSLATED lv] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
-    "askMeAnything": "[AUTO-TRANSLATED lv] Ask me anything! For knowledge base search, select a knowledge base first.",
-    "usingGeneralAI": "[AUTO-TRANSLATED lv] Using general AI assistant",
-    "usingKnowledgeBase": "[AUTO-TRANSLATED lv] Using knowledge base:",
-    "usingDocuments": "[AUTO-TRANSLATED lv] Using # document(s)",
-    "usingFiles": "[AUTO-TRANSLATED lv] Using {{count}} document{{plural}}:",
+    "searchModeDescription": "Vektoru meklēšana nodrošina ātrus, mērķtiecīgus rezultātus. Pilna teksta skenēšana pārskata visu zināšanu bāzes saturu.",
+    "askMeAnything": "Jautājiet man jebko! Zināšanu bāzes meklēšanai vispirms izvēlieties zināšanu bāzi.",
+    "usingGeneralAI": "Izmanto vispārējo AI asistentu",
+    "usingKnowledgeBase": "Izmanto zināšanu bāzi:",
+    "usingDocuments": "Izmanto # dokumentu(s)",
+    "usingFiles": "Izmanto {{count}} dokumentu{{plural}}:",
     "remove": "Noņemt",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED lv] Select Knowledge Base",
+    "selectKnowledgeBase": "Izvēlieties zināšanu bāzi",
     "knowledgeBaseTable": {
       "name": "Nosaukums",
       "description": "Apraksts",
@@ -91,11 +91,11 @@
     "knowledgeBase": "Zināšanu bāze",
     "file": "Fails",
     "errors": {
-      "generic": "[AUTO-TRANSLATED lv] Sorry, something went wrong. Please try again.",
-      "timeout": "[AUTO-TRANSLATED lv] Request timed out. Please try again.",
-      "largeFileTimeout": "[AUTO-TRANSLATED lv] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
-      "fileSize": "[AUTO-TRANSLATED lv] File is too large. Please choose smaller files.",
-      "serverError": "[AUTO-TRANSLATED lv] Server error occurred. Please try again later."
+      "generic": "Atvainojiet, kaut kas nogāja greizi. Lūdzu, mēģiniet vēlreiz.",
+      "timeout": "Pieprasījums beidzās ar noildzi. Lūdzu, mēģiniet vēlreiz.",
+      "largeFileTimeout": "Liela faila apstrāde beidzās ar noildzi. Mēģiniet pārslēgties uz 'Pilna teksta skenēšana' režīmu labākai veiktspējai ar lieliem failiem.",
+      "fileSize": "Fails ir pārāk liels. Lūdzu, izvēlieties mazākus failus.",
+      "serverError": "Radās servera kļūda. Lūdzu, mēģiniet vēlāk."
     }
   },
   "settings": {
@@ -212,9 +212,9 @@
       "processing": "Apstrāde...",
       "extracting": "Satura iegūšana..."
     },
-    "error": "[AUTO-TRANSLATED lv] Something went wrong!",
-    "welcomeBack": "[AUTO-TRANSLATED lv] Welcome back, nice to see you again!",
-    "hiUser": "[AUTO-TRANSLATED lv] Hi, {{name}} 👋"
+    "error": "Kaut kas nogāja greizi!",
+    "welcomeBack": "Laipni lūdzam atpakaļ, patīkami redzēt jūs atkal!",
+    "hiUser": "Sveiki, {{name}} 👋"
   },
   "usage": {
     "title": "Lietojums",
@@ -366,7 +366,7 @@
     },
     "pleaseWait": "Lūdzu, uzgaidiet, kamēr mēs salīdzinām jūsu dokumentus",
     "compareSuccess": "Dokumenti veiksmīgi salīdzināti!",
-    "selectTopicListTitle": "[AUTO-TRANSLATED lv] Select Topic List"
+    "selectTopicListTitle": "Izvēlieties tēmu sarakstu"
   },
   "match": {
     "title": "Dokumentu atbilstība",
@@ -401,7 +401,7 @@
     "pleaseWait": "Lūdzu, uzgaidiet, kamēr mēs saskaņojam jūsu dokumentus",
     "matchSuccess": "Formas apstrāde veiksmīgi pabeigta!",
     "singleDocumentSuccess": "Lauku vērtības iegūtas no viena dokumenta.",
-    "selectFormTemplateTitle": "[AUTO-TRANSLATED lv] Select Form Template"
+    "selectFormTemplateTitle": "Izvēlieties formas veidni"
   },
   "editFormTemplateModal": {
     "title": "Formas veidnes rediģēšana",
@@ -578,33 +578,33 @@
         "updateFormTemplate": "Atjaunināt Formas Veidni"
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED lv] Title",
+        "title": "Virsraksts",
         "description": "Apraksts"
       },
       "fileUpload": {
-        "currentFiles": "[AUTO-TRANSLATED lv] Current Files",
-        "newFiles": "[AUTO-TRANSLATED lv] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED lv] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED lv] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED lv] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED lv] Remove file",
-        "supportedFormats": "[AUTO-TRANSLATED lv] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "currentFiles": "Pašreizējie faili",
+        "newFiles": "Jaunie faili",
+        "selectedFiles": "Atlasītie faili",
+        "dragAndDrop": "Velciet un nometiet failus šeit vai noklikšķiniet, lai pārlūkotu",
+        "dropFiles": "Nometiet failus šeit...",
+        "removeFile": "Noņemt failu",
+        "supportedFormats": "Atbalsta: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
       },
       "buttons": {
         "cancel": "Atcelt",
         "create": "Izveidot",
         "save": "Saglabāt",
-        "saving": "[AUTO-TRANSLATED lv] Saving...",
-        "creating": "[AUTO-TRANSLATED lv] Creating..."
+        "saving": "Saglabā...",
+        "creating": "Izveido..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED lv] Title is required"
+        "titleRequired": "Virsraksts ir nepieciešams"
       },
       "messages": {
-        "createSuccess": "[AUTO-TRANSLATED lv] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED lv] Knowledge Base updated successfully.",
-        "processing": "[AUTO-TRANSLATED lv] Processing...",
-        "pleaseWait": "[AUTO-TRANSLATED lv] Please wait while we process your files..."
+        "createSuccess": "Zināšanu bāze veiksmīgi izveidota.",
+        "updateSuccess": "Zināšanu bāze veiksmīgi atjaunināta.",
+        "processing": "Apstrādā...",
+        "pleaseWait": "Lūdzu, uzgaidiet, kamēr mēs apstrādājam jūsu failus..."
       }
     },
     "editCustom": {
@@ -768,43 +768,43 @@
       "processingSection": "Apstrādā sadaļu {{sectionNum}} no {{totalSections}}: {{sectionPreview}}"
     },
     "pleaseWait": "Lūdzu, uzgaidiet, kamēr mēs ģenerējam jūsu ziņojumu",
-    "pageDescription": "[AUTO-TRANSLATED lv] Generate a document based on a user-defined outline and document database.",
-    "generatingDocument": "[AUTO-TRANSLATED lv] Generating document...",
+    "pageDescription": "Ģenerējiet dokumentu, pamatojoties uz lietotāja definētu kontūru un dokumentu datubāzi.",
+    "generatingDocument": "Ģenerē dokumentu...",
     "knowledgeBaseTitle": "Zināšanu bāze",
-    "documentOutlineTitle": "[AUTO-TRANSLATED lv] Document Outline",
-    "clickToSelect": "[AUTO-TRANSLATED lv] Click to select",
-    "customInstructionsTitle": "[AUTO-TRANSLATED lv] Custom Instructions (Optional)",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED lv] Enter any additional instructions that should be considered when generating each section of the report...",
-    "characterCount": "[AUTO-TRANSLATED lv] {{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
-    "selectKnowledgeBaseTitle": "[AUTO-TRANSLATED lv] Select Knowledge Base",
-    "selectDocumentOutlineTitle": "[AUTO-TRANSLATED lv] Select Document Outline",
-    "generateButton": "[AUTO-TRANSLATED lv] Generate",
-    "results": "[AUTO-TRANSLATED lv] Results",
-    "copyText": "[AUTO-TRANSLATED lv] Copy Text",
-    "copied": "[AUTO-TRANSLATED lv] Copied!",
-    "downloadDocx": "[AUTO-TRANSLATED lv] Download DOCX",
-    "downloadCsv": "[AUTO-TRANSLATED lv] Download CSV",
-    "clearReport": "[AUTO-TRANSLATED lv] Clear Report",
-    "resultsPlaceholder": "[AUTO-TRANSLATED lv] Results will appear here after generating a document.",
-    "sectionsWithSources": "[AUTO-TRANSLATED lv] Sections with Sources",
-    "sectionNumber": "[AUTO-TRANSLATED lv] Section {number}: {title}",
-    "kbGenerated": "[AUTO-TRANSLATED lv] KB Generated",
-    "rawText": "[AUTO-TRANSLATED lv] Raw Text",
-    "viewSourceCitations": "[AUTO-TRANSLATED lv] View Source Citations ({count})",
-    "documentCopiedSuccess": "[AUTO-TRANSLATED lv] Document copied to clipboard",
-    "documentCopiedError": "[AUTO-TRANSLATED lv] Failed to copy document to clipboard",
-    "documentDownloadSuccess": "[AUTO-TRANSLATED lv] Document downloaded successfully",
-    "documentDownloadError": "[AUTO-TRANSLATED lv] Failed to download document: {error}",
-    "csvDownloadSuccess": "[AUTO-TRANSLATED lv] CSV downloaded successfully",
-    "csvDownloadError": "[AUTO-TRANSLATED lv] Failed to download CSV: {error}",
-    "reportClearedSuccess": "[AUTO-TRANSLATED lv] Generated report cleared",
-    "enterAtLeastOneSection": "[AUTO-TRANSLATED lv] Please enter at least one section",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED lv] Please select a knowledge base",
-    "generateSuccess": "[AUTO-TRANSLATED lv] Report generated successfully!",
-    "generateError": "[AUTO-TRANSLATED lv] Failed to generate document: {error}",
-    "vectorSearch": "[AUTO-TRANSLATED lv] vector search",
-    "fullDocumentScan": "[AUTO-TRANSLATED lv] full document scan",
-    "editOutline": "[AUTO-TRANSLATED lv] Edit Outline"
+    "documentOutlineTitle": "Dokumenta kontūra",
+    "clickToSelect": "Noklikšķiniet, lai atlasītu",
+    "customInstructionsTitle": "Pielāgotas instrukcijas (neobligāti)",
+    "customInstructionsPlaceholder": "Ievadiet jebkādas papildu instrukcijas, kas jāņem vērā, ģenerējot katru ziņojuma sadaļu...",
+    "characterCount": "{{count}}/2000 rakstzīmes. Šīs instrukcijas tiks pievienotas uzvednei, ģenerējot katru sadaļu.",
+    "selectKnowledgeBaseTitle": "Izvēlieties zināšanu bāzi",
+    "selectDocumentOutlineTitle": "Izvēlieties dokumenta kontūru",
+    "generateButton": "Ģenerēt",
+    "results": "Rezultāti",
+    "copyText": "Kopēt tekstu",
+    "copied": "Nokopēts!",
+    "downloadDocx": "Lejupielādēt DOCX",
+    "downloadCsv": "Lejupielādēt CSV",
+    "clearReport": "Notīrīt ziņojumu",
+    "resultsPlaceholder": "Rezultāti parādīsies šeit pēc dokumenta ģenerēšanas.",
+    "sectionsWithSources": "Sadaļas ar avotiem",
+    "sectionNumber": "Sadaļa {number}: {title}",
+    "kbGenerated": "KB ģenerēts",
+    "rawText": "Neapstrādāts teksts",
+    "viewSourceCitations": "Skatīt avotu citātus ({count})",
+    "documentCopiedSuccess": "Dokuments nokopēts starpliktuvē",
+    "documentCopiedError": "Neizdevās nokopēt dokumentu starpliktuvē",
+    "documentDownloadSuccess": "Dokuments veiksmīgi lejupielādēts",
+    "documentDownloadError": "Neizdevās lejupielādēt dokumentu: {error}",
+    "csvDownloadSuccess": "CSV veiksmīgi lejupielādēts",
+    "csvDownloadError": "Neizdevās lejupielādēt CSV: {error}",
+    "reportClearedSuccess": "Ģenerētais ziņojums notīrīts",
+    "enterAtLeastOneSection": "Lūdzu, ievadiet vismaz vienu sadaļu",
+    "selectKnowledgeBase": "Lūdzu, atlasiet zināšanu bāzi",
+    "generateSuccess": "Ziņojums veiksmīgi ģenerēts!",
+    "generateError": "Neizdevās ģenerēt dokumentu: {error}",
+    "vectorSearch": "vektoru meklēšana",
+    "fullDocumentScan": "pilna dokumenta skenēšana",
+    "editOutline": "Rediģēt apceri"
   },
   "feedback": {
     "modalTitlePositive": "Kas bija noderīgs?",

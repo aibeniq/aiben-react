@@ -66,14 +66,14 @@
     "searchMode": "検索モード：",
     "vectorSearch": "ベクター検索",
     "fullTextScan": "全文スキャン",
-    "searchModeDescription": "[AUTO-TRANSLATED ja] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
-    "askMeAnything": "[AUTO-TRANSLATED ja] Ask me anything! For knowledge base search, select a knowledge base first.",
-    "usingGeneralAI": "[AUTO-TRANSLATED ja] Using general AI assistant",
-    "usingKnowledgeBase": "[AUTO-TRANSLATED ja] Using knowledge base:",
-    "usingDocuments": "[AUTO-TRANSLATED ja] Using # document(s)",
-    "usingFiles": "[AUTO-TRANSLATED ja] Using {{count}} document{{plural}}:",
+    "searchModeDescription": "ベクター検索は高速で対象を絞った結果を提供します。全文スキャンはナレッジベースのすべてのコンテンツをレビューします。",
+    "askMeAnything": "何でも聞いてください！ナレッジベース検索の場合は、まずナレッジベースを選択してください。",
+    "usingGeneralAI": "一般AIアシスタントを使用",
+    "usingKnowledgeBase": "ナレッジベースを使用：",
+    "usingDocuments": "# ドキュメントを使用",
+    "usingFiles": "{{count}} ドキュメント{{plural}}を使用：",
     "remove": "削除",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED ja] Select Knowledge Base",
+    "selectKnowledgeBase": "ナレッジベースを選択",
     "knowledgeBaseTable": {
       "name": "名前",
       "description": "説明",
@@ -85,17 +85,17 @@
     "knowledgeBaseTableName": "名前",
     "knowledgeBaseTableDescription": "説明",
     "knowledgeBaseTableSources": "ソース",
-    "knowledgeBaseTablePages": "[AUTO-TRANSLATED ja] Pages",
+    "knowledgeBaseTablePages": "ページ",
     "selectKnowledgeBasePlaceholder": "ナレッジベースを選択...",
     "noKnowledgeBasesAvailable": "利用可能なナレッジベースがありません。まず1つ作成してください。",
     "knowledgeBase": "ナレッジベース",
     "file": "ファイル",
     "errors": {
-      "generic": "[AUTO-TRANSLATED ja] Sorry, something went wrong. Please try again.",
-      "timeout": "[AUTO-TRANSLATED ja] Request timed out. Please try again.",
-      "largeFileTimeout": "[AUTO-TRANSLATED ja] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
-      "fileSize": "[AUTO-TRANSLATED ja] File is too large. Please choose smaller files.",
-      "serverError": "[AUTO-TRANSLATED ja] Server error occurred. Please try again later."
+      "generic": "申し訳ありません。何か問題が発生しました。もう一度お試しください。",
+      "timeout": "リクエストがタイムアウトしました。もう一度お試しください。",
+      "largeFileTimeout": "大きなファイルの処理がタイムアウトしました。大きなファイルでより良いパフォーマンスを得るために「全文スキャン」モードに切り替えてください。",
+      "fileSize": "ファイルが大きすぎます。小さいファイルを選択してください。",
+      "serverError": "サーバーエラーが発生しました。後でもう一度お試しください。"
     }
   },
   "settings": {
@@ -180,7 +180,7 @@
     "goodbye": "さようなら",
     "yes": "はい",
     "no": "いいえ",
-    "ok": "[AUTO-TRANSLATED ja] OK",
+    "ok": "OK",
     "search": "検索",
     "filter": "フィルタ",
     "sort": "ソート",
@@ -214,7 +214,7 @@
       "processing": "処理中...",
       "extracting": "コンテンツ抽出中..."
     },
-    "error": "[AUTO-TRANSLATED ja] Something went wrong!"
+    "error": "何か問題が発生しました！"
   },
   "usage": {
     "title": "使用状況",
@@ -329,8 +329,8 @@
     "vectorSearchDescription": "AI類似性検索を使用して関連コンテンツを見つける（高速、的確）",
     "fullScanDescription": "ナレッジベース内のすべてのドキュメントを分析する（包括的、徹底的）",
     "pleaseWait": "ドキュメントを確認するまでお待ちください",
-    "reviewSuccess": "[AUTO-TRANSLATED ja] Document review completed successfully!",
-    "reviewSuccessMultiple": "[AUTO-TRANSLATED ja] {{count}} files processed with optimized context sharing!"
+    "reviewSuccess": "ドキュメントレビューの完了に成功しました！",
+    "reviewSuccessMultiple": "{{count}} ファイルが最適化されたコンテキスト共有で処理されました！"
   },
   "compare": {
     "title": "ドキュメント比較",
@@ -484,9 +484,9 @@
     "optimizationsSelectedText": "{{s}}個の最適化が適用対象として選択されました",
     "applying": "適用中...",
     "applySelectedOptimizations": "選択した最適化を適用",
-    "uploadDocumentsTitle": "[AUTO-TRANSLATED ja] Upload document(s) that should be accepted by checklist *",
-    "uploadDocumentsHelperText": "[AUTO-TRANSLATED ja] Upload documents that should meet all checklist requirements to help identify questions that may be too strict",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED ja] e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
+    "uploadDocumentsTitle": "チェックリストで承認されるべきドキュメントをアップロード *",
+    "uploadDocumentsHelperText": "厳しすぎる可能性のある質問を特定するのに役立つ、すべてのチェックリスト要件を満たすべきドキュメントをアップロードしてください",
+    "customInstructionsPlaceholder": "例：年齢関連要件を評価する際はこれを小児研究と見なす、このプロトコルは低リスク介入のためのものなど"
   },
   "optimizeOutlineModal": {
     "title": "アウトラインを最適化",
@@ -537,40 +537,40 @@
     "modals": {
       "fileUpload": {
         "supportedFormats": "対応形式：PDF、TXT、DOC/DOCX、RTF、CSV、XLSX",
-        "currentFiles": "[AUTO-TRANSLATED ja] Current Files",
-        "newFiles": "[AUTO-TRANSLATED ja] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED ja] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED ja] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED ja] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED ja] Remove file"
+        "currentFiles": "現在のファイル",
+        "newFiles": "新しいファイル",
+        "selectedFiles": "選択されたファイル",
+        "dragAndDrop": "ファイルをここにドラッグ＆ドロップするか、クリックして参照",
+        "dropFiles": "ファイルをここにドロップ...",
+        "removeFile": "ファイルを削除"
       },
       "messages": {
         "processing": "処理中...",
         "pleaseWait": "ファイルを処理中です。しばらくお待ちください...",
-        "createSuccess": "[AUTO-TRANSLATED ja] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED ja] Knowledge Base updated successfully."
+        "createSuccess": "ナレッジベースが正常に作成されました。",
+        "updateSuccess": "ナレッジベースが正常に更新されました。"
       },
       "add": {
-        "title": "[AUTO-TRANSLATED ja] Add Knowledge Base",
-        "description": "[AUTO-TRANSLATED ja] Create a new knowledge base by providing details and uploading documents below."
+        "title": "ナレッジベースを追加",
+        "description": "詳細を提供し、以下のドキュメントをアップロードして新しいナレッジベースを作成してください。"
       },
       "edit": {
-        "title": "[AUTO-TRANSLATED ja] Edit Knowledge Base",
-        "description": "[AUTO-TRANSLATED ja] Update the Knowledge Base details below."
+        "title": "ナレッジベースを編集",
+        "description": "以下のナレッジベースの詳細を更新してください。"
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED ja] Title",
+        "title": "タイトル",
         "description": "説明"
       },
       "buttons": {
         "cancel": "キャンセル",
         "create": "作成",
         "save": "保存",
-        "saving": "[AUTO-TRANSLATED ja] Saving...",
-        "creating": "[AUTO-TRANSLATED ja] Creating..."
+        "saving": "保存中...",
+        "creating": "作成中..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED ja] Title is required"
+        "titleRequired": "タイトルは必須です"
       }
     },
     "progress": {
@@ -599,10 +599,10 @@
       "errorMessage": "ナレッジベースの削除中にエラーが発生しました"
     },
     "actions": {
-      "view": "[AUTO-TRANSLATED ja] View",
-      "edit": "[AUTO-TRANSLATED ja] Edit",
-      "delete": "[AUTO-TRANSLATED ja] Delete",
-      "configure": "[AUTO-TRANSLATED ja] Configure"
+      "view": "表示",
+      "edit": "編集",
+      "delete": "削除",
+      "configure": "設定"
     }
   },
   "archive": {
@@ -705,43 +705,43 @@
       "processingSection": "セクション {{sectionNum}}/{{totalSections}} を処理中: {{sectionPreview}}"
     },
     "pleaseWait": "レポートを生成中です。しばらくお待ちください",
-    "pageDescription": "[AUTO-TRANSLATED ja] Generate a document based on a user-defined outline and document database.",
-    "generatingDocument": "[AUTO-TRANSLATED ja] Generating document...",
+    "pageDescription": "ユーザー定義のアウトラインとドキュメントデータベースに基づいてドキュメントを生成します。",
+    "generatingDocument": "ドキュメントを生成中...",
     "knowledgeBaseTitle": "ナレッジベース",
-    "documentOutlineTitle": "[AUTO-TRANSLATED ja] Document Outline",
-    "clickToSelect": "[AUTO-TRANSLATED ja] Click to select",
-    "customInstructionsTitle": "[AUTO-TRANSLATED ja] Custom Instructions (Optional)",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED ja] Enter any additional instructions that should be considered when generating each section of the report...",
-    "characterCount": "[AUTO-TRANSLATED ja] {{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
-    "selectKnowledgeBaseTitle": "[AUTO-TRANSLATED ja] Select Knowledge Base",
-    "selectDocumentOutlineTitle": "[AUTO-TRANSLATED ja] Select Document Outline",
-    "generateButton": "[AUTO-TRANSLATED ja] Generate",
-    "results": "[AUTO-TRANSLATED ja] Results",
-    "copyText": "[AUTO-TRANSLATED ja] Copy Text",
-    "copied": "[AUTO-TRANSLATED ja] Copied!",
-    "downloadDocx": "[AUTO-TRANSLATED ja] Download DOCX",
-    "downloadCsv": "[AUTO-TRANSLATED ja] Download CSV",
-    "clearReport": "[AUTO-TRANSLATED ja] Clear Report",
-    "resultsPlaceholder": "[AUTO-TRANSLATED ja] Results will appear here after generating a document.",
-    "sectionsWithSources": "[AUTO-TRANSLATED ja] Sections with Sources",
-    "sectionNumber": "[AUTO-TRANSLATED ja] Section {number}: {title}",
-    "kbGenerated": "[AUTO-TRANSLATED ja] KB Generated",
-    "rawText": "[AUTO-TRANSLATED ja] Raw Text",
-    "viewSourceCitations": "[AUTO-TRANSLATED ja] View Source Citations ({count})",
-    "documentCopiedSuccess": "[AUTO-TRANSLATED ja] Document copied to clipboard",
-    "documentCopiedError": "[AUTO-TRANSLATED ja] Failed to copy document to clipboard",
-    "documentDownloadSuccess": "[AUTO-TRANSLATED ja] Document downloaded successfully",
-    "documentDownloadError": "[AUTO-TRANSLATED ja] Failed to download document: {error}",
-    "csvDownloadSuccess": "[AUTO-TRANSLATED ja] CSV downloaded successfully",
-    "csvDownloadError": "[AUTO-TRANSLATED ja] Failed to download CSV: {error}",
-    "reportClearedSuccess": "[AUTO-TRANSLATED ja] Generated report cleared",
-    "enterAtLeastOneSection": "[AUTO-TRANSLATED ja] Please enter at least one section",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED ja] Please select a knowledge base",
-    "generateSuccess": "[AUTO-TRANSLATED ja] Report generated successfully!",
-    "generateError": "[AUTO-TRANSLATED ja] Failed to generate document: {error}",
-    "vectorSearch": "[AUTO-TRANSLATED ja] vector search",
-    "fullDocumentScan": "[AUTO-TRANSLATED ja] full document scan",
-    "editOutline": "[AUTO-TRANSLATED ja] Edit Outline"
+    "documentOutlineTitle": "ドキュメントアウトライン",
+    "clickToSelect": "クリックして選択",
+    "customInstructionsTitle": "カスタム指示（オプション）",
+    "customInstructionsPlaceholder": "レポートの各セクションを生成する際に考慮される追加の指示を入力してください...",
+    "characterCount": "{{count}}/2000文字。これらの指示は各セクションを生成する際にプロンプトに追加されます。",
+    "selectKnowledgeBaseTitle": "ナレッジベースを選択",
+    "selectDocumentOutlineTitle": "ドキュメントアウトラインを選択",
+    "generateButton": "生成",
+    "results": "結果",
+    "copyText": "テキストをコピー",
+    "copied": "コピーしました！",
+    "downloadDocx": "DOCXをダウンロード",
+    "downloadCsv": "CSVをダウンロード",
+    "clearReport": "レポートをクリア",
+    "resultsPlaceholder": "ドキュメント生成後に結果がここに表示されます。",
+    "sectionsWithSources": "ソース付きセクション",
+    "sectionNumber": "セクション {number}: {title}",
+    "kbGenerated": "KB生成済み",
+    "rawText": "生テキスト",
+    "viewSourceCitations": "ソース引用を表示 ({count})",
+    "documentCopiedSuccess": "ドキュメントがクリップボードにコピーされました",
+    "documentCopiedError": "ドキュメントのクリップボードへのコピーに失敗しました",
+    "documentDownloadSuccess": "ドキュメントが正常にダウンロードされました",
+    "documentDownloadError": "ドキュメントのダウンロードに失敗しました: {error}",
+    "csvDownloadSuccess": "CSVが正常にダウンロードされました",
+    "csvDownloadError": "CSVのダウンロードに失敗しました: {error}",
+    "reportClearedSuccess": "生成されたレポートがクリアされました",
+    "enterAtLeastOneSection": "少なくとも1つのセクションを入力してください",
+    "selectKnowledgeBase": "ナレッジベースを選択してください",
+    "generateSuccess": "レポートが正常に生成されました！",
+    "generateError": "ドキュメントの生成に失敗しました: {error}",
+    "vectorSearch": "ベクター検索",
+    "fullDocumentScan": "完全ドキュメントスキャン",
+    "editOutline": "アウトラインを編集"
   },
   "ui": {
     "results": "結果",

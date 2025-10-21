@@ -49,7 +49,7 @@
     "selectKnowledgeBase": "Seleccione una Base de Conocimiento..."
   },
   "chatbot": {
-    "title": "[AUTO-TRANSLATED es] Chat",
+    "title": "Chat",
     "placeholder": "Haz una pregunta...",
     "sourcePopover": {
       "knowledgeBase": "Base de Conocimiento",
@@ -501,8 +501,8 @@
     "hiUser": "Hola, {{name}} 👋",
     "goodbye": "Adiós",
     "yes": "Sí",
-    "no": "[AUTO-TRANSLATED es] No",
-    "ok": "[AUTO-TRANSLATED es] OK",
+    "no": "No",
+    "ok": "Aceptar",
     "search": "Buscar",
     "filter": "Filtrar",
     "sort": "Ordenar",
@@ -536,7 +536,7 @@
       "processing": "Procesando...",
       "extracting": "Extrayendo contenido..."
     },
-    "error": "[AUTO-TRANSLATED es] Something went wrong!"
+    "error": "¡Algo salió mal!"
   },
   "usage": {
     "title": "Uso",
@@ -761,7 +761,7 @@
     "questionsAlreadyOptimized": "Preguntas Ya Optimizadas",
     "selected": "Seleccionado",
     "select": "Seleccionar",
-    "original": "[AUTO-TRANSLATED es] Original",
+    "original": "Original",
     "suggestedImprovement": "Mejora Sugerida",
     "policyContext": "Contexto de Política",
     "currentAnswer": "Respuesta Actual",

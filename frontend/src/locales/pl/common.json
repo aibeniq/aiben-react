@@ -10,7 +10,7 @@
     "archive": "Archiwum",
     "settings": "Ustawienia",
     "admin": "Administrator",
-    "menu": "[AUTO-TRANSLATED pl] Menu",
+    "menu": "Menu",
     "tools": "Narzędzia",
     "configurations": "Konfiguracje",
     "myProfile": "Mój profil",
@@ -35,7 +35,7 @@
   "forms": {
     "firstName": "Imię",
     "lastName": "Nazwisko",
-    "email": "[AUTO-TRANSLATED pl] Email",
+    "email": "Email",
     "password": "Hasło",
     "confirmPassword": "Potwierdź hasło",
     "currentPassword": "Obecne hasło",
@@ -63,14 +63,14 @@
     "searchMode": "Tryb wyszukiwania:",
     "vectorSearch": "Wyszukiwanie wektorowe",
     "fullTextScan": "Pełne skanowanie tekstu",
-    "searchModeDescription": "[AUTO-TRANSLATED pl] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
-    "askMeAnything": "[AUTO-TRANSLATED pl] Ask me anything! For knowledge base search, select a knowledge base first.",
-    "usingGeneralAI": "[AUTO-TRANSLATED pl] Using general AI assistant",
-    "usingKnowledgeBase": "[AUTO-TRANSLATED pl] Using knowledge base:",
-    "usingDocuments": "[AUTO-TRANSLATED pl] Using # document(s)",
-    "usingFiles": "[AUTO-TRANSLATED pl] Using {{count}} document{{plural}}:",
+    "searchModeDescription": "Wyszukiwanie wektorowe zapewnia szybkie, ukierunkowane wyniki. Pełne skanowanie tekstu przegląda całą zawartość bazy wiedzy.",
+    "askMeAnything": "Zapytaj mnie o cokolwiek! W przypadku wyszukiwania w bazie wiedzy najpierw wybierz bazę wiedzy.",
+    "usingGeneralAI": "Korzystanie z ogólnego asystenta AI",
+    "usingKnowledgeBase": "Korzystanie z bazy wiedzy:",
+    "usingDocuments": "Korzystanie z # dokumentów",
+    "usingFiles": "Korzystanie z {{count}} dokumentu{{plural}}:",
     "remove": "Usuń",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED pl] Select Knowledge Base",
+    "selectKnowledgeBase": "Wybierz bazę wiedzy",
     "knowledgeBaseTable": {
       "name": "Nazwa",
       "description": "Opis",
@@ -82,17 +82,17 @@
     "knowledgeBaseTableName": "Nazwa",
     "knowledgeBaseTableDescription": "Opis",
     "knowledgeBaseTableSources": "Źródła",
-    "knowledgeBaseTablePages": "[AUTO-TRANSLATED pl] Pages",
+    "knowledgeBaseTablePages": "Strony",
     "selectKnowledgeBasePlaceholder": "Wybierz bazę wiedzy...",
     "noKnowledgeBasesAvailable": "Brak dostępnych baz wiedzy. Utwórz jedną najpierw, aby korzystać z tej funkcji.",
     "knowledgeBase": "Baza wiedzy",
     "file": "Plik",
     "errors": {
-      "generic": "[AUTO-TRANSLATED pl] Sorry, something went wrong. Please try again.",
-      "timeout": "[AUTO-TRANSLATED pl] Request timed out. Please try again.",
-      "largeFileTimeout": "[AUTO-TRANSLATED pl] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
-      "fileSize": "[AUTO-TRANSLATED pl] File is too large. Please choose smaller files.",
-      "serverError": "[AUTO-TRANSLATED pl] Server error occurred. Please try again later."
+      "generic": "Przepraszamy, coś poszło nie tak. Spróbuj ponownie.",
+      "timeout": "Żądanie przekroczyło limit czasu. Spróbuj ponownie.",
+      "largeFileTimeout": "Przetwarzanie dużego pliku przekroczyło limit czasu. Spróbuj przełączyć na tryb 'Pełne skanowanie tekstu' dla lepszej wydajności z dużymi plikami.",
+      "fileSize": "Plik jest zbyt duży. Wybierz mniejsze pliki.",
+      "serverError": "Wystąpił błąd serwera. Spróbuj ponownie później."
     }
   },
   "settings": {
@@ -112,7 +112,7 @@
     "newPassword": "Nowe hasło",
     "confirmPassword": "Potwierdź hasło",
     "save": "Zapisz",
-    "system": "[AUTO-TRANSLATED pl] System",
+    "system": "System",
     "lightMode": "Tryb jasny",
     "darkMode": "Tryb ciemny",
     "deleteAccountDescription": "Trwale usuń swoje dane i wszystko powiązane z Twoim kontem.",
@@ -177,7 +177,7 @@
     "goodbye": "Do widzenia",
     "yes": "Tak",
     "no": "Nie",
-    "ok": "[AUTO-TRANSLATED pl] OK",
+    "ok": "OK",
     "search": "Szukaj",
     "filter": "Filtr",
     "sort": "Sortuj",
@@ -211,7 +211,7 @@
       "processing": "Przetwarzanie...",
       "extracting": "Wyodrębnianie treści..."
     },
-    "error": "[AUTO-TRANSLATED pl] Something went wrong!"
+    "error": "Coś poszło nie tak!"
   },
   "usage": {
     "title": "Użycie",
@@ -278,8 +278,8 @@
     "vectorSearchDescription": "Znajduje odpowiednią treść używając wyszukiwania podobieństwa AI (szybkie, celowe)",
     "fullScanDescription": "Analizuje wszystkie dokumenty w bazie wiedzy (kompleksowe, dokładne)",
     "pleaseWait": "Proszę czekać, podczas gdy przeglądamy Twoje dokumenty",
-    "reviewSuccess": "[AUTO-TRANSLATED pl] Document review completed successfully!",
-    "reviewSuccessMultiple": "[AUTO-TRANSLATED pl] {{count}} files processed with optimized context sharing!"
+    "reviewSuccess": "Przegląd dokumentu zakończony pomyślnie!",
+    "reviewSuccessMultiple": "{{count}} plików przetworzonych z zoptymalizowanym udostępnianiem kontekstu!"
   },
   "generate": {
     "pageDescription": "Wygeneruj dokument na podstawie zdefiniowanego przez użytkownika konspektu i bazy danych dokumentów.",
@@ -326,7 +326,7 @@
       "generating": "Generowanie raportu...",
       "processingSection": "Przetwarzanie sekcji {{sectionNum}} z {{totalSections}}: {{sectionPreview}}"
     },
-    "editOutline": "[AUTO-TRANSLATED pl] Edit Outline"
+    "editOutline": "Edytuj konspekt"
   },
   "modelSelection": {
     "llmManagement": "Zarządzanie LLM",
@@ -344,7 +344,7 @@
       "modelId": "ID modelu",
       "provider": "Dostawca",
       "description": "Opis",
-      "status": "[AUTO-TRANSLATED pl] Status",
+      "status": "Status",
       "actions": "Akcje"
     },
     "status": {
@@ -528,9 +528,9 @@
     "optimizationsSelectedText": "optymalizacja{{s}} wybrana{{s}} do zastosowania",
     "applying": "Stosowanie...",
     "applySelectedOptimizations": "Zastosuj Wybrane Optymalizacje",
-    "uploadDocumentsTitle": "[AUTO-TRANSLATED pl] Upload document(s) that should be accepted by checklist *",
-    "uploadDocumentsHelperText": "[AUTO-TRANSLATED pl] Upload documents that should meet all checklist requirements to help identify questions that may be too strict",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED pl] e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
+    "uploadDocumentsTitle": "Prześlij dokument(y), które powinny być zaakceptowane przez checklistę *",
+    "uploadDocumentsHelperText": "Prześlij dokumenty, które spełniają wszystkie wymagania checklisty, aby pomóc zidentyfikować pytania, które mogą być zbyt surowe",
+    "customInstructionsPlaceholder": "np. Rozważ, że jest to badanie pediatryczne podczas oceny wymagań związanych z wiekiem, Ten protokół jest przeznaczony dla interwencji niskiego ryzyka itp."
   },
   "optimizeOutlineModal": {
     "title": "Optymalizuj Konspekt",
@@ -581,40 +581,40 @@
     "modals": {
       "fileUpload": {
         "supportedFormats": "Obsługuje: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
-        "currentFiles": "[AUTO-TRANSLATED pl] Current Files",
-        "newFiles": "[AUTO-TRANSLATED pl] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED pl] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED pl] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED pl] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED pl] Remove file"
+        "currentFiles": "Aktualne pliki",
+        "newFiles": "Nowe pliki",
+        "selectedFiles": "Wybrane pliki",
+        "dragAndDrop": "Przeciągnij i upuść pliki tutaj lub kliknij, aby przeglądać",
+        "dropFiles": "Upuść pliki tutaj...",
+        "removeFile": "Usuń plik"
       },
       "messages": {
         "processing": "Przetwarzanie...",
         "pleaseWait": "Proszę czekać, podczas gdy przetwarzamy Twoje pliki...",
-        "createSuccess": "[AUTO-TRANSLATED pl] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED pl] Knowledge Base updated successfully."
+        "createSuccess": "Baza wiedzy została pomyślnie utworzona.",
+        "updateSuccess": "Baza wiedzy została pomyślnie zaktualizowana."
       },
       "add": {
-        "title": "[AUTO-TRANSLATED pl] Add Knowledge Base",
-        "description": "[AUTO-TRANSLATED pl] Create a new knowledge base by providing details and uploading documents below."
+        "title": "Dodaj bazę wiedzy",
+        "description": "Utwórz nową bazę wiedzy, podając szczegóły i przesyłając dokumenty poniżej."
       },
       "edit": {
-        "title": "[AUTO-TRANSLATED pl] Edit Knowledge Base",
-        "description": "[AUTO-TRANSLATED pl] Update the Knowledge Base details below."
+        "title": "Edytuj bazę wiedzy",
+        "description": "Zaktualizuj szczegóły bazy wiedzy poniżej."
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED pl] Title",
+        "title": "Tytuł",
         "description": "Opis"
       },
       "buttons": {
         "cancel": "Anuluj",
         "create": "Utwórz",
         "save": "Zapisz",
-        "saving": "[AUTO-TRANSLATED pl] Saving...",
-        "creating": "[AUTO-TRANSLATED pl] Creating..."
+        "saving": "Zapisywanie...",
+        "creating": "Tworzenie..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED pl] Title is required"
+        "titleRequired": "Tytuł jest wymagany"
       }
     },
     "progress": {
@@ -643,10 +643,10 @@
       "errorMessage": "Błąd podczas usuwania bazy wiedzy"
     },
     "actions": {
-      "view": "[AUTO-TRANSLATED pl] View",
-      "edit": "[AUTO-TRANSLATED pl] Edit",
-      "delete": "[AUTO-TRANSLATED pl] Delete",
-      "configure": "[AUTO-TRANSLATED pl] Configure"
+      "view": "Zobacz",
+      "edit": "Edytuj",
+      "delete": "Usuń",
+      "configure": "Konfiguruj"
     }
   },
   "archive": {

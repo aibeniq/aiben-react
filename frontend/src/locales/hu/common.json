@@ -70,14 +70,14 @@
     "searchMode": "Keresési mód:",
     "vectorSearch": "Vektor keresés",
     "fullTextScan": "Teljes szöveg átvizsgálás",
-    "searchModeDescription": "[AUTO-TRANSLATED hu] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
-    "askMeAnything": "[AUTO-TRANSLATED hu] Ask me anything! For knowledge base search, select a knowledge base first.",
-    "usingGeneralAI": "[AUTO-TRANSLATED hu] Using general AI assistant",
-    "usingKnowledgeBase": "[AUTO-TRANSLATED hu] Using knowledge base:",
-    "usingDocuments": "[AUTO-TRANSLATED hu] Using # document(s)",
-    "usingFiles": "[AUTO-TRANSLATED hu] Using {{count}} document{{plural}}:",
+  "searchModeDescription": "A vektoros keresés gyors, célzott találatokat ad. A teljes szöveges átvizsgálás átnézi a tudásbázis teljes tartalmát.",
+  "askMeAnything": "Kérdezz bármit! A tudásbázis kereséséhez először válassz egy tudásbázist.",
+  "usingGeneralAI": "Általános AI asszisztens használatban",
+  "usingKnowledgeBase": "Használt tudásbázis:",
+  "usingDocuments": "Használt dokumentumok száma: #",
+  "usingFiles": "Használt {{count}} dokumentum{{plural}}:",
     "remove": "Eltávolítás",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED hu] Select Knowledge Base",
+    "selectKnowledgeBase": "Tudásbázis kiválasztása",
     "knowledgeBaseTable": {
       "name": "Név",
       "description": "Leírás",
@@ -91,11 +91,11 @@
     "knowledgeBase": "Tudásbázis",
     "file": "Fájl",
     "errors": {
-      "generic": "[AUTO-TRANSLATED hu] Sorry, something went wrong. Please try again.",
-      "timeout": "[AUTO-TRANSLATED hu] Request timed out. Please try again.",
-      "largeFileTimeout": "[AUTO-TRANSLATED hu] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
-      "fileSize": "[AUTO-TRANSLATED hu] File is too large. Please choose smaller files.",
-      "serverError": "[AUTO-TRANSLATED hu] Server error occurred. Please try again later."
+      "generic": "Sajnáljuk, hiba történt. Kérjük, próbálkozzon újra.",
+      "timeout": "A kérés időtúllépés miatt megszakadt. Kérjük, próbálkozzon újra.",
+      "largeFileTimeout": "Nagy fájl feldolgozása időtúllépés miatt megszakadt. Nagy fájlok esetén váltson a „Teljes szöveg átvizsgálás” módra a jobb teljesítmény érdekében.",
+      "fileSize": "A fájl túl nagy. Kérjük, válasszon kisebb fájlokat.",
+      "serverError": "Szerverhiba történt. Kérjük, próbálkozzon később újra."
     }
   },
   "settings": {
@@ -180,7 +180,7 @@
     "goodbye": "Viszlát",
     "yes": "Igen",
     "no": "Nem",
-    "ok": "[AUTO-TRANSLATED hu] OK",
+    "ok": "OK",
     "search": "Keresés",
     "filter": "Szűrő",
     "sort": "Rendezés",
@@ -214,7 +214,7 @@
       "processing": "Feldolgozás...",
       "extracting": "Tartalom kinyerése..."
     },
-    "error": "[AUTO-TRANSLATED hu] Something went wrong!"
+    "error": "Valami hiba történt!"
   },
   "usage": {
     "title": "Használat",
@@ -275,15 +275,15 @@
     "pleaseWait": "Kérjük várjon, amíg áttekintjük a dokumentumait",
     "reviewSuccess": "A dokumentum áttekintése sikeresen befejeződött!",
     "reviewSuccessMultiple": "{{count}} fájl feldolgozva optimalizált kontextusmegosztással!",
-    "dropFilesHere": "[AUTO-TRANSLATED hu] Drop the files here",
-    "uploadedFiles": "[AUTO-TRANSLATED hu] Uploaded Files",
+  "dropFilesHere": "Húzza ide a fájlokat",
+  "uploadedFiles": "Feltöltött fájlok",
     "removeFile": "Eltávolítás",
-    "characterCount": "[AUTO-TRANSLATED hu] {{count}}/2000 characters. These instructions will be appended to each question when processing.",
-    "searchMode": "[AUTO-TRANSLATED hu] Search Mode",
-    "vectorSearch": "Vektor keresés",
-    "fullDocumentScan": "[AUTO-TRANSLATED hu] Full Document Scan",
-    "vectorSearchDescription": "[AUTO-TRANSLATED hu] Finds relevant content using AI similarity search (fast, targeted)",
-    "fullScanDescription": "[AUTO-TRANSLATED hu] Analyzes all documents in the knowledge base (comprehensive, thorough)"
+  "characterCount": "{{count}}/2000 karakter. Ezek az utasítások minden kérdéshez hozzá lesznek fűzve a feldolgozás során.",
+  "searchMode": "Keresési mód",
+  "vectorSearch": "Vektor keresés",
+  "fullDocumentScan": "Teljes dokumentum átvizsgálás",
+  "vectorSearchDescription": "AI hasonlóság alapú keresés segítségével talál releváns tartalmakat (gyors, célzott)",
+  "fullScanDescription": "Elemzi a tudásbázis összes dokumentumát (átfogó, alapos)"
   },
   "modelSelection": {
     "llmManagement": "LLM Kezelés",
@@ -366,7 +366,7 @@
     },
     "pleaseWait": "Kérjük, várjon, amíg összehasonlítjuk a dokumentumait",
     "compareSuccess": "A dokumentumok sikeresen összehasonlítva!",
-    "selectTopicListTitle": "[AUTO-TRANSLATED hu] Select Topic List"
+    "selectTopicListTitle": "Témalista kiválasztása"
   },
   "match": {
     "title": "Dokumentumok párosítása",
@@ -401,7 +401,7 @@
     "pleaseWait": "Kérjük, várjon, amíg egyeztetjük a dokumentumait",
     "matchSuccess": "Az űrlap feldolgozása sikeresen befejeződött!",
     "singleDocumentSuccess": "A mezőértékek egyetlen dokumentumból lettek kinyerve.",
-    "selectFormTemplateTitle": "[AUTO-TRANSLATED hu] Select Form Template"
+    "selectFormTemplateTitle": "Űrlapsablon kiválasztása"
   },
   "editFormTemplateModal": {
     "title": "Űrlapsablon szerkesztése",
@@ -566,31 +566,31 @@
       "messages": {
         "processing": "Feldolgozás...",
         "pleaseWait": "Kérjük várjon, amíg feldolgozzuk a fájljait...",
-        "createSuccess": "[AUTO-TRANSLATED hu] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED hu] Knowledge Base updated successfully."
+        "createSuccess": "Tudásbázis sikeresen létrehozva.",
+        "updateSuccess": "Tudásbázis sikeresen frissítve."
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED hu] Title",
+        "title": "Cím",
         "description": "Leírás"
       },
       "fileUpload": {
-        "currentFiles": "[AUTO-TRANSLATED hu] Current Files",
-        "newFiles": "[AUTO-TRANSLATED hu] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED hu] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED hu] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED hu] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED hu] Remove file",
-        "supportedFormats": "[AUTO-TRANSLATED hu] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "currentFiles": "Jelenlegi fájlok",
+        "newFiles": "Új fájlok",
+        "selectedFiles": "Kiválasztott fájlok",
+        "dragAndDrop": "Húzza ide a fájlokat vagy kattintson a böngészéshez",
+        "dropFiles": "Húzza ide a fájlokat...",
+        "removeFile": "Fájl eltávolítása",
+        "supportedFormats": "Támogatott: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
       },
       "buttons": {
         "cancel": "Mégse",
         "create": "Létrehozás",
         "save": "Mentés",
-        "saving": "[AUTO-TRANSLATED hu] Saving...",
-        "creating": "[AUTO-TRANSLATED hu] Creating..."
+        "saving": "Mentés...",
+        "creating": "Létrehozás..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED hu] Title is required"
+        "titleRequired": "A cím megadása kötelező"
       }
     },
     "editCustom": {
@@ -768,43 +768,43 @@
       "processingSection": "{{sectionNum}}. szakasz feldolgozása a(z) {{totalSections}}-ból: {{sectionPreview}}"
     },
     "pleaseWait": "Kérjük, várjon, amíg elkészítjük a jelentését",
-    "pageDescription": "[AUTO-TRANSLATED hu] Generate a document based on a user-defined outline and document database.",
-    "generatingDocument": "[AUTO-TRANSLATED hu] Generating document...",
+    "pageDescription": "Dokumentum generálása felhasználó által definiált vázlat és dokumentum adatbázis alapján.",
+    "generatingDocument": "Dokumentum generálása...",
     "knowledgeBaseTitle": "Tudásbázis",
-    "documentOutlineTitle": "[AUTO-TRANSLATED hu] Document Outline",
-    "clickToSelect": "[AUTO-TRANSLATED hu] Click to select",
-    "customInstructionsTitle": "[AUTO-TRANSLATED hu] Custom Instructions (Optional)",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED hu] Enter any additional instructions that should be considered when generating each section of the report...",
-    "characterCount": "[AUTO-TRANSLATED hu] {{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
-    "selectKnowledgeBaseTitle": "[AUTO-TRANSLATED hu] Select Knowledge Base",
-    "selectDocumentOutlineTitle": "[AUTO-TRANSLATED hu] Select Document Outline",
-    "generateButton": "[AUTO-TRANSLATED hu] Generate",
-    "results": "[AUTO-TRANSLATED hu] Results",
-    "copyText": "[AUTO-TRANSLATED hu] Copy Text",
-    "copied": "[AUTO-TRANSLATED hu] Copied!",
-    "downloadDocx": "[AUTO-TRANSLATED hu] Download DOCX",
-    "downloadCsv": "[AUTO-TRANSLATED hu] Download CSV",
-    "clearReport": "[AUTO-TRANSLATED hu] Clear Report",
-    "resultsPlaceholder": "[AUTO-TRANSLATED hu] Results will appear here after generating a document.",
-    "sectionsWithSources": "[AUTO-TRANSLATED hu] Sections with Sources",
-    "sectionNumber": "[AUTO-TRANSLATED hu] Section {number}: {title}",
-    "kbGenerated": "[AUTO-TRANSLATED hu] KB Generated",
-    "rawText": "[AUTO-TRANSLATED hu] Raw Text",
-    "viewSourceCitations": "[AUTO-TRANSLATED hu] View Source Citations ({count})",
-    "documentCopiedSuccess": "[AUTO-TRANSLATED hu] Document copied to clipboard",
-    "documentCopiedError": "[AUTO-TRANSLATED hu] Failed to copy document to clipboard",
-    "documentDownloadSuccess": "[AUTO-TRANSLATED hu] Document downloaded successfully",
-    "documentDownloadError": "[AUTO-TRANSLATED hu] Failed to download document: {error}",
-    "csvDownloadSuccess": "[AUTO-TRANSLATED hu] CSV downloaded successfully",
-    "csvDownloadError": "[AUTO-TRANSLATED hu] Failed to download CSV: {error}",
-    "reportClearedSuccess": "[AUTO-TRANSLATED hu] Generated report cleared",
-    "enterAtLeastOneSection": "[AUTO-TRANSLATED hu] Please enter at least one section",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED hu] Please select a knowledge base",
-    "generateSuccess": "[AUTO-TRANSLATED hu] Report generated successfully!",
-    "generateError": "[AUTO-TRANSLATED hu] Failed to generate document: {error}",
-    "vectorSearch": "[AUTO-TRANSLATED hu] vector search",
-    "fullDocumentScan": "[AUTO-TRANSLATED hu] full document scan",
-    "editOutline": "[AUTO-TRANSLATED hu] Edit Outline"
+    "documentOutlineTitle": "Dokumentum vázlat",
+    "clickToSelect": "Kattintson a kiválasztáshoz",
+    "customInstructionsTitle": "Egyéni utasítások (Opcionális)",
+    "customInstructionsPlaceholder": "Adjon meg bármilyen további utasítást, amelyet figyelembe kell venni a jelentés egyes szakaszainak generálásakor...",
+    "characterCount": "{{count}}/2000 karakter. Ezek az utasítások hozzáadásra kerülnek a prompt-hoz minden szakasz generálásakor.",
+    "selectKnowledgeBaseTitle": "Tudásbázis kiválasztása",
+    "selectDocumentOutlineTitle": "Dokumentum vázlat kiválasztása",
+    "generateButton": "Generálás",
+    "results": "Eredmények",
+    "copyText": "Szöveg másolása",
+    "copied": "Másolva!",
+    "downloadDocx": "DOCX letöltése",
+    "downloadCsv": "CSV letöltése",
+    "clearReport": "Jelentés törlése",
+    "resultsPlaceholder": "Az eredmények a dokumentum generálása után itt jelennek meg.",
+    "sectionsWithSources": "Szakaszok forrásokkal",
+    "sectionNumber": "{number}. szakasz: {title}",
+    "kbGenerated": "KB generált",
+    "rawText": "Nyers szöveg",
+    "viewSourceCitations": "Forrás idézetek megtekintése ({count})",
+    "documentCopiedSuccess": "Dokumentum vágólapra másolva",
+    "documentCopiedError": "Nem sikerült a dokumentumot vágólapra másolni",
+    "documentDownloadSuccess": "Dokumentum sikeresen letöltve",
+    "documentDownloadError": "A dokumentum letöltése sikertelen: {error}",
+    "csvDownloadSuccess": "CSV sikeresen letöltve",
+    "csvDownloadError": "A CSV letöltése sikertelen: {error}",
+    "reportClearedSuccess": "Generált jelentés törölve",
+    "enterAtLeastOneSection": "Adjon meg legalább egy szakaszt",
+    "selectKnowledgeBase": "Kérjük, válasszon tudásbázist",
+    "generateSuccess": "Jelentés sikeresen generálva!",
+    "generateError": "A dokumentum generálása sikertelen: {error}",
+    "vectorSearch": "vektor keresés",
+    "fullDocumentScan": "teljes dokumentum átvizsgálás",
+    "editOutline": "Vázlat szerkesztése"
   },
   "feedback": {
     "modalTitlePositive": "Mi volt hasznos?",

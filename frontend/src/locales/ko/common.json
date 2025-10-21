@@ -30,7 +30,7 @@
     "previous": "이전",
     "confirm": "확인",
     "back": "뒤로",
-    "done": "[AUTO-TRANSLATED ko] Done"
+    "done": "완료"
   },
   "forms": {
     "firstName": "이름",
@@ -211,7 +211,7 @@
       "processing": "처리 중...",
       "extracting": "콘텐츠 추출 중..."
     },
-    "error": "[AUTO-TRANSLATED ko] Something went wrong!"
+    "error": "문제가 발생했습니다!"
   },
   "usage": {
     "title": "사용량",
@@ -278,8 +278,8 @@
     "vectorSearchDescription": "AI 유사성 검색을 사용하여 관련 콘텐츠 찾기 (빠름, 대상 지향적)",
     "fullScanDescription": "지식 베이스의 모든 문서 분석 (포괄적, 철저함)",
     "pleaseWait": "문서를 검토하는 동안 잠시 기다려 주세요",
-    "reviewSuccess": "[AUTO-TRANSLATED ko] Document review completed successfully!",
-    "reviewSuccessMultiple": "[AUTO-TRANSLATED ko] {{count}} files processed with optimized context sharing!"
+    "reviewSuccess": "문서 검토가 성공적으로 완료되었습니다!",
+    "reviewSuccessMultiple": "{{count}}개 파일이 최적화된 컨텍스트 공유로 처리되었습니다!"
   },
   "generate": {
     "pageDescription": "사용자 정의 체크리스트와 문서 데이터베이스를 기반으로 문서를 생성합니다.",
@@ -325,7 +325,7 @@
       "processingSection": "섹션 {{sectionNum}}/{{totalSections}} 처리 중: {{sectionPreview}}"
     },
     "pleaseWait": "보고서를 생성하는 동안 잠시 기다려주세요",
-    "editOutline": "[AUTO-TRANSLATED ko] Edit Outline"
+    "editOutline": "개요 편집"
   },
   "modelSelection": {
     "llmManagement": "LLM 관리",
@@ -527,9 +527,9 @@
     "optimizationsSelectedText": "{{s}}개의 최적화가 적용을 위해 선택되었습니다",
     "applying": "적용 중...",
     "applySelectedOptimizations": "선택된 최적화 적용",
-    "uploadDocumentsTitle": "[AUTO-TRANSLATED ko] Upload document(s) that should be accepted by checklist *",
-    "uploadDocumentsHelperText": "[AUTO-TRANSLATED ko] Upload documents that should meet all checklist requirements to help identify questions that may be too strict",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED ko] e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
+    "uploadDocumentsTitle": "체크리스트에서 승인되어야 하는 문서 업로드 *",
+    "uploadDocumentsHelperText": "너무 엄격한 질문을 식별하는 데 도움이 되도록 모든 체크리스트 요구사항을 충족해야 하는 문서를 업로드하세요",
+    "customInstructionsPlaceholder": "예: 연령 관련 요구사항을 평가할 때 이것을 소아 연구로 고려, 이 프로토콜은 저위험 개입을 위한 것 등"
   },
   "optimizeOutlineModal": {
     "title": "개요 최적화",
@@ -633,31 +633,31 @@
       "messages": {
         "processing": "처리 중...",
         "pleaseWait": "파일을 처리하는 동안 잠시 기다려 주세요...",
-        "createSuccess": "[AUTO-TRANSLATED ko] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED ko] Knowledge Base updated successfully."
+        "createSuccess": "지식 베이스가 성공적으로 생성되었습니다.",
+        "updateSuccess": "지식 베이스가 성공적으로 업데이트되었습니다."
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED ko] Title",
+        "title": "제목",
         "description": "설명"
       },
       "fileUpload": {
-        "currentFiles": "[AUTO-TRANSLATED ko] Current Files",
-        "newFiles": "[AUTO-TRANSLATED ko] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED ko] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED ko] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED ko] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED ko] Remove file",
-        "supportedFormats": "[AUTO-TRANSLATED ko] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "currentFiles": "현재 파일",
+        "newFiles": "새 파일",
+        "selectedFiles": "선택된 파일",
+        "dragAndDrop": "여기에 파일을 드래그 앤 드롭하거나 클릭하여 찾아보기",
+        "dropFiles": "여기에 파일을 드롭하세요...",
+        "removeFile": "파일 제거",
+        "supportedFormats": "지원 형식: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
       },
       "buttons": {
         "cancel": "취소",
         "create": "생성",
         "save": "저장",
-        "saving": "[AUTO-TRANSLATED ko] Saving...",
-        "creating": "[AUTO-TRANSLATED ko] Creating..."
+        "saving": "저장 중...",
+        "creating": "생성 중..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED ko] Title is required"
+        "titleRequired": "제목이 필요합니다"
       }
     },
     "editCustom": {
@@ -751,10 +751,10 @@
       "errorMessage": "지식 베이스 삭제 중 오류 발생"
     },
     "actions": {
-      "view": "[AUTO-TRANSLATED ko] View",
-      "edit": "[AUTO-TRANSLATED ko] Edit",
-      "delete": "[AUTO-TRANSLATED ko] Delete",
-      "configure": "[AUTO-TRANSLATED ko] Configure"
+      "view": "보기",
+      "edit": "편집",
+      "delete": "삭제",
+      "configure": "구성"
     }
   },
   "archive": {

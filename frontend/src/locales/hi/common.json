@@ -66,14 +66,14 @@
     "searchMode": "खोज मोड:",
     "vectorSearch": "वेक्टर खोज",
     "fullTextScan": "पूर्ण टेक्स्ट स्कैन",
-    "searchModeDescription": "[AUTO-TRANSLATED hi] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
-    "askMeAnything": "[AUTO-TRANSLATED hi] Ask me anything! For knowledge base search, select a knowledge base first.",
-    "usingGeneralAI": "[AUTO-TRANSLATED hi] Using general AI assistant",
-    "usingKnowledgeBase": "[AUTO-TRANSLATED hi] Using knowledge base:",
-    "usingDocuments": "[AUTO-TRANSLATED hi] Using # document(s)",
-    "usingFiles": "[AUTO-TRANSLATED hi] Using {{count}} document{{plural}}:",
+    "searchModeDescription": "वेक्टर खोज तेज़, लक्षित परिणाम प्रदान करती है। पूर्ण टेक्स्ट स्कैन ज्ञान आधार में सभी सामग्री की समीक्षा करता है।",
+    "askMeAnything": "मुझसे कुछ भी पूछें! ज्ञान आधार खोज के लिए, पहले एक ज्ञान आधार चुनें।",
+    "usingGeneralAI": "सामान्य AI सहायक का उपयोग कर रहे हैं",
+    "usingKnowledgeBase": "ज्ञान आधार का उपयोग कर रहे हैं:",
+    "usingDocuments": "# दस्तावेज़ का उपयोग कर रहे हैं",
+    "usingFiles": "{{count}} दस्तावेज़{{plural}} का उपयोग कर रहे हैं:",
     "remove": "हटाएं",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED hi] Select Knowledge Base",
+    "selectKnowledgeBase": "ज्ञान आधार चुनें",
     "knowledgeBaseTable": {
       "name": "नाम",
       "description": "विवरण",
@@ -85,17 +85,17 @@
     "knowledgeBaseTableName": "नाम",
     "knowledgeBaseTableDescription": "विवरण",
     "knowledgeBaseTableSources": "स्रोत",
-    "knowledgeBaseTablePages": "[AUTO-TRANSLATED hi] Pages",
+    "knowledgeBaseTablePages": "पेज",
     "selectKnowledgeBasePlaceholder": "एक नॉलेज बेस चुनें...",
     "noKnowledgeBasesAvailable": "कोई नॉलेज बेस उपलब्ध नहीं है। पहले एक बनाएं।",
     "knowledgeBase": "नॉलेज बेस",
     "file": "फ़ाइल",
     "errors": {
-      "generic": "[AUTO-TRANSLATED hi] Sorry, something went wrong. Please try again.",
-      "timeout": "[AUTO-TRANSLATED hi] Request timed out. Please try again.",
-      "largeFileTimeout": "[AUTO-TRANSLATED hi] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
-      "fileSize": "[AUTO-TRANSLATED hi] File is too large. Please choose smaller files.",
-      "serverError": "[AUTO-TRANSLATED hi] Server error occurred. Please try again later."
+      "generic": "क्षमा करें, कुछ गलत हो गया। कृपया पुनः प्रयास करें।",
+      "timeout": "अनुरोध का समय समाप्त हो गया। कृपया पुनः प्रयास करें।",
+      "largeFileTimeout": "बड़ी फ़ाइल प्रसंस्करण का समय समाप्त हो गया। बड़ी फ़ाइलों के साथ बेहतर प्रदर्शन के लिए 'पूर्ण टेक्स्ट स्कैन' मोड में स्विच करने का प्रयास करें।",
+      "fileSize": "फ़ाइल बहुत बड़ी है। कृपया छोटी फ़ाइलें चुनें।",
+      "serverError": "सर्वर त्रुटि हुई। कृपया बाद में पुनः प्रयास करें।"
     }
   },
   "settings": {
@@ -216,7 +216,7 @@
       "generating": "रिपोर्ट तैयार की जा रही है...",
       "processingSection": "अनुभाग {{sectionNum}} का प्रसंस्करण {{totalSections}} में से: {{sectionPreview}}"
     },
-    "error": "[AUTO-TRANSLATED hi] Something went wrong!"
+    "error": "कुछ गलत हो गया!"
   },
   "usage": {
     "title": "उपयोग",
@@ -283,8 +283,8 @@
     "vectorSearchDescription": "AI समानता खोज का उपयोग करके प्रासंगिक सामग्री खोजता है (तेज़, लक्षित)",
     "fullScanDescription": "ज्ञान आधार में सभी दस्तावेज़ों का विश्लेषण करता है (व्यापक, गहन)",
     "pleaseWait": "कृपया प्रतीक्षा करें जब तक हम आपके दस्तावेजों की समीक्षा करते हैं",
-    "reviewSuccess": "[AUTO-TRANSLATED hi] Document review completed successfully!",
-    "reviewSuccessMultiple": "[AUTO-TRANSLATED hi] {{count}} files processed with optimized context sharing!"
+    "reviewSuccess": "दस्तावेज़ समीक्षा सफलतापूर्वक पूरी हुई!",
+    "reviewSuccessMultiple": "{{count}} फ़ाइलें अनुकूलित संदर्भ साझाकरण के साथ संसाधित की गईं!"
   },
   "generate": {
     "pageDescription": "उपयोगकर्ता-परिभाषित आउटलाइन और दस्तावेज़ डेटाबेस के आधार पर दस्तावेज़ उत्पन्न करें।",
@@ -331,7 +331,7 @@
       "generating": "रिपोर्ट तैयार की जा रही है...",
       "processingSection": "अनुभाग {{sectionNum}} का प्रसंस्करण {{totalSections}} में से: {{sectionPreview}}"
     },
-    "editOutline": "[AUTO-TRANSLATED hi] Edit Outline"
+    "editOutline": "आउटलाइन संपादित करें"
   },
   "editFormTemplateModal": {
     "title": "फॉर्म टेम्प्लेट संपादित करें",
@@ -433,40 +433,40 @@
     "modals": {
       "fileUpload": {
         "supportedFormats": "समर्थित: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
-        "currentFiles": "[AUTO-TRANSLATED hi] Current Files",
-        "newFiles": "[AUTO-TRANSLATED hi] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED hi] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED hi] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED hi] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED hi] Remove file"
+        "currentFiles": "वर्तमान फ़ाइलें",
+        "newFiles": "नई फ़ाइलें",
+        "selectedFiles": "चयनित फ़ाइलें",
+        "dragAndDrop": "फ़ाइलों को यहां खींचें और छोड़ें, या ब्राउज़ करने के लिए क्लिक करें",
+        "dropFiles": "फ़ाइलों को यहां छोड़ें...",
+        "removeFile": "फ़ाइल हटाएं"
       },
       "messages": {
         "processing": "प्रोसेसिंग...",
         "pleaseWait": "कृपया प्रतीक्षा करें जब तक हम आपकी फाइलों को प्रोसेस करते हैं...",
-        "createSuccess": "[AUTO-TRANSLATED hi] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED hi] Knowledge Base updated successfully."
+        "createSuccess": "ज्ञान आधार सफलतापूर्वक बनाया गया।",
+        "updateSuccess": "ज्ञान आधार सफलतापूर्वक अपडेट किया गया।"
       },
       "add": {
-        "title": "[AUTO-TRANSLATED hi] Add Knowledge Base",
-        "description": "[AUTO-TRANSLATED hi] Create a new knowledge base by providing details and uploading documents below."
+        "title": "ज्ञान आधार जोड़ें",
+        "description": "नीचे विवरण प्रदान करके और दस्तावेज़ अपलोड करके एक नया ज्ञान आधार बनाएं।"
       },
       "edit": {
-        "title": "[AUTO-TRANSLATED hi] Edit Knowledge Base",
-        "description": "[AUTO-TRANSLATED hi] Update the Knowledge Base details below."
+        "title": "ज्ञान आधार संपादित करें",
+        "description": "नीचे ज्ञान आधार विवरण अपडेट करें।"
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED hi] Title",
+        "title": "शीर्षक",
         "description": "विवरण"
       },
       "buttons": {
         "cancel": "रद्द करें",
         "create": "बनाएँ",
         "save": "सहेजें",
-        "saving": "[AUTO-TRANSLATED hi] Saving...",
-        "creating": "[AUTO-TRANSLATED hi] Creating..."
+        "saving": "सहेज रहा है...",
+        "creating": "बना रहा है..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED hi] Title is required"
+        "titleRequired": "शीर्षक आवश्यक है"
       }
     },
     "progress": {
@@ -644,9 +644,9 @@
     "optimizationsSelectedText": "{{s}} अनुकूलन आवेदन के लिए चुने गए",
     "applying": "लागू कर रहे हैं...",
     "applySelectedOptimizations": "चुने गए अनुकूलन लागू करें",
-    "uploadDocumentsTitle": "[AUTO-TRANSLATED hi] Upload document(s) that should be accepted by checklist *",
-    "uploadDocumentsHelperText": "[AUTO-TRANSLATED hi] Upload documents that should meet all checklist requirements to help identify questions that may be too strict",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED hi] e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
+    "uploadDocumentsTitle": "दस्तावेज़ अपलोड करें जो चेकलिस्ट द्वारा स्वीकार किए जाने चाहिए *",
+    "uploadDocumentsHelperText": "दस्तावेज़ अपलोड करें जो सभी चेकलिस्ट आवश्यकताओं को पूरा करते हैं ताकि ऐसे प्रश्नों की पहचान करने में मदद मिल सके जो बहुत कड़े हो सकते हैं",
+    "customInstructionsPlaceholder": "उदाहरण के लिए, आयु संबंधी आवश्यकताओं का मूल्यांकन करते समय इस बात पर विचार करें कि यह एक बाल चिकित्सा अध्ययन है, यह प्रोटोकॉल कम-जोखिम हस्तक्षेप के लिए है, आदि।"
   },
   "optimizeOutlineModal": {
     "title": "रूपरेखा अनुकूलित करें",
@@ -712,22 +712,22 @@
     "pleaseWait": "कृपया प्रतीक्षा करें जब तक हम आपके दस्तावेज़ों को मिलान कर रहे हैं",
     "matchSuccess": "फॉर्म प्रसंस्करण सफलतापूर्वक पूरा हुआ!",
     "singleDocumentSuccess": "एकल दस्तावेज़ से फ़ील्ड मान निकाले गए।",
-    "title": "[AUTO-TRANSLATED hi] Match Documents",
-    "subtitle": "[AUTO-TRANSLATED hi] Ensure that field entries match across documents of different format.",
-    "selectDocument": "[AUTO-TRANSLATED hi] Select a document to find matches",
-    "pleaseSelect": "[AUTO-TRANSLATED hi] Please select a document...",
-    "sourceDocument": "[AUTO-TRANSLATED hi] Form Template",
-    "matchingDocuments": "[AUTO-TRANSLATED hi] Matching Documents",
-    "findMatches": "[AUTO-TRANSLATED hi] Find Matches",
-    "similarityScore": "[AUTO-TRANSLATED hi] Similarity Score",
-    "noDocumentsFound": "[AUTO-TRANSLATED hi] No documents found",
-    "selectDocumentToMatch": "[AUTO-TRANSLATED hi] Please select a document to find matches",
-    "loadingMatches": "[AUTO-TRANSLATED hi] Finding matches...",
-    "noMatchesFound": "[AUTO-TRANSLATED hi] No similar documents found",
-    "matchResults": "[AUTO-TRANSLATED hi] Match Results",
-    "similarity": "[AUTO-TRANSLATED hi] Similarity",
-    "editFormTemplate": "[AUTO-TRANSLATED hi] Edit Form Template",
-    "selectFormTemplateTitle": "[AUTO-TRANSLATED hi] Select Form Template"
+    "title": "दस्तावेज़ मिलान करें",
+    "subtitle": "सुनिश्चित करें कि विभिन्न प्रारूप के दस्तावेज़ों में फ़ील्ड प्रविष्टियाँ मेल खाती हैं।",
+    "selectDocument": "मिलान खोजने के लिए एक दस्तावेज़ चुनें",
+    "pleaseSelect": "कृपया एक दस्तावेज़ चुनें...",
+    "sourceDocument": "फॉर्म टेम्प्लेट",
+    "matchingDocuments": "मिलान दस्तावेज़",
+    "findMatches": "मिलान खोजें",
+    "similarityScore": "समानता स्कोर",
+    "noDocumentsFound": "कोई दस्तावेज़ नहीं मिला",
+    "selectDocumentToMatch": "मिलान खोजने के लिए कृपया एक दस्तावेज़ चुनें",
+    "loadingMatches": "मिलान खोज रहे हैं...",
+    "noMatchesFound": "कोई समान दस्तावेज़ नहीं मिला",
+    "matchResults": "मिलान परिणाम",
+    "similarity": "समानता",
+    "editFormTemplate": "फॉर्म टेम्प्लेट संपादित करें",
+    "selectFormTemplateTitle": "फॉर्म टेम्प्लेट चुनें"
   },
   "feedback": {
     "modalTitlePositive": "क्या सहायक था?",

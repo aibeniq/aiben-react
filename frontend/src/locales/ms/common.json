@@ -569,28 +569,28 @@
       },
       "fileUpload": {
         "currentFiles": "Fail Semasa",
-        "newFiles": "[AUTO-TRANSLATED ms] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED ms] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED ms] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED ms] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED ms] Remove file",
-        "supportedFormats": "[AUTO-TRANSLATED ms] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "newFiles": "Fail Baharu",
+        "selectedFiles": "Fail yang Dipilih",
+        "dragAndDrop": "Seret dan lepaskan fail di sini, atau klik untuk menyemak imbas",
+        "dropFiles": "Lepaskan fail di sini...",
+        "removeFile": "Keluarkan fail",
+        "supportedFormats": "Menyokong: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
       },
       "buttons": {
         "cancel": "Batal",
         "create": "Buat",
         "save": "Simpan",
-        "saving": "[AUTO-TRANSLATED ms] Saving...",
-        "creating": "[AUTO-TRANSLATED ms] Creating..."
+        "saving": "Menyimpan...",
+        "creating": "Mencipta..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED ms] Title is required"
+        "titleRequired": "Tajuk diperlukan"
       },
       "messages": {
-        "createSuccess": "[AUTO-TRANSLATED ms] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED ms] Knowledge Base updated successfully.",
-        "processing": "[AUTO-TRANSLATED ms] Processing...",
-        "pleaseWait": "[AUTO-TRANSLATED ms] Please wait while we process your files..."
+        "createSuccess": "Pangkalan Pengetahuan berjaya dicipta.",
+        "updateSuccess": "Pangkalan Pengetahuan berjaya dikemas kini.",
+        "processing": "Memproses...",
+        "pleaseWait": "Sila tunggu sementara kami memproses fail anda..."
       }
     },
     "editCustom": {
@@ -900,19 +900,19 @@
     "outlineSaveFailed": "Penyimpanan garis panduan gagal: {{error}}"
   },
   "editFormTemplateModal": {
-    "title": "[AUTO-TRANSLATED ms] Edit Form Template",
-    "formTemplateName": "[AUTO-TRANSLATED ms] Form Template Name",
-    "formTemplateNamePlaceholder": "[AUTO-TRANSLATED ms] Enter form template name",
-    "formTemplateDescription": "[AUTO-TRANSLATED ms] Form Template Description",
-    "descriptionPlaceholder": "[AUTO-TRANSLATED ms] Enter form template description to auto-suggest fields (minimum 10 characters)...",
-    "referenceDocuments": "[AUTO-TRANSLATED ms] Reference Documents (Optional)",
-    "uploadFiles": "[AUTO-TRANSLATED ms] Upload Files",
+    "title": "Edit Templat Borang",
+    "formTemplateName": "Nama Templat Borang",
+    "formTemplateNamePlaceholder": "Masukkan nama templat borang",
+    "formTemplateDescription": "Penerangan Templat Borang",
+    "descriptionPlaceholder": "Masukkan penerangan templat borang untuk mencadangkan medan secara automatik (minimum 10 aksara)...",
+    "referenceDocuments": "Dokumen Rujukan (Pilihan)",
+    "uploadFiles": "Muat Naik Fail",
     "pleaseWait": "Sila tunggu sementara kami menyemak dokumen anda",
     "knowledgeBase": "Pangkalan Pengetahuan",
-    "formFields": "[AUTO-TRANSLATED ms] Form Fields",
-    "suggest": "[AUTO-TRANSLATED ms] Suggest",
-    "fieldPlaceholder": "[AUTO-TRANSLATED ms] Add a field name...",
+    "formFields": "Medan Borang",
+    "suggest": "Cadangkan",
+    "fieldPlaceholder": "Tambah nama medan...",
     "cancel": "Batal",
-    "updateFormTemplate": "[AUTO-TRANSLATED ms] Update Form Template"
+    "updateFormTemplate": "Kemas Kini Templat Borang"
   }
 }
