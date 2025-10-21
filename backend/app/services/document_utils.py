@@ -280,7 +280,9 @@ def extract_text_from_xlsx_bytes(file_content: bytes, filename: str) -> str:
         return f"Failed to extract text from XLSX {filename}: {str(e)}"
 
 
-def extract_text_from_file_unified(file_content: bytes, filename: str) -> str:
+def extract_text_from_file_unified(
+    file_content: bytes, filename: str, use_enhanced_pdf_parsing: bool = False
+) -> str:
     """
     Unified file text extraction function that handles multiple file types.
     This is the main entry point for document text extraction.
@@ -288,6 +290,8 @@ def extract_text_from_file_unified(file_content: bytes, filename: str) -> str:
     Args:
         file_content: Raw bytes of the file
         filename: Name of the file
+        use_enhanced_pdf_parsing: If True, use PyMuPDF4LLM for better table handling in PDFs
+
 
     Returns:
         Extracted text content as string
@@ -300,7 +304,9 @@ def extract_text_from_file_unified(file_content: bytes, filename: str) -> str:
             # Handle PDF files
             from app.services.pdf_utils import extract_text_from_pdf_bytes
 
-            return extract_text_from_pdf_bytes(file_content, filename)
+            return extract_text_from_pdf_bytes(
+                file_content, filename, use_enhanced_parsing=use_enhanced_pdf_parsing
+            )
 
         elif file_ext in [".docx", ".doc"]:
             # Handle Word documents using our unified DOCX function
@@ -363,7 +369,7 @@ def extract_text_from_file_unified(file_content: bytes, filename: str) -> str:
 
 
 def extract_documents_from_file_unified(
-    file_content: bytes, filename: str
+    file_content: bytes, filename: str, use_enhanced_pdf_parsing: bool = True
 ) -> List[Document]:
     """
     Unified file extraction function that returns LangChain Document objects.
@@ -372,6 +378,7 @@ def extract_documents_from_file_unified(
     Args:
         file_content: Raw bytes of the file
         filename: Name of the file
+        use_enhanced_pdf_parsing: If True, use PyMuPDF4LLM for better table handling in PDFs
 
     Returns:
         List of LangChain Document objects
@@ -389,7 +396,11 @@ def extract_documents_from_file_unified(
             try:
                 from app.services.pdf_utils import load_pdf_with_pypdf
 
-                return load_pdf_with_pypdf(temp_file_path, filename)
+                return load_pdf_with_pypdf(
+                    temp_file_path,
+                    filename,
+                    use_enhanced_parsing=use_enhanced_pdf_parsing,
+                )
             finally:
                 if os.path.exists(temp_file_path):
                     os.unlink(temp_file_path)

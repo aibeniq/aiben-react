@@ -546,7 +546,9 @@ async def _handle_full_text_document_query(
                 file_content = f.read()
 
             # Use the unified document extraction function
-            documents = extract_documents_from_file_unified(file_content, file.filename)
+            documents = extract_documents_from_file_unified(
+                file_content, file.filename, use_enhanced_pdf_parsing=True
+            )
             full_text = "\n\n".join([doc.page_content for doc in documents])
 
             # Extract images if vision is enabled
