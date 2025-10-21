@@ -508,8 +508,13 @@ const VeraDoc = () => {
         knowledgeBaseId: data.knowledgeBaseId,
         customInstructions: data.customInstructions,
         searchMode: data.searchMode,
-        taskId: newTaskId,
+        taskId: newTaskId, // Pass the task_id to the endpoint
         formData: {
+          questions: data.questions,
+          knowledge_base_id: data.knowledgeBaseId,
+          custom_instructions: data.customInstructions,
+          search_mode: data.searchMode,
+          task_id: newTaskId,
           files: data.files,
         },
       })
