@@ -29,7 +29,8 @@
     "next": "다음",
     "previous": "이전",
     "confirm": "확인",
-    "back": "뒤로"
+    "back": "뒤로",
+    "done": "[AUTO-TRANSLATED ko] Done"
   },
   "forms": {
     "firstName": "이름",
@@ -71,7 +72,10 @@
     "knowledgeBaseTable": {
       "name": "이름",
       "description": "설명",
-      "sources": "소스"
+      "sources": "소스",
+      "noDescription": "설명 없음",
+      "sourcesCount": "{{count}} 출처",
+      "pagesCount": "{{count}} 페이지"
     },
     "knowledgeBaseTableName": "이름",
     "knowledgeBaseTableDescription": "설명",
@@ -181,32 +185,33 @@
     "copy": "복사",
     "paste": "붙여넣기",
     "cut": "잘라내기",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "더 보기",
+    "showLess": "적게 보기",
+    "readMore": "더 읽기",
+    "questionNumber": "질문 {{number}}:",
+    "viewSourceCitations": "소스 인용 보기 ({{count}})",
+    "answer": "답변:",
+    "relevantPolicyContext": "관련 정책 맥락:",
+    "sources": "소스",
+    "sourceCitations": "소스 인용 ({{count}})",
+    "citationNumber": "인용 {{number}}",
+    "noSourceCitations": "이 섹션에 사용할 수 있는 소스 인용이 없습니다",
+    "noDetailedSections": "이 보고서에 사용할 수 있는 상세 섹션이 없습니다",
+    "topicLabel": "주제:",
+    "knowledgeBaseReference": "지식 베이스 참조",
+    "knowledgeBaseReferences": "지식 베이스 참조",
+    "hideReferences": "참조 숨기기",
+    "showReferences": "참조 표시",
+    "referenceNumber": "참조 {{number}}",
+    "processedInChunks": "{{count}} 청크에서 처리됨",
+    "synthesisErrorNote": "참고: 합성 오류가 발생했습니다 - 결합된 청크 결과 표시 중",
     "progress": {
       "starting": "시작 중...",
       "initializing": "초기화 중...",
       "processing": "처리 중...",
       "extracting": "콘텐츠 추출 중..."
-    }
+    },
+    "error": "[AUTO-TRANSLATED ko] Something went wrong!"
   },
   "usage": {
     "title": "사용량",
@@ -245,7 +250,7 @@
     "checklistNamePlaceholder": "체크리스트 이름을 입력하세요...",
     "checklistDescriptionLabel": "설명",
     "checklistDescriptionPlaceholder": "자동 질문 제안을 위한 체크리스트 설명을 입력하세요 (최소 10자)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} 질문",
     "suggest": "제안",
     "suggesting": "제안 중...",
     "optimize": "최적화",
@@ -272,7 +277,9 @@
     "fullDocumentScan": "전체 문서 분석",
     "vectorSearchDescription": "AI 유사성 검색을 사용하여 관련 콘텐츠 찾기 (빠름, 대상 지향적)",
     "fullScanDescription": "지식 베이스의 모든 문서 분석 (포괄적, 철저함)",
-    "pleaseWait": "문서를 검토하는 동안 잠시 기다려 주세요"
+    "pleaseWait": "문서를 검토하는 동안 잠시 기다려 주세요",
+    "reviewSuccess": "[AUTO-TRANSLATED ko] Document review completed successfully!",
+    "reviewSuccessMultiple": "[AUTO-TRANSLATED ko] {{count}} files processed with optimized context sharing!"
   },
   "generate": {
     "pageDescription": "사용자 정의 체크리스트와 문서 데이터베이스를 기반으로 문서를 생성합니다.",
@@ -317,7 +324,8 @@
       "generating": "보고서 생성 중...",
       "processingSection": "섹션 {{sectionNum}}/{{totalSections}} 처리 중: {{sectionPreview}}"
     },
-    "pleaseWait": "보고서를 생성하는 동안 잠시 기다려주세요"
+    "pleaseWait": "보고서를 생성하는 동안 잠시 기다려주세요",
+    "editOutline": "[AUTO-TRANSLATED ko] Edit Outline"
   },
   "modelSelection": {
     "llmManagement": "LLM 관리",
@@ -433,7 +441,8 @@
     "suggest": "제안",
     "fieldPlaceholder": "필드 이름 추가...",
     "cancel": "취소",
-    "updateFormTemplate": "양식 템플릿 업데이트"
+    "updateFormTemplate": "양식 템플릿 업데이트",
+    "pleaseWait": "문서를 검토하는 동안 기다려주세요"
   },
   "editOutlineModal": {
     "title": "개요 편집",
@@ -448,6 +457,7 @@
     "sections": "섹션",
     "suggest": "제안",
     "optimize": "최적화",
+    "consultDocs": "문서 참조",
     "addSectionPlaceholder": "섹션 추가",
     "cancel": "취소",
     "createOutline": "개요 만들기",
@@ -463,7 +473,7 @@
     "referenceDocuments": "참조 문서 (선택사항)",
     "uploadFiles": "파일 업로드",
     "knowledgeBase": "지식 베이스",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} 질문",
     "suggest": "제안",
     "optimize": "최적화",
     "addQuestionPlaceholder": "질문 추가",
@@ -483,10 +493,10 @@
     "uploadFiles": "파일 업로드",
     "knowledgeBase": "지식 베이스",
     "comparisonTopics": "비교 주제",
-    "topics": "{{count}} topics",
-    "section": "{{count}} section",
-    "section_one": "{{count}} section",
-    "sections": "{{count}} sections",
+    "topics": "{{count}} 주제",
+    "section": "{{count}} 섹션",
+    "section_one": "{{count}} 섹션",
+    "sections": "{{count}} 섹션",
     "suggest": "제안",
     "addTopicPlaceholder": "비교 주제 추가",
     "copyAllTopics": "모든 주제를 텍스트로 복사",
@@ -516,7 +526,10 @@
     "showMore": "더 보기",
     "optimizationsSelectedText": "{{s}}개의 최적화가 적용을 위해 선택되었습니다",
     "applying": "적용 중...",
-    "applySelectedOptimizations": "선택된 최적화 적용"
+    "applySelectedOptimizations": "선택된 최적화 적용",
+    "uploadDocumentsTitle": "[AUTO-TRANSLATED ko] Upload document(s) that should be accepted by checklist *",
+    "uploadDocumentsHelperText": "[AUTO-TRANSLATED ko] Upload documents that should meet all checklist requirements to help identify questions that may be too strict",
+    "customInstructionsPlaceholder": "[AUTO-TRANSLATED ko] e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
   },
   "optimizeOutlineModal": {
     "title": "개요 최적화",
@@ -619,7 +632,32 @@
       },
       "messages": {
         "processing": "처리 중...",
-        "pleaseWait": "파일을 처리하는 동안 잠시 기다려 주세요..."
+        "pleaseWait": "파일을 처리하는 동안 잠시 기다려 주세요...",
+        "createSuccess": "[AUTO-TRANSLATED ko] Knowledge Base created successfully.",
+        "updateSuccess": "[AUTO-TRANSLATED ko] Knowledge Base updated successfully."
+      },
+      "fields": {
+        "title": "[AUTO-TRANSLATED ko] Title",
+        "description": "설명"
+      },
+      "fileUpload": {
+        "currentFiles": "[AUTO-TRANSLATED ko] Current Files",
+        "newFiles": "[AUTO-TRANSLATED ko] New Files",
+        "selectedFiles": "[AUTO-TRANSLATED ko] Selected Files",
+        "dragAndDrop": "[AUTO-TRANSLATED ko] Drag and drop files here, or click to browse",
+        "dropFiles": "[AUTO-TRANSLATED ko] Drop the files here...",
+        "removeFile": "[AUTO-TRANSLATED ko] Remove file",
+        "supportedFormats": "[AUTO-TRANSLATED ko] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "취소",
+        "create": "생성",
+        "save": "저장",
+        "saving": "[AUTO-TRANSLATED ko] Saving...",
+        "creating": "[AUTO-TRANSLATED ko] Creating..."
+      },
+      "validation": {
+        "titleRequired": "[AUTO-TRANSLATED ko] Title is required"
       }
     },
     "editCustom": {
@@ -656,7 +694,7 @@
       "referenceDocuments": "참조 문서 (선택사항)",
       "uploadFiles": "파일 업로드",
       "knowledgeBase": "지식 베이스",
-      "questions": "{{count}} questions",
+      "questions": "{{count}} 질문",
       "suggest": "제안",
       "optimize": "최적화",
       "addQuestionPlaceholder": "질문 추가",
@@ -676,10 +714,10 @@
       "uploadFiles": "파일 업로드",
       "knowledgeBase": "지식 베이스",
       "comparisonTopics": "비교 주제",
-      "topics": "{{count}} topics",
-      "section": "{{count}} section",
-      "section_one": "{{count}} section",
-      "sections": "{{count}} sections",
+      "topics": "{{count}} 주제",
+      "section": "{{count}} 섹션",
+      "section_one": "{{count}} 섹션",
+      "sections": "{{count}} 섹션",
       "suggest": "제안",
       "addTopicPlaceholder": "비교 주제 추가",
       "copyAllTopics": "모든 주제를 텍스트로 복사",
@@ -711,6 +749,12 @@
       "cancelButton": "취소",
       "successMessage": "지식 베이스가 성공적으로 삭제되었습니다",
       "errorMessage": "지식 베이스 삭제 중 오류 발생"
+    },
+    "actions": {
+      "view": "[AUTO-TRANSLATED ko] View",
+      "edit": "[AUTO-TRANSLATED ko] Edit",
+      "delete": "[AUTO-TRANSLATED ko] Delete",
+      "configure": "[AUTO-TRANSLATED ko] Configure"
     }
   },
   "archive": {
@@ -813,14 +857,14 @@
     "downloadCsv": "CSV 다운로드",
     "clearCsv": "CSV 지우기",
     "clearResults": "결과 지우기",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "주제:",
+    "knowledgeBaseReference": "지식 베이스 참조",
+    "knowledgeBaseReferences": "지식 베이스 참조",
+    "hideReferences": "참조 숨기기",
+    "showReferences": "참조 표시",
+    "referenceNumber": "참조 {{number}}",
+    "processedInChunks": "{{count}} 청크로 처리됨",
+    "synthesisError": "주제 분석 합성 오류"
   },
   "toast": {
     "passwordUpdated": "비밀번호가 성공적으로 업데이트되었습니다.",
@@ -894,5 +938,8 @@
     "outlineUpdated": "개요가 성공적으로 업데이트되었습니다",
     "outlineCreated": "개요가 성공적으로 생성되었습니다",
     "outlineSaveFailed": "개요 저장 실패: {{error}}"
+  },
+  "dropdowns": {
+    "selectKnowledgeBase": "지식 베이스 선택..."
   }
 }

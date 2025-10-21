@@ -29,7 +29,8 @@
     "next": "Naslednji",
     "previous": "Prejšnji",
     "confirm": "Potrdi",
-    "back": "Nazaj"
+    "back": "Nazaj",
+    "done": "Končano"
   },
   "forms": {
     "firstName": "Ime",
@@ -44,6 +45,9 @@
     "emailPlaceholder": "Vnesite svoj e-poštni naslov",
     "passwordPlaceholder": "Vnesite svoje geslo"
   },
+  "dropdowns": {
+    "selectKnowledgeBase": "Izberite bazo znanja..."
+  },
   "chatbot": {
     "placeholder": "Vnesite svoje sporočilo tukaj...",
     "send": "Pošlji",
@@ -57,7 +61,42 @@
     "knowledgeBaseTableName": "Ime",
     "knowledgeBaseTableDescription": "Opis",
     "knowledgeBaseTableSources": "Viri",
-    "knowledgeBaseTablePages": "Strani"
+    "knowledgeBaseTablePages": "Strani",
+    "title": "Klepet",
+    "sourcePopover": {
+      "knowledgeBase": "Baza znanja",
+      "file": "Datoteka"
+    },
+    "searchMode": "Način iskanja:",
+    "vectorSearch": "Vektorsko iskanje",
+    "fullTextScan": "Popolno skeniranje besedila",
+    "searchModeDescription": "Vektorsko iskanje zagotavlja hitre, ciljne rezultate. Popolno skeniranje besedila pregleda vso vsebino v bazi znanja.",
+    "askMeAnything": "Vprašaj me karkoli! Za iskanje po bazi znanja najprej izberi bazo znanja.",
+    "usingGeneralAI": "Uporaba splošnega AI pomočnika",
+    "usingKnowledgeBase": "Uporaba baze znanja:",
+    "usingDocuments": "Uporaba # dokument(a)",
+    "usingFiles": "Uporaba {{count}} dokument{{plural}}:",
+    "remove": "Odstrani",
+    "selectKnowledgeBase": "Izberi bazo znanja",
+    "knowledgeBaseTable": {
+      "name": "Ime",
+      "description": "Opis",
+      "sources": "Viri",
+      "noDescription": "Ni opisa",
+      "sourcesCount": "{{count}} virov",
+      "pagesCount": "{{count}} strani"
+    },
+    "selectKnowledgeBasePlaceholder": "Izberite bazo znanja...",
+    "noKnowledgeBasesAvailable": "Ni na voljo nobenih baz znanja. Najprej ustvarite eno, da uporabite to funkcijo.",
+    "knowledgeBase": "Baza znanja",
+    "file": "Datoteka",
+    "errors": {
+      "generic": "Oprostite, nekaj je šlo narobe. Poskusite znova.",
+      "timeout": "Zahteva je potekla. Poskusite znova.",
+      "largeFileTimeout": "Obdelava velikih datotek je potekla. Poskusite preklopiti v način 'Popolno skeniranje besedila' za boljšo učinkovitost z velikimi datotekami.",
+      "fileSize": "Datoteka je prevelika. Izberite manjše datoteke.",
+      "serverError": "Prišlo je do napake strežnika. Poskusite znova pozneje."
+    }
   },
   "settings": {
     "title": "Nastavitve",
@@ -147,32 +186,40 @@
     "copy": "Kopiraj",
     "paste": "Prilepi",
     "cut": "Izreži",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Prikaži več",
+    "showLess": "Prikaži manj",
+    "readMore": "Preberi več",
+    "questionNumber": "Vprašanje {{number}}:",
+    "viewSourceCitations": "Ogled citatov virov ({{count}})",
+    "answer": "Odgovor:",
+    "relevantPolicyContext": "Ustrezen kontekst politike:",
+    "sources": "viri",
+    "sourceCitations": "Citati virov ({{count}})",
+    "citationNumber": "Citat {{number}}",
+    "noSourceCitations": "Za ta razdelek ni na voljo citatov virov",
+    "noDetailedSections": "Za to poročilo ni na voljo podrobnih razdelkov",
+    "topicLabel": "Tema:",
+    "knowledgeBaseReference": "Referenca baze znanja",
+    "knowledgeBaseReferences": "Reference baze znanja",
+    "hideReferences": "Skrij reference",
+    "showReferences": "Prikaži reference",
+    "referenceNumber": "Referenca {{number}}",
+    "processedInChunks": "Obdelano v {{count}} kosih",
+    "synthesisErrorNote": "Opomba: Prišlo je do napake pri sintezi - prikazani so kombinirani rezultati kosov",
     "progress": {
       "starting": "Začenjanje...",
       "initializing": "Inicializacija...",
       "processing": "Obdelava...",
       "extracting": "Izvlečenje vsebine..."
-    }
+    },
+    "error": "Nekaj je šlo narobe!",
+    "welcomeBack": "Dobrodošli nazaj, veseli smo, da vas spet vidimo!",
+    "hiUser": "Pozdravljeni, {{name}} 👋"
+  },
+  "usage": {
+    "title": "Uporaba",
+    "currentPeriod": "Trenutno obdobje:",
+    "usedOfQuota": "uporabljeno od vaše mesečne kvote"
   },
   "review": {
     "pageTitle": "Pregled dokumentov",
@@ -206,7 +253,7 @@
     "checklistNamePlaceholder": "Vnesite ime kontrolne liste...",
     "checklistDescriptionLabel": "Opis",
     "checklistDescriptionPlaceholder": "Vnesite opis kontrolne liste za samodejne predloge vprašanj (najmanj 10 znakov)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} vprašanja",
     "suggest": "Predlagaj",
     "suggesting": "Predlagam...",
     "optimize": "Optimiziraj",
@@ -227,7 +274,64 @@
     "deleteChecklist": "Izbriši kontrolno listo",
     "pleaseWait": "Prosimo, počakajte, da pregledamo vaše dokumente",
     "reviewSuccess": "Pregled dokumenta uspešno zaključen!",
-    "reviewSuccessMultiple": "{{count}} datotek obdelanih z optimiziranim deljenjem konteksta!"
+    "reviewSuccessMultiple": "{{count}} datotek obdelanih z optimiziranim deljenjem konteksta!",
+    "dropFilesHere": "Spustite datoteke tukaj",
+    "uploadedFiles": "Naložene datoteke",
+    "removeFile": "Odstrani",
+    "characterCount": "{{count}}/2000 znakov. Ta navodila bodo dodana vsaki vprašanju med obdelavo.",
+    "searchMode": "Način iskanja",
+    "vectorSearch": "Vektorsko iskanje",
+    "fullDocumentScan": "Popolno skeniranje dokumenta",
+    "vectorSearchDescription": "Najde ustrezno vsebino z uporabo AI iskanja podobnosti (hitro, ciljno)",
+    "fullScanDescription": "Analizira vse dokumente v bazi znanja (celovito, temeljito)"
+  },
+  "modelSelection": {
+    "llmManagement": "Upravljanje LLM",
+    "llmDescription": "Konfigurirajte in upravljajte LLM-je, ki se uporabljajo za generiranje besedilnih odgovorov. Privzeti model bo uporabljen za vse operacije.",
+    "addNewLlm": "Dodaj nov LLM",
+    "noLlmsConfigured": "Ni konfiguriranih LLM-jev",
+    "addNewLlmToGetStarted": "Dodajte nov LLM za začetek",
+    "embeddingModelManagement": "Upravljanje modelov vdelave",
+    "embeddingDescription": "Konfigurirajte in upravljajte modele vdelave, ki se uporabljajo za indeksiranje in pridobivanje baze znanja. Privzeti model bo uporabljen pri ustvarjanju novih baz znanja, vendar bo vsaka baza znanja še naprej uporabljala svoj izvirni model vdelave, tudi če se privzeti kasneje spremeni.",
+    "addEmbeddingModel": "Dodaj model vdelave",
+    "noEmbeddingModelsConfigured": "Ni konfiguriranih modelov vdelave",
+    "addNewEmbeddingModelToGetStarted": "Dodajte nov model vdelave za začetek",
+    "tableHeaders": {
+      "name": "Ime",
+      "modelId": "ID modela",
+      "provider": "Ponudnik",
+      "description": "Opis",
+      "status": "Status",
+      "actions": "Dejanja"
+    },
+    "status": {
+      "default": "Privzeti",
+      "available": "Na voljo"
+    },
+    "actions": {
+      "setAsDefault": "Nastavi kot privzeti",
+      "delete": "Izbriši",
+      "validate": "Preveri",
+      "validating": "Preverjanje"
+    },
+    "dialog": {
+      "addNewLlm": "Dodaj nov LLM",
+      "addEmbeddingModel": "Dodaj model vdelave",
+      "displayName": "Prikazno ime",
+      "provider": "Ponudnik",
+      "modelId": "ID modela",
+      "description": "Opis",
+      "cancel": "Prekliči",
+      "addModel": "Dodaj model"
+    },
+    "placeholders": {
+      "customModel": "npr. Moj model po meri",
+      "embeddingModelId": "npr. sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Opišite model, njegove značilnosti in kdaj ga uporabiti"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Prosimo, vnesite ID modela"
+    }
   },
   "compare": {
     "title": "Primerjaj dokumente",
@@ -261,7 +365,8 @@
       "comparing": "Primerjanje..."
     },
     "pleaseWait": "Prosimo, počakajte, medtem ko primerjamo vaše dokumente",
-    "compareSuccess": "Dokumenti so bili uspešno primerjani!"
+    "compareSuccess": "Dokumenti so bili uspešno primerjani!",
+    "selectTopicListTitle": "Izberi seznam tem"
   },
   "match": {
     "title": "Ujemanje dokumentov",
@@ -295,7 +400,84 @@
     },
     "pleaseWait": "Prosimo, počakajte, medtem ko ujemamo vaše dokumente",
     "matchSuccess": "Obdelava obrazca je bila uspešno zaključena!",
-    "singleDocumentSuccess": "Vrednosti polj so bile izvlečene iz enega dokumenta."
+    "singleDocumentSuccess": "Vrednosti polj so bile izvlečene iz enega dokumenta.",
+    "selectFormTemplateTitle": "Izberi predlogo obrazca"
+  },
+  "editFormTemplateModal": {
+    "title": "Uredi predlogo obrazca",
+    "formTemplateName": "Ime predloge obrazca",
+    "formTemplateNamePlaceholder": "Vnesite ime predloge obrazca",
+    "formTemplateDescription": "Opis predloge obrazca",
+    "descriptionPlaceholder": "Vnesite opis predloge obrazca za samodejno predlaganje polj (najmanj 10 znakov)...",
+    "referenceDocuments": "Referenčni dokumenti (neobvezno)",
+    "uploadFiles": "Naloži datoteke",
+    "pleaseWait": "Prosimo, počakajte, da pregledamo vaše dokumente",
+    "knowledgeBase": "Baza znanja",
+    "formFields": "Polja obrazca",
+    "suggest": "Predlagaj",
+    "fieldPlaceholder": "Dodaj ime polja...",
+    "cancel": "Prekliči",
+    "updateFormTemplate": "Posodobi predlogo obrazca"
+  },
+  "editOutlineModal": {
+    "title": "Uredi oris",
+    "createTitle": "Ustvari nov oris",
+    "outlineName": "Ime orisa",
+    "outlineNamePlaceholder": "Vnesite ime orisa",
+    "description": "Opis",
+    "descriptionPlaceholder": "Vnesite opis orisa za samodejno predlaganje razdelkov (najmanj 10 znakov)...",
+    "referenceDocuments": "Referenčni dokumenti (neobvezno)",
+    "uploadFiles": "Naloži datoteke",
+    "knowledgeBase": "Baza znanja",
+    "sections": "Razdelki",
+    "suggest": "Predlagaj",
+    "optimize": "Optimiziraj",
+    "consultDocs": "Posvetuj se z dokumenti",
+    "addSectionPlaceholder": "Dodaj razdelek",
+    "cancel": "Prekliči",
+    "createOutline": "Ustvari oris",
+    "updateOutline": "Posodobi oris"
+  },
+  "editChecklistModal": {
+    "title": "Uredi kontrolno listo",
+    "createTitle": "Ustvari novo kontrolno listo",
+    "checklistName": "Ime kontrolne liste",
+    "checklistNamePlaceholder": "Vnesite ime kontrolne liste",
+    "description": "Opis",
+    "descriptionPlaceholder": "Vnesite opis kontrolne liste za samodejno predlaganje vprašanj (najmanj 10 znakov)...",
+    "referenceDocuments": "Referenčni dokumenti (neobvezno)",
+    "uploadFiles": "Naloži datoteke",
+    "knowledgeBase": "Baza znanja",
+    "questions": "{{count}} vprašanj",
+    "suggest": "Predlagaj",
+    "optimize": "Optimiziraj",
+    "addQuestionPlaceholder": "Dodaj vprašanje",
+    "copyAllQuestions": "Kopiraj vsa vprašanja kot besedilo",
+    "cancel": "Prekliči",
+    "createChecklist": "Ustvari kontrolno listo",
+    "updateChecklist": "Posodobi kontrolno listo"
+  },
+  "editTopicListModal": {
+    "title": "Uredi seznam tem",
+    "createTitle": "Ustvari nov seznam tem",
+    "topicListName": "Ime seznama tem",
+    "topicListNamePlaceholder": "Vnesite ime seznama tem",
+    "description": "Opis seznama tem",
+    "descriptionPlaceholder": "Vnesite opis seznama tem za samodejno predlaganje tem (najmanj 10 znakov)...",
+    "referenceDocuments": "Referenčni dokumenti (neobvezno)",
+    "uploadFiles": "Naloži datoteke",
+    "knowledgeBase": "Baza znanja",
+    "comparisonTopics": "Primerjalne teme",
+    "topics": "{{count}} tem",
+    "section": "{{count}} razdelek",
+    "section_one": "{{count}} razdelek",
+    "sections": "{{count}} razdelkov",
+    "suggest": "Predlagaj",
+    "addTopicPlaceholder": "Dodaj primerjalno temo",
+    "copyAllTopics": "Kopiraj vse teme kot besedilo",
+    "cancel": "Prekliči",
+    "createTopicList": "Ustvari seznam tem",
+    "updateTopicList": "Posodobi seznam tem"
   },
   "knowledgeBases": {
     "title": "Upravljanje baz znanja",
@@ -394,6 +576,35 @@
         "fieldPlaceholder": "Dodajte ime polja...",
         "cancel": "Prekliči",
         "updateFormTemplate": "Posodobi Predlogo Obrazca"
+      },
+      "fields": {
+        "title": "Naslov",
+        "description": "Opis"
+      },
+      "fileUpload": {
+        "currentFiles": "Trenutne datoteke",
+        "newFiles": "Nove datoteke",
+        "selectedFiles": "Izbrane datoteke",
+        "dragAndDrop": "Povlecite in spustite datoteke sem ali kliknite za brskanje",
+        "dropFiles": "Spustite datoteke sem...",
+        "removeFile": "Odstrani datoteko",
+        "supportedFormats": "Podpira: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "Prekliči",
+        "create": "Ustvari",
+        "save": "Shrani",
+        "saving": "Shranjevanje...",
+        "creating": "Ustvarjanje..."
+      },
+      "validation": {
+        "titleRequired": "Naslov je obvezen"
+      },
+      "messages": {
+        "createSuccess": "Baza znanja je bila uspešno ustvarjena.",
+        "updateSuccess": "Baza znanja je bila uspešno posodobljena.",
+        "processing": "Obdelovanje...",
+        "pleaseWait": "Prosimo, počakajte, medtem ko obdelujemo vaše datoteke..."
       }
     },
     "editCustom": {
@@ -556,7 +767,44 @@
       "generating": "Ustvarjanje poročila...",
       "processingSection": "Obdelava razdelka {{sectionNum}} od {{totalSections}}: {{sectionPreview}}"
     },
-    "pleaseWait": "Prosimo, počakajte, medtem ko ustvarjamo vaše poročilo"
+    "pleaseWait": "Prosimo, počakajte, medtem ko ustvarjamo vaše poročilo",
+    "pageDescription": "Ustvarite dokument na podlagi uporabniško določenega orisa in baze dokumentov.",
+    "generatingDocument": "Ustvarjanje dokumenta...",
+    "knowledgeBaseTitle": "Baza znanja",
+    "documentOutlineTitle": "Oris dokumenta",
+    "clickToSelect": "Kliknite za izbiro",
+    "customInstructionsTitle": "Prilagojena navodila (neobvezno)",
+    "customInstructionsPlaceholder": "Vnesite dodatna navodila, ki jih je treba upoštevati pri ustvarjanju vsakega razdelka poročila...",
+    "characterCount": "{{count}}/2000 znakov. Ta navodila bodo dodana v poziv pri ustvarjanju vsakega razdelka.",
+    "selectKnowledgeBaseTitle": "Izberite bazo znanja",
+    "selectDocumentOutlineTitle": "Izberite oris dokumenta",
+    "generateButton": "Ustvari",
+    "results": "Rezultati",
+    "copyText": "Kopiraj besedilo",
+    "copied": "Kopirano!",
+    "downloadDocx": "Prenesi DOCX",
+    "downloadCsv": "Prenesi CSV",
+    "clearReport": "Počisti poročilo",
+    "resultsPlaceholder": "Rezultati se bodo prikazali tukaj po ustvarjanju dokumenta.",
+    "sectionsWithSources": "Razdelki z viri",
+    "sectionNumber": "Razdelek {number}: {title}",
+    "kbGenerated": "KB ustvarjeno",
+    "rawText": "Surovo besedilo",
+    "viewSourceCitations": "Ogled citatov virov ({count})",
+    "documentCopiedSuccess": "Dokument kopiran v odložišče",
+    "documentCopiedError": "Kopiranje dokumenta v odložišče ni uspelo",
+    "documentDownloadSuccess": "Dokument uspešno prenesen",
+    "documentDownloadError": "Prenos dokumenta ni uspel: {error}",
+    "csvDownloadSuccess": "CSV uspešno prenesen",
+    "csvDownloadError": "Prenos CSV ni uspel: {error}",
+    "reportClearedSuccess": "Ustvarjeno poročilo počišćeno",
+    "enterAtLeastOneSection": "Prosimo, vnesite vsaj en razdelek",
+    "selectKnowledgeBase": "Prosimo, izberite bazo znanja",
+    "generateSuccess": "Poročilo uspešno ustvarjeno!",
+    "generateError": "Ustvarjanje dokumenta ni uspelo: {error}",
+    "vectorSearch": "vektorsko iskanje",
+    "fullDocumentScan": "celoten pregled dokumenta",
+    "editOutline": "Uredi oris"
   },
   "feedback": {
     "modalTitlePositive": "Kaj je bilo koristno?",
@@ -583,14 +831,14 @@
     "downloadCsv": "Prenesi CSV",
     "clearCsv": "Počisti CSV",
     "clearResults": "Počisti rezultate",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Tema:",
+    "knowledgeBaseReference": "Sklic na Znanstveno Bazo",
+    "knowledgeBaseReferences": "Sklici na Znanstveno Bazo",
+    "hideReferences": "Skrij Sklice",
+    "showReferences": "Prikaži Sklice",
+    "referenceNumber": "Sklic {{number}}",
+    "processedInChunks": "Obdelano v {{count}} delih",
+    "synthesisError": "Napaka pri sintezi analize teme"
   },
   "toast": {
     "passwordUpdated": "Geslo je bilo uspešno posodobljeno.",

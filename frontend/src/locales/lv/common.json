@@ -29,7 +29,8 @@
     "next": "Nākamais",
     "previous": "Iepriekšējais",
     "confirm": "Apstiprināt",
-    "back": "Atpakaļ"
+    "back": "Atpakaļ",
+    "done": "Gatavs"
   },
   "forms": {
     "firstName": "Vārds",
@@ -60,7 +61,42 @@
     "knowledgeBaseTableName": "Nosaukums",
     "knowledgeBaseTableDescription": "Apraksts",
     "knowledgeBaseTableSources": "Avoti",
-    "knowledgeBaseTablePages": "Lapas"
+    "knowledgeBaseTablePages": "Lapas",
+    "title": "Čats",
+    "sourcePopover": {
+      "knowledgeBase": "Zināšanu bāze",
+      "file": "Fails"
+    },
+    "searchMode": "Meklēšanas režīms:",
+    "vectorSearch": "Vektoru meklēšana",
+    "fullTextScan": "Pilna teksta skenēšana",
+    "searchModeDescription": "[AUTO-TRANSLATED lv] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
+    "askMeAnything": "[AUTO-TRANSLATED lv] Ask me anything! For knowledge base search, select a knowledge base first.",
+    "usingGeneralAI": "[AUTO-TRANSLATED lv] Using general AI assistant",
+    "usingKnowledgeBase": "[AUTO-TRANSLATED lv] Using knowledge base:",
+    "usingDocuments": "[AUTO-TRANSLATED lv] Using # document(s)",
+    "usingFiles": "[AUTO-TRANSLATED lv] Using {{count}} document{{plural}}:",
+    "remove": "Noņemt",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED lv] Select Knowledge Base",
+    "knowledgeBaseTable": {
+      "name": "Nosaukums",
+      "description": "Apraksts",
+      "sources": "Avoti",
+      "noDescription": "Nav apraksta",
+      "sourcesCount": "{{count}} avoti",
+      "pagesCount": "{{count}} lapas"
+    },
+    "selectKnowledgeBasePlaceholder": "Izvēlieties zināšanu bāzi...",
+    "noKnowledgeBasesAvailable": "Nav pieejamu zināšanu bāzu. Vispirms izveidojiet vienu, lai izmantotu šo funkciju.",
+    "knowledgeBase": "Zināšanu bāze",
+    "file": "Fails",
+    "errors": {
+      "generic": "[AUTO-TRANSLATED lv] Sorry, something went wrong. Please try again.",
+      "timeout": "[AUTO-TRANSLATED lv] Request timed out. Please try again.",
+      "largeFileTimeout": "[AUTO-TRANSLATED lv] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
+      "fileSize": "[AUTO-TRANSLATED lv] File is too large. Please choose smaller files.",
+      "serverError": "[AUTO-TRANSLATED lv] Server error occurred. Please try again later."
+    }
   },
   "settings": {
     "title": "Iestatījumi",
@@ -150,32 +186,40 @@
     "copy": "Kopēt",
     "paste": "Ielīmēt",
     "cut": "Izgriezt",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Rādīt vairāk",
+    "showLess": "Rādīt mazāk",
+    "readMore": "Lasīt vairāk",
+    "questionNumber": "Jautājums {{number}}:",
+    "viewSourceCitations": "Skatīt avotu citātus ({{count}})",
+    "answer": "Atbilde:",
+    "relevantPolicyContext": "Saistītais politikas konteksts:",
+    "sources": "avoti",
+    "sourceCitations": "Avotu citāti ({{count}})",
+    "citationNumber": "Citāts {{number}}",
+    "noSourceCitations": "Šai sadaļai nav pieejami avotu citāti",
+    "noDetailedSections": "Šai atskaitei nav pieejamas detalizētas sadaļas",
+    "topicLabel": "Temats:",
+    "knowledgeBaseReference": "Zināšanu bāzes atsauce",
+    "knowledgeBaseReferences": "Zināšanu bāzes atsauces",
+    "hideReferences": "Slēpt atsauces",
+    "showReferences": "Rādīt atsauces",
+    "referenceNumber": "Atsauce {{number}}",
+    "processedInChunks": "Apstrādāts {{count}} daļās",
+    "synthesisErrorNote": "Piezīme: Radās sintēzes kļūda - tiek rādīti kombinētie daļu rezultāti",
     "progress": {
       "starting": "Sākšana...",
       "initializing": "Inicializēšana...",
       "processing": "Apstrāde...",
       "extracting": "Satura iegūšana..."
-    }
+    },
+    "error": "[AUTO-TRANSLATED lv] Something went wrong!",
+    "welcomeBack": "[AUTO-TRANSLATED lv] Welcome back, nice to see you again!",
+    "hiUser": "[AUTO-TRANSLATED lv] Hi, {{name}} 👋"
+  },
+  "usage": {
+    "title": "Lietojums",
+    "currentPeriod": "Pašreizējais periods:",
+    "usedOfQuota": "izmantots no jūsu mēneša kvotas"
   },
   "review": {
     "pageTitle": "Dokumentu pārskats",
@@ -209,7 +253,7 @@
     "checklistNamePlaceholder": "Ievadiet kontrolsaraksta nosaukumu...",
     "checklistDescriptionLabel": "Apraksts",
     "checklistDescriptionPlaceholder": "Ievadiet kontrolsaraksta aprakstu automātiskajiem jautājumu ieteikumiem (vismaz 10 rakstzīmes)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} jautājumi",
     "suggest": "Ieteikt",
     "suggesting": "Ieteic...",
     "optimize": "Optimizēt",
@@ -240,6 +284,54 @@
     "pleaseWait": "Lūdzu, uzgaidiet, kamēr pārskatām jūsu dokumentus",
     "reviewSuccess": "Dokumenta pārskatīšana pabeigta veiksmīgi!",
     "reviewSuccessMultiple": "{{count}} faili apstrādāti ar optimizētu konteksta koplietošanu!"
+  },
+  "modelSelection": {
+    "llmManagement": "LLM pārvaldība",
+    "llmDescription": "Konfigurējiet un pārvaldiet LLM, kas tiek izmantoti teksta atbilžu ģenerēšanai. Noklusējuma modelis tiks izmantots visām operācijām.",
+    "addNewLlm": "Pievienot jaunu LLM",
+    "noLlmsConfigured": "Nav konfigurēti LLM",
+    "addNewLlmToGetStarted": "Pievienojiet jaunu LLM, lai sāktu",
+    "embeddingModelManagement": "Iegulšanas modeļu pārvaldība",
+    "embeddingDescription": "Konfigurējiet un pārvaldiet iegulšanas modeļus, kas tiek izmantoti zināšanu bāzes indeksēšanai un meklēšanai. Noklusējuma modelis tiks izmantots, veidojot jaunas zināšanu bāzes, bet katra zināšanu bāze turpinās izmantot savu sākotnējo iegulšanas modeli, pat ja noklusējums vēlāk mainīsies.",
+    "addEmbeddingModel": "Pievienot iegulšanas modeli",
+    "noEmbeddingModelsConfigured": "Nav konfigurēti iegulšanas modeļi",
+    "addNewEmbeddingModelToGetStarted": "Pievienojiet jaunu iegulšanas modeli, lai sāktu",
+    "tableHeaders": {
+      "name": "Nosaukums",
+      "modelId": "Modeļa ID",
+      "provider": "Sniedzējs",
+      "description": "Apraksts",
+      "status": "Statuss",
+      "actions": "Darbības"
+    },
+    "status": {
+      "default": "Noklusējums",
+      "available": "Pieejams"
+    },
+    "actions": {
+      "setAsDefault": "Iestatīt kā noklusējumu",
+      "delete": "Dzēst",
+      "validate": "Pārbaudīt",
+      "validating": "Pārbauda"
+    },
+    "dialog": {
+      "addNewLlm": "Pievienot jaunu LLM",
+      "addEmbeddingModel": "Pievienot iegulšanas modeli",
+      "displayName": "Parādāmais nosaukums",
+      "provider": "Sniedzējs",
+      "modelId": "Modeļa ID",
+      "description": "Apraksts",
+      "cancel": "Atcelt",
+      "addModel": "Pievienot modeli"
+    },
+    "placeholders": {
+      "customModel": "piem. Mans pielāgotais modelis",
+      "embeddingModelId": "piem. sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Aprakstiet modeli, tā īpašības un kad to izmantot"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Lūdzu, ievadiet modeļa ID"
+    }
   },
   "compare": {
     "title": "Salīdzināt dokumentus",
@@ -273,7 +365,8 @@
       "comparing": "Salīdzināšana..."
     },
     "pleaseWait": "Lūdzu, uzgaidiet, kamēr mēs salīdzinām jūsu dokumentus",
-    "compareSuccess": "Dokumenti veiksmīgi salīdzināti!"
+    "compareSuccess": "Dokumenti veiksmīgi salīdzināti!",
+    "selectTopicListTitle": "[AUTO-TRANSLATED lv] Select Topic List"
   },
   "match": {
     "title": "Dokumentu atbilstība",
@@ -307,7 +400,84 @@
     },
     "pleaseWait": "Lūdzu, uzgaidiet, kamēr mēs saskaņojam jūsu dokumentus",
     "matchSuccess": "Formas apstrāde veiksmīgi pabeigta!",
-    "singleDocumentSuccess": "Lauku vērtības iegūtas no viena dokumenta."
+    "singleDocumentSuccess": "Lauku vērtības iegūtas no viena dokumenta.",
+    "selectFormTemplateTitle": "[AUTO-TRANSLATED lv] Select Form Template"
+  },
+  "editFormTemplateModal": {
+    "title": "Formas veidnes rediģēšana",
+    "formTemplateName": "Formas veidnes nosaukums",
+    "formTemplateNamePlaceholder": "Ievadiet formas veidnes nosaukumu",
+    "formTemplateDescription": "Formas veidnes apraksts",
+    "descriptionPlaceholder": "Ievadiet formas veidnes aprakstu automātiskai lauku ieteikšanai (vismaz 10 rakstzīmes)...",
+    "referenceDocuments": "Atsauces dokumenti (neobligāti)",
+    "uploadFiles": "Augšupielādēt failus",
+    "pleaseWait": "Lūdzu, uzgaidiet, kamēr mēs pārskatām jūsu dokumentus",
+    "knowledgeBase": "Zināšanu bāze",
+    "formFields": "Formas lauki",
+    "suggest": "Ieteikt",
+    "fieldPlaceholder": "Pievienot lauka nosaukumu...",
+    "cancel": "Atcelt",
+    "updateFormTemplate": "Atjaunināt formas veidni"
+  },
+  "editOutlineModal": {
+    "title": "Kontūras rediģēšana",
+    "createTitle": "Izveidot jaunu kontūru",
+    "outlineName": "Kontūras nosaukums",
+    "outlineNamePlaceholder": "Ievadiet kontūras nosaukumu",
+    "description": "Apraksts",
+    "descriptionPlaceholder": "Ievadiet kontūras aprakstu automātiskai sadaļu ieteikšanai (vismaz 10 rakstzīmes)...",
+    "referenceDocuments": "Atsauces dokumenti (neobligāti)",
+    "uploadFiles": "Augšupielādēt failus",
+    "knowledgeBase": "Zināšanu bāze",
+    "sections": "Sadaļas",
+    "suggest": "Ieteikt",
+    "optimize": "Optimizēt",
+    "consultDocs": "Konsultēties ar dokumentiem",
+    "addSectionPlaceholder": "Pievienot sadaļu",
+    "cancel": "Atcelt",
+    "createOutline": "Izveidot kontūru",
+    "updateOutline": "Atjaunināt kontūru"
+  },
+  "editChecklistModal": {
+    "title": "Kontrolsaraksta rediģēšana",
+    "createTitle": "Izveidot jaunu kontrolsarakstu",
+    "checklistName": "Kontrolsaraksta nosaukums",
+    "checklistNamePlaceholder": "Ievadiet kontrolsaraksta nosaukumu",
+    "description": "Apraksts",
+    "descriptionPlaceholder": "Ievadiet kontrolsaraksta aprakstu automātiskai jautājumu ieteikšanai (vismaz 10 rakstzīmes)...",
+    "referenceDocuments": "Atsauces dokumenti (neobligāti)",
+    "uploadFiles": "Augšupielādēt failus",
+    "knowledgeBase": "Zināšanu bāze",
+    "questions": "{{count}} jautājumi",
+    "suggest": "Ieteikt",
+    "optimize": "Optimizēt",
+    "addQuestionPlaceholder": "Pievienot jautājumu",
+    "copyAllQuestions": "Kopēt visus jautājumus kā tekstu",
+    "cancel": "Atcelt",
+    "createChecklist": "Izveidot kontrolsarakstu",
+    "updateChecklist": "Atjaunināt kontrolsarakstu"
+  },
+  "editTopicListModal": {
+    "title": "Tēmu saraksta rediģēšana",
+    "createTitle": "Izveidot jaunu tēmu sarakstu",
+    "topicListName": "Tēmu saraksta nosaukums",
+    "topicListNamePlaceholder": "Ievadiet tēmu saraksta nosaukumu",
+    "description": "Tēmu saraksta apraksts",
+    "descriptionPlaceholder": "Ievadiet tēmu saraksta aprakstu automātiskai tēmu ieteikšanai (vismaz 10 rakstzīmes)...",
+    "referenceDocuments": "Atsauces dokumenti (neobligāti)",
+    "uploadFiles": "Augšupielādēt failus",
+    "knowledgeBase": "Zināšanu bāze",
+    "comparisonTopics": "Salīdzināšanas tēmas",
+    "topics": "{{count}} tēmas",
+    "section": "{{count}} sadaļa",
+    "section_one": "{{count}} sadaļa",
+    "sections": "{{count}} sadaļas",
+    "suggest": "Ieteikt",
+    "addTopicPlaceholder": "Pievienot salīdzināšanas tēmu",
+    "copyAllTopics": "Kopēt visas tēmas kā tekstu",
+    "cancel": "Atcelt",
+    "createTopicList": "Izveidot tēmu sarakstu",
+    "updateTopicList": "Atjaunināt tēmu sarakstu"
   },
   "knowledgeBases": {
     "title": "Zināšanu bāzu pārvaldība",
@@ -406,6 +576,35 @@
         "fieldPlaceholder": "Pievienot lauka nosaukumu...",
         "cancel": "Atcelt",
         "updateFormTemplate": "Atjaunināt Formas Veidni"
+      },
+      "fields": {
+        "title": "[AUTO-TRANSLATED lv] Title",
+        "description": "Apraksts"
+      },
+      "fileUpload": {
+        "currentFiles": "[AUTO-TRANSLATED lv] Current Files",
+        "newFiles": "[AUTO-TRANSLATED lv] New Files",
+        "selectedFiles": "[AUTO-TRANSLATED lv] Selected Files",
+        "dragAndDrop": "[AUTO-TRANSLATED lv] Drag and drop files here, or click to browse",
+        "dropFiles": "[AUTO-TRANSLATED lv] Drop the files here...",
+        "removeFile": "[AUTO-TRANSLATED lv] Remove file",
+        "supportedFormats": "[AUTO-TRANSLATED lv] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "Atcelt",
+        "create": "Izveidot",
+        "save": "Saglabāt",
+        "saving": "[AUTO-TRANSLATED lv] Saving...",
+        "creating": "[AUTO-TRANSLATED lv] Creating..."
+      },
+      "validation": {
+        "titleRequired": "[AUTO-TRANSLATED lv] Title is required"
+      },
+      "messages": {
+        "createSuccess": "[AUTO-TRANSLATED lv] Knowledge Base created successfully.",
+        "updateSuccess": "[AUTO-TRANSLATED lv] Knowledge Base updated successfully.",
+        "processing": "[AUTO-TRANSLATED lv] Processing...",
+        "pleaseWait": "[AUTO-TRANSLATED lv] Please wait while we process your files..."
       }
     },
     "editCustom": {
@@ -568,7 +767,44 @@
       "generating": "Ziņojuma ģenerēšana...",
       "processingSection": "Apstrādā sadaļu {{sectionNum}} no {{totalSections}}: {{sectionPreview}}"
     },
-    "pleaseWait": "Lūdzu, uzgaidiet, kamēr mēs ģenerējam jūsu ziņojumu"
+    "pleaseWait": "Lūdzu, uzgaidiet, kamēr mēs ģenerējam jūsu ziņojumu",
+    "pageDescription": "[AUTO-TRANSLATED lv] Generate a document based on a user-defined outline and document database.",
+    "generatingDocument": "[AUTO-TRANSLATED lv] Generating document...",
+    "knowledgeBaseTitle": "Zināšanu bāze",
+    "documentOutlineTitle": "[AUTO-TRANSLATED lv] Document Outline",
+    "clickToSelect": "[AUTO-TRANSLATED lv] Click to select",
+    "customInstructionsTitle": "[AUTO-TRANSLATED lv] Custom Instructions (Optional)",
+    "customInstructionsPlaceholder": "[AUTO-TRANSLATED lv] Enter any additional instructions that should be considered when generating each section of the report...",
+    "characterCount": "[AUTO-TRANSLATED lv] {{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
+    "selectKnowledgeBaseTitle": "[AUTO-TRANSLATED lv] Select Knowledge Base",
+    "selectDocumentOutlineTitle": "[AUTO-TRANSLATED lv] Select Document Outline",
+    "generateButton": "[AUTO-TRANSLATED lv] Generate",
+    "results": "[AUTO-TRANSLATED lv] Results",
+    "copyText": "[AUTO-TRANSLATED lv] Copy Text",
+    "copied": "[AUTO-TRANSLATED lv] Copied!",
+    "downloadDocx": "[AUTO-TRANSLATED lv] Download DOCX",
+    "downloadCsv": "[AUTO-TRANSLATED lv] Download CSV",
+    "clearReport": "[AUTO-TRANSLATED lv] Clear Report",
+    "resultsPlaceholder": "[AUTO-TRANSLATED lv] Results will appear here after generating a document.",
+    "sectionsWithSources": "[AUTO-TRANSLATED lv] Sections with Sources",
+    "sectionNumber": "[AUTO-TRANSLATED lv] Section {number}: {title}",
+    "kbGenerated": "[AUTO-TRANSLATED lv] KB Generated",
+    "rawText": "[AUTO-TRANSLATED lv] Raw Text",
+    "viewSourceCitations": "[AUTO-TRANSLATED lv] View Source Citations ({count})",
+    "documentCopiedSuccess": "[AUTO-TRANSLATED lv] Document copied to clipboard",
+    "documentCopiedError": "[AUTO-TRANSLATED lv] Failed to copy document to clipboard",
+    "documentDownloadSuccess": "[AUTO-TRANSLATED lv] Document downloaded successfully",
+    "documentDownloadError": "[AUTO-TRANSLATED lv] Failed to download document: {error}",
+    "csvDownloadSuccess": "[AUTO-TRANSLATED lv] CSV downloaded successfully",
+    "csvDownloadError": "[AUTO-TRANSLATED lv] Failed to download CSV: {error}",
+    "reportClearedSuccess": "[AUTO-TRANSLATED lv] Generated report cleared",
+    "enterAtLeastOneSection": "[AUTO-TRANSLATED lv] Please enter at least one section",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED lv] Please select a knowledge base",
+    "generateSuccess": "[AUTO-TRANSLATED lv] Report generated successfully!",
+    "generateError": "[AUTO-TRANSLATED lv] Failed to generate document: {error}",
+    "vectorSearch": "[AUTO-TRANSLATED lv] vector search",
+    "fullDocumentScan": "[AUTO-TRANSLATED lv] full document scan",
+    "editOutline": "[AUTO-TRANSLATED lv] Edit Outline"
   },
   "feedback": {
     "modalTitlePositive": "Kas bija noderīgs?",
@@ -595,14 +831,14 @@
     "downloadCsv": "Lejupielādēt CSV",
     "clearCsv": "Notīrīt CSV",
     "clearResults": "Notīrīt rezultātus",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Temats:",
+    "knowledgeBaseReference": "Zināšanu Bāzes Atsauce",
+    "knowledgeBaseReferences": "Zināšanu Bāzes Atsauces",
+    "hideReferences": "Slēpt Atsauces",
+    "showReferences": "Rādīt Atsauces",
+    "referenceNumber": "Atsauce {{number}}",
+    "processedInChunks": "Apstrādāts {{count}} daļās",
+    "synthesisError": "Kļūda tēmas analīzes sintēzē"
   },
   "toast": {
     "passwordUpdated": "Parole veiksmīgi atjaunināta.",

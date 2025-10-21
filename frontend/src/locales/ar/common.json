@@ -29,7 +29,8 @@
     "next": "التالي",
     "previous": "السابق",
     "confirm": "تأكيد",
-    "back": "رجوع"
+    "back": "رجوع",
+    "done": "تم"
   },
   "forms": {
     "firstName": "الاسم الأول",
@@ -44,6 +45,9 @@
     "emailPlaceholder": "أدخل عنوان بريدك الإلكتروني",
     "passwordPlaceholder": "أدخل كلمة المرور"
   },
+  "dropdowns": {
+    "selectKnowledgeBase": "اختر قاعدة معرفة..."
+  },
   "chatbot": {
     "placeholder": "اكتب رسالتك هنا...",
     "send": "إرسال",
@@ -53,7 +57,46 @@
     "error": "عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.",
     "welcome": "مرحباً! كيف يمكنني مساعدتك اليوم؟",
     "welcomeMessageWithSource": "اختر قاعدة معرفة أو ارفع ملفات، ثم اطرح سؤالاً.",
-    "welcomeMessageGeneral": "اسألني أي شيء! للبحث في قاعدة المعرفة، اختر قاعدة معرفة أولاً."
+    "welcomeMessageGeneral": "اسألني أي شيء! للبحث في قاعدة المعرفة، اختر قاعدة معرفة أولاً.",
+  "title": "دردشة",
+    "sourcePopover": {
+      "knowledgeBase": "قاعدة المعرفة",
+      "file": "ملف"
+    },
+  "searchMode": "وضع البحث:",
+  "vectorSearch": "بحث متجه",
+  "fullTextScan": "مسح كامل للنص",
+  "searchModeDescription": "البحث المتجه يوفر نتائج سريعة ومستهدفة. مسح النص الكامل يراجع كل المحتوى في قاعدة المعرفة.",
+  "askMeAnything": "اسألني أي شيء! للبحث في قاعدة المعرفة، اختر قاعدة معرفة أولاً.",
+  "usingGeneralAI": "باستخدام مساعد الذكاء الاصطناعي العام",
+  "usingKnowledgeBase": "باستخدام قاعدة المعرفة:",
+  "usingDocuments": "باستخدام {{count}} مستند{{plural}}",
+  "usingFiles": "باستخدام {{count}} مستند{{plural}}:",
+  "remove": "إزالة",
+  "selectKnowledgeBase": "اختر قاعدة معرفة",
+    "knowledgeBaseTable": {
+      "name": "الاسم",
+      "description": "الوصف",
+      "sources": "المصادر",
+      "noDescription": "لا يوجد وصف",
+      "sourcesCount": "{{count}} مصادر",
+      "pagesCount": "{{count}} صفحات"
+    },
+    "knowledgeBaseTableName": "الاسم",
+    "knowledgeBaseTableDescription": "الوصف",
+    "knowledgeBaseTableSources": "المصادر",
+    "knowledgeBaseTablePages": "الصفحات",
+    "selectKnowledgeBasePlaceholder": "اختر قاعدة معرفة...",
+    "noKnowledgeBasesAvailable": "لا توجد قواعد معرفة متاحة. أنشئ واحدة أولاً لاستخدام هذه الميزة.",
+    "knowledgeBase": "قاعدة المعرفة",
+    "file": "ملف",
+    "errors": {
+      "generic": "عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+      "timeout": "انتهت مهلة الطلب. يرجى المحاولة مرة أخرى.",
+      "largeFileTimeout": "انتهت مهلة معالجة ملف كبير. جرّب التحويل إلى وضع 'مسح النص الكامل' لأداء أفضل مع الملفات الكبيرة.",
+      "fileSize": "حجم الملف كبير جداً. يرجى اختيار ملفات أصغر.",
+      "serverError": "حدث خطأ في الخادم. يرجى المحاولة لاحقاً."
+    }
   },
   "settings": {
     "title": "الإعدادات",
@@ -145,32 +188,33 @@
     "copy": "نسخ",
     "paste": "لصق",
     "cut": "قص",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "عرض المزيد",
+    "showLess": "عرض أقل",
+    "readMore": "اقرأ المزيد",
+    "questionNumber": "السؤال {{number}}:",
+    "viewSourceCitations": "عرض اقتباسات المصدر ({{count}})",
+    "answer": "الإجابة:",
+    "relevantPolicyContext": "السياق السياسي ذو الصلة:",
+    "sources": "المصادر",
+    "sourceCitations": "اقتباسات المصدر ({{count}})",
+    "citationNumber": "الاقتباس {{number}}",
+    "noSourceCitations": "لا توجد اقتباسات مصدر متاحة لهذا القسم",
+    "noDetailedSections": "لا توجد أقسام مفصلة متاحة لهذا التقرير",
+    "topicLabel": "الموضوع:",
+    "knowledgeBaseReference": "مرجع قاعدة المعرفة",
+    "knowledgeBaseReferences": "مراجع قاعدة المعرفة",
+    "hideReferences": "إخفاء المراجع",
+    "showReferences": "عرض المراجع",
+    "referenceNumber": "المرجع {{number}}",
+    "processedInChunks": "تم المعالجة في {{count}} أجزاء",
+    "synthesisErrorNote": "ملاحظة: حدث خطأ في التركيب - عرض نتائج الأجزاء المجمعة",
     "progress": {
       "starting": "جاري البدء...",
       "initializing": "جاري التهيئة...",
       "processing": "جاري المعالجة...",
       "extracting": "جاري استخراج المحتوى..."
-    }
+    },
+  "error": "حدث خطأ ما!"
   },
   "usage": {
     "title": "الاستخدام",
@@ -209,7 +253,7 @@
     "checklistNamePlaceholder": "أدخل اسم قائمة المراجعة...",
     "checklistDescriptionLabel": "الوصف",
     "checklistDescriptionPlaceholder": "أدخل وصف قائمة المراجعة لاقتراحات الأسئلة التلقائية (10 أحرف على الأقل)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} أسئلة",
     "suggest": "اقتراح",
     "suggesting": "جاري الاقتراح...",
     "optimize": "تحسين",
@@ -236,7 +280,9 @@
     "fullDocumentScan": "تحليل المستند الكامل",
     "vectorSearchDescription": "يجد المحتوى ذو الصلة باستخدام بحث التشابه بالذكاء الاصطناعي (سريع، مستهدف)",
     "fullScanDescription": "يحلل جميع المستندات في قاعدة المعرفة (شامل، دقيق)",
-    "pleaseWait": "يرجى الانتظار أثناء مراجعة مستنداتك"
+    "pleaseWait": "يرجى الانتظار أثناء مراجعة مستنداتك",
+  "reviewSuccess": "اكتملت مراجعة المستند بنجاح!",
+  "reviewSuccessMultiple": "تمت معالجة {{count}} ملفًا باستخدام مشاركة سياق محسّنة!"
   },
   "generate": {
     "pageDescription": "إنشاء مستند بناءً على مخطط محدد من قبل المستخدم وقاعدة بيانات المستندات.",
@@ -281,8 +327,9 @@
       "starting": "جاري البدء...",
       "initializing": "جاري التهيئة...",
       "generating": "جاري إنشاء التقرير...",
-      "processingSection": "معالجة القسم {{sectionNum}} من {{totalSections}}: {{sectionPreview}}"
-    }
+    "processingSection": "معالجة القسم {{sectionNum}} من {{totalSections}}: {{sectionPreview}}"
+    },
+    "editOutline": "تحرير المخطط"
   },
   "editFormTemplateModal": {
     "title": "تحرير قالب النموذج",
@@ -297,7 +344,8 @@
     "suggest": "اقتراح",
     "fieldPlaceholder": "أضف اسم حقل...",
     "cancel": "إلغاء",
-    "updateFormTemplate": "تحديث قالب النموذج"
+    "updateFormTemplate": "تحديث قالب النموذج",
+  "pleaseWait": "الرجاء الانتظار بينما نراجع مستنداتك"
   },
   "editOutlineModal": {
     "title": "تحرير المخطط",
@@ -312,6 +360,7 @@
     "sections": "الأقسام",
     "suggest": "اقتراح",
     "optimize": "تحسين",
+    "consultDocs": "استشر الوثائق",
     "addSectionPlaceholder": "إضافة قسم",
     "cancel": "إلغاء",
     "createOutline": "إنشاء المخطط",
@@ -327,7 +376,7 @@
     "referenceDocuments": "المستندات المرجعية (اختيارية)",
     "uploadFiles": "رفع الملفات",
     "knowledgeBase": "قاعدة المعرفة",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} أسئلة",
     "suggest": "اقتراح",
     "optimize": "تحسين",
     "addQuestionPlaceholder": "إضافة سؤال",
@@ -347,10 +396,10 @@
     "uploadFiles": "رفع الملفات",
     "knowledgeBase": "قاعدة المعرفة",
     "comparisonTopics": "مواضيع المقارنة",
-    "topics": "{{count}} topics",
-    "section": "{{count}} section",
-    "section_one": "{{count}} section",
-    "sections": "{{count}} sections",
+    "topics": "{{count}} موضوع",
+    "section": "{{count}} قسم",
+    "section_one": "{{count}} قسم",
+    "sections": "{{count}} أقسام",
     "suggest": "اقتراح",
     "addTopicPlaceholder": "إضافة موضوع مقارنة",
     "copyAllTopics": "نسخ جميع المواضيع كنص",
@@ -378,9 +427,12 @@
     "currentAnswer": "الإجابة الحالية",
     "showLess": "عرض أقل",
     "showMore": "عرض المزيد",
-    "optimizationsSelectedText": "تم تحديد {{s}} تحسين للتطبيق",
+  "optimizationsSelectedText": "تم تحديد {{s}} تحسين لتطبيقه",
     "applying": "جاري التطبيق...",
-    "applySelectedOptimizations": "تطبيق التحسينات المحددة"
+    "applySelectedOptimizations": "تطبيق التحسينات المحددة",
+  "uploadDocumentsTitle": "ارفع المستند(ات) التي يجب أن تقبلها قائمة المراجعة *",
+  "uploadDocumentsHelperText": "قم بتحميل المستندات التي يجب أن تستوفي جميع متطلبات قائمة المراجعة للمساعدة في تحديد الأسئلة التي قد تكون صارمة للغاية",
+  "customInstructionsPlaceholder": "مثال: ضع في اعتبارك أن هذه دراسة أطفال عند تقييم المتطلبات المتعلقة بالعمر؛ أو أن هذا البروتوكول لتدخل منخفض المخاطر، إلخ."
   },
   "optimizeOutlineModal": {
     "title": "تحسين المخطط",
@@ -478,11 +530,41 @@
     },
     "modals": {
       "fileUpload": {
-        "supportedFormats": "يدعم: PDF، TXT، DOC/DOCX، RTF، CSV، XLSX"
+        "supportedFormats": "يدعم: PDF، TXT، DOC/DOCX، RTF، CSV، XLSX",
+        "currentFiles": "الملفات الحالية",
+        "newFiles": "ملفات جديدة",
+        "selectedFiles": "الملفات المحددة",
+        "dragAndDrop": "اسحب الملفات هنا أو انقر للاستعراض",
+        "dropFiles": "أسقط الملفات هنا...",
+        "removeFile": "إزالة الملف"
       },
       "messages": {
         "processing": "جاري المعالجة...",
-        "pleaseWait": "يرجى الانتظار بينما نعالج ملفاتك..."
+        "pleaseWait": "يرجى الانتظار بينما نعالج ملفاتك...",
+        "createSuccess": "تم إنشاء قاعدة المعرفة بنجاح.",
+        "updateSuccess": "تم تحديث قاعدة المعرفة بنجاح."
+      },
+      "add": {
+        "title": "إضافة قاعدة معرفة",
+        "description": "أنشئ قاعدة معرفة جديدة بتقديم التفاصيل ورفع المستندات أدناه."
+      },
+      "edit": {
+        "title": "تحرير قاعدة المعرفة",
+        "description": "حدّث تفاصيل قاعدة المعرفة أدناه."
+      },
+      "fields": {
+        "title": "العنوان",
+        "description": "الوصف"
+      },
+      "buttons": {
+        "cancel": "إلغاء",
+        "create": "إنشاء",
+        "save": "حفظ",
+        "saving": "جارٍ الحفظ...",
+        "creating": "جارٍ الإنشاء..."
+      },
+      "validation": {
+        "titleRequired": "العنوان مطلوب"
       }
     },
     "progress": {
@@ -509,6 +591,12 @@
       "cancelButton": "إلغاء",
       "successMessage": "تم حذف قاعدة المعرفة بنجاح",
       "errorMessage": "حدث خطأ أثناء حذف قاعدة المعرفة"
+    },
+    "actions": {
+      "view": "عرض",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "configure": "تكوين"
     }
   },
   "archive": {
@@ -610,7 +698,24 @@
       "comparing": "جاري المقارنة..."
     },
     "pleaseWait": "يرجى الانتظار أثناء مقارنة مستنداتك",
-    "compareSuccess": "تمت مقارنة المستندات بنجاح!"
+    "compareSuccess": "تمت مقارنة المستندات بنجاح!",
+    "title": "مقارنة المستندات",
+    "subtitle": "قارن مستندين لترى كيف يختلفان بالنسبة لقائمة مواضيع يحددها المستخدم.",
+    "selectFirstDocument": "اختر المستند الأول",
+    "selectSecondDocument": "اختر المستند الثاني",
+    "pleaseSelect": "يرجى الاختيار...",
+    "documentA": "المستند A",
+    "documentB": "المستند B",
+    "compareDocuments": "قارن المستندات",
+    "comparison": "المقارنة",
+    "noDocumentsFound": "لم يتم العثور على مستندات",
+    "selectTwoDocuments": "يرجى اختيار مستندين للمقارنة",
+    "loadingComparison": "جارٍ تحميل المقارنة...",
+    "topicList": "قائمة المواضيع",
+    "clickToBrowse": "انقر للتصفح أو اسحب وأسقط",
+    "supportedFormats": "يدعم: PDF، TXT، وDOCX",
+    "editTopicList": "تحرير قائمة المواضيع",
+    "selectTopicListTitle": "اختر قائمة المواضيع"
   },
   "match": {
     "progress": {
@@ -621,7 +726,23 @@
     },
     "pleaseWait": "يرجى الانتظار أثناء مطابقة مستنداتك",
     "matchSuccess": "تم إكمال معالجة النموذج بنجاح!",
-    "singleDocumentSuccess": "تم استخراج قيم الحقول من مستند واحد."
+    "singleDocumentSuccess": "تم استخراج قيم الحقول من مستند واحد.",
+    "title": "مطابقة المستندات",
+    "subtitle": "تأكد من تطابق قيم الحقول عبر مستندات من تنسيقات مختلفة.",
+    "selectDocument": "اختر مستنداً للبحث عن التطابقات",
+    "pleaseSelect": "يرجى اختيار مستند...",
+    "sourceDocument": "قالب النموذج",
+    "matchingDocuments": "المستندات المطابقة",
+    "findMatches": "ابحث عن التطابقات",
+    "similarityScore": "درجة التشابه",
+    "noDocumentsFound": "لم يتم العثور على مستندات",
+    "selectDocumentToMatch": "يرجى اختيار مستند للبحث عن التطابقات",
+    "loadingMatches": "جارٍ العثور على التطابقات...",
+    "noMatchesFound": "لم يتم العثور على مستندات مشابهة",
+    "matchResults": "نتائج المطابقة",
+    "similarity": "التشابه",
+    "editFormTemplate": "تحرير قالب النموذج",
+    "selectFormTemplateTitle": "اختر قالب النموذج"
   },
   "ui": {
     "results": "النتائج",
@@ -631,14 +752,14 @@
     "downloadCsv": "تحميل CSV",
     "clearCsv": "مسح CSV",
     "clearResults": "مسح النتائج",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "الموضوع:",
+    "knowledgeBaseReference": "مرجع قاعدة المعرفة",
+    "knowledgeBaseReferences": "مراجع قاعدة المعرفة",
+    "hideReferences": "إخفاء المراجع",
+    "showReferences": "إظهار المراجع",
+    "referenceNumber": "المرجع {{number}}",
+    "processedInChunks": "تم المعالجة في {{count}} أجزاء",
+    "synthesisError": "خطأ في تحليل الموضوع"
   },
   "toast": {
     "passwordUpdated": "تم تحديث كلمة المرور بنجاح.",

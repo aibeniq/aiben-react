@@ -1,0 +1,646 @@
+[
+  {
+    "path": "navigation.loggedInAs",
+    "value": "مسجل الدخول كـ: {{email}}"
+  },
+  {
+    "path": "chatbot.usingDocuments",
+    "value": "باستخدام {{count}} مستند{{plural}}"
+  },
+  {
+    "path": "chatbot.usingFiles",
+    "value": "باستخدام {{count}} مستند{{plural}}:"
+  },
+  {
+    "path": "chatbot.knowledgeBaseTable.sourcesCount",
+    "value": "{{count}} مصادر"
+  },
+  {
+    "path": "chatbot.knowledgeBaseTable.pagesCount",
+    "value": "{{count}} صفحات"
+  },
+  {
+    "path": "help.usageStats",
+    "value": "عرض استخدام رمز API الحالي ومعلومات الحصة لفترة الفوترة الحالية"
+  },
+  {
+    "path": "common.hiUser",
+    "value": "مرحباً، {{name}} 👋"
+  },
+  {
+    "path": "common.questionNumber",
+    "value": "السؤال {{number}}:"
+  },
+  {
+    "path": "common.viewSourceCitations",
+    "value": "عرض اقتباسات المصدر ({{count}})"
+  },
+  {
+    "path": "common.sourceCitations",
+    "value": "اقتباسات المصدر ({{count}})"
+  },
+  {
+    "path": "common.citationNumber",
+    "value": "الاقتباس {{number}}"
+  },
+  {
+    "path": "common.referenceNumber",
+    "value": "المرجع {{number}}"
+  },
+  {
+    "path": "common.processedInChunks",
+    "value": "تم المعالجة في {{count}} أجزاء"
+  },
+  {
+    "path": "common.error",
+    "value": "Something went wrong!"
+  },
+  {
+    "path": "review.customInstructionsHelp",
+    "value": "{{count}}/2000 حرف. ستتم إضافة هذه التعليمات إلى كل سؤال أثناء المعالجة."
+  },
+  {
+    "path": "review.downloadCsv",
+    "value": "تحميل CSV"
+  },
+  {
+    "path": "review.questions",
+    "value": "{{count}} أسئلة"
+  },
+  {
+    "path": "review.characterCount",
+    "value": "{{count}}/2000 حرف. ستُضاف هذه التعليمات إلى كل سؤال أثناء المعالجة."
+  },
+  {
+    "path": "review.reviewSuccess",
+    "value": "Document review completed successfully!"
+  },
+  {
+    "path": "review.reviewSuccessMultiple",
+    "value": "{{count}} files processed with optimized context sharing!"
+  },
+  {
+    "path": "generate.characterCount",
+    "value": "{{count}}/2000 حرف. ستُضاف هذه التعليمات إلى الطلب عند إنشاء كل قسم."
+  },
+  {
+    "path": "generate.downloadDocx",
+    "value": "تحميل DOCX"
+  },
+  {
+    "path": "generate.downloadCsv",
+    "value": "تحميل CSV"
+  },
+  {
+    "path": "generate.sectionNumber",
+    "value": "القسم {number}: {title}"
+  },
+  {
+    "path": "generate.viewSourceCitations",
+    "value": "عرض اقتباسات المصدر ({count})"
+  },
+  {
+    "path": "generate.documentDownloadError",
+    "value": "فشل في تحميل المستند: {error}"
+  },
+  {
+    "path": "generate.csvDownloadSuccess",
+    "value": "تم تحميل CSV بنجاح"
+  },
+  {
+    "path": "generate.csvDownloadError",
+    "value": "فشل في تحميل CSV: {error}"
+  },
+  {
+    "path": "generate.generateError",
+    "value": "فشل في إنشاء المستند: {error}"
+  },
+  {
+    "path": "generate.progress.processingSection",
+    "value": "معالجة القسم {{sectionNum}} من {{totalSections}}: {{sectionPreview}}"
+  },
+  {
+    "path": "editChecklistModal.questions",
+    "value": "{{count}} أسئلة"
+  },
+  {
+    "path": "editTopicListModal.topics",
+    "value": "{{count}} موضوع"
+  },
+  {
+    "path": "editTopicListModal.section",
+    "value": "{{count}} قسم"
+  },
+  {
+    "path": "editTopicListModal.section_one",
+    "value": "{{count}} قسم"
+  },
+  {
+    "path": "editTopicListModal.sections",
+    "value": "{{count}} أقسام"
+  },
+  {
+    "path": "optimizeChecklistModal.downloadCsv",
+    "value": "تحميل CSV"
+  },
+  {
+    "path": "optimizeChecklistModal.optimizationsSelectedText",
+    "value": "تم تحديد {{s}} تحسين للتطبيق"
+  },
+  {
+    "path": "optimizeChecklistModal.uploadDocumentsTitle",
+    "value": "Upload document(s) that should be accepted by checklist *"
+  },
+  {
+    "path": "optimizeChecklistModal.uploadDocumentsHelperText",
+    "value": "Upload documents that should meet all checklist requirements to help identify questions that may be too strict"
+  },
+  {
+    "path": "optimizeChecklistModal.customInstructionsPlaceholder",
+    "value": "e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
+  },
+  {
+    "path": "optimizeOutlineModal.downloadCsv",
+    "value": "تحميل CSV"
+  },
+  {
+    "path": "optimizeOutlineModal.applyOptimizations",
+    "value": "تطبيق {{count}} تحسين"
+  },
+  {
+    "path": "modelSelection.llmManagement",
+    "value": "إدارة LLM"
+  },
+  {
+    "path": "modelSelection.llmDescription",
+    "value": "قم بتكوين وإدارة نماذج LLM المستخدمة لتوليد الاستجابات النصية. سيتم استخدام النموذج الافتراضي لجميع العمليات."
+  },
+  {
+    "path": "modelSelection.addNewLlm",
+    "value": "إضافة LLM جديد"
+  },
+  {
+    "path": "modelSelection.noLlmsConfigured",
+    "value": "لا توجد نماذج LLM مكونة"
+  },
+  {
+    "path": "modelSelection.addNewLlmToGetStarted",
+    "value": "أضف نموذج LLM جديد للبدء"
+  },
+  {
+    "path": "modelSelection.dialog.addNewLlm",
+    "value": "إضافة LLM جديد"
+  },
+  {
+    "path": "modelSelection.placeholders.embeddingModelId",
+    "value": "مثال: sentence-transformers/all-MiniLM-L6-v2"
+  },
+  {
+    "path": "knowledgeBases.modals.fileUpload.supportedFormats",
+    "value": "يدعم: PDF، TXT، DOC/DOCX، RTF، CSV، XLSX"
+  },
+  {
+    "path": "knowledgeBases.modals.fileUpload.currentFiles",
+    "value": "Current Files"
+  },
+  {
+    "path": "knowledgeBases.modals.fileUpload.newFiles",
+    "value": "New Files"
+  },
+  {
+    "path": "knowledgeBases.modals.fileUpload.selectedFiles",
+    "value": "Selected Files"
+  },
+  {
+    "path": "knowledgeBases.modals.fileUpload.dragAndDrop",
+    "value": "Drag and drop files here, or click to browse"
+  },
+  {
+    "path": "knowledgeBases.modals.fileUpload.dropFiles",
+    "value": "Drop the files here..."
+  },
+  {
+    "path": "knowledgeBases.modals.fileUpload.removeFile",
+    "value": "Remove file"
+  },
+  {
+    "path": "knowledgeBases.modals.messages.createSuccess",
+    "value": "Knowledge Base created successfully."
+  },
+  {
+    "path": "knowledgeBases.modals.messages.updateSuccess",
+    "value": "Knowledge Base updated successfully."
+  },
+  {
+    "path": "knowledgeBases.modals.add.title",
+    "value": "Add Knowledge Base"
+  },
+  {
+    "path": "knowledgeBases.modals.add.description",
+    "value": "Create a new knowledge base by providing details and uploading documents below."
+  },
+  {
+    "path": "knowledgeBases.modals.edit.title",
+    "value": "Edit Knowledge Base"
+  },
+  {
+    "path": "knowledgeBases.modals.edit.description",
+    "value": "Update the Knowledge Base details below."
+  },
+  {
+    "path": "knowledgeBases.modals.fields.title",
+    "value": "Title"
+  },
+  {
+    "path": "knowledgeBases.modals.fields.description",
+    "value": "Description"
+  },
+  {
+    "path": "knowledgeBases.modals.buttons.cancel",
+    "value": "Cancel"
+  },
+  {
+    "path": "knowledgeBases.modals.buttons.create",
+    "value": "Create"
+  },
+  {
+    "path": "knowledgeBases.modals.buttons.save",
+    "value": "Save"
+  },
+  {
+    "path": "knowledgeBases.modals.buttons.saving",
+    "value": "Saving..."
+  },
+  {
+    "path": "knowledgeBases.modals.buttons.creating",
+    "value": "Creating..."
+  },
+  {
+    "path": "knowledgeBases.modals.validation.titleRequired",
+    "value": "Title is required"
+  },
+  {
+    "path": "knowledgeBases.progress.uploading",
+    "value": "جاري التحميل {{current}} ميغابايت/{{total}} ميغابايت..."
+  },
+  {
+    "path": "knowledgeBases.progress.processingFile",
+    "value": "معالجة الملف {{current}}/{{total}}: {{filename}}"
+  },
+  {
+    "path": "knowledgeBases.progress.chunking",
+    "value": "تقسيم المستند {{current}}/{{total}}..."
+  },
+  {
+    "path": "knowledgeBases.progress.embedding",
+    "value": "إنشاء التضمينات {{current}}/{{total}}..."
+  },
+  {
+    "path": "knowledgeBases.progress.storing",
+    "value": "تخزين البيانات {{current}}/{{total}}..."
+  },
+  {
+    "path": "knowledgeBases.progress.finalizing",
+    "value": "إنهاء الإنشاء {{current}}/{{total}}..."
+  },
+  {
+    "path": "knowledgeBases.progress.saving_file",
+    "value": "حفظ الملف {{current}}/{{total}}: {{filename}}"
+  },
+  {
+    "path": "knowledgeBases.progress.processing_file",
+    "value": "معالجة الملف {{current}}/{{total}}: {{filename}}"
+  },
+  {
+    "path": "knowledgeBases.progress.processed_chunks",
+    "value": "تم معالجة {{chunks}} أجزاء من {{current}}/{{total}} ملفات"
+  },
+  {
+    "path": "knowledgeBases.progress.processed_all_chunks",
+    "value": "تم معالجة جميع {{chunks}} أجزاء من {{current}} ملفات"
+  },
+  {
+    "path": "knowledgeBases.progress.chunking_complete",
+    "value": "اكتمل التقسيم: تم إنشاء {{chunks}} قطعة"
+  },
+  {
+    "path": "knowledgeBases.progress.embedding_complete",
+    "value": "تم إنشاء تضمينات لـ {{current}} قطعة"
+  },
+  {
+    "path": "knowledgeBases.progress.storing_complete",
+    "value": "تم تخزين قاعدة البيانات المتجهة مع {{current}} تضمين"
+  },
+  {
+    "path": "knowledgeBases.actions.view",
+    "value": "View"
+  },
+  {
+    "path": "knowledgeBases.actions.edit",
+    "value": "Edit"
+  },
+  {
+    "path": "knowledgeBases.actions.delete",
+    "value": "Delete"
+  },
+  {
+    "path": "knowledgeBases.actions.configure",
+    "value": "Configure"
+  },
+  {
+    "path": "archive.metadata.question",
+    "value": "{{count}} سؤال"
+  },
+  {
+    "path": "archive.metadata.question_one",
+    "value": "{{count}} سؤال"
+  },
+  {
+    "path": "archive.metadata.questions",
+    "value": "{{count}} أسئلة"
+  },
+  {
+    "path": "archive.metadata.topic",
+    "value": "{{count}} موضوع"
+  },
+  {
+    "path": "archive.metadata.topic_one",
+    "value": "{{count}} موضوع"
+  },
+  {
+    "path": "archive.metadata.topics",
+    "value": "{{count}} مواضيع"
+  },
+  {
+    "path": "archive.metadata.section",
+    "value": "{{count}} قسم"
+  },
+  {
+    "path": "archive.metadata.section_one",
+    "value": "{{count}} قسم"
+  },
+  {
+    "path": "archive.metadata.sections",
+    "value": "{{count}} أقسام"
+  },
+  {
+    "path": "archive.metadata.field",
+    "value": "{{count}} حقل"
+  },
+  {
+    "path": "archive.metadata.field_one",
+    "value": "{{count}} حقل"
+  },
+  {
+    "path": "archive.metadata.fields",
+    "value": "{{count}} حقول"
+  },
+  {
+    "path": "archive.metadata.document",
+    "value": "{{count}} وثيقة"
+  },
+  {
+    "path": "archive.metadata.document_one",
+    "value": "{{count}} وثيقة"
+  },
+  {
+    "path": "archive.metadata.documents",
+    "value": "{{count}} وثائق"
+  },
+  {
+    "path": "compare.title",
+    "value": "Compare Documents"
+  },
+  {
+    "path": "compare.subtitle",
+    "value": "Compare two documents to see how they differ with respect to a user-defined topic list."
+  },
+  {
+    "path": "compare.selectFirstDocument",
+    "value": "Select first document"
+  },
+  {
+    "path": "compare.selectSecondDocument",
+    "value": "Select second document"
+  },
+  {
+    "path": "compare.pleaseSelect",
+    "value": "Please select..."
+  },
+  {
+    "path": "compare.documentA",
+    "value": "Document A"
+  },
+  {
+    "path": "compare.documentB",
+    "value": "Document B"
+  },
+  {
+    "path": "compare.compareDocuments",
+    "value": "Compare Documents"
+  },
+  {
+    "path": "compare.comparison",
+    "value": "Comparison"
+  },
+  {
+    "path": "compare.noDocumentsFound",
+    "value": "No documents found"
+  },
+  {
+    "path": "compare.selectTwoDocuments",
+    "value": "Please select two documents to compare"
+  },
+  {
+    "path": "compare.loadingComparison",
+    "value": "Loading comparison..."
+  },
+  {
+    "path": "compare.topicList",
+    "value": "Topic List"
+  },
+  {
+    "path": "compare.clickToBrowse",
+    "value": "Click to browse or drag & drop"
+  },
+  {
+    "path": "compare.supportedFormats",
+    "value": "Supports PDF, TXT, and DOCX"
+  },
+  {
+    "path": "compare.editTopicList",
+    "value": "Edit Topic List"
+  },
+  {
+    "path": "compare.selectTopicListTitle",
+    "value": "Select Topic List"
+  },
+  {
+    "path": "match.title",
+    "value": "Match Documents"
+  },
+  {
+    "path": "match.subtitle",
+    "value": "Ensure that field entries match across documents of different format."
+  },
+  {
+    "path": "match.selectDocument",
+    "value": "Select a document to find matches"
+  },
+  {
+    "path": "match.pleaseSelect",
+    "value": "Please select a document..."
+  },
+  {
+    "path": "match.sourceDocument",
+    "value": "Form Template"
+  },
+  {
+    "path": "match.matchingDocuments",
+    "value": "Matching Documents"
+  },
+  {
+    "path": "match.findMatches",
+    "value": "Find Matches"
+  },
+  {
+    "path": "match.similarityScore",
+    "value": "Similarity Score"
+  },
+  {
+    "path": "match.noDocumentsFound",
+    "value": "No documents found"
+  },
+  {
+    "path": "match.selectDocumentToMatch",
+    "value": "Please select a document to find matches"
+  },
+  {
+    "path": "match.loadingMatches",
+    "value": "Finding matches..."
+  },
+  {
+    "path": "match.noMatchesFound",
+    "value": "No similar documents found"
+  },
+  {
+    "path": "match.matchResults",
+    "value": "Match Results"
+  },
+  {
+    "path": "match.similarity",
+    "value": "Similarity"
+  },
+  {
+    "path": "match.editFormTemplate",
+    "value": "Edit Form Template"
+  },
+  {
+    "path": "match.selectFormTemplateTitle",
+    "value": "Select Form Template"
+  },
+  {
+    "path": "ui.downloadDocx",
+    "value": "تحميل DOCX"
+  },
+  {
+    "path": "ui.downloadCsv",
+    "value": "تحميل CSV"
+  },
+  {
+    "path": "ui.clearCsv",
+    "value": "مسح CSV"
+  },
+  {
+    "path": "ui.referenceNumber",
+    "value": "المرجع {{number}}"
+  },
+  {
+    "path": "ui.processedInChunks",
+    "value": "تم المعالجة في {{count}} أجزاء"
+  },
+  {
+    "path": "toast.feedbackMarked",
+    "value": "شكراً لك على تحديد هذا الرد كـ {{type}}!"
+  },
+  {
+    "path": "toast.evaluationDownloadFailed",
+    "value": "فشل في تحميل التقييم: {{error}}"
+  },
+  {
+    "path": "toast.csvDownloaded",
+    "value": "تم تحميل CSV بنجاح"
+  },
+  {
+    "path": "toast.csvDownloadFailed",
+    "value": "فشل في تحميل CSV: {{error}}"
+  },
+  {
+    "path": "toast.comparisonDownloadFailed",
+    "value": "فشل في تحميل التقرير: {{error}}"
+  },
+  {
+    "path": "toast.resultsDownloadFailed",
+    "value": "فشل في تحميل النتائج: {{error}}"
+  },
+  {
+    "path": "toast.llmAdded",
+    "value": "تم إضافة LLM بنجاح"
+  },
+  {
+    "path": "toast.llmAddFailed",
+    "value": "فشل في إضافة LLM: {{error}}"
+  },
+  {
+    "path": "toast.defaultModelUpdateFailed",
+    "value": "فشل في تحديث النموذج الافتراضي: {{error}}"
+  },
+  {
+    "path": "toast.llmDeleted",
+    "value": "تم حذف LLM بنجاح"
+  },
+  {
+    "path": "toast.llmDeleteFailed",
+    "value": "فشل في حذف LLM: {{error}}"
+  },
+  {
+    "path": "toast.ollamaNotAvailable",
+    "value": "خادم Ollama غير متاح. تأكد من تشغيل Ollama."
+  },
+  {
+    "path": "toast.openaiApiKeyRequired",
+    "value": "مفتاح API مطلوب لنماذج OpenAI ولم يتم تكوينه في الخادم الخلفي"
+  },
+  {
+    "path": "toast.modelAddFailed",
+    "value": "فشل في إضافة النموذج: {{error}}"
+  },
+  {
+    "path": "toast.modelDeleteFailed",
+    "value": "فشل في حذف النموذج: {{error}}"
+  },
+  {
+    "path": "toast.reportCopyFailed",
+    "value": "فشل في نسخ التقرير إلى الحافظة: {{error}}"
+  },
+  {
+    "path": "toast.documentDownloadFailed",
+    "value": "فشل في تحميل المستند: {{error}}"
+  },
+  {
+    "path": "toast.csvDownloadNotAvailable",
+    "value": "تحميل CSV غير متاح لهذا النوع من التقرير"
+  },
+  {
+    "path": "toast.csvFileDownloaded",
+    "value": "تم تحميل ملف CSV بنجاح!"
+  },
+  {
+    "path": "toast.csvDownloadFailedGeneric",
+    "value": "فشل في تحميل CSV. حاول مرة أخرى."
+  },
+  {
+    "path": "toast.outlineSaveFailed",
+    "value": "فشل في حفظ المخطط: {{error}}"
+  }
+]

@@ -29,7 +29,8 @@
     "next": "Selanjutnya",
     "previous": "Sebelumnya",
     "confirm": "Konfirmasi",
-    "back": "Kembali"
+    "back": "Kembali",
+    "done": "Selesai"
   },
   "forms": {
     "firstName": "Nama Depan",
@@ -60,7 +61,42 @@
     "knowledgeBaseTableName": "Nama",
     "knowledgeBaseTableDescription": "Deskripsi",
     "knowledgeBaseTableSources": "Sumber",
-    "knowledgeBaseTablePages": "Halaman"
+    "knowledgeBaseTablePages": "Halaman",
+    "title": "Obrolan",
+    "sourcePopover": {
+      "knowledgeBase": "Basis Pengetahuan",
+      "file": "File"
+    },
+    "searchMode": "Mode Pencarian:",
+    "vectorSearch": "Pencarian Vektor",
+    "fullTextScan": "Pemindaian Teks Lengkap",
+    "searchModeDescription": "Pencarian vektor memberikan hasil yang cepat dan tepat sasaran. Pemindaian teks lengkap meninjau semua konten di basis pengetahuan.",
+    "askMeAnything": "Tanyakan apa saja kepada saya! Untuk pencarian basis pengetahuan, pilih basis pengetahuan terlebih dahulu.",
+    "usingGeneralAI": "Menggunakan asisten AI umum",
+    "usingKnowledgeBase": "Menggunakan basis pengetahuan:",
+    "usingDocuments": "Menggunakan # dokumen",
+    "usingFiles": "Menggunakan {{count}} dokumen{{plural}}:",
+    "remove": "Hapus",
+    "selectKnowledgeBase": "Pilih Basis Pengetahuan",
+    "knowledgeBaseTable": {
+      "name": "Nama",
+      "description": "Deskripsi",
+      "sources": "Sumber",
+      "noDescription": "Tidak ada deskripsi",
+      "sourcesCount": "{{count}} sumber",
+      "pagesCount": "{{count}} halaman"
+    },
+    "selectKnowledgeBasePlaceholder": "Pilih Basis Pengetahuan...",
+    "noKnowledgeBasesAvailable": "Tidak ada Basis Pengetahuan tersedia. Buat satu terlebih dahulu untuk menggunakan fitur ini.",
+    "knowledgeBase": "Basis Pengetahuan",
+    "file": "File",
+    "errors": {
+      "generic": "Maaf, terjadi kesalahan. Silakan coba lagi.",
+      "timeout": "Permintaan waktu habis. Silakan coba lagi.",
+      "largeFileTimeout": "Pemrosesan file besar waktu habis. Coba beralih ke mode 'Pemindaian Teks Lengkap' untuk performa yang lebih baik dengan file besar.",
+      "fileSize": "File terlalu besar. Silakan pilih file yang lebih kecil.",
+      "serverError": "Terjadi kesalahan server. Silakan coba lagi nanti."
+    }
   },
   "settings": {
     "title": "Pengaturan",
@@ -150,32 +186,40 @@
     "copy": "Salin",
     "paste": "Tempel",
     "cut": "Potong",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Tampilkan Lebih Banyak",
+    "showLess": "Tampilkan Lebih Sedikit",
+    "readMore": "Baca Lebih Lanjut",
+    "questionNumber": "Pertanyaan {{number}}:",
+    "viewSourceCitations": "Lihat Kutipan Sumber ({{count}})",
+    "answer": "Jawaban:",
+    "relevantPolicyContext": "Konteks Kebijakan yang Relevan:",
+    "sources": "sumber",
+    "sourceCitations": "Kutipan Sumber ({{count}})",
+    "citationNumber": "Kutipan {{number}}",
+    "noSourceCitations": "Tidak ada kutipan sumber yang tersedia untuk bagian ini",
+    "noDetailedSections": "Tidak ada bagian detail yang tersedia untuk laporan ini",
+    "topicLabel": "Topik:",
+    "knowledgeBaseReference": "Referensi Basis Pengetahuan",
+    "knowledgeBaseReferences": "Referensi Basis Pengetahuan",
+    "hideReferences": "Sembunyikan Referensi",
+    "showReferences": "Tampilkan Referensi",
+    "referenceNumber": "Referensi {{number}}",
+    "processedInChunks": "Diproses dalam {{count}} bagian",
+    "synthesisErrorNote": "Catatan: Terjadi kesalahan sintesis - menampilkan hasil bagian gabungan",
     "progress": {
       "starting": "Memulai...",
       "initializing": "Memulai...",
       "processing": "Memproses...",
       "extracting": "Mengekstrak konten..."
-    }
+    },
+    "error": "Terjadi kesalahan!",
+    "welcomeBack": "Selamat datang kembali, senang bertemu Anda lagi!",
+    "hiUser": "Hai, {{name}} 👋"
+  },
+  "usage": {
+    "title": "Penggunaan",
+    "currentPeriod": "Periode saat ini:",
+    "usedOfQuota": "digunakan dari kuota bulanan Anda"
   },
   "review": {
     "pageTitle": "Tinjau Dokumen",
@@ -209,7 +253,7 @@
     "checklistNamePlaceholder": "Masukkan nama daftar periksa...",
     "checklistDescriptionLabel": "Deskripsi",
     "checklistDescriptionPlaceholder": "Masukkan deskripsi daftar periksa untuk saran pertanyaan otomatis (minimal 10 karakter)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} pertanyaan",
     "suggest": "Sarankan",
     "suggesting": "Menyarankan...",
     "optimize": "Optimalkan",
@@ -230,7 +274,64 @@
     "deleteChecklist": "Hapus Daftar Periksa",
     "pleaseWait": "Harap tunggu, kami sedang meninjau dokumen Anda",
     "reviewSuccess": "Peninjauan dokumen berhasil diselesaikan!",
-    "reviewSuccessMultiple": "{{count}} file diproses dengan berbagi konteks yang dioptimalkan!"
+    "reviewSuccessMultiple": "{{count}} file diproses dengan berbagi konteks yang dioptimalkan!",
+    "dropFilesHere": "Jatuhkan file di sini",
+    "uploadedFiles": "File yang Diupload",
+    "removeFile": "Hapus",
+    "characterCount": "{{count}}/2000 karakter. Instruksi ini akan ditambahkan ke setiap pertanyaan saat diproses.",
+    "searchMode": "Mode Pencarian",
+    "vectorSearch": "Pencarian Vektor",
+    "fullDocumentScan": "Pemindaian Dokumen Lengkap",
+    "vectorSearchDescription": "Menemukan konten relevan menggunakan pencarian kesamaan AI (cepat, tepat sasaran)",
+    "fullScanDescription": "Menganalisis semua dokumen di basis pengetahuan (komprehensif, menyeluruh)"
+  },
+  "modelSelection": {
+    "llmManagement": "Manajemen LLM",
+    "llmDescription": "Konfigurasi dan kelola LLM yang digunakan untuk menghasilkan respons teks. Model default akan digunakan untuk semua operasi.",
+    "addNewLlm": "Tambah LLM Baru",
+    "noLlmsConfigured": "Tidak ada LLM yang dikonfigurasi",
+    "addNewLlmToGetStarted": "Tambahkan LLM baru untuk memulai",
+    "embeddingModelManagement": "Manajemen Model Embedding",
+    "embeddingDescription": "Konfigurasi dan kelola model embedding yang digunakan untuk pengindeksan dan pencarian basis pengetahuan. Model default akan digunakan saat membuat basis pengetahuan baru, tetapi setiap basis pengetahuan akan terus menggunakan model embedding aslinya bahkan jika default berubah nanti.",
+    "addEmbeddingModel": "Tambah Model Embedding",
+    "noEmbeddingModelsConfigured": "Tidak ada model embedding yang dikonfigurasi",
+    "addNewEmbeddingModelToGetStarted": "Tambahkan model embedding baru untuk memulai",
+    "tableHeaders": {
+      "name": "Nama",
+      "modelId": "ID Model",
+      "provider": "Penyedia",
+      "description": "Deskripsi",
+      "status": "Status",
+      "actions": "Tindakan"
+    },
+    "status": {
+      "default": "Default",
+      "available": "Tersedia"
+    },
+    "actions": {
+      "setAsDefault": "Tetapkan sebagai Default",
+      "delete": "Hapus",
+      "validate": "Validasi",
+      "validating": "Memvalidasi"
+    },
+    "dialog": {
+      "addNewLlm": "Tambah LLM Baru",
+      "addEmbeddingModel": "Tambah Model Embedding",
+      "displayName": "Nama Tampilan",
+      "provider": "Penyedia",
+      "modelId": "ID Model",
+      "description": "Deskripsi",
+      "cancel": "Batal",
+      "addModel": "Tambah Model"
+    },
+    "placeholders": {
+      "customModel": "misalnya Model Kustom Saya",
+      "embeddingModelId": "misalnya sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Jelaskan model, karakteristiknya, dan kapan menggunakannya"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Silakan masukkan ID model"
+    }
   },
   "compare": {
     "title": "Bandingkan Dokumen",
@@ -264,7 +365,8 @@
       "comparing": "Membandingkan..."
     },
     "pleaseWait": "Harap tunggu saat kami membandingkan dokumen Anda",
-    "compareSuccess": "Dokumen dibandingkan dengan sukses!"
+    "compareSuccess": "Dokumen dibandingkan dengan sukses!",
+    "selectTopicListTitle": "Pilih Daftar Topik"
   },
   "match": {
     "title": "Pencocokan Dokumen",
@@ -298,7 +400,84 @@
     },
     "pleaseWait": "Harap tunggu saat kami mencocokkan dokumen Anda",
     "matchSuccess": "Pemrosesan formulir selesai dengan sukses!",
-    "singleDocumentSuccess": "Nilai bidang berhasil diekstrak dari satu dokumen."
+    "singleDocumentSuccess": "Nilai bidang berhasil diekstrak dari satu dokumen.",
+    "selectFormTemplateTitle": "Pilih Template Formulir"
+  },
+  "editFormTemplateModal": {
+    "title": "Edit Template Formulir",
+    "formTemplateName": "Nama Template Formulir",
+    "formTemplateNamePlaceholder": "Masukkan nama template formulir",
+    "formTemplateDescription": "Deskripsi Template Formulir",
+    "descriptionPlaceholder": "Masukkan deskripsi template formulir untuk menyarankan bidang secara otomatis (minimal 10 karakter)...",
+    "referenceDocuments": "Dokumen Referensi (Opsional)",
+    "uploadFiles": "Unggah File",
+    "pleaseWait": "Harap tunggu saat kami meninjau dokumen Anda",
+    "knowledgeBase": "Basis Pengetahuan",
+    "formFields": "Bidang Formulir",
+    "suggest": "Sarankan",
+    "fieldPlaceholder": "Tambahkan nama bidang...",
+    "cancel": "Batal",
+    "updateFormTemplate": "Perbarui Template Formulir"
+  },
+  "editOutlineModal": {
+    "title": "Edit Outline",
+    "createTitle": "Buat Outline Baru",
+    "outlineName": "Nama Outline",
+    "outlineNamePlaceholder": "Masukkan nama outline",
+    "description": "Deskripsi",
+    "descriptionPlaceholder": "Masukkan deskripsi outline untuk menyarankan bagian secara otomatis (minimal 10 karakter)...",
+    "referenceDocuments": "Dokumen Referensi (Opsional)",
+    "uploadFiles": "Unggah File",
+    "knowledgeBase": "Basis Pengetahuan",
+    "sections": "Bagian",
+    "suggest": "Sarankan",
+    "optimize": "Optimalkan",
+    "consultDocs": "Konsultasikan Dokumen",
+    "addSectionPlaceholder": "Tambahkan bagian",
+    "cancel": "Batal",
+    "createOutline": "Buat Outline",
+    "updateOutline": "Perbarui Outline"
+  },
+  "editChecklistModal": {
+    "title": "Edit Daftar Periksa",
+    "createTitle": "Buat Daftar Periksa Baru",
+    "checklistName": "Nama Daftar Periksa",
+    "checklistNamePlaceholder": "Masukkan nama daftar periksa",
+    "description": "Deskripsi",
+    "descriptionPlaceholder": "Masukkan deskripsi daftar periksa untuk menyarankan pertanyaan secara otomatis (minimal 10 karakter)...",
+    "referenceDocuments": "Dokumen Referensi (Opsional)",
+    "uploadFiles": "Unggah File",
+    "knowledgeBase": "Basis Pengetahuan",
+    "questions": "{{count}} pertanyaan",
+    "suggest": "Sarankan",
+    "optimize": "Optimalkan",
+    "addQuestionPlaceholder": "Tambahkan pertanyaan",
+    "copyAllQuestions": "Salin semua pertanyaan sebagai teks",
+    "cancel": "Batal",
+    "createChecklist": "Buat Daftar Periksa",
+    "updateChecklist": "Perbarui Daftar Periksa"
+  },
+  "editTopicListModal": {
+    "title": "Edit Daftar Topik",
+    "createTitle": "Buat Daftar Topik Baru",
+    "topicListName": "Nama Daftar Topik",
+    "topicListNamePlaceholder": "Masukkan nama daftar topik",
+    "description": "Deskripsi Daftar Topik",
+    "descriptionPlaceholder": "Masukkan deskripsi daftar topik untuk menyarankan topik secara otomatis (minimal 10 karakter)...",
+    "referenceDocuments": "Dokumen Referensi (Opsional)",
+    "uploadFiles": "Unggah File",
+    "knowledgeBase": "Basis Pengetahuan",
+    "comparisonTopics": "Topik Perbandingan",
+    "topics": "{{count}} topik",
+    "section": "{{count}} bagian",
+    "section_one": "{{count}} bagian",
+    "sections": "{{count}} bagian",
+    "suggest": "Sarankan",
+    "addTopicPlaceholder": "Tambahkan topik perbandingan",
+    "copyAllTopics": "Salin semua topik sebagai teks",
+    "cancel": "Batal",
+    "createTopicList": "Buat Daftar Topik",
+    "updateTopicList": "Perbarui Daftar Topik"
   },
   "knowledgeBases": {
     "title": "Kelola Basis Pengetahuan",
@@ -397,6 +576,35 @@
         "fieldPlaceholder": "Tambahkan nama bidang...",
         "cancel": "Batal",
         "updateFormTemplate": "Perbarui Template Form"
+      },
+      "fields": {
+        "title": "Judul",
+        "description": "Deskripsi"
+      },
+      "fileUpload": {
+        "currentFiles": "File Saat Ini",
+        "newFiles": "File Baru",
+        "selectedFiles": "File Terpilih",
+        "dragAndDrop": "Seret dan jatuhkan file di sini, atau klik untuk menelusuri",
+        "dropFiles": "Jatuhkan file di sini...",
+        "removeFile": "Hapus file",
+        "supportedFormats": "Mendukung: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "Batal",
+        "create": "Buat",
+        "save": "Simpan",
+        "saving": "Menyimpan...",
+        "creating": "Membuat..."
+      },
+      "validation": {
+        "titleRequired": "Judul diperlukan"
+      },
+      "messages": {
+        "createSuccess": "Basis Pengetahuan berhasil dibuat.",
+        "updateSuccess": "Basis Pengetahuan berhasil diperbarui.",
+        "processing": "Memproses...",
+        "pleaseWait": "Harap tunggu sementara kami memproses file Anda..."
       }
     },
     "editCustom": {
@@ -559,7 +767,44 @@
       "generating": "Menghasilkan laporan...",
       "processingSection": "Memproses bagian {{sectionNum}} dari {{totalSections}}: {{sectionPreview}}"
     },
-    "pleaseWait": "Harap tunggu saat kami menghasilkan laporan Anda"
+    "pleaseWait": "Harap tunggu saat kami menghasilkan laporan Anda",
+    "pageDescription": "Hasilkan dokumen berdasarkan outline yang ditentukan pengguna dan database dokumen.",
+    "generatingDocument": "Menghasilkan dokumen...",
+    "knowledgeBaseTitle": "Basis Pengetahuan",
+    "documentOutlineTitle": "Outline Dokumen",
+    "clickToSelect": "Klik untuk memilih",
+    "customInstructionsTitle": "Instruksi Khusus (Opsional)",
+    "customInstructionsPlaceholder": "Masukkan instruksi tambahan apa pun yang harus dipertimbangkan saat menghasilkan setiap bagian laporan...",
+    "characterCount": "{{count}}/2000 karakter. Instruksi ini akan ditambahkan ke prompt saat menghasilkan setiap bagian.",
+    "selectKnowledgeBaseTitle": "Pilih Basis Pengetahuan",
+    "selectDocumentOutlineTitle": "Pilih Outline Dokumen",
+    "generateButton": "Hasilkan",
+    "results": "Hasil",
+    "copyText": "Salin Teks",
+    "copied": "Disalin!",
+    "downloadDocx": "Unduh DOCX",
+    "downloadCsv": "Unduh CSV",
+    "clearReport": "Hapus Laporan",
+    "resultsPlaceholder": "Hasil akan muncul di sini setelah menghasilkan dokumen.",
+    "sectionsWithSources": "Bagian dengan Sumber",
+    "sectionNumber": "Bagian {number}: {title}",
+    "kbGenerated": "KB Dihasilkan",
+    "rawText": "Teks Mentah",
+    "viewSourceCitations": "Lihat Kutipan Sumber ({count})",
+    "documentCopiedSuccess": "Dokumen berhasil disalin ke clipboard",
+    "documentCopiedError": "Gagal menyalin dokumen ke clipboard",
+    "documentDownloadSuccess": "Dokumen berhasil diunduh",
+    "documentDownloadError": "Gagal mengunduh dokumen: {error}",
+    "csvDownloadSuccess": "CSV berhasil diunduh",
+    "csvDownloadError": "Gagal mengunduh CSV: {error}",
+    "reportClearedSuccess": "Laporan yang dihasilkan telah dihapus",
+    "enterAtLeastOneSection": "Silakan masukkan setidaknya satu bagian",
+    "selectKnowledgeBase": "Silakan pilih basis pengetahuan",
+    "generateSuccess": "Laporan berhasil dihasilkan!",
+    "generateError": "Gagal menghasilkan dokumen: {error}",
+    "vectorSearch": "pencarian vektor",
+    "fullDocumentScan": "pemindaian dokumen lengkap",
+    "editOutline": "Edit Outline"
   },
   "feedback": {
     "modalTitlePositive": "Apa yang membantu?",
@@ -586,14 +831,14 @@
     "downloadCsv": "Unduh CSV",
     "clearCsv": "Hapus CSV",
     "clearResults": "Hapus hasil",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Topik:",
+    "knowledgeBaseReference": "Referensi Basis Pengetahuan",
+    "knowledgeBaseReferences": "Referensi Basis Pengetahuan",
+    "hideReferences": "Sembunyikan Referensi",
+    "showReferences": "Tampilkan Referensi",
+    "referenceNumber": "Referensi {{number}}",
+    "processedInChunks": "Diproses dalam {{count}} bagian",
+    "synthesisError": "Kesalahan dalam mensintesis analisis topik"
   },
   "toast": {
     "passwordUpdated": "Kata sandi berhasil diperbarui.",

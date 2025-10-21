@@ -1210,6 +1210,11 @@ export type VeradocGetVeradocResultsData = {
 export type VeradocGetVeradocResultsResponse = (unknown);
 
 export type VeradocProcessRagChecklistData = {
+  questions: string;
+  customInstructions?: (string | null);
+  knowledgeBaseId: string;
+  searchMode?: 'vector' | 'full_scan';
+  taskId?: (string | null);
   formData: Body_veradoc_process_rag_checklist;
 };
 

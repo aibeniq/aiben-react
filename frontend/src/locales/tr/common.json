@@ -29,7 +29,8 @@
     "next": "Sonraki",
     "previous": "Önceki",
     "confirm": "Onayla",
-    "back": "Geri"
+    "back": "Geri",
+    "done": "Tamam"
   },
   "forms": {
     "firstName": "Ad",
@@ -56,7 +57,46 @@
     "error": "Üzgünüz, bir şeyler ters gitti. Tekrar deneyin.",
     "welcome": "Merhaba! Bugün size nasıl yardımcı olabilirim?",
     "welcomeMessageWithSource": "Bir bilgi tabanı seçin veya dosyalar yükleyin, ardından soru sorun.",
-    "welcomeMessageGeneral": "Bana her şeyi sorabilirsiniz! Bilgi tabanı aramak için önce bir bilgi tabanı seçin."
+    "welcomeMessageGeneral": "Bana her şeyi sorabilirsiniz! Bilgi tabanı aramak için önce bir bilgi tabanı seçin.",
+    "title": "Sohbet",
+    "sourcePopover": {
+      "knowledgeBase": "Bilgi Tabanı",
+      "file": "Dosya"
+    },
+    "searchMode": "Arama Modu:",
+    "vectorSearch": "Vektör Arama",
+    "fullTextScan": "Tüm Metni Tara",
+    "searchModeDescription": "Vektör arama hızlı, hedefe yönelik sonuçlar sağlar. Tam metin tarama bilgi tabanındaki tüm içeriği inceler.",
+    "askMeAnything": "Bana her şeyi sor! Bilgi tabanı araması için önce bir bilgi tabanı seçin.",
+    "usingGeneralAI": "Genel AI asistanı kullanılıyor",
+    "usingKnowledgeBase": "Bilgi tabanı kullanılıyor:",
+    "usingDocuments": "# belge kullanılıyor",
+    "usingFiles": "{{count}} belge{{plural}} kullanılıyor:",
+    "remove": "Kaldır",
+    "selectKnowledgeBase": "Bilgi Tabanı Seç",
+    "knowledgeBaseTable": {
+      "name": "Ad",
+      "description": "Açıklama",
+      "sources": "Kaynaklar",
+      "noDescription": "Açıklama yok",
+      "sourcesCount": "{{count}} kaynak",
+      "pagesCount": "{{count}} sayfa"
+    },
+    "knowledgeBaseTableName": "Ad",
+    "knowledgeBaseTableDescription": "Açıklama",
+    "knowledgeBaseTableSources": "Kaynaklar",
+    "knowledgeBaseTablePages": "Sayfalar",
+    "selectKnowledgeBasePlaceholder": "Bir Bilgi Tabanı seçin...",
+    "noKnowledgeBasesAvailable": "Kullanılabilir Bilgi Tabanı yok. Bu özelliği kullanmak için önce bir tane oluşturun.",
+    "knowledgeBase": "Bilgi Tabanı",
+    "file": "Dosya",
+    "errors": {
+      "generic": "Üzgünüz, bir şeyler ters gitti. Tekrar deneyin.",
+      "timeout": "İstek zaman aşımına uğradı. Tekrar deneyin.",
+      "largeFileTimeout": "Büyük dosya işleme zaman aşımına uğradı. Daha iyi performans için 'Tam Metin Tarama' moduna geçmeyi deneyin.",
+      "fileSize": "Dosya çok büyük. Lütfen daha küçük dosyalar seçin.",
+      "serverError": "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin."
+    }
   },
   "settings": {
     "title": "Ayarlar",
@@ -146,32 +186,40 @@
     "copy": "Kopyala",
     "paste": "Yapıştır",
     "cut": "Kes",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Daha Fazla Göster",
+    "showLess": "Daha Az Göster",
+    "readMore": "Daha Fazla Oku",
+    "questionNumber": "Soru {{number}}:",
+    "viewSourceCitations": "Kaynak Alıntılarını Görüntüle ({{count}})",
+    "answer": "Cevap:",
+    "relevantPolicyContext": "İlgili Politika Bağlamı:",
+    "sources": "kaynaklar",
+    "sourceCitations": "Kaynak Alıntıları ({{count}})",
+    "citationNumber": "Alıntı {{number}}",
+    "noSourceCitations": "Bu bölüm için kaynak alıntısı mevcut değil",
+    "noDetailedSections": "Bu rapor için ayrıntılı bölüm mevcut değil",
+    "topicLabel": "Konu:",
+    "knowledgeBaseReference": "Bilgi Bankası Referansı",
+    "knowledgeBaseReferences": "Bilgi Bankası Referansları",
+    "hideReferences": "Referansları Gizle",
+    "showReferences": "Referansları Göster",
+    "referenceNumber": "Referans {{number}}",
+    "processedInChunks": "{{count}} parçada işlendi",
+    "synthesisErrorNote": "Not: Sentez hatası oluştu - birleştirilmiş parça sonuçları gösteriliyor",
     "progress": {
       "starting": "Başlatılıyor...",
       "initializing": "Başlatılıyor...",
       "processing": "İşleniyor...",
       "extracting": "İçerik çıkarılıyor..."
-    }
+    },
+    "error": "Bir şeyler ters gitti!",
+    "welcomeBack": "Tekrar hoş geldiniz, sizi tekrar görmek güzel!",
+    "hiUser": "Merhaba, {{name}} 👋"
+  },
+  "usage": {
+    "title": "Kullanım",
+    "currentPeriod": "Geçerli dönem:",
+    "usedOfQuota": "aylık kotanızın kullanıldı"
   },
   "review": {
     "pageTitle": "Belgeleri İncele",
@@ -205,7 +253,7 @@
     "checklistNamePlaceholder": "Kontrol listesi adını girin...",
     "checklistDescriptionLabel": "Açıklama",
     "checklistDescriptionPlaceholder": "Otomatik soru önerileri için kontrol listesi açıklamasını girin (en az 10 karakter)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} sorular",
     "suggest": "Öner",
     "suggesting": "Öneriliyor...",
     "optimize": "Optimize Et",
@@ -226,7 +274,16 @@
     "deleteChecklist": "Kontrol Listesini Sil",
     "pleaseWait": "Lütfen bekleyin, belgelerinizi inceliyoruz",
     "reviewSuccess": "Belge incelemesi başarıyla tamamlandı!",
-    "reviewSuccessMultiple": "{{count}} dosya optimize edilmiş bağlam paylaşımı ile işlendi!"
+    "reviewSuccessMultiple": "{{count}} dosya optimize edilmiş bağlam paylaşımı ile işlendi!",
+    "dropFilesHere": "Dosyaları buraya bırakın",
+    "uploadedFiles": "Yüklenen Dosyalar",
+    "removeFile": "Kaldır",
+    "characterCount": "{{count}}/2000 karakter. Bu talimatlar işleme sırasında her soruya eklenecektir.",
+    "searchMode": "Arama Modu",
+    "vectorSearch": "Vektör Arama",
+    "fullDocumentScan": "Tam Belge Tarama",
+    "vectorSearchDescription": "AI benzerlik araması kullanarak ilgili içeriği bulur (hızlı, hedefe yönelik)",
+    "fullScanDescription": "Bilgi tabanındaki tüm belgeleri analiz eder (kapsamlı, derinlemesine)"
   },
   "compare": {
     "title": "Belgeleri Karşılaştır",
@@ -260,7 +317,8 @@
       "comparing": "Karşılaştırılıyor..."
     },
     "pleaseWait": "Lütfen belgeleriniz karşılaştırılırken bekleyin",
-    "compareSuccess": "Belgeler başarıyla karşılaştırıldı!"
+    "compareSuccess": "Belgeler başarıyla karşılaştırıldı!",
+    "selectTopicListTitle": "Konu Listesi Seç"
   },
   "match": {
     "title": "Belge Eşleştirme",
@@ -294,7 +352,84 @@
     },
     "pleaseWait": "Lütfen belgeleriniz eşleştirilirken bekleyin",
     "matchSuccess": "Form işleme başarıyla tamamlandı!",
-    "singleDocumentSuccess": "Alan değerleri tek bir belgeden çıkarıldı."
+    "singleDocumentSuccess": "Alan değerleri tek bir belgeden çıkarıldı.",
+    "selectFormTemplateTitle": "Form Şablonu Seç"
+  },
+  "editFormTemplateModal": {
+    "title": "Form Şablonunu Düzenle",
+    "formTemplateName": "Form Şablonu Adı",
+    "formTemplateNamePlaceholder": "Form şablonu adını girin",
+    "formTemplateDescription": "Form Şablonu Açıklaması",
+    "descriptionPlaceholder": "Alanları otomatik önermek için form şablonu açıklamasını girin (minimum 10 karakter)...",
+    "referenceDocuments": "Referans Belgeler (İsteğe Bağlı)",
+    "uploadFiles": "Dosyaları Yükle",
+    "pleaseWait": "Belgeleriniz incelenirken lütfen bekleyin",
+    "knowledgeBase": "Bilgi Tabanı",
+    "formFields": "Form Alanları",
+    "suggest": "Öner",
+    "fieldPlaceholder": "Alan adı ekle...",
+    "cancel": "İptal",
+    "updateFormTemplate": "Form Şablonunu Güncelle"
+  },
+  "editOutlineModal": {
+    "title": "Taslağı Düzenle",
+    "createTitle": "Yeni Taslak Oluştur",
+    "outlineName": "Taslak Adı",
+    "outlineNamePlaceholder": "Taslak adını girin",
+    "description": "Açıklama",
+    "descriptionPlaceholder": "Bölümleri otomatik önermek için taslak açıklamasını girin (minimum 10 karakter)...",
+    "referenceDocuments": "Referans Belgeler (İsteğe Bağlı)",
+    "uploadFiles": "Dosyaları Yükle",
+    "knowledgeBase": "Bilgi Tabanı",
+    "sections": "Bölümler",
+    "suggest": "Öner",
+    "optimize": "Optimize Et",
+    "consultDocs": "Belgelere Danış",
+    "addSectionPlaceholder": "Bölüm ekle",
+    "cancel": "İptal",
+    "createOutline": "Taslak Oluştur",
+    "updateOutline": "Taslağı Güncelle"
+  },
+  "editChecklistModal": {
+    "title": "Kontrol Listesini Düzenle",
+    "createTitle": "Yeni Kontrol Listesi Oluştur",
+    "checklistName": "Kontrol Listesi Adı",
+    "checklistNamePlaceholder": "Kontrol listesi adını girin",
+    "description": "Açıklama",
+    "descriptionPlaceholder": "Soruları otomatik önermek için kontrol listesi açıklamasını girin (minimum 10 karakter)...",
+    "referenceDocuments": "Referans Belgeler (İsteğe Bağlı)",
+    "uploadFiles": "Dosyaları Yükle",
+    "knowledgeBase": "Bilgi Tabanı",
+    "questions": "{{count}} soru",
+    "suggest": "Öner",
+    "optimize": "Optimize Et",
+    "addQuestionPlaceholder": "Soru ekle",
+    "copyAllQuestions": "Tüm soruları metin olarak kopyala",
+    "cancel": "İptal",
+    "createChecklist": "Kontrol Listesi Oluştur",
+    "updateChecklist": "Kontrol Listesini Güncelle"
+  },
+  "editTopicListModal": {
+    "title": "Konu Listesini Düzenle",
+    "createTitle": "Yeni Konu Listesi Oluştur",
+    "topicListName": "Konu Listesi Adı",
+    "topicListNamePlaceholder": "Konu listesi adını girin",
+    "description": "Konu Listesi Açıklaması",
+    "descriptionPlaceholder": "Konuları otomatik önermek için konu listesi açıklamasını girin (minimum 10 karakter)...",
+    "referenceDocuments": "Referans Belgeler (İsteğe Bağlı)",
+    "uploadFiles": "Dosyaları Yükle",
+    "knowledgeBase": "Bilgi Tabanı",
+    "comparisonTopics": "Karşılaştırma Konuları",
+    "topics": "{{count}} konu",
+    "section": "{{count}} bölüm",
+    "section_one": "{{count}} bölüm",
+    "sections": "{{count}} bölüm",
+    "suggest": "Öner",
+    "addTopicPlaceholder": "Karşılaştırma konusu ekle",
+    "copyAllTopics": "Tüm konuları metin olarak kopyala",
+    "cancel": "İptal",
+    "createTopicList": "Konu Listesi Oluştur",
+    "updateTopicList": "Konu Listesini Güncelle"
   },
   "knowledgeBases": {
     "title": "Bilgi Tabanı Yönetimi",
@@ -393,6 +528,35 @@
         "fieldPlaceholder": "Alan adı ekle...",
         "cancel": "İptal",
         "updateFormTemplate": "Form Şablonunu Güncelle"
+      },
+      "fields": {
+        "title": "Başlık",
+        "description": "Açıklama"
+      },
+      "fileUpload": {
+        "currentFiles": "Mevcut Dosyalar",
+        "newFiles": "Yeni Dosyalar",
+        "selectedFiles": "Seçilen Dosyalar",
+        "dragAndDrop": "Dosyaları buraya sürükleyip bırakın veya göz atmak için tıklayın",
+        "dropFiles": "Dosyaları buraya bırakın...",
+        "removeFile": "Dosyayı kaldır",
+        "supportedFormats": "Destekler: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "İptal",
+        "create": "Oluştur",
+        "save": "Kaydet",
+        "saving": "Kaydediliyor...",
+        "creating": "Oluşturuluyor..."
+      },
+      "validation": {
+        "titleRequired": "Başlık gerekli"
+      },
+      "messages": {
+        "createSuccess": "Bilgi Tabanı başarıyla oluşturuldu.",
+        "updateSuccess": "Bilgi Tabanı başarıyla güncellendi.",
+        "processing": "İşleniyor...",
+        "pleaseWait": "Dosyalarınızı işlerken lütfen bekleyin..."
       }
     },
     "editCustom": {
@@ -555,7 +719,92 @@
       "generating": "Rapor oluşturuluyor...",
       "processingSection": "{{sectionNum}} / {{totalSections}} bölüm işleniyor: {{sectionPreview}}"
     },
-    "pleaseWait": "Raporunuz oluşturulurken lütfen bekleyin"
+    "pleaseWait": "Raporunuz oluşturulurken lütfen bekleyin",
+    "pageDescription": "Kullanıcı tanımlı bir ana hat ve belge veritabanına dayalı bir belge oluşturun.",
+    "generatingDocument": "Belge oluşturuluyor...",
+    "knowledgeBaseTitle": "Bilgi Tabanı",
+    "documentOutlineTitle": "Belge Ana Hat",
+    "clickToSelect": "Seçmek için tıklayın",
+    "customInstructionsTitle": "Özel Talimatlar (İsteğe Bağlı)",
+    "customInstructionsPlaceholder": "Raporun her bölümünü oluştururken dikkate alınması gereken ek talimatları girin...",
+    "characterCount": "{{count}}/2000 karakter. Bu talimatlar her bölüm oluşturulurken isteme eklenecektir.",
+    "selectKnowledgeBaseTitle": "Bilgi Tabanı Seç",
+    "selectDocumentOutlineTitle": "Belge Ana Hat Seç",
+    "generateButton": "Oluştur",
+    "results": "Sonuçlar",
+    "copyText": "Metni Kopyala",
+    "copied": "Kopyalandı!",
+    "downloadDocx": "DOCX İndir",
+    "downloadCsv": "CSV İndir",
+    "clearReport": "Raporu Temizle",
+    "resultsPlaceholder": "Bir belge oluşturduktan sonra sonuçlar burada görünecektir.",
+    "sectionsWithSources": "Kaynaklı Bölümler",
+    "sectionNumber": "Bölüm {number}: {title}",
+    "kbGenerated": "BT Oluşturuldu",
+    "rawText": "Ham Metin",
+    "viewSourceCitations": "Kaynak Atıflarını Görüntüle ({count})",
+    "documentCopiedSuccess": "Belge panoya kopyalandı",
+    "documentCopiedError": "Belge panoya kopyalanamadı",
+    "documentDownloadSuccess": "Belge başarıyla indirildi",
+    "documentDownloadError": "Belge indirilemedi: {error}",
+    "csvDownloadSuccess": "CSV başarıyla indirildi",
+    "csvDownloadError": "CSV indirilemedi: {error}",
+    "reportClearedSuccess": "Oluşturulan rapor temizlendi",
+    "enterAtLeastOneSection": "Lütfen en az bir bölüm girin",
+    "selectKnowledgeBase": "Lütfen bir bilgi tabanı seçin",
+    "generateSuccess": "Rapor başarıyla oluşturuldu!",
+    "generateError": "Belge oluşturulamadı: {error}",
+    "vectorSearch": "vektör arama",
+    "fullDocumentScan": "tam belge tarama",
+    "editOutline": "Ana Hat Düzenle"
+  },
+  "modelSelection": {
+    "llmManagement": "LLM Yönetimi",
+    "llmDescription": "Metin yanıtları oluşturmak için kullanılan LLM'leri yapılandırın ve yönetin. Varsayılan model tüm işlemler için kullanılacaktır.",
+    "addNewLlm": "Yeni LLM Ekle",
+    "noLlmsConfigured": "Hiç LLM yapılandırılmamış",
+    "addNewLlmToGetStarted": "Başlamak için yeni bir LLM ekleyin",
+    "embeddingModelManagement": "Gömme Modeli Yönetimi",
+    "embeddingDescription": "Bilgi tabanı indeksleme ve alma için kullanılan gömme modellerini yapılandırın ve yönetin. Varsayılan model yeni bilgi tabanları oluştururken kullanılacaktır, ancak her bilgi tabanı daha sonra varsayılan değişse bile orijinal gömme modelini kullanmaya devam edecektir.",
+    "addEmbeddingModel": "Gömme Modeli Ekle",
+    "noEmbeddingModelsConfigured": "Hiç gömme modeli yapılandırılmamış",
+    "addNewEmbeddingModelToGetStarted": "Başlamak için yeni bir gömme modeli ekleyin",
+    "tableHeaders": {
+      "name": "Ad",
+      "modelId": "Model Kimliği",
+      "provider": "Sağlayıcı",
+      "description": "Açıklama",
+      "status": "Durum",
+      "actions": "Eylemler"
+    },
+    "status": {
+      "default": "Varsayılan",
+      "available": "Kullanılabilir"
+    },
+    "actions": {
+      "setAsDefault": "Varsayılan Olarak Ayarla",
+      "delete": "Sil",
+      "validate": "Doğrula",
+      "validating": "Doğrulanıyor"
+    },
+    "dialog": {
+      "addNewLlm": "Yeni LLM Ekle",
+      "addEmbeddingModel": "Gömme Modeli Ekle",
+      "displayName": "Görünen Ad",
+      "provider": "Sağlayıcı",
+      "modelId": "Model Kimliği",
+      "description": "Açıklama",
+      "cancel": "İptal",
+      "addModel": "Model Ekle"
+    },
+    "placeholders": {
+      "customModel": "örn. Özel Modelim",
+      "embeddingModelId": "örn. sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Modeli, özelliklerini ve ne zaman kullanılacağını açıklayın"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Lütfen bir model kimliği girin"
+    }
   },
   "feedback": {
     "modalTitlePositive": "Ne yardımcı oldu?",
@@ -582,14 +831,14 @@
     "downloadCsv": "CSV İndir",
     "clearCsv": "CSV'yi Temizle",
     "clearResults": "Sonuçları Temizle",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Konu:",
+    "knowledgeBaseReference": "Bilgi Bankası Referansı",
+    "knowledgeBaseReferences": "Bilgi Bankası Referansları",
+    "hideReferences": "Referansları Gizle",
+    "showReferences": "Referansları Göster",
+    "referenceNumber": "Referans {{number}}",
+    "processedInChunks": "{{count}} parçada işlendi",
+    "synthesisError": "Konu analizi sentezi hatası"
   },
   "toast": {
     "passwordUpdated": "Şifre başarıyla güncellendi.",

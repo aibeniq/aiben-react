@@ -29,7 +29,8 @@
     "next": "Επόμενο",
     "previous": "Προηγούμενο",
     "confirm": "Επιβεβαίωση",
-    "back": "Πίσω"
+    "back": "Πίσω",
+    "done": "Ολοκληρώθηκε"
   },
   "forms": {
     "firstName": "Όνομα",
@@ -60,7 +61,42 @@
     "knowledgeBaseTableName": "Όνομα",
     "knowledgeBaseTableDescription": "Περιγραφή",
     "knowledgeBaseTableSources": "Πηγές",
-    "knowledgeBaseTablePages": "Σελίδες"
+    "knowledgeBaseTablePages": "Σελίδες",
+    "title": "Συνομιλία",
+    "sourcePopover": {
+      "knowledgeBase": "Βάση γνώσης",
+      "file": "Αρχείο"
+    },
+    "searchMode": "Τρόπος αναζήτησης:",
+    "vectorSearch": "Αναζήτηση διανυσμάτων",
+    "fullTextScan": "Πλήρης σάρωση κειμένου",
+    "searchModeDescription": "Η διανυσματική αναζήτηση παρέχει γρήγορα, στοχευμένα αποτελέσματα. Η πλήρης σάρωση κειμένου εξετάζει όλο το περιεχόμενο της βάσης γνώσης.",
+    "askMeAnything": "Ρωτήστε με οτιδήποτε! Για αναζήτηση στη βάση γνώσεων, επιλέξτε πρώτα μια βάση γνώσεων.",
+    "usingGeneralAI": "Χρήση γενικού βοηθού AI",
+    "usingKnowledgeBase": "Χρήση βάσης γνώσεων:",
+    "usingDocuments": "Χρήση # εγγράφων",
+    "usingFiles": "Χρήση {{count}} εγγράφου{{plural}}:",
+    "remove": "Αφαίρεση",
+    "selectKnowledgeBase": "Επιλέξτε Βάση Γνώσεων",
+    "knowledgeBaseTable": {
+      "name": "Όνομα",
+      "description": "Περιγραφή",
+      "sources": "Πηγές",
+      "noDescription": "Χωρίς περιγραφή",
+      "sourcesCount": "{{count}} πηγές",
+      "pagesCount": "{{count}} σελίδες"
+    },
+    "selectKnowledgeBasePlaceholder": "Επιλέξτε μια βάση γνώσης...",
+    "noKnowledgeBasesAvailable": "Δεν υπάρχουν διαθέσιμες βάσεις γνώσης. Δημιουργήστε μία πρώτα για να χρησιμοποιήσετε αυτή τη λειτουργία.",
+    "knowledgeBase": "Βάση γνώσης",
+    "file": "Αρχείο",
+    "errors": {
+      "generic": "Συγγνώμη, κάτι πήγε στραβά. Δοκιμάστε ξανά.",
+      "timeout": "Το αίτημα έληξε. Δοκιμάστε ξανά.",
+      "largeFileTimeout": "Η επεξεργασία μεγάλου αρχείου έληξε. Δοκιμάστε να αλλάξετε σε λειτουργία 'Πλήρης σάρωση κειμένου' για καλύτερη απόδοση με μεγάλα αρχεία.",
+      "fileSize": "Το αρχείο είναι πολύ μεγάλο. Επιλέξτε μικρότερα αρχεία.",
+      "serverError": "Παρουσιάστηκε σφάλμα διακομιστή. Δοκιμάστε ξανά αργότερα."
+    }
   },
   "settings": {
     "title": "Ρυθμίσεις",
@@ -150,32 +186,40 @@
     "copy": "Αντιγραφή",
     "paste": "Επικόλληση",
     "cut": "Αποκοπή",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Εμφάνιση περισσότερων",
+    "showLess": "Εμφάνιση λιγότερων",
+    "readMore": "Διαβάστε περισσότερα",
+    "questionNumber": "Ερώτηση {{number}}:",
+    "viewSourceCitations": "Προβολή παραπομπών πηγών ({{count}})",
+    "answer": "Απάντηση:",
+    "relevantPolicyContext": "Σχετικό πλαίσιο πολιτικής:",
+    "sources": "πηγές",
+    "sourceCitations": "Παραπομπές πηγών ({{count}})",
+    "citationNumber": "Παραπομπή {{number}}",
+    "noSourceCitations": "Δεν υπάρχουν διαθέσιμες παραπομπές πηγών για αυτή την ενότητα",
+    "noDetailedSections": "Δεν υπάρχουν διαθέσιμες λεπτομερείς ενότητες για αυτή την αναφορά",
+    "topicLabel": "Θέμα:",
+    "knowledgeBaseReference": "Αναφορά βάσης γνώσεων",
+    "knowledgeBaseReferences": "Αναφορές βάσης γνώσεων",
+    "hideReferences": "Απόκρυψη αναφορών",
+    "showReferences": "Εμφάνιση αναφορών",
+    "referenceNumber": "Αναφορά {{number}}",
+    "processedInChunks": "Επεξεργάστηκε σε {{count}} κομμάτια",
+    "synthesisErrorNote": "Σημείωση: Παρουσιάστηκε σφάλμα σύνθεσης - εμφάνιση συνδυασμένων αποτελεσμάτων κομματιών",
     "progress": {
       "starting": "Έναρξη...",
       "initializing": "Αρχικοποίηση...",
       "processing": "Επεξεργασία...",
       "extracting": "Εξαγωγή περιεχομένου..."
-    }
+    },
+    "error": "Κάτι πήγε στραβά!",
+    "welcomeBack": "Καλώς ορίσατε πίσω, χαίρομαι που σας ξαναβλέπω!",
+    "hiUser": "Γεια σας, {{name}} 👋"
+  },
+  "usage": {
+    "title": "Χρήση",
+    "currentPeriod": "Τρέχουσα περίοδος:",
+    "usedOfQuota": "χρησιμοποιήθηκε από την μηνιαία ποσόστωσή σας"
   },
   "review": {
     "pageTitle": "Επισκόπηση εγγράφων",
@@ -241,6 +285,54 @@
     "reviewSuccess": "Ο έλεγχος εγγράφου ολοκληρώθηκε με επιτυχία!",
     "reviewSuccessMultiple": "{{count}} αρχεία επεξεργάστηκαν με βελτιστοποιημένη κοινή χρήση περιβάλλοντος!"
   },
+  "modelSelection": {
+    "llmManagement": "Διαχείριση LLM",
+    "llmDescription": "Διαμορφώστε και διαχειριστείτε τα LLM που χρησιμοποιούνται για τη δημιουργία απαντήσεων κειμένου. Το προεπιλεγμένο μοντέλο θα χρησιμοποιηθεί για όλες τις λειτουργίες.",
+    "addNewLlm": "Προσθήκη νέου LLM",
+    "noLlmsConfigured": "Δεν έχουν διαμορφωθεί LLM",
+    "addNewLlmToGetStarted": "Προσθέστε ένα νέο LLM για να ξεκινήσετε",
+    "embeddingModelManagement": "Διαχείριση μοντέλων ενσωμάτωσης",
+    "embeddingDescription": "Διαμορφώστε και διαχειριστείτε τα μοντέλα ενσωμάτωσης που χρησιμοποιούνται για ευρετηρίαση και αναζήτηση βάσης γνώσεων. Το προεπιλεγμένο μοντέλο θα χρησιμοποιηθεί κατά τη δημιουργία νέων βάσεων γνώσεων, αλλά κάθε βάση γνώσεων θα συνεχίσει να χρησιμοποιεί το αρχικό της μοντέλο ενσωμάτωσης ακόμη και αν το προεπιλεγμένο αλλάξει αργότερα.",
+    "addEmbeddingModel": "Προσθήκη μοντέλου ενσωμάτωσης",
+    "noEmbeddingModelsConfigured": "Δεν έχουν διαμορφωθεί μοντέλα ενσωμάτωσης",
+    "addNewEmbeddingModelToGetStarted": "Προσθέστε ένα νέο μοντέλο ενσωμάτωσης για να ξεκινήσετε",
+    "tableHeaders": {
+      "name": "Όνομα",
+      "modelId": "ID μοντέλου",
+      "provider": "Πάροχος",
+      "description": "Περιγραφή",
+      "status": "Κατάσταση",
+      "actions": "Ενέργειες"
+    },
+    "status": {
+      "default": "Προεπιλεγμένο",
+      "available": "Διαθέσιμο"
+    },
+    "actions": {
+      "setAsDefault": "Ορισμός ως προεπιλεγμένου",
+      "delete": "Διαγραφή",
+      "validate": "Επικύρωση",
+      "validating": "Επικύρωση"
+    },
+    "dialog": {
+      "addNewLlm": "Προσθήκη νέου LLM",
+      "addEmbeddingModel": "Προσθήκη μοντέλου ενσωμάτωσης",
+      "displayName": "Εμφανιζόμενο όνομα",
+      "provider": "Πάροχος",
+      "modelId": "ID μοντέλου",
+      "description": "Περιγραφή",
+      "cancel": "Ακύρωση",
+      "addModel": "Προσθήκη μοντέλου"
+    },
+    "placeholders": {
+      "customModel": "π.χ. Το προσαρμοσμένο μοντέλο μου",
+      "embeddingModelId": "π.χ. sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Περιγράψτε το μοντέλο, τα χαρακτηριστικά του και πότε να το χρησιμοποιήσετε"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Παρακαλώ εισάγετε ένα ID μοντέλου"
+    }
+  },
   "compare": {
     "title": "Σύγκριση εγγράφων",
     "subtitle": "Επιλέξτε δύο έγγραφα για σύγκριση",
@@ -273,7 +365,8 @@
       "comparing": "Σύγκριση..."
     },
     "pleaseWait": "Παρακαλώ περιμένετε όσο συγκρίνουμε τα έγγραφά σας",
-    "compareSuccess": "Τα έγγραφα συγκρίθηκαν με επιτυχία!"
+    "compareSuccess": "Τα έγγραφα συγκρίθηκαν με επιτυχία!",
+    "selectTopicListTitle": "Επιλέξτε Λίστα Θεμάτων"
   },
   "match": {
     "title": "Αντιστοίχιση εγγράφων",
@@ -307,7 +400,84 @@
     },
     "pleaseWait": "Παρακαλώ περιμένετε όσο αντιστοιχίζουμε τα έγγραφά σας",
     "matchSuccess": "Η επεξεργασία της φόρμας ολοκληρώθηκε με επιτυχία!",
-    "singleDocumentSuccess": "Οι τιμές των πεδίων εξήχθησαν από ένα μόνο έγγραφο."
+    "singleDocumentSuccess": "Οι τιμές των πεδίων εξήχθησαν από ένα μόνο έγγραφο.",
+    "selectFormTemplateTitle": "Επιλέξτε Πρότυπο Φόρμας"
+  },
+  "editFormTemplateModal": {
+    "title": "Επεξεργασία προτύπου φόρμας",
+    "formTemplateName": "Όνομα προτύπου φόρμας",
+    "formTemplateNamePlaceholder": "Εισάγετε όνομα προτύπου φόρμας",
+    "formTemplateDescription": "Περιγραφή προτύπου φόρμας",
+    "descriptionPlaceholder": "Εισάγετε περιγραφή προτύπου φόρμας για αυτόματη πρόταση πεδίων (τουλάχιστον 10 χαρακτήρες)...",
+    "referenceDocuments": "Αναφορικά έγγραφα (προαιρετικά)",
+    "uploadFiles": "Ανέβασμα αρχείων",
+    "pleaseWait": "Παρακαλώ περιμένετε όσο ελέγχουμε τα έγγραφά σας",
+    "knowledgeBase": "Βάση γνώσης",
+    "formFields": "Πεδία φόρμας",
+    "suggest": "Πρόταση",
+    "fieldPlaceholder": "Προσθήκη ονόματος πεδίου...",
+    "cancel": "Ακύρωση",
+    "updateFormTemplate": "Ενημέρωση προτύπου φόρμας"
+  },
+  "editOutlineModal": {
+    "title": "Επεξεργασία περιγράμματος",
+    "createTitle": "Δημιουργία νέου περιγράμματος",
+    "outlineName": "Όνομα περιγράμματος",
+    "outlineNamePlaceholder": "Εισάγετε όνομα περιγράμματος",
+    "description": "Περιγραφή",
+    "descriptionPlaceholder": "Εισάγετε περιγραφή περιγράμματος για αυτόματη πρόταση ενοτήτων (τουλάχιστον 10 χαρακτήρες)...",
+    "referenceDocuments": "Αναφορικά έγγραφα (προαιρετικά)",
+    "uploadFiles": "Ανέβασμα αρχείων",
+    "knowledgeBase": "Βάση γνώσης",
+    "sections": "Ενότητες",
+    "suggest": "Πρόταση",
+    "optimize": "Βελτιστοποίηση",
+    "consultDocs": "Διαβούλευση εγγράφων",
+    "addSectionPlaceholder": "Προσθήκη ενότητας",
+    "cancel": "Ακύρωση",
+    "createOutline": "Δημιουργία περιγράμματος",
+    "updateOutline": "Ενημέρωση περιγράμματος"
+  },
+  "editChecklistModal": {
+    "title": "Επεξεργασία λίστας ελέγχου",
+    "createTitle": "Δημιουργία νέας λίστας ελέγχου",
+    "checklistName": "Όνομα λίστας ελέγχου",
+    "checklistNamePlaceholder": "Εισάγετε όνομα λίστας ελέγχου",
+    "description": "Περιγραφή",
+    "descriptionPlaceholder": "Εισάγετε περιγραφή λίστας ελέγχου για αυτόματη πρόταση ερωτήσεων (τουλάχιστον 10 χαρακτήρες)...",
+    "referenceDocuments": "Αναφορικά έγγραφα (προαιρετικά)",
+    "uploadFiles": "Ανέβασμα αρχείων",
+    "knowledgeBase": "Βάση γνώσης",
+    "questions": "{{count}} ερωτήσεις",
+    "suggest": "Πρόταση",
+    "optimize": "Βελτιστοποίηση",
+    "addQuestionPlaceholder": "Προσθήκη ερώτησης",
+    "copyAllQuestions": "Αντιγραφή όλων των ερωτήσεων ως κείμενο",
+    "cancel": "Ακύρωση",
+    "createChecklist": "Δημιουργία λίστας ελέγχου",
+    "updateChecklist": "Ενημέρωση λίστας ελέγχου"
+  },
+  "editTopicListModal": {
+    "title": "Επεξεργασία λίστας θεμάτων",
+    "createTitle": "Δημιουργία νέας λίστας θεμάτων",
+    "topicListName": "Όνομα λίστας θεμάτων",
+    "topicListNamePlaceholder": "Εισάγετε όνομα λίστας θεμάτων",
+    "description": "Περιγραφή λίστας θεμάτων",
+    "descriptionPlaceholder": "Εισάγετε περιγραφή λίστας θεμάτων για αυτόματη πρόταση θεμάτων (τουλάχιστον 10 χαρακτήρες)...",
+    "referenceDocuments": "Αναφορικά έγγραφα (προαιρετικά)",
+    "uploadFiles": "Ανέβασμα αρχείων",
+    "knowledgeBase": "Βάση γνώσης",
+    "comparisonTopics": "Θέματα σύγκρισης",
+    "topics": "{{count}} θέματα",
+    "section": "{{count}} ενότητα",
+    "section_one": "{{count}} ενότητα",
+    "sections": "{{count}} ενότητες",
+    "suggest": "Πρόταση",
+    "addTopicPlaceholder": "Προσθήκη θέματος σύγκρισης",
+    "copyAllTopics": "Αντιγραφή όλων των θεμάτων ως κείμενο",
+    "cancel": "Ακύρωση",
+    "createTopicList": "Δημιουργία λίστας θεμάτων",
+    "updateTopicList": "Ενημέρωση λίστας θεμάτων"
   },
   "knowledgeBases": {
     "title": "Διαχείριση βάσεων γνώσης",
@@ -406,6 +576,35 @@
         "fieldPlaceholder": "Προσθήκη ονόματος πεδίου...",
         "cancel": "Ακύρωση",
         "updateFormTemplate": "Ενημέρωση Προτύπου Φόρμας"
+      },
+      "fields": {
+        "title": "Τίτλος",
+        "description": "Περιγραφή"
+      },
+      "fileUpload": {
+        "currentFiles": "Τρέχοντα Αρχεία",
+        "newFiles": "Νέα Αρχεία",
+        "selectedFiles": "Επιλεγμένα Αρχεία",
+        "dragAndDrop": "Σύρετε και αφήστε αρχεία εδώ, ή κάντε κλικ για περιήγηση",
+        "dropFiles": "Αφήστε τα αρχεία εδώ...",
+        "removeFile": "Αφαίρεση αρχείου",
+        "supportedFormats": "Υποστηρίζει: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "Ακύρωση",
+        "create": "Δημιουργία",
+        "save": "Αποθήκευση",
+        "saving": "Αποθήκευση...",
+        "creating": "Δημιουργία..."
+      },
+      "validation": {
+        "titleRequired": "Ο τίτλος είναι υποχρεωτικός"
+      },
+      "messages": {
+        "createSuccess": "Η Βάση Γνώσεων δημιουργήθηκε με επιτυχία.",
+        "updateSuccess": "Η Βάση Γνώσεων ενημερώθηκε με επιτυχία.",
+        "processing": "Επεξεργασία...",
+        "pleaseWait": "Παρακαλώ περιμένετε ενώ επεξεργαζόμαστε τα αρχεία σας..."
       }
     },
     "editCustom": {
@@ -534,7 +733,32 @@
       "generatedDocument": "Δημιουργημένο Έγγραφο",
       "documentComparison": "Σύγκριση Εγγράφων",
       "matchingResults": "Αποτελέσματα Αντιστοίχισης"
-    }
+    },
+    "title": "Βελτιστοποίηση Λίστας Ελέγχου",
+    "customInstructionsLabel": "Προσαρμοσμένες Οδηγίες (Προαιρετικό)",
+    "customInstructionsHelperText": "Εισάγετε τυχόν πρόσθετες οδηγίες που πρέπει να ληφθούν υπόψη κατά την απάντηση στις ερωτήσεις της λίστας ελέγχου",
+    "analyzing": "Ανάλυση...",
+    "analyzeButton": "Ανάλυση Λίστας Ελέγχου",
+    "analyzingMessage": "Ανάλυση της λίστας ελέγχου σας για ευκαιρίες βελτιστοποίησης...",
+    "cancelAnalysis": "Ακύρωση Ανάλυσης",
+    "downloading": "Λήψη...",
+    "downloadCsv": "Λήψη CSV",
+    "questionsNeedingOptimization": "Ερωτήσεις που Χρειάζονται Βελτιστοποίηση",
+    "questionsAlreadyOptimized": "Ερωτήσεις που Έχουν Ήδη Βελτιστοποιηθεί",
+    "selected": "Επιλεγμένο",
+    "select": "Επιλογή",
+    "original": "Πρωτότυπο",
+    "suggestedImprovement": "Προτεινόμενη Βελτίωση",
+    "policyContext": "Πλαίσιο Πολιτικής",
+    "currentAnswer": "Τρέχουσα Απάντηση",
+    "showLess": "Εμφάνιση Λιγότερων",
+    "showMore": "Εμφάνιση Περισσότερων",
+    "optimizationsSelectedText": "βελτιστοποίηση{{s}} επιλέχθηκε για εφαρμογή",
+    "applying": "Εφαρμογή...",
+    "applySelectedOptimizations": "Εφαρμογή Επιλεγμένων Βελτιστοποιήσεων",
+    "uploadDocumentsTitle": "Ανεβάστε έγγραφο(α) που πρέπει να γίνονται αποδεκτά από τη λίστα ελέγχου *",
+    "uploadDocumentsHelperText": "Ανεβάστε έγγραφα που πρέπει να πληρούν όλες τις απαιτήσεις της λίστας ελέγχου για να βοηθήσετε στην αναγνώριση ερωτήσεων που μπορεί να είναι πολύ αυστηρές",
+    "customInstructionsPlaceholder": "π.χ., Σκεφτείτε ότι αυτή είναι μια παιδιατρική μελέτη κατά την αξιολόγηση απαιτήσεων σχετικών με την ηλικία, Αυτό το πρωτόκολλο είναι για μια παρέμβαση χαμηλού κινδύνου, κ.λπ."
   },
   "optimizeOutlineModal": {
     "title": "Βελτιστοποίηση Περιγράμματος",
@@ -571,7 +795,44 @@
       "generating": "Δημιουργία αναφοράς...",
       "processingSection": "Επεξεργασία ενότητας {{sectionNum}} από {{totalSections}}: {{sectionPreview}}"
     },
-    "pleaseWait": "Παρακαλώ περιμένετε όσο δημιουργούμε την αναφορά σας"
+    "pleaseWait": "Παρακαλώ περιμένετε όσο δημιουργούμε την αναφορά σας",
+    "pageDescription": "Δημιουργήστε ένα έγγραφο βασισμένο σε περίγραμμα καθορισμένο από τον χρήστη και βάση δεδομένων εγγράφων.",
+    "generatingDocument": "Δημιουργία εγγράφου...",
+    "knowledgeBaseTitle": "Βάση γνώσης",
+    "documentOutlineTitle": "Περίγραμμα Εγγράφου",
+    "clickToSelect": "Κάντε κλικ για επιλογή",
+    "customInstructionsTitle": "Προσαρμοσμένες Οδηγίες (Προαιρετικό)",
+    "customInstructionsPlaceholder": "Εισάγετε τυχόν πρόσθετες οδηγίες που πρέπει να ληφθούν υπόψη κατά τη δημιουργία κάθε ενότητας της αναφοράς...",
+    "characterCount": "{{count}}/2000 χαρακτήρες. Αυτές οι οδηγίες θα προστεθούν στην προτροπή κατά τη δημιουργία κάθε ενότητας.",
+    "selectKnowledgeBaseTitle": "Επιλέξτε Βάση Γνώσεων",
+    "selectDocumentOutlineTitle": "Επιλέξτε Περίγραμμα Εγγράφου",
+    "generateButton": "Δημιουργία",
+    "results": "Αποτελέσματα",
+    "copyText": "Αντιγραφή Κειμένου",
+    "copied": "Αντιγράφηκε!",
+    "downloadDocx": "Λήψη DOCX",
+    "downloadCsv": "Λήψη CSV",
+    "clearReport": "Καθαρισμός Αναφοράς",
+    "resultsPlaceholder": "Τα αποτελέσματα θα εμφανιστούν εδώ μετά τη δημιουργία ενός εγγράφου.",
+    "sectionsWithSources": "Ενότητες με Πηγές",
+    "sectionNumber": "Ενότητα {number}: {title}",
+    "kbGenerated": "Δημιουργήθηκε ΒΓ",
+    "rawText": "Ακατέργαστο Κείμενο",
+    "viewSourceCitations": "Προβολή Παραπομπών Πηγών ({count})",
+    "documentCopiedSuccess": "Το έγγραφο αντιγράφηκε στο πρόχειρο",
+    "documentCopiedError": "Αποτυχία αντιγραφής του εγγράφου στο πρόχειρο",
+    "documentDownloadSuccess": "Το έγγραφο κατέβηκε με επιτυχία",
+    "documentDownloadError": "Αποτυχία λήψης εγγράφου: {error}",
+    "csvDownloadSuccess": "Το CSV κατέβηκε με επιτυχία",
+    "csvDownloadError": "Αποτυχία λήψης CSV: {error}",
+    "reportClearedSuccess": "Η δημιουργημένη αναφορά καθαρίστηκε",
+    "enterAtLeastOneSection": "Παρακαλώ εισάγετε τουλάχιστον μία ενότητα",
+    "selectKnowledgeBase": "Παρακαλώ επιλέξτε μια βάση γνώσεων",
+    "generateSuccess": "Η αναφορά δημιουργήθηκε με επιτυχία!",
+    "generateError": "Αποτυχία δημιουργίας εγγράφου: {error}",
+    "vectorSearch": "αναζήτηση διανυσμάτων",
+    "fullDocumentScan": "πλήρης σάρωση εγγράφου",
+    "editOutline": "Επεξεργασία Περιγράμματος"
   },
   "feedback": {
     "modalTitlePositive": "Τι ήταν χρήσιμο;",
@@ -598,14 +859,14 @@
     "downloadCsv": "Λήψη CSV",
     "clearCsv": "Εκκαθάριση CSV",
     "clearResults": "Εκκαθάριση αποτελεσμάτων",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Θέμα:",
+    "knowledgeBaseReference": "Αναφορά Βάσης Γνώσεων",
+    "knowledgeBaseReferences": "Αναφορές Βάσης Γνώσεων",
+    "hideReferences": "Απόκρυψη Αναφορών",
+    "showReferences": "Εμφάνιση Αναφορών",
+    "referenceNumber": "Αναφορά {{number}}",
+    "processedInChunks": "Επεξεργάστηκε σε {{count}} κομμάτια",
+    "synthesisError": "Σφάλμα σύνθεσης ανάλυσης θέματος"
   },
   "toast": {
     "passwordUpdated": "Ο κωδικός πρόσβασης ενημερώθηκε επιτυχώς.",

@@ -29,7 +29,8 @@
     "next": "Kitas",
     "previous": "Ankstesnis",
     "confirm": "Patvirtinti",
-    "back": "Atgal"
+    "back": "Atgal",
+    "done": "Atlikta"
   },
   "forms": {
     "firstName": "Vardas",
@@ -60,7 +61,42 @@
     "knowledgeBaseTableName": "Pavadinimas",
     "knowledgeBaseTableDescription": "Aprašymas",
     "knowledgeBaseTableSources": "Šaltiniai",
-    "knowledgeBaseTablePages": "Puslapiai"
+    "knowledgeBaseTablePages": "Puslapiai",
+    "title": "Pokalbiai",
+    "sourcePopover": {
+      "knowledgeBase": "Žinių bazė",
+      "file": "Failas"
+    },
+    "searchMode": "Paieškos režimas:",
+    "vectorSearch": "Vektorinė paieška",
+    "fullTextScan": "Viso teksto nuskaitymas",
+    "searchModeDescription": "[AUTO-TRANSLATED lt] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
+    "askMeAnything": "[AUTO-TRANSLATED lt] Ask me anything! For knowledge base search, select a knowledge base first.",
+    "usingGeneralAI": "[AUTO-TRANSLATED lt] Using general AI assistant",
+    "usingKnowledgeBase": "[AUTO-TRANSLATED lt] Using knowledge base:",
+    "usingDocuments": "[AUTO-TRANSLATED lt] Using # document(s)",
+    "usingFiles": "[AUTO-TRANSLATED lt] Using {{count}} document{{plural}}:",
+    "remove": "Pašalinti",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED lt] Select Knowledge Base",
+    "knowledgeBaseTable": {
+      "name": "Pavadinimas",
+      "description": "Aprašymas",
+      "sources": "Šaltiniai",
+      "noDescription": "Aprašymo nėra",
+      "sourcesCount": "{{count}} šaltiniai",
+      "pagesCount": "{{count}} puslapiai"
+    },
+    "selectKnowledgeBasePlaceholder": "Pasirinkite žinių bazę...",
+    "noKnowledgeBasesAvailable": "Nėra prieinamų žinių bazių. Sukurkite vieną, kad galėtumėte naudoti šią funkciją.",
+    "knowledgeBase": "Žinių bazė",
+    "file": "Failas",
+    "errors": {
+      "generic": "[AUTO-TRANSLATED lt] Sorry, something went wrong. Please try again.",
+      "timeout": "[AUTO-TRANSLATED lt] Request timed out. Please try again.",
+      "largeFileTimeout": "[AUTO-TRANSLATED lt] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
+      "fileSize": "[AUTO-TRANSLATED lt] File is too large. Please choose smaller files.",
+      "serverError": "[AUTO-TRANSLATED lt] Server error occurred. Please try again later."
+    }
   },
   "settings": {
     "title": "Nustatymai",
@@ -150,32 +186,40 @@
     "copy": "Kopijuoti",
     "paste": "Įklijuoti",
     "cut": "Iškirpti",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Rodyti daugiau",
+    "showLess": "Rodyti mažiau",
+    "readMore": "Skaityti daugiau",
+    "questionNumber": "Klausimas {{number}}:",
+    "viewSourceCitations": "Žiūrėti šaltinių citatas ({{count}})",
+    "answer": "Atsakymas:",
+    "relevantPolicyContext": "Aktualus politikos kontekstas:",
+    "sources": "šaltiniai",
+    "sourceCitations": "Šaltinių citatos ({{count}})",
+    "citationNumber": "Citata {{number}}",
+    "noSourceCitations": "Šiam skyriui nėra šaltinių citatų",
+    "noDetailedSections": "Šiai ataskaitai nėra išsamios sekcijos",
+    "topicLabel": "Tema:",
+    "knowledgeBaseReference": "Žinių bazės nuoroda",
+    "knowledgeBaseReferences": "Žinių bazės nuorodos",
+    "hideReferences": "Slėpti nuorodas",
+    "showReferences": "Rodyti nuorodas",
+    "referenceNumber": "Nuoroda {{number}}",
+    "processedInChunks": "Apdorota {{count}} dalyse",
+    "synthesisErrorNote": "Pastaba: Įvyko sintezės klaida - rodomi kombinuoti dalių rezultatai",
     "progress": {
       "starting": "Paleidžiama...",
       "initializing": "Inicijuojama...",
       "processing": "Apdorojama...",
       "extracting": "Turinio ištraukimas..."
-    }
+    },
+    "error": "[AUTO-TRANSLATED lt] Something went wrong!",
+    "welcomeBack": "[AUTO-TRANSLATED lt] Welcome back, nice to see you again!",
+    "hiUser": "[AUTO-TRANSLATED lt] Hi, {{name}} 👋"
+  },
+  "usage": {
+    "title": "Naudojimas",
+    "currentPeriod": "Dabartinis laikotarpis:",
+    "usedOfQuota": "naudota iš jūsų mėnesinės kvotos"
   },
   "review": {
     "pageTitle": "Dokumentų peržiūra",
@@ -209,7 +253,7 @@
     "checklistNamePlaceholder": "Įveskite kontrolinio sąrašo pavadinimą...",
     "checklistDescriptionLabel": "Aprašymas",
     "checklistDescriptionPlaceholder": "Įveskite kontrolinio sąrašo aprašymą automatiniams klausimų pasiūlymams (mažiausiai 10 simbolių)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} klausimai",
     "suggest": "Pasiūlyti",
     "suggesting": "Siūloma...",
     "optimize": "Optimizuoti",
@@ -240,6 +284,54 @@
     "pleaseWait": "Prašome palaukti, kol peržiūrime jūsų dokumentus",
     "reviewSuccess": "Dokumento peržiūra sėkmingai baigta!",
     "reviewSuccessMultiple": "{{count}} failai apdoroti su optimizuotu konteksto bendrinimu!"
+  },
+  "modelSelection": {
+    "llmManagement": "LLM valdymas",
+    "llmDescription": "Konfigūruokite ir valdykite LLM, naudojamus teksto atsakymams generuoti. Numatytoji modelis bus naudojamas visoms operacijoms.",
+    "addNewLlm": "Pridėti naują LLM",
+    "noLlmsConfigured": "Nėra sukonfigūruotų LLM",
+    "addNewLlmToGetStarted": "Pridėkite naują LLM, kad pradėtumėte",
+    "embeddingModelManagement": "Įterpimo modelių valdymas",
+    "embeddingDescription": "Konfigūruokite ir valdykite įterpimo modelius, naudojamus žinių bazės indeksavimui ir paieškai. Numatytoji modelis bus naudojamas kuriant naujas žinių bazes, tačiau kiekviena žinių bazė toliau naudos savo pradinį įterpimo modelį, net jei numatytoji vėliau pasikeis.",
+    "addEmbeddingModel": "Pridėti įterpimo modelį",
+    "noEmbeddingModelsConfigured": "Nėra sukonfigūruotų įterpimo modelių",
+    "addNewEmbeddingModelToGetStarted": "Pridėkite naują įterpimo modelį, kad pradėtumėte",
+    "tableHeaders": {
+      "name": "Pavadinimas",
+      "modelId": "Modelio ID",
+      "provider": "Teikėjas",
+      "description": "Aprašymas",
+      "status": "Būsena",
+      "actions": "Veiksmai"
+    },
+    "status": {
+      "default": "Numatytasis",
+      "available": "Prieinamas"
+    },
+    "actions": {
+      "setAsDefault": "Nustatyti kaip numatytąjį",
+      "delete": "Ištrinti",
+      "validate": "Patvirtinti",
+      "validating": "Patvirtinama"
+    },
+    "dialog": {
+      "addNewLlm": "Pridėti naują LLM",
+      "addEmbeddingModel": "Pridėti įterpimo modelį",
+      "displayName": "Rodomas pavadinimas",
+      "provider": "Teikėjas",
+      "modelId": "Modelio ID",
+      "description": "Aprašymas",
+      "cancel": "Atšaukti",
+      "addModel": "Pridėti modelį"
+    },
+    "placeholders": {
+      "customModel": "pvz. Mano pasirinktinis modelis",
+      "embeddingModelId": "pvz. sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Aprašykite modelį, jo charakteristikas ir kada jį naudoti"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Prašome įvesti modelio ID"
+    }
   },
   "compare": {
     "title": "Palyginti dokumentus",
@@ -273,7 +365,8 @@
       "comparing": "Lyginima..."
     },
     "pleaseWait": "Prašome palaukti, kol palyginame jūsų dokumentus",
-    "compareSuccess": "Dokumentai sėkmingai palyginti!"
+    "compareSuccess": "Dokumentai sėkmingai palyginti!",
+    "selectTopicListTitle": "[AUTO-TRANSLATED lt] Select Topic List"
   },
   "match": {
     "title": "Dokumentų atitikimas",
@@ -307,7 +400,84 @@
     },
     "pleaseWait": "Prašome palaukti, kol suderinsime jūsų dokumentus",
     "matchSuccess": "Formos apdorojimas sėkmingai baigtas!",
-    "singleDocumentSuccess": "Laukų reikšmės išgautos iš vieno dokumento."
+    "singleDocumentSuccess": "Laukų reikšmės išgautos iš vieno dokumento.",
+    "selectFormTemplateTitle": "[AUTO-TRANSLATED lt] Select Form Template"
+  },
+  "editFormTemplateModal": {
+    "title": "Formos šablono redagavimas",
+    "formTemplateName": "Formos šablono pavadinimas",
+    "formTemplateNamePlaceholder": "Įveskite formos šablono pavadinimą",
+    "formTemplateDescription": "Formos šablono aprašymas",
+    "descriptionPlaceholder": "Įveskite formos šablono aprašymą laukams automatiškai pasiūlyti (mažiausiai 10 simbolių)...",
+    "referenceDocuments": "Nuorodos dokumentai (neprivaloma)",
+    "uploadFiles": "Įkelti failus",
+    "pleaseWait": "Prašome palaukti, kol peržiūrėsime jūsų dokumentus",
+    "knowledgeBase": "Žinių bazė",
+    "formFields": "Formos laukai",
+    "suggest": "Pasiūlyti",
+    "fieldPlaceholder": "Pridėti lauko pavadinimą...",
+    "cancel": "Atšaukti",
+    "updateFormTemplate": "Atnaujinti formos šabloną"
+  },
+  "editOutlineModal": {
+    "title": "Kontūro redagavimas",
+    "createTitle": "Sukurti naują kontūrą",
+    "outlineName": "Kontūro pavadinimas",
+    "outlineNamePlaceholder": "Įveskite kontūro pavadinimą",
+    "description": "Aprašymas",
+    "descriptionPlaceholder": "Įveskite kontūro aprašymą skyriams automatiškai pasiūlyti (mažiausiai 10 simbolių)...",
+    "referenceDocuments": "Nuorodos dokumentai (neprivaloma)",
+    "uploadFiles": "Įkelti failus",
+    "knowledgeBase": "Žinių bazė",
+    "sections": "Skyriai",
+    "suggest": "Pasiūlyti",
+    "optimize": "Optimizuoti",
+    "consultDocs": "Konsultuotis su dokumentais",
+    "addSectionPlaceholder": "Pridėti skyrių",
+    "cancel": "Atšaukti",
+    "createOutline": "Sukurti kontūrą",
+    "updateOutline": "Atnaujinti kontūrą"
+  },
+  "editChecklistModal": {
+    "title": "Kontrolinio sąrašo redagavimas",
+    "createTitle": "Sukurti naują kontrolinį sąrašą",
+    "checklistName": "Kontrolinio sąrašo pavadinimas",
+    "checklistNamePlaceholder": "Įveskite kontrolinio sąrašo pavadinimą",
+    "description": "Aprašymas",
+    "descriptionPlaceholder": "Įveskite kontrolinio sąrašo aprašymą klausimams automatiškai pasiūlyti (mažiausiai 10 simbolių)...",
+    "referenceDocuments": "Nuorodos dokumentai (neprivaloma)",
+    "uploadFiles": "Įkelti failus",
+    "knowledgeBase": "Žinių bazė",
+    "questions": "{{count}} klausimų",
+    "suggest": "Pasiūlyti",
+    "optimize": "Optimizuoti",
+    "addQuestionPlaceholder": "Pridėti klausimą",
+    "copyAllQuestions": "Kopijuoti visus klausimus kaip tekstą",
+    "cancel": "Atšaukti",
+    "createChecklist": "Sukurti kontrolinį sąrašą",
+    "updateChecklist": "Atnaujinti kontrolinį sąrašą"
+  },
+  "editTopicListModal": {
+    "title": "Temų sąrašo redagavimas",
+    "createTitle": "Sukurti naują temų sąrašą",
+    "topicListName": "Temų sąrašo pavadinimas",
+    "topicListNamePlaceholder": "Įveskite temų sąrašo pavadinimą",
+    "description": "Temų sąrašo aprašymas",
+    "descriptionPlaceholder": "Įveskite temų sąrašo aprašymą temoms automatiškai pasiūlyti (mažiausiai 10 simbolių)...",
+    "referenceDocuments": "Nuorodos dokumentai (neprivaloma)",
+    "uploadFiles": "Įkelti failus",
+    "knowledgeBase": "Žinių bazė",
+    "comparisonTopics": "Palyginimo temos",
+    "topics": "{{count}} temų",
+    "section": "{{count}} skyrius",
+    "section_one": "{{count}} skyrius",
+    "sections": "{{count}} skyrių",
+    "suggest": "Pasiūlyti",
+    "addTopicPlaceholder": "Pridėti palyginimo temą",
+    "copyAllTopics": "Kopijuoti visas temas kaip tekstą",
+    "cancel": "Atšaukti",
+    "createTopicList": "Sukurti temų sąrašą",
+    "updateTopicList": "Atnaujinti temų sąrašą"
   },
   "knowledgeBases": {
     "title": "Žinių bazių valdymas",
@@ -406,6 +576,35 @@
         "fieldPlaceholder": "Pridėti lauko pavadinimą...",
         "cancel": "Atšaukti",
         "updateFormTemplate": "Atnaujinti Formos Šabloną"
+      },
+      "fields": {
+        "title": "[AUTO-TRANSLATED lt] Title",
+        "description": "Aprašymas"
+      },
+      "fileUpload": {
+        "currentFiles": "[AUTO-TRANSLATED lt] Current Files",
+        "newFiles": "[AUTO-TRANSLATED lt] New Files",
+        "selectedFiles": "[AUTO-TRANSLATED lt] Selected Files",
+        "dragAndDrop": "[AUTO-TRANSLATED lt] Drag and drop files here, or click to browse",
+        "dropFiles": "[AUTO-TRANSLATED lt] Drop the files here...",
+        "removeFile": "[AUTO-TRANSLATED lt] Remove file",
+        "supportedFormats": "[AUTO-TRANSLATED lt] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "Atšaukti",
+        "create": "Sukurti",
+        "save": "Išsaugoti",
+        "saving": "[AUTO-TRANSLATED lt] Saving...",
+        "creating": "[AUTO-TRANSLATED lt] Creating..."
+      },
+      "validation": {
+        "titleRequired": "[AUTO-TRANSLATED lt] Title is required"
+      },
+      "messages": {
+        "createSuccess": "[AUTO-TRANSLATED lt] Knowledge Base created successfully.",
+        "updateSuccess": "[AUTO-TRANSLATED lt] Knowledge Base updated successfully.",
+        "processing": "[AUTO-TRANSLATED lt] Processing...",
+        "pleaseWait": "[AUTO-TRANSLATED lt] Please wait while we process your files..."
       }
     },
     "editCustom": {
@@ -568,7 +767,44 @@
       "generating": "Ataskaitos generavimas...",
       "processingSection": "Apdorojama sekcija {{sectionNum}} iš {{totalSections}}: {{sectionPreview}}"
     },
-    "pleaseWait": "Prašome palaukti, kol sugeneruosime jūsų ataskaitą"
+    "pleaseWait": "Prašome palaukti, kol sugeneruosime jūsų ataskaitą",
+    "pageDescription": "[AUTO-TRANSLATED lt] Generate a document based on a user-defined outline and document database.",
+    "generatingDocument": "[AUTO-TRANSLATED lt] Generating document...",
+    "knowledgeBaseTitle": "Žinių bazė",
+    "documentOutlineTitle": "[AUTO-TRANSLATED lt] Document Outline",
+    "clickToSelect": "[AUTO-TRANSLATED lt] Click to select",
+    "customInstructionsTitle": "[AUTO-TRANSLATED lt] Custom Instructions (Optional)",
+    "customInstructionsPlaceholder": "[AUTO-TRANSLATED lt] Enter any additional instructions that should be considered when generating each section of the report...",
+    "characterCount": "[AUTO-TRANSLATED lt] {{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
+    "selectKnowledgeBaseTitle": "[AUTO-TRANSLATED lt] Select Knowledge Base",
+    "selectDocumentOutlineTitle": "[AUTO-TRANSLATED lt] Select Document Outline",
+    "generateButton": "[AUTO-TRANSLATED lt] Generate",
+    "results": "[AUTO-TRANSLATED lt] Results",
+    "copyText": "[AUTO-TRANSLATED lt] Copy Text",
+    "copied": "[AUTO-TRANSLATED lt] Copied!",
+    "downloadDocx": "[AUTO-TRANSLATED lt] Download DOCX",
+    "downloadCsv": "[AUTO-TRANSLATED lt] Download CSV",
+    "clearReport": "[AUTO-TRANSLATED lt] Clear Report",
+    "resultsPlaceholder": "[AUTO-TRANSLATED lt] Results will appear here after generating a document.",
+    "sectionsWithSources": "[AUTO-TRANSLATED lt] Sections with Sources",
+    "sectionNumber": "[AUTO-TRANSLATED lt] Section {number}: {title}",
+    "kbGenerated": "[AUTO-TRANSLATED lt] KB Generated",
+    "rawText": "[AUTO-TRANSLATED lt] Raw Text",
+    "viewSourceCitations": "[AUTO-TRANSLATED lt] View Source Citations ({count})",
+    "documentCopiedSuccess": "[AUTO-TRANSLATED lt] Document copied to clipboard",
+    "documentCopiedError": "[AUTO-TRANSLATED lt] Failed to copy document to clipboard",
+    "documentDownloadSuccess": "[AUTO-TRANSLATED lt] Document downloaded successfully",
+    "documentDownloadError": "[AUTO-TRANSLATED lt] Failed to download document: {error}",
+    "csvDownloadSuccess": "[AUTO-TRANSLATED lt] CSV downloaded successfully",
+    "csvDownloadError": "[AUTO-TRANSLATED lt] Failed to download CSV: {error}",
+    "reportClearedSuccess": "[AUTO-TRANSLATED lt] Generated report cleared",
+    "enterAtLeastOneSection": "[AUTO-TRANSLATED lt] Please enter at least one section",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED lt] Please select a knowledge base",
+    "generateSuccess": "[AUTO-TRANSLATED lt] Report generated successfully!",
+    "generateError": "[AUTO-TRANSLATED lt] Failed to generate document: {error}",
+    "vectorSearch": "[AUTO-TRANSLATED lt] vector search",
+    "fullDocumentScan": "[AUTO-TRANSLATED lt] full document scan",
+    "editOutline": "[AUTO-TRANSLATED lt] Edit Outline"
   },
   "feedback": {
     "modalTitlePositive": "Kas buvo naudinga?",
@@ -595,14 +831,14 @@
     "downloadCsv": "Atsisiųsti CSV",
     "clearCsv": "Išvalyti CSV",
     "clearResults": "Išvalyti rezultatus",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Tema:",
+    "knowledgeBaseReference": "Žinių Bazės Nuoroda",
+    "knowledgeBaseReferences": "Žinių Bazės Nuorodos",
+    "hideReferences": "Slėpti Nuorodas",
+    "showReferences": "Rodyti Nuorodas",
+    "referenceNumber": "Nuoroda {{number}}",
+    "processedInChunks": "Apdorota {{count}} dalyse",
+    "synthesisError": "Klaida sintezėje temos analizės"
   },
   "toast": {
     "passwordUpdated": "Slaptažodis sėkmingai atnaujintas.",

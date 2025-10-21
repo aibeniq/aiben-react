@@ -10,7 +10,7 @@
     "archive": "Archiv",
     "settings": "Nastavení",
     "admin": "Správce",
-    "menu": "Menu",
+    "menu": "[AUTO-TRANSLATED cs] Menu",
     "tools": "Nástroje",
     "configurations": "Konfigurace",
     "myProfile": "Můj profil",
@@ -29,7 +29,8 @@
     "next": "Další",
     "previous": "Předchozí",
     "confirm": "Potvrdit",
-    "back": "Zpět"
+    "back": "Zpět",
+    "done": "Hotovo"
   },
   "forms": {
     "firstName": "Jméno",
@@ -57,7 +58,42 @@
     "knowledgeBaseTableName": "Název",
     "knowledgeBaseTableDescription": "Popis",
     "knowledgeBaseTableSources": "Zdroje",
-    "knowledgeBaseTablePages": "Stránky"
+    "knowledgeBaseTablePages": "Stránky",
+    "title": "[AUTO-TRANSLATED cs] Chat",
+    "sourcePopover": {
+      "knowledgeBase": "Databáze znalostí",
+      "file": "Soubor"
+    },
+    "searchMode": "Režim vyhledávání:",
+    "vectorSearch": "Vektorové vyhledávání",
+    "fullTextScan": "Kompletní sken textu",
+    "searchModeDescription": "[AUTO-TRANSLATED cs] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
+    "askMeAnything": "[AUTO-TRANSLATED cs] Ask me anything! For knowledge base search, select a knowledge base first.",
+    "usingGeneralAI": "[AUTO-TRANSLATED cs] Using general AI assistant",
+    "usingKnowledgeBase": "[AUTO-TRANSLATED cs] Using knowledge base:",
+    "usingDocuments": "[AUTO-TRANSLATED cs] Using # document(s)",
+    "usingFiles": "[AUTO-TRANSLATED cs] Using {{count}} document{{plural}}:",
+    "remove": "Odebrat",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED cs] Select Knowledge Base",
+    "knowledgeBaseTable": {
+      "name": "Název",
+      "description": "Popis",
+      "sources": "Zdroje",
+      "noDescription": "Žádný popis",
+      "sourcesCount": "{{count}} zdrojů",
+      "pagesCount": "{{count}} stránek"
+    },
+    "selectKnowledgeBasePlaceholder": "Vyberte databázi znalostí...",
+    "noKnowledgeBasesAvailable": "Žádné dostupné databáze znalostí. Nejprve vytvořte jednu pro použití této funkce.",
+    "knowledgeBase": "Databáze znalostí",
+    "file": "Soubor",
+    "errors": {
+      "generic": "[AUTO-TRANSLATED cs] Sorry, something went wrong. Please try again.",
+      "timeout": "[AUTO-TRANSLATED cs] Request timed out. Please try again.",
+      "largeFileTimeout": "[AUTO-TRANSLATED cs] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
+      "fileSize": "[AUTO-TRANSLATED cs] File is too large. Please choose smaller files.",
+      "serverError": "[AUTO-TRANSLATED cs] Server error occurred. Please try again later."
+    }
   },
   "settings": {
     "title": "Nastavení",
@@ -142,7 +178,7 @@
     "goodbye": "Na shledanou",
     "yes": "Ano",
     "no": "Ne",
-    "ok": "OK",
+    "ok": "[AUTO-TRANSLATED cs] OK",
     "search": "Hledat",
     "filter": "Filtr",
     "sort": "Seřadit",
@@ -150,32 +186,37 @@
     "copy": "Kopírovat",
     "paste": "Vložit",
     "cut": "Vyjmout",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Zobrazit více",
+    "showLess": "Zobrazit méně",
+    "readMore": "Číst více",
+    "questionNumber": "Otázka {{number}}:",
+    "viewSourceCitations": "Zobrazit zdrojové citace ({{count}})",
+    "answer": "Odpověď:",
+    "relevantPolicyContext": "Relevantní kontext politiky:",
+    "sources": "zdroje",
+    "sourceCitations": "Zdrojové citace ({{count}})",
+    "citationNumber": "Citace {{number}}",
+    "noSourceCitations": "Pro tuto sekci nejsou k dispozici žádné zdrojové citace",
+    "noDetailedSections": "Pro tuto zprávu nejsou k dispozici žádné podrobné sekce",
+    "topicLabel": "Téma:",
+    "knowledgeBaseReference": "Odkaz na znalostní bázi",
+    "knowledgeBaseReferences": "Odkazy na znalostní bázi",
+    "hideReferences": "Skrýt odkazy",
+    "showReferences": "Zobrazit odkazy",
+    "referenceNumber": "Odkaz {{number}}",
+    "processedInChunks": "Zpracováno v {{count}} částech",
+    "synthesisErrorNote": "Poznámka: Došlo k chybě syntézy - zobrazují se kombinované výsledky částí",
     "progress": {
       "starting": "Spouštění...",
       "initializing": "Inicializace...",
       "processing": "Zpracování...",
       "extracting": "Extrahování obsahu..."
     }
+  },
+  "usage": {
+    "title": "Využití",
+    "currentPeriod": "Aktuální období:",
+    "usedOfQuota": "využito z vaší měsíční kvóty"
   },
   "review": {
     "pageTitle": "Kontrolovat Dokumenty",
@@ -209,7 +250,7 @@
     "checklistNamePlaceholder": "Zadejte název kontrolního seznamu...",
     "checklistDescriptionLabel": "Popis",
     "checklistDescriptionPlaceholder": "Zadejte popis kontrolního seznamu pro automatické návrhy otázek (minimálně 10 znaků)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} otázky",
     "suggest": "Navrhnout",
     "suggesting": "Navrhování...",
     "optimize": "Optimalizovat",
@@ -230,7 +271,16 @@
     "deleteChecklist": "Smazat Kontrolní Seznam",
     "pleaseWait": "Počkejte prosím, než zkontrolujeme vaše dokumenty",
     "reviewSuccess": "Kontrola dokumentu dokončena úspěšně!",
-    "reviewSuccessMultiple": "{{count}} souborů zpracováno s optimalizovaným sdílením kontextu!"
+    "reviewSuccessMultiple": "{{count}} souborů zpracováno s optimalizovaným sdílením kontextu!",
+    "dropFilesHere": "[AUTO-TRANSLATED cs] Drop the files here",
+    "uploadedFiles": "[AUTO-TRANSLATED cs] Uploaded Files",
+    "removeFile": "Odebrat",
+    "characterCount": "[AUTO-TRANSLATED cs] {{count}}/2000 characters. These instructions will be appended to each question when processing.",
+    "searchMode": "[AUTO-TRANSLATED cs] Search Mode",
+    "vectorSearch": "Vektorové vyhledávání",
+    "fullDocumentScan": "[AUTO-TRANSLATED cs] Full Document Scan",
+    "vectorSearchDescription": "[AUTO-TRANSLATED cs] Finds relevant content using AI similarity search (fast, targeted)",
+    "fullScanDescription": "[AUTO-TRANSLATED cs] Analyzes all documents in the knowledge base (comprehensive, thorough)"
   },
   "compare": {
     "title": "Porovnat dokumenty",
@@ -264,7 +314,8 @@
       "comparing": "Porovnávání..."
     },
     "pleaseWait": "Počkejte prosím, zatímco porovnáváme vaše dokumenty",
-    "compareSuccess": "Dokumenty byly úspěšně porovnány!"
+    "compareSuccess": "Dokumenty byly úspěšně porovnány!",
+    "selectTopicListTitle": "[AUTO-TRANSLATED cs] Select Topic List"
   },
   "match": {
     "title": "Párování dokumentů",
@@ -298,7 +349,84 @@
     },
     "pleaseWait": "Počkejte prosím, zatímco párujeme vaše dokumenty",
     "matchSuccess": "Zpracování formuláře bylo úspěšně dokončeno!",
-    "singleDocumentSuccess": "Hodnoty polí byly extrahovány z jednoho dokumentu."
+    "singleDocumentSuccess": "Hodnoty polí byly extrahovány z jednoho dokumentu.",
+    "selectFormTemplateTitle": "[AUTO-TRANSLATED cs] Select Form Template"
+  },
+  "editFormTemplateModal": {
+    "title": "Upravit šablonu formuláře",
+    "formTemplateName": "Název šablony formuláře",
+    "formTemplateNamePlaceholder": "Zadejte název šablony formuláře",
+    "formTemplateDescription": "Popis šablony formuláře",
+    "descriptionPlaceholder": "Zadejte popis šablony formuláře pro automatické navržení polí (minimálně 10 znaků)...",
+    "referenceDocuments": "Referenční dokumenty (volitelné)",
+    "uploadFiles": "Nahrát soubory",
+    "pleaseWait": "Počkejte prosím, zatímco kontrolujeme vaše dokumenty",
+    "knowledgeBase": "Znalostní báze",
+    "formFields": "Pole formuláře",
+    "suggest": "Navrhnout",
+    "fieldPlaceholder": "Přidat název pole...",
+    "cancel": "Zrušit",
+    "updateFormTemplate": "Aktualizovat šablonu formuláře"
+  },
+  "editOutlineModal": {
+    "title": "Upravit osnovu",
+    "createTitle": "Vytvořit novou osnovu",
+    "outlineName": "Název osnovy",
+    "outlineNamePlaceholder": "Zadejte název osnovy",
+    "description": "Popis",
+    "descriptionPlaceholder": "Zadejte popis osnovy pro automatické navržení sekcí (minimálně 10 znaků)...",
+    "referenceDocuments": "Referenční dokumenty (volitelné)",
+    "uploadFiles": "Nahrát soubory",
+    "knowledgeBase": "Znalostní báze",
+    "sections": "Sekce",
+    "suggest": "Navrhnout",
+    "optimize": "Optimalizovat",
+    "consultDocs": "Konzultovat dokumenty",
+    "addSectionPlaceholder": "Přidat sekci",
+    "cancel": "Zrušit",
+    "createOutline": "Vytvořit osnovu",
+    "updateOutline": "Aktualizovat osnovu"
+  },
+  "editChecklistModal": {
+    "title": "Upravit kontrolní seznam",
+    "createTitle": "Vytvořit nový kontrolní seznam",
+    "checklistName": "Název kontrolního seznamu",
+    "checklistNamePlaceholder": "Zadejte název kontrolního seznamu",
+    "description": "Popis",
+    "descriptionPlaceholder": "Zadejte popis kontrolního seznamu pro automatické navržení otázek (minimálně 10 znaků)...",
+    "referenceDocuments": "Referenční dokumenty (volitelné)",
+    "uploadFiles": "Nahrát soubory",
+    "knowledgeBase": "Znalostní báze",
+    "questions": "{{count}} otázek",
+    "suggest": "Navrhnout",
+    "optimize": "Optimalizovat",
+    "addQuestionPlaceholder": "Přidat otázku",
+    "copyAllQuestions": "Kopírovat všechny otázky jako text",
+    "cancel": "Zrušit",
+    "createChecklist": "Vytvořit kontrolní seznam",
+    "updateChecklist": "Aktualizovat kontrolní seznam"
+  },
+  "editTopicListModal": {
+    "title": "Upravit seznam témat",
+    "createTitle": "Vytvořit nový seznam témat",
+    "topicListName": "Název seznamu témat",
+    "topicListNamePlaceholder": "Zadejte název seznamu témat",
+    "description": "Popis seznamu témat",
+    "descriptionPlaceholder": "Zadejte popis seznamu témat pro automatické navržení témat (minimálně 10 znaků)...",
+    "referenceDocuments": "Referenční dokumenty (volitelné)",
+    "uploadFiles": "Nahrát soubory",
+    "knowledgeBase": "Znalostní báze",
+    "comparisonTopics": "Témata porovnání",
+    "topics": "{{count}} témat",
+    "section": "{{count}} sekce",
+    "section_one": "{{count}} sekce",
+    "sections": "{{count}} sekcí",
+    "suggest": "Navrhnout",
+    "addTopicPlaceholder": "Přidat téma porovnání",
+    "copyAllTopics": "Kopírovat všechna témata jako text",
+    "cancel": "Zrušit",
+    "createTopicList": "Vytvořit seznam témat",
+    "updateTopicList": "Aktualizovat seznam témat"
   },
   "knowledgeBases": {
     "title": "Správa znalostních bází",
@@ -388,7 +516,32 @@
       },
       "messages": {
         "processing": "Zpracování...",
-        "pleaseWait": "Počkejte prosím, než zpracujeme vaše soubory..."
+        "pleaseWait": "Počkejte prosím, než zpracujeme vaše soubory...",
+        "createSuccess": "[AUTO-TRANSLATED cs] Knowledge Base created successfully.",
+        "updateSuccess": "[AUTO-TRANSLATED cs] Knowledge Base updated successfully."
+      },
+      "fields": {
+        "title": "[AUTO-TRANSLATED cs] Title",
+        "description": "Popis"
+      },
+      "fileUpload": {
+        "currentFiles": "[AUTO-TRANSLATED cs] Current Files",
+        "newFiles": "[AUTO-TRANSLATED cs] New Files",
+        "selectedFiles": "[AUTO-TRANSLATED cs] Selected Files",
+        "dragAndDrop": "[AUTO-TRANSLATED cs] Drag and drop files here, or click to browse",
+        "dropFiles": "[AUTO-TRANSLATED cs] Drop the files here...",
+        "removeFile": "[AUTO-TRANSLATED cs] Remove file",
+        "supportedFormats": "[AUTO-TRANSLATED cs] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "Zrušit",
+        "create": "Vytvořit",
+        "save": "Uložit",
+        "saving": "Ukládání...",
+        "creating": "Vytváření..."
+      },
+      "validation": {
+        "titleRequired": "[AUTO-TRANSLATED cs] Title is required"
       }
     },
     "editCustom": {
@@ -531,7 +684,10 @@
     "showMore": "Zobrazit více",
     "optimizationsSelectedText": "{{s}} optimalizací vybráno k aplikaci",
     "applying": "Aplikování...",
-    "applySelectedOptimizations": "Aplikovat vybrané optimalizace"
+    "applySelectedOptimizations": "Aplikovat vybrané optimalizace",
+    "uploadDocumentsTitle": "[AUTO-TRANSLATED cs] Upload document(s) that should be accepted by checklist *",
+    "uploadDocumentsHelperText": "[AUTO-TRANSLATED cs] Upload documents that should meet all checklist requirements to help identify questions that may be too strict",
+    "customInstructionsPlaceholder": "[AUTO-TRANSLATED cs] e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
   },
   "optimizeOutlineModal": {
     "title": "Optimalizovat osnovu",
@@ -568,7 +724,92 @@
       "generating": "Generování zprávy...",
       "processingSection": "Zpracování sekce {{sectionNum}} z {{totalSections}}: {{sectionPreview}}"
     },
-    "pleaseWait": "Počkejte prosím, zatímco generujeme vaši zprávu"
+    "pleaseWait": "Počkejte prosím, zatímco generujeme vaši zprávu",
+    "pageDescription": "[AUTO-TRANSLATED cs] Generate a document based on a user-defined outline and document database.",
+    "generatingDocument": "[AUTO-TRANSLATED cs] Generating document...",
+    "knowledgeBaseTitle": "Databáze znalostí",
+    "documentOutlineTitle": "[AUTO-TRANSLATED cs] Document Outline",
+    "clickToSelect": "[AUTO-TRANSLATED cs] Click to select",
+    "customInstructionsTitle": "[AUTO-TRANSLATED cs] Custom Instructions (Optional)",
+    "customInstructionsPlaceholder": "[AUTO-TRANSLATED cs] Enter any additional instructions that should be considered when generating each section of the report...",
+    "characterCount": "[AUTO-TRANSLATED cs] {{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
+    "selectKnowledgeBaseTitle": "[AUTO-TRANSLATED cs] Select Knowledge Base",
+    "selectDocumentOutlineTitle": "[AUTO-TRANSLATED cs] Select Document Outline",
+    "generateButton": "[AUTO-TRANSLATED cs] Generate",
+    "results": "[AUTO-TRANSLATED cs] Results",
+    "copyText": "[AUTO-TRANSLATED cs] Copy Text",
+    "copied": "[AUTO-TRANSLATED cs] Copied!",
+    "downloadDocx": "[AUTO-TRANSLATED cs] Download DOCX",
+    "downloadCsv": "[AUTO-TRANSLATED cs] Download CSV",
+    "clearReport": "[AUTO-TRANSLATED cs] Clear Report",
+    "resultsPlaceholder": "[AUTO-TRANSLATED cs] Results will appear here after generating a document.",
+    "sectionsWithSources": "[AUTO-TRANSLATED cs] Sections with Sources",
+    "sectionNumber": "[AUTO-TRANSLATED cs] Section {number}: {title}",
+    "kbGenerated": "[AUTO-TRANSLATED cs] KB Generated",
+    "rawText": "[AUTO-TRANSLATED cs] Raw Text",
+    "viewSourceCitations": "[AUTO-TRANSLATED cs] View Source Citations ({count})",
+    "documentCopiedSuccess": "[AUTO-TRANSLATED cs] Document copied to clipboard",
+    "documentCopiedError": "[AUTO-TRANSLATED cs] Failed to copy document to clipboard",
+    "documentDownloadSuccess": "[AUTO-TRANSLATED cs] Document downloaded successfully",
+    "documentDownloadError": "[AUTO-TRANSLATED cs] Failed to download document: {error}",
+    "csvDownloadSuccess": "[AUTO-TRANSLATED cs] CSV downloaded successfully",
+    "csvDownloadError": "[AUTO-TRANSLATED cs] Failed to download CSV: {error}",
+    "reportClearedSuccess": "[AUTO-TRANSLATED cs] Generated report cleared",
+    "enterAtLeastOneSection": "[AUTO-TRANSLATED cs] Please enter at least one section",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED cs] Please select a knowledge base",
+    "generateSuccess": "[AUTO-TRANSLATED cs] Report generated successfully!",
+    "generateError": "[AUTO-TRANSLATED cs] Failed to generate document: {error}",
+    "vectorSearch": "[AUTO-TRANSLATED cs] vector search",
+    "fullDocumentScan": "[AUTO-TRANSLATED cs] full document scan",
+    "editOutline": "[AUTO-TRANSLATED cs] Edit Outline"
+  },
+  "modelSelection": {
+    "llmManagement": "Správa LLM",
+    "llmDescription": "Konfigurujte a spravujte LLM používané pro generování textových odpovědí. Výchozí model bude použit pro všechny operace.",
+    "addNewLlm": "Přidat nové LLM",
+    "noLlmsConfigured": "Nejsou nakonfigurované žádné LLM",
+    "addNewLlmToGetStarted": "Přidejte nové LLM pro začátek",
+    "embeddingModelManagement": "Správa modelu vkládání",
+    "embeddingDescription": "Konfigurujte a spravujte modely vkládání používané pro indexování znalostní báze a vyhledávání. Výchozí model bude použit při vytváření nových znalostních bází, ale každá znalostní báze bude nadále používat svůj původní model vkládání, i když se výchozí později změní.",
+    "addEmbeddingModel": "Přidat model vkládání",
+    "noEmbeddingModelsConfigured": "Nejsou nakonfigurované žádné modely vkládání",
+    "addNewEmbeddingModelToGetStarted": "Přidejte nový model vkládání pro začátek",
+    "tableHeaders": {
+      "name": "Název",
+      "modelId": "ID modelu",
+      "provider": "Poskytovatel",
+      "description": "Popis",
+      "status": "Stav",
+      "actions": "Akce"
+    },
+    "status": {
+      "default": "Výchozí",
+      "available": "Dostupné"
+    },
+    "actions": {
+      "setAsDefault": "Nastavit jako výchozí",
+      "delete": "Smazat",
+      "validate": "Ověřit",
+      "validating": "Ověřování"
+    },
+    "dialog": {
+      "addNewLlm": "Přidat nové LLM",
+      "addEmbeddingModel": "Přidat model vkládání",
+      "displayName": "Zobrazovaný název",
+      "provider": "Poskytovatel",
+      "modelId": "ID modelu",
+      "description": "Popis",
+      "cancel": "Zrušit",
+      "addModel": "Přidat model"
+    },
+    "placeholders": {
+      "customModel": "např. Můj vlastní model",
+      "embeddingModelId": "např. sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Popište model, jeho vlastnosti a kdy jej použít"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Zadejte prosím ID modelu"
+    }
   },
   "feedback": {
     "modalTitlePositive": "Co bylo užitečné?",
@@ -595,14 +836,14 @@
     "downloadCsv": "Stáhnout CSV",
     "clearCsv": "Vymazat CSV",
     "clearResults": "Vymazat výsledky",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Téma:",
+    "knowledgeBaseReference": "Odkaz na Znalostní Bázi",
+    "knowledgeBaseReferences": "Odkazy na Znalostní Bázi",
+    "hideReferences": "Skrýt Odkazy",
+    "showReferences": "Zobrazit Odkazy",
+    "referenceNumber": "Odkaz {{number}}",
+    "processedInChunks": "Zpracováno v {{count}} částech",
+    "synthesisError": "Chyba při syntéze analýzy tématu"
   },
   "toast": {
     "passwordUpdated": "Heslo bylo úspěšně aktualizováno.",

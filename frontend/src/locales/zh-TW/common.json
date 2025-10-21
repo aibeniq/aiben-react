@@ -29,7 +29,8 @@
     "next": "下一個",
     "previous": "上一個",
     "confirm": "確認",
-    "back": "返回"
+    "back": "返回",
+    "done": "完成"
   },
   "forms": {
     "firstName": "名字",
@@ -60,7 +61,42 @@
     "knowledgeBaseTableName": "名稱",
     "knowledgeBaseTableDescription": "描述",
     "knowledgeBaseTableSources": "來源",
-    "knowledgeBaseTablePages": "頁面"
+    "knowledgeBaseTablePages": "頁面",
+    "title": "聊天",
+    "sourcePopover": {
+      "knowledgeBase": "知識庫",
+      "file": "檔案"
+    },
+    "searchMode": "搜尋模式：",
+    "vectorSearch": "向量搜尋",
+    "fullTextScan": "全文掃描",
+    "searchModeDescription": "向量搜尋提供快速、有針對性的結果。全文掃描檢查知識庫的所有內容。",
+    "askMeAnything": "隨意問我任何問題！如需搜尋知識庫，請先選擇知識庫。",
+    "usingGeneralAI": "使用一般 AI 助理",
+    "usingKnowledgeBase": "使用知識庫：",
+    "usingDocuments": "使用 # 個文件",
+    "usingFiles": "使用 {{count}} 個文件{{plural}}：",
+    "remove": "移除",
+    "selectKnowledgeBase": "選擇知識庫",
+    "knowledgeBaseTable": {
+      "name": "名稱",
+      "description": "描述",
+      "sources": "來源",
+      "noDescription": "無描述",
+      "sourcesCount": "{{count}} 個來源",
+      "pagesCount": "{{count}} 頁"
+    },
+    "selectKnowledgeBasePlaceholder": "選擇一個知識庫...",
+    "noKnowledgeBasesAvailable": "沒有可用的知識庫。請先建立一個以使用此功能。",
+    "knowledgeBase": "知識庫",
+    "file": "檔案",
+    "errors": {
+      "generic": "抱歉，發生錯誤。請重試。",
+      "timeout": "請求逾時。請重試。",
+      "largeFileTimeout": "大型檔案處理逾時。嘗試切換到「全文掃描」模式以獲得更好的大型檔案效能。",
+      "fileSize": "檔案過大。請選擇較小的檔案。",
+      "serverError": "發生伺服器錯誤。請稍後重試。"
+    }
   },
   "settings": {
     "title": "設定",
@@ -151,32 +187,39 @@
     "copy": "複製",
     "paste": "貼上",
     "cut": "剪下",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "显示更多",
+    "showLess": "显示更少",
+    "readMore": "阅读更多",
+    "questionNumber": "问题 {{number}}：",
+    "viewSourceCitations": "查看来源引用 ({{count}})",
+    "answer": "答案：",
+    "relevantPolicyContext": "相关政策背景：",
+    "sources": "来源",
+    "sourceCitations": "来源引用 ({{count}})",
+    "citationNumber": "引用 {{number}}",
+    "noSourceCitations": "此部分没有可用的来源引用",
+    "noDetailedSections": "此报告没有可用的详细部分",
+    "topicLabel": "主题：",
+    "knowledgeBaseReference": "知识库参考",
+    "knowledgeBaseReferences": "知识库参考",
+    "hideReferences": "隐藏参考",
+    "showReferences": "显示参考",
+    "referenceNumber": "参考 {{number}}",
+    "processedInChunks": "在 {{count}} 个块中处理",
+    "synthesisErrorNote": "注意：发生合成错误 - 显示组合块结果",
     "progress": {
       "starting": "開始...",
       "initializing": "初始化...",
       "processing": "處理中...",
       "extracting": "提取內容..."
-    }
+    },
+    "welcomeBack": "歡迎回來，很高興再次見到您！",
+    "hiUser": "嗨，{{name}} 👋"
+  },
+  "usage": {
+    "title": "使用情況",
+    "currentPeriod": "當前期間：",
+    "usedOfQuota": "已使用每月配額"
   },
   "review": {
     "pageTitle": "檢閱文件",
@@ -210,7 +253,7 @@
     "checklistNamePlaceholder": "輸入檢查清單名稱...",
     "checklistDescriptionLabel": "描述",
     "checklistDescriptionPlaceholder": "輸入檢查清單描述以獲取自動問題建議（最少10個字符）...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} 問題",
     "suggest": "建議",
     "suggesting": "正在建議...",
     "optimize": "最佳化",
@@ -231,7 +274,64 @@
     "deleteChecklist": "刪除檢查清單",
     "pleaseWait": "請稍候，我們正在檢查您的文件",
     "reviewSuccess": "文件檢查成功完成！",
-    "reviewSuccessMultiple": "{{count}} 個文件已處理並優化上下文共享！"
+    "reviewSuccessMultiple": "{{count}} 個文件已處理並優化上下文共享！",
+    "dropFilesHere": "將檔案拖放到此處",
+    "uploadedFiles": "已上傳的檔案",
+    "removeFile": "移除",
+    "characterCount": "{{count}}/2000 個字符。這些指示將在處理時添加到每個問題中。",
+    "searchMode": "搜尋模式",
+    "vectorSearch": "向量搜尋",
+    "fullDocumentScan": "完整文件掃描",
+    "vectorSearchDescription": "使用 AI 相似性搜尋尋找相關內容（快速、有針對性）",
+    "fullScanDescription": "分析知識庫中的所有文件（全面、徹底）"
+  },
+  "modelSelection": {
+    "llmManagement": "LLM 管理",
+    "llmDescription": "配置和管理用於生成文本回應的 LLM。預設模型將用於所有操作。",
+    "addNewLlm": "新增 LLM",
+    "noLlmsConfigured": "未配置 LLM",
+    "addNewLlmToGetStarted": "新增 LLM 以開始使用",
+    "embeddingModelManagement": "嵌入模型管理",
+    "embeddingDescription": "配置和管理用於知識庫索引和檢索的嵌入模型。預設模型將用於創建新知識庫，但每個知識庫將繼續使用其原始嵌入模型，即使預設值稍後更改。",
+    "addEmbeddingModel": "新增嵌入模型",
+    "noEmbeddingModelsConfigured": "未配置嵌入模型",
+    "addNewEmbeddingModelToGetStarted": "新增嵌入模型以開始使用",
+    "tableHeaders": {
+      "name": "名稱",
+      "modelId": "模型 ID",
+      "provider": "提供者",
+      "description": "描述",
+      "status": "狀態",
+      "actions": "操作"
+    },
+    "status": {
+      "default": "預設",
+      "available": "可用"
+    },
+    "actions": {
+      "setAsDefault": "設為預設",
+      "delete": "刪除",
+      "validate": "驗證",
+      "validating": "驗證中"
+    },
+    "dialog": {
+      "addNewLlm": "新增 LLM",
+      "addEmbeddingModel": "新增嵌入模型",
+      "displayName": "顯示名稱",
+      "provider": "提供者",
+      "modelId": "模型 ID",
+      "description": "描述",
+      "cancel": "取消",
+      "addModel": "新增模型"
+    },
+    "placeholders": {
+      "customModel": "例如：我的自訂模型",
+      "embeddingModelId": "例如：sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "描述模型、其特性以及何時使用"
+    },
+    "validation": {
+      "pleaseEnterModelId": "請輸入模型 ID"
+    }
   },
   "compare": {
     "title": "文件比較",
@@ -265,7 +365,8 @@
       "comparing": "比較中..."
     },
     "pleaseWait": "請稍候，我們正在生成您的報告",
-    "compareSuccess": "文件比較成功！"
+    "compareSuccess": "文件比較成功！",
+    "selectTopicListTitle": "選擇主題清單"
   },
   "match": {
     "title": "文件匹配",
@@ -299,7 +400,68 @@
     },
     "pleaseWait": "請稍候，我們正在生成您的報告",
     "matchSuccess": "表單處理成功完成！",
-    "singleDocumentSuccess": "從單個文件中提取的字段值。"
+    "singleDocumentSuccess": "從單個文件中提取的字段值。",
+    "selectFormTemplateTitle": "選擇表單範本"
+  },
+  "editOutlineModal": {
+    "title": "編輯大綱",
+    "createTitle": "創建新大綱",
+    "outlineName": "大綱名稱",
+    "outlineNamePlaceholder": "輸入大綱名稱",
+    "description": "描述",
+    "descriptionPlaceholder": "輸入大綱描述以自動建議部分（至少 10 個字符）...",
+    "referenceDocuments": "參考文檔（可選）",
+    "uploadFiles": "上傳檔案",
+    "knowledgeBase": "知識庫",
+    "sections": "部分",
+    "suggest": "建議",
+    "optimize": "優化",
+    "consultDocs": "查詢文檔",
+    "addSectionPlaceholder": "新增部分",
+    "cancel": "取消",
+    "createOutline": "創建大綱",
+    "updateOutline": "更新大綱"
+  },
+  "editChecklistModal": {
+    "title": "編輯檢查清單",
+    "createTitle": "創建新檢查清單",
+    "checklistName": "檢查清單名稱",
+    "checklistNamePlaceholder": "輸入檢查清單名稱",
+    "description": "描述",
+    "descriptionPlaceholder": "輸入檢查清單描述以自動建議問題（至少 10 個字符）...",
+    "referenceDocuments": "參考文檔（可選）",
+    "uploadFiles": "上傳檔案",
+    "knowledgeBase": "知識庫",
+    "questions": "{{count}} 個問題",
+    "suggest": "建議",
+    "optimize": "優化",
+    "addQuestionPlaceholder": "新增問題",
+    "copyAllQuestions": "將所有問題複製為文字",
+    "cancel": "取消",
+    "createChecklist": "創建檢查清單",
+    "updateChecklist": "更新檢查清單"
+  },
+  "editTopicListModal": {
+    "title": "編輯主題清單",
+    "createTitle": "創建新主題清單",
+    "topicListName": "主題清單名稱",
+    "topicListNamePlaceholder": "輸入主題清單名稱",
+    "description": "主題清單描述",
+    "descriptionPlaceholder": "輸入主題清單描述以自動建議主題（至少 10 個字符）...",
+    "referenceDocuments": "參考文檔（可選）",
+    "uploadFiles": "上傳檔案",
+    "knowledgeBase": "知識庫",
+    "comparisonTopics": "比較主題",
+    "topics": "{{count}} 個主題",
+    "section": "{{count}} 個部分",
+    "section_one": "{{count}} 個部分",
+    "sections": "{{count}} 個部分",
+    "suggest": "建議",
+    "addTopicPlaceholder": "新增比較主題",
+    "copyAllTopics": "將所有主題複製為文字",
+    "cancel": "取消",
+    "createTopicList": "創建主題清單",
+    "updateTopicList": "更新主題清單"
   },
   "knowledgeBases": {
     "title": "知識庫管理",
@@ -398,6 +560,35 @@
         "fieldPlaceholder": "新增欄位名稱...",
         "cancel": "取消",
         "updateFormTemplate": "更新表單範本"
+      },
+      "fields": {
+        "title": "標題",
+        "description": "描述"
+      },
+      "fileUpload": {
+        "currentFiles": "目前檔案",
+        "newFiles": "新檔案",
+        "selectedFiles": "已選擇的檔案",
+        "dragAndDrop": "將檔案拖放到此處，或點擊瀏覽",
+        "dropFiles": "將檔案拖放到此處...",
+        "removeFile": "移除檔案",
+        "supportedFormats": "支援格式：PDF、TXT、DOC/DOCX、RTF、CSV、XLSX"
+      },
+      "buttons": {
+        "cancel": "取消",
+        "create": "建立",
+        "save": "儲存",
+        "saving": "儲存中...",
+        "creating": "建立中..."
+      },
+      "validation": {
+        "titleRequired": "標題為必填"
+      },
+      "messages": {
+        "createSuccess": "知識庫建立成功。",
+        "updateSuccess": "知識庫更新成功。",
+        "processing": "處理中...",
+        "pleaseWait": "請稍候，我們正在處理您的檔案..."
       }
     },
     "editCustom": {
@@ -560,7 +751,44 @@
       "generating": "生成報告中...",
       "processingSection": "處理第 {{sectionNum}} 部分，共 {{totalSections}}：{{sectionPreview}}"
     },
-    "pleaseWait": "請稍候，我們正在生成您的報告"
+    "pleaseWait": "請稍候，我們正在生成您的報告",
+    "pageDescription": "基於用戶定義的大綱和文件資料庫生成文件。",
+    "generatingDocument": "正在生成文件...",
+    "knowledgeBaseTitle": "知識庫",
+    "documentOutlineTitle": "文件大綱",
+    "clickToSelect": "點擊選擇",
+    "customInstructionsTitle": "自訂指示（選填）",
+    "customInstructionsPlaceholder": "輸入在生成報告每個部分時應考慮的任何額外指示...",
+    "characterCount": "{{count}}/2000 個字符。這些指示將在生成每個部分時添加到提示中。",
+    "selectKnowledgeBaseTitle": "選擇知識庫",
+    "selectDocumentOutlineTitle": "選擇文件大綱",
+    "generateButton": "生成",
+    "results": "結果",
+    "copyText": "複製文字",
+    "copied": "已複製！",
+    "downloadDocx": "下載 DOCX",
+    "downloadCsv": "下載 CSV",
+    "clearReport": "清除報告",
+    "resultsPlaceholder": "生成文件後，結果將顯示在此處。",
+    "sectionsWithSources": "帶來源的部分",
+    "sectionNumber": "第 {number} 部分：{title}",
+    "kbGenerated": "知識庫生成",
+    "rawText": "原始文字",
+    "viewSourceCitations": "查看來源引用 ({count})",
+    "documentCopiedSuccess": "文件已複製到剪貼簿",
+    "documentCopiedError": "複製文件到剪貼簿失敗",
+    "documentDownloadSuccess": "文件下載成功",
+    "documentDownloadError": "下載文件失敗：{error}",
+    "csvDownloadSuccess": "CSV 下載成功",
+    "csvDownloadError": "下載 CSV 失敗：{error}",
+    "reportClearedSuccess": "生成的報告已清除",
+    "enterAtLeastOneSection": "請輸入至少一個部分",
+    "selectKnowledgeBase": "請選擇知識庫",
+    "generateSuccess": "報告生成成功！",
+    "generateError": "生成文件失敗：{error}",
+    "vectorSearch": "向量搜尋",
+    "fullDocumentScan": "完整文件掃描",
+    "editOutline": "編輯大綱"
   },
   "feedback": {
     "modalTitlePositive": "什麼是有幫助的？",
@@ -587,14 +815,14 @@
     "downloadCsv": "下載 CSV",
     "clearCsv": "清除 CSV",
     "clearResults": "清除結果",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "主題:",
+    "knowledgeBaseReference": "知識庫參考",
+    "knowledgeBaseReferences": "知識庫參考",
+    "hideReferences": "隱藏參考",
+    "showReferences": "顯示參考",
+    "referenceNumber": "參考 {{number}}",
+    "processedInChunks": "在 {{count}} 個區塊中處理",
+    "synthesisError": "主題分析合成錯誤"
   },
   "toast": {
     "passwordUpdated": "密碼已成功更新。",
@@ -668,5 +896,21 @@
     "outlineUpdated": "大綱已成功更新",
     "outlineCreated": "大綱已成功建立",
     "outlineSaveFailed": "儲存大綱失敗：{{error}}"
+  },
+  "editFormTemplateModal": {
+    "title": "編輯表單範本",
+    "formTemplateName": "表單範本名稱",
+    "formTemplateNamePlaceholder": "輸入表單範本名稱",
+    "formTemplateDescription": "表單範本描述",
+    "descriptionPlaceholder": "輸入表單範本描述以自動建議欄位（最少 10 個字符）...",
+    "referenceDocuments": "參考文件（選填）",
+    "uploadFiles": "上傳檔案",
+    "pleaseWait": "請稍候，我們正在審查您的文件",
+    "knowledgeBase": "知識庫",
+    "formFields": "表單欄位",
+    "suggest": "建議",
+    "fieldPlaceholder": "新增欄位名稱...",
+    "cancel": "取消",
+    "updateFormTemplate": "更新表單範本"
   }
 }

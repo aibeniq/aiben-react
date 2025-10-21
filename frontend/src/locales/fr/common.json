@@ -29,7 +29,8 @@
     "next": "Suivant",
     "previous": "Précédent",
     "confirm": "Confirmer",
-    "back": "Retour"
+    "back": "Retour",
+    "done": "Fait"
   },
   "forms": {
     "firstName": "Prénom",
@@ -74,7 +75,10 @@
     "knowledgeBaseTable": {
       "name": "Nom",
       "description": "Description",
-      "sources": "Sources"
+      "sources": "Sources",
+      "noDescription": "Aucune description",
+      "sourcesCount": "{{count}} sources",
+      "pagesCount": "{{count}} pages"
     },
     "knowledgeBaseTableName": "Nom",
     "knowledgeBaseTableDescription": "Description",
@@ -224,7 +228,9 @@
     "fullDocumentScan": "Analyse Complète du Document",
     "vectorSearchDescription": "Trouve du contenu pertinent en utilisant la recherche de similarité IA (rapide, ciblé)",
     "fullScanDescription": "Analyse tous les documents dans la base de connaissances (complet, approfondi)",
-    "pleaseWait": "Veuillez patienter pendant que nous examinons vos documents"
+    "pleaseWait": "Veuillez patienter pendant que nous examinons vos documents",
+    "reviewSuccess": "Révision du document terminée avec succès !",
+    "reviewSuccessMultiple": "{{count}} fichiers traités avec partage de contexte optimisé !"
   },
   "generate": {
     "pageDescription": "Générer un document basé sur une liste de contrôle définie par l'utilisateur et une base de données de documents.",
@@ -246,7 +252,7 @@
     "clearReport": "Effacer le Rapport",
     "resultsPlaceholder": "Les résultats apparaîtront ici après la génération d'un document.",
     "sectionsWithSources": "Sections avec Sources",
-    "sectionNumber": "Section {number}: {title}",
+    "sectionNumber": "Section {number} : {title}",
     "kbGenerated": "Généré par KB",
     "rawText": "Texte Brut",
     "viewSourceCitations": "Voir les Citations Sources ({count})",
@@ -502,32 +508,33 @@
     "copy": "Copier",
     "paste": "Coller",
     "cut": "Couper",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Afficher Plus",
+    "showLess": "Afficher Moins",
+    "readMore": "Lire Plus",
+    "questionNumber": "Question {{number}} :",
+    "viewSourceCitations": "Voir les Citations de Source ({{count}})",
+    "answer": "Réponse :",
+    "relevantPolicyContext": "Contexte de Politique Pertinent :",
+    "sources": "sources",
+    "sourceCitations": "Citations de Source ({{count}})",
+    "citationNumber": "Citation {{number}}",
+    "noSourceCitations": "Aucune citation de source disponible pour cette section",
+    "noDetailedSections": "Aucune section détaillée disponible pour ce rapport",
+    "topicLabel": "Sujet :",
+    "knowledgeBaseReference": "Référence de Base de Connaissances",
+    "knowledgeBaseReferences": "Références de Base de Connaissances",
+    "hideReferences": "Masquer les Références",
+    "showReferences": "Afficher les Références",
+    "referenceNumber": "Référence {{number}}",
+    "processedInChunks": "Traité en {{count}} fragments",
+    "synthesisErrorNote": "Note : Erreur de synthèse survenue - affichage des résultats combinés de fragments",
     "progress": {
       "starting": "Démarrage...",
       "initializing": "Initialisation...",
       "processing": "Traitement...",
       "extracting": "Extraction du contenu..."
-    }
+    },
+    "error": "Quelque chose s'est mal passé !"
   },
   "usage": {
     "title": "Utilisation",
@@ -669,7 +676,8 @@
     "suggest": "Suggérer",
     "fieldPlaceholder": "Ajoutez un nom de champ (ex., Prénom, Adresse, Numéro de Sécurité Sociale) ou suggérez à partir de la description",
     "cancel": "Annuler",
-    "updateFormTemplate": "Mettre à Jour le Modèle de Formulaire"
+    "updateFormTemplate": "Mettre à Jour le Modèle de Formulaire",
+    "pleaseWait": "Veuillez patienter pendant que nous examinons vos documents"
   },
   "editOutlineModal": {
     "title": "Modifier le Plan",
@@ -684,6 +692,7 @@
     "sections": "Sections",
     "suggest": "Suggérer",
     "optimize": "Optimiser",
+    "consultDocs": "Consulter les Documents",
     "addSectionPlaceholder": "Ajouter une section",
     "cancel": "Annuler",
     "createOutline": "Créer un Plan",
@@ -719,7 +728,7 @@
     "uploadFiles": "Télécharger des Fichiers",
     "knowledgeBase": "Base de Connaissances",
     "comparisonTopics": "Sujets de Comparaison",
-    "topics": "{{count}} topics",
+    "topics": "{{count}} sujets",
     "section": "{{count}} section",
     "section_one": "{{count}} section",
     "sections": "{{count}} sections",
@@ -816,14 +825,14 @@
     "downloadCsv": "Télécharger CSV",
     "clearCsv": "Effacer CSV",
     "clearResults": "Effacer les résultats",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Sujet:",
+    "knowledgeBaseReference": "Référence de Base de Connaissances",
+    "knowledgeBaseReferences": "Références de Base de Connaissances",
+    "hideReferences": "Masquer les Références",
+    "showReferences": "Afficher les Références",
+    "referenceNumber": "Référence {{number}}",
+    "processedInChunks": "Traitée en {{count}} parties",
+    "synthesisError": "Erreur lors de la synthèse de l'analyse de sujet"
   },
   "toast": {
     "passwordUpdated": "Mot de passe mis à jour avec succès.",

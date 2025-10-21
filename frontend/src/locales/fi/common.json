@@ -188,32 +188,33 @@
     "copy": "Kopioi",
     "paste": "Liitä",
     "cut": "Leikkaa",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Näytä lisää",
+    "showLess": "Näytä vähemmän",
+    "readMore": "Lue lisää",
+    "questionNumber": "Kysymys {{number}}:",
+    "viewSourceCitations": "Näytä lähdeviitteet ({{count}})",
+    "answer": "Vastaus:",
+    "relevantPolicyContext": "Asiaankuuluva politiikkakonteksti:",
+    "sources": "lähteet",
+    "sourceCitations": "Lähdeviitteet ({{count}})",
+    "citationNumber": "Viite {{number}}",
+    "noSourceCitations": "Tälle osiolle ei ole saatavilla lähdeviitteitä",
+    "noDetailedSections": "Tälle raportille ei ole saatavilla yksityiskohtaisia osioita",
+    "topicLabel": "Aihe:",
+    "knowledgeBaseReference": "Tietokannan viite",
+    "knowledgeBaseReferences": "Tietokannan viitteet",
+    "hideReferences": "Piilota viitteet",
+    "showReferences": "Näytä viitteet",
+    "referenceNumber": "Viite {{number}}",
+    "processedInChunks": "Käsitelty {{count}} osassa",
+    "synthesisErrorNote": "Huomautus: Syntesivirhe tapahtui - näytetään yhdistetyt osatulokset",
     "progress": {
       "starting": "Aloitetaan...",
       "initializing": "Alustetaan...",
       "processing": "Käsitellään...",
       "extracting": "Puretaan sisältöä..."
-    }
+    },
+    "error": "Jotain meni pieleen!"
   },
   "usage": {
     "title": "Käyttö",
@@ -225,7 +226,7 @@
     "pageDescription": "Arvioi asiakirjaa käyttäjän määrittelemän checklistin ja politiikkatietokannan perusteella.",
     "knowledgeBaseTitle": "Tietokanta",
     "knowledgeBaseDescription": "Klikkaa valitaksesi",
-    "checklistTitle": "Checklist",
+    "checklistTitle": "Tarkistuslista",
     "checklistDescription": "Klikkaa valitaksesi",
     "customInstructionsTitle": "Mukautetut ohjeet (valinnainen)",
     "customInstructionsPlaceholder": "Syötä lisäohjeita, jotka tulisi ottaa huomioon checklist-kysymyksiin vastattaessa...",
@@ -251,8 +252,8 @@
     "checklistName": "Checklistin nimi",
     "checklistNamePlaceholder": "Syötä checklistin nimi...",
     "checklistDescriptionLabel": "Kuvaus",
-    "checklistDescriptionPlaceholder": "Syötä checklistin kuvaus automaattisia kysymysehdotuksia varten (vähintään 10 merkkiä)...",
-    "questions": "{{count}} questions",
+    "checklistDescriptionPlaceholder": "Syötä tarkistuslistan kuvaus automaattisia kysymys-ehdotuksia varten (vähintään 10 merkkiä)...",
+    "questions": "{{count}} kysymykset",
     "suggest": "Ehdota",
     "suggesting": "Ehdotetaan...",
     "optimize": "Optimoi",
@@ -328,7 +329,8 @@
       "initializing": "Alustetaan...",
       "generating": "Luodaan raporttia...",
       "processingSection": "Käsitellään osiota {{sectionNum}}/{{totalSections}}: {{sectionPreview}}"
-    }
+    },
+    "editOutline": "Muokkaa ääriviivaa"
   },
   "modelSelection": {
     "llmManagement": "LLM-hallinta",
@@ -444,7 +446,8 @@
     "suggest": "Ehdota",
     "fieldPlaceholder": "Lisää kentän nimi...",
     "cancel": "Peruuta",
-    "updateFormTemplate": "Päivitä lomakemalli"
+    "updateFormTemplate": "Päivitä lomakemalli",
+    "pleaseWait": "Odota hetki, kun tarkistamme asiakirjasi"
   },
   "editOutlineModal": {
     "title": "Muokkaa jäsentelyä",
@@ -459,6 +462,7 @@
     "sections": "Osiot",
     "suggest": "Ehdota",
     "optimize": "Optimoi",
+    "consultDocs": "Konsultoi asiakirjoja",
     "addSectionPlaceholder": "Lisää osio",
     "cancel": "Peruuta",
     "createOutline": "Luo jäsentely",
@@ -474,7 +478,7 @@
     "referenceDocuments": "Viiteasiakirjat (valinnainen)",
     "uploadFiles": "Lataa tiedostoja",
     "knowledgeBase": "Tietokanta",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} kysymykset",
     "suggest": "Ehdota",
     "optimize": "Optimoi",
     "addQuestionPlaceholder": "Lisää kysymys",
@@ -494,10 +498,10 @@
     "uploadFiles": "Lataa tiedostoja",
     "knowledgeBase": "Tietokanta",
     "comparisonTopics": "Vertailuaiheet",
-    "topics": "{{count}} topics",
-    "section": "{{count}} section",
-    "section_one": "{{count}} section",
-    "sections": "{{count}} sections",
+    "topics": "{{count}} aihetta",
+    "section": "{{count}} osa",
+    "section_one": "{{count}} osa",
+    "sections": "{{count}} osaa",
     "suggest": "Ehdota",
     "addTopicPlaceholder": "Lisää vertailuaihe",
     "copyAllTopics": "Kopioi kaikki aiheet tekstinä",
@@ -527,7 +531,10 @@
     "showMore": "Näytä enemmän",
     "optimizationsSelectedText": "{{s}} optimointia valittu sovellettavaksi",
     "applying": "Sovelletaan...",
-    "applySelectedOptimizations": "Sovella valitut optimoinnit"
+    "applySelectedOptimizations": "Sovella valitut optimoinnit",
+    "uploadDocumentsTitle": "Lataa asiakirja(t), jotka pitäisi hyväksyä tarkistuslistalla *",
+    "uploadDocumentsHelperText": "Lataa asiakirjoja, jotka täyttävät kaikki tarkistuslistan vaatimukset auttaaksesi tunnistamaan kysymyksiä, jotka voivat olla liian tiukkoja",
+    "customInstructionsPlaceholder": "esim. Harkitse tätä lastentutkimuksena arvioitaessa ikään liittyviä vaatimuksia, Tämä protokolla on vähäriskinen interventio, jne."
   },
   "optimizeOutlineModal": {
     "title": "Optimoi jäsentely",
@@ -654,7 +661,8 @@
       "messages": {
         "processing": "Käsitellään...",
         "pleaseWait": "Odota, kun käsittelemme tiedostojasi...",
-        "updateSuccess": "Tietokanta päivitettiin onnistuneesti."
+        "updateSuccess": "Tietokanta päivitettiin onnistuneesti.",
+        "createSuccess": "Tietokanta luotiin onnistuneesti."
       }
     },
     "deleteModal": {
@@ -681,6 +689,12 @@
       "embedding_complete": "Luotu upotukset {{current}} lohkolle",
       "storing_complete": "Tallennettu vektorikanta {{current}} upotuksella",
       "kb_creation_complete": "Tietokannan luonti suoritettu onnistuneesti"
+    },
+    "actions": {
+      "view": "Näytä",
+      "edit": "Muokkaa",
+      "delete": "Poista",
+      "configure": "Määritä"
     }
   },
   "archive": {
@@ -783,14 +797,14 @@
     "downloadCsv": "Lataa CSV",
     "clearCsv": "Tyhjennä CSV",
     "clearResults": "Tyhjennä tulokset",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Aihe:",
+    "knowledgeBaseReference": "Tietokannan Viite",
+    "knowledgeBaseReferences": "Tietokannan Viitteet",
+    "hideReferences": "Piilota Viitteet",
+    "showReferences": "Näytä Viitteet",
+    "referenceNumber": "Viite {{number}}",
+    "processedInChunks": "Käsitelty {{count}} osassa",
+    "synthesisError": "Virhe aiheen analyysin synteesissä"
   },
   "toast": {
     "passwordUpdated": "Salasana päivitetty onnistuneesti.",

@@ -29,7 +29,8 @@
     "next": "Järgmine",
     "previous": "Eelmine",
     "confirm": "Kinnita",
-    "back": "Tagasi"
+    "back": "Tagasi",
+    "done": "Valmis"
   },
   "forms": {
     "firstName": "Eesnimi",
@@ -60,7 +61,42 @@
     "knowledgeBaseTableName": "Nimi",
     "knowledgeBaseTableDescription": "Kirjeldus",
     "knowledgeBaseTableSources": "Allikad",
-    "knowledgeBaseTablePages": "Leheküljed"
+    "knowledgeBaseTablePages": "Leheküljed",
+    "title": "Vestlus",
+    "sourcePopover": {
+      "knowledgeBase": "Teadmistebaas",
+      "file": "Fail"
+    },
+    "searchMode": "Otsingu režiim:",
+    "vectorSearch": "Vektorotsing",
+    "fullTextScan": "Täisteksti skaneerimine",
+    "searchModeDescription": "[AUTO-TRANSLATED et] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
+    "askMeAnything": "[AUTO-TRANSLATED et] Ask me anything! For knowledge base search, select a knowledge base first.",
+    "usingGeneralAI": "[AUTO-TRANSLATED et] Using general AI assistant",
+    "usingKnowledgeBase": "[AUTO-TRANSLATED et] Using knowledge base:",
+    "usingDocuments": "[AUTO-TRANSLATED et] Using # document(s)",
+    "usingFiles": "[AUTO-TRANSLATED et] Using {{count}} document{{plural}}:",
+    "remove": "Eemalda",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED et] Select Knowledge Base",
+    "knowledgeBaseTable": {
+      "name": "Nimi",
+      "description": "Kirjeldus",
+      "sources": "Allikad",
+      "noDescription": "Kirjeldust pole",
+      "sourcesCount": "{{count}} allikat",
+      "pagesCount": "{{count}} lehte"
+    },
+    "selectKnowledgeBasePlaceholder": "Vali teadmistebaas...",
+    "noKnowledgeBasesAvailable": "Ühtegi teadmistebaasi pole saadaval. Loo esmalt üks, et kasutada seda funktsiooni.",
+    "knowledgeBase": "Teadmistebaas",
+    "file": "Fail",
+    "errors": {
+      "generic": "[AUTO-TRANSLATED et] Sorry, something went wrong. Please try again.",
+      "timeout": "[AUTO-TRANSLATED et] Request timed out. Please try again.",
+      "largeFileTimeout": "[AUTO-TRANSLATED et] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
+      "fileSize": "[AUTO-TRANSLATED et] File is too large. Please choose smaller files.",
+      "serverError": "[AUTO-TRANSLATED et] Server error occurred. Please try again later."
+    }
   },
   "settings": {
     "title": "Seaded",
@@ -143,40 +179,47 @@
     "goodbye": "Nägemist",
     "yes": "Jah",
     "no": "Ei",
-    "ok": "OK",
+    "ok": "[AUTO-TRANSLATED et] OK",
     "search": "Otsi",
-    "filter": "Filter",
+    "filter": "[AUTO-TRANSLATED et] Filter",
     "sort": "Sorteeri",
     "view": "Vaata",
     "copy": "Kopeeri",
     "paste": "Kleebi",
     "cut": "Lõika",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Näita rohkem",
+    "showLess": "Näita vähem",
+    "readMore": "Loe rohkem",
+    "questionNumber": "Küsimus {{number}}:",
+    "viewSourceCitations": "Vaata allika viiteid ({{count}})",
+    "answer": "Vastus:",
+    "relevantPolicyContext": "Asjakohane poliitika kontekst:",
+    "sources": "allikad",
+    "sourceCitations": "Allika viited ({{count}})",
+    "citationNumber": "Viide {{number}}",
+    "noSourceCitations": "Selle jaotise jaoks pole allika viiteid saadaval",
+    "noDetailedSections": "Selle aruande jaoks pole üksikasjalikke jaotisi saadaval",
+    "topicLabel": "Teema:",
+    "knowledgeBaseReference": "Teadmusbaasi viide",
+    "knowledgeBaseReferences": "Teadmusbaasi viited",
+    "hideReferences": "Peida viited",
+    "showReferences": "Näita viiteid",
+    "referenceNumber": "Viide {{number}}",
+    "processedInChunks": "Töödeldud {{count}} tükis",
+    "synthesisErrorNote": "Märkus: Tekkis sünteesi viga - näidatakse kombineeritud tükkide tulemusi",
     "progress": {
       "starting": "Alustamine...",
       "initializing": "Initsialiseerimine...",
       "processing": "Töötlemine...",
       "extracting": "Sisu eraldamine..."
-    }
+    },
+    "welcomeBack": "[AUTO-TRANSLATED et] Welcome back, nice to see you again!",
+    "hiUser": "[AUTO-TRANSLATED et] Hi, {{name}} 👋"
+  },
+  "usage": {
+    "title": "Kasutus",
+    "currentPeriod": "Praegune periood:",
+    "usedOfQuota": "kasutatud teie kuu kvoodist"
   },
   "review": {
     "pageTitle": "Dokumentide ülevaade",
@@ -210,7 +253,7 @@
     "checklistNamePlaceholder": "Sisestage kontrollnimekirja nimi...",
     "checklistDescriptionLabel": "Kirjeldus",
     "checklistDescriptionPlaceholder": "Sisestage kontrollnimekirja kirjeldus automaatsete küsimuste soovituste jaoks (vähemalt 10 märki)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} küsimused",
     "suggest": "Soovita",
     "suggesting": "Soovitan...",
     "optimize": "Optimeeri",
@@ -241,6 +284,54 @@
     "pleaseWait": "Palun oodake, kuni vaatame teie dokumente üle",
     "reviewSuccess": "Dokumendi ülevaatus lõpetati edukalt!",
     "reviewSuccessMultiple": "{{count}} faili töödeldud optimeeritud konteksti jagamisega!"
+  },
+  "modelSelection": {
+    "llmManagement": "LLM haldus",
+    "llmDescription": "Seadistage ja hallake LLM-e, mida kasutatakse tekstivastuste genereerimiseks. Vaikemudelit kasutatakse kõigi toimingute jaoks.",
+    "addNewLlm": "Lisa uus LLM",
+    "noLlmsConfigured": "Ühtegi LLM-i pole seadistatud",
+    "addNewLlmToGetStarted": "Alustamiseks lisage uus LLM",
+    "embeddingModelManagement": "Manustamismudelite haldus",
+    "embeddingDescription": "Seadistage ja hallake manustamismudeleid, mida kasutatakse teadmistebaasi indekseerimiseks ja otsinguks. Vaikemudelit kasutatakse uute teadmistebaaside loomisel, kuid iga teadmistebaas jätkab oma algse manustamismudeli kasutamist isegi siis, kui vaikeväärtus hiljem muutub.",
+    "addEmbeddingModel": "Lisa manustamismudel",
+    "noEmbeddingModelsConfigured": "Ühtegi manustamismudelit pole seadistatud",
+    "addNewEmbeddingModelToGetStarted": "Alustamiseks lisage uus manustamismudel",
+    "tableHeaders": {
+      "name": "Nimi",
+      "modelId": "Mudeli ID",
+      "provider": "Pakkuja",
+      "description": "Kirjeldus",
+      "status": "Olek",
+      "actions": "Tegevused"
+    },
+    "status": {
+      "default": "Vaikeväärtus",
+      "available": "Saadaval"
+    },
+    "actions": {
+      "setAsDefault": "Määra vaikeväärtuseks",
+      "delete": "Kustuta",
+      "validate": "Valideeri",
+      "validating": "Valideerimine"
+    },
+    "dialog": {
+      "addNewLlm": "Lisa uus LLM",
+      "addEmbeddingModel": "Lisa manustamismudel",
+      "displayName": "Kuvatav nimi",
+      "provider": "Pakkuja",
+      "modelId": "Mudeli ID",
+      "description": "Kirjeldus",
+      "cancel": "Tühista",
+      "addModel": "Lisa mudel"
+    },
+    "placeholders": {
+      "customModel": "nt. Minu kohandatud mudel",
+      "embeddingModelId": "nt. sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Kirjeldage mudelit, selle omadusi ja millal seda kasutada"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Palun sisestage mudeli ID"
+    }
   },
   "compare": {
     "title": "Dokumentide võrdlus",
@@ -274,7 +365,8 @@
       "comparing": "Võrdlemine..."
     },
     "pleaseWait": "Palun oodake, kuni me võrdleme teie dokumente",
-    "compareSuccess": "Dokumentide võrdlemine õnnestus!"
+    "compareSuccess": "Dokumentide võrdlemine õnnestus!",
+    "selectTopicListTitle": "[AUTO-TRANSLATED et] Select Topic List"
   },
   "match": {
     "title": "Dokumentide vastavus",
@@ -308,7 +400,84 @@
     },
     "pleaseWait": "Palun oodake, kuni me sobitame teie dokumente",
     "matchSuccess": "Vormi töötlemine lõpetati edukalt!",
-    "singleDocumentSuccess": "Väli väärtuste väljavõttmine ühest dokumendist."
+    "singleDocumentSuccess": "Väli väärtuste väljavõttmine ühest dokumendist.",
+    "selectFormTemplateTitle": "[AUTO-TRANSLATED et] Select Form Template"
+  },
+  "editFormTemplateModal": {
+    "title": "Vormimalli redigeerimine",
+    "formTemplateName": "Vormimalli nimi",
+    "formTemplateNamePlaceholder": "Sisestage vormimalli nimi",
+    "formTemplateDescription": "Vormimalli kirjeldus",
+    "descriptionPlaceholder": "Sisestage vormimalli kirjeldus väljade automaatseks soovitamiseks (vähemalt 10 tähemärki)...",
+    "referenceDocuments": "Viitedokumendid (valikuline)",
+    "uploadFiles": "Laadi failid üles",
+    "pleaseWait": "Palun oodake, kuni vaatame teie dokumente üle",
+    "knowledgeBase": "Teadmusbaas",
+    "formFields": "Vormiväljad",
+    "suggest": "Soovita",
+    "fieldPlaceholder": "Lisa välja nimi...",
+    "cancel": "Tühista",
+    "updateFormTemplate": "Uuenda vormimall"
+  },
+  "editOutlineModal": {
+    "title": "Kontuuri redigeerimine",
+    "createTitle": "Loo uus kontuur",
+    "outlineName": "Kontuuri nimi",
+    "outlineNamePlaceholder": "Sisestage kontuuri nimi",
+    "description": "Kirjeldus",
+    "descriptionPlaceholder": "Sisestage kontuuri kirjeldus jaotiste automaatseks soovitamiseks (vähemalt 10 tähemärki)...",
+    "referenceDocuments": "Viitedokumendid (valikuline)",
+    "uploadFiles": "Laadi failid üles",
+    "knowledgeBase": "Teadmusbaas",
+    "sections": "Jaotised",
+    "suggest": "Soovita",
+    "optimize": "Optimeeri",
+    "consultDocs": "Konsulteeri dokumentidega",
+    "addSectionPlaceholder": "Lisa jaotis",
+    "cancel": "Tühista",
+    "createOutline": "Loo kontuur",
+    "updateOutline": "Uuenda kontuur"
+  },
+  "editChecklistModal": {
+    "title": "Kontrollnimekirja redigeerimine",
+    "createTitle": "Loo uus kontrollnimekiri",
+    "checklistName": "Kontrollnimekirja nimi",
+    "checklistNamePlaceholder": "Sisestage kontrollnimekirja nimi",
+    "description": "Kirjeldus",
+    "descriptionPlaceholder": "Sisestage kontrollnimekirja kirjeldus küsimuste automaatseks soovitamiseks (vähemalt 10 tähemärki)...",
+    "referenceDocuments": "Viitedokumendid (valikuline)",
+    "uploadFiles": "Laadi failid üles",
+    "knowledgeBase": "Teadmusbaas",
+    "questions": "{{count}} küsimust",
+    "suggest": "Soovita",
+    "optimize": "Optimeeri",
+    "addQuestionPlaceholder": "Lisa küsimus",
+    "copyAllQuestions": "Kopeeri kõik küsimused tekstina",
+    "cancel": "Tühista",
+    "createChecklist": "Loo kontrollnimekiri",
+    "updateChecklist": "Uuenda kontrollnimekiri"
+  },
+  "editTopicListModal": {
+    "title": "Teemade loendi redigeerimine",
+    "createTitle": "Loo uus teemade loend",
+    "topicListName": "Teemade loendi nimi",
+    "topicListNamePlaceholder": "Sisestage teemade loendi nimi",
+    "description": "Teemade loendi kirjeldus",
+    "descriptionPlaceholder": "Sisestage teemade loendi kirjeldus teemade automaatseks soovitamiseks (vähemalt 10 tähemärki)...",
+    "referenceDocuments": "Viitedokumendid (valikuline)",
+    "uploadFiles": "Laadi failid üles",
+    "knowledgeBase": "Teadmusbaas",
+    "comparisonTopics": "Võrdlusteed",
+    "topics": "{{count}} teemat",
+    "section": "{{count}} jaotis",
+    "section_one": "{{count}} jaotis",
+    "sections": "{{count}} jaotist",
+    "suggest": "Soovita",
+    "addTopicPlaceholder": "Lisa võrdlusteema",
+    "copyAllTopics": "Kopeeri kõik teemad tekstina",
+    "cancel": "Tühista",
+    "createTopicList": "Loo teemade loend",
+    "updateTopicList": "Uuenda teemade loend"
   },
   "knowledgeBases": {
     "title": "Teadmusbaaside haldamine",
@@ -396,7 +565,9 @@
       },
       "messages": {
         "processing": "Töötlemine...",
-        "pleaseWait": "Palun oodake, kuni töötleme teie faile..."
+        "pleaseWait": "Palun oodake, kuni töötleme teie faile...",
+        "createSuccess": "[AUTO-TRANSLATED et] Knowledge Base created successfully.",
+        "updateSuccess": "[AUTO-TRANSLATED et] Knowledge Base updated successfully."
       },
       "editFormTemplateModal": {
         "title": "Muuda Vormi Malli",
@@ -411,6 +582,29 @@
         "fieldPlaceholder": "Lisa välja nimi...",
         "cancel": "Tühista",
         "updateFormTemplate": "Värskenda Vormi Malli"
+      },
+      "fields": {
+        "title": "[AUTO-TRANSLATED et] Title",
+        "description": "Kirjeldus"
+      },
+      "fileUpload": {
+        "currentFiles": "[AUTO-TRANSLATED et] Current Files",
+        "newFiles": "[AUTO-TRANSLATED et] New Files",
+        "selectedFiles": "[AUTO-TRANSLATED et] Selected Files",
+        "dragAndDrop": "[AUTO-TRANSLATED et] Drag and drop files here, or click to browse",
+        "dropFiles": "[AUTO-TRANSLATED et] Drop the files here...",
+        "removeFile": "[AUTO-TRANSLATED et] Remove file",
+        "supportedFormats": "[AUTO-TRANSLATED et] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "Tühista",
+        "create": "Loo",
+        "save": "Salvesta",
+        "saving": "[AUTO-TRANSLATED et] Saving...",
+        "creating": "[AUTO-TRANSLATED et] Creating..."
+      },
+      "validation": {
+        "titleRequired": "[AUTO-TRANSLATED et] Title is required"
       }
     },
     "editCustom": {
@@ -573,7 +767,44 @@
       "generating": "Aruande loomine...",
       "processingSection": "Töötlemise sektsioon {{sectionNum}}/{{totalSections}}: {{sectionPreview}}"
     },
-    "pleaseWait": "Palun oodake, kuni me loome teie aruande"
+    "pleaseWait": "Palun oodake, kuni me loome teie aruande",
+    "pageDescription": "[AUTO-TRANSLATED et] Generate a document based on a user-defined outline and document database.",
+    "generatingDocument": "[AUTO-TRANSLATED et] Generating document...",
+    "knowledgeBaseTitle": "Teadmistebaas",
+    "documentOutlineTitle": "[AUTO-TRANSLATED et] Document Outline",
+    "clickToSelect": "[AUTO-TRANSLATED et] Click to select",
+    "customInstructionsTitle": "[AUTO-TRANSLATED et] Custom Instructions (Optional)",
+    "customInstructionsPlaceholder": "[AUTO-TRANSLATED et] Enter any additional instructions that should be considered when generating each section of the report...",
+    "characterCount": "[AUTO-TRANSLATED et] {{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
+    "selectKnowledgeBaseTitle": "[AUTO-TRANSLATED et] Select Knowledge Base",
+    "selectDocumentOutlineTitle": "[AUTO-TRANSLATED et] Select Document Outline",
+    "generateButton": "[AUTO-TRANSLATED et] Generate",
+    "results": "[AUTO-TRANSLATED et] Results",
+    "copyText": "[AUTO-TRANSLATED et] Copy Text",
+    "copied": "[AUTO-TRANSLATED et] Copied!",
+    "downloadDocx": "[AUTO-TRANSLATED et] Download DOCX",
+    "downloadCsv": "[AUTO-TRANSLATED et] Download CSV",
+    "clearReport": "[AUTO-TRANSLATED et] Clear Report",
+    "resultsPlaceholder": "[AUTO-TRANSLATED et] Results will appear here after generating a document.",
+    "sectionsWithSources": "[AUTO-TRANSLATED et] Sections with Sources",
+    "sectionNumber": "[AUTO-TRANSLATED et] Section {number}: {title}",
+    "kbGenerated": "[AUTO-TRANSLATED et] KB Generated",
+    "rawText": "[AUTO-TRANSLATED et] Raw Text",
+    "viewSourceCitations": "[AUTO-TRANSLATED et] View Source Citations ({count})",
+    "documentCopiedSuccess": "[AUTO-TRANSLATED et] Document copied to clipboard",
+    "documentCopiedError": "[AUTO-TRANSLATED et] Failed to copy document to clipboard",
+    "documentDownloadSuccess": "[AUTO-TRANSLATED et] Document downloaded successfully",
+    "documentDownloadError": "[AUTO-TRANSLATED et] Failed to download document: {error}",
+    "csvDownloadSuccess": "[AUTO-TRANSLATED et] CSV downloaded successfully",
+    "csvDownloadError": "[AUTO-TRANSLATED et] Failed to download CSV: {error}",
+    "reportClearedSuccess": "[AUTO-TRANSLATED et] Generated report cleared",
+    "enterAtLeastOneSection": "[AUTO-TRANSLATED et] Please enter at least one section",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED et] Please select a knowledge base",
+    "generateSuccess": "[AUTO-TRANSLATED et] Report generated successfully!",
+    "generateError": "[AUTO-TRANSLATED et] Failed to generate document: {error}",
+    "vectorSearch": "[AUTO-TRANSLATED et] vector search",
+    "fullDocumentScan": "[AUTO-TRANSLATED et] full document scan",
+    "editOutline": "[AUTO-TRANSLATED et] Edit Outline"
   },
   "feedback": {
     "modalTitlePositive": "Mis oli kasulik?",
@@ -600,14 +831,14 @@
     "downloadCsv": "Laadi alla CSV",
     "clearCsv": "Kustuta CSV",
     "clearResults": "Kustuta tulemused",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Teema:",
+    "knowledgeBaseReference": "Teadmistebaasi Viide",
+    "knowledgeBaseReferences": "Teadmistebaasi Viited",
+    "hideReferences": "Peida Viited",
+    "showReferences": "Näita Viiteid",
+    "referenceNumber": "Viide {{number}}",
+    "processedInChunks": "Töödeldud {{count}} tükis",
+    "synthesisError": "Viga teemaanalüüsi sünteesil"
   },
   "toast": {
     "passwordUpdated": "Parool uuendati edukalt.",

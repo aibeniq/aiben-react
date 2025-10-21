@@ -29,7 +29,8 @@
     "next": "ถัดไป",
     "previous": "ก่อนหน้า",
     "confirm": "ยืนยัน",
-    "back": "กลับ"
+    "back": "กลับ",
+    "done": "เสร็จสิ้น"
   },
   "forms": {
     "firstName": "ชื่อ",
@@ -60,7 +61,42 @@
     "knowledgeBaseTableName": "ชื่อ",
     "knowledgeBaseTableDescription": "คำอธิบาย",
     "knowledgeBaseTableSources": "แหล่งที่มา",
-    "knowledgeBaseTablePages": "หน้า"
+    "knowledgeBaseTablePages": "หน้า",
+    "title": "แชท",
+    "sourcePopover": {
+      "knowledgeBase": "คลังความรู้",
+      "file": "ไฟล์"
+    },
+    "searchMode": "โหมดการค้นหา:",
+    "vectorSearch": "การค้นหาเชิงเวกเตอร์",
+    "fullTextScan": "สแกนข้อความทั้งหมด",
+    "searchModeDescription": "การค้นหาเชิงเวกเตอร์ให้ผลลัพธ์ที่รวดเร็วและตรงเป้าหมาย การสแกนข้อความทั้งหมดจะตรวจสอบเนื้อหาทั้งหมดในคลังความรู้",
+    "askMeAnything": "ถามอะไรก็ได้! สำหรับการค้นหาคลังความรู้ ให้เลือกคลังความรู้ก่อน",
+    "usingGeneralAI": "ใช้ผู้ช่วย AI ทั่วไป",
+    "usingKnowledgeBase": "ใช้คลังความรู้:",
+    "usingDocuments": "ใช้ # เอกสาร",
+    "usingFiles": "ใช้ {{count}} เอกสาร:",
+    "remove": "ลบ",
+    "selectKnowledgeBase": "เลือกคลังความรู้",
+    "knowledgeBaseTable": {
+      "name": "ชื่อ",
+      "description": "คำอธิบาย",
+      "sources": "แหล่งข้อมูล",
+      "noDescription": "ไม่มีคำอธิบาย",
+      "sourcesCount": "{{count}} แหล่ง",
+      "pagesCount": "{{count}} หน้า"
+    },
+    "selectKnowledgeBasePlaceholder": "เลือกคลังความรู้...",
+    "noKnowledgeBasesAvailable": "ไม่มีคลังความรู้ที่ใช้ได้ สร้างหนึ่งก่อนเพื่อใช้ฟีเจอร์นี้",
+    "knowledgeBase": "คลังความรู้",
+    "file": "ไฟล์",
+    "errors": {
+      "generic": "ขออภัย มีบางอย่างผิดพลาด กรุณาลองใหม่อีกครั้ง",
+      "timeout": "คำขอหมดเวลา กรุณาลองใหม่อีกครั้ง",
+      "largeFileTimeout": "การประมวลผลไฟล์ขนาดใหญ่หมดเวลา ลองเปลี่ยนเป็นโหมด 'สแกนข้อความทั้งหมด' เพื่อประสิทธิภาพที่ดีขึ้นกับไฟล์ขนาดใหญ่",
+      "fileSize": "ไฟล์มีขนาดใหญ่เกินไป กรุณาเลือกไฟล์ที่มีขนาดเล็กลง",
+      "serverError": "เกิดข้อผิดพลาดของเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้งในภายหลัง"
+    }
   },
   "settings": {
     "title": "การตั้งค่า",
@@ -150,32 +186,40 @@
     "copy": "คัดลอก",
     "paste": "วาง",
     "cut": "ตัด",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "แสดงเพิ่มเติม",
+    "showLess": "แสดงน้อยลง",
+    "readMore": "อ่านเพิ่มเติม",
+    "questionNumber": "คำถาม {{number}}:",
+    "viewSourceCitations": "ดูการอ้างอิงแหล่งที่มา ({{count}})",
+    "answer": "คำตอบ:",
+    "relevantPolicyContext": "บริบทนโยบายที่เกี่ยวข้อง:",
+    "sources": "แหล่งที่มา",
+    "sourceCitations": "การอ้างอิงแหล่งที่มา ({{count}})",
+    "citationNumber": "การอ้างอิง {{number}}",
+    "noSourceCitations": "ไม่มีแหล่งอ้างอิงสำหรับส่วนนี้",
+    "noDetailedSections": "ไม่มีส่วนรายละเอียดสำหรับรายงานนี้",
+    "topicLabel": "หัวข้อ:",
+    "knowledgeBaseReference": "การอ้างอิงฐานความรู้",
+    "knowledgeBaseReferences": "การอ้างอิงฐานความรู้",
+    "hideReferences": "ซ่อนการอ้างอิง",
+    "showReferences": "แสดงการอ้างอิง",
+    "referenceNumber": "การอ้างอิง {{number}}",
+    "processedInChunks": "ประมวลผลใน {{count}} ส่วน",
+    "synthesisErrorNote": "หมายเหตุ: เกิดข้อผิดพลาดในการสังเคราะห์ - แสดงผลลัพธ์ส่วนที่รวมกัน",
     "progress": {
       "starting": "กำลังเริ่มต้น...",
       "initializing": "กำลังเริ่มต้น...",
       "processing": "กำลังประมวลผล...",
       "extracting": "กำลังดึงเนื้อหา..."
-    }
+    },
+    "error": "มีบางอย่างผิดพลาด!",
+    "welcomeBack": "ยินดีต้อนรับกลับมา ยินดีที่ได้เห็นคุณอีกครั้ง!",
+    "hiUser": "สวัสดี {{name}} 👋"
+  },
+  "usage": {
+    "title": "การใช้งาน",
+    "currentPeriod": "ช่วงเวลาปัจจุบัน:",
+    "usedOfQuota": "ใช้จากโควตารายเดือนของคุณ"
   },
   "review": {
     "pageTitle": "ตรวจสอบเอกสาร",
@@ -209,7 +253,7 @@
     "checklistNamePlaceholder": "ใส่ชื่อรายการตรวจสอบ...",
     "checklistDescriptionLabel": "คำอธิบาย",
     "checklistDescriptionPlaceholder": "ใส่คำอธิบายรายการตรวจสอบสำหรับข้อเสนอแนะคำถามอัตโนมัติ (อย่างน้อย 10 ตัวอักษร)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} คำถาม",
     "suggest": "แนะนำ",
     "suggesting": "กำลังแนะนำ...",
     "optimize": "ปรับให้เหมาะสม",
@@ -230,7 +274,64 @@
     "deleteChecklist": "ลบรายการตรวจสอบ",
     "pleaseWait": "กรุณารอสักครู่ เรากำลังตรวจสอบเอกสารของคุณ",
     "reviewSuccess": "การตรวจสอบเอกสารเสร็จสิ้นเรียบร้อยแล้ว!",
-    "reviewSuccessMultiple": "ไฟล์ {{count}} ไฟล์ได้รับการประมวลผลด้วยการแบ่งปันบริบทที่ปรับให้เหมาะสม!"
+    "reviewSuccessMultiple": "ไฟล์ {{count}} ไฟล์ได้รับการประมวลผลด้วยการแบ่งปันบริบทที่ปรับให้เหมาะสม!",
+    "dropFilesHere": "วางไฟล์ที่นี่",
+    "uploadedFiles": "ไฟล์ที่อัปโหลดแล้ว",
+    "removeFile": "ลบ",
+    "characterCount": "{{count}}/2000 ตัวอักษร คำแนะนำเหล่านี้จะถูกเพิ่มต่อท้ายแต่ละคำถามเมื่อทำการประมวลผล",
+    "searchMode": "โหมดการค้นหา",
+    "vectorSearch": "การค้นหาเชิงเวกเตอร์",
+    "fullDocumentScan": "สแกนเอกสารทั้งหมด",
+    "vectorSearchDescription": "ค้นหาเนื้อหาที่เกี่ยวข้องโดยใช้การค้นหาความคล้ายคลึงของ AI (รวดเร็ว ตรงเป้าหมาย)",
+    "fullScanDescription": "วิเคราะห์เอกสารทั้งหมดในคลังความรู้ (ครอบคลุม ละเอียดถี่ถ้วน)"
+  },
+  "modelSelection": {
+    "llmManagement": "การจัดการ LLM",
+    "llmDescription": "กำหนดค่าและจัดการ LLM ที่ใช้สำหรับสร้างการตอบสนองด้วยข้อความ รุ่นเริ่มต้นจะใช้สำหรับการดำเนินการทั้งหมด",
+    "addNewLlm": "เพิ่ม LLM ใหม่",
+    "noLlmsConfigured": "ไม่ได้กำหนดค่า LLM",
+    "addNewLlmToGetStarted": "เพิ่ม LLM ใหม่เพื่อเริ่มต้น",
+    "embeddingModelManagement": "การจัดการโมเดลการฝัง",
+    "embeddingDescription": "กำหนดค่าและจัดการโมเดลการฝังที่ใช้สำหรับการจัดทำดัชนีและการเรียกค้นฐานความรู้ รุ่นเริ่มต้นจะใช้สำหรับการสร้างฐานความรู้ใหม่ แต่ฐานความรู้แต่ละฐานจะยังคงใช้โมเดลการฝังเดิมของตนต่อไปแม้ว่ารุ่นเริ่มต้นจะเปลี่ยนแปลงในภายหลัง",
+    "addEmbeddingModel": "เพิ่มโมเดลการฝัง",
+    "noEmbeddingModelsConfigured": "ไม่ได้กำหนดค่าโมเดลการฝัง",
+    "addNewEmbeddingModelToGetStarted": "เพิ่มโมเดลการฝังใหม่เพื่อเริ่มต้น",
+    "tableHeaders": {
+      "name": "ชื่อ",
+      "modelId": "รหัสโมเดล",
+      "provider": "ผู้ให้บริการ",
+      "description": "คำอธิบาย",
+      "status": "สถานะ",
+      "actions": "การดำเนินการ"
+    },
+    "status": {
+      "default": "เริ่มต้น",
+      "available": "พร้อมใช้งาน"
+    },
+    "actions": {
+      "setAsDefault": "ตั้งเป็นเริ่มต้น",
+      "delete": "ลบ",
+      "validate": "ตรวจสอบ",
+      "validating": "กำลังตรวจสอบ"
+    },
+    "dialog": {
+      "addNewLlm": "เพิ่ม LLM ใหม่",
+      "addEmbeddingModel": "เพิ่มโมเดลการฝัง",
+      "displayName": "ชื่อที่แสดง",
+      "provider": "ผู้ให้บริการ",
+      "modelId": "รหัสโมเดล",
+      "description": "คำอธิบาย",
+      "cancel": "ยกเลิก",
+      "addModel": "เพิ่มโมเดล"
+    },
+    "placeholders": {
+      "customModel": "ตัวอย่าง: โมเดลที่กำหนดเองของฉัน",
+      "embeddingModelId": "ตัวอย่าง: sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "อธิบายโมเดล ลักษณะเฉพาะ และเมื่อใดที่ควรใช้"
+    },
+    "validation": {
+      "pleaseEnterModelId": "กรุณาป้อนรหัสโมเดล"
+    }
   },
   "compare": {
     "title": "เปรียบเทียบเอกสาร",
@@ -264,7 +365,8 @@
       "comparing": "กำลังเปรียบเทียบ..."
     },
     "pleaseWait": "กรุณารอสักครู่ในขณะที่เรากำลังเปรียบเทียบเอกสารของคุณ",
-    "compareSuccess": "เปรียบเทียบเอกสารสำเร็จ!"
+    "compareSuccess": "เปรียบเทียบเอกสารสำเร็จ!",
+    "selectTopicListTitle": "เลือกรายการหัวข้อ"
   },
   "match": {
     "title": "การจับคู่เอกสาร",
@@ -298,7 +400,68 @@
     },
     "pleaseWait": "กรุณารอสักครู่ในขณะที่เรากำลังจับคู่เอกสารของคุณ",
     "matchSuccess": "การประมวลผลฟอร์มเสร็จสมบูรณ์เรียบร้อยแล้ว!",
-    "singleDocumentSuccess": "ดึงค่าฟิลด์จากเอกสารเดียวเรียบร้อยแล้ว"
+    "singleDocumentSuccess": "ดึงค่าฟิลด์จากเอกสารเดียวเรียบร้อยแล้ว",
+    "selectFormTemplateTitle": "เลือกเทมเพลตฟอร์ม"
+  },
+  "editOutlineModal": {
+    "title": "แก้ไขโครงร่าง",
+    "createTitle": "สร้างโครงร่างใหม่",
+    "outlineName": "ชื่อโครงร่าง",
+    "outlineNamePlaceholder": "ป้อนชื่อโครงร่าง",
+    "description": "คำอธิบาย",
+    "descriptionPlaceholder": "ป้อนคำอธิบายโครงร่างเพื่อแนะนำส่วนต่างๆ โดยอัตโนมัติ (อย่างน้อย 10 ตัวอักษร)...",
+    "referenceDocuments": "เอกสารอ้างอิง (ไม่บังคับ)",
+    "uploadFiles": "อัปโหลดไฟล์",
+    "knowledgeBase": "ฐานความรู้",
+    "sections": "ส่วน",
+    "suggest": "แนะนำ",
+    "optimize": "เพิ่มประสิทธิภาพ",
+    "consultDocs": "ปรึกษาเอกสาร",
+    "addSectionPlaceholder": "เพิ่มส่วน",
+    "cancel": "ยกเลิก",
+    "createOutline": "สร้างโครงร่าง",
+    "updateOutline": "อัปเดตโครงร่าง"
+  },
+  "editChecklistModal": {
+    "title": "แก้ไขรายการตรวจสอบ",
+    "createTitle": "สร้างรายการตรวจสอบใหม่",
+    "checklistName": "ชื่อรายการตรวจสอบ",
+    "checklistNamePlaceholder": "ป้อนชื่อรายการตรวจสอบ",
+    "description": "คำอธิบาย",
+    "descriptionPlaceholder": "ป้อนคำอธิบายรายการตรวจสอบเพื่อแนะนำคำถามโดยอัตโนมัติ (อย่างน้อย 10 ตัวอักษร)...",
+    "referenceDocuments": "เอกสารอ้างอิง (ไม่บังคับ)",
+    "uploadFiles": "อัปโหลดไฟล์",
+    "knowledgeBase": "ฐานความรู้",
+    "questions": "{{count}} คำถาม",
+    "suggest": "แนะนำ",
+    "optimize": "เพิ่มประสิทธิภาพ",
+    "addQuestionPlaceholder": "เพิ่มคำถาม",
+    "copyAllQuestions": "คัดลอกคำถามทั้งหมดเป็นข้อความ",
+    "cancel": "ยกเลิก",
+    "createChecklist": "สร้างรายการตรวจสอบ",
+    "updateChecklist": "อัปเดตรายการตรวจสอบ"
+  },
+  "editTopicListModal": {
+    "title": "แก้ไขรายการหัวข้อ",
+    "createTitle": "สร้างรายการหัวข้อใหม่",
+    "topicListName": "ชื่อรายการหัวข้อ",
+    "topicListNamePlaceholder": "ป้อนชื่อรายการหัวข้อ",
+    "description": "คำอธิบายรายการหัวข้อ",
+    "descriptionPlaceholder": "ป้อนคำอธิบายรายการหัวข้อเพื่อแนะนำหัวข้อโดยอัตโนมัติ (อย่างน้อย 10 ตัวอักษร)...",
+    "referenceDocuments": "เอกสารอ้างอิง (ไม่บังคับ)",
+    "uploadFiles": "อัปโหลดไฟล์",
+    "knowledgeBase": "ฐานความรู้",
+    "comparisonTopics": "หัวข้อการเปรียบเทียบ",
+    "topics": "{{count}} หัวข้อ",
+    "section": "{{count}} ส่วน",
+    "section_one": "{{count}} ส่วน",
+    "sections": "{{count}} ส่วน",
+    "suggest": "แนะนำ",
+    "addTopicPlaceholder": "เพิ่มหัวข้อการเปรียบเทียบ",
+    "copyAllTopics": "คัดลอกหัวข้อทั้งหมดเป็นข้อความ",
+    "cancel": "ยกเลิก",
+    "createTopicList": "สร้างรายการหัวข้อ",
+    "updateTopicList": "อัปเดตรายการหัวข้อ"
   },
   "knowledgeBases": {
     "title": "การจัดการฐานความรู้",
@@ -397,6 +560,35 @@
         "fieldPlaceholder": "เพิ่มชื่อฟิลด์...",
         "cancel": "ยกเลิก",
         "updateFormTemplate": "อัปเดตเทมเพลตฟอร์ม"
+      },
+      "fields": {
+        "title": "ชื่อเรื่อง",
+        "description": "คำอธิบาย"
+      },
+      "fileUpload": {
+        "currentFiles": "ไฟล์ปัจจุบัน",
+        "newFiles": "ไฟล์ใหม่",
+        "selectedFiles": "ไฟล์ที่เลือก",
+        "dragAndDrop": "ลากและวางไฟล์ที่นี่ หรือคลิกเพื่อเรียกดู",
+        "dropFiles": "วางไฟล์ที่นี่...",
+        "removeFile": "ลบไฟล์",
+        "supportedFormats": "รองรับ: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "ยกเลิก",
+        "create": "สร้าง",
+        "save": "บันทึก",
+        "saving": "กำลังบันทึก...",
+        "creating": "กำลังสร้าง..."
+      },
+      "validation": {
+        "titleRequired": "ต้องระบุชื่อเรื่อง"
+      },
+      "messages": {
+        "createSuccess": "สร้างคลังความรู้สำเร็จแล้ว",
+        "updateSuccess": "อัปเดตคลังความรู้สำเร็จแล้ว",
+        "processing": "กำลังประมวลผล...",
+        "pleaseWait": "กรุณารอสักครู่ในขณะที่เราประมวลผลไฟล์ของคุณ..."
       }
     },
     "editCustom": {
@@ -623,14 +815,14 @@
     "downloadCsv": "ดาวน์โหลด CSV",
     "clearCsv": "ล้าง CSV",
     "clearResults": "ล้างผลลัพธ์",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "หัวข้อ:",
+    "knowledgeBaseReference": "การอ้างอิงฐานความรู้",
+    "knowledgeBaseReferences": "การอ้างอิงฐานความรู้",
+    "hideReferences": "ซ่อนการอ้างอิง",
+    "showReferences": "แสดงการอ้างอิง",
+    "referenceNumber": "การอ้างอิง {{number}}",
+    "processedInChunks": "ประมวลผลใน {{count}} ชิ้น",
+    "synthesisError": "ข้อผิดพลาดในการสังเคราะห์การวิเคราะห์หัวข้อ"
   },
   "toast": {
     "passwordUpdated": "อัปเดตรหัสผ่านสำเร็จแล้ว",
@@ -704,5 +896,21 @@
     "outlineUpdated": "อัปเดตโครงร่างสำเร็จแล้ว",
     "outlineCreated": "สร้างโครงร่างสำเร็จแล้ว",
     "outlineSaveFailed": "บันทึกโครงร่างไม่สำเร็จ: {{error}}"
+  },
+  "editFormTemplateModal": {
+    "title": "แก้ไขเทมเพลตฟอร์ม",
+    "formTemplateName": "ชื่อเทมเพลตฟอร์ม",
+    "formTemplateNamePlaceholder": "ป้อนชื่อเทมเพลตฟอร์ม",
+    "formTemplateDescription": "คำอธิบายเทมเพลตฟอร์ม",
+    "descriptionPlaceholder": "ป้อนคำอธิบายเทมเพลตฟอร์มเพื่อแนะนำฟิลด์อัตโนมัติ (อย่างน้อย 10 ตัวอักษร)...",
+    "referenceDocuments": "เอกสารอ้างอิง (ไม่บังคับ)",
+    "uploadFiles": "อัปโหลดไฟล์",
+    "pleaseWait": "กรุณารอในขณะที่เราตรวจสอบเอกสารของคุณ",
+    "knowledgeBase": "คลังความรู้",
+    "formFields": "ฟิลด์ฟอร์ม",
+    "suggest": "แนะนำ",
+    "fieldPlaceholder": "เพิ่มชื่อฟิลด์...",
+    "cancel": "ยกเลิก",
+    "updateFormTemplate": "อัปเดตเทมเพลตฟอร์ม"
   }
 }

@@ -29,7 +29,8 @@
     "next": "Далі",
     "previous": "Назад",
     "confirm": "Підтвердити",
-    "back": "Назад"
+    "back": "Назад",
+    "done": "Готово"
   },
   "forms": {
     "firstName": "Ім'я",
@@ -53,7 +54,46 @@
     "error": "Вибачте, щось пішло не так. Спробуйте ще раз.",
     "welcome": "Привіт! Як я можу допомогти вам сьогодні?",
     "welcomeMessageWithSource": "Оберіть базу знань або завантажте файли, потім поставте запитання.",
-    "welcomeMessageGeneral": "Запитуйте мене про будь-що! Для пошуку в базі знань спочатку оберіть базу знань."
+    "welcomeMessageGeneral": "Запитуйте мене про будь-що! Для пошуку в базі знань спочатку оберіть базу знань.",
+    "title": "Чат",
+    "sourcePopover": {
+      "knowledgeBase": "База знань",
+      "file": "Файл"
+    },
+    "searchMode": "Режим пошуку:",
+    "vectorSearch": "Векторний пошук",
+    "fullTextScan": "Повне сканування тексту",
+    "searchModeDescription": "Векторний пошук забезпечує швидкі, цільові результати. Повне сканування тексту переглядає весь вміст у базі знань.",
+    "askMeAnything": "Запитуйте мене про будь-що! Для пошуку в базі знань спочатку оберіть базу знань.",
+    "usingGeneralAI": "Використання загального ШІ-помічника",
+    "usingKnowledgeBase": "Використання бази знань:",
+    "usingDocuments": "Використання # документів",
+    "usingFiles": "Використання {{count}} документів{{plural}}:",
+    "remove": "Видалити",
+    "selectKnowledgeBase": "Оберіть базу знань",
+    "knowledgeBaseTable": {
+      "name": "Назва",
+      "description": "Опис",
+      "sources": "Джерела",
+      "noDescription": "Немає опису",
+      "sourcesCount": "{{count}} джерел",
+      "pagesCount": "{{count}} сторінок"
+    },
+    "knowledgeBaseTableName": "Назва",
+    "knowledgeBaseTableDescription": "Опис",
+    "knowledgeBaseTableSources": "Джерела",
+    "knowledgeBaseTablePages": "Сторінки",
+    "selectKnowledgeBasePlaceholder": "Виберіть базу знань...",
+    "noKnowledgeBasesAvailable": "Немає доступних баз знань. Спочатку створіть одну, щоб використовувати цю функцію.",
+    "knowledgeBase": "База знань",
+    "file": "Файл",
+    "errors": {
+      "generic": "Вибачте, щось пішло не так. Спробуйте ще раз.",
+      "timeout": "Час очікування запиту минув. Спробуйте ще раз.",
+      "largeFileTimeout": "Обробка великого файлу завершилася тайм-аутом. Спробуйте перемкнутися на режим 'Повне сканування тексту' для кращої продуктивності з великими файлами.",
+      "fileSize": "Файл занадто великий. Будь ласка, оберіть менші файли.",
+      "serverError": "Сталася помилка сервера. Спробуйте ще раз пізніше."
+    }
   },
   "settings": {
     "title": "Налаштування",
@@ -145,32 +185,33 @@
     "copy": "Копіювати",
     "paste": "Вставити",
     "cut": "Вирізати",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Показати більше",
+    "showLess": "Показати менше",
+    "readMore": "Читати більше",
+    "questionNumber": "Питання {{number}}:",
+    "viewSourceCitations": "Переглянути цитати джерел ({{count}})",
+    "answer": "Відповідь:",
+    "relevantPolicyContext": "Відповідний контекст політики:",
+    "sources": "джерела",
+    "sourceCitations": "Цитати джерел ({{count}})",
+    "citationNumber": "Цитата {{number}}",
+    "noSourceCitations": "Для цього розділу немає доступних цитат джерел",
+    "noDetailedSections": "Для цього звіту немає доступних детальних розділів",
+    "topicLabel": "Тема:",
+    "knowledgeBaseReference": "Посилання на базу знань",
+    "knowledgeBaseReferences": "Посилання на базу знань",
+    "hideReferences": "Приховати посилання",
+    "showReferences": "Показати посилання",
+    "referenceNumber": "Посилання {{number}}",
+    "processedInChunks": "Оброблено в {{count}} частинах",
+    "synthesisErrorNote": "Примітка: Сталася помилка синтезу - показані об'єднані результати частин",
     "progress": {
       "starting": "Початок...",
       "initializing": "Ініціалізація...",
       "processing": "Обробка...",
       "extracting": "Витягування вмісту..."
-    }
+    },
+    "error": "Щось пішло не так!"
   },
   "usage": {
     "title": "Використання",
@@ -257,7 +298,7 @@
     "checklistNamePlaceholder": "Введіть назву контрольного списку...",
     "checklistDescriptionLabel": "Опис",
     "checklistDescriptionPlaceholder": "Введіть опис контрольного списку для автоматичних пропозицій питань (мінімум 10 символів)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} питання",
     "suggest": "Запропонувати",
     "suggesting": "Пропонування...",
     "optimize": "Оптимізувати",
@@ -284,7 +325,9 @@
     "fullDocumentScan": "Повний Аналіз Документа",
     "vectorSearchDescription": "Знаходить релевантний контент використовуючи пошук подібності ШІ (швидко, цілеспрямовано)",
     "fullScanDescription": "Аналізує всі документи в базі знань (повний, ретельний)",
-    "pleaseWait": "Будь ласка, зачекайте, поки ми переглядаємо ваші документи"
+    "pleaseWait": "Будь ласка, зачекайте, поки ми переглядаємо ваші документи",
+    "reviewSuccess": "Перегляд документа завершено успішно!",
+    "reviewSuccessMultiple": "{{count}} файлів оброблено з оптимізованим спільним використанням контексту!"
   },
   "generate": {
     "pageDescription": "Створити документ на основі визначеного користувачем плану та бази даних документів.",
@@ -332,7 +375,8 @@
       "extracting": "Витягування вмісту...",
       "generating": "Генерація звіту...",
       "processingSection": "Обробка розділу {{sectionNum}} з {{totalSections}}: {{sectionPreview}}"
-    }
+    },
+    "editOutline": "Редагувати план"
   },
   "compare": {
     "title": "Порівняти Документи",
@@ -400,7 +444,8 @@
     "suggest": "Запропонувати",
     "fieldPlaceholder": "Додайте назву поля (наприклад, Ім'я, Адреса, ІПН) або запропонуйте з опису",
     "cancel": "Скасувати",
-    "updateFormTemplate": "Оновити Шаблон Форми"
+    "updateFormTemplate": "Оновити Шаблон Форми",
+    "pleaseWait": "Будь ласка, зачекайте, поки ми перевіримо ваші документи"
   },
   "editOutlineModal": {
     "title": "Редагувати Схему",
@@ -415,6 +460,7 @@
     "sections": "Розділи",
     "suggest": "Запропонувати",
     "optimize": "Оптимізувати",
+    "consultDocs": "Консультувати документи",
     "addSectionPlaceholder": "Додати розділ",
     "cancel": "Скасувати",
     "createOutline": "Створити Схему",
@@ -430,7 +476,7 @@
     "referenceDocuments": "Довідкові Документи (Необов'язково)",
     "uploadFiles": "Завантажити Файли",
     "knowledgeBase": "База Знань",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} питання",
     "suggest": "Запропонувати",
     "optimize": "Оптимізувати",
     "addQuestionPlaceholder": "Додати питання",
@@ -450,10 +496,10 @@
     "uploadFiles": "Завантажити Файли",
     "knowledgeBase": "База Знань",
     "comparisonTopics": "Теми для Порівняння",
-    "topics": "{{count}} topics",
-    "section": "{{count}} section",
-    "section_one": "{{count}} section",
-    "sections": "{{count}} sections",
+    "topics": "{{count}} тем",
+    "section": "{{count}} розділ",
+    "section_one": "{{count}} розділ",
+    "sections": "{{count}} розділів",
     "suggest": "Запропонувати",
     "addTopicPlaceholder": "Додати тему для порівняння",
     "copyAllTopics": "Скопіювати всі теми як текст",
@@ -483,7 +529,10 @@
     "showMore": "Показати Більше",
     "optimizationsSelectedText": "оптимізація{{s}} вибрана{{s}} для застосування",
     "applying": "Застосовую...",
-    "applySelectedOptimizations": "Застосувати Вибрані Оптимізації"
+    "applySelectedOptimizations": "Застосувати Вибрані Оптимізації",
+    "uploadDocumentsTitle": "Завантажити документ(и), які мають бути прийняті чек-листом *",
+    "uploadDocumentsHelperText": "Завантажте документи, які мають відповідати всім вимогам чек-листа, щоб допомогти ідентифікувати питання, які можуть бути занадто суворими",
+    "customInstructionsPlaceholder": "наприклад, Вважайте, що це педіатричне дослідження при оцінці вікових вимог, Цей протокол призначений для низькоризикового втручання тощо."
   },
   "optimizeOutlineModal": {
     "title": "Оптимізувати Схему",
@@ -533,11 +582,41 @@
     },
     "modals": {
       "fileUpload": {
-        "supportedFormats": "Підтримує: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "supportedFormats": "Підтримує: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
+        "currentFiles": "Поточні файли",
+        "newFiles": "Нові файли",
+        "selectedFiles": "Вибрані файли",
+        "dragAndDrop": "Перетягніть файли сюди або натисніть, щоб переглянути",
+        "dropFiles": "Перетягніть файли сюди...",
+        "removeFile": "Видалити файл"
       },
       "messages": {
         "processing": "Обробка...",
-        "pleaseWait": "Будь ласка, зачекайте, поки ми обробляємо ваші файли..."
+        "pleaseWait": "Будь ласка, зачекайте, поки ми обробляємо ваші файли...",
+        "createSuccess": "Базу знань успішно створено.",
+        "updateSuccess": "Базу знань успішно оновлено."
+      },
+      "add": {
+        "title": "Додати базу знань",
+        "description": "Створіть нову базу знань, надавши деталі та завантаживши документи нижче."
+      },
+      "edit": {
+        "title": "Редагувати базу знань",
+        "description": "Оновіть деталі бази знань нижче."
+      },
+      "fields": {
+        "title": "Назва",
+        "description": "Опис"
+      },
+      "buttons": {
+        "cancel": "Скасувати",
+        "create": "Створити",
+        "save": "Зберегти",
+        "saving": "Збереження...",
+        "creating": "Створення..."
+      },
+      "validation": {
+        "titleRequired": "Назва обов'язкова"
       }
     },
     "progress": {
@@ -564,6 +643,12 @@
       "cancelButton": "Скасувати",
       "successMessage": "Базу знань успішно видалено",
       "errorMessage": "Помилка при видаленні бази знань"
+    },
+    "actions": {
+      "view": "Переглянути",
+      "edit": "Редагувати",
+      "delete": "Видалити",
+      "configure": "Налаштувати"
     }
   },
   "archive": {
@@ -666,14 +751,14 @@
     "downloadCsv": "Завантажити CSV",
     "clearCsv": "Очистити CSV",
     "clearResults": "Очистити результати",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Тема:",
+    "knowledgeBaseReference": "Посилання на Базу Знань",
+    "knowledgeBaseReferences": "Посилання на Базу Знань",
+    "hideReferences": "Приховати Посилання",
+    "showReferences": "Показати Посилання",
+    "referenceNumber": "Посилання {{number}}",
+    "processedInChunks": "Оброблено в {{count}} частинах",
+    "synthesisError": "Помилка синтезу аналізу теми"
   },
   "toast": {
     "passwordUpdated": "Пароль успішно оновлено.",
@@ -747,5 +832,8 @@
     "outlineUpdated": "Конспект успішно оновлено",
     "outlineCreated": "Конспект успішно створено",
     "outlineSaveFailed": "Помилка збереження конспекту: {{error}}"
+  },
+  "dropdowns": {
+    "selectKnowledgeBase": "Виберіть базу знань..."
   }
 }

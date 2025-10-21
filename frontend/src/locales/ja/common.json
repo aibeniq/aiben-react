@@ -29,7 +29,8 @@
     "next": "次へ",
     "previous": "前へ",
     "confirm": "確認",
-    "back": "戻る"
+    "back": "戻る",
+    "done": "完了"
   },
   "forms": {
     "firstName": "名",
@@ -44,6 +45,9 @@
     "emailPlaceholder": "メールアドレスを入力",
     "passwordPlaceholder": "パスワードを入力"
   },
+  "dropdowns": {
+    "selectKnowledgeBase": "ナレッジベースを選択..."
+  },
   "chatbot": {
     "placeholder": "メッセージをここに入力...",
     "send": "送信",
@@ -53,7 +57,46 @@
     "error": "申し訳ございませんが、エラーが発生しました。もう一度お試しください。",
     "welcome": "こんにちは！今日はどのようにお手伝いできますか？",
     "welcomeMessageWithSource": "ナレッジベースを選択するか、ファイルをアップロードしてから質問してください。",
-    "welcomeMessageGeneral": "何でもお聞きください！ナレッジベース検索には、最初にナレッジベースを選択してください。"
+    "welcomeMessageGeneral": "何でもお聞きください！ナレッジベース検索には、最初にナレッジベースを選択してください。",
+    "title": "チャット",
+    "sourcePopover": {
+      "knowledgeBase": "ナレッジベース",
+      "file": "ファイル"
+    },
+    "searchMode": "検索モード：",
+    "vectorSearch": "ベクター検索",
+    "fullTextScan": "全文スキャン",
+    "searchModeDescription": "[AUTO-TRANSLATED ja] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
+    "askMeAnything": "[AUTO-TRANSLATED ja] Ask me anything! For knowledge base search, select a knowledge base first.",
+    "usingGeneralAI": "[AUTO-TRANSLATED ja] Using general AI assistant",
+    "usingKnowledgeBase": "[AUTO-TRANSLATED ja] Using knowledge base:",
+    "usingDocuments": "[AUTO-TRANSLATED ja] Using # document(s)",
+    "usingFiles": "[AUTO-TRANSLATED ja] Using {{count}} document{{plural}}:",
+    "remove": "削除",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED ja] Select Knowledge Base",
+    "knowledgeBaseTable": {
+      "name": "名前",
+      "description": "説明",
+      "sources": "ソース",
+      "noDescription": "説明なし",
+      "sourcesCount": "{{count}} 件のソース",
+      "pagesCount": "{{count}} ページ"
+    },
+    "knowledgeBaseTableName": "名前",
+    "knowledgeBaseTableDescription": "説明",
+    "knowledgeBaseTableSources": "ソース",
+    "knowledgeBaseTablePages": "[AUTO-TRANSLATED ja] Pages",
+    "selectKnowledgeBasePlaceholder": "ナレッジベースを選択...",
+    "noKnowledgeBasesAvailable": "利用可能なナレッジベースがありません。まず1つ作成してください。",
+    "knowledgeBase": "ナレッジベース",
+    "file": "ファイル",
+    "errors": {
+      "generic": "[AUTO-TRANSLATED ja] Sorry, something went wrong. Please try again.",
+      "timeout": "[AUTO-TRANSLATED ja] Request timed out. Please try again.",
+      "largeFileTimeout": "[AUTO-TRANSLATED ja] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
+      "fileSize": "[AUTO-TRANSLATED ja] File is too large. Please choose smaller files.",
+      "serverError": "[AUTO-TRANSLATED ja] Server error occurred. Please try again later."
+    }
   },
   "settings": {
     "title": "設定",
@@ -137,7 +180,7 @@
     "goodbye": "さようなら",
     "yes": "はい",
     "no": "いいえ",
-    "ok": "OK",
+    "ok": "[AUTO-TRANSLATED ja] OK",
     "search": "検索",
     "filter": "フィルタ",
     "sort": "ソート",
@@ -145,32 +188,33 @@
     "copy": "コピー",
     "paste": "貼り付け",
     "cut": "切り取り",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "もっと見る",
+    "showLess": "少なく表示",
+    "readMore": "もっと読む",
+    "questionNumber": "質問 {{number}}：",
+    "viewSourceCitations": "ソース引用を表示 ({{count}})",
+    "answer": "回答：",
+    "relevantPolicyContext": "関連するポリシーコンテキスト：",
+    "sources": "ソース",
+    "sourceCitations": "ソース引用 ({{count}})",
+    "citationNumber": "引用 {{number}}",
+    "noSourceCitations": "このセクションには利用可能なソース引用がありません",
+    "noDetailedSections": "このレポートには利用可能な詳細セクションがありません",
+    "topicLabel": "トピック：",
+    "knowledgeBaseReference": "知識ベース参照",
+    "knowledgeBaseReferences": "知識ベース参照",
+    "hideReferences": "参照を非表示",
+    "showReferences": "参照を表示",
+    "referenceNumber": "参照 {{number}}",
+    "processedInChunks": "{{count}} 個のチャンクで処理",
+    "synthesisErrorNote": "注意：合成エラーが発生しました - 結合されたチャンク結果を表示しています",
     "progress": {
       "starting": "開始中...",
       "initializing": "初期化中...",
       "processing": "処理中...",
       "extracting": "コンテンツ抽出中..."
-    }
+    },
+    "error": "[AUTO-TRANSLATED ja] Something went wrong!"
   },
   "usage": {
     "title": "使用状況",
@@ -257,7 +301,7 @@
     "checklistNamePlaceholder": "チェックリスト名を入力...",
     "checklistDescriptionLabel": "説明",
     "checklistDescriptionPlaceholder": "自動質問提案のためのチェックリストの説明を入力してください（最低10文字）...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} 質問",
     "suggest": "提案",
     "suggesting": "提案中...",
     "optimize": "最適化",
@@ -284,7 +328,9 @@
     "fullDocumentScan": "完全なドキュメント分析",
     "vectorSearchDescription": "AI類似性検索を使用して関連コンテンツを見つける（高速、的確）",
     "fullScanDescription": "ナレッジベース内のすべてのドキュメントを分析する（包括的、徹底的）",
-    "pleaseWait": "ドキュメントを確認するまでお待ちください"
+    "pleaseWait": "ドキュメントを確認するまでお待ちください",
+    "reviewSuccess": "[AUTO-TRANSLATED ja] Document review completed successfully!",
+    "reviewSuccessMultiple": "[AUTO-TRANSLATED ja] {{count}} files processed with optimized context sharing!"
   },
   "compare": {
     "title": "ドキュメント比較",
@@ -352,7 +398,8 @@
     "suggest": "提案",
     "fieldPlaceholder": "フィールド名を追加（例：氏名、住所、社会保障番号）または説明から提案",
     "cancel": "キャンセル",
-    "updateFormTemplate": "フォームテンプレートを更新"
+    "updateFormTemplate": "フォームテンプレートを更新",
+    "pleaseWait": "ドキュメントを確認しています。しばらくお待ちください。"
   },
   "editOutlineModal": {
     "title": "アウトラインを編集",
@@ -367,6 +414,7 @@
     "sections": "セクション",
     "suggest": "提案",
     "optimize": "最適化",
+    "consultDocs": "文書を参照",
     "addSectionPlaceholder": "セクションを追加",
     "cancel": "キャンセル",
     "createOutline": "アウトラインを作成",
@@ -382,7 +430,7 @@
     "referenceDocuments": "参考文書（オプション）",
     "uploadFiles": "ファイルをアップロード",
     "knowledgeBase": "ナレッジベース",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} 質問",
     "suggest": "提案",
     "optimize": "最適化",
     "addQuestionPlaceholder": "質問を追加",
@@ -402,10 +450,10 @@
     "uploadFiles": "ファイルをアップロード",
     "knowledgeBase": "ナレッジベース",
     "comparisonTopics": "比較トピック",
-    "topics": "{{count}} topics",
-    "section": "{{count}} section",
-    "section_one": "{{count}} section",
-    "sections": "{{count}} sections",
+    "topics": "{{count}} トピック",
+    "section": "{{count}} セクション",
+    "section_one": "{{count}} セクション",
+    "sections": "{{count}} セクション",
     "suggest": "提案",
     "addTopicPlaceholder": "比較トピックを追加",
     "copyAllTopics": "すべてのトピックをテキストとしてコピー",
@@ -435,7 +483,10 @@
     "showMore": "詳細表示",
     "optimizationsSelectedText": "{{s}}個の最適化が適用対象として選択されました",
     "applying": "適用中...",
-    "applySelectedOptimizations": "選択した最適化を適用"
+    "applySelectedOptimizations": "選択した最適化を適用",
+    "uploadDocumentsTitle": "[AUTO-TRANSLATED ja] Upload document(s) that should be accepted by checklist *",
+    "uploadDocumentsHelperText": "[AUTO-TRANSLATED ja] Upload documents that should meet all checklist requirements to help identify questions that may be too strict",
+    "customInstructionsPlaceholder": "[AUTO-TRANSLATED ja] e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
   },
   "optimizeOutlineModal": {
     "title": "アウトラインを最適化",
@@ -485,11 +536,41 @@
     },
     "modals": {
       "fileUpload": {
-        "supportedFormats": "対応形式：PDF、TXT、DOC/DOCX、RTF、CSV、XLSX"
+        "supportedFormats": "対応形式：PDF、TXT、DOC/DOCX、RTF、CSV、XLSX",
+        "currentFiles": "[AUTO-TRANSLATED ja] Current Files",
+        "newFiles": "[AUTO-TRANSLATED ja] New Files",
+        "selectedFiles": "[AUTO-TRANSLATED ja] Selected Files",
+        "dragAndDrop": "[AUTO-TRANSLATED ja] Drag and drop files here, or click to browse",
+        "dropFiles": "[AUTO-TRANSLATED ja] Drop the files here...",
+        "removeFile": "[AUTO-TRANSLATED ja] Remove file"
       },
       "messages": {
         "processing": "処理中...",
-        "pleaseWait": "ファイルを処理中です。しばらくお待ちください..."
+        "pleaseWait": "ファイルを処理中です。しばらくお待ちください...",
+        "createSuccess": "[AUTO-TRANSLATED ja] Knowledge Base created successfully.",
+        "updateSuccess": "[AUTO-TRANSLATED ja] Knowledge Base updated successfully."
+      },
+      "add": {
+        "title": "[AUTO-TRANSLATED ja] Add Knowledge Base",
+        "description": "[AUTO-TRANSLATED ja] Create a new knowledge base by providing details and uploading documents below."
+      },
+      "edit": {
+        "title": "[AUTO-TRANSLATED ja] Edit Knowledge Base",
+        "description": "[AUTO-TRANSLATED ja] Update the Knowledge Base details below."
+      },
+      "fields": {
+        "title": "[AUTO-TRANSLATED ja] Title",
+        "description": "説明"
+      },
+      "buttons": {
+        "cancel": "キャンセル",
+        "create": "作成",
+        "save": "保存",
+        "saving": "[AUTO-TRANSLATED ja] Saving...",
+        "creating": "[AUTO-TRANSLATED ja] Creating..."
+      },
+      "validation": {
+        "titleRequired": "[AUTO-TRANSLATED ja] Title is required"
       }
     },
     "progress": {
@@ -516,6 +597,12 @@
       "cancelButton": "キャンセル",
       "successMessage": "ナレッジベースが正常に削除されました",
       "errorMessage": "ナレッジベースの削除中にエラーが発生しました"
+    },
+    "actions": {
+      "view": "[AUTO-TRANSLATED ja] View",
+      "edit": "[AUTO-TRANSLATED ja] Edit",
+      "delete": "[AUTO-TRANSLATED ja] Delete",
+      "configure": "[AUTO-TRANSLATED ja] Configure"
     }
   },
   "archive": {
@@ -617,7 +704,44 @@
       "generating": "レポート生成中...",
       "processingSection": "セクション {{sectionNum}}/{{totalSections}} を処理中: {{sectionPreview}}"
     },
-    "pleaseWait": "レポートを生成中です。しばらくお待ちください"
+    "pleaseWait": "レポートを生成中です。しばらくお待ちください",
+    "pageDescription": "[AUTO-TRANSLATED ja] Generate a document based on a user-defined outline and document database.",
+    "generatingDocument": "[AUTO-TRANSLATED ja] Generating document...",
+    "knowledgeBaseTitle": "ナレッジベース",
+    "documentOutlineTitle": "[AUTO-TRANSLATED ja] Document Outline",
+    "clickToSelect": "[AUTO-TRANSLATED ja] Click to select",
+    "customInstructionsTitle": "[AUTO-TRANSLATED ja] Custom Instructions (Optional)",
+    "customInstructionsPlaceholder": "[AUTO-TRANSLATED ja] Enter any additional instructions that should be considered when generating each section of the report...",
+    "characterCount": "[AUTO-TRANSLATED ja] {{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
+    "selectKnowledgeBaseTitle": "[AUTO-TRANSLATED ja] Select Knowledge Base",
+    "selectDocumentOutlineTitle": "[AUTO-TRANSLATED ja] Select Document Outline",
+    "generateButton": "[AUTO-TRANSLATED ja] Generate",
+    "results": "[AUTO-TRANSLATED ja] Results",
+    "copyText": "[AUTO-TRANSLATED ja] Copy Text",
+    "copied": "[AUTO-TRANSLATED ja] Copied!",
+    "downloadDocx": "[AUTO-TRANSLATED ja] Download DOCX",
+    "downloadCsv": "[AUTO-TRANSLATED ja] Download CSV",
+    "clearReport": "[AUTO-TRANSLATED ja] Clear Report",
+    "resultsPlaceholder": "[AUTO-TRANSLATED ja] Results will appear here after generating a document.",
+    "sectionsWithSources": "[AUTO-TRANSLATED ja] Sections with Sources",
+    "sectionNumber": "[AUTO-TRANSLATED ja] Section {number}: {title}",
+    "kbGenerated": "[AUTO-TRANSLATED ja] KB Generated",
+    "rawText": "[AUTO-TRANSLATED ja] Raw Text",
+    "viewSourceCitations": "[AUTO-TRANSLATED ja] View Source Citations ({count})",
+    "documentCopiedSuccess": "[AUTO-TRANSLATED ja] Document copied to clipboard",
+    "documentCopiedError": "[AUTO-TRANSLATED ja] Failed to copy document to clipboard",
+    "documentDownloadSuccess": "[AUTO-TRANSLATED ja] Document downloaded successfully",
+    "documentDownloadError": "[AUTO-TRANSLATED ja] Failed to download document: {error}",
+    "csvDownloadSuccess": "[AUTO-TRANSLATED ja] CSV downloaded successfully",
+    "csvDownloadError": "[AUTO-TRANSLATED ja] Failed to download CSV: {error}",
+    "reportClearedSuccess": "[AUTO-TRANSLATED ja] Generated report cleared",
+    "enterAtLeastOneSection": "[AUTO-TRANSLATED ja] Please enter at least one section",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED ja] Please select a knowledge base",
+    "generateSuccess": "[AUTO-TRANSLATED ja] Report generated successfully!",
+    "generateError": "[AUTO-TRANSLATED ja] Failed to generate document: {error}",
+    "vectorSearch": "[AUTO-TRANSLATED ja] vector search",
+    "fullDocumentScan": "[AUTO-TRANSLATED ja] full document scan",
+    "editOutline": "[AUTO-TRANSLATED ja] Edit Outline"
   },
   "ui": {
     "results": "結果",
@@ -627,14 +751,14 @@
     "downloadCsv": "CSVをダウンロード",
     "clearCsv": "CSVをクリア",
     "clearResults": "結果をクリア",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "トピック:",
+    "knowledgeBaseReference": "ナレッジベース参照",
+    "knowledgeBaseReferences": "ナレッジベース参照",
+    "hideReferences": "参照を非表示",
+    "showReferences": "参照を表示",
+    "referenceNumber": "参照 {{number}}",
+    "processedInChunks": "{{count}} 個のチャンクで処理",
+    "synthesisError": "トピック分析の合成エラー"
   },
   "toast": {
     "passwordUpdated": "パスワードが正常に更新されました。",

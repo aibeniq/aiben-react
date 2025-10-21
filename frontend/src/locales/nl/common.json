@@ -29,7 +29,8 @@
     "next": "Volgende",
     "previous": "Vorige",
     "confirm": "Bevestigen",
-    "back": "Terug"
+    "back": "Terug",
+    "done": "Klaar"
   },
   "forms": {
     "firstName": "Voornaam",
@@ -53,7 +54,46 @@
     "error": "Sorry, er is iets misgegaan. Probeer het opnieuw.",
     "welcome": "Hallo! Hoe kan ik u vandaag helpen?",
     "welcomeMessageWithSource": "Selecteer een kennisbank of upload bestanden, stel dan een vraag.",
-    "welcomeMessageGeneral": "Vraag me alles! Voor het zoeken in de kennisbank, selecteer eerst een kennisbank."
+    "welcomeMessageGeneral": "Vraag me alles! Voor het zoeken in de kennisbank, selecteer eerst een kennisbank.",
+    "title": "Chat",
+    "sourcePopover": {
+      "knowledgeBase": "Kennisbank",
+      "file": "Bestand"
+    },
+    "searchMode": "Zoekmodus:",
+    "vectorSearch": "Zoeken met vectoren",
+    "fullTextScan": "Volledige documentscan",
+    "searchModeDescription": "Vectorzoekopdrachten bieden snelle, gerichte resultaten. Volledige documentscan beoordeelt alle inhoud in de kennisbank.",
+    "askMeAnything": "Vraag me alles! Voor zoeken in de kennisbank, selecteer eerst een kennisbank.",
+    "usingGeneralAI": "Algemene AI-assistent gebruiken",
+    "usingKnowledgeBase": "Gebruik kennisbank:",
+    "usingDocuments": "Gebruik # document(en)",
+    "usingFiles": "Gebruik {{count}} document{{plural}}:",
+    "remove": "Verwijderen",
+    "selectKnowledgeBase": "Selecteer een Kennisbank",
+    "knowledgeBaseTable": {
+      "name": "Naam",
+      "description": "Beschrijving",
+      "sources": "Bronnen",
+      "noDescription": "Geen beschrijving",
+      "sourcesCount": "{{count}} bronnen",
+      "pagesCount": "{{count}} pagina's"
+    },
+    "knowledgeBaseTableName": "Naam",
+    "knowledgeBaseTableDescription": "Beschrijving",
+    "knowledgeBaseTableSources": "Bronnen",
+    "knowledgeBaseTablePages": "Pagina's",
+    "selectKnowledgeBasePlaceholder": "Selecteer een Kennisbank...",
+    "noKnowledgeBasesAvailable": "Geen kennisbanken beschikbaar. Maak er eerst een om deze functie te gebruiken.",
+    "knowledgeBase": "Kennisbank",
+    "file": "Bestand",
+    "errors": {
+      "generic": "Sorry, er is iets misgegaan. Probeer het opnieuw.",
+      "timeout": "Aanvraag time-out. Probeer het opnieuw.",
+      "largeFileTimeout": "Het verwerken van grote bestanden heeft te lang geduurd. Probeer over te schakelen naar 'Volledige documentscan' voor betere prestaties bij grote bestanden.",
+      "fileSize": "Bestand is te groot. Kies kleinere bestanden.",
+      "serverError": "Er is een serverfout opgetreden. Probeer het later opnieuw."
+    }
   },
   "settings": {
     "title": "Instellingen",
@@ -145,32 +185,33 @@
     "copy": "Kopiëren",
     "paste": "Plakken",
     "cut": "Knippen",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Meer tonen",
+    "showLess": "Minder tonen",
+    "readMore": "Meer lezen",
+    "questionNumber": "Vraag {{number}}:",
+    "viewSourceCitations": "Broncitaten bekijken ({{count}})",
+    "answer": "Antwoord:",
+    "relevantPolicyContext": "Relevante beleidscontext:",
+    "sources": "bronnen",
+    "sourceCitations": "Broncitaten ({{count}})",
+    "citationNumber": "Citaat {{number}}",
+    "noSourceCitations": "Geen broncitaten beschikbaar voor deze sectie",
+    "noDetailedSections": "Geen gedetailleerde secties beschikbaar voor dit rapport",
+    "topicLabel": "Onderwerp:",
+    "knowledgeBaseReference": "Kennisbankreferentie",
+    "knowledgeBaseReferences": "Kennisbankreferenties",
+    "hideReferences": "Referenties verbergen",
+    "showReferences": "Referenties tonen",
+    "referenceNumber": "Referentie {{number}}",
+    "processedInChunks": "Verwerkt in {{count}} delen",
+    "synthesisErrorNote": "Opmerking: Er is een synthesefout opgetreden - gecombineerde deelresultaten worden getoond",
     "progress": {
       "starting": "Beginnen...",
       "initializing": "Initialiseren...",
       "processing": "Verwerken...",
       "extracting": "Inhoud extraheren..."
-    }
+    },
+    "error": "Er is iets misgegaan!"
   },
   "usage": {
     "title": "Gebruik",
@@ -209,7 +250,7 @@
     "checklistNamePlaceholder": "Voer checklist naam in...",
     "checklistDescriptionLabel": "Beschrijving",
     "checklistDescriptionPlaceholder": "Voer checklist beschrijving in voor automatische vraagvoorstellen (minimaal 10 tekens)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} vragen",
     "suggest": "Voorstellen",
     "suggesting": "Voorstellen...",
     "optimize": "Optimaliseren",
@@ -236,14 +277,16 @@
     "fullDocumentScan": "Volledige Document Analyse",
     "vectorSearchDescription": "Vindt relevante inhoud met AI gelijkenis zoeken (snel, gericht)",
     "fullScanDescription": "Analyseert alle documenten in de kennisbank (uitgebreid, grondig)",
-    "pleaseWait": "Even geduld terwijl we uw documenten bekijken"
+    "pleaseWait": "Even geduld terwijl we uw documenten bekijken",
+    "reviewSuccess": "Documentbeoordeling succesvol voltooid!",
+    "reviewSuccessMultiple": "{{count}} bestanden verwerkt met geoptimaliseerde contextdeling!"
   },
   "generate": {
     "pageDescription": "Genereer een document op basis van een door de gebruiker gedefinieerde outline en documentendatabase.",
     "generatingDocument": "Document genereren...",
     "pleaseWait": "Even geduld terwijl we uw rapport genereren",
     "knowledgeBaseTitle": "Kennisbank",
-    "documentOutlineTitle": "Document Outline",
+    "documentOutlineTitle": "Documentschema",
     "clickToSelect": "Klik om te selecteren",
     "customInstructionsTitle": "Aangepaste Instructies (Optioneel)",
     "customInstructionsPlaceholder": "Voer aanvullende instructies in die moeten worden overwogen bij het genereren van elke sectie van het rapport...",
@@ -284,7 +327,8 @@
       "extracting": "Inhoud extraheren...",
       "generating": "Rapport genereren...",
       "processingSection": "Sectie {{sectionNum}} van {{totalSections}} verwerken: {{sectionPreview}}"
-    }
+    },
+    "editOutline": "Schema bewerken"
   },
   "modelSelection": {
     "llmManagement": "LLM Beheer",
@@ -298,12 +342,8 @@
     "noEmbeddingModelsConfigured": "Geen inbeddingsmodellen geconfigureerd",
     "addNewEmbeddingModelToGetStarted": "Voeg een nieuw inbeddingsmodel toe om te beginnen",
     "tableHeaders": {
-      "name": "Naam",
-      "modelId": "Model ID",
-      "provider": "Aanbieder",
-      "description": "Beschrijving",
-      "status": "Status",
-      "actions": "Acties"
+      "modelId": "Model-ID",
+      "status": "Status"
     },
     "status": {
       "default": "Standaard",
@@ -319,9 +359,7 @@
       "addNewLlm": "Nieuwe LLM toevoegen",
       "addEmbeddingModel": "Inbeddingsmodel toevoegen",
       "displayName": "Weergavenaam",
-      "provider": "Aanbieder",
-      "modelId": "Model ID",
-      "description": "Beschrijving",
+      "modelId": "Model-ID",
       "cancel": "Annuleren",
       "addModel": "Model toevoegen"
     },
@@ -400,7 +438,8 @@
     "suggest": "Voorstellen",
     "fieldPlaceholder": "Voeg een veldnaam toe (bijv. Voornaam, Adres, BSN) of stel voor uit beschrijving",
     "cancel": "Annuleren",
-    "updateFormTemplate": "Formuliersjabloon Bijwerken"
+    "updateFormTemplate": "Formuliersjabloon Bijwerken",
+    "pleaseWait": "Wacht alstublieft terwijl we uw documenten controleren"
   },
   "editOutlineModal": {
     "title": "Overzicht Bewerken",
@@ -415,6 +454,7 @@
     "sections": "Secties",
     "suggest": "Voorstellen",
     "optimize": "Optimaliseren",
+    "consultDocs": "Documenten raadplegen",
     "addSectionPlaceholder": "Sectie toevoegen",
     "cancel": "Annuleren",
     "createOutline": "Overzicht Aanmaken",
@@ -430,7 +470,7 @@
     "referenceDocuments": "Referentiedocumenten (Optioneel)",
     "uploadFiles": "Bestanden Uploaden",
     "knowledgeBase": "Kennisbank",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} vragen",
     "suggest": "Voorstellen",
     "optimize": "Optimaliseren",
     "addQuestionPlaceholder": "Vraag toevoegen",
@@ -450,10 +490,10 @@
     "uploadFiles": "Bestanden Uploaden",
     "knowledgeBase": "Kennisbank",
     "comparisonTopics": "Vergelijkingsonderwerpen",
-    "topics": "{{count}} topics",
-    "section": "{{count}} section",
-    "section_one": "{{count}} section",
-    "sections": "{{count}} sections",
+    "topics": "{{count}} onderwerpen",
+    "section": "{{count}} sectie",
+    "section_one": "{{count}} sectie",
+    "sections": "{{count}} secties",
     "suggest": "Voorstellen",
     "addTopicPlaceholder": "Vergelijkingsonderwerp toevoegen",
     "copyAllTopics": "Alle onderwerpen als tekst kopiëren",
@@ -483,7 +523,10 @@
     "showMore": "Meer Tonen",
     "optimizationsSelectedText": "optimalisatie{{s}} geselecteerd voor toepassing",
     "applying": "Toepassen...",
-    "applySelectedOptimizations": "Geselecteerde Optimalisaties Toepassen"
+    "applySelectedOptimizations": "Geselecteerde Optimalisaties Toepassen",
+    "uploadDocumentsTitle": "Upload document(en) die door checklist moeten worden geaccepteerd *",
+    "uploadDocumentsHelperText": "Upload documenten die aan alle checklistvereisten moeten voldoen om vragen te identificeren die mogelijk te streng zijn",
+    "customInstructionsPlaceholder": "bijv. Houd rekening met het feit dat dit een pediatrische studie is bij het evalueren van leeftijdgerelateerde vereisten, Dit protocol is voor een interventie met laag risico, etc."
   },
   "optimizeOutlineModal": {
     "title": "Overzicht Optimaliseren",
@@ -533,11 +576,41 @@
     },
     "modals": {
       "fileUpload": {
-        "supportedFormats": "Ondersteunt: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "supportedFormats": "Ondersteunt: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
+        "currentFiles": "Huidige bestanden",
+        "newFiles": "Nieuwe bestanden",
+        "selectedFiles": "Geselecteerde bestanden",
+        "dragAndDrop": "Sleep bestanden hierheen, of klik om te bladeren",
+        "dropFiles": "Laat de bestanden hier vallen...",
+        "removeFile": "Bestand verwijderen"
       },
       "messages": {
         "processing": "Verwerken...",
-        "pleaseWait": "Wacht even terwijl we uw bestanden verwerken..."
+        "pleaseWait": "Wacht even terwijl we uw bestanden verwerken...",
+        "createSuccess": "Kennisbank succesvol aangemaakt.",
+        "updateSuccess": "Kennisbank succesvol bijgewerkt."
+      },
+      "add": {
+        "title": "Kennisbank toevoegen",
+        "description": "Maak een nieuwe kennisbank aan door hieronder details en documenten te verstrekken."
+      },
+      "edit": {
+        "title": "Kennisbank bewerken",
+        "description": "Werk hieronder de details van de kennisbank bij."
+      },
+      "fields": {
+        "title": "Titel",
+        "description": "Beschrijving"
+      },
+      "buttons": {
+        "cancel": "Annuleren",
+        "create": "Aanmaken",
+        "save": "Opslaan",
+        "saving": "Opslaan...",
+        "creating": "Aanmaken..."
+      },
+      "validation": {
+        "titleRequired": "Titel is verplicht"
       }
     },
     "progress": {
@@ -564,6 +637,12 @@
       "cancelButton": "Annuleren",
       "successMessage": "Kennisbank succesvol verwijderd",
       "errorMessage": "Fout bij het verwijderen van kennisbank"
+    },
+    "actions": {
+      "view": "Bekijken",
+      "edit": "Bewerken",
+      "delete": "Verwijderen",
+      "configure": "Configureren"
     }
   },
   "archive": {
@@ -666,14 +745,14 @@
     "downloadCsv": "CSV downloaden",
     "clearCsv": "CSV wissen",
     "clearResults": "Resultaten wissen",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Onderwerp:",
+    "knowledgeBaseReference": "Kennisbank Referentie",
+    "knowledgeBaseReferences": "Kennisbank Referenties",
+    "hideReferences": "Referenties Verbergen",
+    "showReferences": "Referenties Tonen",
+    "referenceNumber": "Referentie {{number}}",
+    "processedInChunks": "Verwerkt in {{count}} delen",
+    "synthesisError": "Fout bij synthese van onderwerpanalyse"
   },
   "toast": {
     "passwordUpdated": "Wachtwoord succesvol bijgewerkt.",
@@ -747,5 +826,8 @@
     "outlineUpdated": "Overzicht succesvol bijgewerkt",
     "outlineCreated": "Overzicht succesvol aangemaakt",
     "outlineSaveFailed": "Overzicht opslaan mislukt: {{error}}"
+  },
+  "dropdowns": {
+    "selectKnowledgeBase": "Selecteer een kennisbank..."
   }
 }

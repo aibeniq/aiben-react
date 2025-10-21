@@ -29,7 +29,8 @@
     "next": "Próximo",
     "previous": "Anterior",
     "confirm": "Confirmar",
-    "back": "Voltar"
+    "back": "Voltar",
+    "done": "Concluído"
   },
   "forms": {
     "firstName": "Nome",
@@ -56,7 +57,46 @@
     "error": "Desculpe, algo deu errado. Tente novamente.",
     "welcome": "Olá! Como posso te ajudar hoje?",
     "welcomeMessageWithSource": "Selecione uma base de conhecimento ou carregue arquivos, depois faça uma pergunta.",
-    "welcomeMessageGeneral": "Me pergunte qualquer coisa! Para busca na base de conhecimento, selecione primeiro uma base de conhecimento."
+    "welcomeMessageGeneral": "Me pergunte qualquer coisa! Para busca na base de conhecimento, selecione primeiro uma base de conhecimento.",
+    "title": "Chat",
+    "sourcePopover": {
+      "knowledgeBase": "Base de Conhecimento",
+      "file": "Arquivo"
+    },
+    "searchMode": "Modo de Busca:",
+    "vectorSearch": "Busca Vetorial",
+    "fullTextScan": "Varredura de Texto Completo",
+    "searchModeDescription": "A busca vetorial fornece resultados rápidos e direcionados. A varredura de texto completo revisa todo o conteúdo da base de conhecimento.",
+    "askMeAnything": "Pergunte-me qualquer coisa! Para busca na base de conhecimento, selecione uma base de conhecimento primeiro.",
+    "usingGeneralAI": "Usando assistente de IA geral",
+    "usingKnowledgeBase": "Usando base de conhecimento:",
+    "usingDocuments": "Usando # documento(s)",
+    "usingFiles": "Usando {{count}} documento{{plural}}:",
+    "remove": "Remover",
+    "selectKnowledgeBase": "Selecionar Base de Conhecimento",
+    "knowledgeBaseTable": {
+      "name": "Nome",
+      "description": "Descrição",
+      "sources": "Fontes",
+      "noDescription": "Sem descrição",
+      "sourcesCount": "{{count}} fontes",
+      "pagesCount": "{{count}} páginas"
+    },
+    "knowledgeBaseTableName": "Nome",
+    "knowledgeBaseTableDescription": "Descrição",
+    "knowledgeBaseTableSources": "Fontes",
+    "knowledgeBaseTablePages": "Páginas",
+    "selectKnowledgeBasePlaceholder": "Selecione uma Base de Conhecimento...",
+    "noKnowledgeBasesAvailable": "Nenhuma Base de Conhecimento disponível. Crie uma primeiro para usar este recurso.",
+    "knowledgeBase": "Base de Conhecimento",
+    "file": "Arquivo",
+    "errors": {
+      "generic": "Desculpe, algo deu errado. Tente novamente.",
+      "timeout": "Tempo de requisição esgotado. Por favor, tente novamente.",
+      "largeFileTimeout": "O processamento de arquivos grandes excedeu o tempo limite. Tente alternar para o modo 'Varredura de Texto Completo' para melhor desempenho com arquivos grandes.",
+      "fileSize": "Arquivo muito grande. Escolha arquivos menores.",
+      "serverError": "Ocorreu um erro no servidor. Por favor, tente novamente mais tarde."
+    }
   },
   "settings": {
     "title": "Configurações",
@@ -70,7 +110,19 @@
     "profile": "Perfil",
     "security": "Segurança",
     "changePassword": "Alterar Senha",
-    "appearance": "Aparência"
+    "appearance": "Aparência",
+    "currentPassword": "Senha Atual",
+    "newPassword": "Nova Senha",
+    "confirmPassword": "Confirmar Senha",
+    "save": "Salvar",
+    "system": "Sistema",
+    "lightMode": "Modo Claro",
+    "darkMode": "Modo Escuro",
+    "deleteAccountDescription": "Excluir permanentemente seus dados e tudo associado à sua conta.",
+    "delete": "Excluir",
+    "confirmationRequired": "Confirmação Necessária",
+    "deleteConfirmationText": "Todos os dados da sua conta serão excluídos permanentemente. Se você tem certeza, clique em \"Confirmar\" para prosseguir. Esta ação não pode ser desfeita.",
+    "cancel": "Cancelar"
   },
   "errors": {
     "somethingWentWrong": "Algo deu errado",
@@ -134,33 +186,36 @@
     "copy": "Copiar",
     "paste": "Colar",
     "cut": "Cortar",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Mostrar Mais",
+    "showLess": "Mostrar Menos",
+    "readMore": "Ler Mais",
+    "questionNumber": "Pergunta {{number}}:",
+    "viewSourceCitations": "Ver Citações de Fonte ({{count}})",
+    "answer": "Resposta:",
+    "relevantPolicyContext": "Contexto de Política Relevante:",
+    "sources": "fontes",
+    "sourceCitations": "Citações de Fonte ({{count}})",
+    "citationNumber": "Citação {{number}}",
+    "noSourceCitations": "Nenhuma citação de fonte disponível para esta seção",
+    "noDetailedSections": "Nenhuma seção detalhada disponível para este relatório",
+    "topicLabel": "Tópico:",
+    "knowledgeBaseReference": "Referência da Base de Conhecimento",
+    "knowledgeBaseReferences": "Referências da Base de Conhecimento",
+    "hideReferences": "Ocultar Referências",
+    "showReferences": "Mostrar Referências",
+    "referenceNumber": "Referência {{number}}",
+    "processedInChunks": "Processado em {{count}} blocos",
+    "synthesisErrorNote": "Nota: Ocorreu um erro de síntese - mostrando resultados combinados de blocos",
     "progress": {
       "starting": "Iniciando...",
       "initializing": "Inicializando...",
       "processing": "Processando...",
       "extracting": "Extraindo conteúdo...",
       "comparing": "Comparando..."
-    }
+    },
+    "error": "Algo deu errado!",
+    "welcomeBack": "Bem-vindo de volta, que bom ver você novamente!",
+    "hiUser": "Oi, {{name}} 👋"
   },
   "review": {
     "pageTitle": "Revisão de Documentos",
@@ -194,7 +249,7 @@
     "checklistNamePlaceholder": "Digite o nome da lista de verificação...",
     "checklistDescriptionLabel": "Descrição",
     "checklistDescriptionPlaceholder": "Digite a descrição da lista de verificação para sugestões automáticas de perguntas (mínimo 10 caracteres)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} perguntas",
     "suggest": "Sugerir",
     "suggesting": "Sugerindo...",
     "optimize": "Otimizar",
@@ -215,7 +270,16 @@
     "deleteChecklist": "Excluir Lista de Verificação",
     "pleaseWait": "Aguarde, estamos revisando seus documentos",
     "reviewSuccess": "Revisão do documento concluída com sucesso!",
-    "reviewSuccessMultiple": "{{count}} arquivos processados com compartilhamento de contexto otimizado!"
+    "reviewSuccessMultiple": "{{count}} arquivos processados com compartilhamento de contexto otimizado!",
+    "dropFilesHere": "Solte os arquivos aqui",
+    "uploadedFiles": "Arquivos Carregados",
+    "removeFile": "Remover",
+    "characterCount": "{{count}}/2000 caracteres. Estas instruções serão anexadas a cada pergunta durante o processamento.",
+    "searchMode": "Modo de Busca",
+    "vectorSearch": "Busca vetorial",
+    "fullDocumentScan": "Verificação Completa do Documento",
+    "vectorSearchDescription": "Encontra conteúdo relevante usando busca de similaridade de IA (rápida, direcionada)",
+    "fullScanDescription": "Analisa todos os documentos na base de conhecimento (abrangente, detalhada)"
   },
   "compare": {
     "title": "Comparar Documentos",
@@ -249,7 +313,8 @@
       "comparing": "Comparando..."
     },
     "pleaseWait": "Por favor, aguarde enquanto comparamos seus documentos",
-    "compareSuccess": "Documentos comparados com sucesso!"
+    "compareSuccess": "Documentos comparados com sucesso!",
+    "selectTopicListTitle": "Selecionar Lista de Tópicos"
   },
   "match": {
     "title": "Correspondência de Documentos",
@@ -283,7 +348,137 @@
     },
     "pleaseWait": "Aguarde enquanto correspondemos seus documentos",
     "matchSuccess": "Processamento do formulário concluído com sucesso!",
-    "singleDocumentSuccess": "Valores de campo extraídos de documento único."
+    "singleDocumentSuccess": "Valores de campo extraídos de documento único.",
+    "selectFormTemplateTitle": "Selecionar Modelo de Formulário"
+  },
+  "editFormTemplateModal": {
+    "title": "Editar Modelo de Formulário",
+    "formTemplateName": "Nome do Modelo de Formulário",
+    "formTemplateNamePlaceholder": "Digite o nome do modelo de formulário",
+    "formTemplateDescription": "Descrição do Modelo de Formulário",
+    "descriptionPlaceholder": "Digite a descrição do modelo de formulário para sugerir campos automaticamente (mínimo 10 caracteres)...",
+    "referenceDocuments": "Documentos de Referência (Opcional)",
+    "uploadFiles": "Enviar Arquivos",
+    "pleaseWait": "Aguarde enquanto analisamos seus documentos",
+    "knowledgeBase": "Base de Conhecimento",
+    "formFields": "Campos do Formulário",
+    "suggest": "Sugerir",
+    "fieldPlaceholder": "Adicionar nome do campo...",
+    "cancel": "Cancelar",
+    "updateFormTemplate": "Atualizar Modelo de Formulário"
+  },
+  "editOutlineModal": {
+    "title": "Editar Estrutura",
+    "createTitle": "Criar Nova Estrutura",
+    "outlineName": "Nome da Estrutura",
+    "outlineNamePlaceholder": "Digite o nome da estrutura",
+    "description": "Descrição",
+    "descriptionPlaceholder": "Digite a descrição da estrutura para sugerir seções automaticamente (mínimo 10 caracteres)...",
+    "referenceDocuments": "Documentos de Referência (Opcional)",
+    "uploadFiles": "Enviar Arquivos",
+    "knowledgeBase": "Base de Conhecimento",
+    "sections": "Seções",
+    "suggest": "Sugerir",
+    "optimize": "Otimizar",
+    "consultDocs": "Consultar Documentos",
+    "addSectionPlaceholder": "Adicionar seção",
+    "cancel": "Cancelar",
+    "createOutline": "Criar Estrutura",
+    "updateOutline": "Atualizar Estrutura"
+  },
+  "editChecklistModal": {
+    "title": "Editar Lista de Verificação",
+    "createTitle": "Criar Nova Lista de Verificação",
+    "checklistName": "Nome da Lista de Verificação",
+    "checklistNamePlaceholder": "Digite o nome da lista de verificação",
+    "description": "Descrição",
+    "descriptionPlaceholder": "Digite a descrição da lista de verificação para sugerir perguntas automaticamente (mínimo 10 caracteres)...",
+    "referenceDocuments": "Documentos de Referência (Opcional)",
+    "uploadFiles": "Enviar Arquivos",
+    "knowledgeBase": "Base de Conhecimento",
+    "questions": "{{count}} perguntas",
+    "suggest": "Sugerir",
+    "optimize": "Otimizar",
+    "addQuestionPlaceholder": "Adicionar pergunta",
+    "copyAllQuestions": "Copiar todas as perguntas como texto",
+    "cancel": "Cancelar",
+    "createChecklist": "Criar Lista de Verificação",
+    "updateChecklist": "Atualizar Lista de Verificação"
+  },
+  "editTopicListModal": {
+    "title": "Editar Lista de Tópicos",
+    "createTitle": "Criar Nova Lista de Tópicos",
+    "topicListName": "Nome da Lista de Tópicos",
+    "topicListNamePlaceholder": "Digite o nome da lista de tópicos",
+    "description": "Descrição da Lista de Tópicos",
+    "descriptionPlaceholder": "Digite a descrição da lista de tópicos para sugerir tópicos automaticamente (mínimo 10 caracteres)...",
+    "referenceDocuments": "Documentos de Referência (Opcional)",
+    "uploadFiles": "Enviar Arquivos",
+    "knowledgeBase": "Base de Conhecimento",
+    "comparisonTopics": "Tópicos de Comparação",
+    "topics": "{{count}} tópicos",
+    "section": "{{count}} seção",
+    "section_one": "{{count}} seção",
+    "sections": "{{count}} seções",
+    "suggest": "Sugerir",
+    "addTopicPlaceholder": "Adicionar tópico de comparação",
+    "copyAllTopics": "Copiar todos os tópicos como texto",
+    "cancel": "Cancelar",
+    "createTopicList": "Criar Lista de Tópicos",
+    "updateTopicList": "Atualizar Lista de Tópicos"
+  },
+  "usage": {
+    "title": "Uso",
+    "currentPeriod": "Período atual:",
+    "usedOfQuota": "usado da sua cota mensal"
+  },
+  "modelSelection": {
+    "llmManagement": "Gerenciamento de LLM",
+    "llmDescription": "Configure e gerencie os LLMs usados para gerar respostas de texto. O modelo padrão será usado para todas as operações.",
+    "addNewLlm": "Adicionar Novo LLM",
+    "noLlmsConfigured": "Nenhum LLM configurado",
+    "addNewLlmToGetStarted": "Adicione um novo LLM para começar",
+    "embeddingModelManagement": "Gerenciamento de Modelo de Incorporação",
+    "embeddingDescription": "Configure e gerencie os modelos de incorporação usados para indexação e recuperação de bases de conhecimento. O modelo padrão será usado ao criar novas bases de conhecimento, mas cada base de conhecimento continuará usando seu modelo de incorporação original mesmo se o padrão mudar posteriormente.",
+    "addEmbeddingModel": "Adicionar Modelo de Incorporação",
+    "noEmbeddingModelsConfigured": "Nenhum modelo de incorporação configurado",
+    "addNewEmbeddingModelToGetStarted": "Adicione um novo modelo de incorporação para começar",
+    "tableHeaders": {
+      "name": "Nome",
+      "modelId": "ID do Modelo",
+      "provider": "Provedor",
+      "description": "Descrição",
+      "status": "Status",
+      "actions": "Ações"
+    },
+    "status": {
+      "default": "Padrão",
+      "available": "Disponível"
+    },
+    "actions": {
+      "setAsDefault": "Definir como Padrão",
+      "delete": "Excluir",
+      "validate": "Validar",
+      "validating": "Validando"
+    },
+    "dialog": {
+      "addNewLlm": "Adicionar Novo LLM",
+      "addEmbeddingModel": "Adicionar Modelo de Incorporação",
+      "displayName": "Nome de Exibição",
+      "provider": "Provedor",
+      "modelId": "ID do Modelo",
+      "description": "Descrição",
+      "cancel": "Cancelar",
+      "addModel": "Adicionar Modelo"
+    },
+    "placeholders": {
+      "customModel": "ex.: Meu Modelo Personalizado",
+      "embeddingModelId": "ex.: sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Descreva o modelo, suas características e quando usá-lo"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Por favor, insira um ID de modelo"
+    }
   },
   "knowledgeBases": {
     "title": "Gerenciamento de Bases de Conhecimento",
@@ -337,6 +532,7 @@
         },
         "buttons": {
           "cancel": "Cancelar",
+          "create": "Criar",
           "save": "Salvar",
           "creating": "Criando..."
         },
@@ -364,8 +560,10 @@
         },
         "buttons": {
           "cancel": "Cancelar",
+          "create": "Criar",
           "save": "Salvar",
-          "saving": "Salvando..."
+          "saving": "Salvando...",
+          "creating": "Criando..."
         },
         "success": "Base de conhecimento atualizada com sucesso."
       },
@@ -382,6 +580,35 @@
         "fieldPlaceholder": "Adicionar nome do campo...",
         "cancel": "Cancelar",
         "updateFormTemplate": "Atualizar Modelo de Formulário"
+      },
+      "fields": {
+        "title": "Título",
+        "description": "Descrição"
+      },
+      "fileUpload": {
+        "currentFiles": "Arquivos Atuais",
+        "newFiles": "Novos Arquivos",
+        "selectedFiles": "Arquivos Selecionados",
+        "dragAndDrop": "Arraste e solte arquivos aqui, ou clique para navegar",
+        "dropFiles": "Solte os arquivos aqui...",
+        "removeFile": "Remover arquivo",
+        "supportedFormats": "Suporta: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "Cancelar",
+        "create": "Criar",
+        "save": "Salvar",
+        "saving": "Salvando...",
+        "creating": "Criando..."
+      },
+      "validation": {
+        "titleRequired": "Título é obrigatório"
+      },
+      "messages": {
+        "createSuccess": "Base de Conhecimento criada com sucesso.",
+        "updateSuccess": "Base de Conhecimento atualizada com sucesso.",
+        "processing": "Processando...",
+        "pleaseWait": "Por favor, aguarde enquanto processamos seus arquivos..."
       }
     },
     "editCustom": {
@@ -538,13 +765,50 @@
     "applyOptimizations": "Aplicar {{count}} Otimizações"
   },
   "generate": {
+    "pageDescription": "Gere um documento baseado em uma estrutura definida pelo usuário e banco de dados de documentos.",
+    "generatingDocument": "Gerando documento...",
+    "pleaseWait": "Aguarde enquanto geramos seu relatório",
+    "knowledgeBaseTitle": "Base de Conhecimento",
+    "documentOutlineTitle": "Estrutura do Documento",
+    "clickToSelect": "Clique para selecionar",
+    "customInstructionsTitle": "Instruções Personalizadas (Opcional)",
+    "customInstructionsPlaceholder": "Digite quaisquer instruções adicionais que devem ser consideradas ao gerar cada seção do relatório...",
+    "characterCount": "{{count}}/2000 caracteres. Estas instruções serão adicionadas ao prompt ao gerar cada seção.",
+    "selectKnowledgeBaseTitle": "Selecionar Base de Conhecimento",
+    "selectDocumentOutlineTitle": "Selecionar Estrutura do Documento",
+    "generateButton": "Gerar",
+    "results": "Resultados",
+    "copyText": "Copiar Texto",
+    "copied": "Copiado!",
+    "downloadDocx": "Baixar DOCX",
+    "downloadCsv": "Baixar CSV",
+    "clearReport": "Limpar Relatório",
+    "resultsPlaceholder": "Os resultados aparecerão aqui após gerar um documento.",
+    "sectionsWithSources": "Seções com Fontes",
+    "sectionNumber": "Seção {number}: {title}",
+    "kbGenerated": "KB Gerado",
+    "rawText": "Texto Bruto",
+    "viewSourceCitations": "Ver Citações de Fonte ({{count}})",
+    "documentCopiedSuccess": "Documento copiado para a área de transferência",
+    "documentCopiedError": "Falha ao copiar documento para a área de transferência",
+    "documentDownloadSuccess": "Documento baixado com sucesso",
+    "documentDownloadError": "Falha ao baixar documento: {error}",
+    "csvDownloadSuccess": "CSV baixado com sucesso",
+    "csvDownloadError": "Falha ao baixar CSV: {error}",
+    "reportClearedSuccess": "Relatório gerado limpo",
+    "enterAtLeastOneSection": "Por favor, insira pelo menos uma seção",
+    "selectKnowledgeBase": "Por favor, selecione uma base de conhecimento",
+    "generateSuccess": "Relatório gerado com sucesso!",
+    "generateError": "Falha ao gerar documento: {error}",
+    "vectorSearch": "busca vetorial",
+    "fullDocumentScan": "varredura completa do documento",
+    "editOutline": "Editar Estrutura",
     "progress": {
       "starting": "Iniciando...",
       "initializing": "Inicializando...",
       "generating": "Gerando relatório...",
       "processingSection": "Processando seção {{sectionNum}} de {{totalSections}}: {{sectionPreview}}"
-    },
-    "pleaseWait": "Aguarde enquanto geramos seu relatório"
+    }
   },
   "feedback": {
     "modalTitlePositive": "O que foi útil?",
@@ -571,14 +835,14 @@
     "downloadCsv": "Baixar CSV",
     "clearCsv": "Limpar CSV",
     "clearResults": "Limpar Resultados",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Tópico:",
+    "knowledgeBaseReference": "Referência da Base de Conhecimento",
+    "knowledgeBaseReferences": "Referências da Base de Conhecimento",
+    "hideReferences": "Ocultar Referências",
+    "showReferences": "Mostrar Referências",
+    "referenceNumber": "Referência {{number}}",
+    "processedInChunks": "Processado em {{count}} partes",
+    "synthesisError": "Erro ao sintetizar análise do tópico"
   },
   "toast": {
     "passwordUpdated": "Senha atualizada com sucesso.",

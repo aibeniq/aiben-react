@@ -10,7 +10,7 @@
     "archive": "Arkib",
     "settings": "Tetapan",
     "admin": "Pentadbir",
-    "menu": "Menu",
+    "menu": "[AUTO-TRANSLATED ms] Menu",
     "tools": "Alatan",
     "configurations": "Konfigurasi",
     "myProfile": "Profil Saya",
@@ -23,13 +23,14 @@
     "save": "Simpan",
     "cancel": "Batal",
     "delete": "Padam",
-    "edit": "Edit",
+    "edit": "[AUTO-TRANSLATED ms] Edit",
     "submit": "Hantar",
     "close": "Tutup",
     "next": "Seterusnya",
     "previous": "Sebelumnya",
     "confirm": "Sahkan",
-    "back": "Kembali"
+    "back": "Kembali",
+    "done": "Selesai"
   },
   "forms": {
     "firstName": "Nama Pertama",
@@ -60,7 +61,42 @@
     "knowledgeBaseTableName": "Nama",
     "knowledgeBaseTableDescription": "Keterangan",
     "knowledgeBaseTableSources": "Sumber",
-    "knowledgeBaseTablePages": "Halaman"
+    "knowledgeBaseTablePages": "Halaman",
+    "title": "Sembang",
+    "sourcePopover": {
+      "knowledgeBase": "Pangkalan Pengetahuan",
+      "file": "Fail"
+    },
+    "searchMode": "Mod Carian:",
+    "vectorSearch": "Carian Vektor",
+    "fullTextScan": "Imbasan Teks Penuh",
+    "searchModeDescription": "[AUTO-TRANSLATED ms] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
+    "askMeAnything": "[AUTO-TRANSLATED ms] Ask me anything! For knowledge base search, select a knowledge base first.",
+    "usingGeneralAI": "[AUTO-TRANSLATED ms] Using general AI assistant",
+    "usingKnowledgeBase": "[AUTO-TRANSLATED ms] Using knowledge base:",
+    "usingDocuments": "[AUTO-TRANSLATED ms] Using # document(s)",
+    "usingFiles": "[AUTO-TRANSLATED ms] Using {{count}} document{{plural}}:",
+    "remove": "Keluarkan",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED ms] Select Knowledge Base",
+    "knowledgeBaseTable": {
+      "name": "Nama",
+      "description": "Penerangan",
+      "sources": "Sumber",
+      "noDescription": "Tiada penerangan",
+      "sourcesCount": "{{count}} sumber",
+      "pagesCount": "{{count}} halaman"
+    },
+    "selectKnowledgeBasePlaceholder": "Pilih Pangkalan Pengetahuan...",
+    "noKnowledgeBasesAvailable": "Tiada Pangkalan Pengetahuan tersedia. Buat satu terlebih dahulu untuk menggunakan ciri ini.",
+    "knowledgeBase": "Pangkalan Pengetahuan",
+    "file": "Fail",
+    "errors": {
+      "generic": "[AUTO-TRANSLATED ms] Sorry, something went wrong. Please try again.",
+      "timeout": "[AUTO-TRANSLATED ms] Request timed out. Please try again.",
+      "largeFileTimeout": "[AUTO-TRANSLATED ms] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
+      "fileSize": "[AUTO-TRANSLATED ms] File is too large. Please choose smaller files.",
+      "serverError": "[AUTO-TRANSLATED ms] Server error occurred. Please try again later."
+    }
   },
   "settings": {
     "title": "Tetapan",
@@ -142,7 +178,7 @@
     "goodbye": "Selamat tinggal",
     "yes": "Ya",
     "no": "Tidak",
-    "ok": "OK",
+    "ok": "[AUTO-TRANSLATED ms] OK",
     "search": "Cari",
     "filter": "Penapis",
     "sort": "Susun",
@@ -150,34 +186,42 @@
     "copy": "Salin",
     "paste": "Tampal",
     "cut": "Potong",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Tunjukkan Lebih Banyak",
+    "showLess": "Tunjukkan Kurang",
+    "readMore": "Baca Lebih Lanjut",
+    "questionNumber": "Soalan {{number}}:",
+    "viewSourceCitations": "Lihat Petikan Sumber ({{count}})",
+    "answer": "Jawapan:",
+    "relevantPolicyContext": "Konteks Dasar Berkaitan:",
+    "sources": "sumber",
+    "sourceCitations": "Petikan Sumber ({{count}})",
+    "citationNumber": "Petikan {{number}}",
+    "noSourceCitations": "Tiada petikan sumber tersedia untuk bahagian ini",
+    "noDetailedSections": "Tiada bahagian terperinci tersedia untuk laporan ini",
+    "topicLabel": "Topik:",
+    "knowledgeBaseReference": "Rujukan Pangkalan Pengetahuan",
+    "knowledgeBaseReferences": "Rujukan Pangkalan Pengetahuan",
+    "hideReferences": "Sembunyikan Rujukan",
+    "showReferences": "Tunjukkan Rujukan",
+    "referenceNumber": "Rujukan {{number}}",
+    "processedInChunks": "Diproses dalam {{count}} bahagian",
+    "synthesisErrorNote": "Nota: Ralat sintesis berlaku - menunjukkan hasil gabungan bahagian",
     "progress": {
       "starting": "Memulakan...",
       "initializing": "Memulakan...",
       "generating": "Menjana laporan...",
       "processingSection": "Memproses bahagian {{sectionNum}} daripada {{totalSections}}: {{sectionPreview}}",
-      "processing": "[TODO: Processing...]",
-      "extracting": "[TODO: Extracting content...]"
-    }
+      "processing": "Memproses...",
+      "extracting": "Mengekstrak kandungan..."
+    },
+    "error": "[AUTO-TRANSLATED ms] Something went wrong!",
+    "welcomeBack": "[AUTO-TRANSLATED ms] Welcome back, nice to see you again!",
+    "hiUser": "[AUTO-TRANSLATED ms] Hi, {{name}} 👋"
+  },
+  "usage": {
+    "title": "Penggunaan",
+    "currentPeriod": "Tempoh semasa:",
+    "usedOfQuota": "digunakan daripada kuota bulanan anda"
   },
   "review": {
     "pageTitle": "Semak Dokumen",
@@ -211,7 +255,7 @@
     "checklistNamePlaceholder": "Masukkan nama senarai semak...",
     "checklistDescriptionLabel": "Penerangan",
     "checklistDescriptionPlaceholder": "Masukkan penerangan senarai semak untuk cadangan soalan automatik (sekurang-kurangnya 10 aksara)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} soalan",
     "suggest": "Cadangkan",
     "suggesting": "Mencadangkan...",
     "optimize": "Optimumkan",
@@ -232,7 +276,64 @@
     "deleteChecklist": "Padam Senarai Semak",
     "pleaseWait": "Sila tunggu, kami sedang menyemak dokumen anda",
     "reviewSuccess": "Semakan dokumen berjaya diselesaikan!",
-    "reviewSuccessMultiple": "{{count}} fail diproses dengan perkongsian konteks yang dioptimumkan!"
+    "reviewSuccessMultiple": "{{count}} fail diproses dengan perkongsian konteks yang dioptimumkan!",
+    "dropFilesHere": "[AUTO-TRANSLATED ms] Drop the files here",
+    "uploadedFiles": "[AUTO-TRANSLATED ms] Uploaded Files",
+    "removeFile": "Keluarkan",
+    "characterCount": "[AUTO-TRANSLATED ms] {{count}}/2000 characters. These instructions will be appended to each question when processing.",
+    "searchMode": "[AUTO-TRANSLATED ms] Search Mode",
+    "vectorSearch": "Carian Vektor",
+    "fullDocumentScan": "[AUTO-TRANSLATED ms] Full Document Scan",
+    "vectorSearchDescription": "[AUTO-TRANSLATED ms] Finds relevant content using AI similarity search (fast, targeted)",
+    "fullScanDescription": "[AUTO-TRANSLATED ms] Analyzes all documents in the knowledge base (comprehensive, thorough)"
+  },
+  "modelSelection": {
+    "llmManagement": "Pengurusan LLM",
+    "llmDescription": "Konfigurasi dan urus LLM yang digunakan untuk menjana respons teks. Model lalai akan digunakan untuk semua operasi.",
+    "addNewLlm": "Tambah LLM Baharu",
+    "noLlmsConfigured": "Tiada LLM dikonfigurasi",
+    "addNewLlmToGetStarted": "Tambah LLM baharu untuk bermula",
+    "embeddingModelManagement": "Pengurusan Model Penyematan",
+    "embeddingDescription": "Konfigurasi dan urus model penyematan yang digunakan untuk pengindeksan dan pengambilan pangkalan pengetahuan. Model lalai akan digunakan untuk mencipta pangkalan pengetahuan baharu, tetapi setiap pangkalan pengetahuan akan terus menggunakan model penyematan asalnya walaupun lalai diubah kemudian.",
+    "addEmbeddingModel": "Tambah Model Penyematan",
+    "noEmbeddingModelsConfigured": "Tiada model penyematan dikonfigurasi",
+    "addNewEmbeddingModelToGetStarted": "Tambah model penyematan baharu untuk bermula",
+    "tableHeaders": {
+      "name": "Nama",
+      "modelId": "ID Model",
+      "provider": "Pembekal",
+      "description": "Penerangan",
+      "status": "[AUTO-TRANSLATED ms] Status",
+      "actions": "Tindakan"
+    },
+    "status": {
+      "default": "Lalai",
+      "available": "Tersedia"
+    },
+    "actions": {
+      "setAsDefault": "Tetapkan sebagai Lalai",
+      "delete": "Padam",
+      "validate": "Sahkan",
+      "validating": "Menyahkan"
+    },
+    "dialog": {
+      "addNewLlm": "Tambah LLM Baharu",
+      "addEmbeddingModel": "Tambah Model Penyematan",
+      "displayName": "Nama Paparan",
+      "provider": "Pembekal",
+      "modelId": "ID Model",
+      "description": "Penerangan",
+      "cancel": "Batal",
+      "addModel": "Tambah Model"
+    },
+    "placeholders": {
+      "customModel": "Contoh: Model peribadi saya",
+      "embeddingModelId": "Contoh: sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Terangkan model, ciri-cirinya dan bila untuk menggunakannya"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Sila masukkan ID model"
+    }
   },
   "compare": {
     "title": "Bandingkan Dokumen",
@@ -266,7 +367,8 @@
       "comparing": "Membandingkan..."
     },
     "pleaseWait": "Sila tunggu sementara kami membandingkan dokumen anda",
-    "compareSuccess": "Dokumen berjaya dibandingkan!"
+    "compareSuccess": "Dokumen berjaya dibandingkan!",
+    "selectTopicListTitle": "[AUTO-TRANSLATED ms] Select Topic List"
   },
   "match": {
     "title": "Padanan Dokumen",
@@ -300,7 +402,68 @@
     },
     "pleaseWait": "Sila tunggu sementara kami memadankan dokumen anda",
     "matchSuccess": "Pemprosesan borang berjaya diselesaikan!",
-    "singleDocumentSuccess": "Nilai medan berjaya diekstrak daripada satu dokumen."
+    "singleDocumentSuccess": "Nilai medan berjaya diekstrak daripada satu dokumen.",
+    "selectFormTemplateTitle": "[AUTO-TRANSLATED ms] Select Form Template"
+  },
+  "editOutlineModal": {
+    "title": "Edit Rangka",
+    "createTitle": "Cipta Rangka Baharu",
+    "outlineName": "Nama Rangka",
+    "outlineNamePlaceholder": "Masukkan nama rangka",
+    "description": "Penerangan",
+    "descriptionPlaceholder": "Masukkan penerangan rangka untuk mencadangkan bahagian secara automatik (minimum 10 aksara)...",
+    "referenceDocuments": "Dokumen Rujukan (Pilihan)",
+    "uploadFiles": "Muat Naik Fail",
+    "knowledgeBase": "Pangkalan Pengetahuan",
+    "sections": "Bahagian",
+    "suggest": "Cadangkan",
+    "optimize": "Optimumkan",
+    "consultDocs": "Rujuk Dokumen",
+    "addSectionPlaceholder": "Tambah bahagian",
+    "cancel": "Batal",
+    "createOutline": "Cipta Rangka",
+    "updateOutline": "Kemas Kini Rangka"
+  },
+  "editChecklistModal": {
+    "title": "Edit Senarai Semak",
+    "createTitle": "Cipta Senarai Semak Baharu",
+    "checklistName": "Nama Senarai Semak",
+    "checklistNamePlaceholder": "Masukkan nama senarai semak",
+    "description": "Penerangan",
+    "descriptionPlaceholder": "Masukkan penerangan senarai semak untuk mencadangkan soalan secara automatik (minimum 10 aksara)...",
+    "referenceDocuments": "Dokumen Rujukan (Pilihan)",
+    "uploadFiles": "Muat Naik Fail",
+    "knowledgeBase": "Pangkalan Pengetahuan",
+    "questions": "{{count}} soalan",
+    "suggest": "Cadangkan",
+    "optimize": "Optimumkan",
+    "addQuestionPlaceholder": "Tambah soalan",
+    "copyAllQuestions": "Salin semua soalan sebagai teks",
+    "cancel": "Batal",
+    "createChecklist": "Cipta Senarai Semak",
+    "updateChecklist": "Kemas Kini Senarai Semak"
+  },
+  "editTopicListModal": {
+    "title": "Edit Senarai Topik",
+    "createTitle": "Cipta Senarai Topik Baharu",
+    "topicListName": "Nama Senarai Topik",
+    "topicListNamePlaceholder": "Masukkan nama senarai topik",
+    "description": "Penerangan Senarai Topik",
+    "descriptionPlaceholder": "Masukkan penerangan senarai topik untuk mencadangkan topik secara automatik (minimum 10 aksara)...",
+    "referenceDocuments": "Dokumen Rujukan (Pilihan)",
+    "uploadFiles": "Muat Naik Fail",
+    "knowledgeBase": "Pangkalan Pengetahuan",
+    "comparisonTopics": "Topik Perbandingan",
+    "topics": "{{count}} topik",
+    "section": "{{count}} bahagian",
+    "section_one": "{{count}} bahagian",
+    "sections": "{{count}} bahagian",
+    "suggest": "Cadangkan",
+    "addTopicPlaceholder": "Tambah topik perbandingan",
+    "copyAllTopics": "Salin semua topik sebagai teks",
+    "cancel": "Batal",
+    "createTopicList": "Cipta Senarai Topik",
+    "updateTopicList": "Kemas Kini Senarai Topik"
   },
   "knowledgeBases": {
     "title": "Pengurusan Pangkalan Pengetahuan",
@@ -322,7 +485,7 @@
     },
     "actions": {
       "view": "Lihat",
-      "edit": "Edit",
+      "edit": "[AUTO-TRANSLATED ms] Edit",
       "delete": "Padam",
       "configure": "Konfigurasi"
     },
@@ -399,6 +562,35 @@
         "fieldPlaceholder": "Tambah nama medan...",
         "cancel": "Batal",
         "updateFormTemplate": "Kemas Kini Templat Borang"
+      },
+      "fields": {
+        "title": "[AUTO-TRANSLATED ms] Title",
+        "description": "Penerangan"
+      },
+      "fileUpload": {
+        "currentFiles": "[AUTO-TRANSLATED ms] Current Files",
+        "newFiles": "[AUTO-TRANSLATED ms] New Files",
+        "selectedFiles": "[AUTO-TRANSLATED ms] Selected Files",
+        "dragAndDrop": "[AUTO-TRANSLATED ms] Drag and drop files here, or click to browse",
+        "dropFiles": "[AUTO-TRANSLATED ms] Drop the files here...",
+        "removeFile": "[AUTO-TRANSLATED ms] Remove file",
+        "supportedFormats": "[AUTO-TRANSLATED ms] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "Batal",
+        "create": "Buat",
+        "save": "Simpan",
+        "saving": "[AUTO-TRANSLATED ms] Saving...",
+        "creating": "[AUTO-TRANSLATED ms] Creating..."
+      },
+      "validation": {
+        "titleRequired": "[AUTO-TRANSLATED ms] Title is required"
+      },
+      "messages": {
+        "createSuccess": "[AUTO-TRANSLATED ms] Knowledge Base created successfully.",
+        "updateSuccess": "[AUTO-TRANSLATED ms] Knowledge Base updated successfully.",
+        "processing": "[AUTO-TRANSLATED ms] Processing...",
+        "pleaseWait": "[AUTO-TRANSLATED ms] Please wait while we process your files..."
       }
     },
     "editCustom": {
@@ -625,14 +817,14 @@
     "downloadCsv": "Muat Turun CSV",
     "clearCsv": "Kosongkan CSV",
     "clearResults": "Kosongkan Keputusan",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Topik:",
+    "knowledgeBaseReference": "Rujukan Pangkalan Pengetahuan",
+    "knowledgeBaseReferences": "Rujukan Pangkalan Pengetahuan",
+    "hideReferences": "Sembunyikan Rujukan",
+    "showReferences": "Tunjukkan Rujukan",
+    "referenceNumber": "Rujukan {{number}}",
+    "processedInChunks": "Diproses dalam {{count}} bahagian",
+    "synthesisError": "Ralat mensintesis analisis topik"
   },
   "toast": {
     "passwordUpdated": "Kata laluan berjaya dikemas kini.",
@@ -706,5 +898,21 @@
     "outlineUpdated": "Garis panduan berjaya dikemas kini",
     "outlineCreated": "Garis panduan berjaya dicipta",
     "outlineSaveFailed": "Penyimpanan garis panduan gagal: {{error}}"
+  },
+  "editFormTemplateModal": {
+    "title": "[AUTO-TRANSLATED ms] Edit Form Template",
+    "formTemplateName": "[AUTO-TRANSLATED ms] Form Template Name",
+    "formTemplateNamePlaceholder": "[AUTO-TRANSLATED ms] Enter form template name",
+    "formTemplateDescription": "[AUTO-TRANSLATED ms] Form Template Description",
+    "descriptionPlaceholder": "[AUTO-TRANSLATED ms] Enter form template description to auto-suggest fields (minimum 10 characters)...",
+    "referenceDocuments": "[AUTO-TRANSLATED ms] Reference Documents (Optional)",
+    "uploadFiles": "[AUTO-TRANSLATED ms] Upload Files",
+    "pleaseWait": "Sila tunggu sementara kami menyemak dokumen anda",
+    "knowledgeBase": "Pangkalan Pengetahuan",
+    "formFields": "[AUTO-TRANSLATED ms] Form Fields",
+    "suggest": "[AUTO-TRANSLATED ms] Suggest",
+    "fieldPlaceholder": "[AUTO-TRANSLATED ms] Add a field name...",
+    "cancel": "Batal",
+    "updateFormTemplate": "[AUTO-TRANSLATED ms] Update Form Template"
   }
 }
