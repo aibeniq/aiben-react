@@ -1,16 +1,16 @@
 {
   "navigation": {
-    "dashboard": "[AUTO-TRANSLATED da] Dashboard",
+    "dashboard": "Dashboard",
     "review": "Gennemgang",
     "generate": "Generer",
     "compare": "Sammenlign",
-    "match": "[AUTO-TRANSLATED da] Match",
+    "match": "Match",
     "modelSelection": "Modelvalg",
     "knowledgeBases": "Videnbaser",
     "archive": "Arkiv",
     "settings": "Indstillinger",
-    "admin": "[AUTO-TRANSLATED da] Admin",
-    "menu": "[AUTO-TRANSLATED da] Menu",
+    "admin": "Admin",
+    "menu": "Menu",
     "tools": "Værktøjer",
     "configurations": "Konfigurationer",
     "myProfile": "Min Profil",
@@ -18,8 +18,8 @@
     "loggedInAs": "Logget ind som: {{email}}"
   },
   "buttons": {
-    "upload": "[AUTO-TRANSLATED da] Upload",
-    "download": "[AUTO-TRANSLATED da] Download",
+    "upload": "Upload",
+    "download": "Download",
     "save": "Gem",
     "cancel": "Annuller",
     "delete": "Slet",
@@ -30,7 +30,7 @@
     "previous": "Forrige",
     "confirm": "Bekræft",
     "back": "Tilbage",
-    "done": "[AUTO-TRANSLATED da] Done"
+    "done": "Færdig"
   },
   "forms": {
     "firstName": "Fornavn",
@@ -49,13 +49,13 @@
     "selectKnowledgeBase": "Vælg en videnbase..."
   },
   "chatbot": {
-    "title": "[AUTO-TRANSLATED da] Chat",
+    "title": "Chat",
     "placeholder": "Stil et spørgsmål...",
     "sourcePopover": {
       "knowledgeBase": "Videnbase",
       "file": "Fil"
     },
-    "send": "[AUTO-TRANSLATED da] Send",
+    "send": "Send",
     "newChat": "Ny chat",
     "clearHistory": "Ryd historik",
     "typing": "AI skriver...",
@@ -115,7 +115,7 @@
     "newPassword": "Ny adgangskode",
     "confirmPassword": "Bekræft adgangskode",
     "save": "Gem",
-    "system": "[AUTO-TRANSLATED da] System",
+    "system": "System",
     "lightMode": "Lys tilstand",
     "darkMode": "Mørk tilstand",
     "deleteAccountDescription": "Slet permanent dine data og alt, der er forbundet med din konto.",
@@ -180,9 +180,9 @@
     "goodbye": "Farvel",
     "yes": "Ja",
     "no": "Nej",
-    "ok": "[AUTO-TRANSLATED da] OK",
+    "ok": "OK",
     "search": "Søg",
-    "filter": "[AUTO-TRANSLATED da] Filter",
+    "filter": "Filter",
     "sort": "Sorter",
     "view": "Vis",
     "copy": "Kopier",
@@ -205,7 +205,7 @@
     "knowledgeBaseReferences": "Vidensbase referencer",
     "hideReferences": "Skjul referencer",
     "showReferences": "Vis referencer",
-    "referenceNumber": "[AUTO-TRANSLATED da] Reference {{number}}",
+    "referenceNumber": "Reference {{number}}",
     "processedInChunks": "Behandlet i {{count}} bidder",
     "synthesisErrorNote": "Bemærk: Syntesefejl opstod - viser kombinerede bidresultater",
     "progress": {
@@ -214,7 +214,7 @@
       "processing": "Behandler...",
       "extracting": "Udtrækker indhold..."
     },
-    "error": "[AUTO-TRANSLATED da] Something went wrong!"
+    "error": "Noget gik galt!"
   },
   "usage": {
     "title": "Forbrug",
@@ -240,7 +240,7 @@
     "uploadDocuments": "Upload et eller flere dokumenter til gennemgang mod din valgte tjekliste",
     "results": "Resultater",
     "downloadReport": "Download rapport",
-    "downloadCsv": "[AUTO-TRANSLATED da] Download CSV",
+    "downloadCsv": "Download CSV",
     "clearResults": "Ryd resultater",
     "copyReport": "Kopier rapport",
     "reportCopied": "Rapport kopieret til udklipsholder!",
@@ -300,8 +300,8 @@
     "results": "Resultater",
     "copyText": "Kopier tekst",
     "copied": "Kopieret!",
-    "downloadDocx": "[AUTO-TRANSLATED da] Download DOCX",
-    "downloadCsv": "[AUTO-TRANSLATED da] Download CSV",
+    "downloadDocx": "Download DOCX",
+    "downloadCsv": "Download CSV",
     "clearReport": "Ryd rapport",
     "resultsPlaceholder": "Resultater vil blive vist her efter dokumentgenerering.",
     "sectionsWithSources": "Afsnit med kilder",
@@ -330,7 +330,7 @@
       "processingSection": "Behandler afsnit {{sectionNum}} af {{totalSections}}: {{sectionPreview}}"
     },
     "pleaseWait": "Vent venligst, mens vi genererer din rapport",
-    "editOutline": "[AUTO-TRANSLATED da] Edit Outline"
+    "editOutline": "Rediger disposition"
   },
   "modelSelection": {
     "llmManagement": "LLM-styring",
@@ -348,7 +348,7 @@
       "modelId": "Model-ID",
       "provider": "Udbyder",
       "description": "Beskrivelse",
-      "status": "[AUTO-TRANSLATED da] Status",
+      "status": "Status",
       "actions": "Handlinger"
     },
     "status": {
@@ -518,12 +518,12 @@
     "analyzingMessage": "Analyserer din tjekliste for at finde optimeringsmuligheder...",
     "cancelAnalysis": "Annuller analyse",
     "downloading": "Downloader...",
-    "downloadCsv": "[AUTO-TRANSLATED da] Download CSV",
+    "downloadCsv": "Download CSV",
     "questionsNeedingOptimization": "Spørgsmål, der har brug for optimering",
     "questionsAlreadyOptimized": "Allerede optimerede spørgsmål",
     "selected": "Valgt",
     "select": "Vælg",
-    "original": "[AUTO-TRANSLATED da] Original",
+    "original": "Original",
     "suggestedImprovement": "Foreslået forbedring",
     "policyContext": "Politikkontekst",
     "currentAnswer": "Nuværende svar",
@@ -532,9 +532,9 @@
     "optimizationsSelectedText": "{{s}} optimeringer valgt til anvendelse",
     "applying": "Anvender...",
     "applySelectedOptimizations": "Anvend valgte optimeringer",
-    "uploadDocumentsTitle": "[AUTO-TRANSLATED da] Upload document(s) that should be accepted by checklist *",
-    "uploadDocumentsHelperText": "[AUTO-TRANSLATED da] Upload documents that should meet all checklist requirements to help identify questions that may be too strict",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED da] e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
+    "uploadDocumentsTitle": "Upload dokument(er), der skal accepteres af tjekliste *",
+    "uploadDocumentsHelperText": "Upload dokumenter, der opfylder alle tjeklistekrav for at hjælpe med at identificere spørgsmål, der kan være for strenge",
+    "customInstructionsPlaceholder": "f.eks. Overvej at dette er en pædiatrisk undersøgelse, når aldersrelaterede krav evalueres, Denne protokol er til en lavrisiko-intervention, etc."
   },
   "optimizeOutlineModal": {
     "title": "Optimer disposition",
@@ -548,7 +548,7 @@
     "cancelAnalysis": "Annuller analyse",
     "optimizationResults": "Optimeringsresultater",
     "sectionsNeedOptimization": "afsnit har brug for optimering",
-    "downloadCsv": "[AUTO-TRANSLATED da] Download CSV",
+    "downloadCsv": "Download CSV",
     "section": "Afsnit",
     "accepted": "Accepteret",
     "accept": "Accepter",
@@ -653,31 +653,31 @@
       "messages": {
         "processing": "Behandler...",
         "pleaseWait": "Vent venligst mens vi behandler dine filer...",
-        "createSuccess": "[AUTO-TRANSLATED da] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED da] Knowledge Base updated successfully."
+        "createSuccess": "Videnbase oprettet succesfuldt.",
+        "updateSuccess": "Videnbase opdateret succesfuldt."
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED da] Title",
+        "title": "Titel",
         "description": "Beskrivelse"
       },
       "fileUpload": {
-        "currentFiles": "[AUTO-TRANSLATED da] Current Files",
-        "newFiles": "[AUTO-TRANSLATED da] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED da] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED da] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED da] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED da] Remove file",
-        "supportedFormats": "[AUTO-TRANSLATED da] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "currentFiles": "Nuværende filer",
+        "newFiles": "Nye filer",
+        "selectedFiles": "Valgte filer",
+        "dragAndDrop": "Træk og slip filer her, eller klik for at gennemse",
+        "dropFiles": "Slip filerne her...",
+        "removeFile": "Fjern fil",
+        "supportedFormats": "Understøtter: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
       },
       "buttons": {
         "cancel": "Annuller",
         "create": "Opret",
         "save": "Gem",
-        "saving": "[AUTO-TRANSLATED da] Saving...",
-        "creating": "[AUTO-TRANSLATED da] Creating..."
+        "saving": "Gemmer...",
+        "creating": "Opretter..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED da] Title is required"
+        "titleRequired": "Titel er påkrævet"
       }
     },
     "progress": {
@@ -708,7 +708,7 @@
       "review": "Gennemgang",
       "generate": "Generer",
       "compare": "Sammenlign",
-      "match": "[AUTO-TRANSLATED da] Match"
+      "match": "Match"
     },
     "emptyMessages": {
       "review": "Ingen tidligere evalueringer",
@@ -767,9 +767,9 @@
       "sources": "kilder"
     },
     "feedback": {
-      "positive": "[AUTO-TRANSLATED da] Positive feedback",
-      "negative": "[AUTO-TRANSLATED da] Negative feedback",
-      "hasFeedback": "[AUTO-TRANSLATED da] Has feedback"
+      "positive": "Positiv feedback",
+      "negative": "Negativ feedback",
+      "hasFeedback": "Har feedback"
     }
   },
   "feedback": {
@@ -793,8 +793,8 @@
     "results": "Resultater",
     "copyText": "Kopier tekst",
     "copied": "Kopieret!",
-    "downloadDocx": "[AUTO-TRANSLATED da] Download DOCX",
-    "downloadCsv": "[AUTO-TRANSLATED da] Download CSV",
+    "downloadDocx": "Download DOCX",
+    "downloadCsv": "Download CSV",
     "clearCsv": "Ryd CSV",
     "clearResults": "Ryd resultater",
     "topicLabel": "Emne:",
@@ -802,7 +802,7 @@
     "knowledgeBaseReferences": "Vidensbase Referencer",
     "hideReferences": "Skjul Referencer",
     "showReferences": "Vis Referencer",
-    "referenceNumber": "[AUTO-TRANSLATED da] Reference {{number}}",
+    "referenceNumber": "Reference {{number}}",
     "processedInChunks": "Behandlet i {{count}} bidder",
     "synthesisError": "Fejl ved syntese af emneanalyse"
   },

@@ -35,7 +35,7 @@
   "forms": {
     "firstName": "Prenume",
     "lastName": "Nume",
-    "email": "[AUTO-TRANSLATED ro] Email",
+    "email": "Email",
     "password": "Parolă",
     "confirmPassword": "Confirmă parola",
     "currentPassword": "Parola curentă",
@@ -59,7 +59,7 @@
     "knowledgeBaseTableDescription": "Descriere",
     "knowledgeBaseTableSources": "Surse",
     "knowledgeBaseTablePages": "Pagini",
-    "title": "[AUTO-TRANSLATED ro] Chat",
+    "title": "Chat",
     "sourcePopover": {
       "knowledgeBase": "Bază de cunoștințe",
       "file": "Fișier"
@@ -67,14 +67,12 @@
     "searchMode": "Mod de căutare:",
     "vectorSearch": "Căutare vectorială",
     "fullTextScan": "Scanare text completă",
-    "searchModeDescription": "[AUTO-TRANSLATED ro] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
-    "askMeAnything": "[AUTO-TRANSLATED ro] Ask me anything! For knowledge base search, select a knowledge base first.",
-    "usingGeneralAI": "[AUTO-TRANSLATED ro] Using general AI assistant",
-    "usingKnowledgeBase": "[AUTO-TRANSLATED ro] Using knowledge base:",
-    "usingDocuments": "[AUTO-TRANSLATED ro] Using # document(s)",
-    "usingFiles": "[AUTO-TRANSLATED ro] Using {{count}} document{{plural}}:",
-    "remove": "Elimină",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED ro] Select Knowledge Base",
+    "searchModeDescription": "Căutarea vectorială oferă rezultate rapide și țintite. Scanarea textului complet analizează tot conținutul din baza de cunoștințe.",
+    "askMeAnything": "Întreabă-mă orice! Pentru căutarea în baza de cunoștințe, selectează mai întâi o bază de cunoștințe.",
+    "usingGeneralAI": "Folosește asistentul AI general",
+    "usingKnowledgeBase": "Folosește baza de cunoștințe:",
+    "usingDocuments": "Folosește # document(e)",
+    "selectKnowledgeBase": "Selectează baza de cunoștințe",
     "knowledgeBaseTable": {
       "name": "Nume",
       "description": "Descriere",
@@ -88,11 +86,11 @@
     "knowledgeBase": "Bază de cunoștințe",
     "file": "Fișier",
     "errors": {
-      "generic": "[AUTO-TRANSLATED ro] Sorry, something went wrong. Please try again.",
-      "timeout": "[AUTO-TRANSLATED ro] Request timed out. Please try again.",
-      "largeFileTimeout": "[AUTO-TRANSLATED ro] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
-      "fileSize": "[AUTO-TRANSLATED ro] File is too large. Please choose smaller files.",
-      "serverError": "[AUTO-TRANSLATED ro] Server error occurred. Please try again later."
+      "generic": "Ne pare rău, ceva a mers prost. Încercați din nou.",
+      "timeout": "Cererea a expirat. Încercați din nou.",
+      "largeFileTimeout": "Procesarea fișierului mare a expirat. Încercați să comutați la modul 'Scanare text complet' pentru performanță mai bună cu fișiere mari.",
+      "fileSize": "Fișierul este prea mare. Vă rugăm să alegeți fișiere mai mici.",
+      "serverError": "A apărut o eroare de server. Încercați din nou mai târziu."
     }
   },
   "settings": {
@@ -175,7 +173,7 @@
     "goodbye": "La revedere",
     "yes": "Da",
     "no": "Nu",
-    "ok": "[AUTO-TRANSLATED ro] OK",
+    "ok": "OK",
     "search": "Căutare",
     "filter": "Filtru",
     "sort": "Sortare",
@@ -209,9 +207,9 @@
       "processing": "Procesare...",
       "extracting": "Extragere conținut..."
     },
-    "error": "[AUTO-TRANSLATED ro] Something went wrong!",
-    "welcomeBack": "[AUTO-TRANSLATED ro] Welcome back, nice to see you again!",
-    "hiUser": "[AUTO-TRANSLATED ro] Hi, {{name}} 👋"
+    "error": "Ceva a mers prost!",
+    "welcomeBack": "Bine ai revenit, mă bucur să te văd din nou!",
+    "hiUser": "Salut, {{name}} 👋"
   },
   "usage": {
     "title": "Utilizare",
@@ -261,7 +259,7 @@
     "knowledgeBase": "Baza de Cunoștințe",
     "referenceDocuments": "Documente de Referință (Opțional)",
     "selectKnowledgeBasePlaceholder": "Selectați Baza de Cunoștințe...",
-    "noKnowledgeBasesAvailable": "Nu este disponibilă nicio Bază de Cunoștințe. Creați mai întâi una pentru a utiliza această funcție.",
+    "noKnowledgeBasesAvailable": "Nu este disponibilă nicio Bază de cunoștințe. Creați mai întâi una pentru a utiliza această funcție.",
     "copyQuestions": "Copiați Întrebările",
     "questionsCopied": "Întrebări copiate în clipboard",
     "noQuestionsToCopy": "Nu sunt întrebări de copiat",
@@ -272,15 +270,13 @@
     "pleaseWait": "Vă rugăm așteptați în timp ce revizuim documentele dumneavoastră",
     "reviewSuccess": "Revizuirea documentului s-a finalizat cu succes!",
     "reviewSuccessMultiple": "{{count}} fișiere procesate cu partajarea optimizată a contextului!",
-    "dropFilesHere": "[AUTO-TRANSLATED ro] Drop the files here",
-    "uploadedFiles": "[AUTO-TRANSLATED ro] Uploaded Files",
-    "removeFile": "Elimină",
-    "characterCount": "[AUTO-TRANSLATED ro] {{count}}/2000 characters. These instructions will be appended to each question when processing.",
-    "searchMode": "[AUTO-TRANSLATED ro] Search Mode",
-    "vectorSearch": "Căutare vectorială",
-    "fullDocumentScan": "[AUTO-TRANSLATED ro] Full Document Scan",
-    "vectorSearchDescription": "[AUTO-TRANSLATED ro] Finds relevant content using AI similarity search (fast, targeted)",
-    "fullScanDescription": "[AUTO-TRANSLATED ro] Analyzes all documents in the knowledge base (comprehensive, thorough)"
+    "dropFilesHere": "Plasați fișierele aici...",
+    "uploadedFiles": "Fișiere încărcate",
+    "characterCount": "{{count}}/2000 caractere. Aceste instrucțiuni vor fi adăugate la fiecare întrebare în timpul procesării.",
+    "searchMode": "Mod de căutare",
+    "fullDocumentScan": "Scanare document completă",
+    "vectorSearchDescription": "Găsește conținut relevant folosind căutarea AI pe bază de similaritate (rapid, țintit)",
+    "fullScanDescription": "Analizează toate documentele din baza de cunoștințe (cuprinzătoare, detaliat)"
   },
   "compare": {
     "title": "Compararea documentelor",
@@ -315,7 +311,7 @@
     },
     "pleaseWait": "Vă rugăm să așteptați în timp ce comparăm documentele dvs.",
     "compareSuccess": "Documentele au fost comparate cu succes!",
-    "selectTopicListTitle": "[AUTO-TRANSLATED ro] Select Topic List"
+    "selectTopicListTitle": "Selectați lista de subiecte"
   },
   "match": {
     "title": "Potrivirea documentelor",
@@ -323,7 +319,7 @@
     "selectDocument": "Selectați documentul pentru găsirea potrivirilor",
     "pleaseSelect": "Vă rugăm selectați un document...",
     "sourceDocument": "Document sursă",
-    "matchingDocuments": "Documente potrivite",
+    "matchingDocuments": "Documente potrite",
     "findMatches": "Găsiți potriviri",
     "similarityScore": "Scorul similarității",
     "noDocumentsFound": "Nu s-au găsit documente",
@@ -350,7 +346,7 @@
     "pleaseWait": "Vă rugăm să așteptați în timp ce potrivim documentele dvs.",
     "matchSuccess": "Procesarea formularului a fost finalizată cu succes!",
     "singleDocumentSuccess": "Valorile câmpurilor au fost extrase dintr-un singur document.",
-    "selectFormTemplateTitle": "[AUTO-TRANSLATED ro] Select Form Template"
+    "selectFormTemplateTitle": "Selectați șablonul de formular"
   },
   "editFormTemplateModal": {
     "title": "Editare Șablon Formular",
@@ -515,31 +511,31 @@
       "messages": {
         "processing": "Procesare...",
         "pleaseWait": "Vă rugăm așteptați în timp ce procesăm fișierele dumneavoastră...",
-        "createSuccess": "[AUTO-TRANSLATED ro] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED ro] Knowledge Base updated successfully."
+        "createSuccess": "Baza de cunoștințe a fost creată cu succes.",
+        "updateSuccess": "Baza de cunoștințe a fost actualizată cu succes."
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED ro] Title",
+        "title": "Titlu",
         "description": "Descriere"
       },
       "fileUpload": {
-        "currentFiles": "[AUTO-TRANSLATED ro] Current Files",
-        "newFiles": "[AUTO-TRANSLATED ro] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED ro] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED ro] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED ro] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED ro] Remove file",
-        "supportedFormats": "[AUTO-TRANSLATED ro] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "currentFiles": "Fișiere curente",
+        "newFiles": "Fișiere noi",
+        "selectedFiles": "Fișiere selectate",
+        "dragAndDrop": "Trageți fișierele aici, sau faceți clic pentru a răsfoi",
+        "dropFiles": "Plasați fișierele aici...",
+        "removeFile": "Eliminați fișierul",
+        "supportedFormats": "Formate suportate: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
       },
       "buttons": {
         "cancel": "Anulați",
         "create": "Creați",
         "save": "Salvați",
-        "saving": "[AUTO-TRANSLATED ro] Saving...",
-        "creating": "[AUTO-TRANSLATED ro] Creating..."
+        "saving": "Se salvează...",
+        "creating": "Se creează..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED ro] Title is required"
+        "titleRequired": "Titlul este necesar"
       }
     },
     "editCustom": {
@@ -611,8 +607,8 @@
       "field": "{{count}} câmp",
       "field_one": "{{count}} câmp",
       "fields": "{{count}} câmp",
-      "document": "[AUTO-TRANSLATED ro] {{count}} document",
-      "document_one": "[AUTO-TRANSLATED ro] {{count}} document",
+      "document": "{{count}} document",
+      "document_one": "{{count}} document",
       "documents": "{{count}} document",
       "digitized": "digitizat",
       "handwritten": "scris de mână"
@@ -668,7 +664,7 @@
     "questionsAlreadyOptimized": "Întrebări Deja Optimizate",
     "selected": "Selectat",
     "select": "Selectează",
-    "original": "[AUTO-TRANSLATED ro] Original",
+    "original": "Original",
     "suggestedImprovement": "Îmbunătățire Sugerată",
     "policyContext": "Context Politică",
     "currentAnswer": "Răspuns Curent",
@@ -717,43 +713,43 @@
       "processingSection": "Procesare secțiune {{sectionNum}} din {{totalSections}}: {{sectionPreview}}"
     },
     "pleaseWait": "Vă rugăm să așteptați în timp ce generăm raportul dvs.",
-    "pageDescription": "[AUTO-TRANSLATED ro] Generate a document based on a user-defined outline and document database.",
-    "generatingDocument": "[AUTO-TRANSLATED ro] Generating document...",
+    "pageDescription": "Generați un document pe baza unei schițe definite de utilizator și a unei baze de date de documente.",
+    "generatingDocument": "Generare document...",
     "knowledgeBaseTitle": "Bază de cunoștințe",
-    "documentOutlineTitle": "[AUTO-TRANSLATED ro] Document Outline",
-    "clickToSelect": "[AUTO-TRANSLATED ro] Click to select",
-    "customInstructionsTitle": "[AUTO-TRANSLATED ro] Custom Instructions (Optional)",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED ro] Enter any additional instructions that should be considered when generating each section of the report...",
-    "characterCount": "[AUTO-TRANSLATED ro] {{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
-    "selectKnowledgeBaseTitle": "[AUTO-TRANSLATED ro] Select Knowledge Base",
-    "selectDocumentOutlineTitle": "[AUTO-TRANSLATED ro] Select Document Outline",
-    "generateButton": "[AUTO-TRANSLATED ro] Generate",
-    "results": "[AUTO-TRANSLATED ro] Results",
-    "copyText": "[AUTO-TRANSLATED ro] Copy Text",
-    "copied": "[AUTO-TRANSLATED ro] Copied!",
-    "downloadDocx": "[AUTO-TRANSLATED ro] Download DOCX",
-    "downloadCsv": "[AUTO-TRANSLATED ro] Download CSV",
-    "clearReport": "[AUTO-TRANSLATED ro] Clear Report",
-    "resultsPlaceholder": "[AUTO-TRANSLATED ro] Results will appear here after generating a document.",
-    "sectionsWithSources": "[AUTO-TRANSLATED ro] Sections with Sources",
-    "sectionNumber": "[AUTO-TRANSLATED ro] Section {number}: {title}",
-    "kbGenerated": "[AUTO-TRANSLATED ro] KB Generated",
-    "rawText": "[AUTO-TRANSLATED ro] Raw Text",
-    "viewSourceCitations": "[AUTO-TRANSLATED ro] View Source Citations ({count})",
-    "documentCopiedSuccess": "[AUTO-TRANSLATED ro] Document copied to clipboard",
-    "documentCopiedError": "[AUTO-TRANSLATED ro] Failed to copy document to clipboard",
-    "documentDownloadSuccess": "[AUTO-TRANSLATED ro] Document downloaded successfully",
-    "documentDownloadError": "[AUTO-TRANSLATED ro] Failed to download document: {error}",
-    "csvDownloadSuccess": "[AUTO-TRANSLATED ro] CSV downloaded successfully",
-    "csvDownloadError": "[AUTO-TRANSLATED ro] Failed to download CSV: {error}",
-    "reportClearedSuccess": "[AUTO-TRANSLATED ro] Generated report cleared",
-    "enterAtLeastOneSection": "[AUTO-TRANSLATED ro] Please enter at least one section",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED ro] Please select a knowledge base",
-    "generateSuccess": "[AUTO-TRANSLATED ro] Report generated successfully!",
-    "generateError": "[AUTO-TRANSLATED ro] Failed to generate document: {error}",
-    "vectorSearch": "[AUTO-TRANSLATED ro] vector search",
-    "fullDocumentScan": "[AUTO-TRANSLATED ro] full document scan",
-    "editOutline": "[AUTO-TRANSLATED ro] Edit Outline"
+    "documentOutlineTitle": "Schița documentului",
+    "clickToSelect": "Faceți clic pentru a selecta",
+    "customInstructionsTitle": "Instrucțiuni personalizate (opțional)",
+    "customInstructionsPlaceholder": "Introduceți orice instrucțiuni suplimentare care ar trebui luate în considerare la generarea fiecărei secțiuni a raportului...",
+    "characterCount": "{{count}}/2000 caractere. Aceste instrucțiuni vor fi adăugate la promptul de generare a fiecărei secțiuni.",
+    "selectKnowledgeBaseTitle": "Selectați baza de cunoștințe",
+    "selectDocumentOutlineTitle": "Selectați schița documentului",
+    "generateButton": "Generați",
+    "results": "Rezultate",
+    "copyText": "Copiați textul",
+    "copied": "Copiat!",
+    "downloadDocx": "Descarcă DOCX",
+    "downloadCsv": "Descarcă CSV",
+    "clearReport": "Șterge raportul",
+    "resultsPlaceholder": "Rezultatele vor apărea aici după generarea unui document.",
+    "sectionsWithSources": "Secțiuni cu surse",
+    "sectionNumber": "Secțiunea {number}: {title}",
+    "kbGenerated": "KB generată",
+    "rawText": "Text brut",
+    "viewSourceCitations": "Vizualizați citatele sursei ({count})",
+    "documentCopiedSuccess": "Document copiat în clipboard",
+    "documentCopiedError": "Nu s-a putut copia documentul în clipboard",
+    "documentDownloadSuccess": "Document descărcat cu succes",
+    "documentDownloadError": "Descărcarea documentului a eșuat: {error}",
+    "csvDownloadSuccess": "CSV descărcat cu succes",
+    "csvDownloadError": "Descărcarea CSV a eșuat: {error}",
+    "reportClearedSuccess": "Raport generat șters",
+    "enterAtLeastOneSection": "Vă rugăm să introduceți cel puțin o secțiune",
+    "selectKnowledgeBase": "Vă rugăm să selectați o bază de cunoștințe",
+    "generateSuccess": "Raport generat cu succes!",
+    "generateError": "Generarea documentului a eșuat: {error}",
+    "vectorSearch": "căutare vectorială",
+    "fullDocumentScan": "scanare document completă",
+    "editOutline": "Editează schița"
   },
   "modelSelection": {
     "llmManagement": "Management LLM",

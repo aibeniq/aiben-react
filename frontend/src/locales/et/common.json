@@ -70,14 +70,14 @@
     "searchMode": "Otsingu režiim:",
     "vectorSearch": "Vektorotsing",
     "fullTextScan": "Täisteksti skaneerimine",
-    "searchModeDescription": "[AUTO-TRANSLATED et] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
-    "askMeAnything": "[AUTO-TRANSLATED et] Ask me anything! For knowledge base search, select a knowledge base first.",
-    "usingGeneralAI": "[AUTO-TRANSLATED et] Using general AI assistant",
-    "usingKnowledgeBase": "[AUTO-TRANSLATED et] Using knowledge base:",
-    "usingDocuments": "[AUTO-TRANSLATED et] Using # document(s)",
-    "usingFiles": "[AUTO-TRANSLATED et] Using {{count}} document{{plural}}:",
+    "searchModeDescription": "Vektorotsing pakub kiireid, sihitud tulemusi. Täisteksti skaneerimine vaatab läbi kogu teadmistebaasi sisu.",
+    "askMeAnything": "Küsi minult mistahes! Teadmistebaasi otsingu jaoks vali esmalt teadmistebaas.",
+    "usingGeneralAI": "Kasutades üldist AI assistenti",
+    "usingKnowledgeBase": "Kasutades teadmistebaasi:",
+    "usingDocuments": "Kasutades # dokumenti",
+    "usingFiles": "Kasutades {{count}} dokumenti{{plural}}:",
     "remove": "Eemalda",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED et] Select Knowledge Base",
+    "selectKnowledgeBase": "Vali teadmistebaas",
     "knowledgeBaseTable": {
       "name": "Nimi",
       "description": "Kirjeldus",
@@ -91,11 +91,11 @@
     "knowledgeBase": "Teadmistebaas",
     "file": "Fail",
     "errors": {
-      "generic": "[AUTO-TRANSLATED et] Sorry, something went wrong. Please try again.",
-      "timeout": "[AUTO-TRANSLATED et] Request timed out. Please try again.",
-      "largeFileTimeout": "[AUTO-TRANSLATED et] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
-      "fileSize": "[AUTO-TRANSLATED et] File is too large. Please choose smaller files.",
-      "serverError": "[AUTO-TRANSLATED et] Server error occurred. Please try again later."
+      "generic": "Vabandust, midagi läks valesti. Palun proovi uuesti.",
+      "timeout": "Taotlus aegus. Palun proovi uuesti.",
+      "largeFileTimeout": "Suurte failide töötlemine aegus. Proovi lülituda 'Täisteksti skaneerimine' režiimi parema jõudluse saavutamiseks suurte failidega.",
+      "fileSize": "Fail on liiga suur. Palun vali väiksemad failid.",
+      "serverError": "Tekkis serveri viga. Palun proovi hiljem uuesti."
     }
   },
   "settings": {
@@ -179,9 +179,9 @@
     "goodbye": "Nägemist",
     "yes": "Jah",
     "no": "Ei",
-    "ok": "[AUTO-TRANSLATED et] OK",
+    "ok": "OK",
     "search": "Otsi",
-    "filter": "[AUTO-TRANSLATED et] Filter",
+    "filter": "Filter",
     "sort": "Sorteeri",
     "view": "Vaata",
     "copy": "Kopeeri",
@@ -213,8 +213,8 @@
       "processing": "Töötlemine...",
       "extracting": "Sisu eraldamine..."
     },
-    "welcomeBack": "[AUTO-TRANSLATED et] Welcome back, nice to see you again!",
-    "hiUser": "[AUTO-TRANSLATED et] Hi, {{name}} 👋"
+    "welcomeBack": "Tere tulemast tagasi, tore sind jälle näha!",
+    "hiUser": "Tere, {{name}} 👋"
   },
   "usage": {
     "title": "Kasutus",
@@ -366,7 +366,7 @@
     },
     "pleaseWait": "Palun oodake, kuni me võrdleme teie dokumente",
     "compareSuccess": "Dokumentide võrdlemine õnnestus!",
-    "selectTopicListTitle": "[AUTO-TRANSLATED et] Select Topic List"
+    "selectTopicListTitle": "Vali teemade loend"
   },
   "match": {
     "title": "Dokumentide vastavus",
@@ -401,7 +401,7 @@
     "pleaseWait": "Palun oodake, kuni me sobitame teie dokumente",
     "matchSuccess": "Vormi töötlemine lõpetati edukalt!",
     "singleDocumentSuccess": "Väli väärtuste väljavõttmine ühest dokumendist.",
-    "selectFormTemplateTitle": "[AUTO-TRANSLATED et] Select Form Template"
+    "selectFormTemplateTitle": "Vali vormimall"
   },
   "editFormTemplateModal": {
     "title": "Vormimalli redigeerimine",
@@ -566,8 +566,8 @@
       "messages": {
         "processing": "Töötlemine...",
         "pleaseWait": "Palun oodake, kuni töötleme teie faile...",
-        "createSuccess": "[AUTO-TRANSLATED et] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED et] Knowledge Base updated successfully."
+        "createSuccess": "Teadmistebaas loodi edukalt.",
+        "updateSuccess": "Teadmistebaas uuendati edukalt."
       },
       "editFormTemplateModal": {
         "title": "Muuda Vormi Malli",
@@ -584,27 +584,27 @@
         "updateFormTemplate": "Värskenda Vormi Malli"
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED et] Title",
+        "title": "Pealkiri",
         "description": "Kirjeldus"
       },
       "fileUpload": {
-        "currentFiles": "[AUTO-TRANSLATED et] Current Files",
-        "newFiles": "[AUTO-TRANSLATED et] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED et] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED et] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED et] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED et] Remove file",
-        "supportedFormats": "[AUTO-TRANSLATED et] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "currentFiles": "Praegused failid",
+        "newFiles": "Uued failid",
+        "selectedFiles": "Valitud failid",
+        "dragAndDrop": "Lohista ja kukuta failid siia või klõpsa sirvimiseks",
+        "dropFiles": "Kukuta failid siia...",
+        "removeFile": "Eemalda fail",
+        "supportedFormats": "Toetab: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
       },
       "buttons": {
         "cancel": "Tühista",
         "create": "Loo",
         "save": "Salvesta",
-        "saving": "[AUTO-TRANSLATED et] Saving...",
-        "creating": "[AUTO-TRANSLATED et] Creating..."
+        "saving": "Salvestamine...",
+        "creating": "Loomine..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED et] Title is required"
+        "titleRequired": "Pealkiri on nõutav"
       }
     },
     "editCustom": {
@@ -768,43 +768,43 @@
       "processingSection": "Töötlemise sektsioon {{sectionNum}}/{{totalSections}}: {{sectionPreview}}"
     },
     "pleaseWait": "Palun oodake, kuni me loome teie aruande",
-    "pageDescription": "[AUTO-TRANSLATED et] Generate a document based on a user-defined outline and document database.",
-    "generatingDocument": "[AUTO-TRANSLATED et] Generating document...",
+    "pageDescription": "Loo dokument kasutaja määratletud struktuuri ja dokumendibaasi põhjal.",
+    "generatingDocument": "Dokumendi loomine...",
     "knowledgeBaseTitle": "Teadmistebaas",
-    "documentOutlineTitle": "[AUTO-TRANSLATED et] Document Outline",
-    "clickToSelect": "[AUTO-TRANSLATED et] Click to select",
-    "customInstructionsTitle": "[AUTO-TRANSLATED et] Custom Instructions (Optional)",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED et] Enter any additional instructions that should be considered when generating each section of the report...",
-    "characterCount": "[AUTO-TRANSLATED et] {{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
-    "selectKnowledgeBaseTitle": "[AUTO-TRANSLATED et] Select Knowledge Base",
-    "selectDocumentOutlineTitle": "[AUTO-TRANSLATED et] Select Document Outline",
-    "generateButton": "[AUTO-TRANSLATED et] Generate",
-    "results": "[AUTO-TRANSLATED et] Results",
-    "copyText": "[AUTO-TRANSLATED et] Copy Text",
-    "copied": "[AUTO-TRANSLATED et] Copied!",
-    "downloadDocx": "[AUTO-TRANSLATED et] Download DOCX",
-    "downloadCsv": "[AUTO-TRANSLATED et] Download CSV",
-    "clearReport": "[AUTO-TRANSLATED et] Clear Report",
-    "resultsPlaceholder": "[AUTO-TRANSLATED et] Results will appear here after generating a document.",
-    "sectionsWithSources": "[AUTO-TRANSLATED et] Sections with Sources",
-    "sectionNumber": "[AUTO-TRANSLATED et] Section {number}: {title}",
-    "kbGenerated": "[AUTO-TRANSLATED et] KB Generated",
-    "rawText": "[AUTO-TRANSLATED et] Raw Text",
-    "viewSourceCitations": "[AUTO-TRANSLATED et] View Source Citations ({count})",
-    "documentCopiedSuccess": "[AUTO-TRANSLATED et] Document copied to clipboard",
-    "documentCopiedError": "[AUTO-TRANSLATED et] Failed to copy document to clipboard",
-    "documentDownloadSuccess": "[AUTO-TRANSLATED et] Document downloaded successfully",
-    "documentDownloadError": "[AUTO-TRANSLATED et] Failed to download document: {error}",
-    "csvDownloadSuccess": "[AUTO-TRANSLATED et] CSV downloaded successfully",
-    "csvDownloadError": "[AUTO-TRANSLATED et] Failed to download CSV: {error}",
-    "reportClearedSuccess": "[AUTO-TRANSLATED et] Generated report cleared",
-    "enterAtLeastOneSection": "[AUTO-TRANSLATED et] Please enter at least one section",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED et] Please select a knowledge base",
-    "generateSuccess": "[AUTO-TRANSLATED et] Report generated successfully!",
-    "generateError": "[AUTO-TRANSLATED et] Failed to generate document: {error}",
-    "vectorSearch": "[AUTO-TRANSLATED et] vector search",
-    "fullDocumentScan": "[AUTO-TRANSLATED et] full document scan",
-    "editOutline": "[AUTO-TRANSLATED et] Edit Outline"
+    "documentOutlineTitle": "Dokumendi struktuur",
+    "clickToSelect": "Klõpsa valimiseks",
+    "customInstructionsTitle": "Kohandatud juhised (valikuline)",
+    "customInstructionsPlaceholder": "Sisestage täiendavad juhised, mida tuleks arvestada aruande iga osa loomisel...",
+    "characterCount": "{{count}}/2000 tähemärki. Need juhised lisatakse viibale iga osa loomisel.",
+    "selectKnowledgeBaseTitle": "Vali teadmistebaas",
+    "selectDocumentOutlineTitle": "Vali dokumendi struktuur",
+    "generateButton": "Loo",
+    "results": "Tulemused",
+    "copyText": "Kopeeri tekst",
+    "copied": "Kopeeritud!",
+    "downloadDocx": "Laadi alla DOCX",
+    "downloadCsv": "Laadi alla CSV",
+    "clearReport": "Tühjenda aruanne",
+    "resultsPlaceholder": "Tulemused ilmuvad siia pärast dokumendi loomist.",
+    "sectionsWithSources": "Osad allikatega",
+    "sectionNumber": "Osa {number}: {title}",
+    "kbGenerated": "TB loodud",
+    "rawText": "Toortekst",
+    "viewSourceCitations": "Vaata allika tsitaate ({count})",
+    "documentCopiedSuccess": "Dokument kopeeritud lõikelauale",
+    "documentCopiedError": "Dokumendi kopeerimine lõikelauale ebaõnnestus",
+    "documentDownloadSuccess": "Dokument edukalt alla laaditud",
+    "documentDownloadError": "Dokumendi allalaadimine ebaõnnestus: {error}",
+    "csvDownloadSuccess": "CSV edukalt alla laaditud",
+    "csvDownloadError": "CSV allalaadimine ebaõnnestus: {error}",
+    "reportClearedSuccess": "Loodud aruanne tühjendatud",
+    "enterAtLeastOneSection": "Palun sisestage vähemalt üks osa",
+    "selectKnowledgeBase": "Palun valige teadmistebaas",
+    "generateSuccess": "Aruanne edukalt loodud!",
+    "generateError": "Dokumendi loomine ebaõnnestus: {error}",
+    "vectorSearch": "vektorotsing",
+    "fullDocumentScan": "täielik dokumendi skaneerimine",
+    "editOutline": "Muuda struktuuri"
   },
   "feedback": {
     "modalTitlePositive": "Mis oli kasulik?",

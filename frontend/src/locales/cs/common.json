@@ -10,7 +10,7 @@
     "archive": "Archiv",
     "settings": "Nastavení",
     "admin": "Správce",
-    "menu": "[AUTO-TRANSLATED cs] Menu",
+    "menu": "Menu",
     "tools": "Nástroje",
     "configurations": "Konfigurace",
     "myProfile": "Můj profil",
@@ -59,7 +59,7 @@
     "knowledgeBaseTableDescription": "Popis",
     "knowledgeBaseTableSources": "Zdroje",
     "knowledgeBaseTablePages": "Stránky",
-    "title": "[AUTO-TRANSLATED cs] Chat",
+    "title": "Chat",
     "sourcePopover": {
       "knowledgeBase": "Databáze znalostí",
       "file": "Soubor"
@@ -67,14 +67,14 @@
     "searchMode": "Režim vyhledávání:",
     "vectorSearch": "Vektorové vyhledávání",
     "fullTextScan": "Kompletní sken textu",
-    "searchModeDescription": "[AUTO-TRANSLATED cs] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
-    "askMeAnything": "[AUTO-TRANSLATED cs] Ask me anything! For knowledge base search, select a knowledge base first.",
-    "usingGeneralAI": "[AUTO-TRANSLATED cs] Using general AI assistant",
-    "usingKnowledgeBase": "[AUTO-TRANSLATED cs] Using knowledge base:",
-    "usingDocuments": "[AUTO-TRANSLATED cs] Using # document(s)",
-    "usingFiles": "[AUTO-TRANSLATED cs] Using {{count}} document{{plural}}:",
+    "searchModeDescription": "Vektorové vyhledávání poskytuje rychlé, cílené výsledky. Kompletní sken textu kontroluje veškerý obsah v databázi znalostí.",
+    "askMeAnything": "Zeptejte se mě na cokoliv! Pro vyhledávání v databázi znalostí nejprve vyberte databázi znalostí.",
+    "usingGeneralAI": "Používání obecného AI asistenta",
+    "usingKnowledgeBase": "Používání databáze znalostí:",
+    "usingDocuments": "Používání # dokumentů",
+    "usingFiles": "Používání {{count}} dokumentu{{plural}}:",
     "remove": "Odebrat",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED cs] Select Knowledge Base",
+    "selectKnowledgeBase": "Vybrat databázi znalostí",
     "knowledgeBaseTable": {
       "name": "Název",
       "description": "Popis",
@@ -88,11 +88,11 @@
     "knowledgeBase": "Databáze znalostí",
     "file": "Soubor",
     "errors": {
-      "generic": "[AUTO-TRANSLATED cs] Sorry, something went wrong. Please try again.",
-      "timeout": "[AUTO-TRANSLATED cs] Request timed out. Please try again.",
-      "largeFileTimeout": "[AUTO-TRANSLATED cs] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
-      "fileSize": "[AUTO-TRANSLATED cs] File is too large. Please choose smaller files.",
-      "serverError": "[AUTO-TRANSLATED cs] Server error occurred. Please try again later."
+      "generic": "Omlouváme se, něco se pokazilo. Zkuste to prosím znovu.",
+      "timeout": "Časový limit požadavku vypršel. Zkuste to prosím znovu.",
+      "largeFileTimeout": "Zpracování velkého souboru vypršelo. Zkuste přepnout do režimu 'Kompletní sken textu' pro lepší výkon s velkými soubory.",
+      "fileSize": "Soubor je příliš velký. Vyberte prosím menší soubory.",
+      "serverError": "Došlo k chybě serveru. Zkuste to prosím znovu později."
     }
   },
   "settings": {
@@ -178,7 +178,7 @@
     "goodbye": "Na shledanou",
     "yes": "Ano",
     "no": "Ne",
-    "ok": "[AUTO-TRANSLATED cs] OK",
+    "ok": "OK",
     "search": "Hledat",
     "filter": "Filtr",
     "sort": "Seřadit",
@@ -272,15 +272,15 @@
     "pleaseWait": "Počkejte prosím, než zkontrolujeme vaše dokumenty",
     "reviewSuccess": "Kontrola dokumentu dokončena úspěšně!",
     "reviewSuccessMultiple": "{{count}} souborů zpracováno s optimalizovaným sdílením kontextu!",
-    "dropFilesHere": "[AUTO-TRANSLATED cs] Drop the files here",
-    "uploadedFiles": "[AUTO-TRANSLATED cs] Uploaded Files",
+    "dropFilesHere": "Pusťte soubory sem",
+    "uploadedFiles": "Nahrané soubory",
     "removeFile": "Odebrat",
-    "characterCount": "[AUTO-TRANSLATED cs] {{count}}/2000 characters. These instructions will be appended to each question when processing.",
-    "searchMode": "[AUTO-TRANSLATED cs] Search Mode",
+    "characterCount": "{{count}}/2000 znaků. Tyto instrukce budou připojeny ke každé otázce při zpracování.",
+    "searchMode": "Režim vyhledávání",
     "vectorSearch": "Vektorové vyhledávání",
-    "fullDocumentScan": "[AUTO-TRANSLATED cs] Full Document Scan",
-    "vectorSearchDescription": "[AUTO-TRANSLATED cs] Finds relevant content using AI similarity search (fast, targeted)",
-    "fullScanDescription": "[AUTO-TRANSLATED cs] Analyzes all documents in the knowledge base (comprehensive, thorough)"
+    "fullDocumentScan": "Kompletní sken dokumentu",
+    "vectorSearchDescription": "Nachází relevantní obsah pomocí vyhledávání podobnosti AI (rychlé, cílené)",
+    "fullScanDescription": "Analyzuje všechny dokumenty v databázi znalostí (komplexní, důkladné)"
   },
   "compare": {
     "title": "Porovnat dokumenty",
@@ -315,7 +315,7 @@
     },
     "pleaseWait": "Počkejte prosím, zatímco porovnáváme vaše dokumenty",
     "compareSuccess": "Dokumenty byly úspěšně porovnány!",
-    "selectTopicListTitle": "[AUTO-TRANSLATED cs] Select Topic List"
+    "selectTopicListTitle": "Vybrat seznam témat"
   },
   "match": {
     "title": "Párování dokumentů",
@@ -350,7 +350,7 @@
     "pleaseWait": "Počkejte prosím, zatímco párujeme vaše dokumenty",
     "matchSuccess": "Zpracování formuláře bylo úspěšně dokončeno!",
     "singleDocumentSuccess": "Hodnoty polí byly extrahovány z jednoho dokumentu.",
-    "selectFormTemplateTitle": "[AUTO-TRANSLATED cs] Select Form Template"
+    "selectFormTemplateTitle": "Vybrat šablonu formuláře"
   },
   "editFormTemplateModal": {
     "title": "Upravit šablonu formuláře",
@@ -517,21 +517,21 @@
       "messages": {
         "processing": "Zpracování...",
         "pleaseWait": "Počkejte prosím, než zpracujeme vaše soubory...",
-        "createSuccess": "[AUTO-TRANSLATED cs] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED cs] Knowledge Base updated successfully."
+        "createSuccess": "Znalostní báze byla úspěšně vytvořena.",
+        "updateSuccess": "Znalostní báze byla úspěšně aktualizována."
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED cs] Title",
+        "title": "Název",
         "description": "Popis"
       },
       "fileUpload": {
-        "currentFiles": "[AUTO-TRANSLATED cs] Current Files",
-        "newFiles": "[AUTO-TRANSLATED cs] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED cs] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED cs] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED cs] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED cs] Remove file",
-        "supportedFormats": "[AUTO-TRANSLATED cs] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "currentFiles": "Aktuální soubory",
+        "newFiles": "Nové soubory",
+        "selectedFiles": "Vybrané soubory",
+        "dragAndDrop": "Přetáhněte soubory sem nebo klikněte pro procházení",
+        "dropFiles": "Pusťte soubory zde...",
+        "removeFile": "Odebrat soubor",
+        "supportedFormats": "Podporuje: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
       },
       "buttons": {
         "cancel": "Zrušit",
@@ -541,7 +541,7 @@
         "creating": "Vytváření..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED cs] Title is required"
+        "titleRequired": "Název je povinný"
       }
     },
     "editCustom": {
@@ -685,9 +685,9 @@
     "optimizationsSelectedText": "{{s}} optimalizací vybráno k aplikaci",
     "applying": "Aplikování...",
     "applySelectedOptimizations": "Aplikovat vybrané optimalizace",
-    "uploadDocumentsTitle": "[AUTO-TRANSLATED cs] Upload document(s) that should be accepted by checklist *",
-    "uploadDocumentsHelperText": "[AUTO-TRANSLATED cs] Upload documents that should meet all checklist requirements to help identify questions that may be too strict",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED cs] e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
+    "uploadDocumentsTitle": "Nahrajte dokument(y), které by měly být přijaty kontrolním seznamem *",
+    "uploadDocumentsHelperText": "Nahrajte dokumenty, které by měly splňovat všechny požadavky kontrolního seznamu, aby pomohly identifikovat otázky, které mohou být příliš přísné",
+    "customInstructionsPlaceholder": "např., Zvažte, že se jedná o pediatrickou studii při hodnocení požadavků souvisejících s věkem, Tento protokol je pro nízkorizikové zásahy atd."
   },
   "optimizeOutlineModal": {
     "title": "Optimalizovat osnovu",
@@ -725,43 +725,43 @@
       "processingSection": "Zpracování sekce {{sectionNum}} z {{totalSections}}: {{sectionPreview}}"
     },
     "pleaseWait": "Počkejte prosím, zatímco generujeme vaši zprávu",
-    "pageDescription": "[AUTO-TRANSLATED cs] Generate a document based on a user-defined outline and document database.",
-    "generatingDocument": "[AUTO-TRANSLATED cs] Generating document...",
+    "pageDescription": "Vygenerujte dokument na základě uživatelem definované osnovy a databáze dokumentů.",
+    "generatingDocument": "Generování dokumentu...",
     "knowledgeBaseTitle": "Databáze znalostí",
-    "documentOutlineTitle": "[AUTO-TRANSLATED cs] Document Outline",
-    "clickToSelect": "[AUTO-TRANSLATED cs] Click to select",
-    "customInstructionsTitle": "[AUTO-TRANSLATED cs] Custom Instructions (Optional)",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED cs] Enter any additional instructions that should be considered when generating each section of the report...",
-    "characterCount": "[AUTO-TRANSLATED cs] {{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
-    "selectKnowledgeBaseTitle": "[AUTO-TRANSLATED cs] Select Knowledge Base",
-    "selectDocumentOutlineTitle": "[AUTO-TRANSLATED cs] Select Document Outline",
-    "generateButton": "[AUTO-TRANSLATED cs] Generate",
-    "results": "[AUTO-TRANSLATED cs] Results",
-    "copyText": "[AUTO-TRANSLATED cs] Copy Text",
-    "copied": "[AUTO-TRANSLATED cs] Copied!",
-    "downloadDocx": "[AUTO-TRANSLATED cs] Download DOCX",
-    "downloadCsv": "[AUTO-TRANSLATED cs] Download CSV",
-    "clearReport": "[AUTO-TRANSLATED cs] Clear Report",
-    "resultsPlaceholder": "[AUTO-TRANSLATED cs] Results will appear here after generating a document.",
-    "sectionsWithSources": "[AUTO-TRANSLATED cs] Sections with Sources",
-    "sectionNumber": "[AUTO-TRANSLATED cs] Section {number}: {title}",
-    "kbGenerated": "[AUTO-TRANSLATED cs] KB Generated",
-    "rawText": "[AUTO-TRANSLATED cs] Raw Text",
-    "viewSourceCitations": "[AUTO-TRANSLATED cs] View Source Citations ({count})",
-    "documentCopiedSuccess": "[AUTO-TRANSLATED cs] Document copied to clipboard",
-    "documentCopiedError": "[AUTO-TRANSLATED cs] Failed to copy document to clipboard",
-    "documentDownloadSuccess": "[AUTO-TRANSLATED cs] Document downloaded successfully",
-    "documentDownloadError": "[AUTO-TRANSLATED cs] Failed to download document: {error}",
-    "csvDownloadSuccess": "[AUTO-TRANSLATED cs] CSV downloaded successfully",
-    "csvDownloadError": "[AUTO-TRANSLATED cs] Failed to download CSV: {error}",
-    "reportClearedSuccess": "[AUTO-TRANSLATED cs] Generated report cleared",
-    "enterAtLeastOneSection": "[AUTO-TRANSLATED cs] Please enter at least one section",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED cs] Please select a knowledge base",
-    "generateSuccess": "[AUTO-TRANSLATED cs] Report generated successfully!",
-    "generateError": "[AUTO-TRANSLATED cs] Failed to generate document: {error}",
-    "vectorSearch": "[AUTO-TRANSLATED cs] vector search",
-    "fullDocumentScan": "[AUTO-TRANSLATED cs] full document scan",
-    "editOutline": "[AUTO-TRANSLATED cs] Edit Outline"
+    "documentOutlineTitle": "Osnova dokumentu",
+    "clickToSelect": "Klikněte pro výběr",
+    "customInstructionsTitle": "Vlastní instrukce (volitelné)",
+    "customInstructionsPlaceholder": "Zadejte jakékoli další instrukce, které by měly být zváženy při generování každé části zprávy...",
+    "characterCount": "{{count}}/2000 znaků. Tyto instrukce budou přidány do výzvy při generování každé části.",
+    "selectKnowledgeBaseTitle": "Vyberte znalostní bázi",
+    "selectDocumentOutlineTitle": "Vyberte osnovu dokumentu",
+    "generateButton": "Generovat",
+    "results": "Výsledky",
+    "copyText": "Kopírovat text",
+    "copied": "Zkopírováno!",
+    "downloadDocx": "Stáhnout DOCX",
+    "downloadCsv": "Stáhnout CSV",
+    "clearReport": "Vymazat zprávu",
+    "resultsPlaceholder": "Výsledky se zobrazí zde po vygenerování dokumentu.",
+    "sectionsWithSources": "Části se zdroji",
+    "sectionNumber": "Část {number}: {title}",
+    "kbGenerated": "KB vygenerováno",
+    "rawText": "Nezpracovaný text",
+    "viewSourceCitations": "Zobrazit citace zdrojů ({count})",
+    "documentCopiedSuccess": "Dokument zkopírován do schránky",
+    "documentCopiedError": "Nepodařilo se zkopírovat dokument do schránky",
+    "documentDownloadSuccess": "Dokument úspěšně stažen",
+    "documentDownloadError": "Nepodařilo se stáhnout dokument: {error}",
+    "csvDownloadSuccess": "CSV úspěšně staženo",
+    "csvDownloadError": "Nepodařilo se stáhnout CSV: {error}",
+    "reportClearedSuccess": "Vygenerovaná zpráva vymazána",
+    "enterAtLeastOneSection": "Zadejte prosím alespoň jednu sekci",
+    "selectKnowledgeBase": "Vyberte prosím znalostní bázi",
+    "generateSuccess": "Zpráva byla úspěšně vygenerována!",
+    "generateError": "Nepodařilo se vygenerovat dokument: {error}",
+    "vectorSearch": "vektorové vyhledávání",
+    "fullDocumentScan": "kompletní sken dokumentu",
+    "editOutline": "Upravit osnovu"
   },
   "modelSelection": {
     "llmManagement": "Správa LLM",

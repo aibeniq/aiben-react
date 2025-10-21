@@ -59,7 +59,7 @@
     "knowledgeBaseTableDescription": "Opis",
     "knowledgeBaseTableSources": "Izvori",
     "knowledgeBaseTablePages": "Stranice",
-    "title": "[AUTO-TRANSLATED hr] Chat",
+    "title": "Chat",
     "sourcePopover": {
       "knowledgeBase": "Baza znanja",
       "file": "Datoteka"
@@ -67,14 +67,14 @@
     "searchMode": "Način pretraživanja:",
     "vectorSearch": "Vektorsko pretraživanje",
     "fullTextScan": "Potpuno skeniranje teksta",
-    "searchModeDescription": "[AUTO-TRANSLATED hr] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
-    "askMeAnything": "[AUTO-TRANSLATED hr] Ask me anything! For knowledge base search, select a knowledge base first.",
-    "usingGeneralAI": "[AUTO-TRANSLATED hr] Using general AI assistant",
-    "usingKnowledgeBase": "[AUTO-TRANSLATED hr] Using knowledge base:",
-    "usingDocuments": "[AUTO-TRANSLATED hr] Using # document(s)",
-    "usingFiles": "[AUTO-TRANSLATED hr] Using {{count}} document{{plural}}:",
+    "searchModeDescription": "Vektorsko pretraživanje pruža brze, ciljane rezultate. Potpuno skeniranje teksta pregledava sav sadržaj u bazi znanja.",
+    "askMeAnything": "Pitaj me bilo što! Za pretraživanje baze znanja, prvo odaberite bazu znanja.",
+    "usingGeneralAI": "Koristi se opći AI asistent",
+    "usingKnowledgeBase": "Koristi se baza znanja:",
+    "usingDocuments": "Koristi se # dokument(a)",
+    "usingFiles": "Koristi se {{count}} dokument{{plural}}:",
     "remove": "Ukloni",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED hr] Select Knowledge Base",
+    "selectKnowledgeBase": "Odaberite bazu znanja",
     "knowledgeBaseTable": {
       "name": "Naziv",
       "description": "Opis",
@@ -88,11 +88,11 @@
     "knowledgeBase": "Baza znanja",
     "file": "Datoteka",
     "errors": {
-      "generic": "[AUTO-TRANSLATED hr] Sorry, something went wrong. Please try again.",
-      "timeout": "[AUTO-TRANSLATED hr] Request timed out. Please try again.",
-      "largeFileTimeout": "[AUTO-TRANSLATED hr] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
-      "fileSize": "[AUTO-TRANSLATED hr] File is too large. Please choose smaller files.",
-      "serverError": "[AUTO-TRANSLATED hr] Server error occurred. Please try again later."
+      "generic": "Žao nam je, nešto je pošlo po zlu. Molimo pokušajte ponovno.",
+      "timeout": "Zahtjev je istekao. Molimo pokušajte ponovno.",
+      "largeFileTimeout": "Obrada velike datoteke je istekla. Pokušajte se prebaciti na način 'Potpuno skeniranje teksta' za bolje performanse s velikim datotekama.",
+      "fileSize": "Datoteka je prevelika. Molimo odaberite manje datoteke.",
+      "serverError": "Došlo je do pogreške poslužitelja. Molimo pokušajte ponovno kasnije."
     }
   },
   "settings": {
@@ -209,9 +209,9 @@
       "processing": "Obrada...",
       "extracting": "Izdvajanje sadržaja..."
     },
-    "error": "[AUTO-TRANSLATED hr] Something went wrong!",
-    "welcomeBack": "[AUTO-TRANSLATED hr] Welcome back, nice to see you again!",
-    "hiUser": "[AUTO-TRANSLATED hr] Hi, {{name}} 👋"
+    "error": "Nešto je pošlo po zlu!",
+    "welcomeBack": "Dobrodošli natrag, drago nam je što vas ponovno vidimo!",
+    "hiUser": "Bok, {{name}} 👋"
   },
   "usage": {
     "title": "Upotreba",
@@ -272,15 +272,15 @@
     "pleaseWait": "Molimo pričekajte dok pregledavamo vaše dokumente",
     "reviewSuccess": "Pregled dokumenta uspješno završen!",
     "reviewSuccessMultiple": "{{count}} datoteka obrađeno s optimiziranim dijeljenjem konteksta!",
-    "dropFilesHere": "[AUTO-TRANSLATED hr] Drop the files here",
-    "uploadedFiles": "[AUTO-TRANSLATED hr] Uploaded Files",
+    "dropFilesHere": "Ispustite datoteke ovdje",
+    "uploadedFiles": "Učitane datoteke",
     "removeFile": "Ukloni",
-    "characterCount": "[AUTO-TRANSLATED hr] {{count}}/2000 characters. These instructions will be appended to each question when processing.",
-    "searchMode": "[AUTO-TRANSLATED hr] Search Mode",
+    "characterCount": "{{count}}/2000 znakova. Ove će se upute dodati svakom pitanju prilikom obrade.",
+    "searchMode": "Način pretraživanja",
     "vectorSearch": "Vektorsko pretraživanje",
-    "fullDocumentScan": "[AUTO-TRANSLATED hr] Full Document Scan",
-    "vectorSearchDescription": "[AUTO-TRANSLATED hr] Finds relevant content using AI similarity search (fast, targeted)",
-    "fullScanDescription": "[AUTO-TRANSLATED hr] Analyzes all documents in the knowledge base (comprehensive, thorough)"
+    "fullDocumentScan": "Potpuno skeniranje dokumenta",
+    "vectorSearchDescription": "Pronalazi relevantan sadržaj koristeći AI pretraživanje sličnosti (brzo, ciljano)",
+    "fullScanDescription": "Analizira sve dokumente u bazi znanja (sveobuhvatno, temeljito)"
   },
   "modelSelection": {
     "llmManagement": "Upravljanje LLM-om",
@@ -298,7 +298,7 @@
       "modelId": "ID modela",
       "provider": "Pružatelj",
       "description": "Opis",
-      "status": "[AUTO-TRANSLATED hr] Status",
+      "status": "Status",
       "actions": "Radnje"
     },
     "status": {
@@ -363,7 +363,7 @@
     },
     "pleaseWait": "Molimo pričekajte dok uspoređujemo vaše dokumente",
     "compareSuccess": "Dokumenti su uspješno uspoređeni!",
-    "selectTopicListTitle": "[AUTO-TRANSLATED hr] Select Topic List"
+    "selectTopicListTitle": "Odaberite popis tema"
   },
   "match": {
     "title": "Podudarne dokumente",
@@ -398,7 +398,7 @@
     "pleaseWait": "Molimo pričekajte dok usklađujemo vaše dokumente",
     "matchSuccess": "Obrada obrasca je uspješno završena!",
     "singleDocumentSuccess": "Vrijednosti polja su izvučene iz jednog dokumenta.",
-    "selectFormTemplateTitle": "[AUTO-TRANSLATED hr] Select Form Template"
+    "selectFormTemplateTitle": "Odaberite predložak obrasca"
   },
   "editOutlineModal": {
     "title": "Uredi strukturu",
@@ -559,33 +559,33 @@
         "updateFormTemplate": "Ažuriraj Predložak Obrasca"
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED hr] Title",
+        "title": "Naslov",
         "description": "Opis"
       },
       "fileUpload": {
-        "currentFiles": "[AUTO-TRANSLATED hr] Current Files",
-        "newFiles": "[AUTO-TRANSLATED hr] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED hr] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED hr] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED hr] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED hr] Remove file",
-        "supportedFormats": "[AUTO-TRANSLATED hr] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "currentFiles": "Trenutne datoteke",
+        "newFiles": "Nove datoteke",
+        "selectedFiles": "Odabrane datoteke",
+        "dragAndDrop": "Povucite i ispustite datoteke ovdje ili kliknite za pregledavanje",
+        "dropFiles": "Ispustite datoteke ovdje...",
+        "removeFile": "Ukloni datoteku",
+        "supportedFormats": "Podržava: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
       },
       "buttons": {
         "cancel": "Odustani",
         "create": "Stvori",
         "save": "Spremi",
-        "saving": "[AUTO-TRANSLATED hr] Saving...",
-        "creating": "[AUTO-TRANSLATED hr] Creating..."
+        "saving": "Spremanje...",
+        "creating": "Stvaranje..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED hr] Title is required"
+        "titleRequired": "Naslov je obavezan"
       },
       "messages": {
-        "createSuccess": "[AUTO-TRANSLATED hr] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED hr] Knowledge Base updated successfully.",
-        "processing": "[AUTO-TRANSLATED hr] Processing...",
-        "pleaseWait": "[AUTO-TRANSLATED hr] Please wait while we process your files..."
+        "createSuccess": "Baza znanja je uspješno stvorena.",
+        "updateSuccess": "Baza znanja je uspješno ažurirana.",
+        "processing": "Obrada...",
+        "pleaseWait": "Molimo pričekajte dok obrađujemo vaše datoteke..."
       }
     },
     "editCustom": {
@@ -898,19 +898,19 @@
     "selectKnowledgeBase": "Odaberite bazu znanja..."
   },
   "editFormTemplateModal": {
-    "title": "[AUTO-TRANSLATED hr] Edit Form Template",
-    "formTemplateName": "[AUTO-TRANSLATED hr] Form Template Name",
-    "formTemplateNamePlaceholder": "[AUTO-TRANSLATED hr] Enter form template name",
-    "formTemplateDescription": "[AUTO-TRANSLATED hr] Form Template Description",
-    "descriptionPlaceholder": "[AUTO-TRANSLATED hr] Enter form template description to auto-suggest fields (minimum 10 characters)...",
-    "referenceDocuments": "[AUTO-TRANSLATED hr] Reference Documents (Optional)",
-    "uploadFiles": "[AUTO-TRANSLATED hr] Upload Files",
+    "title": "Uredi Predložak Obrasca",
+    "formTemplateName": "Naziv Predloška Obrasca",
+    "formTemplateNamePlaceholder": "Unesite naziv predloška obrasca",
+    "formTemplateDescription": "Opis Predloška Obrasca",
+    "descriptionPlaceholder": "Unesite opis predloška obrasca za automatsko predlaganje polja (najmanje 10 znakova)...",
+    "referenceDocuments": "Referentni Dokumenti (Neobavezno)",
+    "uploadFiles": "Prenesi Datoteke",
     "pleaseWait": "Pričekajte dok pregledavamo vaše dokumente",
     "knowledgeBase": "Baza znanja",
-    "formFields": "[AUTO-TRANSLATED hr] Form Fields",
-    "suggest": "[AUTO-TRANSLATED hr] Suggest",
-    "fieldPlaceholder": "[AUTO-TRANSLATED hr] Add a field name...",
+    "formFields": "Polja Obrasca",
+    "suggest": "Predloži",
+    "fieldPlaceholder": "Dodaj naziv polja...",
     "cancel": "Odustani",
-    "updateFormTemplate": "[AUTO-TRANSLATED hr] Update Form Template"
+    "updateFormTemplate": "Ažuriraj Predložak Obrasca"
   }
 }

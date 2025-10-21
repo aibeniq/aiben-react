@@ -66,14 +66,14 @@
     "searchMode": "מצב חיפוש:",
     "vectorSearch": "חיפוש וקטורי",
     "fullTextScan": "סריקת טקסט מלאה",
-    "searchModeDescription": "[AUTO-TRANSLATED he] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
-    "askMeAnything": "[AUTO-TRANSLATED he] Ask me anything! For knowledge base search, select a knowledge base first.",
-    "usingGeneralAI": "[AUTO-TRANSLATED he] Using general AI assistant",
-    "usingKnowledgeBase": "[AUTO-TRANSLATED he] Using knowledge base:",
-    "usingDocuments": "[AUTO-TRANSLATED he] Using # document(s)",
-    "usingFiles": "[AUTO-TRANSLATED he] Using {{count}} document{{plural}}:",
+    "searchModeDescription": "חיפוש וקטורי מספק תוצאות מהירות וממוקדות. סריקת טקסט מלאה בודקת את כל התוכן בבסיס הידע.",
+    "askMeAnything": "שאל אותי כל דבר! לחיפוש בבסיס ידע, בחר תחילה בסיס ידע.",
+    "usingGeneralAI": "משתמש בעוזר AI כללי",
+    "usingKnowledgeBase": "משתמש בבסיס ידע:",
+    "usingDocuments": "משתמש ב-# מסמכים",
+    "usingFiles": "משתמש ב-{{count}} מסמך{{plural}}:",
     "remove": "הסר",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED he] Select Knowledge Base",
+    "selectKnowledgeBase": "בחר בסיס ידע",
     "knowledgeBaseTable": {
       "name": "שם",
       "description": "תיאור",
@@ -85,17 +85,17 @@
     "knowledgeBaseTableName": "שם",
     "knowledgeBaseTableDescription": "תיאור",
     "knowledgeBaseTableSources": "מקורות",
-    "knowledgeBaseTablePages": "[AUTO-TRANSLATED he] Pages",
+    "knowledgeBaseTablePages": "עמודים",
     "selectKnowledgeBasePlaceholder": "בחר מאגר ידע...",
     "noKnowledgeBasesAvailable": "אין מאגרים זמינים. צור אחד תחילה כדי להשתמש בתכונה זו.",
     "knowledgeBase": "מאגר ידע",
     "file": "קובץ",
     "errors": {
-      "generic": "[AUTO-TRANSLATED he] Sorry, something went wrong. Please try again.",
-      "timeout": "[AUTO-TRANSLATED he] Request timed out. Please try again.",
-      "largeFileTimeout": "[AUTO-TRANSLATED he] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
-      "fileSize": "[AUTO-TRANSLATED he] File is too large. Please choose smaller files.",
-      "serverError": "[AUTO-TRANSLATED he] Server error occurred. Please try again later."
+      "generic": "מצטערים, משהו השתבש. אנא נסה שוב.",
+      "timeout": "הבקשה פגה. אנא נסה שוב.",
+      "largeFileTimeout": "עיבוד קובץ גדול פג זמן. נסה לעבור למצב 'סריקת טקסט מלאה' לביצועים טובים יותר עם קבצים גדולים.",
+      "fileSize": "הקובץ גדול מדי. אנא בחר קבצים קטנים יותר.",
+      "serverError": "אירעה שגיאת שרת. אנא נסה שוב מאוחר יותר."
     }
   },
   "settings": {
@@ -212,9 +212,9 @@
       "processing": "מעבד...",
       "extracting": "מחלץ תוכן..."
     },
-    "error": "[AUTO-TRANSLATED he] Something went wrong!",
-    "welcomeBack": "[AUTO-TRANSLATED he] Welcome back, nice to see you again!",
-    "hiUser": "[AUTO-TRANSLATED he] Hi, {{name}} 👋"
+    "error": "משהו השתבש!",
+    "welcomeBack": "ברוך שובך, נעים לראות אותך שוב!",
+    "hiUser": "שלום, {{name}} 👋"
   },
   "usage": {
     "title": "שימוש",
@@ -275,15 +275,15 @@
     "pleaseWait": "אנא המתן, אנחנו בודקים את המסמכים שלך",
     "reviewSuccess": "בדיקת המסמך הושלמה בהצלחה!",
     "reviewSuccessMultiple": "{{count}} קבצים עובדו עם שיתוף הקשר מותאם!",
-    "dropFilesHere": "[AUTO-TRANSLATED he] Drop the files here",
-    "uploadedFiles": "[AUTO-TRANSLATED he] Uploaded Files",
+    "dropFilesHere": "שחרר את הקבצים כאן",
+    "uploadedFiles": "קבצים שהועלו",
     "removeFile": "הסר",
-    "characterCount": "[AUTO-TRANSLATED he] {{count}}/2000 characters. These instructions will be appended to each question when processing.",
-    "searchMode": "[AUTO-TRANSLATED he] Search Mode",
+    "characterCount": "{{count}}/2000 תווים. הוראות אלה יתווספו לכל שאלה בעת העיבוד.",
+    "searchMode": "מצב חיפוש",
     "vectorSearch": "חיפוש וקטורי",
-    "fullDocumentScan": "[AUTO-TRANSLATED he] Full Document Scan",
-    "vectorSearchDescription": "[AUTO-TRANSLATED he] Finds relevant content using AI similarity search (fast, targeted)",
-    "fullScanDescription": "[AUTO-TRANSLATED he] Analyzes all documents in the knowledge base (comprehensive, thorough)"
+    "fullDocumentScan": "סריקת מסמך מלאה",
+    "vectorSearchDescription": "מוצא תוכן רלוונטי באמצעות חיפוש דמיון AI (מהיר, ממוקד)",
+    "fullScanDescription": "מנתח את כל המסמכים בבסיס הידע (מקיף, יסודי)"
   },
   "compare": {
     "title": "השווה מסמכים",
@@ -318,7 +318,7 @@
     },
     "pleaseWait": "אנא המתן, אנו משווים את המסמכים שלך",
     "compareSuccess": "המסמכים הושוו בהצלחה!",
-    "selectTopicListTitle": "[AUTO-TRANSLATED he] Select Topic List"
+    "selectTopicListTitle": "בחר רשימת נושאים"
   },
   "match": {
     "title": "התאמת מסמכים",
@@ -353,7 +353,7 @@
     "pleaseWait": "אנא המתן בזמן שאנו משווים את המסמכים שלך",
     "matchSuccess": "עיבוד הטופס הושלם בהצלחה!",
     "singleDocumentSuccess": "ערכי שדות הופקו ממסמך יחיד.",
-    "selectFormTemplateTitle": "[AUTO-TRANSLATED he] Select Form Template"
+    "selectFormTemplateTitle": "בחר תבנית טופס"
   },
   "editFormTemplateModal": {
     "title": "עריכת תבנית טופס",
@@ -530,33 +530,33 @@
         "updateFormTemplate": "עדכן תבנית טופס"
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED he] Title",
+        "title": "כותרת",
         "description": "תיאור"
       },
       "fileUpload": {
-        "currentFiles": "[AUTO-TRANSLATED he] Current Files",
-        "newFiles": "[AUTO-TRANSLATED he] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED he] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED he] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED he] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED he] Remove file",
-        "supportedFormats": "[AUTO-TRANSLATED he] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "currentFiles": "קבצים נוכחיים",
+        "newFiles": "קבצים חדשים",
+        "selectedFiles": "קבצים נבחרים",
+        "dragAndDrop": "גרור ושחרר קבצים כאן, או לחץ כדי לעיין",
+        "dropFiles": "שחרר את הקבצים כאן...",
+        "removeFile": "הסר קובץ",
+        "supportedFormats": "תומך: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
       },
       "buttons": {
         "cancel": "בטל",
         "create": "צור",
         "save": "שמור",
-        "saving": "[AUTO-TRANSLATED he] Saving...",
-        "creating": "[AUTO-TRANSLATED he] Creating..."
+        "saving": "שומר...",
+        "creating": "יוצר..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED he] Title is required"
+        "titleRequired": "כותרת נדרשת"
       },
       "messages": {
-        "createSuccess": "[AUTO-TRANSLATED he] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED he] Knowledge Base updated successfully.",
-        "processing": "[AUTO-TRANSLATED he] Processing...",
-        "pleaseWait": "[AUTO-TRANSLATED he] Please wait while we process your files..."
+        "createSuccess": "בסיס הידע נוצר בהצלחה.",
+        "updateSuccess": "בסיס הידע עודכן בהצלחה.",
+        "processing": "מעבד...",
+        "pleaseWait": "אנא המתן בזמן שאנו מעבדים את הקבצים שלך..."
       }
     },
     "editCustom": {
@@ -720,43 +720,43 @@
       "processingSection": "מעבד חלק {{sectionNum}} מתוך {{totalSections}}: {{sectionPreview}}"
     },
     "pleaseWait": "אנא המתן בזמן שאנו יוצרים את הדוח שלך",
-    "pageDescription": "[AUTO-TRANSLATED he] Generate a document based on a user-defined outline and document database.",
-    "generatingDocument": "[AUTO-TRANSLATED he] Generating document...",
+    "pageDescription": "צור מסמך על בסיס מתווה מוגדר על ידי המשתמש ומסד נתונים של מסמכים.",
+    "generatingDocument": "יוצר מסמך...",
     "knowledgeBaseTitle": "מאגר ידע",
-    "documentOutlineTitle": "[AUTO-TRANSLATED he] Document Outline",
-    "clickToSelect": "[AUTO-TRANSLATED he] Click to select",
-    "customInstructionsTitle": "[AUTO-TRANSLATED he] Custom Instructions (Optional)",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED he] Enter any additional instructions that should be considered when generating each section of the report...",
-    "characterCount": "[AUTO-TRANSLATED he] {{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
-    "selectKnowledgeBaseTitle": "[AUTO-TRANSLATED he] Select Knowledge Base",
-    "selectDocumentOutlineTitle": "[AUTO-TRANSLATED he] Select Document Outline",
-    "generateButton": "[AUTO-TRANSLATED he] Generate",
-    "results": "[AUTO-TRANSLATED he] Results",
-    "copyText": "[AUTO-TRANSLATED he] Copy Text",
-    "copied": "[AUTO-TRANSLATED he] Copied!",
-    "downloadDocx": "[AUTO-TRANSLATED he] Download DOCX",
-    "downloadCsv": "[AUTO-TRANSLATED he] Download CSV",
-    "clearReport": "[AUTO-TRANSLATED he] Clear Report",
-    "resultsPlaceholder": "[AUTO-TRANSLATED he] Results will appear here after generating a document.",
-    "sectionsWithSources": "[AUTO-TRANSLATED he] Sections with Sources",
-    "sectionNumber": "[AUTO-TRANSLATED he] Section {number}: {title}",
-    "kbGenerated": "[AUTO-TRANSLATED he] KB Generated",
-    "rawText": "[AUTO-TRANSLATED he] Raw Text",
-    "viewSourceCitations": "[AUTO-TRANSLATED he] View Source Citations ({count})",
-    "documentCopiedSuccess": "[AUTO-TRANSLATED he] Document copied to clipboard",
-    "documentCopiedError": "[AUTO-TRANSLATED he] Failed to copy document to clipboard",
-    "documentDownloadSuccess": "[AUTO-TRANSLATED he] Document downloaded successfully",
-    "documentDownloadError": "[AUTO-TRANSLATED he] Failed to download document: {error}",
-    "csvDownloadSuccess": "[AUTO-TRANSLATED he] CSV downloaded successfully",
-    "csvDownloadError": "[AUTO-TRANSLATED he] Failed to download CSV: {error}",
-    "reportClearedSuccess": "[AUTO-TRANSLATED he] Generated report cleared",
-    "enterAtLeastOneSection": "[AUTO-TRANSLATED he] Please enter at least one section",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED he] Please select a knowledge base",
-    "generateSuccess": "[AUTO-TRANSLATED he] Report generated successfully!",
-    "generateError": "[AUTO-TRANSLATED he] Failed to generate document: {error}",
-    "vectorSearch": "[AUTO-TRANSLATED he] vector search",
-    "fullDocumentScan": "[AUTO-TRANSLATED he] full document scan",
-    "editOutline": "[AUTO-TRANSLATED he] Edit Outline"
+    "documentOutlineTitle": "מתווה מסמך",
+    "clickToSelect": "לחץ לבחירה",
+    "customInstructionsTitle": "הוראות מותאמות (אופציונלי)",
+    "customInstructionsPlaceholder": "הזן הוראות נוספות שיש לקחת בחשבון בעת יצירת כל חלק של הדוח...",
+    "characterCount": "{{count}}/2000 תווים. הוראות אלה יתווספו להנחיה בעת יצירת כל חלק.",
+    "selectKnowledgeBaseTitle": "בחר בסיס ידע",
+    "selectDocumentOutlineTitle": "בחר מתווה מסמך",
+    "generateButton": "צור",
+    "results": "תוצאות",
+    "copyText": "העתק טקסט",
+    "copied": "הועתק!",
+    "downloadDocx": "הורד DOCX",
+    "downloadCsv": "הורד CSV",
+    "clearReport": "נקה דוח",
+    "resultsPlaceholder": "תוצאות יופיעו כאן לאחר יצירת מסמך.",
+    "sectionsWithSources": "חלקים עם מקורות",
+    "sectionNumber": "חלק {number}: {title}",
+    "kbGenerated": "KB נוצר",
+    "rawText": "טקסט גולמי",
+    "viewSourceCitations": "הצג ציטוטי מקור ({count})",
+    "documentCopiedSuccess": "המסמך הועתק ללוח",
+    "documentCopiedError": "העתקת המסמך ללוח נכשלה",
+    "documentDownloadSuccess": "המסמך הורד בהצלחה",
+    "documentDownloadError": "הורדת המסמך נכשלה: {error}",
+    "csvDownloadSuccess": "CSV הורד בהצלחה",
+    "csvDownloadError": "הורדת CSV נכשלה: {error}",
+    "reportClearedSuccess": "הדוח שנוצר נוקה",
+    "enterAtLeastOneSection": "אנא הזן לפחות חלק אחד",
+    "selectKnowledgeBase": "אנא בחר בסיס ידע",
+    "generateSuccess": "הדוח נוצר בהצלחה!",
+    "generateError": "יצירת המסמך נכשלה: {error}",
+    "vectorSearch": "חיפוש וקטורי",
+    "fullDocumentScan": "סריקת מסמך מלאה",
+    "editOutline": "ערוך מתווה"
   },
   "modelSelection": {
     "llmManagement": "ניהול LLM",

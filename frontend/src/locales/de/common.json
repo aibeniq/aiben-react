@@ -1,6 +1,6 @@
 {
   "navigation": {
-    "dashboard": "[AUTO-TRANSLATED de] Dashboard",
+    "dashboard": "Dashboard",
     "review": "Überprüfen",
     "generate": "Generieren",
     "compare": "Vergleichen",
@@ -41,7 +41,7 @@
     "currentPassword": "Aktuelles Passwort",
     "newPassword": "Neues Passwort",
     "required": "Erforderlich",
-    "optional": "[AUTO-TRANSLATED de] Optional",
+    "optional": "Optional",
     "emailPlaceholder": "Geben Sie Ihre E-Mail-Adresse ein",
     "passwordPlaceholder": "Geben Sie Ihr Passwort ein"
   },
@@ -49,7 +49,7 @@
     "selectKnowledgeBase": "Wissensbasis auswählen..."
   },
   "chatbot": {
-    "title": "[AUTO-TRANSLATED de] Chat",
+    "title": "Chat",
     "placeholder": "Stellen Sie eine Frage...",
     "send": "Senden",
     "newChat": "Neuer Chat",
@@ -69,14 +69,14 @@
     "remove": "Entfernen",
     "selectKnowledgeBase": "Wissensbasis auswählen",
     "knowledgeBaseTable": {
-      "name": "[AUTO-TRANSLATED de] Name",
+      "name": "Name",
       "description": "Beschreibung",
       "sources": "Quellen",
       "noDescription": "Keine Beschreibung",
       "sourcesCount": "{{count}} Quellen",
       "pagesCount": "{{count}} Seiten"
     },
-    "knowledgeBaseTableName": "[AUTO-TRANSLATED de] Name",
+    "knowledgeBaseTableName": "Name",
     "knowledgeBaseTableDescription": "Beschreibung",
     "knowledgeBaseTableSources": "Quellen",
     "knowledgeBaseTablePages": "Seiten",
@@ -115,7 +115,7 @@
     "newPassword": "Neues Passwort",
     "confirmPassword": "Passwort bestätigen",
     "save": "Speichern",
-    "system": "[AUTO-TRANSLATED de] System",
+    "system": "System",
     "lightMode": "Heller Modus",
     "darkMode": "Dunkler Modus",
     "deleteAccountDescription": "Ihre Daten und alles, was mit Ihrem Konto verknüpft ist, dauerhaft löschen.",
@@ -229,8 +229,8 @@
     "vectorSearchDescription": "Findet relevanten Inhalt mit KI-Ähnlichkeitssuche (schnell, gezielt)",
     "fullScanDescription": "Analysiert alle Dokumente in der Wissensbasis (umfassend, gründlich)",
     "pleaseWait": "Bitte warten Sie, während wir Ihre Dokumente überprüfen",
-    "reviewSuccess": "[AUTO-TRANSLATED de] Document review completed successfully!",
-    "reviewSuccessMultiple": "[AUTO-TRANSLATED de] {{count}} files processed with optimized context sharing!"
+    "reviewSuccess": "Dokumentenüberprüfung erfolgreich abgeschlossen!",
+    "reviewSuccessMultiple": "{{count}} Dateien mit optimiertem Kontext-Sharing verarbeitet!"
   },
   "generate": {
     "pageDescription": "Erstellen Sie ein Dokument basierend auf einer benutzerdefinierten Checkliste und Dokumentendatenbank.",
@@ -290,11 +290,11 @@
     "noEmbeddingModelsConfigured": "Keine Embedding-Modelle konfiguriert",
     "addNewEmbeddingModelToGetStarted": "Fügen Sie ein neues Embedding-Modell hinzu, um zu beginnen",
     "tableHeaders": {
-      "name": "[AUTO-TRANSLATED de] Name",
+      "name": "Name",
       "modelId": "Modell-ID",
       "provider": "Anbieter",
       "description": "Beschreibung",
-      "status": "[AUTO-TRANSLATED de] Status",
+      "status": "Status",
       "actions": "Aktionen"
     },
     "status": {
@@ -501,9 +501,9 @@
     "goodbye": "Auf Wiedersehen",
     "yes": "Ja",
     "no": "Nein",
-    "ok": "[AUTO-TRANSLATED de] OK",
+    "ok": "OK",
     "search": "Suchen",
-    "filter": "[AUTO-TRANSLATED de] Filter",
+    "filter": "Filter",
     "sort": "Sortieren",
     "view": "Ansicht",
     "copy": "Kopieren",
@@ -535,7 +535,7 @@
       "processing": "Wird verarbeitet...",
       "extracting": "Inhalt wird extrahiert..."
     },
-    "error": "[AUTO-TRANSLATED de] Something went wrong!"
+    "error": "Etwas ist schief gelaufen!"
   },
   "usage": {
     "title": "Nutzung",
@@ -760,7 +760,7 @@
     "questionsAlreadyOptimized": "Bereits Optimierte Fragen",
     "selected": "Ausgewählt",
     "select": "Auswählen",
-    "original": "[AUTO-TRANSLATED de] Original",
+    "original": "Original",
     "suggestedImprovement": "Vorgeschlagene Verbesserung",
     "policyContext": "Richtlinienkontext",
     "currentAnswer": "Aktuelle Antwort",

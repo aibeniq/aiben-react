@@ -4,12 +4,12 @@
     "review": "Gjennomgang",
     "generate": "Generer",
     "compare": "Sammenlign",
-    "match": "[AUTO-TRANSLATED no] Match",
+    "match": "Match",
     "modelSelection": "Modellvalg",
     "knowledgeBases": "Kunnskapsbaser",
     "archive": "Arkiv",
     "settings": "Innstillinger",
-    "admin": "[AUTO-TRANSLATED no] Admin",
+    "admin": "Admin",
     "menu": "Meny",
     "tools": "Verktøy",
     "configurations": "Konfigurasjoner",
@@ -30,7 +30,7 @@
     "previous": "Forrige",
     "confirm": "Bekreft",
     "back": "Tilbake",
-    "done": "[AUTO-TRANSLATED no] Done"
+    "done": "Ferdig"
   },
   "forms": {
     "firstName": "Fornavn",
@@ -49,13 +49,13 @@
     "selectKnowledgeBase": "Velg en kunnskapsbase..."
   },
   "chatbot": {
-    "title": "[AUTO-TRANSLATED no] Chat",
+  "title": "Chat",
     "placeholder": "Still et spørsmål...",
     "sourcePopover": {
       "knowledgeBase": "Kunnskapsbase",
       "file": "Fil"
     },
-    "send": "[AUTO-TRANSLATED no] Send",
+  "send": "Send",
     "newChat": "Ny chat",
     "clearHistory": "Tøm historikk",
     "typing": "AI skriver...",
@@ -115,7 +115,7 @@
     "newPassword": "Nytt passord",
     "confirmPassword": "Bekreft passord",
     "save": "Lagre",
-    "system": "[AUTO-TRANSLATED no] System",
+  "system": "System",
     "lightMode": "Lys modus",
     "darkMode": "Mørk modus",
     "deleteAccountDescription": "Slett dataene dine og alt som er knyttet til kontoen din permanent.",
@@ -180,9 +180,9 @@
     "goodbye": "Ha det",
     "yes": "Ja",
     "no": "Nei",
-    "ok": "[AUTO-TRANSLATED no] OK",
+  "ok": "OK",
     "search": "Søk",
-    "filter": "[AUTO-TRANSLATED no] Filter",
+  "filter": "Filter",
     "sort": "Sorter",
     "view": "Vis",
     "copy": "Kopier",
@@ -221,7 +221,7 @@
       "singleDocumentSuccess": "Feltverdier hentet fra ett dokument.",
       "processing": "Behandler..."
     },
-    "error": "[AUTO-TRANSLATED no] Something went wrong!"
+  "error": "Noe gikk galt!"
   },
   "usage": {
     "title": "Bruk",
@@ -233,7 +233,7 @@
     "pageDescription": "Gjennomgå et dokument basert på brukerdefinert sjekkliste og policydatabase.",
     "knowledgeBaseTitle": "Kunnskapsbase",
     "knowledgeBaseDescription": "Klikk for å velge",
-    "checklistTitle": "Sjekkliste",
+  "title": "Tittel",
     "checklistDescription": "Klikk for å velge",
     "customInstructionsTitle": "Tilpassede instruksjoner (valgfritt)",
     "customInstructionsPlaceholder": "Skriv inn tilleggsinstruksjoner som bør vurderes når sjekklistespørsmål besvares...",
@@ -339,7 +339,7 @@
     "pleaseWait": "Vennligst vent mens vi genererer rapporten din",
     "compareSuccess": "Dokumenter sammenlignet vellykket!",
     "singleDocumentSuccess": "Feltverdier hentet fra enkelt dokument.",
-    "editOutline": "[AUTO-TRANSLATED no] Edit Outline"
+  "editOutline": "Rediger disposisjon"
   },
   "modelSelection": {
     "llmManagement": "LLM-håndtering",
@@ -357,7 +357,7 @@
       "modelId": "Modell-ID",
       "provider": "Leverandør",
       "description": "Beskrivelse",
-      "status": "[AUTO-TRANSLATED no] Status",
+    "status": "Status",
       "actions": "Handlinger"
     },
     "status": {
@@ -532,7 +532,7 @@
     "questionsAlreadyOptimized": "Allerede optimaliserte spørsmål",
     "selected": "Valgt",
     "select": "Velg",
-    "original": "[AUTO-TRANSLATED no] Original",
+  "original": "Original",
     "suggestedImprovement": "Foreslått forbedring",
     "policyContext": "Policykontekst",
     "currentAnswer": "Nåværende svar",
@@ -541,9 +541,9 @@
     "optimizationsSelectedText": "{{s}} optimaliseringer valgt for anvendelse",
     "applying": "Anvender...",
     "applySelectedOptimizations": "Anvend valgte optimaliseringer",
-    "uploadDocumentsTitle": "[AUTO-TRANSLATED no] Upload document(s) that should be accepted by checklist *",
-    "uploadDocumentsHelperText": "[AUTO-TRANSLATED no] Upload documents that should meet all checklist requirements to help identify questions that may be too strict",
-    "customInstructionsPlaceholder": "[AUTO-TRANSLATED no] e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
+  "uploadDocumentsTitle": "Last opp dokument(er) som skal aksepteres av sjekklisten *",
+  "uploadDocumentsHelperText": "Last opp dokumenter som skal oppfylle alle sjekklistekrav for å identifisere spørsmål som kan være for strenge",
+  "customInstructionsPlaceholder": "f.eks. Vurder at dette er en pediatrisk studie ved evaluering av aldersrelaterte krav, Dette protokollen er for en lavrisiko intervensjon, osv."
   },
   "optimizeOutlineModal": {
     "title": "Optimaliser disposisjon",
@@ -662,31 +662,31 @@
       "messages": {
         "processing": "Behandler...",
         "pleaseWait": "Vent mens vi behandler filene dine...",
-        "createSuccess": "[AUTO-TRANSLATED no] Knowledge Base created successfully.",
-        "updateSuccess": "[AUTO-TRANSLATED no] Knowledge Base updated successfully."
+  "createSuccess": "Kunnskapsbase opprettet vellykket.",
+  "updateSuccess": "Kunnskapsbase oppdatert vellykket."
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED no] Title",
+        "title": "Tittel",
         "description": "Beskrivelse"
       },
       "fileUpload": {
-        "currentFiles": "[AUTO-TRANSLATED no] Current Files",
-        "newFiles": "[AUTO-TRANSLATED no] New Files",
-        "selectedFiles": "[AUTO-TRANSLATED no] Selected Files",
-        "dragAndDrop": "[AUTO-TRANSLATED no] Drag and drop files here, or click to browse",
-        "dropFiles": "[AUTO-TRANSLATED no] Drop the files here...",
-        "removeFile": "[AUTO-TRANSLATED no] Remove file",
-        "supportedFormats": "[AUTO-TRANSLATED no] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+  "currentFiles": "Nåværende filer:",
+  "newFiles": "Nye filer:",
+  "selectedFiles": "Valgte filer:",
+  "dragAndDrop": "Dra og slipp filer her eller klikk for å bla gjennom",
+  "dropFiles": "Slipp filer her...",
+  "removeFile": "Fjern fil",
+  "supportedFormats": "Støtter: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
       },
       "buttons": {
         "cancel": "Avbryt",
         "create": "Opprett",
         "save": "Lagre",
-        "saving": "[AUTO-TRANSLATED no] Saving...",
-        "creating": "[AUTO-TRANSLATED no] Creating..."
+  "saving": "Lagrer...",
+  "creating": "Oppretter..."
       },
       "validation": {
-        "titleRequired": "[AUTO-TRANSLATED no] Title is required"
+  "titleRequired": "Tittel er påkrevd."
       }
     },
     "progress": {
@@ -717,7 +717,7 @@
       "review": "Gjennomgang",
       "generate": "Generer",
       "compare": "Sammenlign",
-      "match": "[AUTO-TRANSLATED no] Match"
+  "match": "Match"
     },
     "emptyMessages": {
       "review": "Ingen tidligere evalueringer",
@@ -776,9 +776,9 @@
       "sources": "kilder"
     },
     "feedback": {
-      "positive": "[AUTO-TRANSLATED no] Positive feedback",
-      "negative": "[AUTO-TRANSLATED no] Negative feedback",
-      "hasFeedback": "[AUTO-TRANSLATED no] Has feedback"
+  "positive": "Positiv tilbakemelding",
+  "negative": "Negativ tilbakemelding",
+  "hasFeedback": "Har tilbakemelding"
     }
   },
   "feedback": {
@@ -790,13 +790,13 @@
     "cancel": "Avbryt",
     "updateFeedback": "Oppdater tilbakemelding",
     "submit": "Send inn",
-    "tooltipEditPositive": "[AUTO-TRANSLATED no] Edit your helpful feedback",
-    "tooltipMarkPositive": "[AUTO-TRANSLATED no] Mark as helpful",
-    "tooltipEditNegative": "[AUTO-TRANSLATED no] Edit your feedback for improvements",
-    "tooltipMarkNegative": "[AUTO-TRANSLATED no] Mark as not helpful",
-    "feedbackSaved": "[AUTO-TRANSLATED no] Feedback saved",
-    "thankYouMessage": "[AUTO-TRANSLATED no] Thank you for your feedback!",
-    "submitErrorMessage": "[AUTO-TRANSLATED no] Failed to submit feedback. Please try again."
+  "tooltipEditPositive": "Rediger din nyttige tilbakemelding",
+  "tooltipMarkPositive": "Marker som nyttig",
+  "tooltipEditNegative": "Rediger din tilbakemelding for forbedringer",
+  "tooltipMarkNegative": "Marker som ikke nyttig",
+  "feedbackSaved": "Tilbakemelding lagret",
+  "thankYouMessage": "Takk for tilbakemeldingen!",
+  "submitErrorMessage": "Kunne ikke sende tilbakemelding. Prøv igjen."
   },
   "ui": {
     "results": "Resultater",

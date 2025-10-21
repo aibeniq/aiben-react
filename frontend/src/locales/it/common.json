@@ -1,6 +1,6 @@
 {
   "navigation": {
-    "dashboard": "[AUTO-TRANSLATED it] Dashboard",
+    "dashboard": "Dashboard",
     "review": "Rivedi",
     "generate": "Genera",
     "compare": "Confronta",
@@ -10,7 +10,7 @@
     "archive": "Archivio",
     "settings": "Impostazioni",
     "admin": "Amministratore",
-    "menu": "[AUTO-TRANSLATED it] Menu",
+    "menu": "Menu",
     "tools": "Strumenti",
     "configurations": "Configurazioni",
     "myProfile": "Il Mio Profilo",
@@ -30,13 +30,13 @@
     "previous": "Precedente",
     "confirm": "Conferma",
     "back": "Indietro",
-    "done": "[AUTO-TRANSLATED it] Done"
+    "done": "Fatto"
   },
   "forms": {
     "firstName": "Nome",
     "lastName": "Cognome",
-    "email": "[AUTO-TRANSLATED it] Email",
-    "password": "[AUTO-TRANSLATED it] Password",
+    "email": "Email",
+    "password": "Password",
     "confirmPassword": "Conferma Password",
     "currentPassword": "Password Attuale",
     "newPassword": "Nuova Password",
@@ -58,22 +58,22 @@
     "welcome": "Ciao! Come posso aiutarti oggi?",
     "welcomeMessageWithSource": "Seleziona una base di conoscenza o carica file, poi fai una domanda.",
     "welcomeMessageGeneral": "Chiedi pure qualsiasi cosa! Per la ricerca nella base di conoscenza, seleziona prima una base di conoscenza.",
-    "title": "[AUTO-TRANSLATED it] Chat",
+    "title": "Chat",
     "sourcePopover": {
       "knowledgeBase": "Base di conoscenza",
-      "file": "[AUTO-TRANSLATED it] File"
+      "file": "File"
     },
     "searchMode": "Modalità di ricerca:",
     "vectorSearch": "Ricerca vettoriale",
     "fullTextScan": "Scansione completa del testo",
-    "searchModeDescription": "[AUTO-TRANSLATED it] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
-    "askMeAnything": "[AUTO-TRANSLATED it] Ask me anything! For knowledge base search, select a knowledge base first.",
-    "usingGeneralAI": "[AUTO-TRANSLATED it] Using general AI assistant",
-    "usingKnowledgeBase": "[AUTO-TRANSLATED it] Using knowledge base:",
-    "usingDocuments": "[AUTO-TRANSLATED it] Using # document(s)",
-    "usingFiles": "[AUTO-TRANSLATED it] Using {{count}} document{{plural}}:",
+    "searchModeDescription": "La ricerca vettoriale fornisce risultati rapidi e mirati. La scansione completa del testo esamina tutto il contenuto nella base di conoscenza.",
+    "askMeAnything": "Chiedimi qualsiasi cosa! Per la ricerca nella base di conoscenza, seleziona prima una base di conoscenza.",
+    "usingGeneralAI": "Utilizzo assistente IA generale",
+    "usingKnowledgeBase": "Utilizzo base di conoscenza:",
+    "usingDocuments": "Utilizzo # documento(i)",
+    "usingFiles": "Utilizzo {{count}} documento{{plural}}:",
     "remove": "Rimuovi",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED it] Select Knowledge Base",
+    "selectKnowledgeBase": "Seleziona Base di Conoscenza",
     "knowledgeBaseTable": {
       "name": "Nome",
       "description": "Descrizione",
@@ -85,22 +85,22 @@
     "knowledgeBaseTableName": "Nome",
     "knowledgeBaseTableDescription": "Descrizione",
     "knowledgeBaseTableSources": "Fonti",
-    "knowledgeBaseTablePages": "[AUTO-TRANSLATED it] Pages",
+    "knowledgeBaseTablePages": "Pagine",
     "selectKnowledgeBasePlaceholder": "Seleziona una Base di Conoscenza...",
     "noKnowledgeBasesAvailable": "Nessuna base di conoscenza disponibile. Creane una prima di usare questa funzione.",
     "knowledgeBase": "Base di conoscenza",
-    "file": "[AUTO-TRANSLATED it] File",
+    "file": "File",
     "errors": {
-      "generic": "[AUTO-TRANSLATED it] Sorry, something went wrong. Please try again.",
-      "timeout": "[AUTO-TRANSLATED it] Request timed out. Please try again.",
-      "largeFileTimeout": "[AUTO-TRANSLATED it] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
-      "fileSize": "[AUTO-TRANSLATED it] File is too large. Please choose smaller files.",
-      "serverError": "[AUTO-TRANSLATED it] Server error occurred. Please try again later."
+      "generic": "Spiacente, qualcosa è andato storto. Riprova.",
+      "timeout": "Richiesta scaduta. Riprova.",
+      "largeFileTimeout": "Elaborazione file di grandi dimensioni scaduta. Prova a passare alla modalità 'Scansione Completa del Testo' per prestazioni migliori con file di grandi dimensioni.",
+      "fileSize": "Il file è troppo grande. Scegli file più piccoli.",
+      "serverError": "Si è verificato un errore del server. Riprova più tardi."
     }
   },
   "settings": {
     "title": "Impostazioni",
-    "account": "[AUTO-TRANSLATED it] Account",
+    "account": "Account",
     "language": "Lingua",
     "dangerZone": "Zona di Pericolo",
     "preferredLanguage": "Lingua Preferita",
@@ -174,7 +174,7 @@
     "pageDescription": "Rivedi un documento basato su una checklist e database di politiche definiti dall'utente.",
     "knowledgeBaseTitle": "Base di Conoscenza",
     "knowledgeBaseDescription": "Clicca per selezionare",
-    "checklistTitle": "[AUTO-TRANSLATED it] Checklist",
+    "checklistTitle": "Checklist",
     "checklistDescription": "Clicca per selezionare",
     "customInstructionsTitle": "Istruzioni Personalizzate (Opzionale)",
     "customInstructionsPlaceholder": "Inserisci istruzioni aggiuntive che dovrebbero essere considerate quando si risponde alle domande della checklist...",
@@ -229,8 +229,8 @@
     "vectorSearchDescription": "Trova contenuto rilevante usando la ricerca di similarità AI (veloce, mirato)",
     "fullScanDescription": "Analizza tutti i documenti nella base di conoscenza (completo, approfondito)",
     "pleaseWait": "Attendere prego mentre revisioniamo i vostri documenti",
-    "reviewSuccess": "[AUTO-TRANSLATED it] Document review completed successfully!",
-    "reviewSuccessMultiple": "[AUTO-TRANSLATED it] {{count}} files processed with optimized context sharing!"
+    "reviewSuccess": "Revisione documento completata con successo!",
+    "reviewSuccessMultiple": "{{count}} file elaborati con condivisione contesto ottimizzata!"
   },
   "generate": {
     "pageDescription": "Genera un documento basato su una checklist definita dall'utente e un database di documenti.",
@@ -276,7 +276,7 @@
       "processingSection": "Elaborazione sezione {{sectionNum}} di {{totalSections}}: {{sectionPreview}}"
     },
     "pleaseWait": "Attendere mentre generiamo il rapporto",
-    "editOutline": "[AUTO-TRANSLATED it] Edit Outline"
+    "editOutline": "Modifica Struttura"
   },
   "modelSelection": {
     "llmManagement": "Gestione LLM",
@@ -292,7 +292,7 @@
     "tableHeaders": {
       "name": "Nome",
       "modelId": "ID Modello",
-      "provider": "[AUTO-TRANSLATED it] Provider",
+      "provider": "Provider",
       "description": "Descrizione",
       "status": "Stato",
       "actions": "Azioni"
@@ -311,7 +311,7 @@
       "addNewLlm": "Aggiungi Nuovo LLM",
       "addEmbeddingModel": "Aggiungi Modello di Embedding",
       "displayName": "Nome Visualizzato",
-      "provider": "[AUTO-TRANSLATED it] Provider",
+      "provider": "Provider",
       "modelId": "ID Modello",
       "description": "Descrizione",
       "cancel": "Annulla",
@@ -500,8 +500,8 @@
     "hiUser": "Ciao, {{name}} 👋",
     "goodbye": "Arrivederci",
     "yes": "Sì",
-    "no": "[AUTO-TRANSLATED it] No",
-    "ok": "[AUTO-TRANSLATED it] OK",
+    "no": "No",
+    "ok": "OK",
     "search": "Cerca",
     "filter": "Filtro",
     "sort": "Ordina",
@@ -535,7 +535,7 @@
       "processing": "Elaborazione...",
       "extracting": "Estrazione contenuto..."
     },
-    "error": "[AUTO-TRANSLATED it] Something went wrong!"
+    "error": "Qualcosa è andato storto!"
   },
   "usage": {
     "title": "Utilizzo",
