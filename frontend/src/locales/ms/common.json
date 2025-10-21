@@ -10,7 +10,7 @@
     "archive": "Arkib",
     "settings": "Tetapan",
     "admin": "Pentadbir",
-    "menu": "[AUTO-TRANSLATED ms] Menu",
+    "menu": "Menu",
     "tools": "Alatan",
     "configurations": "Konfigurasi",
     "myProfile": "Profil Saya",
@@ -23,7 +23,7 @@
     "save": "Simpan",
     "cancel": "Batal",
     "delete": "Padam",
-    "edit": "[AUTO-TRANSLATED ms] Edit",
+    "edit": "Edit",
     "submit": "Hantar",
     "close": "Tutup",
     "next": "Seterusnya",
@@ -70,14 +70,14 @@
     "searchMode": "Mod Carian:",
     "vectorSearch": "Carian Vektor",
     "fullTextScan": "Imbasan Teks Penuh",
-    "searchModeDescription": "[AUTO-TRANSLATED ms] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
-    "askMeAnything": "[AUTO-TRANSLATED ms] Ask me anything! For knowledge base search, select a knowledge base first.",
-    "usingGeneralAI": "[AUTO-TRANSLATED ms] Using general AI assistant",
-    "usingKnowledgeBase": "[AUTO-TRANSLATED ms] Using knowledge base:",
-    "usingDocuments": "[AUTO-TRANSLATED ms] Using # document(s)",
-    "usingFiles": "[AUTO-TRANSLATED ms] Using {{count}} document{{plural}}:",
+    "searchModeDescription": "Carian vektor memberikan hasil yang cepat dan disasarkan. Imbasan teks penuh menyemak semua kandungan dalam pangkalan pengetahuan.",
+    "askMeAnything": "Tanya saya apa sahaja! Untuk carian pangkalan pengetahuan, pilih pangkalan pengetahuan terlebih dahulu.",
+    "usingGeneralAI": "Menggunakan pembantu AI umum",
+    "usingKnowledgeBase": "Menggunakan pangkalan pengetahuan:",
+    "usingDocuments": "Menggunakan # dokumen",
+    "usingFiles": "Menggunakan {{count}} dokumen{{plural}}:",
     "remove": "Keluarkan",
-    "selectKnowledgeBase": "[AUTO-TRANSLATED ms] Select Knowledge Base",
+    "selectKnowledgeBase": "Pilih Pangkalan Pengetahuan",
     "knowledgeBaseTable": {
       "name": "Nama",
       "description": "Penerangan",
@@ -91,11 +91,11 @@
     "knowledgeBase": "Pangkalan Pengetahuan",
     "file": "Fail",
     "errors": {
-      "generic": "[AUTO-TRANSLATED ms] Sorry, something went wrong. Please try again.",
-      "timeout": "[AUTO-TRANSLATED ms] Request timed out. Please try again.",
-      "largeFileTimeout": "[AUTO-TRANSLATED ms] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
-      "fileSize": "[AUTO-TRANSLATED ms] File is too large. Please choose smaller files.",
-      "serverError": "[AUTO-TRANSLATED ms] Server error occurred. Please try again later."
+      "generic": "Maaf, ada yang tidak kena. Sila cuba lagi.",
+      "timeout": "Permintaan tamat masa. Sila cuba lagi.",
+      "largeFileTimeout": "Pemprosesan fail besar tamat masa. Cuba tukar ke mod 'Imbasan Teks Penuh' untuk prestasi yang lebih baik dengan fail besar.",
+      "fileSize": "Fail terlalu besar. Sila pilih fail yang lebih kecil.",
+      "serverError": "Ralat pelayan berlaku. Sila cuba lagi kemudian."
     }
   },
   "settings": {
@@ -178,7 +178,7 @@
     "goodbye": "Selamat tinggal",
     "yes": "Ya",
     "no": "Tidak",
-    "ok": "[AUTO-TRANSLATED ms] OK",
+    "ok": "OK",
     "search": "Cari",
     "filter": "Penapis",
     "sort": "Susun",
@@ -214,9 +214,9 @@
       "processing": "Memproses...",
       "extracting": "Mengekstrak kandungan..."
     },
-    "error": "[AUTO-TRANSLATED ms] Something went wrong!",
-    "welcomeBack": "[AUTO-TRANSLATED ms] Welcome back, nice to see you again!",
-    "hiUser": "[AUTO-TRANSLATED ms] Hi, {{name}} 👋"
+    "error": "Ada yang tidak kena!",
+    "welcomeBack": "Selamat kembali, gembira bertemu anda lagi!",
+    "hiUser": "Hai, {{name}} 👋"
   },
   "usage": {
     "title": "Penggunaan",
@@ -277,15 +277,15 @@
     "pleaseWait": "Sila tunggu, kami sedang menyemak dokumen anda",
     "reviewSuccess": "Semakan dokumen berjaya diselesaikan!",
     "reviewSuccessMultiple": "{{count}} fail diproses dengan perkongsian konteks yang dioptimumkan!",
-    "dropFilesHere": "[AUTO-TRANSLATED ms] Drop the files here",
-    "uploadedFiles": "[AUTO-TRANSLATED ms] Uploaded Files",
+    "dropFilesHere": "Lepaskan fail di sini",
+    "uploadedFiles": "Fail yang Dimuat Naik",
     "removeFile": "Keluarkan",
-    "characterCount": "[AUTO-TRANSLATED ms] {{count}}/2000 characters. These instructions will be appended to each question when processing.",
-    "searchMode": "[AUTO-TRANSLATED ms] Search Mode",
+    "characterCount": "{{count}}/2000 aksara. Arahan ini akan ditambahkan pada setiap soalan semasa pemprosesan.",
+    "searchMode": "Mod Carian",
     "vectorSearch": "Carian Vektor",
-    "fullDocumentScan": "[AUTO-TRANSLATED ms] Full Document Scan",
-    "vectorSearchDescription": "[AUTO-TRANSLATED ms] Finds relevant content using AI similarity search (fast, targeted)",
-    "fullScanDescription": "[AUTO-TRANSLATED ms] Analyzes all documents in the knowledge base (comprehensive, thorough)"
+    "fullDocumentScan": "Imbasan Dokumen Penuh",
+    "vectorSearchDescription": "Mencari kandungan yang berkaitan menggunakan carian persamaan AI (cepat, disasarkan)",
+    "fullScanDescription": "Menganalisis semua dokumen dalam pangkalan pengetahuan (menyeluruh, teliti)"
   },
   "modelSelection": {
     "llmManagement": "Pengurusan LLM",
@@ -303,7 +303,7 @@
       "modelId": "ID Model",
       "provider": "Pembekal",
       "description": "Penerangan",
-      "status": "[AUTO-TRANSLATED ms] Status",
+      "status": "Status",
       "actions": "Tindakan"
     },
     "status": {
@@ -368,7 +368,7 @@
     },
     "pleaseWait": "Sila tunggu sementara kami membandingkan dokumen anda",
     "compareSuccess": "Dokumen berjaya dibandingkan!",
-    "selectTopicListTitle": "[AUTO-TRANSLATED ms] Select Topic List"
+    "selectTopicListTitle": "Pilih Senarai Topik"
   },
   "match": {
     "title": "Padanan Dokumen",
@@ -403,7 +403,7 @@
     "pleaseWait": "Sila tunggu sementara kami memadankan dokumen anda",
     "matchSuccess": "Pemprosesan borang berjaya diselesaikan!",
     "singleDocumentSuccess": "Nilai medan berjaya diekstrak daripada satu dokumen.",
-    "selectFormTemplateTitle": "[AUTO-TRANSLATED ms] Select Form Template"
+    "selectFormTemplateTitle": "Pilih Templat Borang"
   },
   "editOutlineModal": {
     "title": "Edit Rangka",
@@ -485,7 +485,7 @@
     },
     "actions": {
       "view": "Lihat",
-      "edit": "[AUTO-TRANSLATED ms] Edit",
+      "edit": "Edit",
       "delete": "Padam",
       "configure": "Konfigurasi"
     },
@@ -564,11 +564,11 @@
         "updateFormTemplate": "Kemas Kini Templat Borang"
       },
       "fields": {
-        "title": "[AUTO-TRANSLATED ms] Title",
+        "title": "Tajuk",
         "description": "Penerangan"
       },
       "fileUpload": {
-        "currentFiles": "[AUTO-TRANSLATED ms] Current Files",
+        "currentFiles": "Fail Semasa",
         "newFiles": "[AUTO-TRANSLATED ms] New Files",
         "selectedFiles": "[AUTO-TRANSLATED ms] Selected Files",
         "dragAndDrop": "[AUTO-TRANSLATED ms] Drag and drop files here, or click to browse",

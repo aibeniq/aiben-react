@@ -2314,10 +2314,6 @@ export class VeradocService {
             method: 'POST',
             url: '/api/v1/veradoc/process-rag',
             query: {
-                questions: data.questions,
-                custom_instructions: data.customInstructions,
-                knowledge_base_id: data.knowledgeBaseId,
-                search_mode: data.searchMode,
                 task_id: data.taskId
             },
             formData: data.formData,
