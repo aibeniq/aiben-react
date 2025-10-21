@@ -1,0 +1,940 @@
+{
+  "es": [
+    {
+      "key": "buttons.done",
+      "english": "Done"
+    },
+    {
+      "key": "chatbot.title",
+      "english": "Chat"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.noDescription",
+      "english": "No description"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.sourcesCount",
+      "english": "{{count}} sources"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.pagesCount",
+      "english": "{{count}} pages"
+    },
+    {
+      "key": "common.error",
+      "english": "Something went wrong!"
+    },
+    {
+      "key": "common.no",
+      "english": "No"
+    },
+    {
+      "key": "common.ok",
+      "english": "OK"
+    },
+    {
+      "key": "editFormTemplateModal.pleaseWait",
+      "english": "Please wait while we review your documents"
+    },
+    {
+      "key": "optimizeChecklistModal.original",
+      "english": "Original"
+    }
+  ],
+  "de": [
+    {
+      "key": "navigation.dashboard",
+      "english": "Dashboard"
+    },
+    {
+      "key": "buttons.done",
+      "english": "Done"
+    },
+    {
+      "key": "forms.optional",
+      "english": "Optional"
+    },
+    {
+      "key": "chatbot.title",
+      "english": "Chat"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.name",
+      "english": "Name"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.noDescription",
+      "english": "No description"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.sourcesCount",
+      "english": "{{count}} sources"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.pagesCount",
+      "english": "{{count}} pages"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTableName",
+      "english": "Name"
+    },
+    {
+      "key": "settings.system",
+      "english": "System"
+    },
+    {
+      "key": "review.reviewSuccess",
+      "english": "Document review completed successfully!"
+    },
+    {
+      "key": "review.reviewSuccessMultiple",
+      "english": "{{count}} files processed with optimized context sharing!"
+    },
+    {
+      "key": "modelSelection.tableHeaders.name",
+      "english": "Name"
+    },
+    {
+      "key": "modelSelection.tableHeaders.status",
+      "english": "Status"
+    },
+    {
+      "key": "common.error",
+      "english": "Something went wrong!"
+    },
+    {
+      "key": "common.ok",
+      "english": "OK"
+    },
+    {
+      "key": "common.filter",
+      "english": "Filter"
+    },
+    {
+      "key": "editFormTemplateModal.pleaseWait",
+      "english": "Please wait while we review your documents"
+    },
+    {
+      "key": "optimizeChecklistModal.original",
+      "english": "Original"
+    }
+  ],
+  "fr": [
+    {
+      "key": "navigation.archive",
+      "english": "Archive"
+    },
+    {
+      "key": "navigation.menu",
+      "english": "Menu"
+    },
+    {
+      "key": "navigation.configurations",
+      "english": "Configurations"
+    },
+    {
+      "key": "buttons.done",
+      "english": "Done"
+    },
+    {
+      "key": "forms.email",
+      "english": "Email"
+    },
+    {
+      "key": "chatbot.title",
+      "english": "Chat"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.description",
+      "english": "Description"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.sources",
+      "english": "Sources"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.noDescription",
+      "english": "No description"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.sourcesCount",
+      "english": "{{count}} sources"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.pagesCount",
+      "english": "{{count}} pages"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTableDescription",
+      "english": "Description"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTableSources",
+      "english": "Sources"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTablePages",
+      "english": "Pages"
+    },
+    {
+      "key": "review.checklistDescriptionLabel",
+      "english": "Description"
+    },
+    {
+      "key": "review.questions",
+      "english": "{{count}} questions"
+    },
+    {
+      "key": "review.reviewSuccess",
+      "english": "Document review completed successfully!"
+    },
+    {
+      "key": "review.reviewSuccessMultiple",
+      "english": "{{count}} files processed with optimized context sharing!"
+    },
+    {
+      "key": "generate.sectionNumber",
+      "english": "Section {number}: {title}"
+    },
+    {
+      "key": "modelSelection.tableHeaders.description",
+      "english": "Description"
+    },
+    {
+      "key": "modelSelection.tableHeaders.actions",
+      "english": "Actions"
+    },
+    {
+      "key": "modelSelection.dialog.description",
+      "english": "Description"
+    },
+    {
+      "key": "knowledgeBases.tableHeaders.description",
+      "english": "Description"
+    },
+    {
+      "key": "knowledgeBases.tableHeaders.actions",
+      "english": "Actions"
+    },
+    {
+      "key": "knowledgeBases.modals.fields.description",
+      "english": "Description"
+    },
+    {
+      "key": "archive.title",
+      "english": "Archive"
+    },
+    {
+      "key": "archive.metadata.question",
+      "english": "{{count}} question"
+    },
+    {
+      "key": "archive.metadata.question_one",
+      "english": "{{count}} question"
+    },
+    {
+      "key": "archive.metadata.questions",
+      "english": "{{count}} questions"
+    },
+    {
+      "key": "archive.metadata.section",
+      "english": "{{count}} section"
+    },
+    {
+      "key": "archive.metadata.section_one",
+      "english": "{{count}} section"
+    },
+    {
+      "key": "archive.metadata.sections",
+      "english": "{{count}} sections"
+    },
+    {
+      "key": "archive.metadata.document",
+      "english": "{{count}} document"
+    },
+    {
+      "key": "archive.metadata.document_one",
+      "english": "{{count}} document"
+    },
+    {
+      "key": "archive.metadata.documents",
+      "english": "{{count}} documents"
+    },
+    {
+      "key": "archive.labels.questionNumber",
+      "english": "Question"
+    },
+    {
+      "key": "archive.labels.sources",
+      "english": "sources"
+    },
+    {
+      "key": "common.error",
+      "english": "Something went wrong!"
+    },
+    {
+      "key": "common.ok",
+      "english": "OK"
+    },
+    {
+      "key": "common.sources",
+      "english": "sources"
+    },
+    {
+      "key": "common.citationNumber",
+      "english": "Citation {{number}}"
+    },
+    {
+      "key": "compare.documentA",
+      "english": "Document A"
+    },
+    {
+      "key": "compare.documentB",
+      "english": "Document B"
+    },
+    {
+      "key": "editFormTemplateModal.pleaseWait",
+      "english": "Please wait while we review your documents"
+    },
+    {
+      "key": "editOutlineModal.description",
+      "english": "Description"
+    },
+    {
+      "key": "editOutlineModal.sections",
+      "english": "Sections"
+    },
+    {
+      "key": "editChecklistModal.description",
+      "english": "Description"
+    },
+    {
+      "key": "editChecklistModal.questions",
+      "english": "{{count}} questions"
+    },
+    {
+      "key": "editTopicListModal.section",
+      "english": "{{count}} section"
+    },
+    {
+      "key": "editTopicListModal.section_one",
+      "english": "{{count}} section"
+    },
+    {
+      "key": "editTopicListModal.sections",
+      "english": "{{count}} sections"
+    },
+    {
+      "key": "optimizeChecklistModal.original",
+      "english": "Original"
+    },
+    {
+      "key": "optimizeOutlineModal.section",
+      "english": "Section"
+    }
+  ],
+  "pt-BR": [
+    {
+      "key": "navigation.menu",
+      "english": "Menu"
+    },
+    {
+      "key": "chatbot.title",
+      "english": "Chat"
+    },
+    {
+      "key": "chatbot.sourcePopover.knowledgeBase",
+      "english": "Knowledge Base"
+    },
+    {
+      "key": "chatbot.sourcePopover.file",
+      "english": "File"
+    },
+    {
+      "key": "chatbot.searchMode",
+      "english": "Search Mode:"
+    },
+    {
+      "key": "chatbot.vectorSearch",
+      "english": "Vector Search"
+    },
+    {
+      "key": "chatbot.fullTextScan",
+      "english": "Full Text Scan"
+    },
+    {
+      "key": "chatbot.searchModeDescription",
+      "english": "Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base."
+    },
+    {
+      "key": "chatbot.askMeAnything",
+      "english": "Ask me anything! For knowledge base search, select a knowledge base first."
+    },
+    {
+      "key": "chatbot.usingGeneralAI",
+      "english": "Using general AI assistant"
+    },
+    {
+      "key": "chatbot.usingKnowledgeBase",
+      "english": "Using knowledge base:"
+    },
+    {
+      "key": "chatbot.usingDocuments",
+      "english": "Using # document(s)"
+    },
+    {
+      "key": "chatbot.usingFiles",
+      "english": "Using {{count}} document{{plural}}:"
+    },
+    {
+      "key": "chatbot.remove",
+      "english": "Remove"
+    },
+    {
+      "key": "chatbot.selectKnowledgeBase",
+      "english": "Select Knowledge Base"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.name",
+      "english": "Name"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.description",
+      "english": "Description"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.sources",
+      "english": "Sources"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.noDescription",
+      "english": "No description"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.sourcesCount",
+      "english": "{{count}} sources"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.pagesCount",
+      "english": "{{count}} pages"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTableName",
+      "english": "Name"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTableDescription",
+      "english": "Description"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTableSources",
+      "english": "Sources"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTablePages",
+      "english": "Pages"
+    },
+    {
+      "key": "chatbot.selectKnowledgeBasePlaceholder",
+      "english": "Select a Knowledge Base..."
+    },
+    {
+      "key": "chatbot.noKnowledgeBasesAvailable",
+      "english": "No Knowledge Bases available. Create one first to use this feature."
+    },
+    {
+      "key": "chatbot.knowledgeBase",
+      "english": "Knowledge Base"
+    },
+    {
+      "key": "chatbot.file",
+      "english": "File"
+    },
+    {
+      "key": "chatbot.errors.generic",
+      "english": "Sorry, something went wrong. Please try again."
+    },
+    {
+      "key": "chatbot.errors.timeout",
+      "english": "Request timed out. Please try again."
+    },
+    {
+      "key": "chatbot.errors.largeFileTimeout",
+      "english": "Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files."
+    },
+    {
+      "key": "chatbot.errors.fileSize",
+      "english": "File is too large. Please choose smaller files."
+    },
+    {
+      "key": "chatbot.errors.serverError",
+      "english": "Server error occurred. Please try again later."
+    },
+    {
+      "key": "review.dropFilesHere",
+      "english": "Drop the files here"
+    },
+    {
+      "key": "review.uploadedFiles",
+      "english": "Uploaded Files"
+    },
+    {
+      "key": "review.removeFile",
+      "english": "Remove"
+    },
+    {
+      "key": "review.characterCount",
+      "english": "{{count}}/2000 characters. These instructions will be appended to each question when processing."
+    },
+    {
+      "key": "review.searchMode",
+      "english": "Search Mode"
+    },
+    {
+      "key": "review.vectorSearch",
+      "english": "Vector Search"
+    },
+    {
+      "key": "review.fullDocumentScan",
+      "english": "Full Document Scan"
+    },
+    {
+      "key": "review.vectorSearchDescription",
+      "english": "Finds relevant content using AI similarity search (fast, targeted)"
+    },
+    {
+      "key": "review.fullScanDescription",
+      "english": "Analyzes all documents in the knowledge base (comprehensive, thorough)"
+    },
+    {
+      "key": "modelSelection.tableHeaders.status",
+      "english": "Status"
+    },
+    {
+      "key": "knowledgeBases.modals.fields.title",
+      "english": "Title"
+    },
+    {
+      "key": "knowledgeBases.modals.fields.description",
+      "english": "Description"
+    },
+    {
+      "key": "knowledgeBases.modals.fileUpload.currentFiles",
+      "english": "Current Files"
+    },
+    {
+      "key": "knowledgeBases.modals.fileUpload.newFiles",
+      "english": "New Files"
+    },
+    {
+      "key": "knowledgeBases.modals.fileUpload.selectedFiles",
+      "english": "Selected Files"
+    },
+    {
+      "key": "knowledgeBases.modals.fileUpload.dragAndDrop",
+      "english": "Drag and drop files here, or click to browse"
+    },
+    {
+      "key": "knowledgeBases.modals.fileUpload.dropFiles",
+      "english": "Drop the files here..."
+    },
+    {
+      "key": "knowledgeBases.modals.fileUpload.removeFile",
+      "english": "Remove file"
+    },
+    {
+      "key": "knowledgeBases.modals.fileUpload.supportedFormats",
+      "english": "Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+    },
+    {
+      "key": "knowledgeBases.modals.buttons.cancel",
+      "english": "Cancel"
+    },
+    {
+      "key": "knowledgeBases.modals.buttons.create",
+      "english": "Create"
+    },
+    {
+      "key": "knowledgeBases.modals.buttons.save",
+      "english": "Save"
+    },
+    {
+      "key": "knowledgeBases.modals.buttons.saving",
+      "english": "Saving..."
+    },
+    {
+      "key": "knowledgeBases.modals.buttons.creating",
+      "english": "Creating..."
+    },
+    {
+      "key": "knowledgeBases.modals.validation.titleRequired",
+      "english": "Title is required"
+    },
+    {
+      "key": "knowledgeBases.modals.messages.createSuccess",
+      "english": "Knowledge Base created successfully."
+    },
+    {
+      "key": "knowledgeBases.modals.messages.updateSuccess",
+      "english": "Knowledge Base updated successfully."
+    },
+    {
+      "key": "knowledgeBases.modals.messages.processing",
+      "english": "Processing..."
+    },
+    {
+      "key": "knowledgeBases.modals.messages.pleaseWait",
+      "english": "Please wait while we process your files..."
+    },
+    {
+      "key": "common.error",
+      "english": "Something went wrong!"
+    },
+    {
+      "key": "common.welcomeBack",
+      "english": "Welcome back, nice to see you again!"
+    },
+    {
+      "key": "common.hiUser",
+      "english": "Hi, {{name}} 👋"
+    },
+    {
+      "key": "common.ok",
+      "english": "OK"
+    },
+    {
+      "key": "compare.selectTopicListTitle",
+      "english": "Select Topic List"
+    },
+    {
+      "key": "match.selectFormTemplateTitle",
+      "english": "Select Form Template"
+    },
+    {
+      "key": "optimizeChecklistModal.original",
+      "english": "Original"
+    }
+  ],
+  "nl": [
+    {
+      "key": "navigation.dashboard",
+      "english": "Dashboard"
+    },
+    {
+      "key": "navigation.menu",
+      "english": "Menu"
+    },
+    {
+      "key": "dropdowns.selectKnowledgeBase",
+      "english": "Select a Knowledge Base..."
+    },
+    {
+      "key": "chatbot.title",
+      "english": "Chat"
+    },
+    {
+      "key": "chatbot.sourcePopover.knowledgeBase",
+      "english": "Knowledge Base"
+    },
+    {
+      "key": "chatbot.sourcePopover.file",
+      "english": "File"
+    },
+    {
+      "key": "chatbot.searchMode",
+      "english": "Search Mode:"
+    },
+    {
+      "key": "chatbot.vectorSearch",
+      "english": "Vector Search"
+    },
+    {
+      "key": "chatbot.fullTextScan",
+      "english": "Full Text Scan"
+    },
+    {
+      "key": "chatbot.searchModeDescription",
+      "english": "Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base."
+    },
+    {
+      "key": "chatbot.askMeAnything",
+      "english": "Ask me anything! For knowledge base search, select a knowledge base first."
+    },
+    {
+      "key": "chatbot.usingGeneralAI",
+      "english": "Using general AI assistant"
+    },
+    {
+      "key": "chatbot.usingKnowledgeBase",
+      "english": "Using knowledge base:"
+    },
+    {
+      "key": "chatbot.usingDocuments",
+      "english": "Using # document(s)"
+    },
+    {
+      "key": "chatbot.usingFiles",
+      "english": "Using {{count}} document{{plural}}:"
+    },
+    {
+      "key": "chatbot.remove",
+      "english": "Remove"
+    },
+    {
+      "key": "chatbot.selectKnowledgeBase",
+      "english": "Select Knowledge Base"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.name",
+      "english": "Name"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.description",
+      "english": "Description"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.sources",
+      "english": "Sources"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.noDescription",
+      "english": "No description"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.sourcesCount",
+      "english": "{{count}} sources"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTable.pagesCount",
+      "english": "{{count}} pages"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTableName",
+      "english": "Name"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTableDescription",
+      "english": "Description"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTableSources",
+      "english": "Sources"
+    },
+    {
+      "key": "chatbot.knowledgeBaseTablePages",
+      "english": "Pages"
+    },
+    {
+      "key": "chatbot.selectKnowledgeBasePlaceholder",
+      "english": "Select a Knowledge Base..."
+    },
+    {
+      "key": "chatbot.noKnowledgeBasesAvailable",
+      "english": "No Knowledge Bases available. Create one first to use this feature."
+    },
+    {
+      "key": "chatbot.knowledgeBase",
+      "english": "Knowledge Base"
+    },
+    {
+      "key": "chatbot.file",
+      "english": "File"
+    },
+    {
+      "key": "chatbot.errors.generic",
+      "english": "Sorry, something went wrong. Please try again."
+    },
+    {
+      "key": "chatbot.errors.timeout",
+      "english": "Request timed out. Please try again."
+    },
+    {
+      "key": "chatbot.errors.largeFileTimeout",
+      "english": "Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files."
+    },
+    {
+      "key": "chatbot.errors.fileSize",
+      "english": "File is too large. Please choose smaller files."
+    },
+    {
+      "key": "chatbot.errors.serverError",
+      "english": "Server error occurred. Please try again later."
+    },
+    {
+      "key": "settings.account",
+      "english": "Account"
+    },
+    {
+      "key": "review.checklistTitle",
+      "english": "Checklist"
+    },
+    {
+      "key": "review.reviewSuccess",
+      "english": "Document review completed successfully!"
+    },
+    {
+      "key": "review.reviewSuccessMultiple",
+      "english": "{{count}} files processed with optimized context sharing!"
+    },
+    {
+      "key": "generate.documentOutlineTitle",
+      "english": "Document Outline"
+    },
+    {
+      "key": "generate.editOutline",
+      "english": "Edit Outline"
+    },
+    {
+      "key": "modelSelection.tableHeaders.modelId",
+      "english": "Model ID"
+    },
+    {
+      "key": "modelSelection.tableHeaders.status",
+      "english": "Status"
+    },
+    {
+      "key": "modelSelection.dialog.modelId",
+      "english": "Model ID"
+    },
+    {
+      "key": "knowledgeBases.actions.view",
+      "english": "View"
+    },
+    {
+      "key": "knowledgeBases.actions.edit",
+      "english": "Edit"
+    },
+    {
+      "key": "knowledgeBases.actions.delete",
+      "english": "Delete"
+    },
+    {
+      "key": "knowledgeBases.actions.configure",
+      "english": "Configure"
+    },
+    {
+      "key": "knowledgeBases.modals.add.title",
+      "english": "Add Knowledge Base"
+    },
+    {
+      "key": "knowledgeBases.modals.add.description",
+      "english": "Create a new knowledge base by providing details and uploading documents below."
+    },
+    {
+      "key": "knowledgeBases.modals.edit.title",
+      "english": "Edit Knowledge Base"
+    },
+    {
+      "key": "knowledgeBases.modals.edit.description",
+      "english": "Update the Knowledge Base details below."
+    },
+    {
+      "key": "knowledgeBases.modals.fields.title",
+      "english": "Title"
+    },
+    {
+      "key": "knowledgeBases.modals.fields.description",
+      "english": "Description"
+    },
+    {
+      "key": "knowledgeBases.modals.fileUpload.currentFiles",
+      "english": "Current Files"
+    },
+    {
+      "key": "knowledgeBases.modals.fileUpload.newFiles",
+      "english": "New Files"
+    },
+    {
+      "key": "knowledgeBases.modals.fileUpload.selectedFiles",
+      "english": "Selected Files"
+    },
+    {
+      "key": "knowledgeBases.modals.fileUpload.dragAndDrop",
+      "english": "Drag and drop files here, or click to browse"
+    },
+    {
+      "key": "knowledgeBases.modals.fileUpload.dropFiles",
+      "english": "Drop the files here..."
+    },
+    {
+      "key": "knowledgeBases.modals.fileUpload.removeFile",
+      "english": "Remove file"
+    },
+    {
+      "key": "knowledgeBases.modals.buttons.cancel",
+      "english": "Cancel"
+    },
+    {
+      "key": "knowledgeBases.modals.buttons.create",
+      "english": "Create"
+    },
+    {
+      "key": "knowledgeBases.modals.buttons.save",
+      "english": "Save"
+    },
+    {
+      "key": "knowledgeBases.modals.buttons.saving",
+      "english": "Saving..."
+    },
+    {
+      "key": "knowledgeBases.modals.buttons.creating",
+      "english": "Creating..."
+    },
+    {
+      "key": "knowledgeBases.modals.validation.titleRequired",
+      "english": "Title is required"
+    },
+    {
+      "key": "knowledgeBases.modals.messages.createSuccess",
+      "english": "Knowledge Base created successfully."
+    },
+    {
+      "key": "knowledgeBases.modals.messages.updateSuccess",
+      "english": "Knowledge Base updated successfully."
+    },
+    {
+      "key": "archive.metadata.document",
+      "english": "{{count}} document"
+    },
+    {
+      "key": "archive.metadata.document_one",
+      "english": "{{count}} document"
+    },
+    {
+      "key": "common.error",
+      "english": "Something went wrong!"
+    },
+    {
+      "key": "common.ok",
+      "english": "OK"
+    },
+    {
+      "key": "common.filter",
+      "english": "Filter"
+    },
+    {
+      "key": "compare.documentA",
+      "english": "Document A"
+    },
+    {
+      "key": "compare.documentB",
+      "english": "Document B"
+    },
+    {
+      "key": "editFormTemplateModal.pleaseWait",
+      "english": "Please wait while we review your documents"
+    },
+    {
+      "key": "optimizeChecklistModal.uploadDocumentsTitle",
+      "english": "Upload document(s) that should be accepted by checklist *"
+    },
+    {
+      "key": "optimizeChecklistModal.uploadDocumentsHelperText",
+      "english": "Upload documents that should meet all checklist requirements to help identify questions that may be too strict"
+    },
+    {
+      "key": "optimizeChecklistModal.customInstructionsPlaceholder",
+      "english": "e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
+    }
+  ]
+}

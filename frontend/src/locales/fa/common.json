@@ -29,7 +29,8 @@
     "next": "بعدی",
     "previous": "قبلی",
     "confirm": "تأیید",
-    "back": "برگشت"
+    "back": "برگشت",
+    "done": "انجام شد"
   },
   "forms": {
     "firstName": "نام",
@@ -56,7 +57,46 @@
     "error": "متأسفیم، مشکلی پیش آمد. دوباره تلاش کنید.",
     "welcome": "سلام! امروز چگونه می‌توانم کمکتان کنم؟",
     "welcomeMessageWithSource": "یک پایگاه دانش انتخاب کنید یا فایل‌ها را آپلود کنید، سپس سوال بپرسید.",
-    "welcomeMessageGeneral": "هر چیزی از من بپرسید! برای جستجو در پایگاه دانش، ابتدا یک پایگاه دانش انتخاب کنید."
+    "welcomeMessageGeneral": "هر چیزی از من بپرسید! برای جستجو در پایگاه دانش، ابتدا یک پایگاه دانش انتخاب کنید.",
+    "title": "چت",
+    "sourcePopover": {
+      "knowledgeBase": "پایگاه دانش",
+      "file": "فایل"
+    },
+    "searchMode": "حالت جستجو:",
+    "vectorSearch": "جستجوی برداری",
+    "fullTextScan": "اسکن کامل متن",
+    "searchModeDescription": "جستجوی برداری نتایج سریع و هدفمند ارائه می‌دهد. اسکن کامل متن تمام محتوای پایگاه دانش را بررسی می‌کند.",
+    "askMeAnything": "هر چیزی از من بپرس! برای جستجوی پایگاه دانش، ابتدا یک پایگاه دانش انتخاب کنید.",
+    "usingGeneralAI": "استفاده از دستیار هوش مصنوعی عمومی",
+    "usingKnowledgeBase": "استفاده از پایگاه دانش:",
+    "usingDocuments": "استفاده از # سند",
+    "usingFiles": "استفاده از {{count}} سند{{plural}}:",
+    "remove": "حذف",
+    "selectKnowledgeBase": "انتخاب پایگاه دانش",
+    "knowledgeBaseTable": {
+      "name": "نام",
+      "description": "توضیحات",
+      "sources": "منابع",
+      "noDescription": "بدون توضیحات",
+      "sourcesCount": "{{count}} منبع",
+      "pagesCount": "{{count}} صفحه"
+    },
+    "knowledgeBaseTableName": "نام",
+    "knowledgeBaseTableDescription": "توضیحات",
+    "knowledgeBaseTableSources": "منابع",
+    "knowledgeBaseTablePages": "صفحات",
+    "selectKnowledgeBasePlaceholder": "یک پایگاه دانش انتخاب کنید...",
+    "noKnowledgeBasesAvailable": "هیچ پایگاه دانشی موجود نیست. ابتدا یکی بسازید تا از این ویژگی استفاده کنید.",
+    "knowledgeBase": "پایگاه دانش",
+    "file": "فایل",
+    "errors": {
+      "generic": "متأسفانه، مشکلی پیش آمد. لطفاً دوباره امتحان کنید.",
+      "timeout": "زمان درخواست تمام شد. لطفاً دوباره امتحان کنید.",
+      "largeFileTimeout": "پردازش فایل بزرگ زمان تمام شد. برای عملکرد بهتر با فایل‌های بزرگ، به حالت 'اسکن کامل متن' تغییر دهید.",
+      "fileSize": "فایل خیلی بزرگ است. لطفاً فایل‌های کوچک‌تری انتخاب کنید.",
+      "serverError": "خطای سرور رخ داد. لطفاً بعداً دوباره امتحان کنید."
+    }
   },
   "settings": {
     "title": "تنظیمات",
@@ -146,32 +186,40 @@
     "copy": "کپی",
     "paste": "چسباندن",
     "cut": "برش",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "نمایش بیشتر",
+    "showLess": "نمایش کمتر",
+    "readMore": "بیشتر بخوانید",
+    "questionNumber": "سوال {{number}}:",
+    "viewSourceCitations": "مشاهده ارجاعات منبع ({{count}})",
+    "answer": "پاسخ:",
+    "relevantPolicyContext": "زمینه سیاست مربوطه:",
+    "sources": "منابع",
+    "sourceCitations": "ارجاعات منبع ({{count}})",
+    "citationNumber": "ارجاع {{number}}",
+    "noSourceCitations": "هیچ ارجاع منبع برای این بخش موجود نیست",
+    "noDetailedSections": "هیچ بخش مفصل برای این گزارش موجود نیست",
+    "topicLabel": "موضوع:",
+    "knowledgeBaseReference": "ارجاع پایگاه دانش",
+    "knowledgeBaseReferences": "ارجاعات پایگاه دانش",
+    "hideReferences": "پنهان کردن ارجاعات",
+    "showReferences": "نمایش ارجاعات",
+    "referenceNumber": "ارجاع {{number}}",
+    "processedInChunks": "در {{count}} قسمت پردازش شد",
+    "synthesisErrorNote": "توجه: خطای سنتز رخ داد - نتایج قسمت‌های ترکیبی نمایش داده می‌شود",
     "progress": {
       "starting": "در حال شروع...",
       "initializing": "در حال مقداردهی اولیه...",
       "processing": "در حال پردازش...",
       "extracting": "در حال استخراج محتوا..."
-    }
+    },
+    "error": "مشکلی پیش آمد!",
+    "welcomeBack": "خوش آمدید، خوشحالم که دوباره شما را می‌بینم!",
+    "hiUser": "سلام، {{name}} 👋"
+  },
+  "usage": {
+    "title": "استفاده",
+    "currentPeriod": "دوره جاری:",
+    "usedOfQuota": "از سهمیه ماهانه شما استفاده شده"
   },
   "review": {
     "pageTitle": "بررسی اسناد",
@@ -205,7 +253,7 @@
     "checklistNamePlaceholder": "نام چک‌لیست را وارد کنید...",
     "checklistDescriptionLabel": "توضیحات",
     "checklistDescriptionPlaceholder": "توضیحات چک‌لیست را برای پیشنهادات خودکار سوال وارد کنید (حداقل 10 کاراکتر)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} سؤالات",
     "suggest": "پیشنهاد",
     "suggesting": "در حال پیشنهاد...",
     "optimize": "بهینه‌سازی",
@@ -226,7 +274,16 @@
     "deleteChecklist": "حذف چک‌لیست",
     "pleaseWait": "لطفا صبر کنید، ما اسناد شما را بررسی می‌کنیم",
     "reviewSuccess": "بررسی سند با موفقیت تکمیل شد!",
-    "reviewSuccessMultiple": "{{count}} فایل با به اشتراک‌گذاری بهینه‌سازی شده زمینه پردازش شد!"
+    "reviewSuccessMultiple": "{{count}} فایل با به اشتراک‌گذاری بهینه‌سازی شده زمینه پردازش شد!",
+    "dropFilesHere": "فایل‌ها را اینجا رها کنید",
+    "uploadedFiles": "فایل‌های آپلود شده",
+    "removeFile": "حذف",
+    "characterCount": "{{count}}/2000 کاراکتر. این دستورالعمل‌ها هنگام پردازش به هر سوال اضافه خواهند شد.",
+    "searchMode": "حالت جستجو",
+    "vectorSearch": "جستجوی برداری",
+    "fullDocumentScan": "اسکن کامل سند",
+    "vectorSearchDescription": "محتوای مرتبط را با استفاده از جستجوی مشابهت هوش مصنوعی پیدا می‌کند (سریع، هدفمند)",
+    "fullScanDescription": "تمام اسناد موجود در پایگاه دانش را تحلیل می‌کند (جامع، دقیق)"
   },
   "compare": {
     "title": "مقایسه اسناد",
@@ -260,7 +317,8 @@
       "comparing": "در حال مقایسه..."
     },
     "pleaseWait": "لطفاً صبر کنید، اسناد شما در حال مقایسه هستند",
-    "compareSuccess": "اسناد با موفقیت مقایسه شدند!"
+    "compareSuccess": "اسناد با موفقیت مقایسه شدند!",
+    "selectTopicListTitle": "انتخاب لیست موضوع"
   },
   "match": {
     "title": "تطبیق اسناد",
@@ -294,7 +352,84 @@
     },
     "pleaseWait": "لطفاً صبر کنید، اسناد شما در حال تطبیق هستند",
     "matchSuccess": "پردازش فرم با موفقیت انجام شد!",
-    "singleDocumentSuccess": "مقادیر فیلد از یک سند استخراج شد."
+    "singleDocumentSuccess": "مقادیر فیلد از یک سند استخراج شد.",
+    "selectFormTemplateTitle": "انتخاب الگوی فرم"
+  },
+  "editFormTemplateModal": {
+    "title": "ویرایش الگوی فرم",
+    "formTemplateName": "نام الگوی فرم",
+    "formTemplateNamePlaceholder": "نام الگوی فرم را وارد کنید",
+    "formTemplateDescription": "توضیحات الگوی فرم",
+    "descriptionPlaceholder": "توضیحات الگوی فرم را برای پیشنهاد خودکار فیلدها وارد کنید (حداقل ۱۰ کاراکتر)...",
+    "referenceDocuments": "اسناد مرجع (اختیاری)",
+    "uploadFiles": "بارگذاری فایل‌ها",
+    "pleaseWait": "لطفاً صبر کنید، اسناد شما در حال بررسی هستند",
+    "knowledgeBase": "پایگاه دانش",
+    "formFields": "فیلدهای فرم",
+    "suggest": "پیشنهاد",
+    "fieldPlaceholder": "نام فیلد اضافه کنید...",
+    "cancel": "لغو",
+    "updateFormTemplate": "به‌روزرسانی الگوی فرم"
+  },
+  "editOutlineModal": {
+    "title": "ویرایش طرح کلی",
+    "createTitle": "ایجاد طرح کلی جدید",
+    "outlineName": "نام طرح کلی",
+    "outlineNamePlaceholder": "نام طرح کلی را وارد کنید",
+    "description": "توضیحات",
+    "descriptionPlaceholder": "توضیحات طرح کلی را برای پیشنهاد خودکار بخش‌ها وارد کنید (حداقل ۱۰ کاراکتر)...",
+    "referenceDocuments": "اسناد مرجع (اختیاری)",
+    "uploadFiles": "بارگذاری فایل‌ها",
+    "knowledgeBase": "پایگاه دانش",
+    "sections": "بخش‌ها",
+    "suggest": "پیشنهاد",
+    "optimize": "بهینه‌سازی",
+    "consultDocs": "مشاوره با اسناد",
+    "addSectionPlaceholder": "بخش اضافه کنید",
+    "cancel": "لغو",
+    "createOutline": "ایجاد طرح کلی",
+    "updateOutline": "به‌روزرسانی طرح کلی"
+  },
+  "editChecklistModal": {
+    "title": "ویرایش چک‌لیست",
+    "createTitle": "ایجاد چک‌لیست جدید",
+    "checklistName": "نام چک‌لیست",
+    "checklistNamePlaceholder": "نام چک‌لیست را وارد کنید",
+    "description": "توضیحات",
+    "descriptionPlaceholder": "توضیحات چک‌لیست را برای پیشنهاد خودکار سوالات وارد کنید (حداقل ۱۰ کاراکتر)...",
+    "referenceDocuments": "اسناد مرجع (اختیاری)",
+    "uploadFiles": "بارگذاری فایل‌ها",
+    "knowledgeBase": "پایگاه دانش",
+    "questions": "{{count}} سوال",
+    "suggest": "پیشنهاد",
+    "optimize": "بهینه‌سازی",
+    "addQuestionPlaceholder": "سوال اضافه کنید",
+    "copyAllQuestions": "کپی کردن همه سوالات به عنوان متن",
+    "cancel": "لغو",
+    "createChecklist": "ایجاد چک‌لیست",
+    "updateChecklist": "به‌روزرسانی چک‌لیست"
+  },
+  "editTopicListModal": {
+    "title": "ویرایش لیست موضوعات",
+    "createTitle": "ایجاد لیست موضوعات جدید",
+    "topicListName": "نام لیست موضوعات",
+    "topicListNamePlaceholder": "نام لیست موضوعات را وارد کنید",
+    "description": "توضیحات لیست موضوعات",
+    "descriptionPlaceholder": "توضیحات لیست موضوعات را برای پیشنهاد خودکار موضوعات وارد کنید (حداقل ۱۰ کاراکتر)...",
+    "referenceDocuments": "اسناد مرجع (اختیاری)",
+    "uploadFiles": "بارگذاری فایل‌ها",
+    "knowledgeBase": "پایگاه دانش",
+    "comparisonTopics": "موضوعات مقایسه",
+    "topics": "{{count}} موضوع",
+    "section": "{{count}} بخش",
+    "section_one": "{{count}} بخش",
+    "sections": "{{count}} بخش",
+    "suggest": "پیشنهاد",
+    "addTopicPlaceholder": "موضوع مقایسه اضافه کنید",
+    "copyAllTopics": "کپی کردن همه موضوعات به عنوان متن",
+    "cancel": "لغو",
+    "createTopicList": "ایجاد لیست موضوعات",
+    "updateTopicList": "به‌روزرسانی لیست موضوعات"
   },
   "knowledgeBases": {
     "title": "مدیریت پایگاه‌های دانش",
@@ -393,6 +528,35 @@
         "fieldPlaceholder": "نام فیلد اضافه کنید...",
         "cancel": "لغو",
         "updateFormTemplate": "به‌روزرسانی قالب فرم"
+      },
+      "fields": {
+        "title": "عنوان",
+        "description": "توضیحات"
+      },
+      "fileUpload": {
+        "currentFiles": "فایل‌های فعلی",
+        "newFiles": "فایل‌های جدید",
+        "selectedFiles": "فایل‌های انتخاب شده",
+        "dragAndDrop": "فایل‌ها را اینجا بکشید و رها کنید، یا برای مرور کلیک کنید",
+        "dropFiles": "فایل‌ها را اینجا رها کنید...",
+        "removeFile": "حذف فایل",
+        "supportedFormats": "پشتیبانی می‌کند: PDF، TXT، DOC/DOCX، RTF، CSV، XLSX"
+      },
+      "buttons": {
+        "cancel": "لغو",
+        "create": "ایجاد",
+        "save": "ذخیره",
+        "saving": "در حال ذخیره...",
+        "creating": "در حال ایجاد..."
+      },
+      "validation": {
+        "titleRequired": "عنوان الزامی است"
+      },
+      "messages": {
+        "createSuccess": "پایگاه دانش با موفقیت ایجاد شد.",
+        "updateSuccess": "پایگاه دانش با موفقیت به‌روزرسانی شد.",
+        "processing": "در حال پردازش...",
+        "pleaseWait": "لطفاً صبر کنید تا فایل‌های شما پردازش شوند..."
       }
     },
     "editCustom": {
@@ -555,7 +719,92 @@
       "generating": "در حال تولید گزارش...",
       "processingSection": "در حال پردازش بخش {{sectionNum}} از {{totalSections}}: {{sectionPreview}}"
     },
-    "pleaseWait": "لطفاً صبر کنید، گزارش شما در حال تولید است"
+    "pleaseWait": "لطفاً صبر کنید، گزارش شما در حال تولید است",
+    "pageDescription": "یک سند بر اساس طرح کلی تعریف شده توسط کاربر و پایگاه داده اسناد تولید کنید.",
+    "generatingDocument": "در حال تولید سند...",
+    "knowledgeBaseTitle": "پایگاه دانش",
+    "documentOutlineTitle": "طرح کلی سند",
+    "clickToSelect": "برای انتخاب کلیک کنید",
+    "customInstructionsTitle": "دستورالعمل‌های سفارشی (اختیاری)",
+    "customInstructionsPlaceholder": "هر دستورالعمل اضافی که باید هنگام تولید هر بخش از گزارش در نظر گرفته شود را وارد کنید...",
+    "characterCount": "{{count}}/2000 کاراکتر. این دستورالعمل‌ها هنگام تولید هر بخش به اعلان اضافه خواهند شد.",
+    "selectKnowledgeBaseTitle": "انتخاب پایگاه دانش",
+    "selectDocumentOutlineTitle": "انتخاب طرح کلی سند",
+    "generateButton": "تولید",
+    "results": "نتایج",
+    "copyText": "کپی متن",
+    "copied": "کپی شد!",
+    "downloadDocx": "دانلود DOCX",
+    "downloadCsv": "دانلود CSV",
+    "clearReport": "پاک کردن گزارش",
+    "resultsPlaceholder": "نتایج پس از تولید سند اینجا ظاهر خواهند شد.",
+    "sectionsWithSources": "بخش‌ها با منابع",
+    "sectionNumber": "بخش {number}: {title}",
+    "kbGenerated": "پایگاه دانش تولید شد",
+    "rawText": "متن خام",
+    "viewSourceCitations": "مشاهده ارجاعات منبع ({count})",
+    "documentCopiedSuccess": "سند در کلیپ‌بورد کپی شد",
+    "documentCopiedError": "کپی سند در کلیپ‌بورد شکست خورد",
+    "documentDownloadSuccess": "سند با موفقیت دانلود شد",
+    "documentDownloadError": "دانلود سند شکست خورد: {error}",
+    "csvDownloadSuccess": "CSV با موفقیت دانلود شد",
+    "csvDownloadError": "دانلود CSV شکست خورد: {error}",
+    "reportClearedSuccess": "گزارش تولید شده پاک شد",
+    "enterAtLeastOneSection": "لطفاً حداقل یک بخش وارد کنید",
+    "selectKnowledgeBase": "لطفاً یک پایگاه دانش انتخاب کنید",
+    "generateSuccess": "گزارش با موفقیت تولید شد!",
+    "generateError": "تولید سند شکست خورد: {error}",
+    "vectorSearch": "جستجوی برداری",
+    "fullDocumentScan": "اسکن کامل سند",
+    "editOutline": "ویرایش طرح کلی"
+  },
+  "modelSelection": {
+    "llmManagement": "مدیریت LLM",
+    "llmDescription": "LLM هایی که برای تولید پاسخ‌های متنی استفاده می‌شوند را پیکربندی و مدیریت کنید. مدل پیش‌فرض برای همه عملیات استفاده خواهد شد.",
+    "addNewLlm": "افزودن LLM جدید",
+    "noLlmsConfigured": "هیچ LLM ای پیکربندی نشده",
+    "addNewLlmToGetStarted": "برای شروع، یک LLM جدید اضافه کنید",
+    "embeddingModelManagement": "مدیریت مدل تعبیه",
+    "embeddingDescription": "مدل‌های تعبیه‌ای که برای نمایه‌سازی پایگاه دانش و بازیابی استفاده می‌شوند را پیکربندی و مدیریت کنید. مدل پیش‌فرض هنگام ایجاد پایگاه‌های دانش جدید استفاده خواهد شد، اما هر پایگاه دانش همچنان از مدل تعبیه اصلی خود استفاده خواهد کرد، حتی اگر پیش‌فرض بعداً تغییر کند.",
+    "addEmbeddingModel": "افزودن مدل تعبیه",
+    "noEmbeddingModelsConfigured": "هیچ مدل تعبیه‌ای پیکربندی نشده",
+    "addNewEmbeddingModelToGetStarted": "برای شروع، یک مدل تعبیه جدید اضافه کنید",
+    "tableHeaders": {
+      "name": "نام",
+      "modelId": "شناسه مدل",
+      "provider": "ارائه‌دهنده",
+      "description": "توضیحات",
+      "status": "وضعیت",
+      "actions": "اقدامات"
+    },
+    "status": {
+      "default": "پیش‌فرض",
+      "available": "در دسترس"
+    },
+    "actions": {
+      "setAsDefault": "تنظیم به عنوان پیش‌فرض",
+      "delete": "حذف",
+      "validate": "اعتبارسنجی",
+      "validating": "در حال اعتبارسنجی"
+    },
+    "dialog": {
+      "addNewLlm": "افزودن LLM جدید",
+      "addEmbeddingModel": "افزودن مدل تعبیه",
+      "displayName": "نام نمایشی",
+      "provider": "ارائه‌دهنده",
+      "modelId": "شناسه مدل",
+      "description": "توضیحات",
+      "cancel": "لغو",
+      "addModel": "افزودن مدل"
+    },
+    "placeholders": {
+      "customModel": "مثلاً مدل سفارشی من",
+      "embeddingModelId": "مثلاً sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "مدل را توصیف کنید، ویژگی‌های آن و چه زمانی از آن استفاده کنید"
+    },
+    "validation": {
+      "pleaseEnterModelId": "لطفاً شناسه مدل را وارد کنید"
+    }
   },
   "feedback": {
     "modalTitlePositive": "چه چیزی مفید بود؟",
@@ -582,14 +831,14 @@
     "downloadCsv": "دانلود CSV",
     "clearCsv": "پاک کردن CSV",
     "clearResults": "پاک کردن نتایج",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "موضوع:",
+    "knowledgeBaseReference": "مرجع پایگاه دانش",
+    "knowledgeBaseReferences": "مراجع پایگاه دانش",
+    "hideReferences": "پنهان کردن مراجع",
+    "showReferences": "نمایش مراجع",
+    "referenceNumber": "مرجع {{number}}",
+    "processedInChunks": "در {{count}} قسمت پردازش شد",
+    "synthesisError": "خطا در سنتز تحلیل موضوع"
   },
   "toast": {
     "passwordUpdated": "رمز عبور با موفقیت به‌روزرسانی شد.",

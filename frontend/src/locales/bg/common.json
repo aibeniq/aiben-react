@@ -29,7 +29,8 @@
     "next": "Следващ",
     "previous": "Предишен",
     "confirm": "Потвърждение",
-    "back": "Назад"
+    "back": "Назад",
+    "done": "Готово"
   },
   "forms": {
     "firstName": "Собствено име",
@@ -57,7 +58,42 @@
     "knowledgeBaseTableName": "Име",
     "knowledgeBaseTableDescription": "Описание",
     "knowledgeBaseTableSources": "Източници",
-    "knowledgeBaseTablePages": "Страници"
+    "knowledgeBaseTablePages": "Страници",
+    "title": "Чат",
+    "sourcePopover": {
+      "knowledgeBase": "База данни",
+      "file": "Файл"
+    },
+    "searchMode": "Режим на търсене:",
+    "vectorSearch": "Векторно търсене",
+    "fullTextScan": "Пълно сканиране на текста",
+    "searchModeDescription": "Векторното търсене предоставя бързи, насочени резултати. Пълното сканиране на текста преглежда цялото съдържание в базата знания.",
+    "askMeAnything": "Попитай ме всичко! За търсене в базата знания, първо изберете база знания.",
+    "usingGeneralAI": "Използване на общ AI асистент",
+    "usingKnowledgeBase": "Използване на база знания:",
+    "usingDocuments": "Използване на # документ(а)",
+    "usingFiles": "Използване на {{count}} документ{{plural}}:",
+    "remove": "Премахни",
+    "selectKnowledgeBase": "Изберете база знания",
+    "knowledgeBaseTable": {
+      "name": "Име",
+      "description": "Описание",
+      "sources": "Източници",
+      "noDescription": "Няма описание",
+      "sourcesCount": "{{count}} източника",
+      "pagesCount": "{{count}} страници"
+    },
+    "selectKnowledgeBasePlaceholder": "Изберете база данни...",
+    "noKnowledgeBasesAvailable": "Няма налични бази данни. Създайте първо такава, за да използвате тази функция.",
+    "knowledgeBase": "База данни",
+    "file": "Файл",
+    "errors": {
+      "generic": "Съжалявам, нещо се обърка. Моля, опитайте отново.",
+      "timeout": "Заявката изтече. Моля, опитайте отново.",
+      "largeFileTimeout": "Обработката на голям файл изтече. Опитайте да превключите на режим 'Пълно сканиране на текста' за по-добра производителност с големи файлове.",
+      "fileSize": "Файлът е твърде голям. Моля, изберете по-малки файлове.",
+      "serverError": "Възникна грешка на сървъра. Моля, опитайте отново по-късно."
+    }
   },
   "settings": {
     "title": "Настройки",
@@ -147,32 +183,40 @@
     "copy": "Копиране",
     "paste": "Поставяне",
     "cut": "Изрязване",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Покажи повече",
+    "showLess": "Покажи по-малко",
+    "readMore": "Прочети повече",
+    "questionNumber": "Въпрос {{number}}:",
+    "viewSourceCitations": "Преглед на цитатите от източници ({{count}})",
+    "answer": "Отговор:",
+    "relevantPolicyContext": "Релевантен контекст на политиката:",
+    "sources": "източници",
+    "sourceCitations": "Цитати от източници ({{count}})",
+    "citationNumber": "Цитат {{number}}",
+    "noSourceCitations": "Няма налични цитати от източници за тази секция",
+    "noDetailedSections": "Няма налични подробни секции за този доклад",
+    "topicLabel": "Тема:",
+    "knowledgeBaseReference": "Препратка към база знания",
+    "knowledgeBaseReferences": "Препратки към база знания",
+    "hideReferences": "Скрий препратките",
+    "showReferences": "Покажи препратките",
+    "referenceNumber": "Препратка {{number}}",
+    "processedInChunks": "Обработено в {{count}} части",
+    "synthesisErrorNote": "Забележка: Възникна грешка при синтеза - показват се комбинирани резултати от части",
     "progress": {
       "starting": "Стартиране...",
       "initializing": "Инициализиране...",
       "processing": "Обработка...",
       "extracting": "Извличане на съдържание..."
-    }
+    },
+    "error": "Нещо се обърка!",
+    "welcomeBack": "Добре дошли обратно, приятно е да ви видя отново!",
+    "hiUser": "Здравей, {{name}} 👋"
+  },
+  "usage": {
+    "title": "Използване",
+    "currentPeriod": "Текущ период:",
+    "usedOfQuota": "използвани от месечната ви квота"
   },
   "review": {
     "pageTitle": "Преглед на документи",
@@ -206,7 +250,7 @@
     "checklistNamePlaceholder": "Въведете име на списъка за проверка...",
     "checklistDescriptionLabel": "Описание",
     "checklistDescriptionPlaceholder": "Въведете описание на списъка за проверка за автоматични предложения за въпроси (поне 10 знака)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} въпроси",
     "suggest": "Предложете",
     "suggesting": "Предлагане...",
     "optimize": "Оптимизирайте",
@@ -227,7 +271,64 @@
     "deleteChecklist": "Изтрийте списъка за проверка",
     "pleaseWait": "Моля изчакайте, докато прегледаме вашите документи",
     "reviewSuccess": "Прегледът на документа завърши успешно!",
-    "reviewSuccessMultiple": "{{count}} файла обработени с оптимизирано споделяне на контекста!"
+    "reviewSuccessMultiple": "{{count}} файла обработени с оптимизирано споделяне на контекста!",
+    "dropFilesHere": "Пуснете файловете тук",
+    "uploadedFiles": "Качени файлове",
+    "removeFile": "Премахни",
+    "characterCount": "{{count}}/2000 знака. Тези инструкции ще бъдат добавени към всеки въпрос при обработка.",
+    "searchMode": "Режим на търсене",
+    "vectorSearch": "Векторно търсене",
+    "fullDocumentScan": "Пълно сканиране на документ",
+    "vectorSearchDescription": "Намира подходящо съдържание чрез търсене на сходство с AI (бързо, насочено)",
+    "fullScanDescription": "Анализира всички документи в базата знания (изчерпателно, подробно)"
+  },
+  "modelSelection": {
+    "llmManagement": "Управление на LLM",
+    "llmDescription": "Конфигурирайте и управлявайте LLM, използвани за генериране на текстови отговори. Моделът по подразбиране ще се използва за всички операции.",
+    "addNewLlm": "Добавяне на нов LLM",
+    "noLlmsConfigured": "Няма конфигурирани LLM",
+    "addNewLlmToGetStarted": "Добавете нов LLM, за да започнете",
+    "embeddingModelManagement": "Управление на модели за вграждане",
+    "embeddingDescription": "Конфигурирайте и управлявайте модели за вграждане, използвани за индексиране и извличане на бази знания. Моделът по подразбиране ще се използва за създаване на нови бази знания, но всяка база знания ще продължи да използва своя оригинален модел за вграждане, дори ако подразбирането се промени по-късно.",
+    "addEmbeddingModel": "Добавяне на модел за вграждане",
+    "noEmbeddingModelsConfigured": "Няма конфигурирани модели за вграждане",
+    "addNewEmbeddingModelToGetStarted": "Добавете нов модел за вграждане, за да започнете",
+    "tableHeaders": {
+      "name": "Име",
+      "modelId": "ID на модела",
+      "provider": "Доставчик",
+      "description": "Описание",
+      "status": "Статус",
+      "actions": "Действия"
+    },
+    "status": {
+      "default": "По подразбиране",
+      "available": "Наличен"
+    },
+    "actions": {
+      "setAsDefault": "Задай като по подразбиране",
+      "delete": "Изтриване",
+      "validate": "Валидиране",
+      "validating": "Валидиране"
+    },
+    "dialog": {
+      "addNewLlm": "Добавяне на нов LLM",
+      "addEmbeddingModel": "Добавяне на модел за вграждане",
+      "displayName": "Показвано име",
+      "provider": "Доставчик",
+      "modelId": "ID на модела",
+      "description": "Описание",
+      "cancel": "Отказ",
+      "addModel": "Добавяне на модел"
+    },
+    "placeholders": {
+      "customModel": "Например: Моят персонализиран модел",
+      "embeddingModelId": "Например: sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Опишете модела, неговите характеристики и кога да се използва"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Моля въведете ID на модела"
+    }
   },
   "compare": {
     "title": "Сравняване на документи",
@@ -261,7 +362,8 @@
       "comparing": "Сравняване..."
     },
     "pleaseWait": "Моля, изчакайте докато сравняваме вашите документи",
-    "compareSuccess": "Документите са успешно сравнени!"
+    "compareSuccess": "Документите са успешно сравнени!",
+    "selectTopicListTitle": "Изберете списък с теми"
   },
   "match": {
     "title": "Съвпадение на документи",
@@ -295,7 +397,68 @@
     },
     "pleaseWait": "Моля, изчакайте докато съпоставяме вашите документи",
     "matchSuccess": "Обработката на формуляра приключи успешно!",
-    "singleDocumentSuccess": "Стойностите на полетата са извлечени от един документ."
+    "singleDocumentSuccess": "Стойностите на полетата са извлечени от един документ.",
+    "selectFormTemplateTitle": "Изберете шаблон на формуляр"
+  },
+  "editOutlineModal": {
+    "title": "Редактиране на структура",
+    "createTitle": "Създаване на нова структура",
+    "outlineName": "Име на структура",
+    "outlineNamePlaceholder": "Въведете име на структура",
+    "description": "Описание",
+    "descriptionPlaceholder": "Въведете описание на структурата за автоматично предлагане на секции (минимум 10 знака)...",
+    "referenceDocuments": "Референтни документи (по избор)",
+    "uploadFiles": "Качване на файлове",
+    "knowledgeBase": "База знания",
+    "sections": "Секции",
+    "suggest": "Предложение",
+    "optimize": "Оптимизиране",
+    "consultDocs": "Консултиране с документи",
+    "addSectionPlaceholder": "Добавяне на секция",
+    "cancel": "Отказ",
+    "createOutline": "Създаване на структура",
+    "updateOutline": "Актуализиране на структура"
+  },
+  "editChecklistModal": {
+    "title": "Редактиране на списък за проверка",
+    "createTitle": "Създаване на нов списък за проверка",
+    "checklistName": "Име на списък за проверка",
+    "checklistNamePlaceholder": "Въведете име на списък за проверка",
+    "description": "Описание",
+    "descriptionPlaceholder": "Въведете описание на списъка за проверка за автоматично предлагане на въпроси (минимум 10 знака)...",
+    "referenceDocuments": "Референтни документи (по избор)",
+    "uploadFiles": "Качване на файлове",
+    "knowledgeBase": "База знания",
+    "questions": "{{count}} въпроси",
+    "suggest": "Предложение",
+    "optimize": "Оптимизиране",
+    "addQuestionPlaceholder": "Добавяне на въпрос",
+    "copyAllQuestions": "Копиране на всички въпроси като текст",
+    "cancel": "Отказ",
+    "createChecklist": "Създаване на списък за проверка",
+    "updateChecklist": "Актуализиране на списък за проверка"
+  },
+  "editTopicListModal": {
+    "title": "Редактиране на списък с теми",
+    "createTitle": "Създаване на нов списък с теми",
+    "topicListName": "Име на списък с теми",
+    "topicListNamePlaceholder": "Въведете име на списък с теми",
+    "description": "Описание на списък с теми",
+    "descriptionPlaceholder": "Въведете описание на списъка с теми за автоматично предлагане на теми (минимум 10 знака)...",
+    "referenceDocuments": "Референтни документи (по избор)",
+    "uploadFiles": "Качване на файлове",
+    "knowledgeBase": "База знания",
+    "comparisonTopics": "Теми за сравнение",
+    "topics": "{{count}} теми",
+    "section": "{{count}} секция",
+    "section_one": "{{count}} секция",
+    "sections": "{{count}} секции",
+    "suggest": "Предложение",
+    "addTopicPlaceholder": "Добавяне на тема за сравнение",
+    "copyAllTopics": "Копиране на всички теми като текст",
+    "cancel": "Отказ",
+    "createTopicList": "Създаване на списък с теми",
+    "updateTopicList": "Актуализиране на списък с теми"
   },
   "knowledgeBases": {
     "title": "Управление на бази знания",
@@ -383,7 +546,32 @@
       },
       "messages": {
         "processing": "Обработка...",
-        "pleaseWait": "Моля изчакайте, докато обработваме вашите файлове..."
+        "pleaseWait": "Моля изчакайте, докато обработваме вашите файлове...",
+        "createSuccess": "Базата знания беше успешно създадена.",
+        "updateSuccess": "Базата знания беше успешно актуализирана."
+      },
+      "fields": {
+        "title": "Заглавие",
+        "description": "Описание"
+      },
+      "fileUpload": {
+        "currentFiles": "Текущи файлове",
+        "newFiles": "Нови файлове",
+        "selectedFiles": "Избрани файлове",
+        "dragAndDrop": "Плъзнете и пуснете файлове тук или кликнете за разглеждане",
+        "dropFiles": "Пуснете файловете тук...",
+        "removeFile": "Премахни файл",
+        "supportedFormats": "Поддържа: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "Отказ",
+        "create": "Създаване",
+        "save": "Запази",
+        "saving": "Запазване...",
+        "creating": "Създаване..."
+      },
+      "validation": {
+        "titleRequired": "Заглавието е задължително"
       }
     },
     "editCustom": {
@@ -624,14 +812,14 @@
     "downloadCsv": "Изтегли CSV",
     "clearCsv": "Изчисти CSV",
     "clearResults": "Изчисти резултатите",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Тема:",
+    "knowledgeBaseReference": "Препратка към База Знания",
+    "knowledgeBaseReferences": "Препратки към База Знания",
+    "hideReferences": "Скрий Препратките",
+    "showReferences": "Покажи Препратките",
+    "referenceNumber": "Препратка {{number}}",
+    "processedInChunks": "Обработено в {{count}} части",
+    "synthesisError": "Грешка при синтезиране на анализ на тема"
   },
   "toast": {
     "passwordUpdated": "Паролата беше актуализирана успешно.",
@@ -705,5 +893,24 @@
     "outlineUpdated": "Очертанието беше актуализирано успешно",
     "outlineCreated": "Очертанието беше създадено успешно",
     "outlineSaveFailed": "Запазването на очертанието се провали: {{error}}"
+  },
+  "dropdowns": {
+    "selectKnowledgeBase": "Изберете база данни..."
+  },
+  "editFormTemplateModal": {
+    "title": "Редактиране на шаблон на формуляр",
+    "formTemplateName": "Име на шаблон на формуляр",
+    "formTemplateNamePlaceholder": "Въведете име на шаблон на формуляр",
+    "formTemplateDescription": "Описание на шаблон на формуляр",
+    "descriptionPlaceholder": "Въведете описание на шаблон на формуляр за автоматично предлагане на полета (минимум 10 знака)...",
+    "referenceDocuments": "Референтни документи (по избор)",
+    "uploadFiles": "Качване на файлове",
+    "pleaseWait": "Моля изчакайте, докато преглеждаме документите ви",
+    "knowledgeBase": "База данни",
+    "formFields": "Полетата на формуляра",
+    "suggest": "Предложи",
+    "fieldPlaceholder": "Добавете име на поле...",
+    "cancel": "Отказ",
+    "updateFormTemplate": "Актуализирай шаблон на формуляр"
   }
 }

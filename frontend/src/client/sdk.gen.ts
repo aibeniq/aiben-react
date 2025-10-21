@@ -2310,29 +2310,16 @@ export class VeradocService {
      * @throws ApiError
      */
     public static processRagChecklist(data: VeradocProcessRagChecklistData): CancelablePromise<VeradocProcessRagChecklistResponse> {
-        const formDataToSend = new FormData();
-        
-        // Append all parameters to FormData
-        formDataToSend.append('questions', data.questions);
-        if (data.customInstructions !== undefined && data.customInstructions !== null) {
-            formDataToSend.append('custom_instructions', data.customInstructions);
-        }
-        formDataToSend.append('knowledge_base_id', data.knowledgeBaseId);
-        formDataToSend.append('search_mode', data.searchMode);
-        if (data.taskId !== undefined && data.taskId !== null) {
-            formDataToSend.append('task_id', data.taskId);
-        }
-        
-        // Append files from data.formData
-        if (data.formData && data.formData.files) {
-            for (const file of data.formData.files) {
-                formDataToSend.append('files', file);
-            }
-        }
-        
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/veradoc/process-rag',
+            query: {
+                questions: data.questions,
+                custom_instructions: data.customInstructions,
+                knowledge_base_id: data.knowledgeBaseId,
+                search_mode: data.searchMode,
+                task_id: data.taskId
+            },
             formData: data.formData,
             mediaType: 'multipart/form-data',
             errors: {

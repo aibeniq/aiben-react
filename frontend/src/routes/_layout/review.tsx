@@ -504,12 +504,12 @@ const VeraDoc = () => {
       // STEP 2: Call the review endpoint with the task_id
       // Backend will use this task_id for progress tracking
       const promise = VeradocService.processRagChecklist({
+        questions: data.questions,
+        knowledgeBaseId: data.knowledgeBaseId,
+        customInstructions: data.customInstructions,
+        searchMode: data.searchMode,
+        taskId: newTaskId,
         formData: {
-          questions: data.questions,
-          knowledge_base_id: data.knowledgeBaseId,
-          custom_instructions: data.customInstructions,
-          search_mode: data.searchMode,
-          task_id: newTaskId,
           files: data.files,
         },
       })

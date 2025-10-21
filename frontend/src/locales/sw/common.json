@@ -29,7 +29,8 @@
     "next": "Ifuatayo",
     "previous": "Iliyotangulia",
     "confirm": "Thibitisha",
-    "back": "Rudi"
+    "back": "Rudi",
+    "done": "Imekamilika"
   },
   "forms": {
     "firstName": "Jina la Kwanza",
@@ -56,7 +57,46 @@
     "error": "Samahani, kuna hitilafu. Jaribu tena.",
     "welcome": "Hujambo! Ninawezaje kukusaidia leo?",
     "welcomeMessageWithSource": "Chagua hifadhi ya maarifa au pakia faili, kisha uliza swali.",
-    "welcomeMessageGeneral": "Niulize chochote! Kwa utafutaji wa hifadhi ya maarifa, chagua hifadhi ya maarifa kwanza."
+    "welcomeMessageGeneral": "Niulize chochote! Kwa utafutaji wa hifadhi ya maarifa, chagua hifadhi ya maarifa kwanza.",
+    "title": "Mazungumzo",
+    "sourcePopover": {
+      "knowledgeBase": "Msingi wa Maarifa",
+      "file": "Faili"
+    },
+    "searchMode": "Hali ya Utafutaji:",
+    "vectorSearch": "Utafutaji wa Vector",
+    "fullTextScan": "Skansio ya Nyaraka Kamili",
+    "searchModeDescription": "Utafutaji wa vector hutoa matokeo ya haraka na lengo. Skansio ya maandishi kamili hukagua maudhui yote katika hifadhi ya maarifa.",
+    "askMeAnything": "Niulize chochote! Kwa utafutaji wa hifadhi ya maarifa, chagua hifadhi ya maarifa kwanza.",
+    "usingGeneralAI": "Kutumia msaidizi wa AI wa jumla",
+    "usingKnowledgeBase": "Kutumia hifadhi ya maarifa:",
+    "usingDocuments": "Kutumia # hati",
+    "usingFiles": "Kutumia {{count}} hati{{plural}}:",
+    "remove": "Ondoa",
+    "selectKnowledgeBase": "Chagua Msingi wa Maarifa",
+    "knowledgeBaseTable": {
+      "name": "Jina",
+      "description": "Maelezo",
+      "sources": "Vyanzo",
+      "noDescription": "Hakuna maelezo",
+      "sourcesCount": "{{count}} vyanzo",
+      "pagesCount": "{{count}} kurasa"
+    },
+    "knowledgeBaseTableName": "Jina",
+    "knowledgeBaseTableDescription": "Maelezo",
+    "knowledgeBaseTableSources": "Vyanzo",
+    "knowledgeBaseTablePages": "Kurasa",
+    "selectKnowledgeBasePlaceholder": "Chagua Msingi wa Maarifa...",
+    "noKnowledgeBasesAvailable": "Hakuna Misingi ya Maarifa inayopatikana. Tengeneza moja kwanza ili kutumia kipengele hiki.",
+    "knowledgeBase": "Msingi wa Maarifa",
+    "file": "Faili",
+    "errors": {
+      "generic": "Samahani, kuna kitu kilienda vibaya. Tafadhali jaribu tena.",
+      "timeout": "Ombi limepitwa na wakati. Tafadhali jaribu tena.",
+      "largeFileTimeout": "Usindikaji wa faili kubwa umepitwa na wakati. Jaribu kubadili kwenye hali ya 'Skansio ya Maandishi Kamili' kwa utendaji bora na faili kubwa.",
+      "fileSize": "Faili ni kubwa sana. Tafadhali chagua faili ndogo.",
+      "serverError": "Hitilafu ya seva imetokea. Tafadhali jaribu tena baadaye."
+    }
   },
   "settings": {
     "title": "Mipangilio",
@@ -146,32 +186,40 @@
     "copy": "Nakili",
     "paste": "Bandika",
     "cut": "Kata",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Onyesha Zaidi",
+    "showLess": "Onyesha Kidogo",
+    "readMore": "Soma Zaidi",
+    "questionNumber": "Swali {{number}}:",
+    "viewSourceCitations": "Tazama Marejeo ya Chanzo ({{count}})",
+    "answer": "Jibu:",
+    "relevantPolicyContext": "Muktadha wa Sera Sahihi:",
+    "sources": "vyanzo",
+    "sourceCitations": "Marejeo ya Chanzo ({{count}})",
+    "citationNumber": "Marejeo {{number}}",
+    "noSourceCitations": "Hakuna marejeo ya chanzo yanayopatikana kwa sehemu hii",
+    "noDetailedSections": "Hakuna sehemu za kina zinazopatikana kwa ripoti hii",
+    "topicLabel": "Mada:",
+    "knowledgeBaseReference": "Marejeo ya Msingi wa Maarifa",
+    "knowledgeBaseReferences": "Marejeo ya Msingi wa Maarifa",
+    "hideReferences": "Ficha Marejeo",
+    "showReferences": "Onyesha Marejeo",
+    "referenceNumber": "Marejeo {{number}}",
+    "processedInChunks": "Imesindikishwa katika sehemu {{count}}",
+    "synthesisErrorNote": "Kumbuka: Hitilafu ya usanisi imetokea - inaonyesha matokeo ya sehemu zilizounganishwa",
     "progress": {
       "starting": "Inaanza...",
       "initializing": "Inaanzisha...",
       "processing": "Inachakata...",
       "extracting": "Inatoa maudhui..."
-    }
+    },
+    "error": "Kuna kitu kilienda vibaya!",
+    "welcomeBack": "Karibu tena, ni vizuri kukuona tena!",
+    "hiUser": "Habari, {{name}} 👋"
+  },
+  "usage": {
+    "title": "Matumizi",
+    "currentPeriod": "Kipindi cha sasa:",
+    "usedOfQuota": "imetumika kutoka kwa quota yako ya kila mwezi"
   },
   "review": {
     "pageTitle": "Ukaguzi wa Hati",
@@ -205,7 +253,7 @@
     "checklistNamePlaceholder": "Ingiza jina la orodha ya ukaguzi...",
     "checklistDescriptionLabel": "Maelezo",
     "checklistDescriptionPlaceholder": "Ingiza maelezo ya orodha ya ukaguzi kwa mapendekezo ya otomatiki ya maswali (angalau herufi 10)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} maswali",
     "suggest": "Pendekeza",
     "suggesting": "Inapendekeza...",
     "optimize": "Boresha",
@@ -226,7 +274,64 @@
     "deleteChecklist": "Futa Orodha ya Ukaguzi",
     "pleaseWait": "Tafadhali subiri, tunakagua hati zako",
     "reviewSuccess": "Ukaguzi wa hati umekamilika kwa mafanikio!",
-    "reviewSuccessMultiple": "Faili {{count}} zimeshughulikiwa na ugawaji wa muktadha ulioboreshwa!"
+    "reviewSuccessMultiple": "Faili {{count}} zimeshughulikiwa na ugawaji wa muktadha ulioboreshwa!",
+    "dropFilesHere": "Achia faili hapa",
+    "uploadedFiles": "Faili Zilizopakiwa",
+    "removeFile": "Ondoa",
+    "characterCount": "{{count}}/2000 herufi. Maelekezo haya yataongezwa kwa kila swali wakati wa uchakataji.",
+    "searchMode": "Hali ya Utafutaji",
+    "vectorSearch": "Utafutaji wa Vector",
+    "fullDocumentScan": "Skansio ya Hati Kamili",
+    "vectorSearchDescription": "Hupata maudhui muhimu kwa kutumia utafutaji wa ufananifu wa AI (haraka, lengo)",
+    "fullScanDescription": "Huchambua hati zote katika msingi wa maarifa (kamilifu, kamili)"
+  },
+  "modelSelection": {
+    "llmManagement": "Usimamizi wa LLM",
+    "llmDescription": "Sanidi na simamia LLM zinazotumiwa kutengeneza majibu ya maandishi. Modeli chaguo-msingi itatumika kwa operesheni zote.",
+    "addNewLlm": "Ongeza LLM Mpya",
+    "noLlmsConfigured": "Hakuna LLM zilizosanidiwa",
+    "addNewLlmToGetStarted": "Ongeza LLM mpya ili kuanza",
+    "embeddingModelManagement": "Usimamizi wa Modeli za Ujumuishaji",
+    "embeddingDescription": "Sanidi na simamia modeli za ujumuishaji zinazotumiwa kwa kupanga fahirisi na kurejesha maktaba za maarifa. Modeli chaguo-msingi itatumika kuunda maktaba mpya za maarifa, lakini kila maktaba ya maarifa itaendelea kutumia modeli yake ya asili ya ujumuishaji hata kama chaguo-msingi kitabadilishwa baadaye.",
+    "addEmbeddingModel": "Ongeza Modeli ya Ujumuishaji",
+    "noEmbeddingModelsConfigured": "Hakuna modeli za ujumuishaji zilizosanidiwa",
+    "addNewEmbeddingModelToGetStarted": "Ongeza modeli mpya ya ujumuishaji ili kuanza",
+    "tableHeaders": {
+      "name": "Jina",
+      "modelId": "Kitambulisho cha Modeli",
+      "provider": "Mtoa Huduma",
+      "description": "Maelezo",
+      "status": "Hali",
+      "actions": "Vitendo"
+    },
+    "status": {
+      "default": "Chaguo-msingi",
+      "available": "Inapatikana"
+    },
+    "actions": {
+      "setAsDefault": "Weka kama Chaguo-msingi",
+      "delete": "Futa",
+      "validate": "Thibitisha",
+      "validating": "Inathibitisha"
+    },
+    "dialog": {
+      "addNewLlm": "Ongeza LLM Mpya",
+      "addEmbeddingModel": "Ongeza Modeli ya Ujumuishaji",
+      "displayName": "Jina la Kuonyesha",
+      "provider": "Mtoa Huduma",
+      "modelId": "Kitambulisho cha Modeli",
+      "description": "Maelezo",
+      "cancel": "Ghairi",
+      "addModel": "Ongeza Modeli"
+    },
+    "placeholders": {
+      "customModel": "Mfano: Modeli yangu maalum",
+      "embeddingModelId": "Mfano: sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Elezea modeli, sifa zake na wakati wa kuitumia"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Tafadhali ingiza kitambulisho cha modeli"
+    }
   },
   "compare": {
     "title": "Linganisha Hati",
@@ -260,7 +365,8 @@
       "comparing": "Inalinganisha..."
     },
     "pleaseWait": "Tafadhali subiri tunapolinganisha hati zako",
-    "compareSuccess": "Hati zilinganishwa kwa mafanikio!"
+    "compareSuccess": "Hati zilinganishwa kwa mafanikio!",
+    "selectTopicListTitle": "Chagua Orodha ya Mada"
   },
   "match": {
     "title": "Uoanishaji wa Hati",
@@ -294,7 +400,68 @@
     },
     "pleaseWait": "Tafadhali subiri tunapooanisha hati zako",
     "matchSuccess": "Uchakataji wa fomu umekamilika kwa mafanikio!",
-    "singleDocumentSuccess": "Thamani za sehemu zimechukuliwa kutoka kwa hati moja."
+    "singleDocumentSuccess": "Thamani za sehemu zimechukuliwa kutoka kwa hati moja.",
+    "selectFormTemplateTitle": "Chagua Kiolezo cha Fomu"
+  },
+  "editOutlineModal": {
+    "title": "Hariri Muhtasari",
+    "createTitle": "Tengeneza Muhtasari Mpya",
+    "outlineName": "Jina la Muhtasari",
+    "outlineNamePlaceholder": "Ingiza jina la muhtasari",
+    "description": "Maelezo",
+    "descriptionPlaceholder": "Ingiza maelezo ya muhtasari ili kupendekeza sehemu kiotomatiki (angalau herufi 10)...",
+    "referenceDocuments": "Hati za Marejeo (Hiari)",
+    "uploadFiles": "Pakia Faili",
+    "knowledgeBase": "Msingi wa Maarifa",
+    "sections": "Sehemu",
+    "suggest": "Pendekeza",
+    "optimize": "Boresha",
+    "consultDocs": "Shauriana na Hati",
+    "addSectionPlaceholder": "Ongeza sehemu",
+    "cancel": "Ghairi",
+    "createOutline": "Tengeneza Muhtasari",
+    "updateOutline": "Sasisha Muhtasari"
+  },
+  "editChecklistModal": {
+    "title": "Hariri Orodha ya Ukaguzi",
+    "createTitle": "Tengeneza Orodha Mpya ya Ukaguzi",
+    "checklistName": "Jina la Orodha ya Ukaguzi",
+    "checklistNamePlaceholder": "Ingiza jina la orodha ya ukaguzi",
+    "description": "Maelezo",
+    "descriptionPlaceholder": "Ingiza maelezo ya orodha ya ukaguzi ili kupendekeza maswali kiotomatiki (angalau herufi 10)...",
+    "referenceDocuments": "Hati za Marejeo (Hiari)",
+    "uploadFiles": "Pakia Faili",
+    "knowledgeBase": "Msingi wa Maarifa",
+    "questions": "maswali {{count}}",
+    "suggest": "Pendekeza",
+    "optimize": "Boresha",
+    "addQuestionPlaceholder": "Ongeza swali",
+    "copyAllQuestions": "Nakili maswali yote kama maandishi",
+    "cancel": "Ghairi",
+    "createChecklist": "Tengeneza Orodha ya Ukaguzi",
+    "updateChecklist": "Sasisha Orodha ya Ukaguzi"
+  },
+  "editTopicListModal": {
+    "title": "Hariri Orodha ya Mada",
+    "createTitle": "Tengeneza Orodha Mpya ya Mada",
+    "topicListName": "Jina la Orodha ya Mada",
+    "topicListNamePlaceholder": "Ingiza jina la orodha ya mada",
+    "description": "Maelezo ya Orodha ya Mada",
+    "descriptionPlaceholder": "Ingiza maelezo ya orodha ya mada ili kupendekeza mada kiotomatiki (angalau herufi 10)...",
+    "referenceDocuments": "Hati za Marejeo (Hiari)",
+    "uploadFiles": "Pakia Faili",
+    "knowledgeBase": "Msingi wa Maarifa",
+    "comparisonTopics": "Mada za Ulinganishaji",
+    "topics": "mada {{count}}",
+    "section": "sehemu {{count}}",
+    "section_one": "sehemu {{count}}",
+    "sections": "sehemu {{count}}",
+    "suggest": "Pendekeza",
+    "addTopicPlaceholder": "Ongeza mada ya ulinganishaji",
+    "copyAllTopics": "Nakili mada zote kama maandishi",
+    "cancel": "Ghairi",
+    "createTopicList": "Tengeneza Orodha ya Mada",
+    "updateTopicList": "Sasisha Orodha ya Mada"
   },
   "knowledgeBases": {
     "title": "Usimamizi wa Misingi ya Maarifa",
@@ -393,6 +560,35 @@
         "fieldPlaceholder": "Ongeza jina la sehemu...",
         "cancel": "Ghairi",
         "updateFormTemplate": "Sasisha Kiolezo cha Fomu"
+      },
+      "fields": {
+        "title": "Kichwa",
+        "description": "Maelezo"
+      },
+      "fileUpload": {
+        "currentFiles": "Faili za Sasa",
+        "newFiles": "Faili Mpya",
+        "selectedFiles": "Faili Zilizochaguliwa",
+        "dragAndDrop": "Buruta na uache faili hapa, au bonyeza ili kutafuta",
+        "dropFiles": "Achia faili hapa...",
+        "removeFile": "Ondoa faili",
+        "supportedFormats": "Inasaidia: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "Ghairi",
+        "create": "Tengeneza",
+        "save": "Hifadhi",
+        "saving": "Inahifadhi...",
+        "creating": "Inatengeneza..."
+      },
+      "validation": {
+        "titleRequired": "Kichwa kinahitajika"
+      },
+      "messages": {
+        "createSuccess": "Msingi wa Maarifa umetengenezwa kwa mafanikio.",
+        "updateSuccess": "Msingi wa Maarifa umesasishwa kwa mafanikio.",
+        "processing": "Inachakata...",
+        "pleaseWait": "Tafadhali subiri tunapochakata faili zako..."
       }
     },
     "editCustom": {
@@ -619,14 +815,14 @@
     "downloadCsv": "Pakua CSV",
     "clearCsv": "Futa CSV",
     "clearResults": "Futa Matokeo",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Mada:",
+    "knowledgeBaseReference": "Marejeo ya Msingi wa Maarifa",
+    "knowledgeBaseReferences": "Marejeo ya Msingi wa Maarifa",
+    "hideReferences": "Ficha Marejeo",
+    "showReferences": "Onyesha Marejeo",
+    "referenceNumber": "Marejeo {{number}}",
+    "processedInChunks": "Imesindikwa katika {{count}} sehemu",
+    "synthesisError": "Hitilafu katika usanisi wa uchambuzi wa mada"
   },
   "toast": {
     "passwordUpdated": "Nenosiri imesasishwa kwa mafanikio.",
@@ -700,5 +896,21 @@
     "outlineUpdated": "Muhtasari umesasishwa kwa mafanikio",
     "outlineCreated": "Muhtasari umeundwa kwa mafanikio",
     "outlineSaveFailed": "Kuhifadhi muhtasari haukufaulu: {{error}}"
+  },
+  "editFormTemplateModal": {
+    "title": "Hariri Kiolezo cha Fomu",
+    "formTemplateName": "Jina la Kiolezo cha Fomu",
+    "formTemplateNamePlaceholder": "Ingiza jina la kiolezo cha fomu",
+    "formTemplateDescription": "Maelezo ya Kiolezo cha Fomu",
+    "descriptionPlaceholder": "Ingiza maelezo ya kiolezo cha fomu ili kupendekeza sehemu kiotomatiki (angalau herufi 10)...",
+    "referenceDocuments": "Hati za Marejeo (Hiari)",
+    "uploadFiles": "Pakia Faili",
+    "pleaseWait": "Tafadhali subiri tunapopitia nyaraka zako",
+    "knowledgeBase": "Msingi wa Maarifa",
+    "formFields": "Sehemu za Fomu",
+    "suggest": "Pendekeza",
+    "fieldPlaceholder": "Ongeza jina la sehemu...",
+    "cancel": "Ghairi",
+    "updateFormTemplate": "Sasisha Kiolezo cha Fomu"
   }
 }

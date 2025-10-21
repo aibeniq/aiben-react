@@ -29,7 +29,8 @@
     "next": "הבא",
     "previous": "הקודם",
     "confirm": "אישור",
-    "back": "חזרה"
+    "back": "חזרה",
+    "done": "סיום"
   },
   "forms": {
     "firstName": "שם פרטי",
@@ -56,7 +57,46 @@
     "error": "סליחה, משהו השתבש. נסה שוב.",
     "welcome": "שלום! איך אני יכול לעזור לך היום?",
     "welcomeMessageWithSource": "בחר בסיס ידע או העלה קבצים, ואז שאל שאלה.",
-    "welcomeMessageGeneral": "שאל אותי כל דבר! לחיפוש בבסיס ידע, בחר קודם בסיס ידע."
+    "welcomeMessageGeneral": "שאל אותי כל דבר! לחיפוש בבסיס ידע, בחר קודם בסיס ידע.",
+    "title": "שיחה",
+    "sourcePopover": {
+      "knowledgeBase": "מאגר ידע",
+      "file": "קובץ"
+    },
+    "searchMode": "מצב חיפוש:",
+    "vectorSearch": "חיפוש וקטורי",
+    "fullTextScan": "סריקת טקסט מלאה",
+    "searchModeDescription": "[AUTO-TRANSLATED he] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
+    "askMeAnything": "[AUTO-TRANSLATED he] Ask me anything! For knowledge base search, select a knowledge base first.",
+    "usingGeneralAI": "[AUTO-TRANSLATED he] Using general AI assistant",
+    "usingKnowledgeBase": "[AUTO-TRANSLATED he] Using knowledge base:",
+    "usingDocuments": "[AUTO-TRANSLATED he] Using # document(s)",
+    "usingFiles": "[AUTO-TRANSLATED he] Using {{count}} document{{plural}}:",
+    "remove": "הסר",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED he] Select Knowledge Base",
+    "knowledgeBaseTable": {
+      "name": "שם",
+      "description": "תיאור",
+      "sources": "מקורות",
+      "noDescription": "אין תיאור",
+      "sourcesCount": "{{count}} מקורות",
+      "pagesCount": "{{count}} דפים"
+    },
+    "knowledgeBaseTableName": "שם",
+    "knowledgeBaseTableDescription": "תיאור",
+    "knowledgeBaseTableSources": "מקורות",
+    "knowledgeBaseTablePages": "[AUTO-TRANSLATED he] Pages",
+    "selectKnowledgeBasePlaceholder": "בחר מאגר ידע...",
+    "noKnowledgeBasesAvailable": "אין מאגרים זמינים. צור אחד תחילה כדי להשתמש בתכונה זו.",
+    "knowledgeBase": "מאגר ידע",
+    "file": "קובץ",
+    "errors": {
+      "generic": "[AUTO-TRANSLATED he] Sorry, something went wrong. Please try again.",
+      "timeout": "[AUTO-TRANSLATED he] Request timed out. Please try again.",
+      "largeFileTimeout": "[AUTO-TRANSLATED he] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
+      "fileSize": "[AUTO-TRANSLATED he] File is too large. Please choose smaller files.",
+      "serverError": "[AUTO-TRANSLATED he] Server error occurred. Please try again later."
+    }
   },
   "settings": {
     "title": "הגדרות",
@@ -146,32 +186,40 @@
     "copy": "העתקה",
     "paste": "הדבקה",
     "cut": "גזירה",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "הצג עוד",
+    "showLess": "הצג פחות",
+    "readMore": "קרא עוד",
+    "questionNumber": "שאלה {{number}}:",
+    "viewSourceCitations": "הצג ציטוטי מקור ({{count}})",
+    "answer": "תשובה:",
+    "relevantPolicyContext": "הקשר מדיניות רלוונטי:",
+    "sources": "מקורות",
+    "sourceCitations": "ציטוטי מקור ({{count}})",
+    "citationNumber": "ציטוט {{number}}",
+    "noSourceCitations": "אין ציטוטי מקור זמינים עבור סעיף זה",
+    "noDetailedSections": "אין סעיפים מפורטים זמינים עבור דוח זה",
+    "topicLabel": "נושא:",
+    "knowledgeBaseReference": "הפניה לבסיס ידע",
+    "knowledgeBaseReferences": "הפניות לבסיס ידע",
+    "hideReferences": "הסתר הפניות",
+    "showReferences": "הצג הפניות",
+    "referenceNumber": "הפניה {{number}}",
+    "processedInChunks": "עובד ב-{{count}} חלקים",
+    "synthesisErrorNote": "הערה: אירעה שגיאת סינתזה - מציג תוצאות חלק משולבות",
     "progress": {
       "starting": "מתחיל...",
       "initializing": "מאתחל...",
       "processing": "מעבד...",
       "extracting": "מחלץ תוכן..."
-    }
+    },
+    "error": "[AUTO-TRANSLATED he] Something went wrong!",
+    "welcomeBack": "[AUTO-TRANSLATED he] Welcome back, nice to see you again!",
+    "hiUser": "[AUTO-TRANSLATED he] Hi, {{name}} 👋"
+  },
+  "usage": {
+    "title": "שימוש",
+    "currentPeriod": "תקופה נוכחית:",
+    "usedOfQuota": "נוצל מהמכסה החודשית שלך"
   },
   "review": {
     "pageTitle": "בדיקת מסמכים",
@@ -205,7 +253,7 @@
     "checklistNamePlaceholder": "הזן שם רשימת בדיקה...",
     "checklistDescriptionLabel": "תיאור",
     "checklistDescriptionPlaceholder": "הזן תיאור רשימת בדיקה להצעות שאלות אוטומטיות (לפחות 10 תווים)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} שאלות",
     "suggest": "הצע",
     "suggesting": "מציע...",
     "optimize": "אופטימיזציה",
@@ -226,7 +274,16 @@
     "deleteChecklist": "מחק רשימת בדיקה",
     "pleaseWait": "אנא המתן, אנחנו בודקים את המסמכים שלך",
     "reviewSuccess": "בדיקת המסמך הושלמה בהצלחה!",
-    "reviewSuccessMultiple": "{{count}} קבצים עובדו עם שיתוף הקשר מותאם!"
+    "reviewSuccessMultiple": "{{count}} קבצים עובדו עם שיתוף הקשר מותאם!",
+    "dropFilesHere": "[AUTO-TRANSLATED he] Drop the files here",
+    "uploadedFiles": "[AUTO-TRANSLATED he] Uploaded Files",
+    "removeFile": "הסר",
+    "characterCount": "[AUTO-TRANSLATED he] {{count}}/2000 characters. These instructions will be appended to each question when processing.",
+    "searchMode": "[AUTO-TRANSLATED he] Search Mode",
+    "vectorSearch": "חיפוש וקטורי",
+    "fullDocumentScan": "[AUTO-TRANSLATED he] Full Document Scan",
+    "vectorSearchDescription": "[AUTO-TRANSLATED he] Finds relevant content using AI similarity search (fast, targeted)",
+    "fullScanDescription": "[AUTO-TRANSLATED he] Analyzes all documents in the knowledge base (comprehensive, thorough)"
   },
   "compare": {
     "title": "השווה מסמכים",
@@ -260,7 +317,8 @@
       "comparing": "משווה..."
     },
     "pleaseWait": "אנא המתן, אנו משווים את המסמכים שלך",
-    "compareSuccess": "המסמכים הושוו בהצלחה!"
+    "compareSuccess": "המסמכים הושוו בהצלחה!",
+    "selectTopicListTitle": "[AUTO-TRANSLATED he] Select Topic List"
   },
   "match": {
     "title": "התאמת מסמכים",
@@ -294,7 +352,84 @@
     },
     "pleaseWait": "אנא המתן בזמן שאנו משווים את המסמכים שלך",
     "matchSuccess": "עיבוד הטופס הושלם בהצלחה!",
-    "singleDocumentSuccess": "ערכי שדות הופקו ממסמך יחיד."
+    "singleDocumentSuccess": "ערכי שדות הופקו ממסמך יחיד.",
+    "selectFormTemplateTitle": "[AUTO-TRANSLATED he] Select Form Template"
+  },
+  "editFormTemplateModal": {
+    "title": "עריכת תבנית טופס",
+    "formTemplateName": "שם תבנית טופס",
+    "formTemplateNamePlaceholder": "הזן שם תבנית טופס",
+    "formTemplateDescription": "תיאור תבנית טופס",
+    "descriptionPlaceholder": "הזן תיאור תבנית טופס כדי להציע שדות אוטומטית (מינימום 10 תווים)...",
+    "referenceDocuments": "מסמכי הפניה (אופציונלי)",
+    "uploadFiles": "העלה קבצים",
+    "pleaseWait": "אנא המתן בזמן שאנו בודקים את המסמכים שלך",
+    "knowledgeBase": "בסיס ידע",
+    "formFields": "שדות טופס",
+    "suggest": "הצע",
+    "fieldPlaceholder": "הוסף שם שדה...",
+    "cancel": "ביטול",
+    "updateFormTemplate": "עדכן תבנית טופס"
+  },
+  "editOutlineModal": {
+    "title": "עריכת מתאר",
+    "createTitle": "צור מתאר חדש",
+    "outlineName": "שם מתאר",
+    "outlineNamePlaceholder": "הזן שם מתאר",
+    "description": "תיאור",
+    "descriptionPlaceholder": "הזן תיאור מתאר כדי להציע חלקים אוטומטית (מינימום 10 תווים)...",
+    "referenceDocuments": "מסמכי הפניה (אופציונלי)",
+    "uploadFiles": "העלה קבצים",
+    "knowledgeBase": "בסיס ידע",
+    "sections": "חלקים",
+    "suggest": "הצע",
+    "optimize": "בצע אופטימיזציה",
+    "consultDocs": "התייעץ עם מסמכים",
+    "addSectionPlaceholder": "הוסף חלק",
+    "cancel": "ביטול",
+    "createOutline": "צור מתאר",
+    "updateOutline": "עדכן מתאר"
+  },
+  "editChecklistModal": {
+    "title": "עריכת רשימת בדיקה",
+    "createTitle": "צור רשימת בדיקה חדשה",
+    "checklistName": "שם רשימת בדיקה",
+    "checklistNamePlaceholder": "הזן שם רשימת בדיקה",
+    "description": "תיאור",
+    "descriptionPlaceholder": "הזן תיאור רשימת בדיקה כדי להציע שאלות אוטומטית (מינימום 10 תווים)...",
+    "referenceDocuments": "מסמכי הפניה (אופציונלי)",
+    "uploadFiles": "העלה קבצים",
+    "knowledgeBase": "בסיס ידע",
+    "questions": "{{count}} שאלות",
+    "suggest": "הצע",
+    "optimize": "בצע אופטימיזציה",
+    "addQuestionPlaceholder": "הוסף שאלה",
+    "copyAllQuestions": "העתק את כל השאלות כטקסט",
+    "cancel": "ביטול",
+    "createChecklist": "צור רשימת בדיקה",
+    "updateChecklist": "עדכן רשימת בדיקה"
+  },
+  "editTopicListModal": {
+    "title": "עריכת רשימת נושאים",
+    "createTitle": "צור רשימת נושאים חדשה",
+    "topicListName": "שם רשימת נושאים",
+    "topicListNamePlaceholder": "הזן שם רשימת נושאים",
+    "description": "תיאור רשימת נושאים",
+    "descriptionPlaceholder": "הזן תיאור רשימת נושאים כדי להציע נושאים אוטומטית (מינימום 10 תווים)...",
+    "referenceDocuments": "מסמכי הפניה (אופציונלי)",
+    "uploadFiles": "העלה קבצים",
+    "knowledgeBase": "בסיס ידע",
+    "comparisonTopics": "נושאי השוואה",
+    "topics": "{{count}} נושאים",
+    "section": "{{count}} חלק",
+    "section_one": "{{count}} חלק",
+    "sections": "{{count}} חלקים",
+    "suggest": "הצע",
+    "addTopicPlaceholder": "הוסף נושא השוואה",
+    "copyAllTopics": "העתק את כל הנושאים כטקסט",
+    "cancel": "ביטול",
+    "createTopicList": "צור רשימת נושאים",
+    "updateTopicList": "עדכן רשימת נושאים"
   },
   "knowledgeBases": {
     "title": "ניהול בסיסי ידע",
@@ -393,6 +528,35 @@
         "fieldPlaceholder": "הוסף שם שדה...",
         "cancel": "בטל",
         "updateFormTemplate": "עדכן תבנית טופס"
+      },
+      "fields": {
+        "title": "[AUTO-TRANSLATED he] Title",
+        "description": "תיאור"
+      },
+      "fileUpload": {
+        "currentFiles": "[AUTO-TRANSLATED he] Current Files",
+        "newFiles": "[AUTO-TRANSLATED he] New Files",
+        "selectedFiles": "[AUTO-TRANSLATED he] Selected Files",
+        "dragAndDrop": "[AUTO-TRANSLATED he] Drag and drop files here, or click to browse",
+        "dropFiles": "[AUTO-TRANSLATED he] Drop the files here...",
+        "removeFile": "[AUTO-TRANSLATED he] Remove file",
+        "supportedFormats": "[AUTO-TRANSLATED he] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "בטל",
+        "create": "צור",
+        "save": "שמור",
+        "saving": "[AUTO-TRANSLATED he] Saving...",
+        "creating": "[AUTO-TRANSLATED he] Creating..."
+      },
+      "validation": {
+        "titleRequired": "[AUTO-TRANSLATED he] Title is required"
+      },
+      "messages": {
+        "createSuccess": "[AUTO-TRANSLATED he] Knowledge Base created successfully.",
+        "updateSuccess": "[AUTO-TRANSLATED he] Knowledge Base updated successfully.",
+        "processing": "[AUTO-TRANSLATED he] Processing...",
+        "pleaseWait": "[AUTO-TRANSLATED he] Please wait while we process your files..."
       }
     },
     "editCustom": {
@@ -555,7 +719,92 @@
       "generating": "יוצר דוח...",
       "processingSection": "מעבד חלק {{sectionNum}} מתוך {{totalSections}}: {{sectionPreview}}"
     },
-    "pleaseWait": "אנא המתן בזמן שאנו יוצרים את הדוח שלך"
+    "pleaseWait": "אנא המתן בזמן שאנו יוצרים את הדוח שלך",
+    "pageDescription": "[AUTO-TRANSLATED he] Generate a document based on a user-defined outline and document database.",
+    "generatingDocument": "[AUTO-TRANSLATED he] Generating document...",
+    "knowledgeBaseTitle": "מאגר ידע",
+    "documentOutlineTitle": "[AUTO-TRANSLATED he] Document Outline",
+    "clickToSelect": "[AUTO-TRANSLATED he] Click to select",
+    "customInstructionsTitle": "[AUTO-TRANSLATED he] Custom Instructions (Optional)",
+    "customInstructionsPlaceholder": "[AUTO-TRANSLATED he] Enter any additional instructions that should be considered when generating each section of the report...",
+    "characterCount": "[AUTO-TRANSLATED he] {{count}}/2000 characters. These instructions will be added to the prompt when generating each section.",
+    "selectKnowledgeBaseTitle": "[AUTO-TRANSLATED he] Select Knowledge Base",
+    "selectDocumentOutlineTitle": "[AUTO-TRANSLATED he] Select Document Outline",
+    "generateButton": "[AUTO-TRANSLATED he] Generate",
+    "results": "[AUTO-TRANSLATED he] Results",
+    "copyText": "[AUTO-TRANSLATED he] Copy Text",
+    "copied": "[AUTO-TRANSLATED he] Copied!",
+    "downloadDocx": "[AUTO-TRANSLATED he] Download DOCX",
+    "downloadCsv": "[AUTO-TRANSLATED he] Download CSV",
+    "clearReport": "[AUTO-TRANSLATED he] Clear Report",
+    "resultsPlaceholder": "[AUTO-TRANSLATED he] Results will appear here after generating a document.",
+    "sectionsWithSources": "[AUTO-TRANSLATED he] Sections with Sources",
+    "sectionNumber": "[AUTO-TRANSLATED he] Section {number}: {title}",
+    "kbGenerated": "[AUTO-TRANSLATED he] KB Generated",
+    "rawText": "[AUTO-TRANSLATED he] Raw Text",
+    "viewSourceCitations": "[AUTO-TRANSLATED he] View Source Citations ({count})",
+    "documentCopiedSuccess": "[AUTO-TRANSLATED he] Document copied to clipboard",
+    "documentCopiedError": "[AUTO-TRANSLATED he] Failed to copy document to clipboard",
+    "documentDownloadSuccess": "[AUTO-TRANSLATED he] Document downloaded successfully",
+    "documentDownloadError": "[AUTO-TRANSLATED he] Failed to download document: {error}",
+    "csvDownloadSuccess": "[AUTO-TRANSLATED he] CSV downloaded successfully",
+    "csvDownloadError": "[AUTO-TRANSLATED he] Failed to download CSV: {error}",
+    "reportClearedSuccess": "[AUTO-TRANSLATED he] Generated report cleared",
+    "enterAtLeastOneSection": "[AUTO-TRANSLATED he] Please enter at least one section",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED he] Please select a knowledge base",
+    "generateSuccess": "[AUTO-TRANSLATED he] Report generated successfully!",
+    "generateError": "[AUTO-TRANSLATED he] Failed to generate document: {error}",
+    "vectorSearch": "[AUTO-TRANSLATED he] vector search",
+    "fullDocumentScan": "[AUTO-TRANSLATED he] full document scan",
+    "editOutline": "[AUTO-TRANSLATED he] Edit Outline"
+  },
+  "modelSelection": {
+    "llmManagement": "ניהול LLM",
+    "llmDescription": "הגדר ונהל את ה-LLM המשמשים ליצירת תגובות טקסט. המודל ברירת המחדל ישמש לכל הפעולות.",
+    "addNewLlm": "הוסף LLM חדש",
+    "noLlmsConfigured": "לא הוגדרו LLM",
+    "addNewLlmToGetStarted": "הוסף LLM חדש כדי להתחיל",
+    "embeddingModelManagement": "ניהול מודל הטמעה",
+    "embeddingDescription": "הגדר ונהל את מודלי ההטמעה המשמשים לאינדקס בסיס ידע ואחזור. המודל ברירת המחדל ישמש בעת יצירת בסיסי ידע חדשים, אך כל בסיס ידע ימשיך להשתמש במודל ההטמעה המקורי שלו גם אם ברירת המחדל משתנה מאוחר יותר.",
+    "addEmbeddingModel": "הוסף מודל הטמעה",
+    "noEmbeddingModelsConfigured": "לא הוגדרו מודלי הטמעה",
+    "addNewEmbeddingModelToGetStarted": "הוסף מודל הטמעה חדש כדי להתחיל",
+    "tableHeaders": {
+      "name": "שם",
+      "modelId": "מזהה מודל",
+      "provider": "ספק",
+      "description": "תיאור",
+      "status": "סטטוס",
+      "actions": "פעולות"
+    },
+    "status": {
+      "default": "ברירת מחדל",
+      "available": "זמין"
+    },
+    "actions": {
+      "setAsDefault": "הגדר כברירת מחדל",
+      "delete": "מחק",
+      "validate": "אמת",
+      "validating": "מאמת"
+    },
+    "dialog": {
+      "addNewLlm": "הוסף LLM חדש",
+      "addEmbeddingModel": "הוסף מודל הטמעה",
+      "displayName": "שם תצוגה",
+      "provider": "ספק",
+      "modelId": "מזהה מודל",
+      "description": "תיאור",
+      "cancel": "ביטול",
+      "addModel": "הוסף מודל"
+    },
+    "placeholders": {
+      "customModel": "למשל, המודל המותאם שלי",
+      "embeddingModelId": "למשל, sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "תאר את המודל, את המאפיינים שלו וכיצד להשתמש בו"
+    },
+    "validation": {
+      "pleaseEnterModelId": "אנא הזן מזהה מודל"
+    }
   },
   "feedback": {
     "modalTitlePositive": "מה היה מועיל?",
@@ -582,14 +831,14 @@
     "downloadCsv": "הורד CSV",
     "clearCsv": "נקה CSV",
     "clearResults": "נקה תוצאות",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "נושא:",
+    "knowledgeBaseReference": "הפניה לבסיס הידע",
+    "knowledgeBaseReferences": "הפניות לבסיס הידע",
+    "hideReferences": "הסתר הפניות",
+    "showReferences": "הצג הפניות",
+    "referenceNumber": "הפניה {{number}}",
+    "processedInChunks": "עובד ב-{{count}} חלקים",
+    "synthesisError": "שגיאה בסינתזה של ניתוח נושא"
   },
   "toast": {
     "passwordUpdated": "הסיסמה עודכנה בהצלחה.",

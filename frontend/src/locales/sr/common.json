@@ -29,7 +29,8 @@
     "next": "Следеће",
     "previous": "Претходно",
     "confirm": "Потврди",
-    "back": "Назад"
+    "back": "Назад",
+    "done": "Готово"
   },
   "forms": {
     "firstName": "Име",
@@ -44,6 +45,9 @@
     "emailPlaceholder": "Унесите своју е-мејл адресу",
     "passwordPlaceholder": "Унесите своју лозинку"
   },
+  "dropdowns": {
+    "selectKnowledgeBase": "Изаберите базу знања..."
+  },
   "chatbot": {
     "placeholder": "Упишите своју поруку овде...",
     "send": "Пошаљи",
@@ -57,7 +61,42 @@
     "knowledgeBaseTableName": "Назив",
     "knowledgeBaseTableDescription": "Опис",
     "knowledgeBaseTableSources": "Извори",
-    "knowledgeBaseTablePages": "Странице"
+    "knowledgeBaseTablePages": "Странице",
+    "title": "Чат",
+    "sourcePopover": {
+      "knowledgeBase": "База знања",
+      "file": "Фајл"
+    },
+    "searchMode": "Режим претраге:",
+    "vectorSearch": "Векторска претрага",
+    "fullTextScan": "Пуно скенирање текста",
+    "searchModeDescription": "Векторска претрага пружа брзе, циљане резултате. Пуно скенирање текста прегледава цео садржај у бази знања.",
+    "askMeAnything": "Питај ме било шта! За претрагу базе знања, прво изаберите базу знања.",
+    "usingGeneralAI": "Коришћење општег AI асистента",
+    "usingKnowledgeBase": "Коришћење базе знања:",
+    "usingDocuments": "Коришћење # документ(а)",
+    "usingFiles": "Коришћење {{count}} документ{{plural}}:",
+    "remove": "Уклони",
+    "selectKnowledgeBase": "Изаберите базу знања",
+    "knowledgeBaseTable": {
+      "name": "Име",
+      "description": "Опис",
+      "sources": "Извори",
+      "noDescription": "Нема описа",
+      "sourcesCount": "{{count}} извора",
+      "pagesCount": "{{count}} страница"
+    },
+    "selectKnowledgeBasePlaceholder": "Изаберите базу знања...",
+    "noKnowledgeBasesAvailable": "Нема доступних база знања. Креирајте једну прво да бисте користили ову функцију.",
+    "knowledgeBase": "База знања",
+    "file": "Фајл",
+    "errors": {
+      "generic": "Извините, нешто је пошло по злу. Молимо покушајте поново.",
+      "timeout": "Захтев је истекао. Молимо покушајте поново.",
+      "largeFileTimeout": "Обрада великог фајла је истекла. Покушајте да пређете на режим 'Пуно скенирање текста' за боље перформансе са великим фајловима.",
+      "fileSize": "Фајл је превелик. Молимо изаберите мање фајлове.",
+      "serverError": "Дошло је до грешке на серверу. Молимо покушајте поново касније."
+    }
   },
   "settings": {
     "title": "Подешавања",
@@ -147,32 +186,40 @@
     "copy": "Копирај",
     "paste": "Налепи",
     "cut": "Исеци",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Prikaži više",
+    "showLess": "Prikaži manje",
+    "readMore": "Pročitaj više",
+    "questionNumber": "Pitanje {{number}}:",
+    "viewSourceCitations": "Prikaži citate izvora ({{count}})",
+    "answer": "Odgovor:",
+    "relevantPolicyContext": "Relevantan kontekst politike:",
+    "sources": "izvori",
+    "sourceCitations": "Citati izvora ({{count}})",
+    "citationNumber": "Citat {{number}}",
+    "noSourceCitations": "Za ovaj odeljak nisu dostupni citati izvora",
+    "noDetailedSections": "Za ovaj izveštaj nisu dostupni detaljni odeljci",
+    "topicLabel": "Tema:",
+    "knowledgeBaseReference": "Referenca baze znanja",
+    "knowledgeBaseReferences": "Reference baze znanja",
+    "hideReferences": "Sakrij reference",
+    "showReferences": "Prikaži reference",
+    "referenceNumber": "Referenca {{number}}",
+    "processedInChunks": "Obradjeno u {{count}} delova",
+    "synthesisErrorNote": "Napomena: Došlo je do greške u sintezi - prikazani su kombinovani rezultati delova",
     "progress": {
       "starting": "Покретање...",
       "initializing": "Иницијализација...",
       "processing": "Обрада...",
       "extracting": "Издвајање садржаја..."
-    }
+    },
+    "error": "Нешто је пошло по злу!",
+    "welcomeBack": "Добродошли назад, лепо је видети вас поново!",
+    "hiUser": "Здраво, {{name}} 👋"
+  },
+  "usage": {
+    "title": "Коришћење",
+    "currentPeriod": "Тренутни период:",
+    "usedOfQuota": "искоришћено од ваше месечне квоте"
   },
   "review": {
     "pageTitle": "Преглед докумената",
@@ -206,7 +253,7 @@
     "checklistNamePlaceholder": "Унесите назив листе провере...",
     "checklistDescriptionLabel": "Опис",
     "checklistDescriptionPlaceholder": "Унесите опис листе провере за аутоматске предлоге питања (најмање 10 карактера)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} питања",
     "suggest": "Предложи",
     "suggesting": "Предлажем...",
     "optimize": "Оптимизуј",
@@ -227,7 +274,64 @@
     "deleteChecklist": "Обриши листу провере",
     "pleaseWait": "Молимо сачекајте док прегледамо ваше документе",
     "reviewSuccess": "Преглед документа успешно завршен!",
-    "reviewSuccessMultiple": "{{count}} датотека обрађено са оптимизованим дељењем контекста!"
+    "reviewSuccessMultiple": "{{count}} датотека обрађено са оптимизованим дељењем контекста!",
+    "dropFilesHere": "Пустите фајлове овде",
+    "uploadedFiles": "Отпремљени фајлови",
+    "removeFile": "Уклони",
+    "characterCount": "{{count}}/2000 карактера. Ова упутства ће бити додана сваком питању при обради.",
+    "searchMode": "Режим претраге",
+    "vectorSearch": "Векторска претрага",
+    "fullDocumentScan": "Пуно скенирање документа",
+    "vectorSearchDescription": "Проналази релевантан садржај користећи AI претрагу сличности (брза, циљана)",
+    "fullScanDescription": "Анализира све документе у бази знања (свеобухватно, темељно)"
+  },
+  "modelSelection": {
+    "llmManagement": "Управљање LLM",
+    "llmDescription": "Конфигуришите и управљајте LLM-овима који се користе за генерисање текстуалних одговора. Подразумевани модел ће се користити за све операције.",
+    "addNewLlm": "Додај нови LLM",
+    "noLlmsConfigured": "Ниједан LLM није конфигурисан",
+    "addNewLlmToGetStarted": "Додајте нови LLM да бисте започели",
+    "embeddingModelManagement": "Управљање моделима уграђивања",
+    "embeddingDescription": "Конфигуришите и управљајте моделима уграђивања који се користе за индексирање и претрагу базе знања. Подразумевани модел ће се користити при креирању нових база знања, али свака база знања ће наставити да користи свој оригинални модел уграђивања чак и ако се подразумевани касније промени.",
+    "addEmbeddingModel": "Додај модел уграђивања",
+    "noEmbeddingModelsConfigured": "Ниједан модел уграђивања није конфигурисан",
+    "addNewEmbeddingModelToGetStarted": "Додајте нови модел уграђивања да бисте започели",
+    "tableHeaders": {
+      "name": "Име",
+      "modelId": "ID модела",
+      "provider": "Провајдер",
+      "description": "Опис",
+      "status": "Статус",
+      "actions": "Акције"
+    },
+    "status": {
+      "default": "Подразумевани",
+      "available": "Доступан"
+    },
+    "actions": {
+      "setAsDefault": "Постави као подразумевани",
+      "delete": "Обриши",
+      "validate": "Провери",
+      "validating": "Проверавање"
+    },
+    "dialog": {
+      "addNewLlm": "Додај нови LLM",
+      "addEmbeddingModel": "Додај модел уграђивања",
+      "displayName": "Приказано име",
+      "provider": "Провајдер",
+      "modelId": "ID модела",
+      "description": "Опис",
+      "cancel": "Откажи",
+      "addModel": "Додај модел"
+    },
+    "placeholders": {
+      "customModel": "нпр. Мој прилагођени модел",
+      "embeddingModelId": "нпр. sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Опишите модел, његове карактеристике и када га користити"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Молимо унесите ID модела"
+    }
   },
   "compare": {
     "title": "Упореди документе",
@@ -261,7 +365,8 @@
       "comparing": "Упоређивање..."
     },
     "pleaseWait": "Молимо сачекајте док упоређујемо ваше документе",
-    "compareSuccess": "Документи су успешно упоређени!"
+    "compareSuccess": "Документи су успешно упоређени!",
+    "selectTopicListTitle": "Изаберите листу тема"
   },
   "match": {
     "title": "Подударање докумената",
@@ -295,7 +400,84 @@
     },
     "pleaseWait": "Молимо сачекајте док упарујемо ваше документе",
     "matchSuccess": "Обрада обрасца је успешно завршена!",
-    "singleDocumentSuccess": "Вредности поља су издвојене из једног документа."
+    "singleDocumentSuccess": "Вредности поља су издвојене из једног документа.",
+    "selectFormTemplateTitle": "Изаберите шаблон формулара"
+  },
+  "editFormTemplateModal": {
+    "title": "Уреди шаблон обрасца",
+    "formTemplateName": "Име шаблона обрасца",
+    "formTemplateNamePlaceholder": "Унесите име шаблона обрасца",
+    "formTemplateDescription": "Опис шаблона обрасца",
+    "descriptionPlaceholder": "Унесите опис шаблона обрасца за аутоматско предлагање поља (минимум 10 карактера)...",
+    "referenceDocuments": "Референтни документи (необавезно)",
+    "uploadFiles": "Отпреми датотеке",
+    "pleaseWait": "Молимо сачекајте док прегледамо ваше документе",
+    "knowledgeBase": "База знања",
+    "formFields": "Поља обрасца",
+    "suggest": "Предложи",
+    "fieldPlaceholder": "Додај име поља...",
+    "cancel": "Откажи",
+    "updateFormTemplate": "Ажурирај шаблон обрасца"
+  },
+  "editOutlineModal": {
+    "title": "Уреди контуру",
+    "createTitle": "Креирај нову контуру",
+    "outlineName": "Име контуре",
+    "outlineNamePlaceholder": "Унесите име контуре",
+    "description": "Опис",
+    "descriptionPlaceholder": "Унесите опис контуре за аутоматско предлагање секција (минимум 10 карактера)...",
+    "referenceDocuments": "Референтни документи (необавезно)",
+    "uploadFiles": "Отпреми датотеке",
+    "knowledgeBase": "База знања",
+    "sections": "Секције",
+    "suggest": "Предложи",
+    "optimize": "Оптимизуј",
+    "consultDocs": "Консултуј документе",
+    "addSectionPlaceholder": "Додај секцију",
+    "cancel": "Откажи",
+    "createOutline": "Креирај контуру",
+    "updateOutline": "Ажурирај контуру"
+  },
+  "editChecklistModal": {
+    "title": "Уреди листу провере",
+    "createTitle": "Креирај нову листу провере",
+    "checklistName": "Име листе провере",
+    "checklistNamePlaceholder": "Унесите име листе провере",
+    "description": "Опис",
+    "descriptionPlaceholder": "Унесите опис листе провере за аутоматско предлагање питања (минимум 10 карактера)...",
+    "referenceDocuments": "Референтни документи (необавезно)",
+    "uploadFiles": "Отпреми датотеке",
+    "knowledgeBase": "База знања",
+    "questions": "{{count}} питања",
+    "suggest": "Предложи",
+    "optimize": "Оптимизуј",
+    "addQuestionPlaceholder": "Додај питање",
+    "copyAllQuestions": "Копирај сва питања као текст",
+    "cancel": "Откажи",
+    "createChecklist": "Креирај листу провере",
+    "updateChecklist": "Ажурирај листу провере"
+  },
+  "editTopicListModal": {
+    "title": "Уреди листу тема",
+    "createTitle": "Креирај нову листу тема",
+    "topicListName": "Име листе тема",
+    "topicListNamePlaceholder": "Унесите име листе тема",
+    "description": "Опис листе тема",
+    "descriptionPlaceholder": "Унесите опис листе тема за аутоматско предлагање тема (минимум 10 карактера)...",
+    "referenceDocuments": "Референтни документи (необавезно)",
+    "uploadFiles": "Отпреми датотеке",
+    "knowledgeBase": "База знања",
+    "comparisonTopics": "Теме за поређење",
+    "topics": "{{count}} тема",
+    "section": "{{count}} секција",
+    "section_one": "{{count}} секција",
+    "sections": "{{count}} секција",
+    "suggest": "Предложи",
+    "addTopicPlaceholder": "Додај тему за поређење",
+    "copyAllTopics": "Копирај све теме као текст",
+    "cancel": "Откажи",
+    "createTopicList": "Креирај листу тема",
+    "updateTopicList": "Ажурирај листу тема"
   },
   "knowledgeBases": {
     "title": "Управљање базама знања",
@@ -394,6 +576,35 @@
         "fieldPlaceholder": "Додајте назив поља...",
         "cancel": "Откажи",
         "updateFormTemplate": "Ажурирај Шаблон Форме"
+      },
+      "fields": {
+        "title": "Наслов",
+        "description": "Опис"
+      },
+      "fileUpload": {
+        "currentFiles": "Тренутни фајлови",
+        "newFiles": "Нови фајлови",
+        "selectedFiles": "Изабрани фајлови",
+        "dragAndDrop": "Повуците и пустите фајлове овде, или кликните да бисте претражили",
+        "dropFiles": "Пустите фајлове овде...",
+        "removeFile": "Уклони фајл",
+        "supportedFormats": "Подржава: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "Откажи",
+        "create": "Креирај",
+        "save": "Сачувај",
+        "saving": "Чување...",
+        "creating": "Креирање..."
+      },
+      "validation": {
+        "titleRequired": "Наслов је обавезан"
+      },
+      "messages": {
+        "createSuccess": "База знања је успешно креирана.",
+        "updateSuccess": "База знања је успешно ажурирана.",
+        "processing": "Обрада...",
+        "pleaseWait": "Молимо сачекајте док обрађујемо ваше фајлове..."
       }
     },
     "editCustom": {
@@ -556,7 +767,44 @@
       "generating": "Генерисање извештаја...",
       "processingSection": "Обрада одељка {{sectionNum}} од {{totalSections}}: {{sectionPreview}}"
     },
-    "pleaseWait": "Молимо сачекајте док генеришемо ваш извештај"
+    "pleaseWait": "Молимо сачекајте док генеришемо ваш извештај",
+    "pageDescription": "Генеришите документ на основу кориснички дефинисаног оквира и базе докумената.",
+    "generatingDocument": "Генерисање документа...",
+    "knowledgeBaseTitle": "База знања",
+    "documentOutlineTitle": "Оквир документа",
+    "clickToSelect": "Кликните да изаберете",
+    "customInstructionsTitle": "Прилагођена упутства (опционо)",
+    "customInstructionsPlaceholder": "Унесите било која додатна упутства која треба узети у обзир при генерисању сваког одељка извештаја...",
+    "characterCount": "{{count}}/2000 карактера. Ова упутства ће бити додана у промпт при генерисању сваког одељка.",
+    "selectKnowledgeBaseTitle": "Изаберите базу знања",
+    "selectDocumentOutlineTitle": "Изаберите оквир документа",
+    "generateButton": "Генериши",
+    "results": "Резултати",
+    "copyText": "Копирај текст",
+    "copied": "Копирано!",
+    "downloadDocx": "Преузми DOCX",
+    "downloadCsv": "Преузми CSV",
+    "clearReport": "Обриши извештај",
+    "resultsPlaceholder": "Резултати ће се појавити овде након генерисања документа.",
+    "sectionsWithSources": "Одељци са изворима",
+    "sectionNumber": "Одељак {number}: {title}",
+    "kbGenerated": "Генерисано из базе знања",
+    "rawText": "Необрађени текст",
+    "viewSourceCitations": "Погледај цитате извора ({count})",
+    "documentCopiedSuccess": "Документ копиран у клипборд",
+    "documentCopiedError": "Неуспешно копирање документа у клипборд",
+    "documentDownloadSuccess": "Документ успешно преузет",
+    "documentDownloadError": "Неуспешно преузимање документа: {error}",
+    "csvDownloadSuccess": "CSV успешно преузет",
+    "csvDownloadError": "Неуспешно преузимање CSV-а: {error}",
+    "reportClearedSuccess": "Генерисани извештај обрисан",
+    "enterAtLeastOneSection": "Молимо унесите бар један одељак",
+    "selectKnowledgeBase": "Молимо изаберите базу знања",
+    "generateSuccess": "Извештај успешно генерисан!",
+    "generateError": "Неуспешно генерисање документа: {error}",
+    "vectorSearch": "векторска претрага",
+    "fullDocumentScan": "пуно скенирање документа",
+    "editOutline": "Уреди оквир"
   },
   "feedback": {
     "modalTitlePositive": "Шта је било корисно?",
@@ -583,14 +831,14 @@
     "downloadCsv": "Преузми CSV",
     "clearCsv": "Обриши CSV",
     "clearResults": "Обриши резултате",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Tema:",
+    "knowledgeBaseReference": "Референца Базе Знања",
+    "knowledgeBaseReferences": "Референце Базе Знања",
+    "hideReferences": "Сакриј Референце",
+    "showReferences": "Прикажи Референце",
+    "referenceNumber": "Референца {{number}}",
+    "processedInChunks": "Обрађено у {{count}} делова",
+    "synthesisError": "Грешка при синтези анализе теме"
   },
   "toast": {
     "passwordUpdated": "Лозинка је успешно ажурирана.",

@@ -10,7 +10,7 @@
     "archive": "Archiwum",
     "settings": "Ustawienia",
     "admin": "Administrator",
-    "menu": "Menu",
+    "menu": "[AUTO-TRANSLATED pl] Menu",
     "tools": "Narzędzia",
     "configurations": "Konfiguracje",
     "myProfile": "Mój profil",
@@ -29,12 +29,13 @@
     "next": "Dalej",
     "previous": "Wstecz",
     "confirm": "Potwierdź",
-    "back": "Wstecz"
+    "back": "Wstecz",
+    "done": "Gotowe"
   },
   "forms": {
     "firstName": "Imię",
     "lastName": "Nazwisko",
-    "email": "Email",
+    "email": "[AUTO-TRANSLATED pl] Email",
     "password": "Hasło",
     "confirmPassword": "Potwierdź hasło",
     "currentPassword": "Obecne hasło",
@@ -53,7 +54,46 @@
     "error": "Przepraszamy, coś poszło nie tak. Spróbuj ponownie.",
     "welcome": "Cześć! Jak mogę ci dzisiaj pomóc?",
     "welcomeMessageWithSource": "Wybierz bazę wiedzy lub wczytaj pliki, a następnie zadaj pytanie.",
-    "welcomeMessageGeneral": "Zapytaj mnie o cokolwiek! Aby wyszukać w bazie wiedzy, najpierw wybierz bazę wiedzy."
+    "welcomeMessageGeneral": "Zapytaj mnie o cokolwiek! Aby wyszukać w bazie wiedzy, najpierw wybierz bazę wiedzy.",
+    "title": "Czat",
+    "sourcePopover": {
+      "knowledgeBase": "Baza wiedzy",
+      "file": "Plik"
+    },
+    "searchMode": "Tryb wyszukiwania:",
+    "vectorSearch": "Wyszukiwanie wektorowe",
+    "fullTextScan": "Pełne skanowanie tekstu",
+    "searchModeDescription": "[AUTO-TRANSLATED pl] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
+    "askMeAnything": "[AUTO-TRANSLATED pl] Ask me anything! For knowledge base search, select a knowledge base first.",
+    "usingGeneralAI": "[AUTO-TRANSLATED pl] Using general AI assistant",
+    "usingKnowledgeBase": "[AUTO-TRANSLATED pl] Using knowledge base:",
+    "usingDocuments": "[AUTO-TRANSLATED pl] Using # document(s)",
+    "usingFiles": "[AUTO-TRANSLATED pl] Using {{count}} document{{plural}}:",
+    "remove": "Usuń",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED pl] Select Knowledge Base",
+    "knowledgeBaseTable": {
+      "name": "Nazwa",
+      "description": "Opis",
+      "sources": "Źródła",
+      "noDescription": "Brak opisu",
+      "sourcesCount": "{{count}} źródeł",
+      "pagesCount": "{{count}} stron"
+    },
+    "knowledgeBaseTableName": "Nazwa",
+    "knowledgeBaseTableDescription": "Opis",
+    "knowledgeBaseTableSources": "Źródła",
+    "knowledgeBaseTablePages": "[AUTO-TRANSLATED pl] Pages",
+    "selectKnowledgeBasePlaceholder": "Wybierz bazę wiedzy...",
+    "noKnowledgeBasesAvailable": "Brak dostępnych baz wiedzy. Utwórz jedną najpierw, aby korzystać z tej funkcji.",
+    "knowledgeBase": "Baza wiedzy",
+    "file": "Plik",
+    "errors": {
+      "generic": "[AUTO-TRANSLATED pl] Sorry, something went wrong. Please try again.",
+      "timeout": "[AUTO-TRANSLATED pl] Request timed out. Please try again.",
+      "largeFileTimeout": "[AUTO-TRANSLATED pl] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
+      "fileSize": "[AUTO-TRANSLATED pl] File is too large. Please choose smaller files.",
+      "serverError": "[AUTO-TRANSLATED pl] Server error occurred. Please try again later."
+    }
   },
   "settings": {
     "title": "Ustawienia",
@@ -72,7 +112,7 @@
     "newPassword": "Nowe hasło",
     "confirmPassword": "Potwierdź hasło",
     "save": "Zapisz",
-    "system": "System",
+    "system": "[AUTO-TRANSLATED pl] System",
     "lightMode": "Tryb jasny",
     "darkMode": "Tryb ciemny",
     "deleteAccountDescription": "Trwale usuń swoje dane i wszystko powiązane z Twoim kontem.",
@@ -137,7 +177,7 @@
     "goodbye": "Do widzenia",
     "yes": "Tak",
     "no": "Nie",
-    "ok": "OK",
+    "ok": "[AUTO-TRANSLATED pl] OK",
     "search": "Szukaj",
     "filter": "Filtr",
     "sort": "Sortuj",
@@ -145,32 +185,33 @@
     "copy": "Kopiuj",
     "paste": "Wklej",
     "cut": "Wytnij",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Pokaż więcej",
+    "showLess": "Pokaż mniej",
+    "readMore": "Czytaj więcej",
+    "questionNumber": "Pytanie {{number}}:",
+    "viewSourceCitations": "Zobacz cytaty źródłowe ({{count}})",
+    "answer": "Odpowiedź:",
+    "relevantPolicyContext": "Odpowiedni kontekst polityki:",
+    "sources": "źródła",
+    "sourceCitations": "Cytaty źródłowe ({{count}})",
+    "citationNumber": "Cytat {{number}}",
+    "noSourceCitations": "Brak dostępnych cytatów źródłowych dla tej sekcji",
+    "noDetailedSections": "Brak dostępnych szczegółowych sekcji dla tego raportu",
+    "topicLabel": "Temat:",
+    "knowledgeBaseReference": "Odniesienie do bazy wiedzy",
+    "knowledgeBaseReferences": "Odniesienia do bazy wiedzy",
+    "hideReferences": "Ukryj odniesienia",
+    "showReferences": "Pokaż odniesienia",
+    "referenceNumber": "Odniesienie {{number}}",
+    "processedInChunks": "Przetworzono w {{count}} częściach",
+    "synthesisErrorNote": "Uwaga: Wystąpił błąd syntezy - wyświetlane są połączone wyniki części",
     "progress": {
       "starting": "Rozpoczynanie...",
       "initializing": "Inicjalizacja...",
       "processing": "Przetwarzanie...",
       "extracting": "Wyodrębnianie treści..."
-    }
+    },
+    "error": "[AUTO-TRANSLATED pl] Something went wrong!"
   },
   "usage": {
     "title": "Użycie",
@@ -209,7 +250,7 @@
     "checklistNamePlaceholder": "Wprowadź nazwę listy kontrolnej...",
     "checklistDescriptionLabel": "Opis",
     "checklistDescriptionPlaceholder": "Wprowadź opis listy kontrolnej dla automatycznych sugestii pytań (minimum 10 znaków)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} pytania",
     "suggest": "Zasugeruj",
     "suggesting": "Sugerowanie...",
     "optimize": "Optymalizuj",
@@ -236,7 +277,9 @@
     "fullDocumentScan": "Pełna Analiza Dokumentu",
     "vectorSearchDescription": "Znajduje odpowiednią treść używając wyszukiwania podobieństwa AI (szybkie, celowe)",
     "fullScanDescription": "Analizuje wszystkie dokumenty w bazie wiedzy (kompleksowe, dokładne)",
-    "pleaseWait": "Proszę czekać, podczas gdy przeglądamy Twoje dokumenty"
+    "pleaseWait": "Proszę czekać, podczas gdy przeglądamy Twoje dokumenty",
+    "reviewSuccess": "[AUTO-TRANSLATED pl] Document review completed successfully!",
+    "reviewSuccessMultiple": "[AUTO-TRANSLATED pl] {{count}} files processed with optimized context sharing!"
   },
   "generate": {
     "pageDescription": "Wygeneruj dokument na podstawie zdefiniowanego przez użytkownika konspektu i bazy danych dokumentów.",
@@ -282,7 +325,8 @@
       "initializing": "Inicjalizacja...",
       "generating": "Generowanie raportu...",
       "processingSection": "Przetwarzanie sekcji {{sectionNum}} z {{totalSections}}: {{sectionPreview}}"
-    }
+    },
+    "editOutline": "[AUTO-TRANSLATED pl] Edit Outline"
   },
   "modelSelection": {
     "llmManagement": "Zarządzanie LLM",
@@ -300,7 +344,7 @@
       "modelId": "ID modelu",
       "provider": "Dostawca",
       "description": "Opis",
-      "status": "Status",
+      "status": "[AUTO-TRANSLATED pl] Status",
       "actions": "Akcje"
     },
     "status": {
@@ -398,7 +442,8 @@
     "suggest": "Sugeruj",
     "fieldPlaceholder": "Dodaj nazwę pola (np. Imię, Adres, PESEL) lub sugeruj z opisu",
     "cancel": "Anuluj",
-    "updateFormTemplate": "Aktualizuj Szablon Formularza"
+    "updateFormTemplate": "Aktualizuj Szablon Formularza",
+    "pleaseWait": "Proszę czekać, sprawdzamy twoje dokumenty"
   },
   "editOutlineModal": {
     "title": "Edytuj Konspekt",
@@ -413,6 +458,7 @@
     "sections": "Sekcje",
     "suggest": "Sugeruj",
     "optimize": "Optymalizuj",
+    "consultDocs": "Konsultuj dokumenty",
     "addSectionPlaceholder": "Dodaj sekcję",
     "cancel": "Anuluj",
     "createOutline": "Utwórz Konspekt",
@@ -428,7 +474,7 @@
     "referenceDocuments": "Dokumenty Referencyjne (Opcjonalne)",
     "uploadFiles": "Prześlij Pliki",
     "knowledgeBase": "Baza Wiedzy",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} pytania",
     "suggest": "Sugeruj",
     "optimize": "Optymalizuj",
     "addQuestionPlaceholder": "Dodaj pytanie",
@@ -448,10 +494,10 @@
     "uploadFiles": "Prześlij Pliki",
     "knowledgeBase": "Baza Wiedzy",
     "comparisonTopics": "Tematy Porównawcze",
-    "topics": "{{count}} topics",
-    "section": "{{count}} section",
-    "section_one": "{{count}} section",
-    "sections": "{{count}} sections",
+    "topics": "{{count}} tematów",
+    "section": "{{count}} sekcja",
+    "section_one": "{{count}} sekcja",
+    "sections": "{{count}} sekcji",
     "suggest": "Sugeruj",
     "addTopicPlaceholder": "Dodaj temat porównawczy",
     "copyAllTopics": "Skopiuj wszystkie tematy jako tekst",
@@ -481,7 +527,10 @@
     "showMore": "Pokaż Więcej",
     "optimizationsSelectedText": "optymalizacja{{s}} wybrana{{s}} do zastosowania",
     "applying": "Stosowanie...",
-    "applySelectedOptimizations": "Zastosuj Wybrane Optymalizacje"
+    "applySelectedOptimizations": "Zastosuj Wybrane Optymalizacje",
+    "uploadDocumentsTitle": "[AUTO-TRANSLATED pl] Upload document(s) that should be accepted by checklist *",
+    "uploadDocumentsHelperText": "[AUTO-TRANSLATED pl] Upload documents that should meet all checklist requirements to help identify questions that may be too strict",
+    "customInstructionsPlaceholder": "[AUTO-TRANSLATED pl] e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
   },
   "optimizeOutlineModal": {
     "title": "Optymalizuj Konspekt",
@@ -531,11 +580,41 @@
     },
     "modals": {
       "fileUpload": {
-        "supportedFormats": "Obsługuje: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+        "supportedFormats": "Obsługuje: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX",
+        "currentFiles": "[AUTO-TRANSLATED pl] Current Files",
+        "newFiles": "[AUTO-TRANSLATED pl] New Files",
+        "selectedFiles": "[AUTO-TRANSLATED pl] Selected Files",
+        "dragAndDrop": "[AUTO-TRANSLATED pl] Drag and drop files here, or click to browse",
+        "dropFiles": "[AUTO-TRANSLATED pl] Drop the files here...",
+        "removeFile": "[AUTO-TRANSLATED pl] Remove file"
       },
       "messages": {
         "processing": "Przetwarzanie...",
-        "pleaseWait": "Proszę czekać, podczas gdy przetwarzamy Twoje pliki..."
+        "pleaseWait": "Proszę czekać, podczas gdy przetwarzamy Twoje pliki...",
+        "createSuccess": "[AUTO-TRANSLATED pl] Knowledge Base created successfully.",
+        "updateSuccess": "[AUTO-TRANSLATED pl] Knowledge Base updated successfully."
+      },
+      "add": {
+        "title": "[AUTO-TRANSLATED pl] Add Knowledge Base",
+        "description": "[AUTO-TRANSLATED pl] Create a new knowledge base by providing details and uploading documents below."
+      },
+      "edit": {
+        "title": "[AUTO-TRANSLATED pl] Edit Knowledge Base",
+        "description": "[AUTO-TRANSLATED pl] Update the Knowledge Base details below."
+      },
+      "fields": {
+        "title": "[AUTO-TRANSLATED pl] Title",
+        "description": "Opis"
+      },
+      "buttons": {
+        "cancel": "Anuluj",
+        "create": "Utwórz",
+        "save": "Zapisz",
+        "saving": "[AUTO-TRANSLATED pl] Saving...",
+        "creating": "[AUTO-TRANSLATED pl] Creating..."
+      },
+      "validation": {
+        "titleRequired": "[AUTO-TRANSLATED pl] Title is required"
       }
     },
     "progress": {
@@ -562,6 +641,12 @@
       "cancelButton": "Anuluj",
       "successMessage": "Baza wiedzy została pomyślnie usunięta",
       "errorMessage": "Błąd podczas usuwania bazy wiedzy"
+    },
+    "actions": {
+      "view": "[AUTO-TRANSLATED pl] View",
+      "edit": "[AUTO-TRANSLATED pl] Edit",
+      "delete": "[AUTO-TRANSLATED pl] Delete",
+      "configure": "[AUTO-TRANSLATED pl] Configure"
     }
   },
   "archive": {
@@ -664,14 +749,14 @@
     "downloadCsv": "Pobierz CSV",
     "clearCsv": "Wyczyść CSV",
     "clearResults": "Wyczyść wyniki",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Temat:",
+    "knowledgeBaseReference": "Odniesienie do Bazy Wiedzy",
+    "knowledgeBaseReferences": "Odniesienia do Bazy Wiedzy",
+    "hideReferences": "Ukryj Odniesienia",
+    "showReferences": "Pokaż Odniesienia",
+    "referenceNumber": "Odniesienie {{number}}",
+    "processedInChunks": "Przetworzono w {{count}} częściach",
+    "synthesisError": "Błąd syntezy analizy tematu"
   },
   "toast": {
     "passwordUpdated": "Hasło zostało pomyślnie zaktualizowane.",
@@ -745,5 +830,8 @@
     "outlineUpdated": "Konspekt został pomyślnie zaktualizowany",
     "outlineCreated": "Konspekt został pomyślnie utworzony",
     "outlineSaveFailed": "Zapisywanie konspektu nie powiodło się: {{error}}"
+  },
+  "dropdowns": {
+    "selectKnowledgeBase": "Wybierz bazę wiedzy..."
   }
 }

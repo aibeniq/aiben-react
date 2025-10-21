@@ -29,7 +29,8 @@
     "next": "Susunod",
     "previous": "Nakaraan",
     "confirm": "Kumpirmahin",
-    "back": "Bumalik"
+    "back": "Bumalik",
+    "done": "Tapos na"
   },
   "forms": {
     "firstName": "Unang Pangalan",
@@ -60,7 +61,42 @@
     "knowledgeBaseTableName": "Pangalan",
     "knowledgeBaseTableDescription": "Paglalarawan",
     "knowledgeBaseTableSources": "Mga Pinagmulan",
-    "knowledgeBaseTablePages": "Mga Pahina"
+    "knowledgeBaseTablePages": "Mga Pahina",
+    "title": "Chat",
+    "sourcePopover": {
+      "knowledgeBase": "Base ng Kaalaman",
+      "file": "File"
+    },
+    "searchMode": "Mode ng Paghahanap:",
+    "vectorSearch": "Vector Search",
+    "fullTextScan": "Full Text Scan",
+    "searchModeDescription": "Ang vector search ay nagbibigay ng mabilis, naka-target na mga resulta. Ang full text scan ay sumusuri sa lahat ng nilalaman sa knowledge base.",
+    "askMeAnything": "Tanungin mo ako ng kahit ano! Para sa paghahanap sa knowledge base, pumili muna ng knowledge base.",
+    "usingGeneralAI": "Gamit ang general AI assistant",
+    "usingKnowledgeBase": "Gamit ang knowledge base:",
+    "usingDocuments": "Gamit ang # dokumento(s)",
+    "usingFiles": "Gamit ang {{count}} dokumento{{plural}}:",
+    "remove": "Alisin",
+    "selectKnowledgeBase": "Pumili ng Knowledge Base",
+    "knowledgeBaseTable": {
+      "name": "Pangalan",
+      "description": "Paglalarawan",
+      "sources": "Pinagkukunan",
+      "noDescription": "Walang paglalarawan",
+      "sourcesCount": "{{count}} pinagmulan",
+      "pagesCount": "{{count}} pahina"
+    },
+    "selectKnowledgeBasePlaceholder": "Pumili ng Base ng Kaalaman...",
+    "noKnowledgeBasesAvailable": "Walang magagamit na Base ng Kaalaman. Lumikha muna ng isa upang magamit ang tampok na ito.",
+    "knowledgeBase": "Base ng Kaalaman",
+    "file": "File",
+    "errors": {
+      "generic": "Paumanhin, may mali. Subukang muli.",
+      "timeout": "Nag-timeout ang request. Subukang muli.",
+      "largeFileTimeout": "Nag-timeout ang pagproseso ng malaking file. Subukang lumipat sa 'Full Text Scan' mode para sa mas mahusay na performance sa malalaking file.",
+      "fileSize": "Masyadong malaki ang file. Pumili ng mas maliliit na file.",
+      "serverError": "May error sa server. Subukang muli mamaya."
+    }
   },
   "settings": {
     "title": "Mga Setting",
@@ -150,32 +186,40 @@
     "copy": "Kopyahin",
     "paste": "I-paste",
     "cut": "Putulin",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Magpakita ng Higit Pa",
+    "showLess": "Magpakita ng Mas Kaunti",
+    "readMore": "Magbasa ng Higit Pa",
+    "questionNumber": "Tanong {{number}}:",
+    "viewSourceCitations": "Tingnan ang mga Sipi ng Pinagmulan ({{count}})",
+    "answer": "Sagot:",
+    "relevantPolicyContext": "Kaukulang Konteksto ng Patakaran:",
+    "sources": "mga pinagmulan",
+    "sourceCitations": "Mga Sipi ng Pinagmulan ({{count}})",
+    "citationNumber": "Sipi {{number}}",
+    "noSourceCitations": "Walang available na mga sipi ng pinagmulan para sa seksyong ito",
+    "noDetailedSections": "Walang available na mga detalyadong seksyon para sa ulat na ito",
+    "topicLabel": "Paksa:",
+    "knowledgeBaseReference": "Reperensya ng Base ng Kaalaman",
+    "knowledgeBaseReferences": "Mga Reperensya ng Base ng Kaalaman",
+    "hideReferences": "Itago ang mga Reperensya",
+    "showReferences": "Ipakita ang mga Reperensya",
+    "referenceNumber": "Reperensya {{number}}",
+    "processedInChunks": "Pinoproseso sa {{count}} mga chunk",
+    "synthesisErrorNote": "Tandaan: May naganap na error sa synthesis - ipinapakita ang pinagsamang mga resulta ng chunk",
     "progress": {
       "starting": "Nagsisimula...",
       "initializing": "Nagsisimula ng paunang proseso...",
       "processing": "Pinoproseso...",
       "extracting": "Kinukuha ang nilalaman..."
-    }
+    },
+    "error": "May mali!",
+    "welcomeBack": "Maligayang pagbabalik, masaya akong makita ka ulit!",
+    "hiUser": "Kamusta, {{name}} 👋"
+  },
+  "usage": {
+    "title": "Paggamit",
+    "currentPeriod": "Kasalukuyang panahon:",
+    "usedOfQuota": "ginamit mula sa iyong buwanang quota"
   },
   "review": {
     "pageTitle": "Pagsusuri ng mga Dokumento",
@@ -209,7 +253,7 @@
     "checklistNamePlaceholder": "Ilagay ang pangalan ng checklist...",
     "checklistDescriptionLabel": "Paglalarawan",
     "checklistDescriptionPlaceholder": "Ilagay ang paglalarawan ng checklist para sa awtomatikong mga mungkahi ng tanong (hindi kukulangin sa 10 character)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} mga tanong",
     "suggest": "Magmungkahi",
     "suggesting": "Nagmumungkahi...",
     "optimize": "I-optimize",
@@ -230,7 +274,64 @@
     "deleteChecklist": "Tanggalin ang Checklist",
     "pleaseWait": "Mangyaring maghintay, sinusuri namin ang iyong mga dokumento",
     "reviewSuccess": "Matagumpay na natapos ang pagsusuri sa dokumento!",
-    "reviewSuccessMultiple": "{{count}} mga file ang naproseso na may na-optimize na pagbabahagi ng konteksto!"
+    "reviewSuccessMultiple": "{{count}} mga file ang naproseso na may na-optimize na pagbabahagi ng konteksto!",
+    "dropFilesHere": "I-drop ang mga file dito",
+    "uploadedFiles": "Mga Na-upload na File",
+    "removeFile": "Alisin",
+    "characterCount": "{{count}}/2000 character. Ang mga tagubiling ito ay idadagdag sa bawat tanong sa panahon ng pagproseso.",
+    "searchMode": "Mode ng Paghahanap",
+    "vectorSearch": "Vector Search",
+    "fullDocumentScan": "Buong Pagsusuri ng Dokumento",
+    "vectorSearchDescription": "Naghahanap ng relevant na nilalaman gamit ang AI similarity search (mabilis, naka-target)",
+    "fullScanDescription": "Sinusuri ang lahat ng dokumento sa base ng kaalaman (komprehensibo, masinsinan)"
+  },
+  "modelSelection": {
+    "llmManagement": "Pamamahala ng LLM",
+    "llmDescription": "I-configure at pamahalaan ang mga LLM na ginagamit para sa pagbuo ng mga text response. Ang default na modelo ay gagamitin para sa lahat ng operasyon.",
+    "addNewLlm": "Magdagdag ng Bagong LLM",
+    "noLlmsConfigured": "Walang naka-configure na LLM",
+    "addNewLlmToGetStarted": "Magdagdag ng bagong LLM upang magsimula",
+    "embeddingModelManagement": "Pamamahala ng Embedding Models",
+    "embeddingDescription": "I-configure at pamahalaan ang mga embedding model na ginagamit para sa pag-index at pag-retrieve ng knowledge bases. Ang default na modelo ay gagamitin para sa paglikha ng mga bagong knowledge base, ngunit ang bawat knowledge base ay magpapatuloy na gamitin ang sarili nitong orihinal na embedding model kahit na ang default ay babaguhin sa ibang pagkakataon.",
+    "addEmbeddingModel": "Magdagdag ng Embedding Model",
+    "noEmbeddingModelsConfigured": "Walang naka-configure na embedding models",
+    "addNewEmbeddingModelToGetStarted": "Magdagdag ng bagong embedding model upang magsimula",
+    "tableHeaders": {
+      "name": "Pangalan",
+      "modelId": "Model ID",
+      "provider": "Provider",
+      "description": "Paglalarawan",
+      "status": "Status",
+      "actions": "Mga Aksyon"
+    },
+    "status": {
+      "default": "Default",
+      "available": "Magagamit"
+    },
+    "actions": {
+      "setAsDefault": "Itakda bilang Default",
+      "delete": "Tanggalin",
+      "validate": "I-validate",
+      "validating": "Nagva-validate"
+    },
+    "dialog": {
+      "addNewLlm": "Magdagdag ng Bagong LLM",
+      "addEmbeddingModel": "Magdagdag ng Embedding Model",
+      "displayName": "Display Name",
+      "provider": "Provider",
+      "modelId": "Model ID",
+      "description": "Paglalarawan",
+      "cancel": "Kanselahin",
+      "addModel": "Magdagdag ng Model"
+    },
+    "placeholders": {
+      "customModel": "Halimbawa: Aking custom na modelo",
+      "embeddingModelId": "Halimbawa: sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Ilarawan ang modelo, ang mga katangian nito, at kung kailan ito gagamitin"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Mangyaring maglagay ng Model ID"
+    }
   },
   "compare": {
     "title": "Ihambing ang mga Dokumento",
@@ -264,14 +365,15 @@
       "comparing": "Inihahambing..."
     },
     "pleaseWait": "Pakihintay habang inihahambing namin ang iyong mga dokumento",
-    "compareSuccess": "Matagumpay na naihambing ang mga dokumento!"
+    "compareSuccess": "Matagumpay na naihambing ang mga dokumento!",
+    "selectTopicListTitle": "Pumili ng Listahan ng Paksa"
   },
   "match": {
     "title": "Pagtugma ng Dokumento",
     "subtitle": "Maghanap ng mga katulad na dokumento batay sa nilalaman",
     "selectDocument": "Pumili ng dokumento upang maghanap ng mga tumugma",
     "pleaseSelect": "Pakiselect ang dokumento...",
-    "sourceDocument": "Form Template",
+    "sourceDocument": "Template ng Form",
     "matchingDocuments": "Mga Tumugmang Dokumento",
     "findMatches": "Maghanap ng mga Tugma",
     "similarityScore": "Similarity Score",
@@ -298,7 +400,68 @@
     },
     "pleaseWait": "Pakihintay habang pinagtutugma namin ang iyong mga dokumento",
     "matchSuccess": "Matagumpay na natapos ang pagproseso ng form!",
-    "singleDocumentSuccess": "Matagumpay na nakuha ang mga halaga ng field mula sa isang dokumento."
+    "singleDocumentSuccess": "Matagumpay na nakuha ang mga halaga ng field mula sa isang dokumento.",
+    "selectFormTemplateTitle": "Pumili ng Template ng Form"
+  },
+  "editOutlineModal": {
+    "title": "I-edit ang Outline",
+    "createTitle": "Gumawa ng Bagong Outline",
+    "outlineName": "Pangalan ng Outline",
+    "outlineNamePlaceholder": "Ilagay ang pangalan ng outline",
+    "description": "Paglalarawan",
+    "descriptionPlaceholder": "Ilagay ang paglalarawan ng outline upang awtomatikong magmungkahi ng mga seksyon (hindi bababa sa 10 character)...",
+    "referenceDocuments": "Mga Reperensyang Dokumento (Opsyonal)",
+    "uploadFiles": "Mag-upload ng mga File",
+    "knowledgeBase": "Base ng Kaalaman",
+    "sections": "Mga Seksyon",
+    "suggest": "Imungkahi",
+    "optimize": "I-optimize",
+    "consultDocs": "Konsultahin ang mga Dokumento",
+    "addSectionPlaceholder": "Magdagdag ng seksyon",
+    "cancel": "Kanselahin",
+    "createOutline": "Gumawa ng Outline",
+    "updateOutline": "I-update ang Outline"
+  },
+  "editChecklistModal": {
+    "title": "I-edit ang Checklist",
+    "createTitle": "Gumawa ng Bagong Checklist",
+    "checklistName": "Pangalan ng Checklist",
+    "checklistNamePlaceholder": "Ilagay ang pangalan ng checklist",
+    "description": "Paglalarawan",
+    "descriptionPlaceholder": "Ilagay ang paglalarawan ng checklist upang awtomatikong magmungkahi ng mga tanong (hindi bababa sa 10 character)...",
+    "referenceDocuments": "Mga Reperensyang Dokumento (Opsyonal)",
+    "uploadFiles": "Mag-upload ng mga File",
+    "knowledgeBase": "Base ng Kaalaman",
+    "questions": "{{count}} mga tanong",
+    "suggest": "Imungkahi",
+    "optimize": "I-optimize",
+    "addQuestionPlaceholder": "Magdagdag ng tanong",
+    "copyAllQuestions": "Kopyahin ang lahat ng tanong bilang text",
+    "cancel": "Kanselahin",
+    "createChecklist": "Gumawa ng Checklist",
+    "updateChecklist": "I-update ang Checklist"
+  },
+  "editTopicListModal": {
+    "title": "I-edit ang Listahan ng Paksa",
+    "createTitle": "Gumawa ng Bagong Listahan ng Paksa",
+    "topicListName": "Pangalan ng Listahan ng Paksa",
+    "topicListNamePlaceholder": "Ilagay ang pangalan ng listahan ng paksa",
+    "description": "Paglalarawan ng Listahan ng Paksa",
+    "descriptionPlaceholder": "Ilagay ang paglalarawan ng listahan ng paksa upang awtomatikong magmungkahi ng mga paksa (hindi bababa sa 10 character)...",
+    "referenceDocuments": "Mga Reperensyang Dokumento (Opsyonal)",
+    "uploadFiles": "Mag-upload ng mga File",
+    "knowledgeBase": "Base ng Kaalaman",
+    "comparisonTopics": "Mga Paksa ng Paghahambing",
+    "topics": "{{count}} mga paksa",
+    "section": "{{count}} seksyon",
+    "section_one": "{{count}} seksyon",
+    "sections": "{{count}} mga seksyon",
+    "suggest": "Imungkahi",
+    "addTopicPlaceholder": "Magdagdag ng paksa ng paghahambing",
+    "copyAllTopics": "Kopyahin ang lahat ng paksa bilang text",
+    "cancel": "Kanselahin",
+    "createTopicList": "Gumawa ng Listahan ng Paksa",
+    "updateTopicList": "I-update ang Listahan ng Paksa"
   },
   "knowledgeBases": {
     "title": "Pamamahala ng Knowledge Base",
@@ -397,6 +560,35 @@
         "fieldPlaceholder": "Magdagdag ng field name...",
         "cancel": "Kanselahin",
         "updateFormTemplate": "I-update ang Form Template"
+      },
+      "fields": {
+        "title": "Title",
+        "description": "Paglalarawan"
+      },
+      "fileUpload": {
+        "currentFiles": "Mga Kasalukuyang File",
+        "newFiles": "Mga Bagong File",
+        "selectedFiles": "Mga Napiling File",
+        "dragAndDrop": "I-drag at i-drop ang mga file dito, o i-click upang mag-browse",
+        "dropFiles": "I-drop ang mga file dito...",
+        "removeFile": "Alisin ang file",
+        "supportedFormats": "Suportado: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "Kanselahin",
+        "create": "Lumikha",
+        "save": "I-save",
+        "saving": "Sine-save...",
+        "creating": "Lumilikha..."
+      },
+      "validation": {
+        "titleRequired": "Kinakailangan ang title"
+      },
+      "messages": {
+        "createSuccess": "Matagumpay na nalikha ang Knowledge Base.",
+        "updateSuccess": "Matagumpay na na-update ang Knowledge Base.",
+        "processing": "Pinoproseso...",
+        "pleaseWait": "Pakihintay habang pinoproseso namin ang iyong mga file..."
       }
     },
     "editCustom": {
@@ -425,10 +617,10 @@
   "archive": {
     "title": "Archive",
     "history": "History",
-    "allUsers": "All Users",
-    "allUsersToggleTooltip": "Toggle between viewing only your history or all users' history",
-    "viewingAllUsers": "Viewing all users' history",
-    "viewingMyHistory": "Viewing only my history",
+    "allUsers": "Lahat ng Users",
+    "allUsersToggleTooltip": "Magpalit sa pagitan ng pagtingin lamang sa iyong history o sa history ng lahat ng users",
+    "viewingAllUsers": "Tinitingnan ang history ng lahat ng users",
+    "viewingMyHistory": "Tinitingnan lamang ang aking history",
     "tabs": {
       "review": "Review",
       "generate": "Generate",
@@ -436,10 +628,10 @@
       "match": "Match"
     },
     "emptyMessages": {
-      "review": "No previous evaluations",
-      "generate": "No previous reports",
-      "compare": "No previous comparisons",
-      "match": "No previous form processing"
+      "review": "Walang nakaraang mga evaluation",
+      "generate": "Walang nakaraang mga report",
+      "compare": "Walang nakaraang mga comparison",
+      "match": "Walang nakaraang form processing"
     },
     "metadata": {
       "question": "{{count}} tanong",
@@ -457,26 +649,26 @@
       "document": "{{count}} dokumento",
       "document_one": "{{count}} dokumento",
       "documents": "{{count}} mga dokumento",
-      "digitized": "digitized",
+      "digitized": "na-digitize",
       "handwritten": "nakasulat sa kamay"
     },
     "feedback": {
-      "positive": "Positive feedback",
-      "negative": "Negative feedback",
-      "hasFeedback": "Has feedback"
+      "positive": " positibong feedback",
+      "negative": "negatibong feedback",
+      "hasFeedback": "May feedback"
     },
-    "deleteConfirmation": "Are you sure you want to delete this item? This action cannot be undone.",
-    "unknownDate": "Unknown date",
-    "unnamedItem": "Unnamed item",
+    "deleteConfirmation": "Sigurado ka bang gusto mong tanggalin ang item na ito? Ang aksyong ito ay hindi maaaring bawiin.",
+    "unknownDate": "Hindi kilalang petsa",
+    "unnamedItem": "Hindi pinangalanang item",
     "successMessages": {
-      "evaluationLoaded": "Evaluation loaded successfully",
-      "reportLoaded": "Report loaded successfully",
-      "comparisonLoaded": "Comparison loaded successfully",
-      "formProcessingLoaded": "Form processing loaded successfully",
-      "evaluationDeleted": "Evaluation deleted successfully",
-      "reportDeleted": "Report deleted successfully",
-      "comparisonDeleted": "Comparison deleted successfully",
-      "formProcessingDeleted": "Form processing deleted successfully"
+      "evaluationLoaded": "Matagumpay na na-load ang evaluation",
+      "reportLoaded": "Matagumpay na na-load ang report",
+      "comparisonLoaded": "Matagumpay na na-load ang comparison",
+      "formProcessingLoaded": "Matagumpay na na-load ang form processing",
+      "evaluationDeleted": "Matagumpay na natanggal ang evaluation",
+      "reportDeleted": "Matagumpay na natanggal ang report",
+      "comparisonDeleted": "Matagumpay na natanggal ang comparison",
+      "formProcessingDeleted": "Matagumpay na natanggal ang form processing"
     },
     "docxHeaders": {
       "evaluationSummary": "Buod ng Pagsusuri",
@@ -623,14 +815,14 @@
     "downloadCsv": "I-download ang CSV",
     "clearCsv": "I-clear ang CSV",
     "clearResults": "I-clear ang Mga Resulta",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Paksa:",
+    "knowledgeBaseReference": "Sanggunian ng Knowledge Base",
+    "knowledgeBaseReferences": "Mga Sanggunian ng Knowledge Base",
+    "hideReferences": "Itago ang Mga Sanggunian",
+    "showReferences": "Ipakita ang Mga Sanggunian",
+    "referenceNumber": "Sanggunian {{number}}",
+    "processedInChunks": "Pinroseso sa {{count}} chunks",
+    "synthesisError": "Error sa pagsasama-sama ng topic analysis"
   },
   "toast": {
     "passwordUpdated": "Matagumpay na na-update ang password.",
@@ -704,5 +896,21 @@
     "outlineUpdated": "Matagumpay na na-update ang outline",
     "outlineCreated": "Matagumpay na nalikha ang outline",
     "outlineSaveFailed": "Nabigo ang pag-save ng outline: {{error}}"
+  },
+  "editFormTemplateModal": {
+    "title": "I-edit ang Form Template",
+    "formTemplateName": "Pangalan ng Form Template",
+    "formTemplateNamePlaceholder": "Ilagay ang pangalan ng form template",
+    "formTemplateDescription": "Paglalarawan ng Form Template",
+    "descriptionPlaceholder": "Ilagay ang paglalarawan ng form template upang awtomatikong imungkahi ang mga field (minimum 10 character)...",
+    "referenceDocuments": "Mga Sanggunian na Dokumento (Opsyonal)",
+    "uploadFiles": "Mag-upload ng mga File",
+    "pleaseWait": "Pakihintay habang sinusuri namin ang iyong mga dokumento",
+    "knowledgeBase": "Base ng Kaalaman",
+    "formFields": "Mga Field ng Form",
+    "suggest": "Imungkahi",
+    "fieldPlaceholder": "Magdagdag ng pangalan ng field...",
+    "cancel": "Kanselahin",
+    "updateFormTemplate": "I-update ang Form Template"
   }
 }

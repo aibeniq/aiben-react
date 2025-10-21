@@ -69,7 +69,34 @@
     "knowledgeBaseTableName": "Tên",
     "knowledgeBaseTableDescription": "Mô tả",
     "knowledgeBaseTableSources": "Nguồn",
-    "knowledgeBaseTablePages": "Trang"
+    "knowledgeBaseTablePages": "Trang",
+    "title": "Trò chuyện",
+    "sourcePopover": {
+      "knowledgeBase": "Cơ sở tri thức",
+      "file": "Tệp"
+    },
+    "searchMode": "Chế độ tìm kiếm:",
+    "vectorSearch": "Tìm kiếm vector",
+    "fullTextScan": "Quét toàn văn bản",
+    "searchModeDescription": "Tìm kiếm vector cung cấp kết quả nhanh chóng, có mục tiêu. Quét toàn văn bản xem xét tất cả nội dung trong cơ sở tri thức.",
+    "askMeAnything": "Hỏi tôi bất cứ điều gì! Để tìm kiếm cơ sở tri thức, hãy chọn cơ sở tri thức trước.",
+    "usingGeneralAI": "Sử dụng trợ lý AI chung",
+    "usingKnowledgeBase": "Sử dụng cơ sở tri thức:",
+    "usingDocuments": "Sử dụng # tài liệu",
+    "usingFiles": "Sử dụng {{count}} tài liệu{{plural}}:",
+    "remove": "Xóa",
+    "selectKnowledgeBase": "Chọn Cơ sở tri thức",
+    "selectKnowledgeBasePlaceholder": "Chọn một Cơ sở tri thức...",
+    "noKnowledgeBasesAvailable": "Không có Cơ sở tri thức sẵn có. Tạo một cái trước để sử dụng tính năng này.",
+    "knowledgeBase": "Cơ sở tri thức",
+    "file": "Tệp",
+    "errors": {
+      "generic": "Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại.",
+      "timeout": "Yêu cầu đã hết thời gian chờ. Vui lòng thử lại.",
+      "largeFileTimeout": "Xử lý tệp lớn đã hết thời gian chờ. Hãy thử chuyển sang chế độ 'Quét toàn văn bản' để có hiệu suất tốt hơn với tệp lớn.",
+      "fileSize": "Tệp quá lớn. Vui lòng chọn tệp nhỏ hơn.",
+      "serverError": "Đã xảy ra lỗi máy chủ. Vui lòng thử lại sau."
+    }
   },
   "settings": {
     "title": "Cài đặt",
@@ -186,7 +213,8 @@
       "initializing": "Khởi tạo...",
       "processing": "Đang xử lý...",
       "extracting": "Đang trích xuất nội dung..."
-    }
+    },
+    "error": "Đã xảy ra lỗi!"
   },
   "review": {
     "pageTitle": "Đánh giá tài liệu",
@@ -220,7 +248,7 @@
     "checklistNamePlaceholder": "Nhập tên danh sách kiểm tra...",
     "checklistDescriptionLabel": "Mô tả",
     "checklistDescriptionPlaceholder": "Nhập mô tả danh sách kiểm tra cho các đề xuất câu hỏi tự động (tối thiểu 10 ký tự)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} câu hỏi",
     "suggest": "Đề xuất",
     "suggesting": "Đang đề xuất...",
     "optimize": "Tối ưu hóa",
@@ -249,7 +277,8 @@
     "fullScanDescription": "Phân tích tất cả tài liệu trong cơ sở tri thức (toàn diện, kỹ lưỡng)",
     "pleaseWait": "Vui lòng đợi, chúng tôi đang đánh giá tài liệu của bạn",
     "reviewSuccess": "Việc đánh giá tài liệu đã hoàn thành thành công!",
-    "reviewSuccessMultiple": "{{count}} tệp đã được xử lý với việc chia sẻ ngữ cảnh được tối ưu hóa!"
+    "reviewSuccessMultiple": "{{count}} tệp đã được xử lý với việc chia sẻ ngữ cảnh được tối ưu hóa!",
+    "characterCount": "{{count}}/2000 ký tự. Những hướng dẫn này sẽ được thêm vào mỗi câu hỏi khi xử lý."
   },
   "usage": {
     "title": "Sử dụng",
@@ -800,7 +829,15 @@
     "downloadDocx": "Tải xuống DOCX",
     "downloadCsv": "Tải xuống CSV",
     "clearCsv": "Xóa CSV",
-    "clearResults": "Xóa kết quả"
+    "clearResults": "Xóa kết quả",
+    "topicLabel": "Chủ đề:",
+    "knowledgeBaseReference": "Tham chiếu Cơ sở tri thức",
+    "knowledgeBaseReferences": "Tham chiếu Cơ sở tri thức",
+    "hideReferences": "Ẩn Tham chiếu",
+    "showReferences": "Hiển thị Tham chiếu",
+    "referenceNumber": "Tham chiếu {{number}}",
+    "processedInChunks": "Đã xử lý trong {{count}} khối",
+    "synthesisError": "Lỗi tổng hợp phân tích chủ đề"
   },
   "toast": {
     "passwordUpdated": "Mật khẩu đã được cập nhật thành công.",
@@ -874,5 +911,21 @@
     "outlineUpdated": "Dàn ý đã được cập nhật thành công",
     "outlineCreated": "Dàn ý đã được tạo thành công",
     "outlineSaveFailed": "Lưu dàn ý thất bại: {{error}}"
+  },
+  "editFormTemplateModal": {
+    "title": "Chỉnh sửa Mẫu biểu mẫu",
+    "formTemplateName": "Tên Mẫu biểu mẫu",
+    "formTemplateNamePlaceholder": "Nhập tên mẫu biểu mẫu",
+    "formTemplateDescription": "Mô tả Mẫu biểu mẫu",
+    "descriptionPlaceholder": "Nhập mô tả mẫu biểu mẫu để tự động đề xuất các trường (tối thiểu 10 ký tự)...",
+    "referenceDocuments": "Tài liệu Tham khảo (Tùy chọn)",
+    "uploadFiles": "Tải lên Tệp",
+    "pleaseWait": "Vui lòng đợi trong khi chúng tôi xem xét tài liệu của bạn",
+    "knowledgeBase": "Cơ sở tri thức",
+    "formFields": "Các Trường Biểu mẫu",
+    "suggest": "Đề xuất",
+    "fieldPlaceholder": "Thêm tên trường...",
+    "cancel": "Hủy",
+    "updateFormTemplate": "Cập nhật Mẫu biểu mẫu"
   }
 }

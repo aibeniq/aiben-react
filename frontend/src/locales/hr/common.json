@@ -29,7 +29,8 @@
     "next": "Sljedeći",
     "previous": "Prethodni",
     "confirm": "Potvrdi",
-    "back": "Natrag"
+    "back": "Natrag",
+    "done": "Gotovo"
   },
   "forms": {
     "firstName": "Ime",
@@ -57,7 +58,42 @@
     "knowledgeBaseTableName": "Naziv",
     "knowledgeBaseTableDescription": "Opis",
     "knowledgeBaseTableSources": "Izvori",
-    "knowledgeBaseTablePages": "Stranice"
+    "knowledgeBaseTablePages": "Stranice",
+    "title": "[AUTO-TRANSLATED hr] Chat",
+    "sourcePopover": {
+      "knowledgeBase": "Baza znanja",
+      "file": "Datoteka"
+    },
+    "searchMode": "Način pretraživanja:",
+    "vectorSearch": "Vektorsko pretraživanje",
+    "fullTextScan": "Potpuno skeniranje teksta",
+    "searchModeDescription": "[AUTO-TRANSLATED hr] Vector search provides fast, targeted results. Full text scan reviews all content in the knowledge base.",
+    "askMeAnything": "[AUTO-TRANSLATED hr] Ask me anything! For knowledge base search, select a knowledge base first.",
+    "usingGeneralAI": "[AUTO-TRANSLATED hr] Using general AI assistant",
+    "usingKnowledgeBase": "[AUTO-TRANSLATED hr] Using knowledge base:",
+    "usingDocuments": "[AUTO-TRANSLATED hr] Using # document(s)",
+    "usingFiles": "[AUTO-TRANSLATED hr] Using {{count}} document{{plural}}:",
+    "remove": "Ukloni",
+    "selectKnowledgeBase": "[AUTO-TRANSLATED hr] Select Knowledge Base",
+    "knowledgeBaseTable": {
+      "name": "Naziv",
+      "description": "Opis",
+      "sources": "Izvori",
+      "noDescription": "Nema opisa",
+      "sourcesCount": "{{count}} izvora",
+      "pagesCount": "{{count}} stranica"
+    },
+    "selectKnowledgeBasePlaceholder": "Odaberite bazu znanja...",
+    "noKnowledgeBasesAvailable": "Nema dostupnih baza znanja. Prvo stvorite jednu za korištenje ove značajke.",
+    "knowledgeBase": "Baza znanja",
+    "file": "Datoteka",
+    "errors": {
+      "generic": "[AUTO-TRANSLATED hr] Sorry, something went wrong. Please try again.",
+      "timeout": "[AUTO-TRANSLATED hr] Request timed out. Please try again.",
+      "largeFileTimeout": "[AUTO-TRANSLATED hr] Large file processing timed out. Try switching to 'Full Text Scan' mode for better performance with large files.",
+      "fileSize": "[AUTO-TRANSLATED hr] File is too large. Please choose smaller files.",
+      "serverError": "[AUTO-TRANSLATED hr] Server error occurred. Please try again later."
+    }
   },
   "settings": {
     "title": "Postavke",
@@ -147,32 +183,40 @@
     "copy": "Kopiraj",
     "paste": "Zalijepi",
     "cut": "Izreži",
-    "showMore": "[TODO: Show More]",
-    "showLess": "[TODO: Show Less]",
-    "readMore": "[TODO: Read More]",
-    "questionNumber": "[TODO: Question {{number}}:]",
-    "viewSourceCitations": "[TODO: View Source Citations ({{count}})]",
-    "answer": "[TODO: Answer:]",
-    "relevantPolicyContext": "[TODO: Relevant Policy Context:]",
-    "sources": "[TODO: sources]",
-    "sourceCitations": "[TODO: Source Citations ({{count}})]",
-    "citationNumber": "[TODO: Citation {{number}}]",
-    "noSourceCitations": "[TODO: No source citations available for this section]",
-    "noDetailedSections": "[TODO: No detailed sections available for this report]",
-    "topicLabel": "[TODO: Topic:]",
-    "knowledgeBaseReference": "[TODO: Knowledge Base Reference]",
-    "knowledgeBaseReferences": "[TODO: Knowledge Base References]",
-    "hideReferences": "[TODO: Hide References]",
-    "showReferences": "[TODO: Show References]",
-    "referenceNumber": "[TODO: Reference {{number}}]",
-    "processedInChunks": "[TODO: Processed in {{count}} chunks]",
-    "synthesisErrorNote": "[TODO: Note: Synthesis error occurred - showing combined chunk results]",
+    "showMore": "Prikaži više",
+    "showLess": "Prikaži manje",
+    "readMore": "Pročitaj više",
+    "questionNumber": "Pitanje {{number}}:",
+    "viewSourceCitations": "Prikaži izvorne citate ({{count}})",
+    "answer": "Odgovor:",
+    "relevantPolicyContext": "Relevantan kontekst politike:",
+    "sources": "izvori",
+    "sourceCitations": "Izvorni citati ({{count}})",
+    "citationNumber": "Citat {{number}}",
+    "noSourceCitations": "Nema dostupnih izvornih citata za ovaj odjeljak",
+    "noDetailedSections": "Nema dostupnih detaljnih odjeljaka za ovaj izvještaj",
+    "topicLabel": "Tema:",
+    "knowledgeBaseReference": "Referenca baze znanja",
+    "knowledgeBaseReferences": "Reference baze znanja",
+    "hideReferences": "Sakrij reference",
+    "showReferences": "Prikaži reference",
+    "referenceNumber": "Referenca {{number}}",
+    "processedInChunks": "Obradjeno u {{count}} dijelova",
+    "synthesisErrorNote": "Napomena: Došlo je do pogreške u sintezi - prikazuju se kombinirani rezultati dijelova",
     "progress": {
       "starting": "Pokretanje...",
       "initializing": "Inicijalizacija...",
       "processing": "Obrada...",
       "extracting": "Izdvajanje sadržaja..."
-    }
+    },
+    "error": "[AUTO-TRANSLATED hr] Something went wrong!",
+    "welcomeBack": "[AUTO-TRANSLATED hr] Welcome back, nice to see you again!",
+    "hiUser": "[AUTO-TRANSLATED hr] Hi, {{name}} 👋"
+  },
+  "usage": {
+    "title": "Upotreba",
+    "currentPeriod": "Trenutno razdoblje:",
+    "usedOfQuota": "iskorišteno od vaše mjesečne kvote"
   },
   "review": {
     "pageTitle": "Pregled dokumenata",
@@ -206,7 +250,7 @@
     "checklistNamePlaceholder": "Unesite naziv liste provjere...",
     "checklistDescriptionLabel": "Opis",
     "checklistDescriptionPlaceholder": "Unesite opis liste provjere za automatske prijedloge pitanja (najmanje 10 znakova)...",
-    "questions": "{{count}} questions",
+    "questions": "{{count}} pitanja",
     "suggest": "Predloži",
     "suggesting": "Predlažem...",
     "optimize": "Optimiziraj",
@@ -227,7 +271,64 @@
     "deleteChecklist": "Obriši listu provjere",
     "pleaseWait": "Molimo pričekajte dok pregledavamo vaše dokumente",
     "reviewSuccess": "Pregled dokumenta uspješno završen!",
-    "reviewSuccessMultiple": "{{count}} datoteka obrađeno s optimiziranim dijeljenjem konteksta!"
+    "reviewSuccessMultiple": "{{count}} datoteka obrađeno s optimiziranim dijeljenjem konteksta!",
+    "dropFilesHere": "[AUTO-TRANSLATED hr] Drop the files here",
+    "uploadedFiles": "[AUTO-TRANSLATED hr] Uploaded Files",
+    "removeFile": "Ukloni",
+    "characterCount": "[AUTO-TRANSLATED hr] {{count}}/2000 characters. These instructions will be appended to each question when processing.",
+    "searchMode": "[AUTO-TRANSLATED hr] Search Mode",
+    "vectorSearch": "Vektorsko pretraživanje",
+    "fullDocumentScan": "[AUTO-TRANSLATED hr] Full Document Scan",
+    "vectorSearchDescription": "[AUTO-TRANSLATED hr] Finds relevant content using AI similarity search (fast, targeted)",
+    "fullScanDescription": "[AUTO-TRANSLATED hr] Analyzes all documents in the knowledge base (comprehensive, thorough)"
+  },
+  "modelSelection": {
+    "llmManagement": "Upravljanje LLM-om",
+    "llmDescription": "Konfigurirajte i upravljajte LLM-ovima koji se koriste za generiranje tekstualnih odgovora. Zadani model će se koristiti za sve operacije.",
+    "addNewLlm": "Dodaj novi LLM",
+    "noLlmsConfigured": "Nema konfiguriranih LLM-ova",
+    "addNewLlmToGetStarted": "Dodajte novi LLM da započnete",
+    "embeddingModelManagement": "Upravljanje modelima ugrađivanja",
+    "embeddingDescription": "Konfigurirajte i upravljajte modelima ugrađivanja koji se koriste za indeksiranje i dohvaćanje baza znanja. Zadani model će se koristiti za stvaranje novih baza znanja, ali svaka baza znanja će nastaviti koristiti svoj izvorni model ugrađivanja čak i ako se zadani kasnije promijeni.",
+    "addEmbeddingModel": "Dodaj model ugrađivanja",
+    "noEmbeddingModelsConfigured": "Nema konfiguriranih modela ugrađivanja",
+    "addNewEmbeddingModelToGetStarted": "Dodajte novi model ugrađivanja da započnete",
+    "tableHeaders": {
+      "name": "Ime",
+      "modelId": "ID modela",
+      "provider": "Pružatelj",
+      "description": "Opis",
+      "status": "[AUTO-TRANSLATED hr] Status",
+      "actions": "Radnje"
+    },
+    "status": {
+      "default": "Zadano",
+      "available": "Dostupno"
+    },
+    "actions": {
+      "setAsDefault": "Postavi kao zadano",
+      "delete": "Obriši",
+      "validate": "Provjeri",
+      "validating": "Provjeravanje"
+    },
+    "dialog": {
+      "addNewLlm": "Dodaj novi LLM",
+      "addEmbeddingModel": "Dodaj model ugrađivanja",
+      "displayName": "Prikazano ime",
+      "provider": "Pružatelj",
+      "modelId": "ID modela",
+      "description": "Opis",
+      "cancel": "Odustani",
+      "addModel": "Dodaj model"
+    },
+    "placeholders": {
+      "customModel": "Primjer: Moj prilagođeni model",
+      "embeddingModelId": "Primjer: sentence-transformers/all-MiniLM-L6-v2",
+      "describeModel": "Opišite model, njegove značajke i kada ga koristiti"
+    },
+    "validation": {
+      "pleaseEnterModelId": "Molimo unesite ID modela"
+    }
   },
   "compare": {
     "title": "Usporedi dokumente",
@@ -261,7 +362,8 @@
       "comparing": "Uspoređivanje..."
     },
     "pleaseWait": "Molimo pričekajte dok uspoređujemo vaše dokumente",
-    "compareSuccess": "Dokumenti su uspješno uspoređeni!"
+    "compareSuccess": "Dokumenti su uspješno uspoređeni!",
+    "selectTopicListTitle": "[AUTO-TRANSLATED hr] Select Topic List"
   },
   "match": {
     "title": "Podudarne dokumente",
@@ -295,7 +397,68 @@
     },
     "pleaseWait": "Molimo pričekajte dok usklađujemo vaše dokumente",
     "matchSuccess": "Obrada obrasca je uspješno završena!",
-    "singleDocumentSuccess": "Vrijednosti polja su izvučene iz jednog dokumenta."
+    "singleDocumentSuccess": "Vrijednosti polja su izvučene iz jednog dokumenta.",
+    "selectFormTemplateTitle": "[AUTO-TRANSLATED hr] Select Form Template"
+  },
+  "editOutlineModal": {
+    "title": "Uredi strukturu",
+    "createTitle": "Stvori novu strukturu",
+    "outlineName": "Ime strukture",
+    "outlineNamePlaceholder": "Unesite ime strukture",
+    "description": "Opis",
+    "descriptionPlaceholder": "Unesite opis strukture za automatsko predlaganje odjeljaka (najmanje 10 znakova)...",
+    "referenceDocuments": "Referentni dokumenti (neobavezno)",
+    "uploadFiles": "Prenesi datoteke",
+    "knowledgeBase": "Baza znanja",
+    "sections": "Odjeljci",
+    "suggest": "Predloži",
+    "optimize": "Optimiziraj",
+    "consultDocs": "Konzultiraj dokumente",
+    "addSectionPlaceholder": "Dodaj odjeljak",
+    "cancel": "Odustani",
+    "createOutline": "Stvori strukturu",
+    "updateOutline": "Ažuriraj strukturu"
+  },
+  "editChecklistModal": {
+    "title": "Uredi listu provjere",
+    "createTitle": "Stvori novu listu provjere",
+    "checklistName": "Ime liste provjere",
+    "checklistNamePlaceholder": "Unesite ime liste provjere",
+    "description": "Opis",
+    "descriptionPlaceholder": "Unesite opis liste provjere za automatsko predlaganje pitanja (najmanje 10 znakova)...",
+    "referenceDocuments": "Referentni dokumenti (neobavezno)",
+    "uploadFiles": "Prenesi datoteke",
+    "knowledgeBase": "Baza znanja",
+    "questions": "{{count}} pitanja",
+    "suggest": "Predloži",
+    "optimize": "Optimiziraj",
+    "addQuestionPlaceholder": "Dodaj pitanje",
+    "copyAllQuestions": "Kopiraj sva pitanja kao tekst",
+    "cancel": "Odustani",
+    "createChecklist": "Stvori listu provjere",
+    "updateChecklist": "Ažuriraj listu provjere"
+  },
+  "editTopicListModal": {
+    "title": "Uredi popis tema",
+    "createTitle": "Stvori novi popis tema",
+    "topicListName": "Ime popisa tema",
+    "topicListNamePlaceholder": "Unesite ime popisa tema",
+    "description": "Opis popisa tema",
+    "descriptionPlaceholder": "Unesite opis popisa tema za automatsko predlaganje tema (najmanje 10 znakova)...",
+    "referenceDocuments": "Referentni dokumenti (neobavezno)",
+    "uploadFiles": "Prenesi datoteke",
+    "knowledgeBase": "Baza znanja",
+    "comparisonTopics": "Teme usporedbe",
+    "topics": "{{count}} tema",
+    "section": "{{count}} odjeljak",
+    "section_one": "{{count}} odjeljak",
+    "sections": "{{count}} odjeljaka",
+    "suggest": "Predloži",
+    "addTopicPlaceholder": "Dodaj temu usporedbe",
+    "copyAllTopics": "Kopiraj sve teme kao tekst",
+    "cancel": "Odustani",
+    "createTopicList": "Stvori popis tema",
+    "updateTopicList": "Ažuriraj popis tema"
   },
   "knowledgeBases": {
     "title": "Upravljanje bazama znanja",
@@ -394,6 +557,35 @@
         "fieldPlaceholder": "Dodaj naziv polja...",
         "cancel": "Odustani",
         "updateFormTemplate": "Ažuriraj Predložak Obrasca"
+      },
+      "fields": {
+        "title": "[AUTO-TRANSLATED hr] Title",
+        "description": "Opis"
+      },
+      "fileUpload": {
+        "currentFiles": "[AUTO-TRANSLATED hr] Current Files",
+        "newFiles": "[AUTO-TRANSLATED hr] New Files",
+        "selectedFiles": "[AUTO-TRANSLATED hr] Selected Files",
+        "dragAndDrop": "[AUTO-TRANSLATED hr] Drag and drop files here, or click to browse",
+        "dropFiles": "[AUTO-TRANSLATED hr] Drop the files here...",
+        "removeFile": "[AUTO-TRANSLATED hr] Remove file",
+        "supportedFormats": "[AUTO-TRANSLATED hr] Supports: PDF, TXT, DOC/DOCX, RTF, CSV, XLSX"
+      },
+      "buttons": {
+        "cancel": "Odustani",
+        "create": "Stvori",
+        "save": "Spremi",
+        "saving": "[AUTO-TRANSLATED hr] Saving...",
+        "creating": "[AUTO-TRANSLATED hr] Creating..."
+      },
+      "validation": {
+        "titleRequired": "[AUTO-TRANSLATED hr] Title is required"
+      },
+      "messages": {
+        "createSuccess": "[AUTO-TRANSLATED hr] Knowledge Base created successfully.",
+        "updateSuccess": "[AUTO-TRANSLATED hr] Knowledge Base updated successfully.",
+        "processing": "[AUTO-TRANSLATED hr] Processing...",
+        "pleaseWait": "[AUTO-TRANSLATED hr] Please wait while we process your files..."
       }
     },
     "editCustom": {
@@ -620,14 +812,14 @@
     "downloadCsv": "Preuzmi CSV",
     "clearCsv": "Očisti CSV",
     "clearResults": "Očisti rezultate",
-    "topicLabel": "[TODO] Topic:",
-    "knowledgeBaseReference": "[TODO] Knowledge Base Reference",
-    "knowledgeBaseReferences": "[TODO] Knowledge Base References",
-    "hideReferences": "[TODO] Hide References",
-    "showReferences": "[TODO] Show References",
-    "referenceNumber": "[TODO] Reference {{number}}",
-    "processedInChunks": "[TODO] Processed in {{count}} chunks",
-    "synthesisError": "[TODO] Error synthesizing topic analysis"
+    "topicLabel": "Tema:",
+    "knowledgeBaseReference": "Referenca Baze Znanja",
+    "knowledgeBaseReferences": "Reference Baze Znanja",
+    "hideReferences": "Sakrij Reference",
+    "showReferences": "Prikaži Reference",
+    "referenceNumber": "Referenca {{number}}",
+    "processedInChunks": "Obradjeno u {{count}} dijelova",
+    "synthesisError": "Greška pri sintezi analize teme"
   },
   "toast": {
     "passwordUpdated": "Lozinka je uspješno ažurirana.",
@@ -701,5 +893,24 @@
     "outlineUpdated": "Nacrt je uspješno ažuriran",
     "outlineCreated": "Nacrt je uspješno stvoren",
     "outlineSaveFailed": "Spremanje nacrta nije uspjelo: {{error}}"
+  },
+  "dropdowns": {
+    "selectKnowledgeBase": "Odaberite bazu znanja..."
+  },
+  "editFormTemplateModal": {
+    "title": "[AUTO-TRANSLATED hr] Edit Form Template",
+    "formTemplateName": "[AUTO-TRANSLATED hr] Form Template Name",
+    "formTemplateNamePlaceholder": "[AUTO-TRANSLATED hr] Enter form template name",
+    "formTemplateDescription": "[AUTO-TRANSLATED hr] Form Template Description",
+    "descriptionPlaceholder": "[AUTO-TRANSLATED hr] Enter form template description to auto-suggest fields (minimum 10 characters)...",
+    "referenceDocuments": "[AUTO-TRANSLATED hr] Reference Documents (Optional)",
+    "uploadFiles": "[AUTO-TRANSLATED hr] Upload Files",
+    "pleaseWait": "Pričekajte dok pregledavamo vaše dokumente",
+    "knowledgeBase": "Baza znanja",
+    "formFields": "[AUTO-TRANSLATED hr] Form Fields",
+    "suggest": "[AUTO-TRANSLATED hr] Suggest",
+    "fieldPlaceholder": "[AUTO-TRANSLATED hr] Add a field name...",
+    "cancel": "Odustani",
+    "updateFormTemplate": "[AUTO-TRANSLATED hr] Update Form Template"
   }
 }
