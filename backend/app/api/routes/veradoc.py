@@ -1668,19 +1668,22 @@ async def process_rag_checklist(
                                         vision_analysis, session, current_user, llm
                                     )
 
-                                    # Combine text and vision analysis
+                                    # Combine text and vision analysis seamlessly (photogenic integration)
                                     if (
                                         "contains images but no extractable text"
                                         in document_text
                                         and len(document_text) < 200
                                     ):
                                         # For image-only documents, use vision-primary combination
-                                        combined_answer = f"## Visual Analysis\n{vision_analysis}\n\n## Document Note\nThis analysis is based on visual content as the document contains images but no extractable text."
+                                        combined_answer = f"Based on visual analysis of the document: {vision_analysis}. This assessment relies on image content, as the document contains minimal extractable text."
                                     else:
-                                        # Normal text + vision combination
-                                        combined_answer = VisionService.combine_text_and_vision_analysis(
-                                            answer, vision_analysis, "comprehensive"
-                                        )
+                                        # Normal text + vision combination: Integrate narratively without markers
+                                        # Clean the vision_analysis to remove any residual markers (if present)
+                                        vision_analysis_clean = re.sub(
+                                            r"## .*? ##|---.*?---", "", vision_analysis
+                                        ).strip()
+                                        # Combine into a flowing response
+                                        combined_answer = f"Text Analysis: {answer} Visual Analysis: {vision_analysis_clean}"
 
                                     answer = combined_answer
                                     print(

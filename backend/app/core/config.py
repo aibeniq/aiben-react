@@ -433,7 +433,8 @@ class Settings(BaseSettings):
     According to policy, an acceptable document must have all of the elements described in the following questions.
     Read the following question-and-answer pairs about a certain proposal and determine whether or not it conforms to the policy.
     
-    Remember: if any single element is missing from the proposal, it automatically means that the entire proposal does NOT conform to policy.
+    Remember: if an answer to any of the questions is "no", it automatically means that the entire proposal does NOT conform to policy.
+    Sometimes the Visual Analysis might show that a document meets criteria even if the Text Analysis is insufficient. As such, treat visual analysis as equally valid evidence to text analysis-—do not discount it if text analysis is insufficient.
     If the plan does not conform to policy, explain why not.
     
     {qa_pairs}
