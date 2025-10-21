@@ -699,8 +699,12 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
 
     try:
         if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
-            print("Loading PDF with PyPDF...")
-            loaded_documents = load_pdf_with_pypdf(temp_file_path, file.filename)
+            print("Loading PDF with enhanced parsing...")
+            loaded_documents = load_pdf_with_pypdf(
+                temp_file_path,
+                file.filename,
+                use_enhanced_parsing=True,  # Enable for better table handling
+            )
         elif (
             content_type
             == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -728,7 +732,7 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
 
             # First try regular document extraction
             loaded_documents = extract_documents_from_file_unified(
-                file_content, file.filename
+                file_content, file.filename, use_enhanced_pdf_parsing=True
             )
 
             # If no documents, try enhanced extraction with images
@@ -1497,7 +1501,7 @@ async def process_knowledge_base_creation(
                             # Process the file based on its type
                             if filename.lower().endswith(".pdf"):
                                 loaded_documents = load_pdf_with_pypdf(
-                                    temp_file_path, filename
+                                    temp_file_path, filename, use_enhanced_parsing=True
                                 )
                             elif filename.lower().endswith(".txt"):
                                 loader = TextLoader(temp_file_path)

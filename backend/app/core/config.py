@@ -7,6 +7,7 @@ from pydantic import (
     AnyUrl,
     BeforeValidator,
     EmailStr,
+    Field,
     HttpUrl,
     PostgresDsn,
     computed_field,
@@ -50,6 +51,14 @@ class Settings(BaseSettings):
     RAG_DOCUMENT_CHUNK_SIZE: int = 1000
     RAG_DOCUMENT_CHUNK_OVERLAP: int = 200
     RAG_NUM_CHUNKS: int = 20  # Number of chunks to retrieve for RAG search
+
+    # PDF processing settings
+    USE_ENHANCED_PDF_PARSING: bool = Field(
+        default=False, description="Enable PyMuPDF4LLM for enhanced PDF table parsing"
+    )
+    PDF_PARSING_MODE: str = Field(
+        default="auto", description="PDF parsing mode: 'auto', 'enhanced', 'basic'"
+    )
 
     # Content filtering settings for improved RAG quality
     RAG_FILTER_BIBLIOGRAPHY: bool = True  # Filter bibliography content from RAG results
