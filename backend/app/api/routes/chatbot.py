@@ -12,6 +12,7 @@ from app.services.llms import (
     create_llm,
     get_default_llm,
     invoke_llm,
+    invoke_llm_async,
     record_llm_interaction,
 )
 from app.services.translation import translate_text_if_needed
@@ -1206,6 +1207,39 @@ async def query_knowledge_base(
 
         # 5. Retrieve relevant context for the question
         docs = retriever.get_relevant_documents(rephrased_question)
+
+        # LLM-based relevance filtering for vector search (optional, controlled by config)
+        if settings.RAG_ENABLE_LLM_RELEVANCE_FILTER and docs:
+            print(
+                f"🔍 LLM filtering enabled - analyzing {len(docs)} retrieved chunks for relevance to question..."
+            )
+
+            filtered_docs = []
+            for i, doc in enumerate(docs):
+                print(f"Analyzing chunk {i+1}/{len(docs)} for relevance...")
+
+                relevance_check = invoke_llm(
+                    llm,
+                    settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
+                    {
+                        "chunk": doc.page_content or "",
+                        "question": rephrased_question,
+                    },
+                )
+
+                if "No relevant information found" not in relevance_check:
+                    print(f"✅ Chunk {i+1} is relevant")
+                    filtered_docs.append(doc)
+                else:
+                    print(
+                        f"❌ Chunk {i+1} is not relevant - excluding from context and citations"
+                    )
+
+            print(
+                f"📊 Relevance filtering: {len(filtered_docs)}/{len(docs)} chunks are relevant"
+            )
+            docs = filtered_docs
+
         context = "\n\n".join([doc.page_content for doc in docs])
         print("Retrieved context:", context)
 
@@ -1813,6 +1847,39 @@ async def query_document(
 
         # Retrieve relevant context
         docs = retriever.get_relevant_documents(rephrased_question)
+
+        # LLM-based relevance filtering for vector search
+        if docs:
+            print(
+                f"🔍 LLM filtering enabled - analyzing {len(docs)} retrieved chunks for relevance to question..."
+            )
+
+            filtered_docs = []
+            for i, doc in enumerate(docs):
+                print(f"Analyzing chunk {i+1}/{len(docs)} for relevance...")
+
+                relevance_check = invoke_llm(
+                    llm,
+                    settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
+                    {
+                        "chunk": doc.page_content or "",
+                        "question": rephrased_question,
+                    },
+                )
+
+                if "No relevant information found" not in relevance_check:
+                    print(f"✅ Chunk {i+1} is relevant")
+                    filtered_docs.append(doc)
+                else:
+                    print(
+                        f"❌ Chunk {i+1} is not relevant - excluding from context and citations"
+                    )
+
+            print(
+                f"📊 Relevance filtering: {len(filtered_docs)}/{len(docs)} chunks are relevant"
+            )
+            docs = filtered_docs
+
         context = "\n\n".join([doc.page_content for doc in docs])
 
         # For follow-up questions, restore images from cached session data
@@ -2283,3 +2350,175 @@ async def startup_event():
             print("Session cache cleanup performed")
 
     asyncio.create_task(cleanup_sessions())
+
+
+# Assistant Intent Detection Models
+class AssistantIntentRequest(BaseModel):
+    message: str
+    file_names: Optional[List[str]] = None
+
+
+class AssistantIntentStep(BaseModel):
+    action: str
+    description: str
+
+
+class AssistantIntentParameters(BaseModel):
+    custom_instructions: Optional[str] = None
+    search_mode: Optional[str] = "vector"
+    consult_docs: Optional[bool] = True
+
+
+class AssistantIntentResponse(BaseModel):
+    primary_intent: str
+    suggestion_type: Optional[str] = None
+    is_multistep: bool = False
+    steps: List[AssistantIntentStep] = []
+    parameters: AssistantIntentParameters = AssistantIntentParameters()
+    confidence: float
+    reasoning: str
+
+
+@router.post("/assistant/detect-intent", response_model=AssistantIntentResponse)
+async def detect_assistant_intent(
+    request: AssistantIntentRequest,
+    current_user: CurrentUser,
+    session: SessionDep,
+) -> AssistantIntentResponse:
+    """
+    Use LLM to detect user intent for assistant mode requests.
+    Analyzes the message and file information to determine appropriate actions.
+    """
+    try:
+        print("DEBUG: Starting intent detection")
+        # Prepare the prompt with user message and file context
+        file_context = ""
+        if request.file_names:
+            file_context = f"\n\nUploaded files: {', '.join(request.file_names)}"
+            # Add file type hints
+            file_types = []
+            for filename in request.file_names:
+                if filename.lower().endswith(".pdf"):
+                    file_types.append("PDF document")
+                elif filename.lower().endswith((".docx", ".doc")):
+                    file_types.append("Word document")
+                elif filename.lower().endswith((".xlsx", ".xls", ".csv")):
+                    file_types.append("spreadsheet")
+                elif filename.lower().endswith((".txt", ".md")):
+                    file_types.append("text document")
+                else:
+                    file_types.append("document")
+            if file_types:
+                file_context += f"\nFile types: {', '.join(set(file_types))}"
+
+        print(f"DEBUG: File context: {file_context}")
+        prompt = f"""Analyze this user request and determine the appropriate action.
+
+User request: {request.message}
+File context: {file_context}
+
+Return a JSON object with:
+- primary_intent: "generate", "review", "compare", "match", or "chatbot"
+- suggestion_type: "outline", "checklist", "topics", "form_template", or null
+- is_multistep: true or false
+- steps: array of actions
+- parameters: object with custom_instructions, search_mode, consult_docs
+- confidence: 0.0-1.0
+- reasoning: explanation
+
+Example: {{"primary_intent": "generate", "suggestion_type": "outline", "is_multistep": true, "steps": [{{"action": "suggest_outline", "description": "Generate outline"}}, {{"action": "run_generate", "description": "Generate report"}}], "parameters": {{"custom_instructions": "about canned sardines"}}, "confidence": 0.9, "reasoning": "User wants to generate content with outline first"}}"""
+        print(f"DEBUG: Prompt prepared, length: {len(prompt)}")
+
+        # Get LLM for intent detection
+        llm = get_default_llm(session, current_user)
+        print(f"DEBUG: LLM retrieved: {type(llm)}")
+
+        # Call LLM for intent detection
+        print("DEBUG: Calling invoke_llm")
+        try:
+            import asyncio
+
+            loop = asyncio.get_running_loop()
+            response = await loop.run_in_executor(None, invoke_llm, llm, prompt, None)
+            print("DEBUG: LLM call completed successfully")
+        except Exception as e:
+            print(f"DEBUG: LLM call failed: {type(e).__name__}: {str(e)}")
+            raise
+
+        print("LLM intent detection response:", response)
+
+        # Parse the JSON response
+        try:
+            # Extract JSON from the response (LLM might add extra text)
+            response_text = response.strip()
+            # Look for JSON object in the response
+            json_start = response_text.find("{")
+            json_end = response_text.rfind("}") + 1
+            if json_start != -1 and json_end > json_start:
+                json_str = response_text[json_start:json_end]
+                intent_data = json.loads(json_str)
+            else:
+                # Fallback if no JSON found
+                intent_data = {
+                    "primary_intent": "chatbot",
+                    "suggestion_type": None,
+                    "is_multistep": False,
+                    "steps": [{"action": "chat", "description": "Have a conversation"}],
+                    "parameters": {},
+                    "confidence": 0.5,
+                    "reasoning": "Could not parse LLM response, defaulting to chat",
+                }
+
+            # Validate and structure the response
+            validated_response = AssistantIntentResponse(
+                primary_intent=intent_data.get("primary_intent", "chatbot"),
+                suggestion_type=intent_data.get("suggestion_type"),
+                is_multistep=intent_data.get("is_multistep", False),
+                steps=[
+                    AssistantIntentStep(**step) for step in intent_data.get("steps", [])
+                ],
+                parameters=AssistantIntentParameters(
+                    **intent_data.get("parameters", {})
+                ),
+                confidence=min(1.0, max(0.0, intent_data.get("confidence", 0.5))),
+                reasoning=intent_data.get("reasoning", "Intent detected by LLM"),
+            )
+
+            return validated_response
+
+        except (json.JSONDecodeError, KeyError, TypeError) as e:
+            # Fallback for parsing errors
+            print(f"DEBUG: JSON parsing error: {str(e)}")
+            return AssistantIntentResponse(
+                primary_intent="chatbot",
+                suggestion_type=None,
+                is_multistep=False,
+                steps=[
+                    AssistantIntentStep(
+                        action="chat", description="Have a conversation"
+                    )
+                ],
+                parameters=AssistantIntentParameters(),
+                confidence=0.3,
+                reasoning=f"Failed to parse LLM response: {str(e)}",
+            )
+
+    except Exception as e:
+        # Final fallback
+        print(
+            f"DEBUG: Final exception in intent detection: {type(e).__name__}: {str(e)}"
+        )
+        import traceback
+
+        traceback.print_exc()
+        return AssistantIntentResponse(
+            primary_intent="chatbot",
+            suggestion_type=None,
+            is_multistep=False,
+            steps=[
+                AssistantIntentStep(action="chat", description="Have a conversation")
+            ],
+            parameters=AssistantIntentParameters(),
+            confidence=0.1,
+            reasoning=f"Error in intent detection: {str(e)}",
+        )

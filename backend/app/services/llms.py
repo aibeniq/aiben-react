@@ -1015,7 +1015,7 @@ def record_llm_interaction(
     """
     print(f"[DEBUG] record_llm_interaction called with functionality: {functionality}")
     print(f"[DEBUG] user_id: {user_id}")
-    print(f"[DEBUG] metadata: {metadata}")
+    # print(f"[DEBUG] metadata: {metadata}")
     # Convert input and output to strings if they're not already
     if not isinstance(input_data, str):
         # Try to preserve structure by using JSON
