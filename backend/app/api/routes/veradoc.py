@@ -577,9 +577,8 @@ def extract_text_from_file(file_content: bytes, filename: str) -> str:
     """Extract text from various file formats using unified document processing."""
     from app.services.document_utils import extract_text_from_file_unified
 
-    return extract_text_from_file_unified(
-        file_content, filename, use_enhanced_pdf_parsing=True
-    )
+    # Uses settings.PDF_PARSING_MODE by default
+    return extract_text_from_file_unified(file_content, filename)
 
 
 async def extract_text_from_file_async(file_content: bytes, filename: str) -> str:

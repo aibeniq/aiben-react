@@ -53,11 +53,9 @@ class Settings(BaseSettings):
     RAG_NUM_CHUNKS: int = 20  # Number of chunks to retrieve for RAG search
 
     # PDF processing settings
-    USE_ENHANCED_PDF_PARSING: bool = Field(
-        default=False, description="Enable PyMuPDF4LLM for enhanced PDF table parsing"
-    )
     PDF_PARSING_MODE: str = Field(
-        default="auto", description="PDF parsing mode: 'auto', 'enhanced', 'basic'"
+        default="basic",
+        description="PDF parsing mode: 'auto' (detect tables automatically), 'enhanced' (always use PyMuPDF4LLM), 'basic' (always use pypdf)",
     )
 
     # Content filtering settings for improved RAG quality

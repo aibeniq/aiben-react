@@ -281,7 +281,7 @@ def extract_text_from_xlsx_bytes(file_content: bytes, filename: str) -> str:
 
 
 def extract_text_from_file_unified(
-    file_content: bytes, filename: str, use_enhanced_pdf_parsing: bool = False
+    file_content: bytes, filename: str, pdf_parsing_mode: str = None
 ) -> str:
     """
     Unified file text extraction function that handles multiple file types.
@@ -290,8 +290,8 @@ def extract_text_from_file_unified(
     Args:
         file_content: Raw bytes of the file
         filename: Name of the file
-        use_enhanced_pdf_parsing: If True, use PyMuPDF4LLM for better table handling in PDFs
-
+        pdf_parsing_mode: PDF parsing mode ('auto', 'enhanced', 'basic').
+                         If None, uses settings.PDF_PARSING_MODE
 
     Returns:
         Extracted text content as string
@@ -303,9 +303,17 @@ def extract_text_from_file_unified(
         if file_ext == ".pdf":
             # Handle PDF files
             from app.services.pdf_utils import extract_text_from_pdf_bytes
+            from app.core.config import settings
+
+            # Use provided mode or fall back to settings
+            mode = (
+                pdf_parsing_mode
+                if pdf_parsing_mode is not None
+                else settings.PDF_PARSING_MODE
+            )
 
             return extract_text_from_pdf_bytes(
-                file_content, filename, use_enhanced_parsing=use_enhanced_pdf_parsing
+                file_content, filename, parsing_mode=mode
             )
 
         elif file_ext in [".docx", ".doc"]:
@@ -369,7 +377,7 @@ def extract_text_from_file_unified(
 
 
 def extract_documents_from_file_unified(
-    file_content: bytes, filename: str, use_enhanced_pdf_parsing: bool = True
+    file_content: bytes, filename: str, pdf_parsing_mode: str = None
 ) -> List[Document]:
     """
     Unified file extraction function that returns LangChain Document objects.
@@ -378,7 +386,8 @@ def extract_documents_from_file_unified(
     Args:
         file_content: Raw bytes of the file
         filename: Name of the file
-        use_enhanced_pdf_parsing: If True, use PyMuPDF4LLM for better table handling in PDFs
+        pdf_parsing_mode: PDF parsing mode ('auto', 'enhanced', 'basic').
+                         If None, uses settings.PDF_PARSING_MODE
 
     Returns:
         List of LangChain Document objects
@@ -395,11 +404,19 @@ def extract_documents_from_file_unified(
 
             try:
                 from app.services.pdf_utils import load_pdf_with_pypdf
+                from app.core.config import settings
+
+                # Use provided mode or fall back to settings
+                mode = (
+                    pdf_parsing_mode
+                    if pdf_parsing_mode is not None
+                    else settings.PDF_PARSING_MODE
+                )
 
                 return load_pdf_with_pypdf(
                     temp_file_path,
                     filename,
-                    use_enhanced_parsing=use_enhanced_pdf_parsing,
+                    parsing_mode=mode,
                 )
             finally:
                 if os.path.exists(temp_file_path):

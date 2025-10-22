@@ -63,25 +63,33 @@ The codebase now uses both `pypdf` (BSD license) for basic text extraction and P
 
 **Knowledge Bases** (`backend/app/api/routes/knowledgebases.py`):
 
-- Direct PDF processing: `use_enhanced_parsing=True`
-- Unified processing: `use_enhanced_pdf_parsing=True`
+- Uses `settings.PDF_PARSING_MODE` for all PDF processing
+- Configurable via environment variable
 
 **Chatbot** (`backend/app/api/routes/chatbot.py`):
 
-- File upload processing: `use_enhanced_pdf_parsing=True`
+- File upload processing uses `settings.PDF_PARSING_MODE`
 
 **VeraDoc** (`backend/app/api/routes/veradoc.py`):
 
-- Text extraction: `use_enhanced_pdf_parsing=True`
+- Text extraction uses `settings.PDF_PARSING_MODE`
 
 ### Phase 4: Configuration and Feature Flags ✅
 
 **Added to `backend/app/core/config.py`**:
 
 ```python
-USE_ENHANCED_PDF_PARSING: bool = Field(default=False, description="Enable PyMuPDF4LLM for enhanced PDF table parsing")
-PDF_PARSING_MODE: str = Field(default="auto", description="PDF parsing mode: 'auto', 'enhanced', 'basic'")
+PDF_PARSING_MODE: str = Field(
+    default="auto",
+    description="PDF parsing mode: 'auto' (detect tables automatically), 'enhanced' (always use PyMuPDF4LLM), 'basic' (always use pypdf)"
+)
 ```
+
+**Modes:**
+
+- `auto`: Automatically detect tables and use enhanced parsing only when tables are found (default, best performance)
+- `enhanced`: Always use PyMuPDF4LLM for all PDFs (best quality, slower)
+- `basic`: Always use basic pypdf extraction (fastest, may miss table structure)
 
 ### Phase 5: Testing and Validation ✅
 
@@ -117,29 +125,46 @@ PDF_PARSING_MODE: str = Field(default="auto", description="PDF parsing mode: 'au
 
 ## Usage Examples
 
-### Automatic Enhanced Parsing (Current Implementation)
+### Using Global Settings (Recommended)
 
-All PDF processing now automatically attempts enhanced parsing:
+Set `PDF_PARSING_MODE` in your `.env` file or environment variables:
 
-```python
-# Knowledge base document ingestion
-documents = load_pdf_with_pypdf(file_path, filename, use_enhanced_parsing=True)
+```bash
+# Auto mode (default) - detect tables automatically
+PDF_PARSING_MODE=auto
 
-# Chatbot file uploads
-documents = extract_documents_from_file_unified(file_content, filename, use_enhanced_pdf_parsing=True)
+# Enhanced mode - always use PyMuPDF4LLM
+PDF_PARSING_MODE=enhanced
 
-# Document review/analysis
-text = extract_text_from_file_unified(file_content, filename, use_enhanced_pdf_parsing=True)
+# Basic mode - always use pypdf
+PDF_PARSING_MODE=basic
 ```
 
-### Manual Control (Future Enhancement)
+All PDF processing will automatically use the configured mode:
 
 ```python
-# Force enhanced parsing
-documents = load_pdf_with_pypdf(file_path, filename, use_enhanced_parsing=True)
+# Uses settings.PDF_PARSING_MODE by default
+documents = extract_documents_from_file_unified(file_content, filename)
+text = extract_text_from_file_unified(file_content, filename)
+```
 
-# Force basic parsing only
-documents = load_pdf_with_pypdf(file_path, filename, use_enhanced_parsing=False)
+### Overriding Mode Per-File
+
+You can override the global setting for specific files:
+
+```python
+# Force enhanced parsing for a specific file
+documents = extract_documents_from_file_unified(
+    file_content, filename, pdf_parsing_mode="enhanced"
+)
+
+# Force basic parsing for a specific file
+text = extract_text_from_file_unified(
+    file_content, filename, pdf_parsing_mode="basic"
+)
+
+# Use auto mode for a specific file
+documents = load_pdf_with_pypdf(file_path, filename, parsing_mode="auto")
 ```
 
 ## Deployment Notes

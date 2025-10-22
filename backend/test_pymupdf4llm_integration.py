@@ -34,7 +34,7 @@ def test_fallback_behavior():
     if test_pdf.exists():
         # Should work regardless of PyMuPDF4LLM availability
         documents = load_pdf_with_pypdf(
-            str(test_pdf), "sample.pdf", use_enhanced_parsing=True
+            str(test_pdf), "sample.pdf", parsing_mode="auto"
         )
         assert len(documents) > 0
         assert all(doc.page_content.strip() for doc in documents)
@@ -53,14 +53,14 @@ def test_extract_text_from_pdf_bytes_enhanced():
 
         # Test enhanced parsing
         text_enhanced = extract_text_from_pdf_bytes(
-            pdf_bytes, "sample.pdf", use_enhanced_parsing=True
+            pdf_bytes, "sample.pdf", parsing_mode="enhanced"
         )
         assert isinstance(text_enhanced, str)
         assert len(text_enhanced.strip()) > 0
 
         # Test basic parsing
         text_basic = extract_text_from_pdf_bytes(
-            pdf_bytes, "sample.pdf", use_enhanced_parsing=False
+            pdf_bytes, "sample.pdf", parsing_mode="basic"
         )
         assert isinstance(text_basic, str)
         assert len(text_basic.strip()) > 0
@@ -81,14 +81,14 @@ def test_document_utils_integration():
 
         # Test document extraction with enhanced parsing
         documents = extract_documents_from_file_unified(
-            pdf_bytes, "sample.pdf", use_enhanced_pdf_parsing=True
+            pdf_bytes, "sample.pdf", pdf_parsing_mode="enhanced"
         )
         assert len(documents) > 0
         assert all(doc.page_content.strip() for doc in documents)
 
         # Test text extraction with enhanced parsing
         text = extract_text_from_file_unified(
-            pdf_bytes, "sample.pdf", use_enhanced_pdf_parsing=True
+            pdf_bytes, "sample.pdf", pdf_parsing_mode="enhanced"
         )
         assert isinstance(text, str)
         assert len(text.strip()) > 0
