@@ -35,6 +35,7 @@ import OutlineTable from "../../components/Generate/OutlineTable"
 import { useResults } from "../../contexts/ResultsContext"
 import { copyToClipboard } from "../../utils/copyToClipboard"
 import { cleanRTFFormatting } from "../../utils/rtfCleaner"
+import { useAssistantStore } from "../../stores/assistantStore"
 
 const ReportGenie = () => {
   const { t } = useTranslation()
@@ -356,6 +357,179 @@ const ReportGenie = () => {
   useEffect(() => {
     fetchOutlines()
   }, [])
+
+  // Assistant mode prefilling
+  const {
+    message,
+    assistantMode,
+    targetRoute,
+    files,
+    suggestionType,
+    isMultistep,
+    steps,
+    parameters,
+    setAssistantData,
+  } = useAssistantStore()
+  useEffect(() => {
+    if (assistantMode && targetRoute === "/generate" && message) {
+      const processAssistantRequest = async () => {
+        try {
+          // Handle multistep processing
+          if (isMultistep && steps && steps.length > 0) {
+            for (let i = 0; i < steps.length; i++) {
+              const step = steps[i]
+
+              if (step.action === "suggest_outline") {
+                // Generate outline from files or description
+                showSuccessToast(t("generate.generatingOutlineFromFiles"))
+
+                let outlineResponse
+                if (files && files.length > 0) {
+                  // Generate outline from uploaded files
+                  outlineResponse = await ReportgenieService.generateOutline({
+                    formData: {
+                      description: message,
+                      files: files,
+                    },
+                  })
+                } else {
+                  // Generate outline from description only
+                  outlineResponse = await ReportgenieService.generateOutline({
+                    formData: {
+                      description: message,
+                    },
+                  })
+                }
+
+                // Convert sections array to newline-separated string
+                const sectionsString = outlineResponse.sections.join("\n")
+                console.log("Generated outline sections:", sectionsString)
+                console.log("Sections array length:", outlineResponse.sections.length)
+
+                // Create a new outline
+                const newOutline = await ReportgenieService.createOutline({
+                  requestBody: {
+                    name: `Assistant Generated - ${new Date().toLocaleString()}`,
+                    description: outlineResponse.description_analysis || message,
+                    sections: sectionsString,
+                    owner_id: "", // Backend will set this automatically
+                  },
+                })
+                console.log("Created new outline:", newOutline)
+
+                // Set the generated outline as selected
+                setSelectedOutline(newOutline)
+                setSections(sectionsString)
+                setCustomInstructions(parameters?.customInstructions || message)
+
+                console.log("State updated - sections set to:", sectionsString)
+
+                // Refresh outlines list to include the new one
+                const outlinesData = await ReportgenieService.getOutlines()
+                setOutlines(outlinesData)
+
+                // Wait a bit for state to update
+                await new Promise((resolve) => setTimeout(resolve, 1000))
+                console.log("Outline setup complete, sections state:", sectionsString)
+              } else if (step.action === "run_generate") {
+                // Wait for sections to be available before generating
+                console.log("Running generate step, waiting for sections...")
+                let attempts = 0
+                const maxAttempts = 10
+
+                const waitForSections = () => {
+                  attempts++
+                  console.log(`Generate attempt ${attempts}, current sections:`, sections)
+
+                  if (sections && sections.trim()) {
+                    console.log("Sections available, starting generation")
+                    handleGenerateDocument()
+                  } else if (attempts < maxAttempts) {
+                    console.log("Sections not ready yet, waiting...")
+                    setTimeout(waitForSections, 200)
+                  } else {
+                    console.error("Sections never became available for generation")
+                    showErrorToast(t("generate.enterAtLeastOneSection"))
+                  }
+                }
+
+                waitForSections()
+              }
+            }
+          } else if (files && files.length > 0) {
+            // Single step: Generate outline from uploaded files
+            showSuccessToast(t("generate.generatingOutlineFromFiles"))
+
+            const outlineResponse = await ReportgenieService.generateOutline({
+              formData: {
+                description: message,
+                files: files,
+              },
+            })
+
+            // Convert sections array to newline-separated string
+            const sectionsString = outlineResponse.sections.join("\n")
+
+            // Create a new outline
+            const newOutline = await ReportgenieService.createOutline({
+              requestBody: {
+                name: `Assistant Generated - ${new Date().toLocaleString()}`,
+                description: outlineResponse.description_analysis || message,
+                sections: sectionsString,
+                owner_id: "", // Backend will set this automatically
+              },
+            })
+
+            // Set the generated outline as selected
+            setSelectedOutline(newOutline)
+            setSections(sectionsString)
+            setCustomInstructions(message)
+
+            // Refresh outlines list to include the new one
+            const outlinesData = await ReportgenieService.getOutlines()
+            setOutlines(outlinesData)
+          } else {
+            // Single step: Original behavior - use message as sections
+            setCustomInstructions(message)
+            setSections(message)
+          }
+
+          // If not multistep or if the last step was run_generate, trigger generation
+          if (!isMultistep || (steps && steps[steps.length - 1]?.action === "run_generate")) {
+            setTimeout(() => {
+              handleGenerateDocument()
+            }, 500)
+          }
+        } catch (error) {
+          console.error("Assistant mode processing failed:", error)
+          showErrorToast(t("generate.outlineGenerationFailed"))
+
+          // Fallback to original behavior
+          setCustomInstructions(message)
+          setSections(message)
+
+          setTimeout(() => {
+            handleGenerateDocument()
+          }, 500)
+        } finally {
+          // Reset assistant mode
+          setAssistantData({ assistantMode: false, targetRoute: "", message: "", files: [] })
+        }
+      }
+
+      processAssistantRequest()
+    }
+  }, [
+    assistantMode,
+    targetRoute,
+    message,
+    files,
+    suggestionType,
+    isMultistep,
+    steps,
+    parameters,
+    setAssistantData,
+  ])
 
   // Mutation hook for generating the document
   const mutation = useMutation({

@@ -21,6 +21,7 @@ import FeedbackButtons from "../../components/Feedback/FeedbackButtons"
 import FormTemplateTable from "../../components/Match/FormTemplateTable"
 import { useResults } from "../../contexts/ResultsContext"
 import { copyToClipboard } from "../../utils/copyToClipboard"
+import { useAssistantStore } from "../../stores/assistantStore"
 
 const FormConnect = () => {
   const { t, ready } = useTranslation()
@@ -275,6 +276,35 @@ const FormConnect = () => {
   useEffect(() => {
     fetchForms()
   }, [])
+
+  // Assistant mode prefilling
+  const { message, files, assistantMode, targetRoute, setAssistantData } = useAssistantStore()
+  useEffect(() => {
+    if (assistantMode && targetRoute === "/match" && message) {
+      // Prefill the form
+      setFields(message)
+      if (files.length > 0) {
+        // Convert files to FileItem format
+        const fileItemsFromFiles = files.map((file, index) => ({
+          id: `assistant-file-${index}`,
+          file,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        }))
+        setFileItems(fileItemsFromFiles)
+      }
+
+      // Trigger the match process automatically after a short delay
+      // This allows the form to update with the new values
+      setTimeout(() => {
+        handleRun()
+      }, 500)
+
+      // Reset assistant mode
+      setAssistantData({ assistantMode: false, targetRoute: "", message: "", files: [] })
+    }
+  }, [assistantMode, targetRoute, message, files, setAssistantData])
 
   const mutation = useMutation({
     mutationFn: async (data: {

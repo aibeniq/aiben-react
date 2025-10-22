@@ -30,6 +30,7 @@ const ChatbotMain = () => {
   const [currentFileNames, setCurrentFileNames] = useState<string[]>([])
   const [sessionId, setSessionId] = useState<string>("")
   const [searchMode, setSearchMode] = useState<"vector" | "full_text">("vector")
+  const [assistantMode, setAssistantMode] = useState(false)
 
   const clearChat = () => {
     setMessages([])
@@ -376,6 +377,8 @@ const ChatbotMain = () => {
                 handleSendMessage={handleSendMessage}
                 searchMode={searchMode}
                 setSearchMode={setSearchMode}
+                assistantMode={assistantMode}
+                setAssistantMode={setAssistantMode}
               />
             </Drawer.Content>
           </Drawer.Positioner>

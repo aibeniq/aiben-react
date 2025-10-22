@@ -36,6 +36,7 @@ import SelectionCard from "../../components/Common/SelectionCard"
 import SelectionModal from "../../components/Common/SelectionModal"
 import ChecklistTable from "../../components/Review/ChecklistTable"
 import { useResults } from "../../contexts/ResultsContext"
+import { useAssistantStore } from "../../stores/assistantStore"
 import { copyToClipboard } from "../../utils/copyToClipboard"
 import { getCleanFileName } from "../../utils/filename"
 import { cleanRTFFormatting } from "../../utils/rtfCleaner"
@@ -467,6 +468,105 @@ const VeraDoc = () => {
   useEffect(() => {
     fetchChecklists()
   }, [])
+
+  // Assistant mode prefilling with multistep support
+  const {
+    message,
+    files,
+    assistantMode,
+    targetRoute,
+    suggestionType,
+    isMultistep,
+    steps,
+    parameters,
+    setAssistantData,
+  } = useAssistantStore()
+  useEffect(() => {
+    if (assistantMode && targetRoute === "/review" && message) {
+      const processAssistantRequest = async () => {
+        try {
+          // Handle file uploads first
+          if (files.length > 0) {
+            const fileItemsFromFiles = files.map((file, index) => ({
+              id: `assistant-file-${index}`,
+              file,
+              name: file.name,
+              size: file.size,
+              type: file.type,
+            }))
+            setFileItems(fileItemsFromFiles)
+          }
+
+          // Set custom instructions from parameters or message
+          setCustomInstructions(parameters?.customInstructions || message)
+
+          // Set search mode if specified
+          if (parameters?.searchMode) {
+            setSearchMode(parameters.searchMode as "vector" | "full_scan")
+          }
+
+          // Handle multistep processing
+          if (isMultistep && steps && steps.length > 0) {
+            for (let i = 0; i < steps.length; i++) {
+              const step = steps[i]
+
+              if (step.action === "suggest_checklist") {
+                // For now, just set the description for manual suggestion
+                // TODO: Implement automatic checklist creation and suggestion
+                showSuccessToast(t("review.generatingChecklist"))
+                setCustomInstructions(parameters?.customInstructions || message)
+              } else if (step.action === "run_review") {
+                // Run the review process
+                setTimeout(() => {
+                  handleRun()
+                }, 500)
+              }
+            }
+          } else if (suggestionType === "checklist") {
+            // Single step: set description for checklist suggestion
+            showSuccessToast(t("review.generatingChecklist"))
+            setCustomInstructions(parameters?.customInstructions || message)
+          } else {
+            // Single step: run review directly
+            setTimeout(() => {
+              handleRun()
+            }, 500)
+          }
+        } catch (error) {
+          console.error("Assistant mode processing failed:", error)
+          showErrorToast(t("review.assistantModeError"))
+          // Fallback: just run review
+          setTimeout(() => {
+            handleRun()
+          }, 500)
+        } finally {
+          // Reset assistant mode
+          setAssistantData({
+            assistantMode: false,
+            targetRoute: "",
+            message: "",
+            files: [],
+            suggestionType: undefined,
+            isMultistep: false,
+            steps: [],
+            parameters: {},
+          })
+        }
+      }
+
+      processAssistantRequest()
+    }
+  }, [
+    assistantMode,
+    targetRoute,
+    message,
+    files,
+    suggestionType,
+    isMultistep,
+    steps,
+    parameters,
+    setAssistantData,
+  ])
 
   // Optimized single-request mutation for both single and multi-file processing
   const mutation = useMutation({

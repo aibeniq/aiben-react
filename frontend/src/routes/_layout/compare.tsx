@@ -20,6 +20,7 @@ import { useTwincheckProgress } from "@/hooks/useTwincheckProgress"
 
 import { useResults } from "@/contexts/ResultsContext"
 import { copyToClipboard } from "@/utils/copyToClipboard"
+import { useAssistantStore } from "../../stores/assistantStore"
 
 const TwinCheck = () => {
   const { t } = useTranslation()
@@ -36,11 +37,22 @@ const TwinCheck = () => {
   const [showTopicListModal, setShowTopicListModal] = useState(false)
 
   // Initialize form state from persisted inputs or defaults
-  const [document1, setDocument1] = useState<File | null>(compareInputs?.document1 || null)
-  const [document2, setDocument2] = useState<File | null>(compareInputs?.document2 || null)
+  const { message: assistantMessage, files: assistantFiles, assistantMode } = useAssistantStore()
+  const [document1, setDocument1] = useState<File | null>(
+    assistantMode && assistantFiles.length >= 1
+      ? assistantFiles[0]
+      : compareInputs?.document1 || null,
+  )
+  const [document2, setDocument2] = useState<File | null>(
+    assistantMode && assistantFiles.length >= 2
+      ? assistantFiles[1]
+      : compareInputs?.document2 || null,
+  )
 
   // Topics state
-  const [topics, setTopics] = useState(compareInputs?.topics || "")
+  const [topics, setTopics] = useState(
+    assistantMode && assistantMessage ? assistantMessage : compareInputs?.topics || "",
+  )
   const [comparisons, setComparisons] = useState<TwinCheckTopicList[]>([])
   const [selectedComparison, setSelectedComparison] = useState<TwinCheckTopicList | null>(
     compareInputs?.selectedComparison || null,
@@ -310,7 +322,62 @@ const TwinCheck = () => {
     fetchComparisons()
   }, [])
 
-  // Mutation for comparing documents
+  // Assistant mode prefilling
+  const { message, files, targetRoute, setAssistantData } = useAssistantStore()
+  useEffect(() => {
+    const runAssistantMode = async () => {
+      if (assistantMode && targetRoute === "/compare" && files.length >= 2) {
+        console.log(
+          "Assistant mode activated with files:",
+          files.map((f) => f.name),
+        )
+
+        // Files are already set in state initialization, just set topics and trigger comparison
+
+        // Generate topics automatically using the suggest topics feature
+        try {
+          const topicsResponse = await TwincheckService.generateTopics({
+            formData: {
+              description: message || "Compare these two documents",
+              files: [files[0], files[1]],
+            },
+            searchMode: "vector",
+          })
+
+          if (topicsResponse.topics && Array.isArray(topicsResponse.topics)) {
+            setTopics(topicsResponse.topics.join("\n"))
+            console.log("Set topics from API")
+          }
+
+          // Trigger the comparison automatically after a short delay
+          setTimeout(() => {
+            console.log("Triggering comparison")
+            handleCompare()
+            // Reset assistant mode after comparison starts
+            setTimeout(() => {
+              setAssistantData({ assistantMode: false, targetRoute: "", message: "", files: [] })
+            }, 1000)
+          }, 500) // Small delay to ensure topics are set
+        } catch (error) {
+          console.error("Failed to generate topics:", error)
+          // Fallback: use message as topics if generation fails
+          if (message) {
+            setTopics(message)
+            setTimeout(() => {
+              console.log("Triggering comparison with fallback topics")
+              handleCompare()
+              // Reset assistant mode after comparison starts
+              setTimeout(() => {
+                setAssistantData({ assistantMode: false, targetRoute: "", message: "", files: [] })
+              }, 1000)
+            }, 500)
+          }
+        }
+      }
+    }
+
+    runAssistantMode()
+  }, [assistantMode, message, files]) // Removed setAssistantData from deps  // Mutation for comparing documents
   const mutation = useMutation({
     mutationFn: async (data: {
       comparison_topics: string
