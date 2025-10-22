@@ -508,12 +508,22 @@ async def generate_report(
                             )
 
                             try:
+                                # Get user language and create language instruction
+                                user_language = current_user.language or "en"
+                                language_name = settings.SUPPORTED_LANGUAGES.get(
+                                    user_language, "English"
+                                )
+                                language_instruction = (
+                                    f"Respond in this language: {language_name}."
+                                )
+
                                 synthesized_answer = invoke_llm(
                                     llm,
                                     settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
                                     {
                                         "chunk_analyses": "\n\n".join(chunk_analyses),
                                         "question": section_description,
+                                        "language_instruction": language_instruction,
                                     },
                                 )
 
@@ -535,9 +545,10 @@ async def generate_report(
                                     )
 
                                 # Translate the synthesized answer if needed
-                                section_content = await translate_text_if_needed(
-                                    synthesized_answer, session, current_user, llm
-                                )
+                                # section_content = await translate_text_if_needed(
+                                #     synthesized_answer, session, current_user, llm
+                                # )
+                                section_content = synthesized_answer
 
                                 # Create source citations from relevant chunks only
                                 source_citations = []
@@ -583,6 +594,19 @@ async def generate_report(
                             [doc.page_content for doc in search_results]
                         )
 
+                        # Prepare language instruction - ALWAYS include for consistency
+                        user_language = (
+                            getattr(current_user, "preferred_language", "en") or "en"
+                        )
+                        language_instruction = ""
+                        if user_language:
+                            language_name = settings.SUPPORTED_LANGUAGES.get(
+                                user_language, user_language
+                            )
+                            language_instruction = (
+                                f"Respond in this language: {language_name}."
+                            )
+
                         synthesized_answer = invoke_llm(
                             llm,
                             settings.REPORT_GENIE_PROMPT_TEMPLATE,
@@ -595,6 +619,7 @@ async def generate_report(
                                     if custom_instructions
                                     else ""
                                 ),
+                                "language_instruction": language_instruction,
                             },
                         )
 
@@ -614,9 +639,10 @@ async def generate_report(
                             print(f"Warning: Could not check disconnect status: {e}")
 
                         # Translate the synthesized answer if needed
-                        section_content = await translate_text_if_needed(
-                            synthesized_answer, session, current_user, llm
-                        )
+                        # section_content = await translate_text_if_needed(
+                        #     synthesized_answer, session, current_user, llm
+                        # )
+                        section_content = synthesized_answer
 
                         # Extract source citations from search results
                         source_citations = []
@@ -1246,6 +1272,15 @@ async def generate_outline_json(
         description = request.description or ""
 
         # Prepare variables for the prompt
+        # Prepare language instruction - ALWAYS include for consistency
+        user_language = getattr(current_user, "preferred_language", "en") or "en"
+        language_instruction = ""
+        if user_language:
+            language_name = settings.SUPPORTED_LANGUAGES.get(
+                user_language, user_language
+            )
+            language_instruction = f"Respond in this language: {language_name}."
+
         prompt_variables = {
             "description": description,
             "report_type": request.report_type or "general",
@@ -1254,6 +1289,7 @@ async def generate_outline_json(
             "example_analysis_instruction": "",
             "knowledge_base_instruction": "",
             "knowledge_base_content": "",
+            "language_instruction": language_instruction,
         }
 
         # If knowledge base is specified, retrieve content using selected search mode
@@ -1417,6 +1453,15 @@ async def generate_outline(
         # Get the default LLM
         llm = get_default_llm(session, current_user)
 
+        # Prepare language instruction - ALWAYS include for consistency
+        user_language = getattr(current_user, "preferred_language", "en") or "en"
+        language_instruction = ""
+        if user_language:
+            language_name = settings.SUPPORTED_LANGUAGES.get(
+                user_language, user_language
+            )
+            language_instruction = f"Respond in this language: {language_name}."
+
         # Process uploaded files to extract example document content
         example_document_content = ""
         if files:
@@ -1527,6 +1572,7 @@ async def generate_outline(
                         "example_analysis_instruction": ". Briefly mention how the example document influenced the structure",
                         "knowledge_base_content": "",
                         "knowledge_base_instruction": "",
+                        "language_instruction": language_instruction,
                     }
 
                     try:
@@ -1668,6 +1714,7 @@ Return only the final selected sections, one per line, numbered."""
             "example_analysis_instruction": example_analysis_instruction,
             "knowledge_base_content": "",
             "knowledge_base_instruction": "",
+            "language_instruction": language_instruction,
         }
 
         # Format the prompt with variables to show what exactly is being sent to the LLM
@@ -2133,10 +2180,23 @@ async def optimize_outline(
 
                         chunk_analyses = []
                         for chunk in text_chunks:
+                            # Get user language and create language instruction
+                            user_language = current_user.language or "en"
+                            language_name = settings.SUPPORTED_LANGUAGES.get(
+                                user_language, "English"
+                            )
+                            language_instruction = (
+                                f"Respond in this language: {language_name}."
+                            )
+
                             analysis = invoke_llm(
                                 llm,
                                 settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
-                                {"chunk": chunk, "question": section_description},
+                                {
+                                    "chunk": chunk,
+                                    "question": section_description,
+                                    "language_instruction": language_instruction,
+                                },
                             )
                             chunk_analyses.append(analysis)
 
@@ -2151,12 +2211,14 @@ async def optimize_outline(
                                 {
                                     "chunk_analyses": chunk_analyses_text,
                                     "question": section_description,
+                                    "language_instruction": language_instruction,
                                 },
                             )
                             # Translate the synthesized answer if needed
-                            generated_content = await translate_text_if_needed(
-                                synthesized_answer, session, current_user, llm
-                            )
+                            # generated_content = await translate_text_if_needed(
+                            #     synthesized_answer, session, current_user, llm
+                            # )
+                            generated_content = synthesized_answer
 
                         print(
                             f"Generated {len(generated_content)} characters for section using full text scan"
@@ -2265,10 +2327,24 @@ async def optimize_outline(
                                 )
 
                         # Generate content for this section using LLM
+                        # Prepare language instruction - ALWAYS include for consistency
+                        user_language = (
+                            getattr(current_user, "preferred_language", "en") or "en"
+                        )
+                        language_instruction = ""
+                        if user_language:
+                            language_name = settings.SUPPORTED_LANGUAGES.get(
+                                user_language, user_language
+                            )
+                            language_instruction = (
+                                f"Respond in this language: {language_name}."
+                            )
+
                         template_vars = {
                             "report_draft": report_draft,
                             "context": context,
                             "question": section_description,
+                            "language_instruction": language_instruction,
                         }
 
                         # Add custom instructions if provided
@@ -2288,9 +2364,9 @@ async def optimize_outline(
                             template_vars,
                         )
                         # Translate the generated content if needed
-                        generated_content = await translate_text_if_needed(
-                            generated_content, session, current_user, llm
-                        )
+                        # generated_content = await translate_text_if_needed(
+                        #     generated_content, session, current_user, llm
+                        # )
                         print(
                             f"Generated {len(generated_content)} characters for section using vector search"
                         )
@@ -3050,6 +3126,7 @@ Prompt size: {prompt_size} characters (~{estimated_tokens} tokens)
                     "ground_truth_content": ground_truth_context[
                         :2000
                     ],  # Limit to avoid token limits
+                    "language_instruction": language_instruction,
                 }
 
                 # Add custom instructions if provided
@@ -3117,15 +3194,18 @@ Prompt size: {prompt_size} characters (~{estimated_tokens} tokens)
                     optimization_count += 1
 
                 # Translate suggestion fields to user's language
-                translated_reason = await translate_text_if_needed(
-                    reason, session, current_user, llm
-                )
-                translated_current_output = await translate_text_if_needed(
-                    generated_content[:1000], session, current_user, llm
-                )
-                translated_ground_truth = await translate_text_if_needed(
-                    ground_truth_context[:1000], session, current_user, llm
-                )
+                # translated_reason = await translate_text_if_needed(
+                #     reason, session, current_user, llm
+                # )
+                # translated_current_output = await translate_text_if_needed(
+                #     generated_content[:1000], session, current_user, llm
+                # )
+                # translated_ground_truth = await translate_text_if_needed(
+                #     ground_truth_context[:1000], session, current_user, llm
+                # )
+                translated_reason = reason
+                translated_current_output = generated_content[:1000]
+                translated_ground_truth = ground_truth_context[:1000]
 
                 suggestions.append(
                     OutlineSuggestion(
@@ -3213,9 +3293,10 @@ Content Extraction:
             )
 
             # Translate the analysis summary to user's language
-            translated_analysis_summary = await translate_text_if_needed(
-                analysis_summary, session, current_user, llm
-            )
+            # translated_analysis_summary = await translate_text_if_needed(
+            #     analysis_summary, session, current_user, llm
+            # )
+            translated_analysis_summary = analysis_summary
 
             return OptimizedOutlineResponse(
                 original_sections=consulting_section_descriptions,  # Only return consulting sections

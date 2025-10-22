@@ -387,6 +387,17 @@ async def compare_documents(
                     )
 
                     try:
+                        # Get user language and create language instruction
+                        user_language = (
+                            getattr(current_user, "preferred_language", "en") or "en"
+                        )
+                        language_name = settings.SUPPORTED_LANGUAGES.get(
+                            user_language, "English"
+                        )
+                        language_instruction = (
+                            f"Respond in this language: {language_name}."
+                        )
+
                         # Simplified prompt without knowledge base context
                         prompt_variables = {
                             "diff_text": chunk,
@@ -394,6 +405,7 @@ async def compare_documents(
                             "doc1_name": document1.filename,
                             "doc2_name": document2.filename,
                             "knowledge_base_context": "",  # Always empty
+                            "language_instruction": language_instruction,
                         }
 
                         chunk_result = invoke_llm(
@@ -404,17 +416,17 @@ async def compare_documents(
 
                         # Translate each chunk result into the user's preferred language
                         # so later synthesis and final topic outputs are consistent.
-                        try:
-                            # small sleep to allow cancellation to be observed
-                            await asyncio.sleep(0.01)
-                            chunk_result = await translate_text_if_needed(
-                                chunk_result, session, current_user, llm
-                            )
-                        except Exception as _translate_exc:
-                            # If translation fails, keep original chunk_result
-                            print(
-                                f"Warning: chunk translation failed: {_translate_exc}"
-                            )
+                        # try:
+                        #     # small sleep to allow cancellation to be observed
+                        #     await asyncio.sleep(0.01)
+                        #     chunk_result = await translate_text_if_needed(
+                        #         chunk_result, session, current_user, llm
+                        #     )
+                        # except Exception as _translate_exc:
+                        #     # If translation fails, keep original chunk_result
+                        #     print(
+                        #         f"Warning: chunk translation failed: {_translate_exc}"
+                        #     )
 
                         # CRITICAL: Check if client disconnected after LLM call
                         try:
@@ -456,9 +468,9 @@ async def compare_documents(
                     synthesized_result = invoke_llm(llm, synthesis_prompt, {})
 
                     # Translate the synthesized result if needed
-                    synthesized_result = await translate_text_if_needed(
-                        synthesized_result, session, current_user, llm
-                    )
+                    # synthesized_result = await translate_text_if_needed(
+                    #     synthesized_result, session, current_user, llm
+                    # )
 
                     # Add vision analysis if images exist and LLM supports it
                     if vision_enabled and (doc1_images or doc2_images):
@@ -487,9 +499,9 @@ async def compare_documents(
                             )
 
                             # Translate vision analysis if needed
-                            vision_analysis = await translate_text_if_needed(
-                                vision_analysis, session, current_user, llm
-                            )
+                            # vision_analysis = await translate_text_if_needed(
+                            #     vision_analysis, session, current_user, llm
+                            # )
 
                             # Combine text and vision analysis
                             final_analysis = (
@@ -559,6 +571,15 @@ async def compare_documents(
             else:
                 # Single chunk processing (original behavior)
                 try:
+                    # Get user language and create language instruction
+                    user_language = (
+                        getattr(current_user, "preferred_language", "en") or "en"
+                    )
+                    language_name = settings.SUPPORTED_LANGUAGES.get(
+                        user_language, "English"
+                    )
+                    language_instruction = f"Respond in this language: {language_name}."
+
                     # Simplified prompt without knowledge base context
                     prompt_variables = {
                         "diff_text": diff_text,
@@ -566,6 +587,7 @@ async def compare_documents(
                         "doc1_name": document1.filename,
                         "doc2_name": document2.filename,
                         "knowledge_base_context": "",  # Always empty
+                        "language_instruction": language_instruction,
                     }
 
                     topic_result = invoke_llm(
@@ -603,9 +625,9 @@ async def compare_documents(
                             )
 
                             # Translate vision analysis if needed
-                            vision_analysis = await translate_text_if_needed(
-                                vision_analysis, session, current_user, llm
-                            )
+                            # vision_analysis = await translate_text_if_needed(
+                            #     vision_analysis, session, current_user, llm
+                            # )
 
                             # Combine text and vision analysis
                             combined_analysis = (
@@ -615,15 +637,15 @@ async def compare_documents(
                             )
 
                             # Ensure combined analysis is translated for user's language as well
-                            try:
-                                await asyncio.sleep(0.01)
-                                combined_analysis = await translate_text_if_needed(
-                                    combined_analysis, session, current_user, llm
-                                )
-                            except Exception as _comb_translate_exc:
-                                print(
-                                    f"Warning: combined analysis translation failed: {_comb_translate_exc}"
-                                )
+                            # try:
+                            #     await asyncio.sleep(0.01)
+                            #     combined_analysis = await translate_text_if_needed(
+                            #         combined_analysis, session, current_user, llm
+                            #     )
+                            # except Exception as _comb_translate_exc:
+                            #     print(
+                            #         f"Warning: combined analysis translation failed: {_comb_translate_exc}"
+                            #     )
 
                             topic_analysis.append(
                                 {
@@ -643,18 +665,19 @@ async def compare_documents(
                                 f"Vision analysis error for topic {topic}: {vision_error}"
                             )
                             # Fall back to text-only analysis - translate topic_result before appending
-                            try:
-                                await asyncio.sleep(0.01)
-                                translated_topic_result = (
-                                    await translate_text_if_needed(
-                                        topic_result, session, current_user, llm
-                                    )
-                                )
-                            except Exception as _t_exc:
-                                print(
-                                    f"Warning: topic_result translation failed in vision fallback: {_t_exc}"
-                                )
-                                translated_topic_result = topic_result
+                            # try:
+                            #     await asyncio.sleep(0.01)
+                            #     translated_topic_result = (
+                            #         await translate_text_if_needed(
+                            #             topic_result, session, current_user, llm
+                            #         )
+                            #     )
+                            # except Exception as _t_exc:
+                            #     print(
+                            #         f"Warning: topic_result translation failed in vision fallback: {_t_exc}"
+                            #     )
+                            #     translated_topic_result = topic_result
+                            translated_topic_result = topic_result
 
                             topic_analysis.append(
                                 {
@@ -667,12 +690,12 @@ async def compare_documents(
                     else:
                         # Text-only analysis
                         # Translate the topic result if needed
-                        await asyncio.sleep(
-                            0.01
-                        )  # Allow cancellation during translation
-                        topic_result = await translate_text_if_needed(
-                            topic_result, session, current_user, llm
-                        )
+                        # await asyncio.sleep(
+                        #     0.01
+                        # )  # Allow cancellation during translation
+                        # topic_result = await translate_text_if_needed(
+                        #     topic_result, session, current_user, llm
+                        # )
 
                         topic_analysis.append(
                             {
@@ -727,15 +750,20 @@ async def compare_documents(
                 summary = invoke_llm(llm, summary_prompt, {})
 
                 # Translate the summary if needed
-                summary = await translate_text_if_needed(
-                    summary, session, current_user, llm
-                )
+                # summary = await translate_text_if_needed(
+                #     summary, session, current_user, llm
+                # )
 
             except Exception as e:
                 summary = f"Summary generation error: {str(e)}\n\nPlease refer to the individual topic analyses below for detailed insights."
         else:
             # Single chunk processing (original behavior)
             print("Creating summary from diff text (single chunk mode)")
+            # Get user language and create language instruction
+            user_language = getattr(current_user, "preferred_language", "en") or "en"
+            language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+            language_instruction = f"Respond in this language: {language_name}."
+
             summary = invoke_llm(
                 llm,
                 settings.TWINCHECK_SUMMARY_PROMPT_TEMPLATE,
@@ -744,13 +772,14 @@ async def compare_documents(
                     "doc1_name": document1.filename,
                     "doc2_name": document2.filename,
                     "topics": comparison_topics,
+                    "language_instruction": language_instruction,
                 },
             )
 
             # Translate the summary if needed
-            summary = await translate_text_if_needed(
-                summary, session, current_user, llm
-            )
+            # summary = await translate_text_if_needed(
+            #     summary, session, current_user, llm
+            # )
 
         # Record this interaction for history
         interaction_id = record_llm_interaction(
@@ -1418,11 +1447,12 @@ async def generate_csv(
 
             try:
                 # Attempt to translate both topic title and analysis for CSV consumers
-                await asyncio.sleep(0.01)
-                topic = await translate_text_if_needed(topic, session, current_user)
-                analysis = await translate_text_if_needed(
-                    analysis, session, current_user
-                )
+                # await asyncio.sleep(0.01)
+                # topic = await translate_text_if_needed(topic, session, current_user)
+                # analysis = await translate_text_if_needed(
+                #     analysis, session, current_user
+                # )
+                pass
             except Exception as _csv_trans_exc:
                 print(
                     f"Warning: translation failed while generating CSV: {_csv_trans_exc}"
@@ -1558,6 +1588,15 @@ async def generate_topics(
                     print(f"Processing chunk {i+1}/{len(chunks)}")
 
                     # Generate topics for this chunk
+                    # Get user language and create language instruction
+                    user_language = (
+                        getattr(current_user, "preferred_language", "en") or "en"
+                    )
+                    language_name = settings.SUPPORTED_LANGUAGES.get(
+                        user_language, "English"
+                    )
+                    language_instruction = f"Respond in this language: {language_name}."
+
                     chunk_prompt_variables = {
                         "description": description,
                         "comparison_type": comparison_type,
@@ -1566,6 +1605,7 @@ async def generate_topics(
                         "example_analysis_instruction": example_analysis_instruction,
                         "knowledge_base_content": "",
                         "knowledge_base_instruction": "",
+                        "language_instruction": language_instruction,
                     }
 
                     # If knowledge base is specified, retrieve content using selected search mode
@@ -1735,6 +1775,11 @@ Return only the final selected topics, one per line, numbered."""
                     example_analysis_instruction = ""
 
         # Continue with existing logic for small documents or when no files provided
+        # Get user language and create language instruction
+        user_language = getattr(current_user, "preferred_language", "en") or "en"
+        language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+        language_instruction = f"Respond in this language: {language_name}."
+
         prompt_variables = {
             "description": description,
             "comparison_type": comparison_type,
@@ -1747,6 +1792,7 @@ Return only the final selected topics, one per line, numbered."""
             "example_analysis_instruction": example_analysis_instruction,
             "knowledge_base_content": "",
             "knowledge_base_instruction": "",
+            "language_instruction": language_instruction,
         }
 
         # If knowledge base is specified, retrieve content using selected search mode
@@ -1917,6 +1963,11 @@ async def generate_topics_json(
         description = request.description or ""
 
         # Prepare variables for the prompt
+        # Get user language and create language instruction
+        user_language = getattr(current_user, "preferred_language", "en") or "en"
+        language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+        language_instruction = f"Respond in this language: {language_name}."
+
         prompt_variables = {
             "description": description,
             "comparison_type": request.comparison_type or "general",
@@ -1925,6 +1976,7 @@ async def generate_topics_json(
             "example_analysis_instruction": "",
             "knowledge_base_instruction": "",
             "knowledge_base_content": "",
+            "language_instruction": language_instruction,
         }
 
         # If knowledge base is specified, retrieve content using selected search mode

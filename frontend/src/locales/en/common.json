@@ -690,12 +690,16 @@
     "currentAnswer": "Current Answer",
     "showLess": "Show Less",
     "showMore": "Show More",
-    "optimizationsSelectedText": "optimization{{s}} selected for application",
+    "optimizationsSelectedText": "optimization selected for application",
+    "optimizationsSelectedText_other": "optimizations selected for application",
     "applying": "Applying...",
     "applySelectedOptimizations": "Apply Selected Optimizations",
     "uploadDocumentsTitle": "Upload document(s) that should be accepted by checklist *",
     "uploadDocumentsHelperText": "Upload documents that should meet all checklist requirements to help identify questions that may be too strict",
-    "customInstructionsPlaceholder": "e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc."
+    "customInstructionsPlaceholder": "e.g., Consider this is a pediatric study when evaluating age-related requirements, This protocol is for a low-risk intervention, etc.",
+    "analysisComplete": "Analysis Complete",
+    "opportunitiesFound": "{{count}} of {{total}} questions need optimization",
+    "noOptimizationSuggestions": "No optimization suggestions found - your checklist looks good!"
   },
   "optimizeOutlineModal": {
     "title": "Optimize Outline",
@@ -723,7 +727,10 @@
     "cancel": "Cancel",
     "optimizing": "Optimizing...",
     "optimizeOutline": "Optimize Outline",
-    "applyOptimizations": "Apply {{count}} Optimization{{s}}"
+    "applyOptimizations": "Apply {{count}} Optimization",
+    "applyOptimizations_other": "Apply {{count}} Optimizations",
+    "sectionWellOptimized": "Section Well Optimized",
+    "groundTruthContent": "Ground Truth Content"
   },
   "feedback": {
     "modalTitlePositive": "What was helpful?",
@@ -821,6 +828,7 @@
     "csvFileDownloaded": "CSV file downloaded successfully!",
     "csvDownloadFailedGeneric": "Failed to download CSV. Please try again.",
     "optimizationCancelled": "Optimization cancelled",
+    "optimizeChecklistSuccess": "Checklist optimized successfully!",
     "filesTooLarge": "Some files are too large. Maximum size is 10MB per file.",
     "outlineCopied": "Outline copied successfully",
     "outlineCopyFailed": "Failed to copy outline",
