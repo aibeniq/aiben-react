@@ -188,7 +188,7 @@ async def prefetch_knowledge_base_context(
 
                     # LLM-based relevance filtering for VeraDoc (similar to ReportGenie)
                     # This prevents irrelevant chunks from being included as citations
-                    if docs:
+                    if docs and settings.RAG_ENABLE_LLM_RELEVANCE_FILTER:
                         print(
                             f"🔍 Filtering {len(docs)} retrieved chunks for relevance to question: {question_text[:50]}..."
                         )
@@ -209,7 +209,6 @@ async def prefetch_knowledge_base_context(
                             settings, "PROCESSING_DELAY_BETWEEN_REQUESTS", 0.02
                         )
 
-                        loop = asyncio.get_running_loop()
                         filtered_docs = []
                         print(
                             f"Starting batch processing with batch size {BATCH_SIZE} for {len(docs)} documents"
@@ -263,17 +262,13 @@ async def prefetch_knowledge_base_context(
                                         )
 
                                         # Use LLM to determine if this chunk is relevant
-                                        # Use run_in_executor to run the sync invoke_llm in a thread pool
-                                        relevance_check = await loop.run_in_executor(
-                                            None,
-                                            lambda: invoke_llm(
-                                                llm,
-                                                settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
-                                                {
-                                                    "chunk": doc.page_content or "",
-                                                    "question": question_text,
-                                                },
-                                            ),
+                                        relevance_check = await invoke_llm_async(
+                                            llm,
+                                            settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
+                                            {
+                                                "chunk": doc.page_content or "",
+                                                "question": question_text,
+                                            },
                                         )
 
                                         # Check for cancellation after LLM call
@@ -1015,7 +1010,7 @@ async def process_rag_checklist(
             )
 
             # Print all metadata in the vectorstore
-            print("======= CHROMA VECTORDB METADATA CONTENTS =======")
+            # print("======= CHROMA VECTORDB METADATA CONTENTS =======")
             # Get all documents with their metadata
             all_docs = chroma_db.get()
             if all_docs and "metadatas" in all_docs and False:
@@ -1519,13 +1514,61 @@ async def process_rag_checklist(
                                                 if doc.page_content
                                             ]
                                         )
-                                        source_citations = [
-                                            {
-                                                "content": doc.page_content or "",
-                                                "metadata": doc.metadata or {},
-                                            }
-                                            for doc in docs
-                                        ]
+                                        source_citations = []
+                                        for doc in docs:
+                                            metadata = (
+                                                doc.metadata.copy()
+                                                if doc.metadata
+                                                else {}
+                                            )
+
+                                            # Source lookup logic (same as prefetch)
+                                            if "source" in metadata and isinstance(
+                                                metadata["source"], str
+                                            ):
+                                                source_path = metadata["source"]
+                                                raw_filename = Path(source_path).name
+
+                                                match = re.search(
+                                                    r"^[^_]*_(.+)$", raw_filename
+                                                )
+                                                if match:
+                                                    filename = match.group(1)
+                                                else:
+                                                    filename = raw_filename
+
+                                                try:
+                                                    source_entry = session.exec(
+                                                        select(Source).where(
+                                                            Source.name == filename
+                                                        )
+                                                    ).first()
+
+                                                    if not source_entry:
+                                                        source_entry = session.exec(
+                                                            select(Source).where(
+                                                                Source.name
+                                                                == raw_filename
+                                                            )
+                                                        ).first()
+
+                                                    if source_entry:
+                                                        metadata["source_data_id"] = (
+                                                            str(
+                                                                source_entry.source_data_id
+                                                            )
+                                                        )
+                                                except Exception as source_lookup_error:
+                                                    print(
+                                                        f"Error looking up source: {source_lookup_error}"
+                                                    )
+
+                                            source_citations.append(
+                                                {
+                                                    "content": doc.page_content or "",
+                                                    "metadata": metadata,
+                                                }
+                                            )
 
                                     question_context = await invoke_llm_async(
                                         llm,
@@ -1600,13 +1643,13 @@ async def process_rag_checklist(
                             rendered_prompt = f"[ERROR rendering prompt: {e}]"
                         # Clean surrogates from rendered_prompt before printing to avoid UnicodeEncodeError
                         clean_prompt = re.sub(r"[\ud800-\udfff]", "", rendered_prompt)
-                        print(
-                            "\n===== VERADOC_QA_PROMPT_TEMPLATE PROMPT SENT TO LLM =====\n"
-                        )
-                        print(clean_prompt)
-                        print(
-                            "\n========================================================\n"
-                        )
+                        # print(
+                        #    "\n===== VERADOC_QA_PROMPT_TEMPLATE PROMPT SENT TO LLM =====\n"
+                        # )
+                        # print(clean_prompt)
+                        # print(
+                        #    "\n========================================================\n"
+                        # )
 
                         try:
                             # Generate text-based answer

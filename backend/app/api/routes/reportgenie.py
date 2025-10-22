@@ -439,58 +439,62 @@ async def generate_report(
                         chunk_analyses = []
                         relevant_chunk_indices = []
 
-                        for i, chunk in enumerate(text_chunks):
-                            # Add delay between chunk processing to prevent rate limit exhaustion
-                            if i > 0 and settings.REPORTGENIE_ENABLE_PROCESSING_DELAYS:
-                                await asyncio.sleep(
-                                    settings.PROCESSING_DELAY_BETWEEN_CHUNKS
-                                )
+                        if settings.RAG_ENABLE_LLM_RELEVANCE_FILTER:
+                            for i, chunk in enumerate(text_chunks):
+                                # Add delay between chunk processing to prevent rate limit exhaustion
+                                if (
+                                    i > 0
+                                    and settings.REPORTGENIE_ENABLE_PROCESSING_DELAYS
+                                ):
+                                    await asyncio.sleep(
+                                        settings.PROCESSING_DELAY_BETWEEN_CHUNKS
+                                    )
 
-                            # CRITICAL: Check if client has disconnected before processing each chunk
-                            try:
-                                if request and await request.is_disconnected():
+                                # CRITICAL: Check if client has disconnected before processing each chunk
+                                try:
+                                    if request and await request.is_disconnected():
+                                        print(
+                                            f"❌ CLIENT DISCONNECTED - Stopping at chunk {i + 1}"
+                                        )
+                                        return ReportGenieResponse(
+                                            results={
+                                                "status": "cancelled",
+                                                "message": "Request cancelled - client disconnected during chunk processing",
+                                            }
+                                        )
+                                except Exception as e:
                                     print(
-                                        f"❌ CLIENT DISCONNECTED - Stopping at chunk {i + 1}"
+                                        f"Warning: Could not check disconnect status: {e}"
                                     )
-                                    return ReportGenieResponse(
-                                        results={
-                                            "status": "cancelled",
-                                            "message": "Request cancelled - client disconnected during chunk processing",
-                                        }
-                                    )
-                            except Exception as e:
-                                print(
-                                    f"Warning: Could not check disconnect status: {e}"
+
+                                # Use relevance filter to check if chunk is relevant
+                                analysis = invoke_llm(
+                                    llm,
+                                    settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
+                                    {"chunk": chunk, "question": section_description},
                                 )
 
-                            # Use relevance filter to check if chunk is relevant
-                            analysis = invoke_llm(
-                                llm,
-                                settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
-                                {"chunk": chunk, "question": section_description},
-                            )
-
-                            # CRITICAL: Check if client disconnected after LLM call
-                            try:
-                                if request and await request.is_disconnected():
+                                # CRITICAL: Check if client disconnected after LLM call
+                                try:
+                                    if request and await request.is_disconnected():
+                                        print(
+                                            f"❌ CLIENT DISCONNECTED - After LLM call for chunk {i + 1}"
+                                        )
+                                        return ReportGenieResponse(
+                                            results={
+                                                "status": "cancelled",
+                                                "message": "Request cancelled - client disconnected after LLM call",
+                                            }
+                                        )
+                                except Exception as e:
                                     print(
-                                        f"❌ CLIENT DISCONNECTED - After LLM call for chunk {i + 1}"
+                                        f"Warning: Could not check disconnect status: {e}"
                                     )
-                                    return ReportGenieResponse(
-                                        results={
-                                            "status": "cancelled",
-                                            "message": "Request cancelled - client disconnected after LLM call",
-                                        }
-                                    )
-                            except Exception as e:
-                                print(
-                                    f"Warning: Could not check disconnect status: {e}"
-                                )
 
-                            # Only include relevant chunks
-                            if "No relevant information found" not in analysis:
-                                chunk_analyses.append(analysis)
-                                relevant_chunk_indices.append(i)
+                                # Only include relevant chunks
+                                if "No relevant information found" not in analysis:
+                                    chunk_analyses.append(analysis)
+                                    relevant_chunk_indices.append(i)
 
                         # Synthesize the chunk analyses
                         print(
@@ -572,9 +576,11 @@ async def generate_report(
                             except Exception as e:
                                 print(f"Error in synthesis: {e}")
                                 print(
-                                    f"Template: {settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE}"
+                                    "Template: "
+                                    + str(
+                                        settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE
+                                    )
                                 )
-                                raise
                     else:
                         # Vector Search Logic
                         print(f"Performing Vector Search for: {section_description}")
@@ -588,6 +594,43 @@ async def generate_report(
                         search_results = retriever.get_relevant_documents(
                             section_description
                         )
+
+                        # LLM-based relevance filtering for vector search
+                        if search_results and settings.RAG_ENABLE_LLM_RELEVANCE_FILTER:
+                            print(
+                                f"🔍 LLM filtering enabled - analyzing {len(search_results)} retrieved chunks for relevance to section: {section_description[:50]}..."
+                            )
+
+                            filtered_results = []
+                            for i, doc in enumerate(search_results):
+                                print(
+                                    f"Analyzing chunk {i+1}/{len(search_results)} for relevance..."
+                                )
+
+                                relevance_check = invoke_llm(
+                                    llm,
+                                    settings.VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE,
+                                    {
+                                        "chunk": doc.page_content or "",
+                                        "question": section_description,
+                                    },
+                                )
+
+                                if (
+                                    "No relevant information found"
+                                    not in relevance_check
+                                ):
+                                    print(f"✅ Chunk {i+1} is relevant")
+                                    filtered_results.append(doc)
+                                else:
+                                    print(
+                                        f"❌ Chunk {i+1} is not relevant - excluding from context and citations"
+                                    )
+
+                            print(
+                                f"📊 Relevance filtering: {len(filtered_results)}/{len(search_results)} chunks are relevant"
+                            )
+                            search_results = filtered_results
 
                         # Format search results for the synthesis prompt
                         context = "\n\n".join(

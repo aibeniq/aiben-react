@@ -61,9 +61,14 @@ class Settings(BaseSettings):
     )
 
     # Content filtering settings for improved RAG quality
-    RAG_FILTER_BIBLIOGRAPHY: bool = True  # Filter bibliography content from RAG results
+    RAG_FILTER_BIBLIOGRAPHY: bool = (
+        False  # Filter bibliography content from RAG results
+    )
     RAG_MIN_QUALITY_SCORE: float = 0.3  # Minimum quality score for content chunks
     RAG_MAX_BIBLIOGRAPHY_CHUNKS: int = 0  # Maximum bibliography chunks to include
+    RAG_ENABLE_LLM_RELEVANCE_FILTER: bool = (
+        False  # Enable LLM-based relevance filtering for vector search
+    )
 
     # Embedding processing parameters
     EMBEDDING_MAX_TOKENS_PER_REQUEST: int = (
@@ -345,7 +350,7 @@ class Settings(BaseSettings):
     REPORT_GENIE_PROMPT_TEMPLATE: str = """
     You are drafting a document.
     
-    DRAFT OF REPORT SO FAR:
+    DRAFT OF DOCUMENT SO FAR:
     {report_draft}
 
     TASK:
@@ -361,10 +366,9 @@ class Settings(BaseSettings):
     The content should:
     1. Be written in plain language (8th-grade reading level)
     2. Be concise yet thorough
-    3. Be limited to the specific section requested -- don't keep adding unnecessary/unrequested language like "Your participation is important, and we appreciate your commitment to this investigation."
-    4. Use second-person perspective (addressing "you" - the participant)
-    5. Should not make any claims that are not supported by the provided reference information
-    6. Keep in mind what has already been generated in the report, and don't be redundant when writing the new section.
+    3. Be limited to the specific section requested -- don't keep adding unnecessary/unrequested language.
+    4. Should not make any claims that are not supported by the provided reference information
+    6. Keep in mind what has already been generated in the document, and don't be redundant when writing the new section.
 
     {custom_instructions}
 
@@ -374,29 +378,25 @@ class Settings(BaseSettings):
     """
 
     VERADOC_CONTEXT_PROMPT_TEMPLATE: str = """
-    INSTRUCTION: 
-    You are an AI assistant that helps answer questions about documents that are under review based on specific policy regulations.
-    You are answering a certain question about a document, but you need to check the policy regulations to make sure that you are taking into account the full policy context.
+INSTRUCTION: 
+You are an AI assistant that helps answer questions about documents that are under review based on specific regulations/guidelines.
+You are answering a certain question about a document, but you need to check the regulations/guidelines to make sure that you are taking into account the full context and clarifying any ambiguities for answering the question.
 
-    What necessary information from the context below should be kept in mind when answering the following question? {question} 
+What necessary information from the context below should be kept in mind when answering the following question? {question} 
 
-    SOURCE POLICY CITATIONS:
-    {context}
-    
-    CRITICAL INSTRUCTIONS:
-    1. ONLY include policy information that is EXPLICITLY stated in the provided SOURCE POLICY CITATIONS above
-    2. Do NOT make assumptions or infer requirements that are not directly written in the source material
-    3. Do NOT add general knowledge about policies or regulations that is not contained in the citations
-    4. If the provided citations do not contain information relevant to the question, state "No relevant policy information found in the provided citations"
-    5. Quote or directly reference specific sections from the citations when possible
-    6. ONLY include policy information that would be SPECIFICALLY pertinent to the question -- do NOT repeat general requirements
-    7. If you cannot find specific, relevant policy information in the citations, it is better to say so than to make up requirements
-    
-    ANSWER:
-    Based strictly on the provided policy citations, the following should be kept in mind when answering the question:
-    """
-
-    # Relevance filter for Full Document Scan mode - prevents entire KB from being included as citations
+SOURCE POLICY CITATIONS:
+{context}
+ 
+CRITICAL INSTRUCTIONS:
+1. Include regulations/guideline information that is EXPLICITLY stated in the provided SOURCE CITATIONS above, as well as information that could reasonably help provide broader context or understanding of the regulatory landscape
+2. Consider information relevant if it could help answer the question directly OR provide useful context for understanding the broader regulatory framework, even if not directly addressing the specific question
+3. Avoid adding general knowledge about policies or regulations that is not contained in the citations, but be permissive about including related contextual information that could aid comprehension
+4. Try to come up with a summary the best you can. Only state "No relevant information found in the provided citations" if the citations contain absolutely nothing that could inform or provide context for the question
+5. Quote or directly reference specific sections from the citations when possible, but also include broader contextual information that could be helpful
+ 
+ANSWER:
+Based on the provided regulations/guideline citations, the following should be kept in mind when answering the question:
+"""  # Relevance filter for Full Document Scan mode - prevents entire KB from being included as citations
     VERADOC_RELEVANCE_FILTER_PROMPT_TEMPLATE: str = """
     You are an AI assistant analyzing a text chunk to determine if it contains information relevant to a specific question.
 
@@ -409,18 +409,18 @@ class Settings(BaseSettings):
     1. Carefully analyze the text chunk to determine if it contains information relevant to answering the question.
     2. If the chunk contains relevant context that would help answer the question, respond with a brief summary of the relevant information.
     3. If the chunk does NOT contain information relevant to the question, respond EXACTLY with: "No relevant information found in this chunk."
-    4. Do not make assumptions or infer relevance that is not present in the text.
-    5. Consider information relevant if it provides ANY information, requirements, procedures, definitions, or context that would help answer the question.
+    4. Be permissive about relevance - include chunks that could provide indirect context or help with understanding the broader topic area, even if they don't directly address the specific question.
+    5. Consider information relevant if it provides ANY information, requirements, procedures, definitions, or context that would help answer the question, OR if it could contribute to a wider understanding of the regulatory landscape or topic area.
 
     ANALYSIS:
     """
 
     VERADOC_QA_PROMPT_TEMPLATE: str = """
         INSTRUCTION: 
-        You are an AI assistant that helps answer questions about documents based on specific policy regulations.
+        You are an AI assistant that helps answer questions about documents based on specific regulations/guidelines.
         Read the following document and answer the question below clearly and concisely in 100 words or less.
         If the document does not contain sufficient detail to confirm that a requirement is met, state that the information is insufficient, even if the requirement is mentioned.
-        You will also be provided with some policy context to help you in your determination.
+        You will also be provided with some regulation/guideline context to help you in your determination.
         
         SAMPLE DOCUMENT:
         {document_text}
@@ -442,17 +442,17 @@ class Settings(BaseSettings):
 
     VERADOC_FINAL_PROMPT_TEMPLATE: str = """
     INSTRUCTION: 
-    You are an AI assistant that helps answer questions about documents based on specific policy regulations.
+    You are an AI assistant that helps answer questions about documents based on specific regulation/guideline regulations.
     According to policy, an acceptable document must have all of the elements described in the following questions.
-    Read the following question-and-answer pairs about a certain proposal and determine whether or not it conforms to the policy.
+    Read the following question-and-answer pairs about a certain draft and determine whether or not it conforms to the regulations/guidelines.
     
-    Remember: if an answer to any of the questions is "no", it automatically means that the entire proposal does NOT conform to policy.
+    Remember: if an answer to any of the questions is "no", it automatically means that the entire draft does NOT conform to regulations/guidelines.
     Sometimes the Visual Analysis might show that a document meets criteria even if the Text Analysis is insufficient. As such, treat visual analysis as equally valid evidence to text analysis-—do not discount it if text analysis is insufficient.
-    If the plan does not conform to policy, explain why not.
+    If the draft does not conform to regulations/guidelines, explain why not.
     
     {qa_pairs}
     
-    Based on the question-and-answer pairs above, does the plan follow policy?
+    Based on the question-and-answer pairs above, does the draft follow regulations/guidelines?
     {language_instruction}
     """
 
@@ -688,7 +688,7 @@ class Settings(BaseSettings):
     {topics}
     
     Please provide a comprehensive analysis of all significant differences between the two documents. 
-    Focus on structural, content, and semantic variations. 
+    Focus on actual content (not just superficial details about style, organization, and formatting). 
     Highlight the most important distinctions and explain their potential implications.
     Be clear, concise, and informative.
     {language_instruction}
@@ -1100,6 +1100,111 @@ Your task is to:
 {language_instruction}
 
 Answer:
+"""
+
+    ASSISTANT_INTENT_DETECTION_PROMPT_TEMPLATE: str = """
+You are an intelligent assistant for a document analysis and processing application. Your role is to analyze user requests and determine the appropriate actions to take.
+
+## Application Functionalities
+
+### Core Pages:
+1. **Generate**: Create structured reports and documents using AI based on user-defined outlines and knowledge bases
+2. **Review**: Check documents against checklists of requirements using AI analysis
+3. **Compare**: Compare two documents and identify differences using AI-powered analysis
+4. **Match**: Process forms and match them against uploaded documents using AI
+5. **Chatbot**: Have natural language conversations about documents with full context awareness
+
+### AI-Powered Suggestion Features:
+- **Suggest Outlines**: Generate outline sections for reports based on descriptions and reference documents
+- **Suggest Checklists**: Create requirement checklists based on descriptions and reference documents  
+- **Suggest Topic Lists**: Generate comparison topics based on descriptions and reference documents
+- **Suggest Form Templates**: Create form field templates based on descriptions and reference documents
+
+### Advanced Features:
+- **Consult Documents Toggle**: For checklist and outline items, you can toggle "Consult Docs" on/off to control whether AI should reference uploaded documents when processing that specific item
+- **Multistep Requests**: Users can request multiple operations in sequence (e.g., "suggest a checklist, then run review")
+
+## Your Task
+
+Analyze the user's message and any uploaded files to determine:
+1. The primary intent (which page/functionality to use)
+2. Any suggestion operations needed (outlines, checklists, topics, templates)
+3. Whether this is a multistep request requiring sequential operations
+4. Specific parameters or customizations requested
+
+## Response Format
+
+Return a JSON object with this structure:
+{
+  "primary_intent": "generate|review|compare|match|chatbot",
+  "suggestion_type": "outline|checklist|topics|form_template|null",
+  "is_multistep": true|false,
+  "steps": [
+    {
+      "action": "suggest_outline|run_generate|suggest_checklist|run_review|etc",
+      "description": "Brief description of this step"
+    }
+  ],
+  "parameters": {
+    "custom_instructions": "Any specific instructions from the user",
+    "search_mode": "vector|full_scan",
+    "consult_docs": true|false
+  },
+  "confidence": 0.0-1.0,
+  "reasoning": "Brief explanation of your analysis"
+}
+
+## Examples
+
+### Simple Generate Request:
+User: "Generate a report about our company policies"
+Response: {
+  "primary_intent": "generate",
+  "suggestion_type": null,
+  "is_multistep": false,
+  "steps": [{"action": "run_generate", "description": "Generate report from user instructions"}],
+  "parameters": {"custom_instructions": "about our company policies"},
+  "confidence": 0.9,
+  "reasoning": "Direct request to generate a report"
+}
+
+### Multistep with Suggestions:
+User: "Create a checklist for compliance requirements and then review these documents against it"
+Response: {
+  "primary_intent": "review", 
+  "suggestion_type": "checklist",
+  "is_multistep": true,
+  "steps": [
+    {"action": "suggest_checklist", "description": "Generate compliance checklist"},
+    {"action": "run_review", "description": "Review documents against the checklist"}
+  ],
+  "parameters": {"custom_instructions": "compliance requirements"},
+  "confidence": 0.95,
+  "reasoning": "User wants both checklist creation and document review"
+}
+
+### Compare with Topic Suggestions:
+User: "Compare these two contracts and highlight the key differences"
+Response: {
+  "primary_intent": "compare",
+  "suggestion_type": "topics", 
+  "is_multistep": true,
+  "steps": [
+    {"action": "suggest_topics", "description": "Generate comparison topics"},
+    {"action": "run_compare", "description": "Compare documents using generated topics"}
+  ],
+  "parameters": {"custom_instructions": "highlight key differences"},
+  "confidence": 0.9,
+  "reasoning": "Comparison request with difference analysis"
+}
+
+## Guidelines
+
+- Default to "chatbot" intent if the request is conversational or unclear
+- Set is_multistep=true when users mention sequences like "first...then" or "create...and then"
+- Extract specific instructions, preferences, and constraints from the user message
+- Consider file types and content when determining intent (PDFs might suggest review, spreadsheets might suggest match)
+- Be conservative with confidence scores - only high confidence (>0.8) for clear intents
 """
 
 
