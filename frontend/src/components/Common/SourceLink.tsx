@@ -28,11 +28,11 @@ const SourceLink: React.FC<SourceLinkProps> = ({
 }) => {
   // In Chakra UI v3, we need to manually manage this state
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { viewFile, viewFileInModal, currentFile, isLoading, clearFile } =
-    useFileViewer()
+  const { viewFile, viewFileInModal, currentFile, isLoading, clearFile } = useFileViewer()
   const [isLoadingFile, setIsLoadingFile] = useState(false)
-  const [convertedPdfFile, setConvertedPdfFile] =
-    useState<FilesGetSourceContentResponse | null>(null) // For DOCX converted to PDF
+  const [convertedPdfFile, setConvertedPdfFile] = useState<FilesGetSourceContentResponse | null>(
+    null,
+  ) // For DOCX converted to PDF
   const { showErrorToast } = useCustomToast()
 
   const handleClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -55,48 +55,50 @@ const SourceLink: React.FC<SourceLinkProps> = ({
       return
     }
 
+    // Strip page number suffix from fileName if present (e.g., "file.pdf (Page 1)" -> "file.pdf")
+    // This is needed because formatSourceWithPage() adds the page number for display,
+    // but the actual filename in the database doesn't include it
+    const actualFileName = fileName.replace(/\s*\(Page\s+\d+\)\s*$/i, "").trim()
+
+    console.log("Filename processing:", {
+      originalFileName: fileName,
+      actualFileName: actualFileName,
+      wasModified: fileName !== actualFileName,
+    })
+
     // Existing logic for knowledge base files
     console.log("File extension check:", {
-      fileName,
-      toLowerCase: fileName.toLowerCase(),
-      endsWithDocx: fileName.toLowerCase().endsWith(".docx"),
-      endsWithRtf: fileName.toLowerCase().endsWith(".rtf"),
+      fileName: actualFileName,
+      toLowerCase: actualFileName.toLowerCase(),
+      endsWithDocx: actualFileName.toLowerCase().endsWith(".docx"),
+      endsWithRtf: actualFileName.toLowerCase().endsWith(".rtf"),
     })
     setIsLoadingFile(true)
 
     try {
       // Check if the file is a DOCX or RTF
-      const isDocx = fileName.toLowerCase().endsWith(".docx")
-      const isRtf = fileName.toLowerCase().endsWith(".rtf")
+      const isDocx = actualFileName.toLowerCase().endsWith(".docx")
+      const isRtf = actualFileName.toLowerCase().endsWith(".rtf")
 
       if (isDocx || isRtf) {
         const fileType = isDocx ? "DOCX" : "RTF"
-        console.log(
-          `${fileType} detected! Converting to PDF for viewing:`,
-          fileName,
-        )
+        console.log(`${fileType} detected! Converting to PDF for viewing:`, actualFileName)
 
         let pdfBlob: Blob
 
         // If sourceId is empty/null, use filename-based conversion
         if (!sourceId || sourceId.trim() === "") {
-          console.log(
-            "No sourceId provided, using filename-based conversion:",
-            fileName,
-          )
+          console.log("No sourceId provided, using filename-based conversion:", actualFileName)
           if (isDocx) {
             pdfBlob = (await FilesService.convertDocxToPdfByFilename({
-              filename: fileName,
+              filename: actualFileName,
             })) as Blob
           } else {
             pdfBlob = (await FilesService.convertRtfToPdfByFilename({
-              filename: fileName,
+              filename: actualFileName,
             })) as Blob
           }
-          console.log(
-            "PDF conversion by filename successful, blob size:",
-            pdfBlob.size,
-          )
+          console.log("PDF conversion by filename successful, blob size:", pdfBlob.size)
         } else {
           console.log("Using sourceId-based conversion:", sourceId)
           // Use the appropriate conversion endpoint with sourceId
@@ -128,7 +130,7 @@ const SourceLink: React.FC<SourceLinkProps> = ({
         const pdfBase64 = btoa(binary)
 
         // Create a fake response object compatible with FilesGetSourceContentResponse
-        const pdfFilename = fileName.replace(/\.docx$/i, ".pdf")
+        const pdfFilename = actualFileName.replace(/\.docx$/i, ".pdf")
         const fakeResponse = {
           id: sourceId || "converted-docx",
           name: pdfFilename,
@@ -160,17 +162,17 @@ const SourceLink: React.FC<SourceLinkProps> = ({
         // If no sourceId is available, try filename-based viewing for PDFs and TXT files
         if (
           (!sourceId || sourceId.trim() === "") &&
-          (fileName.toLowerCase().endsWith(".pdf") ||
-            fileName.toLowerCase().endsWith(".txt"))
+          (actualFileName.toLowerCase().endsWith(".pdf") ||
+            actualFileName.toLowerCase().endsWith(".txt"))
         ) {
           console.log(
             "No sourceId provided for PDF/TXT, using filename-based viewing:",
-            fileName,
+            actualFileName,
           )
 
           try {
             const response = await FilesService.getSourceContentByFilename({
-              filename: fileName,
+              filename: actualFileName,
             })
             console.log("PDF/TXT file data received:", response)
 
@@ -197,16 +199,13 @@ const SourceLink: React.FC<SourceLinkProps> = ({
               console.log("Opened PDF/TXT in new tab using filename")
             }
           } catch (filenameError) {
-            console.error(
-              "Filename-based PDF/TXT viewing failed:",
-              filenameError,
-            )
+            console.error("Filename-based PDF/TXT viewing failed:", filenameError)
             throw filenameError // Re-throw to trigger fallback
           }
         } else {
           // Use normal sourceId-based viewing
           // For .txt files, if sourceId method fails, try filename-based viewing as fallback
-          const isTxtFile = fileName.toLowerCase().endsWith(".txt")
+          const isTxtFile = actualFileName.toLowerCase().endsWith(".txt")
 
           try {
             if (useModal) {
@@ -220,18 +219,12 @@ const SourceLink: React.FC<SourceLinkProps> = ({
 
             // For .txt files, try filename-based viewing as fallback
             if (isTxtFile) {
-              console.log(
-                "Attempting filename-based fallback for .txt file:",
-                fileName,
-              )
+              console.log("Attempting filename-based fallback for .txt file:", actualFileName)
               try {
                 const response = await FilesService.getSourceContentByFilename({
-                  filename: fileName,
+                  filename: actualFileName,
                 })
-                console.log(
-                  "TXT file data received via filename fallback:",
-                  response,
-                )
+                console.log("TXT file data received via filename fallback:", response)
 
                 if (useModal) {
                   setConvertedPdfFile(response)
@@ -256,10 +249,7 @@ const SourceLink: React.FC<SourceLinkProps> = ({
                   console.log("Opened TXT in new tab using filename fallback")
                 }
               } catch (filenameError) {
-                console.error(
-                  "Filename-based TXT viewing also failed:",
-                  filenameError,
-                )
+                console.error("Filename-based TXT viewing also failed:", filenameError)
                 throw sourceIdError // Re-throw the original error
               }
             } else {
@@ -277,17 +267,15 @@ const SourceLink: React.FC<SourceLinkProps> = ({
       })
 
       // Check if this was a DOCX or RTF file that failed conversion
-      const isDocx = fileName.toLowerCase().endsWith(".docx")
-      const isRtf = fileName.toLowerCase().endsWith(".rtf")
+      const isDocx = actualFileName.toLowerCase().endsWith(".docx")
+      const isRtf = actualFileName.toLowerCase().endsWith(".rtf")
 
       if (isDocx || isRtf) {
         const fileType = isDocx ? "DOCX" : "RTF"
         // For DOCX/RTF files, don't fall back to original method since they can't be displayed natively
-        console.error(
-          `${fileType} to PDF conversion failed, not attempting fallback`,
-        )
+        console.error(`${fileType} to PDF conversion failed, not attempting fallback`)
         showErrorToast(
-          `Failed to convert ${fileType} file "${fileName}" to PDF for viewing. Please try again or download the file directly.`,
+          `Failed to convert ${fileType} file "${actualFileName}" to PDF for viewing. Please try again or download the file directly.`,
         )
       } else {
         // Fallback to original method if conversion fails for non-DOCX/RTF files

@@ -801,27 +801,31 @@ async def get_source_content_by_filename(
         if not source_data:
             raise HTTPException(status_code=404, detail="Source data not found")
 
-        # Extract the file content from the ZIP
-        zip_data = BytesIO(source_data.data)
-        with zipfile.ZipFile(zip_data, "r") as zip_file:
-            # Get the first file in the archive
-            file_info = zip_file.infolist()[0]
-            file_content = zip_file.read(file_info.filename)
+        # Try to extract file content - handle both ZIP and non-ZIP formats
+        try:
+            # First, try ZIP format (most files are stored this way)
+            zip_data = BytesIO(source_data.data)
+            with zipfile.ZipFile(zip_data, "r") as zip_file:
+                # Get the first file in the archive
+                file_info = zip_file.infolist()[0]
+                file_content = zip_file.read(file_info.filename)
+        except zipfile.BadZipFile:
+            # If not a ZIP file, assume it's stored as raw data (e.g., .txt files)
+            print(f"File {filename} is not in ZIP format, using raw data")
+            file_content = source_data.data
 
-            # Determine content type
-            content_type = (
-                mimetypes.guess_type(filename)[0] or "application/octet-stream"
-            )
+        # Determine content type
+        content_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
 
-            # Base64 encode for transmission
-            content_base64 = base64.b64encode(file_content).decode("utf-8")
+        # Base64 encode for transmission
+        content_base64 = base64.b64encode(file_content).decode("utf-8")
 
-            return {
-                "id": str(source.source_data_id),
-                "name": filename,
-                "data_base64": content_base64,
-                "content_type": content_type,
-            }
+        return {
+            "id": str(source.source_data_id),
+            "name": filename,
+            "data_base64": content_base64,
+            "content_type": content_type,
+        }
 
     except Exception as e:
         import traceback
