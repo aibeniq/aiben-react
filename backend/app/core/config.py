@@ -368,6 +368,8 @@ class Settings(BaseSettings):
 
     {custom_instructions}
 
+    {language_instruction}
+
     SECTION CONTENT:
     """
 
@@ -419,7 +421,7 @@ class Settings(BaseSettings):
         Read the following document and answer the question below clearly and concisely in 100 words or less.
         If the document does not contain sufficient detail to confirm that a requirement is met, state that the information is insufficient, even if the requirement is mentioned.
         You will also be provided with some policy context to help you in your determination.
-
+        
         SAMPLE DOCUMENT:
         {document_text}
 
@@ -433,6 +435,8 @@ class Settings(BaseSettings):
         {custom_instructions_section}
 
         Now begin your answer with either YES or NO.
+        {language_instruction}
+
         ANSWER:
     """
 
@@ -449,6 +453,7 @@ class Settings(BaseSettings):
     {qa_pairs}
     
     Based on the question-and-answer pairs above, does the plan follow policy?
+    {language_instruction}
     """
 
     VERADOC_OPTIMIZE_PROMPT_TEMPLATE: str = """
@@ -481,6 +486,7 @@ class Settings(BaseSettings):
     Here is a template of the fields that I want you to extract from this document: {template}
     Here is the full text of a document: {document_text}
     Fill out the template based on the fields you can find.
+    {language_instruction}
     """
 
     FORMCONNECT_COMPARISON_PROMPT_TEMPLATE: str = """
@@ -511,6 +517,7 @@ class Settings(BaseSettings):
     Also, do NOT add tick marks like ``` and the label 'markdown': just give the actual markdown table content as raw text.
     However, if there are no discrepancies, please state that all fields match across documents.
     IF A FIELD ENTRY WASN'T FOUND FOR A GIVEN DOCUMENT, SAY SO EXPLICITLY.
+    {language_instruction}
     """
 
     FORMCONNECT_SINGLE_DOCUMENT_PROMPT_TEMPLATE: str = """
@@ -543,6 +550,7 @@ class Settings(BaseSettings):
     ONLY return the Markdown table and summary -- do NOT return any other text.
     Also, do NOT add tick marks like ``` and the label 'markdown': just give the actual markdown table content as raw text.
     IF A FIELD VALUE WASN'T FOUND, CLEARLY STATE "Not found" OR "Not detected" in the VALUE column.
+    {language_instruction}
     """
 
     FORMCONNECT_GENERATE_FIELDS_PROMPT_TEMPLATE: str = """
@@ -578,6 +586,8 @@ class Settings(BaseSettings):
 
     ANALYSIS:
     [Brief explanation of why these fields were selected and how they relate to the description{analysis_note}]
+
+    {language_instruction}
     """
 
     CHATBOT_REPHRASING_PROMPT_TEMPLATE: str = """
@@ -596,6 +606,8 @@ class Settings(BaseSettings):
     5. If the current question is already self-contained and doesn't reference anything from the history, return it unchanged.
     
     REPHRASED QUESTION:
+
+    {language_instruction}
     """
 
     CHATBOT_KB_QA_PROMPT_TEMPLATE: str = """
@@ -618,6 +630,7 @@ class Settings(BaseSettings):
     4. Be concise and to the point, and cite whether your answer used text or visual evidence in a single short sentence.
     5. Don't make up information or use knowledge outside the provided context.
     
+    {language_instruction}
     ANSWER:
     """
 
@@ -627,6 +640,7 @@ class Settings(BaseSettings):
 
     QUESTION: {question}
 
+    {language_instruction}
     ANSWER:
     """
 
@@ -652,6 +666,8 @@ class Settings(BaseSettings):
     Refer to specific sections of the documents where relevant differences exist.
     If there are no differences related to this topic, state that clearly.
     If reference context was provided, use it to inform your analysis and provide additional insights.
+
+    {language_instruction}
     """
 
     TWINCHECK_SUMMARY_PROMPT_TEMPLATE: str = """
@@ -675,6 +691,7 @@ class Settings(BaseSettings):
     Focus on structural, content, and semantic variations. 
     Highlight the most important distinctions and explain their potential implications.
     Be clear, concise, and informative.
+    {language_instruction}
     """
 
     # TwinCheck chunk processing settings
@@ -720,6 +737,8 @@ class Settings(BaseSettings):
     4. If the combined analysis does not provide a clear answer, state that the information could not be fully determined from the text.
     5. Synthesize the information, do not just list the findings from each chunk.
 
+    {language_instruction}
+
     SYNTHESIZED ANSWER:
     """
 
@@ -737,6 +756,8 @@ class Settings(BaseSettings):
     2. If the chunk contains relevant information, provide a clear and concise answer based only on that information.
     3. If the chunk does not contain relevant information, respond with "No relevant information found in this chunk."
     4. Do not make assumptions or add information not present in the text chunk.
+
+    {language_instruction}
 
     ANALYSIS:
     """
@@ -763,6 +784,8 @@ class Settings(BaseSettings):
     6. Provide a well-structured, coherent response.
     7. Be concise and to the point, and cite whether your answer used text or visual evidence in a single short sentence if applicable.
 
+    {language_instruction}
+
     ANSWER:
     """
 
@@ -783,173 +806,180 @@ class Settings(BaseSettings):
     6. If documents complement each other, combine the insights.
     7. Provide a well-structured, coherent response.
 
+    {language_instruction}
+
     ANSWER:
     """
 
     VERADOC_GENERATE_QUESTIONS_PROMPT_TEMPLATE: str = """
-INSTRUCTION: 
-You are an AI assistant that helps generate comprehensive checklist questions based on a given description.
-Your task is to create specific, actionable questions that would help evaluate documents or processes according to the described requirements.
+    INSTRUCTION: 
+    You are an AI assistant that helps generate comprehensive checklist questions based on a given description.
+    Your task is to create specific, actionable questions that would help evaluate documents or processes according to the described requirements.
 
-DESCRIPTION:
-{description}
+    DESCRIPTION:
+    {description}
 
-CHECKLIST TYPE: {checklist_type}
+    CHECKLIST TYPE: {checklist_type}
 
-{reference_documents_instruction}
+    {reference_documents_instruction}
 
-{reference_documents_content}
+    {reference_documents_content}
 
-INSTRUCTIONS:
-1. Generate as many specific, clear, and actionable questions as needed to comprehensively cover the description
-2. Each question should be evaluable with a yes/no or specific answer
-3. Questions should be comprehensive and cover all aspects mentioned in the description
-4. Make questions specific enough to be useful for document review or compliance checking
-5. Avoid vague or overly general questions
-6. Focus on what can be verified or assessed in a document or process
-7. Use clear, professional language suitable for a checklist
-8. Generate between 5-25 questions depending on the complexity of the requirements
-9. For complex regulatory or compliance requirements, generate more detailed questions
-10. For simple processes, fewer but comprehensive questions are sufficient
-{additional_instructions}
+    INSTRUCTIONS:
+    1. Generate as many specific, clear, and actionable questions as needed to comprehensively cover the description
+    2. Each question should be evaluable with a yes/no or specific answer
+    3. Questions should be comprehensive and cover all aspects mentioned in the description
+    4. Make questions specific enough to be useful for document review or compliance checking
+    5. Avoid vague or overly general questions
+    6. Focus on what can be verified or assessed in a document or process
+    7. Use clear, professional language suitable for a checklist
+    8. Generate between 5-25 questions depending on the complexity of the requirements
+    9. For complex regulatory or compliance requirements, generate more detailed questions
+    10. For simple processes, fewer but comprehensive questions are sufficient
+    {additional_instructions}
 
-FORMAT YOUR RESPONSE AS:
-QUESTIONS:
-1. [First question]
-2. [Second question]
-3. [Third question]
-... (continue with as many questions as needed to comprehensively cover the requirements)
+    FORMAT YOUR RESPONSE AS:
+    QUESTIONS:
+    1. [First question]
+    2. [Second question]
+    3. [Third question]
+    ... (continue with as many questions as needed to comprehensively cover the requirements)
 
-ANALYSIS:
-[Brief explanation of why these questions comprehensively cover the described requirements and how many questions were needed]
-"""
+    ANALYSIS:
+    [Brief explanation of why these questions comprehensively cover the described requirements and how many questions were needed]
+
+    {language_instruction}
+    """
 
     TWINCHECK_GENERATE_TOPICS_PROMPT_TEMPLATE: str = """
-INSTRUCTION: 
-You are an AI assistant that helps generate comprehensive comparison topics for document analysis based on a given description.
-Your task is to create specific, actionable topics that would help compare two documents effectively according to the described comparison requirements.
+    INSTRUCTION: 
+    You are an AI assistant that helps generate comprehensive comparison topics for document analysis based on a given description.
+    Your task is to create specific, actionable topics that would help compare two documents effectively according to the described comparison requirements.
 
-DESCRIPTION:
-{description}
+    DESCRIPTION:
+    {description}
 
-COMPARISON TYPE: {comparison_type}
+    COMPARISON TYPE: {comparison_type}
 
-{example_document}
+    {example_document}
 
-{knowledge_base_content}
+    {knowledge_base_content}
 
-INSTRUCTIONS:
-1. Generate as many specific, clear, and actionable comparison topics as needed to comprehensively cover the description
-2. Each topic should represent a distinct area of comparison between two documents
-3. Topics should be comprehensive and cover all aspects mentioned in the description
-4. Make topics specific enough to be useful for meaningful document comparison
-5. Avoid vague or overly general topics
-6. Focus on what can be compared, contrasted, or analyzed between documents
-7. Use clear, professional language suitable for document comparison analysis
-8. Generate between 3-15 topics depending on the complexity of the comparison requirements
-9. For complex regulatory or compliance comparisons, generate more detailed topics
-10. For simple comparisons, fewer but comprehensive topics are sufficient
-11. Consider both content-based comparisons (what is included/excluded) and structural comparisons (how information is organized)
-12. Include topics that would reveal differences in approach, methodology, compliance, or implementation{example_instruction}{knowledge_base_instruction}
+    INSTRUCTIONS:
+    1. Generate as many specific, clear, and actionable comparison topics as needed to comprehensively cover the description
+    2. Each topic should represent a distinct area of comparison between two documents
+    3. Topics should be comprehensive and cover all aspects mentioned in the description
+    4. Make topics specific enough to be useful for meaningful document comparison
+    5. Avoid vague or overly general topics
+    6. Focus on what can be compared, contrasted, or analyzed between documents
+    7. Use clear, professional language suitable for document comparison analysis
+    8. Generate between 3-15 topics depending on the complexity of the comparison requirements
+    9. For complex regulatory or compliance comparisons, generate more detailed topics
+    10. For simple comparisons, fewer but comprehensive topics are sufficient
+    11. Consider both content-based comparisons (what is included/excluded) and structural comparisons (how information is organized)
+    12. Include topics that would reveal differences in approach, methodology, compliance, or implementation{example_instruction}{knowledge_base_instruction}
 
-FORMAT YOUR RESPONSE AS:
-TOPICS:
-1. [First topic for comparison]
-2. [Second topic for comparison]
-3. [Third topic for comparison]
-... (continue with as many topics as needed to comprehensively cover the comparison requirements)
+    FORMAT YOUR RESPONSE AS:
+    TOPICS:
+    1. [First topic for comparison]
+    2. [Second topic for comparison]
+    3. [Third topic for comparison]
+    ... (continue with as many topics as needed to comprehensively cover the comparison requirements)
 
-ANALYSIS:
-[Brief explanation of why these topics comprehensively cover the described comparison requirements and how they would help identify meaningful differences between documents{example_analysis_instruction}]
-"""
+    ANALYSIS:
+    [Brief explanation of why these topics comprehensively cover the described comparison requirements and how they would help identify meaningful differences between documents{example_analysis_instruction}]
+    {language_instruction}
+    """
 
     REPORTGENIE_GENERATE_OUTLINE_PROMPT_TEMPLATE: str = """
-INSTRUCTION: 
-You are an AI assistant that helps generate comprehensive section outlines for reports based on a given description.
-Your task is to create specific, meaningful section descriptions that would help structure a comprehensive report according to the outlined requirements.
+    INSTRUCTION: 
+    You are an AI assistant that helps generate comprehensive section outlines for reports based on a given description.
+    Your task is to create specific, meaningful section descriptions that would help structure a comprehensive report according to the outlined requirements.
 
-OUTLINE DESCRIPTION:
-{description}
+    OUTLINE DESCRIPTION:
+    {description}
 
-REPORT TYPE: {report_type}
+    REPORT TYPE: {report_type}
 
-{example_document}
+    {example_document}
 
-{knowledge_base_content}
+    {knowledge_base_content}
 
-INSTRUCTIONS:
-1. Generate as many specific, clear, and meaningful sections as needed to comprehensively cover the outline description
-2. Each section should represent a distinct topic or area that would be covered in the report
-3. Sections should be comprehensive and cover all aspects mentioned in the outline description
-4. Make section descriptions specific enough to be useful for report generation
-5. Avoid vague or overly general section descriptions
-6. Focus on what would be meaningful content areas for a structured report
-7. Use clear, professional language suitable for report sections
-8. If an example document is provided, generate approximately the same number of sections as shown in the example document structure to match its format and depth
-9. For each section, provide not just a title but also a detailed description that includes:
-   - The specific topics and subtopics that should be covered in that section
-   - The general scope and depth of content expected
-   - Approximate length or detail level (e.g., brief overview, detailed analysis, comprehensive review)
-10. Each section description should be substantive (3-5 sentences) explaining what content would be included{example_instruction}{knowledge_base_instruction}
+    INSTRUCTIONS:
+    1. Generate as many specific, clear, and meaningful sections as needed to comprehensively cover the outline description
+    2. Each section should represent a distinct topic or area that would be covered in the report
+    3. Sections should be comprehensive and cover all aspects mentioned in the outline description
+    4. Make section descriptions specific enough to be useful for report generation
+    5. Avoid vague or overly general section descriptions
+    6. Focus on what would be meaningful content areas for a structured report
+    7. Use clear, professional language suitable for report sections
+    8. If an example document is provided, generate approximately the same number of sections as shown in the example document structure to match its format and depth
+    9. For each section, provide not just a title but also a detailed description that includes:
+       - The specific topics and subtopics that should be covered in that section
+       - The general scope and depth of content expected
+       - Approximate length or detail level (e.g., brief overview, detailed analysis, comprehensive review)
+    10. Each section description should be substantive (3-5 sentences) explaining what content would be included{example_instruction}{knowledge_base_instruction}
 
-FORMAT YOUR RESPONSE AS:
-SECTIONS:
-1. [Section Title]: [Detailed description of what this section should cover, including specific topics, scope, and expected depth/length of content]
-2. [Section Title]: [Detailed description of what this section should cover, including specific topics, scope, and expected depth/length of content]
-3. [Section Title]: [Detailed description of what this section should cover, including specific topics, scope, and expected depth/length of content]
-... (continue with as many sections as needed to comprehensively cover the outline)
+    FORMAT YOUR RESPONSE AS:
+    SECTIONS:
+    1. [Section Title]: [Detailed description of what this section should cover, including specific topics, scope, and expected depth/length of content]
+    2. [Section Title]: [Detailed description of what this section should cover, including specific topics, scope, and expected depth/length of content]
+    3. [Section Title]: [Detailed description of what this section should cover, including specific topics, scope, and expected depth/length of content]
+    ... (continue with as many sections as needed to comprehensively cover the outline)
 
-ANALYSIS:
-[Brief explanation of why these sections comprehensively cover the outlined requirements and how the sections work together to form a complete report structure{example_analysis_instruction}]
-"""
+    ANALYSIS:
+    [Brief explanation of why these sections comprehensively cover the outlined requirements and how the sections work together to form a complete report structure{example_analysis_instruction}]
+    {language_instruction}
+    """
 
     REPORTGENIE_OPTIMIZE_OUTLINE_PROMPT_TEMPLATE: str = """
-INSTRUCTION:
-You are an expert at analyzing content quality and suggesting improvements to report outline sections by comparing generated report content to a ground-truth reference document.
+    INSTRUCTION:
+    You are an expert at analyzing content quality and suggesting improvements to report outline sections by comparing generated report content to a ground-truth reference document.
 
-ORIGINAL SECTION: {original_section}
+    ORIGINAL SECTION: {original_section}
 
-GENERATED CONTENT FOR THIS SECTION:
-{generated_content}
+    GENERATED CONTENT FOR THIS SECTION:
+    {generated_content}
 
-RELEVANT CONTENT FROM GROUND-TRUTH DOCUMENT:
-{ground_truth_content}
+    RELEVANT CONTENT FROM GROUND-TRUTH DOCUMENT:
+    {ground_truth_content}
 
-{custom_instructions}
+    {custom_instructions}
 
-ANALYSIS GUIDELINES:
-Compare the generated content to the ground truth and determine if revision is needed.
+    ANALYSIS GUIDELINES:
+    Compare the generated content to the ground truth and determine if revision is needed.
 
-ONLY set NEEDS_REVISION to YES if there are SIGNIFICANT issues:
-- Major information gaps (missing key points from ground truth)
-- Substantially different scope or focus that makes content less useful
-- Quality issues that would materially impact report effectiveness
-- Clear misalignment with the intended purpose of the section
-- Generated content covers fundamentally different topics than ground truth
+    ONLY set NEEDS_REVISION to YES if there are SIGNIFICANT issues:
+    - Major information gaps (missing key points from ground truth)
+    - Substantially different scope or focus that makes content less useful
+    - Quality issues that would materially impact report effectiveness
+    - Clear misalignment with the intended purpose of the section
+    - Generated content covers fundamentally different topics than ground truth
 
-DO NOT revise for minor differences:
-- Small wording variations or stylistic differences
-- Different but equivalent phrasing that conveys the same information
-- Minor detail variations if core information is adequately covered
-- Reorganized content that still addresses the same key points
-- Acceptable alternative approaches to the same topic
+    DO NOT revise for minor differences:
+    - Small wording variations or stylistic differences
+    - Different but equivalent phrasing that conveys the same information
+    - Minor detail variations if core information is adequately covered
+    - Reorganized content that still addresses the same key points
+    - Acceptable alternative approaches to the same topic
 
-THRESHOLD: Be conservative - only suggest revisions for substantial improvements that would meaningfully enhance the report quality.
+    THRESHOLD: Be conservative - only suggest revisions for substantial improvements that would meaningfully enhance the report quality.
 
-INSTRUCTIONS:
-1. Compare the generated content to the relevant ground-truth content
-2. Assess whether there are significant gaps, deficiencies, or scope misalignments
-3. Only suggest a revision if the improvement would be substantial and meaningful
-4. If suggesting a revision, provide a specific improved section description
-5. Focus on what content should be included to better match the ground-truth scope and quality
-6. If the generated content adequately covers the key points, indicate no revision is needed
+    INSTRUCTIONS:
+    1. Compare the generated content to the relevant ground-truth content
+    2. Assess whether there are significant gaps, deficiencies, or scope misalignments
+    3. Only suggest a revision if the improvement would be substantial and meaningful
+    4. If suggesting a revision, provide a specific improved section description
+    5. Focus on what content should be included to better match the ground-truth scope and quality
+    6. If the generated content adequately covers the key points, indicate no revision is needed
 
-FORMAT YOUR RESPONSE AS:
-NEEDS_REVISION: [Yes/No]
-SUGGESTED_SECTION: [Improved section description if revision needed, otherwise same as original]
-REASON: [Specific explanation of significant gaps requiring revision, or why current content is adequate]
-QUALITY_GAP_SEVERITY: [none/minor/moderate/significant]
-"""
+    FORMAT YOUR RESPONSE AS:
+    NEEDS_REVISION: [Yes/No]
+    SUGGESTED_SECTION: [Improved section description if revision needed, otherwise same as original]
+    REASON: [Specific explanation of significant gaps requiring revision, or why current content is adequate]
+    QUALITY_GAP_SEVERITY: [none/minor/moderate/significant]
+    {language_instruction}
+    """
 
     # Vision-related settings for multimodal document analysis
     VISION_ENABLED_MODELS: List[str] = [
@@ -974,58 +1004,64 @@ QUALITY_GAP_SEVERITY: [none/minor/moderate/significant]
 
     # Vision prompt templates for different functionalities
     CHATBOT_VISION_PROMPT_TEMPLATE: str = """
-You are an AI assistant analyzing visual content to answer questions.
+    You are an AI assistant analyzing visual content to answer questions.
 
-Images provided: {image_count} from files: {source_files}
+    Images provided: {image_count} from files: {source_files}
 
-Question: {question}
+    Question: {question}
 
-Analyze the visual elements in the images and provide a comprehensive answer based on what you can see. Focus on:
-1. Text content visible in images
-2. Charts, diagrams, and visual data
-3. Layout and formatting
-4. Any relevant visual information
-DO NOT ADD ANY INFORMATION THAT IS NOT ATTESTED IN THE IMAGES
+    Analyze the visual elements in the images and provide a comprehensive answer based on what you can see. Focus on:
+    1. Text content visible in images
+    2. Charts, diagrams, and visual data
+    3. Layout and formatting
+    4. Any relevant visual information
+    DO NOT ADD ANY INFORMATION THAT IS NOT ATTESTED IN THE IMAGES
 
-If the images do not have the answer to your question, respond with exactly: {insufficient_info_phrase}
+    If the images do not have the answer to your question, respond with exactly: {insufficient_info_phrase}
 
-Answer:
-"""
+    {language_instruction}
+
+    Answer:
+    """
 
     TWINCHECK_VISION_COMPARISON_PROMPT_TEMPLATE: str = """
-Analyze and compare the visual content in these images from two documents.
+    Analyze and compare the visual content in these images from two documents.
 
-Topic to analyze: {topic}
+    Topic to analyze: {topic}
 
-Document 1 Images: {doc1_image_count} images
-Document 2 Images: {doc2_image_count} images
+    Document 1 Images: {doc1_image_count} images
+    Document 2 Images: {doc2_image_count} images
 
-Focus on:
-1. Visual elements, charts, diagrams, tables
-2. Layout and formatting differences
-3. Any visual information that differs between documents
-4. Text content and annotations
+    Focus on:
+    1. Visual elements, charts, diagrams, tables
+    2. Layout and formatting differences
+    3. Any visual information that differs between documents
+    4. Text content and annotations
 
-Provide a detailed comparison focusing on the topic: {topic}
-"""
+    Provide a detailed comparison focusing on the topic: {topic}
+
+    {language_instruction}
+    """
 
     FORMCONNECT_VISION_PROMPT_TEMPLATE: str = """
-Extract information from these images to fill the form template.
+    Extract information from these images to fill the form template.
 
-Template fields to fill:
-{template_fields}
+    Template fields to fill:
+    {template_fields}
 
-Images provided: {image_count}
+    Images provided: {image_count}
 
-Analyze the visual content and extract relevant information for each template field. Look for:
-1. Text content in images
-2. Form fields and their values
-3. Tables and structured data
-4. Text content and annotations
-5. Signatures and checkboxes
+    Analyze the visual content and extract relevant information for each template field. Look for:
+    1. Text content in images
+    2. Form fields and their values
+    3. Tables and structured data
+    4. Text content and annotations
+    5. Signatures and checkboxes
 
-Return the extracted information in JSON format matching the template structure.
-"""
+    Return the extracted information in JSON format matching the template structure.
+
+    {language_instruction}
+    """
 
     VERADOC_VISION_PROMPT_TEMPLATE: str = """
 Analyze the visual content in these images to answer the checklist question.
@@ -1041,7 +1077,9 @@ Look for visual evidence that helps answer the question, including:
 4. Layout and formatting
 5. Visual indicators or symbols
 
-Provide a detailed answer based on the visual analysis. DO NOT ADD ANY INFORMATION THAT IS NOT ATTESTED IN THE IMAGES:
+Provide a detailed answer based on the visual analysis. DO NOT ADD ANY INFORMATION THAT IS NOT ATTESTED IN THE IMAGES.
+
+{language_instruction}
 """
 
     VISION_SUMMARIZATION_PROMPT_TEMPLATE: str = """
@@ -1058,6 +1096,8 @@ Your task is to:
 3. If the images do NOT contain the information needed to answer the question, respond with exactly: {insufficient_info_phrase}
 4. DO NOT mention "batches", "analysis results", or processing details
 5. DO NOT ADD ANY INFORMATION THAT IS NOT ATTESTED IN THE PROVIDED ANALYSIS RESULTS
+
+{language_instruction}
 
 Answer:
 """

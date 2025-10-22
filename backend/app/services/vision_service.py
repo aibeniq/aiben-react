@@ -363,6 +363,9 @@ The analysis above integrates both textual content and visual elements to provid
                     vision_results_text = "\n\n".join(numbered_results)
 
                     # Use LLM to summarize all the vision results
+                    print(
+                        f"DEBUG: vision summarization language_instruction = '{variables.get('language_instruction', '')}'"
+                    )
                     summary_result = invoke_llm(
                         llm,
                         settings.VISION_SUMMARIZATION_PROMPT_TEMPLATE,
@@ -373,6 +376,9 @@ The analysis above integrates both textual content and visual elements to provid
                             ),
                             "vision_results": vision_results_text,
                             "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                            "language_instruction": variables.get(
+                                "language_instruction", ""
+                            ),
                         },
                     )
 

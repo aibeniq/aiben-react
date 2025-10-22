@@ -4,7 +4,6 @@ from pydantic import BaseModel
 import tempfile
 import os
 import uuid
-import traceback
 import re
 import json
 import redis
@@ -260,10 +259,24 @@ async def _handle_full_text_kb_query(
                     if i > 0 and settings.CHATBOT_ENABLE_CHUNK_DELAYS:
                         await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
 
+                    # Get user language and create language instruction (use preferred_language)
+                    user_language = (
+                        getattr(current_user, "preferred_language", None) or "en"
+                    )
+                    language_name = settings.SUPPORTED_LANGUAGES.get(
+                        user_language, "English"
+                    )
+                    language_instruction = f"Respond in this language: {language_name}."
+                    print(f"DEBUG: language_instruction = {language_instruction}")
+
                     chunk_analysis = invoke_llm(
                         llm,
                         settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
-                        {"chunk": chunk, "question": rephrased_question},
+                        {
+                            "chunk": chunk,
+                            "question": rephrased_question,
+                            "language_instruction": language_instruction,
+                        },
                     )
 
                     if "No relevant information found" not in chunk_analysis:
@@ -299,6 +312,13 @@ async def _handle_full_text_kb_query(
     if not all_chunk_analyses:
         # No relevant chunks found - still run synthesis template to get standardized insufficient context message
         chunk_analyses_text = "No relevant information found in any chunks."
+        # Get user language and create language instruction (use preferred_language)
+        user_language = getattr(current_user, "preferred_language", None) or "en"
+        language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+        language_instruction = f"Respond in this language: {language_name}."
+
+        print(f"DEBUG: language_instruction = {language_instruction}")
+
         final_answer = invoke_llm(
             llm,
             settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
@@ -306,6 +326,7 @@ async def _handle_full_text_kb_query(
                 "question": rephrased_question,
                 "chunk_analyses": chunk_analyses_text,
                 "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                "language_instruction": language_instruction,
             },
         )
         sources = []
@@ -318,6 +339,13 @@ async def _handle_full_text_kb_query(
             ]
         )
 
+        # Get user language and create language instruction (use preferred_language)
+        user_language = getattr(current_user, "preferred_language", None) or "en"
+        language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+        language_instruction = f"Respond in this language: {language_name}."
+
+        print(f"DEBUG: language_instruction = {language_instruction}")
+
         final_answer = invoke_llm(
             llm,
             settings.CHATBOT_FULL_TEXT_SYNTHESIS_PROMPT_TEMPLATE,
@@ -325,6 +353,7 @@ async def _handle_full_text_kb_query(
                 "question": rephrased_question,
                 "chunk_analyses": chunk_analyses_text,
                 "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                "language_instruction": language_instruction,
             },
         )
 
@@ -392,6 +421,17 @@ async def _handle_full_text_kb_query(
         if all_images:
             print(f"Total images extracted: {len(all_images)}")
             try:
+                # Get user language and create language instruction (use preferred_language)
+                user_language = (
+                    getattr(current_user, "preferred_language", None) or "en"
+                )
+                language_name = settings.SUPPORTED_LANGUAGES.get(
+                    user_language, "English"
+                )
+                language_instruction = f"Respond in this language: {language_name}."
+
+                print(f"DEBUG: language_instruction = {language_instruction}")
+
                 # Convert base64 images to the format expected by VisionService
                 vision_images = []
                 for img_b64 in all_images:
@@ -410,6 +450,7 @@ async def _handle_full_text_kb_query(
                         "source_files": "knowledge_base_sources",
                         "question": rephrased_question,
                         "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                        "language_instruction": language_instruction,
                     },
                     images=vision_images,
                 )
@@ -522,9 +563,10 @@ async def _handle_full_text_document_query(
         rephrased_question = question
 
     # Translate the rephrased question for display purposes
-    translated_rephrased_question = await translate_text_if_needed(
-        rephrased_question, session, current_user, llm
-    )
+    # translated_rephrased_question = await translate_text_if_needed(
+    #     rephrased_question, session, current_user, llm
+    # )
+    translated_rephrased_question = rephrased_question
 
     # Process each file independently
     all_document_analyses = []
@@ -580,10 +622,24 @@ async def _handle_full_text_document_query(
                     await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_CHUNKS)
 
                 try:
+                    # Get user language and create language instruction (use preferred_language)
+                    user_language = (
+                        getattr(current_user, "preferred_language", None) or "en"
+                    )
+                    language_name = settings.SUPPORTED_LANGUAGES.get(
+                        user_language, "English"
+                    )
+                    language_instruction = f"Respond in this language: {language_name}."
+                    print(f"DEBUG: language_instruction = {language_instruction}")
+
                     chunk_analysis = invoke_llm(
                         llm,
                         settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
-                        {"chunk": chunk, "question": rephrased_question},
+                        {
+                            "chunk": chunk,
+                            "question": rephrased_question,
+                            "language_instruction": language_instruction,
+                        },
                     )
 
                     if "No relevant information found" not in chunk_analysis:
@@ -624,6 +680,7 @@ async def _handle_full_text_document_query(
                         "question": rephrased_question,
                         "chunk_analyses": file_chunk_analyses_text,
                         "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                        "language_instruction": language_instruction,
                     },
                 )
 
@@ -676,9 +733,9 @@ async def _handle_full_text_document_query(
                     )
 
                     # Translate vision analysis if needed
-                    vision_analysis = await translate_text_if_needed(
-                        vision_analysis, session, current_user, llm
-                    )
+                    # vision_analysis = await translate_text_if_needed(
+                    #     vision_analysis, session, current_user, llm
+                    # )
 
                     # When text analysis was insufficient, use vision analysis directly
                     # instead of combining with formatted markers
@@ -766,6 +823,13 @@ async def _handle_full_text_document_query(
             )
 
             # Create a final synthesis across all documents
+            # Get user language and create language instruction (use preferred_language)
+            user_language = getattr(current_user, "preferred_language", None) or "en"
+            language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+            language_instruction = f"Respond in this language: {language_name}."
+
+            print(f"DEBUG: language_instruction = {language_instruction}")
+
             final_answer = invoke_llm(
                 llm,
                 settings.CHATBOT_MULTI_DOCUMENT_SYNTHESIS_PROMPT_TEMPLATE,
@@ -773,14 +837,15 @@ async def _handle_full_text_document_query(
                     "question": rephrased_question,
                     "document_analyses": document_analyses_text,
                     "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                    "language_instruction": language_instruction,
                 },
             )
             sources = all_source_citations
 
         # Translate the final answer if needed
-        final_answer = await translate_text_if_needed(
-            final_answer, session, current_user, llm
-        )
+        # final_answer = await translate_text_if_needed(
+        #     final_answer, session, current_user, llm
+        # )
 
         # Replace the internal insufficient info phrase with a user-friendly message
         if settings.LLM_INSUFFICIENT_INFO_PHRASE in final_answer:
@@ -1217,6 +1282,13 @@ async def query_knowledge_base(
         # 7. Generate the answer - with potential vision analysis
         try:
             print("Generating initial answer for knowledge base query...")
+            # Get user language and create language instruction (use preferred_language)
+            user_language = getattr(current_user, "preferred_language", None) or "en"
+            language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+            language_instruction = f"Respond in this language: {language_name}."
+
+            print(f"DEBUG: language_instruction = {language_instruction}")
+
             answer_content = invoke_llm(
                 llm,
                 qa_prompt_template,
@@ -1224,6 +1296,7 @@ async def query_knowledge_base(
                     "context": context,
                     "question": rephrased_question,
                     "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                    "language_instruction": language_instruction,
                 },
             )
             print(f"Initial text-only response: {answer_content[:100]}...")
@@ -1303,6 +1376,7 @@ async def query_knowledge_base(
                                 "source_files": "knowledge_base_sources",
                                 "question": rephrased_question,
                                 "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                                "language_instruction": language_instruction,
                             },
                             images=vision_images,
                         )
@@ -1388,6 +1462,8 @@ async def query_knowledge_base(
 
     except Exception as e:
         # Don't delete the temp dir on error if it's cached
+        import traceback
+
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error querying knowledge base: {str(e)}"
@@ -1726,13 +1802,14 @@ async def query_document(
             rephrased_question = question
 
         # Translate the rephrased question if needed for display purposes
-        try:
-            translated_rephrased_question = await translate_text_if_needed(
-                rephrased_question, session, current_user, llm
-            )
-        except Exception as e:
-            print(f"Translation of rephrased question failed: {e}")
-            translated_rephrased_question = rephrased_question  # Fallback to original
+        # try:
+        #     translated_rephrased_question = await translate_text_if_needed(
+        #         rephrased_question, session, current_user, llm
+        #     )
+        # except Exception as e:
+        #     print(f"Translation of rephrased question failed: {e}")
+        #     translated_rephrased_question = rephrased_question  # Fallback to original
+        translated_rephrased_question = rephrased_question
 
         # Retrieve relevant context
         docs = retriever.get_relevant_documents(rephrased_question)
@@ -1814,6 +1891,13 @@ async def query_document(
         text_only_context = context  # Keep original text context
         vision_analysis_performed = False
 
+        # Get user language and create language instruction (use preferred_language)
+        user_language = getattr(current_user, "preferred_language", None) or "en"
+        language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+        language_instruction = f"Respond in this language: {language_name}."
+
+        print(f"DEBUG: language_instruction = {language_instruction}")
+
         # Generate initial answer with text-only context
         print("Generating initial answer with text-only context...")
         initial_answer = invoke_llm(
@@ -1823,6 +1907,7 @@ async def query_document(
                 "context": text_only_context,
                 "question": rephrased_question,
                 "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                "language_instruction": language_instruction,
             },
         )
         print(f"Initial text-only answer: {initial_answer[:200]}...")
@@ -1859,6 +1944,7 @@ async def query_document(
                         "question": rephrased_question,
                         "context": text_only_context,
                         "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                        "language_instruction": language_instruction,
                     },
                     images=vision_images,
                 )
@@ -1922,6 +2008,7 @@ async def query_document(
                         "context": context,
                         "question": rephrased_question,
                         "insufficient_info_phrase": settings.LLM_INSUFFICIENT_INFO_PHRASE,
+                        "language_instruction": language_instruction,
                     },
                 )
                 print(f"Got vision-enhanced response: {answer_content[:100]}...")
@@ -1931,13 +2018,13 @@ async def query_document(
                 print(f"Using text-only response: {answer_content[:100]}...")
 
             # Translate the answer if needed
-            try:
-                answer_content = await translate_text_if_needed(
-                    answer_content, session, current_user, llm
-                )
-            except Exception as e:
-                print(f"Translation of answer failed: {e}")
-                # Keep original answer if translation fails
+            # try:
+            #     answer_content = await translate_text_if_needed(
+            #         answer_content, session, current_user, llm
+            #     )
+            # except Exception as e:
+            #     print(f"Translation of answer failed: {e}")
+            #     # Keep original answer if translation fails
 
         except Exception as e:
             print(f"Error generating answer: {e}")
@@ -2007,6 +2094,8 @@ async def query_document(
         }
 
     except Exception as e:
+        import traceback
+
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error querying document: {str(e)}"
@@ -2087,8 +2176,20 @@ async def query_text(
         # Generate the answer using invoke_llm
         try:
             print("Generating answer for text query...")
+            # Get user language and create language instruction (use preferred_language)
+            user_language = getattr(current_user, "preferred_language", None) or "en"
+            language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+            language_instruction = f"Respond in this language: {language_name}."
+
+            print(f"DEBUG: language_instruction = {language_instruction}")
+
             answer_content = invoke_llm(
-                llm, qa_prompt_template, {"question": rephrased_question}
+                llm,
+                qa_prompt_template,
+                {
+                    "question": rephrased_question,
+                    "language_instruction": language_instruction,
+                },
             )
             print(f"Got response: {answer_content[:100]}...")
         except Exception as e:
@@ -2113,6 +2214,8 @@ async def query_text(
         }
 
     except Exception as e:
+        import traceback
+
         traceback.print_exc()
         raise HTTPException(
             status_code=500, detail=f"Error processing question: {str(e)}"
@@ -2164,6 +2267,8 @@ async def chat(
             )
 
     except Exception as e:
+        import traceback
+
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error in chat: {str(e)}")
 

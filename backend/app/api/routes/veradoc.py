@@ -516,9 +516,9 @@ async def prefetch_knowledge_base_context(
                 print(f"Got context: {question_context[:100]}...")
 
                 # Translate the question context if needed
-                question_context = await translate_text_if_needed(
-                    question_context, session, current_user, llm
-                )
+                # question_context = await translate_text_if_needed(
+                #     question_context, session, current_user, llm
+                # )
 
             except Exception as context_error:
                 print(f"Error generating context for question: {context_error}")
@@ -551,17 +551,17 @@ async def prefetch_knowledge_base_context(
                     question_context = f"Error generating context: {str(context_error)}"
 
                 # Translate the fallback context if needed
-                question_context = await translate_text_if_needed(
-                    question_context, session, current_user, llm
-                )
+                # question_context = await translate_text_if_needed(
+                #     question_context, session, current_user, llm
+                # )
         else:
             # Skip knowledge base consultation
             question_context = (
                 "No policy context consultation requested for this question."
             )
-            question_context = await translate_text_if_needed(
-                question_context, session, current_user, llm
-            )
+            # question_context = await translate_text_if_needed(
+            #     question_context, session, current_user, llm
+            # )
             source_citations = []
             print(
                 f"Skipping document consultation for question: {question_text[:50]}..."
@@ -1543,9 +1543,9 @@ async def process_rag_checklist(
                                             detail="Request cancelled during fallback context generation",
                                         )
 
-                                    question_context = await translate_text_if_needed(
-                                        question_context, session, current_user, llm
-                                    )
+                                    # question_context = await translate_text_if_needed(
+                                    #     question_context, session, current_user, llm
+                                    # )
                                     # Clean surrogates from question_context
                                     question_context = re.sub(
                                         r"[\ud800-\udfff]", "", question_context
@@ -1558,9 +1558,9 @@ async def process_rag_checklist(
                                     source_citations = []
                             else:
                                 question_context = "No policy context consultation requested for this question."
-                                question_context = await translate_text_if_needed(
-                                    question_context, session, current_user, llm
-                                )
+                                # question_context = await translate_text_if_needed(
+                                #     question_context, session, current_user, llm
+                                # )
                                 # Clean surrogates from question_context
                                 question_context = re.sub(
                                     r"[\ud800-\udfff]", "", question_context
@@ -1577,6 +1577,16 @@ async def process_rag_checklist(
                         ):
                             custom_instructions_section = f"\nADDITIONAL INSTRUCTIONS:\n{request_data.custom_instructions.strip()}\n"
 
+                        # Prepare language instruction - ALWAYS include for consistency
+                        language_instruction = ""
+                        if user_language:
+                            language_name = settings.SUPPORTED_LANGUAGES.get(
+                                user_language, user_language
+                            )
+                            language_instruction = (
+                                f"Respond in this language: {language_name}."
+                            )
+
                         # DEBUG: Print the full prompt sent to the LLM
                         try:
                             rendered_prompt = qa_prompt_template.format(
@@ -1584,6 +1594,7 @@ async def process_rag_checklist(
                                 question=question_text,
                                 question_context=question_context,
                                 custom_instructions_section=custom_instructions_section,
+                                language_instruction=language_instruction,
                             )
                         except Exception as e:
                             rendered_prompt = f"[ERROR rendering prompt: {e}]"
@@ -1599,6 +1610,9 @@ async def process_rag_checklist(
 
                         try:
                             # Generate text-based answer
+                            print(
+                                f"DEBUG: language_instruction = '{language_instruction}'"
+                            )
                             answer = await invoke_llm_async(
                                 llm,
                                 qa_prompt_template,
@@ -1607,6 +1621,7 @@ async def process_rag_checklist(
                                     "question": question_text,
                                     "question_context": question_context,
                                     "custom_instructions_section": custom_instructions_section,
+                                    "language_instruction": language_instruction,
                                 },
                             )
 
@@ -1656,18 +1671,17 @@ async def process_rag_checklist(
                                             )
                                             else ""
                                         ),
+                                        "language_instruction": language_instruction,
                                     }
 
+                                    print(
+                                        f"DEBUG: vision language_instruction = '{vision_variables.get('language_instruction', '')}'"
+                                    )
                                     vision_analysis = await VisionService.process_images_with_prompt(
                                         llm=llm,
                                         images=image_data_list,
                                         prompt_template=settings.VERADOC_VISION_PROMPT_TEMPLATE,
                                         variables=vision_variables,
-                                    )
-
-                                    # Translate vision analysis if needed
-                                    vision_analysis = await translate_text_if_needed(
-                                        vision_analysis, session, current_user, llm
                                     )
 
                                     # Combine text and vision analysis seamlessly (photogenic integration)
@@ -1698,10 +1712,6 @@ async def process_rag_checklist(
                                     )
                                     # Continue with text-only answer
 
-                            # Translate the answer if needed
-                            answer = await translate_text_if_needed(
-                                answer, session, current_user, llm
-                            )
                             # Clean surrogates from answer
                             answer = re.sub(r"[\ud800-\udfff]", "", answer)
 
@@ -1792,13 +1802,20 @@ async def process_rag_checklist(
                     await asyncio.sleep(0.01)  # Allow progress API to respond
 
                     print(f"Generating final evaluation for {file.filename}...")
+                    print(
+                        f"DEBUG: final evaluation language_instruction = '{language_instruction}'"
+                    )
                     final_evaluation = invoke_llm(
-                        llm, final_prompt_template, {"qa_pairs": qa_pairs_text}
+                        llm,
+                        final_prompt_template,
+                        {
+                            "qa_pairs": qa_pairs_text,
+                            "language_instruction": language_instruction,
+                        },
                     )
                     print(f"Got final evaluation: {final_evaluation[:100]}...")
-                    final_evaluation = await translate_text_if_needed(
-                        final_evaluation, session, current_user, llm
-                    )
+                    # Clean surrogates from final_evaluation
+                    final_evaluation = re.sub(r"[\ud800-\udfff]", "", final_evaluation)
                 except Exception as final_eval_error:
                     print(
                         f"Error generating final evaluation for {file.filename}: {final_eval_error}"
@@ -2383,6 +2400,9 @@ async def optimize_checklist(
     try:
         print("Starting checklist optimization...")
 
+        # Get user's preferred language
+        user_language = getattr(current_user, "preferred_language", "en") or "en"
+
         # 1. Retrieve knowledge base
         kb = session.get(KnowledgeBase, request_data.knowledge_base_id)
         if not kb:
@@ -2534,9 +2554,9 @@ async def optimize_checklist(
                 )
 
                 # Translate the question context if needed
-                question_context = await translate_text_if_needed(
-                    question_context, session, current_user, llm
-                )
+                # question_context = await translate_text_if_needed(
+                #     question_context, session, current_user, llm
+                # )
 
                 # Prepare custom instructions section if provided
                 custom_instructions_section = ""
@@ -2546,7 +2566,16 @@ async def optimize_checklist(
                 ):
                     custom_instructions_section = f"\nADDITIONAL INSTRUCTIONS:\n{request_data.custom_instructions.strip()}\n"
 
+                # Prepare language instruction
+                language_instruction = ""
+                if user_language:
+                    language_name = settings.SUPPORTED_LANGUAGES.get(
+                        user_language, user_language
+                    )
+                    language_instruction = f"Respond in this language: {language_name}."
+
                 # Generate answer
+                print(f"DEBUG: language_instruction = '{language_instruction}'")
                 answer = invoke_llm(
                     llm,
                     qa_prompt_template,
@@ -2555,6 +2584,7 @@ async def optimize_checklist(
                         "question": question,
                         "question_context": question_context,
                         "custom_instructions_section": custom_instructions_section,
+                        "language_instruction": language_instruction,
                     },
                 )
 
@@ -2598,20 +2628,21 @@ async def optimize_checklist(
                     suggestion.policy_context = qa["context"]
 
                     # Translate current answer and analysis to user's language
-                    suggestion.current_answer = await translate_text_if_needed(
-                        suggestion.current_answer, session, current_user, llm
-                    )
-                    suggestion.reason = await translate_text_if_needed(
-                        suggestion.reason, session, current_user, llm
-                    )
+                    # suggestion.current_answer = await translate_text_if_needed(
+                    #     suggestion.current_answer, session, current_user, llm
+                    # )
+                    # suggestion.reason = await translate_text_if_needed(
+                    #     suggestion.reason, session, current_user, llm
+                    # )
 
                     suggestions.append(suggestion)
                 else:
                     # Question is already working well
                     reason_text = "Question already generates positive responses"
-                    translated_reason = await translate_text_if_needed(
-                        reason_text, session, current_user, llm
-                    )
+                    # translated_reason = await translate_text_if_needed(
+                    #     reason_text, session, current_user, llm
+                    # )
+                    translated_reason = reason_text
                     suggestion = ChecklistSuggestion(
                         original_question=qa["question"],
                         suggested_question=qa["question"],
@@ -2622,12 +2653,12 @@ async def optimize_checklist(
                     )
 
                     # Translate current answer and analysis to user's language
-                    suggestion.current_answer = await translate_text_if_needed(
-                        suggestion.current_answer, session, current_user, llm
-                    )
-                    suggestion.reason = await translate_text_if_needed(
-                        suggestion.reason, session, current_user, llm
-                    )
+                    # suggestion.current_answer = await translate_text_if_needed(
+                    #     suggestion.current_answer, session, current_user, llm
+                    # )
+                    # suggestion.reason = await translate_text_if_needed(
+                    #     suggestion.reason, session, current_user, llm
+                    # )
 
                     suggestions.append(suggestion)
 
@@ -3313,6 +3344,7 @@ Return only the final selected questions, one per line, numbered."""
             "reference_documents_instruction": reference_documents_instruction,
             "reference_documents_content": reference_document_content,
             "additional_instructions": additional_instructions,
+            "language_instruction": f"Respond in this language: {settings.SUPPORTED_LANGUAGES.get(getattr(current_user, 'preferred_language', 'en'), 'English')}.",
         }
 
         # Generate questions using the LLM
@@ -3429,6 +3461,7 @@ async def generate_questions(
             "reference_documents_instruction": "",
             "reference_documents_content": "",
             "additional_instructions": "",
+            "language_instruction": f"Respond in this language: {settings.SUPPORTED_LANGUAGES.get(getattr(current_user, 'preferred_language', 'en'), 'English')}.",
         }
 
         # If knowledge base is provided, retrieve content using selected search mode
@@ -3467,8 +3500,6 @@ async def generate_questions(
 
             except Exception as e:
                 print(f"Error retrieving knowledge base documents: {e}")
-                import traceback
-
                 traceback.print_exc()
                 # Continue without reference documents if there's an error
                 pass

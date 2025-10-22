@@ -41,7 +41,16 @@ from app.core.config import settings
 from app.services.progress_tracker import progress_tracker
 
 from sqlmodel import Session, select
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, Request as FastAPIRequest, Query
+from fastapi import (
+    APIRouter,
+    UploadFile,
+    File,
+    Form,
+    HTTPException,
+    Depends,
+    Request as FastAPIRequest,
+    Query,
+)
 from typing import List, Dict, Any, Literal, Optional
 
 from langchain.prompts import ChatPromptTemplate
@@ -94,15 +103,14 @@ async def create_process_task():
         "loading": 15,
         "extracting": 60,
         "comparing": 10,
-        "finalizing": 5
+        "finalizing": 5,
     }
-    
+
     # Initialize progress tracker with stages for FormConnect processing
     task_id = progress_tracker.create_task(
-        operation="FormConnect Processing",
-        stages=stages
+        operation="FormConnect Processing", stages=stages
     )
-    
+
     print(f"📋 Created FormConnect task with ID: {task_id}")
     return {"task_id": task_id}
 
@@ -117,13 +125,15 @@ async def get_formconnect_progress(
     Get the progress of a FormConnect processing task.
     """
     progress = progress_tracker.get_progress(task_id)
-    
+
     if not progress:
         raise HTTPException(status_code=404, detail="Task not found")
-    
-    print(f"🔍 PROGRESS DATA: status={progress.get('status')}, percentage={progress.get('percentage')}, current_stage={progress.get('current_stage')}")
+
+    print(
+        f"🔍 PROGRESS DATA: status={progress.get('status')}, percentage={progress.get('percentage')}, current_stage={progress.get('current_stage')}"
+    )
     print(f"🔍 PROGRESS MESSAGE: {progress.get('message')}")
-    
+
     return progress
 
 
@@ -136,7 +146,11 @@ def generate_template(fields: List[str]) -> Dict[str, str]:
 
 
 async def extract_fields_from_digitized_document(
-    file: UploadFile, template: Dict[str, str], llm=None, search_mode: str = "full_scan"
+    file: UploadFile,
+    template: Dict[str, str],
+    llm=None,
+    search_mode: str = "full_scan",
+    current_user=None,
 ) -> Dict[str, str]:
     """
     Extract fields from a document using the LLM.
@@ -151,12 +165,16 @@ async def extract_fields_from_digitized_document(
     else:
         # FULL TEXT MODE (existing implementation)
         return await extract_fields_using_full_text(
-            content, file.filename, template, llm
+            content, file.filename, template, llm, current_user
         )
 
 
 async def extract_fields_using_vector_search(
-    file: UploadFile, content: bytes, template: Dict[str, str], llm=None
+    file: UploadFile,
+    content: bytes,
+    template: Dict[str, str],
+    llm=None,
+    current_user=None,
 ) -> Dict[str, str]:
     """
     Extract fields using vector search to find relevant document sections.
@@ -180,12 +198,12 @@ async def extract_fields_using_vector_search(
         from app.api.deps import get_db
 
         session = next(get_db())
-        embedding_info = get_embedding_model(session)
+        embedding_info = get_embedding_model(session, current_user)
 
         if not embedding_info:
             print("❌ No embedding model available, falling back to full text mode")
             return await extract_fields_using_full_text(
-                content, file.filename, template, llm
+                content, file.filename, template, llm, current_user
             )
 
         print(
@@ -333,7 +351,7 @@ async def extract_fields_using_vector_search(
                 print(f"Error creating vector store: {e}")
                 # Fall back to full text extraction if vector store fails
                 return await extract_fields_using_full_text(
-                    content, file.filename, template, llm
+                    content, file.filename, template, llm, current_user
                 )
 
             # Create retriever for semantic search
@@ -517,12 +535,12 @@ Extracted value:"""
     except Exception as e:
         print(f"❌ Vector search failed: {str(e)}. Falling back to full text mode.")
         return await extract_fields_using_full_text(
-            content, file.filename, template, llm
+            content, file.filename, template, llm, current_user
         )
 
 
 async def extract_fields_using_full_text(
-    content: bytes, filename: str, template: Dict[str, str], llm=None
+    content: bytes, filename: str, template: Dict[str, str], llm=None, current_user=None
 ) -> Dict[str, str]:
     """
     Extract fields using full text processing with enhanced visual processing.
@@ -584,7 +602,7 @@ async def extract_fields_using_full_text(
             print(
                 f"⚠️ Large document detected ({token_count} tokens), implementing chunking..."
             )
-            return await extract_fields_with_chunking(text, template, llm)
+            return await extract_fields_with_chunking(text, template, llm, current_user)
 
     except Exception as e:
         print(f"Error processing file {filename}: {str(e)}")
@@ -600,13 +618,26 @@ async def extract_fields_using_full_text(
         )
         # Use vision-enhanced processing
         response = await process_with_text_and_images(
-            text, document_images, template, llm, filename
+            text, document_images, template, llm, filename, current_user
         )
     else:
         print(f"📄 Processing {filename} with text only (no images or vision disabled)")
         # Use standard text-only processing
+        # Get user language and create language instruction
+        user_language = (
+            getattr(current_user, "preferred_language", "en") or "en"
+            if current_user
+            else "en"
+        )
+        language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+        language_instruction = f"Respond in this language: {language_name}."
+
         prompt_template = settings.FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE
-        variables = {"template": json.dumps(template), "document_text": text}
+        variables = {
+            "template": json.dumps(template),
+            "document_text": text,
+            "language_instruction": language_instruction,
+        }
         response = invoke_llm(llm, prompt_template, variables)
 
     # Try to parse JSON from the response
@@ -703,7 +734,12 @@ async def process_images_only(
 
 
 async def process_with_text_and_images(
-    text: str, document_images: List[str], template: Dict[str, str], llm, filename: str
+    text: str,
+    document_images: List[str],
+    template: Dict[str, str],
+    llm,
+    filename: str,
+    current_user=None,
 ) -> Dict[str, str]:
     """
     Process a document that has both text and images using enhanced vision analysis.
@@ -766,8 +802,21 @@ async def process_with_text_and_images(
                 f"⚠️ JSON parsing failed for combined analysis, falling back to text-only"
             )
             # Fallback to text-only processing
+            # Get user language and create language instruction
+            user_language = (
+                getattr(current_user, "preferred_language", "en") or "en"
+                if current_user
+                else "en"
+            )
+            language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+            language_instruction = f"Respond in this language: {language_name}."
+
             prompt_template = settings.FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE
-            variables = {"template": json.dumps(template), "document_text": text}
+            variables = {
+                "template": json.dumps(template),
+                "document_text": text,
+                "language_instruction": language_instruction,
+            }
             response = invoke_llm(llm, prompt_template, variables)
 
             if isinstance(response, dict):
@@ -864,7 +913,7 @@ Value for "{field_name}":"""
 
 
 async def extract_fields_with_chunking(
-    document_text: str, template: Dict[str, str], llm=None
+    document_text: str, template: Dict[str, str], llm=None, current_user=None
 ) -> Dict[str, str]:
     """
     Extract fields from large documents using chunking.
@@ -890,8 +939,21 @@ async def extract_fields_with_chunking(
         print(f"[{i+1}/{len(chunks)}] Processing chunk ({count_tokens(chunk)} tokens)")
 
         try:
+            # Get user language and create language instruction
+            user_language = (
+                getattr(current_user, "preferred_language", "en") or "en"
+                if current_user
+                else "en"
+            )
+            language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+            language_instruction = f"Respond in this language: {language_name}."
+
             prompt_template = settings.FORMCONNECT_DIGITIZED_PROMPT_TEMPLATE
-            variables = {"template": json.dumps(template), "document_text": chunk}
+            variables = {
+                "template": json.dumps(template),
+                "document_text": chunk,
+                "language_instruction": language_instruction,
+            }
             response = invoke_llm(llm, prompt_template, variables)
 
             try:
@@ -1079,7 +1141,7 @@ def merge_page_extractions(
 
 
 async def format_single_document_result(
-    extracted_data: Dict[str, str], file_name: str, llm
+    extracted_data: Dict[str, str], file_name: str, llm, current_user=None
 ) -> str:
     """
     Format the results from a single document into a clear presentation.
@@ -1091,8 +1153,21 @@ async def format_single_document_result(
     data_str = str(extracted_data).replace("{", "{{").replace("}", "}}")
 
     # Use the single document template from config
+    # Get user language and create language instruction
+    user_language = (
+        getattr(current_user, "preferred_language", "en") or "en"
+        if current_user
+        else "en"
+    )
+    language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+    language_instruction = f"Respond in this language: {language_name}."
+
     prompt_template = settings.FORMCONNECT_SINGLE_DOCUMENT_PROMPT_TEMPLATE
-    variables = {"document_name": clean_filename, "extracted_data": data_str}
+    variables = {
+        "document_name": clean_filename,
+        "extracted_data": data_str,
+        "language_instruction": language_instruction,
+    }
 
     print(f"Formatting single document result for: {clean_filename}")
 
@@ -1151,10 +1226,10 @@ Format your response in markdown with clear tables and analysis."""
     }
     response = invoke_llm(llm, enhanced_prompt_template, variables)
     # Translate the response if needed
-    translated_response = await translate_text_if_needed(
-        response, session, current_user, llm
-    )
-    return translated_response
+    # translated_response = await translate_text_if_needed(
+    #     response, session, current_user, llm
+    # )
+    return response
 
 
 @router.post("/process", response_model=FormConnectResponse)
@@ -1172,7 +1247,7 @@ async def process_form(
     """
     Process the uploaded files and fields with unified visual processing.
     All files now benefit from automatic visual enhancement for embedded images.
-    
+
     Args:
         task_id: Optional task ID for progress tracking
     """
@@ -1198,11 +1273,13 @@ async def process_form(
         files.extend(digitized_files)
     if handwritten_files:
         files.extend(handwritten_files)
-    
+
     total_files = len(files)
     print(f"Now processing {total_files} files with unified visual processing...")
     print(f"  - Digitized files: {len(digitized_files) if digitized_files else 0}")
-    print(f"  - Handwritten files: {len(handwritten_files) if handwritten_files else 0}")
+    print(
+        f"  - Handwritten files: {len(handwritten_files) if handwritten_files else 0}"
+    )
 
     # Check if we have at least one file
     if total_files < 1:
@@ -1217,22 +1294,28 @@ async def process_form(
 
     # Update progress: Setup complete
     if task_id:
-        progress_tracker.complete_stage(task_id, "setup", message_key="common.progress.initializing")
+        progress_tracker.complete_stage(
+            task_id, "setup", message_key="common.progress.initializing"
+        )
         progress_tracker.update_stage_progress(
-            task_id, "loading", 0, 1, 
-            message_key="common.progress.processing"
+            task_id, "loading", 0, 1, message_key="common.progress.processing"
         )
         await asyncio.sleep(0.01)  # Yield to event loop
 
     # Generate the JSON template
     template = generate_template(field_list)
-    
+
     # Update progress: Loading complete
     if task_id:
-        progress_tracker.complete_stage(task_id, "loading", message_key="common.progress.processing")
+        progress_tracker.complete_stage(
+            task_id, "loading", message_key="common.progress.processing"
+        )
         progress_tracker.update_stage_progress(
-            task_id, "extracting", 0, total_files,
-            message_key="common.progress.extracting"
+            task_id,
+            "extracting",
+            0,
+            total_files,
+            message_key="common.progress.extracting",
         )
         await asyncio.sleep(0.01)  # Yield to event loop
 
@@ -1246,15 +1329,18 @@ async def process_form(
             # Update progress for this file
             if task_id:
                 progress_tracker.update_stage_progress(
-                    task_id, "extracting", i, total_files,
-                    message_key="common.progress.extracting"
+                    task_id,
+                    "extracting",
+                    i,
+                    total_files,
+                    message_key="common.progress.extracting",
                 )
                 await asyncio.sleep(0.01)  # Yield to event loop
-            
+
             # Add delay between file processing to prevent rate limit exhaustion
             if i > 0:
                 await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_DOCUMENTS)
-                
+
             # CRITICAL: Check if client has disconnected before processing each file
             try:
                 if request and await request.is_disconnected():
@@ -1262,25 +1348,25 @@ async def process_form(
                     return FormConnectResponse(
                         results={
                             "status": "cancelled",
-                            "message": "Request cancelled - client disconnected"
+                            "message": "Request cancelled - client disconnected",
                         }
                     )
             except Exception as e:
                 print(f"Warning: Could not check disconnect status: {e}")
-            
+
             # Read file content
             file_content = await file.read()
             filename = file.filename
-            
+
             if search_mode == "vector":
                 # Use vector search with visual enhancement
                 extracted = await extract_fields_using_vector_search(
-                    file, file_content, template, llm
+                    file, file_content, template, llm, current_user
                 )
             else:
                 # Use full text processing with visual enhancement
                 extracted = await extract_fields_using_full_text(
-                    file_content, filename, template, llm
+                    file_content, filename, template, llm, current_user
                 )
 
             # CRITICAL: Check if client disconnected after field extraction
@@ -1290,7 +1376,7 @@ async def process_form(
                     return FormConnectResponse(
                         results={
                             "status": "cancelled",
-                            "message": "Request cancelled - client disconnected after file processing"
+                            "message": "Request cancelled - client disconnected after file processing",
                         }
                     )
             except Exception as e:
@@ -1306,10 +1392,11 @@ async def process_form(
 
     # Update progress: Extraction complete, starting comparison
     if task_id:
-        progress_tracker.complete_stage(task_id, "extracting", message_key="common.progress.extracting")
+        progress_tracker.complete_stage(
+            task_id, "extracting", message_key="common.progress.extracting"
+        )
         progress_tracker.update_stage_progress(
-            task_id, "comparing", 0, 1,
-            message_key="match.progress.formatting"
+            task_id, "comparing", 0, 1, message_key="match.progress.formatting"
         )
         await asyncio.sleep(0.01)  # Yield to event loop
 
@@ -1317,7 +1404,7 @@ async def process_form(
     if total_files == 1:
         # Format the single document result for better presentation
         formatted_result = await format_single_document_result(
-            extracted_results[0], file_names[0], llm
+            extracted_results[0], file_names[0], llm, current_user
         )
         result = {
             "message_key": "match.singleDocumentSuccess",
@@ -1337,10 +1424,11 @@ async def process_form(
 
     # Update progress: Comparison complete, finalizing
     if task_id:
-        progress_tracker.complete_stage(task_id, "comparing", message_key="match.progress.formatting")
+        progress_tracker.complete_stage(
+            task_id, "comparing", message_key="match.progress.formatting"
+        )
         progress_tracker.update_stage_progress(
-            task_id, "finalizing", 0, 1,
-            message_key="common.progress.processing"
+            task_id, "finalizing", 0, 1, message_key="common.progress.processing"
         )
         await asyncio.sleep(0.01)  # Yield to event loop
 
@@ -1348,7 +1436,12 @@ async def process_form(
         session=session,
         user_id=current_user.id,
         functionality="formconnect",
-        input_data={"fields": fields, "files": file_names, "search_mode": search_mode, "form_name": form_name},
+        input_data={
+            "fields": fields,
+            "files": file_names,
+            "search_mode": search_mode,
+            "form_name": form_name,
+        },
         output_data=result,
         metadata={
             "file_count": total_files,
@@ -1376,7 +1469,9 @@ async def process_form(
     if task_id:
         progress_tracker.complete_stage(task_id, "finalizing", "Processing complete")
         # Mark the entire task as complete using the ProgressTracker API
-        progress_tracker.complete_task(task_id, "Form processing completed successfully")
+        progress_tracker.complete_task(
+            task_id, "Form processing completed successfully"
+        )
         await asyncio.sleep(0.01)  # Yield to event loop
 
     # Return the comparison results as a dictionary
@@ -1617,7 +1712,9 @@ async def get_form_history(
                         first_field = fields[0].strip()
                         if first_field:
                             # Truncate if too long
-                            form_name = first_field[:50] + ("..." if len(first_field) > 50 else "")
+                            form_name = first_field[:50] + (
+                                "..." if len(first_field) > 50 else ""
+                            )
                         else:
                             form_name = "Custom Form"
 
@@ -1716,6 +1813,11 @@ async def generate_form_fields(
         description = request.description or ""
 
         # Prepare variables for the prompt
+        # Get user language and create language instruction
+        user_language = getattr(current_user, "preferred_language", "en") or "en"
+        language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+        language_instruction = f"Respond in this language: {language_name}."
+
         prompt_variables = {
             "description": description,
             "example_instruction": "",
@@ -1723,6 +1825,7 @@ async def generate_form_fields(
             "analysis_note": "",
             "knowledge_base_instruction": "",
             "knowledge_base_content": "",
+            "language_instruction": language_instruction,
         }
 
         # If knowledge base is specified, retrieve content using selected search mode
@@ -1828,9 +1931,10 @@ async def generate_form_fields(
                 analysis += " with knowledge base reference."
 
         # Translate the analysis if needed
-        translated_analysis = await translate_text_if_needed(
-            analysis, session, current_user, llm
-        )
+        # translated_analysis = await translate_text_if_needed(
+        #     analysis, session, current_user, llm
+        # )
+        translated_analysis = analysis
 
         # Record the interaction
         record_llm_interaction(
@@ -1908,7 +2012,7 @@ async def generate_form_fields_with_files(
             # Add delay between reference file processing to prevent rate limit exhaustion
             if i > 0:
                 await asyncio.sleep(settings.PROCESSING_DELAY_BETWEEN_DOCUMENTS)
-                
+
             try:
                 # Read file content
                 content = await file.read()
@@ -1954,6 +2058,11 @@ async def generate_form_fields_with_files(
             combined_content += doc["content"]
 
         # Prepare variables for the prompt
+        # Get user language and create language instruction
+        user_language = getattr(current_user, "preferred_language", "en") or "en"
+        language_name = settings.SUPPORTED_LANGUAGES.get(user_language, "English")
+        language_instruction = f"Respond in this language: {language_name}."
+
         prompt_variables = {
             "description": (
                 description.strip()
@@ -1965,6 +2074,7 @@ async def generate_form_fields_with_files(
             "analysis_note": f" (analyzed {len(extracted_documents)} reference documents)",
             "knowledge_base_instruction": "",
             "knowledge_base_content": f"REFERENCE DOCUMENTS:\n{combined_content}",
+            "language_instruction": language_instruction,
         }
 
         # Generate fields using the LLM
@@ -2031,9 +2141,10 @@ async def generate_form_fields_with_files(
             analysis = f"Generated {len(fields)} form fields based on analysis of {len(extracted_documents)} reference document(s) using {search_mode} method"
 
         # Translate the analysis if needed
-        translated_analysis = await translate_text_if_needed(
-            analysis, session, current_user, llm
-        )
+        # translated_analysis = await translate_text_if_needed(
+        #     analysis, session, current_user, llm
+        # )
+        translated_analysis = analysis
 
         # Record the interaction
         record_llm_interaction(
@@ -2102,24 +2213,26 @@ async def generate_docx(
 
         print("Adding title and date to the document...")
         # Determine language
-        language = request.language or getattr(current_user, 'preferred_language', 'en') or 'en'
+        language = (
+            request.language
+            or getattr(current_user, "preferred_language", "en")
+            or "en"
+        )
 
         # Add a title
         title_text = (
-            request.title
-            if request.title
-            else translate('matching_results', language)
+            request.title if request.title else translate("matching_results", language)
         )
         title = doc.add_heading(title_text, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
         # Add translated subtitle with metadata
-        date_str = datetime.now().strftime('%B %d, %Y at %H:%M')
-        subtitle_template = translate('generated_on', language)
+        date_str = datetime.now().strftime("%B %d, %Y at %H:%M")
+        subtitle_template = translate("generated_on", language)
         subtitle = subtitle_template.format(
             date=date_str,
             name=current_user.full_name or current_user.email,
-            email=current_user.email
+            email=current_user.email,
         )
         subtitle_paragraph = doc.add_paragraph()
         subtitle_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT

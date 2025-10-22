@@ -299,7 +299,12 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
             <Dialog.Header flexShrink={0}>
               <Dialog.Title>{t("optimizeChecklistModal.title")}</Dialog.Title>
             </Dialog.Header>
-            <Dialog.Body flex={1} overflow="hidden" display="flex" flexDirection="column">
+            <Dialog.Body
+              flex={1}
+              overflow={suggestions.length > 0 ? "auto" : "hidden"}
+              display="flex"
+              flexDirection="column"
+            >
               {/* Configuration and Analysis Section */}
               <VStack
                 gap={4}
@@ -414,15 +419,15 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
 
               {/* Two-Column Results Layout */}
               {suggestions.length > 0 && !isLoading && (
-                <Box flex={1} overflow="hidden" display="flex" flexDirection="column" pt={4}>
-                  <HStack gap={6} flex={1} overflow="hidden" align="stretch">
+                <Box flex={1} display="flex" flexDirection="column" pt={4}>
+                  <HStack gap={6} flex={1} align="stretch">
                     {/* Left Column: Suggestions that need revision */}
-                    <VStack flex={1} align="stretch" overflow="hidden">
+                    <VStack flex={1} align="stretch">
                       <Text fontWeight="semibold" color="blue.700" mb={3}>
                         {t("optimizeChecklistModal.questionsNeedingOptimization")} (
                         {suggestions.filter((s) => s.needs_revision).length})
                       </Text>
-                      <Box flex={1} overflow="auto" pr={2}>
+                      <Box pr={2}>
                         <VStack gap={4} align="stretch">
                           {suggestions
                             .map((suggestion, index) => ({ suggestion, index }))
@@ -648,12 +653,12 @@ const OptimizeChecklistModal: React.FC<OptimizeChecklistModalProps> = ({
                     </VStack>
 
                     {/* Right Column: Questions that are already good */}
-                    <VStack flex={1} align="stretch" overflow="hidden">
+                    <VStack flex={1} align="stretch">
                       <Text fontWeight="semibold" color="green.700" mb={3}>
                         {t("optimizeChecklistModal.questionsAlreadyOptimized")} (
                         {suggestions.filter((s) => !s.needs_revision).length})
                       </Text>
-                      <Box flex={1} overflow="auto" pr={2}>
+                      <Box pr={2}>
                         <VStack gap={4} align="stretch">
                           {suggestions
                             .map((suggestion, index) => ({ suggestion, index }))

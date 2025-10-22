@@ -47,11 +47,15 @@ async def translate_text_if_needed(
     Returns:
         Original text if language is English, translated text otherwise
     """
+    print(
+        f"DEBUG translate_text_if_needed: called with text='{text[:100]}...', user_language='{getattr(current_user, 'preferred_language', 'en')}'"
+    )
     # Check user's preferred language
     user_language = getattr(current_user, "preferred_language", "en")
 
     # If language is English or not set, return original text
     if not user_language or user_language == "en":
+        print(f"DEBUG: No translation needed, returning original text")
         return text
 
     try:
@@ -61,6 +65,9 @@ async def translate_text_if_needed(
 
         # Create translation prompt
         translation_prompt = get_translation_prompt(text, user_language)
+        print(
+            f"DEBUG: Translating to {user_language}, prompt: {translation_prompt[:200]}..."
+        )
 
         # Invoke LLM for translation
         translated_text = await invoke_llm_async(llm, translation_prompt)
@@ -69,7 +76,9 @@ async def translate_text_if_needed(
         if hasattr(translated_text, "content"):
             translated_text = translated_text.content
 
-        return str(translated_text).strip()
+        translated_text = str(translated_text).strip()
+        print(f"DEBUG: Translated text: '{translated_text[:100]}...'")
+        return translated_text
 
     except Exception as e:
         # If translation fails, log the error and return original text
@@ -1728,7 +1737,9 @@ def translate_progress_message(key: str, language: str = "en", **kwargs) -> str:
         Translated message with parameters substituted
     """
     # Get translations for the requested language, fallback to English
-    translations = PROGRESS_TRANSLATIONS.get(language, PROGRESS_TRANSLATIONS.get("en", {}))
+    translations = PROGRESS_TRANSLATIONS.get(
+        language, PROGRESS_TRANSLATIONS.get("en", {})
+    )
 
     # Get the message template
     template = translations.get(key, PROGRESS_TRANSLATIONS["en"].get(key, key))
@@ -1754,7 +1765,9 @@ def translate(key: str, language: str = "en", **kwargs) -> str:
         Translated message with parameters substituted
     """
     # Get translations for the requested language, fallback to English
-    translations = PROGRESS_TRANSLATIONS.get(language, PROGRESS_TRANSLATIONS.get("en", {}))
+    translations = PROGRESS_TRANSLATIONS.get(
+        language, PROGRESS_TRANSLATIONS.get("en", {})
+    )
 
     # Get the message template
     template = translations.get(key, PROGRESS_TRANSLATIONS["en"].get(key, key))
