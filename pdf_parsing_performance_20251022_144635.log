@@ -1,0 +1,39 @@
+============================================================
+PDF PARSING PERFORMANCE COMPARISON TEST
+============================================================
+Test file: New York City wikipedia-1.pdf
+File size: 747.26 KB
+Test date: 2025-10-22 14:46:35
+PyMuPDF4LLM available: True
+
+
+BASIC MODE:
+----------------------------------------
+  mode: basic
+  time_seconds: 163.52ms
+  num_documents: 1
+  total_characters: 2153
+  has_markdown_tables: False
+  extraction_method: pypdf_text
+
+ENHANCED MODE:
+----------------------------------------
+  mode: enhanced
+  time_seconds: 2.67s
+  num_documents: 1
+  total_characters: 144
+  has_markdown_tables: False
+  extraction_method: pymupdf4llm_markdown
+
+AUTO MODE:
+----------------------------------------
+  mode: auto
+  time_seconds: 3.28s
+  detection_time: 0.4527168273925781
+  parse_time: 2.826768159866333
+  tables_detected: 1
+  chose_method: enhanced
+  num_documents: 1
+  total_characters: 144
+  has_markdown_tables: False
+  extraction_method: pymupdf4llm_markdown

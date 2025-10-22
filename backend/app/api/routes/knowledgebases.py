@@ -699,11 +699,13 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
 
     try:
         if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
-            print("Loading PDF with enhanced parsing...")
+            from app.core.config import settings
+
+            print(f"Loading PDF with parsing mode: {settings.PDF_PARSING_MODE}...")
             loaded_documents = load_pdf_with_pypdf(
                 temp_file_path,
                 file.filename,
-                use_enhanced_parsing=True,  # Enable for better table handling
+                parsing_mode=settings.PDF_PARSING_MODE,
             )
         elif (
             content_type
@@ -730,9 +732,9 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
                 ensure_documents_for_vector_search,
             )
 
-            # First try regular document extraction
+            # First try regular document extraction (uses settings.PDF_PARSING_MODE by default)
             loaded_documents = extract_documents_from_file_unified(
-                file_content, file.filename, use_enhanced_pdf_parsing=True
+                file_content, file.filename
             )
 
             # If no documents, try enhanced extraction with images
