@@ -71,7 +71,7 @@ class User(UserBase, table=True):
     )
     # user's preferred language for UI and LLM templates
     preferred_language: str = Field(default="en", max_length=10)
-    
+
     # Account lockout fields for security
     failed_login_attempts: int = Field(default=0)
     locked_until: Optional[datetime] = Field(default=None)
@@ -188,7 +188,9 @@ class KnowledgeBase(KnowledgeBaseBase, table=True):
     )
     owner: User | None = Relationship(back_populates="knowledge_bases")
     data: bytes | None = Field(default=None, sa_column=LargeBinary)
-    file_path: str | None = Field(default=None, max_length=512)  # Path to file-based storage
+    file_path: str | None = Field(
+        default=None, max_length=512
+    )  # Path to file-based storage
     storage_type: str = Field(default="database", max_length=20)  # "database" or "file"
     total_pages: int = Field(default=0)
     date_created: datetime
@@ -239,7 +241,7 @@ class Source(SQLModel, table=True):
 # This stores the actual file data, not just the metadata
 class SourceData(SQLModel, table=True):
     __tablename__ = "source-data"
-    id: uuid.UUID = Field(primary_key=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     data: bytes = Field(sa_column=LargeBinary)
     file_hash: str = Field(max_length=64)  # SHA-256 hash is 64 characters
 
@@ -344,20 +346,25 @@ class VeraDocDetailResponse(SQLModel):
 # Summary response models for lightweight archive list views
 class QaPairSummary(SQLModel):
     """Lightweight QA pair with just the question (for expandable sections)"""
+
     index: int
     question: str
 
 
 class VeraDocSummaryResults(SQLModel):
     """Lightweight results without heavy qa_pairs data"""
+
     final_evaluation: str
     interaction_id: str
     qa_pairs_count: int = 0  # Just the count, not the full data
-    qa_pairs_summary: Optional[List[QaPairSummary]] = None  # Question headers for lazy loading
+    qa_pairs_summary: Optional[List[QaPairSummary]] = (
+        None  # Question headers for lazy loading
+    )
 
 
 class VeraDocSummaryResponse(SQLModel):
     """Lightweight response for archive list - excludes heavy qa_pairs"""
+
     id: str
     date_created: datetime
     document_name: Optional[str] = None
@@ -371,6 +378,7 @@ class VeraDocSummaryResponse(SQLModel):
 # Individual QA pair model for lazy loading
 class QaPairDetail(SQLModel):
     """Full QA pair with answer, context, and citations"""
+
     index: int
     question: str
     answer: str
@@ -594,7 +602,7 @@ class ReportGenieDetailResponse(SQLModel):
 class DocxRequest(SQLModel):
     content: str
     title: Optional[str] = None
-    language: Optional[str] = 'en'
+    language: Optional[str] = "en"
 
 
 class LlmInteraction(SQLModel, table=True):

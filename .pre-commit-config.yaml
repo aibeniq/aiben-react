@@ -11,10 +11,10 @@ repos:
           - --unsafe
       - id: end-of-file-fixer
         exclude: |
-            (?x)^(
-                frontend/src/client/.*|
-                backend/app/email-templates/build/.*
-            )$
+          (?x)^(
+              frontend/src/client/.*|
+              backend/app/email-templates/build/.*
+          )$
       - id: trailing-whitespace
         exclude: ^frontend/src/client/.*
   - repo: https://github.com/charliermarsh/ruff-pre-commit
@@ -25,6 +25,13 @@ repos:
           - --fix
       - id: ruff-format
 
-ci:
-  autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
-  autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate
+  - repo: local
+    hooks:
+      - id: pytest
+        name: run tests
+        entry: uv run pytest --tb=short
+        language: system
+        files: \.py$
+        working-directory: backend
+        pass_filenames: false
+        stages: [pre-push]

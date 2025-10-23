@@ -336,7 +336,7 @@ async def generate_report(
         )
 
         # Process each section
-        sections = []
+        processed_sections = []
         draft_report = ""
 
         # Initialize knowledge base cache for this report generation
@@ -719,7 +719,7 @@ async def generate_report(
                 section_title = section_description
 
                 # Store the section with its content and sources
-                sections.append(
+                processed_sections.append(
                     {
                         "title": section_title,
                         "content": section_content,
@@ -738,18 +738,22 @@ async def generate_report(
             )
 
             full_report = "\n\n\n\n".join(
-                [section["content"].strip() for section in sections]
+                [section["content"].strip() for section in processed_sections]
             )
 
         finally:
             # Always cleanup the knowledge base cache
             kb_cache.cleanup()
 
-        result = {"full_report": full_report, "sections": sections, "task_id": task_id}
+        result = {
+            "full_report": full_report,
+            "sections": processed_sections,
+            "task_id": task_id,
+        }
 
         # Debug logging to verify citations are being saved
-        print(f"🔍 REPORTGENIE SAVE DEBUG: Saving {len(sections)} sections")
-        for i, section in enumerate(sections):
+        print(f"🔍 REPORTGENIE SAVE DEBUG: Saving {len(processed_sections)} sections")
+        for i, section in enumerate(processed_sections):
             citations_count = len(section.get("source_citations", []))
             print(
                 f"🔍 Section {i+1}: '{section.get('title', 'No title')}' has {citations_count} citations"
@@ -2277,7 +2281,7 @@ async def optimize_outline(
 
                         # LLM-based relevance filtering for ReportGenie section generation (similar to VeraDoc full scan)
                         # This prevents irrelevant chunks from being included in report sections
-                        if docs:
+                        if settings.RAG_ENABLE_LLM_RELEVANCE_FILTER and docs:
                             print(
                                 f"🔍 Filtering {len(docs)} retrieved chunks for relevance to section: {section_description[:50]}..."
                             )

@@ -54,7 +54,7 @@ class Settings(BaseSettings):
 
     # PDF processing settings
     PDF_PARSING_MODE: str = Field(
-        default="basic",
+        default="enhanced",
         description="PDF parsing mode: 'auto' (detect tables automatically), 'enhanced' (always use PyMuPDF4LLM), 'basic' (always use pypdf)",
     )
 

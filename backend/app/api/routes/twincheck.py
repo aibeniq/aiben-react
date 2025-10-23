@@ -1081,6 +1081,9 @@ async def get_comparison_detail(
                 },
             }
 
+    except HTTPException:
+        # Re-raise HTTPExceptions (like 404 for not found)
+        raise
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(

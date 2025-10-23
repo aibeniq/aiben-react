@@ -2,8 +2,8 @@
 
 ## Requirements
 
-* [Docker](https://www.docker.com/).
-* [uv](https://docs.astral.sh/uv/) for Python package and environment management.
+- [Docker](https://www.docker.com/).
+- [uv](https://docs.astral.sh/uv/) for Python package and environment management.
 
 ## Docker Compose
 
@@ -121,29 +121,55 @@ docker compose exec backend bash scripts/tests-start.sh -x
 
 When the tests are run, a file `htmlcov/index.html` is generated, you can open it in your browser to see the coverage of the tests.
 
+**Current Test Coverage Status (as of 2024-12-22):**
+
+- Overall coverage: **51%** (improved from 49%)
+- Key areas with low coverage:
+  - `app/api/routes/veradoc.py`: 23% (1336 statements, 1032 missing)
+  - `app/api/routes/chatbot.py`: 39% (961 statements, 586 missing)
+  - `app/api/routes/formconnect.py`: 34% (992 statements, 652 missing)
+  - `app/api/routes/reportgenie.py`: 42% (1462 statements, 850 missing) - **IMPROVED**
+
+**Recent Improvements:**
+
+- ✅ **ReportGenie API Testing Complete**: Fixed all 5 failing ReportGenie tests
+  - Fixed vector search, invalid search mode, unauthorized access, and generate outline tests
+  - Successfully implemented optimize outline test with comprehensive mocking
+  - Added proper mocking for LLM services, vector databases, and file processing
+  - Corrected test data structures and API response assertions
+- Coverage improved from 48% → 49% → 51%
+- ReportGenie module coverage improved from 21% → 42%
+
+**Ongoing Work:**
+
+- Focus shifting to VeraDoc API testing (currently 23% coverage)
+- ChatBot API testing (currently 39% coverage)
+- FormConnect API testing (currently 34% coverage)
+- Target: Improve coverage to 55%+ by end of testing phase
+
 ## Migrations
 
 As during local development your app directory is mounted as a volume inside the container, you can also run the migrations with `alembic` commands inside the container and the migration code will be in your app directory (instead of being only inside the container). So you can add it to your git repository.
 
 Make sure you create a "revision" of your models and that you "upgrade" your database with that revision every time you change them. As this is what will update the tables in your database. Otherwise, your application will have errors.
 
-* Start an interactive session in the backend container:
+- Start an interactive session in the backend container:
 
 ```console
 $ docker compose exec backend bash
 ```
 
-* Alembic is already configured to import your SQLModel models from `./backend/app/models.py`.
+- Alembic is already configured to import your SQLModel models from `./backend/app/models.py`.
 
-* After changing a model (for example, adding a column), inside the container, create a revision, e.g.:
+- After changing a model (for example, adding a column), inside the container, create a revision, e.g.:
 
 ```console
 $ alembic revision --autogenerate -m "Add column last_name to User model"
 ```
 
-* Commit to the git repository the files generated in the alembic directory.
+- Commit to the git repository the files generated in the alembic directory.
 
-* After creating the revision, run the migration in the database (this is what will actually change the database):
+- After creating the revision, run the migration in the database (this is what will actually change the database):
 
 ```console
 $ alembic upgrade head

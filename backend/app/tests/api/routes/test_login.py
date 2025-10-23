@@ -18,10 +18,13 @@ def test_get_access_token(client: TestClient) -> None:
         "password": settings.FIRST_SUPERUSER_PASSWORD,
     }
     r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
-    tokens = r.json()
+    response_data = r.json()
     assert r.status_code == 200
-    assert "access_token" in tokens
-    assert tokens["access_token"]
+    assert response_data["message"] == "Login successful"
+    assert "user" in response_data
+    assert response_data["user"]["email"] == settings.FIRST_SUPERUSER
+    # Check that the access_token cookie was set
+    assert "access_token" in r.cookies
 
 
 def test_get_access_token_incorrect_password(client: TestClient) -> None:
