@@ -1,6 +1,7 @@
 """
 Tests for rate limiting and account lockout functionality.
 """
+
 import pytest
 from datetime import datetime, timedelta
 from fastapi import HTTPException
@@ -100,55 +101,55 @@ class TestLoginRateLimiter:
 class TestAccountLockout:
     """Test account lockout functionality."""
 
-    def test_check_account_not_locked(self, session, user):
+    def test_check_account_not_locked(self, db, test_user):
         """Test that account is not locked initially."""
-        assert check_account_lockout(user) is False
+        assert check_account_lockout(test_user) is False
 
-    def test_record_failed_login_increments_counter(self, session, user):
+    def test_record_failed_login_increments_counter(self, db, test_user):
         """Test that failed login attempts are recorded."""
-        initial_attempts = user.failed_login_attempts
+        initial_attempts = test_user.failed_login_attempts
 
-        record_failed_login(session, user)
+        record_failed_login(db, test_user)
 
-        assert user.failed_login_attempts == initial_attempts + 1
+        assert test_user.failed_login_attempts == initial_attempts + 1
 
-    def test_account_locks_after_threshold(self, session, user):
+    def test_account_locks_after_threshold(self, db, test_user):
         """Test that account locks after 5 failed attempts."""
         # Record 5 failed attempts
         for i in range(5):
-            record_failed_login(session, user)
+            record_failed_login(db, test_user)
 
         # Account should be locked
-        assert check_account_lockout(user) is True
-        assert user.locked_until is not None
-        assert user.locked_until > datetime.now()
+        assert check_account_lockout(test_user) is True
+        assert test_user.locked_until is not None
+        assert test_user.locked_until > datetime.now()
 
-    def test_reset_failed_login_attempts(self, session, user):
+    def test_reset_failed_login_attempts(self, db, test_user):
         """Test resetting failed login attempts."""
         # Add some failed attempts
         for i in range(3):
-            record_failed_login(session, user)
+            record_failed_login(db, test_user)
 
         # Reset
-        reset_failed_login_attempts(session, user)
+        reset_failed_login_attempts(db, test_user)
 
         # Verify reset
-        assert user.failed_login_attempts == 0
-        assert user.locked_until is None
+        assert test_user.failed_login_attempts == 0
+        assert test_user.locked_until is None
 
-    def test_get_lockout_remaining_time(self, session, user):
+    def test_get_lockout_remaining_time(self, db, test_user):
         """Test getting remaining lockout time."""
         # Lock the account
         for i in range(5):
-            record_failed_login(session, user)
+            record_failed_login(db, test_user)
 
         # Get remaining time
-        remaining = get_lockout_remaining_time(user)
+        remaining = get_lockout_remaining_time(test_user)
 
         # Should be close to 1 hour (3600 seconds)
         assert 3500 < remaining <= 3600
 
-    def test_get_lockout_remaining_time_not_locked(self, session, user):
+    def test_get_lockout_remaining_time_not_locked(self, db, test_user):
         """Test getting remaining time when not locked."""
-        remaining = get_lockout_remaining_time(user)
+        remaining = get_lockout_remaining_time(test_user)
         assert remaining == 0

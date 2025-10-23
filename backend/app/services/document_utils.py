@@ -670,33 +670,33 @@ def create_fallback_document_for_vision(
     images: List[str], source_filename: str
 ) -> Document:
     """
-    Create a fallback document when no text is extractable but images are available.
-    This ensures vector search doesn't fail when documents contain only images.
+    Create a fallback document for vision processing when no text content is available.
+    This allows documents with only images to still be processed by vector search.
 
     Args:
         images: List of base64 encoded images
         source_filename: Name of the source file
 
     Returns:
-        A Document with minimal text content for vector processing
+        Document object with metadata indicating it's for vision processing
     """
-    fallback_content = f"This document '{source_filename}' contains {len(images)} image(s) with visual content that can be analyzed using vision-enabled models."
+    image_count = len(images) if images else 0
+
+    fallback_content = f"This document '{source_filename}' contains {image_count} image(s) with visual content that can be analyzed using vision-enabled models."
 
     return Document(
         page_content=fallback_content,
         metadata={
             "source_filename": source_filename,
             "is_vision_fallback": True,
-            "image_count": len(images),
+            "image_count": image_count,
             "content_type": "images_only",
         },
     )
 
 
 def ensure_documents_for_vector_search(
-    documents: List[Document],
-    images: List[str] = None,
-    source_filename: str = "document",
+    documents: List[Document], source_filename: str, images: List[str] = None
 ) -> List[Document]:
     """
     Ensure there are documents available for vector search, creating fallback documents if needed.
@@ -704,8 +704,8 @@ def ensure_documents_for_vector_search(
 
     Args:
         documents: List of extracted documents (may be empty)
-        images: Optional list of base64 encoded images
         source_filename: Name of the source file
+        images: Optional list of base64 encoded images
 
     Returns:
         List of documents guaranteed to have at least one document for vector search

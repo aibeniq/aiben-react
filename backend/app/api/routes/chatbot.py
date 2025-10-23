@@ -44,6 +44,7 @@ from sqlmodel import select
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
+from langchain_community.vectorstores.utils import filter_complex_metadata
 import tempfile
 import os
 import zipfile
@@ -1492,6 +1493,9 @@ async def query_knowledge_base(
             "rephrased_question": rephrased_question,
         }
 
+    except HTTPException:
+        # Re-raise HTTPExceptions as-is
+        raise
     except Exception as e:
         # Don't delete the temp dir on error if it's cached
         import traceback
@@ -1785,6 +1789,9 @@ async def query_document(
             )
             chunks = text_splitter.split_documents(resilient_documents)
 
+            # Filter out complex metadata that Chroma can't handle
+            chunks = filter_complex_metadata(chunks)
+
             # Create embeddings
             embeddings = load_embeddings_model(
                 provider=embedding_model.provider, model_id=embedding_model.model_id
@@ -1847,7 +1854,7 @@ async def query_document(
         docs = retriever.get_relevant_documents(rephrased_question)
 
         # LLM-based relevance filtering for vector search
-        if docs:
+        if settings.RAG_ENABLE_LLM_RELEVANCE_FILTER and docs:
             print(
                 f"🔍 LLM filtering enabled - analyzing {len(docs)} retrieved chunks for relevance to question..."
             )
@@ -2325,10 +2332,10 @@ async def chat(
 
             # Convert TextQueryResponse to QueryResponse format
             return QueryResponse(
-                answer=response.answer,
+                answer=response["answer"],
                 sources=[],  # Text queries don't have sources
-                session_id=response.session_id,
-                rephrased_question=response.rephrased_question,
+                session_id=response["session_id"],
+                rephrased_question=response["rephrased_question"],
             )
 
     except Exception as e:
