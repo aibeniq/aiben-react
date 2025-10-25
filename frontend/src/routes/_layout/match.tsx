@@ -304,8 +304,6 @@ const FormConnect = () => {
       // Use the SDK's processForm method with task_id in formData
       // This matches how TwinCheck handles progress tracking
       const promise = FormconnectService.processForm({
-        fields: data.fields,
-        searchMode: data.search_mode,
         formData: {
           fields: data.fields,
           search_mode: data.search_mode,
@@ -313,7 +311,7 @@ const FormConnect = () => {
           task_id: newTaskId,
           digitized_files: digitizedFiles,
           handwritten_files: handwrittenFiles,
-        } as any,
+        },
       })
 
       // Register the operation for automatic cancellation on navigation

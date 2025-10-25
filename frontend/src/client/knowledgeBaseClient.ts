@@ -11,7 +11,7 @@ interface KnowledgeBaseCreateResponse {
 
 // Extended interface that includes timeout option and task_id
 interface KnowledgeBasesCreateKnowledgeBaseDataWithTimeout
-  extends KnowledgeBasesCreateKnowledgeBaseData {
+  extends CreateKnowledgeBaseApiV1KnowledgeBasesPostData {
   timeout?: number // Optional timeout in milliseconds
   taskId?: string // Optional task_id for existing progress tracking
 }
