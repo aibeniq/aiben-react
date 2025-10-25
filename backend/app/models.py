@@ -68,7 +68,19 @@ class UpdatePassword(SQLModel):
 class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
-    status: UserStatus = Field(default=UserStatus.PENDING)
+    # User approval fields
+    status: UserStatus = Field(
+        default=UserStatus.PENDING,
+        sa_column=Column(
+            SQLAlchemyEnum(
+                UserStatus,
+                native_enum=True,
+                values_callable=lambda x: [e.value for e in x],
+                name="userstatus"
+            ),
+            nullable=False
+        )
+    )
     registration_date: datetime = Field(default_factory=datetime.utcnow)
     approved_date: datetime | None = Field(default=None)
     approved_by: uuid.UUID | None = Field(default=None, foreign_key="user.id")

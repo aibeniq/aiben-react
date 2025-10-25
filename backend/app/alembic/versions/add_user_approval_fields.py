@@ -1,3 +1,4 @@
+# filepath: /home/ec2-user/aiben-react/backend/app/alembic/versions/add_user_approval_fields.py
 """Add user approval fields
 
 Revision ID: add_user_approval_fields
@@ -10,6 +11,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 import uuid
+from app.models import UserStatus  # Add this import
 
 # revision identifiers, used by Alembic.
 revision = "add_user_approval_fields"
@@ -17,21 +19,29 @@ down_revision = "merge_lockout_and_storage"
 branch_labels = None
 depends_on = None
 
-
 def upgrade() -> None:
-    # Drop the status column if it exists (to avoid conflicts)
-    op.drop_column("user", "status")
+    # Conditionally drop the status column if it exists (to avoid conflicts)
+    op.execute("""
+        DO $$
+        BEGIN
+            IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'user' AND column_name = 'status') THEN
+                ALTER TABLE "user" DROP COLUMN status;
+            END IF;
+        END $$;
+    """)
 
     # Drop enum type if it exists
     op.execute("DROP TYPE IF EXISTS userstatus CASCADE")
 
-    # Add new columns without creating custom enum type
-    # Let SQLAlchemy handle the enum
+    # Create the enum type explicitly with lowercase values
+    op.execute("CREATE TYPE userstatus AS ENUM ('pending', 'active', 'rejected', 'suspended')")
+
+    # Add new columns using the created enum type
     op.add_column(
         "user",
         sa.Column(
             "status",
-            sa.String(),
+            postgresql.ENUM('pending', 'active', 'rejected', 'suspended', name='userstatus', create_type=False),
             nullable=True,
         ),
     )
@@ -41,7 +51,7 @@ def upgrade() -> None:
         "user", sa.Column("approved_by", postgresql.UUID(as_uuid=True), nullable=True)
     )
 
-    # Set existing users to 'active' status
+    # Set existing users to 'active' status (matches the enum value)
     op.execute("UPDATE \"user\" SET status = 'active' WHERE status IS NULL")
 
     # Set registration_date for existing users to current timestamp
@@ -62,7 +72,6 @@ def upgrade() -> None:
         ["id"],
         ondelete="SET NULL",
     )
-
 
 def downgrade() -> None:
     op.drop_constraint("fk_user_approved_by", "user", type_="foreignkey")
