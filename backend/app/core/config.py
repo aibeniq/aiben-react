@@ -68,6 +68,17 @@ class Settings(BaseSettings):
         False  # Enable LLM-based relevance filtering for vector search
     )
 
+    # Cross-Encoder Reranker settings for improved RAG retrieval
+    RAG_USE_RERANKER: bool = False  # Enable cross-encoder reranking (requires sentence-transformers)
+    RAG_RERANKER_MODEL: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"  # Cross-encoder model
+    # Model options:
+    # - cross-encoder/ms-marco-MiniLM-L-6-v2: Fast, good for general use (82MB)
+    # - cross-encoder/ms-marco-MiniLM-L-12-v2: Better accuracy, slower (133MB)
+    # - BAAI/bge-reranker-base: Good multilingual support (279MB)
+    # - BAAI/bge-reranker-large: Best accuracy, slowest (1.11GB)
+    RAG_RERANKER_TOP_K: int = 10  # Number of results to return after reranking
+    RAG_RERANKER_QUALITY_WEIGHT: float = 0.3  # Weight for quality score fusion (0-1)
+
     # Embedding processing parameters
     EMBEDDING_MAX_TOKENS_PER_REQUEST: int = (
         250000  # Maximum tokens per embedding API request (safe limit below OpenAI's 300k token limit)

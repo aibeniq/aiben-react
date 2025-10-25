@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 class EnhancedRetriever(BaseRetriever):
     """
     Enhanced retriever that filters out bibliography content and re-ranks results by quality.
+    Now supports optional cross-encoder reranking for improved relevance scoring.
     """
 
     base_retriever: BaseRetriever = Field(description="The underlying retriever")
@@ -34,6 +35,19 @@ class EnhancedRetriever(BaseRetriever):
     rerank_by_quality: bool = Field(
         default=True, description="Whether to re-rank results by quality"
     )
+    use_cross_encoder: bool = Field(
+        default=False, description="Whether to use cross-encoder reranking"
+    )
+    cross_encoder_model: str = Field(
+        default="cross-encoder/ms-marco-MiniLM-L-6-v2",
+        description="Cross-encoder model name"
+    )
+    reranker_top_k: Optional[int] = Field(
+        default=None, description="Top K results after reranking"
+    )
+    reranker_quality_weight: float = Field(
+        default=0.3, description="Weight for quality score in fusion"
+    )
 
     def __init__(
         self,
@@ -42,6 +56,10 @@ class EnhancedRetriever(BaseRetriever):
         min_quality_score: float = 0.3,
         max_bibliography_results: int = 1,
         rerank_by_quality: bool = True,
+        use_cross_encoder: bool = False,
+        cross_encoder_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2",
+        reranker_top_k: Optional[int] = None,
+        reranker_quality_weight: float = 0.3,
         **kwargs,
     ):
         """
@@ -52,7 +70,11 @@ class EnhancedRetriever(BaseRetriever):
             filter_bibliography: Whether to filter out bibliography content
             min_quality_score: Minimum quality score for results
             max_bibliography_results: Maximum number of bibliography results to include
-            rerank_by_quality: Whether to re-rank results by content quality
+            rerank_by_quality: Whether to re-rank results by content quality (heuristic)
+            use_cross_encoder: Whether to use cross-encoder reranking (more accurate)
+            cross_encoder_model: Cross-encoder model to use
+            reranker_top_k: Top K results to return after reranking
+            reranker_quality_weight: Weight for quality score in fusion (0-1)
         """
         super().__init__(
             base_retriever=base_retriever,
@@ -60,8 +82,26 @@ class EnhancedRetriever(BaseRetriever):
             min_quality_score=min_quality_score,
             max_bibliography_results=max_bibliography_results,
             rerank_by_quality=rerank_by_quality,
+            use_cross_encoder=use_cross_encoder,
+            cross_encoder_model=cross_encoder_model,
+            reranker_top_k=reranker_top_k,
+            reranker_quality_weight=reranker_quality_weight,
             **kwargs,
         )
+        
+        # Initialize cross-encoder reranker if enabled
+        self._reranker = None
+        if use_cross_encoder:
+            try:
+                from app.services.reranker import CrossEncoderReranker
+                self._reranker = CrossEncoderReranker(model_name=cross_encoder_model)
+                logger.info(f"✓ Cross-encoder reranking enabled with {cross_encoder_model}")
+            except Exception as e:
+                logger.warning(
+                    f"Failed to initialize cross-encoder reranker: {e}. "
+                    f"Falling back to quality-based reranking."
+                )
+                self.use_cross_encoder = False
 
     def _get_relevant_documents(
         self, query: str, *, run_manager=None
@@ -98,8 +138,19 @@ class EnhancedRetriever(BaseRetriever):
         # Apply filtering
         filtered_results = self._apply_content_filtering(enhanced_results, query)
 
-        # Apply quality-based re-ranking
-        if self.rerank_by_quality and filtered_results:
+        # Apply reranking based on configuration
+        if self.use_cross_encoder and self._reranker and filtered_results:
+            # Use cross-encoder reranking (more accurate)
+            logger.debug("Applying cross-encoder reranking...")
+            filtered_results = self._reranker.rerank_with_quality_fusion(
+                query=query,
+                documents=filtered_results,
+                top_k=self.reranker_top_k,
+                quality_weight=self.reranker_quality_weight
+            )
+        elif self.rerank_by_quality and filtered_results:
+            # Fallback to heuristic quality-based reranking
+            logger.debug("Applying heuristic quality-based reranking...")
             filtered_results = self._rerank_by_quality(filtered_results, query)
 
         logger.info(
@@ -305,6 +356,10 @@ def create_enhanced_retriever(
     filter_bibliography: bool = True,
     min_quality_score: float = 0.3,
     max_bibliography_results: int = 1,
+    use_cross_encoder: bool = False,
+    cross_encoder_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    reranker_top_k: Optional[int] = None,
+    reranker_quality_weight: float = 0.3,
 ) -> EnhancedRetriever:
     """
     Create an enhanced retriever with content filtering and quality re-ranking.
@@ -317,6 +372,10 @@ def create_enhanced_retriever(
         filter_bibliography: Whether to filter bibliography content
         min_quality_score: Minimum quality score for results
         max_bibliography_results: Maximum bibliography results to include
+        use_cross_encoder: Whether to use cross-encoder reranking
+        cross_encoder_model: Cross-encoder model to use
+        reranker_top_k: Top K results after reranking
+        reranker_quality_weight: Weight for quality score in fusion
 
     Returns:
         Enhanced retriever instance
@@ -342,10 +401,15 @@ def create_enhanced_retriever(
         min_quality_score=min_quality_score,
         max_bibliography_results=max_bibliography_results,
         rerank_by_quality=True,
+        use_cross_encoder=use_cross_encoder,
+        cross_encoder_model=cross_encoder_model,
+        reranker_top_k=reranker_top_k,
+        reranker_quality_weight=reranker_quality_weight,
     )
 
     logger.info(
-        f"Created enhanced retriever with bibliography filtering: {filter_bibliography}"
+        f"Created enhanced retriever with bibliography filtering: {filter_bibliography}, "
+        f"cross-encoder reranking: {use_cross_encoder}"
     )
 
     return enhanced_retriever
@@ -358,11 +422,18 @@ class SmartRetrieverFactory:
 
     @staticmethod
     def create_academic_paper_retriever(
-        chroma_db: Chroma, search_kwargs: Dict[str, Any] = None
+        chroma_db: Chroma,
+        search_kwargs: Dict[str, Any] = None,
+        use_cross_encoder: bool = False,
     ) -> EnhancedRetriever:
         """
         Create a retriever optimized for academic papers.
         Heavily filters bibliography content and prioritizes main content.
+        
+        Args:
+            chroma_db: ChromaDB instance
+            search_kwargs: Search parameters
+            use_cross_encoder: Whether to enable cross-encoder reranking
         """
         try:
             return create_enhanced_retriever(
@@ -373,6 +444,7 @@ class SmartRetrieverFactory:
                 filter_bibliography=True,  # Aggressive bibliography filtering
                 min_quality_score=0.4,  # Higher quality threshold
                 max_bibliography_results=0,  # No bibliography results
+                use_cross_encoder=use_cross_encoder,
             )
         except Exception as e:
             logger.error(f"Failed to create academic paper retriever: {e}")
@@ -385,15 +457,23 @@ class SmartRetrieverFactory:
                 filter_bibliography=True,
                 min_quality_score=0.4,
                 max_bibliography_results=0,
+                use_cross_encoder=use_cross_encoder,
             )
 
     @staticmethod
     def create_general_document_retriever(
-        chroma_db: Chroma, search_kwargs: Dict[str, Any] = None
+        chroma_db: Chroma,
+        search_kwargs: Dict[str, Any] = None,
+        use_cross_encoder: bool = False,
     ) -> EnhancedRetriever:
         """
         Create a retriever for general documents.
         Balanced approach with moderate filtering.
+        
+        Args:
+            chroma_db: ChromaDB instance
+            search_kwargs: Search parameters
+            use_cross_encoder: Whether to enable cross-encoder reranking
         """
         try:
             return create_enhanced_retriever(
@@ -404,6 +484,7 @@ class SmartRetrieverFactory:
                 filter_bibliography=True,
                 min_quality_score=0.3,
                 max_bibliography_results=1,
+                use_cross_encoder=use_cross_encoder,
             )
         except Exception as e:
             logger.error(f"Failed to create general document retriever: {e}")
@@ -414,6 +495,7 @@ class SmartRetrieverFactory:
             return EnhancedRetriever(
                 base_retriever=base_retriever,
                 filter_bibliography=True,
+                use_cross_encoder=use_cross_encoder,
                 min_quality_score=0.3,
                 max_bibliography_results=1,
             )
