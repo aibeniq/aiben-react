@@ -202,14 +202,16 @@ services:
 
       - traefik.http.services.${STACK_NAME?Variable not set}-frontend.loadbalancer.server.port=80
 
-      - traefik.http.middlewares.${STACK_NAME?Variable not set}-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+      #disable initial password challenge
+      #- traefik.http.middlewares.${STACK_NAME?Variable not set}-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
 
       # HTTPS route
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.rule=Host(`alaco.${DOMAIN?Variable not set}`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.entrypoints=https
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.tls=true
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.tls.certresolver=le
-      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.middlewares=${STACK_NAME?Variable not set}-auth,auth-ratelimit@file,security-headers@file
+      #disable initial password challenge
+      #- traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.middlewares=${STACK_NAME?Variable not set}-auth,auth-ratelimit@file,security-headers@file
 
       # HTTP route (redirect to HTTPS)
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.rule=Host(`alaco.${DOMAIN?Variable not set}`)
