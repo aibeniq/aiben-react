@@ -1,0 +1,48 @@
+LLM MAPPING RESPONSE
+Chunk: 1 of 1
+Timestamp: 2025-10-22T22:54:03.771317
+Ground-truth document: ground_truth.pdf
+Chunk size: 29 characters
+Prompt size: 2418 characters (~604 tokens)
+
+=== MAPPING PROMPT SENT TO LLM ===
+
+Analyze this document chunk and identify the individual sections within it. Extract the actual text content for each section and map it to exactly one outline section.
+
+IMPORTANT BOUNDARY RULES:
+- When mapping content to a section, consider where that section should END based on the NEXT SECTION information
+- Do NOT assign content to a section if it clearly belongs to the next section's topic/scope
+- Stop assigning content to a section when you encounter content that better fits the next section
+- If content spans multiple sections, assign it to the most appropriate primary section
+
+OUTLINE SECTIONS (with next section boundaries):
+1. [TOPIC/CONCEPT] Intro content - Look for content that relates to this topic/concept | NEXT SECTION: 2. [TOPIC/CONCEPT] Conclusion content
+2. [TOPIC/CONCEPT] Conclusion content - Look for content that relates to this topic/concept | NEXT SECTION: [END OF OUTLINE]
+
+DOCUMENT CHUNK (1 of 1):
+Ground truth document content
+
+
+MAPPING INSTRUCTIONS:
+1. Look for discrete sections in the chunk (titles, headers, paragraphs, topic changes)
+2. For each section you identify, extract the ACTUAL TEXT CONTENT from the document
+3. Determine which outline section (1-2) it best matches:
+   - For [TOPIC/CONCEPT] sections: Match content that discusses the same topic/concept, even if wording differs
+   - For [LITERAL TEXT] sections: Match content that contains the same or very similar text/wording
+4. CRITICAL: When assigning content to a section, check if any content better belongs to the NEXT SECTION
+5. STOP assigning content to a section when you encounter content that transitions to the next section's topic
+6. Respond with valid JSON only
+
+RESPONSE FORMAT (JSON only):
+{"mappings": [{"section_content": "the actual text extracted from the document section", "outline_section": 1, "boundary_reasoning": "why this content belongs to this section and not the next"}, {"section_content": "the actual text from another document section", "outline_section": 2, "boundary_reasoning": "reasoning for section assignment and boundary decision"}]}
+
+IMPORTANT: 
+- "section_content" must contain the actual text from the document, not a description or summary
+- "boundary_reasoning" should explain why this content belongs to the assigned section and not the next section
+- Be conservative: if content could belong to either section, assign it to the earlier section but mention the ambiguity
+
+
+=== RAW LLM RESPONSE ===
+{"mappings": [{"section_content": "Ground truth document content", "outline_section": 1, "boundary_reasoning": "This content matches the introduction section"}]}
+
+=== END OF RESPONSE ===

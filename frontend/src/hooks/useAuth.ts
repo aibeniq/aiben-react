@@ -1,13 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate, useRouterState } from "@tanstack/react-router"
+import { toaster } from "@/components/ui/toaster"
 
 import {
-  type Body_login_login_access_token as AccessToken,
+  type Body_login_access_token_api_v1_login_access_token_post as AccessToken,
   type ApiError,
-  LoginService,
   type UserPublic,
   type UserRegister,
-  UsersService,
 } from "@/client"
 import { useHandleError } from "@/utils"
 
@@ -26,25 +25,79 @@ const useAuth = () => {
   const handleError = useHandleError()
 
   // Don't run the user query on authentication pages to prevent infinite loops
-  const isAuthPage = ['/login', '/signup', '/reset-password', '/recover-password'].some(path =>
-    routerState.location.pathname.startsWith(path)
-  )
+    const isAuthPage = routerState.location.pathname.startsWith('/login') || 
+                   routerState.location.pathname.startsWith('/signup') ||
+                   routerState.location.pathname.startsWith('/recover-password') ||
+                   routerState.location.pathname.startsWith('/reset-password')
+  
+  // Check if we're on a protected route (under _layout) or auth route
+  const isProtectedRoute = routerState.location.pathname.startsWith('/_layout') || 
+                          (routerState.location.pathname === '/' && !isAuthPage)
+  
+  const isEnabled = isProtectedRoute && typeof window !== 'undefined'
+  console.log('useAuth: isAuthPage:', isAuthPage, 'isProtectedRoute:', isProtectedRoute, 'isEnabled:', isEnabled, 'pathname:', routerState.location.pathname)
 
   const { data: user, isLoading, isError } = useQuery<UserPublic | null, Error>({
     queryKey: ["currentUser"],
-    queryFn: UsersService.readUserMe,
+    queryFn: async () => {
+      // Double-check we're not on an auth page before making the request
+      const currentPath = window.location.pathname
+      const isCurrentlyAuthPage = currentPath.startsWith('/login') || 
+                                 currentPath.startsWith('/signup') ||
+                                 currentPath.startsWith('/recover-password') ||
+                                 currentPath.startsWith('/reset-password')
+      
+      if (isCurrentlyAuthPage) {
+        console.log('useAuth: Skipping /me request on auth page:', currentPath)
+        throw new Error('Cannot fetch user on auth page')
+      }
+      
+      const apiUrl = 'http://localhost:8000' // Hardcode for testing
+      const response = await fetch(`${apiUrl}/api/v1/users/me`, {
+        credentials: 'include',
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch user')
+      }
+      
+      return await response.json()
+    },
     retry: false, // Don't retry on auth errors
     staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
-    enabled: !isAuthPage, // Only run query if NOT on auth pages
+    enabled: isProtectedRoute && typeof window !== 'undefined', // Only run query if NOT on auth pages and in browser
     refetchOnWindowFocus: false, // Don't refetch when window gains focus
-    refetchOnMount: !isAuthPage, // Don't refetch on mount if on auth pages
+    refetchOnMount: isProtectedRoute && typeof window !== 'undefined', // Don't refetch on mount if on auth pages or not in browser
   })
 
   const signUpMutation = useMutation({
-    mutationFn: (data: UserRegister) =>
-      UsersService.registerUser({ requestBody: data }),
+    mutationFn: async (data: UserRegister) => {
+      const apiUrl = 'http://localhost:8000' // Hardcode for testing
+      const response = await fetch(`${apiUrl}/api/v1/users/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        credentials: 'include',
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: 'Signup failed' }))
+        throw new Error(errorData.detail || 'Signup failed')
+      }
+      
+      return await response.json()
+    },
 
-    onSuccess: () => {
+    onSuccess: (response) => {
+      // Show success message for pending approval
+      toaster.create({
+        title: "Registration Submitted",
+        description: response.message || "Your account is pending admin approval. You'll receive an email when approved.",
+        type: "info",
+        duration: 8000,
+      })
       navigate({ to: "/login" })
     },
     onError: (err: ApiError) => {
@@ -56,12 +109,27 @@ const useAuth = () => {
   })
 
   const login = async (data: AccessToken) => {
-    const response = await LoginService.loginAccessToken({
-      formData: data,
+    // Use direct fetch for login to avoid client generation issues
+    const formData = new URLSearchParams()
+    formData.append('username', data.username)
+    formData.append('password', data.password)
+    
+    const apiUrl = 'http://localhost:8000' // Hardcode for testing
+    const response = await fetch(`${apiUrl}/api/v1/login/access-token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData,
+      credentials: 'include', // Include cookies
     })
-    // No need to store token in localStorage - it's now an HTTP-only cookie
-    // The response should contain user info instead of token
-    return response
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ detail: 'Login failed' }))
+      throw new Error(errorData.detail || 'Login failed')
+    }
+    
+    return await response.json()
   }
 
   const loginMutation = useMutation({
@@ -72,8 +140,65 @@ const useAuth = () => {
       // Navigate to home - the query will be enabled on protected routes
       navigate({ to: "/" })
     },
-    onError: (err: ApiError) => {
-      handleError(err)
+    onError: (err: Error | ApiError) => {
+      // Handle both ApiError and regular Error objects
+      let errDetail: string
+      let status: number
+
+      if ('status' in err && 'body' in err) {
+        // It's an ApiError
+        errDetail = (err.body as any)?.detail
+        status = err.status
+      } else {
+        // For regular Error objects, the message contains the error detail
+        errDetail = err.message
+        status = 400 // Default status for regular errors
+      }
+
+      if (status === 403 && errDetail?.includes?.("pending")) {
+        toaster.create({
+          title: "Account Pending",
+          description: "Your account is awaiting admin approval. Please check your email for updates.",
+          type: "warning",
+          duration: 6000,
+        })
+      } else if (status === 400 && errDetail?.includes?.("Incorrect email or password")) {
+        // More user-friendly message for wrong credentials
+        toaster.create({
+          title: "Login Failed",
+          description: "The email or password you entered is incorrect. Please check your credentials and try again.",
+          type: "error",
+          duration: 5000,
+        })
+      } else if (status === 429 && errDetail?.includes?.("Too many login attempts")) {
+        // Rate limiting due to too many attempts
+        toaster.create({
+          title: "Too Many Attempts",
+          description: errDetail,
+          type: "error",
+          duration: 8000,
+        })
+      } else if (status === 400 && errDetail?.includes?.("Inactive user")) {
+        toaster.create({
+          title: "Account Inactive",
+          description: "Your account is not currently activated. Please contact support for assistance.",
+          type: "error",
+          duration: 6000,
+        })
+      } else {
+        // For ApiError objects, use the handleError function
+        if ('status' in err && 'body' in err) {
+          handleError(err)
+        } else {
+          // For regular Error objects, show a generic error
+          toaster.create({
+            title: "Login Failed",
+            description: errDetail || "Something went wrong. Please try again.",
+            type: "error",
+            duration: 5000,
+          })
+        }
+      }
     },
   })
 
@@ -81,7 +206,8 @@ const useAuth = () => {
     try {
       // Call the logout endpoint to clear HTTP-only cookie
       // For now, we'll make a direct API call since the generated client may not have the logout method yet
-      const response = await fetch("/api/v1/login/logout", {
+      const apiUrl = 'http://localhost:8000' // Hardcode for testing
+      const response = await fetch(`${apiUrl}/api/v1/login/logout`, {
         method: "POST",
         credentials: "include", // Include cookies
       })

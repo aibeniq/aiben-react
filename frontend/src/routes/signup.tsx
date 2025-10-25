@@ -1,9 +1,5 @@
 import { Container, Flex, HStack, Image, Input, Text } from "@chakra-ui/react"
-import {
-  Link as RouterLink,
-  createFileRoute,
-  redirect,
-} from "@tanstack/react-router"
+import { Link as RouterLink, createFileRoute } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { FiLock, FiMail, FiUser } from "react-icons/fi"
 
@@ -13,24 +9,11 @@ import { Field } from "@/components/ui/field"
 import { InputGroup } from "@/components/ui/input-group"
 import { PasswordInput } from "@/components/ui/password-input"
 import useAuth from "@/hooks/useAuth"
-import { UsersService } from "@/client"
 import { confirmPasswordRules, emailPattern, passwordRules } from "@/utils"
 import Logo from "/assets/images/aibeniq-logo-center.png"
 
 export const Route = createFileRoute("/signup")({
   component: SignUp,
-  beforeLoad: async () => {
-    // Check if user is already authenticated
-    try {
-      await UsersService.readUserMe()
-      // If successful, user is already logged in, redirect to home
-      throw redirect({
-        to: "/",
-      })
-    } catch (error) {
-      // User is not authenticated, allow access to signup page
-    }
-  },
 })
 
 interface UserRegisterForm extends UserRegister {
@@ -72,17 +55,8 @@ function SignUp() {
           gap={4}
           centerContent
         >
-          <Image
-            src={Logo}
-            alt="aibenIQ logo"
-            height="auto"
-            maxW="2xs"
-            alignSelf="center"
-          />
-          <Field
-            invalid={!!errors.full_name}
-            errorText={errors.full_name?.message}
-          >
+          <Image src={Logo} alt="aibenIQ logo" height="auto" maxW="2xs" alignSelf="center" />
+          <Field invalid={!!errors.full_name} errorText={errors.full_name?.message}>
             <InputGroup w="100%" startElement={<FiUser />}>
               <Input
                 id="full_name"
@@ -134,21 +108,15 @@ function SignUp() {
           </Button>
           <HStack gap={1}>
             <Text>Already have an account?</Text>
-            <Text>
-              <RouterLink
-                to="/login"
-                className="main-link"
-                style={{ width: "fit-content" }}
+            <RouterLink to="/login" className="main-link" style={{ width: "fit-content" }}>
+              <Text
+                color="rgba(0, 65, 72, 0.8)"
+                fontSize="sm"
+                _hover={{ textDecoration: "underline" }}
               >
-                <Text
-                  color="rgba(0, 65, 72, 0.8)"
-                  fontSize="sm"
-                  _hover={{ textDecoration: "underline" }}
-                >
-                  Log In
-                </Text>
-              </RouterLink>
-            </Text>
+                Log In
+              </Text>
+            </RouterLink>
           </HStack>
         </Container>
       </Flex>

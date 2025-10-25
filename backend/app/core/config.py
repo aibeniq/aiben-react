@@ -207,6 +207,11 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
+    # Admin approval settings
+    ADMIN_EMAIL: EmailStr = "david@aiben.io"
+    APPROVAL_TOKEN_EXPIRE_HOURS: int = 72  # 3 days
+    REQUIRE_ADMIN_APPROVAL: bool = True  # Feature flag
+
     # ENABLED_LLM_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
     # ENABLED_EMBEDDING_PROVIDERS: str = "huggingface,openai,ollama,replicate,aws"
     ENABLED_LLM_PROVIDERS: str = "openai,aws"

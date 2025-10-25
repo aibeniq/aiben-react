@@ -1,7 +1,7 @@
 import axios from "axios"
 import "./axiosGlobalConfig" // Ensure global timeout configuration is applied
 import { OpenAPI } from "./core/OpenAPI"
-import type { KnowledgeBasesCreateKnowledgeBaseData } from "./types.gen"
+import type { CreateKnowledgeBaseApiV1KnowledgeBasesPostData } from "./types.gen"
 
 // Temporary interface for the new response format until types are regenerated
 interface KnowledgeBaseCreateResponse {

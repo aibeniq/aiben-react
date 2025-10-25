@@ -16,11 +16,15 @@ export const Route = createFileRoute("/_layout")({
     try {
       await UsersService.readUserMe()
       // If the call succeeds, user is authenticated
-    } catch (error) {
-      // If the call fails, redirect to login
-      throw redirect({
-        to: "/login",
-      })
+    } catch (error: any) {
+      // Only redirect on authentication errors (401, 403), not on server errors (404, 500)
+      if (error?.status === 401 || error?.status === 403) {
+        throw redirect({
+          to: "/login",
+        })
+      }
+      // For other errors (like 404, 500), don't redirect - let the route load and handle the error
+      console.warn("Authentication check failed with non-auth error:", error)
     }
   },
 })

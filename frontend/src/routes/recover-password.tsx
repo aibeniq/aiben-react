@@ -1,10 +1,10 @@
 import { Container, Heading, Input, Text } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { FiMail } from "react-icons/fi"
 
-import { type ApiError, LoginService, UsersService } from "@/client"
+import { type ApiError, LoginService } from "@/client"
 import { Button } from "@/components/ui/button"
 import { Field } from "@/components/ui/field"
 import { InputGroup } from "@/components/ui/input-group"
@@ -18,18 +18,6 @@ interface FormData {
 
 export const Route = createFileRoute("/recover-password")({
   component: RecoverPassword,
-  beforeLoad: async () => {
-    // Check if user is already authenticated
-    try {
-      await UsersService.readUserMe()
-      // If successful, user is already logged in, redirect to home
-      throw redirect({
-        to: "/",
-      })
-    } catch (error) {
-      // User is not authenticated, allow access to recover password page
-    }
-  },
 })
 
 function RecoverPassword() {

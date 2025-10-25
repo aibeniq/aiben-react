@@ -47,7 +47,7 @@ def test_fast_table_detection(pdf_path: str):
         print("2. Loading PDF with enhanced parsing (includes fast check)...")
         start_time = time.time()
         documents = load_pdf_with_pypdf(
-            pdf_path, os.path.basename(pdf_path), use_enhanced_parsing=True
+            pdf_path, os.path.basename(pdf_path), parsing_mode="enhanced"
         )
         enhanced_time = time.time() - start_time
 
@@ -64,7 +64,7 @@ def test_fast_table_detection(pdf_path: str):
     print("3. Loading PDF with basic pypdf (baseline)...")
     start_time = time.time()
     documents_basic = load_pdf_with_pypdf(
-        pdf_path, os.path.basename(pdf_path), use_enhanced_parsing=False
+        pdf_path, os.path.basename(pdf_path), parsing_mode="basic"
     )
     basic_time = time.time() - start_time
 

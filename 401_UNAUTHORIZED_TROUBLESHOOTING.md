@@ -8,10 +8,14 @@ A "401 Unauthorized" error occurs when a user attempts to access your AiBeniq ap
 
 - **System-wide**: All users affected (usually server configuration issues)
 - **One user affected**: Most likely browser-cached wrong HTTP Basic Auth credentials
+- **Work computers only**: 🚨 **Corporate network rate limiting** - multiple users sharing same IP
 - **Intermittent**: Network or rate limiting issues
 - **After login**: JWT token or account issues
 
-**Quick Fix for Single User Issues**: If only one person gets 401 errors, have them clear browser data or try incognito mode first - this resolves 90% of single-user 401 issues.
+**Quick Fixes**:
+
+- **Single user issue**: Clear browser data or try incognito mode first
+- **Work computers only**: 🚨 **Your rate limiting is blocking corporate IPs** - see Section 9 for solutions
 
 ## Authentication Architecture
 
@@ -178,6 +182,170 @@ Your application uses a **multi-layered authentication system**:
 - Everyone else can access the site normally
 - Same user works on different devices/browsers
 - Issue persists across browser sessions
+
+### 9. Corporate Network Issues (Multiple Users from Work Computers)
+
+**Description**: Users accessing from work computers get 401 errors, but the same users can access fine from personal devices/home networks. This is a **critical issue** caused by IP-based rate limiting when multiple users share the same corporate proxy/NAT IP address.
+
+**Symptoms**:
+
+- ✅ Works fine on personal devices (home WiFi, mobile data)
+- ❌ Fails on work computers
+- ❌ Persists even after clearing browser data and using incognito mode
+- ❌ Multiple employees in the same office experience the issue
+- May show "Too Many Requests" (429) before showing 401
+
+**Root Cause**:
+
+Your application uses **IP-based rate limiting** at multiple layers:
+
+1. Traefik reverse proxy (10 requests/minute for auth)
+2. Backend API (5 login attempts per 15 minutes per IP)
+3. Account lockout (5 failed attempts locks account)
+
+When employees access from a **corporate network**, they all appear to come from the **same public IP address** (corporate proxy/NAT gateway). This causes:
+
+- **Shared rate limit quota**: 10 employees making requests = rate limit hit quickly
+- **Cascading lockouts**: If anyone enters wrong credentials, it affects the shared IP
+- **False positives**: Legitimate users get blocked due to others' actions
+
+**How to Verify This is the Issue**:
+
+```bash
+# Check backend logs for rate limiting from specific IPs
+docker-compose logs backend | grep -i "rate limit"
+
+# Check if multiple users share the same IP in logs
+docker-compose logs backend | grep "X-Forwarded-For"
+
+# Look for 429 errors in Traefik logs
+docker-compose logs traefik | grep "429"
+```
+
+**Immediate Workarounds** (for affected users):
+
+1. **Use VPN or Mobile Hotspot**: Bypass corporate proxy
+2. **Request IP whitelist**: Add corporate IP to whitelist (see solution below)
+3. **Wait for reset**: Rate limits reset after 15 minutes - 1 hour
+
+**Permanent Solutions**:
+
+#### Solution 1: Whitelist Corporate IP Addresses
+
+Add corporate IP ranges to the whitelist in `docker/traefik-rate-limit.yml`:
+
+```yaml
+# IP Whitelist for trusted sources
+ip-whitelist:
+  ipWhiteList:
+    sourceRange:
+      - "127.0.0.1/32"
+      - "10.0.0.0/8"
+      - "172.16.0.0/12"
+      - "192.168.0.0/16"
+      - "YOUR_CORPORATE_IP/32" # Add your corporate public IP
+      - "YOUR_CORPORATE_RANGE/24" # Or IP range if available
+```
+
+Then apply the whitelist to frontend router in `docker-compose.yml`:
+
+```yaml
+- traefik.http.routers.${STACK_NAME}-frontend-https.middlewares=${STACK_NAME}-auth,auth-ratelimit@file,ip-whitelist@file,security-headers@file
+```
+
+#### Solution 2: Increase Rate Limits for Auth
+
+Edit `docker/traefik-rate-limit.yml`:
+
+```yaml
+auth-ratelimit:
+  rateLimit:
+    average: 50 # Increase from 10 to 50
+    period: 1m
+    burst: 100 # Increase from 20 to 100
+    sourceCriterion:
+      ipStrategy:
+        depth: 1
+```
+
+#### Solution 3: Use User-Based Rate Limiting Instead of IP-Based (Recommended)
+
+**Current problem**: Backend uses both IP and user rate limiting, but IP limits trigger first.
+
+**Fix**: Modify `backend/app/api/routes/login.py` to prioritize user-based limiting:
+
+```python
+# Only rate limit by username for login attempts
+# await rate_limiter.check_rate_limit(f"ip:{client_ip}")  # Comment out or remove
+await rate_limiter.check_rate_limit(f"user:{form_data.username}")
+```
+
+This way, each user has their own rate limit regardless of shared IP.
+
+#### Solution 4: Improve IP Detection for Corporate Proxies
+
+If your corporate proxy adds custom headers, configure Traefik to read the correct IP.
+
+Edit `docker/traefik-rate-limit.yml`:
+
+```yaml
+auth-ratelimit:
+  rateLimit:
+    average: 10
+    period: 1m
+    burst: 20
+    sourceCriterion:
+      ipStrategy:
+        depth: 0 # Change from 1 to 0 to use client IP directly
+        # OR
+        excludedIPs: # Exclude corporate proxy IPs from chain
+          - "CORPORATE_PROXY_IP"
+```
+
+#### Solution 5: Disable HTTP Basic Auth Rate Limiting (If Acceptable)
+
+If HTTP Basic Auth is just for staging/demo protection and you trust the users:
+
+Remove `auth-ratelimit@file` from the middleware chain in `docker-compose.yml`:
+
+```yaml
+# Before
+- traefik.http.routers.${STACK_NAME}-frontend-https.middlewares=${STACK_NAME}-auth,auth-ratelimit@file,security-headers@file
+
+# After (remove auth-ratelimit)
+- traefik.http.routers.${STACK_NAME}-frontend-https.middlewares=${STACK_NAME}-auth,security-headers@file
+```
+
+**Keep backend rate limiting** for actual login security, but remove the more aggressive Traefik-level rate limiting.
+
+**Testing After Changes**:
+
+```bash
+# Restart Traefik to apply changes
+docker-compose restart traefik
+
+# Check if rate limiting middleware is applied
+docker-compose logs traefik | tail -50
+
+# Test from corporate network
+# Ask affected user to try accessing again
+```
+
+**Recommended Approach**:
+
+For your use case, I recommend **Solution 3 (User-based rate limiting) + Solution 5 (Remove HTTP Basic Auth rate limiting)**:
+
+1. Keep strong rate limiting on the backend per-user account
+2. Remove or significantly relax IP-based rate limiting at Traefik level
+3. This allows multiple corporate users while still preventing brute force attacks on individual accounts
+
+**Monitoring**:
+
+After implementing fixes, monitor:
+
+- Rate limit triggers: `docker-compose logs backend | grep "rate limit"`
+- Failed login attempts by IP: `docker-compose logs backend | grep "failed login"`
+- Account lockouts: Check database `failed_login_attempts` and `locked_until` fields
 
 #### A. Browser-Cached HTTP Basic Auth Credentials
 

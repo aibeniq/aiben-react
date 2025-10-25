@@ -1,10 +1,10 @@
 import { Container, Heading, Text } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { FiLock } from "react-icons/fi"
 
-import { type ApiError, LoginService, type NewPassword, UsersService } from "@/client"
+import { type ApiError, LoginService, type NewPassword } from "@/client"
 import { Button } from "@/components/ui/button"
 import { PasswordInput } from "@/components/ui/password-input"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -17,18 +17,6 @@ interface NewPasswordForm extends NewPassword {
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPassword,
-  beforeLoad: async () => {
-    // Check if user is already authenticated
-    try {
-      await UsersService.readUserMe()
-      // If successful, user is already logged in, redirect to home
-      throw redirect({
-        to: "/",
-      })
-    } catch (error) {
-      // User is not authenticated, allow access to reset password page
-    }
-  },
 })
 
 function ResetPassword() {

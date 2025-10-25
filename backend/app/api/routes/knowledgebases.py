@@ -1503,7 +1503,7 @@ async def process_knowledge_base_creation(
                             # Process the file based on its type
                             if filename.lower().endswith(".pdf"):
                                 loaded_documents = load_pdf_with_pypdf(
-                                    temp_file_path, filename, use_enhanced_parsing=True
+                                    temp_file_path, filename, parsing_mode="enhanced"
                                 )
                             elif filename.lower().endswith(".txt"):
                                 loader = TextLoader(temp_file_path)

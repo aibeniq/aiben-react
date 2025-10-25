@@ -121,7 +121,7 @@ class TestPDFUtils:
         result = extract_pdf_with_pymupdf4llm("/path/to/test.pdf", "test.pdf")
 
         mock_load_pypdf.assert_called_once_with(
-            "/path/to/test.pdf", "test.pdf", use_enhanced_parsing=False
+            "/path/to/test.pdf", "test.pdf", parsing_mode="basic"
         )
         assert result == mock_documents
 

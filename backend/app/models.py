@@ -15,6 +15,13 @@ from sqlalchemy import (
 from datetime import datetime
 
 
+class UserStatus(str, enum.Enum):
+    PENDING = "pending"  # Awaiting admin approval
+    ACTIVE = "active"  # Approved and can log in
+    REJECTED = "rejected"  # Admin declined
+    SUSPENDED = "suspended"  # Temporarily disabled
+
+
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
@@ -26,6 +33,7 @@ class UserBase(SQLModel):
 # Properties to receive via API on creation
 class UserCreate(UserBase):
     password: str = Field(min_length=8, max_length=40)
+    status: UserStatus = Field(default=UserStatus.PENDING)
 
 
 class UserRegister(SQLModel):
@@ -60,6 +68,10 @@ class UpdatePassword(SQLModel):
 class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
+    status: UserStatus = Field(default=UserStatus.PENDING)
+    registration_date: datetime = Field(default_factory=datetime.utcnow)
+    approved_date: datetime | None = Field(default=None)
+    approved_by: uuid.UUID | None = Field(default=None, foreign_key="user.id")
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
     knowledge_bases: list["KnowledgeBase"] = Relationship(
         back_populates="owner", cascade_delete=True
@@ -80,6 +92,9 @@ class User(UserBase, table=True):
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
     id: uuid.UUID
+    status: UserStatus
+    registration_date: datetime
+    approved_date: datetime | None
     preferred_language: str
 
 

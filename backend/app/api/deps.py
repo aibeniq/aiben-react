@@ -15,7 +15,7 @@ from app.models import TokenPayload, User
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token",
-    auto_error=False  # Don't auto-error, we'll handle cookies
+    auto_error=False,  # Don't auto-error, we'll handle cookies
 )
 
 
@@ -27,7 +27,9 @@ def get_db() -> Generator[Session, None, None]:
 SessionDep = Annotated[Session, Depends(get_db)]
 
 
-def get_token_from_cookie_or_header(request: Request, token: str = Depends(reusable_oauth2)) -> str:
+def get_token_from_cookie_or_header(
+    request: Request, token: str = Depends(reusable_oauth2)
+) -> str:
     """
     Get token from HTTP-only cookie first, fallback to Authorization header for backward compatibility
     """
@@ -35,11 +37,11 @@ def get_token_from_cookie_or_header(request: Request, token: str = Depends(reusa
     cookie_token = request.cookies.get("access_token")
     if cookie_token:
         return cookie_token
-    
+
     # Fallback to Authorization header (for API clients or during migration)
     if token:
         return token
-    
+
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Not authenticated",
@@ -63,7 +65,10 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
         )
     user = session.get(User, token_data.sub)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+        )
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return user

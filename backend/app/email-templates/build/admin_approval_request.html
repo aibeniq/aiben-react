@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ project_name }} - New Registration Requires Approval</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .header { background-color: #f8f9fa; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .user-info { background-color: #f8f9fa; padding: 15px; margin: 20px 0; border-left: 4px solid #007bff; }
+        .button { display: inline-block; padding: 12px 24px; margin: 10px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+        .approve-btn { background-color: #28a745; color: white; }
+        .reject-btn { background-color: #dc3545; color: white; }
+        .footer { font-size: 12px; color: #666; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>{{ project_name }} - New Registration Request</h2>
+        </div>
+
+        <div class="content">
+            <p><strong>A new user has registered and requires your approval:</strong></p>
+
+            <div class="user-info">
+                <p><strong>Name:</strong> {{ user_name }}</p>
+                <p><strong>Email:</strong> {{ user_email }}</p>
+                <p><strong>Registration Date:</strong> {{ registration_date }}</p>
+            </div>
+
+            <p style="margin-top: 30px;">
+                <strong>Please review and take action:</strong>
+            </p>
+
+            <p>
+                <a href="{{ approval_link }}" class="button approve-btn">
+                    ✓ Approve Registration
+                </a>
+            </p>
+
+            <p>
+                <a href="{{ rejection_link }}" class="button reject-btn">
+                    ✗ Reject Registration
+                </a>
+            </p>
+
+            <div class="footer">
+                <p>This approval link will expire in {{ expiry_hours }} hours.</p>
+                <p>If you did not expect this email, please ignore it.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
