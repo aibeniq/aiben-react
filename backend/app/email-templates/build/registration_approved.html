@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ project_name }} - Account Approved</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .header { background-color: #d4edda; padding: 20px; text-align: center; border-radius: 4px; }
+        .content { padding: 20px; }
+        .account-info { background-color: #f8f9fa; padding: 15px; margin: 20px 0; border-left: 4px solid #28a745; }
+        .button { display: inline-block; padding: 12px 24px; margin: 10px; text-decoration: none; border-radius: 4px; font-weight: bold; background-color: #007bff; color: white; }
+        .footer { font-size: 12px; color: #666; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Welcome to {{ project_name }}!</h2>
+        </div>
+
+        <div class="content">
+            <p>Hi {{ user_name }},</p>
+
+            <p><strong>Great news!</strong> Your account registration has been approved.</p>
+
+            <p>You can now log in to your account with your credentials:</p>
+
+            <div class="account-info">
+                <p><strong>Email:</strong> {{ user_email }}</p>
+                <p><strong>Login URL:</strong> <a href="{{ login_link }}">{{ login_link }}</a></p>
+            </div>
+
+            <p>
+                <a href="{{ login_link }}" class="button">
+                    Go to Login
+                </a>
+            </p>
+
+            <p>If you have any questions, please contact support.</p>
+
+            <p>Best regards,<br>{{ project_name }} Team</p>
+
+            <div class="footer">
+                <p>This is an automated message. Please do not reply to this email.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

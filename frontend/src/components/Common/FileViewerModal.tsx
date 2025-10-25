@@ -1,10 +1,10 @@
-import type { FilesGetSourceContentResponse } from "@/client"
+import type { SourceContentResponse } from "@/client"
 import { Box, Button, Dialog, Image, Spinner, Text } from "@chakra-ui/react"
 import { useEffect, useRef, useState } from "react"
 import { cleanRTFFormatting } from "../../utils/rtfCleaner"
 
 interface FileViewerModalProps {
-  file: FilesGetSourceContentResponse | File | null
+  file: SourceContentResponse | File | null
   isOpen: boolean
   isLoading: boolean
   onClose: () => void
@@ -219,12 +219,12 @@ const FileViewerModal: React.FC<FileViewerModalProps> = ({
   }
 
   // Helper function to get content type from either file type
-  const getContentType = (file: FilesGetSourceContentResponse | File): string => {
+  const getContentType = (file: SourceContentResponse | File): string => {
     return file instanceof File ? file.type : file.content_type
   }
 
   // Helper function to get file name from either file type
-  const getFileName = (file: FilesGetSourceContentResponse | File): string => {
+  const getFileName = (file: SourceContentResponse | File): string => {
     return file instanceof File ? file.name : file.name
   }
 

@@ -1,5 +1,6 @@
 import uuid
 from typing import Any
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import col, delete, func, select
@@ -24,8 +25,15 @@ from app.models import (
     UserUpdate,
     UserUpdateMe,
     LanguageUpdate,
+    UserStatus,
 )
-from app.utils.email_utils import generate_new_account_email, send_email
+from app.utils.email_utils import (
+    generate_new_account_email,
+    send_email,
+    generate_admin_approval_email,
+    send_admin_approval_email,
+    generate_approval_token,
+)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -66,7 +74,11 @@ def update_language(
     dependencies=[Depends(get_current_active_superuser)],
     response_model=UsersPublic,
 )
-def read_users(session: SessionDep, skip: int = Query(0, ge=0, le=10000), limit: int = Query(100, ge=1, le=1000)) -> Any:
+def read_users(
+    session: SessionDep,
+    skip: int = Query(0, ge=0, le=10000),
+    limit: int = Query(100, ge=1, le=1000),
+) -> Any:
     """
     Retrieve users.
     """
@@ -171,20 +183,100 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     return Message(message="User deleted successfully")
 
 
-@router.post("/signup", response_model=UserPublic)
+@router.post("/signup", response_model=Message)
 def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     """
     Create new user without the need to be logged in.
     """
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:
-        raise HTTPException(
-            status_code=400,
-            detail="The user with this email already exists in the system",
-        )
+        if user.status == UserStatus.PENDING:
+            raise HTTPException(status_code=400, detail="Registration pending approval")
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="The user with this email already exists in the system",
+            )
+
+    # Create user in pending state
     user_create = UserCreate.model_validate(user_in)
+    user_create.status = UserStatus.PENDING
+    user_create.is_active = False  # Ensure pending users can't log in
     user = crud.create_user(session=session, user_create=user_create)
-    return user
+
+    # Generate approval token
+    approval_token = generate_approval_token(str(user.email), str(user.id))
+
+    # Send admin notification email
+    if settings.emails_enabled and settings.REQUIRE_ADMIN_APPROVAL:
+        send_admin_approval_email(
+            user_email=user.email,
+            user_name=user.full_name or user.email,
+            approval_token=approval_token,
+        )
+
+    return Message(message="Registration submitted. Awaiting admin approval.")
+
+
+@router.post("/approve-registration/{token}", response_model=Message)
+def approve_registration(token: str, session: SessionDep) -> Any:
+    """
+    Approve a pending user registration.
+    Admin-only endpoint (accessed via email link).
+    """
+    from app.utils.email_utils import verify_approval_token
+
+    # Verify and decode token
+    user_data = verify_approval_token(token)
+    if not user_data:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+
+    # Get pending user
+    user = session.get(User, user_data["user_id"])
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.status != UserStatus.PENDING:
+        raise HTTPException(status_code=400, detail="User already processed")
+
+    # Activate user
+    user.status = UserStatus.ACTIVE
+    user.is_active = True
+    user.approved_date = datetime.utcnow()
+    # Optional: track which admin approved
+    # user.approved_by = current_admin_user.id
+
+    session.add(user)
+    session.commit()
+
+    # Send welcome email to user
+    if settings.emails_enabled:
+        from app.utils.email_utils import send_registration_approved_email
+
+        send_registration_approved_email(
+            email_to=user.email, full_name=user.full_name or user.email
+        )
+
+    # Return success page or redirect
+    return Message(message=f"User {user.email} has been successfully approved.")
+
+
+@router.post("/reject-registration/{token}", response_model=Message)
+def reject_registration(token: str, session: SessionDep) -> Any:
+    """Reject and delete a pending registration."""
+    from app.utils.email_utils import verify_approval_token
+
+    user_data = verify_approval_token(token)
+    if not user_data:
+        raise HTTPException(status_code=400, detail="Invalid token")
+
+    user = session.get(User, user_data["user_id"])
+    if user and user.status == UserStatus.PENDING:
+        session.delete(user)
+        session.commit()
+        return Message(message="Registration rejected and user deleted")
+
+    raise HTTPException(status_code=400, detail="Invalid request")
 
 
 @router.get("/{user_id}", response_model=UserPublic)

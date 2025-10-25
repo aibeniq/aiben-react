@@ -11,7 +11,7 @@ from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
 from app.middleware.rate_limit import get_client_ip, rate_limiter
-from app.models import Message, NewPassword, Token, UserPublic
+from app.models import Message, NewPassword, Token, UserPublic, UserStatus
 from app.utils.account_lockout import (
     check_account_lockout,
     get_lockout_remaining_time,
@@ -31,9 +31,9 @@ router = APIRouter(tags=["login"])
 @router.post("/login/access-token")
 async def login_access_token(
     request: Request,
-    session: SessionDep, 
+    session: SessionDep,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    response: Response
+    response: Response,
 ) -> dict:
     """
     OAuth2 compatible token login, get an access token for future requests.
@@ -42,46 +42,55 @@ async def login_access_token(
     """
     # Get client IP for rate limiting
     client_ip = get_client_ip(request)
-    
+
     # Rate limit by IP address
-    await rate_limiter.check_rate_limit(f"ip:{client_ip}")
-    
+    await rate_limiter.check_rate_limit(f"ip:{client_ip}", max_attempts=10)
+
     # Rate limit by username (email)
-    await rate_limiter.check_rate_limit(f"user:{form_data.username}")
-    
+    await rate_limiter.check_rate_limit(f"user:{form_data.username}", max_attempts=10)
+
     # Authenticate user
     user = crud.authenticate(
         session=session, email=form_data.username, password=form_data.password
     )
-    
+
     if not user:
         # Record failed attempt if user exists
-        existing_user = crud.get_user_by_email(session=session, email=form_data.username)
+        existing_user = crud.get_user_by_email(
+            session=session, email=form_data.username
+        )
         if existing_user:
             record_failed_login(session, existing_user)
         raise HTTPException(status_code=400, detail="Incorrect email or password")
-    
+
     # Check if account is locked due to too many failed attempts
     if check_account_lockout(user):
         remaining_time = get_lockout_remaining_time(user)
         raise HTTPException(
             status_code=423,  # 423 Locked
-            detail=f"Account is locked due to too many failed login attempts. Try again in {remaining_time} seconds."
+            detail=f"Account is locked due to too many failed login attempts. Try again in {remaining_time} seconds.",
         )
-    
+
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
-    
+
+    # Check if user account is pending approval
+    if hasattr(user, "status") and user.status == UserStatus.PENDING:
+        raise HTTPException(
+            status_code=403,
+            detail="Account pending admin approval. Please check your email.",
+        )
+
     # Successful login - reset failed attempts counter and clear rate limits
     reset_failed_login_attempts(session, user)
     rate_limiter.clear_attempts(f"ip:{client_ip}")
     rate_limiter.clear_attempts(f"user:{form_data.username}")
-    
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
         user.id, expires_delta=access_token_expires
     )
-    
+
     # Set HTTP-only cookie instead of returning token in response
     response.set_cookie(
         key="access_token",
@@ -92,8 +101,11 @@ async def login_access_token(
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/",  # Available for all paths
     )
-    
-    return {"message": "Login successful", "user": {"id": str(user.id), "email": user.email}}
+
+    return {
+        "message": "Login successful",
+        "user": {"id": str(user.id), "email": user.email},
+    }
 
 
 @router.post("/logout")
@@ -105,7 +117,7 @@ def logout(response: Response) -> dict:
         key="access_token",
         path="/",
         secure=settings.ENVIRONMENT != "local",
-        samesite="strict"
+        samesite="strict",
     )
     return {"message": "Successfully logged out"}
 

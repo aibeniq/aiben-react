@@ -5,7 +5,7 @@ import {
   FormconnectService,
   ReportgenieService,
   TwincheckService,
-  type VeradocGetVeradocDetailResponse,
+  type GetVeradocDetailApiV1VeradocHistoryReportIdGetResponse,
   VeradocService,
 } from "../client"
 import useCustomToast from "./useCustomToast"
@@ -25,7 +25,7 @@ interface ToolActions {
 interface UseToolArchiveReturn {
   veradoc: ToolState<
     { [key: string]: unknown },
-    VeradocGetVeradocDetailResponse
+    GetVeradocDetailApiV1VeradocHistoryReportIdGetResponse
   > &
   ToolActions
   reportgenie: ToolState<{ [key: string]: unknown }, any> & ToolActions
@@ -50,7 +50,7 @@ export const useToolArchive = (): UseToolArchiveReturn => {
     { [key: string]: unknown }[]
   >([])
   const [selectedVeradocReport, setSelectedVeradocReport] =
-    useState<VeradocGetVeradocDetailResponse | null>(null)
+    useState<GetVeradocDetailApiV1VeradocHistoryReportIdGetResponse | null>(null)
   const [isVeradocLoading, setIsVeradocLoading] = useState(false)
 
   // ReportGenie (Generate) state

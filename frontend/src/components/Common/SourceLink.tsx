@@ -1,4 +1,4 @@
-import { type FilesGetSourceContentResponse, FilesService } from "@/client"
+import { type SourceContentResponse, FilesService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
 import { useFileViewer } from "@/hooks/useFileViewer"
 import { Link, type LinkProps } from "@chakra-ui/react"
@@ -30,7 +30,7 @@ const SourceLink: React.FC<SourceLinkProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { viewFile, viewFileInModal, currentFile, isLoading, clearFile } = useFileViewer()
   const [isLoadingFile, setIsLoadingFile] = useState(false)
-  const [convertedPdfFile, setConvertedPdfFile] = useState<FilesGetSourceContentResponse | null>(
+  const [convertedPdfFile, setConvertedPdfFile] = useState<SourceContentResponse | null>(
     null,
   ) // For DOCX converted to PDF
   const { showErrorToast } = useCustomToast()

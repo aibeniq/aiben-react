@@ -1,9 +1,4 @@
-import {
-  MutationCache,
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query"
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { RouterProvider, createRouter } from "@tanstack/react-router"
 import React, { StrictMode, Suspense } from "react"
 import ReactDOM from "react-dom/client"
@@ -29,10 +24,7 @@ try {
     const envHost = envUrl.hostname
     const currentHost = window.location.hostname
     // If env points at production API but we're on localhost (or a different host), use same origin
-    if (
-      envHost !== currentHost &&
-      (currentHost === "localhost" || currentHost === "127.0.0.1")
-    ) {
+    if (envHost !== currentHost && (currentHost === "localhost" || currentHost === "127.0.0.1")) {
       computedBase = window.location.origin
       console.log(
         `API URL override: running on ${currentHost}, overriding API base to ${computedBase}`,
@@ -44,18 +36,21 @@ try {
 }
 
 OpenAPI.BASE = computedBase
-OpenAPI.WITH_CREDENTIALS = true  // Enable sending cookies with requests
+OpenAPI.WITH_CREDENTIALS = true // Enable sending cookies with requests
 // Remove TOKEN since we'll use HTTP-only cookies
 // OpenAPI.TOKEN is no longer needed as authentication is handled via cookies
+
+console.log("OpenAPI.BASE set to:", OpenAPI.BASE)
+console.log("computedBase was:", computedBase)
 
 const handleApiError = (error: Error) => {
   if (error instanceof ApiError && [401, 403].includes(error.status)) {
     // Don't redirect if we're already on an auth page to prevent loops
     const currentPath = window.location.pathname
-    const isAuthPage = ['/login', '/signup', '/reset-password', '/recover-password'].some(path => 
-      currentPath.startsWith(path)
+    const isAuthPage = ["/login", "/signup", "/reset-password", "/recover-password"].some((path) =>
+      currentPath.startsWith(path),
     )
-    
+
     if (!isAuthPage) {
       // No need to remove localStorage since we're using HTTP-only cookies
       // The server will handle cookie clearing on logout

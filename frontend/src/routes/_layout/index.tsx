@@ -63,9 +63,7 @@ function UsageStats() {
   const maxTokens = quotaPeriod?.max_tokens || 50_000_000
   const percentage = Math.min((totalTokens / maxTokens) * 100, 100)
 
-  const startDate = quotaPeriod?.start_date
-    ? new Date(quotaPeriod.start_date)
-    : null
+  const startDate = quotaPeriod?.start_date ? new Date(quotaPeriod.start_date) : null
   const endDate = quotaPeriod?.end_date ? new Date(quotaPeriod.end_date) : null
 
   return (

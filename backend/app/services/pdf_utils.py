@@ -92,7 +92,7 @@ def extract_pdf_with_pymupdf4llm(
             print(
                 f"No tables detected in {filename}. Using fast pypdf extraction instead."
             )
-            return load_pdf_with_pypdf(file_path, filename, use_enhanced_parsing=False)
+            return load_pdf_with_pypdf(file_path, filename, parsing_mode="basic")
 
     documents = []
 

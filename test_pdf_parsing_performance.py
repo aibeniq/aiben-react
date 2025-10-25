@@ -43,7 +43,7 @@ def test_basic_mode(pdf_path: str, filename: str) -> Tuple[float, int, Dict]:
     print(f"{'='*60}")
 
     start_time = time.time()
-    documents = load_pdf_with_pypdf(pdf_path, filename, use_enhanced_parsing=False)
+    documents = load_pdf_with_pypdf(pdf_path, filename, parsing_mode="basic")
     end_time = time.time()
 
     elapsed = end_time - start_time
@@ -129,7 +129,7 @@ def test_auto_mode(pdf_path: str, filename: str) -> Tuple[float, int, Dict]:
 
     # Now do the actual parsing
     parse_start = time.time()
-    documents = load_pdf_with_pypdf(pdf_path, filename, use_enhanced_parsing=True)
+    documents = load_pdf_with_pypdf(pdf_path, filename, parsing_mode="enhanced")
     parse_end = time.time()
 
     parse_time = parse_end - parse_start

@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ChatQueryKnowledgeBaseData, ChatQueryKnowledgeBaseResponse, ChatQueryDocumentData, ChatQueryDocumentResponse, ChatQueryTextData, ChatQueryTextResponse, ChatChatData, ChatChatResponse, EmbeddingModelsGetAvailableProvidersResponse, EmbeddingModelsGetEmbeddingModelsData, EmbeddingModelsGetEmbeddingModelsResponse, EmbeddingModelsCreateEmbeddingModelData, EmbeddingModelsCreateEmbeddingModelResponse, EmbeddingModelsGetDefaultEmbeddingModelResponse, EmbeddingModelsGetEmbeddingModelData, EmbeddingModelsGetEmbeddingModelResponse, EmbeddingModelsUpdateEmbeddingModelData, EmbeddingModelsUpdateEmbeddingModelResponse, EmbeddingModelsDeleteEmbeddingModelData, EmbeddingModelsDeleteEmbeddingModelResponse, EmbeddingModelsSetDefaultEmbeddingModelData, EmbeddingModelsSetDefaultEmbeddingModelResponse, EmbeddingModelsValidateEmbeddingModelData, EmbeddingModelsValidateEmbeddingModelResponse, EmbeddingModelsCheckApiKeyConfiguredData, EmbeddingModelsCheckApiKeyConfiguredResponse, FeedbackSubmitFeedbackData, FeedbackSubmitFeedbackResponse, FilesGetSourceContentData, FilesGetSourceContentResponse, FilesConvertDocxToPdfData, FilesConvertDocxToPdfResponse, FilesConvertDocxToPdfByFilenameData, FilesConvertDocxToPdfByFilenameResponse, FilesConvertRtfToPdfData, FilesConvertRtfToPdfResponse, FilesConvertRtfToPdfByFilenameData, FilesConvertRtfToPdfByFilenameResponse, FilesGetSourceContentByFilenameData, FilesGetSourceContentByFilenameResponse, FormconnectProcessFormData, FormconnectProcessFormResponse, FormconnectGetFormsResponse, FormconnectCreateFormData, FormconnectCreateFormResponse, FormconnectGetFormData, FormconnectGetFormResponse, FormconnectUpdateFormData, FormconnectUpdateFormResponse, FormconnectDeleteFormData, FormconnectDeleteFormResponse, FormconnectGetFormDetailData, FormconnectGetFormDetailResponse, FormconnectGetFormHistoryData, FormconnectGetFormHistoryResponse, FormconnectGenerateFormFieldsData, FormconnectGenerateFormFieldsResponse, FormconnectGenerateFormFieldsJsonData, FormconnectGenerateFormFieldsJsonResponse, FormconnectGenerateFormFieldsWithFilesData, FormconnectGenerateFormFieldsWithFilesResponse, FormconnectGenerateDocxData, FormconnectGenerateDocxResponse, FormconnectGenerateCsvData, FormconnectGenerateCsvResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, KnowledgeBasesReadKnowledgeBasesData, KnowledgeBasesReadKnowledgeBasesResponse, KnowledgeBasesCreateKnowledgeBaseData, KnowledgeBasesCreateKnowledgeBaseResponse, KnowledgeBasesReadKnowledgeBaseData, KnowledgeBasesReadKnowledgeBaseResponse, KnowledgeBasesUpdateKnowledgeBaseData, KnowledgeBasesUpdateKnowledgeBaseResponse, KnowledgeBasesDeleteKnowledgeBaseData, KnowledgeBasesDeleteKnowledgeBaseResponse, KnowledgeBasesCreateKnowledgeBaseTaskData, KnowledgeBasesCreateKnowledgeBaseTaskResponse, KnowledgeBasesGetKnowledgeBaseProgressData, KnowledgeBasesGetKnowledgeBaseProgressResponse, LlmModelsGetLlmModelsData, LlmModelsGetLlmModelsResponse, LlmModelsCreateLlmModelData, LlmModelsCreateLlmModelResponse, LlmModelsGetDefaultLlmModelResponse, LlmModelsDeleteLlmModelData, LlmModelsDeleteLlmModelResponse, LlmModelsValidateLlmModelData, LlmModelsValidateLlmModelResponse, LlmModelsSetDefaultLlmModelData, LlmModelsSetDefaultLlmModelResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MonitoringGetRateLimiterStatusResponse, MonitoringResetRateLimiterResponse, ReportgenieCreateGenerateTaskResponse, ReportgenieCreateGenerateOutlineTaskResponse, ReportgenieCreateOptimizeOutlineTaskResponse, ReportgenieGetReportgenieProgressData, ReportgenieGetReportgenieProgressResponse, ReportgenieGenerateReportData, ReportgenieGenerateReportResponse, ReportgenieDeleteReportData, ReportgenieDeleteReportResponse, ReportgenieGetReportHistoryData, ReportgenieGetReportHistoryResponse, ReportgenieGetReportDetailData, ReportgenieGetReportDetailResponse, ReportgenieGetOutlinesResponse, ReportgenieCreateOutlineData, ReportgenieCreateOutlineResponse, ReportgenieGetOutlineData, ReportgenieGetOutlineResponse, ReportgenieUpdateOutlineData, ReportgenieUpdateOutlineResponse, ReportgenieDeleteOutlineData, ReportgenieDeleteOutlineResponse, ReportgenieGenerateOutlineJsonData, ReportgenieGenerateOutlineJsonResponse, ReportgenieGenerateOutlineData, ReportgenieGenerateOutlineResponse, ReportgenieOptimizeOutlineData, ReportgenieOptimizeOutlineResponse, ReportgenieGenerateOutlineOptimizationCsvData, ReportgenieGenerateOutlineOptimizationCsvResponse, ReportgenieGenerateDocxData, ReportgenieGenerateDocxResponse, ReportgenieGenerateCsvData, ReportgenieGenerateCsvResponse, TwincheckCompareDocumentsData, TwincheckCompareDocumentsResponse, TwincheckGetComparisonHistoryData, TwincheckGetComparisonHistoryResponse, TwincheckGetComparisonDetailData, TwincheckGetComparisonDetailResponse, TwincheckGetComparisonsResponse, TwincheckCreateComparisonData, TwincheckCreateComparisonResponse, TwincheckGetComparisonData, TwincheckGetComparisonResponse, TwincheckUpdateComparisonData, TwincheckUpdateComparisonResponse, TwincheckDeleteComparisonData, TwincheckDeleteComparisonResponse, TwincheckGenerateDocxData, TwincheckGenerateDocxResponse, TwincheckGenerateCsvData, TwincheckGenerateCsvResponse, TwincheckGenerateTopicsData, TwincheckGenerateTopicsResponse, TwincheckGenerateTopicsJsonData, TwincheckGenerateTopicsJsonResponse, UsageGetTokenUsageResponse, UsersGetSupportedLanguagesResponse, UsersUpdateLanguageData, UsersUpdateLanguageResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, UtilsGetSystemConfigResponse, VeradocGetVeradocProgressData, VeradocGetVeradocProgressResponse, VeradocGetVeradocResultsData, VeradocGetVeradocResultsResponse, VeradocProcessRagChecklistData, VeradocProcessRagChecklistResponse, VeradocGetChecklistsResponse, VeradocCreateChecklistData, VeradocCreateChecklistResponse, VeradocGetChecklistData, VeradocGetChecklistResponse, VeradocUpdateChecklistData, VeradocUpdateChecklistResponse, VeradocDeleteChecklistData, VeradocDeleteChecklistResponse, VeradocDeleteEvaluationData, VeradocDeleteEvaluationResponse, VeradocGetVeradocHistoryData, VeradocGetVeradocHistoryResponse, VeradocGetVeradocDetailData, VeradocGetVeradocDetailResponse, VeradocGetVeradocQaPairData, VeradocGetVeradocQaPairResponse, VeradocOptimizeChecklistData, VeradocOptimizeChecklistResponse, VeradocGenerateDocxData, VeradocGenerateDocxResponse, VeradocGenerateCsvData, VeradocGenerateCsvResponse, VeradocGenerateOptimizationCsvData, VeradocGenerateOptimizationCsvResponse, VeradocGenerateQuestionsWithFilesData, VeradocGenerateQuestionsWithFilesResponse, VeradocGenerateQuestionsData, VeradocGenerateQuestionsResponse } from './types.gen';
+import type { QueryKnowledgeBaseApiV1ChatKnowledgeBaseKbIdPostData, QueryKnowledgeBaseApiV1ChatKnowledgeBaseKbIdPostResponse, QueryDocumentApiV1ChatDocumentPostData, QueryDocumentApiV1ChatDocumentPostResponse, QueryTextApiV1ChatTextPostData, QueryTextApiV1ChatTextPostResponse, ChatApiV1ChatPostData, ChatApiV1ChatPostResponse, DetectAssistantIntentApiV1ChatAssistantDetectIntentPostData, DetectAssistantIntentApiV1ChatAssistantDetectIntentPostResponse, GetAvailableProvidersApiV1EmbeddingModelsProvidersGetResponse, GetEmbeddingModelsApiV1EmbeddingModelsGetData, GetEmbeddingModelsApiV1EmbeddingModelsGetResponse, CreateEmbeddingModelApiV1EmbeddingModelsPostData, CreateEmbeddingModelApiV1EmbeddingModelsPostResponse, GetDefaultEmbeddingModelApiV1EmbeddingModelsDefaultGetResponse, GetEmbeddingModelApiV1EmbeddingModelsModelIdGetData, GetEmbeddingModelApiV1EmbeddingModelsModelIdGetResponse, UpdateEmbeddingModelApiV1EmbeddingModelsModelIdPutData, UpdateEmbeddingModelApiV1EmbeddingModelsModelIdPutResponse, DeleteEmbeddingModelApiV1EmbeddingModelsModelIdDeleteData, DeleteEmbeddingModelApiV1EmbeddingModelsModelIdDeleteResponse, SetDefaultEmbeddingModelApiV1EmbeddingModelsModelIdSetDefaultPostData, SetDefaultEmbeddingModelApiV1EmbeddingModelsModelIdSetDefaultPostResponse, ValidateEmbeddingModelApiV1EmbeddingModelsValidatePostData, ValidateEmbeddingModelApiV1EmbeddingModelsValidatePostResponse, CheckApiKeyConfiguredApiV1EmbeddingModelsCheckApiKeyProviderGetData, CheckApiKeyConfiguredApiV1EmbeddingModelsCheckApiKeyProviderGetResponse, SubmitFeedbackApiV1ApiV1FeedbackPostData, SubmitFeedbackApiV1ApiV1FeedbackPostResponse, GetSourceContentApiV1FilesSourceSourceIdGetData, GetSourceContentApiV1FilesSourceSourceIdGetResponse, ConvertDocxToPdfApiV1FilesSourceSourceIdPdfGetData, ConvertDocxToPdfApiV1FilesSourceSourceIdPdfGetResponse, ConvertDocxToPdfByFilenameApiV1FilesSourceByFilenameFilenamePdfGetData, ConvertDocxToPdfByFilenameApiV1FilesSourceByFilenameFilenamePdfGetResponse, ConvertRtfToPdfApiV1FilesSourceSourceIdRtfPdfGetData, ConvertRtfToPdfApiV1FilesSourceSourceIdRtfPdfGetResponse, ConvertRtfToPdfByFilenameApiV1FilesSourceByFilenameFilenameRtfPdfGetData, ConvertRtfToPdfByFilenameApiV1FilesSourceByFilenameFilenameRtfPdfGetResponse, GetSourceContentByFilenameApiV1FilesSourceByFilenameFilenameGetData, GetSourceContentByFilenameApiV1FilesSourceByFilenameFilenameGetResponse, CreateProcessTaskApiV1FormconnectProcessTaskPostResponse, GetFormconnectProgressApiV1FormconnectProgressTaskIdGetData, GetFormconnectProgressApiV1FormconnectProgressTaskIdGetResponse, ProcessFormApiV1FormconnectProcessPostData, ProcessFormApiV1FormconnectProcessPostResponse, GetFormsApiV1FormconnectFormsGetResponse, CreateFormApiV1FormconnectFormsPostData, CreateFormApiV1FormconnectFormsPostResponse, GetFormApiV1FormconnectFormsFormIdGetData, GetFormApiV1FormconnectFormsFormIdGetResponse, UpdateFormApiV1FormconnectFormsFormIdPutData, UpdateFormApiV1FormconnectFormsFormIdPutResponse, DeleteFormApiV1FormconnectFormsFormIdDeleteData, DeleteFormApiV1FormconnectFormsFormIdDeleteResponse, GetFormDetailApiV1FormconnectHistoryInteractionIdGetData, GetFormDetailApiV1FormconnectHistoryInteractionIdGetResponse, GetFormHistoryApiV1FormconnectHistoryGetData, GetFormHistoryApiV1FormconnectHistoryGetResponse, GenerateFormFieldsApiV1FormconnectGenerateFieldsPostData, GenerateFormFieldsApiV1FormconnectGenerateFieldsPostResponse, GenerateFormFieldsJsonApiV1FormconnectGenerateFieldsJsonPostData, GenerateFormFieldsJsonApiV1FormconnectGenerateFieldsJsonPostResponse, GenerateFormFieldsWithFilesApiV1FormconnectGenerateFieldsWithFilesPostData, GenerateFormFieldsWithFilesApiV1FormconnectGenerateFieldsWithFilesPostResponse, GenerateDocxApiV1FormconnectGenerateDocxPostData, GenerateDocxApiV1FormconnectGenerateDocxPostResponse, GenerateCsvApiV1FormconnectGenerateCsvPostData, GenerateCsvApiV1FormconnectGenerateCsvPostResponse, ReadItemsApiV1ItemsGetData, ReadItemsApiV1ItemsGetResponse, CreateItemApiV1ItemsPostData, CreateItemApiV1ItemsPostResponse, ReadItemApiV1ItemsIdGetData, ReadItemApiV1ItemsIdGetResponse, UpdateItemApiV1ItemsIdPutData, UpdateItemApiV1ItemsIdPutResponse, DeleteItemApiV1ItemsIdDeleteData, DeleteItemApiV1ItemsIdDeleteResponse, ReadKnowledgeBasesApiV1KnowledgeBasesGetData, ReadKnowledgeBasesApiV1KnowledgeBasesGetResponse, CreateKnowledgeBaseApiV1KnowledgeBasesPostData, CreateKnowledgeBaseApiV1KnowledgeBasesPostResponse, GetKnowledgeBaseProgressApiV1KnowledgeBasesProgressTaskIdGetData, GetKnowledgeBaseProgressApiV1KnowledgeBasesProgressTaskIdGetResponse, ReadKnowledgeBaseApiV1KnowledgeBasesIdGetData, ReadKnowledgeBaseApiV1KnowledgeBasesIdGetResponse, UpdateKnowledgeBaseApiV1KnowledgeBasesIdPutData, UpdateKnowledgeBaseApiV1KnowledgeBasesIdPutResponse, DeleteKnowledgeBaseApiV1KnowledgeBasesIdDeleteData, DeleteKnowledgeBaseApiV1KnowledgeBasesIdDeleteResponse, CreateKnowledgeBaseTaskApiV1KnowledgeBasesCreateTaskPostData, CreateKnowledgeBaseTaskApiV1KnowledgeBasesCreateTaskPostResponse, GetLlmModelsApiV1LlmModelsGetData, GetLlmModelsApiV1LlmModelsGetResponse, CreateLlmModelApiV1LlmModelsPostData, CreateLlmModelApiV1LlmModelsPostResponse, GetDefaultLlmModelApiV1LlmModelsDefaultGetResponse, DeleteLlmModelApiV1LlmModelsModelIdDeleteData, DeleteLlmModelApiV1LlmModelsModelIdDeleteResponse, ValidateLlmModelApiV1LlmModelsValidatePostData, ValidateLlmModelApiV1LlmModelsValidatePostResponse, SetDefaultLlmModelApiV1LlmModelsModelIdSetDefaultPostData, SetDefaultLlmModelApiV1LlmModelsModelIdSetDefaultPostResponse, LoginAccessTokenApiV1LoginAccessTokenPostData, LoginAccessTokenApiV1LoginAccessTokenPostResponse, LogoutApiV1LogoutPostResponse, TestTokenApiV1LoginTestTokenPostResponse, RecoverPasswordApiV1PasswordRecoveryEmailPostData, RecoverPasswordApiV1PasswordRecoveryEmailPostResponse, ResetPasswordApiV1ResetPasswordPostData, ResetPasswordApiV1ResetPasswordPostResponse, RecoverPasswordHtmlContentApiV1PasswordRecoveryHtmlContentEmailPostData, RecoverPasswordHtmlContentApiV1PasswordRecoveryHtmlContentEmailPostResponse, GetRateLimiterStatusApiV1RateLimiterStatusGetResponse, ResetRateLimiterApiV1RateLimiterResetPostResponse, CreateUserApiV1PrivateUsersPostData, CreateUserApiV1PrivateUsersPostResponse, CreateGenerateTaskApiV1ReportgenieGenerateTaskPostResponse, CreateGenerateOutlineTaskApiV1ReportgenieGenerateOutlineTaskPostResponse, CreateOptimizeOutlineTaskApiV1ReportgenieOptimizeOutlineTaskPostResponse, GetReportgenieProgressApiV1ReportgenieProgressTaskIdGetData, GetReportgenieProgressApiV1ReportgenieProgressTaskIdGetResponse, GenerateReportApiV1ReportgenieGeneratePostData, GenerateReportApiV1ReportgenieGeneratePostResponse, DeleteReportApiV1ReportgenieReportsReportIdDeleteData, DeleteReportApiV1ReportgenieReportsReportIdDeleteResponse, GetReportHistoryApiV1ReportgenieHistoryGetData, GetReportHistoryApiV1ReportgenieHistoryGetResponse, GetReportDetailApiV1ReportgenieDetailReportIdGetData, GetReportDetailApiV1ReportgenieDetailReportIdGetResponse, GetOutlinesApiV1ReportgenieOutlinesGetResponse, CreateOutlineApiV1ReportgenieOutlinesPostData, CreateOutlineApiV1ReportgenieOutlinesPostResponse, GetOutlineApiV1ReportgenieOutlinesOutlineIdGetData, GetOutlineApiV1ReportgenieOutlinesOutlineIdGetResponse, UpdateOutlineApiV1ReportgenieOutlinesOutlineIdPutData, UpdateOutlineApiV1ReportgenieOutlinesOutlineIdPutResponse, DeleteOutlineApiV1ReportgenieOutlinesOutlineIdDeleteData, DeleteOutlineApiV1ReportgenieOutlinesOutlineIdDeleteResponse, GenerateOutlineJsonApiV1ReportgenieGenerateOutlineJsonPostData, GenerateOutlineJsonApiV1ReportgenieGenerateOutlineJsonPostResponse, GenerateOutlineApiV1ReportgenieGenerateOutlinePostData, GenerateOutlineApiV1ReportgenieGenerateOutlinePostResponse, OptimizeOutlineApiV1ReportgenieOptimizeOutlinePostData, OptimizeOutlineApiV1ReportgenieOptimizeOutlinePostResponse, GenerateOutlineOptimizationCsvApiV1ReportgenieOptimizeOutlineCsvPostData, GenerateOutlineOptimizationCsvApiV1ReportgenieOptimizeOutlineCsvPostResponse, GenerateDocxApiV1ReportgenieGenerateDocxPostData, GenerateDocxApiV1ReportgenieGenerateDocxPostResponse, GenerateCsvApiV1ReportgenieGenerateCsvPostData, GenerateCsvApiV1ReportgenieGenerateCsvPostResponse, CreateOptimizeOutlineTaskApiV1TwincheckOptimizeOutlineTaskPostResponse, CompareDocumentsApiV1TwincheckComparePostData, CompareDocumentsApiV1TwincheckComparePostResponse, GetTwincheckProgressApiV1TwincheckProgressTaskIdGetData, GetTwincheckProgressApiV1TwincheckProgressTaskIdGetResponse, GetComparisonHistoryApiV1TwincheckHistoryGetData, GetComparisonHistoryApiV1TwincheckHistoryGetResponse, GetComparisonDetailApiV1TwincheckHistoryComparisonIdGetData, GetComparisonDetailApiV1TwincheckHistoryComparisonIdGetResponse, GetComparisonsApiV1TwincheckComparisonsGetResponse, CreateComparisonApiV1TwincheckComparisonsPostData, CreateComparisonApiV1TwincheckComparisonsPostResponse, GetComparisonApiV1TwincheckComparisonsComparisonIdGetData, GetComparisonApiV1TwincheckComparisonsComparisonIdGetResponse, UpdateComparisonApiV1TwincheckComparisonsComparisonIdPutData, UpdateComparisonApiV1TwincheckComparisonsComparisonIdPutResponse, DeleteComparisonApiV1TwincheckComparisonsComparisonIdDeleteData, DeleteComparisonApiV1TwincheckComparisonsComparisonIdDeleteResponse, GenerateDocxApiV1TwincheckGenerateDocxPostData, GenerateDocxApiV1TwincheckGenerateDocxPostResponse, GenerateCsvApiV1TwincheckGenerateCsvPostData, GenerateCsvApiV1TwincheckGenerateCsvPostResponse, GenerateTopicsApiV1TwincheckGenerateTopicsPostData, GenerateTopicsApiV1TwincheckGenerateTopicsPostResponse, GenerateTopicsJsonApiV1TwincheckGenerateTopicsJsonPostData, GenerateTopicsJsonApiV1TwincheckGenerateTopicsJsonPostResponse, GetTokenUsageApiV1UsageTokenUsageGetResponse, GetSupportedLanguagesApiV1UsersSupportedLanguagesGetResponse, UpdateLanguageApiV1UsersMeLanguagePutData, UpdateLanguageApiV1UsersMeLanguagePutResponse, ReadUsersApiV1UsersGetData, ReadUsersApiV1UsersGetResponse, CreateUserApiV1UsersPostData, CreateUserApiV1UsersPostResponse, ReadUserMeApiV1UsersMeGetResponse, DeleteUserMeApiV1UsersMeDeleteResponse, UpdateUserMeApiV1UsersMePatchData, UpdateUserMeApiV1UsersMePatchResponse, UpdatePasswordMeApiV1UsersMePasswordPatchData, UpdatePasswordMeApiV1UsersMePasswordPatchResponse, RegisterUserApiV1UsersSignupPostData, RegisterUserApiV1UsersSignupPostResponse, ApproveRegistrationApiV1UsersApproveRegistrationTokenPostData, ApproveRegistrationApiV1UsersApproveRegistrationTokenPostResponse, RejectRegistrationApiV1UsersRejectRegistrationTokenPostData, RejectRegistrationApiV1UsersRejectRegistrationTokenPostResponse, ReadUserByIdApiV1UsersUserIdGetData, ReadUserByIdApiV1UsersUserIdGetResponse, UpdateUserApiV1UsersUserIdPatchData, UpdateUserApiV1UsersUserIdPatchResponse, DeleteUserApiV1UsersUserIdDeleteData, DeleteUserApiV1UsersUserIdDeleteResponse, TestEmailApiV1UtilsTestEmailPostData, TestEmailApiV1UtilsTestEmailPostResponse, HealthCheckApiV1UtilsHealthCheckGetResponse, GetSystemConfigApiV1UtilsSystemConfigGetResponse, GetVeradocProgressApiV1VeradocProgressTaskIdGetData, GetVeradocProgressApiV1VeradocProgressTaskIdGetResponse, GetVeradocResultsApiV1VeradocResultsTaskIdGetData, GetVeradocResultsApiV1VeradocResultsTaskIdGetResponse, CreateReviewTaskApiV1VeradocReviewTaskPostResponse, ProcessRagChecklistApiV1VeradocProcessRagPostData, ProcessRagChecklistApiV1VeradocProcessRagPostResponse, GetChecklistsApiV1VeradocChecklistsGetResponse, CreateChecklistApiV1VeradocChecklistsPostData, CreateChecklistApiV1VeradocChecklistsPostResponse, GetChecklistApiV1VeradocChecklistsChecklistIdGetData, GetChecklistApiV1VeradocChecklistsChecklistIdGetResponse, UpdateChecklistApiV1VeradocChecklistsChecklistIdPutData, UpdateChecklistApiV1VeradocChecklistsChecklistIdPutResponse, DeleteChecklistApiV1VeradocChecklistsChecklistIdDeleteData, DeleteChecklistApiV1VeradocChecklistsChecklistIdDeleteResponse, DeleteEvaluationApiV1VeradocEvaluationsEvaluationIdDeleteData, DeleteEvaluationApiV1VeradocEvaluationsEvaluationIdDeleteResponse, GetVeradocHistoryApiV1VeradocHistoryGetData, GetVeradocHistoryApiV1VeradocHistoryGetResponse, GetVeradocDetailApiV1VeradocHistoryReportIdGetData, GetVeradocDetailApiV1VeradocHistoryReportIdGetResponse, GetVeradocQaPairApiV1VeradocHistoryReportIdQaPairQaIndexGetData, GetVeradocQaPairApiV1VeradocHistoryReportIdQaPairQaIndexGetResponse, OptimizeChecklistApiV1VeradocOptimizeChecklistPostData, OptimizeChecklistApiV1VeradocOptimizeChecklistPostResponse, GenerateDocxApiV1VeradocGenerateDocxPostData, GenerateDocxApiV1VeradocGenerateDocxPostResponse, GenerateCsvApiV1VeradocGenerateCsvPostData, GenerateCsvApiV1VeradocGenerateCsvPostResponse, GenerateOptimizationCsvApiV1VeradocOptimizationCsvPostData, GenerateOptimizationCsvApiV1VeradocOptimizationCsvPostResponse, GenerateQuestionsWithFilesApiV1VeradocGenerateQuestionsWithFilesPostData, GenerateQuestionsWithFilesApiV1VeradocGenerateQuestionsWithFilesPostResponse, GenerateQuestionsApiV1VeradocGenerateQuestionsPostData, GenerateQuestionsApiV1VeradocGenerateQuestionsPostResponse } from './types.gen';
 
 export class ChatService {
     /**
@@ -20,7 +20,7 @@ export class ChatService {
      * @returns QueryResponse Successful Response
      * @throws ApiError
      */
-    public static queryKnowledgeBase(data: ChatQueryKnowledgeBaseData): CancelablePromise<ChatQueryKnowledgeBaseResponse> {
+    public static queryKnowledgeBase(data: QueryKnowledgeBaseApiV1ChatKnowledgeBaseKbIdPostData): CancelablePromise<QueryKnowledgeBaseApiV1ChatKnowledgeBaseKbIdPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/chat/knowledge-base/{kb_id}',
@@ -40,7 +40,7 @@ export class ChatService {
             }
         });
     }
-
+    
     /**
      * Query Document
      * Query uploaded documents with a question using either vector search or full text scan.
@@ -55,7 +55,7 @@ export class ChatService {
      * @returns DocumentQueryResponse Successful Response
      * @throws ApiError
      */
-    public static queryDocument(data: ChatQueryDocumentData = {}): CancelablePromise<ChatQueryDocumentResponse> {
+    public static queryDocument(data: QueryDocumentApiV1ChatDocumentPostData = {}): CancelablePromise<QueryDocumentApiV1ChatDocumentPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/chat/document',
@@ -74,7 +74,7 @@ export class ChatService {
             }
         });
     }
-
+    
     /**
      * Query Text
      * Answer a direct text question without a knowledge base or document.
@@ -86,7 +86,7 @@ export class ChatService {
      * @returns TextQueryResponse Successful Response
      * @throws ApiError
      */
-    public static queryText(data: ChatQueryTextData): CancelablePromise<ChatQueryTextResponse> {
+    public static queryText(data: QueryTextApiV1ChatTextPostData): CancelablePromise<QueryTextApiV1ChatTextPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/chat/text',
@@ -101,7 +101,7 @@ export class ChatService {
             }
         });
     }
-
+    
     /**
      * Chat
      * Main chat endpoint that routes to appropriate handlers based on context.
@@ -110,7 +110,7 @@ export class ChatService {
      * @returns QueryResponse Successful Response
      * @throws ApiError
      */
-    public static chat(data: ChatChatData): CancelablePromise<ChatChatResponse> {
+    public static chat(data: ChatApiV1ChatPostData): CancelablePromise<ChatApiV1ChatPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/chat/',
@@ -121,7 +121,28 @@ export class ChatService {
             }
         });
     }
-
+    
+    /**
+     * Detect Assistant Intent
+     * Use LLM to detect user intent for assistant mode requests.
+     * Analyzes the message and file information to determine appropriate actions.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns AssistantIntentResponse Successful Response
+     * @throws ApiError
+     */
+    public static detectAssistantIntent(data: DetectAssistantIntentApiV1ChatAssistantDetectIntentPostData): CancelablePromise<DetectAssistantIntentApiV1ChatAssistantDetectIntentPostResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/chat/assistant/detect-intent',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
 }
 
 export class EmbeddingModelsService {
@@ -131,13 +152,13 @@ export class EmbeddingModelsService {
      * @returns string Successful Response
      * @throws ApiError
      */
-    public static getAvailableProviders(): CancelablePromise<EmbeddingModelsGetAvailableProvidersResponse> {
+    public static getAvailableProviders(): CancelablePromise<GetAvailableProvidersApiV1EmbeddingModelsProvidersGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/embedding-models/providers'
         });
     }
-
+    
     /**
      * Get Embedding Models
      * Get all embedding models.
@@ -147,7 +168,7 @@ export class EmbeddingModelsService {
      * @returns EmbeddingModelsPublic Successful Response
      * @throws ApiError
      */
-    public static getEmbeddingModels(data: EmbeddingModelsGetEmbeddingModelsData = {}): CancelablePromise<EmbeddingModelsGetEmbeddingModelsResponse> {
+    public static getEmbeddingModels(data: GetEmbeddingModelsApiV1EmbeddingModelsGetData = {}): CancelablePromise<GetEmbeddingModelsApiV1EmbeddingModelsGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/embedding-models/',
@@ -160,7 +181,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-
+    
     /**
      * Create Embedding Model
      * Create a new embedding model.
@@ -169,7 +190,7 @@ export class EmbeddingModelsService {
      * @returns EmbeddingModelPublic Successful Response
      * @throws ApiError
      */
-    public static createEmbeddingModel(data: EmbeddingModelsCreateEmbeddingModelData): CancelablePromise<EmbeddingModelsCreateEmbeddingModelResponse> {
+    public static createEmbeddingModel(data: CreateEmbeddingModelApiV1EmbeddingModelsPostData): CancelablePromise<CreateEmbeddingModelApiV1EmbeddingModelsPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/embedding-models/',
@@ -180,20 +201,20 @@ export class EmbeddingModelsService {
             }
         });
     }
-
+    
     /**
      * Get Default Embedding Model
      * Get the user's default embedding model (or system default if not set).
      * @returns EmbeddingModelPublic Successful Response
      * @throws ApiError
      */
-    public static getDefaultEmbeddingModel(): CancelablePromise<EmbeddingModelsGetDefaultEmbeddingModelResponse> {
+    public static getDefaultEmbeddingModel(): CancelablePromise<GetDefaultEmbeddingModelApiV1EmbeddingModelsDefaultGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/embedding-models/default'
         });
     }
-
+    
     /**
      * Get Embedding Model
      * Get a specific embedding model by ID.
@@ -202,7 +223,7 @@ export class EmbeddingModelsService {
      * @returns EmbeddingModelPublic Successful Response
      * @throws ApiError
      */
-    public static getEmbeddingModel(data: EmbeddingModelsGetEmbeddingModelData): CancelablePromise<EmbeddingModelsGetEmbeddingModelResponse> {
+    public static getEmbeddingModel(data: GetEmbeddingModelApiV1EmbeddingModelsModelIdGetData): CancelablePromise<GetEmbeddingModelApiV1EmbeddingModelsModelIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/embedding-models/{model_id}',
@@ -214,7 +235,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-
+    
     /**
      * Update Embedding Model
      * Update an embedding model.
@@ -224,7 +245,7 @@ export class EmbeddingModelsService {
      * @returns EmbeddingModelPublic Successful Response
      * @throws ApiError
      */
-    public static updateEmbeddingModel(data: EmbeddingModelsUpdateEmbeddingModelData): CancelablePromise<EmbeddingModelsUpdateEmbeddingModelResponse> {
+    public static updateEmbeddingModel(data: UpdateEmbeddingModelApiV1EmbeddingModelsModelIdPutData): CancelablePromise<UpdateEmbeddingModelApiV1EmbeddingModelsModelIdPutResponse> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/v1/embedding-models/{model_id}',
@@ -238,7 +259,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-
+    
     /**
      * Delete Embedding Model
      * Delete an embedding model.
@@ -247,7 +268,7 @@ export class EmbeddingModelsService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static deleteEmbeddingModel(data: EmbeddingModelsDeleteEmbeddingModelData): CancelablePromise<EmbeddingModelsDeleteEmbeddingModelResponse> {
+    public static deleteEmbeddingModel(data: DeleteEmbeddingModelApiV1EmbeddingModelsModelIdDeleteData): CancelablePromise<DeleteEmbeddingModelApiV1EmbeddingModelsModelIdDeleteResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/embedding-models/{model_id}',
@@ -259,7 +280,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-
+    
     /**
      * Set Default Embedding Model
      * Set an embedding model as the default for the current user.
@@ -268,7 +289,7 @@ export class EmbeddingModelsService {
      * @returns EmbeddingModelPublic Successful Response
      * @throws ApiError
      */
-    public static setDefaultEmbeddingModel(data: EmbeddingModelsSetDefaultEmbeddingModelData): CancelablePromise<EmbeddingModelsSetDefaultEmbeddingModelResponse> {
+    public static setDefaultEmbeddingModel(data: SetDefaultEmbeddingModelApiV1EmbeddingModelsModelIdSetDefaultPostData): CancelablePromise<SetDefaultEmbeddingModelApiV1EmbeddingModelsModelIdSetDefaultPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/embedding-models/{model_id}/set-default',
@@ -280,7 +301,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-
+    
     /**
      * Validate Embedding Model
      * Validate if an embedding model ID is valid for the specified provider.
@@ -289,7 +310,7 @@ export class EmbeddingModelsService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static validateEmbeddingModel(data: EmbeddingModelsValidateEmbeddingModelData): CancelablePromise<EmbeddingModelsValidateEmbeddingModelResponse> {
+    public static validateEmbeddingModel(data: ValidateEmbeddingModelApiV1EmbeddingModelsValidatePostData): CancelablePromise<ValidateEmbeddingModelApiV1EmbeddingModelsValidatePostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/embedding-models/validate',
@@ -300,7 +321,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-
+    
     /**
      * Check Api Key Configured
      * Check if the API key for a specific provider is configured in the backend.
@@ -309,7 +330,7 @@ export class EmbeddingModelsService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static checkApiKeyConfigured(data: EmbeddingModelsCheckApiKeyConfiguredData): CancelablePromise<EmbeddingModelsCheckApiKeyConfiguredResponse> {
+    public static checkApiKeyConfigured(data: CheckApiKeyConfiguredApiV1EmbeddingModelsCheckApiKeyProviderGetData): CancelablePromise<CheckApiKeyConfiguredApiV1EmbeddingModelsCheckApiKeyProviderGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/embedding-models/check-api-key/{provider}',
@@ -321,7 +342,7 @@ export class EmbeddingModelsService {
             }
         });
     }
-
+    
 }
 
 export class FeedbackService {
@@ -335,7 +356,7 @@ export class FeedbackService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static submitFeedback(data: FeedbackSubmitFeedbackData): CancelablePromise<FeedbackSubmitFeedbackResponse> {
+    public static submitFeedback(data: SubmitFeedbackApiV1ApiV1FeedbackPostData): CancelablePromise<SubmitFeedbackApiV1ApiV1FeedbackPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/api/v1/feedback/',
@@ -349,7 +370,7 @@ export class FeedbackService {
             }
         });
     }
-
+    
 }
 
 export class FilesService {
@@ -362,7 +383,7 @@ export class FilesService {
      * @returns SourceContentResponse Successful Response
      * @throws ApiError
      */
-    public static getSourceContent(data: FilesGetSourceContentData): CancelablePromise<FilesGetSourceContentResponse> {
+    public static getSourceContent(data: GetSourceContentApiV1FilesSourceSourceIdGetData): CancelablePromise<GetSourceContentApiV1FilesSourceSourceIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/files/source/{source_id}',
@@ -374,7 +395,7 @@ export class FilesService {
             }
         });
     }
-
+    
     /**
      * Convert Docx To Pdf
      * Convert a DOCX source file to PDF on-demand.
@@ -384,20 +405,19 @@ export class FilesService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static convertDocxToPdf(data: FilesConvertDocxToPdfData): CancelablePromise<FilesConvertDocxToPdfResponse> {
+    public static convertDocxToPdf(data: ConvertDocxToPdfApiV1FilesSourceSourceIdPdfGetData): CancelablePromise<ConvertDocxToPdfApiV1FilesSourceSourceIdPdfGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/files/source/{source_id}/pdf',
             path: {
                 source_id: data.sourceId
             },
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-
+    
     /**
      * Convert Docx To Pdf By Filename
      * Convert a DOCX source file to PDF on-demand using filename.
@@ -407,20 +427,19 @@ export class FilesService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static convertDocxToPdfByFilename(data: FilesConvertDocxToPdfByFilenameData): CancelablePromise<FilesConvertDocxToPdfByFilenameResponse> {
+    public static convertDocxToPdfByFilename(data: ConvertDocxToPdfByFilenameApiV1FilesSourceByFilenameFilenamePdfGetData): CancelablePromise<ConvertDocxToPdfByFilenameApiV1FilesSourceByFilenameFilenamePdfGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/files/source/by-filename/{filename}/pdf',
             path: {
                 filename: data.filename
             },
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-
+    
     /**
      * Convert Rtf To Pdf
      * Convert an RTF source file to PDF on-demand.
@@ -430,20 +449,19 @@ export class FilesService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static convertRtfToPdf(data: FilesConvertRtfToPdfData): CancelablePromise<FilesConvertRtfToPdfResponse> {
+    public static convertRtfToPdf(data: ConvertRtfToPdfApiV1FilesSourceSourceIdRtfPdfGetData): CancelablePromise<ConvertRtfToPdfApiV1FilesSourceSourceIdRtfPdfGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/files/source/{source_id}/rtf-pdf',
             path: {
                 source_id: data.sourceId
             },
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-
+    
     /**
      * Convert Rtf To Pdf By Filename
      * Convert an RTF source file to PDF on-demand using filename.
@@ -453,20 +471,19 @@ export class FilesService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static convertRtfToPdfByFilename(data: FilesConvertRtfToPdfByFilenameData): CancelablePromise<FilesConvertRtfToPdfByFilenameResponse> {
+    public static convertRtfToPdfByFilename(data: ConvertRtfToPdfByFilenameApiV1FilesSourceByFilenameFilenameRtfPdfGetData): CancelablePromise<ConvertRtfToPdfByFilenameApiV1FilesSourceByFilenameFilenameRtfPdfGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/files/source/by-filename/{filename}/rtf-pdf',
             path: {
                 filename: data.filename
             },
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-
+    
     /**
      * Get Source Content By Filename
      * Retrieve a source file by filename.
@@ -476,7 +493,7 @@ export class FilesService {
      * @returns SourceContentResponse Successful Response
      * @throws ApiError
      */
-    public static getSourceContentByFilename(data: FilesGetSourceContentByFilenameData): CancelablePromise<FilesGetSourceContentByFilenameResponse> {
+    public static getSourceContentByFilename(data: GetSourceContentByFilenameApiV1FilesSourceByFilenameFilenameGetData): CancelablePromise<GetSourceContentByFilenameApiV1FilesSourceByFilenameFilenameGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/files/source/by-filename/{filename}',
@@ -488,29 +505,61 @@ export class FilesService {
             }
         });
     }
-
+    
 }
 
 export class FormconnectService {
     /**
+     * Create Process Task
+     * Create a new FormConnect processing task for progress tracking.
+     * Returns a task_id that can be used to track progress.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static createProcessTask(): CancelablePromise<CreateProcessTaskApiV1FormconnectProcessTaskPostResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/formconnect/process/task'
+        });
+    }
+    
+    /**
+     * Get Formconnect Progress
+     * Get the progress of a FormConnect processing task.
+     * @param data The data for the request.
+     * @param data.taskId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getFormconnectProgress(data: GetFormconnectProgressApiV1FormconnectProgressTaskIdGetData): CancelablePromise<GetFormconnectProgressApiV1FormconnectProgressTaskIdGetResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/formconnect/progress/{task_id}',
+            path: {
+                task_id: data.taskId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
      * Process Form
      * Process the uploaded files and fields with unified visual processing.
      * All files now benefit from automatic visual enhancement for embedded images.
+     *
+     * Args:
+     * task_id: Optional task ID for progress tracking
      * @param data The data for the request.
-     * @param data.fields
-     * @param data.searchMode
      * @param data.formData
      * @returns FormConnectResponse Successful Response
      * @throws ApiError
      */
-    public static processForm(data: FormconnectProcessFormData): CancelablePromise<FormconnectProcessFormResponse> {
+    public static processForm(data: ProcessFormApiV1FormconnectProcessPostData): CancelablePromise<ProcessFormApiV1FormconnectProcessPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/formconnect/process',
-            query: {
-                fields: data.fields,
-                search_mode: data.searchMode
-            },
             formData: data.formData,
             mediaType: 'multipart/form-data',
             errors: {
@@ -518,20 +567,20 @@ export class FormconnectService {
             }
         });
     }
-
+    
     /**
      * Get Forms
      * Retrieve all forms from the database for this user.
      * @returns FormConnectForm Successful Response
      * @throws ApiError
      */
-    public static getForms(): CancelablePromise<FormconnectGetFormsResponse> {
+    public static getForms(): CancelablePromise<GetFormsApiV1FormconnectFormsGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/formconnect/forms'
         });
     }
-
+    
     /**
      * Create Form
      * Save a new form to the database.
@@ -540,7 +589,7 @@ export class FormconnectService {
      * @returns FormConnectForm Successful Response
      * @throws ApiError
      */
-    public static createForm(data: FormconnectCreateFormData): CancelablePromise<FormconnectCreateFormResponse> {
+    public static createForm(data: CreateFormApiV1FormconnectFormsPostData): CancelablePromise<CreateFormApiV1FormconnectFormsPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/formconnect/forms',
@@ -551,7 +600,7 @@ export class FormconnectService {
             }
         });
     }
-
+    
     /**
      * Get Form
      * Retrieve a specific form by ID.
@@ -560,7 +609,7 @@ export class FormconnectService {
      * @returns FormConnectForm Successful Response
      * @throws ApiError
      */
-    public static getForm(data: FormconnectGetFormData): CancelablePromise<FormconnectGetFormResponse> {
+    public static getForm(data: GetFormApiV1FormconnectFormsFormIdGetData): CancelablePromise<GetFormApiV1FormconnectFormsFormIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/formconnect/forms/{form_id}',
@@ -572,7 +621,7 @@ export class FormconnectService {
             }
         });
     }
-
+    
     /**
      * Update Form
      * Update an existing form.
@@ -582,7 +631,7 @@ export class FormconnectService {
      * @returns FormConnectForm Successful Response
      * @throws ApiError
      */
-    public static updateForm(data: FormconnectUpdateFormData): CancelablePromise<FormconnectUpdateFormResponse> {
+    public static updateForm(data: UpdateFormApiV1FormconnectFormsFormIdPutData): CancelablePromise<UpdateFormApiV1FormconnectFormsFormIdPutResponse> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/v1/formconnect/forms/{form_id}',
@@ -596,7 +645,7 @@ export class FormconnectService {
             }
         });
     }
-
+    
     /**
      * Delete Form
      * Delete a form by ID.
@@ -605,7 +654,7 @@ export class FormconnectService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static deleteForm(data: FormconnectDeleteFormData): CancelablePromise<FormconnectDeleteFormResponse> {
+    public static deleteForm(data: DeleteFormApiV1FormconnectFormsFormIdDeleteData): CancelablePromise<DeleteFormApiV1FormconnectFormsFormIdDeleteResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/formconnect/forms/{form_id}',
@@ -617,7 +666,7 @@ export class FormconnectService {
             }
         });
     }
-
+    
     /**
      * Get Form Detail
      * Retrieve a specific form processing's full content by ID.
@@ -626,7 +675,7 @@ export class FormconnectService {
      * @returns FormConnectDetailResponse Successful Response
      * @throws ApiError
      */
-    public static getFormDetail(data: FormconnectGetFormDetailData): CancelablePromise<FormconnectGetFormDetailResponse> {
+    public static getFormDetail(data: GetFormDetailApiV1FormconnectHistoryInteractionIdGetData): CancelablePromise<GetFormDetailApiV1FormconnectHistoryInteractionIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/formconnect/history/{interaction_id}',
@@ -638,7 +687,7 @@ export class FormconnectService {
             }
         });
     }
-
+    
     /**
      * Get Form History
      * Retrieve past form processing history for the current user or all users.
@@ -649,7 +698,7 @@ export class FormconnectService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static getFormHistory(data: FormconnectGetFormHistoryData = {}): CancelablePromise<FormconnectGetFormHistoryResponse> {
+    public static getFormHistory(data: GetFormHistoryApiV1FormconnectHistoryGetData = {}): CancelablePromise<GetFormHistoryApiV1FormconnectHistoryGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/formconnect/history',
@@ -663,7 +712,7 @@ export class FormconnectService {
             }
         });
     }
-
+    
     /**
      * Generate Form Fields
      * Generate form fields based on a description with optional knowledge base reference.
@@ -672,7 +721,7 @@ export class FormconnectService {
      * @returns GenerateFormFieldsResponse Successful Response
      * @throws ApiError
      */
-    public static generateFormFields(data: FormconnectGenerateFormFieldsData): CancelablePromise<FormconnectGenerateFormFieldsResponse> {
+    public static generateFormFields(data: GenerateFormFieldsApiV1FormconnectGenerateFieldsPostData): CancelablePromise<GenerateFormFieldsApiV1FormconnectGenerateFieldsPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/formconnect/generate-fields',
@@ -683,7 +732,7 @@ export class FormconnectService {
             }
         });
     }
-
+    
     /**
      * Generate Form Fields Json
      * Generate form fields based on a description with optional knowledge base reference (JSON version).
@@ -692,7 +741,7 @@ export class FormconnectService {
      * @returns GenerateFormFieldsResponse Successful Response
      * @throws ApiError
      */
-    public static generateFormFieldsJson(data: FormconnectGenerateFormFieldsJsonData): CancelablePromise<FormconnectGenerateFormFieldsJsonResponse> {
+    public static generateFormFieldsJson(data: GenerateFormFieldsJsonApiV1FormconnectGenerateFieldsJsonPostData): CancelablePromise<GenerateFormFieldsJsonApiV1FormconnectGenerateFieldsJsonPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/formconnect/generate-fields-json',
@@ -703,7 +752,7 @@ export class FormconnectService {
             }
         });
     }
-
+    
     /**
      * Generate Form Fields With Files
      * Generate form fields based on a description and uploaded reference documents.
@@ -712,7 +761,7 @@ export class FormconnectService {
      * @returns GenerateFormFieldsResponse Successful Response
      * @throws ApiError
      */
-    public static generateFormFieldsWithFiles(data: FormconnectGenerateFormFieldsWithFilesData): CancelablePromise<FormconnectGenerateFormFieldsWithFilesResponse> {
+    public static generateFormFieldsWithFiles(data: GenerateFormFieldsWithFilesApiV1FormconnectGenerateFieldsWithFilesPostData): CancelablePromise<GenerateFormFieldsWithFilesApiV1FormconnectGenerateFieldsWithFilesPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/formconnect/generate-fields-with-files',
@@ -723,7 +772,7 @@ export class FormconnectService {
             }
         });
     }
-
+    
     /**
      * Generate Docx
      * Generate a DOCX file from the FormConnect results content.
@@ -733,19 +782,18 @@ export class FormconnectService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static generateDocx(data: FormconnectGenerateDocxData): CancelablePromise<FormconnectGenerateDocxResponse> {
+    public static generateDocx(data: GenerateDocxApiV1FormconnectGenerateDocxPostData): CancelablePromise<GenerateDocxApiV1FormconnectGenerateDocxPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/formconnect/generate/docx',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-
+    
     /**
      * Generate Csv
      * Generate a CSV file from the FormConnect results content using LLM formatting.
@@ -754,19 +802,18 @@ export class FormconnectService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static generateCsv(data: FormconnectGenerateCsvData): CancelablePromise<FormconnectGenerateCsvResponse> {
+    public static generateCsv(data: GenerateCsvApiV1FormconnectGenerateCsvPostData): CancelablePromise<GenerateCsvApiV1FormconnectGenerateCsvPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/formconnect/generate/csv',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-
+    
 }
 
 export class ItemsService {
@@ -779,7 +826,7 @@ export class ItemsService {
      * @returns ItemsPublic Successful Response
      * @throws ApiError
      */
-    public static readItems(data: ItemsReadItemsData = {}): CancelablePromise<ItemsReadItemsResponse> {
+    public static readItems(data: ReadItemsApiV1ItemsGetData = {}): CancelablePromise<ReadItemsApiV1ItemsGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/items/',
@@ -792,7 +839,7 @@ export class ItemsService {
             }
         });
     }
-
+    
     /**
      * Create Item
      * Create new item.
@@ -801,7 +848,7 @@ export class ItemsService {
      * @returns ItemPublic Successful Response
      * @throws ApiError
      */
-    public static createItem(data: ItemsCreateItemData): CancelablePromise<ItemsCreateItemResponse> {
+    public static createItem(data: CreateItemApiV1ItemsPostData): CancelablePromise<CreateItemApiV1ItemsPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/items/',
@@ -812,7 +859,7 @@ export class ItemsService {
             }
         });
     }
-
+    
     /**
      * Read Item
      * Get item by ID.
@@ -821,7 +868,7 @@ export class ItemsService {
      * @returns ItemPublic Successful Response
      * @throws ApiError
      */
-    public static readItem(data: ItemsReadItemData): CancelablePromise<ItemsReadItemResponse> {
+    public static readItem(data: ReadItemApiV1ItemsIdGetData): CancelablePromise<ReadItemApiV1ItemsIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/items/{id}',
@@ -833,7 +880,7 @@ export class ItemsService {
             }
         });
     }
-
+    
     /**
      * Update Item
      * Update an item.
@@ -843,7 +890,7 @@ export class ItemsService {
      * @returns ItemPublic Successful Response
      * @throws ApiError
      */
-    public static updateItem(data: ItemsUpdateItemData): CancelablePromise<ItemsUpdateItemResponse> {
+    public static updateItem(data: UpdateItemApiV1ItemsIdPutData): CancelablePromise<UpdateItemApiV1ItemsIdPutResponse> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/v1/items/{id}',
@@ -857,7 +904,7 @@ export class ItemsService {
             }
         });
     }
-
+    
     /**
      * Delete Item
      * Delete an item.
@@ -866,7 +913,7 @@ export class ItemsService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static deleteItem(data: ItemsDeleteItemData): CancelablePromise<ItemsDeleteItemResponse> {
+    public static deleteItem(data: DeleteItemApiV1ItemsIdDeleteData): CancelablePromise<DeleteItemApiV1ItemsIdDeleteResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/items/{id}',
@@ -878,7 +925,7 @@ export class ItemsService {
             }
         });
     }
-
+    
 }
 
 export class KnowledgeBasesService {
@@ -892,7 +939,7 @@ export class KnowledgeBasesService {
      * @returns KnowledgeBasesPublic Successful Response
      * @throws ApiError
      */
-    public static readKnowledgeBases(data: KnowledgeBasesReadKnowledgeBasesData = {}): CancelablePromise<KnowledgeBasesReadKnowledgeBasesResponse> {
+    public static readKnowledgeBases(data: ReadKnowledgeBasesApiV1KnowledgeBasesGetData = {}): CancelablePromise<ReadKnowledgeBasesApiV1KnowledgeBasesGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/knowledge-bases/',
@@ -906,7 +953,7 @@ export class KnowledgeBasesService {
             }
         });
     }
-
+    
     /**
      * Create Knowledge Base
      * Create new knowledge base asynchronously with real-time progress tracking.
@@ -914,21 +961,21 @@ export class KnowledgeBasesService {
      * @param data The data for the request.
      * @param data.title
      * @param data.formData
-     * @param data.taskId
      * @param data.description
      * @param data.embeddingModelId
+     * @param data.taskId
      * @returns KnowledgeBaseCreateResponse Successful Response
      * @throws ApiError
      */
-    public static createKnowledgeBase(data: KnowledgeBasesCreateKnowledgeBaseData): CancelablePromise<KnowledgeBasesCreateKnowledgeBaseResponse> {
+    public static createKnowledgeBase(data: CreateKnowledgeBaseApiV1KnowledgeBasesPostData): CancelablePromise<CreateKnowledgeBaseApiV1KnowledgeBasesPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/knowledge-bases/',
             query: {
-                task_id: data.taskId,
                 title: data.title,
                 description: data.description,
-                embedding_model_id: data.embeddingModelId
+                embedding_model_id: data.embeddingModelId,
+                task_id: data.taskId
             },
             formData: data.formData,
             mediaType: 'multipart/form-data',
@@ -937,7 +984,28 @@ export class KnowledgeBasesService {
             }
         });
     }
-
+    
+    /**
+     * Get Knowledge Base Progress
+     * Get progress information for a knowledge base creation task.
+     * @param data The data for the request.
+     * @param data.taskId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getKnowledgeBaseProgress(data: GetKnowledgeBaseProgressApiV1KnowledgeBasesProgressTaskIdGetData): CancelablePromise<GetKnowledgeBaseProgressApiV1KnowledgeBasesProgressTaskIdGetResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/knowledge-bases/progress/{task_id}',
+            path: {
+                task_id: data.taskId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
     /**
      * Read Knowledge Base
      * Get knowledge base by ID.
@@ -946,7 +1014,7 @@ export class KnowledgeBasesService {
      * @returns KnowledgeBasePublic Successful Response
      * @throws ApiError
      */
-    public static readKnowledgeBase(data: KnowledgeBasesReadKnowledgeBaseData): CancelablePromise<KnowledgeBasesReadKnowledgeBaseResponse> {
+    public static readKnowledgeBase(data: ReadKnowledgeBaseApiV1KnowledgeBasesIdGetData): CancelablePromise<ReadKnowledgeBaseApiV1KnowledgeBasesIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/knowledge-bases/{id}',
@@ -958,7 +1026,7 @@ export class KnowledgeBasesService {
             }
         });
     }
-
+    
     /**
      * Update Knowledge Base
      * Update a knowledge base.
@@ -971,7 +1039,7 @@ export class KnowledgeBasesService {
      * @returns KnowledgeBasePublic Successful Response
      * @throws ApiError
      */
-    public static updateKnowledgeBase(data: KnowledgeBasesUpdateKnowledgeBaseData): CancelablePromise<KnowledgeBasesUpdateKnowledgeBaseResponse> {
+    public static updateKnowledgeBase(data: UpdateKnowledgeBaseApiV1KnowledgeBasesIdPutData): CancelablePromise<UpdateKnowledgeBaseApiV1KnowledgeBasesIdPutResponse> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/v1/knowledge-bases/{id}',
@@ -990,7 +1058,7 @@ export class KnowledgeBasesService {
             }
         });
     }
-
+    
     /**
      * Delete Knowledge Base
      * Delete a knowledge base.
@@ -999,7 +1067,7 @@ export class KnowledgeBasesService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static deleteKnowledgeBase(data: KnowledgeBasesDeleteKnowledgeBaseData): CancelablePromise<KnowledgeBasesDeleteKnowledgeBaseResponse> {
+    public static deleteKnowledgeBase(data: DeleteKnowledgeBaseApiV1KnowledgeBasesIdDeleteData): CancelablePromise<DeleteKnowledgeBaseApiV1KnowledgeBasesIdDeleteResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/knowledge-bases/{id}',
@@ -1011,7 +1079,7 @@ export class KnowledgeBasesService {
             }
         });
     }
-
+    
     /**
      * Create Knowledge Base Task
      * Create a knowledge base task and return task_id immediately for progress tracking.
@@ -1023,7 +1091,7 @@ export class KnowledgeBasesService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static createKnowledgeBaseTask(data: KnowledgeBasesCreateKnowledgeBaseTaskData): CancelablePromise<KnowledgeBasesCreateKnowledgeBaseTaskResponse> {
+    public static createKnowledgeBaseTask(data: CreateKnowledgeBaseTaskApiV1KnowledgeBasesCreateTaskPostData): CancelablePromise<CreateKnowledgeBaseTaskApiV1KnowledgeBasesCreateTaskPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/knowledge-bases/create-task',
@@ -1037,28 +1105,7 @@ export class KnowledgeBasesService {
             }
         });
     }
-
-    /**
-     * Get Knowledge Base Progress
-     * Get progress information for a knowledge base creation task.
-     * @param data The data for the request.
-     * @param data.taskId
-     * @returns unknown Successful Response
-     * @throws ApiError
-     */
-    public static getKnowledgeBaseProgress(data: KnowledgeBasesGetKnowledgeBaseProgressData): CancelablePromise<KnowledgeBasesGetKnowledgeBaseProgressResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/knowledge-bases/progress/{task_id}',
-            path: {
-                task_id: data.taskId
-            },
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-
+    
 }
 
 export class LlmModelsService {
@@ -1071,7 +1118,7 @@ export class LlmModelsService {
      * @returns LlmModelsPublic Successful Response
      * @throws ApiError
      */
-    public static getLlmModels(data: LlmModelsGetLlmModelsData = {}): CancelablePromise<LlmModelsGetLlmModelsResponse> {
+    public static getLlmModels(data: GetLlmModelsApiV1LlmModelsGetData = {}): CancelablePromise<GetLlmModelsApiV1LlmModelsGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/llm-models/',
@@ -1084,7 +1131,7 @@ export class LlmModelsService {
             }
         });
     }
-
+    
     /**
      * Create Llm Model
      * Create a new LLM.
@@ -1093,7 +1140,7 @@ export class LlmModelsService {
      * @returns LlmModelPublic Successful Response
      * @throws ApiError
      */
-    public static createLlmModel(data: LlmModelsCreateLlmModelData): CancelablePromise<LlmModelsCreateLlmModelResponse> {
+    public static createLlmModel(data: CreateLlmModelApiV1LlmModelsPostData): CancelablePromise<CreateLlmModelApiV1LlmModelsPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/llm-models/',
@@ -1104,20 +1151,20 @@ export class LlmModelsService {
             }
         });
     }
-
+    
     /**
      * Get Default Llm Model
      * Get the user's default LLM model (database record).
      * @returns LlmModelPublic Successful Response
      * @throws ApiError
      */
-    public static getDefaultLlmModel(): CancelablePromise<LlmModelsGetDefaultLlmModelResponse> {
+    public static getDefaultLlmModel(): CancelablePromise<GetDefaultLlmModelApiV1LlmModelsDefaultGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/llm-models/default'
         });
     }
-
+    
     /**
      * Delete Llm Model
      * Delete an LLM.
@@ -1126,7 +1173,7 @@ export class LlmModelsService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static deleteLlmModel(data: LlmModelsDeleteLlmModelData): CancelablePromise<LlmModelsDeleteLlmModelResponse> {
+    public static deleteLlmModel(data: DeleteLlmModelApiV1LlmModelsModelIdDeleteData): CancelablePromise<DeleteLlmModelApiV1LlmModelsModelIdDeleteResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/llm-models/{model_id}',
@@ -1138,7 +1185,7 @@ export class LlmModelsService {
             }
         });
     }
-
+    
     /**
      * Validate Llm Model
      * Validate if an LLM ID is valid for the specified provider.
@@ -1147,7 +1194,7 @@ export class LlmModelsService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static validateLlmModel(data: LlmModelsValidateLlmModelData): CancelablePromise<LlmModelsValidateLlmModelResponse> {
+    public static validateLlmModel(data: ValidateLlmModelApiV1LlmModelsValidatePostData): CancelablePromise<ValidateLlmModelApiV1LlmModelsValidatePostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/llm-models/validate',
@@ -1158,7 +1205,7 @@ export class LlmModelsService {
             }
         });
     }
-
+    
     /**
      * Set Default Llm Model
      * Set an LLM as the default.
@@ -1167,7 +1214,7 @@ export class LlmModelsService {
      * @returns LlmModelPublic Successful Response
      * @throws ApiError
      */
-    public static setDefaultLlmModel(data: LlmModelsSetDefaultLlmModelData): CancelablePromise<LlmModelsSetDefaultLlmModelResponse> {
+    public static setDefaultLlmModel(data: SetDefaultLlmModelApiV1LlmModelsModelIdSetDefaultPostData): CancelablePromise<SetDefaultLlmModelApiV1LlmModelsModelIdSetDefaultPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/llm-models/{model_id}/set-default',
@@ -1179,19 +1226,21 @@ export class LlmModelsService {
             }
         });
     }
-
+    
 }
 
 export class LoginService {
     /**
      * Login Access Token
-     * OAuth2 compatible token login, get an access token for future requests
+     * OAuth2 compatible token login, get an access token for future requests.
+     * Sets HTTP-only cookie for secure token storage.
+     * Protected by rate limiting to prevent brute force attacks.
      * @param data The data for the request.
      * @param data.formData
-     * @returns Token Successful Response
+     * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static loginAccessToken(data: LoginLoginAccessTokenData): CancelablePromise<LoginLoginAccessTokenResponse> {
+    public static loginAccessToken(data: LoginAccessTokenApiV1LoginAccessTokenPostData): CancelablePromise<LoginAccessTokenApiV1LoginAccessTokenPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/login/access-token',
@@ -1202,20 +1251,33 @@ export class LoginService {
             }
         });
     }
-
+    
+    /**
+     * Logout
+     * Logout user by clearing the HTTP-only cookie
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static logout(): CancelablePromise<LogoutApiV1LogoutPostResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/logout'
+        });
+    }
+    
     /**
      * Test Token
      * Test access token
      * @returns UserPublic Successful Response
      * @throws ApiError
      */
-    public static testToken(): CancelablePromise<LoginTestTokenResponse> {
+    public static testToken(): CancelablePromise<TestTokenApiV1LoginTestTokenPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/login/test-token'
         });
     }
-
+    
     /**
      * Recover Password
      * Password Recovery
@@ -1224,7 +1286,7 @@ export class LoginService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static recoverPassword(data: LoginRecoverPasswordData): CancelablePromise<LoginRecoverPasswordResponse> {
+    public static recoverPassword(data: RecoverPasswordApiV1PasswordRecoveryEmailPostData): CancelablePromise<RecoverPasswordApiV1PasswordRecoveryEmailPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/password-recovery/{email}',
@@ -1236,7 +1298,7 @@ export class LoginService {
             }
         });
     }
-
+    
     /**
      * Reset Password
      * Reset password
@@ -1245,7 +1307,7 @@ export class LoginService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static resetPassword(data: LoginResetPasswordData): CancelablePromise<LoginResetPasswordResponse> {
+    public static resetPassword(data: ResetPasswordApiV1ResetPasswordPostData): CancelablePromise<ResetPasswordApiV1ResetPasswordPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reset-password/',
@@ -1256,7 +1318,7 @@ export class LoginService {
             }
         });
     }
-
+    
     /**
      * Recover Password Html Content
      * HTML Content for Password Recovery
@@ -1265,7 +1327,7 @@ export class LoginService {
      * @returns string Successful Response
      * @throws ApiError
      */
-    public static recoverPasswordHtmlContent(data: LoginRecoverPasswordHtmlContentData): CancelablePromise<LoginRecoverPasswordHtmlContentResponse> {
+    public static recoverPasswordHtmlContent(data: RecoverPasswordHtmlContentApiV1PasswordRecoveryHtmlContentEmailPostData): CancelablePromise<RecoverPasswordHtmlContentApiV1PasswordRecoveryHtmlContentEmailPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/password-recovery-html-content/{email}',
@@ -1277,7 +1339,7 @@ export class LoginService {
             }
         });
     }
-
+    
 }
 
 export class MonitoringService {
@@ -1290,13 +1352,13 @@ export class MonitoringService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static getRateLimiterStatus(): CancelablePromise<MonitoringGetRateLimiterStatusResponse> {
+    public static getRateLimiterStatus(): CancelablePromise<GetRateLimiterStatusApiV1RateLimiterStatusGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/rate-limiter/status'
         });
     }
-
+    
     /**
      * Reset Rate Limiter
      * Reset the rate limiter counters (admin function).
@@ -1305,13 +1367,36 @@ export class MonitoringService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static resetRateLimiter(): CancelablePromise<MonitoringResetRateLimiterResponse> {
+    public static resetRateLimiter(): CancelablePromise<ResetRateLimiterApiV1RateLimiterResetPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/rate-limiter/reset'
         });
     }
+    
+}
 
+export class PrivateService {
+    /**
+     * Create User
+     * Create a new user.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns UserPublic Successful Response
+     * @throws ApiError
+     */
+    public static createUser(data: CreateUserApiV1PrivateUsersPostData): CancelablePromise<CreateUserApiV1PrivateUsersPostResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/private/users/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
 }
 
 export class ReportgenieService {
@@ -1322,13 +1407,13 @@ export class ReportgenieService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static createGenerateTask(): CancelablePromise<ReportgenieCreateGenerateTaskResponse> {
+    public static createGenerateTask(): CancelablePromise<CreateGenerateTaskApiV1ReportgenieGenerateTaskPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reportgenie/generate/task'
         });
     }
-
+    
     /**
      * Create Generate Outline Task
      * Create a progress tracking task for outline generation and return task_id immediately.
@@ -1336,13 +1421,13 @@ export class ReportgenieService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static createGenerateOutlineTask(): CancelablePromise<ReportgenieCreateGenerateOutlineTaskResponse> {
+    public static createGenerateOutlineTask(): CancelablePromise<CreateGenerateOutlineTaskApiV1ReportgenieGenerateOutlineTaskPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reportgenie/generate-outline/task'
         });
     }
-
+    
     /**
      * Create Optimize Outline Task
      * Create a progress tracking task for outline optimization and return task_id immediately.
@@ -1350,13 +1435,13 @@ export class ReportgenieService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static createOptimizeOutlineTask(): CancelablePromise<ReportgenieCreateOptimizeOutlineTaskResponse> {
+    public static createOptimizeOutlineTask(): CancelablePromise<CreateOptimizeOutlineTaskApiV1ReportgenieOptimizeOutlineTaskPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reportgenie/optimize-outline/task'
         });
     }
-
+    
     /**
      * Get Reportgenie Progress
      * Get progress information for a reportgenie task (generate, generate-outline, or optimize-outline).
@@ -1365,7 +1450,7 @@ export class ReportgenieService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static getReportgenieProgress(data: ReportgenieGetReportgenieProgressData): CancelablePromise<ReportgenieGetReportgenieProgressResponse> {
+    public static getReportgenieProgress(data: GetReportgenieProgressApiV1ReportgenieProgressTaskIdGetData): CancelablePromise<GetReportgenieProgressApiV1ReportgenieProgressTaskIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/reportgenie/progress/{task_id}',
@@ -1377,7 +1462,7 @@ export class ReportgenieService {
             }
         });
     }
-
+    
     /**
      * Generate Report
      * Generate a report based on sections outline and knowledge base search results.
@@ -1387,7 +1472,7 @@ export class ReportgenieService {
      * @returns ReportGenieResponse Successful Response
      * @throws ApiError
      */
-    public static generateReport(data: ReportgenieGenerateReportData): CancelablePromise<ReportgenieGenerateReportResponse> {
+    public static generateReport(data: GenerateReportApiV1ReportgenieGeneratePostData): CancelablePromise<GenerateReportApiV1ReportgenieGeneratePostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reportgenie/generate',
@@ -1398,7 +1483,7 @@ export class ReportgenieService {
             }
         });
     }
-
+    
     /**
      * Delete Report
      * Delete a report by ID.
@@ -1407,7 +1492,7 @@ export class ReportgenieService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static deleteReport(data: ReportgenieDeleteReportData): CancelablePromise<ReportgenieDeleteReportResponse> {
+    public static deleteReport(data: DeleteReportApiV1ReportgenieReportsReportIdDeleteData): CancelablePromise<DeleteReportApiV1ReportgenieReportsReportIdDeleteResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/reportgenie/reports/{report_id}',
@@ -1419,7 +1504,7 @@ export class ReportgenieService {
             }
         });
     }
-
+    
     /**
      * Get Report History
      * Retrieve past ReportGenie generation history for the current user or all users.
@@ -1430,7 +1515,7 @@ export class ReportgenieService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static getReportHistory(data: ReportgenieGetReportHistoryData = {}): CancelablePromise<ReportgenieGetReportHistoryResponse> {
+    public static getReportHistory(data: GetReportHistoryApiV1ReportgenieHistoryGetData = {}): CancelablePromise<GetReportHistoryApiV1ReportgenieHistoryGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/reportgenie/history',
@@ -1444,7 +1529,7 @@ export class ReportgenieService {
             }
         });
     }
-
+    
     /**
      * Get Report Detail
      * Retrieve a specific ReportGenie report's full content by ID.
@@ -1453,7 +1538,7 @@ export class ReportgenieService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static getReportDetail(data: ReportgenieGetReportDetailData): CancelablePromise<ReportgenieGetReportDetailResponse> {
+    public static getReportDetail(data: GetReportDetailApiV1ReportgenieDetailReportIdGetData): CancelablePromise<GetReportDetailApiV1ReportgenieDetailReportIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/reportgenie/detail/{report_id}',
@@ -1465,20 +1550,20 @@ export class ReportgenieService {
             }
         });
     }
-
+    
     /**
      * Get Outlines
      * Retrieve all outlines from the database for this user.
      * @returns ReportGenieOutline Successful Response
      * @throws ApiError
      */
-    public static getOutlines(): CancelablePromise<ReportgenieGetOutlinesResponse> {
+    public static getOutlines(): CancelablePromise<GetOutlinesApiV1ReportgenieOutlinesGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/reportgenie/outlines'
         });
     }
-
+    
     /**
      * Create Outline
      * Save a new outline to the database.
@@ -1487,7 +1572,7 @@ export class ReportgenieService {
      * @returns ReportGenieOutline Successful Response
      * @throws ApiError
      */
-    public static createOutline(data: ReportgenieCreateOutlineData): CancelablePromise<ReportgenieCreateOutlineResponse> {
+    public static createOutline(data: CreateOutlineApiV1ReportgenieOutlinesPostData): CancelablePromise<CreateOutlineApiV1ReportgenieOutlinesPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reportgenie/outlines',
@@ -1498,7 +1583,7 @@ export class ReportgenieService {
             }
         });
     }
-
+    
     /**
      * Get Outline
      * Retrieve a specific outline by ID.
@@ -1507,7 +1592,7 @@ export class ReportgenieService {
      * @returns ReportGenieOutline Successful Response
      * @throws ApiError
      */
-    public static getOutline(data: ReportgenieGetOutlineData): CancelablePromise<ReportgenieGetOutlineResponse> {
+    public static getOutline(data: GetOutlineApiV1ReportgenieOutlinesOutlineIdGetData): CancelablePromise<GetOutlineApiV1ReportgenieOutlinesOutlineIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/reportgenie/outlines/{outline_id}',
@@ -1519,7 +1604,7 @@ export class ReportgenieService {
             }
         });
     }
-
+    
     /**
      * Update Outline
      * Update an existing outline.
@@ -1529,7 +1614,7 @@ export class ReportgenieService {
      * @returns ReportGenieOutline Successful Response
      * @throws ApiError
      */
-    public static updateOutline(data: ReportgenieUpdateOutlineData): CancelablePromise<ReportgenieUpdateOutlineResponse> {
+    public static updateOutline(data: UpdateOutlineApiV1ReportgenieOutlinesOutlineIdPutData): CancelablePromise<UpdateOutlineApiV1ReportgenieOutlinesOutlineIdPutResponse> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/v1/reportgenie/outlines/{outline_id}',
@@ -1543,7 +1628,7 @@ export class ReportgenieService {
             }
         });
     }
-
+    
     /**
      * Delete Outline
      * Delete an outline by ID.
@@ -1552,7 +1637,7 @@ export class ReportgenieService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static deleteOutline(data: ReportgenieDeleteOutlineData): CancelablePromise<ReportgenieDeleteOutlineResponse> {
+    public static deleteOutline(data: DeleteOutlineApiV1ReportgenieOutlinesOutlineIdDeleteData): CancelablePromise<DeleteOutlineApiV1ReportgenieOutlinesOutlineIdDeleteResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/reportgenie/outlines/{outline_id}',
@@ -1564,7 +1649,7 @@ export class ReportgenieService {
             }
         });
     }
-
+    
     /**
      * Generate Outline Json
      * Generate outline sections based on a description using LLM, with optional knowledge base reference (JSON version).
@@ -1573,7 +1658,7 @@ export class ReportgenieService {
      * @returns GenerateOutlineResponse Successful Response
      * @throws ApiError
      */
-    public static generateOutlineJson(data: ReportgenieGenerateOutlineJsonData): CancelablePromise<ReportgenieGenerateOutlineJsonResponse> {
+    public static generateOutlineJson(data: GenerateOutlineJsonApiV1ReportgenieGenerateOutlineJsonPostData): CancelablePromise<GenerateOutlineJsonApiV1ReportgenieGenerateOutlineJsonPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reportgenie/generate-outline-json',
@@ -1584,7 +1669,7 @@ export class ReportgenieService {
             }
         });
     }
-
+    
     /**
      * Generate Outline
      * Generate outline sections based on a description using LLM, with optional example document.
@@ -1594,7 +1679,7 @@ export class ReportgenieService {
      * @returns GenerateOutlineResponse Successful Response
      * @throws ApiError
      */
-    public static generateOutline(data: ReportgenieGenerateOutlineData): CancelablePromise<ReportgenieGenerateOutlineResponse> {
+    public static generateOutline(data: GenerateOutlineApiV1ReportgenieGenerateOutlinePostData): CancelablePromise<GenerateOutlineApiV1ReportgenieGenerateOutlinePostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reportgenie/generate-outline',
@@ -1605,7 +1690,7 @@ export class ReportgenieService {
             }
         });
     }
-
+    
     /**
      * Optimize Outline
      * Optimize outline sections by testing them against a ground-truth document.
@@ -1616,7 +1701,7 @@ export class ReportgenieService {
      * @returns OptimizedOutlineResponse Successful Response
      * @throws ApiError
      */
-    public static optimizeOutline(data: ReportgenieOptimizeOutlineData): CancelablePromise<ReportgenieOptimizeOutlineResponse> {
+    public static optimizeOutline(data: OptimizeOutlineApiV1ReportgenieOptimizeOutlinePostData): CancelablePromise<OptimizeOutlineApiV1ReportgenieOptimizeOutlinePostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reportgenie/optimize-outline',
@@ -1627,7 +1712,7 @@ export class ReportgenieService {
             }
         });
     }
-
+    
     /**
      * Generate Outline Optimization Csv
      * Generate a CSV file from outline optimization results with columns for:
@@ -1637,19 +1722,18 @@ export class ReportgenieService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static generateOutlineOptimizationCsv(data: ReportgenieGenerateOutlineOptimizationCsvData): CancelablePromise<ReportgenieGenerateOutlineOptimizationCsvResponse> {
+    public static generateOutlineOptimizationCsv(data: GenerateOutlineOptimizationCsvApiV1ReportgenieOptimizeOutlineCsvPostData): CancelablePromise<GenerateOutlineOptimizationCsvApiV1ReportgenieOptimizeOutlineCsvPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reportgenie/optimize-outline/csv',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-
+    
     /**
      * Generate Docx
      * Generate a DOCX file from the report content.
@@ -1658,19 +1742,18 @@ export class ReportgenieService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static generateDocx(data: ReportgenieGenerateDocxData): CancelablePromise<ReportgenieGenerateDocxResponse> {
+    public static generateDocx(data: GenerateDocxApiV1ReportgenieGenerateDocxPostData): CancelablePromise<GenerateDocxApiV1ReportgenieGenerateDocxPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reportgenie/generate/docx',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-
+    
     /**
      * Generate Csv
      * Generate a CSV file from report content with columns for:
@@ -1680,33 +1763,48 @@ export class ReportgenieService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static generateCsv(data: ReportgenieGenerateCsvData): CancelablePromise<ReportgenieGenerateCsvResponse> {
+    public static generateCsv(data: GenerateCsvApiV1ReportgenieGenerateCsvPostData): CancelablePromise<GenerateCsvApiV1ReportgenieGenerateCsvPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reportgenie/generate/csv',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-
+    
 }
 
 export class TwincheckService {
     /**
+     * Create Optimize Outline Task
+     * Create a progress tracking task for TwinCheck comparison and return task_id immediately.
+     * This allows the frontend to start polling twincheck progress before submitting documents.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static createOptimizeOutlineTask(): CancelablePromise<CreateOptimizeOutlineTaskApiV1TwincheckOptimizeOutlineTaskPostResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/twincheck/optimize-outline/task'
+        });
+    }
+    
+    /**
      * Compare Documents
      * Compare two documents based on the provided comparison topics.
      * Supports PDF, DOCX, and plain text files.
+     *
+     * Args:
+     * task_id: Optional task ID for progress tracking
      * @param data The data for the request.
-     * @param data.comparisonTopics
      * @param data.formData
      * @returns TwinCheckResponse Successful Response
      * @throws ApiError
      */
-    public static compareDocuments(data: TwincheckCompareDocumentsData): CancelablePromise<TwincheckCompareDocumentsResponse> {
+    public static compareDocuments(data: CompareDocumentsApiV1TwincheckComparePostData): CancelablePromise<CompareDocumentsApiV1TwincheckComparePostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/twincheck/compare',
@@ -1717,7 +1815,28 @@ export class TwincheckService {
             }
         });
     }
-
+    
+    /**
+     * Get Twincheck Progress
+     * Get progress information for a twincheck task.
+     * @param data The data for the request.
+     * @param data.taskId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getTwincheckProgress(data: GetTwincheckProgressApiV1TwincheckProgressTaskIdGetData): CancelablePromise<GetTwincheckProgressApiV1TwincheckProgressTaskIdGetResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/twincheck/progress/{task_id}',
+            path: {
+                task_id: data.taskId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
     /**
      * Get Comparison History
      * Retrieve past document comparison history for the current user or all users.
@@ -1728,7 +1847,7 @@ export class TwincheckService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static getComparisonHistory(data: TwincheckGetComparisonHistoryData = {}): CancelablePromise<TwincheckGetComparisonHistoryResponse> {
+    public static getComparisonHistory(data: GetComparisonHistoryApiV1TwincheckHistoryGetData = {}): CancelablePromise<GetComparisonHistoryApiV1TwincheckHistoryGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/twincheck/history',
@@ -1742,7 +1861,7 @@ export class TwincheckService {
             }
         });
     }
-
+    
     /**
      * Get Comparison Detail
      * Retrieve a specific comparison's full content by ID.
@@ -1751,7 +1870,7 @@ export class TwincheckService {
      * @returns TwinCheckDetailResponse Successful Response
      * @throws ApiError
      */
-    public static getComparisonDetail(data: TwincheckGetComparisonDetailData): CancelablePromise<TwincheckGetComparisonDetailResponse> {
+    public static getComparisonDetail(data: GetComparisonDetailApiV1TwincheckHistoryComparisonIdGetData): CancelablePromise<GetComparisonDetailApiV1TwincheckHistoryComparisonIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/twincheck/history/{comparison_id}',
@@ -1763,20 +1882,20 @@ export class TwincheckService {
             }
         });
     }
-
+    
     /**
      * Get Comparisons
      * Retrieve all saved comparison topic sets from the database for this user.
      * @returns TwinCheckTopicList Successful Response
      * @throws ApiError
      */
-    public static getComparisons(): CancelablePromise<TwincheckGetComparisonsResponse> {
+    public static getComparisons(): CancelablePromise<GetComparisonsApiV1TwincheckComparisonsGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/twincheck/comparisons'
         });
     }
-
+    
     /**
      * Create Comparison
      * Save a new comparison topic set to the database.
@@ -1785,7 +1904,7 @@ export class TwincheckService {
      * @returns TwinCheckTopicList Successful Response
      * @throws ApiError
      */
-    public static createComparison(data: TwincheckCreateComparisonData): CancelablePromise<TwincheckCreateComparisonResponse> {
+    public static createComparison(data: CreateComparisonApiV1TwincheckComparisonsPostData): CancelablePromise<CreateComparisonApiV1TwincheckComparisonsPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/twincheck/comparisons',
@@ -1796,7 +1915,7 @@ export class TwincheckService {
             }
         });
     }
-
+    
     /**
      * Get Comparison
      * Retrieve a specific comparison topic set by ID.
@@ -1805,7 +1924,7 @@ export class TwincheckService {
      * @returns TwinCheckTopicList Successful Response
      * @throws ApiError
      */
-    public static getComparison(data: TwincheckGetComparisonData): CancelablePromise<TwincheckGetComparisonResponse> {
+    public static getComparison(data: GetComparisonApiV1TwincheckComparisonsComparisonIdGetData): CancelablePromise<GetComparisonApiV1TwincheckComparisonsComparisonIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/twincheck/comparisons/{comparison_id}',
@@ -1817,7 +1936,7 @@ export class TwincheckService {
             }
         });
     }
-
+    
     /**
      * Update Comparison
      * Update an existing comparison topic set.
@@ -1827,7 +1946,7 @@ export class TwincheckService {
      * @returns TwinCheckTopicList Successful Response
      * @throws ApiError
      */
-    public static updateComparison(data: TwincheckUpdateComparisonData): CancelablePromise<TwincheckUpdateComparisonResponse> {
+    public static updateComparison(data: UpdateComparisonApiV1TwincheckComparisonsComparisonIdPutData): CancelablePromise<UpdateComparisonApiV1TwincheckComparisonsComparisonIdPutResponse> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/v1/twincheck/comparisons/{comparison_id}',
@@ -1841,7 +1960,7 @@ export class TwincheckService {
             }
         });
     }
-
+    
     /**
      * Delete Comparison
      * Delete a comparison topic set by ID.
@@ -1850,7 +1969,7 @@ export class TwincheckService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static deleteComparison(data: TwincheckDeleteComparisonData): CancelablePromise<TwincheckDeleteComparisonResponse> {
+    public static deleteComparison(data: DeleteComparisonApiV1TwincheckComparisonsComparisonIdDeleteData): CancelablePromise<DeleteComparisonApiV1TwincheckComparisonsComparisonIdDeleteResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/twincheck/comparisons/{comparison_id}',
@@ -1862,7 +1981,7 @@ export class TwincheckService {
             }
         });
     }
-
+    
     /**
      * Generate Docx
      * Generate a DOCX file from the comparison content.
@@ -1871,19 +1990,18 @@ export class TwincheckService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static generateDocx(data: TwincheckGenerateDocxData): CancelablePromise<TwincheckGenerateDocxResponse> {
+    public static generateDocx(data: GenerateDocxApiV1TwincheckGenerateDocxPostData): CancelablePromise<GenerateDocxApiV1TwincheckGenerateDocxPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/twincheck/generate/docx',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-
+    
     /**
      * Generate Csv
      * Generate a CSV file from the comparison content.
@@ -1892,19 +2010,18 @@ export class TwincheckService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static generateCsv(data: TwincheckGenerateCsvData): CancelablePromise<TwincheckGenerateCsvResponse> {
+    public static generateCsv(data: GenerateCsvApiV1TwincheckGenerateCsvPostData): CancelablePromise<GenerateCsvApiV1TwincheckGenerateCsvPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/twincheck/generate/csv',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-
+    
     /**
      * Generate Topics
      * Generate comparison topics based on a description using LLM, with optional example document.
@@ -1914,7 +2031,7 @@ export class TwincheckService {
      * @returns GenerateTopicsResponse Successful Response
      * @throws ApiError
      */
-    public static generateTopics(data: TwincheckGenerateTopicsData): CancelablePromise<TwincheckGenerateTopicsResponse> {
+    public static generateTopics(data: GenerateTopicsApiV1TwincheckGenerateTopicsPostData): CancelablePromise<GenerateTopicsApiV1TwincheckGenerateTopicsPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/twincheck/generate-topics',
@@ -1928,7 +2045,7 @@ export class TwincheckService {
             }
         });
     }
-
+    
     /**
      * Generate Topics Json
      * Generate comparison topics based on a description using LLM, with optional knowledge base reference (JSON version).
@@ -1937,7 +2054,7 @@ export class TwincheckService {
      * @returns GenerateTopicsResponse Successful Response
      * @throws ApiError
      */
-    public static generateTopicsJson(data: TwincheckGenerateTopicsJsonData): CancelablePromise<TwincheckGenerateTopicsJsonResponse> {
+    public static generateTopicsJson(data: GenerateTopicsJsonApiV1TwincheckGenerateTopicsJsonPostData): CancelablePromise<GenerateTopicsJsonApiV1TwincheckGenerateTopicsJsonPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/twincheck/generate-topics-json',
@@ -1948,7 +2065,7 @@ export class TwincheckService {
             }
         });
     }
-
+    
 }
 
 export class UsageService {
@@ -1961,13 +2078,13 @@ export class UsageService {
      * @returns TokenUsageResponse Successful Response
      * @throws ApiError
      */
-    public static getTokenUsage(): CancelablePromise<UsageGetTokenUsageResponse> {
+    public static getTokenUsage(): CancelablePromise<GetTokenUsageApiV1UsageTokenUsageGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/usage/token-usage'
         });
     }
-
+    
 }
 
 export class UsersService {
@@ -1977,13 +2094,13 @@ export class UsersService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static getSupportedLanguages(): CancelablePromise<UsersGetSupportedLanguagesResponse> {
+    public static getSupportedLanguages(): CancelablePromise<GetSupportedLanguagesApiV1UsersSupportedLanguagesGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/users/supported-languages'
         });
     }
-
+    
     /**
      * Update Language
      * Update current user language preference.
@@ -1992,7 +2109,7 @@ export class UsersService {
      * @returns User Successful Response
      * @throws ApiError
      */
-    public static updateLanguage(data: UsersUpdateLanguageData): CancelablePromise<UsersUpdateLanguageResponse> {
+    public static updateLanguage(data: UpdateLanguageApiV1UsersMeLanguagePutData): CancelablePromise<UpdateLanguageApiV1UsersMeLanguagePutResponse> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/v1/users/me/language',
@@ -2003,7 +2120,7 @@ export class UsersService {
             }
         });
     }
-
+    
     /**
      * Read Users
      * Retrieve users.
@@ -2013,7 +2130,7 @@ export class UsersService {
      * @returns UsersPublic Successful Response
      * @throws ApiError
      */
-    public static readUsers(data: UsersReadUsersData = {}): CancelablePromise<UsersReadUsersResponse> {
+    public static readUsers(data: ReadUsersApiV1UsersGetData = {}): CancelablePromise<ReadUsersApiV1UsersGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/users/',
@@ -2026,7 +2143,7 @@ export class UsersService {
             }
         });
     }
-
+    
     /**
      * Create User
      * Create new user.
@@ -2035,7 +2152,7 @@ export class UsersService {
      * @returns UserPublic Successful Response
      * @throws ApiError
      */
-    public static createUser(data: UsersCreateUserData): CancelablePromise<UsersCreateUserResponse> {
+    public static createUser(data: CreateUserApiV1UsersPostData): CancelablePromise<CreateUserApiV1UsersPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/users/',
@@ -2046,33 +2163,33 @@ export class UsersService {
             }
         });
     }
-
+    
     /**
      * Read User Me
      * Get current user.
      * @returns UserPublic Successful Response
      * @throws ApiError
      */
-    public static readUserMe(): CancelablePromise<UsersReadUserMeResponse> {
+    public static readUserMe(): CancelablePromise<ReadUserMeApiV1UsersMeGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/users/me'
         });
     }
-
+    
     /**
      * Delete User Me
      * Delete own user.
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static deleteUserMe(): CancelablePromise<UsersDeleteUserMeResponse> {
+    public static deleteUserMe(): CancelablePromise<DeleteUserMeApiV1UsersMeDeleteResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/users/me'
         });
     }
-
+    
     /**
      * Update User Me
      * Update own user.
@@ -2081,7 +2198,7 @@ export class UsersService {
      * @returns UserPublic Successful Response
      * @throws ApiError
      */
-    public static updateUserMe(data: UsersUpdateUserMeData): CancelablePromise<UsersUpdateUserMeResponse> {
+    public static updateUserMe(data: UpdateUserMeApiV1UsersMePatchData): CancelablePromise<UpdateUserMeApiV1UsersMePatchResponse> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/v1/users/me',
@@ -2092,7 +2209,7 @@ export class UsersService {
             }
         });
     }
-
+    
     /**
      * Update Password Me
      * Update own password.
@@ -2101,7 +2218,7 @@ export class UsersService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static updatePasswordMe(data: UsersUpdatePasswordMeData): CancelablePromise<UsersUpdatePasswordMeResponse> {
+    public static updatePasswordMe(data: UpdatePasswordMeApiV1UsersMePasswordPatchData): CancelablePromise<UpdatePasswordMeApiV1UsersMePasswordPatchResponse> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/v1/users/me/password',
@@ -2112,16 +2229,16 @@ export class UsersService {
             }
         });
     }
-
+    
     /**
      * Register User
      * Create new user without the need to be logged in.
      * @param data The data for the request.
      * @param data.requestBody
-     * @returns UserPublic Successful Response
+     * @returns Message Successful Response
      * @throws ApiError
      */
-    public static registerUser(data: UsersRegisterUserData): CancelablePromise<UsersRegisterUserResponse> {
+    public static registerUser(data: RegisterUserApiV1UsersSignupPostData): CancelablePromise<RegisterUserApiV1UsersSignupPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/users/signup',
@@ -2132,7 +2249,50 @@ export class UsersService {
             }
         });
     }
-
+    
+    /**
+     * Approve Registration
+     * Approve a pending user registration.
+     * Admin-only endpoint (accessed via email link).
+     * @param data The data for the request.
+     * @param data.token
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static approveRegistration(data: ApproveRegistrationApiV1UsersApproveRegistrationTokenPostData): CancelablePromise<ApproveRegistrationApiV1UsersApproveRegistrationTokenPostResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/users/approve-registration/{token}',
+            path: {
+                token: data.token
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Reject Registration
+     * Reject and delete a pending registration.
+     * @param data The data for the request.
+     * @param data.token
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static rejectRegistration(data: RejectRegistrationApiV1UsersRejectRegistrationTokenPostData): CancelablePromise<RejectRegistrationApiV1UsersRejectRegistrationTokenPostResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/users/reject-registration/{token}',
+            path: {
+                token: data.token
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
     /**
      * Read User By Id
      * Get a specific user by id.
@@ -2141,7 +2301,7 @@ export class UsersService {
      * @returns UserPublic Successful Response
      * @throws ApiError
      */
-    public static readUserById(data: UsersReadUserByIdData): CancelablePromise<UsersReadUserByIdResponse> {
+    public static readUserById(data: ReadUserByIdApiV1UsersUserIdGetData): CancelablePromise<ReadUserByIdApiV1UsersUserIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/users/{user_id}',
@@ -2153,7 +2313,7 @@ export class UsersService {
             }
         });
     }
-
+    
     /**
      * Update User
      * Update a user.
@@ -2163,7 +2323,7 @@ export class UsersService {
      * @returns UserPublic Successful Response
      * @throws ApiError
      */
-    public static updateUser(data: UsersUpdateUserData): CancelablePromise<UsersUpdateUserResponse> {
+    public static updateUser(data: UpdateUserApiV1UsersUserIdPatchData): CancelablePromise<UpdateUserApiV1UsersUserIdPatchResponse> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/v1/users/{user_id}',
@@ -2177,7 +2337,7 @@ export class UsersService {
             }
         });
     }
-
+    
     /**
      * Delete User
      * Delete a user.
@@ -2186,7 +2346,7 @@ export class UsersService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static deleteUser(data: UsersDeleteUserData): CancelablePromise<UsersDeleteUserResponse> {
+    public static deleteUser(data: DeleteUserApiV1UsersUserIdDeleteData): CancelablePromise<DeleteUserApiV1UsersUserIdDeleteResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/users/{user_id}',
@@ -2198,7 +2358,7 @@ export class UsersService {
             }
         });
     }
-
+    
 }
 
 export class UtilsService {
@@ -2210,7 +2370,7 @@ export class UtilsService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static testEmail(data: UtilsTestEmailData): CancelablePromise<UtilsTestEmailResponse> {
+    public static testEmail(data: TestEmailApiV1UtilsTestEmailPostData): CancelablePromise<TestEmailApiV1UtilsTestEmailPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/utils/test-email/',
@@ -2222,32 +2382,32 @@ export class UtilsService {
             }
         });
     }
-
+    
     /**
      * Health Check
      * @returns boolean Successful Response
      * @throws ApiError
      */
-    public static healthCheck(): CancelablePromise<UtilsHealthCheckResponse> {
+    public static healthCheck(): CancelablePromise<HealthCheckApiV1UtilsHealthCheckGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/utils/health-check/'
         });
     }
-
+    
     /**
      * Get System Config
      * Get system configuration for frontend.
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static getSystemConfig(): CancelablePromise<UtilsGetSystemConfigResponse> {
+    public static getSystemConfig(): CancelablePromise<GetSystemConfigApiV1UtilsSystemConfigGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/utils/system-config'
         });
     }
-
+    
 }
 
 export class VeradocService {
@@ -2259,7 +2419,7 @@ export class VeradocService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static getVeradocProgress(data: VeradocGetVeradocProgressData): CancelablePromise<VeradocGetVeradocProgressResponse> {
+    public static getVeradocProgress(data: GetVeradocProgressApiV1VeradocProgressTaskIdGetData): CancelablePromise<GetVeradocProgressApiV1VeradocProgressTaskIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/veradoc/progress/{task_id}',
@@ -2271,7 +2431,7 @@ export class VeradocService {
             }
         });
     }
-
+    
     /**
      * Get Veradoc Results
      * Get the results for a completed VeraDoc review task.
@@ -2281,7 +2441,7 @@ export class VeradocService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static getVeradocResults(data: VeradocGetVeradocResultsData): CancelablePromise<VeradocGetVeradocResultsResponse> {
+    public static getVeradocResults(data: GetVeradocResultsApiV1VeradocResultsTaskIdGetData): CancelablePromise<GetVeradocResultsApiV1VeradocResultsTaskIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/veradoc/results/{task_id}',
@@ -2293,29 +2453,34 @@ export class VeradocService {
             }
         });
     }
-
+    
+    /**
+     * Create Review Task
+     * Create a progress tracking task for document review and return task_id immediately.
+     * This allows frontend to start progress polling before form submission.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static createReviewTask(): CancelablePromise<CreateReviewTaskApiV1VeradocReviewTaskPostResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/veradoc/review/task'
+        });
+    }
+    
     /**
      * Process Rag Checklist
      * Process the uploaded files using RAG with a knowledge base.
-     * This endpoint now returns immediately with a task_id for progress tracking.
-     * The actual processing happens in a background task.
+     * Includes real-time progress tracking similar to ReportGenie.
      * @param data The data for the request.
-     * @param data.questions
-     * @param data.knowledgeBaseId
-     * @param data.customInstructions
-     * @param data.searchMode
-     * @param data.taskId
      * @param data.formData
      * @returns VeraDocResponse Successful Response
      * @throws ApiError
      */
-    public static processRagChecklist(data: VeradocProcessRagChecklistData): CancelablePromise<VeradocProcessRagChecklistResponse> {
+    public static processRagChecklist(data: ProcessRagChecklistApiV1VeradocProcessRagPostData): CancelablePromise<ProcessRagChecklistApiV1VeradocProcessRagPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/veradoc/process-rag',
-            query: {
-                task_id: data.taskId
-            },
             formData: data.formData,
             mediaType: 'multipart/form-data',
             errors: {
@@ -2323,20 +2488,20 @@ export class VeradocService {
             }
         });
     }
-
+    
     /**
      * Get Checklists
      * Retrieve all checklists from the database for this user.
      * @returns VeraDocChecklist Successful Response
      * @throws ApiError
      */
-    public static getChecklists(): CancelablePromise<VeradocGetChecklistsResponse> {
+    public static getChecklists(): CancelablePromise<GetChecklistsApiV1VeradocChecklistsGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/veradoc/checklists'
         });
     }
-
+    
     /**
      * Create Checklist
      * Save a new checklist to the database.
@@ -2345,7 +2510,7 @@ export class VeradocService {
      * @returns VeraDocChecklist Successful Response
      * @throws ApiError
      */
-    public static createChecklist(data: VeradocCreateChecklistData): CancelablePromise<VeradocCreateChecklistResponse> {
+    public static createChecklist(data: CreateChecklistApiV1VeradocChecklistsPostData): CancelablePromise<CreateChecklistApiV1VeradocChecklistsPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/veradoc/checklists',
@@ -2356,7 +2521,7 @@ export class VeradocService {
             }
         });
     }
-
+    
     /**
      * Get Checklist
      * Retrieve a specific checklist by ID.
@@ -2365,7 +2530,7 @@ export class VeradocService {
      * @returns VeraDocChecklist Successful Response
      * @throws ApiError
      */
-    public static getChecklist(data: VeradocGetChecklistData): CancelablePromise<VeradocGetChecklistResponse> {
+    public static getChecklist(data: GetChecklistApiV1VeradocChecklistsChecklistIdGetData): CancelablePromise<GetChecklistApiV1VeradocChecklistsChecklistIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/veradoc/checklists/{checklist_id}',
@@ -2377,7 +2542,7 @@ export class VeradocService {
             }
         });
     }
-
+    
     /**
      * Update Checklist
      * Update an existing checklist.
@@ -2387,7 +2552,7 @@ export class VeradocService {
      * @returns VeraDocChecklist Successful Response
      * @throws ApiError
      */
-    public static updateChecklist(data: VeradocUpdateChecklistData): CancelablePromise<VeradocUpdateChecklistResponse> {
+    public static updateChecklist(data: UpdateChecklistApiV1VeradocChecklistsChecklistIdPutData): CancelablePromise<UpdateChecklistApiV1VeradocChecklistsChecklistIdPutResponse> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/v1/veradoc/checklists/{checklist_id}',
@@ -2401,7 +2566,7 @@ export class VeradocService {
             }
         });
     }
-
+    
     /**
      * Delete Checklist
      * Delete a checklist by ID.
@@ -2410,7 +2575,7 @@ export class VeradocService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static deleteChecklist(data: VeradocDeleteChecklistData): CancelablePromise<VeradocDeleteChecklistResponse> {
+    public static deleteChecklist(data: DeleteChecklistApiV1VeradocChecklistsChecklistIdDeleteData): CancelablePromise<DeleteChecklistApiV1VeradocChecklistsChecklistIdDeleteResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/veradoc/checklists/{checklist_id}',
@@ -2422,7 +2587,7 @@ export class VeradocService {
             }
         });
     }
-
+    
     /**
      * Delete Evaluation
      * Delete an evaluation/report by ID.
@@ -2431,7 +2596,7 @@ export class VeradocService {
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static deleteEvaluation(data: VeradocDeleteEvaluationData): CancelablePromise<VeradocDeleteEvaluationResponse> {
+    public static deleteEvaluation(data: DeleteEvaluationApiV1VeradocEvaluationsEvaluationIdDeleteData): CancelablePromise<DeleteEvaluationApiV1VeradocEvaluationsEvaluationIdDeleteResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/veradoc/evaluations/{evaluation_id}',
@@ -2443,7 +2608,7 @@ export class VeradocService {
             }
         });
     }
-
+    
     /**
      * Get Veradoc History
      * Retrieve past VeraDoc evaluation history for the current user or all users.
@@ -2454,7 +2619,7 @@ export class VeradocService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static getVeradocHistory(data: VeradocGetVeradocHistoryData = {}): CancelablePromise<VeradocGetVeradocHistoryResponse> {
+    public static getVeradocHistory(data: GetVeradocHistoryApiV1VeradocHistoryGetData = {}): CancelablePromise<GetVeradocHistoryApiV1VeradocHistoryGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/veradoc/history',
@@ -2468,7 +2633,7 @@ export class VeradocService {
             }
         });
     }
-
+    
     /**
      * Get Veradoc Detail
      * Retrieve a specific VeraDoc evaluation by ID.
@@ -2485,7 +2650,7 @@ export class VeradocService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static getVeradocDetail(data: VeradocGetVeradocDetailData): CancelablePromise<VeradocGetVeradocDetailResponse> {
+    public static getVeradocDetail(data: GetVeradocDetailApiV1VeradocHistoryReportIdGetData): CancelablePromise<GetVeradocDetailApiV1VeradocHistoryReportIdGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/veradoc/history/{report_id}',
@@ -2500,7 +2665,7 @@ export class VeradocService {
             }
         });
     }
-
+    
     /**
      * Get Veradoc Qa Pair
      * Retrieve a specific QA pair from a VeraDoc evaluation by index.
@@ -2518,7 +2683,7 @@ export class VeradocService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static getVeradocQaPair(data: VeradocGetVeradocQaPairData): CancelablePromise<VeradocGetVeradocQaPairResponse> {
+    public static getVeradocQaPair(data: GetVeradocQaPairApiV1VeradocHistoryReportIdQaPairQaIndexGetData): CancelablePromise<GetVeradocQaPairApiV1VeradocHistoryReportIdQaPairQaIndexGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/veradoc/history/{report_id}/qa-pair/{qa_index}',
@@ -2531,7 +2696,7 @@ export class VeradocService {
             }
         });
     }
-
+    
     /**
      * Optimize Checklist
      * Optimize checklist questions by testing them against a document that should meet all requirements.
@@ -2546,7 +2711,7 @@ export class VeradocService {
      * @returns OptimizedChecklistResponse Successful Response
      * @throws ApiError
      */
-    public static optimizeChecklist(data: VeradocOptimizeChecklistData): CancelablePromise<VeradocOptimizeChecklistResponse> {
+    public static optimizeChecklist(data: OptimizeChecklistApiV1VeradocOptimizeChecklistPostData): CancelablePromise<OptimizeChecklistApiV1VeradocOptimizeChecklistPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/veradoc/optimize-checklist',
@@ -2564,7 +2729,7 @@ export class VeradocService {
             }
         });
     }
-
+    
     /**
      * Generate Docx
      * Generate a DOCX file from the evaluation content.
@@ -2573,19 +2738,18 @@ export class VeradocService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static generateDocx(data: VeradocGenerateDocxData): CancelablePromise<VeradocGenerateDocxResponse> {
+    public static generateDocx(data: GenerateDocxApiV1VeradocGenerateDocxPostData): CancelablePromise<GenerateDocxApiV1VeradocGenerateDocxPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/veradoc/generate/docx',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-
+    
     /**
      * Generate Csv
      * Generate a CSV file from VeraDoc review results with columns for:
@@ -2595,19 +2759,18 @@ export class VeradocService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static generateCsv(data: VeradocGenerateCsvData): CancelablePromise<VeradocGenerateCsvResponse> {
+    public static generateCsv(data: GenerateCsvApiV1VeradocGenerateCsvPostData): CancelablePromise<GenerateCsvApiV1VeradocGenerateCsvPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/veradoc/generate/csv',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-
+    
     /**
      * Generate Optimization Csv
      * Generate a CSV file from checklist optimization results with columns for:
@@ -2617,19 +2780,18 @@ export class VeradocService {
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static generateOptimizationCsv(data: VeradocGenerateOptimizationCsvData): CancelablePromise<VeradocGenerateOptimizationCsvResponse> {
+    public static generateOptimizationCsv(data: GenerateOptimizationCsvApiV1VeradocOptimizationCsvPostData): CancelablePromise<GenerateOptimizationCsvApiV1VeradocOptimizationCsvPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/veradoc/optimization/csv',
             body: data.requestBody,
             mediaType: 'application/json',
-            responseType: 'blob',
             errors: {
                 422: 'Validation Error'
             }
         });
     }
-
+    
     /**
      * Generate Questions With Files
      * Generate checklist questions based on a description using LLM, with optional reference documents.
@@ -2638,7 +2800,7 @@ export class VeradocService {
      * @returns GenerateQuestionsResponse Successful Response
      * @throws ApiError
      */
-    public static generateQuestionsWithFiles(data: VeradocGenerateQuestionsWithFilesData): CancelablePromise<VeradocGenerateQuestionsWithFilesResponse> {
+    public static generateQuestionsWithFiles(data: GenerateQuestionsWithFilesApiV1VeradocGenerateQuestionsWithFilesPostData): CancelablePromise<GenerateQuestionsWithFilesApiV1VeradocGenerateQuestionsWithFilesPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/veradoc/generate-questions-with-files',
@@ -2649,7 +2811,7 @@ export class VeradocService {
             }
         });
     }
-
+    
     /**
      * Generate Questions
      * Generate checklist questions based on a description using LLM (JSON version).
@@ -2659,7 +2821,7 @@ export class VeradocService {
      * @returns GenerateQuestionsResponse Successful Response
      * @throws ApiError
      */
-    public static generateQuestions(data: VeradocGenerateQuestionsData): CancelablePromise<VeradocGenerateQuestionsResponse> {
+    public static generateQuestions(data: GenerateQuestionsApiV1VeradocGenerateQuestionsPostData): CancelablePromise<GenerateQuestionsApiV1VeradocGenerateQuestionsPostResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/veradoc/generate-questions',
@@ -2670,5 +2832,5 @@ export class VeradocService {
             }
         });
     }
-
+    
 }

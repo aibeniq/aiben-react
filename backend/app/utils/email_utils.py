@@ -124,3 +124,109 @@ def verify_password_reset_token(token: str) -> str | None:
         return str(decoded_token["sub"])
     except InvalidTokenError:
         return None
+
+
+def generate_approval_token(email: str, user_id: str) -> str:
+    """Generate secure approval token with expiration."""
+    delta = timedelta(hours=settings.APPROVAL_TOKEN_EXPIRE_HOURS)
+    now = datetime.now(timezone.utc)
+    expires = now + delta
+    exp = expires.timestamp()
+
+    encoded_jwt = jwt.encode(
+        {
+            "exp": exp,
+            "nbf": now,
+            "sub": email,
+            "user_id": str(user_id),
+            "type": "registration_approval",
+        },
+        settings.SECRET_KEY,
+        algorithm=security.ALGORITHM,
+    )
+    return encoded_jwt
+
+
+def verify_approval_token(token: str) -> dict | None:
+    """Verify and decode approval token."""
+    try:
+        decoded_token = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+        )
+        if decoded_token.get("type") != "registration_approval":
+            return None
+        return {"email": decoded_token["sub"], "user_id": decoded_token["user_id"]}
+    except InvalidTokenError:
+        return None
+
+
+def generate_admin_approval_email(
+    user_email: str, user_name: str, approval_token: str
+) -> EmailData:
+    """Generate email to admin requesting approval for new registration."""
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - New Registration Requires Approval"
+
+    approval_link = (
+        f"{settings.FRONTEND_HOST}/admin/approve-registration?token={approval_token}"
+    )
+    rejection_link = (
+        f"{settings.FRONTEND_HOST}/admin/reject-registration?token={approval_token}"
+    )
+
+    html_content = render_email_template(
+        template_name="admin_approval_request.html",
+        context={
+            "project_name": project_name,
+            "user_name": user_name,
+            "user_email": user_email,
+            "registration_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "approval_link": approval_link,
+            "rejection_link": rejection_link,
+            "expiry_hours": settings.APPROVAL_TOKEN_EXPIRE_HOURS,
+        },
+    )
+    return EmailData(html_content=html_content, subject=subject)
+
+
+def send_admin_approval_email(
+    user_email: str, user_name: str, approval_token: str
+) -> None:
+    """Send approval request email to admin."""
+    email_data = generate_admin_approval_email(
+        user_email=user_email, user_name=user_name, approval_token=approval_token
+    )
+    send_email(
+        email_to=settings.ADMIN_EMAIL,
+        subject=email_data.subject,
+        html_content=email_data.html_content,
+    )
+
+
+def generate_registration_approved_email(email_to: str, full_name: str) -> EmailData:
+    """Generate welcome email after registration approval."""
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Account Approved!"
+
+    html_content = render_email_template(
+        template_name="registration_approved.html",
+        context={
+            "project_name": project_name,
+            "user_name": full_name,
+            "user_email": email_to,
+            "login_link": f"{settings.FRONTEND_HOST}/login",
+        },
+    )
+    return EmailData(html_content=html_content, subject=subject)
+
+
+def send_registration_approved_email(email_to: str, full_name: str) -> None:
+    """Send approval notification to user."""
+    email_data = generate_registration_approved_email(
+        email_to=email_to, full_name=full_name
+    )
+    send_email(
+        email_to=email_to,
+        subject=email_data.subject,
+        html_content=email_data.html_content,
+    )

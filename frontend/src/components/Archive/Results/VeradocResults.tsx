@@ -3,12 +3,12 @@ import type React from "react"
 import { useTranslation } from "react-i18next"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import type { VeradocGetVeradocDetailResponse } from "../../../client"
+import type { GetVeradocDetailApiV1VeradocHistoryReportIdGetResponse } from "../../../client"
 import QAPairDisplay from "../Utils/QAPairDisplay"
 import LazyQAPairDisplay from "./LazyQAPairDisplay"
 
 interface VeradocResultsProps {
-  selectedReport: VeradocGetVeradocDetailResponse
+  selectedReport: GetVeradocDetailApiV1VeradocHistoryReportIdGetResponse
   components: any // Markdown components for table rendering
 }
 

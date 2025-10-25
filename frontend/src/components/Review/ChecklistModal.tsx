@@ -485,7 +485,9 @@ const ChecklistModal = ({
                       {/* Suggest and Optimize buttons above questions */}
                       <HStack justify="space-between" align="center">
                         <Text fontSize="md" fontWeight="medium">
-                          {t("editChecklistModal.questions", { count: questionsList.length })}
+                          {t("editChecklistModal.questions", {
+                            count: questionsList.filter((q) => q.trim()).length,
+                          })}
                         </Text>
                         <HStack gap={2}>
                           <Button

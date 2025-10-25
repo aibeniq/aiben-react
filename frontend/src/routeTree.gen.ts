@@ -17,6 +17,8 @@ import { Route as RecoverPasswordImport } from './routes/recover-password'
 import { Route as LoginImport } from './routes/login'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
+import { Route as AdminRejectRegistrationImport } from './routes/admin/reject-registration'
+import { Route as AdminApproveRegistrationImport } from './routes/admin/approve-registration'
 import { Route as LayoutSettingsImport } from './routes/_layout/settings'
 import { Route as LayoutReviewImport } from './routes/_layout/review'
 import { Route as LayoutModelSelectionImport } from './routes/_layout/model-selection'
@@ -58,6 +60,16 @@ const LayoutRoute = LayoutImport.update({
 const LayoutIndexRoute = LayoutIndexImport.update({
   path: '/',
   getParentRoute: () => LayoutRoute,
+} as any)
+
+const AdminRejectRegistrationRoute = AdminRejectRegistrationImport.update({
+  path: '/admin/reject-registration',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AdminApproveRegistrationRoute = AdminApproveRegistrationImport.update({
+  path: '/admin/approve-registration',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const LayoutSettingsRoute = LayoutSettingsImport.update({
@@ -174,6 +186,14 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsImport
       parentRoute: typeof LayoutImport
     }
+    '/admin/approve-registration': {
+      preLoaderRoute: typeof AdminApproveRegistrationImport
+      parentRoute: typeof rootRoute
+    }
+    '/admin/reject-registration': {
+      preLoaderRoute: typeof AdminRejectRegistrationImport
+      parentRoute: typeof rootRoute
+    }
     '/_layout/': {
       preLoaderRoute: typeof LayoutIndexImport
       parentRoute: typeof LayoutImport
@@ -201,6 +221,8 @@ export const routeTree = rootRoute.addChildren([
   RecoverPasswordRoute,
   ResetPasswordRoute,
   SignupRoute,
+  AdminApproveRegistrationRoute,
+  AdminRejectRegistrationRoute,
 ])
 
 /* prettier-ignore-end */
