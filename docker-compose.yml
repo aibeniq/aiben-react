@@ -53,11 +53,15 @@ services:
       - traefik.docker.network=traefik-public
       - traefik.constraint-label=traefik-public
 
+      # Basic auth middleware for adminer
+      - traefik.http.middlewares.${STACK_NAME?Variable not set}-adminer-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+
       # HTTPS route
       - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.rule=Host(`alaco-adminer.${DOMAIN?Variable not set}`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.entrypoints=https
       - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.tls=true
       - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.tls.certresolver=le
+      - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.middlewares=${STACK_NAME?Variable not set}-adminer-auth,security-headers@file
 
       # HTTP route (redirect to HTTPS)
       - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-http.rule=Host(`alaco-adminer.${DOMAIN?Variable not set}`)
@@ -184,7 +188,7 @@ services:
       - traefik.http.middlewares.backend-timeout.buffering.retryExpression=IsNetworkError() && Attempts() < 2
 
   frontend:
-    profiles: ["frontend"]
+    #profiles: ["frontend"]
     image: "${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}"
     restart: always
     networks:
