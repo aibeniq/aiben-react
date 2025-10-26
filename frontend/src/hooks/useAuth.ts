@@ -25,15 +25,15 @@ const useAuth = () => {
   const handleError = useHandleError()
 
   // Don't run the user query on authentication pages to prevent infinite loops
-    const isAuthPage = routerState.location.pathname.startsWith('/login') || 
-                   routerState.location.pathname.startsWith('/signup') ||
-                   routerState.location.pathname.startsWith('/recover-password') ||
-                   routerState.location.pathname.startsWith('/reset-password')
-  
+  const isAuthPage = routerState.location.pathname.startsWith('/login') ||
+    routerState.location.pathname.startsWith('/signup') ||
+    routerState.location.pathname.startsWith('/recover-password') ||
+    routerState.location.pathname.startsWith('/reset-password')
+
   // Check if we're on a protected route (under _layout) or auth route
-  const isProtectedRoute = routerState.location.pathname.startsWith('/_layout') || 
-                          (routerState.location.pathname === '/' && !isAuthPage)
-  
+  const isProtectedRoute = routerState.location.pathname.startsWith('/_layout') ||
+    (routerState.location.pathname === '/' && !isAuthPage)
+
   const isEnabled = isProtectedRoute && typeof window !== 'undefined'
   console.log('useAuth: isAuthPage:', isAuthPage, 'isProtectedRoute:', isProtectedRoute, 'isEnabled:', isEnabled, 'pathname:', routerState.location.pathname)
 
@@ -42,25 +42,25 @@ const useAuth = () => {
     queryFn: async () => {
       // Double-check we're not on an auth page before making the request
       const currentPath = window.location.pathname
-      const isCurrentlyAuthPage = currentPath.startsWith('/login') || 
-                                 currentPath.startsWith('/signup') ||
-                                 currentPath.startsWith('/recover-password') ||
-                                 currentPath.startsWith('/reset-password')
-      
+      const isCurrentlyAuthPage = currentPath.startsWith('/login') ||
+        currentPath.startsWith('/signup') ||
+        currentPath.startsWith('/recover-password') ||
+        currentPath.startsWith('/reset-password')
+
       if (isCurrentlyAuthPage) {
         console.log('useAuth: Skipping /me request on auth page:', currentPath)
         throw new Error('Cannot fetch user on auth page')
       }
-      
-      const apiUrl = 'http://localhost:8000' // Hardcode for testing
+
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
       const response = await fetch(`${apiUrl}/api/v1/users/me`, {
         credentials: 'include',
       })
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch user')
       }
-      
+
       return await response.json()
     },
     retry: false, // Don't retry on auth errors
@@ -72,7 +72,7 @@ const useAuth = () => {
 
   const signUpMutation = useMutation({
     mutationFn: async (data: UserRegister) => {
-      const apiUrl = 'http://localhost:8000' // Hardcode for testing
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
       const response = await fetch(`${apiUrl}/api/v1/users/signup`, {
         method: 'POST',
         headers: {
@@ -81,12 +81,12 @@ const useAuth = () => {
         body: JSON.stringify(data),
         credentials: 'include',
       })
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ detail: 'Signup failed' }))
         throw new Error(errorData.detail || 'Signup failed')
       }
-      
+
       return await response.json()
     },
 
@@ -113,8 +113,8 @@ const useAuth = () => {
     const formData = new URLSearchParams()
     formData.append('username', data.username)
     formData.append('password', data.password)
-    
-    const apiUrl = 'http://localhost:8000' // Hardcode for testing
+
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
     const response = await fetch(`${apiUrl}/api/v1/login/access-token`, {
       method: 'POST',
       headers: {
@@ -123,12 +123,12 @@ const useAuth = () => {
       body: formData,
       credentials: 'include', // Include cookies
     })
-    
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ detail: 'Login failed' }))
       throw new Error(errorData.detail || 'Login failed')
     }
-    
+
     return await response.json()
   }
 
@@ -206,7 +206,7 @@ const useAuth = () => {
     try {
       // Call the logout endpoint to clear HTTP-only cookie
       // For now, we'll make a direct API call since the generated client may not have the logout method yet
-      const apiUrl = 'http://localhost:8000' // Hardcode for testing
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
       const response = await fetch(`${apiUrl}/api/v1/login/logout`, {
         method: "POST",
         credentials: "include", // Include cookies
