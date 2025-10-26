@@ -274,9 +274,33 @@ function Archive() {
         })
       } else if (activeTab === "review") {
         // VeraDoc CSV download
+        let qaPairs = (selectedReport.results as any)?.qa_pairs || []
+        let finalEvaluation = selectedReport.results?.final_evaluation || ""
+        const qaPairsSummary = (selectedReport.results as any)?.qa_pairs_summary || []
+        
+        // Check if we only have qa_pairs_summary (lazy loading) and need to fetch full data
+        // This happens when the report was loaded with include_qa_pairs=false
+        if (qaPairs.length === 0 && qaPairsSummary.length > 0) {
+          console.log("📦 Only qa_pairs_summary available, fetching full QA pairs for CSV...")
+          try {
+            const fetchedReport = await VeradocService.getVeradocDetail({
+              reportId: selectedReport.id,
+              includeQaPairs: true,
+            })
+            qaPairs = (fetchedReport.results as any)?.qa_pairs || []
+            finalEvaluation = (fetchedReport.results as any)?.final_evaluation || ""
+            console.log(`Fetched ${qaPairs.length} QA pairs for CSV download`)
+          } catch (error) {
+            console.error("Failed to fetch full QA pairs for CSV:", error)
+            showErrorToast(t("toast.loadDataFailed"))
+            setLoadingCsvDownload(false)
+            return
+          }
+        }
+        
         const csvData = {
-          qa_pairs: selectedReport.results?.qa_pairs || [],
-          final_evaluation: selectedReport.results?.final_evaluation || "",
+          qa_pairs: qaPairs,
+          final_evaluation: finalEvaluation,
         }
         console.log("VeraDoc CSV data to send:", csvData)
         console.log("Number of QA pairs:", csvData.qa_pairs.length)
