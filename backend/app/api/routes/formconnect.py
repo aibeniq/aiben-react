@@ -223,7 +223,7 @@ async def extract_fields_using_vector_search(
 
         # Also extract images for vision-enhanced processing (for PDFs)
         document_images = []
-        vision_enabled = VisionService.is_vision_enabled(llm)
+        vision_enabled = VisionService.is_vision_enabled(llm, current_user)
         file_ext = Path(file.filename or "").suffix.lower()
 
         if vision_enabled and file_ext == ".pdf":
@@ -252,7 +252,7 @@ async def extract_fields_using_vector_search(
             )
 
             # Check if we have vision capabilities for image-only processing
-            if images and VisionService.is_vision_enabled(llm):
+            if images and VisionService.is_vision_enabled(llm, current_user):
                 print(f"Found {len(images)} images, using vision extraction")
                 # Use VisionService for image-only extraction
                 try:
@@ -555,7 +555,7 @@ async def extract_fields_using_full_text(
     from app.services.vision_service import VisionService
 
     # Check if vision is enabled for this LLM
-    vision_enabled = VisionService.is_vision_enabled(llm)
+    vision_enabled = VisionService.is_vision_enabled(llm, current_user)
     print(f"🔍 Vision processing enabled: {vision_enabled}")
 
     try:
@@ -2027,6 +2027,7 @@ async def generate_form_fields_with_files(
                     file.filename or "unknown",
                     llm,
                     purpose="form field generation",
+                    current_user=current_user,
                 )
 
                 if text.strip():

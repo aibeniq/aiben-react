@@ -1210,7 +1210,7 @@ async def process_rag_checklist(
             # Check if LLM supports vision
             from app.services.vision_service import VisionService
 
-            vision_enabled = VisionService.is_vision_enabled(llm)
+            vision_enabled = VisionService.is_vision_enabled(llm, current_user)
 
             # 5. Define the prompts for the different stages
             context_prompt_template = settings.VERADOC_CONTEXT_PROMPT_TEMPLATE
@@ -3198,6 +3198,7 @@ async def generate_questions_with_files(
                             file.filename or "unknown",
                             llm,
                             purpose="checklist question generation",
+                            current_user=current_user,
                         )
 
                         if file_text.strip():

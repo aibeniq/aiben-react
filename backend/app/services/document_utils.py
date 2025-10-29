@@ -737,7 +737,11 @@ def ensure_documents_for_vector_search(
 
 
 async def extract_text_with_vision_enhancement(
-    file_content: bytes, filename: str, llm, purpose: str = "analysis"
+    file_content: bytes,
+    filename: str,
+    llm,
+    purpose: str = "analysis",
+    current_user=None,
 ) -> str:
     """
     Enhanced document processing that combines text extraction with visual processing.
@@ -748,6 +752,7 @@ async def extract_text_with_vision_enhancement(
         filename: Original filename
         llm: Language model instance
         purpose: Purpose of extraction (e.g., "checklist generation", "outline creation")
+        current_user: Current user object for vision analysis permission check
 
     Returns:
         Combined text content from both text extraction and vision analysis
@@ -762,7 +767,7 @@ async def extract_text_with_vision_enhancement(
     text_content = extract_text_from_file_unified(file_content, filename)
 
     # Check if vision processing should be attempted
-    vision_enabled = VisionService.is_vision_enabled(llm)
+    vision_enabled = VisionService.is_vision_enabled(llm, current_user)
 
     if not vision_enabled:
         print(f"ℹ️ Vision not enabled, using text-only extraction for {filename}")

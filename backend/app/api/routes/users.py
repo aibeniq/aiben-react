@@ -25,6 +25,7 @@ from app.models import (
     UserUpdate,
     UserUpdateMe,
     LanguageUpdate,
+    VisionAnalysisUpdate,
     UserStatus,
 )
 from app.utils.email_utils import (
@@ -63,6 +64,23 @@ def update_language(
     # Update user's language preference
     user = session.get(User, current_user.id)
     user.preferred_language = language_update.preferred_language
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+@router.put("/me/vision-analysis", response_model=User)
+def update_vision_analysis_setting(
+    vision_update: VisionAnalysisUpdate,
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> Any:
+    """Update current user's vision analysis preference."""
+
+    # Update user's vision analysis preference
+    user = session.get(User, current_user.id)
+    user.vision_analysis_enabled = vision_update.vision_analysis_enabled
     session.add(user)
     session.commit()
     session.refresh(user)

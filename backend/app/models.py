@@ -47,16 +47,22 @@ class UserUpdate(UserBase):
     email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore
     password: str | None = Field(default=None, min_length=8, max_length=40)
     preferred_language: str | None = Field(default=None, max_length=10)
+    vision_analysis_enabled: bool | None = None
 
 
 class LanguageUpdate(SQLModel):
     preferred_language: str
 
 
+class VisionAnalysisUpdate(SQLModel):
+    vision_analysis_enabled: bool
+
+
 class UserUpdateMe(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     email: EmailStr | None = Field(default=None, max_length=255)
     preferred_language: str | None = Field(default=None, max_length=10)
+    vision_analysis_enabled: bool | None = None
 
 
 class UpdatePassword(SQLModel):
@@ -76,10 +82,10 @@ class User(UserBase, table=True):
                 UserStatus,
                 native_enum=True,
                 values_callable=lambda x: [e.value for e in x],
-                name="userstatus"
+                name="userstatus",
             ),
-            nullable=False
-        )
+            nullable=False,
+        ),
     )
     registration_date: datetime = Field(default_factory=datetime.utcnow)
     approved_date: datetime | None = Field(default=None)
@@ -96,6 +102,9 @@ class User(UserBase, table=True):
     # user's preferred language for UI and LLM templates
     preferred_language: str = Field(default="en", max_length=10)
 
+    # Vision analysis control - user can enable/disable vision processing
+    vision_analysis_enabled: bool = Field(default=False)
+
     # Account lockout fields for security
     failed_login_attempts: int = Field(default=0)
     locked_until: Optional[datetime] = Field(default=None)
@@ -108,6 +117,7 @@ class UserPublic(UserBase):
     registration_date: datetime
     approved_date: datetime | None
     preferred_language: str
+    vision_analysis_enabled: bool
 
 
 class UsersPublic(SQLModel):

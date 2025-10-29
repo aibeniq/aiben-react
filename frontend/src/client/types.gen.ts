@@ -543,6 +543,7 @@ export type User = {
     default_llm?: (string | null);
     default_embedding_model?: (string | null);
     preferred_language?: string;
+    vision_analysis_enabled?: boolean;
     failed_login_attempts?: number;
     locked_until?: (string | null);
 };
@@ -566,6 +567,7 @@ export type UserPublic = {
     registration_date: string;
     approved_date: (string | null);
     preferred_language: string;
+    vision_analysis_enabled: boolean;
 };
 
 export type UserRegister = {
@@ -588,12 +590,18 @@ export type UserUpdate = {
     full_name?: (string | null);
     password?: (string | null);
     preferred_language?: (string | null);
+    vision_analysis_enabled?: boolean;
 };
 
 export type UserUpdateMe = {
     full_name?: (string | null);
     email?: (string | null);
     preferred_language?: (string | null);
+    vision_analysis_enabled?: boolean;
+};
+
+export type VisionAnalysisUpdate = {
+    vision_analysis_enabled: boolean;
 };
 
 export type ValidationError = {
@@ -1209,6 +1217,12 @@ export type UpdateLanguageApiV1UsersMeLanguagePutData = {
 };
 
 export type UpdateLanguageApiV1UsersMeLanguagePutResponse = (User);
+
+export type UpdateVisionAnalysisApiV1UsersMeVisionAnalysisPutData = {
+    requestBody: VisionAnalysisUpdate;
+};
+
+export type UpdateVisionAnalysisApiV1UsersMeVisionAnalysisPutResponse = (User);
 
 export type ReadUsersApiV1UsersGetData = {
     limit?: number;

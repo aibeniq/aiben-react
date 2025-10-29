@@ -17,20 +17,21 @@ class VisionService:
     """Centralized service for handling vision-enabled document processing"""
 
     @staticmethod
-    def is_vision_enabled(llm) -> bool:
+    def is_vision_enabled(llm, current_user=None) -> bool:
         """
-        Check if the LLM supports multimodal/vision capabilities.
+        Check if vision analysis should be performed.
 
         Args:
             llm: The LLM instance to check
+            current_user: Current user object (optional for backward compatibility)
 
         Returns:
-            bool: True if the LLM supports vision, False otherwise
+            bool: True if BOTH model supports vision AND user has enabled it
         """
         if not llm:
             return False
 
-        # Check if LLM model name is in vision-enabled models list
+        # Check 1: Does the model support vision?
         model_name = getattr(llm, "model_name", "") or getattr(llm, "model", "")
 
         # Handle different LLM wrapper types
@@ -51,10 +52,26 @@ class VisionService:
             return False
 
         # Check against vision-enabled models list
-        return any(
+        model_supports_vision = any(
             vision_model in model_name.lower()
             for vision_model in settings.VISION_ENABLED_MODELS
         )
+
+        if not model_supports_vision:
+            return False
+
+        # Check 2: Has the user enabled vision analysis?
+        if current_user is not None:
+            user_enabled_vision = getattr(
+                current_user, "vision_analysis_enabled", False
+            )
+            if not user_enabled_vision:
+                logger.info(
+                    f"Vision analysis disabled by user preference (user_id: {getattr(current_user, 'id', 'unknown')})"
+                )
+                return False
+
+        return True
 
     @staticmethod
     def extract_images_from_files(files: List[Any]) -> List[Dict[str, Any]]:
