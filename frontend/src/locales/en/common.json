@@ -122,7 +122,22 @@
     "delete": "Delete",
     "confirmationRequired": "Confirmation Required",
     "deleteConfirmationText": "All your account data will be permanently deleted. If you are sure, please click \"Confirm\" to proceed. This action cannot be undone.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "visionAnalysis": {
+      "tab": "Vision Analysis",
+      "title": "Vision Analysis Settings",
+      "description": "Control whether the AI analyzes images embedded in your documents. Disabling this can significantly reduce API costs for documents with many images.",
+      "enableLabel": "Enable Vision Analysis",
+      "costWarning": "⚠️ Vision analysis can be expensive for documents with many images. Each image analyzed incurs additional API costs. Consider disabling if you primarily work with text-only documents.",
+      "whenEnabled": "When enabled:",
+      "feature1": "Images in PDFs and DOCX files will be analyzed",
+      "feature2": "Charts, diagrams, and visual content will be extracted",
+      "feature3": "Form fields in images can be detected (FormConnect)",
+      "feature4": "More comprehensive document understanding",
+      "whenDisabled": "When disabled:",
+      "disabled1": "Only text content will be analyzed (lower cost)",
+      "disabled2": "Visual elements in documents will be ignored"
+    }
   },
   "errors": {
     "somethingWentWrong": "Something went wrong",

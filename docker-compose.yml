@@ -57,14 +57,14 @@ services:
       - traefik.http.middlewares.${STACK_NAME?Variable not set}-adminer-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
 
       # HTTPS route
-      - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.rule=Host(`alaco-adminer.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.rule=Host(`adminer.${DOMAIN?Variable not set}`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.entrypoints=https
       - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.tls=true
       - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.tls.certresolver=le
       - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.middlewares=${STACK_NAME?Variable not set}-adminer-auth,security-headers@file
 
       # HTTP route (redirect to HTTPS)
-      - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-http.rule=Host(`alaco-adminer.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-http.rule=Host(`adminer.${DOMAIN?Variable not set}`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-http.entrypoints=http
       - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-http.middlewares=https-redirect
 
@@ -165,13 +165,13 @@ services:
       - traefik.http.services.${STACK_NAME?Variable not set}-backend.loadbalancer.server.port=8000
 
       # HTTPS route
-      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.rule=Host(`alaco-api.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.rule=Host(`api.${DOMAIN?Variable not set}`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.entrypoints=https
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.tls=true
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.tls.certresolver=le
 
       # HTTP route (redirect to HTTPS)
-      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.rule=Host(`alaco-api.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.rule=Host(`api.${DOMAIN?Variable not set}`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.entrypoints=http
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.middlewares=https-redirect
 
@@ -188,7 +188,7 @@ services:
       - traefik.http.middlewares.backend-timeout.buffering.retryExpression=IsNetworkError() && Attempts() < 2
 
   frontend:
-    #profiles: ["frontend"]
+    profiles: ["frontend"]
     image: "${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}"
     restart: always
     networks:
@@ -197,7 +197,7 @@ services:
     build:
       context: ./frontend
       args:
-        - VITE_API_URL=https://alaco-api.${DOMAIN?Variable not set}
+        - VITE_API_URL=https://api.${DOMAIN?Variable not set}
         - NODE_ENV=production
     labels:
       - traefik.enable=true
@@ -210,7 +210,7 @@ services:
       #- traefik.http.middlewares.${STACK_NAME?Variable not set}-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
 
       # HTTPS route
-      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.rule=Host(`alaco.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.rule=Host(`demo.${DOMAIN?Variable not set}`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.entrypoints=https
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.tls=true
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.tls.certresolver=le
@@ -218,7 +218,7 @@ services:
       #- traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.middlewares=${STACK_NAME?Variable not set}-auth,auth-ratelimit@file,security-headers@file
 
       # HTTP route (redirect to HTTPS)
-      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.rule=Host(`alaco.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.rule=Host(`demo.${DOMAIN?Variable not set}`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.entrypoints=http
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
 

@@ -146,7 +146,7 @@ async def _handle_full_text_kb_query(
     # Check if LLM supports vision
     from app.services.vision_service import VisionService
 
-    vision_enabled = VisionService.is_vision_enabled(llm)
+    vision_enabled = VisionService.is_vision_enabled(llm, current_user)
 
     # Rephrase the question using chat history if available
     if chat_history:
@@ -556,7 +556,7 @@ async def _handle_full_text_document_query(
     # Check if LLM supports vision
     from app.services.vision_service import VisionService
 
-    vision_enabled = VisionService.is_vision_enabled(llm)
+    vision_enabled = VisionService.is_vision_enabled(llm, current_user)
 
     # Rephrase the question using chat history if available
     if chat_history:
@@ -1310,7 +1310,7 @@ async def query_knowledge_base(
         # Check if LLM supports vision for potential vision analysis
         from app.services.vision_service import VisionService
 
-        vision_enabled = VisionService.is_vision_enabled(llm)
+        vision_enabled = VisionService.is_vision_enabled(llm, current_user)
 
         # 7. Generate the answer - with potential vision analysis
         try:
@@ -1947,7 +1947,7 @@ async def query_document(
         # Decide whether to attempt vision analysis
         from app.services.vision_service import VisionService
 
-        vision_enabled = VisionService.is_vision_enabled(llm)
+        vision_enabled = VisionService.is_vision_enabled(llm, current_user)
 
         # Check if any of the retrieved docs are vision fallbacks
         has_vision_fallbacks = any(

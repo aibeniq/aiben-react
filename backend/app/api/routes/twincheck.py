@@ -253,7 +253,7 @@ async def compare_documents(
         # Check if LLM supports vision
         from app.services.vision_service import VisionService
 
-        vision_enabled = VisionService.is_vision_enabled(llm)
+        vision_enabled = VisionService.is_vision_enabled(llm, current_user)
 
         # Extract text from both documents
         doc1_text = extract_text_from_file(document1)
@@ -1561,6 +1561,7 @@ async def generate_topics(
                     file.filename or "unknown",
                     llm,
                     purpose="comparison topic generation",
+                    current_user=current_user,
                 )
                 example_instruction = f" and use the uploaded example document ({file.filename}) as a reference for the appropriate scope and depth of comparison topics"
                 example_analysis_instruction = f" and explain how they align with the scope shown in the example document ({file.filename})"

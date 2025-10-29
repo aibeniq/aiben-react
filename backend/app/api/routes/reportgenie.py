@@ -1544,6 +1544,7 @@ async def generate_outline(
                             file.filename or "unknown",
                             llm,
                             purpose="outline generation",
+                            current_user=current_user,
                         )
 
                         if file_text.strip():
