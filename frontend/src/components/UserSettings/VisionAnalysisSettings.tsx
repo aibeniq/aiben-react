@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button"
 import { Field } from "@/components/ui/field"
 import { Box, Card, VStack, Text, Switch } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -24,7 +23,7 @@ const VisionAnalysisSettings = () => {
   const updateMutation = useMutation({
     mutationFn: (visionEnabled: boolean) => {
       console.log("[VisionAnalysis] Sending update:", visionEnabled)
-      return UsersService.updateVisionAnalysis({
+      return UsersService.updateVisionAnalysisSetting({
         requestBody: { vision_analysis_enabled: visionEnabled },
       })
     },
