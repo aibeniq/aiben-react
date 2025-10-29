@@ -116,7 +116,10 @@ export const createKnowledgeBaseWithTimeout = async (
 
     // Make the request with our custom axios client
     const requestStartTime = Date.now()
-    console.log("🌐 MAKING HTTP REQUEST to /api/v1/knowledge-bases/ with task_id:", data.taskId)
+    console.log(
+      "🌐 MAKING HTTP REQUEST to /api/v1/knowledge-bases/ with task_id:",
+      data.taskId,
+    )
 
     const response = await knowledgeBaseAxiosClient.post(
       "/api/v1/knowledge-bases/",

@@ -674,12 +674,13 @@ def create_source_entry_from_file_data(
         # Don't raise - this shouldn't fail the entire knowledge base creation
 
 
-def load_uploaded_file(file: UploadFile) -> List[Any]:
+def load_uploaded_file(file: UploadFile, current_user=None) -> List[Any]:
     """
     Load an uploaded file based on its type (e.g., PDF, text file).
 
     Args:
         file (UploadFile): The uploaded file to process.
+        current_user: Current user object (optional) for PDF parsing preference
 
     Returns:
         List[Any]: A list of loaded documents from the file.
@@ -701,11 +702,22 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
         if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
             from app.core.config import settings
 
-            print(f"Loading PDF with parsing mode: {settings.PDF_PARSING_MODE}...")
+            # Determine parsing mode with priority: user preference > global setting
+            if current_user is not None:
+                parsing_mode = getattr(
+                    current_user, "pdf_parsing_preference", settings.PDF_PARSING_MODE
+                )
+                print(
+                    f"[KB] Using user {current_user.id} PDF parsing preference: {parsing_mode}"
+                )
+            else:
+                parsing_mode = settings.PDF_PARSING_MODE
+                print(f"[KB] Using global PDF_PARSING_MODE setting: {parsing_mode}")
+
             loaded_documents = load_pdf_with_pypdf(
                 temp_file_path,
                 file.filename,
-                parsing_mode=settings.PDF_PARSING_MODE,
+                parsing_mode=parsing_mode,
             )
         elif (
             content_type
@@ -734,7 +746,7 @@ def load_uploaded_file(file: UploadFile) -> List[Any]:
 
             # First try regular document extraction (uses settings.PDF_PARSING_MODE by default)
             loaded_documents = extract_documents_from_file_unified(
-                file_content, file.filename
+                file_content, file.filename, current_user=current_user
             )
 
             # If no documents, try enhanced extraction with images
@@ -1400,6 +1412,17 @@ async def process_knowledge_base_creation(
     # Create a new session for background processing
     with Session(engine) as session:
         try:
+            # Fetch user to get PDF parsing preference
+            from app.models import User
+
+            user = session.get(User, user_id)
+            user_pdf_preference = (
+                getattr(user, "pdf_parsing_preference", "auto") if user else "auto"
+            )
+            print(
+                f"[KB BACKGROUND] User {user_id} PDF parsing preference: {user_pdf_preference}"
+            )
+
             # Check if a knowledge base with this title already exists for this user
             knowledge_base = session.get(KnowledgeBase, knowledge_base_id)
 
@@ -1503,7 +1526,9 @@ async def process_knowledge_base_creation(
                             # Process the file based on its type
                             if filename.lower().endswith(".pdf"):
                                 loaded_documents = load_pdf_with_pypdf(
-                                    temp_file_path, filename, parsing_mode="enhanced"
+                                    temp_file_path,
+                                    filename,
+                                    parsing_mode=user_pdf_preference,
                                 )
                             elif filename.lower().endswith(".txt"):
                                 loader = TextLoader(temp_file_path)
@@ -2219,7 +2244,9 @@ async def update_knowledge_base(
                 print("Adding new files to VectorDB...")
                 documents = []
                 for file in files:
-                    loaded_documents = load_uploaded_file(file)
+                    loaded_documents = load_uploaded_file(
+                        file, current_user=current_user
+                    )
                     documents.extend(loaded_documents)
 
                     # Reset the file pointer before passing to create_source_entries

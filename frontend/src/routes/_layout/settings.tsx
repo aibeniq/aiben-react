@@ -7,6 +7,7 @@ import ChangePassword from "@/components/UserSettings/ChangePassword"
 import DeleteAccount from "@/components/UserSettings/DeleteAccount"
 import LanguageSettings from "@/components/UserSettings/LanguageSettings"
 import VisionAnalysisSettings from "@/components/UserSettings/VisionAnalysisSettings"
+import PdfParsingSettings from "@/components/UserSettings/PdfParsingSettings"
 import UserInformation from "@/components/UserSettings/UserInformation"
 import useAuth from "@/hooks/useAuth"
 
@@ -28,6 +29,12 @@ const tabsConfig = [
     title: "Vision Analysis",
     titleKey: "settings.visionAnalysis.tab",
     component: VisionAnalysisSettings,
+  },
+  {
+    value: "pdf-parsing",
+    title: "PDF Parsing",
+    titleKey: "settings.pdfParsing.tab",
+    component: PdfParsingSettings,
   },
   {
     value: "password",

@@ -48,6 +48,7 @@ class UserUpdate(UserBase):
     password: str | None = Field(default=None, min_length=8, max_length=40)
     preferred_language: str | None = Field(default=None, max_length=10)
     vision_analysis_enabled: bool | None = None
+    pdf_parsing_preference: str | None = Field(default=None, max_length=20)
 
 
 class LanguageUpdate(SQLModel):
@@ -58,11 +59,20 @@ class VisionAnalysisUpdate(SQLModel):
     vision_analysis_enabled: bool
 
 
+class PdfParsingPreferenceUpdate(SQLModel):
+    """Dedicated update model for PDF parsing preference."""
+
+    pdf_parsing_preference: str = Field(
+        max_length=20, description="PDF parsing mode: 'auto', 'enhanced', or 'basic'"
+    )
+
+
 class UserUpdateMe(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     email: EmailStr | None = Field(default=None, max_length=255)
     preferred_language: str | None = Field(default=None, max_length=10)
     vision_analysis_enabled: bool | None = None
+    pdf_parsing_preference: str | None = Field(default=None, max_length=20)
 
 
 class UpdatePassword(SQLModel):
@@ -105,6 +115,13 @@ class User(UserBase, table=True):
     # Vision analysis control - user can enable/disable vision processing
     vision_analysis_enabled: bool = Field(default=False)
 
+    # PDF parsing preference - user can choose parsing mode (auto/enhanced/basic)
+    pdf_parsing_preference: str = Field(
+        default="auto",
+        max_length=20,
+        description="PDF parsing mode preference: 'auto', 'enhanced', or 'basic'",
+    )
+
     # Account lockout fields for security
     failed_login_attempts: int = Field(default=0)
     locked_until: Optional[datetime] = Field(default=None)
@@ -118,6 +135,7 @@ class UserPublic(UserBase):
     approved_date: datetime | None
     preferred_language: str
     vision_analysis_enabled: bool
+    pdf_parsing_preference: str
 
 
 class UsersPublic(SQLModel):

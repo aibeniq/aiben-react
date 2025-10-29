@@ -99,7 +99,7 @@ async def create_optimize_outline_task():
     return {"task_id": task_id}
 
 
-def extract_text_from_file(file: UploadFile) -> str:
+def extract_text_from_file(file: UploadFile, current_user=None) -> str:
     """
     Extract text content from uploaded files using unified document processing.
     """
@@ -116,7 +116,9 @@ def extract_text_from_file(file: UploadFile) -> str:
         )
 
     try:
-        return extract_text_from_file_unified(file_content, file.filename or "unknown")
+        return extract_text_from_file_unified(
+            file_content, file.filename or "unknown", current_user=current_user
+        )
     except Exception as e:
         print(f"Error processing file {file.filename}: {str(e)}")
         raise HTTPException(
@@ -256,11 +258,11 @@ async def compare_documents(
         vision_enabled = VisionService.is_vision_enabled(llm, current_user)
 
         # Extract text from both documents
-        doc1_text = extract_text_from_file(document1)
+        doc1_text = extract_text_from_file(document1, current_user)
 
         # Reset file pointer for document2
         document2.file.seek(0)
-        doc2_text = extract_text_from_file(document2)
+        doc2_text = extract_text_from_file(document2, current_user)
 
         # Extract images if vision is enabled
         doc1_images = []
