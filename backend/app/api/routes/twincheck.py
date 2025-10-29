@@ -488,6 +488,7 @@ async def compare_documents(
                             "topic": topic,
                             "doc1_image_count": len(doc1_images),
                             "doc2_image_count": len(doc2_images),
+                            "language_instruction": language_instruction,
                         }
 
                         try:
@@ -614,6 +615,7 @@ async def compare_documents(
                             "topic": topic,
                             "doc1_image_count": len(doc1_images),
                             "doc2_image_count": len(doc2_images),
+                            "language_instruction": language_instruction,
                         }
 
                         try:
