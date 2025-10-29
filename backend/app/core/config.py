@@ -208,7 +208,7 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER_PASSWORD: str
 
     # Admin approval settings
-    ADMIN_EMAIL: EmailStr = "david@aiben.io"
+    ADMIN_EMAILS: list[EmailStr] = ["david@aiben.io", "laurent@aiben.io"]
     APPROVAL_TOKEN_EXPIRE_HOURS: int = 72  # 3 days
     REQUIRE_ADMIN_APPROVAL: bool = True  # Feature flag
 

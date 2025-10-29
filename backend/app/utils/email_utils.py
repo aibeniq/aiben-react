@@ -192,15 +192,17 @@ def generate_admin_approval_email(
 def send_admin_approval_email(
     user_email: str, user_name: str, approval_token: str
 ) -> None:
-    """Send approval request email to admin."""
+    """Send approval request email to all admins."""
     email_data = generate_admin_approval_email(
         user_email=user_email, user_name=user_name, approval_token=approval_token
     )
-    send_email(
-        email_to=settings.ADMIN_EMAIL,
-        subject=email_data.subject,
-        html_content=email_data.html_content,
-    )
+    # Send to each admin in the list
+    for admin_email in settings.ADMIN_EMAILS:
+        send_email(
+            email_to=admin_email,
+            subject=email_data.subject,
+            html_content=email_data.html_content,
+        )
 
 
 def generate_registration_approved_email(email_to: str, full_name: str) -> EmailData:
