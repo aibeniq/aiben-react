@@ -199,7 +199,9 @@ async def _handle_full_text_kb_query(
                 print(
                     f"WARNING: {source.name} does not appear to be a ZIP file, trying direct extraction"
                 )
-                file_content = extract_text_from_file(source_data.data, source.name)
+                file_content = extract_text_from_file(
+                    source_data.data, source.name, current_user=current_user
+                )
             else:
                 # Extract the file content from the ZIP
                 zip_data = BytesIO(source_data.data)
@@ -217,7 +219,9 @@ async def _handle_full_text_kb_query(
                     print(f"Extracted file header: {extracted_header}")
 
                     # Now extract text from the raw file content
-                    file_content = extract_text_from_file(raw_file_content, source.name)
+                    file_content = extract_text_from_file(
+                        raw_file_content, source.name, current_user=current_user
+                    )
 
         except zipfile.BadZipFile as e:
             print(f"Error extracting ZIP file for source {source.name}: {e}")
@@ -227,7 +231,9 @@ async def _handle_full_text_kb_query(
             # Try direct extraction as fallback
             try:
                 print(f"Attempting direct text extraction for {source.name}")
-                file_content = extract_text_from_file(source_data.data, source.name)
+                file_content = extract_text_from_file(
+                    source_data.data, source.name, current_user=current_user
+                )
             except Exception as fallback_e:
                 print(
                     f"Fallback extraction also failed for {source.name}: {fallback_e}"
@@ -409,6 +415,7 @@ async def _handle_full_text_kb_query(
                     _, images = extract_documents_and_images_from_file_unified(
                         raw_file_content,
                         source.name,  # Use actual filename with extension
+                        current_user=current_user,
                     )
                     all_images.extend(images)
                     print(
@@ -590,7 +597,9 @@ async def _handle_full_text_document_query(
                 file_content = f.read()
 
             # Use the unified document extraction function (uses settings.PDF_PARSING_MODE by default)
-            documents = extract_documents_from_file_unified(file_content, file.filename)
+            documents = extract_documents_from_file_unified(
+                file_content, file.filename, current_user=current_user
+            )
             full_text = "\n\n".join([doc.page_content for doc in documents])
 
             # Extract images if vision is enabled
@@ -601,7 +610,7 @@ async def _handle_full_text_document_query(
                 )
 
                 _, file_images = extract_documents_and_images_from_file_unified(
-                    file_content, file.filename
+                    file_content, file.filename, current_user=current_user
                 )
                 print(f"Extracted {len(file_images)} images from {file.filename}")
 
@@ -1379,6 +1388,7 @@ async def query_knowledge_base(
                             _, images = extract_documents_and_images_from_file_unified(
                                 raw_file_content,
                                 filename,  # Use actual filename with extension
+                                current_user=current_user,
                             )
                             all_images.extend(images)
                             print(
@@ -1766,7 +1776,7 @@ async def query_document(
                     file_content = f.read()
 
                 documents, images = extract_documents_and_images_from_file_unified(
-                    file_content, file.filename
+                    file_content, file.filename, current_user=current_user
                 )
 
                 # Add file source information to metadata
@@ -1922,7 +1932,9 @@ async def query_document(
                                     )
                                     _, images = (
                                         extract_documents_and_images_from_file_unified(
-                                            file_content, os.path.basename(temp_path)
+                                            file_content,
+                                            os.path.basename(temp_path),
+                                            current_user=current_user,
                                         )
                                     )
                                     print(

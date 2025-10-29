@@ -147,6 +147,9 @@ def load_pdf_with_pypdf(
     # Normalize mode to lowercase
     mode = parsing_mode.lower()
 
+    # DEBUG: Log the parsing mode being used
+    print(f"[PDF_UTILS] load_pdf_with_pypdf called with mode='{mode}' for {filename}")
+
     if mode == "enhanced":
         # Force enhanced parsing if available
         if PYMUPDF4LLM_AVAILABLE:

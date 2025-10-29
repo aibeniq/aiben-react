@@ -219,7 +219,9 @@ async def extract_fields_using_vector_search(
         from app.services.vision_service import VisionService
 
         # First try regular text extraction
-        text = extract_text_from_file_unified(content, file.filename or "unknown")
+        text = extract_text_from_file_unified(
+            content, file.filename or "unknown", current_user=current_user
+        )
 
         # Also extract images for vision-enhanced processing (for PDFs)
         document_images = []
@@ -565,7 +567,9 @@ async def extract_fields_using_full_text(
             extract_documents_and_images_from_file_unified,
         )
 
-        text = extract_text_from_file_unified(content, filename)
+        text = extract_text_from_file_unified(
+            content, filename, current_user=current_user
+        )
         document_images = []
 
         # Extract images if vision is enabled and we're processing a PDF

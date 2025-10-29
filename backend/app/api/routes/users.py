@@ -26,6 +26,7 @@ from app.models import (
     UserUpdateMe,
     LanguageUpdate,
     VisionAnalysisUpdate,
+    PdfParsingPreferenceUpdate,
     UserStatus,
 )
 from app.utils.email_utils import (
@@ -81,6 +82,31 @@ def update_vision_analysis_setting(
     # Update user's vision analysis preference
     user = session.get(User, current_user.id)
     user.vision_analysis_enabled = vision_update.vision_analysis_enabled
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+@router.put("/me/pdf-parsing-preference", response_model=UserPublic)
+def update_pdf_parsing_preference(
+    parsing_update: PdfParsingPreferenceUpdate,
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> Any:
+    """Update current user's PDF parsing preference."""
+
+    # Validate mode
+    valid_modes = ["auto", "enhanced", "basic"]
+    if parsing_update.pdf_parsing_preference not in valid_modes:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid parsing mode. Must be one of: {', '.join(valid_modes)}",
+        )
+
+    # Update user's PDF parsing preference
+    user = session.get(User, current_user.id)
+    user.pdf_parsing_preference = parsing_update.pdf_parsing_preference
     session.add(user)
     session.commit()
     session.refresh(user)

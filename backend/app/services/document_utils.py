@@ -281,7 +281,7 @@ def extract_text_from_xlsx_bytes(file_content: bytes, filename: str) -> str:
 
 
 def extract_text_from_file_unified(
-    file_content: bytes, filename: str, pdf_parsing_mode: str = None
+    file_content: bytes, filename: str, pdf_parsing_mode: str = None, current_user=None
 ) -> str:
     """
     Unified file text extraction function that handles multiple file types.
@@ -291,7 +291,11 @@ def extract_text_from_file_unified(
         file_content: Raw bytes of the file
         filename: Name of the file
         pdf_parsing_mode: PDF parsing mode ('auto', 'enhanced', 'basic').
-                         If None, uses settings.PDF_PARSING_MODE
+                         Priority order:
+                         1. Explicit pdf_parsing_mode parameter
+                         2. User's preference (current_user.pdf_parsing_preference)
+                         3. Global setting (settings.PDF_PARSING_MODE)
+        current_user: Current user object (optional)
 
     Returns:
         Extracted text content as string
@@ -305,12 +309,25 @@ def extract_text_from_file_unified(
             from app.services.pdf_utils import extract_text_from_pdf_bytes
             from app.core.config import settings
 
-            # Use provided mode or fall back to settings
-            mode = (
-                pdf_parsing_mode
-                if pdf_parsing_mode is not None
-                else settings.PDF_PARSING_MODE
-            )
+            # Priority order for mode selection
+            if pdf_parsing_mode is not None:
+                # Explicit parameter takes highest priority
+                mode = pdf_parsing_mode
+                print(
+                    f"[DOCUMENT_UTILS] Using explicit pdf_parsing_mode parameter: {mode}"
+                )
+            elif current_user is not None:
+                # User preference takes second priority
+                mode = getattr(
+                    current_user, "pdf_parsing_preference", settings.PDF_PARSING_MODE
+                )
+                print(
+                    f"[DOCUMENT_UTILS] Using user {current_user.id} PDF parsing preference: {mode}"
+                )
+            else:
+                # Global setting is fallback
+                mode = settings.PDF_PARSING_MODE
+                print(f"[DOCUMENT_UTILS] Using global PDF_PARSING_MODE setting: {mode}")
 
             return extract_text_from_pdf_bytes(
                 file_content, filename, parsing_mode=mode
@@ -377,7 +394,7 @@ def extract_text_from_file_unified(
 
 
 def extract_documents_from_file_unified(
-    file_content: bytes, filename: str, pdf_parsing_mode: str = None
+    file_content: bytes, filename: str, pdf_parsing_mode: str = None, current_user=None
 ) -> List[Document]:
     """
     Unified file extraction function that returns LangChain Document objects.
@@ -387,7 +404,11 @@ def extract_documents_from_file_unified(
         file_content: Raw bytes of the file
         filename: Name of the file
         pdf_parsing_mode: PDF parsing mode ('auto', 'enhanced', 'basic').
-                         If None, uses settings.PDF_PARSING_MODE
+                         Priority order:
+                         1. Explicit pdf_parsing_mode parameter
+                         2. User's preference (current_user.pdf_parsing_preference)
+                         3. Global setting (settings.PDF_PARSING_MODE)
+        current_user: Current user object (optional)
 
     Returns:
         List of LangChain Document objects
@@ -406,12 +427,29 @@ def extract_documents_from_file_unified(
                 from app.services.pdf_utils import load_pdf_with_pypdf
                 from app.core.config import settings
 
-                # Use provided mode or fall back to settings
-                mode = (
-                    pdf_parsing_mode
-                    if pdf_parsing_mode is not None
-                    else settings.PDF_PARSING_MODE
-                )
+                # Priority order for mode selection
+                if pdf_parsing_mode is not None:
+                    # Explicit parameter takes highest priority
+                    mode = pdf_parsing_mode
+                    print(
+                        f"[DOCUMENT_UTILS] Using explicit pdf_parsing_mode parameter: {mode}"
+                    )
+                elif current_user is not None:
+                    # User preference takes second priority
+                    mode = getattr(
+                        current_user,
+                        "pdf_parsing_preference",
+                        settings.PDF_PARSING_MODE,
+                    )
+                    print(
+                        f"[DOCUMENT_UTILS] Using user {current_user.id} PDF parsing preference: {mode}"
+                    )
+                else:
+                    # Global setting is fallback
+                    mode = settings.PDF_PARSING_MODE
+                    print(
+                        f"[DOCUMENT_UTILS] Using global PDF_PARSING_MODE setting: {mode}"
+                    )
 
                 return load_pdf_with_pypdf(
                     temp_file_path,
@@ -532,7 +570,7 @@ def extract_documents_from_file_unified(
 
 
 def extract_documents_and_images_from_file_unified(
-    file_content: bytes, filename: str
+    file_content: bytes, filename: str, current_user=None
 ) -> Tuple[List[Document], List[str]]:
     """
     Enhanced unified extraction that returns both text documents and images.
@@ -540,6 +578,7 @@ def extract_documents_and_images_from_file_unified(
     Args:
         file_content: Raw bytes of the file
         filename: Name of the file
+        current_user: Current user object (optional) for PDF parsing preference
 
     Returns:
         Tuple of (text_documents, image_list_base64)
@@ -550,7 +589,9 @@ def extract_documents_and_images_from_file_unified(
     logger = logging.getLogger(__name__)
 
     # Get existing text extraction
-    documents = extract_documents_from_file_unified(file_content, filename)
+    documents = extract_documents_from_file_unified(
+        file_content, filename, current_user=current_user
+    )
 
     # Extract images based on file type
     images = []

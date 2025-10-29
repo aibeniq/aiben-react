@@ -573,15 +573,28 @@ async def prefetch_knowledge_base_context(
     return question_contexts
 
 
-def extract_text_from_file(file_content: bytes, filename: str) -> str:
+def extract_text_from_file(
+    file_content: bytes, filename: str, current_user=None
+) -> str:
     """Extract text from various file formats using unified document processing."""
     from app.services.document_utils import extract_text_from_file_unified
 
-    # Uses settings.PDF_PARSING_MODE by default
-    return extract_text_from_file_unified(file_content, filename)
+    if current_user:
+        print(
+            f"[VERADOC] extract_text_from_file called for {filename} with user {current_user.id}"
+        )
+    else:
+        print(f"[VERADOC] extract_text_from_file called for {filename} with NO user")
+
+    # Uses settings.PDF_PARSING_MODE by default, or user preference if current_user provided
+    return extract_text_from_file_unified(
+        file_content, filename, current_user=current_user
+    )
 
 
-async def extract_text_from_file_async(file_content: bytes, filename: str) -> str:
+async def extract_text_from_file_async(
+    file_content: bytes, filename: str, current_user=None
+) -> str:
     """
     Async wrapper for text extraction to prevent blocking on large files.
     Uses ThreadPoolExecutor for CPU-intensive text extraction operations.
@@ -605,12 +618,12 @@ async def extract_text_from_file_async(file_content: bytes, filename: str) -> st
         loop = asyncio.get_event_loop()
         with ThreadPoolExecutor(max_workers=1) as executor:
             document_text = await loop.run_in_executor(
-                executor, extract_text_from_file, file_content, filename
+                executor, extract_text_from_file, file_content, filename, current_user
             )
         return document_text
     else:
         # For small non-DOCX files, process synchronously
-        return extract_text_from_file(file_content, filename)
+        return extract_text_from_file(file_content, filename, current_user)
 
 
 router = APIRouter(prefix="/veradoc", tags=["veradoc"])
@@ -1346,7 +1359,7 @@ async def process_rag_checklist(
                         f"Processing file with unified text extraction: {file.filename}"
                     )
                     document_text = await extract_text_from_file_async(
-                        content, file.filename
+                        content, file.filename, current_user
                     )
                     # Clean surrogates from document_text to prevent encoding issues
                     document_text = re.sub(r"[\ud800-\udfff]", "", document_text)
@@ -2549,7 +2562,9 @@ async def optimize_checklist(
             # 3. Process the test document
             file = files[0]
             content = await file.read()
-            document_text = await extract_text_from_file_async(content, file.filename)
+            document_text = await extract_text_from_file_async(
+                content, file.filename, current_user
+            )
             print(
                 f"Processing test document: {file.filename} ({len(document_text)} characters)"
             )
