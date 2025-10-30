@@ -197,9 +197,7 @@ class TestChatbotKnowledgeBase:
             params=data,
         )
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
     def test_query_knowledge_base_not_found(
         self, client: TestClient, superuser_token_headers: dict[str, str]
@@ -234,11 +232,10 @@ class TestChatbotDocument:
         sample_pdf_bytes,
     ):
         """Test successful document query with vector search mode."""
-        # Mock LLM response - return different values for relevance check and final answer
-        mock_invoke_llm.side_effect = [
-            "Relevant information found.",  # For relevance check
-            "This is a test answer from the uploaded document.",  # For final answer
-        ]
+        # Mock LLM response for final answer generation
+        mock_invoke_llm.return_value = (
+            "This is a test answer from the uploaded document."
+        )
 
         # Mock session manager
         mock_session_manager.get_session.return_value = None
@@ -387,9 +384,7 @@ class TestChatbotDocument:
             files=files,
         )
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 class TestChatbotText:
@@ -449,9 +444,7 @@ class TestChatbotText:
             params=data,
         )
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 class TestChatbotGeneral:
@@ -506,9 +499,7 @@ class TestChatbotGeneral:
             json=data,
         )
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 class TestChatbotAssistant:
@@ -653,9 +644,7 @@ class TestChatbotAssistant:
             json=data,
         )
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
     def test_detect_assistant_intent_no_message(
         self, client: TestClient, superuser_token_headers: dict[str, str]

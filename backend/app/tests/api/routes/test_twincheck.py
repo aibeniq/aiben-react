@@ -166,9 +166,7 @@ class TestTwinCheckCompare:
             json=sample_compare_request,
         )
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
     def test_compare_documents_invalid_data(
         self, client: TestClient, superuser_token_headers: dict[str, str]
@@ -350,9 +348,7 @@ class TestTwinCheckComparisons:
         """Test comparisons endpoints without authentication."""
         response = client.get(f"{settings.API_V1_STR}/twincheck/comparisons")
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 class TestTwinCheckHistory:
@@ -392,9 +388,7 @@ class TestTwinCheckHistory:
         """Test history endpoints without authentication."""
         response = client.get(f"{settings.API_V1_STR}/twincheck/history")
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 class TestTwinCheckGenerateTopics:
@@ -472,9 +466,7 @@ These topics are commonly used for document comparison."""
             json=request_data,
         )
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
     def test_generate_topics_invalid_request(
         self, client: TestClient, superuser_token_headers: dict[str, str]
@@ -530,9 +522,7 @@ class TestTwinCheckGenerateDocx:
             json=request_data,
         )
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 class TestTwinCheckGenerateCsv:
@@ -571,6 +561,4 @@ class TestTwinCheckGenerateCsv:
             json=request_data,
         )
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided

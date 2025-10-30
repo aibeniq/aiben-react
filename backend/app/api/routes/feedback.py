@@ -19,7 +19,7 @@ class FeedbackRequest(BaseModel):
 
 @router.post("/", response_model=Message)
 def submit_feedback(
-    session: SessionDep, current_user: CurrentUser, request: FeedbackRequest = Depends()
+    session: SessionDep, current_user: CurrentUser, request: FeedbackRequest
 ):
     """Submit feedback for an LLM interaction."""
     # Find the interaction

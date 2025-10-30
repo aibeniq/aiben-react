@@ -36,7 +36,7 @@ def record_failed_login(session: Session, user: User) -> None:
     # Lock account after 5 failed attempts
     if user.failed_login_attempts >= 5:
         # Lock for 1 hour
-        user.locked_until = datetime.now() + timedelta(minutes=5)
+        user.locked_until = datetime.now() + timedelta(hours=1)
 
     session.add(user)
     session.commit()

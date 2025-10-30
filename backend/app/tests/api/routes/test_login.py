@@ -12,7 +12,18 @@ from app.tests.utils.utils import random_email, random_lower_string
 from app.utils.email_utils import generate_password_reset_token
 
 
-def test_get_access_token(client: TestClient) -> None:
+@patch("app.api.routes.login.rate_limiter")
+def test_get_access_token(mock_rate_limiter, client: TestClient) -> None:
+    # Mock rate limiter to avoid rate limiting in tests
+    async def mock_check_rate_limit(*args, **kwargs):
+        return None
+
+    async def mock_clear_attempts(*args, **kwargs):
+        return None
+
+    mock_rate_limiter.check_rate_limit = mock_check_rate_limit
+    mock_rate_limiter.clear_attempts = mock_clear_attempts
+
     login_data = {
         "username": settings.FIRST_SUPERUSER,
         "password": settings.FIRST_SUPERUSER_PASSWORD,

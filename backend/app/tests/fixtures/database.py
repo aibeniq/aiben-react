@@ -4,7 +4,7 @@ Database fixtures for testing database operations and models.
 
 import pytest
 from sqlmodel import Session
-from app.models import User, KnowledgeBase
+from app.models import User, UserStatus, KnowledgeBase
 from app.core.security import get_password_hash
 
 
@@ -26,6 +26,7 @@ def test_user(db: Session):
         hashed_password=get_password_hash("testpassword"),
         is_active=True,
         is_superuser=False,
+        status=UserStatus.ACTIVE,
     )
     db.add(user)
     db.commit()
@@ -46,6 +47,7 @@ def test_superuser(db: Session):
         hashed_password=get_password_hash("adminpassword"),
         is_active=True,
         is_superuser=True,
+        status=UserStatus.ACTIVE,
     )
     db.add(user)
     db.commit()

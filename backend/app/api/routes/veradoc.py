@@ -855,7 +855,7 @@ def needs_optimization(answer: str) -> bool:
 async def process_rag_checklist(
     session: SessionDep,
     current_user: CurrentUser,
-    questions: str = Form(...),
+    questions: Optional[str] = Form(None),
     knowledge_base_id: str = Form(...),
     files: List[UploadFile] = File(...),
     custom_instructions: Optional[str] = Form(None),
@@ -870,7 +870,7 @@ async def process_rag_checklist(
     print("process_rag_checklist function invoked!")
     print(f"Received search_mode: {search_mode}")
     print(
-        f"Request data: knowledge_base_id={knowledge_base_id}, questions length={len(questions)}"
+        f"Request data: knowledge_base_id={knowledge_base_id}, questions length={len(questions) if questions else 0}"
     )
 
     # Input validation
@@ -2441,7 +2441,11 @@ async def get_veradoc_qa_pair(
 async def optimize_checklist(
     session: SessionDep,
     current_user: CurrentUser,
-    request_data: OptimizeChecklistRequest = Depends(),
+    knowledge_base_id: str = Form(...),
+    questions: str = Form(...),
+    target_answers: str = Form("yes"),
+    custom_instructions: Optional[str] = Form(None),
+    search_mode: str = Form("vector"),
     files: List[UploadFile] = File(...),
     request: FastAPIRequest = None,
 ):
@@ -2451,6 +2455,17 @@ async def optimize_checklist(
     """
     print("optimize_checklist function invoked!")
     # Disconnect monitoring disabled due to false positives
+
+    # Create request_data object for backward compatibility with rest of the code
+    class RequestData:
+        pass
+
+    request_data = RequestData()
+    request_data.questions = questions
+    request_data.knowledge_base_id = knowledge_base_id
+    request_data.custom_instructions = custom_instructions
+    request_data.search_mode = search_mode
+    request_data.target_answers = target_answers
 
     try:
         print("Starting checklist optimization...")
