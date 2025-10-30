@@ -211,9 +211,7 @@ class TestReportGenieGenerate:
             data=data,
         )
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 class TestReportGenieOutline:
@@ -363,11 +361,11 @@ class TestReportGenieOutline:
             f"{settings.API_V1_STR}/reportgenie/outlines",
             json=sample_outline_data,
         )
-        assert response.status_code == 404
+        assert response.status_code == 401
 
         # Test get
         response = client.get(f"{settings.API_V1_STR}/reportgenie/outlines")
-        assert response.status_code == 404
+        assert response.status_code == 401
 
 
 class TestReportGenieSuggestOutline:
@@ -466,7 +464,7 @@ Generated 3 sections based on the business report description to ensure comprehe
             data=data,
         )
 
-        assert response.status_code == 404
+        assert response.status_code == 401
 
 
 class TestReportGenieOptimizeOutline:
@@ -652,4 +650,4 @@ class TestReportGenieOptimizeOutline:
             data=data,
         )
 
-        assert response.status_code == 404
+        assert response.status_code == 401

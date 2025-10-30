@@ -16,7 +16,7 @@ def random_email() -> str:
 
 def get_superuser_token_headers(client: TestClient, db_session=None) -> dict[str, str]:
     from sqlmodel import select
-    from app.models import User
+    from app.models import User, UserStatus
     from app.core.security import get_password_hash
 
     # Use provided session or create a new one
@@ -32,23 +32,29 @@ def get_superuser_token_headers(client: TestClient, db_session=None) -> dict[str
     try:
         # Ensure superuser exists in database
         existing_user = session.exec(
-            select(User).where(User.email == "admin@example.com")
+            select(User).where(User.email == settings.FIRST_SUPERUSER)
         ).first()
         if not existing_user:
             superuser = User(
-                email="admin@example.com",
-                hashed_password=get_password_hash(
-                    "minglemongles"
-                ),  # Use the correct password from settings
+                email=settings.FIRST_SUPERUSER,
+                hashed_password=get_password_hash(settings.FIRST_SUPERUSER_PASSWORD),
                 is_active=True,
                 is_superuser=True,
+                status=UserStatus.ACTIVE,  # Ensure user is active
             )
             session.add(superuser)
             session.commit()
+        else:
+            # Update existing user to ensure it's active
+            if existing_user.status != UserStatus.ACTIVE:
+                existing_user.status = UserStatus.ACTIVE
+                existing_user.is_active = True
+                existing_user.is_superuser = True
+                session.commit()
 
         login_data = {
-            "username": "admin@example.com",  # Use test superuser email
-            "password": "minglemongles",  # Use the correct password
+            "username": settings.FIRST_SUPERUSER,
+            "password": settings.FIRST_SUPERUSER_PASSWORD,
         }
         r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
         # The endpoint sets a cookie, TestClient will automatically include it in subsequent requests

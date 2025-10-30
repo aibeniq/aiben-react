@@ -163,9 +163,7 @@ class TestFormConnectProcess:
             json=sample_form_request,
         )
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
     def test_process_form_invalid_data(
         self, client: TestClient, superuser_token_headers: dict[str, str]
@@ -347,9 +345,7 @@ class TestFormConnectForms:
         """Test forms endpoints without authentication."""
         response = client.get(f"{settings.API_V1_STR}/formconnect/forms")
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 class TestFormConnectHistory:
@@ -389,9 +385,7 @@ class TestFormConnectHistory:
         """Test history endpoints without authentication."""
         response = client.get(f"{settings.API_V1_STR}/formconnect/history")
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 class TestFormConnectGenerateFields:
@@ -497,9 +491,7 @@ This field is extracted from the document content."""
             json=request_data,
         )
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
     @patch("app.services.llms.invoke_llm")
     def test_generate_fields_invalid_request(

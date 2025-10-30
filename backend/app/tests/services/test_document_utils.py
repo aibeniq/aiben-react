@@ -128,9 +128,11 @@ class TestDocumentUtils:
 
     def test_extract_text_from_xlsx_bytes_success(self, sample_xlsx_bytes):
         """Test XLSX text extraction."""
-        # For fake XLSX data, expect the error message
+        # For real XLSX data created by pandas, expect actual content
         result = extract_text_from_xlsx_bytes(sample_xlsx_bytes, "test.xlsx")
-        assert "Failed to extract text" in result
+        assert "Sheet1" in result  # Should contain sheet name
+        assert "Name" in result  # Should contain column headers
+        assert "Alice" in result  # Should contain data
 
     @patch("pandas.ExcelFile")
     def test_extract_text_from_xlsx_bytes_error(
@@ -148,9 +150,11 @@ class TestDocumentUtils:
             (b"docx content", ".docx", "extract_text_from_docx_bytes"),
             (b"csv,content", ".csv", "extract_text_from_csv_bytes"),
             (b"xlsx content", ".xlsx", "extract_text_from_xlsx_bytes"),
+            (b"pdf content", ".pdf", "extract_text_from_pdf_bytes"),
             (b"text content", ".txt", None),  # Should return content as-is
         ],
     )
+    @patch("app.services.pdf_utils.extract_text_from_pdf_bytes")
     @patch("app.services.document_utils.extract_text_from_docx_bytes")
     @patch("app.services.document_utils.extract_text_from_csv_bytes")
     @patch("app.services.document_utils.extract_text_from_xlsx_bytes")
@@ -159,6 +163,7 @@ class TestDocumentUtils:
         mock_xlsx,
         mock_csv,
         mock_docx,
+        mock_pdf,
         file_content,
         file_extension,
         expected_call,
@@ -181,10 +186,49 @@ class TestDocumentUtils:
             result = extract_text_from_file_unified(file_content, filename)
             mock_xlsx.assert_called_once_with(file_content, filename)
             assert result == "xlsx extracted"
+        elif expected_call == "extract_text_from_pdf_bytes":
+            mock_pdf.return_value = "pdf extracted"
+            result = extract_text_from_file_unified(file_content, filename)
+            mock_pdf.assert_called_once_with(
+                file_content, filename, parsing_mode="enhanced"
+            )
+            assert result == "pdf extracted"
         else:
             # Text files should return content as-is
             result = extract_text_from_file_unified(file_content, filename)
             assert result == file_content.decode("utf-8", errors="ignore")
+
+    @patch("app.services.pdf_utils.extract_text_from_pdf_bytes")
+    def test_extract_text_from_file_unified_pdf_parsing_mode(self, mock_pdf):
+        """Test PDF parsing mode parameter."""
+        mock_pdf.return_value = "pdf with custom mode"
+
+        result = extract_text_from_file_unified(
+            b"pdf content", "test.pdf", pdf_parsing_mode="basic"
+        )
+
+        mock_pdf.assert_called_once_with(
+            b"pdf content", "test.pdf", parsing_mode="basic"
+        )
+        assert result == "pdf with custom mode"
+
+    @patch("app.services.pdf_utils.extract_text_from_pdf_bytes")
+    def test_extract_text_from_file_unified_user_preference(self, mock_pdf):
+        """Test user PDF parsing preference."""
+        from app.models import User
+
+        # Create a mock user with preference
+        mock_user = User(id=1, email="test@example.com", pdf_parsing_preference="auto")
+        mock_pdf.return_value = "pdf with user preference"
+
+        result = extract_text_from_file_unified(
+            b"pdf content", "test.pdf", current_user=mock_user
+        )
+
+        mock_pdf.assert_called_once_with(
+            b"pdf content", "test.pdf", parsing_mode="auto"
+        )
+        assert result == "pdf with user preference"
 
     def test_extract_text_from_file_unified_unknown_extension(self):
         """Test unified extraction with unknown file extension."""

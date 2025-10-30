@@ -350,12 +350,9 @@ class TestVeraDocReview:
             files=files,
         )
 
-        assert response.status_code == 422  # Pydantic validation error
+        assert response.status_code == 400  # Questions are required
         content = response.json()
-        assert "Field required" in str(
-            content
-        )  # Should still work but default to vector search
-        assert response.status_code == 200
+        assert "Questions are required" in content["detail"]
 
     def test_process_rag_checklist_unauthorized(
         self, client: TestClient, test_knowledge_base, sample_pdf_bytes
@@ -375,9 +372,7 @@ class TestVeraDocReview:
             files=files,
         )
 
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 class TestVeraDocChecklists:
@@ -574,15 +569,11 @@ class TestVeraDocChecklists:
             f"{settings.API_V1_STR}/veradoc/checklists",
             json=sample_checklist_data,
         )
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
         # Test get
         response = client.get(f"{settings.API_V1_STR}/veradoc/checklists")
-        assert (
-            response.status_code == 404
-        )  # Route not found when no auth in test environment
+        assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 class TestVeraDocOptimizeChecklist:
@@ -593,8 +584,10 @@ class TestVeraDocOptimizeChecklist:
     @patch("app.api.routes.veradoc.zipfile.ZipFile")
     @patch("app.api.routes.veradoc.progress_tracker")
     @patch("app.api.routes.veradoc.invoke_llm")
+    @patch("app.api.routes.veradoc.SmartRetrieverFactory")
     def test_optimize_checklist_success(
         self,
+        mock_smart_retriever_factory,
         mock_invoke_llm,
         mock_progress_tracker,
         mock_zipfile,
@@ -608,11 +601,9 @@ class TestVeraDocOptimizeChecklist:
     ):
         """Test successful checklist optimization."""
         # Mock LLM response
-        mock_response = Mock()
-        mock_response.content = (
-            '{"optimized_questions": ["Optimized question 1", "Optimized question 2"]}'
+        mock_invoke_llm.return_value = (
+            "Yes, the document is complete and all sections are present."
         )
-        mock_invoke_llm.return_value = mock_response
 
         # Mock execute_llm_request_safely to return a proper result object
         mock_result = Mock()
@@ -639,6 +630,15 @@ class TestVeraDocOptimizeChecklist:
         mock_zipfile.return_value.__enter__.return_value.extractall.return_value = None
         mock_zipfile.return_value.__exit__.return_value = None
 
+        # Mock SmartRetrieverFactory
+        mock_retriever = Mock()
+        mock_retriever.get_relevant_documents.return_value = [
+            Mock(page_content="test content", metadata={"source": "test.pdf"})
+        ]
+        mock_smart_retriever_factory.create_academic_paper_retriever.return_value = (
+            mock_retriever
+        )
+
         # Create test source data
         source_data = SourceData(
             data=sample_pdf_bytes,
@@ -656,6 +656,11 @@ class TestVeraDocOptimizeChecklist:
             owner_id=test_knowledge_base.owner_id,
         )
         db.add(source)
+        db.commit()
+
+        # Set up knowledge base with mock vector database data
+        test_knowledge_base.data = b"mock vector database data"
+        test_knowledge_base.storage_type = "database"
         db.commit()
 
         # Create test file

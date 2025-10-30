@@ -48,9 +48,11 @@ class TestDocumentProcessingPipeline:
         mock_reader.pages = [mock_page]
         mock_pypdf.PdfReader.return_value = mock_reader
 
-        # Test PDF text extraction
+        # Test PDF text extraction with parsing_mode parameter
         pdf_bytes = b"fake pdf content"
-        result = extract_text_from_pdf_bytes(pdf_bytes, "test.pdf")
+        result = extract_text_from_pdf_bytes(
+            pdf_bytes, "test.pdf", parsing_mode="basic"
+        )
         assert result == "PDF content with tables and text"
 
     @patch("app.services.document_utils.extract_text_from_csv_bytes")
@@ -92,28 +94,30 @@ class TestDocumentProcessingPipeline:
         record_llm_interaction(
             session=mock_session,
             user_id=1,
-            provider="openai",
-            model="gpt-4",
-            prompt="Analyze this document",
-            response="Document analysis complete",
-            tokens_used=150,
+            functionality="veradoc",
+            input_data="Analyze this document",
+            output_data="Document analysis complete",
+            metadata={"model": "gpt-4", "provider": "openai", "tokens_used": 150},
         )
 
         # Verify database operations
         mock_session.add.assert_called_once_with(mock_interaction)
         mock_session.commit.assert_called_once()
 
-    @patch("app.services.llms.invoke_llm")
+    @patch("app.tests.integration.test_document_processing_pipeline.invoke_llm")
+    @patch("app.services.global_rate_limiter.global_rate_limiter")
     def test_document_analysis_workflow(
-        self, mock_invoke_llm, client, superuser_token_headers, db
+        self, mock_rate_limiter, mock_invoke_llm, client, superuser_token_headers, db
     ):
         """Test complete document analysis workflow."""
+        # Mock rate limiter
+        mock_rate_limiter.wait_for_capacity.return_value = True
+        mock_rate_limiter.record_actual_usage.return_value = None
+
         # Mock LLM response
-        mock_response = Mock()
-        mock_response.content = (
+        mock_invoke_llm.return_value = (
             "Analysis: This document contains important business information."
         )
-        mock_invoke_llm.return_value = mock_response
 
         # Mock document content
         doc_content = "Company financial report Q1 2024"
@@ -142,7 +146,7 @@ class TestDocumentProcessingPipeline:
         assert result == "This is a plain text file."
 
     @patch("app.services.document_utils.extract_documents_from_file_unified")
-    @patch("app.services.llms.invoke_llm")
+    @patch("app.tests.integration.test_document_processing_pipeline.invoke_llm")
     def test_knowledge_base_ingestion_simulation(
         self, mock_invoke_llm, mock_extract_docs, client, superuser_token_headers, db
     ):
@@ -163,9 +167,7 @@ class TestDocumentProcessingPipeline:
         mock_extract_docs.return_value = mock_docs
 
         # Mock LLM processing
-        mock_response = Mock()
-        mock_response.content = "Processed and indexed successfully"
-        mock_invoke_llm.return_value = mock_response
+        mock_invoke_llm.return_value = "Processed and indexed successfully"
 
         # Simulate the workflow
         documents = mock_extract_docs(b"pdf content", "test.pdf")
@@ -177,7 +179,7 @@ class TestDocumentProcessingPipeline:
             assert "Processed" in result
 
     @patch("app.services.document_utils.extract_text_from_file_unified")
-    @patch("app.services.llms.invoke_llm")
+    @patch("app.tests.integration.test_document_processing_pipeline.invoke_llm")
     def test_chatbot_query_processing(
         self, mock_invoke_llm, mock_extract_text, client, superuser_token_headers, db
     ):
@@ -186,11 +188,9 @@ class TestDocumentProcessingPipeline:
         mock_extract_text.return_value = "Retrieved document content about AI"
 
         # Mock LLM response
-        mock_response = Mock()
-        mock_response.content = (
+        mock_invoke_llm.return_value = (
             "Based on the documents, AI is transforming business processes."
         )
-        mock_invoke_llm.return_value = mock_response
 
         # Simulate query processing
         query = "What is the impact of AI on business?"

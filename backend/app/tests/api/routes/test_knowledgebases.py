@@ -113,9 +113,7 @@ def test_read_knowledge_bases_pagination(
 def test_read_knowledge_bases_unauthorized(client: TestClient) -> None:
     """Test knowledge bases access without authentication."""
     response = client.get(f"{settings.API_V1_STR}/knowledge-bases/")
-    assert (
-        response.status_code == 404
-    )  # Route not found when no auth in test environment
+    assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 def test_read_knowledge_base_success(
@@ -216,9 +214,7 @@ def test_read_knowledge_base_unauthorized(
     response = client.get(
         f"{settings.API_V1_STR}/knowledge-bases/{test_knowledge_base.id}"
     )
-    assert (
-        response.status_code == 404
-    )  # Route not found when no auth in test environment
+    assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 @patch("app.api.routes.knowledgebases.progress_tracker")
@@ -282,9 +278,7 @@ def test_create_knowledge_base_unauthorized(client: TestClient) -> None:
         data=data,
         files=files,
     )
-    assert (
-        response.status_code == 404
-    )  # Route not found when no auth in test environment
+    assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 def test_update_knowledge_base_success(
@@ -332,9 +326,7 @@ def test_update_knowledge_base_unauthorized(
         f"{settings.API_V1_STR}/knowledge-bases/{test_knowledge_base.id}",
         json=update_data,
     )
-    assert (
-        response.status_code == 404
-    )  # Route not found when no auth in test environment
+    assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 def test_delete_knowledge_base_success(
@@ -376,9 +368,7 @@ def test_delete_knowledge_base_unauthorized(
     response = client.delete(
         f"{settings.API_V1_STR}/knowledge-bases/{test_knowledge_base.id}"
     )
-    assert (
-        response.status_code == 404
-    )  # Route not found when no auth in test environment
+    assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 def test_get_progress_success(
@@ -405,9 +395,7 @@ def test_get_progress_unauthorized(client: TestClient) -> None:
     task_id = uuid.uuid4()
 
     response = client.get(f"{settings.API_V1_STR}/knowledge-bases/progress/{task_id}")
-    assert (
-        response.status_code == 404
-    )  # Route not found when no auth in test environment
+    assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 @patch("app.api.routes.knowledgebases.progress_tracker")
@@ -433,9 +421,7 @@ def test_create_task_unauthorized(client: TestClient) -> None:
     response = client.post(
         f"{settings.API_V1_STR}/knowledge-bases/create-task?title=Test KB&description=Test Description",
     )
-    assert (
-        response.status_code == 404
-    )  # Route not found when no auth in test environment
+    assert response.status_code == 401  # Unauthorized when no auth provided
 
 
 # Removed parametrized test due to fixture scoping issues
@@ -448,6 +434,4 @@ def test_knowledge_base_endpoints_inactive_user(
     # Create token for inactive user (this would normally be handled by auth system)
     # For this test, we'll just verify the endpoint requires authentication
     response = client.get(f"{settings.API_V1_STR}{endpoint}")
-    assert (
-        response.status_code == 404
-    )  # Route not found when no auth in test environment
+    assert response.status_code == 401  # Unauthorized when no auth provided

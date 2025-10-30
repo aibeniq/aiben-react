@@ -7,7 +7,7 @@ from sqlmodel import Session, select
 from app import crud
 from app.core.config import settings
 from app.core.security import verify_password
-from app.models import User, UserCreate
+from app.models import User, UserCreate, UserStatus
 from app.tests.utils.utils import random_email, random_lower_string
 
 
@@ -80,6 +80,9 @@ def test_get_existing_user_current_user(client: TestClient, db: Session) -> None
     password = random_lower_string()
     user_in = UserCreate(email=username, password=password)
     user = crud.create_user(session=db, user_create=user_in)
+    user.status = UserStatus.ACTIVE  # Set user as active for testing
+    user.is_active = True
+    db.commit()
     user_id = user.id
 
     login_data = {
@@ -87,13 +90,10 @@ def test_get_existing_user_current_user(client: TestClient, db: Session) -> None
         "password": password,
     }
     r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
-    tokens = r.json()
-    a_token = tokens["access_token"]
-    headers = {"Authorization": f"Bearer {a_token}"}
+    # Login sets cookie automatically, no need to extract token
 
     r = client.get(
         f"{settings.API_V1_STR}/users/{user_id}",
-        headers=headers,
     )
     assert 200 <= r.status_code < 300
     api_user = r.json()
@@ -292,15 +292,16 @@ def test_register_user(client: TestClient, db: Session) -> None:
         json=data,
     )
     assert r.status_code == 200
-    created_user = r.json()
-    assert created_user["email"] == username
-    assert created_user["full_name"] == full_name
+    response = r.json()
+    assert response["message"] == "Registration submitted. Awaiting admin approval."
 
     user_query = select(User).where(User.email == username)
     user_db = db.exec(user_query).first()
     assert user_db
     assert user_db.email == username
     assert user_db.full_name == full_name
+    assert user_db.status.name == "PENDING"  # User should be in pending state
+    assert user_db.is_active == False  # Pending users should not be active
     assert verify_password(password, user_db.hashed_password)
 
 
@@ -387,6 +388,9 @@ def test_delete_user_me(client: TestClient, db: Session) -> None:
     password = random_lower_string()
     user_in = UserCreate(email=username, password=password)
     user = crud.create_user(session=db, user_create=user_in)
+    user.status = UserStatus.ACTIVE  # Set user as active for testing
+    user.is_active = True
+    db.commit()
     user_id = user.id
 
     login_data = {
@@ -394,13 +398,10 @@ def test_delete_user_me(client: TestClient, db: Session) -> None:
         "password": password,
     }
     r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
-    tokens = r.json()
-    a_token = tokens["access_token"]
-    headers = {"Authorization": f"Bearer {a_token}"}
+    # Login sets cookie automatically, no need to extract token
 
     r = client.delete(
         f"{settings.API_V1_STR}/users/me",
-        headers=headers,
     )
     assert r.status_code == 200
     deleted_user = r.json()
