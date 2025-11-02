@@ -39,15 +39,15 @@ class TestFeedbackAPI:
         db.commit()
         db.refresh(interaction)
 
-        # Submit feedback
-        feedback_data = {
-            "interaction_id": str(interaction.id),
-            "feedback": "correct",
-            "feedback_text": "Great response!",
-        }
-
+        # Submit feedback using query parameters
         response = client.post(
-            "/api/v1/feedback/", json=feedback_data, headers=superuser_token_headers
+            "/api/v1/feedback/",
+            params={
+                "interaction_id": str(interaction.id),
+                "feedback": "correct",
+                "feedback_text": "Great response!",
+            },
+            headers=superuser_token_headers
         )
 
         assert response.status_code == 200
@@ -67,14 +67,14 @@ class TestFeedbackAPI:
         # Use a random UUID that doesn't exist
         fake_interaction_id = str(uuid.uuid4())
 
-        feedback_data = {
-            "interaction_id": fake_interaction_id,
-            "feedback": "correct",
-            "feedback_text": "Good response",
-        }
-
         response = client.post(
-            "/api/v1/feedback/", json=feedback_data, headers=superuser_token_headers
+            "/api/v1/feedback/",
+            params={
+                "interaction_id": fake_interaction_id,
+                "feedback": "correct",
+                "feedback_text": "Good response",
+            },
+            headers=superuser_token_headers
         )
 
         assert response.status_code == 404

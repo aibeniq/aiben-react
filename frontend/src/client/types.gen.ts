@@ -411,16 +411,6 @@ export type OutlineSuggestion = {
   needs_revision: boolean
 }
 
-/**
- * Dedicated update model for PDF parsing preference.
- */
-export type PdfParsingPreferenceUpdate = {
-  /**
-   * PDF parsing mode: 'auto', 'enhanced', or 'basic'
-   */
-  pdf_parsing_preference: string
-}
-
 export type PrivateUserCreate = {
   email: string
   password: string
@@ -560,11 +550,6 @@ export type User = {
   default_llm?: string | null
   default_embedding_model?: string | null
   preferred_language?: string
-  vision_analysis_enabled?: boolean
-  /**
-   * PDF parsing mode preference: 'auto', 'enhanced', or 'basic'
-   */
-  pdf_parsing_preference?: string
   failed_login_attempts?: number
   locked_until?: string | null
 }
@@ -588,8 +573,8 @@ export type UserPublic = {
   registration_date: string
   approved_date: string | null
   preferred_language: string
-  vision_analysis_enabled: boolean
-  pdf_parsing_preference: string
+  pdf_parsing_preference?: string
+  vision_analysis_enabled?: boolean
 }
 
 export type UserRegister = {
@@ -612,16 +597,28 @@ export type UserUpdate = {
   full_name?: string | null
   password?: string | null
   preferred_language?: string | null
-  vision_analysis_enabled?: boolean | null
-  pdf_parsing_preference?: string | null
 }
+
+export type UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutData = {
+  requestBody: {
+    pdf_parsing_preference: string
+  }
+}
+
+export type UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutResponse = User
+
+export type UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisSettingPutData = {
+  requestBody: {
+    vision_analysis_enabled: boolean
+  }
+}
+
+export type UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisSettingPutResponse = User
 
 export type UserUpdateMe = {
   full_name?: string | null
   email?: string | null
   preferred_language?: string | null
-  vision_analysis_enabled?: boolean | null
-  pdf_parsing_preference?: string | null
 }
 
 export type ValidationError = {
@@ -644,10 +641,6 @@ export type VeraDocResponse = {
   results: {
     [key: string]: unknown
   }
-}
-
-export type VisionAnalysisUpdate = {
-  vision_analysis_enabled: boolean
 }
 
 export type QueryKnowledgeBaseApiV1ChatKnowledgeBaseKbIdPostData = {
@@ -1301,21 +1294,6 @@ export type UpdateLanguageApiV1UsersMeLanguagePutData = {
 }
 
 export type UpdateLanguageApiV1UsersMeLanguagePutResponse = User
-
-export type UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisPutData = {
-  requestBody: VisionAnalysisUpdate
-}
-
-export type UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisPutResponse =
-  User
-
-export type UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutData =
-  {
-    requestBody: PdfParsingPreferenceUpdate
-  }
-
-export type UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutResponse =
-  User
 
 export type ReadUsersApiV1UsersGetData = {
   limit?: number

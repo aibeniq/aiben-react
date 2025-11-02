@@ -6192,7 +6192,7 @@
         }
       }
     },
-    "/api/v1/api/v1/feedback/": {
+    "/api/v1/feedback/": {
       "post": {
         "tags": [
           "feedback"

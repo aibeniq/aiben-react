@@ -112,6 +112,8 @@ async def process_knowledge_base_async(
     from app.core.db import engine
     from sqlmodel import Session
     from app.models import User
+    from app.services.knowledgebases import chunk_documents_for_embedding
+    from app.api.routes.knowledgebases import load_correct_embeddings_model, load_uploaded_file
     import tempfile
     import io
     import zipfile
