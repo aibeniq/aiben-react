@@ -187,10 +187,6 @@ import type {
   GetSupportedLanguagesApiV1UsersSupportedLanguagesGetResponse,
   UpdateLanguageApiV1UsersMeLanguagePutData,
   UpdateLanguageApiV1UsersMeLanguagePutResponse,
-  UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisPutData,
-  UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisPutResponse,
-  UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutData,
-  UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutResponse,
   ReadUsersApiV1UsersGetData,
   ReadUsersApiV1UsersGetResponse,
   CreateUserApiV1UsersPostData,
@@ -253,6 +249,10 @@ import type {
   GenerateQuestionsWithFilesApiV1VeradocGenerateQuestionsWithFilesPostResponse,
   GenerateQuestionsApiV1VeradocGenerateQuestionsPostData,
   GenerateQuestionsApiV1VeradocGenerateQuestionsPostResponse,
+  UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutData,
+  UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutResponse,
+  UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisSettingPutData,
+  UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisSettingPutResponse,
 } from "./types.gen"
 
 export class ChatService {
@@ -635,7 +635,7 @@ export class FeedbackService {
   ): CancelablePromise<SubmitFeedbackApiV1ApiV1FeedbackPostResponse> {
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/api/v1/feedback/",
+      url: "/api/v1/feedback/",
       query: {
         interaction_id: data.interactionId,
         feedback: data.feedback,
@@ -2535,50 +2535,6 @@ export class UsersService {
   }
 
   /**
-   * Update Vision Analysis Setting
-   * Update current user's vision analysis preference.
-   * @param data The data for the request.
-   * @param data.requestBody
-   * @returns User Successful Response
-   * @throws ApiError
-   */
-  public static updateVisionAnalysisSetting(
-    data: UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisPutData,
-  ): CancelablePromise<UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisPutResponse> {
-    return __request(OpenAPI, {
-      method: "PUT",
-      url: "/api/v1/users/me/vision-analysis",
-      body: data.requestBody,
-      mediaType: "application/json",
-      errors: {
-        422: "Validation Error",
-      },
-    })
-  }
-
-  /**
-   * Update Pdf Parsing Preference
-   * Update current user's PDF parsing preference.
-   * @param data The data for the request.
-   * @param data.requestBody
-   * @returns User Successful Response
-   * @throws ApiError
-   */
-  public static updatePdfParsingPreference(
-    data: UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutData,
-  ): CancelablePromise<UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutResponse> {
-    return __request(OpenAPI, {
-      method: "PUT",
-      url: "/api/v1/users/me/pdf-parsing-preference",
-      body: data.requestBody,
-      mediaType: "application/json",
-      errors: {
-        422: "Validation Error",
-      },
-    })
-  }
-
-  /**
    * Read Users
    * Retrieve users.
    * @param data The data for the request.
@@ -2830,6 +2786,50 @@ export class UsersService {
       path: {
         user_id: data.userId,
       },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Pdf Parsing Preference
+   * Update current user PDF parsing preference.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns User Successful Response
+   * @throws ApiError
+   */
+  public static updatePdfParsingPreference(
+    data: UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutData,
+  ): CancelablePromise<UpdatePdfParsingPreferenceApiV1UsersMePdfParsingPreferencePutResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/users/me/pdf-parsing-preference",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Vision Analysis Setting
+   * Update current user vision analysis setting.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns User Successful Response
+   * @throws ApiError
+   */
+  public static updateVisionAnalysisSetting(
+    data: UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisSettingPutData,
+  ): CancelablePromise<UpdateVisionAnalysisSettingApiV1UsersMeVisionAnalysisSettingPutResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/users/me/vision-analysis-setting",
+      body: data.requestBody,
+      mediaType: "application/json",
       errors: {
         422: "Validation Error",
       },

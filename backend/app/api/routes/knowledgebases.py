@@ -43,7 +43,7 @@ from app.core.config import settings
 from app.services.pdf_utils import load_pdf_with_pypdf
 import hashlib
 
-from app.services.knowledgebases import KnowledgeBaseService
+from app.services.knowledgebases import KnowledgeBaseService, estimate_tokens_for_embedding, chunk_documents_for_embedding
 from app.utils.memory_manager import MemoryManager
 
 from sqlalchemy.sql import func
@@ -411,100 +411,6 @@ def analyze_upload_feasibility(files: List[UploadFile]) -> dict:
         )
 
     return analysis
-
-
-def estimate_tokens_for_embedding(text: str) -> int:
-    """
-    Estimate tokens in text for embedding models using cl100k_base encoding.
-    This is the same encoding used by OpenAI's text-embedding models.
-    """
-    try:
-        encoding = tiktoken.get_encoding("cl100k_base")
-        return len(encoding.encode(text))
-    except Exception:
-        # Fallback to rough estimation if tiktoken fails
-        return len(text) // 4
-
-
-def chunk_documents_for_embedding(
-    documents: List[Document], max_tokens_per_chunk: int = None
-) -> List[List[Document]]:
-    """
-    Split documents into chunks that fit within embedding model token limits.
-
-    Args:
-        documents: List of Document objects to chunk
-        max_tokens_per_chunk: Maximum tokens per chunk (defaults to config setting)
-
-    Returns:
-        List of document chunks, where each chunk is a list of documents
-    """
-    if max_tokens_per_chunk is None:
-        max_tokens_per_chunk = settings.EMBEDDING_MAX_TOKENS_PER_REQUEST
-
-    chunks = []
-    current_chunk = []
-    current_tokens = 0
-
-    print(
-        f"Chunking {len(documents)} documents with max {max_tokens_per_chunk:,} tokens per chunk"
-    )
-
-    for doc in documents:
-        # Estimate tokens for this document's content
-        doc_tokens = estimate_tokens_for_embedding(doc.page_content)
-
-        # If this single document exceeds the limit, split it further
-        if doc_tokens > max_tokens_per_chunk:
-            print(
-                f"⚠️  Document exceeds token limit ({doc_tokens:,} tokens), splitting further..."
-            )
-
-            # If we have accumulated docs, add them as a chunk first
-            if current_chunk:
-                chunks.append(current_chunk)
-                current_chunk = []
-                current_tokens = 0
-
-            # Split this large document into smaller pieces
-            text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=max_tokens_per_chunk
-                * 3,  # Rough character estimate (4 chars per token)
-                chunk_overlap=200,
-            )
-            split_docs = text_splitter.split_documents([doc])
-
-            # Group the split documents into token-limited chunks
-            for split_doc in split_docs:
-                split_tokens = estimate_tokens_for_embedding(split_doc.page_content)
-
-                if current_tokens + split_tokens > max_tokens_per_chunk:
-                    if current_chunk:
-                        chunks.append(current_chunk)
-                    current_chunk = [split_doc]
-                    current_tokens = split_tokens
-                else:
-                    current_chunk.append(split_doc)
-                    current_tokens += split_tokens
-        else:
-            # Check if adding this document would exceed the limit
-            if current_tokens + doc_tokens > max_tokens_per_chunk:
-                # Start a new chunk
-                if current_chunk:
-                    chunks.append(current_chunk)
-                current_chunk = [doc]
-                current_tokens = doc_tokens
-            else:
-                # Add to current chunk
-                current_chunk.append(doc)
-                current_tokens += doc_tokens
-
-    # Add the last chunk if it has documents
-    if current_chunk:
-        chunks.append(current_chunk)
-
-    print(f"✅ Created {len(chunks)} chunks from {len(documents)} documents")
-    return chunks
 
 
 def load_correct_embeddings_model(
