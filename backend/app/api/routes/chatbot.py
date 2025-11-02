@@ -16,7 +16,7 @@ from app.services.llms import (
     record_llm_interaction,
 )
 from app.services.translation import translate_text_if_needed
-from app.services.knowledgebases import get_embedding_model
+from app.services.knowledgebases import get_embedding_model, chunk_documents_for_embedding
 from app.services.retrievers import (
     create_ensemble_retriever,
 )
@@ -1802,6 +1802,9 @@ async def query_document(
             # Filter out complex metadata that Chroma can't handle
             chunks = filter_complex_metadata(chunks)
 
+            # Use token-aware chunking to avoid OpenAI token limits
+            document_chunks = chunk_documents_for_embedding(chunks, max_tokens_per_chunk=settings.EMBEDDING_MAX_TOKENS_PER_REQUEST)
+
             # Create embeddings
             embeddings = load_embeddings_model(
                 provider=embedding_model.provider, model_id=embedding_model.model_id
@@ -1809,9 +1812,21 @@ async def query_document(
 
             # Create vector store in a temp directory that persists for the session
             vector_dir = tempfile.mkdtemp()
-            vector_store = Chroma.from_documents(
-                documents=chunks, embedding=embeddings, persist_directory=vector_dir
-            )
+
+            # Process chunks sequentially to avoid token limits
+            vector_store = None
+            for i, chunk in enumerate(document_chunks):
+                if vector_store is None:
+                    # Initialize with first chunk
+                    vector_store = Chroma.from_documents(
+                        chunk, embedding=embeddings, persist_directory=vector_dir
+                    )
+                else:
+                    # Add subsequent chunks
+                    vector_store.add_documents(chunk)
+                # Optional: Add small delay to be API-friendly
+                import time
+                time.sleep(0.1)
             # Create a basic retriever without enhanced filtering to avoid async issues
             retriever = vector_store.as_retriever(
                 search_kwargs={"k": settings.RAG_NUM_CHUNKS}
