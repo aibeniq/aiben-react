@@ -122,7 +122,44 @@
     "delete": "Ta bort",
     "confirmationRequired": "Bekräftelse krävs",
     "deleteConfirmationText": "Alla dina kontodata kommer att tas bort permanent. Om du är säker, klicka på \"Bekräfta\" för att fortsätta. Denna åtgärd kan inte ångras.",
-    "cancel": "Avbryt"
+    "cancel": "Avbryt",
+    "visionAnalysis": {
+      "tab": "Synanalys",
+      "title": "Inställningar för Synanalys",
+      "description": "Kontrollerar om AI:n analyserar bilder inbäddade i dina dokument. Att inaktivera detta kan avsevärt minska API-kostnaderna för dokument med många bilder.",
+      "enableLabel": "Aktivera Synanalys",
+      "costWarning": "Varning: Synanalys kan vara dyr för dokument med många bilder. Varje analyserad bild medför ytterligare API-kostnader. Överväg att inaktivera om du främst arbetar med dokument som endast innehåller text.",
+      "whenEnabled": "När aktiverad:",
+      "feature1": "Bilder i PDF- och DOCX-filer kommer att analyseras",
+      "feature2": "Diagram, diagram och visuellt innehåll kommer att extraheras",
+      "feature3": "Formulärfält i bilder kan upptäckas (FormConnect)",
+      "feature4": "Mer omfattande dokumentförståelse",
+      "whenDisabled": "När inaktiverad:",
+      "disabled1": "Endast textinnehåll kommer att analyseras (lägre kostnad)",
+      "disabled2": "Visuella element i dokument kommer att ignoreras"
+    },
+    "pdfParsing": {
+      "tab": "PDF-analys",
+      "title": "Inställningar för PDF-analys",
+      "description": "Kontrollerar hur systemet bearbetar PDF-dokument. Välj det läge som passar bäst för ditt arbetsflöde och dokumenttyper.",
+      "explanation": "Tips: Olika analyslägen erbjuder olika avvägningar mellan hastighet och noggrannhet. Välj baserat på dina typiska dokumenttyper.",
+      "modeLabel": "PDF-analysläge",
+      "enhancedMode": "Förbättrat (Bästa Kvalitet)",
+      "enhancedDescription": "Använder alltid PyMuPDF4LLM för överlägsen tabellextraktion. Bästa för dokument med komplexa tabeller, men långsammare.",
+      "basicMode": "Grundläggande (Snabbast)",
+      "basicDescription": "Använder endast snabb pypdf-extraktion. Bästa för textdokument utan tabeller.",
+      "comparison": {
+        "title": "Lägesjämförelse:",
+        "enhancedTitle": "Förbättrat Läge",
+        "enhancedFeature1": "Använder alltid PyMuPDF4LLM",
+        "enhancedFeature2": "Bästa tabelstrukturbevarande",
+        "enhancedWarning": "Långsammare bearbetningstid",
+        "basicTitle": "Grundläggande Läge",
+        "basicFeature1": "Snabbaste bearbetningshastighet",
+        "basicFeature2": "Lägre resursanvändning",
+        "basicWarning": "Kan missa tabellformatering"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Något gick fel",

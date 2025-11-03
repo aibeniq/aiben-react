@@ -82,9 +82,9 @@
       "name": "名稱",
       "description": "描述",
       "sources": "來源",
-      "noDescription": "無描述",
-      "sourcesCount": "{{count}} 個來源",
-      "pagesCount": "{{count}} 頁"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "selectKnowledgeBasePlaceholder": "選擇一個知識庫...",
     "noKnowledgeBasesAvailable": "沒有可用的知識庫。請先建立一個以使用此功能。",
@@ -122,7 +122,44 @@
     "delete": "刪除",
     "confirmationRequired": "需要確認",
     "deleteConfirmationText": "您的所有帳戶資料將被永久刪除。如果您確定，請點擊\"確認\"繼續。此操作無法撤銷。",
-    "cancel": "取消"
+    "cancel": "取消",
+    "visionAnalysis": {
+      "tab": "視覺分析",
+      "title": "視覺分析設定",
+      "description": "控制AI是否分析文件中嵌入的圖像。停用此功能可以顯著降低包含大量圖像的文件的API成本。",
+      "enableLabel": "啟用視覺分析",
+      "costWarning": "警告：視覺分析對於包含大量圖像的文件可能成本很高。每個分析的圖像都會產生額外的API成本。如果您主要處理純文字文件，請考慮停用此功能。",
+      "whenEnabled": "啟用時：",
+      "feature1": "PDF和DOCX文件中的圖像將被分析",
+      "feature2": "圖表、圖表和視覺內容將被提取",
+      "feature3": "圖像中的表單字段可以被檢測（FormConnect）",
+      "feature4": "更全面的文件理解",
+      "whenDisabled": "停用時：",
+      "disabled1": "僅分析文字內容（成本較低）",
+      "disabled2": "文件中的視覺元素將被忽略"
+    },
+    "pdfParsing": {
+      "tab": "PDF解析",
+      "title": "PDF解析偏好設定",
+      "description": "控制系統如何處理PDF文件。選擇最適合您工作流程和文件類型的模式。",
+      "explanation": "提示：不同的解析模式在速度和準確性之間提供不同的權衡。根據您的典型文件類型進行選擇。",
+      "modeLabel": "PDF解析模式",
+      "enhancedMode": "增強（最佳品質）",
+      "enhancedDescription": "始終使用PyMuPDF4LLM進行卓越的表格提取。最適合具有複雜表格的文件，但速度較慢。",
+      "basicMode": "基礎（最快）",
+      "basicDescription": "僅使用快速pypdf提取。最適合沒有表格的純文字文件。",
+      "comparison": {
+        "title": "模式比較：",
+        "enhancedTitle": "增強模式",
+        "enhancedFeature1": "始終使用PyMuPDF4LLM",
+        "enhancedFeature2": "最佳表格結構保持",
+        "enhancedWarning": "處理時間較慢",
+        "basicTitle": "基礎模式",
+        "basicFeature1": "最快的處理速度",
+        "basicFeature2": "較低的資源使用",
+        "basicWarning": "可能遺失表格格式"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "發生錯誤",

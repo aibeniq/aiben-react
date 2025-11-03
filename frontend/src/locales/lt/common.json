@@ -82,9 +82,9 @@
       "name": "Pavadinimas",
       "description": "Aprašymas",
       "sources": "Šaltiniai",
-      "noDescription": "Aprašymo nėra",
-      "sourcesCount": "{{count}} šaltiniai",
-      "pagesCount": "{{count}} puslapiai"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "selectKnowledgeBasePlaceholder": "Pasirinkite žinių bazę...",
     "noKnowledgeBasesAvailable": "Nėra prieinamų žinių bazių. Sukurkite vieną, kad galėtumėte naudoti šią funkciją.",
@@ -122,7 +122,44 @@
     "delete": "Ištrinti",
     "confirmationRequired": "Reikalingas patvirtinimas",
     "deleteConfirmationText": "Visi jūsų paskyros duomenys bus negrįžtamai ištrinti. Jei esate tikri, spustelėkite \"Patvirtinti\", kad tęstumėte. Šio veiksmo negalima atšaukti.",
-    "cancel": "Atšaukti"
+    "cancel": "Atšaukti",
+    "visionAnalysis": {
+      "tab": "Vaizdo Analizė",
+      "title": "Vaizdo Analizės Nustatymai",
+      "description": "Kontrolė, ar DI analizuoja jūsų dokumentuose įterptus vaizdus. Šios funkcijos išjungimas gali žymiai sumažinti API išlaidas dokumentams su daug vaizdų.",
+      "enableLabel": "Įjungti Vaizdo Analizę",
+      "costWarning": "Įspėjimas: Vaizdo analizė gali būti brangi dokumentams su daug vaizdų. Kiekvienas analizuojamas vaizdas sukelia papildomas API išlaidas. Apsvarstykite išjungimą, jei daugiausia dirbate su tik teksto dokumentais.",
+      "whenEnabled": "Kai įjungta:",
+      "feature1": "Vaizdai PDF ir DOCX failuose bus analizuojami",
+      "feature2": "Diagramos, schemos ir vaizdinis turinys bus ištrauktas",
+      "feature3": "Formų laukai vaizduose gali būti aptikti (FormConnect)",
+      "feature4": "Išsamiau dokumento supratimas",
+      "whenDisabled": "Kai išjungta:",
+      "disabled1": "Bus analizuojamas tik teksto turinys (mažesnės išlaidos)",
+      "disabled2": "Vaizdiniai elementai dokumentuose bus ignoruojami"
+    },
+    "pdfParsing": {
+      "tab": "PDF Analizė",
+      "title": "PDF Analizės Nuostatos",
+      "description": "Kontrolė, kaip sistema apdoroja PDF dokumentus. Pasirinkite režimą, kuris geriausiai tinka jūsų darbo eigai ir dokumentų tipams.",
+      "explanation": "Patarimas: Skirtingi analizės režimai siūlo skirtingus greičio ir tikslumo kompromisus. Pasirinkite pagal savo tipiškus dokumentų tipus.",
+      "modeLabel": "PDF Analizės Režimas",
+      "enhancedMode": "Patobulintas (Geriausia Kokybė)",
+      "enhancedDescription": "Visada naudoja PyMuPDF4LLM pranašesniam lentelių ištraukimui. Geriausia dokumentams su sudėtingomis lentelėmis, bet lėtesnis.",
+      "basicMode": "Pagrindinis (Greičiausias)",
+      "basicDescription": "Naudoja tik greitą pypdf ištraukimą. Geriausia tik teksto dokumentams be lentelių.",
+      "comparison": {
+        "title": "Režimų Palyginimas:",
+        "enhancedTitle": "Patobulintas Režimas",
+        "enhancedFeature1": "Visada naudoja PyMuPDF4LLM",
+        "enhancedFeature2": "Geriausias lentelių struktūros išsaugojimas",
+        "enhancedWarning": "Lėtesnis apdorojimo laikas",
+        "basicTitle": "Pagrindinis Režimas",
+        "basicFeature1": "Greičiausias apdorojimo greitis",
+        "basicFeature2": "Mažesnis išteklių naudojimas",
+        "basicWarning": "Gali praleisti lentelių formatavimą"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Kažkas nutiko",

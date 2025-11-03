@@ -62,9 +62,9 @@
       "name": "Tên",
       "description": "Mô tả",
       "sources": "Nguồn",
-      "noDescription": "Không có mô tả",
-      "sourcesCount": "{{count}} nguồn",
-      "pagesCount": "{{count}} trang"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "Tên",
     "knowledgeBaseTableDescription": "Mô tả",
@@ -122,7 +122,44 @@
     "delete": "Xóa",
     "confirmationRequired": "Yêu cầu xác nhận",
     "deleteConfirmationText": "Tất cả dữ liệu tài khoản của bạn sẽ bị xóa vĩnh viễn. Nếu bạn chắc chắn, hãy nhấp vào \"Xác nhận\" để tiếp tục. Hành động này không thể hoàn tác.",
-    "cancel": "Hủy"
+    "cancel": "Hủy",
+    "visionAnalysis": {
+      "tab": "Phân Tích Hình Ảnh",
+      "title": "Cài Đặt Phân Tích Hình Ảnh",
+      "description": "Kiểm soát xem AI có phân tích hình ảnh nhúng trong tài liệu của bạn hay không. Việc tắt tính năng này có thể giảm đáng kể chi phí API cho các tài liệu có nhiều hình ảnh.",
+      "enableLabel": "Bật Phân Tích Hình Ảnh",
+      "costWarning": "Cảnh báo: Phân tích hình ảnh có thể tốn kém cho các tài liệu có nhiều hình ảnh. Mỗi hình ảnh được phân tích sẽ phát sinh chi phí API bổ sung. Hãy cân nhắc tắt nếu bạn chủ yếu làm việc với tài liệu chỉ có văn bản.",
+      "whenEnabled": "Khi được bật:",
+      "feature1": "Hình ảnh trong tệp PDF và DOCX sẽ được phân tích",
+      "feature2": "Biểu đồ, sơ đồ và nội dung trực quan sẽ được trích xuất",
+      "feature3": "Có thể phát hiện các trường biểu mẫu trong hình ảnh (FormConnect)",
+      "feature4": "Hiểu biết tài liệu toàn diện hơn",
+      "whenDisabled": "Khi bị tắt:",
+      "disabled1": "Chỉ nội dung văn bản sẽ được phân tích (chi phí thấp hơn)",
+      "disabled2": "Các yếu tố trực quan trong tài liệu sẽ bị bỏ qua"
+    },
+    "pdfParsing": {
+      "tab": "Phân Tích PDF",
+      "title": "Tùy Chọn Phân Tích PDF",
+      "description": "Kiểm soát cách hệ thống xử lý tài liệu PDF. Chọn chế độ phù hợp nhất với quy trình làm việc và loại tài liệu của bạn.",
+      "explanation": "Mẹo: Các chế độ phân tích khác nhau cung cấp sự cân bằng khác nhau giữa tốc độ và độ chính xác. Chọn dựa trên loại tài liệu điển hình của bạn.",
+      "modeLabel": "Chế Độ Phân Tích PDF",
+      "enhancedMode": "Nâng Cao (Chất Lượng Tốt Nhất)",
+      "enhancedDescription": "Luôn sử dụng PyMuPDF4LLM để trích xuất bảng vượt trội. Tốt nhất cho tài liệu có bảng phức tạp, nhưng chậm hơn.",
+      "basicMode": "Cơ Bản (Nhanh Nhất)",
+      "basicDescription": "Chỉ sử dụng trích xuất pypdf nhanh. Tốt nhất cho tài liệu chỉ có văn bản không có bảng.",
+      "comparison": {
+        "title": "So Sánh Chế Độ:",
+        "enhancedTitle": "Chế Độ Nâng Cao",
+        "enhancedFeature1": "Luôn sử dụng PyMuPDF4LLM",
+        "enhancedFeature2": "Bảo toàn cấu trúc bảng tốt nhất",
+        "enhancedWarning": "Thời gian xử lý chậm hơn",
+        "basicTitle": "Chế Độ Cơ Bản",
+        "basicFeature1": "Tốc độ xử lý nhanh nhất",
+        "basicFeature2": "Sử dụng tài nguyên thấp hơn",
+        "basicWarning": "Có thể bỏ lỡ định dạng bảng"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Có lỗi xảy ra",

@@ -78,9 +78,9 @@
       "name": "שם",
       "description": "תיאור",
       "sources": "מקורות",
-      "noDescription": "אין תיאור",
-      "sourcesCount": "{{count}} מקורות",
-      "pagesCount": "{{count}} דפים"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "שם",
     "knowledgeBaseTableDescription": "תיאור",
@@ -122,7 +122,44 @@
     "delete": "מחק",
     "confirmationRequired": "נדרשת אישור",
     "deleteConfirmationText": "כל נתוני החשבון שלך יימחקו לצמיתות. אם אתה בטוח, לחץ על \"אישור\" כדי להמשיך. פעולה זו לא ניתנת לביטול.",
-    "cancel": "ביטול"
+    "cancel": "ביטול",
+    "visionAnalysis": {
+      "tab": "ניתוח ראייה",
+      "title": "הגדרות ניתוח ראייה",
+      "description": "שלוט האם ה-AI מנתח תמונות המוטמעות במסמכים שלך. השבתת תכונה זו יכולה להפחית משמעותית את עלויות ה-API עבור מסמכים עם תמונות רבות.",
+      "enableLabel": "הפעל ניתוח ראייה",
+      "costWarning": "אזהרה: ניתוח ראייה יכול להיות יקר עבור מסמכים עם תמונות רבות. כל תמונה המנותחת גורמת לעלויות API נוספות. שקול להשבית אם אתה עובד בעיקר עם מסמכי טקסט בלבד.",
+      "whenEnabled": "כאשר מופעל:",
+      "feature1": "תמונות בקבצי PDF ו-DOCX ינותחו",
+      "feature2": "תרשימים, דיאגרמות ותוכן חזותי יופקו",
+      "feature3": "שדות טופס בתמונות יכולים להתגלות (FormConnect)",
+      "feature4": "הבנה מקיפה יותר של המסמך",
+      "whenDisabled": "כאשר מושבת:",
+      "disabled1": "רק תוכן טקסט ינותח (עלות נמוכה יותר)",
+      "disabled2": "רכיבים חזותיים במסמכים יתעלמו"
+    },
+    "pdfParsing": {
+      "tab": "ניתוח PDF",
+      "title": "העדפות ניתוח PDF",
+      "description": "שלוט כיצד המערכת מעבדת מסמכי PDF. בחר את המצב המתאים ביותר לזרימת העבודה ולסוגי המסמכים שלך.",
+      "explanation": "טיפ: מצבי ניתוח שונים מציעים פשרות שונות בין מהירות ודיוק. בחר בהתבסס על סוגי המסמכים הטיפוסיים שלך.",
+      "modeLabel": "מצב ניתוח PDF",
+      "enhancedMode": "מורחב (איכות הטובה ביותר)",
+      "enhancedDescription": "תמיד משתמש ב-PyMuPDF4LLM לחילוץ טבלאות מעולה. הטוב ביותר עבור מסמכים עם טבלאות מורכבות, אך איטי יותר.",
+      "basicMode": "בסיסי (המהיר ביותר)",
+      "basicDescription": "משתמש רק בחילוץ pypdf מהיר. הטוב ביותר עבור מסמכי טקסט בלבד ללא טבלאות.",
+      "comparison": {
+        "title": "השוואת מצבים:",
+        "enhancedTitle": "מצב מורחב",
+        "enhancedFeature1": "תמיד משתמש ב-PyMuPDF4LLM",
+        "enhancedFeature2": "שימור מבנה הטבלה הטוב ביותר",
+        "enhancedWarning": "זמן עיבוד איטי יותר",
+        "basicTitle": "מצב בסיסי",
+        "basicFeature1": "מהירות עיבוד מהירה ביותר",
+        "basicFeature2": "שימוש נמוך יותר במשאבים",
+        "basicWarning": "עלול לפספס עיצוב טבלה"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "משהו השתבש",

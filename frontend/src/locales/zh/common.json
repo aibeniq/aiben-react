@@ -122,7 +122,44 @@
     "delete": "删除",
     "confirmationRequired": "需要确认",
     "deleteConfirmationText": "您的所有账户数据将被永久删除。如果您确定，请点击\"确认\"继续。此操作无法撤销。",
-    "cancel": "取消"
+    "cancel": "取消",
+    "visionAnalysis": {
+      "tab": "视觉分析",
+      "title": "视觉分析设置",
+      "description": "控制AI是否分析文档中嵌入的图像。禁用此功能可以显著降低包含大量图像的文档的API成本。",
+      "enableLabel": "启用视觉分析",
+      "costWarning": "警告：视觉分析对于包含大量图像的文档可能成本很高。每个分析的图像都会产生额外的API成本。如果您主要处理纯文本文档，请考虑禁用此功能。",
+      "whenEnabled": "启用时：",
+      "feature1": "PDF和DOCX文件中的图像将被分析",
+      "feature2": "图表、图表和视觉内容将被提取",
+      "feature3": "图像中的表单字段可以被检测（FormConnect）",
+      "feature4": "更全面的文档理解",
+      "whenDisabled": "禁用时：",
+      "disabled1": "仅分析文本内容（成本较低）",
+      "disabled2": "文档中的视觉元素将被忽略"
+    },
+    "pdfParsing": {
+      "tab": "PDF解析",
+      "title": "PDF解析偏好设置",
+      "description": "控制系统如何处理PDF文档。选择最适合您工作流程和文档类型的模式。",
+      "explanation": "提示：不同的解析模式在速度和准确性之间提供不同的权衡。根据您的典型文档类型进行选择。",
+      "modeLabel": "PDF解析模式",
+      "enhancedMode": "增强（最佳质量）",
+      "enhancedDescription": "始终使用PyMuPDF4LLM进行卓越的表格提取。最佳适用于具有复杂表格的文档，但速度较慢。",
+      "basicMode": "基础（最快）",
+      "basicDescription": "仅使用快速pypdf提取。最佳适用于没有表格的纯文本文档。",
+      "comparison": {
+        "title": "模式比较：",
+        "enhancedTitle": "增强模式",
+        "enhancedFeature1": "始终使用PyMuPDF4LLM",
+        "enhancedFeature2": "最佳表格结构保持",
+        "enhancedWarning": "处理时间较慢",
+        "basicTitle": "基础模式",
+        "basicFeature1": "最快的处理速度",
+        "basicFeature2": "较低的资源使用",
+        "basicWarning": "可能丢失表格格式"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "出了点问题",

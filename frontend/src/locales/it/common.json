@@ -122,7 +122,44 @@
     "delete": "Elimina",
     "confirmationRequired": "Conferma Richiesta",
     "deleteConfirmationText": "Tutti i dati del tuo account saranno eliminati permanentemente. Se sei sicuro, fai clic su \"Conferma\" per procedere. Questa azione non può essere annullata.",
-    "cancel": "Annulla"
+    "cancel": "Annulla",
+    "visionAnalysis": {
+      "tab": "Analisi Visiva",
+      "title": "Impostazioni Analisi Visiva",
+      "description": "Controlla se l'IA analizza le immagini incorporate nei tuoi documenti. Disabilitare questo può ridurre significativamente i costi API per documenti con molte immagini.",
+      "enableLabel": "Abilita Analisi Visiva",
+      "costWarning": "Avviso: L'analisi visiva può essere costosa per documenti con molte immagini. Ogni immagine analizzata comporta costi API aggiuntivi. Considera di disabilitarla se lavori principalmente con documenti solo testo.",
+      "whenEnabled": "Quando abilitato:",
+      "feature1": "Le immagini nei file PDF e DOCX saranno analizzate",
+      "feature2": "Grafici, diagrammi e contenuto visivo saranno estratti",
+      "feature3": "I campi modulo nelle immagini possono essere rilevati (FormConnect)",
+      "feature4": "Comprensione del documento più completa",
+      "whenDisabled": "Quando disabilitato:",
+      "disabled1": "Solo il contenuto testo sarà analizzato (costo minore)",
+      "disabled2": "Gli elementi visivi nei documenti saranno ignorati"
+    },
+    "pdfParsing": {
+      "tab": "Analisi PDF",
+      "title": "Preferenze Analisi PDF",
+      "description": "Controlla come il sistema elabora i documenti PDF. Scegli la modalità che meglio si adatta al tuo flusso di lavoro e tipi di documenti.",
+      "explanation": "Suggerimento: Diverse modalità di analisi offrono diversi compromessi tra velocità e precisione. Scegli in base ai tuoi tipi di documenti tipici.",
+      "modeLabel": "Modalità Analisi PDF",
+      "enhancedMode": "Migliorato (Migliore Qualità)",
+      "enhancedDescription": "Utilizza sempre PyMuPDF4LLM per un'estrazione tabelle superiore. Migliore per documenti con tabelle complesse, ma più lento.",
+      "basicMode": "Base (Più Veloce)",
+      "basicDescription": "Utilizza solo estrazione pypdf veloce. Migliore per documenti solo testo senza tabelle.",
+      "comparison": {
+        "title": "Confronto Modalità:",
+        "enhancedTitle": "Modalità Migliorata",
+        "enhancedFeature1": "Utilizza sempre PyMuPDF4LLM",
+        "enhancedFeature2": "Migliore preservazione struttura tabelle",
+        "enhancedWarning": "Tempo di elaborazione più lento",
+        "basicTitle": "Modalità Base",
+        "basicFeature1": "Velocità di elaborazione più rapida",
+        "basicFeature2": "Minor utilizzo risorse",
+        "basicWarning": "Potrebbe perdere formattazione tabelle"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Qualcosa è andato storto",

@@ -76,9 +76,9 @@
       "name": "Navn",
       "description": "Beskrivelse",
       "sources": "Kilder",
-      "noDescription": "Ingen beskrivelse",
-      "sourcesCount": "{{count}} kilder",
-      "pagesCount": "{{count}} sider"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "Navn",
     "knowledgeBaseTableDescription": "Beskrivelse",
@@ -122,7 +122,44 @@
     "delete": "Slet",
     "confirmationRequired": "Bekræftelse påkrævet",
     "deleteConfirmationText": "Alle dine kontodata vil blive slettet permanent. Hvis du er sikker, klik på \"Bekræft\" for at fortsætte. Denne handling kan ikke fortrydes.",
-    "cancel": "Annuller"
+    "cancel": "Annuller",
+    "visionAnalysis": {
+      "tab": "Synsanalyse",
+      "title": "Indstillinger for Synsanalyse",
+      "description": "Kontroller, om AI'en analyserer billeder, der er indlejret i dine dokumenter. Deaktivering af dette kan betydeligt reducere API-omkostningerne for dokumenter med mange billeder.",
+      "enableLabel": "Aktivér Synsanalyse",
+      "costWarning": "Advarsel: Synsanalyse kan være dyr for dokumenter med mange billeder. Hvert analyserede billede medfører ekstra API-omkostninger. Overvej at deaktivere, hvis du primært arbejder med tekst-dokumenter.",
+      "whenEnabled": "Når aktiveret:",
+      "feature1": "Billeder i PDF- og DOCX-filer vil blive analyseret",
+      "feature2": "Diagrammer, skemaer og visuelt indhold vil blive udtrukket",
+      "feature3": "Formularfelter i billeder kan detekteres (FormConnect)",
+      "feature4": "Mere omfattende dokumentforståelse",
+      "whenDisabled": "Når deaktiveret:",
+      "disabled1": "Kun tekstindhold vil blive analyseret (lavere omkostninger)",
+      "disabled2": "Visuelle elementer i dokumenter vil blive ignoreret"
+    },
+    "pdfParsing": {
+      "tab": "PDF-analyse",
+      "title": "Præferencer for PDF-analyse",
+      "description": "Kontroller, hvordan systemet behandler PDF-dokumenter. Vælg den tilstand, der passer bedst til din arbejdsproces og dokumenttyper.",
+      "explanation": "Tip: Forskellige analysetilstande tilbyder forskellige kompromiser mellem hastighed og nøjagtighed. Vælg baseret på dine typiske dokumenttyper.",
+      "modeLabel": "PDF-analysetilstand",
+      "enhancedMode": "Forbedret (Bedste Kvalitet)",
+      "enhancedDescription": "Bruger altid PyMuPDF4LLM til overlegen tabeludtrækning. Bedst til dokumenter med komplekse tabeller, men langsommere.",
+      "basicMode": "Grundlæggende (Hurtigst)",
+      "basicDescription": "Bruger kun hurtig pypdf-udtrækning. Bedst til tekst-dokumenter uden tabeller.",
+      "comparison": {
+        "title": "Tilstandssammenligning:",
+        "enhancedTitle": "Forbedret Tilstand",
+        "enhancedFeature1": "Bruger altid PyMuPDF4LLM",
+        "enhancedFeature2": "Bedste tabelstrukturbevarelse",
+        "enhancedWarning": "Langsommere behandlingstid",
+        "basicTitle": "Grundlæggende Tilstand",
+        "basicFeature1": "Hurtigste behandlingshastighed",
+        "basicFeature2": "Lavere ressourceforbrug",
+        "basicWarning": "Kan overse tabelformatering"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Noget gik galt",

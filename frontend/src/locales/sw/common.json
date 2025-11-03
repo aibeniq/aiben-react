@@ -78,9 +78,9 @@
       "name": "Jina",
       "description": "Maelezo",
       "sources": "Vyanzo",
-      "noDescription": "Hakuna maelezo",
-      "sourcesCount": "{{count}} vyanzo",
-      "pagesCount": "{{count}} kurasa"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "Jina",
     "knowledgeBaseTableDescription": "Maelezo",
@@ -122,7 +122,44 @@
     "delete": "Futa",
     "confirmationRequired": "Uthibitisho Unahitajika",
     "deleteConfirmationText": "Data zote za akaunti yako zitafutwa kabisa. Ikiwa una uhakika, bonyeza \"Thibitisha\" ili kuendelea. Hatua hii haiwezi kutenduliwa.",
-    "cancel": "Ghairi"
+    "cancel": "Ghairi",
+    "visionAnalysis": {
+      "tab": "Uchambuzi wa Maono",
+      "title": "Mipangilio ya Uchambuzi wa Maono",
+      "description": "Dhibiti kama AI inachambua picha zilizoingizwa katika hati zako. Kuzima hii kunaweza kupunguza gharama za API kwa kiasi kikubwa kwa hati zilizo na picha nyingi.",
+      "enableLabel": "Wezesha Uchambuzi wa Maono",
+      "costWarning": "Onyo: Uchambuzi wa maono unaweza kuwa ghali kwa hati zilizo na picha nyingi. Kila picha inayochambuliwa inasababisha gharama za ziada za API. Zingatia kuzima ikiwa unashughulika hasa na hati za maandishi pekee.",
+      "whenEnabled": "Wakati imewezeshwa:",
+      "feature1": "Picha katika faili za PDF na DOCX zitachambuliwa",
+      "feature2": "Chati, michoro, na maudhui ya kuona yatatolewa",
+      "feature3": "Sehemu za fomu katika picha zinaweza kutambuliwa (FormConnect)",
+      "feature4": "Uelewa wa hati ulio kamili zaidi",
+      "whenDisabled": "Wakati imezimwa:",
+      "disabled1": "Maudhui ya maandishi pekee yatachambuliwa (gharama ya chini)",
+      "disabled2": "Vipengele vya kuona katika hati vitapuuzwa"
+    },
+    "pdfParsing": {
+      "tab": "Uchambuzi wa PDF",
+      "title": "Mapendeleo ya Uchambuzi wa PDF",
+      "description": "Dhibiti jinsi mfumo unavyoshughulikia hati za PDF. Chagua hali inayofaa zaidi kwa mtiririko wako wa kazi na aina za hati.",
+      "explanation": "Kidokezo: Modi tofauti za uchambuzi hutoa mabadilishano tofauti kati ya kasi na usahihi. Chagua kulingana na aina zako za kawaida za hati.",
+      "modeLabel": "Modi ya Uchambuzi wa PDF",
+      "enhancedMode": "Imara (Ubora Bora)",
+      "enhancedDescription": "Daima hutumia PyMuPDF4LLM kwa uboreshaji bora wa jedwali. Bora kwa hati zilizo na majedwali magumu, lakini polepole.",
+      "basicMode": "Msingi (Haraka Zaidi)",
+      "basicDescription": "Hutumia uboreshaji wa haraka wa pypdf pekee. Bora kwa hati za maandishi pekee zisizo na majedwali.",
+      "comparison": {
+        "title": "Ulinganisho wa Modi:",
+        "enhancedTitle": "Modi Iliyoimarishwa",
+        "enhancedFeature1": "Daima hutumia PyMuPDF4LLM",
+        "enhancedFeature2": "Uhifadhi bora wa muundo wa jedwali",
+        "enhancedWarning": "Muda wa usindikaji polepole",
+        "basicTitle": "Modi ya Msingi",
+        "basicFeature1": "Kasi ya haraka zaidi ya usindikaji",
+        "basicFeature2": "Matumizi ya chini ya rasilimali",
+        "basicWarning": "Inaweza kukosa umbizo wa jedwali"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Kuna hitilafu",

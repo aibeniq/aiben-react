@@ -122,7 +122,44 @@
     "delete": "削除",
     "confirmationRequired": "確認が必要です",
     "deleteConfirmationText": "あなたのアカウントのすべてのデータが永久に削除されます。確信している場合は、続行するために「確認」をクリックしてください。この操作は元に戻せません。",
-    "cancel": "キャンセル"
+    "cancel": "キャンセル",
+    "visionAnalysis": {
+      "tab": "ビジョン分析",
+      "title": "ビジョン分析設定",
+      "description": "AIがドキュメント内の画像を分析するかどうかを制御します。無効にすると、多くの画像を含むドキュメントのAPIコストを大幅に削減できます。",
+      "enableLabel": "ビジョン分析を有効にする",
+      "costWarning": "警告: ビジョン分析は多くの画像を含むドキュメントで高コストになる可能性があります。分析される各画像は追加のAPIコストが発生します。主にテキストのみのドキュメントで作業する場合は無効にすることを検討してください。",
+      "whenEnabled": "有効時:",
+      "feature1": "PDFおよびDOCXファイル内の画像が分析されます",
+      "feature2": "チャート、図表、視覚コンテンツが抽出されます",
+      "feature3": "画像内のフォームフィールドが検出されます（FormConnect）",
+      "feature4": "より包括的なドキュメント理解",
+      "whenDisabled": "無効時:",
+      "disabled1": "テキストコンテンツのみが分析されます（低コスト）",
+      "disabled2": "ドキュメント内の視覚要素は無視されます"
+    },
+    "pdfParsing": {
+      "tab": "PDF解析",
+      "title": "PDF解析設定",
+      "description": "システムがPDFドキュメントを処理する方法を制御します。ワークフローとドキュメントタイプに最適なモードを選択してください。",
+      "explanation": "ヒント: 異なる解析モードは速度と精度の間で異なるトレードオフを提供します。典型的なドキュメントタイプに基づいて選択してください。",
+      "modeLabel": "PDF解析モード",
+      "enhancedMode": "拡張（最高品質）",
+      "enhancedDescription": "常にPyMuPDF4LLMを使用して優れたテーブル抽出を行います。複雑なテーブルを含むドキュメントに最適ですが、低速です。",
+      "basicMode": "基本（最速）",
+      "basicDescription": "高速なpypdf抽出のみを使用します。テーブルなしのテキストのみのドキュメントに最適です。",
+      "comparison": {
+        "title": "モード比較:",
+        "enhancedTitle": "拡張モード",
+        "enhancedFeature1": "常にPyMuPDF4LLMを使用",
+        "enhancedFeature2": "最高のテーブル構造保持",
+        "enhancedWarning": "処理時間が遅い",
+        "basicTitle": "基本モード",
+        "basicFeature1": "最速の処理速度",
+        "basicFeature2": "低いリソース使用量",
+        "basicWarning": "テーブルフォーマットを失う可能性"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "何かが間違っています",

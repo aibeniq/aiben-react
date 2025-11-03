@@ -76,9 +76,9 @@
       "name": "Navn",
       "description": "Beskrivelse",
       "sources": "Kilder",
-      "noDescription": "Ingen beskrivelse",
-      "sourcesCount": "{{count}} kilder",
-      "pagesCount": "{{count}} sider"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "Navn",
     "knowledgeBaseTableDescription": "Beskrivelse",
@@ -122,7 +122,44 @@
     "delete": "Slett",
     "confirmationRequired": "Bekreftelse kreves",
     "deleteConfirmationText": "Alle konto dataene dine vil bli slettet permanent. Hvis du er sikker, klikk \"Bekreft\" for å fortsette. Denne handlingen kan ikke angres.",
-    "cancel": "Avbryt"
+    "cancel": "Avbryt",
+    "visionAnalysis": {
+      "tab": "Synsanalyse",
+      "title": "Innstillinger for Synsanalyse",
+      "description": "Kontrollerer om AI-en analyserer bilder som er innebygd i dokumentene dine. Å deaktivere dette kan betydelig redusere API-kostnadene for dokumenter med mange bilder.",
+      "enableLabel": "Aktiver Synsanalyse",
+      "costWarning": "Advarsel: Synsanalyse kan være dyr for dokumenter med mange bilder. Hvert analyserte bilde medfører ekstra API-kostnader. Vurder å deaktivere hvis du hovedsakelig arbeider med dokumenter som kun inneholder tekst.",
+      "whenEnabled": "Når aktivert:",
+      "feature1": "Bilder i PDF- og DOCX-filer vil bli analysert",
+      "feature2": "Diagrammer, diagram og visuelt innhold vil bli ekstrahert",
+      "feature3": "Skjemafelt i bilder kan oppdages (FormConnect)",
+      "feature4": "Mer omfattende dokumentforståelse",
+      "whenDisabled": "Når deaktivert:",
+      "disabled1": "Kun tekstinnhold vil bli analysert (lavere kostnad)",
+      "disabled2": "Visuelle elementer i dokumenter vil bli ignorert"
+    },
+    "pdfParsing": {
+      "tab": "PDF-analyse",
+      "title": "Innstillinger for PDF-analyse",
+      "description": "Kontrollerer hvordan systemet behandler PDF-dokumenter. Velg modus som passer best for arbeidsflyten og dokumenttypene dine.",
+      "explanation": "Tips: Ulike analysemodi tilbyr forskjellige avveininger mellom hastighet og nøyaktighet. Velg basert på dine typiske dokumenttyper.",
+      "modeLabel": "PDF-analysemodus",
+      "enhancedMode": "Forbedret (Beste Kvalitet)",
+      "enhancedDescription": "Bruker alltid PyMuPDF4LLM for overlegen tabellekstraksjon. Beste for dokumenter med komplekse tabeller, men tregere.",
+      "basicMode": "Grunnleggende (Raskest)",
+      "basicDescription": "Bruker kun rask pypdf-ekstraksjon. Beste for tekst-dokumenter uten tabeller.",
+      "comparison": {
+        "title": "Modus-sammenligning:",
+        "enhancedTitle": "Forbedret Modus",
+        "enhancedFeature1": "Bruker alltid PyMuPDF4LLM",
+        "enhancedFeature2": "Beste tabellstruktur-bevaring",
+        "enhancedWarning": "Tregere behandlingstid",
+        "basicTitle": "Grunnleggende Modus",
+        "basicFeature1": "Raskeste behandlingshastighet",
+        "basicFeature2": "Lavere ressursbruk",
+        "basicWarning": "Kan gå glipp av tabellformatering"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Noe gikk galt",

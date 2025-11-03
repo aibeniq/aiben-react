@@ -82,9 +82,9 @@
       "name": "Nama",
       "description": "Penerangan",
       "sources": "Sumber",
-      "noDescription": "Tiada penerangan",
-      "sourcesCount": "{{count}} sumber",
-      "pagesCount": "{{count}} halaman"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "selectKnowledgeBasePlaceholder": "Pilih Pangkalan Pengetahuan...",
     "noKnowledgeBasesAvailable": "Tiada Pangkalan Pengetahuan tersedia. Buat satu terlebih dahulu untuk menggunakan ciri ini.",
@@ -122,7 +122,44 @@
     "delete": "Padam",
     "confirmationRequired": "Pengesahan Diperlukan",
     "deleteConfirmationText": "Semua data akaun anda akan dipadam secara kekal. Jika anda pasti, klik \"Sahkan\" untuk meneruskan. Tindakan ini tidak boleh dibatalkan.",
-    "cancel": "Batal"
+    "cancel": "Batal",
+    "visionAnalysis": {
+      "tab": "Analisis Penglihatan",
+      "title": "Tetapan Analisis Penglihatan",
+      "description": "Kawal sama ada AI menganalisis imej yang dibenamkan dalam dokumen anda. Menyahaktifkan ini boleh mengurangkan kos API dengan ketara untuk dokumen dengan banyak imej.",
+      "enableLabel": "Dayakan Analisis Penglihatan",
+      "costWarning": "Amaran: Analisis penglihatan boleh mahal untuk dokumen dengan banyak imej. Setiap imej yang dianalisis menimbulkan kos API tambahan. Pertimbangkan untuk menyahaktifkan jika anda terutamanya bekerja dengan dokumen teks sahaja.",
+      "whenEnabled": "Apabila didayakan:",
+      "feature1": "Imej dalam fail PDF dan DOCX akan dianalisis",
+      "feature2": "Carta, gambar rajah dan kandungan visual akan diekstrak",
+      "feature3": "Medan borang dalam imej boleh dikesan (FormConnect)",
+      "feature4": "Pemahaman dokumen yang lebih komprehensif",
+      "whenDisabled": "Apabila dinyahaktifkan:",
+      "disabled1": "Hanya kandungan teks akan dianalisis (kos lebih rendah)",
+      "disabled2": "Elemen visual dalam dokumen akan diabaikan"
+    },
+    "pdfParsing": {
+      "tab": "Analisis PDF",
+      "title": "Keutamaan Analisis PDF",
+      "description": "Kawal bagaimana sistem memproses dokumen PDF. Pilih mod yang paling sesuai dengan aliran kerja dan jenis dokumen anda.",
+      "explanation": "Petua: Mod analisis yang berbeza menawarkan pertukaran yang berbeza antara kelajuan dan ketepatan. Pilih berdasarkan jenis dokumen biasa anda.",
+      "modeLabel": "Mod Analisis PDF",
+      "enhancedMode": "Dipertingkatkan (Kualiti Terbaik)",
+      "enhancedDescription": "Sentiasa menggunakan PyMuPDF4LLM untuk pengekstrakan jadual yang unggul. Terbaik untuk dokumen dengan jadual kompleks, tetapi lebih perlahan.",
+      "basicMode": "Asas (Paling Cepat)",
+      "basicDescription": "Hanya menggunakan pengekstrakan pypdf yang cepat. Terbaik untuk dokumen teks sahaja tanpa jadual.",
+      "comparison": {
+        "title": "Perbandingan Mod:",
+        "enhancedTitle": "Mod Dipertingkatkan",
+        "enhancedFeature1": "Sentiasa menggunakan PyMuPDF4LLM",
+        "enhancedFeature2": "Penyimpanan struktur jadual terbaik",
+        "enhancedWarning": "Masa pemprosesan lebih perlahan",
+        "basicTitle": "Mod Asas",
+        "basicFeature1": "Kelajuan pemprosesan paling cepat",
+        "basicFeature2": "Penggunaan sumber yang lebih rendah",
+        "basicWarning": "Boleh terlepas pemformatan jadual"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Ada yang tidak kena",

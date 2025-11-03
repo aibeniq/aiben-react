@@ -76,9 +76,9 @@
       "name": "Nimi",
       "description": "Kuvaus",
       "sources": "Lähteet",
-      "noDescription": "Ei kuvausta",
-      "sourcesCount": "{{count}} lähdettä",
-      "pagesCount": "{{count}} sivua"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "Nimi",
     "knowledgeBaseTableDescription": "Kuvaus",
@@ -122,7 +122,44 @@
     "delete": "Poista",
     "confirmationRequired": "Vahvistus vaaditaan",
     "deleteConfirmationText": "Kaikki tilisi tiedot poistetaan pysyvästi. Jos olet varma, klikkaa \"Vahvista\" jatkaaksesi. Tätä toimintoa ei voi peruuttaa.",
-    "cancel": "Peruuta"
+    "cancel": "Peruuta",
+    "visionAnalysis": {
+      "tab": "Visioanalyysi",
+      "title": "Visioanalyysin asetukset",
+      "description": "Hallitse, analysoiko AI asiakirjoihisi upotettuja kuvia. Tämän ominaisuuden poistaminen käytöstä voi merkittävästi vähentää API-kustannuksia asiakirjoille, joissa on paljon kuvia.",
+      "enableLabel": "Ota visioanalyysi käyttöön",
+      "costWarning": "Varoitus: Visioanalyysi voi olla kallista asiakirjoille, joissa on paljon kuvia. Jokainen analysoitu kuva aiheuttaa lisäkustannuksia API:lle. Harkitse poistamista käytöstä, jos työskentelet pääasiassa vain tekstiasiakirjojen kanssa.",
+      "whenEnabled": "Kun käytössä:",
+      "feature1": "PDF- ja DOCX-tiedostojen kuvat analysoidaan",
+      "feature2": "Kaaviot, diagrammit ja visuaalinen sisältö puretaan",
+      "feature3": "Lomakekentät kuvissa voidaan havaita (FormConnect)",
+      "feature4": "Kattavampi asiakirjan ymmärtäminen",
+      "whenDisabled": "Kun pois käytöstä:",
+      "disabled1": "Vain tekstisisältö analysoidaan (alempi kustannus)",
+      "disabled2": "Asiakirjojen visuaaliset elementit ohitetaan"
+    },
+    "pdfParsing": {
+      "tab": "PDF-jäsentäminen",
+      "title": "PDF-jäsentämisen asetukset",
+      "description": "Hallitse, miten järjestelmä käsittelee PDF-asiakirjoja. Valitse tila, joka sopii parhaiten työnkulkuusi ja asiakirjatyyppeihisi.",
+      "explanation": "Vinkki: Eri jäsentämistilat tarjoavat erilaisia kompromisseja nopeuden ja tarkkuuden välillä. Valitse tyypillisten asiakirjatyyppiesi perusteella.",
+      "modeLabel": "PDF-jäsentämistila",
+      "enhancedMode": "Parannettu (paras laatu)",
+      "enhancedDescription": "Käyttää aina PyMuPDF4LLM:ää erinomaiselle taulukoiden poistolle. Paras asiakirjoille, joissa on monimutkaisia taulukoita, mutta hitaampi.",
+      "basicMode": "Perus (nopein)",
+      "basicDescription": "Käyttää vain nopeaa pypdf-poistoa. Paras tekstivain asiakirjoille ilman taulukoita.",
+      "comparison": {
+        "title": "Tilojen vertailu:",
+        "enhancedTitle": "Parannettu tila",
+        "enhancedFeature1": "Käyttää aina PyMuPDF4LLM:ää",
+        "enhancedFeature2": "Paras taulukkorakenteen säilyttäminen",
+        "enhancedWarning": "Hitaampi käsittelyaika",
+        "basicTitle": "Perustila",
+        "basicFeature1": "Nopein käsittelynopeus",
+        "basicFeature2": "Alhaisempi resurssien käyttö",
+        "basicWarning": "Saattaa jättää taulukkojen muotoilun huomiotta"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Jotain meni pieleen",

@@ -81,10 +81,10 @@
     "knowledgeBaseTable": {
       "name": "Pangalan",
       "description": "Paglalarawan",
-      "sources": "Pinagkukunan",
-      "noDescription": "Walang paglalarawan",
-      "sourcesCount": "{{count}} pinagmulan",
-      "pagesCount": "{{count}} pahina"
+      "sources": "Pinagmulan",
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "selectKnowledgeBasePlaceholder": "Pumili ng Base ng Kaalaman...",
     "noKnowledgeBasesAvailable": "Walang magagamit na Base ng Kaalaman. Lumikha muna ng isa upang magamit ang tampok na ito.",
@@ -122,7 +122,44 @@
     "delete": "Tanggalin",
     "confirmationRequired": "Kailangan ang Kumpirmasyon",
     "deleteConfirmationText": "Ang lahat ng data ng iyong account ay permanenteng tatanggalin. Kung sigurado ka, i-click ang \"Kumpirmahin\" upang magpatuloy. Hindi na mababawi ang aksyong ito.",
-    "cancel": "Kanselahin"
+    "cancel": "Kanselahin",
+    "visionAnalysis": {
+      "tab": "Pagsusuri ng Biswal",
+      "title": "Mga Setting ng Pagsusuri ng Biswal",
+      "description": "Kontrolin kung susuriin ng AI ang mga larawang naka-embed sa iyong mga dokumento. Ang pag-disable nito ay maaaring lubhang bawasan ang mga gastos sa API para sa mga dokumento na may maraming larawan.",
+      "enableLabel": "Paganahin ang Pagsusuri ng Biswal",
+      "costWarning": "Babala: Ang pagsusuri ng biswal ay maaaring magastos para sa mga dokumento na may maraming larawan. Ang bawat larawang susuriin ay magdudulot ng karagdagang gastos sa API. Isaalang-alang ang pag-disable kung pangunahing nagtatrabaho ka sa mga dokumento na puro teksto lamang.",
+      "whenEnabled": "Kapag pinagana:",
+      "feature1": "Ang mga larawan sa mga file na PDF at DOCX ay susuriin",
+      "feature2": "Ang mga tsart, diagram, at visual content ay aalisin",
+      "feature3": "Ang mga field ng form sa mga larawan ay maaaring matukoy (FormConnect)",
+      "feature4": "Mas komprehensibong pag-unawa sa dokumento",
+      "whenDisabled": "Kapag hindi pinagana:",
+      "disabled1": "Ang text content lamang ang susuriin (mas mababang gastos)",
+      "disabled2": "Ang mga visual element sa mga dokumento ay hindi papansinin"
+    },
+    "pdfParsing": {
+      "tab": "Pagsusuri ng PDF",
+      "title": "Mga Kagustuhan sa Pagsusuri ng PDF",
+      "description": "Kontrolin kung paano pinoproseso ng sistema ang mga dokumento ng PDF. Pumili ng mode na pinaka-angkop sa iyong workflow at mga uri ng dokumento.",
+      "explanation": "Tip: Ang iba't ibang parsing mode ay nag-aalok ng iba't ibang trade-offs sa pagitan ng bilis at katumpakan. Pumili batay sa iyong mga tipikal na uri ng dokumento.",
+      "modeLabel": "Mode ng Pagsusuri ng PDF",
+      "enhancedMode": "Pinahusay (Pinakamahusay na Kalidad)",
+      "enhancedDescription": "Laging gumagamit ng PyMuPDF4LLM para sa superior na pagkuha ng talahanayan. Pinakamahusay para sa mga dokumento na may kumplikadong mga talahanayan, ngunit mas mabagal.",
+      "basicMode": "Batayang (Pinakamabilis)",
+      "basicDescription": "Gumagamit lamang ng mabilis na pagkuha ng pypdf. Pinakamahusay para sa mga dokumento na puro teksto na walang mga talahanayan.",
+      "comparison": {
+        "title": "Paghahambing ng Mode:",
+        "enhancedTitle": "Pinahusay na Mode",
+        "enhancedFeature1": "Laging gumagamit ng PyMuPDF4LLM",
+        "enhancedFeature2": "Pinakamahusay na pagpapanatili ng istraktura ng talahanayan",
+        "enhancedWarning": "Mas mabagal na oras ng pagproseso",
+        "basicTitle": "Batayang Mode",
+        "basicFeature1": "Pinakamabilis na bilis ng pagproseso",
+        "basicFeature2": "Mas mababang paggamit ng resources",
+        "basicWarning": "Maaaring palampasin ang pag-format ng talahanayan"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "May nangyaring mali",

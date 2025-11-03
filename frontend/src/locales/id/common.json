@@ -82,9 +82,9 @@
       "name": "Nama",
       "description": "Deskripsi",
       "sources": "Sumber",
-      "noDescription": "Tidak ada deskripsi",
-      "sourcesCount": "{{count}} sumber",
-      "pagesCount": "{{count}} halaman"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "selectKnowledgeBasePlaceholder": "Pilih Basis Pengetahuan...",
     "noKnowledgeBasesAvailable": "Tidak ada Basis Pengetahuan tersedia. Buat satu terlebih dahulu untuk menggunakan fitur ini.",
@@ -122,7 +122,44 @@
     "delete": "Hapus",
     "confirmationRequired": "Konfirmasi Diperlukan",
     "deleteConfirmationText": "Semua data akun Anda akan dihapus secara permanen. Jika Anda yakin, klik \"Konfirmasi\" untuk melanjutkan. Tindakan ini tidak dapat dibatalkan.",
-    "cancel": "Batal"
+    "cancel": "Batal",
+    "visionAnalysis": {
+      "tab": "Analisis Visi",
+      "title": "Pengaturan Analisis Visi",
+      "description": "Kontrol apakah AI menganalisis gambar yang tertanam dalam dokumen Anda. Menonaktifkan ini dapat secara signifikan mengurangi biaya API untuk dokumen dengan banyak gambar.",
+      "enableLabel": "Aktifkan Analisis Visi",
+      "costWarning": "Peringatan: Analisis visi dapat mahal untuk dokumen dengan banyak gambar. Setiap gambar yang dianalisis menimbulkan biaya API tambahan. Pertimbangkan untuk menonaktifkan jika Anda terutama bekerja dengan dokumen teks saja.",
+      "whenEnabled": "Ketika diaktifkan:",
+      "feature1": "Gambar dalam file PDF dan DOCX akan dianalisis",
+      "feature2": "Bagan, diagram, dan konten visual akan diekstrak",
+      "feature3": "Bidang formulir dalam gambar dapat dideteksi (FormConnect)",
+      "feature4": "Pemahaman dokumen yang lebih komprehensif",
+      "whenDisabled": "Ketika dinonaktifkan:",
+      "disabled1": "Hanya konten teks yang akan dianalisis (biaya lebih rendah)",
+      "disabled2": "Elemen visual dalam dokumen akan diabaikan"
+    },
+    "pdfParsing": {
+      "tab": "Analisis PDF",
+      "title": "Preferensi Analisis PDF",
+      "description": "Kontrol bagaimana sistem memproses dokumen PDF. Pilih mode yang paling sesuai dengan alur kerja dan jenis dokumen Anda.",
+      "explanation": "Tips: Mode parsing yang berbeda menawarkan trade-off yang berbeda antara kecepatan dan akurasi. Pilih berdasarkan jenis dokumen tipikal Anda.",
+      "modeLabel": "Mode Analisis PDF",
+      "enhancedMode": "Ditingkatkan (Kualitas Terbaik)",
+      "enhancedDescription": "Selalu menggunakan PyMuPDF4LLM untuk ekstraksi tabel yang superior. Terbaik untuk dokumen dengan tabel kompleks, tetapi lebih lambat.",
+      "basicMode": "Dasar (Tercepat)",
+      "basicDescription": "Hanya menggunakan ekstraksi pypdf cepat. Terbaik untuk dokumen teks saja tanpa tabel.",
+      "comparison": {
+        "title": "Perbandingan Mode:",
+        "enhancedTitle": "Mode Ditingkatkan",
+        "enhancedFeature1": "Selalu menggunakan PyMuPDF4LLM",
+        "enhancedFeature2": "Pelestarian struktur tabel terbaik",
+        "enhancedWarning": "Waktu pemrosesan lebih lambat",
+        "basicTitle": "Mode Dasar",
+        "basicFeature1": "Kecepatan pemrosesan tercepat",
+        "basicFeature2": "Penggunaan sumber daya lebih rendah",
+        "basicWarning": "Mungkin melewatkan pemformatan tabel"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Terjadi kesalahan",

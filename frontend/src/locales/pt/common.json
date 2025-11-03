@@ -78,9 +78,9 @@
       "name": "Nome",
       "description": "Descrição",
       "sources": "Fontes",
-      "noDescription": "Sem descrição",
-      "sourcesCount": "{{count}} fontes",
-      "pagesCount": "{{count}} páginas"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "knowledgeBaseTableName": "Nome",
     "knowledgeBaseTableDescription": "Descrição",
@@ -122,7 +122,44 @@
     "delete": "Excluir",
     "confirmationRequired": "Confirmação Necessária",
     "deleteConfirmationText": "Todos os dados da sua conta serão excluídos permanentemente. Se você tem certeza, clique em \"Confirmar\" para prosseguir. Esta ação não pode ser desfeita.",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "visionAnalysis": {
+      "tab": "Análise Visual",
+      "title": "Configurações de Análise Visual",
+      "description": "Controla se a IA analisa imagens incorporadas nos seus documentos. Desabilitar isso pode reduzir significativamente os custos da API para documentos com muitas imagens.",
+      "enableLabel": "Habilitar Análise Visual",
+      "costWarning": "Aviso: A análise visual pode ser cara para documentos com muitas imagens. Cada imagem analisada gera custos adicionais da API. Considere desabilitar se você trabalha principalmente com documentos apenas de texto.",
+      "whenEnabled": "Quando habilitado:",
+      "feature1": "Imagens em arquivos PDF e DOCX serão analisadas",
+      "feature2": "Gráficos, diagramas e conteúdo visual serão extraídos",
+      "feature3": "Campos de formulário em imagens podem ser detectados (FormConnect)",
+      "feature4": "Compreensão mais abrangente do documento",
+      "whenDisabled": "Quando desabilitado:",
+      "disabled1": "Apenas o conteúdo de texto será analisado (custo menor)",
+      "disabled2": "Elementos visuais nos documentos serão ignorados"
+    },
+    "pdfParsing": {
+      "tab": "Análise de PDF",
+      "title": "Preferências de Análise de PDF",
+      "description": "Controla como o sistema processa documentos PDF. Escolha o modo que melhor se adapta ao seu fluxo de trabalho e tipos de documento.",
+      "explanation": "Dica: Diferentes modos de análise oferecem diferentes compensações entre velocidade e precisão. Escolha com base nos seus tipos de documento típicos.",
+      "modeLabel": "Modo de Análise de PDF",
+      "enhancedMode": "Avançado (Melhor Qualidade)",
+      "enhancedDescription": "Sempre usa PyMuPDF4LLM para extração superior de tabelas. Melhor para documentos com tabelas complexas, mas mais lento.",
+      "basicMode": "Básico (Mais Rápido)",
+      "basicDescription": "Usa apenas extração rápida pypdf. Melhor para documentos apenas de texto sem tabelas.",
+      "comparison": {
+        "title": "Comparação de Modos:",
+        "enhancedTitle": "Modo Avançado",
+        "enhancedFeature1": "Sempre usa PyMuPDF4LLM",
+        "enhancedFeature2": "Melhor preservação da estrutura da tabela",
+        "enhancedWarning": "Tempo de processamento mais lento",
+        "basicTitle": "Modo Básico",
+        "basicFeature1": "Velocidade de processamento mais rápida",
+        "basicFeature2": "Menor uso de recursos",
+        "basicWarning": "Pode perder a formatação da tabela"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Algo deu errado",

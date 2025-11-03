@@ -82,9 +82,9 @@
       "name": "Nosaukums",
       "description": "Apraksts",
       "sources": "Avoti",
-      "noDescription": "Nav apraksta",
-      "sourcesCount": "{{count}} avoti",
-      "pagesCount": "{{count}} lapas"
+      "noDescription": "N/A",
+      "sourcesCount": "{{count}}",
+      "pagesCount": "{{count}}"
     },
     "selectKnowledgeBasePlaceholder": "Izvēlieties zināšanu bāzi...",
     "noKnowledgeBasesAvailable": "Nav pieejamu zināšanu bāzu. Vispirms izveidojiet vienu, lai izmantotu šo funkciju.",
@@ -122,7 +122,44 @@
     "delete": "Dzēst",
     "confirmationRequired": "Nepieciešama apstiprināšana",
     "deleteConfirmationText": "Visi jūsu konta dati tiks neatgriezeniski dzēsti. Ja esat pārliecināts, noklikšķiniet uz \"Apstiprināt\", lai turpinātu. Šo darbību nevar atsaukt.",
-    "cancel": "Atcelt"
+    "cancel": "Atcelt",
+    "visionAnalysis": {
+      "tab": "Vīzijas Analīze",
+      "title": "Vīzijas Analīzes Iestatījumi",
+      "description": "Kontrolē, vai AI analizē attēlus, kas iegulti jūsu dokumentos. Šīs funkcijas atspējošana var ievērojami samazināt API izmaksas dokumentiem ar daudz attēliem.",
+      "enableLabel": "Iespējot Vīzijas Analīzi",
+      "costWarning": "Brīdinājums: Vīzijas analīze var būt dārga dokumentiem ar daudz attēliem. Katrs analizētais attēls rada papildu API izmaksas. Apsveriet atspējošanu, ja galvenokārt strādājat ar tikai teksta dokumentiem.",
+      "whenEnabled": "Kad ir iespējots:",
+      "feature1": "Attēli PDF un DOCX failos tiks analizēti",
+      "feature2": "Diagrammas, diagrammas un vizuālais saturs tiks izvilkts",
+      "feature3": "Formas lauki attēlos var tikt noteikti (FormConnect)",
+      "feature4": "Visaptverošāka dokumentu izpratne",
+      "whenDisabled": "Kad ir atspējots:",
+      "disabled1": "Tiks analizēts tikai teksta saturs (zemākas izmaksas)",
+      "disabled2": "Vizuālie elementi dokumentos tiks ignorēti"
+    },
+    "pdfParsing": {
+      "tab": "PDF Analīze",
+      "title": "PDF Analīzes Preferences",
+      "description": "Kontrolē, kā sistēma apstrādā PDF dokumentus. Izvēlieties režīmu, kas vislabāk atbilst jūsu darbplūsmai un dokumentu tipiem.",
+      "explanation": "Padoms: Dažādi analīzes režīmi piedāvā dažādus kompromisus starp ātrumu un precizitāti. Izvēlieties, pamatojoties uz jūsu tipiskajiem dokumentu tipiem.",
+      "modeLabel": "PDF Analīzes Režīms",
+      "enhancedMode": "Uzlabots (Labākā Kvalitāte)",
+      "enhancedDescription": "Vienmēr izmanto PyMuPDF4LLM pārāko tabulu ekstrakcijai. Vislabāk piemērots dokumentiem ar sarežģītām tabulām, bet lēnāks.",
+      "basicMode": "Pamata (Ātrākais)",
+      "basicDescription": "Izmanto tikai ātro pypdf ekstrakciju. Vislabāk piemērots tikai teksta dokumentiem bez tabulām.",
+      "comparison": {
+        "title": "Režīmu Salīdzinājums:",
+        "enhancedTitle": "Uzlabots Režīms",
+        "enhancedFeature1": "Vienmēr izmanto PyMuPDF4LLM",
+        "enhancedFeature2": "Labākā tabulu struktūras saglabāšana",
+        "enhancedWarning": "Lēnāks apstrādes laiks",
+        "basicTitle": "Pamata Režīms",
+        "basicFeature1": "Ātrākais apstrādes ātrums",
+        "basicFeature2": "Zemāks resursu patēriņš",
+        "basicWarning": "Var palaist garām tabulu formatējumu"
+      }
+    }
   },
   "errors": {
     "somethingWentWrong": "Kaut kas nogāja greizi",
