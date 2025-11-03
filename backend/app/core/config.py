@@ -271,6 +271,9 @@ class Settings(BaseSettings):
     # OpenAI API Configuration
     OPENAI_TIMEOUT: int = 36000  # 600 minutes timeout for OpenAI API calls
 
+    # LLM Request Timeout (in seconds)
+    LLM_REQUEST_TIMEOUT: float = 300.0  # 5 minutes timeout for LLM requests
+
     # ========================================
     # CENTRALIZED RATE LIMITING CONFIGURATION
     # ========================================
