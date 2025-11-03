@@ -38,7 +38,7 @@ class KnowledgeBaseService:
             file: Uploaded file
         """
         from app.services.page_counter import PageCounter
-        
+
         # file.file.seek(0)
         file_content = file.file.read()
 
@@ -70,18 +70,22 @@ class KnowledgeBaseService:
             try:
                 temp_zip_fd, temp_zip_path = tempfile.mkstemp(suffix=".zip")
                 os.close(temp_zip_fd)  # Close file descriptor, but keep path
-                
-                with zipfile.ZipFile(temp_zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as zip_file:
+
+                with zipfile.ZipFile(
+                    temp_zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=6
+                ) as zip_file:
                     zip_file.writestr(file.filename, file_content)
-                
+
                 # Read compressed content from file
                 with open(temp_zip_path, "rb") as zip_read_file:
                     compressed_content = zip_read_file.read()
-                    
+
                 # Check file size - warn if very large
                 file_size_mb = len(compressed_content) / 1024 / 1024
                 if file_size_mb > 100:  # Warn for files > 100MB
-                    print(f"Warning: Large compressed file {file.filename}: {file_size_mb:.1f}MB")
+                    print(
+                        f"Warning: Large compressed file {file.filename}: {file_size_mb:.1f}MB"
+                    )
 
             except Exception as e:
                 # Clean up temporary file on error
@@ -89,10 +93,12 @@ class KnowledgeBaseService:
                     try:
                         os.unlink(temp_zip_path)
                     except Exception as cleanup_error:
-                        logger.warning(f"Could not clean up temp ZIP file: {cleanup_error}")
+                        logger.warning(
+                            f"Could not clean up temp ZIP file: {cleanup_error}"
+                        )
                 raise HTTPException(
-                    status_code=500, 
-                    detail=f"Error compressing file {file.filename}: {str(e)}"
+                    status_code=500,
+                    detail=f"Error compressing file {file.filename}: {str(e)}",
                 )
             finally:
                 # Always clean up temporary file
@@ -100,7 +106,9 @@ class KnowledgeBaseService:
                     try:
                         os.unlink(temp_zip_path)
                     except Exception as cleanup_error:
-                        logger.warning(f"Could not clean up temp ZIP file: {cleanup_error}")
+                        logger.warning(
+                            f"Could not clean up temp ZIP file: {cleanup_error}"
+                        )
 
             # Create new source_data entry
             source_data_id = uuid.uuid4()
@@ -126,13 +134,16 @@ class KnowledgeBaseService:
     def recalculate_total_pages(session: Session, knowledge_base_id: uuid.UUID) -> None:
         """Recalculate total pages for a knowledge base."""
         from sqlalchemy.sql import func
-        
-        total_pages = session.exec(
-            select(func.sum(Source.page_count)).where(
-                Source.knowledge_base_id == knowledge_base_id
-            )
-        ).one() or 0
-        
+
+        total_pages = (
+            session.exec(
+                select(func.sum(Source.page_count)).where(
+                    Source.knowledge_base_id == knowledge_base_id
+                )
+            ).one()
+            or 0
+        )
+
         kb = session.get(KnowledgeBase, knowledge_base_id)
         if kb:
             kb.total_pages = total_pages
@@ -254,6 +265,17 @@ def chunk_documents_for_embedding(
         f"Chunking {len(documents)} documents with max {max_tokens_per_chunk:,} tokens per chunk"
     )
 
+    # DEBUG: Check incoming document page metadata
+    print(
+        f"🔍 DEBUG chunk_documents_for_embedding: Input has {len(documents)} documents"
+    )
+    page_samples = [
+        (i, doc.metadata.get("page", "MISSING")) for i, doc in enumerate(documents[:5])
+    ]
+    print(
+        f"🔍 DEBUG chunk_documents_for_embedding: First 5 input doc pages: {page_samples}"
+    )
+
     for doc in documents:
         # Estimate tokens for this document's content
         doc_tokens = estimate_tokens_for_embedding(doc.page_content)
@@ -277,6 +299,12 @@ def chunk_documents_for_embedding(
                 chunk_overlap=200,
             )
             split_docs = text_splitter.split_documents([doc])
+
+            # Preserve page metadata in split documents
+            page_num = doc.metadata.get("page", 1)
+            for split_doc in split_docs:
+                if "page" not in split_doc.metadata:
+                    split_doc.metadata["page"] = page_num
 
             # Group the split documents into token-limited chunks
             for split_doc in split_docs:
@@ -308,4 +336,19 @@ def chunk_documents_for_embedding(
         chunks.append(current_chunk)
 
     print(f"✅ Created {len(chunks)} chunks from {len(documents)} documents")
+
+    # DEBUG: Check output chunk page metadata
+    if chunks:
+        print(
+            f"🔍 DEBUG chunk_documents_for_embedding: Output has {len(chunks)} chunks"
+        )
+        for chunk_idx, chunk in enumerate(chunks[:3]):
+            page_samples = [
+                (i, doc.metadata.get("page", "MISSING"))
+                for i, doc in enumerate(chunk[:5])
+            ]
+            print(
+                f"🔍 DEBUG chunk_documents_for_embedding: Chunk {chunk_idx} first 5 doc pages: {page_samples}"
+            )
+
     return chunks

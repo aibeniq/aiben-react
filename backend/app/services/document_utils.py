@@ -571,7 +571,7 @@ async def extract_documents_from_file_unified(
         return [error_doc]
 
 
-def extract_documents_and_images_from_file_unified(
+async def extract_documents_and_images_from_file_unified(
     file_content: bytes, filename: str, current_user=None
 ) -> Tuple[List[Document], List[str]]:
     """
@@ -590,8 +590,8 @@ def extract_documents_and_images_from_file_unified(
 
     logger = logging.getLogger(__name__)
 
-    # Get existing text extraction
-    documents = extract_documents_from_file_unified(
+    # Get existing text extraction (await since it's async)
+    documents = await extract_documents_from_file_unified(
         file_content, filename, current_user=current_user
     )
 
@@ -826,7 +826,7 @@ async def extract_text_with_vision_enhancement(
     # Try to extract images from PDF or DOCX
     try:
         print(f"🖼️ Attempting to extract images from {file_ext.upper()}: {filename}")
-        _, document_images = extract_documents_and_images_from_file_unified(
+        _, document_images = await extract_documents_and_images_from_file_unified(
             file_content, filename
         )
 

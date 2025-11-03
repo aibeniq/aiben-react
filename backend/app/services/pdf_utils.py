@@ -5,7 +5,7 @@ PDF processing utilities with optional PyMuPDF4LLM support for enhanced table pa
 import tempfile
 import os
 import asyncio
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 from pathlib import Path
 
 import pypdf
@@ -65,7 +65,9 @@ def has_tables_fast(file_path: str) -> Tuple[bool, int]:
         return True, 0
 
 
-def _extract_pdf_with_pymupdf4llm_sync(file_path: str, filename: str = None) -> str:
+def _extract_pdf_with_pymupdf4llm_sync(
+    file_path: str, filename: str = None
+) -> List[Dict]:
     """
     Synchronous helper to extract PDF content using PyMuPDF4LLM.
     This function runs the CPU-intensive extraction in a separate thread.
@@ -75,11 +77,26 @@ def _extract_pdf_with_pymupdf4llm_sync(file_path: str, filename: str = None) -> 
         filename: Optional filename for logging
 
     Returns:
-        Markdown text extracted from the PDF
+        List of dicts with page content and metadata (one per page)
     """
     print(f"Using PyMuPDF4LLM for enhanced table parsing on {filename}")
-    md_text = pymupdf4llm.to_markdown(file_path)
-    return md_text
+
+    # Extract with page-level granularity
+    # PyMuPDF4LLM can process pages individually
+    import fitz  # PyMuPDF
+
+    doc = fitz.open(file_path)
+    pages_data = []
+
+    for page_num in range(len(doc)):
+        # Extract markdown for this specific page
+        page_md = pymupdf4llm.to_markdown(file_path, pages=[page_num])
+        pages_data.append(
+            {"page_num": page_num + 1, "content": page_md, "has_tables": "|" in page_md}
+        )
+
+    doc.close()
+    return pages_data
 
 
 async def extract_pdf_with_pymupdf4llm(
@@ -122,26 +139,25 @@ async def extract_pdf_with_pymupdf4llm(
         # Run the CPU-intensive extraction in a thread pool to avoid blocking
         # the async event loop. This allows progress API requests to be served
         # while PyMuPDF4LLM is processing the PDF.
-        md_text = await asyncio.to_thread(
+        pages_data = await asyncio.to_thread(
             _extract_pdf_with_pymupdf4llm_sync, file_path, filename
         )
 
-        # Split into pages if possible (PyMuPDF4LLM may return full document)
-        # Common page separator in Markdown output
-        pages = md_text.split("\n---\n")
-
-        for page_num, page_content in enumerate(pages, 1):
-            if page_content.strip():  # Only add non-empty pages
+        # Create a Document object for each page
+        for page_info in pages_data:
+            if page_info["content"].strip():  # Only add non-empty pages
                 doc = Document(
-                    page_content=page_content.strip(),
+                    page_content=page_info["content"].strip(),
                     metadata={
                         "source": filename or file_path,
-                        "page": page_num,
+                        "page": page_info["page_num"],
                         "extraction_method": "pymupdf4llm_markdown",
-                        "has_tables": "|" in page_content,  # Simple table detection
+                        "has_tables": page_info["has_tables"],
                     },
                 )
                 documents.append(doc)
+
+        print(f"PyMuPDF4LLM extracted {len(documents)} pages from {filename}")
 
     except Exception as e:
         print(f"Error with PyMuPDF4LLM extraction for {filename}: {e}")

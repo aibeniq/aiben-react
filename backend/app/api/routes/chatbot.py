@@ -16,7 +16,10 @@ from app.services.llms import (
     record_llm_interaction,
 )
 from app.services.translation import translate_text_if_needed
-from app.services.knowledgebases import get_embedding_model, chunk_documents_for_embedding
+from app.services.knowledgebases import (
+    get_embedding_model,
+    chunk_documents_for_embedding,
+)
 from app.services.retrievers import (
     create_ensemble_retriever,
 )
@@ -412,7 +415,7 @@ async def _handle_full_text_kb_query(
                         extract_documents_and_images_from_file_unified,
                     )
 
-                    _, images = extract_documents_and_images_from_file_unified(
+                    _, images = await extract_documents_and_images_from_file_unified(
                         raw_file_content,
                         source.name,  # Use actual filename with extension
                         current_user=current_user,
@@ -555,7 +558,7 @@ async def _handle_full_text_document_query(
     is_follow_up: bool = False,
 ):
     """Handle full text scan for document query with multiple files."""
-    from app.services.text_processing import chunk_text
+    from app.services.text_processing import chunk_text, chunk_documents_with_metadata
 
     # Get LLM and check vision capabilities
     llm = get_default_llm(session, current_user)
@@ -597,10 +600,14 @@ async def _handle_full_text_document_query(
                 file_content = f.read()
 
             # Use the unified document extraction function (uses settings.PDF_PARSING_MODE by default)
-            documents = extract_documents_from_file_unified(
+            documents = await extract_documents_from_file_unified(
                 file_content, file.filename, current_user=current_user
             )
-            full_text = "\n\n".join([doc.page_content for doc in documents])
+
+            # Chunk documents while preserving page metadata
+            chunks_with_metadata = chunk_documents_with_metadata(
+                documents, max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE
+            )
 
             # Extract images if vision is enabled
             file_images = []
@@ -609,21 +616,16 @@ async def _handle_full_text_document_query(
                     extract_documents_and_images_from_file_unified,
                 )
 
-                _, file_images = extract_documents_and_images_from_file_unified(
+                _, file_images = await extract_documents_and_images_from_file_unified(
                     file_content, file.filename, current_user=current_user
                 )
                 print(f"Extracted {len(file_images)} images from {file.filename}")
-
-            # Chunk the text
-            chunks = chunk_text(
-                full_text, max_tokens=settings.FULL_SCAN_DOCUMENT_CHUNK_SIZE
-            )
 
             # Analyze each chunk for this file
             file_chunk_analyses = []
             file_source_citations = []
 
-            for i, chunk in enumerate(chunks):
+            for i, chunk_data in enumerate(chunks_with_metadata):
                 # Add delay between chunks to prevent rate limit exhaustion
                 if i > 0 and settings.CHATBOT_ENABLE_CHUNK_DELAYS:
                     import asyncio
@@ -645,7 +647,7 @@ async def _handle_full_text_document_query(
                         llm,
                         settings.CHATBOT_FULL_TEXT_CHUNK_PROMPT_TEMPLATE,
                         {
-                            "chunk": chunk,
+                            "chunk": chunk_data["content"],
                             "question": rephrased_question,
                             "language_instruction": language_instruction,
                         },
@@ -653,13 +655,25 @@ async def _handle_full_text_document_query(
 
                     if "No relevant information found" not in chunk_analysis:
                         file_chunk_analyses.append(chunk_analysis)
+
+                        # Build citation with page information
+                        pages = chunk_data.get("pages", [1])
+                        page_range = (
+                            f"Page {pages[0]}"
+                            if len(pages) == 1
+                            else f"Pages {pages[0]}-{pages[-1]}"
+                        )
+
                         file_source_citations.append(
                             {
-                                "content": chunk,  # Remove 300 character truncation
+                                "content": chunk_data["content"],
                                 "metadata": {
                                     "source": file.filename,
                                     "chunk": i + 1,
                                     "file_index": file_idx + 1,
+                                    "page": pages[0],  # First page for sorting/display
+                                    "pages": pages,  # All pages in this chunk
+                                    "page_range": page_range,
                                 },
                             }
                         )
@@ -1385,10 +1399,12 @@ async def query_knowledge_base(
                                 extract_documents_and_images_from_file_unified,
                             )
 
-                            _, images = extract_documents_and_images_from_file_unified(
-                                raw_file_content,
-                                filename,  # Use actual filename with extension
-                                current_user=current_user,
+                            _, images = (
+                                await extract_documents_and_images_from_file_unified(
+                                    raw_file_content,
+                                    filename,  # Use actual filename with extension
+                                    current_user=current_user,
+                                )
                             )
                             all_images.extend(images)
                             print(
@@ -1775,8 +1791,10 @@ async def query_document(
                 with open(temp_path, "rb") as f:
                     file_content = f.read()
 
-                documents, images = extract_documents_and_images_from_file_unified(
-                    file_content, file.filename, current_user=current_user
+                documents, images = (
+                    await extract_documents_and_images_from_file_unified(
+                        file_content, file.filename, current_user=current_user
+                    )
                 )
 
                 # Add file source information to metadata
@@ -1788,22 +1806,81 @@ async def query_document(
                 all_documents.extend(documents)
                 all_images.extend(images)
 
+            # DEBUG: Check page metadata in original documents
+            print(f"🔍 DEBUG: Extracted {len(all_documents)} documents from files")
+            page_samples = [
+                (i, doc.metadata.get("page", "MISSING"))
+                for i, doc in enumerate(all_documents[:5])
+            ]
+            print(f"🔍 DEBUG: First 5 document pages: {page_samples}")
+            if len(all_documents) > 5:
+                page_samples_end = [
+                    (i, doc.metadata.get("page", "MISSING"))
+                    for i, doc in enumerate(all_documents[-5:], len(all_documents) - 5)
+                ]
+                print(f"🔍 DEBUG: Last 5 document pages: {page_samples_end}")
+
             # Ensure we have documents for vector search (create fallbacks if needed)
             resilient_documents = ensure_documents_for_vector_search(
                 all_documents, all_images, "uploaded_files"
             )
 
-            # Split all documents
+            # DEBUG: Check page metadata after resilience processing
+            print(
+                f"🔍 DEBUG: After resilience check: {len(resilient_documents)} documents"
+            )
+            page_samples = [
+                (i, doc.metadata.get("page", "MISSING"))
+                for i, doc in enumerate(resilient_documents[:5])
+            ]
+            print(f"🔍 DEBUG: First 5 resilient doc pages: {page_samples}")
+
+            # Split all documents while preserving page metadata
             text_splitter = RecursiveCharacterTextSplitter(
                 chunk_size=1000, chunk_overlap=200
             )
-            chunks = text_splitter.split_documents(resilient_documents)
+            chunks = []
+            for doc in resilient_documents:
+                # Split the document
+                split_docs = text_splitter.split_documents([doc])
+                # Ensure page metadata is preserved in all chunks
+                page_num = doc.metadata.get("page", 1)
+                for split_doc in split_docs:
+                    if "page" not in split_doc.metadata:
+                        split_doc.metadata["page"] = page_num
+                chunks.extend(split_docs)
+
+            # DEBUG: Check page metadata after character splitting
+            print(
+                f"🔍 DEBUG: After RecursiveCharacterTextSplitter: {len(chunks)} chunks"
+            )
+            page_samples = [
+                (i, chunk.metadata.get("page", "MISSING"))
+                for i, chunk in enumerate(chunks[:10])
+            ]
+            print(f"🔍 DEBUG: First 10 chunk pages: {page_samples}")
+            if len(chunks) > 10:
+                page_samples_end = [
+                    (i, chunk.metadata.get("page", "MISSING"))
+                    for i, chunk in enumerate(chunks[-10:], len(chunks) - 10)
+                ]
+                print(f"🔍 DEBUG: Last 10 chunk pages: {page_samples_end}")
 
             # Filter out complex metadata that Chroma can't handle
             chunks = filter_complex_metadata(chunks)
 
+            # DEBUG: Check page metadata after filtering
+            print(f"🔍 DEBUG: After filter_complex_metadata: {len(chunks)} chunks")
+            page_samples = [
+                (i, chunk.metadata.get("page", "MISSING"))
+                for i, chunk in enumerate(chunks[:5])
+            ]
+            print(f"🔍 DEBUG: First 5 filtered chunk pages: {page_samples}")
+
             # Use token-aware chunking to avoid OpenAI token limits
-            document_chunks = chunk_documents_for_embedding(chunks, max_tokens_per_chunk=settings.EMBEDDING_MAX_TOKENS_PER_REQUEST)
+            document_chunks = chunk_documents_for_embedding(
+                chunks, max_tokens_per_chunk=settings.EMBEDDING_MAX_TOKENS_PER_REQUEST
+            )
 
             # Create embeddings
             embeddings = load_embeddings_model(
@@ -1826,6 +1903,7 @@ async def query_document(
                     vector_store.add_documents(chunk)
                 # Optional: Add small delay to be API-friendly
                 import time
+
                 time.sleep(0.1)
             # Create a basic retriever without enhanced filtering to avoid async issues
             retriever = vector_store.as_retriever(
@@ -1877,6 +1955,13 @@ async def query_document(
 
         # Retrieve relevant context
         docs = retriever.get_relevant_documents(rephrased_question)
+
+        # DEBUG: Check page metadata in retrieved documents
+        print(f"🔍 DEBUG: Retrieved {len(docs)} documents from vector store")
+        page_samples = [
+            (i, doc.metadata.get("page", "MISSING")) for i, doc in enumerate(docs[:10])
+        ]
+        print(f"🔍 DEBUG: Retrieved doc pages: {page_samples}")
 
         # LLM-based relevance filtering for vector search
         if settings.RAG_ENABLE_LLM_RELEVANCE_FILTER and docs:
@@ -2078,6 +2163,15 @@ async def query_document(
             # Ensure source_data_id is included in metadata if available
             metadata = doc.metadata.copy()  # Copy to avoid modifying the original
 
+            # DEBUG: Check page in each source
+            if not sources:  # Only print first one to avoid spam
+                print(
+                    f"🔍 DEBUG: Building source citation - metadata keys: {metadata.keys()}"
+                )
+                print(
+                    f"🔍 DEBUG: Building source citation - page value: {metadata.get('page', 'MISSING')}"
+                )
+
             # If the metadata contains a source path that matches a pattern from a KB
             if "source" in metadata and isinstance(metadata["source"], str):
                 # Try to find the corresponding source_data_id
@@ -2094,6 +2188,12 @@ async def query_document(
                 "metadata": metadata,
             }
             sources.append(source)
+
+        # DEBUG: Check final sources
+        print(f"🔍 DEBUG: Built {len(sources)} sources for citations")
+        if sources:
+            sample_pages = [s["metadata"].get("page", "MISSING") for s in sources[:10]]
+            print(f"🔍 DEBUG: First 10 source pages: {sample_pages}")
 
         # Generate the final answer - use vision-enhanced context if available, otherwise use initial text answer
         try:
